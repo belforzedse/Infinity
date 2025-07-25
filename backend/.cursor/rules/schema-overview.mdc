@@ -1,0 +1,57 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Strapi Schema Overview
+
+This rule provides an overview of all schemas (content types) in the Infinity Backend Strapi project.
+
+## Content Types
+
+- [Product](mdc:src/api/product/content-types/product/schema.json) - Product catalog items
+- [Product Variation](mdc:src/api/product-variation/content-types/product-variation/schema.json) - Variations of products
+- [Product Category](mdc:src/api/product-category/content-types/product-category/schema.json) - Categories for products
+- [Product Tag](mdc:src/api/product-tag/content-types/product-tag/schema.json) - Tags for products
+- [Product Review](mdc:src/api/product-review/content-types/product-review/schema.json) - Reviews for products
+- [Product FAQ](mdc:src/api/product-faq/content-types/product-faq/schema.json) - FAQs for products
+- [Product Size Helper](mdc:src/api/product-size-helper/content-types/product-size-helper/schema.json) - Size helpers for products
+- [Cart](mdc:src/api/cart/content-types/cart/schema.json) - Shopping cart
+- [Cart Item](mdc:src/api/cart-item/content-types/cart-item/schema.json) - Items in shopping cart
+- [Order](mdc:src/api/order/content-types/order/schema.json) - Customer orders
+- [Order Item](mdc:src/api/order-item/content-types/order-item/schema.json) - Items in customer orders
+- [Local User](mdc:src/api/local-user/content-types/local-user/schema.json) - User authentication
+- [Local User Info](mdc:src/api/local-user-info/content-types/local-user-info/schema.json) - User profile information
+- [Local User Address](mdc:src/api/local-user-address/content-types/local-user-address/schema.json) - User addresses
+- [Local User Wallet](mdc:src/api/local-user-wallet/content-types/local-user-wallet/schema.json) - User wallet
+- [Shipping](mdc:src/api/shipping/content-types/shipping/schema.json) - Shipping methods
+- [Payment Gateway](mdc:src/api/payment-gateway/content-types/payment-gateway/schema.json) - Payment gateway options
+
+## Custom APIs
+
+- [Auth API](mdc:src/api/auth/controllers/auth.ts) - Authentication functions
+- [Cart API](mdc:src/api/cart/controllers/cart.ts) - Shopping cart functionality
+- [Order API](mdc:src/api/order/controllers/order.ts) - Order management
+
+## Additional Rules
+
+The following rules provide detailed information about the project:
+
+- [Product Schema](mdc:.cursor/rules/product-schema.mdc) - Detailed product-related schemas
+- [User Schema](mdc:.cursor/rules/user-schema.mdc) - User-related schemas
+- [Order and Cart Schema](mdc:.cursor/rules/order-cart-schema.mdc) - Order and cart schemas
+- [Discount Schema](mdc:.cursor/rules/discount-schema.mdc) - Discount-related schemas
+- [Contract Schema](mdc:.cursor/rules/contract-schema.mdc) - Contract-related schemas
+- [Misc Schema](mdc:.cursor/rules/misc-schema.mdc) - Miscellaneous schemas
+- [Custom APIs](mdc:.cursor/rules/custom-apis.mdc) - Custom API documentation
+- [TypeScript Types](mdc:.cursor/rules/typescript-types.mdc) - TypeScript type definitions
+- [CRUD API Examples](mdc:.cursor/rules/crud-api-examples.mdc) - Examples of CRUD operations
+- [Authentication and Middleware](mdc:.cursor/rules/auth-middleware.mdc) - Auth and middleware documentation
+- [Components](mdc:.cursor/rules/components.mdc) - Reusable components
+- [Project Structure](mdc:.cursor/rules/project-structure.mdc) - Overall project structure
+- [Frontend API Guide](mdc:.cursor/rules/frontend-api-guide.mdc) - API guide for frontend developers
+
+
+
+
+

@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_review_replies",
+  "info": {
+    "singularName": "product-review-reply",
+    "pluralName": "product-review-replies",
+    "displayName": "ProductReviewReply"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Content": {
+      "type": "text",
+      "required": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user.local-user"
+    },
+    "product_review": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product-review.product-review",
+      "inversedBy": "product_review_replies"
+    }
+  }
+}

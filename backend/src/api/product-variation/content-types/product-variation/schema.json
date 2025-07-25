@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_variations",
+  "info": {
+    "singularName": "product-variation",
+    "pluralName": "product-variations",
+    "displayName": "ProductVariation",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "IsPublished": {
+      "type": "boolean",
+      "default": false
+    },
+    "SKU": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "Price": {
+      "type": "biginteger",
+      "required": true,
+      "min": "0"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "product_variations"
+    },
+    "product_stock": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-stock.product-stock",
+      "inversedBy": "product_variation"
+    },
+    "product_variation_color": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation-color.product-variation-color"
+    },
+    "product_variation_size": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation-size.product-variation-size"
+    },
+    "product_variation_model": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation-model.product-variation-model"
+    },
+    "general_discounts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::general-discount.general-discount",
+      "inversedBy": "product_variations"
+    }
+  }
+}

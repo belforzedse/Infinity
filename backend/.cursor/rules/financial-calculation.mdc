@@ -1,0 +1,52 @@
+---
+description: Financial calculations for orders are performed during the checkout process when a cart is finalized to an order. These calculations determine the total amount to charge the customer and create appropriate financial records.
+globs: 
+alwaysApply: false
+---
+# Financial Calculation
+
+## Overview
+
+Financial calculations for orders are performed during the checkout process when a cart is finalized to an order. These calculations determine the total amount to charge the customer and create appropriate financial records.
+
+## Main File
+
+The financial calculation logic is implemented in:
+- [Cart Service](mdc:src/api/cart/services/cart.ts) - In the `finalizeCartToOrder` method
+
+## Calculation Process
+
+1. **Subtotal Calculation**
+   - Each order item's price is multiplied by its quantity
+   - All item totals are summed to get the subtotal
+
+2. **Discount Application**
+   - Active general discounts are checked
+   - If the order meets the minimum amount, a discount is applied
+   - Percentage discounts: subtotal × discount percentage (capped if needed)
+   - Fixed amount discounts: direct amount reduction
+
+3. **Tax Calculation**
+   - Default tax rate: 10%
+   - Applied to the discounted subtotal: (subtotal - discount) × tax rate
+
+4. **Shipping Cost**
+   - Retrieved from the selected shipping method
+   - Added to the total amount
+
+5. **Total Amount Calculation**
+   - Formula: subtotal - discount + tax + shipping
+
+## Storage
+
+Financial details are stored in:
+- **Contract**: Contains the total amount (`Amount` field), tax percentage (`TaxPercent` field)
+- **Response**: Includes a complete financial summary with all calculated values
+
+## Important Considerations
+
+- All monetary values are rounded to whole numbers to avoid floating-point issues
+- Tax is always calculated after discounts are applied
+- Only one general discount can be applied to an order
+- The contract's `Amount` field holds the final total that will be charged
+

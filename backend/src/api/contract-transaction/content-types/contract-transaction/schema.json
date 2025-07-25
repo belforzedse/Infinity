@@ -1,0 +1,68 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contract_transactions",
+  "info": {
+    "singularName": "contract-transaction",
+    "pluralName": "contract-transactions",
+    "displayName": "ContractTransaction",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Cheque",
+        "Gateway",
+        "Manual",
+        "Others",
+        "Return"
+      ],
+      "required": true
+    },
+    "Amount": {
+      "type": "biginteger",
+      "required": true
+    },
+    "DiscountAmount": {
+      "type": "biginteger",
+      "default": "0"
+    },
+    "Step": {
+      "type": "integer",
+      "required": true,
+      "max": 100,
+      "min": 1
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Success",
+        "Failed"
+      ]
+    },
+    "TrackId": {
+      "type": "string",
+      "required": false
+    },
+    "contract": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::contract.contract",
+      "inversedBy": "contract_transactions"
+    },
+    "payment_gateway": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::payment-gateway.payment-gateway",
+      "inversedBy": "contract_transactions"
+    },
+    "Date": {
+      "type": "datetime"
+    }
+  }
+}

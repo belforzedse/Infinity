@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shipping_provinces",
+  "info": {
+    "singularName": "shipping-province",
+    "pluralName": "shipping-provinces",
+    "displayName": "ShippingProvince"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "shipping_cities": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::shipping-city.shipping-city",
+      "mappedBy": "shipping_province"
+    }
+  }
+}

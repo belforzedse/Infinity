@@ -1,0 +1,48 @@
+---
+description: The application manages users through several related models, including `local-user`, `local-user-info`, `local-user-role`, and `local-user-permission`.
+globs: 
+alwaysApply: false
+---
+# User Management System
+
+The application manages users through several related models, including `local-user`, `local-user-info`, `local-user-role`, and `local-user-permission`.
+
+## User Models
+
+1. **Local User** ([src/api/local-user/content-types/local-user/schema.json](mdc:src/api/local-user/content-types/local-user/schema.json))
+   - Core user model containing authentication data
+   - Contains `Phone`, `Password`, verification status
+   - Links to other user-related entities via relations
+
+2. **User Info** ([src/api/local-user-info/content-types/local-user-info/schema.json](mdc:src/api/local-user-info/content-types/local-user-info/schema.json))
+   - Contains personal information like first name, last name, birth date
+   - Linked to a Local User via a one-to-one relation
+
+3. **User Role** ([src/api/local-user-role/content-types/local-user-role/schema.json](mdc:src/api/local-user-role/content-types/local-user-role/schema.json))
+   - Defines roles that can be assigned to users
+   - Role with ID 2 is the admin role
+   - Other roles represent different permission levels
+
+4. **User Permission** ([src/api/local-user-permission/content-types/local-user-permission/schema.json](mdc:src/api/local-user-permission/content-types/local-user-permission/schema.json))
+   - Defines specific permissions that can be associated with roles
+   - Used for fine-grained access control
+
+## Admin Status
+
+A user is considered an admin if they have a role with ID 2. This is determined in the `/auth/self` endpoint in [src/api/auth/controllers/auth.ts](mdc:src/api/auth/controllers/auth.ts) by checking:
+
+```typescript
+const isAdmin = user?.user_role?.id === 2;
+```
+
+The `isAdmin` flag is included in the response and can be used by frontend applications to conditionally display admin features.
+
+## User Creation
+
+Users can be created through:
+1. The authentication flow when a user first logs in
+2. The `/sp/local-users` endpoint for creating users with additional data
+3. Strapi admin dashboard
+
+The custom user creation is handled in [src/api/local-user/controllers/local-user.ts](mdc:src/api/local-user/controllers/local-user.ts).
+

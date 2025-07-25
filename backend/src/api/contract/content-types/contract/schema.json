@@ -1,0 +1,68 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contracts",
+  "info": {
+    "singularName": "contract",
+    "pluralName": "contracts",
+    "displayName": "Contract",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Cash",
+        "Credit"
+      ],
+      "required": true
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": [
+        "Not Ready",
+        "Confirmed",
+        "Finished",
+        "Failed",
+        "Cancelled"
+      ],
+      "default": "Not Ready"
+    },
+    "local_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user.local-user",
+      "inversedBy": "contracts"
+    },
+    "Amount": {
+      "type": "integer",
+      "min": 0,
+      "required": true
+    },
+    "TaxPercent": {
+      "type": "integer",
+      "max": 100,
+      "min": 0,
+      "default": 10
+    },
+    "Date": {
+      "type": "datetime",
+      "required": true
+    },
+    "contract_transactions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contract-transaction.contract-transaction",
+      "mappedBy": "contract"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "mappedBy": "contract"
+    }
+  }
+}

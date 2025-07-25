@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shipping_cities",
+  "info": {
+    "singularName": "shipping-city",
+    "pluralName": "shipping-cities",
+    "displayName": "ShippingCity",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "shipping_province": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::shipping-province.shipping-province",
+      "inversedBy": "shipping_cities"
+    },
+    "Code": {
+      "type": "string",
+      "unique": true
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_stocks",
+  "info": {
+    "singularName": "product-stock",
+    "pluralName": "product-stocks",
+    "displayName": "ProductStock"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "product_stock_logs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-stock-log.product-stock-log",
+      "mappedBy": "product_stock"
+    },
+    "product_variation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation.product-variation",
+      "mappedBy": "product_stock"
+    }
+  }
+}

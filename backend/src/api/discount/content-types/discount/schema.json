@@ -1,0 +1,68 @@
+{
+  "kind": "collectionType",
+  "collectionName": "discounts",
+  "info": {
+    "singularName": "discount",
+    "pluralName": "discounts",
+    "displayName": "Discount",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Code": {
+      "type": "string",
+      "required": true
+    },
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Discount",
+        "Cash"
+      ],
+      "default": "Discount"
+    },
+    "Amount": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    },
+    "LimitAmount": {
+      "type": "integer"
+    },
+    "StartDate": {
+      "type": "datetime"
+    },
+    "EndDate": {
+      "type": "datetime"
+    },
+    "IsActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "local_users": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::local-user.local-user",
+      "inversedBy": "discounts"
+    },
+    "product_variations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-variation.product-variation"
+    },
+    "removedAt": {
+      "type": "datetime"
+    },
+    "UsedTimes": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "LimitUsage": {
+      "type": "integer"
+    }
+  }
+}

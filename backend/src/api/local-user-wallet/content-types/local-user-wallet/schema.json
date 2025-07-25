@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "local_user_wallets",
+  "info": {
+    "singularName": "local-user-wallet",
+    "pluralName": "local-user-wallets",
+    "displayName": "LocalUserWallet"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Balance": {
+      "type": "biginteger",
+      "required": true,
+      "min": "0",
+      "default": "0"
+    },
+    "LastTransactionDate": {
+      "type": "datetime"
+    },
+    "Description": {
+      "type": "text"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user.local-user",
+      "inversedBy": "user_wallet"
+    },
+    "user_wallet_transactions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::local-user-wallet-transaction.local-user-wallet-transaction",
+      "mappedBy": "user_wallet"
+    }
+  }
+}

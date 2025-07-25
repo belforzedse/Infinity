@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_size_helpers",
+  "info": {
+    "singularName": "product-size-helper",
+    "pluralName": "product-size-helpers",
+    "displayName": "ProductSizeHelper"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product",
+      "inversedBy": "product_size_helper"
+    },
+    "Helper": {
+      "type": "json",
+      "required": true
+    }
+  }
+}

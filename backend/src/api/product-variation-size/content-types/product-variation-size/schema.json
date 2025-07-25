@@ -1,0 +1,20 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_variation_sizes",
+  "info": {
+    "singularName": "product-variation-size",
+    "pluralName": "product-variation-sizes",
+    "displayName": "ProductVariationSize"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    }
+  }
+}

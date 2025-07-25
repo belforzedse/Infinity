@@ -1,0 +1,80 @@
+---
+description: The project uses a custom router pattern for implementing routes beyond the standard CRUD operations provided by Strapi. This pattern allows us to define specific API endpoints with custom handlers and middleware configurations.
+globs: 
+alwaysApply: false
+---
+# Custom Router Pattern
+
+## Overview
+
+The project uses a custom router pattern for implementing routes beyond the standard CRUD operations provided by Strapi. This pattern allows us to define specific API endpoints with custom handlers and middleware configurations.
+
+## Implementation Pattern
+
+Custom routes should be defined in a `custom-router.ts` file within the `routes` directory of each API module that needs custom endpoints. Strapi will automatically detect and merge these routes with the standard routes.
+
+### Example Structure
+
+```
+src/api/module-name/
+  ├── controllers/
+  │   └── module-name.ts     // Contains controller methods for custom endpoints
+  ├── routes/
+  │   ├── module-name.ts     // Standard CRUD routes
+  │   └── custom-router.ts   // Custom routes definition
+  └── services/
+      └── module-name.ts
+```
+
+## Route Definition Format
+
+Custom routes are defined in the following format:
+
+```typescript
+export default {
+  routes: [
+    {
+      method: "HTTP_METHOD",     // GET, POST, PUT, DELETE, etc.
+      path: "/path/to/endpoint", // Path relative to the API base URL
+      handler: "controller.handlerMethod",
+      config: {
+        auth: false, // Strapi's default auth (typically not used)
+        middlewares: ["global::authentication"], // Middleware list
+        policies: [], // Policy list if needed
+      },
+    },
+    // More routes as needed
+  ],
+};
+```
+
+## Real Examples
+
+### Product Reviews API
+
+[Product Review Custom Router](mdc:src/api/product-review/routes/custom-router.ts) - Defines custom routes for:
+- Submitting product reviews (POST /product-reviews/submit)
+- Getting the current user's reviews (GET /product-reviews/user/me)
+
+### Product Likes API
+
+[Product Like Custom Router](mdc:src/api/product-like/routes/custom-router.ts) - Defines custom routes for:
+- Toggling product favorites (POST /product-likes/toggle)
+- Getting the current user's liked products (GET /product-likes/user/me)
+
+## Authentication
+
+Most custom routes should include the `global::authentication` middleware if they require user authentication. This middleware verifies the JWT token and sets the user in the context.
+
+## Controller Implementation
+
+When implementing controllers for custom routes, ensure each handler is added to the controller module using Strapi's extension mechanism:
+
+```typescript
+export default factories.createCoreController('api::module-name.module-name', ({ strapi }) => ({
+  customHandlerMethod(ctx) {
+    // Implementation here
+  },
+  // More methods as needed
+}));
+```

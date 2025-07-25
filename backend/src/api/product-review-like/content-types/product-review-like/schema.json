@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_review_likes",
+  "info": {
+    "singularName": "product-review-like",
+    "pluralName": "product-review-likes",
+    "displayName": "ProductReviewLike"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Like",
+        "Dislike"
+      ],
+      "required": true
+    },
+    "product_review": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-review.product-review"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user.local-user"
+    }
+  }
+}

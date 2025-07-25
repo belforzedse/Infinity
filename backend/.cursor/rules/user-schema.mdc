@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# User Schema
+
+## User Models
+
+The user system consists of several related models:
+
+- [Local User](mdc:src/api/local-user/content-types/local-user/schema.json) - The main user model
+  - Contains authentication data like Phone, Password
+  - Connected to user info, addresses, wallet, etc.
+  
+- [Local User Info](mdc:src/api/local-user-info/content-types/local-user-info/schema.json) - User profile information
+  - Contains FirstName, LastName, and other personal details
+  
+- [Local User Address](mdc:src/api/local-user-address/content-types/local-user-address/schema.json) - User shipping addresses
+  - Contains address details for delivery and billing
+
+- [Local User Role](mdc:src/api/local-user-role/content-types/local-user-role/schema.json) - User role assignments
+  - Defines user permissions and access levels
+
+## User Wallet
+
+- [Local User Wallet](mdc:src/api/local-user-wallet/content-types/local-user-wallet/schema.json) - Digital wallet for users
+  - Tracks user's account balance
+
+- [Local User Wallet Transaction](mdc:src/api/local-user-wallet-transaction/content-types/local-user-wallet-transaction/schema.json) - Wallet transaction history
+  - Records deposits, withdrawals, and other wallet transactions
+
+## User Permissions
+
+- [Local User Permission](mdc:src/api/local-user-permission/content-types/local-user-permission/schema.json) - Permission settings for users
+  - Defines specific permissions for user actions and access
+

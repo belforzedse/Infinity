@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_footer_footer_sections",
+  "info": {
+    "displayName": "FooterSection",
+    "icon": "connector"
+  },
+  "options": {},
+  "attributes": {
+    "Header": {
+      "type": "string"
+    },
+    "Links": {
+      "displayName": "FooterLinkItem",
+      "type": "component",
+      "repeatable": true,
+      "component": "footer.footer-link-item"
+    }
+  }
+}

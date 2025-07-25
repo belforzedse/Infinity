@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_footer_contactuses",
+  "info": {
+    "displayName": "ContactUs",
+    "icon": "apps"
+  },
+  "options": {},
+  "attributes": {
+    "Phone": {
+      "type": "string",
+      "required": true
+    },
+    "Whatsapp": {
+      "type": "string"
+    },
+    "Instagram": {
+      "type": "string"
+    },
+    "Telegram": {
+      "type": "string"
+    }
+  }
+}

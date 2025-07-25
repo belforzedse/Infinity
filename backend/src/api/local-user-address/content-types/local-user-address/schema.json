@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "local_user_addresses",
+  "info": {
+    "singularName": "local-user-address",
+    "pluralName": "local-user-addresses",
+    "displayName": "LocalUserAddress"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "shipping_city": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::shipping-city.shipping-city"
+    },
+    "PostalCode": {
+      "type": "string",
+      "required": true
+    },
+    "Description": {
+      "type": "text"
+    },
+    "FullAddress": {
+      "type": "text"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user.local-user",
+      "inversedBy": "user_addresses"
+    }
+  }
+}

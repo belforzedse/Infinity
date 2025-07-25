@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_faqs",
+  "info": {
+    "singularName": "product-faq",
+    "pluralName": "product-faqs",
+    "displayName": "ProductFAQ"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "text",
+      "required": true
+    },
+    "Answer": {
+      "type": "text"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "product_faqs"
+    }
+  }
+}

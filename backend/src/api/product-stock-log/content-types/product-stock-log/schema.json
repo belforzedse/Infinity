@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_stock_logs",
+  "info": {
+    "singularName": "product-stock-log",
+    "pluralName": "product-stock-logs",
+    "displayName": "ProductStockLog",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product_stock": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product-stock.product-stock",
+      "inversedBy": "product_stock_logs"
+    },
+    "Count": {
+      "type": "integer",
+      "min": 1,
+      "required": true
+    },
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Add",
+        "Minus"
+      ],
+      "required": true
+    },
+    "Description": {
+      "type": "text"
+    },
+    "Cause": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_reviews",
+  "info": {
+    "singularName": "product-review",
+    "pluralName": "product-reviews",
+    "displayName": "ProductReview",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user.local-user",
+      "inversedBy": "product_reviews"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "product_reviews"
+    },
+    "Rate": {
+      "type": "integer",
+      "max": 5,
+      "min": 0
+    },
+    "Date": {
+      "type": "datetime",
+      "required": true
+    },
+    "Content": {
+      "type": "text",
+      "required": true
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": [
+        "Need for Review",
+        "Rejected",
+        "Accepted"
+      ]
+    },
+    "LikeCounts": {
+      "type": "integer",
+      "default": 0
+    },
+    "DislikeCounts": {
+      "type": "integer",
+      "default": 0
+    },
+    "product_review_replies": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-review-reply.product-review-reply",
+      "mappedBy": "product_review"
+    },
+    "removedAt": {
+      "type": "datetime"
+    }
+  }
+}

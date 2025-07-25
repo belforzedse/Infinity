@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Product Schema
+
+## Core Product Models
+
+The product system consists of several related models:
+
+- [Product](mdc:src/api/product/content-types/product/schema.json) - The main product model
+  - Has attributes like Title, Description, CoverImage, Media, Status
+  - Related to categories, variations, reviews, tags, FAQs
+  
+- [Product Variation](mdc:src/api/product-variation/content-types/product-variation/schema.json) - Represents different variants of a product
+  - Connected to product variation colors and sizes
+  - Contains pricing, stock, and SKU information
+  
+- [Product Variation Model](mdc:src/api/product-variation-model/content-types/product-variation-model/schema.json) - Model templates for product variations
+  
+## Product Categorization
+  
+- [Product Category](mdc:src/api/product-category/content-types/product-category/schema.json) - Hierarchical categories for products
+  - Can be main category or additional categories for products
+  - Contains fields like Name, Image, ParentCategory
+  
+- [Product Category Content](mdc:src/api/product-category-content/content-types/product-category-content/schema.json) - Content for product categories
+
+- [Product Tag](mdc:src/api/product-tag/content-types/product-tag/schema.json) - Tags for product filtering and organization
+
+## Product Variants
+
+- [Product Variation Color](mdc:src/api/product-variation-color/content-types/product-variation-color/schema.json) - Color options for product variations
+- [Product Variation Size](mdc:src/api/product-variation-size/content-types/product-variation-size/schema.json) - Size options for product variations
+- [Product Size Helper](mdc:src/api/product-size-helper/content-types/product-size-helper/schema.json) - Size guide for products
+
+## Product Feedback
+
+- [Product Review](mdc:src/api/product-review/content-types/product-review/schema.json) - Customer reviews for products
+- [Product Review Reply](mdc:src/api/product-review-reply/content-types/product-review-reply/schema.json) - Replies to product reviews
+- [Product Review Like](mdc:src/api/product-review-like/content-types/product-review-like/schema.json) - Likes on product reviews
+- [Product Like](mdc:src/api/product-like/content-types/product-like/schema.json) - User likes for products
+- [Product FAQ](mdc:src/api/product-faq/content-types/product-faq/schema.json) - Frequently asked questions about products
+
+## Product Inventory
+
+- [Product Stock](mdc:src/api/product-stock/content-types/product-stock/schema.json) - Stock management for products
+- [Product Stock Log](mdc:src/api/product-stock-log/content-types/product-stock-log/schema.json) - Logs of stock changes
+

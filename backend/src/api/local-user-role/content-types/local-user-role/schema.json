@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "local_user_roles",
+  "info": {
+    "singularName": "local-user-role",
+    "pluralName": "local-user-roles",
+    "displayName": "LocalUserRole"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "users": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::local-user.local-user",
+      "mappedBy": "user_role"
+    },
+    "user_permissions": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::local-user-permission.local-user-permission",
+      "mappedBy": "user_roles"
+    }
+  }
+}

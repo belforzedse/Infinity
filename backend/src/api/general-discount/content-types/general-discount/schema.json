@@ -1,0 +1,56 @@
+{
+  "kind": "collectionType",
+  "collectionName": "general_discounts",
+  "info": {
+    "singularName": "general-discount",
+    "pluralName": "general-discounts",
+    "displayName": "GeneralDiscount",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Discount",
+        "Cash"
+      ],
+      "default": "Discount"
+    },
+    "Amount": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    },
+    "LimitAmount": {
+      "type": "integer"
+    },
+    "StartDate": {
+      "type": "datetime"
+    },
+    "EndDate": {
+      "type": "datetime"
+    },
+    "IsActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "product_variations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product-variation.product-variation",
+      "inversedBy": "general_discounts"
+    },
+    "product_categories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-category.product-category"
+    },
+    "removedAt": {
+      "type": "datetime"
+    }
+  }
+}

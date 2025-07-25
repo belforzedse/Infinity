@@ -1,0 +1,43 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Strapi Project Structure
+
+## Main Directories
+
+- [src/api](mdc:src/api) - Contains all content types and custom APIs
+- [src/components](mdc:src/components) - Reusable components for content types
+- [src/extensions](mdc:src/extensions) - Extensions for Strapi core functionality
+- [src/middlewares](mdc:src/middlewares) - Custom middlewares
+- [src/utils](mdc:src/utils) - Utility functions and helpers
+- [src/admin](mdc:src/admin) - Admin panel customizations
+
+## API Structure
+
+Each content type in the `src/api` directory follows this structure:
+
+```
+src/api/example/
+  ├── content-types/
+  │   └── example/
+  │       └── schema.json    # Schema definition
+  ├── controllers/
+  │   └── example.ts         # Standard controller
+  │   └── custom/            # Custom controllers
+  ├── routes/
+  │   └── example.ts         # Route definitions
+  │   └── custom/            # Custom routes
+  └── services/
+      └── example.ts         # Standard services
+      └── custom/            # Custom services
+```
+
+## Configuration
+
+- [config](mdc:config) - Configuration files
+  - Database connections
+  - Server settings
+  - Middleware configurations
+  - Plugin configurations

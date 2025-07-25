@@ -1,0 +1,38 @@
+---
+description: The application uses a custom authentication system built on top of Strapi. The main authentication controller is in @src/api/auth/controllers/auth.ts.
+globs: 
+alwaysApply: false
+---
+# Authentication System
+
+The application uses a custom authentication system built on top of Strapi. The main authentication controller is in [src/api/auth/controllers/auth.ts](mdc:src/api/auth/controllers/auth.ts).
+
+## Authentication Flow
+
+1. Users can authenticate using either:
+   - OTP (One-Time Password) sent to a phone number
+   - Username/password combination
+
+2. After successful authentication, a JWT token is issued that contains the user's ID.
+
+## User Roles
+
+Users have roles assigned through the `user_role` relation in the `local-user` model. The relationship is defined in [src/api/local-user/content-types/local-user/schema.json](mdc:src/api/local-user/content-types/local-user/schema.json).
+
+Role IDs have specific meanings:
+- Role ID 2: Administrator role
+- Other roles: Regular users
+
+## Self Endpoint
+
+The `/auth/self` endpoint returns information about the currently authenticated user, including:
+- Basic user data
+- User info from related tables
+- `isAdmin` flag that is true if the user's role ID is 2
+
+The documentation for this endpoint is in [src/api/auth/documentation/1.0.0/overrides/auth.json](mdc:src/api/auth/documentation/1.0.0/overrides/auth.json).
+
+## Authentication Middleware
+
+The system uses a global authentication middleware that validates JWT tokens and attaches the user object to `ctx.state.user`. Protected routes use this middleware to ensure only authenticated users can access them.
+

@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "order_items",
+  "info": {
+    "singularName": "order-item",
+    "pluralName": "order-items",
+    "displayName": "OrderItem",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product_variation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation.product-variation"
+    },
+    "Count": {
+      "type": "integer",
+      "min": 1,
+      "default": 1
+    },
+    "PerAmount": {
+      "type": "biginteger",
+      "required": true,
+      "min": "0"
+    },
+    "ProductTitle": {
+      "type": "string",
+      "required": true
+    },
+    "ProductSKU": {
+      "type": "string",
+      "required": true
+    },
+    "product_color": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation-color.product-variation-color"
+    },
+    "product_size": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation-size.product-variation-size"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order",
+      "inversedBy": "order_items"
+    },
+    "product_variation_model": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variation-model.product-variation-model"
+    }
+  }
+}

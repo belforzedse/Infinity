@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_footer_footer_link_items",
+  "info": {
+    "displayName": "FooterLinkItem",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "URL": {
+      "type": "text",
+      "required": true
+    }
+  }
+}

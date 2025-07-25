@@ -1,0 +1,445 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Frontend API Guide
+
+This guide documents the API endpoints and TypeScript interfaces for frontend development. It provides examples of how to interact with the Infinity Backend API.
+
+## API Base URL
+
+All API requests should be prefixed with:
+
+```
+https://api.example.com/api
+```
+
+Replace with the actual API base URL in your environment.
+
+## Authentication
+
+Most endpoints require authentication using a JWT token:
+
+```typescript
+// Add to HTTP headers
+{
+  "Authorization": "Bearer YOUR_JWT_TOKEN"
+}
+```
+
+### Authentication Endpoints
+
+```typescript
+// Types
+interface LoginRequest {
+  phone: string;
+  password: string;
+}
+
+interface OtpRequest {
+  phone: string;
+}
+
+interface OtpVerifyRequest {
+  otp: string;
+  otpToken: string;
+}
+
+interface AuthResponse {
+  message: string;
+  token: string;
+}
+
+interface UserProfile {
+  id: number;
+  Phone: string;
+  IsVerified: boolean;
+  FirstName?: string;
+  LastName?: string;
+  Email?: string;
+  // Other fields...
+}
+
+// Endpoints
+// 1. Request OTP
+POST /auth/otp
+Body: OtpRequest
+Response: { message: string, otpToken: string }
+
+// 2. Verify OTP and login
+POST /auth/login
+Body: OtpVerifyRequest
+Response: AuthResponse
+
+// 3. Login with password
+POST /auth/login-with-password
+Body: LoginRequest
+Response: AuthResponse
+
+// 4. Get current user profile
+GET /auth/self
+Headers: { Authorization: "Bearer TOKEN" }
+Response: UserProfile
+```
+
+## Products API
+
+### Types
+
+```typescript
+interface Product {
+  id: number;
+  Title: string;
+  Description?: string;
+  Status: 'Active' | 'InActive';
+  AverageRating?: number;
+  RatingCount?: number;
+  CoverImage: {
+    id: number;
+    url: string;
+    width: number;
+    height: number;
+    formats: {
+      thumbnail: { url: string; width: number; height: number };
+      small: { url: string; width: number; height: number };
+      medium: { url: string; width: number; height: number };
+      large: { url: string; width: number; height: number };
+    };
+  };
+  Media?: {
+    id: number;
+    url: string;
+    // ...other media properties
+  }[];
+  product_variations?: ProductVariation[];
+  product_main_category?: ProductCategory;
+  product_tags?: ProductTag[];
+  CleaningTips?: string;
+  ReturnConditions?: string;
+  product_faqs?: ProductFaq[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ProductVariation {
+  id: number;
+  SKU: string;
+  Price: number;
+  DiscountPrice?: number;
+  product_variation_sizes?: ProductVariationSize[];
+  product_variation_colors?: ProductVariationColor[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ProductCategory {
+  id: number;
+  Name: string;
+  Image?: { url: string };
+  ParentCategory?: ProductCategory;
+  ChildCategories?: ProductCategory[];
+}
+
+interface ProductTag {
+  id: number;
+  Name: string;
+}
+
+interface ProductFaq {
+  id: number;
+  Question: string;
+  Answer: string;
+  product: Product;
+}
+
+interface ProductReview {
+  id: number;
+  Rating: number;
+  Comment: string;
+  user: UserProfile;
+  product: Product;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Query Parameters
+interface ProductQueryParams {
+  filters?: {
+    product_main_category?: { id?: number };
+    product_tags?: { id?: { $in: number[] } };
+    Title?: { $containsi?: string };
+    Status?: string;
+    // Other filters
+  };
+  populate?: string[];
+  sort?: string[];
+  pagination?: { page: number; pageSize: number };
+}
+```
+
+### Endpoints
+
+```typescript
+// 1. Get all products
+GET /products
+Query Params: ProductQueryParams
+Response: { data: Product[], meta: { pagination: { page, pageSize, total, pageCount } } }
+
+// 2. Get single product
+GET /products/:id
+Response: { data: Product }
+
+// 3. Get featured products
+GET /products/featured
+Response: { data: Product[] }
+
+// 4. Get products by category
+GET /products?filters[product_main_category][id]=1
+Response: { data: Product[], meta: { pagination: { page, pageSize, total, pageCount } } }
+
+// 5. Search products
+GET /products?filters[Title][$containsi]=search_term
+Response: { data: Product[], meta: { pagination: { page, pageSize, total, pageCount } } }
+```
+
+## Cart API
+
+### Types
+
+```typescript
+interface Cart {
+  id: number;
+  TotalAmount: number;
+  Status: 'Active' | 'Inactive' | 'Checkout';
+  user: number | UserProfile;
+  cart_items: CartItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CartItem {
+  id: number;
+  Quantity: number;
+  Price: number;
+  TotalPrice: number;
+  cart: number | Cart;
+  product_variation: number | ProductVariation;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AddToCartRequest {
+  product_variation_id: number;
+  quantity: number;
+}
+
+interface UpdateCartItemRequest {
+  quantity: number;
+}
+```
+
+### Endpoints
+
+```typescript
+// 1. Get active cart
+GET /carts/active
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: Cart }
+
+// 2. Add item to cart
+POST /cart-items
+Headers: { Authorization: "Bearer TOKEN" }
+Body: AddToCartRequest
+Response: { data: CartItem }
+
+// 3. Update cart item quantity
+PUT /cart-items/:id
+Headers: { Authorization: "Bearer TOKEN" }
+Body: UpdateCartItemRequest
+Response: { data: CartItem }
+
+// 4. Remove item from cart
+DELETE /cart-items/:id
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: CartItem }
+```
+
+## Order API
+
+### Types
+
+```typescript
+interface Order {
+  id: number;
+  OrderNumber: string;
+  Status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  TotalAmount: number;
+  ShippingAddress: string;
+  PaymentMethod: string;
+  PaymentStatus: 'Pending' | 'Paid' | 'Failed';
+  user: number | UserProfile;
+  order_items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface OrderItem {
+  id: number;
+  Quantity: number;
+  Price: number;
+  TotalPrice: number;
+  Status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  order: number | Order;
+  product_variation: number | ProductVariation;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateOrderRequest {
+  shipping_address_id: number;
+  payment_method: string;
+}
+```
+
+### Endpoints
+
+```typescript
+// 1. Create order from cart
+POST /orders
+Headers: { Authorization: "Bearer TOKEN" }
+Body: CreateOrderRequest
+Response: { data: Order }
+
+// 2. Get user orders
+GET /orders
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: Order[], meta: { pagination: { page, pageSize, total, pageCount } } }
+
+// 3. Get order details
+GET /orders/:id
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: Order }
+
+// 4. Cancel order
+PUT /orders/:id/cancel
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: Order }
+```
+
+## User Address API
+
+### Types
+
+```typescript
+interface UserAddress {
+  id: number;
+  Title: string;
+  FullName: string;
+  Phone: string;
+  Address: string;
+  City: string;
+  Province: string;
+  PostalCode: string;
+  IsDefault: boolean;
+  user: number | UserProfile;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateAddressRequest {
+  Title: string;
+  FullName: string;
+  Phone: string;
+  Address: string;
+  City: string;
+  Province: string;
+  PostalCode: string;
+  IsDefault?: boolean;
+}
+
+interface UpdateAddressRequest extends CreateAddressRequest {
+  // Same fields as CreateAddressRequest
+}
+```
+
+### Endpoints
+
+```typescript
+// 1. Get user addresses
+GET /local-user-addresses
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: UserAddress[] }
+
+// 2. Create new address
+POST /local-user-addresses
+Headers: { Authorization: "Bearer TOKEN" }
+Body: CreateAddressRequest
+Response: { data: UserAddress }
+
+// 3. Update address
+PUT /local-user-addresses/:id
+Headers: { Authorization: "Bearer TOKEN" }
+Body: UpdateAddressRequest
+Response: { data: UserAddress }
+
+// 4. Delete address
+DELETE /local-user-addresses/:id
+Headers: { Authorization: "Bearer TOKEN" }
+Response: { data: UserAddress }
+```
+
+## HTTP Request Example (Fetch API)
+
+```typescript
+// Example: Get all products
+async function getProducts(params: ProductQueryParams): Promise<{ data: Product[], meta: any }> {
+  // Convert params to query string
+  const queryString = new URLSearchParams();
+  if (params.filters) {
+    queryString.append('filters', JSON.stringify(params.filters));
+  }
+  if (params.populate) {
+    queryString.append('populate', params.populate.join(','));
+  }
+  if (params.sort) {
+    queryString.append('sort', params.sort.join(','));
+  }
+  if (params.pagination) {
+    queryString.append('pagination', JSON.stringify(params.pagination));
+  }
+
+  const response = await fetch(`https://api.example.com/api/products?${queryString}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+// Example: Create order
+async function createOrder(data: CreateOrderRequest): Promise<{ data: Order }> {
+  const response = await fetch('https://api.example.com/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  return await response.json();
+}
+```
+

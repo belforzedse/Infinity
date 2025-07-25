@@ -1,0 +1,166 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Authentication and Middleware
+
+## Authentication System
+
+The authentication system in this Strapi project is custom-built:
+
+- [Auth Controller](mdc:src/api/auth/controllers/auth.ts) - Main authentication controller
+  - OTP-based authentication
+  - Password-based authentication
+  - User registration and profile management
+
+## Key Authentication Methods
+
+```typescript
+// src/api/auth/controllers/auth.ts
+
+// Generate and send OTP for authentication
+async function otp(ctx) {
+  try {
+    const { phone } = ctx.request.body;
+    const validation = validatePhone(ctx, phone);
+    if (validation !== 200) {
+      return validation;
+    }
+    const otpToken = await strapi.service("api::auth.auth").otp(ctx, { phone });
+    ctx.body = {
+      message: "otp sent",
+      otpToken,
+    };
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+// Login with OTP verification
+async function login(ctx) {
+  try {
+    const { otp, otpToken } = ctx.request.body;
+    // OTP validation logic
+    // ...
+    const token = jwt.sign({ userId: otpObj.merchant }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
+    ctx.body = {
+      message: "login successful",
+      token,
+    };
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = JSON.stringify(err);
+  }
+}
+
+// Login with password
+async function loginWithPassword(ctx) {
+  const { phone, password } = ctx.request.body;
+  // Password verification logic
+  // ...
+}
+```
+
+## Custom Middleware
+
+The project uses custom middleware for various purposes:
+
+- [Authentication Middleware](mdc:src/middlewares/authentication.ts) - Validates JWT tokens
+- [Rate Limiting Middleware](mdc:src/api/auth/middlewares/throttle.ts) - Prevents brute force attacks
+
+### Authentication Middleware Example
+
+```typescript
+// src/middlewares/authentication.ts
+export default () => {
+  return async (ctx, next) => {
+    try {
+      const token = ctx.request.header.authorization?.replace('Bearer ', '');
+      
+      if (!token) {
+        ctx.status = 401;
+        ctx.body = { message: 'Unauthorized - Missing token' };
+        return;
+      }
+      
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await strapi.entityService.findOne('api::local-user.local-user', decoded.userId, {
+          populate: ['user_info', 'user_role'],
+        });
+        
+        if (!user) {
+          ctx.status = 401;
+          ctx.body = { message: 'Unauthorized - Invalid user' };
+          return;
+        }
+        
+        // Set user in context state
+        ctx.state.user = user;
+        await next();
+        
+      } catch (err) {
+        ctx.status = 401;
+        ctx.body = { message: 'Unauthorized - Invalid token' };
+      }
+    } catch (err) {
+      ctx.status = 500;
+      ctx.body = { message: err.message };
+    }
+  };
+};
+```
+
+## Adding Middleware to Routes
+
+```typescript
+// src/api/product/routes/product.ts
+export default {
+  routes: [
+    {
+      method: 'GET',
+      path: '/products',
+      handler: 'product.find',
+      config: {
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/products/:id',
+      handler: 'product.findOne',
+      config: {
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/products',
+      handler: 'product.create',
+      config: {
+        middlewares: ['global::authentication'],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/products/:id',
+      handler: 'product.update',
+      config: {
+        middlewares: ['global::authentication'],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/products/:id',
+      handler: 'product.delete',
+      config: {
+        middlewares: ['global::authentication'],
+      },
+    },
+  ],
+};
+```

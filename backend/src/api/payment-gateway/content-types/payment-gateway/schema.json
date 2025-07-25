@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payment_gateways",
+  "info": {
+    "singularName": "payment-gateway",
+    "pluralName": "payment-gateways",
+    "displayName": "PaymentGateway"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "APIKey": {
+      "type": "text"
+    },
+    "CallbackURL": {
+      "type": "text"
+    },
+    "Description": {
+      "type": "text"
+    },
+    "IsActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "contract_transactions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contract-transaction.contract-transaction",
+      "mappedBy": "payment_gateway"
+    }
+  }
+}

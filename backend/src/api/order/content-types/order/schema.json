@@ -1,0 +1,76 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "Order",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Description": {
+      "type": "text"
+    },
+    "Note": {
+      "type": "text"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user.local-user",
+      "inversedBy": "orders"
+    },
+    "contract": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::contract.contract",
+      "inversedBy": "order"
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": [
+        "Paying",
+        "Started",
+        "Shipment",
+        "Done",
+        "Returned",
+        "Cancelled"
+      ],
+      "default": "Paying"
+    },
+    "Date": {
+      "type": "datetime",
+      "required": true
+    },
+    "order_items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order-item.order-item",
+      "mappedBy": "order"
+    },
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Manual",
+        "Automatic"
+      ],
+      "default": "Automatic"
+    },
+    "shipping": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::shipping.shipping",
+      "inversedBy": "orders"
+    },
+    "ShippingCost": {
+      "type": "integer",
+      "required": false,
+      "min": 0,
+      "default": 0
+    }
+  }
+}

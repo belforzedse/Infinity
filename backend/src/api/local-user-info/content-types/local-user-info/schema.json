@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "local_user_infos",
+  "info": {
+    "singularName": "local-user-info",
+    "pluralName": "local-user-infos",
+    "displayName": "LocalUserInfo",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "FirstName": {
+      "type": "string"
+    },
+    "LastName": {
+      "type": "string"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user.local-user",
+      "inversedBy": "user_info"
+    },
+    "NationalCode": {
+      "type": "string"
+    },
+    "BirthDate": {
+      "type": "date"
+    },
+    "Sex": {
+      "type": "boolean"
+    },
+    "Bio": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "local_user_permissions",
+  "info": {
+    "singularName": "local-user-permission",
+    "pluralName": "local-user-permissions",
+    "displayName": "LocalUserPermission",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "Slug": {
+      "type": "string"
+    },
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "Add",
+        "Get",
+        "GetAll",
+        "Remove",
+        "Update"
+      ],
+      "required": true
+    },
+    "Entity": {
+      "type": "string",
+      "required": true
+    },
+    "user_roles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::local-user-role.local-user-role",
+      "inversedBy": "user_permissions"
+    }
+  }
+}

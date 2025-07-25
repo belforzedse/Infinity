@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_likes",
+  "info": {
+    "singularName": "product-like",
+    "pluralName": "product-likes",
+    "displayName": "ProductLike"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user.local-user"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product"
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "kind": "collectionType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "Product",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "CoverImage": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "Description": {
+      "type": "text"
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": [
+        "Active",
+        "InActive"
+      ]
+    },
+    "Media": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "videos"
+      ]
+    },
+    "AverageRating": {
+      "type": "decimal"
+    },
+    "RatingCount": {
+      "type": "integer"
+    },
+    "product_main_category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product-category.product-category",
+      "inversedBy": "products"
+    },
+    "product_reviews": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-review.product-review",
+      "mappedBy": "product"
+    },
+    "product_tags": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product-tag.product-tag",
+      "mappedBy": "products"
+    },
+    "product_variations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-variation.product-variation",
+      "mappedBy": "product"
+    },
+    "Files": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "files"
+      ]
+    },
+    "product_size_helper": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-size-helper.product-size-helper",
+      "mappedBy": "product"
+    },
+    "CleaningTips": {
+      "type": "text"
+    },
+    "ReturnConditions": {
+      "type": "text"
+    },
+    "product_faqs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-faq.product-faq",
+      "mappedBy": "product"
+    },
+    "product_other_categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product-category.product-category",
+      "inversedBy": "product_others"
+    },
+    "removedAt": {
+      "type": "datetime"
+    }
+  }
+}

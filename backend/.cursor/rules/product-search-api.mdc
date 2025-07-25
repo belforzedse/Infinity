@@ -1,0 +1,43 @@
+---
+description: The application provides a powerful search API for finding products based on various criteria. This search functionality is implemented using a custom endpoint.
+globs: 
+alwaysApply: false
+---
+# Product Search API
+
+The application provides a powerful search API for finding products based on various criteria. This search functionality is implemented using a custom endpoint.
+
+## Implementation
+
+The product search functionality is implemented in three main files:
+
+1. **Custom Router**: [src/api/product/routes/custom-router.ts](mdc:src/api/product/routes/custom-router.ts)
+   - Defines the `/products/search` endpoint
+   - Uses the `product.search` controller handler
+
+2. **Controller**: [src/api/product/controllers/product.ts](mdc:src/api/product/controllers/product.ts)
+   - Implements the `search` handler which validates input and calls the service
+   - Returns appropriate error responses if search parameters are invalid
+
+3. **Service**: [src/api/product/services/product.ts](mdc:src/api/product/services/product.ts)
+   - Implements the actual search logic using Strapi's query builder
+   - Searches across multiple product fields including name, description, tags, and categories
+   - Handles pagination and sorting of results
+
+## API Usage
+
+The search endpoint accepts the following query parameters:
+- `q`: (required) The search query string
+- `page`: (optional) Page number for pagination (default: 1)
+- `pageSize`: (optional) Number of items per page (default: 10)
+
+## Response Format
+
+The response includes:
+- Array of matching products with all their details and relations
+- Pagination metadata including current page, page size, page count, and total items
+
+## Documentation
+
+The full API documentation is available in the project README.md, including request parameters, response examples, and error handling.
+
