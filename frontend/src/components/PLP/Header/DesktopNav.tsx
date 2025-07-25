@@ -1,0 +1,54 @@
+"use client";
+
+import ChevronDownIcon from "@/components/Search/Icons/ChevronDownIcon";
+import Link from "next/link";
+import { useNavigation } from "@/hooks/api/useNavigation";
+
+interface NavItem {
+  label: string;
+  href: string;
+  hasDropdown?: boolean;
+}
+
+export default function PLPHeaderDesktopNav() {
+  const { navigation, loading } = useNavigation();
+
+  // Transform navigation items to NavItem format
+  const navItems: NavItem[] = [
+    { label: "خانه", href: "/" },
+    ...navigation.map((item) => ({
+      label: item.title,
+      href: `/plp?category=${item.slug}`,
+      hasDropdown: false,
+    })),
+  ];
+
+  if (loading) {
+    return (
+      <nav className="bg-stone-50 py-3 px-10">
+        <div className="flex items-center justify-center gap-6">
+          <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="bg-stone-50 py-3 px-10">
+      <div className="flex items-center justify-center gap-6">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="text-sm text-foreground-primary hover:text-pink-500 transition-colors flex items-center"
+          >
+            {item.label}
+            {item.hasDropdown && <ChevronDownIcon />}
+          </Link>
+        ))}
+      </div>
+    </nav>
+  );
+}

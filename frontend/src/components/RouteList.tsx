@@ -1,0 +1,104 @@
+"use client";
+
+import Link from "next/link";
+import { RouteInfo } from "@/utils/routes";
+import { useState } from "react";
+
+interface RouteListProps {
+  routes: RouteInfo[];
+}
+
+type RouteCategory = {
+  name: string;
+  paths: string[];
+};
+
+const categories: RouteCategory[] = [
+  { name: "Super Admin", paths: ["/super-admin"] },
+  { name: "Products", paths: ["/plp", "/pdp"] },
+  { name: "Authentication", paths: ["/auth"] },
+  {
+    name: "User",
+    paths: [
+      "/account",
+      "/addresses",
+      "/favorites",
+      "/orders",
+      "/password",
+      "/privileges",
+      "/wallet",
+    ],
+  },
+];
+
+export const RouteList = ({ routes }: RouteListProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const getRoutesByCategory = (categoryPaths: string[]) => {
+    return routes.filter((route) =>
+      categoryPaths.some((path) => route.path.startsWith(path))
+    );
+  };
+
+  const filteredRoutes = routes.filter(
+    (route) =>
+      route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      route.path.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      route.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="w-full max-w-6xl mx-auto">
+      <div className="mb-8">
+        <input
+          type="text"
+          placeholder="Search routes..."
+          className="w-full max-w-md px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {searchTerm ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredRoutes.map((route) => (
+            <RouteCard key={route.path} route={route} />
+          ))}
+        </div>
+      ) : (
+        categories.map((category) => {
+          const categoryRoutes = getRoutesByCategory(category.paths);
+          if (categoryRoutes.length === 0) return null;
+
+          return (
+            <div key={category.name} className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">{category.name}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categoryRoutes.map((route) => (
+                  <RouteCard key={route.path} route={route} />
+                ))}
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+};
+
+const RouteCard = ({ route }: { route: RouteInfo }) => (
+  <Link
+    href={route.path}
+    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+  >
+    <div className="flex flex-col gap-2">
+      <h3 className="text-lg font-semibold">{route.name}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        {route.description}
+      </p>
+      <code className="text-xs bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded">
+        {route.path}
+      </code>
+    </div>
+  </Link>
+);

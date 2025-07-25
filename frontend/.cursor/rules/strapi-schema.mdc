@@ -1,0 +1,222 @@
+---
+description: This rule documents the Strapi data models and schema structure used in the Infinity Store application.
+globs: 
+alwaysApply: false
+---
+# Strapi Schema and Data Models
+
+This rule documents the Strapi data models and schema structure used in the Infinity Store application.
+
+## Common Response Structure
+
+Strapi v4 returns data in a standard format:
+
+```typescript
+// Single entity response
+{
+  data: {
+    id: number,
+    attributes: {
+      // Entity fields...
+      createdAt: string,
+      updatedAt: string
+    }
+  }
+}
+
+// Collection response
+{
+  data: [
+    {
+      id: number,
+      attributes: {
+        // Entity fields...
+      }
+    }
+  ],
+  meta: {
+    pagination: {
+      page: number,
+      pageSize: number,
+      pageCount: number,
+      total: number
+    }
+  }
+}
+```
+
+## Key Data Models
+
+### Footer Schema
+
+The footer data structure:
+
+```typescript
+interface FooterData {
+  CustomerSupport: string;
+  First: {
+    Header: string;
+    Links: Array<{ Title: string; URL: string }>;
+  };
+  Second: {
+    Header: string;
+    Links: Array<{ Title: string; URL: string }>;
+  };
+  Third: {
+    Header: string;
+    Links: Array<{ Title: string; URL: string }>;
+  };
+  ContactUs: {
+    Phone: string;
+    Whatsapp: string | null;
+    Instagram: string | null;
+    Telegram: string | null;
+  };
+}
+```
+
+### Product Schema
+
+The product data structure:
+
+```typescript
+interface Product {
+  Title: string;
+  Description?: string;
+  Status: 'Active' | 'InActive';
+  AverageRating?: number;
+  RatingCount?: number;
+  CoverImage: {
+    id: number;
+    url: string;
+    width: number;
+    height: number;
+    formats: Record<string, { url: string; width: number; height: number }>;
+  };
+  Media?: MediaItem[];
+  product_variations?: ProductVariation[];
+  product_main_category?: ProductCategory;
+  product_tags?: ProductTag[];
+  CleaningTips?: string;
+  ReturnConditions?: string;
+  product_faqs?: ProductFaq[];
+}
+
+interface ProductVariation {
+  SKU: string;
+  Price: number;
+  DiscountPrice?: number;
+  product_variation_sizes?: ProductVariationSize[];
+  product_variation_colors?: ProductVariationColor[];
+}
+```
+
+### User Schema
+
+The user data structure:
+
+```typescript
+interface User {
+  Phone: string;
+  IsVerified: boolean;
+  FirstName?: string;
+  LastName?: string;
+  Email?: string;
+  blocked: boolean;
+  user_info?: UserInfo;
+  user_role?: UserRole;
+}
+
+interface UserInfo {
+  Address?: string;
+  City?: string;
+  Province?: string;
+  PostalCode?: string;
+  ProfileImage?: MediaItem;
+}
+```
+
+## Querying Strapi API
+
+### Basic Filters
+
+```typescript
+// Equal
+/api/products?filters[Status][$eq]=Active
+
+// Contains (case-sensitive)
+/api/products?filters[Title][$contains]=shirt
+
+// Contains (case-insensitive)
+/api/products?filters[Title][$containsi]=shirt
+
+// Greater than
+/api/products?filters[Price][$gt]=100
+
+// Less than
+/api/products?filters[Price][$lt]=100
+
+// In array
+/api/products?filters[product_main_category][id][$in][0]=1&filters[product_main_category][id][$in][1]=2
+```
+
+### Relational Queries
+
+```typescript
+// Filter by relation field
+/api/products?filters[product_main_category][id]=1
+
+// Multiple relation conditions
+/api/products?filters[product_tags][id][$in][0]=1&filters[product_tags][id][$in][1]=2
+```
+
+### Data Population
+
+```typescript
+// Populate all relations (first level)
+/api/products?populate=*
+
+// Populate specific relation
+/api/products?populate=product_variations
+
+// Populate nested relations
+/api/products?populate[product_variations][populate]=product_variation_sizes
+
+// Populate multiple specific relations
+/api/products?populate[0]=product_variations&populate[1]=product_tags
+```
+
+### Pagination
+
+```typescript
+// Basic pagination
+/api/products?pagination[page]=1&pagination[pageSize]=10
+
+// Limit results
+/api/products?pagination[limit]=10
+
+// Start from specific item
+/api/products?pagination[start]=10
+```
+
+### Sorting
+
+```typescript
+// Ascending sort
+/api/products?sort=Title:asc
+
+// Descending sort
+/api/products?sort=Price:desc
+
+// Multiple sort fields
+/api/products?sort[0]=Title:asc&sort[1]=Price:desc
+```
+
+## Integration Best Practices
+
+1. **Type Safety**: Define TypeScript interfaces for all API responses
+2. **Data Transformation**: Transform Strapi's data structure to a format that's more convenient for your frontend
+3. **Error Handling**: Handle API errors gracefully and provide fallback content
+4. **Loading States**: Implement loading states for better user experience
+5. **Caching**: Consider implementing client-side caching for frequently accessed data
+

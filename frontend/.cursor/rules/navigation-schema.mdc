@@ -1,0 +1,171 @@
+---
+description: This rule documents the Navigation API endpoint structure used in the Infinity Store application. The navigation API provides data for both desktop navigation bar and mobile hamburger menu.
+globs: 
+alwaysApply: false
+---
+# Navigation API Schema
+
+This rule documents the Navigation API endpoint structure used in the Infinity Store application. The navigation API provides data for both desktop navigation bar and mobile hamburger menu.
+
+## API Endpoint
+
+```
+GET https://infinity-bck.darkube.app/api/navigation?populate=*
+```
+
+## Response Structure
+
+The navigation API returns a JSON object with the following structure:
+
+```json
+{
+  "data": {
+    "id": 1,
+    "attributes": {
+      "createdAt": "2025-04-23T02:18:41.708Z",
+      "updatedAt": "2025-04-23T02:18:41.708Z",
+      "product_categories": {
+        "data": [
+          {
+            "id": 19,
+            "attributes": {
+              "Title": "پیراهن",
+              "Slug": "Shirts",
+              "createdAt": "2025-04-21T08:13:19.146Z",
+              "updatedAt": "2025-04-21T08:13:19.146Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "meta": {}
+}
+```
+
+## TypeScript Interface
+
+```typescript
+interface NavigationResponse {
+  data: {
+    id: number;
+    attributes: {
+      createdAt: string;
+      updatedAt: string;
+      product_categories: {
+        data: Array<{
+          id: number;
+          attributes: {
+            Title: string;
+            Slug: string;
+            createdAt: string;
+            updatedAt: string;
+          }
+        }>
+      }
+    }
+  };
+  meta: Record<string, unknown>;
+}
+```
+
+## Usage Examples
+
+### Fetching Navigation Data
+
+```typescript
+// Example of fetching navigation data in a component
+import { useEffect, useState } from 'react';
+
+const NavigationComponent = () => {
+  const [navigation, setNavigation] = useState<NavigationResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNavigation = async () => {
+      try {
+        const response = await fetch('https://infinity-bck.darkube.app/api/navigation?populate=*');
+        const data = await response.json();
+        setNavigation(data);
+      } catch (error) {
+        console.error('Error fetching navigation:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNavigation();
+  }, []);
+
+  if (loading) return <div>Loading navigation...</div>;
+  if (!navigation) return <div>Error loading navigation</div>;
+
+  return (
+    <nav>
+      <ul>
+        {navigation.data.attributes.product_categories.data.map((category) => (
+          <li key={category.id}>
+            <a href={`/plp/${category.attributes.Slug}`}>
+              {category.attributes.Title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+};
+
+export default NavigationComponent;
+```
+
+### Using with Mobile Hamburger Menu
+
+```typescript
+// Example integration with mobile hamburger menu
+import { useEffect, useState } from 'react';
+import { NavigationResponse } from '@/types';
+
+const MobileMenu = ({ isOpen }: { isOpen: boolean }) => {
+  const [navigation, setNavigation] = useState<NavigationResponse | null>(null);
+
+  useEffect(() => {
+    const fetchNavigation = async () => {
+      try {
+        const response = await fetch('https://infinity-bck.darkube.app/api/navigation?populate=*');
+        const data = await response.json();
+        setNavigation(data);
+      } catch (error) {
+        console.error('Error fetching navigation:', error);
+      }
+    };
+
+    fetchNavigation();
+  }, []);
+
+  if (!navigation) return null;
+
+  return (
+    <div className={`mobile-menu ${isOpen ? 'open' : ''}`}>
+      <ul>
+        {navigation.data.attributes.product_categories.data.map((category) => (
+          <li key={category.id}>
+            <a href={`/plp/${category.attributes.Slug}`}>
+              {category.attributes.Title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default MobileMenu;
+```
+
+## Notes
+
+- The navigation is configured as a single type in Strapi CMS
+- It contains product categories which can be used for building navigation menus
+- Always use the `?populate=*` query parameter to fetch the complete navigation structure with all related data
+- The API response includes both Persian titles (Title) and English slugs (Slug) for navigation items
+

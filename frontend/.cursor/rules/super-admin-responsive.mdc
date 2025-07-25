@@ -1,0 +1,75 @@
+---
+description: This document outlines the responsive design patterns used in the Super Admin section to ensure a consistent experience across different device sizes.
+globs: 
+alwaysApply: false
+---
+# Super Admin Responsive Design
+
+This document outlines the responsive design patterns used in the Super Admin section to ensure a consistent experience across different device sizes.
+
+## Layout Structure
+
+The Super Admin layout uses different components for desktop and mobile views:
+
+```tsx
+// From src/app/(super-admin)/layout.tsx
+<Suspense fallback={<div>Loading...</div>}>
+  <div className="hidden md:block">
+    <Desktop>{children}</Desktop>
+  </div>
+
+  <div className="block md:hidden">
+    <Mobile>{children}</Mobile>
+  </div>
+</Suspense>
+```
+
+This approach uses Tailwind's responsive utilities to show/hide components based on screen size.
+
+## Mobile Components
+
+For mobile-specific implementations, use the Mobile-specific components:
+
+- [src/components/SuperAdmin/Layout/ContentWrapper/Mobile.tsx](mdc:src/components/SuperAdmin/Layout/ContentWrapper/Mobile.tsx)
+- [src/components/SuperAdmin/Order/MobileOrderItem.tsx](mdc:src/components/SuperAdmin/Order/MobileOrderItem.tsx)
+
+## Responsive Tables
+
+Tables should adapt to different screen sizes:
+- On desktop: Use full table layout with all columns
+- On mobile: Replace tables with card-like layouts or simplified tables with fewer columns
+
+Example implementation:
+- [src/components/SuperAdmin/Table/Mobile/Row/Box.tsx](mdc:src/components/SuperAdmin/Table/Mobile/Row/Box.tsx)
+
+## Sidebar Navigation
+
+The sidebar navigation has specific behavior based on screen size:
+- Desktop: Always visible (expanded)
+- Mobile: Hidden by default, shown when toggled
+
+Implementation in [src/components/SuperAdmin/Layout/Sidebar/index.tsx](mdc:src/components/SuperAdmin/Layout/Sidebar/index.tsx)
+
+## Tailwind Responsive Classes
+
+Use Tailwind's responsive prefixes consistently:
+- `sm:` (640px and up)
+- `md:` (768px and up)
+- `lg:` (1024px and up)
+- `xl:` (1280px and up)
+- `2xl:` (1536px and up)
+
+Example:
+```tsx
+<div className="p-2 md:p-4 lg:p-6">
+  {/* Content that has different padding at different breakpoints */}
+</div>
+```
+
+## Images and Assets
+
+Ensure images and assets are optimized for different screen sizes:
+- Use responsive image techniques
+- Consider different image sizes for different breakpoints
+- Optimize assets for mobile data usage
+

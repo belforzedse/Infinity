@@ -1,0 +1,37 @@
+---
+description: User schema containing Permission and User Wallet and User models.
+globs: 
+alwaysApply: false
+---
+# User Schema
+
+## User Models
+
+The user system consists of several related models:
+
+- @Local User - The main user model
+  - Contains authentication data like Phone, Password
+  - Connected to user info, addresses, wallet, etc.
+  
+- @Local User Info - User profile information
+  - Contains FirstName, LastName, and other personal details
+  
+- @Local User Address - User shipping addresses
+  - Contains address details for delivery and billing
+
+- @Local User Role - User role assignments
+  - Defines user permissions and access levels
+
+## User Wallet
+
+- @Local User Wallet - Digital wallet for users
+  - Tracks user's account balance
+
+- @Local User Wallet Transaction - Wallet transaction history
+  - Records deposits, withdrawals, and other wallet transactions
+
+## User Permissions
+
+- @Local User Permission - Permission settings for users
+  - Defines specific permissions for user actions and access
+

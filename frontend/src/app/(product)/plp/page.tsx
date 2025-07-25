@@ -1,0 +1,275 @@
+import PLPHeroBanner from "@/components/PLP/HeroBanner";
+import PLPList from "@/components/PLP/List";
+import { API_BASE_URL } from "@/constants/api";
+import { searchProducts } from "@/services/product/search";
+
+interface Product {
+  id: number;
+  attributes: {
+    Title: string;
+    Description: string;
+    Status: string;
+    AverageRating: number | null;
+    RatingCount: number | null;
+    CoverImage: {
+      data: {
+        attributes: {
+          url: string;
+        };
+      };
+    };
+    product_main_category: {
+      data: {
+        attributes: {
+          Title: string;
+          Slug: string;
+        };
+      };
+    };
+    product_variations: {
+      data: Array<{
+        attributes: {
+          SKU: string;
+          Price: string;
+          IsPublished: boolean;
+          general_discounts?: {
+            data: Array<{
+              attributes: {
+                Amount: number;
+              };
+            }>;
+          };
+        };
+      }>;
+    };
+  };
+}
+
+async function getProducts(
+  category?: string,
+  page = 1,
+  pageSize = 20,
+  showAvailableOnly = false,
+  minPrice?: string,
+  maxPrice?: string,
+  size?: string,
+  material?: string,
+  season?: string,
+  gender?: string,
+  usage?: string,
+  search?: string
+) {
+  // Handle search queries differently
+  if (search) {
+    try {
+      // Use the search service
+      const searchResults = await searchProducts(search, page, pageSize);
+
+      return {
+        products: searchResults.data.map((item) => {
+          // Transform search API format to match product data format
+          return {
+            id: item.id,
+            attributes: {
+              Title: item.Title,
+              Description: item.Description,
+              Status: "Active",
+              CoverImage: {
+                data: {
+                  attributes: {
+                    url: item.CoverImage?.url,
+                  },
+                },
+              },
+              product_main_category: {
+                data: {
+                  attributes: {
+                    Title: item.product_main_category?.Title || "",
+                    Slug: "",
+                  },
+                },
+              },
+              product_variations: {
+                data: item.product_variations.map((variation) => ({
+                  attributes: {
+                    SKU: "",
+                    Price: variation.Price.toString(),
+                    IsPublished: true,
+                  },
+                })),
+              },
+            },
+          };
+        }),
+        pagination: searchResults.meta.pagination,
+      };
+    } catch (error) {
+      console.error("Error searching products:", error);
+      return {
+        products: [],
+        pagination: {
+          page: 1,
+          pageSize: pageSize,
+          pageCount: 0,
+          total: 0,
+        },
+      };
+    }
+  }
+
+  // Build query parameters for regular product listing
+  const baseUrl = `${API_BASE_URL}/products`;
+
+  // Add required fields
+  const queryParams = new URLSearchParams();
+  queryParams.append("populate[0]", "CoverImage");
+  queryParams.append("populate[1]", "product_main_category");
+  queryParams.append("populate[2]", "product_variations");
+  queryParams.append("populate[3]", "product_variations.general_discounts");
+
+  // Add pagination
+  queryParams.append("pagination[page]", page.toString());
+  queryParams.append("pagination[pageSize]", pageSize.toString());
+
+  // Add filters
+  queryParams.append("filters[Status][$eq]", "Active");
+
+  // Category filter
+  if (category) {
+    queryParams.append("filters[product_main_category][Slug][$eq]", category);
+  }
+
+  // Price range filters
+  if (minPrice) {
+    queryParams.append("filters[product_variations][Price][$gte]", minPrice);
+  }
+  if (maxPrice) {
+    queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
+  }
+
+  // Availability filter
+  if (showAvailableOnly) {
+    queryParams.append("filters[product_variations][IsPublished][$eq]", "true");
+  }
+
+  // Size filter
+  if (size) {
+    queryParams.append("filters[product_variations][Size][$eq]", size);
+  }
+
+  // Material filter
+  if (material) {
+    queryParams.append("filters[product_variations][Material][$eq]", material);
+  }
+
+  // Season filter
+  if (season) {
+    queryParams.append("filters[product_variations][Season][$eq]", season);
+  }
+
+  // Gender filter
+  if (gender) {
+    queryParams.append("filters[product_variations][Gender][$eq]", gender);
+  }
+
+  // Usage filter
+  if (usage) {
+    queryParams.append("filters[product_variations][Usage][$eq]", usage);
+  }
+
+  // Construct final URL
+  const url = `${baseUrl}?${queryParams.toString()}`;
+
+  const response = await fetch(url);
+  const data = await response.json();
+
+  // Filter out products with zero price and check availability if needed
+  const filteredProducts = data.data.filter((product: Product) => {
+    // Check if any variation has a valid price
+    const hasValidPrice = product.attributes.product_variations?.data?.some(
+      (variation) => {
+        const price = variation.attributes.Price;
+        return price && parseInt(price) > 0;
+      }
+    );
+
+    // If showAvailableOnly is true, also check if any variation is published
+    if (showAvailableOnly) {
+      const hasAvailableVariation =
+        product.attributes.product_variations?.data?.some(
+          (variation) => variation.attributes.IsPublished
+        );
+      return hasValidPrice && hasAvailableVariation;
+    }
+
+    return hasValidPrice;
+  });
+
+  return {
+    products: filteredProducts,
+    pagination: data.meta.pagination,
+  };
+}
+
+export default async function PLPPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // Await the searchParams object
+  const params = await searchParams;
+
+  // Extract parameters with default values
+  const category =
+    typeof params.category === "string" ? params.category : undefined;
+  const page = typeof params.page === "string" ? parseInt(params.page) : 1;
+  const showAvailableOnly =
+    typeof params.available === "string" ? params.available === "true" : false;
+  const minPrice =
+    typeof params.minPrice === "string" ? params.minPrice : undefined;
+  const maxPrice =
+    typeof params.maxPrice === "string" ? params.maxPrice : undefined;
+  const size = typeof params.size === "string" ? params.size : undefined;
+  const material =
+    typeof params.material === "string" ? params.material : undefined;
+  const season = typeof params.season === "string" ? params.season : undefined;
+  const gender = typeof params.gender === "string" ? params.gender : undefined;
+  const usage = typeof params.usage === "string" ? params.usage : undefined;
+  const search = typeof params.search === "string" ? params.search : undefined;
+
+  const { products, pagination } = await getProducts(
+    category,
+    page,
+    20,
+    showAvailableOnly,
+    minPrice,
+    maxPrice,
+    size,
+    material,
+    season,
+    gender,
+    usage,
+    search
+  );
+
+  // Determine if we're showing search results or category results
+  const isSearchResults = !!search;
+
+  return (
+    <>
+      <div className="mt-3 md:mt-0 md:pt-[38px] md:pb-[80px]">
+        {/* Show hero banner only for category browsing, not search results */}
+        {!isSearchResults && <PLPHeroBanner category={category} />}
+
+        {/* Show search results or product list */}
+        <PLPList
+          products={products}
+          pagination={pagination}
+          category={category}
+          showAvailableOnly={showAvailableOnly}
+          searchQuery={search}
+        />
+      </div>
+    </>
+  );
+}

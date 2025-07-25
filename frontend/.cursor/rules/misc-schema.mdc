@@ -1,0 +1,21 @@
+---
+description: Miscellaneous Schemas for Footer and Messaging Service in Strapi
+globs: 
+alwaysApply: false
+---
+# Miscellaneous Schemas
+
+## Site Content
+
+- [Footer](mdc:src/api/footer/content-types/footer/schema.json) - Footer content for the website
+  - Contains sections, links, and content for the site footer
+
+## Messaging
+
+- [Messaging Service](mdc:src/api/messaging/services) - Communication system
+  - Custom API service for user-to-user or system-to-user messages
+  - Handles message delivery and notifications
+  - Not a standard content type, but a custom service layer
+
+
+

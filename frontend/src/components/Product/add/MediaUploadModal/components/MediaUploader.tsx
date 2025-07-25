@@ -1,0 +1,71 @@
+import classNames from "classnames";
+import { useState } from "react";
+import Uploader from "./Uploader";
+import { MediaViewEnum, MediaViewType } from "../types";
+import { UploadedPhotosSelector } from "./UploadedPhotosSelector";
+
+interface MediaUploaderProps {
+  dragActive: boolean;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragLeave: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onImageSelect: (image: string) => void;
+}
+
+export default function MediaUploader({
+  dragActive,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onImageSelect,
+}: MediaUploaderProps) {
+  const [activeView, setActiveView] = useState<MediaViewType>(
+    MediaViewEnum.UPLOAD_FILES
+  );
+
+  const views: MediaViewType[] = [
+    MediaViewEnum.UPLOAD_FILES,
+    MediaViewEnum.UPLOAD_MULTIPLE_FILES,
+    MediaViewEnum.SHOW_DETAILS,
+  ];
+
+  return (
+    <div className="flex-1 flex flex-col col-span-3 bg-white rounded-lg overflow-hidden px-5 py-4">
+      {/* View Selector */}
+      <div className="flex border-b border-gray-200 gap-8">
+        {views.map((view) => (
+          <button
+            key={view}
+            onClick={() => setActiveView(view)}
+            className={classNames(
+              "text-sm transition-colors border-b-2 pb-2",
+              view === activeView
+                ? "text-pink-500 border-pink-500"
+                : "text-gray-500 border-transparent hover:text-gray-700"
+            )}
+          >
+            {view}
+          </button>
+        ))}
+      </div>
+
+      {activeView === MediaViewEnum.UPLOAD_FILES && (
+        <Uploader
+          dragActive={dragActive}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+        />
+      )}
+
+      {activeView === MediaViewEnum.UPLOAD_MULTIPLE_FILES && (
+        <UploadedPhotosSelector
+          onPhotoSelect={(photo) => {
+            onImageSelect(photo);
+          }}
+          selectedPhotos={[]}
+        />
+      )}
+    </div>
+  );
+}

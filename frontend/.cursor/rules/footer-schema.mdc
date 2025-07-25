@@ -1,0 +1,98 @@
+---
+description: The footer section of the application is populated via the Strapi backend API. The endpoint provides a structured schema that defines the layout and content of the site footer.
+globs: 
+alwaysApply: false
+---
+# Footer Schema Structure
+
+The footer section of the application is populated via the Strapi backend API. The endpoint provides a structured schema that defines the layout and content of the site footer.
+
+## API Endpoint
+
+```
+GET https://infinity-bck.darkube.app/api/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs
+```
+
+## Schema Structure
+
+The footer schema consists of the following main sections:
+
+### Column Sections (First, Second, Third)
+
+Each column in the footer has:
+- `Header`: The title of the column
+- `Links`: An array of link objects containing:
+  - `Title`: Display text for the link
+  - `URL`: Target path for the link
+
+### Contact Us Section
+
+Contains contact information:
+- `Phone`: Phone number for customer support
+- `Whatsapp`: WhatsApp contact (nullable)
+- `Instagram`: Instagram profile link (nullable)
+- `Telegram`: Telegram contact (nullable)
+
+### Customer Support
+
+Text describing customer support hours and availability.
+
+## Sample Implementation
+
+When implementing the footer component, you should:
+1. Fetch the footer data from the API
+2. Parse the response into appropriate sections
+3. Render each section according to the design
+4. Handle proper loading states and error cases
+
+## Related Components
+
+- Footer component: Should consume this data structure
+- Layout components: Should integrate the footer
+- API service: Should include methods to fetch footer data
+
+## Data Model Example
+
+```json
+{
+  "data": {
+    "attributes": {
+      "CustomerSupport": "شنبه تا پنج شنبه (غیر از روزهای تعطیل) از ساعت9 صبح الی 17 پاسخگوی شما هستیم.",
+      "First": {
+        "Header": "حساب کاربری",
+        "Links": [
+          {
+            "Title": "فروشگاه",
+            "URL": "/plp"
+          }
+        ]
+      },
+      "Second": {
+        "Header": "دسترسی سریع",
+        "Links": [
+          {
+            "Title": "خرید شلوار",
+            "URL": "/plp/pants"
+          }
+        ]
+      },
+      "Third": {
+        "Header": "خدمات مشتریان",
+        "Links": [
+          {
+            "Title": "سوالات متداول",
+            "URL": "/faq"
+          }
+        ]
+      },
+      "ContactUs": {
+        "Phone": "017-325-304-39",
+        "Whatsapp": null,
+        "Instagram": null,
+        "Telegram": null
+      }
+    }
+  }
+}
+```
+

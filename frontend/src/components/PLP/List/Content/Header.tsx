@@ -1,0 +1,57 @@
+import PLPButton from "@/components/Kits/PLP/Button";
+import Text from "@/components/Kits/Text";
+import SortDescIcon from "../../Icons/SortDescIcon";
+import Image from "next/image";
+
+export default function PLPListContentHeader() {
+  return (
+    <div className="w-full flex items-center justify-between">
+      <Text className="text-foreground-primary !text-3xl">پوشاک زنانه</Text>
+
+      <div className="items-center gap-2 hidden md:flex">
+        <PLPButton
+          text="محبوب ترین محصولات"
+          className="bg-red-100 text-red-900"
+          leftIcon={
+            <Image
+              src="/images/heart-image-icon.png"
+              alt="heart"
+              width={20}
+              height={20}
+            />
+          }
+        />
+
+        <PLPButton
+          text="محصولات تخفیف دار"
+          className="bg-blue-100 text-blue-900"
+          leftIcon={
+            <Image
+              src="/images/100-image-icon.png"
+              alt="100"
+              width={20}
+              height={25}
+            />
+          }
+        />
+
+        <PLPButton
+          text="پر فروش ترین محصولات"
+          className="bg-orange-100 text-orange-900"
+          leftIcon={
+            <Image
+              src="/images/fire-image-icon.png"
+              alt="fire"
+              width={20}
+              height={20}
+            />
+          }
+        />
+        <PLPButton
+          text="مرتب سازی"
+          rightIcon={<SortDescIcon className="w-6 h-6" />}
+        />
+      </div>
+    </div>
+  );
+}

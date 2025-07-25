@@ -1,0 +1,113 @@
+"use client";
+
+import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
+import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
+import { ColumnDef } from "@tanstack/react-table";
+
+// This is a sample data type. Modify according to your needs
+export type Province = {
+  id: string;
+  attributes: {
+    Code: string;
+    Title: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+};
+
+export const columns: ColumnDef<Province>[] = [
+  {
+    accessorKey: "attributes.Code",
+    header: "کد استان",
+  },
+  {
+    accessorKey: "attributes.Title",
+    header: "نام",
+  },
+  {
+    accessorKey: "attributes.createdAt",
+    header: "تاریخ ایجاد",
+    cell: ({ row }) => {
+      const date = new Date(row.original?.attributes?.createdAt);
+      return <SuperAdminTableCellFullDate date={date} />;
+    },
+  },
+  {
+    accessorKey: "attributes.updatedAt",
+    header: "تاریخ به روز رسانی",
+    cell: ({ row }) => {
+      const date = new Date(row.original?.attributes?.updatedAt);
+      return <SuperAdminTableCellFullDate date={date} />;
+    },
+  },
+  {
+    accessorKey: "id",
+    header: "عملیات",
+    meta: {
+      headerClassName: "text-left",
+      cellClassName: "text-left",
+    },
+    cell: () => {
+      return (
+        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+          {/* <SuperAdminTableCellActionButton
+            variant="secondary"
+            icon={<EditIcon />}
+          /> */}
+        </div>
+      );
+    },
+  },
+];
+
+type Props = {
+  data: Province[] | undefined;
+};
+
+export const MobileTable = ({ data }: Props) => {
+  if (!data) return null;
+
+  return (
+    <div className="flex flex-col gap-2 mt-2">
+      {data.map((row) => {
+        return (
+          <MobileTableRowBox
+            key={row.id}
+            columns={columns}
+            row={row}
+            header={
+              <>
+                <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
+                  <div className="flex gap-1 items-center">
+                    <span className="text-xs text-neutral-400">
+                      {row.attributes?.Title}
+                    </span>
+                    <span className="text-xs text-neutral-400">|</span>
+                    <span className="text-xs text-neutral-400">
+                      کد {row.attributes?.Code}
+                    </span>
+                    <span className="text-xs text-neutral-400">|</span>
+                    <span className="text-sm text-neutral-400">
+                      ایجاد:{" "}
+                      {new Date(row.attributes?.createdAt).toLocaleDateString(
+                        "fa-IR"
+                      )}
+                    </span>
+                    <span className="text-xs text-neutral-400">|</span>
+                    <span className="text-sm text-neutral-400">
+                      ویرایش:{" "}
+                      {new Date(row.attributes?.updatedAt).toLocaleDateString(
+                        "fa-IR"
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </>
+            }
+            headTitle={row.attributes?.Title}
+          />
+        );
+      })}
+    </div>
+  );
+};

@@ -1,0 +1,292 @@
+"use client";
+
+import Button from "@/components/Kits/PLP/Button";
+import ChatIcon from "../../Icons/ChatIcon";
+import HeartIcon from "../../Icons/HeartIcon";
+import ShareIcon from "../../Icons/ShareIcon";
+import BasketIcon from "../../Icons/BasketIcon";
+import { useState, useEffect, useRef } from "react";
+import Select from "@/components/Kits/Form/Select";
+import useProductLike from "@/hooks/useProductLike";
+import useAddToCart from "@/hooks/useAddToCart";
+import { hasStockForVariation, getAvailableStockCount } from "@/services/product/product";
+import toast from "react-hot-toast";
+
+const options = [
+  { id: 1, name: "۱ عدد" },
+  { id: 2, name: "۲ عدد" },
+  { id: 3, name: "۳ عدد" },
+  { id: 4, name: "۴ عدد" },
+  { id: 5, name: "۵ عدد" },
+];
+
+interface PDPHeroInfoActionProps {
+  productId: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+  color?: string;
+  size?: string;
+  model?: string;
+  variationId?: string;
+  hasStock?: boolean;
+  currentVariation?: any; // Add current variation data
+  productData?: any; // Add product data for stock validation
+}
+
+export default function PDPHeroInfoAction({
+  productId = "",
+  name = "",
+  category = "",
+  price = 0,
+  image = "",
+  color,
+  size,
+  model,
+  variationId,
+  hasStock = true,
+  currentVariation,
+  productData,
+}: PDPHeroInfoActionProps) {
+  const [showShareToast, setShowShareToast] = useState(false);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Initialize product like hook
+  const { isLiked, isLoading, toggleLike } = useProductLike({
+    productId,
+  });
+
+  // Initialize add to cart hook
+  const { quantity, setQuantity, isAdding, isInCart, addToCart } = useAddToCart(
+    {
+      productId,
+      name,
+      category,
+      price,
+      image,
+      color,
+      size,
+      model,
+      variationId,
+    }
+  );
+
+  // Get available stock count for current variation
+  const availableStock = currentVariation ? getAvailableStockCount(currentVariation) : 0;
+
+  // Validate if selected quantity is available
+  const validateQuantity = (requestedQuantity: number): boolean => {
+    if (!currentVariation) {
+      return false;
+    }
+    
+    return hasStockForVariation(currentVariation, requestedQuantity);
+  };
+
+  // Enhanced add to cart handler with stock validation
+  const handleAddToCart = (requestedQuantity: number = 1) => {
+    console.log("=== ADD TO CART DEBUG ===");
+    console.log("Requested quantity:", requestedQuantity);
+    console.log("Current variation ID being sent to cart:", variationId);
+    console.log("Current variation object we're checking stock for:", currentVariation);
+    console.log("Available stock count:", availableStock);
+    
+    // Validate stock before adding to cart
+    if (!validateQuantity(requestedQuantity)) {
+      console.log("❌ Stock validation failed");
+      toast.error(`موجودی کافی نیست. موجودی فعلی: ${availableStock} عدد`);
+      return;
+    }
+
+    console.log("✅ Stock validation passed - calling addToCart");
+    console.log("Product details being sent to cart:", {
+      productId,
+      name,
+      category,
+      price,
+      image,
+      color,
+      size,
+      model,
+      variationId,
+    });
+    console.log("=== END ADD TO CART DEBUG ===");
+
+    // Call the original add to cart function
+    addToCart(requestedQuantity);
+  };
+
+  // Handle share button click
+  const handleShare = () => {
+    const currentUrl = window.location.href;
+
+    // Use the clipboard API
+    navigator.clipboard
+      .writeText(currentUrl)
+      .then(() => {
+        // Show toast message
+        setShowShareToast(true);
+
+        // Clear previous timeout if exists
+        if (toastTimeoutRef.current) {
+          clearTimeout(toastTimeoutRef.current);
+        }
+
+        // Hide toast after 3 seconds
+        toastTimeoutRef.current = setTimeout(() => {
+          setShowShareToast(false);
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error("Failed to copy URL:", error);
+      });
+  };
+
+  // Handle scroll to comments
+  const handleScrollToComments = () => {
+    // Find the comments section element
+    const commentsSection = document.querySelector("[data-comments-section]");
+
+    if (commentsSection) {
+      // Scroll to the comments section with smooth behavior
+      commentsSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      // If the element doesn't exist with the data attribute, try to find it by component name
+      const pdpCommentElement = document.querySelector(
+        ".flex.gap-4.flex-col-reverse.md\\:flex-row"
+      );
+
+      if (pdpCommentElement) {
+        pdpCommentElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }
+  };
+
+  // Clean up timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle quantity change
+  const handleQuantityChange = (option: any) => {
+    const newQuantity = option.id;
+    
+    // Validate the new quantity against available stock
+    if (!validateQuantity(newQuantity)) {
+      toast.error(`موجودی کافی نیست. موجودی فعلی: ${availableStock} عدد`);
+      return;
+    }
+    
+    setQuantity(newQuantity);
+  };
+
+  // Generate options based on available stock (limit to max 5 or available stock)
+  const generateQuantityOptions = () => {
+    const maxOptions = Math.min(5, availableStock);
+    return Array.from({ length: maxOptions }, (_, i) => ({
+      id: i + 1,
+      name: `${i + 1} عدد`,
+    }));
+  };
+
+  const dynamicOptions = availableStock > 0 ? generateQuantityOptions() : options;
+
+  // Find the current option based on quantity
+  const currentOption = dynamicOptions.find((opt) => opt.id === quantity) || null;
+
+  return (
+    <div className="flex gap-3 items-center flex-col md:flex-row relative">
+      <div className="flex gap-3 items-center w-full md:w-auto">
+        <button
+          className="flex-1 md:w-12 md:flex-auto h-12 flex items-center justify-center shadow-md rounded-xl"
+          onClick={handleShare}
+          aria-label="کپی لینک محصول"
+        >
+          <ShareIcon />
+        </button>
+
+        <button
+          className="flex-1 md:w-12 md:flex-auto h-12 flex items-center justify-center shadow-md rounded-xl"
+          onClick={handleScrollToComments}
+          aria-label="مشاهده نظرات"
+        >
+          <ChatIcon />
+        </button>
+
+        <button
+          className={`flex-1 md:w-12 md:flex-auto h-12 flex items-center justify-center shadow-md rounded-xl ${
+            isLoading ? "opacity-50 cursor-wait" : ""
+          }`}
+          onClick={toggleLike}
+          disabled={isLoading}
+          aria-label={
+            isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"
+          }
+        >
+          <HeartIcon
+            filled={isLiked}
+            className={isLiked ? "text-pink-600" : "text-neutral-800"}
+          />
+        </button>
+      </div>
+
+      <div className="flex gap-3 flex-1 w-full">
+        {!hasStock ? (
+          <Button
+            className="flex-1 flex items-center justify-center bg-gray-400 text-white text-base py-3 rounded-xl cursor-not-allowed"
+            text="ناموجود"
+            disabled={true}
+          />
+        ) : !isInCart ? (
+          <Button
+            className={`flex-1 flex items-center justify-center bg-actions-primary text-white text-base py-3 rounded-xl ${
+              isAdding ? "opacity-50 cursor-wait" : ""
+            }`}
+            text="افزودن به سبد خرید"
+            leftIcon={<BasketIcon />}
+            onClick={
+              isAdding
+                ? undefined
+                : () => {
+                    handleAddToCart(1); // Pass 1 as initial quantity
+                  }
+            }
+          />
+        ) : (
+          <>
+            <Button
+              className="flex-1 flex items-center justify-center bg-actions-primary text-white text-base py-3 rounded-xl"
+              text="افزودن"
+              leftIcon={<BasketIcon />}
+              onClick={() => handleAddToCart(quantity)}
+            />
+            <Select
+              className="w-[126px]"
+              options={dynamicOptions}
+              value={currentOption}
+              onChange={handleQuantityChange}
+              placeholder="تعداد"
+            />
+          </>
+        )}
+      </div>
+
+      {showShareToast && (
+        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-4 py-2 rounded-lg text-sm">
+          لینک کپی شد
+        </div>
+      )}
+    </div>
+  );
+}
