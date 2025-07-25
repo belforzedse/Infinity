@@ -1,8 +1,8 @@
-FROM hub.hamdocker.ir/node:20-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add git
+#RUN apk add git
 
 COPY package.json package-lock.json ./
 
