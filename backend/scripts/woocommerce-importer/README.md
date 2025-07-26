@@ -12,6 +12,8 @@ A comprehensive data migration tool for importing products, categories, variatio
 - **Dry Run Mode** - Test imports without making changes
 - **Persian/Farsi Support** - Handles Iranian e-commerce data properly
 - **Comprehensive Logging** - Detailed logs with timestamps and statistics
+- **🖼️ Advanced Image Handling** - Automatic download and upload of product images
+- **🚀 Performance Caching** - Smart caching prevents duplicate downloads/uploads
 
 ## 📦 Installation
 

@@ -55,6 +55,17 @@ module.exports = {
       multiplier: 10 // 1 Toman = 10 Rial
     },
 
+    // Image handling settings
+    images: {
+      enableUpload: true,
+      maxSize: 10 * 1024 * 1024, // 10MB
+      allowedTypes: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+      downloadTimeout: 30000,
+      uploadTimeout: 60000,
+      delayBetweenUploads: 500,
+      cacheImages: true
+    },
+
     // Status mappings
     statusMappings: {
       product: {
