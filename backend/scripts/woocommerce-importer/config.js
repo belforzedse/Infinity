@@ -63,7 +63,13 @@ module.exports = {
       downloadTimeout: 30000,
       uploadTimeout: 60000,
       delayBetweenUploads: 500,
-      cacheImages: true
+      cacheImages: true,
+      conversion: {
+        convertWebpToJpg: true,
+        jpegQuality: 90,
+        pngCompressionLevel: 8,
+        enableOptimization: true
+      }
     },
 
     // Status mappings
