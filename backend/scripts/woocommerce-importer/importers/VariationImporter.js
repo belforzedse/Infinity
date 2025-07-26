@@ -369,7 +369,11 @@ class VariationImporter {
     
     try {
       let result;
-      const attributeData = { Title: value };
+      const attributeData = { 
+        Title: value,
+        external_id: `${type}_${value.toLowerCase().replace(/\s+/g, '_')}`,
+        external_source: 'woocommerce'
+      };
       
       // Add color code for colors
       if (type === 'color') {
