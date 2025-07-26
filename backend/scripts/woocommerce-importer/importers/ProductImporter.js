@@ -1,5 +1,6 @@
 const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
 const DuplicateTracker = require('../utils/DuplicateTracker');
+const ImageUploader = require('../utils/ImageUploader');
 
 /**
  * Product Importer - Handles importing WooCommerce products to Strapi
@@ -18,6 +19,7 @@ class ProductImporter {
     this.wooClient = new WooCommerceClient(config, logger);
     this.strapiClient = new StrapiClient(config, logger);
     this.duplicateTracker = new DuplicateTracker(config, logger);
+    this.imageUploader = new ImageUploader(config, logger);
     
     // Import statistics
     this.stats = {
@@ -170,8 +172,23 @@ class ProductImporter {
       const result = await this.strapiClient.createProduct(strapiProduct);
       
       // Handle images if present
-      if (wcProduct.images && wcProduct.images.length > 0) {
-        await this.handleProductImages(result.data.id, wcProduct.images);
+      const imageResults = await this.handleProductImages(wcProduct, result.data.id);
+      
+      // Update product with images if successfully uploaded
+      if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
+        const updateData = {};
+        
+        if (imageResults.coverImageId) {
+          updateData.CoverImage = imageResults.coverImageId;
+        }
+        
+        if (imageResults.galleryImageIds.length > 0) {
+          updateData.Media = imageResults.galleryImageIds;
+        }
+        
+        // Update product with image relationships
+        await this.strapiClient.updateProduct(result.data.id, updateData);
+        this.logger.success(`📸 Images linked to product: ${wcProduct.name}`);
       }
       
       // Record the mapping
@@ -268,22 +285,31 @@ class ProductImporter {
   }
 
   /**
-   * Handle product images (placeholder - would need actual image upload logic)
+   * Handle product images - download from WooCommerce and upload to Strapi
    */
-  async handleProductImages(productId, images) {
-    // Note: This is a placeholder. In a real implementation, you would:
-    // 1. Download images from WooCommerce URLs
-    // 2. Upload them to Strapi's media library
-    // 3. Link them to the product
-    
-    this.logger.debug(`📸 Would process ${images.length} images for product ${productId}`);
-    
-    for (const image of images) {
-      this.logger.debug(`📸 Image: ${image.src} (${image.alt || 'No alt text'})`);
+  async handleProductImages(wcProduct, strapiProductId) {
+    try {
+      if (!wcProduct.images || wcProduct.images.length === 0) {
+        this.logger.debug(`📸 No images found for product: ${wcProduct.name}`);
+        return { coverImageId: null, galleryImageIds: [] };
+      }
+
+      this.logger.info(`📸 Processing ${wcProduct.images.length} images for: ${wcProduct.name}`);
+
+      // Handle cover image (first image)
+      const coverImageId = await this.imageUploader.handleCoverImage(wcProduct, strapiProductId);
+      
+      // Handle gallery images (remaining images)
+      const galleryImageIds = await this.imageUploader.handleGalleryImages(wcProduct, strapiProductId);
+
+      return {
+        coverImageId,
+        galleryImageIds
+      };
+    } catch (error) {
+      this.logger.error(`❌ Failed to handle images for product ${wcProduct.id}:`, error.message);
+      return { coverImageId: null, galleryImageIds: [] };
     }
-    
-    // TODO: Implement actual image upload logic
-    return null;
   }
 
   /**

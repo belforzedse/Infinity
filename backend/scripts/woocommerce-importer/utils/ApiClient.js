@@ -228,6 +228,16 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Update an existing product
+   */
+  async updateProduct(productId, updateData) {
+    const response = await this.retryRequest(() => 
+      this.client.put(`/products/${productId}`, { data: updateData })
+    );
+    return response.data;
+  }
+
+  /**
    * Create a new product variation
    */
   async createProductVariation(variationData) {
