@@ -305,33 +305,86 @@ class VariationImporter {
    * Create variation attributes (color, size, model)
    */
   async createVariationAttributes(wcVariation, strapiVariation) {
-    if (!wcVariation.attributes || wcVariation.attributes.length === 0) {
-      return;
+    // Track which attribute types are present in WooCommerce data
+    const presentAttributes = new Set();
+    
+    // Process existing WooCommerce attributes
+    if (wcVariation.attributes && wcVariation.attributes.length > 0) {
+      for (const attribute of wcVariation.attributes) {
+        try {
+          const attributeType = this.identifyAttributeType(attribute.name);
+          presentAttributes.add(attributeType);
+          
+          const strapiId = await this.createOrGetAttribute(attributeType, attribute.option);
+          
+          if (strapiId) {
+            // Link the attribute to the variation
+            switch (attributeType) {
+              case 'color':
+                strapiVariation.product_variation_color = strapiId;
+                break;
+              case 'size':
+                strapiVariation.product_variation_size = strapiId;
+                break;
+              case 'model':
+                strapiVariation.product_variation_model = strapiId;
+                break;
+            }
+            
+            this.logger.debug(`🎨 Linked ${attributeType}: ${attribute.option} → ID: ${strapiId}`);
+          }
+        } catch (error) {
+          this.logger.error(`❌ Failed to create attribute ${attribute.name}:`, error.message);
+        }
+      }
     }
 
-    for (const attribute of wcVariation.attributes) {
+    // Add default attributes for missing types
+    await this.addDefaultAttributes(strapiVariation, presentAttributes, wcVariation.id);
+  }
+
+  /**
+   * Add default attributes for types not present in WooCommerce data
+   */
+  async addDefaultAttributes(strapiVariation, presentAttributes, variationId) {
+    const defaultAttrs = this.config.import.defaults.variationAttributes;
+    
+    // Add default color if not present
+    if (!presentAttributes.has('color') && !strapiVariation.product_variation_color) {
       try {
-        const attributeType = this.identifyAttributeType(attribute.name);
-        const strapiId = await this.createOrGetAttribute(attributeType, attribute.option);
-        
-        if (strapiId) {
-          // Link the attribute to the variation
-          switch (attributeType) {
-            case 'color':
-              strapiVariation.product_variation_color = strapiId;
-              break;
-            case 'size':
-              strapiVariation.product_variation_size = strapiId;
-              break;
-            case 'model':
-              strapiVariation.product_variation_model = strapiId;
-              break;
-          }
-          
-          this.logger.debug(`🎨 Linked ${attributeType}: ${attribute.option} → ID: ${strapiId}`);
+        const defaultColorId = await this.createOrGetAttribute('color', defaultAttrs.color.title, defaultAttrs.color.colorCode);
+        if (defaultColorId) {
+          strapiVariation.product_variation_color = defaultColorId;
+          this.logger.info(`🎨 Variation ${variationId}: Added default color "${defaultAttrs.color.title}" → ID: ${defaultColorId}`);
         }
       } catch (error) {
-        this.logger.error(`❌ Failed to create attribute ${attribute.name}:`, error.message);
+        this.logger.error(`❌ Failed to create default color attribute:`, error.message);
+      }
+    }
+
+    // Add default size if not present
+    if (!presentAttributes.has('size') && !strapiVariation.product_variation_size) {
+      try {
+        const defaultSizeId = await this.createOrGetAttribute('size', defaultAttrs.size.title);
+        if (defaultSizeId) {
+          strapiVariation.product_variation_size = defaultSizeId;
+          this.logger.info(`📏 Variation ${variationId}: Added default size "${defaultAttrs.size.title}" → ID: ${defaultSizeId}`);
+        }
+      } catch (error) {
+        this.logger.error(`❌ Failed to create default size attribute:`, error.message);
+      }
+    }
+
+    // Add default model if not present
+    if (!presentAttributes.has('model') && !strapiVariation.product_variation_model) {
+      try {
+        const defaultModelId = await this.createOrGetAttribute('model', defaultAttrs.model.title);
+        if (defaultModelId) {
+          strapiVariation.product_variation_model = defaultModelId;
+          this.logger.info(`🏷️ Variation ${variationId}: Added default model "${defaultAttrs.model.title}" → ID: ${defaultModelId}`);
+        }
+      } catch (error) {
+        this.logger.error(`❌ Failed to create default model attribute:`, error.message);
       }
     }
   }
@@ -359,7 +412,7 @@ class VariationImporter {
   /**
    * Create or get existing attribute
    */
-  async createOrGetAttribute(type, value) {
+  async createOrGetAttribute(type, value, customColorCode = null) {
     const cacheKey = `${type}:${value}`;
     const cache = this.getCacheForType(type);
     
@@ -377,7 +430,7 @@ class VariationImporter {
       
       // Add color code for colors
       if (type === 'color') {
-        attributeData.ColorCode = this.generateColorCode(value);
+        attributeData.ColorCode = customColorCode || this.generateColorCode(value);
       }
       
       switch (type) {
@@ -418,29 +471,37 @@ class VariationImporter {
   }
 
   /**
-   * Generate color code from color name
+   * Generate unique color code from color name using hash-based approach
+   * This ensures every color name gets a unique, consistent color code
    */
   generateColorCode(colorName) {
-    // Basic color mapping - extend as needed
-    const colorMap = {
-      'قرمز': '#FF0000',
-      'آبی': '#0000FF',
-      'سبز': '#00FF00',
-      'زرد': '#FFFF00',
-      'سیاه': '#000000',
-      'سفید': '#FFFFFF',
-      'نسکافه ای': '#6B4226',
-      'طوسی': '#808080',
-      'صورتی': '#FFC0CB',
-      'red': '#FF0000',
-      'blue': '#0000FF',
-      'green': '#00FF00',
-      'yellow': '#FFFF00',
-      'black': '#000000',
-      'white': '#FFFFFF'
+    // Create a hash from the color name
+    let hash = 0;
+    const normalizedName = colorName.toLowerCase().trim();
+    
+    for (let i = 0; i < normalizedName.length; i++) {
+      const char = normalizedName.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    // Use different parts of the hash for RGB components
+    const r = Math.abs(hash) % 256;
+    const g = Math.abs(hash >> 8) % 256;
+    const b = Math.abs(hash >> 16) % 256;
+    
+    // Ensure the color is not too dark or too light for visibility
+    const adjustedR = Math.max(50, Math.min(205, r));
+    const adjustedG = Math.max(50, Math.min(205, g));
+    const adjustedB = Math.max(50, Math.min(205, b));
+    
+    // Convert to hex
+    const toHex = (val) => {
+      const hex = val.toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
     };
     
-    return colorMap[colorName.toLowerCase()] || '#CCCCCC'; // Default gray
+    return `#${toHex(adjustedR)}${toHex(adjustedG)}${toHex(adjustedB)}`.toUpperCase();
   }
 
   /**

@@ -270,5 +270,37 @@
     "slug": "short-tarhdar-nakhi-00331",
     "type": "variable",
     "status": "draft"
+  },
+  "520981": {
+    "strapiId": 38,
+    "importedAt": "2025-07-26T03:27:07.338Z",
+    "name": "شلوار اسلش مردانه m00299",
+    "slug": "salvar-eslash-mardane-m00299",
+    "type": "variable",
+    "status": "draft"
+  },
+  "521003": {
+    "strapiId": 39,
+    "importedAt": "2025-07-26T03:27:17.397Z",
+    "name": "شلوار جاگر (m00317)",
+    "slug": "shalvar-jager-m00317",
+    "type": "variable",
+    "status": "draft"
+  },
+  "521005": {
+    "strapiId": 40,
+    "importedAt": "2025-07-26T03:27:22.605Z",
+    "name": "شورت خرسی قلبی 00352",
+    "slug": "short-khersi-ghalbi-00352",
+    "type": "variable",
+    "status": "draft"
+  },
+  "521008": {
+    "strapiId": 41,
+    "importedAt": "2025-07-26T03:27:31.407Z",
+    "name": "تونیک آستین پفی m00309",
+    "slug": "tonik-astin-pofy-m00309",
+    "type": "variable",
+    "status": "draft"
   }
 }
