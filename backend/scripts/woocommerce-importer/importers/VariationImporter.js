@@ -472,13 +472,14 @@ class VariationImporter {
    */
   convertPrice(price) {
     if (!price || price === '0' || price === '') {
-      return '0';
+      return 0;
     }
     
-    const numPrice = parseInt(price);
+    const numPrice = parseFloat(price);
     const multiplier = this.config.import.currency.multiplier || 1;
     
-    return (numPrice * multiplier).toString();
+    // Return as number for biginteger fields, handle large values properly
+    return Math.round(numPrice * multiplier);
   }
 
   /**

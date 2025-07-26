@@ -362,7 +362,7 @@ class OrderImporter {
    */
   async createContract(orderId, wcOrder, customerId) {
     const contractData = {
-      Amount: parseInt(this.convertPrice(wcOrder.total)),
+      Amount: this.convertPrice(wcOrder.total),
       Date: new Date(wcOrder.date_created).toISOString(),
       Type: this.config.import.defaults.contractType,
       Status: this.mapContractStatus(wcOrder.status),
@@ -399,12 +399,12 @@ class OrderImporter {
    */
   async createContractTransaction(contractId, wcOrder) {
     const transactionData = {
-      Amount: parseInt(this.convertPrice(wcOrder.total)),
+      Amount: this.convertPrice(wcOrder.total),
       Type: this.mapPaymentType(wcOrder.payment_method),
       Status: this.mapTransactionStatus(wcOrder.status),
       Step: 1,
       Date: new Date(wcOrder.date_created).toISOString(),
-      DiscountAmount: parseInt(this.convertPrice(wcOrder.discount_total)),
+      DiscountAmount: this.convertPrice(wcOrder.discount_total),
       TrackId: wcOrder.transaction_id || wcOrder.order_key,
       contract: contractId,
       external_id: `transaction_${wcOrder.id}`,
@@ -482,13 +482,14 @@ class OrderImporter {
    */
   convertPrice(price) {
     if (!price || price === '0' || price === '') {
-      return '0';
+      return 0;
     }
     
     const numPrice = parseFloat(price);
     const multiplier = this.config.import.currency.multiplier || 1;
     
-    return (numPrice * multiplier).toString();
+    // Return as number for biginteger fields, handle large values properly
+    return Math.round(numPrice * multiplier);
   }
 
   /**
