@@ -2,6 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const sharp = require('sharp');
 const { promisify } = require('util');
 const { pipeline } = require('stream');
 const streamPipeline = promisify(pipeline);
@@ -121,14 +122,14 @@ class ImageUploader {
       }
 
       // Download image
-      const imageBuffer = await this.downloadImage(imageUrl);
+      let imageBuffer = await this.downloadImage(imageUrl);
       if (!imageBuffer) return null;
 
-      // Generate filename
-      const fileName = this.generateFileName(imageUrl, prefix);
+      // Convert WebP to JPG if necessary
+      const { buffer: processedBuffer, fileName: processedFileName } = await this.processImage(imageBuffer, imageUrl, prefix);
       
       // Upload to Strapi
-      const uploadedImage = await this.uploadToStrapi(imageBuffer, fileName, altText);
+      const uploadedImage = await this.uploadToStrapi(processedBuffer, processedFileName, altText);
       
       if (uploadedImage) {
         // Cache the result
@@ -185,6 +186,68 @@ class ImageUploader {
     } catch (error) {
       this.logger.error(`❌ Failed to download image ${imageUrl}:`, error.message);
       return null;
+    }
+  }
+
+  /**
+   * Process image: convert WebP to JPG if needed, optimize, and generate filename
+   */
+  async processImage(imageBuffer, imageUrl, prefix) {
+    try {
+      const metadata = await sharp(imageBuffer).metadata();
+      const originalFormat = metadata.format;
+      
+      let processedBuffer = imageBuffer;
+      let fileName = this.generateFileName(imageUrl, prefix);
+      
+      // Check if conversion is needed
+      if (originalFormat === 'webp') {
+        this.logger.debug(`🔄 Converting WebP to JPG: ${imageUrl}`);
+        
+        // Convert WebP to high-quality JPEG
+        processedBuffer = await sharp(imageBuffer)
+          .jpeg({ 
+            quality: 90,
+            progressive: true,
+            mozjpeg: true
+          })
+          .toBuffer();
+        
+        // Update filename extension
+        fileName = fileName.replace(/\.webp$/i, '.jpg');
+        if (!fileName.toLowerCase().endsWith('.jpg') && !fileName.toLowerCase().endsWith('.jpeg')) {
+          fileName = fileName.replace(/\.[^.]+$/, '.jpg');
+        }
+        
+        this.logger.success(`✅ Converted WebP to JPG: ${fileName} (${(processedBuffer.length / 1024).toFixed(2)}KB)`);
+      } else if (['jpeg', 'jpg', 'png', 'gif'].includes(originalFormat)) {
+        // Optimize existing formats without conversion
+        if (originalFormat === 'jpeg' || originalFormat === 'jpg') {
+          processedBuffer = await sharp(imageBuffer)
+            .jpeg({ quality: 90, progressive: true })
+            .toBuffer();
+        } else if (originalFormat === 'png') {
+          processedBuffer = await sharp(imageBuffer)
+            .png({ compressionLevel: 8, progressive: true })
+            .toBuffer();
+        }
+        
+        this.logger.debug(`🎨 Optimized ${originalFormat.toUpperCase()}: ${fileName}`);
+      } else {
+        this.logger.warn(`⚠️ Unsupported image format: ${originalFormat}, keeping original`);
+      }
+      
+      return {
+        buffer: processedBuffer,
+        fileName: fileName
+      };
+    } catch (error) {
+      this.logger.error(`❌ Failed to process image:`, error.message);
+      // Fallback to original
+      return {
+        buffer: imageBuffer,
+        fileName: this.generateFileName(imageUrl, prefix)
+      };
     }
   }
 
