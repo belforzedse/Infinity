@@ -1,9 +1,273 @@
 {
   "520425": {
-    "strapiId": 2,
-    "importedAt": "2025-07-26T02:03:54.507Z",
+    "strapiId": 3,
+    "importedAt": "2025-07-26T02:13:23.349Z",
     "name": "پیراهن کبریتی B00272",
     "slug": "pirahanb00272",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520426": {
+    "strapiId": 4,
+    "importedAt": "2025-07-26T02:13:28.476Z",
+    "name": "مانتو نخی آستین بند دار(B00403)",
+    "slug": "mantob00403",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520427": {
+    "strapiId": 5,
+    "importedAt": "2025-07-26T02:13:36.454Z",
+    "name": "دامن کوتاه ساسبندی b00464",
+    "slug": "daman-b00464",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520428": {
+    "strapiId": 6,
+    "importedAt": "2025-07-26T02:13:44.908Z",
+    "name": "شلوار جین رنگی (b00562)",
+    "slug": "shalvarb00562",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520429": {
+    "strapiId": 7,
+    "importedAt": "2025-07-26T02:13:51.941Z",
+    "name": "مانتو آستین دوبل (B00563)",
+    "slug": "mantub00563",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520430": {
+    "strapiId": 8,
+    "importedAt": "2025-07-26T02:13:57.104Z",
+    "name": "سوتین گیپوری جلو باز شو 00205",
+    "slug": "%d8%b3%d9%88%d8%aa%db%8c%d9%86-%da%af%db%8c%d9%be%d9%88%d8%b1%db%8c-%d8%ac%d9%84%d9%88-%d8%a8%d8%a7%d8%b2-%d8%b4%d9%88-00205",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520431": {
+    "strapiId": 9,
+    "importedAt": "2025-07-26T02:14:10.778Z",
+    "name": "پیراهن کوتاه کبریتی (B00596)",
+    "slug": "pirahan00596",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520432": {
+    "strapiId": 10,
+    "importedAt": "2025-07-26T02:14:20.690Z",
+    "name": "مانتو مشکی 00601",
+    "slug": "manto-meshki00601",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520434": {
+    "strapiId": 11,
+    "importedAt": "2025-07-26T02:14:33.275Z",
+    "name": "پیراهن پشت پاپیونی (b00621)",
+    "slug": "pirahan-posht-papiony-b00621",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520435": {
+    "strapiId": 12,
+    "importedAt": "2025-07-26T02:14:41.508Z",
+    "name": "دامن ساسبندی b00627",
+    "slug": "daman-sasbandy-b00627",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520438": {
+    "strapiId": 13,
+    "importedAt": "2025-07-26T02:14:48.422Z",
+    "name": "شلوار کلاسیک منگو m00112",
+    "slug": "shalvar-classic-mengo-m00112",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520441": {
+    "strapiId": 14,
+    "importedAt": "2025-07-26T02:14:54.617Z",
+    "name": "بافت موهر یقه گرد m0043",
+    "slug": "baft-moher-yaghe-gerd-m0043",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520442": {
+    "strapiId": 15,
+    "importedAt": "2025-07-26T02:15:12.121Z",
+    "name": "پلیور بافت مردانه m00157",
+    "slug": "poliver-baft-mardane-m00157",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520443": {
+    "strapiId": 16,
+    "importedAt": "2025-07-26T02:15:18.914Z",
+    "name": "دامن پایین زیپ (M0079)",
+    "slug": "daman-paiin-zip-m0079",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520444": {
+    "strapiId": 17,
+    "importedAt": "2025-07-26T02:15:25.644Z",
+    "name": "تاپ کبریتی بابونه M00195",
+    "slug": "chamomile-match-top-m00195",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520447": {
+    "strapiId": 18,
+    "importedAt": "2025-07-26T02:15:38.650Z",
+    "name": "دامن ساسبندی M00116",
+    "slug": "daman-sas-bandy-m00116",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520451": {
+    "strapiId": 19,
+    "importedAt": "2025-07-26T02:15:49.650Z",
+    "name": "پلیور یقه هفت سوزنی M00190",
+    "slug": "poliver-yaghe-haft-sozani-m00190",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520466": {
+    "strapiId": 20,
+    "importedAt": "2025-07-26T02:15:54.207Z",
+    "name": "هودی جیبدار (m00240)",
+    "slug": "hody-jibdar-m00240",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520469": {
+    "strapiId": 21,
+    "importedAt": "2025-07-26T02:16:05.696Z",
+    "name": "شکت چهارخونه داخل تدی (m00110)",
+    "slug": "shekt-chaharkhone-dakhel-tedym00110",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520472": {
+    "strapiId": 22,
+    "importedAt": "2025-07-26T02:16:15.916Z",
+    "name": "بافت یقه ب ب جلو مروارید (m00215)",
+    "slug": "baft-yagh-b-b-jlo-morvarid-m00215",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520477": {
+    "strapiId": 23,
+    "importedAt": "2025-07-26T02:16:21.817Z",
+    "name": "شلوار راحتی اسپرت m00130",
+    "slug": "comfortable-sports-pants-m00130",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520479": {
+    "strapiId": 24,
+    "importedAt": "2025-07-26T02:16:34.176Z",
+    "name": "دامن ساس بندی m00247",
+    "slug": "daman-sas-bandy-m00247",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520481": {
+    "strapiId": 25,
+    "importedAt": "2025-07-26T02:16:45.041Z",
+    "name": "کراپ کبریتی یقه 5 سانت m00260",
+    "slug": "match-crop-collar-5-cm-m00260",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520483": {
+    "strapiId": 26,
+    "importedAt": "2025-07-26T02:16:53.458Z",
+    "name": "شلوار جاگر m00262",
+    "slug": "shalwar-jagar-m00262",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520484": {
+    "strapiId": 27,
+    "importedAt": "2025-07-26T02:16:59.546Z",
+    "name": "کراپ کبریتی یقه اسکی m00261",
+    "slug": "match-crop-m00261-ski-neck",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520964": {
+    "strapiId": 28,
+    "importedAt": "2025-07-26T02:17:07.609Z",
+    "name": "دامن بافت موهر m00272",
+    "slug": "daman-aft-moher-m00272",
+    "type": "variable",
+    "status": "publish"
+  },
+  "520965": {
+    "strapiId": 29,
+    "importedAt": "2025-07-26T02:17:13.157Z",
+    "name": "کت چرم m00292",
+    "slug": "kot-charm-m00292",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520966": {
+    "strapiId": 30,
+    "importedAt": "2025-07-26T02:17:20.744Z",
+    "name": "شورت کبریتی پاپیونی 00302",
+    "slug": "bow-match-shorts-00302",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520967": {
+    "strapiId": 31,
+    "importedAt": "2025-07-26T02:17:26.922Z",
+    "name": "شورت بک لس ضربدری FINGCOO 00305",
+    "slug": "%d8%b4%d9%88%d8%b1%d8%aa-%d8%a8%da%a9-%d9%84%d8%b3-%d8%b6%d8%b1%d8%a8%d8%af%d8%b1%db%8c-fingcoo-00305",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520968": {
+    "strapiId": 32,
+    "importedAt": "2025-07-26T02:17:34.860Z",
+    "name": "بافت یقه اسکی استین کلوش m00242",
+    "slug": "baft-yage-esky-astin-klosh-m00242",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520971": {
+    "strapiId": 33,
+    "importedAt": "2025-07-26T02:17:47.106Z",
+    "name": "شورت طرحدار کوزا 00322",
+    "slug": "kuza-patterned-shorts-00322",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520972": {
+    "strapiId": 34,
+    "importedAt": "2025-07-26T02:17:54.668Z",
+    "name": "شورت کبریتی پشت تور 00329",
+    "slug": "match-shorts-behind-net-00329",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520973": {
+    "strapiId": 35,
+    "importedAt": "2025-07-26T02:18:01.679Z",
+    "name": "شورت کبریتی گیپوری 00330",
+    "slug": "short-saiz-bozorg-00330",
+    "type": "variable",
+    "status": "draft"
+  },
+  "520974": {
+    "strapiId": 36,
+    "importedAt": "2025-07-26T02:18:07.399Z",
+    "name": "شورت طرحدار نخی 00331",
+    "slug": "short-tarhdar-nakhi-00331",
     "type": "variable",
     "status": "draft"
   }

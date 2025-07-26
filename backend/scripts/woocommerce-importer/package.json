@@ -11,6 +11,7 @@
     "categories": "node index.js categories",
     "products": "node index.js products",
     "variations": "node index.js variations",
+    "variations-imported": "node index.js variations-imported",
     "orders": "node index.js orders",
     "all": "node index.js all",
     "dry-run": "node index.js categories --dry-run",

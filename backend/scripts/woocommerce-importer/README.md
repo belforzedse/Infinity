@@ -53,9 +53,10 @@ node index.js all --limit 100
 | Command | Description | Options |
 |---------|-------------|---------|
 | `categories` | Import product categories | `--limit`, `--page`, `--dry-run` |
-| `products` | Import products (coming soon) | `--limit`, `--page`, `--dry-run` |
-| `variations` | Import product variations (coming soon) | `--limit`, `--page`, `--dry-run` |
-| `orders` | Import orders (coming soon) | `--limit`, `--page`, `--dry-run` |
+| `products` | Import products | `--limit`, `--page`, `--dry-run` |
+| `variations` | Import product variations | `--limit`, `--page`, `--dry-run`, `--only-imported` |
+| `variations-imported` | Import variations for imported products only | `--limit`, `--page`, `--dry-run` |
+| `orders` | Import orders | `--limit`, `--page`, `--dry-run` |
 | `all` | Import all data types | `--limit`, `--dry-run` |
 
 ## ⚙️ Configuration

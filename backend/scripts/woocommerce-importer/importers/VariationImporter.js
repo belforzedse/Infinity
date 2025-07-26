@@ -45,17 +45,17 @@ class VariationImporter {
    * Main import method
    */
   async import(options = {}) {
-    const { limit = 100, page = 1, dryRun = false } = options;
+    const { limit = 100, page = 1, dryRun = false, onlyImported = false } = options;
     
     this.stats.startTime = Date.now();
-    this.logger.info(`🎨 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun})`);
+    this.logger.info(`🎨 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported})`);
     
     try {
       // Pre-load mappings for faster lookups
       await this.loadMappingCaches();
       
       // Get all variable products to extract variations
-      const variableProducts = await this.fetchVariableProducts(limit, page);
+      const variableProducts = await this.fetchVariableProducts(limit, page, onlyImported);
       
       if (variableProducts.length === 0) {
         this.logger.warn('📭 No variable products found for variation import');
@@ -124,7 +124,7 @@ class VariationImporter {
   /**
    * Fetch variable products from WooCommerce
    */
-  async fetchVariableProducts(limit, startPage) {
+  async fetchVariableProducts(limit, startPage, onlyImported = false) {
     let allProducts = [];
     let currentPage = startPage;
     let totalFetched = 0;
@@ -145,9 +145,21 @@ class VariationImporter {
       }
       
       // Filter only variable products
-      const variableProducts = result.data.filter(product => 
+      let variableProducts = result.data.filter(product => 
         product.type === 'variable' && product.variations && product.variations.length > 0
       );
+
+      // If onlyImported flag is set, filter for products that are already imported
+      if (onlyImported) {
+        const originalCount = variableProducts.length;
+        variableProducts = variableProducts.filter(product => 
+          this.productMappingCache.has(product.id)
+        );
+        
+        if (originalCount > variableProducts.length) {
+          this.logger.debug(`🔍 Filtered ${originalCount - variableProducts.length} non-imported products`);
+        }
+      }
       
       allProducts = allProducts.concat(variableProducts);
       totalFetched += result.data.length;
