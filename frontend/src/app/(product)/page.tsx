@@ -1,5 +1,4 @@
-"use client";
-
+// This page is now SSR (Server Component) by removing "use client"
 import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
@@ -19,14 +18,13 @@ interface ProductCardProps {
 
 async function getDiscountedProducts(): Promise<ProductCardProps[]> {
   const response = await fetch(
-    `${API_BASE_URL}/product-variations?filters[IsPublished]=true&filters[Price][$gte]=1&populate[0]=general_discounts&populate[1]=product&filters[general_discounts][$null]=false&populate[2]=product.CoverImage&populate[3]=product.product_main_category&filters[product][Status]=Active`
+    `${API_BASE_URL}/product-variations?filters[IsPublished]=true&filters[Price][$gte]=1&populate[0]=general_discounts&populate[1]=product&filters[general_discounts][$null]=false&populate[2]=product.CoverImage&populate[3]=product.product_main_category&filters[product][Status]=Active`,
+    { cache: "no-store" }
   );
   const data = await response.json();
 
-  // Group variations by product ID and take the first variation for each product
   const uniqueProducts = data.data
     .filter((item: any) => {
-      // Filter out items that don't have required data
       return (
         item.attributes.product?.data?.attributes?.CoverImage?.data?.attributes
           ?.url &&
@@ -68,13 +66,13 @@ async function getDiscountedProducts(): Promise<ProductCardProps[]> {
 
 async function getNewProducts(): Promise<ProductCardProps[]> {
   const response = await fetch(
-    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&sort[0]=createdAt:desc&pagination[limit]=20`
+    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&sort[0]=createdAt:desc&pagination[limit]=20`,
+    { cache: "no-store" }
   );
   const data = await response.json();
 
   return data.data
     .filter((item: any) => {
-      // Filter out items that don't have required data
       return (
         item.attributes.CoverImage?.data?.attributes?.url &&
         item.attributes.product_main_category?.data?.attributes?.Title &&
@@ -82,7 +80,6 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
       );
     })
     .map((item: any) => {
-      // Find the cheapest published variation
       const publishedVariations =
         item.attributes.product_variations.data.filter(
           (variation: any) =>
@@ -93,10 +90,9 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
         );
 
       if (publishedVariations.length === 0) {
-        return null; // Skip products with no valid variations
+        return null;
       }
 
-      // Find the cheapest variation
       const cheapestVariation = publishedVariations.reduce(
         (cheapest: any, current: any) => {
           const cheapestPrice = parseInt(cheapest.attributes.Price);
@@ -128,18 +124,18 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
         seenCount: 0,
       };
     })
-    .filter((item: any) => item !== null); // Remove null items
+    .filter((item: any) => item !== null);
 }
 
 async function getFavoriteProducts(): Promise<ProductCardProps[]> {
   const response = await fetch(
-    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&sort[0]=AverageRating:desc&pagination[limit]=20`
+    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&sort[0]=AverageRating:desc&pagination[limit]=20`,
+    { cache: "no-store" }
   );
   const data = await response.json();
 
   return data.data
     .filter((item: any) => {
-      // Filter out items that don't have required data
       return (
         item.attributes.AverageRating !== null &&
         item.attributes.CoverImage?.data?.attributes?.url &&
