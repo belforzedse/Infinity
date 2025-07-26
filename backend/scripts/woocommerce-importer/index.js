@@ -73,6 +73,7 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('--dry-run', 'Run without actually importing data', false)
+  .option('--only-imported', 'Only import variations for products that are already imported', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import...');
@@ -80,9 +81,33 @@ program
       await importer.import({
         limit: parseInt(options.limit),
         page: parseInt(options.page),
-        dryRun: options.dryRun
+        dryRun: options.dryRun,
+        onlyImported: options.onlyImported
       });
       logger.success('✅ Variation import completed!');
+    } catch (error) {
+      logger.error('❌ Variation import failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('variations-imported')
+  .description('Import variations only for products that are already imported')
+  .option('-l, --limit <number>', 'Limit number of items to import', '100')
+  .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('--dry-run', 'Run without actually importing data', false)
+  .action(async (options) => {
+    try {
+      logger.info('🎨 Starting variation import for imported products only...');
+      const importer = new VariationImporter(config, logger);
+      await importer.import({
+        limit: parseInt(options.limit),
+        page: parseInt(options.page),
+        dryRun: options.dryRun,
+        onlyImported: true
+      });
+      logger.success('✅ Variation import for imported products completed!');
     } catch (error) {
       logger.error('❌ Variation import failed:', error);
       process.exit(1);
