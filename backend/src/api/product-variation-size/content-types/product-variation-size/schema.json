@@ -15,6 +15,13 @@
       "type": "string",
       "unique": true,
       "required": true
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }

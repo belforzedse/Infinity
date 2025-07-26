@@ -248,33 +248,111 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
-   * Create variation color
+   * Find or create variation color
    */
   async createVariationColor(colorData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/product-variation-colors', { data: colorData })
-    );
-    return response.data;
+    try {
+      // First try to find existing color by Title
+      const existingResponse = await this.retryRequest(() =>
+        this.client.get(`/product-variation-colors?filters[Title][$eq]=${encodeURIComponent(colorData.Title)}`)
+      );
+      
+      if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+        return { data: existingResponse.data.data[0] };
+      }
+      
+      // If not found, create new one
+      const response = await this.retryRequest(() => 
+        this.client.post('/product-variation-colors', { data: colorData })
+      );
+      return response.data;
+    } catch (error) {
+      // If creation fails, try to find again (race condition handling)
+      try {
+        const existingResponse = await this.retryRequest(() =>
+          this.client.get(`/product-variation-colors?filters[Title][$eq]=${encodeURIComponent(colorData.Title)}`)
+        );
+        
+        if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+          return { data: existingResponse.data.data[0] };
+        }
+      } catch (findError) {
+        // Ignore find error, throw original creation error
+      }
+      throw error;
+    }
   }
 
   /**
-   * Create variation size
+   * Find or create variation size
    */
   async createVariationSize(sizeData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/product-variation-sizes', { data: sizeData })
-    );
-    return response.data;
+    try {
+      // First try to find existing size by Title
+      const existingResponse = await this.retryRequest(() =>
+        this.client.get(`/product-variation-sizes?filters[Title][$eq]=${encodeURIComponent(sizeData.Title)}`)
+      );
+      
+      if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+        return { data: existingResponse.data.data[0] };
+      }
+      
+      // If not found, create new one
+      const response = await this.retryRequest(() => 
+        this.client.post('/product-variation-sizes', { data: sizeData })
+      );
+      return response.data;
+    } catch (error) {
+      // If creation fails, try to find again (race condition handling)
+      try {
+        const existingResponse = await this.retryRequest(() =>
+          this.client.get(`/product-variation-sizes?filters[Title][$eq]=${encodeURIComponent(sizeData.Title)}`)
+        );
+        
+        if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+          return { data: existingResponse.data.data[0] };
+        }
+      } catch (findError) {
+        // Ignore find error, throw original creation error
+      }
+      throw error;
+    }
   }
 
   /**
-   * Create variation model
+   * Find or create variation model
    */
   async createVariationModel(modelData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/product-variation-models', { data: modelData })
-    );
-    return response.data;
+    try {
+      // First try to find existing model by Title
+      const existingResponse = await this.retryRequest(() =>
+        this.client.get(`/product-variation-models?filters[Title][$eq]=${encodeURIComponent(modelData.Title)}`)
+      );
+      
+      if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+        return { data: existingResponse.data.data[0] };
+      }
+      
+      // If not found, create new one
+      const response = await this.retryRequest(() => 
+        this.client.post('/product-variation-models', { data: modelData })
+      );
+      return response.data;
+    } catch (error) {
+      // If creation fails, try to find again (race condition handling)
+      try {
+        const existingResponse = await this.retryRequest(() =>
+          this.client.get(`/product-variation-models?filters[Title][$eq]=${encodeURIComponent(modelData.Title)}`)
+        );
+        
+        if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+          return { data: existingResponse.data.data[0] };
+        }
+      } catch (findError) {
+        // Ignore find error, throw original creation error
+      }
+      throw error;
+    }
   }
 
   /**

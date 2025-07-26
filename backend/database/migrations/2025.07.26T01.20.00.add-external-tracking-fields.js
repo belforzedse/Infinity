@@ -23,7 +23,10 @@ async function up(knex) {
     'contracts',
     'contract_transactions',
     'product_stocks',
-    'local_users'
+    'local_users',
+    'product_variation_colors',
+    'product_variation_sizes',
+    'product_variation_models'
   ];
 
   // Add external_id and external_source fields to each table
@@ -76,7 +79,10 @@ async function down(knex) {
     'contracts',
     'contract_transactions',
     'product_stocks',
-    'local_users'
+    'local_users',
+    'product_variation_colors',
+    'product_variation_sizes',
+    'product_variation_models'
   ];
 
   // Remove external tracking fields from each table
