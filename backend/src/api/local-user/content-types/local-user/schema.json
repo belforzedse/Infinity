@@ -78,6 +78,13 @@
       "target": "api::order.order",
       "mappedBy": "user"
     },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
+    },
     "discounts": {
       "type": "relation",
       "relation": "manyToMany",

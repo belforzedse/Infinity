@@ -71,6 +71,13 @@
       "required": false,
       "min": 0,
       "default": 0
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }

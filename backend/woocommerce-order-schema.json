@@ -1,0 +1,229 @@
+[
+  {
+    "id": 1005829,
+    "parent_id": 0,
+    "status": "processing",
+    "currency": "IRT",
+    "version": "10.0.4",
+    "prices_include_tax": false,
+    "date_created": "2025-07-26T04:06:11",
+    "date_modified": "2025-07-26T04:08:01",
+    "discount_total": "0",
+    "discount_tax": "0",
+    "shipping_total": "69000",
+    "shipping_tax": "0",
+    "cart_tax": "0",
+    "total": "718000",
+    "total_tax": "0",
+    "customer_id": 0,
+    "order_key": "wc_order_WbO2U4zSgVSJ6",
+    "billing": {
+      "first_name": "شیرین",
+      "last_name": "نوری مازندرانی",
+      "company": "",
+      "address_1": "کرمان_خیابان فیروزاباد_کوچه ۴_پلاک ۱۵۵ کدپستی: ۷۶۱۵۷۳۴۹۷۶",
+      "address_2": "",
+      "city": "کرمان",
+      "state": "KRN",
+      "postcode": "۷۶۱۵۷۳۴۹۷۶",
+      "country": "IR",
+      "email": "",
+      "phone": "09138433429"
+    },
+    "shipping": {
+      "first_name": "شیرین",
+      "last_name": "نوری مازندرانی",
+      "company": "",
+      "address_1": "کرمان_خیابان فیروزاباد_کوچه ۴_پلاک ۱۵۵ کدپستی: ۷۶۱۵۷۳۴۹۷۶",
+      "address_2": "",
+      "city": "کرمان",
+      "state": "KRN",
+      "postcode": "۷۶۱۵۷۳۴۹۷۶",
+      "country": "IR",
+      "phone": ""
+    },
+    "payment_method": "WC_Gateway_SnappPay",
+    "payment_method_title": "پرداخت اقساطیِ اسنپ پی",
+    "transaction_id": "",
+    "customer_ip_address": "5.202.26.124",
+    "customer_user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36",
+    "created_via": "checkout",
+    "customer_note": "",
+    "date_completed": null,
+    "date_paid": "2025-07-26T04:08:01",
+    "cart_hash": "0a308302f31e1488e5c4e4a4a0e99623",
+    "number": "1005829",
+    "meta_data": [
+      {
+        "id": 21936074,
+        "key": "is_vat_exempt",
+        "value": "no"
+      },
+      {
+        "id": 21936075,
+        "key": "_force_enable_buyer",
+        "value": "yes"
+      },
+      {
+        "id": 21936076,
+        "key": "_allow_buyer_select_status",
+        "value": "no"
+      },
+      {
+        "id": 21936077,
+        "key": "_buyer_sms_notify",
+        "value": "yes"
+      },
+      {
+        "id": 21936078,
+        "key": "_wc_cog_order_total_cost",
+        "value": "0"
+      },
+      {
+        "id": 21936079,
+        "key": "_wallet_rechargeable_order",
+        "value": ""
+      },
+      {
+        "id": 21936080,
+        "key": "_transactionId",
+        "value": "1753490174-1005829"
+      },
+      {
+        "id": 21936081,
+        "key": "_order_spp_token",
+        "value": "7414c9f7-cdad-475e-ba1d-896eb08042bd"
+      },
+      {
+        "id": 21936082,
+        "key": "_paymentToken",
+        "value": "7414c9f7-cdad-475e-ba1d-896eb08042bd"
+      },
+      {
+        "id": 21936085,
+        "key": "order_spp_status",
+        "value": "SETTLE"
+      }
+    ],
+    "line_items": [
+      {
+        "id": 1162353,
+        "name": "شلوار لینن بگ C00560 - دو, مشکی",
+        "product_id": 1005115,
+        "variation_id": 1005123,
+        "quantity": 1,
+        "tax_class": "",
+        "subtotal": "649000",
+        "subtotal_tax": "0",
+        "total": "649000",
+        "total_tax": "0",
+        "taxes": [],
+        "meta_data": [
+          {
+            "id": 11905447,
+            "key": "سایز",
+            "value": "دو",
+            "display_key": "سایز",
+            "display_value": "دو"
+          },
+          {
+            "id": 11905448,
+            "key": "رنگ",
+            "value": "مشکی",
+            "display_key": "رنگ",
+            "display_value": "مشکی"
+          },
+          {
+            "id": 11905455,
+            "key": "_wc_cog_item_cost",
+            "value": "",
+            "display_key": "_wc_cog_item_cost",
+            "display_value": ""
+          },
+          {
+            "id": 11905456,
+            "key": "_wc_cog_item_total_cost",
+            "value": "0",
+            "display_key": "_wc_cog_item_total_cost",
+            "display_value": "0"
+          },
+          {
+            "id": 11905457,
+            "key": "_reduced_stock",
+            "value": "1",
+            "display_key": "_reduced_stock",
+            "display_value": "1"
+          }
+        ],
+        "sku": "",
+        "price": 649000,
+        "image": {
+          "id": 1005167,
+          "src": "https://infinitycolor.co/wp-content/uploads/2025/07/IMG_9855.jpg"
+        },
+        "parent_name": "شلوار لینن بگ C00560"
+      }
+    ],
+    "tax_lines": [],
+    "shipping_lines": [
+      {
+        "id": 1162354,
+        "method_title": "ارسال با پست",
+        "method_id": "advanced_shipping",
+        "instance_id": "0",
+        "total": "69000",
+        "total_tax": "0",
+        "taxes": [],
+        "tax_status": "taxable",
+        "meta_data": [
+          {
+            "id": 11905454,
+            "key": "موارد",
+            "value": "شلوار لینن بگ C00560 - دو, مشکی &times; 1",
+            "display_key": "موارد",
+            "display_value": "شلوار لینن بگ C00560 - دو, مشکی &times; 1"
+          }
+        ]
+      }
+    ],
+    "fee_lines": [],
+    "coupon_lines": [],
+    "refunds": [],
+    "payment_url": "https://infinitycolor.co/checkout/order-pay/1005829/?pay_for_order=true&key=wc_order_WbO2U4zSgVSJ6",
+    "is_editable": false,
+    "needs_payment": false,
+    "needs_processing": true,
+    "date_created_gmt": "2025-07-26T00:36:11",
+    "date_modified_gmt": "2025-07-26T00:38:01",
+    "date_completed_gmt": null,
+    "date_paid_gmt": "2025-07-26T00:38:01",
+    "currency_symbol": "تومان",
+    "_links": {
+      "self": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/orders/1005829",
+          "targetHints": {
+            "allow": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/orders"
+        }
+      ],
+      "email_templates": [
+        {
+          "embeddable": true,
+          "href": "https://infinitycolor.co/wp-json/wc/v3/orders/1005829/actions/email_templates"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "name": "woocommerce-strapi-importer",
+  "version": "1.0.0",
+  "description": "Import data from WooCommerce to Strapi with duplicate prevention and progress tracking",
+  "main": "index.js",
+  "bin": {
+    "woocommerce-importer": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "categories": "node index.js categories",
+    "products": "node index.js products",
+    "variations": "node index.js variations",
+    "orders": "node index.js orders",
+    "all": "node index.js all",
+    "dry-run": "node index.js categories --dry-run",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "woocommerce",
+    "strapi",
+    "import",
+    "e-commerce",
+    "data-migration"
+  ],
+  "author": "Infinity Store Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "commander": "^11.1.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infinity-store/woocommerce-importer"
+  },
+  "bugs": {
+    "url": "https://github.com/infinity-store/woocommerce-importer/issues"
+  },
+  "homepage": "https://github.com/infinity-store/woocommerce-importer#readme"
+} 

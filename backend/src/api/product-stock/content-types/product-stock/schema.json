@@ -27,6 +27,13 @@
       "relation": "oneToOne",
       "target": "api::product-variation.product-variation",
       "mappedBy": "product_stock"
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }
