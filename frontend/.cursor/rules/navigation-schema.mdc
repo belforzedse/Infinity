@@ -10,7 +10,7 @@ This rule documents the Navigation API endpoint structure used in the Infinity S
 ## API Endpoint
 
 ```
-GET https://infinity-bck.darkube.app/api/navigation?populate=*
+GET https://api.infinity.rgbgroup.ir/api/navigation?populate=*
 ```
 
 ## Response Structure
@@ -84,7 +84,7 @@ const NavigationComponent = () => {
   useEffect(() => {
     const fetchNavigation = async () => {
       try {
-        const response = await fetch('https://infinity-bck.darkube.app/api/navigation?populate=*');
+        const response = await fetch('https://api.infinity.rgbgroup.ir/api/navigation?populate=*');
         const data = await response.json();
         setNavigation(data);
       } catch (error) {
@@ -131,7 +131,7 @@ const MobileMenu = ({ isOpen }: { isOpen: boolean }) => {
   useEffect(() => {
     const fetchNavigation = async () => {
       try {
-        const response = await fetch('https://infinity-bck.darkube.app/api/navigation?populate=*');
+        const response = await fetch('https://api.infinity.rgbgroup.ir/api/navigation?populate=*');
         const data = await response.json();
         setNavigation(data);
       } catch (error) {

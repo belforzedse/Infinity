@@ -203,7 +203,7 @@ src/
 3. **Set up environment variables**
 
    ```bash
-   NEXT_PUBLIC_API_BASE_URL=https://infinity-bck.darkube.app/api
+   NEXT_PUBLIC_API_BASE_URL=https://api.infinity.rgbgroup.ir/api
    ```
 
 4. **Run the development server**

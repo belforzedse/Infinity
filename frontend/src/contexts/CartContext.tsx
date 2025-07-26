@@ -7,7 +7,7 @@ import { IMAGE_BASE_URL } from "@/constants/api";
 import toast from "react-hot-toast";
 
 // API base URL
-// const API_BASE_URL = "https://infinity-bck.darkube.app/api";
+// const API_BASE_URL = "https://api.infinity.rgbgroup.ir/api";
 
 export interface CartItem {
   id: string;
