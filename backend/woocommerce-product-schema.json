@@ -1,0 +1,348 @@
+[
+  {
+    "id": 1004583,
+    "name": "تاپ الیزه C00575",
+    "slug": "elise-top-c00575",
+    "permalink": "https://infinitycolor.co/product/elise-top-c00575/",
+    "date_created": "2025-07-25T13:35:29",
+    "date_created_gmt": "2025-07-25T10:05:29",
+    "date_modified": "2025-07-25T17:51:41",
+    "date_modified_gmt": "2025-07-25T14:21:41",
+    "type": "variable",
+    "status": "publish",
+    "featured": false,
+    "catalog_visibility": "visible",
+    "description": "",
+    "short_description": "<p><strong>جنس</strong>:کرپ حریر</p>\n<p>مناسب سایز 38 تا 42 گاها 44 (فری سایز)</p>\n<p>بند قابل تنظیم</p>\n<p>لطفا قبل از ثبت سفارش راهنمای اندازه گیری مطالعه شود.</p>\n<p>توجه:در راهنمای اندازه گیری 2 الی 4 سانتی متر احتمال خطا وجود دارد.</p>\n",
+    "sku": "",
+    "price": "429000",
+    "regular_price": "",
+    "sale_price": "",
+    "date_on_sale_from": null,
+    "date_on_sale_from_gmt": null,
+    "date_on_sale_to": null,
+    "date_on_sale_to_gmt": null,
+    "on_sale": false,
+    "purchasable": true,
+    "total_sales": 1,
+    "virtual": false,
+    "downloadable": false,
+    "downloads": [],
+    "download_limit": -1,
+    "download_expiry": -1,
+    "external_url": "",
+    "button_text": "",
+    "tax_status": "taxable",
+    "tax_class": "",
+    "manage_stock": false,
+    "stock_quantity": null,
+    "backorders": "no",
+    "backorders_allowed": false,
+    "backordered": false,
+    "low_stock_amount": null,
+    "sold_individually": false,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "shipping_required": true,
+    "shipping_taxable": true,
+    "shipping_class": "",
+    "shipping_class_id": 0,
+    "reviews_allowed": true,
+    "average_rating": "0.00",
+    "rating_count": 0,
+    "upsell_ids": [],
+    "cross_sell_ids": [],
+    "parent_id": 0,
+    "purchase_note": "",
+    "categories": [
+      {
+        "id": 15,
+        "name": "بدون دسته‌بندی",
+        "slug": "uncategory"
+      }
+    ],
+    "brands": [],
+    "tags": [],
+    "images": [
+      {
+        "id": 1004604,
+        "date_created": "2025-07-24T21:16:40",
+        "date_created_gmt": "2025-07-24T13:16:40",
+        "date_modified": "2025-07-24T21:16:40",
+        "date_modified_gmt": "2025-07-24T13:16:40",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5880-copy.jpg",
+        "name": "DSC_5880 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004605,
+        "date_created": "2025-07-24T21:16:46",
+        "date_created_gmt": "2025-07-24T13:16:46",
+        "date_modified": "2025-07-24T21:16:46",
+        "date_modified_gmt": "2025-07-24T13:16:46",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5879-copy.jpg",
+        "name": "DSC_5879 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004603,
+        "date_created": "2025-07-24T21:16:34",
+        "date_created_gmt": "2025-07-24T13:16:34",
+        "date_modified": "2025-07-24T21:16:34",
+        "date_modified_gmt": "2025-07-24T13:16:34",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5876-copy.jpg",
+        "name": "DSC_5876 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004615,
+        "date_created": "2025-07-24T21:17:58",
+        "date_created_gmt": "2025-07-24T13:17:58",
+        "date_modified": "2025-07-24T21:17:58",
+        "date_modified_gmt": "2025-07-24T13:17:58",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5875-copy.jpg",
+        "name": "DSC_5875 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004616,
+        "date_created": "2025-07-24T21:18:04",
+        "date_created_gmt": "2025-07-24T13:18:04",
+        "date_modified": "2025-07-24T21:18:04",
+        "date_modified_gmt": "2025-07-24T13:18:04",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5877-copy.jpg",
+        "name": "DSC_5877 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004607,
+        "date_created": "2025-07-24T21:17:06",
+        "date_created_gmt": "2025-07-24T13:17:06",
+        "date_modified": "2025-07-24T21:17:06",
+        "date_modified_gmt": "2025-07-24T13:17:06",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5881-copy.jpg",
+        "name": "DSC_5881 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004608,
+        "date_created": "2025-07-24T21:17:11",
+        "date_created_gmt": "2025-07-24T13:17:11",
+        "date_modified": "2025-07-24T21:17:11",
+        "date_modified_gmt": "2025-07-24T13:17:11",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5422-copy.jpg",
+        "name": "DSC_5422 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004646,
+        "date_created": "2025-07-24T21:23:47",
+        "date_created_gmt": "2025-07-24T13:23:47",
+        "date_modified": "2025-07-24T21:23:47",
+        "date_modified_gmt": "2025-07-24T13:23:47",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/photo_1_2025-07-24_16-53-33.jpg",
+        "name": "photo_1_2025-07-24_16-53-33",
+        "alt": ""
+      },
+      {
+        "id": 1004647,
+        "date_created": "2025-07-24T21:23:52",
+        "date_created_gmt": "2025-07-24T13:23:52",
+        "date_modified": "2025-07-24T21:23:52",
+        "date_modified_gmt": "2025-07-24T13:23:52",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/photo_2_2025-07-24_16-53-33.jpg",
+        "name": "photo_2_2025-07-24_16-53-33",
+        "alt": ""
+      },
+      {
+        "id": 1004613,
+        "date_created": "2025-07-24T21:17:37",
+        "date_created_gmt": "2025-07-24T13:17:37",
+        "date_modified": "2025-07-24T21:17:37",
+        "date_modified_gmt": "2025-07-24T13:17:37",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5459-copy-scaled.jpg",
+        "name": "DSC_5459 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004614,
+        "date_created": "2025-07-24T21:17:48",
+        "date_created_gmt": "2025-07-24T13:17:48",
+        "date_modified": "2025-07-24T21:17:48",
+        "date_modified_gmt": "2025-07-24T13:17:48",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5470-copy-scaled.jpg",
+        "name": "DSC_5470 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004612,
+        "date_created": "2025-07-24T21:17:27",
+        "date_created_gmt": "2025-07-24T13:17:27",
+        "date_modified": "2025-07-24T21:17:27",
+        "date_modified_gmt": "2025-07-24T13:17:27",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5433-copy-scaled.jpg",
+        "name": "DSC_5433 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004611,
+        "date_created": "2025-07-24T21:17:19",
+        "date_created_gmt": "2025-07-24T13:17:19",
+        "date_modified": "2025-07-24T21:17:19",
+        "date_modified_gmt": "2025-07-24T13:17:19",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5430-copy-scaled.jpg",
+        "name": "DSC_5430 copy",
+        "alt": ""
+      },
+      {
+        "id": 1004606,
+        "date_created": "2025-07-24T21:16:56",
+        "date_created_gmt": "2025-07-24T13:16:56",
+        "date_modified": "2025-07-24T21:16:56",
+        "date_modified_gmt": "2025-07-24T13:16:56",
+        "src": "https://infinitycolor.co/wp-content/uploads/2025/07/ditail-copy-Recovered-Recovered-5-scaled.jpg",
+        "name": "ditail copy-Recovered-Recovered",
+        "alt": ""
+      }
+    ],
+    "attributes": [
+      {
+        "id": 7,
+        "name": "رنگ محصول",
+        "slug": "pa_color",
+        "position": 0,
+        "visible": false,
+        "variation": true,
+        "options": [
+          "آبی",
+          "سرمه ای",
+          "سفید",
+          "کرم",
+          "مشکی",
+          "نسکافه ای"
+        ]
+      }
+    ],
+    "default_attributes": [],
+    "variations": [
+      1004595,
+      1004596,
+      1004597,
+      1004598,
+      1004599,
+      1004600
+    ],
+    "grouped_products": [],
+    "menu_order": 0,
+    "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi>429,000&nbsp;<span class=\"woocommerce-Price-currencySymbol\">تومان</span></bdi></span>",
+    "related_ids": [
+      546575,
+      550969,
+      565018,
+      555362,
+      595011
+    ],
+    "meta_data": [
+      {
+        "id": 21878583,
+        "key": "_is_on_sale",
+        "value": "no"
+      },
+      {
+        "id": 21879366,
+        "key": "rank_math_internal_links_processed",
+        "value": "1"
+      },
+      {
+        "id": 21879367,
+        "key": "rank_math_seo_score",
+        "value": "9"
+      },
+      {
+        "id": 21879368,
+        "key": "rank_math_contentai_score",
+        "value": {
+          "keywords": "74.51",
+          "wordCount": "0",
+          "linkCount": "0",
+          "headingCount": "0",
+          "mediaCount": "0"
+        }
+      },
+      {
+        "id": 21879370,
+        "key": "_wc_cog_cost_variable",
+        "value": ""
+      },
+      {
+        "id": 21879383,
+        "key": "_wc_cog_cost",
+        "value": ""
+      },
+      {
+        "id": 21879384,
+        "key": "_wc_cog_min_variation_cost",
+        "value": ""
+      },
+      {
+        "id": 21879385,
+        "key": "_wc_cog_max_variation_cost",
+        "value": ""
+      },
+      {
+        "id": 21879387,
+        "key": "product_size_guide",
+        "value": "[[\"SIZE\",\"دور سینه\",\"قد تاپ از روی سینه \"],[\"فری سایز \",\"94\",\"52\"]]"
+      },
+      {
+        "id": 21879388,
+        "key": "rank_math_primary_product_brand",
+        "value": "0"
+      },
+      {
+        "id": 21879389,
+        "key": "rank_math_primary_product_cat",
+        "value": "0"
+      },
+      {
+        "id": 21879390,
+        "key": "rank_math_primary_offer",
+        "value": "0"
+      },
+      {
+        "id": 21901997,
+        "key": "_wp_old_date",
+        "value": "2025-07-24"
+      }
+    ],
+    "stock_status": "instock",
+    "has_options": true,
+    "post_password": "",
+    "global_unique_id": "",
+    "_links": {
+      "self": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/products/1004583",
+          "targetHints": {
+            "allow": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/products"
+        }
+      ]
+    }
+  }
+]

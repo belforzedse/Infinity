@@ -1,0 +1,142 @@
+{
+  "15": {
+    "strapiId": 1,
+    "importedAt": "2025-07-26T01:17:03.672Z",
+    "name": "بدون دسته‌بندی",
+    "slug": "uncategory",
+    "parentId": 0
+  },
+  "1331": {
+    "strapiId": 2,
+    "importedAt": "2025-07-26T01:17:03.904Z",
+    "name": "شومیز",
+    "slug": "paperback-and-tonic",
+    "parentId": 0
+  },
+  "1332": {
+    "strapiId": 3,
+    "importedAt": "2025-07-26T01:17:04.073Z",
+    "name": "شومیز نخی",
+    "slug": "cotton-paper",
+    "parentId": 1331
+  },
+  "1333": {
+    "strapiId": 4,
+    "importedAt": "2025-07-26T01:17:04.203Z",
+    "name": "شومیز جین",
+    "slug": "denim-paper",
+    "parentId": 1331
+  },
+  "1335": {
+    "strapiId": 5,
+    "importedAt": "2025-07-26T01:17:04.320Z",
+    "name": "تونیک اسپرت",
+    "slug": "sports-tunic",
+    "parentId": 1331
+  },
+  "1336": {
+    "strapiId": 6,
+    "importedAt": "2025-07-26T01:17:04.443Z",
+    "name": "شومیز مجلسی",
+    "slug": "house-paper",
+    "parentId": 1331
+  },
+  "1337": {
+    "strapiId": 7,
+    "importedAt": "2025-07-26T01:17:04.602Z",
+    "name": "راحتی",
+    "slug": "house-dress",
+    "parentId": 0
+  },
+  "1338": {
+    "strapiId": 8,
+    "importedAt": "2025-07-26T01:17:04.706Z",
+    "name": "تیشرت راحتی",
+    "slug": "comfortable-t-shirt",
+    "parentId": 1337
+  },
+  "1340": {
+    "strapiId": 9,
+    "importedAt": "2025-07-26T01:17:04.829Z",
+    "name": "ست دوتیکه راحتی",
+    "slug": "comfort-set",
+    "parentId": 1337
+  },
+  "1341": {
+    "strapiId": 10,
+    "importedAt": "2025-07-26T01:17:04.939Z",
+    "name": "تاپ و کراپ",
+    "slug": "comfortable-top",
+    "parentId": 1337
+  },
+  "1345": {
+    "strapiId": 11,
+    "importedAt": "2025-07-26T01:17:05.060Z",
+    "name": "پیراهن راحتی",
+    "slug": "comfortable-shirt",
+    "parentId": 1337
+  },
+  "1346": {
+    "strapiId": 12,
+    "importedAt": "2025-07-26T01:17:05.189Z",
+    "name": "شلوار",
+    "slug": "pants",
+    "parentId": 0
+  },
+  "1347": {
+    "strapiId": 13,
+    "importedAt": "2025-07-26T01:17:05.323Z",
+    "name": "شلوار جین",
+    "slug": "jeans",
+    "parentId": 1346
+  },
+  "1349": {
+    "strapiId": 14,
+    "importedAt": "2025-07-26T01:17:05.461Z",
+    "name": "شلوار لینن",
+    "slug": "lenin-pants",
+    "parentId": 1346
+  },
+  "1353": {
+    "strapiId": 15,
+    "importedAt": "2025-07-26T01:17:05.589Z",
+    "name": "شلوار دمپا",
+    "slug": "flip-flops",
+    "parentId": 1346
+  },
+  "1354": {
+    "strapiId": 16,
+    "importedAt": "2025-07-26T01:17:05.728Z",
+    "name": "شلوار مام استایل",
+    "slug": "mom-style-pants",
+    "parentId": 1346
+  },
+  "1355": {
+    "strapiId": 17,
+    "importedAt": "2025-07-26T01:17:05.865Z",
+    "name": "شلوار راسته",
+    "slug": "straight-pants",
+    "parentId": 1346
+  },
+  "1356": {
+    "strapiId": 18,
+    "importedAt": "2025-07-26T01:17:05.968Z",
+    "name": "شلوار بگ",
+    "slug": "bag-pants",
+    "parentId": 1346
+  },
+  "1357": {
+    "strapiId": 19,
+    "importedAt": "2025-07-26T01:17:06.079Z",
+    "name": "شلوار نیم بگ",
+    "slug": "half-bag-pants",
+    "parentId": 1346
+  },
+  "1360": {
+    "strapiId": 20,
+    "importedAt": "2025-07-26T01:17:06.186Z",
+    "name": "شلوار مام فیت",
+    "slug": "mom-fit-pants",
+    "parentId": 1346
+  }
+}
