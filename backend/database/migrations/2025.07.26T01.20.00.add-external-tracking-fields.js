@@ -50,6 +50,17 @@ async function up(knex) {
     }
   }
   
+  // Fix Contract Amount field type issue
+  console.log('🔧 Fixing Contract Amount field type...');
+  const hasContractsTable = await knex.schema.hasTable('contracts');
+  if (hasContractsTable) {
+    await knex.schema.alterTable('contracts', (table) => {
+      // Change Amount from integer to biginteger to handle large IRR values
+      table.bigInteger('amount').alter();
+    });
+    console.log('✅ Fixed Contract Amount field type');
+  }
+  
   console.log('✅ External tracking fields migration completed successfully!');
 }
 
@@ -86,6 +97,17 @@ async function down(knex) {
       
       console.log(`✅ Removed external tracking fields from ${tableName}`);
     }
+  }
+  
+  // Rollback Contract Amount field type (if needed)
+  console.log('🔧 Rolling back Contract Amount field type...');
+  const hasContractsTable = await knex.schema.hasTable('contracts');
+  if (hasContractsTable) {
+    await knex.schema.alterTable('contracts', (table) => {
+      // Revert Amount back to integer (WARNING: may lose data if values are large)
+      table.integer('amount').alter();
+    });
+    console.log('✅ Rolled back Contract Amount field type');
   }
   
   console.log('✅ External tracking fields rollback completed!');
