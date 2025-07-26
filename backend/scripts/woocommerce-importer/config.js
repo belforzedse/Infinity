@@ -101,7 +101,21 @@ module.exports = {
       productStatus: 'Active',
       orderType: 'Automatic',
       taxPercent: 10,
-      contractType: 'Cash'
+      contractType: 'Cash',
+      
+      // Default variation attributes when not specified in WooCommerce
+      variationAttributes: {
+        color: {
+          title: 'مشخص نشده', // Default in Persian
+          colorCode: '#CCCCCC' // Light gray
+        },
+        size: {
+          title: 'یک سایز' // One size (free size) in Persian
+        },
+        model: {
+          title: 'استاندارد' // Standard in Persian
+        }
+      }
     }
   },
 

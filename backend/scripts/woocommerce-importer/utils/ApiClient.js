@@ -247,18 +247,35 @@ class StrapiClient extends BaseApiClient {
     return response.data;
   }
 
-  /**
+    /**
    * Find or create variation color
    */
   async createVariationColor(colorData) {
     try {
       // First try to find existing color by Title
-      const existingResponse = await this.retryRequest(() =>
-        this.client.get(`/product-variation-colors?filters[Title][$eq]=${encodeURIComponent(colorData.Title)}`)
+      const existingByTitle = await this.retryRequest(() =>
+        this.client.get('/product-variation-colors', {
+          params: {
+            'filters[Title][$eq]': colorData.Title
+          }
+        })
       );
       
-      if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
-        return { data: existingResponse.data.data[0] };
+      if (existingByTitle.data && existingByTitle.data.data && existingByTitle.data.data.length > 0) {
+        return { data: existingByTitle.data.data[0] };
+      }
+      
+      // Also check by ColorCode to avoid duplicates
+      const existingByColor = await this.retryRequest(() =>
+        this.client.get('/product-variation-colors', {
+          params: {
+            'filters[ColorCode][$eq]': colorData.ColorCode
+          }
+        })
+      );
+      
+      if (existingByColor.data && existingByColor.data.data && existingByColor.data.data.length > 0) {
+        return { data: existingByColor.data.data[0] };
       }
       
       // If not found, create new one
@@ -267,14 +284,33 @@ class StrapiClient extends BaseApiClient {
       );
       return response.data;
     } catch (error) {
+      
       // If creation fails, try to find again (race condition handling)
       try {
-        const existingResponse = await this.retryRequest(() =>
-          this.client.get(`/product-variation-colors?filters[Title][$eq]=${encodeURIComponent(colorData.Title)}`)
+        // Check by Title first
+        const existingByTitle = await this.retryRequest(() =>
+          this.client.get('/product-variation-colors', {
+            params: {
+              'filters[Title][$eq]': colorData.Title
+            }
+          })
         );
         
-        if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
-          return { data: existingResponse.data.data[0] };
+        if (existingByTitle.data && existingByTitle.data.data && existingByTitle.data.data.length > 0) {
+          return { data: existingByTitle.data.data[0] };
+        }
+        
+        // Then check by ColorCode
+        const existingByColor = await this.retryRequest(() =>
+          this.client.get('/product-variation-colors', {
+            params: {
+              'filters[ColorCode][$eq]': colorData.ColorCode
+            }
+          })
+        );
+        
+        if (existingByColor.data && existingByColor.data.data && existingByColor.data.data.length > 0) {
+          return { data: existingByColor.data.data[0] };
         }
       } catch (findError) {
         // Ignore find error, throw original creation error
@@ -290,7 +326,11 @@ class StrapiClient extends BaseApiClient {
     try {
       // First try to find existing size by Title
       const existingResponse = await this.retryRequest(() =>
-        this.client.get(`/product-variation-sizes?filters[Title][$eq]=${encodeURIComponent(sizeData.Title)}`)
+        this.client.get('/product-variation-sizes', {
+          params: {
+            'filters[Title][$eq]': sizeData.Title
+          }
+        })
       );
       
       if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
@@ -305,9 +345,13 @@ class StrapiClient extends BaseApiClient {
     } catch (error) {
       // If creation fails, try to find again (race condition handling)
       try {
-        const existingResponse = await this.retryRequest(() =>
-          this.client.get(`/product-variation-sizes?filters[Title][$eq]=${encodeURIComponent(sizeData.Title)}`)
-        );
+                 const existingResponse = await this.retryRequest(() =>
+           this.client.get('/product-variation-sizes', {
+             params: {
+               'filters[Title][$eq]': sizeData.Title
+             }
+           })
+         );
         
         if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
           return { data: existingResponse.data.data[0] };
@@ -326,7 +370,11 @@ class StrapiClient extends BaseApiClient {
     try {
       // First try to find existing model by Title
       const existingResponse = await this.retryRequest(() =>
-        this.client.get(`/product-variation-models?filters[Title][$eq]=${encodeURIComponent(modelData.Title)}`)
+        this.client.get('/product-variation-models', {
+          params: {
+            'filters[Title][$eq]': modelData.Title
+          }
+        })
       );
       
       if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
@@ -341,9 +389,13 @@ class StrapiClient extends BaseApiClient {
     } catch (error) {
       // If creation fails, try to find again (race condition handling)
       try {
-        const existingResponse = await this.retryRequest(() =>
-          this.client.get(`/product-variation-models?filters[Title][$eq]=${encodeURIComponent(modelData.Title)}`)
-        );
+                 const existingResponse = await this.retryRequest(() =>
+           this.client.get('/product-variation-models', {
+             params: {
+               'filters[Title][$eq]': modelData.Title
+             }
+           })
+         );
         
         if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
           return { data: existingResponse.data.data[0] };
