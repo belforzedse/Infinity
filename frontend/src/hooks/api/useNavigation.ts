@@ -48,7 +48,7 @@ export function useNavigation(
       try {
         setLoading(true);
         const response = await fetch(
-          "https://infinity-bck.darkube.app/api/navigation?populate=*"
+          "https://api.infinity.rgbgroup.ir/api/navigation?populate=*"
         );
 
         if (!response.ok) {

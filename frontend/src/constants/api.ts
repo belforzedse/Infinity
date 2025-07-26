@@ -6,13 +6,13 @@
 // Base URLs
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://infinity-bck.darkube.app/api";
+  "https://api.infinity.rgbgroup.ir/api";
 
 export const STRAPI_TOKEN =
   process.env.NEXT_PUBLIC_STRAPI_TOKEN ||
-  "5ded48b60050770a36fd985fdef2a20b971cd82f26e2e8bc02d38b4fb52258c1ace5049f2bc82b8d336dd20b88d6af9bc826c49a465e4698042fac690650f70a663d357e9bc52e8a6c9cc4a5de7075e07472c6a6d55f0c9a29690a3e6717000c61bb9ba085c233311c9d7e7e1f8f3ab3ff6985a5fd7f2f4ede73204761451fd6";
+  "STRAPI_API_TOKEN";
 
-export const IMAGE_BASE_URL = "https://infinity-bck.darkube.app";
+export const IMAGE_BASE_URL = "https://api.infinity.rgbgroup.ir";
 
 // API Versions
 export const API_VERSION = "v1";
