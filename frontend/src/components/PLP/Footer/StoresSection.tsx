@@ -8,26 +8,22 @@ const socialIcons = [
   {
     src: "/images/social/balad.png",
     alt: "Balad",
+    href: "https://balad.ir/p/P6pI1lysjX6TFp",
   },
   {
     src: "/images/social/g-map.png",
     alt: "Google Map",
+    href: "https://maps.app.goo.gl/JmaqkgoBPyoZhApu9?g_st=iw",
   },
   {
     src: "/images/social/neshan.png",
     alt: "Neshan",
-  },
-  {
-    src: "/images/social/snapp.png",
-    alt: "Snapp",
-  },
-  {
-    src: "/images/social/tapsi.png",
-    alt: "Tapsi",
+    href: "https://nshn.ir/99_bflKtYGB7d-",
   },
   {
     src: "/images/social/waze.png",
     alt: "Waze",
+    href: "https://waze.com/ul/htnw9rnt0n",
   },
 ];
 
@@ -61,13 +57,21 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
       </p>
       <div className="flex gap-2">
         {socialIcons.map((icon) => (
-          <Image
+          <a
             key={icon.src}
-            src={icon.src}
-            alt={icon.alt}
-            width={24}
-            height={24}
-          />
+            href={icon.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-transform hover:scale-110"
+          >
+            <Image
+              src={icon.src}
+              alt={icon.alt}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
+          </a>
         ))}
       </div>
 
