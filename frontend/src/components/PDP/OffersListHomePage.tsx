@@ -35,6 +35,20 @@ export default function OffersListHomePage(props: Props) {
     }
   }
 
+  function getPlpHref(): string {
+    // Map known section titles to PLP filters/sort
+    if (title.includes("تخفیف")) {
+      return "/plp?hasDiscount=true";
+    }
+    if (title.includes("جدید")) {
+      return "/plp?sort=createdAt:desc";
+    }
+    if (title.includes("محبوب")) {
+      return "/plp?sort=AverageRating:desc";
+    }
+    return "/plp";
+  }
+
   // Display only first 8 products on desktop in grid layout
   const displayedProducts = isShowAllProducts
     ? products
@@ -58,8 +72,9 @@ export default function OffersListHomePage(props: Props) {
             />
           </div>
 
+          {/* Desktop: navigate to PLP with appropriate filters */}
           <Link
-            href={`/plp?collection=${title}`}
+            href={getPlpHref()}
             className="hidden md:block text-pink-600 text-sm hover:underline"
           >
             مشاهده همه
@@ -79,11 +94,7 @@ export default function OffersListHomePage(props: Props) {
           }}
         >
           {products.map((product) => (
-            <Link
-              key={product.id}
-              href={`/pdp/${product.id}`}
-              className="snap-start"
-            >
+            <Link key={product.id} href={`/pdp/${product.id}`} className="snap-start">
               <ProductCard {...product} />
             </Link>
           ))}
@@ -91,13 +102,13 @@ export default function OffersListHomePage(props: Props) {
 
         {!isShowAllProducts && products.length > 4 && (
           <div className="flex items-center justify-center mt-4">
-            <button
+            <Link
+              href={getPlpHref()}
               className="text-foreground-primary text-base flex items-center gap-1"
-              onClick={() => setIsShowAllProducts(true)}
             >
               <span>مشاهده همه</span>
               <ArrowLeftIcon />
-            </button>
+            </Link>
           </div>
         )}
       </div>
@@ -114,13 +125,13 @@ export default function OffersListHomePage(props: Props) {
       {/* Desktop view more button */}
       {!isShowAllProducts && products.length > 8 && (
         <div className="hidden md:flex items-center justify-center mt-6">
-          <button
+          <Link
+            href={getPlpHref()}
             className="text-foreground-primary text-base flex items-center gap-1 hover:text-pink-600 transition-colors py-2 px-4 border border-pink-100 rounded-full hover:bg-pink-50"
-            onClick={() => setIsShowAllProducts(true)}
           >
             <span>مشاهده محصولات بیشتر</span>
             <ArrowLeftIcon />
-          </button>
+          </Link>
         </div>
       )}
     </div>
