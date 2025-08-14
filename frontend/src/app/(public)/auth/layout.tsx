@@ -4,6 +4,7 @@ import Image from "next/image";
 import AuthIllustration from "@/components/Auth/Illustration";
 import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { UserService } from "@/services";
 
 export default function AuthLayout({
   children,
@@ -13,9 +14,21 @@ export default function AuthLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      router.push("/super-admin");
-    }
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+    if (!token) return;
+
+    // Redirect authenticated users based on role
+    UserService.me()
+      .then((me) => {
+        if (me?.isAdmin) {
+          router.replace("/super-admin");
+        } else {
+          router.replace("/account");
+        }
+      })
+      .catch(() => {
+        // If fetch fails, stay on auth and let user log in again
+      });
   }, []);
 
   return (
