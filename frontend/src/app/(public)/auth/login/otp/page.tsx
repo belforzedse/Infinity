@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import OTPLoginForm from "@/components/Auth/Login/OTPForm";
-import { AuthService } from "@/services";
+import { AuthService, UserService } from "@/services";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
@@ -31,8 +31,18 @@ export default function LoginPage() {
 
         // Migrate local cart to API after login
         await migrateLocalCartToApi();
-
-        router.push("/super-admin");
+        // Fetch current user and redirect based on role
+        try {
+          const me = await UserService.me();
+          if (me?.isAdmin) {
+            router.push("/super-admin");
+          } else {
+            router.push("/account");
+          }
+        } catch {
+          // Fallback to account if role fetch fails
+          router.push("/account");
+        }
       } else {
         toast.error("کد تایید اشتباه است");
       }
