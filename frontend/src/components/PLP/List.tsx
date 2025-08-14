@@ -89,6 +89,8 @@ export default function PLPList({
   const [gender, setGender] = useQueryState("gender");
   const [usage, setUsage] = useQueryState("usage");
   const [page, setPage] = useQueryState("page", { defaultValue: "1" });
+  const [sort, setSort] = useQueryState("sort");
+  const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
   // Local state for products and pagination
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -189,6 +191,11 @@ export default function PLPList({
         queryParams.append("filters[product_variations][Usage][$eq]", usage);
       }
 
+      // Sorting
+      if (sort) {
+        queryParams.append("sort[0]", sort);
+      }
+
       // Construct final URL
       const url = `${baseUrl}?${queryParams.toString()}`;
 
@@ -219,6 +226,7 @@ export default function PLPList({
     gender,
     usage,
     page,
+    sort,
     searchQuery,
   ]);
 
@@ -238,10 +246,21 @@ export default function PLPList({
         product.attributes.product_variations?.data?.some(
           (variation) => variation.attributes.IsPublished
         );
-      return hasValidPrice && hasAvailableVariation;
+      if (!(hasValidPrice && hasAvailableVariation)) return false;
+    } else if (!hasValidPrice) {
+      return false;
     }
 
-    return hasValidPrice;
+    // Discount-only filter
+    if (discountOnly === "true") {
+      const hasDiscount = product.attributes.product_variations?.data?.some(
+        (variation) =>
+          (variation.attributes as any)?.general_discounts?.data?.length > 0
+      );
+      if (!hasDiscount) return false;
+    }
+
+    return true;
   });
 
   // Create sample products for sidebar suggestions
