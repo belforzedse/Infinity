@@ -1,8 +1,4 @@
-variables:
-  DEV_IP: 172.22.11.11
-  MAIN_IP: 172.22.22.11
-  
 include:
   - project: 'infinity/devops'
     ref: main
-    file: 'infinity-cicd.yml'
+    file: 'infinity-backend-cicd.yml'
