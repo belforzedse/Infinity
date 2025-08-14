@@ -9,6 +9,7 @@ import PLPListMobileFilter from "./List/MobileFilter";
 import HeartIcon from "./Icons/HeartIcon";
 import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
+import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL } from "@/constants/api";
@@ -421,28 +422,11 @@ export default function PLPList({
               </div>
 
               {/* Pagination */}
-              {pagination.pageCount > 1 && (
-                <div className="flex justify-center mt-8">
-                  <div className="flex space-x-2 rtl:space-x-reverse">
-                    {Array.from(
-                      { length: pagination.pageCount },
-                      (_, i) => i + 1
-                    ).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum.toString())}
-                        className={`px-3 py-1 rounded ${
-                          pageNum === pagination.page
-                            ? "bg-primary text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <PLPPagination
+                currentPage={pagination.page}
+                totalPages={pagination.pageCount}
+                onPageChange={(page) => setPage(page.toString())}
+              />
             </>
           )}
         </div>
