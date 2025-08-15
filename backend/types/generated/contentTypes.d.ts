@@ -477,6 +477,8 @@ export interface ApiContractTransactionContractTransaction
       Attribute.Private;
     Date: Attribute.DateTime;
     DiscountAmount: Attribute.BigInteger & Attribute.DefaultTo<'0'>;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     payment_gateway: Attribute.Relation<
       'api::contract-transaction.contract-transaction',
       'manyToOne',
@@ -519,13 +521,13 @@ export interface ApiContractContract extends Schema.CollectionType {
     draftAndPublish: false;
   };
   attributes: {
-    Amount: Attribute.Integer &
+    Amount: Attribute.BigInteger &
       Attribute.Required &
       Attribute.SetMinMax<
         {
-          min: 0;
+          min: '0';
         },
-        number
+        string
       >;
     contract_transactions: Attribute.Relation<
       'api::contract.contract',
@@ -540,6 +542,8 @@ export interface ApiContractContract extends Schema.CollectionType {
     > &
       Attribute.Private;
     Date: Attribute.DateTime & Attribute.Required;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     local_user: Attribute.Relation<
       'api::contract.contract',
       'manyToOne',
@@ -808,6 +812,47 @@ export interface ApiLocalUserInfoLocalUserInfo extends Schema.CollectionType {
   };
 }
 
+export interface ApiLocalUserLogLocalUserLog extends Schema.CollectionType {
+  collectionName: 'local_user_logs';
+  info: {
+    description: 'Audit log for LocalUser entity';
+    displayName: 'LocalUserLog';
+    pluralName: 'local-user-logs';
+    singularName: 'local-user-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<['Create', 'Update', 'Delete']> &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::local-user-log.local-user-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    IP: Attribute.String;
+    local_user: Attribute.Relation<
+      'api::local-user-log.local-user-log',
+      'manyToOne',
+      'api::local-user.local-user'
+    >;
+    PerformedBy: Attribute.String;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::local-user-log.local-user-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    UserAgent: Attribute.String;
+  };
+}
+
 export interface ApiLocalUserPermissionLocalUserPermission
   extends Schema.CollectionType {
   collectionName: 'local_user_permissions';
@@ -1019,6 +1064,8 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
       'manyToMany',
       'api::discount.discount'
     >;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     IsActive: Attribute.Boolean &
       Attribute.Required &
       Attribute.DefaultTo<true>;
@@ -1126,6 +1173,8 @@ export interface ApiOrderItemOrderItem extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     order: Attribute.Relation<
       'api::order-item.order-item',
       'manyToOne',
@@ -1197,6 +1246,8 @@ export interface ApiOrderOrder extends Schema.CollectionType {
       Attribute.Private;
     Date: Attribute.DateTime & Attribute.Required;
     Description: Attribute.Text;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     Note: Attribute.Text;
     order_items: Attribute.Relation<
       'api::order.order',
@@ -1296,7 +1347,7 @@ export interface ApiProductCategoryContentProductCategoryContent
       'admin::user'
     > &
       Attribute.Private;
-    Image: Attribute.Media<'images'> & Attribute.Required;
+    Image: Attribute.Media<'images'>;
     IsPublished: Attribute.Boolean & Attribute.DefaultTo<false>;
     IsRTL: Attribute.Boolean & Attribute.DefaultTo<false>;
     Paragraph: Attribute.Text;
@@ -1341,6 +1392,8 @@ export interface ApiProductCategoryProductCategory
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     parent: Attribute.Relation<
       'api::product-category.product-category',
       'manyToOne',
@@ -1691,6 +1744,8 @@ export interface ApiProductStockProductStock extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     product_stock_logs: Attribute.Relation<
       'api::product-stock.product-stock',
       'oneToMany',
@@ -1765,6 +1820,8 @@ export interface ApiProductVariationColorProductVariationColor
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     Title: Attribute.String & Attribute.Required & Attribute.Unique;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -1795,6 +1852,8 @@ export interface ApiProductVariationModelProductVariationModel
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     Title: Attribute.String & Attribute.Required & Attribute.Unique;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -1825,6 +1884,8 @@ export interface ApiProductVariationSizeProductVariationSize
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     Title: Attribute.String & Attribute.Required & Attribute.Unique;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -1856,6 +1917,8 @@ export interface ApiProductVariationProductVariation
       'admin::user'
     > &
       Attribute.Private;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     general_discounts: Attribute.Relation<
       'api::product-variation.product-variation',
       'manyToMany',
@@ -1920,7 +1983,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
   attributes: {
     AverageRating: Attribute.Decimal;
     CleaningTips: Attribute.Text;
-    CoverImage: Attribute.Media<'images'> & Attribute.Required;
+    CoverImage: Attribute.Media<'images'>;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       'api::product.product',
@@ -1929,6 +1992,8 @@ export interface ApiProductProduct extends Schema.CollectionType {
     > &
       Attribute.Private;
     Description: Attribute.Text;
+    external_id: Attribute.String;
+    external_source: Attribute.String;
     Files: Attribute.Media<'files', true>;
     Media: Attribute.Media<'images' | 'videos', true>;
     product_faqs: Attribute.Relation<
@@ -2541,6 +2606,7 @@ declare module '@strapi/types' {
       'api::general-discount.general-discount': ApiGeneralDiscountGeneralDiscount;
       'api::local-user-address.local-user-address': ApiLocalUserAddressLocalUserAddress;
       'api::local-user-info.local-user-info': ApiLocalUserInfoLocalUserInfo;
+      'api::local-user-log.local-user-log': ApiLocalUserLogLocalUserLog;
       'api::local-user-permission.local-user-permission': ApiLocalUserPermissionLocalUserPermission;
       'api::local-user-role.local-user-role': ApiLocalUserRoleLocalUserRole;
       'api::local-user-wallet-transaction.local-user-wallet-transaction': ApiLocalUserWalletTransactionLocalUserWalletTransaction;
