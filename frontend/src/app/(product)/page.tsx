@@ -247,28 +247,33 @@ export default async function Home() {
       {/* Secondary banners section */}
       <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-4">
         <div className="md:w-1/2">
+        <Link href={`/plp?category=shirt`}>
           <img
             src="/images/index-img2-desktop.png"
             alt="Banner"
             className="w-full h-full rounded-lg object-cover"
           />
+          </Link>
         </div>
 
         <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
           <div className="w-1/2 md:w-full">
+          <Link href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}>
             <img
               src="/images/index-img3-desktop.png"
               alt="Banner"
               className="w-full h-full rounded-lg object-cover"
-            />
+            /></Link>
           </div>
 
           <div className="w-1/2 md:w-full">
+          <Link href={`/plp?category=skirt`}>
             <img
               src="/images/index-img4-desktop.png"
               alt="Banner"
               className="w-full h-full rounded-lg object-cover"
             />
+            </Link>
           </div>
         </div>
       </div>
