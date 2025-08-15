@@ -1,0 +1,35 @@
+---
+description: Backend report APIs, params, auth, and join strategy
+alwaysApply: false
+---
+
+# Backend Report APIs
+
+Endpoints (Strapi custom routes):
+
+- GET `/reports/liquidity?start=<ISO>&end=<ISO>&interval=day|week|month`
+- GET `/reports/product-sales?start=<ISO>&end=<ISO>[&debug=1]`
+- GET `/reports/gateway-liquidity?start=<ISO>&end=<ISO>`
+
+Auth and Guard:
+
+- Uses `global::authentication` middleware (JWT in Authorization header)
+- Controller guards for admin: `user_role.id === 2`
+
+Date Parameters:
+
+- Use ISO 8601 timestamps (UTC). Front converts Jalali → JS Date → `.toISOString()`
+
+Debug (temporary):
+
+- `/reports/product-sales` supports `debug=1` to include a debug block
+
+Strapi v4 Relation Strategy:
+
+- Prefer link-table joins for relations
+- Fallback to detected FKs only if no link table exists
+
+References:
+
+- Controller: [report.ts](mdc:src/api/report/controllers/report.ts)
+- Routes: [a-custom-router.ts](mdc:src/api/report/routes/a-custom-router.ts)
