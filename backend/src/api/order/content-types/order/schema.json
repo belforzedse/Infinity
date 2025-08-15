@@ -66,6 +66,11 @@
       "target": "api::shipping.shipping",
       "inversedBy": "orders"
     },
+    "delivery_address": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user-address.local-user-address"
+    },
     "ShippingCost": {
       "type": "integer",
       "required": false,

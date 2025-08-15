@@ -21,36 +21,59 @@ export default factories.createCoreController(
           SaleReferenceId,
           RefId,
           OrderId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
         // Check if payment was successful (ResCode = 0)
         if (ResCode !== "0") {
           // Handle different failure scenarios
           const orderId = parseInt(OrderId || SaleOrderId, 10);
-          
+
           // Update order status to Cancelled if we have a valid order ID
           if (!isNaN(orderId)) {
             try {
               await strapi.entityService.update("api::order.order", orderId, {
                 data: { Status: "Cancelled" },
               });
-              strapi.log.info(`Order ${orderId} marked as Cancelled due to payment failure/cancellation`);
+              strapi.log.info(
+                `Order ${orderId} marked as Cancelled due to payment failure/cancellation`
+              );
             } catch (updateError) {
-              strapi.log.error(`Failed to update order ${orderId} status:`, updateError);
+              strapi.log.error(
+                `Failed to update order ${orderId} status:`,
+                updateError
+              );
             }
           }
 
           // Log the specific error/cancellation
+          // Audit log for gateway callback failure/cancellation
+          try {
+            if (!isNaN(orderId)) {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "Gateway callback failure/cancellation",
+                  Changes: { ResCode, SaleOrderId, SaleReferenceId, RefId },
+                },
+              });
+            }
+          } catch (e) {
+            strapi.log.error("Failed to persist gateway failure log", e);
+          }
+
           if (ResCode === "17") {
             strapi.log.info("Payment cancelled by user:", { orderId, ResCode });
             // User cancelled - redirect to frontend cancellation page
-            ctx.redirect(`https://infinity.darkube.app/payment/cancelled?orderId=${orderId}&reason=user-cancelled`);
+            ctx.redirect(
+              `https://infinity.rgbgroup.ir/payment/cancelled?orderId=${orderId}&reason=user-cancelled`
+            );
           } else {
             strapi.log.error("Payment failed with ResCode:", ResCode);
             // Other payment failures - redirect to frontend failure page
             ctx.redirect(
-              `https://infinity.darkube.app/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
+              `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
                 `Payment failed with code: ${ResCode}`
               )}`
             );
@@ -97,16 +120,52 @@ export default factories.createCoreController(
               orderId,
               ResCode,
               SaleReferenceId,
-              settlementResult: settlementResult.resCode
+              settlementResult: settlementResult.resCode,
             });
 
+            // Audit log for successful payment callback
+            try {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "Gateway callback success (verify+settle)",
+                  Changes: { ResCode, SaleOrderId, SaleReferenceId, RefId },
+                },
+              });
+            } catch (e) {
+              strapi.log.error("Failed to persist gateway success log", e);
+            }
+
             // Redirect to frontend success page
-            ctx.redirect(`https://infinity.darkube.app/payment/success?orderId=${orderId}`);
+            ctx.redirect(
+              `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}`
+            );
           } else {
             // Settlement failed
             console.error("Payment settlement failed:", settlementResult.error);
+            try {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "Gateway settlement failed",
+                  Changes: {
+                    error: settlementResult.error,
+                    SaleOrderId,
+                    SaleReferenceId,
+                    RefId,
+                  },
+                },
+              });
+            } catch (e) {
+              strapi.log.error(
+                "Failed to persist gateway settlement failure log",
+                e
+              );
+            }
             ctx.redirect(
-              `https://infinity.darkube.app/payment/failure?error=${encodeURIComponent(
+              `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
                 settlementResult.error || "Settlement failed"
               )}`
             );
@@ -117,18 +176,56 @@ export default factories.createCoreController(
             "Payment verification failed:",
             verificationResult.error
           );
+          try {
+            const orderId = parseInt(OrderId || SaleOrderId, 10);
+            if (!isNaN(orderId)) {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "Gateway verification failed",
+                  Changes: {
+                    error: verificationResult.error,
+                    SaleOrderId,
+                    SaleReferenceId,
+                    RefId,
+                  },
+                },
+              });
+            }
+          } catch (e) {
+            strapi.log.error(
+              "Failed to persist gateway verification failure log",
+              e
+            );
+          }
 
           // Redirect to frontend failure page
           ctx.redirect(
-            `https://infinity.darkube.app/payment/failure?error=${encodeURIComponent(
+            `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
               verificationResult.error
             )}`
           );
         }
       } catch (error) {
         console.error("Error in payment verification callback:", error);
+        try {
+          const orderId = parseInt(OrderId || SaleOrderId, 10);
+          if (!isNaN(orderId)) {
+            await strapi.entityService.create("api::order-log.order-log", {
+              data: {
+                order: orderId,
+                Action: "Update",
+                Description: "Gateway callback internal error",
+                Changes: { message: error.message },
+              },
+            });
+          }
+        } catch (e) {
+          strapi.log.error("Failed to persist gateway internal error log", e);
+        }
         ctx.redirect(
-          `https://infinity.darkube.app/payment/failure?error=${encodeURIComponent(
+          `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
             "Internal server error"
           )}`
         );
