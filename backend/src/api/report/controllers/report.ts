@@ -253,12 +253,50 @@ export default {
 
       const knex = strapi.db.connection;
 
+      // Join contract_transactions to payment_gateways via link table if present
+      let txGatewayJoin = `LEFT JOIN payment_gateways pg ON ct.payment_gateway_id = pg.id`;
+      const txGwLinkRes = await knex.raw(
+        `SELECT table_name FROM information_schema.tables 
+         WHERE table_schema = 'public' AND table_name LIKE '%contract%transaction%payment%gateway%links%'`
+      );
+      const txGwLinks = txGwLinkRes.rows || txGwLinkRes[0] || [];
+      if (Array.isArray(txGwLinks) && txGwLinks.length > 0) {
+        const link = String(txGwLinks[0].table_name);
+        const colsRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+          [link]
+        );
+        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+          String(r.column_name)
+        );
+        const contractTxFk =
+          cols.find((c: string) => c === "contract_transaction_id") ||
+          cols.find((c: string) => c.endsWith("contract_transaction_id")) ||
+          cols.find(
+            (c: string) =>
+              c.startsWith("contract_transaction") && c.endsWith("_id")
+          ) ||
+          "contract_transaction_id";
+        const gatewayFk =
+          cols.find((c: string) => c === "payment_gateway_id") ||
+          cols.find((c: string) => c.endsWith("payment_gateway_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("payment_gateway") && c.endsWith("_id")
+          ) ||
+          "payment_gateway_id";
+
+        txGatewayJoin = `
+          JOIN ${link} l ON l.${contractTxFk} = ct.id
+          JOIN payment_gateways pg ON pg.id = l.${gatewayFk}
+        `;
+      }
+
       const query = `
         SELECT pg.id AS gateway_id,
                COALESCE(pg.title, 'Unknown') AS title,
                SUM(CASE WHEN ct.type = 'Return' THEN -ct.amount ELSE ct.amount END)::bigint AS total
         FROM contract_transactions ct
-        LEFT JOIN payment_gateways pg ON ct.payment_gateway_id = pg.id
+        ${txGatewayJoin}
         WHERE ct.status = 'Success' AND ct.date BETWEEN ? AND ?
         GROUP BY pg.id, pg.title
         ORDER BY total DESC
