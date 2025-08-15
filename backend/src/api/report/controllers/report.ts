@@ -93,18 +93,15 @@ export default {
 
       const knex = strapi.db.connection;
 
-      // orders <-> order_items link table detection
+      // orders <-> order_items link table (must contain both order_id and order_item_id)
       let ordersItemsJoinSql: string | null = null;
       let ordersItemsLink: string | undefined;
       const ordersItemsLinksRes = await knex.raw(
         `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND (
-           table_name LIKE 'orders%order_items%links%' OR table_name LIKE 'order_items%orders%links%'
-         )`
+         WHERE table_schema = 'public' AND table_name LIKE '%order%item%links%'`
       );
       const ordersItemsLinks =
         ordersItemsLinksRes.rows || ordersItemsLinksRes[0] || [];
-
       for (const row of ordersItemsLinks) {
         const t = String(row.table_name);
         const colsRes = await knex.raw(
@@ -116,47 +113,17 @@ export default {
             String(r.column_name)
           )
         );
-
-        // Check for Strapi v4 standard link table columns (entity_id, entity_order, etc.)
-        // or legacy specific columns (order_id, order_item_id)
-        const hasEntityColumns =
-          cols.has("entity_id") && cols.has("entity_order");
-        const hasSpecificColumns =
-          cols.has("order_id") && cols.has("order_item_id");
-
-        if (hasEntityColumns || hasSpecificColumns) {
+        if (cols.has("order_id") && cols.has("order_item_id")) {
           ordersItemsLink = t;
           break;
         }
       }
-
       if (ordersItemsLink) {
-        // Check which column pattern this link table uses
-        const colsRes = await knex.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [ordersItemsLink]
-        );
-        const cols = new Set(
-          (colsRes.rows || colsRes[0] || []).map((r: any) =>
-            String(r.column_name)
-          )
-        );
-
-        if (cols.has("entity_id") && cols.has("entity_order")) {
-          // Strapi v4 standard pattern
-          ordersItemsJoinSql = `
-            FROM order_items oi
-            JOIN ${ordersItemsLink} l_oi ON l_oi.entity_id = oi.id
-            JOIN orders o ON o.id = l_oi.entity_order
-          `;
-        } else if (cols.has("order_id") && cols.has("order_item_id")) {
-          // Legacy specific pattern
-          ordersItemsJoinSql = `
-            FROM order_items oi
-            JOIN ${ordersItemsLink} l_oi ON l_oi.order_item_id = oi.id
-            JOIN orders o ON o.id = l_oi.order_id
-          `;
-        }
+        ordersItemsJoinSql = `
+          FROM order_items oi
+          JOIN ${ordersItemsLink} l_oi ON l_oi.order_item_id = oi.id
+          JOIN orders o ON o.id = l_oi.order_id
+        `;
       } else {
         // Fallback to direct FK on order_items (order_id or "order")
         const fkCheck = await knex.raw(
@@ -179,13 +146,10 @@ export default {
       let selectProductVariationId = "NULL AS product_variation_id";
       const oiPvLinksRes = await knex.raw(
         `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND (
-           table_name LIKE 'order_items%product_variation%links%' OR table_name LIKE 'product_variation%order_items%links%'
-         )`
+         WHERE table_schema = 'public' AND table_name LIKE '%order%item%product%variation%links%'`
       );
       const oiPvLinks = oiPvLinksRes.rows || oiPvLinksRes[0] || [];
       let oiPvLink: string | undefined;
-
       for (const row of oiPvLinks) {
         const t = String(row.table_name);
         const colsRes = await knex.raw(
@@ -197,49 +161,17 @@ export default {
             String(r.column_name)
           )
         );
-
-        // Check for Strapi v4 standard or legacy patterns
-        const hasEntityColumns =
-          cols.has("entity_id") && cols.has("entity_order");
-        const hasSpecificColumns =
-          cols.has("order_item_id") && cols.has("product_variation_id");
-
-        if (hasEntityColumns || hasSpecificColumns) {
+        if (cols.has("order_item_id") && cols.has("product_variation_id")) {
           oiPvLink = t;
           break;
         }
       }
-
       if (oiPvLink) {
-        // Check which column pattern this link table uses
-        const colsRes = await knex.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [oiPvLink]
-        );
-        const cols = new Set(
-          (colsRes.rows || colsRes[0] || []).map((r: any) =>
-            String(r.column_name)
-          )
-        );
-
-        if (cols.has("entity_id") && cols.has("entity_order")) {
-          // Strapi v4 standard pattern - need to determine which entity is which
-          productVariationJoinSql = `
-            LEFT JOIN ${oiPvLink} piv ON piv.entity_id = oi.id
-            LEFT JOIN product_variations pv ON pv.id = piv.entity_order
-          `;
-          selectProductVariationId = "pv.id AS product_variation_id";
-        } else if (
-          cols.has("order_item_id") &&
-          cols.has("product_variation_id")
-        ) {
-          // Legacy specific pattern
-          productVariationJoinSql = `
-            LEFT JOIN ${oiPvLink} piv ON piv.order_item_id = oi.id
-            LEFT JOIN product_variations pv ON pv.id = piv.product_variation_id
-          `;
-          selectProductVariationId = "pv.id AS product_variation_id";
-        }
+        productVariationJoinSql = `
+          LEFT JOIN ${oiPvLink} piv ON piv.order_item_id = oi.id
+          LEFT JOIN product_variations pv ON pv.id = piv.product_variation_id
+        `;
+        selectProductVariationId = "pv.id AS product_variation_id";
       } else {
         // Fallback to direct FK if present
         const hasPvColRes = await knex.raw(
@@ -258,35 +190,12 @@ export default {
 
       const contractLinkTablesRes = await knex.raw(
         `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND (
-           table_name LIKE '%contract%order%links%' OR table_name LIKE '%order%contract%links%'
-         )`
+         WHERE table_schema = 'public' AND table_name LIKE '%contract%order%links%'`
       );
       const contractLinkTables =
         contractLinkTablesRes.rows || contractLinkTablesRes[0] || [];
-
-      for (const row of contractLinkTables) {
-        const t = String(row.table_name);
-        const colsRes = await knex.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [t]
-        );
-        const cols = new Set(
-          (colsRes.rows || colsRes[0] || []).map((r: any) =>
-            String(r.column_name)
-          )
-        );
-
-        // Check for Strapi v4 standard or legacy patterns
-        const hasEntityColumns =
-          cols.has("entity_id") && cols.has("entity_order");
-        const hasSpecificColumns =
-          cols.has("contract_id") && cols.has("order_id");
-
-        if (hasEntityColumns || hasSpecificColumns) {
-          contractOrderLink = t;
-          break;
-        }
+      if (Array.isArray(contractLinkTables) && contractLinkTables.length > 0) {
+        contractOrderLink = String(contractLinkTables[0].table_name);
       }
 
       if (contractOrderLink) {
@@ -294,25 +203,28 @@ export default {
           `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
           [contractOrderLink]
         );
-        const cols = new Set(
-          (colsRes.rows || colsRes[0] || []).map((r: any) =>
-            String(r.column_name)
-          )
+        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+          String(r.column_name)
         );
+        const orderFk =
+          cols.find((c: string) => c === "order_id") ||
+          cols.find((c: string) => c.endsWith("order_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("order") && c.endsWith("_id")
+          ) ||
+          "order_id";
+        const contractFk =
+          cols.find((c: string) => c === "contract_id") ||
+          cols.find((c: string) => c.endsWith("contract_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("contract") && c.endsWith("_id")
+          ) ||
+          "contract_id";
 
-        if (cols.has("entity_id") && cols.has("entity_order")) {
-          // Strapi v4 standard pattern - need to determine which entity is which
-          contractJoinSql = `
-            JOIN ${contractOrderLink} col ON col.entity_order = o.id
-            JOIN contracts c ON c.id = col.entity_id
-          `;
-        } else if (cols.has("contract_id") && cols.has("order_id")) {
-          // Legacy specific pattern
-          contractJoinSql = `
-            JOIN ${contractOrderLink} col ON col.order_id = o.id
-            JOIN contracts c ON c.id = col.contract_id
-          `;
-        }
+        contractJoinSql = `
+          JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
+          JOIN contracts c ON c.id = col.${contractFk}
+        `;
       } else {
         // Fallback to contracts.order_id FK
         const hasOrderIdColRes = await knex.raw(
@@ -380,46 +292,38 @@ export default {
       let txGatewayJoin = `LEFT JOIN payment_gateways pg ON ct.payment_gateway_id = pg.id`;
       const txGwLinkRes = await knex.raw(
         `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND (
-           table_name LIKE '%contract%transaction%payment%gateway%links%' OR
-           table_name LIKE '%payment%gateway%contract%transaction%links%'
-         )`
+         WHERE table_schema = 'public' AND table_name LIKE '%contract%transaction%payment%gateway%links%'`
       );
       const txGwLinks = txGwLinkRes.rows || txGwLinkRes[0] || [];
-
-      for (const row of txGwLinks) {
-        const link = String(row.table_name);
+      if (Array.isArray(txGwLinks) && txGwLinks.length > 0) {
+        const link = String(txGwLinks[0].table_name);
         const colsRes = await knex.raw(
           `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
           [link]
         );
-        const cols = new Set(
-          (colsRes.rows || colsRes[0] || []).map((r: any) =>
-            String(r.column_name)
-          )
+        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+          String(r.column_name)
         );
+        const contractTxFk =
+          cols.find((c: string) => c === "contract_transaction_id") ||
+          cols.find((c: string) => c.endsWith("contract_transaction_id")) ||
+          cols.find(
+            (c: string) =>
+              c.startsWith("contract_transaction") && c.endsWith("_id")
+          ) ||
+          "contract_transaction_id";
+        const gatewayFk =
+          cols.find((c: string) => c === "payment_gateway_id") ||
+          cols.find((c: string) => c.endsWith("payment_gateway_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("payment_gateway") && c.endsWith("_id")
+          ) ||
+          "payment_gateway_id";
 
-        // Check for Strapi v4 standard or legacy patterns
-        const hasEntityColumns =
-          cols.has("entity_id") && cols.has("entity_order");
-        const hasSpecificColumns =
-          cols.has("contract_transaction_id") && cols.has("payment_gateway_id");
-
-        if (hasEntityColumns) {
-          // Strapi v4 standard pattern
-          txGatewayJoin = `
-            JOIN ${link} l ON l.entity_id = ct.id
-            JOIN payment_gateways pg ON pg.id = l.entity_order
-          `;
-          break;
-        } else if (hasSpecificColumns) {
-          // Legacy specific pattern
-          txGatewayJoin = `
-            JOIN ${link} l ON l.contract_transaction_id = ct.id
-            JOIN payment_gateways pg ON pg.id = l.payment_gateway_id
-          `;
-          break;
-        }
+        txGatewayJoin = `
+          JOIN ${link} l ON l.${contractTxFk} = ct.id
+          JOIN payment_gateways pg ON pg.id = l.${gatewayFk}
+        `;
       }
 
       const query = `
