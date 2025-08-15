@@ -102054,5 +102054,157 @@
     "total": "1234000",
     "currency": "IRT",
     "date": "2025-03-06T12:04:58"
+  },
+  "905904": {
+    "strapiId": 12759,
+    "importedAt": "2025-08-15T11:58:53.384Z",
+    "status": "completed",
+    "total": "1882000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:09:05"
+  },
+  "905905": {
+    "strapiId": 12760,
+    "importedAt": "2025-08-15T11:58:54.519Z",
+    "status": "completed",
+    "total": "864000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:10:38"
+  },
+  "905906": {
+    "strapiId": 12761,
+    "importedAt": "2025-08-15T11:58:56.167Z",
+    "status": "completed",
+    "total": "1593000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:11:47"
+  },
+  "905907": {
+    "strapiId": 12762,
+    "importedAt": "2025-08-15T11:58:57.815Z",
+    "status": "cancelled",
+    "total": "1144000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:12:54"
+  },
+  "905908": {
+    "strapiId": 12763,
+    "importedAt": "2025-08-15T11:58:58.775Z",
+    "status": "completed",
+    "total": "774000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:12:57"
+  },
+  "905909": {
+    "strapiId": 12764,
+    "importedAt": "2025-08-15T11:59:04.443Z",
+    "status": "completed",
+    "total": "656000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:13:30"
+  },
+  "905910": {
+    "strapiId": 12765,
+    "importedAt": "2025-08-15T11:59:06.145Z",
+    "status": "completed",
+    "total": "819000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:13:35"
+  },
+  "905911": {
+    "strapiId": 12766,
+    "importedAt": "2025-08-15T11:59:11.577Z",
+    "status": "cancelled",
+    "total": "556000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:16:19"
+  },
+  "905912": {
+    "strapiId": 12767,
+    "importedAt": "2025-08-15T11:59:12.800Z",
+    "status": "completed",
+    "total": "564000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:16:25"
+  },
+  "905913": {
+    "strapiId": 12768,
+    "importedAt": "2025-08-15T11:59:14.053Z",
+    "status": "cancelled",
+    "total": "2414000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:17:37"
+  },
+  "905914": {
+    "strapiId": 12769,
+    "importedAt": "2025-08-15T11:59:19.457Z",
+    "status": "completed",
+    "total": "1044000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:19:32"
+  },
+  "905915": {
+    "strapiId": 12770,
+    "importedAt": "2025-08-15T11:59:26.638Z",
+    "status": "completed",
+    "total": "989000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:22:20"
+  },
+  "905916": {
+    "strapiId": 12771,
+    "importedAt": "2025-08-15T11:59:32.237Z",
+    "status": "completed",
+    "total": "529000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:26:08"
+  },
+  "905917": {
+    "strapiId": 12772,
+    "importedAt": "2025-08-15T11:59:38.147Z",
+    "status": "completed",
+    "total": "1452000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:27:33"
+  },
+  "905918": {
+    "strapiId": 12773,
+    "importedAt": "2025-08-15T11:59:39.700Z",
+    "status": "completed",
+    "total": "1743000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:30:05"
+  },
+  "905920": {
+    "strapiId": 12774,
+    "importedAt": "2025-08-15T11:59:45.649Z",
+    "status": "completed",
+    "total": "694000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:31:06"
+  },
+  "905922": {
+    "strapiId": 12775,
+    "importedAt": "2025-08-15T11:59:47.834Z",
+    "status": "cancelled",
+    "total": "1569000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:32:20"
+  },
+  "905923": {
+    "strapiId": 12776,
+    "importedAt": "2025-08-15T11:59:48.957Z",
+    "status": "completed",
+    "total": "576000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:32:22"
+  },
+  "905924": {
+    "strapiId": 12777,
+    "importedAt": "2025-08-15T11:59:50.232Z",
+    "status": "cancelled",
+    "total": "856000",
+    "currency": "IRT",
+    "date": "2025-03-06T12:34:45"
   }
 }
