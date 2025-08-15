@@ -37,7 +37,7 @@ class ProductImporter {
   }
 
   /**
-   * Main import method
+   * Main import method - Optimized for incremental processing
    */
   async import(options = {}) {
     const { limit = 50, page = 1, dryRun = false } = options;
@@ -49,36 +49,78 @@ class ProductImporter {
       // Pre-load category mappings for faster lookups
       await this.loadCategoryMappings();
       
-      // Get all products from WooCommerce
-      const allProducts = await this.fetchAllProducts(limit, page);
-      this.stats.total = allProducts.length;
+      // Load progress state
+      const progressState = this.loadProgressState();
+      let currentPage = Math.max(page, progressState.lastCompletedPage + 1);
+      let totalProcessed = progressState.totalProcessed;
       
-      if (allProducts.length === 0) {
-        this.logger.warn('📭 No products found to import');
-        return this.stats;
-      }
+      this.logger.info(`📊 Resuming from page ${currentPage} (${totalProcessed} products already processed)`);
       
-      this.logger.info(`📊 Found ${allProducts.length} products to process`);
+      // Process products incrementally page by page
+      let hasMorePages = true;
+      let processedInThisSession = 0;
       
-      // Start progress tracking
-      this.logger.startProgress(allProducts.length, 'Importing products');
-      
-      // Import products
-      for (const wcProduct of allProducts) {
-        try {
-          await this.importSingleProduct(wcProduct, dryRun);
-          this.logger.updateProgress();
-        } catch (error) {
-          this.stats.errors++;
-          this.logger.error(`❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`, error.message);
-          
-          if (!this.config.errorHandling.continueOnError) {
-            throw error;
+      while (hasMorePages && processedInThisSession < limit) {
+        const remainingLimit = limit - processedInThisSession;
+        const perPage = Math.min(this.config.import.batchSizes.products, remainingLimit);
+        
+        this.logger.info(`📄 Processing page ${currentPage} (requesting ${perPage} items)...`);
+        
+        // Fetch current page
+        const result = await this.wooClient.getProducts(currentPage, perPage);
+        
+        if (!result.data || result.data.length === 0) {
+          this.logger.info(`📄 No more products found on page ${currentPage}`);
+          hasMorePages = false;
+          break;
+        }
+        
+        // Process products from this page immediately
+        this.logger.info(`🔄 Processing ${result.data.length} products from page ${currentPage}...`);
+        
+        for (const wcProduct of result.data) {
+          try {
+            await this.importSingleProduct(wcProduct, dryRun);
+            totalProcessed++;
+            processedInThisSession++;
+            this.stats.total = totalProcessed;
+            
+            // Save progress after each successful import
+            this.saveProgressState({
+              lastCompletedPage: currentPage,
+              totalProcessed: totalProcessed,
+              lastProcessedAt: new Date().toISOString()
+            });
+            
+            if (totalProcessed % this.config.logging.progressInterval === 0) {
+              this.logger.info(`📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`);
+            }
+            
+          } catch (error) {
+            this.stats.errors++;
+            this.logger.error(`❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`, error.message);
+            
+            if (!this.config.errorHandling.continueOnError) {
+              throw error;
+            }
           }
+        }
+        
+        this.logger.success(`✅ Completed page ${currentPage}: ${result.data.length} products processed`);
+        currentPage++;
+        
+        // Check if we've reached the total pages or our limit
+        if (result.totalPages && currentPage > result.totalPages) {
+          hasMorePages = false;
+        }
+        
+        if (processedInThisSession >= limit) {
+          this.logger.info(`📊 Reached session limit of ${limit} products`);
+          break;
         }
       }
       
-      this.logger.completeProgress();
+      this.logger.success(`🎉 Import session completed: ${processedInThisSession} products processed in this session`);
       
     } catch (error) {
       this.stats.errors++;
@@ -108,41 +150,55 @@ class ProductImporter {
   }
 
   /**
-   * Fetch all products from WooCommerce with pagination
+   * Load progress state from file
    */
-  async fetchAllProducts(limit, startPage) {
-    let allProducts = [];
-    let currentPage = startPage;
-    let totalFetched = 0;
+  loadProgressState() {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/product-import-progress.json`;
     
-    this.logger.info(`📥 Fetching products from WooCommerce...`);
-    
-    while (totalFetched < limit) {
-      const remainingLimit = limit - totalFetched;
-      const perPage = Math.min(this.config.import.batchSizes.products, remainingLimit);
-      
-      this.logger.debug(`Fetching page ${currentPage} (${perPage} items)`);
-      
-      const result = await this.wooClient.getProducts(currentPage, perPage);
-      
-      if (!result.data || result.data.length === 0) {
-        this.logger.info(`📄 No more products found on page ${currentPage}`);
-        break;
+    try {
+      if (require('fs').existsSync(progressFile)) {
+        const data = JSON.parse(require('fs').readFileSync(progressFile, 'utf8'));
+        this.logger.debug(`📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`);
+        return data;
       }
-      
-      allProducts = allProducts.concat(result.data);
-      totalFetched += result.data.length;
-      currentPage++;
-      
-      this.logger.debug(`📊 Fetched ${result.data.length} products (total: ${totalFetched})`);
-      
-      if (currentPage > result.totalPages) {
-        break;
-      }
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to load progress state: ${error.message}`);
     }
     
-    this.logger.info(`✅ Fetched ${allProducts.length} products from WooCommerce`);
-    return allProducts;
+    return {
+      lastCompletedPage: 0,
+      totalProcessed: 0,
+      lastProcessedAt: null
+    };
+  }
+
+  /**
+   * Save progress state to file
+   */
+  saveProgressState(state) {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/product-import-progress.json`;
+    
+    try {
+      require('fs').writeFileSync(progressFile, JSON.stringify(state, null, 2));
+    } catch (error) {
+      this.logger.error(`❌ Failed to save progress state: ${error.message}`);
+    }
+  }
+
+  /**
+   * Reset progress state (useful for starting fresh)
+   */
+  resetProgressState() {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/product-import-progress.json`;
+    
+    try {
+      if (require('fs').existsSync(progressFile)) {
+        require('fs').unlinkSync(progressFile);
+        this.logger.info(`🧹 Reset product import progress state`);
+      }
+    } catch (error) {
+      this.logger.error(`❌ Failed to reset progress state: ${error.message}`);
+    }
   }
 
   /**

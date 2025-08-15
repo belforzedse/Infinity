@@ -64,7 +64,7 @@ class WooCommerceClient extends BaseApiClient {
         username: config.woocommerce.auth.consumerKey,
         password: config.woocommerce.auth.consumerSecret
       },
-      timeout: 30000,
+      timeout: 60000, // Increased to 60 seconds for slow responses
       headers: {
         'User-Agent': 'WooCommerce-Strapi-Importer/1.0'
       }
@@ -72,6 +72,7 @@ class WooCommerceClient extends BaseApiClient {
 
     // Request interceptor for rate limiting
     this.client.interceptors.request.use(async (config) => {
+      this.logger.info(`🔄 Making WC API request: ${config.method?.toUpperCase()} ${config.url}`);
       await this.rateLimitDelay();
       return config;
     });
@@ -79,12 +80,15 @@ class WooCommerceClient extends BaseApiClient {
     // Response interceptor for logging
     this.client.interceptors.response.use(
       (response) => {
-        this.logger.debug(`✅ WC API: ${response.config.method?.toUpperCase()} ${response.config.url} → ${response.status}`);
+        this.logger.info(`✅ WC API Response: ${response.config.method?.toUpperCase()} ${response.config.url} → ${response.status} (${response.data?.length || 'unknown'} items)`);
         return response;
       },
       (error) => {
         if (error.response) {
           this.logger.error(`❌ WC API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`);
+          this.logger.error(`Error details: ${JSON.stringify(error.response.data)}`);
+        } else if (error.code === 'ECONNABORTED') {
+          this.logger.error(`❌ WC API Timeout: ${error.message} - ${error.config?.url}`);
         } else {
           this.logger.error(`❌ WC API Error: ${error.message}`);
         }
@@ -150,6 +154,23 @@ class WooCommerceClient extends BaseApiClient {
   async getOrders(page = 1, perPage = 30) {
     const response = await this.retryRequest(() => 
       this.client.get('/orders', {
+        params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
+      })
+    );
+    
+    return {
+      data: response.data,
+      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
+      totalItems: parseInt(response.headers['x-wp-total'] || '0')
+    };
+  }
+
+  /**
+   * Get customers with pagination
+   */
+  async getCustomers(page = 1, perPage = 50) {
+    const response = await this.retryRequest(() => 
+      this.client.get('/customers', {
         params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
       })
     );
@@ -443,6 +464,51 @@ class StrapiClient extends BaseApiClient {
   async createContract(contractData) {
     const response = await this.retryRequest(() => 
       this.client.post('/contracts', { data: contractData })
+    );
+    return response.data;
+  }
+
+  /**
+   * Get all local users (for phone uniqueness check)
+   */
+  async getAllLocalUsers() {
+    const response = await this.retryRequest(() => 
+      this.client.get('/local-users', {
+        params: { 
+          'pagination[pageSize]': 1000, // Get a large batch for phone checking
+          'fields[0]': 'Phone' // Only get phone field for efficiency
+        }
+      })
+    );
+    return response.data;
+  }
+
+  /**
+   * Create local user
+   */
+  async createLocalUser(userData) {
+    const response = await this.retryRequest(() => 
+      this.client.post('/local-users', { data: userData })
+    );
+    return response.data;
+  }
+
+  /**
+   * Create local user info
+   */
+  async createLocalUserInfo(userInfoData) {
+    const response = await this.retryRequest(() => 
+      this.client.post('/local-user-infos', { data: userInfoData })
+    );
+    return response.data;
+  }
+
+  /**
+   * Create local user role
+   */
+  async createLocalUserRole(roleData) {
+    const response = await this.retryRequest(() => 
+      this.client.post('/local-user-roles', { data: roleData })
     );
     return response.data;
   }

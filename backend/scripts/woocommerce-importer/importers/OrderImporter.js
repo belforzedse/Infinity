@@ -42,7 +42,7 @@ class OrderImporter {
   }
 
   /**
-   * Main import method
+   * Main import method - Optimized for incremental processing
    */
   async import(options = {}) {
     const { limit = 50, page = 1, dryRun = false } = options;
@@ -54,36 +54,78 @@ class OrderImporter {
       // Pre-load mappings for faster lookups
       await this.loadMappingCaches();
       
-      // Get all orders from WooCommerce
-      const allOrders = await this.fetchAllOrders(limit, page);
-      this.stats.total = allOrders.length;
+      // Load progress state
+      const progressState = this.loadProgressState();
+      let currentPage = Math.max(page, progressState.lastCompletedPage + 1);
+      let totalProcessed = progressState.totalProcessed;
       
-      if (allOrders.length === 0) {
-        this.logger.warn('📭 No orders found to import');
-        return this.stats;
-      }
+      this.logger.info(`📊 Resuming from page ${currentPage} (${totalProcessed} orders already processed)`);
       
-      this.logger.info(`📊 Found ${allOrders.length} orders to process`);
+      // Process orders incrementally page by page
+      let hasMorePages = true;
+      let processedInThisSession = 0;
       
-      // Start progress tracking
-      this.logger.startProgress(allOrders.length, 'Importing orders');
-      
-      // Import orders
-      for (const wcOrder of allOrders) {
-        try {
-          await this.importSingleOrder(wcOrder, dryRun);
-          this.logger.updateProgress();
-        } catch (error) {
-          this.stats.errors++;
-          this.logger.error(`❌ Failed to import order ${wcOrder.id}:`, error.message);
-          
-          if (!this.config.errorHandling.continueOnError) {
-            throw error;
+      while (hasMorePages && processedInThisSession < limit) {
+        const remainingLimit = limit - processedInThisSession;
+        const perPage = Math.min(this.config.import.batchSizes.orders, remainingLimit);
+        
+        this.logger.info(`📄 Processing page ${currentPage} (requesting ${perPage} items)...`);
+        
+        // Fetch current page
+        const result = await this.wooClient.getOrders(currentPage, perPage);
+        
+        if (!result.data || result.data.length === 0) {
+          this.logger.info(`📄 No more orders found on page ${currentPage}`);
+          hasMorePages = false;
+          break;
+        }
+        
+        // Process orders from this page immediately
+        this.logger.info(`🔄 Processing ${result.data.length} orders from page ${currentPage}...`);
+        
+        for (const wcOrder of result.data) {
+          try {
+            await this.importSingleOrder(wcOrder, dryRun);
+            totalProcessed++;
+            processedInThisSession++;
+            this.stats.total = totalProcessed;
+            
+            // Save progress after each successful import
+            this.saveProgressState({
+              lastCompletedPage: currentPage,
+              totalProcessed: totalProcessed,
+              lastProcessedAt: new Date().toISOString()
+            });
+            
+            if (totalProcessed % this.config.logging.progressInterval === 0) {
+              this.logger.info(`📈 Progress: ${totalProcessed} orders processed, current page: ${currentPage}`);
+            }
+            
+          } catch (error) {
+            this.stats.errors++;
+            this.logger.error(`❌ Failed to import order ${wcOrder.id}:`, error.message);
+            
+            if (!this.config.errorHandling.continueOnError) {
+              throw error;
+            }
           }
+        }
+        
+        this.logger.success(`✅ Completed page ${currentPage}: ${result.data.length} orders processed`);
+        currentPage++;
+        
+        // Check if we've reached the total pages or our limit
+        if (result.totalPages && currentPage > result.totalPages) {
+          hasMorePages = false;
+        }
+        
+        if (processedInThisSession >= limit) {
+          this.logger.info(`📊 Reached session limit of ${limit} orders`);
+          break;
         }
       }
       
-      this.logger.completeProgress();
+      this.logger.success(`🎉 Import session completed: ${processedInThisSession} orders processed in this session`);
       
     } catch (error) {
       this.stats.errors++;
@@ -114,41 +156,55 @@ class OrderImporter {
   }
 
   /**
-   * Fetch all orders from WooCommerce with pagination
+   * Load progress state from file
    */
-  async fetchAllOrders(limit, startPage) {
-    let allOrders = [];
-    let currentPage = startPage;
-    let totalFetched = 0;
+  loadProgressState() {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/order-import-progress.json`;
     
-    this.logger.info(`📥 Fetching orders from WooCommerce...`);
-    
-    while (totalFetched < limit) {
-      const remainingLimit = limit - totalFetched;
-      const perPage = Math.min(this.config.import.batchSizes.orders, remainingLimit);
-      
-      this.logger.debug(`Fetching page ${currentPage} (${perPage} items)`);
-      
-      const result = await this.wooClient.getOrders(currentPage, perPage);
-      
-      if (!result.data || result.data.length === 0) {
-        this.logger.info(`📄 No more orders found on page ${currentPage}`);
-        break;
+    try {
+      if (require('fs').existsSync(progressFile)) {
+        const data = JSON.parse(require('fs').readFileSync(progressFile, 'utf8'));
+        this.logger.debug(`📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`);
+        return data;
       }
-      
-      allOrders = allOrders.concat(result.data);
-      totalFetched += result.data.length;
-      currentPage++;
-      
-      this.logger.debug(`📊 Fetched ${result.data.length} orders (total: ${totalFetched})`);
-      
-      if (currentPage > result.totalPages) {
-        break;
-      }
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to load progress state: ${error.message}`);
     }
     
-    this.logger.info(`✅ Fetched ${allOrders.length} orders from WooCommerce`);
-    return allOrders;
+    return {
+      lastCompletedPage: 0,
+      totalProcessed: 0,
+      lastProcessedAt: null
+    };
+  }
+
+  /**
+   * Save progress state to file
+   */
+  saveProgressState(state) {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/order-import-progress.json`;
+    
+    try {
+      require('fs').writeFileSync(progressFile, JSON.stringify(state, null, 2));
+    } catch (error) {
+      this.logger.error(`❌ Failed to save progress state: ${error.message}`);
+    }
+  }
+
+  /**
+   * Reset progress state (useful for starting fresh)
+   */
+  resetProgressState() {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/order-import-progress.json`;
+    
+    try {
+      if (require('fs').existsSync(progressFile)) {
+        require('fs').unlinkSync(progressFile);
+        this.logger.info(`🧹 Reset order import progress state`);
+      }
+    } catch (error) {
+      this.logger.error(`❌ Failed to reset progress state: ${error.message}`);
+    }
   }
 
   /**
