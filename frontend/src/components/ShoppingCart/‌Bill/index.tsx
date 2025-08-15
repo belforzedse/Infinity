@@ -90,6 +90,7 @@ function ShoppingCartBillForm({}: Props) {
         shippingCost: Number(data.shippingMethod.attributes.Price),
         note: data.notes || undefined,
         callbackURL: "/orders/payment-callback",
+        addressId: Number((data.address as any)?.id),
       };
 
       // Make a single call to finalize cart
