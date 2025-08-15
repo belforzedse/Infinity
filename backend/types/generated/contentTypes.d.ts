@@ -449,6 +449,44 @@ export interface ApiCartCart extends Schema.CollectionType {
   };
 }
 
+export interface ApiContractLogContractLog extends Schema.CollectionType {
+  collectionName: 'contract_logs';
+  info: {
+    description: 'Audit log for Contract entity';
+    displayName: 'ContractLog';
+    pluralName: 'contract-logs';
+    singularName: 'contract-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<['Create', 'Update', 'Delete']> &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    contract: Attribute.Relation<
+      'api::contract-log.contract-log',
+      'manyToOne',
+      'api::contract.contract'
+    >;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::contract-log.contract-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::contract-log.contract-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiContractTransactionContractTransaction
   extends Schema.CollectionType {
   collectionName: 'contract_transactions';
@@ -1540,6 +1578,44 @@ export interface ApiProductLikeProductLike extends Schema.CollectionType {
   };
 }
 
+export interface ApiProductLogProductLog extends Schema.CollectionType {
+  collectionName: 'product_logs';
+  info: {
+    description: 'Audit log for Product entity';
+    displayName: 'ProductLog';
+    pluralName: 'product-logs';
+    singularName: 'product-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<['Create', 'Update', 'Delete']> &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::product-log.product-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    product: Attribute.Relation<
+      'api::product-log.product-log',
+      'manyToOne',
+      'api::product.product'
+    >;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::product-log.product-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiProductReviewLikeProductReviewLike
   extends Schema.CollectionType {
   collectionName: 'product_review_likes';
@@ -1867,6 +1943,45 @@ export interface ApiProductVariationColorProductVariationColor
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
       'api::product-variation-color.product-variation-color',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiProductVariationLogProductVariationLog
+  extends Schema.CollectionType {
+  collectionName: 'product_variation_logs';
+  info: {
+    description: 'Audit log for ProductVariation entity';
+    displayName: 'ProductVariationLog';
+    pluralName: 'product-variation-logs';
+    singularName: 'product-variation-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<['Create', 'Update', 'Delete']> &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::product-variation-log.product-variation-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    product_variation: Attribute.Relation<
+      'api::product-variation-log.product-variation-log',
+      'manyToOne',
+      'api::product-variation.product-variation'
+    >;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::product-variation-log.product-variation-log',
       'oneToOne',
       'admin::user'
     > &
@@ -2640,6 +2755,7 @@ declare module '@strapi/types' {
       'admin::user': AdminUser;
       'api::cart-item.cart-item': ApiCartItemCartItem;
       'api::cart.cart': ApiCartCart;
+      'api::contract-log.contract-log': ApiContractLogContractLog;
       'api::contract-transaction.contract-transaction': ApiContractTransactionContractTransaction;
       'api::contract.contract': ApiContractContract;
       'api::discount.discount': ApiDiscountDiscount;
@@ -2662,6 +2778,7 @@ declare module '@strapi/types' {
       'api::product-category.product-category': ApiProductCategoryProductCategory;
       'api::product-faq.product-faq': ApiProductFaqProductFaq;
       'api::product-like.product-like': ApiProductLikeProductLike;
+      'api::product-log.product-log': ApiProductLogProductLog;
       'api::product-review-like.product-review-like': ApiProductReviewLikeProductReviewLike;
       'api::product-review-reply.product-review-reply': ApiProductReviewReplyProductReviewReply;
       'api::product-review.product-review': ApiProductReviewProductReview;
@@ -2670,6 +2787,7 @@ declare module '@strapi/types' {
       'api::product-stock.product-stock': ApiProductStockProductStock;
       'api::product-tag.product-tag': ApiProductTagProductTag;
       'api::product-variation-color.product-variation-color': ApiProductVariationColorProductVariationColor;
+      'api::product-variation-log.product-variation-log': ApiProductVariationLogProductVariationLog;
       'api::product-variation-model.product-variation-model': ApiProductVariationModelProductVariationModel;
       'api::product-variation-size.product-variation-size': ApiProductVariationSizeProductVariationSize;
       'api::product-variation.product-variation': ApiProductVariationProductVariation;

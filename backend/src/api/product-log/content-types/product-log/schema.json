@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_logs",
+  "info": {
+    "singularName": "product-log",
+    "pluralName": "product-logs",
+    "displayName": "ProductLog",
+    "description": "Audit log for Product entity"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete"],
+      "required": true
+    },
+    "Changes": {
+      "type": "json"
+    },
+    "Description": {
+      "type": "text"
+    }
+  }
+}
+
+
