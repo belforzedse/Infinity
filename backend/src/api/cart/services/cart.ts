@@ -375,7 +375,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
             },
           });
 
-          // Update product stock
+          // Update product stock (lifecycle will create the log)
           const stockId = variation.product_stock.id;
           const currentStock = variation.product_stock.Count;
           await strapi.entityService.update(
@@ -384,22 +384,6 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
             {
               data: {
                 Count: currentStock - item.Count,
-              },
-            }
-          );
-
-          // Using enum type explicitly for stock log
-          type StockLogType = "Add" | "Minus";
-
-          // Log stock change with correct enum value
-          await strapi.entityService.create(
-            "api::product-stock-log.product-stock-log",
-            {
-              data: {
-                Count: item.Count, // Using positive number
-                Type: "Minus" as StockLogType,
-                Description: `Order ${order.id}`,
-                product_stock: stockId,
               },
             }
           );
