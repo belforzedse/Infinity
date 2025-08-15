@@ -15,12 +15,17 @@
     "variations-all": "node index.js variations --all --batch-size 100",
     "variations-imported": "node index.js variations-imported",
     "orders": "node index.js orders",
+    "orders-all": "node index.js orders --all --batch-size 50",
+    "users": "node index.js users",
+    "users-all": "node index.js users --all --batch-size 50",
     "all": "node index.js all",
     "dry-run": "node index.js categories --dry-run",
     "status": "node index.js status",
     "reset-progress": "node index.js reset-progress",
     "reset-products": "node index.js reset-progress --type products",
     "reset-variations": "node index.js reset-progress --type variations",
+    "reset-orders": "node index.js reset-progress --type orders",
+    "reset-users": "node index.js reset-progress --type users",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

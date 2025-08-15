@@ -34,7 +34,9 @@ module.exports = {
       orders: '/orders',
       orderItems: '/order-items',
       contracts: '/contracts',
-      localUsers: '/local-users'
+      localUsers: '/local-users',
+      localUserInfos: '/local-user-infos',
+      localUserRoles: '/local-user-roles'
     }
   },
 
@@ -42,10 +44,11 @@ module.exports = {
   import: {
     // Batch sizes for different entities
     batchSizes: {
-      categories: 50,
-      products: 20,
+      categories: 100,
+      products: 100, // Increased from 20 to 100 (WooCommerce API max)
       variations: 100,
-      orders: 30
+      orders: 50,
+      users: 50
     },
     
     // Currency conversion (IRT to our internal format)
@@ -135,7 +138,8 @@ module.exports = {
       categories: 'category-mappings.json',
       products: 'product-mappings.json',
       variations: 'variation-mappings.json',
-      orders: 'order-mappings.json'
+      orders: 'order-mappings.json',
+      users: 'user-mappings.json'
     }
   },
 

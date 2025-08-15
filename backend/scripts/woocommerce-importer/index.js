@@ -12,6 +12,7 @@ const CategoryImporter = require('./importers/CategoryImporter');
 const ProductImporter = require('./importers/ProductImporter');
 const VariationImporter = require('./importers/VariationImporter');
 const OrderImporter = require('./importers/OrderImporter');
+const UserImporter = require('./importers/UserImporter');
 const Logger = require('./utils/Logger');
 const config = require('./config');
 
@@ -50,13 +51,21 @@ program
   .description('Import products')
   .option('-l, --limit <number>', 'Limit number of items to import', '50')
   .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('--all', 'Import all products (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
     try {
       logger.info('🛍️ Starting product import...');
+      
+      // Override batch size if provided
+      if (options.batchSize) {
+        config.import.batchSizes.products = Math.min(parseInt(options.batchSize), 100);
+      }
+      
       const importer = new ProductImporter(config, logger);
       await importer.import({
-        limit: parseInt(options.limit),
+        limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun
       });
@@ -72,14 +81,22 @@ program
   .description('Import product variations')
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('--all', 'Import all variations (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--only-imported', 'Only import variations for products that are already imported', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import...');
+      
+      // Override batch size if provided
+      if (options.batchSize) {
+        config.import.batchSizes.products = Math.min(parseInt(options.batchSize), 100);
+      }
+      
       const importer = new VariationImporter(config, logger);
       await importer.import({
-        limit: parseInt(options.limit),
+        limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
         onlyImported: options.onlyImported
@@ -119,13 +136,21 @@ program
   .description('Import orders')
   .option('-l, --limit <number>', 'Limit number of items to import', '50')
   .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-b, --batch-size <number>', 'Items per page (max 100)', '50')
+  .option('--all', 'Import all orders (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
     try {
       logger.info('📦 Starting order import...');
+      
+      // Override batch size if provided
+      if (options.batchSize) {
+        config.import.batchSizes.orders = Math.min(parseInt(options.batchSize), 100);
+      }
+      
       const importer = new OrderImporter(config, logger);
       await importer.import({
-        limit: parseInt(options.limit),
+        limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun
       });
@@ -137,8 +162,38 @@ program
   });
 
 program
+  .command('users')
+  .description('Import customers/users')
+  .option('-l, --limit <number>', 'Limit number of items to import', '50')
+  .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-b, --batch-size <number>', 'Items per page (max 100)', '50')
+  .option('--all', 'Import all users (ignores limit)', false)
+  .option('--dry-run', 'Run without actually importing data', false)
+  .action(async (options) => {
+    try {
+      logger.info('👥 Starting user import...');
+      
+      // Override batch size if provided
+      if (options.batchSize) {
+        config.import.batchSizes.users = Math.min(parseInt(options.batchSize), 100);
+      }
+      
+      const importer = new UserImporter(config, logger);
+      await importer.import({
+        limit: options.all ? 999999 : parseInt(options.limit),
+        page: parseInt(options.page),
+        dryRun: options.dryRun
+      });
+      logger.success('✅ User import completed!');
+    } catch (error) {
+      logger.error('❌ User import failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
   .command('all')
-  .description('Import all data (categories, products, variations, orders)')
+  .description('Import all data (categories, products, variations, orders, users)')
   .option('-l, --limit <number>', 'Limit number of items per type', '50')
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
@@ -148,6 +203,7 @@ program
       // Import in correct order to maintain relationships
       const importers = [
         { name: 'Categories', class: CategoryImporter, limit: parseInt(options.limit) * 2 },
+        { name: 'Users', class: UserImporter, limit: parseInt(options.limit) },
         { name: 'Products', class: ProductImporter, limit: parseInt(options.limit) },
         { name: 'Variations', class: VariationImporter, limit: parseInt(options.limit) * 3 },
         { name: 'Orders', class: OrderImporter, limit: parseInt(options.limit) }
@@ -167,6 +223,79 @@ program
       logger.success('🎉 Full import completed successfully!');
     } catch (error) {
       logger.error('❌ Full import failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('reset-progress')
+  .description('Reset import progress for all importers')
+  .option('-t, --type <type>', 'Reset progress for specific type (products, variations, categories, orders, users)', 'all')
+  .action(async (options) => {
+    try {
+      logger.info('🧹 Resetting import progress...');
+      
+      const resetters = {
+        products: () => new ProductImporter(config, logger).resetProgressState(),
+        variations: () => new VariationImporter(config, logger).resetProgressState(),
+        categories: () => new CategoryImporter(config, logger).resetProgressState(),
+        orders: () => new OrderImporter(config, logger).resetProgressState(),
+        users: () => new UserImporter(config, logger).resetProgressState()
+      };
+      
+      if (options.type === 'all') {
+        for (const [type, resetFn] of Object.entries(resetters)) {
+          try {
+            resetFn();
+            logger.success(`✅ Reset ${type} progress`);
+          } catch (error) {
+            logger.error(`❌ Failed to reset ${type} progress:`, error.message);
+          }
+        }
+      } else if (resetters[options.type]) {
+        resetters[options.type]();
+        logger.success(`✅ Reset ${options.type} progress`);
+      } else {
+        logger.error(`❌ Unknown type: ${options.type}. Available: products, variations, categories, orders, users, all`);
+        process.exit(1);
+      }
+      
+      logger.success('🎉 Progress reset completed!');
+    } catch (error) {
+      logger.error('❌ Progress reset failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('status')
+  .description('Show import progress status')
+  .action(async (options) => {
+    try {
+      logger.info('📊 Import Progress Status:');
+      
+      const importers = [
+        { name: 'Products', class: ProductImporter },
+        { name: 'Variations', class: VariationImporter },
+        { name: 'Categories', class: CategoryImporter },
+        { name: 'Orders', class: OrderImporter },
+        { name: 'Users', class: UserImporter }
+      ];
+      
+      for (const { name, class: ImporterClass } of importers) {
+        try {
+          const importer = new ImporterClass(config, logger);
+          const progress = importer.loadProgressState();
+          logger.info(`📈 ${name}:`);
+          logger.info(`   Last completed page: ${progress.lastCompletedPage}`);
+          logger.info(`   Total processed: ${progress.totalProcessed}`);
+          logger.info(`   Last processed: ${progress.lastProcessedAt || 'Never'}`);
+        } catch (error) {
+          logger.error(`❌ Failed to load ${name} progress:`, error.message);
+        }
+      }
+    } catch (error) {
+      logger.error('❌ Status check failed:', error);
       process.exit(1);
     }
   });

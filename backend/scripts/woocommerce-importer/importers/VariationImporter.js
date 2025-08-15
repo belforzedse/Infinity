@@ -42,7 +42,7 @@ class VariationImporter {
   }
 
   /**
-   * Main import method
+   * Main import method - Optimized for incremental processing
    */
   async import(options = {}) {
     const { limit = 100, page = 1, dryRun = false, onlyImported = false } = options;
@@ -54,44 +54,123 @@ class VariationImporter {
       // Pre-load mappings for faster lookups
       await this.loadMappingCaches();
       
-      // Get all variable products to extract variations
-      const variableProducts = await this.fetchVariableProducts(limit, page, onlyImported);
+      // Load progress state
+      const progressState = this.loadProgressState();
+      let currentPage = Math.max(page, progressState.lastCompletedPage + 1);
+      let totalProcessed = progressState.totalProcessed;
       
-      if (variableProducts.length === 0) {
-        this.logger.warn('📭 No variable products found for variation import');
-        return this.stats;
-      }
+      this.logger.info(`📊 Resuming from page ${currentPage} (${totalProcessed} variations already processed)`);
       
-      // Extract all variations from variable products
-      const allVariations = await this.extractAllVariations(variableProducts);
-      this.stats.total = allVariations.length;
+      // Process variations incrementally page by page
+      let hasMorePages = true;
+      let processedInThisSession = 0;
       
-      if (allVariations.length === 0) {
-        this.logger.warn('📭 No variations found to import');
-        return this.stats;
-      }
-      
-      this.logger.info(`📊 Found ${allVariations.length} variations to process`);
-      
-      // Start progress tracking
-      this.logger.startProgress(allVariations.length, 'Importing variations');
-      
-      // Import variations
-      for (const variation of allVariations) {
-        try {
-          await this.importSingleVariation(variation, dryRun);
-          this.logger.updateProgress();
-        } catch (error) {
-          this.stats.errors++;
-          this.logger.error(`❌ Failed to import variation ${variation.id}:`, error.message);
+      while (hasMorePages && processedInThisSession < limit) {
+        const remainingLimit = limit - processedInThisSession;
+        const perPage = Math.min(this.config.import.batchSizes.products, remainingLimit);
+        
+        this.logger.info(`📄 Processing page ${currentPage} for variable products...`);
+        
+        // Fetch variable products from current page
+        const result = await this.wooClient.getProducts(currentPage, perPage);
+        
+        if (!result.data || result.data.length === 0) {
+          this.logger.info(`📄 No more products found on page ${currentPage}`);
+          hasMorePages = false;
+          break;
+        }
+        
+        // Filter only variable products
+        let variableProducts = result.data.filter(product => 
+          product.type === 'variable' && product.variations && product.variations.length > 0
+        );
+
+        // If onlyImported flag is set, filter for products that are already imported
+        if (onlyImported) {
+          const originalCount = variableProducts.length;
+          variableProducts = variableProducts.filter(product => 
+            this.productMappingCache.has(product.id)
+          );
           
-          if (!this.config.errorHandling.continueOnError) {
-            throw error;
+          if (originalCount > variableProducts.length) {
+            this.logger.debug(`🔍 Filtered ${originalCount - variableProducts.length} non-imported products`);
           }
+        }
+        
+        if (variableProducts.length === 0) {
+          this.logger.debug(`📄 No variable products found on page ${currentPage}, skipping...`);
+          currentPage++;
+          continue;
+        }
+        
+        // Process variations from these products immediately
+        this.logger.info(`🔄 Processing variations from ${variableProducts.length} variable products on page ${currentPage}...`);
+        
+        for (const product of variableProducts) {
+          try {
+            // Fetch variations for this product and process them immediately
+            const variationResult = await this.wooClient.getProductVariations(product.id, 1, 100);
+            
+            if (variationResult.data && variationResult.data.length > 0) {
+              for (const variation of variationResult.data) {
+                // Add parent product info to variation
+                variation._parentProduct = product;
+                
+                try {
+                  await this.importSingleVariation(variation, dryRun);
+                  totalProcessed++;
+                  processedInThisSession++;
+                  this.stats.total = totalProcessed;
+                  
+                  // Save progress after each successful import
+                  this.saveProgressState({
+                    lastCompletedPage: currentPage,
+                    totalProcessed: totalProcessed,
+                    lastProcessedAt: new Date().toISOString()
+                  });
+                  
+                  if (totalProcessed % this.config.logging.progressInterval === 0) {
+                    this.logger.info(`📈 Progress: ${totalProcessed} variations processed, current page: ${currentPage}`);
+                  }
+                  
+                  if (processedInThisSession >= limit) {
+                    this.logger.info(`📊 Reached session limit of ${limit} variations`);
+                    break;
+                  }
+                  
+                } catch (error) {
+                  this.stats.errors++;
+                  this.logger.error(`❌ Failed to import variation ${variation.id}:`, error.message);
+                  
+                  if (!this.config.errorHandling.continueOnError) {
+                    throw error;
+                  }
+                }
+              }
+            }
+            
+            if (processedInThisSession >= limit) break;
+            
+          } catch (error) {
+            this.logger.error(`❌ Failed to fetch variations for product ${product.id}:`, error.message);
+          }
+        }
+        
+        this.logger.success(`✅ Completed page ${currentPage}: processed variations from ${variableProducts.length} products`);
+        currentPage++;
+        
+        // Check if we've reached the total pages or our limit
+        if (result.totalPages && currentPage > result.totalPages) {
+          hasMorePages = false;
+        }
+        
+        if (processedInThisSession >= limit) {
+          this.logger.info(`📊 Reached session limit of ${limit} variations`);
+          break;
         }
       }
       
-      this.logger.completeProgress();
+      this.logger.success(`🎉 Import session completed: ${processedInThisSession} variations processed in this session`);
       
     } catch (error) {
       this.stats.errors++;
@@ -122,90 +201,55 @@ class VariationImporter {
   }
 
   /**
-   * Fetch variable products from WooCommerce
+   * Load progress state from file
    */
-  async fetchVariableProducts(limit, startPage, onlyImported = false) {
-    let allProducts = [];
-    let currentPage = startPage;
-    let totalFetched = 0;
+  loadProgressState() {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/variation-import-progress.json`;
     
-    this.logger.info(`📥 Fetching variable products from WooCommerce...`);
-    
-    while (totalFetched < limit) {
-      const remainingLimit = limit - totalFetched;
-      const perPage = Math.min(this.config.import.batchSizes.products, remainingLimit);
-      
-      this.logger.debug(`Fetching page ${currentPage} (${perPage} items)`);
-      
-      const result = await this.wooClient.getProducts(currentPage, perPage);
-      
-      if (!result.data || result.data.length === 0) {
-        this.logger.info(`📄 No more products found on page ${currentPage}`);
-        break;
+    try {
+      if (require('fs').existsSync(progressFile)) {
+        const data = JSON.parse(require('fs').readFileSync(progressFile, 'utf8'));
+        this.logger.debug(`📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`);
+        return data;
       }
-      
-      // Filter only variable products
-      let variableProducts = result.data.filter(product => 
-        product.type === 'variable' && product.variations && product.variations.length > 0
-      );
-
-      // If onlyImported flag is set, filter for products that are already imported
-      if (onlyImported) {
-        const originalCount = variableProducts.length;
-        variableProducts = variableProducts.filter(product => 
-          this.productMappingCache.has(product.id)
-        );
-        
-        if (originalCount > variableProducts.length) {
-          this.logger.debug(`🔍 Filtered ${originalCount - variableProducts.length} non-imported products`);
-        }
-      }
-      
-      allProducts = allProducts.concat(variableProducts);
-      totalFetched += result.data.length;
-      currentPage++;
-      
-      if (currentPage > result.totalPages) {
-        break;
-      }
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to load progress state: ${error.message}`);
     }
     
-    this.logger.info(`✅ Found ${allProducts.length} variable products with variations`);
-    return allProducts;
+    return {
+      lastCompletedPage: 0,
+      totalProcessed: 0,
+      lastProcessedAt: null
+    };
   }
 
   /**
-   * Extract all variations from variable products
+   * Save progress state to file
    */
-  async extractAllVariations(variableProducts) {
-    let allVariations = [];
+  saveProgressState(state) {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/variation-import-progress.json`;
     
-    this.logger.info(`🔍 Extracting variations from ${variableProducts.length} variable products...`);
-    
-    for (const product of variableProducts) {
-      try {
-        this.logger.debug(`📦 Processing variations for product: ${product.name} (${product.variations.length} variations)`);
-        
-        // Fetch variations for this product
-        const result = await this.wooClient.getProductVariations(product.id, 1, 100);
-        
-        if (result.data && result.data.length > 0) {
-          // Add parent product info to each variation
-          const variationsWithProduct = result.data.map(variation => ({
-            ...variation,
-            _parentProduct: product
-          }));
-          
-          allVariations = allVariations.concat(variationsWithProduct);
-          this.logger.debug(`✅ Extracted ${result.data.length} variations from ${product.name}`);
-        }
-      } catch (error) {
-        this.logger.error(`❌ Failed to fetch variations for product ${product.id}:`, error.message);
-      }
+    try {
+      require('fs').writeFileSync(progressFile, JSON.stringify(state, null, 2));
+    } catch (error) {
+      this.logger.error(`❌ Failed to save progress state: ${error.message}`);
     }
+  }
+
+  /**
+   * Reset progress state (useful for starting fresh)
+   */
+  resetProgressState() {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/variation-import-progress.json`;
     
-    this.logger.info(`✅ Extracted ${allVariations.length} total variations`);
-    return allVariations;
+    try {
+      if (require('fs').existsSync(progressFile)) {
+        require('fs').unlinkSync(progressFile);
+        this.logger.info(`🧹 Reset variation import progress state`);
+      }
+    } catch (error) {
+      this.logger.error(`❌ Failed to reset progress state: ${error.message}`);
+    }
   }
 
   /**

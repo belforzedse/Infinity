@@ -19,7 +19,8 @@ class DuplicateTracker {
       categories: new Map(),
       products: new Map(),
       variations: new Map(),
-      orders: new Map()
+      orders: new Map(),
+      users: new Map()
     };
     
     this.init();
