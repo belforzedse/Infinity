@@ -152,6 +152,59 @@ export default {
         `;
       }
 
+      // Join contracts to orders: prefer link table if present, otherwise FK on contracts.order_id
+      let contractJoinSql: string | null = null;
+      let contractOrderLink: string | undefined;
+
+      const contractLinkTablesRes = await knex.raw(
+        `SELECT table_name FROM information_schema.tables 
+         WHERE table_schema = 'public' AND table_name LIKE '%contract%order%links%'`
+      );
+      const contractLinkTables =
+        contractLinkTablesRes.rows || contractLinkTablesRes[0] || [];
+      if (Array.isArray(contractLinkTables) && contractLinkTables.length > 0) {
+        contractOrderLink = String(contractLinkTables[0].table_name);
+      }
+
+      if (contractOrderLink) {
+        const colsRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+          [contractOrderLink]
+        );
+        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+          String(r.column_name)
+        );
+        const orderFk =
+          cols.find((c: string) => c === "order_id") ||
+          cols.find((c: string) => c.endsWith("order_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("order") && c.endsWith("_id")
+          ) ||
+          "order_id";
+        const contractFk =
+          cols.find((c: string) => c === "contract_id") ||
+          cols.find((c: string) => c.endsWith("contract_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("contract") && c.endsWith("_id")
+          ) ||
+          "contract_id";
+
+        contractJoinSql = `
+          JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
+          JOIN contracts c ON c.id = col.${contractFk}
+        `;
+      } else {
+        // Fallback to contracts.order_id FK
+        const hasOrderIdColRes = await knex.raw(
+          `SELECT 1 FROM information_schema.columns WHERE table_name = 'contracts' AND column_name = 'order_id'`
+        );
+        const hasOrderId =
+          (hasOrderIdColRes.rows || hasOrderIdColRes[0] || []).length > 0;
+        contractJoinSql = hasOrderId
+          ? `JOIN contracts c ON c.order_id = o.id`
+          : `JOIN contracts c ON 1=1 /* no direct join available */`;
+      }
+
       const query = `
         SELECT oi.product_variation_id,
                oi.product_title,
@@ -159,7 +212,7 @@ export default {
                SUM(oi.count)::bigint AS total_count,
                SUM((oi.per_amount * oi.count))::bigint AS total_revenue
         ${joinSql}
-        JOIN contracts c ON c.order_id = o.id
+        ${contractJoinSql}
         WHERE c.status IN ('Confirmed','Finished')
           AND o.date BETWEEN ? AND ?
         GROUP BY oi.product_variation_id, oi.product_title, oi.product_sku
