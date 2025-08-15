@@ -90,18 +90,17 @@ export default function SuperAdminOrderSidebar() {
 
       <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
         <div className="flex justify-between items-center">
-          <span className="text-lg text-foreground-primary">
-            یادداشت های سفارش
-          </span>
-
-          <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
-            <PlusIcon />
-          </button>
+          <span className="text-lg text-foreground-primary">یادداشت های سیستم پرداخت</span>
         </div>
 
-        <span className="text-sm text-neutral-400">
-          هنوز یادداشتی وجود ندارد
-        </span>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm text-neutral-400">
+            رویدادهای درگاه (درخواست، ارجاع، بازگشت) در جزئیات سفارش نمایش داده می‌شود.
+          </span>
+          <span className="text-xs text-neutral-400">
+            برای مشاهده کامل، به بخش جزئیات پرداخت در بدنه صفحه مراجعه کنید.
+          </span>
+        </div>
       </div>
     </div>
   );

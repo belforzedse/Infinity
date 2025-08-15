@@ -2,6 +2,7 @@
 
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import Footer from "@/components/SuperAdmin/Order/SummaryFooter";
+import GatewayLogs from "@/components/SuperAdmin/Order/GatewayLogs";
 import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
 import { useState, useEffect } from "react";
@@ -10,6 +11,7 @@ import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCoverImage } from "@/types/Product";
+import { apiClient as _ } from "@/services";
 
 export type Order = {
   id: number;
@@ -19,6 +21,9 @@ export type Order = {
   userName: string;
   description: string;
   phoneNumber: string;
+  address?: string;
+  postalCode?: string;
+  paymentGateway?: string;
   createdAt: Date;
   contractStatus:
     | "Not Ready"
@@ -42,6 +47,26 @@ type OrderResponse = {
     Date: string;
     Status: string;
     ShippingCost: number;
+    delivery_address?: {
+      data: {
+        id: string;
+        attributes: {
+          PostalCode?: string;
+          FullAddress?: string;
+          shipping_city?: {
+            data: {
+              id: string;
+              attributes: {
+                Title?: string;
+                shipping_province?: {
+                  data: { id: string; attributes: { Title?: string } };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
     contract: {
       data: {
         attributes: {
@@ -52,6 +77,19 @@ type OrderResponse = {
             | "Finished"
             | "Failed"
             | "Cancelled";
+          contract_transactions?: {
+            data: Array<{
+              id: string;
+              attributes: {
+                Type?: string;
+                Status?: string;
+                Date?: string;
+                payment_gateway?: {
+                  data: { id: string; attributes: { Title?: string } };
+                };
+              };
+            }>;
+          };
         };
       };
     };
@@ -140,7 +178,7 @@ export default function EditOrderPage() {
     setLoading(true);
     apiClient
       .get(
-        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info`,
+        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway`,
         {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
@@ -175,6 +213,23 @@ export default function EditOrderPage() {
           (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes
             ?.LastName || "");
 
+        const addr = data.attributes?.delivery_address?.data?.attributes;
+        const city = addr?.shipping_city?.data?.attributes?.Title;
+        const province =
+          addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes
+            ?.Title;
+        const fullAddress = [addr?.FullAddress, city, province]
+          .filter(Boolean)
+          .join(" - ");
+
+        // Extract last gateway used from latest successful or pending contract transaction
+        const txList =
+          data.attributes?.contract?.data?.attributes?.contract_transactions
+            ?.data || [];
+        const lastTx = txList[txList.length - 1]?.attributes;
+        const paymentGateway =
+          lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
+
         setData({
           id: +data.id,
           createdAt: new Date(data.attributes?.createdAt),
@@ -183,6 +238,9 @@ export default function EditOrderPage() {
           orderDate: new Date(data.attributes?.Date),
           orderStatus: data.attributes?.Status,
           phoneNumber: data.attributes?.user?.data?.attributes?.Phone,
+          address: fullAddress || undefined,
+          postalCode: addr?.PostalCode,
+          paymentGateway,
           shipping: data.attributes?.ShippingCost,
           userId: data.attributes?.user?.data?.id,
           userName: userName.trim() || data.attributes?.user?.data?.id,
@@ -236,8 +294,13 @@ export default function EditOrderPage() {
             toast.error("خطایی رخ داده است");
           });
       }}
-      footer={<Footer order={data} />}
-      // customSidebar={<Sidebar />}
+      footer={
+        <>
+          <Footer order={data} />
+          {data?.id ? <GatewayLogs orderId={data.id} /> : null}
+        </>
+      }
+      customSidebar={<Sidebar />}
     />
   );
 }
