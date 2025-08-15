@@ -1220,6 +1220,47 @@ export interface ApiOrderItemOrderItem extends Schema.CollectionType {
   };
 }
 
+export interface ApiOrderLogOrderLog extends Schema.CollectionType {
+  collectionName: 'order_logs';
+  info: {
+    description: 'Audit log for Order entity';
+    displayName: 'OrderLog';
+    pluralName: 'order-logs';
+    singularName: 'order-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<['Create', 'Update', 'Delete']> &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::order-log.order-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    IP: Attribute.String;
+    order: Attribute.Relation<
+      'api::order-log.order-log',
+      'manyToOne',
+      'api::order.order'
+    >;
+    PerformedBy: Attribute.String;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::order-log.order-log',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    UserAgent: Attribute.String;
+  };
+}
+
 export interface ApiOrderOrder extends Schema.CollectionType {
   collectionName: 'orders';
   info: {
@@ -2614,6 +2655,7 @@ declare module '@strapi/types' {
       'api::local-user.local-user': ApiLocalUserLocalUser;
       'api::navigation.navigation': ApiNavigationNavigation;
       'api::order-item.order-item': ApiOrderItemOrderItem;
+      'api::order-log.order-log': ApiOrderLogOrderLog;
       'api::order.order': ApiOrderOrder;
       'api::payment-gateway.payment-gateway': ApiPaymentGatewayPaymentGateway;
       'api::product-category-content.product-category-content': ApiProductCategoryContentProductCategoryContent;

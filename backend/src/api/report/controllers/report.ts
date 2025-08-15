@@ -256,15 +256,50 @@ export default {
       const res = await knex.raw(query, [start, end]);
       const rows = res.rows || res[0];
 
-      ctx.body = {
-        data: rows.map((r: any) => ({
-          productVariationId: r.product_variation_id,
-          productTitle: r.product_title,
-          productSKU: r.product_sku,
-          totalCount: Number(r.total_count || 0),
-          totalRevenue: Number(r.total_revenue || 0),
-        })),
-      };
+      const payload = rows.map((r: any) => ({
+        productVariationId: r.product_variation_id,
+        productTitle: r.product_title,
+        productSKU: r.product_sku,
+        totalCount: Number(r.total_count || 0),
+        totalRevenue: Number(r.total_revenue || 0),
+      }));
+
+      // Optional diagnostics
+      const wantsDebug =
+        String(ctx.query.debug || "").toLowerCase() === "true" ||
+        String(ctx.query.debug || "") === "1";
+      if (wantsDebug) {
+        // Orders in range
+        const ordersCountRes = await knex.raw(
+          `SELECT COUNT(*)::bigint AS c FROM orders o WHERE o.date BETWEEN ? AND ?`,
+          [start, end]
+        );
+        const ordersCount = Number(
+          (ordersCountRes.rows || ordersCountRes[0])[0]?.c || 0
+        );
+
+        // Order items matched by join
+        const joinCountRes = await knex.raw(
+          `SELECT COUNT(*)::bigint AS c ${ordersItemsJoinSql} WHERE o.date BETWEEN ? AND ?`,
+          [start, end]
+        );
+        const joinCount = Number(
+          (joinCountRes.rows || joinCountRes[0])[0]?.c || 0
+        );
+
+        ctx.body = {
+          data: payload,
+          debug: {
+            start,
+            end,
+            ordersInRange: ordersCount,
+            orderItemsJoinedCount: joinCount,
+          },
+        };
+        return;
+      }
+
+      ctx.body = { data: payload };
     } catch (error) {
       ctx.badRequest(error.message, { data: { success: false } });
     }

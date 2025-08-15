@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "order_logs",
+  "info": {
+    "singularName": "order-log",
+    "pluralName": "order-logs",
+    "displayName": "OrderLog",
+    "description": "Audit log for Order entity"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete"],
+      "required": true
+    },
+    "Changes": {
+      "type": "json"
+    },
+    "Description": {
+      "type": "text"
+    },
+    "PerformedBy": {
+      "type": "string"
+    },
+    "IP": {
+      "type": "string"
+    },
+    "UserAgent": {
+      "type": "string"
+    }
+  }
+}
+
+

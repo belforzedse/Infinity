@@ -14,8 +14,7 @@ function diffChanges(
       key === "updatedAt" ||
       key === "createdAt" ||
       key === "id" ||
-      key === "documentId" ||
-      key === "Password"
+      key === "documentId"
     )
       continue;
     const beforeVal = previous?.[key];
@@ -32,16 +31,13 @@ export default {
     const { result } = event;
     if (!result?.id) return;
 
-    await strapi.entityService.create(
-      "api::local-user-log.local-user-log" as any,
-      {
-        data: {
-          local_user: result.id,
-          Action: "Create" as AuditAction,
-          Description: "Local user created",
-        },
-      }
-    );
+    await strapi.entityService.create("api::order-log.order-log" as any, {
+      data: {
+        order: result.id,
+        Action: "Create" as AuditAction,
+        Description: "Order created",
+      },
+    });
   },
 
   async beforeUpdate(event) {
@@ -50,75 +46,75 @@ export default {
     if (!id) return;
 
     const previous = await strapi.entityService.findOne(
-      "api::local-user.local-user",
+      "api::order.order",
       id,
       {
         fields: [
-          "Phone",
-          "IsVerified",
-          "IsActive",
-          // Exclude Password from diffs for security; still loaded but filtered below if needed
+          "Status",
+          "Date",
+          "Type",
+          "ShippingCost",
+          "Description",
+          "Note",
         ],
-        populate: {
-          user_role: true,
-        },
+        populate: { user: true, contract: true, shipping: true },
       }
     );
 
-    event.state = { ...(event.state || {}), previousLocalUser: previous };
+    event.state = { ...(event.state || {}), previousOrder: previous };
   },
 
   async afterUpdate(event) {
     const { result, state } = event as any;
     if (!result?.id) return;
 
-    const previous = state?.previousLocalUser || {};
+    const previous = state?.previousOrder || {};
     const current = await strapi.entityService.findOne(
-      "api::local-user.local-user",
+      "api::order.order",
       result.id,
       {
-        fields: ["Phone", "IsVerified", "IsActive"],
-        populate: { user_role: true },
+        fields: [
+          "Status",
+          "Date",
+          "Type",
+          "ShippingCost",
+          "Description",
+          "Note",
+        ],
+        populate: { user: true, contract: true, shipping: true },
       }
     );
 
     const changes = diffChanges(previous, current);
     if (Object.keys(changes).length === 0) return;
 
-    await strapi.entityService.create(
-      "api::local-user-log.local-user-log" as any,
-      {
-        data: {
-          local_user: result.id,
-          Action: "Update" as AuditAction,
-          Changes: changes,
-          Description: "Local user updated",
-        },
-      }
-    );
+    await strapi.entityService.create("api::order-log.order-log" as any, {
+      data: {
+        order: result.id,
+        Action: "Update" as AuditAction,
+        Changes: changes,
+        Description: "Order updated",
+      },
+    });
   },
 
   async beforeDelete(event) {
     const where = event?.params?.where || {};
     const id = (where && (where.id || where.documentId)) || null;
     if (!id) return;
-
-    event.state = { ...(event.state || {}), deletingUserId: id };
+    event.state = { ...(event.state || {}), deletingOrderId: id };
   },
 
   async afterDelete(event) {
-    const id = (event as any)?.state?.deletingUserId;
+    const id = (event as any)?.state?.deletingOrderId;
     if (!id) return;
 
-    await strapi.entityService.create(
-      "api::local-user-log.local-user-log" as any,
-      {
-        data: {
-          local_user: id,
-          Action: "Delete" as AuditAction,
-          Description: "Local user deleted",
-        },
-      }
-    );
+    await strapi.entityService.create("api::order-log.order-log" as any, {
+      data: {
+        order: id,
+        Action: "Delete" as AuditAction,
+        Description: "Order deleted",
+      },
+    });
   },
 };
