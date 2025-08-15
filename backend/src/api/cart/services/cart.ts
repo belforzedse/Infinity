@@ -342,6 +342,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           ShippingCost: finalShippingCost,
           Description: shippingData.description || "",
           Note: shippingData.note || "",
+          delivery_address: shippingData.addressId || undefined,
         };
 
         const order = await strapi.entityService.create("api::order.order", {

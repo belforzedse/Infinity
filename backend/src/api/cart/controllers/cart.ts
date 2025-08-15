@@ -268,8 +268,14 @@ export default factories.createCoreController(
 
     async finalizeToOrder(ctx) {
       const { user } = ctx.state;
-      const { shipping, shippingCost, description, note, callbackURL } =
-        ctx.request.body;
+      const {
+        shipping,
+        shippingCost,
+        description,
+        note,
+        callbackURL,
+        addressId,
+      } = ctx.request.body;
 
       try {
         if (!shipping) {
@@ -282,6 +288,7 @@ export default factories.createCoreController(
           shippingCost,
           description,
           note,
+          addressId,
         };
 
         // Finalize cart to order
@@ -316,7 +323,7 @@ export default factories.createCoreController(
           contractId: contract.id,
           totalAmount,
           userId: user.id,
-          callbackURL: callbackURL || "/orders/payment-callback"
+          callbackURL: callbackURL || "/orders/payment-callback",
         });
 
         // Process payment via Mellat gateway (using mellat-checkout package)
@@ -333,10 +340,29 @@ export default factories.createCoreController(
           success: paymentResult.success,
           error: paymentResult.error,
           requestId: paymentResult.requestId,
-          hasDetailedError: !!paymentResult.detailedError
+          hasDetailedError: !!paymentResult.detailedError,
         });
 
         if (!paymentResult.success) {
+          // Log gateway failure for audit trail
+          try {
+            await strapi.entityService.create("api::order-log.order-log", {
+              data: {
+                order: order.id,
+                Action: "Update",
+                Description: "Gateway payment request failed",
+                Changes: {
+                  requestId: paymentResult.requestId,
+                  error: paymentResult.error,
+                },
+              },
+            });
+          } catch (e) {
+            strapi.log.error(
+              "Failed to write order-log for gateway failure",
+              e
+            );
+          }
           // If payment request fails, update order status to Cancelled
           await strapi.entityService.update("api::order.order", order.id, {
             data: { Status: "Cancelled" },
@@ -351,10 +377,13 @@ export default factories.createCoreController(
             }
           );
 
-          strapi.log.error(`Payment failed for Order ${order.id}. Order and contract cancelled.`, {
-            error: paymentResult.error,
-            detailedError: paymentResult.detailedError
-          });
+          strapi.log.error(
+            `Payment failed for Order ${order.id}. Order and contract cancelled.`,
+            {
+              error: paymentResult.error,
+              detailedError: paymentResult.detailedError,
+            }
+          );
 
           // Return detailed error information for debugging
           return ctx.badRequest(
@@ -368,7 +397,7 @@ export default factories.createCoreController(
                 requestId: paymentResult.requestId,
                 timestamp: new Date().toISOString(),
                 orderId: order.id,
-                contractId: contract.id
+                contractId: contract.id,
               },
             }
           );
@@ -376,8 +405,26 @@ export default factories.createCoreController(
 
         strapi.log.info(`Payment successful for Order ${order.id}:`, {
           redirectUrl: paymentResult.redirectUrl,
-          refId: paymentResult.refId
+          refId: paymentResult.refId,
         });
+
+        // Log gateway request success for audit trail
+        try {
+          await strapi.entityService.create("api::order-log.order-log", {
+            data: {
+              order: order.id,
+              Action: "Update",
+              Description: "Gateway payment request initiated",
+              Changes: {
+                requestId: paymentResult.requestId,
+                refId: paymentResult.refId,
+                redirectUrl: paymentResult.redirectUrl,
+              },
+            },
+          });
+        } catch (e) {
+          strapi.log.error("Failed to write order-log for gateway request", e);
+        }
 
         return {
           data: {
@@ -389,7 +436,7 @@ export default factories.createCoreController(
             redirectUrl: paymentResult.redirectUrl,
             refId: paymentResult.refId,
             financialSummary: financialSummary,
-            requestId: paymentResult.requestId // For tracking
+            requestId: paymentResult.requestId, // For tracking
           },
         };
       } catch (error) {
@@ -397,15 +444,15 @@ export default factories.createCoreController(
           message: error.message,
           stack: error.stack,
           userId: user?.id,
-          requestBody: ctx.request.body
+          requestBody: ctx.request.body,
         });
-        
+
         return ctx.badRequest(error.message, {
           data: {
             success: false,
             error: error.message,
             timestamp: new Date().toISOString(),
-            userId: user?.id
+            userId: user?.id,
           },
         });
       }
