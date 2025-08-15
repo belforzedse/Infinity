@@ -184,8 +184,8 @@ export default {
         }
       }
 
-      // Join contracts to orders: prefer link table if present, otherwise FK on contracts.order_id
-      let contractJoinSql: string | null = null;
+      // Optionally join contracts to orders (if a reliable relation is present)
+      let contractJoinSql: string = "";
       let contractOrderLink: string | undefined;
 
       const contractLinkTablesRes = await knex.raw(
@@ -222,19 +222,19 @@ export default {
           "contract_id";
 
         contractJoinSql = `
-          JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
-          JOIN contracts c ON c.id = col.${contractFk}
+          LEFT JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
+          LEFT JOIN contracts c ON c.id = col.${contractFk}
         `;
       } else {
-        // Fallback to contracts.order_id FK
+        // Fallback to contracts.order_id FK if it exists
         const hasOrderIdColRes = await knex.raw(
           `SELECT 1 FROM information_schema.columns WHERE table_name = 'contracts' AND column_name = 'order_id'`
         );
         const hasOrderId =
           (hasOrderIdColRes.rows || hasOrderIdColRes[0] || []).length > 0;
         contractJoinSql = hasOrderId
-          ? `JOIN contracts c ON c.order_id = o.id`
-          : `JOIN contracts c ON 1=1 /* no direct join available */`;
+          ? `LEFT JOIN contracts c ON c.order_id = o.id`
+          : "";
       }
 
       const query = `
@@ -246,8 +246,7 @@ export default {
         ${ordersItemsJoinSql}
         ${productVariationJoinSql}
         ${contractJoinSql}
-        WHERE c.status IN ('Confirmed','Finished')
-          AND o.date BETWEEN ? AND ?
+        WHERE o.date BETWEEN ? AND ?
         GROUP BY ${
           selectProductVariationId.includes("pv.id") ? "pv.id," : ""
         } oi.product_title, oi.product_sku
