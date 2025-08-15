@@ -44,14 +44,17 @@ export default {
     const { result } = event;
     if (!result?.id) return;
 
-    await strapi.entityService.create("api::local-user-log.local-user-log" as any, {
-      data: {
-        local_user: result.id,
-        Action: "Create" as AuditAction,
-        Description: "Local user created",
-        PerformedBy: getActorFromEvent(event),
-      },
-    });
+    await strapi.entityService.create(
+      "api::local-user-log.local-user-log" as any,
+      {
+        data: {
+          local_user: result.id,
+          Action: "Create" as AuditAction,
+          Description: "Local user created",
+          PerformedBy: getActorFromEvent(event),
+        },
+      }
+    );
   },
 
   async beforeUpdate(event) {
@@ -95,15 +98,18 @@ export default {
     const changes = diffChanges(previous, current);
     if (Object.keys(changes).length === 0) return;
 
-    await strapi.entityService.create("api::local-user-log.local-user-log" as any, {
-      data: {
-        local_user: result.id,
-        Action: "Update" as AuditAction,
-        Changes: changes,
-        Description: "Local user updated",
-        PerformedBy: getActorFromEvent(event),
-      },
-    });
+    await strapi.entityService.create(
+      "api::local-user-log.local-user-log" as any,
+      {
+        data: {
+          local_user: result.id,
+          Action: "Update" as AuditAction,
+          Changes: changes,
+          Description: "Local user updated",
+          PerformedBy: getActorFromEvent(event),
+        },
+      }
+    );
   },
 
   async beforeDelete(event) {
@@ -118,13 +124,16 @@ export default {
     const id = (event as any)?.state?.deletingUserId;
     if (!id) return;
 
-    await strapi.entityService.create("api::local-user-log.local-user-log" as any, {
-      data: {
-        local_user: id,
-        Action: "Delete" as AuditAction,
-        Description: "Local user deleted",
-        PerformedBy: getActorFromEvent(event),
-      },
-    });
+    await strapi.entityService.create(
+      "api::local-user-log.local-user-log" as any,
+      {
+        data: {
+          local_user: id,
+          Action: "Delete" as AuditAction,
+          Description: "Local user deleted",
+          PerformedBy: getActorFromEvent(event),
+        },
+      }
+    );
   },
 };
