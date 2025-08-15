@@ -93,14 +93,72 @@ export default {
 
       const knex = strapi.db.connection;
 
+      // Try Strapi link-table strategy first (orders_*_links that connects orders and order_items)
+      let joinSql: string | null = null;
+      let linkTable: string | undefined;
+
+      const linkTablesRes = await knex.raw(
+        `SELECT table_name FROM information_schema.tables 
+         WHERE table_schema = 'public' AND table_name LIKE '%order%items%links%'`
+      );
+      const linkTables = linkTablesRes.rows || linkTablesRes[0] || [];
+      if (Array.isArray(linkTables) && linkTables.length > 0) {
+        linkTable = String(linkTables[0].table_name);
+      }
+
+      if (linkTable) {
+        const colsRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+          [linkTable]
+        );
+        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+          String(r.column_name)
+        );
+        const orderFk =
+          cols.find((c: string) => c === "order_id") ||
+          cols.find((c: string) => c.endsWith("order_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("order") && c.endsWith("_id")
+          ) ||
+          "order_id";
+        const orderItemFk =
+          cols.find((c: string) => c === "order_item_id") ||
+          cols.find((c: string) => c.endsWith("order_item_id")) ||
+          cols.find(
+            (c: string) => c.startsWith("order_item") && c.endsWith("_id")
+          ) ||
+          "order_item_id";
+
+        joinSql = `
+          FROM order_items oi
+          JOIN ${linkTable} l ON l.${orderItemFk} = oi.id
+          JOIN orders o ON o.id = l.${orderFk}
+        `;
+      } else {
+        // Fallback to direct FK on order_items (order_id or \"order\")
+        const fkCheck = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'order_items' AND column_name IN ('order_id','order')`
+        );
+        const fkRows = fkCheck.rows || fkCheck[0] || [];
+        const fkName = fkRows.find((r: any) => r.column_name === "order_id")
+          ? "order_id"
+          : fkRows.find((r: any) => r.column_name === "order")
+          ? '"order"'
+          : "order_id";
+
+        joinSql = `
+          FROM order_items oi
+          JOIN orders o ON o.id = oi.${fkName}
+        `;
+      }
+
       const query = `
         SELECT oi.product_variation_id,
                oi.product_title,
                oi.product_sku,
                SUM(oi.count)::bigint AS total_count,
                SUM((oi.per_amount * oi.count))::bigint AS total_revenue
-        FROM order_items oi
-        JOIN orders o ON oi.order_id = o.id
+        ${joinSql}
         JOIN contracts c ON c.order_id = o.id
         WHERE c.status IN ('Confirmed','Finished')
           AND o.date BETWEEN ? AND ?
