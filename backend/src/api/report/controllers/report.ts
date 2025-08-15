@@ -93,49 +93,41 @@ export default {
 
       const knex = strapi.db.connection;
 
-      // Try Strapi link-table strategy first (orders_*_links that connects orders and order_items)
-      let joinSql: string | null = null;
-      let linkTable: string | undefined;
-
-      const linkTablesRes = await knex.raw(
+      // orders <-> order_items link table (must contain both order_id and order_item_id)
+      let ordersItemsJoinSql: string | null = null;
+      let ordersItemsLink: string | undefined;
+      const ordersItemsLinksRes = await knex.raw(
         `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND table_name LIKE '%order%items%links%'`
+         WHERE table_schema = 'public' AND (
+           table_name LIKE 'orders%order_items%links%' OR table_name LIKE 'order_items%orders%links%'
+         )`
       );
-      const linkTables = linkTablesRes.rows || linkTablesRes[0] || [];
-      if (Array.isArray(linkTables) && linkTables.length > 0) {
-        linkTable = String(linkTables[0].table_name);
-      }
-
-      if (linkTable) {
+      const ordersItemsLinks =
+        ordersItemsLinksRes.rows || ordersItemsLinksRes[0] || [];
+      for (const row of ordersItemsLinks) {
+        const t = String(row.table_name);
         const colsRes = await knex.raw(
           `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [linkTable]
+          [t]
         );
-        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
-          String(r.column_name)
+        const cols = new Set(
+          (colsRes.rows || colsRes[0] || []).map((r: any) =>
+            String(r.column_name)
+          )
         );
-        const orderFk =
-          cols.find((c: string) => c === "order_id") ||
-          cols.find((c: string) => c.endsWith("order_id")) ||
-          cols.find(
-            (c: string) => c.startsWith("order") && c.endsWith("_id")
-          ) ||
-          "order_id";
-        const orderItemFk =
-          cols.find((c: string) => c === "order_item_id") ||
-          cols.find((c: string) => c.endsWith("order_item_id")) ||
-          cols.find(
-            (c: string) => c.startsWith("order_item") && c.endsWith("_id")
-          ) ||
-          "order_item_id";
-
-        joinSql = `
+        if (cols.has("order_id") && cols.has("order_item_id")) {
+          ordersItemsLink = t;
+          break;
+        }
+      }
+      if (ordersItemsLink) {
+        ordersItemsJoinSql = `
           FROM order_items oi
-          JOIN ${linkTable} l ON l.${orderItemFk} = oi.id
-          JOIN orders o ON o.id = l.${orderFk}
+          JOIN ${ordersItemsLink} l_oi ON l_oi.order_item_id = oi.id
+          JOIN orders o ON o.id = l_oi.order_id
         `;
       } else {
-        // Fallback to direct FK on order_items (order_id or \"order\")
+        // Fallback to direct FK on order_items (order_id or "order")
         const fkCheck = await knex.raw(
           `SELECT column_name FROM information_schema.columns WHERE table_name = 'order_items' AND column_name IN ('order_id','order')`
         );
@@ -145,11 +137,55 @@ export default {
           : fkRows.find((r: any) => r.column_name === "order")
           ? '"order"'
           : "order_id";
-
-        joinSql = `
+        ordersItemsJoinSql = `
           FROM order_items oi
           JOIN orders o ON o.id = oi.${fkName}
         `;
+      }
+
+      // order_items <-> product_variations link (optional)
+      let productVariationJoinSql = "";
+      let selectProductVariationId = "NULL AS product_variation_id";
+      const oiPvLinksRes = await knex.raw(
+        `SELECT table_name FROM information_schema.tables 
+         WHERE table_schema = 'public' AND (
+           table_name LIKE 'order_items%product_variation%links%' OR table_name LIKE 'product_variation%order_items%links%'
+         )`
+      );
+      const oiPvLinks = oiPvLinksRes.rows || oiPvLinksRes[0] || [];
+      let oiPvLink: string | undefined;
+      for (const row of oiPvLinks) {
+        const t = String(row.table_name);
+        const colsRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+          [t]
+        );
+        const cols = new Set(
+          (colsRes.rows || colsRes[0] || []).map((r: any) =>
+            String(r.column_name)
+          )
+        );
+        if (cols.has("order_item_id") && cols.has("product_variation_id")) {
+          oiPvLink = t;
+          break;
+        }
+      }
+      if (oiPvLink) {
+        productVariationJoinSql = `
+          LEFT JOIN ${oiPvLink} piv ON piv.order_item_id = oi.id
+          LEFT JOIN product_variations pv ON pv.id = piv.product_variation_id
+        `;
+        selectProductVariationId = "pv.id AS product_variation_id";
+      } else {
+        // Fallback to direct FK if present
+        const hasPvColRes = await knex.raw(
+          `SELECT 1 FROM information_schema.columns WHERE table_name = 'order_items' AND column_name = 'product_variation_id'`
+        );
+        const hasPvCol = (hasPvColRes.rows || hasPvColRes[0] || []).length > 0;
+        if (hasPvCol) {
+          selectProductVariationId =
+            "oi.product_variation_id AS product_variation_id";
+        }
       }
 
       // Join contracts to orders: prefer link table if present, otherwise FK on contracts.order_id
@@ -206,16 +242,19 @@ export default {
       }
 
       const query = `
-        SELECT oi.product_variation_id,
+        SELECT ${selectProductVariationId},
                oi.product_title,
                oi.product_sku,
                SUM(oi.count)::bigint AS total_count,
                SUM((oi.per_amount * oi.count))::bigint AS total_revenue
-        ${joinSql}
+        ${ordersItemsJoinSql}
+        ${productVariationJoinSql}
         ${contractJoinSql}
         WHERE c.status IN ('Confirmed','Finished')
           AND o.date BETWEEN ? AND ?
-        GROUP BY oi.product_variation_id, oi.product_title, oi.product_sku
+        GROUP BY ${
+          selectProductVariationId.includes("pv.id") ? "pv.id," : ""
+        } oi.product_title, oi.product_sku
         ORDER BY total_revenue DESC
       `;
 
