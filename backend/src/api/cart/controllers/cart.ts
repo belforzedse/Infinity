@@ -363,12 +363,23 @@ export default factories.createCoreController(
           );
           const rawPhone = String(mobile || userRecord?.Phone || "");
           const normalizePhone = (p: string) => {
-            let d = p.replace(/\D/g, "");
+            const onlyDigits = p.replace(/\D/g, "");
+            let d = onlyDigits;
             if (d.startsWith("0")) d = `98${d.substring(1)}`;
             if (!d.startsWith("98") && d.length === 10) d = `98${d}`;
-            return d;
+            return d ? `+${d}` : "";
           };
           const customerMobile = normalizePhone(rawPhone);
+
+          // Validate mobile format for SnappPay
+          if (!/^\+98\d{10}$/.test(customerMobile)) {
+            return ctx.badRequest(
+              "Phone number is invalid for SnappPay (must be +98XXXXXXXXXX)",
+              {
+                data: { success: false, error: "invalid_mobile_format" },
+              }
+            );
+          }
 
           // Commission mapping placeholder; adjust if contract expects category codes
           const mapCommissionType = (_catTitle?: string) => 1;
