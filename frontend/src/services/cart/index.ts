@@ -194,8 +194,11 @@ export const getSnappEligible = async (
   const url = `/payment-gateway/snapp-eligible${
     qs.toString() ? `?${qs.toString()}` : ""
   }`;
-  const response = await apiClient.get<{ data: any }>(url);
-  return response.data?.data || { eligible: false };
+  const response = await apiClient.get<any>(url);
+  // ApiClient may return either the raw Strapi wrapper or already-unwrapped data
+  // Try common shapes in order
+  const payload = response?.data?.data ?? response?.data ?? response;
+  return payload || { eligible: false };
 };
 
 export interface CreateOrderRequest {
