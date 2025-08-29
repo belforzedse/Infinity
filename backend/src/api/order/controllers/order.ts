@@ -13,6 +13,9 @@ export default factories.createCoreController(
       const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } =
         ctx.request.body;
 
+      // SnappPay callback fields (returnURL POST): transactionId/state/amount may be posted, but we rely on paymentToken via stored transaction
+      const { state, paymentToken, transactionId } = ctx.request.body as any;
+
       try {
         // Log all callback parameters for debugging
         strapi.log.info("Payment callback received:", {
@@ -21,10 +24,160 @@ export default factories.createCoreController(
           SaleReferenceId,
           RefId,
           OrderId,
+          state,
+          paymentToken,
+          transactionId,
           timestamp: new Date().toISOString(),
         });
 
-        // Check if payment was successful (ResCode = 0)
+        // If this is a SnappPay flow (state provided or paymentToken present), follow SnappPay verify+settle
+        if (state || paymentToken || transactionId) {
+          // Resolve orderId from our most recent pending SnappPay contract-transaction if OrderId is missing
+          let orderId: number | undefined = OrderId
+            ? parseInt(OrderId, 10)
+            : undefined;
+
+          if (!orderId) {
+            try {
+              // Find contract-transaction by TrackId (paymentToken) or external_id (transactionId)
+              const txList = (await strapi.entityService.findMany(
+                "api::contract-transaction.contract-transaction",
+                {
+                  filters: {
+                    $or: [
+                      paymentToken ? { TrackId: paymentToken } : {},
+                      transactionId ? { external_id: transactionId } : {},
+                    ],
+                    external_source: "SnappPay",
+                  },
+                  populate: { contract: true },
+                  sort: { createdAt: "desc" },
+                  limit: 1,
+                }
+              )) as any[];
+              if (txList?.length && txList[0]?.contract?.order) {
+                orderId = txList[0].contract.order;
+              }
+            } catch (e) {
+              strapi.log.error(
+                "Failed to resolve order from SnappPay transaction",
+                e
+              );
+            }
+          }
+
+          if (!orderId || isNaN(orderId)) {
+            return ctx.badRequest("Invalid order ID", {
+              data: { success: false, error: "Invalid order ID (SnappPay)" },
+            });
+          }
+
+          // SnappPay requires verify then settle using saved paymentToken (or from request)
+          const snappay = strapi.service("api::payment-gateway.snappay");
+
+          // If we don't have paymentToken in the payload, fetch it from transaction
+          let tokenForOps = paymentToken as string | undefined;
+          if (!tokenForOps) {
+            const tx = (await strapi.entityService.findMany(
+              "api::contract-transaction.contract-transaction",
+              {
+                filters: {
+                  external_source: "SnappPay",
+                  contract: { order: { id: { $notNull: true } } },
+                },
+                sort: { createdAt: "desc" },
+                limit: 1,
+                populate: { contract: true },
+              }
+            )) as any[];
+            // Try to match by transactionId if available
+            const chosen = transactionId
+              ? tx.find((t: any) => t?.external_id === transactionId) || tx[0]
+              : tx[0];
+            tokenForOps = chosen?.TrackId;
+            if (!orderId && chosen?.contract?.order)
+              orderId = chosen.contract.order;
+          }
+
+          if (!tokenForOps) {
+            return ctx.badRequest("Missing payment token for SnappPay", {
+              data: { success: false, error: "Missing paymentToken" },
+            });
+          }
+
+          // On callback, state OK => verify+settle; FAILED => revert
+          if (String(state || "OK").toUpperCase() !== "OK") {
+            const revertResult = await snappay.revert(tokenForOps);
+            // Update order status to Cancelled
+            await strapi.entityService.update("api::order.order", orderId, {
+              data: { Status: "Cancelled" },
+            });
+            // Log
+            try {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "SnappPay callback FAILED (revert)",
+                  Changes: { state, transactionId },
+                },
+              });
+            } catch {}
+            return ctx.redirect(
+              `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}`
+            );
+          }
+
+          const verifyResult = await snappay.verify(tokenForOps);
+          if (!verifyResult?.successful) {
+            // Verification failed; treat as failure
+            await strapi.entityService.update("api::order.order", orderId, {
+              data: { Status: "Cancelled" },
+            });
+            try {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "SnappPay verify failed",
+                  Changes: { verifyResult },
+                },
+              });
+            } catch {}
+            return ctx.redirect(
+              `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}`
+            );
+          }
+
+          const settleResult = await snappay.settle(tokenForOps);
+          if (settleResult?.successful) {
+            await strapi.entityService.update("api::order.order", orderId, {
+              data: { Status: "Started" },
+            });
+            try {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "SnappPay callback success (verify+settle)",
+                  Changes: { transactionId },
+                },
+              });
+            } catch {}
+            return ctx.redirect(
+              `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}`
+            );
+          } else {
+            await strapi.entityService.update("api::order.order", orderId, {
+              data: { Status: "Cancelled" },
+            });
+            return ctx.redirect(
+              `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}`
+            );
+          }
+        }
+
+        // Check if payment was successful (ResCode = 0) - Mellat
         if (ResCode !== "0") {
           // Handle different failure scenarios
           const orderId = parseInt(OrderId || SaleOrderId, 10);
