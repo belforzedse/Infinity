@@ -46,8 +46,8 @@ function ShoppingCartBillPaymentGateway({ selected, onChange, snappEligible = tr
             </div>
 
             <span className="text-neutral-600 lg:text-xs text-sm">{pg.name} درگاه پرداخت</span>
-            {pg.disabled && pg.helper && (
-              <span className="text-[10px] text-amber-700">{pg.helper}</span>
+            {pg.helper && (
+              <span className="text-[10px] text-amber-700 text-center leading-4">{pg.helper}</span>
             )}
           </button>
         ))}
