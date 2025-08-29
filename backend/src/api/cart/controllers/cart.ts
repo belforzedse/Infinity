@@ -418,17 +418,23 @@ export default factories.createCoreController(
           if (transactionId.length > 10)
             transactionId = transactionId.slice(0, 10);
 
+          // Determine returnURL (prefer explicit env, then FRONTEND_BASE_URL proxy, fallback to backend callback)
+          const frontendBase = process.env.FRONTEND_BASE_URL;
+          const preferredReturnUrl =
+            (process.env.SNAPPAY_RETURN_URL &&
+              process.env.SNAPPAY_RETURN_URL.startsWith("http") &&
+              process.env.SNAPPAY_RETURN_URL) ||
+            (frontendBase &&
+              `${frontendBase.replace(/\/$/, "")}/api/snapp/return`) ||
+            absoluteCallback;
+
           const snappPayload = {
             amount: orderAmountIrr,
             discountAmount: discountIrr,
             externalSourceAmount: externalSourceIrr,
             mobile: customerMobile,
             paymentMethodTypeDto: "INSTALLMENT" as const,
-            returnURL:
-              process.env.SNAPPAY_RETURN_URL &&
-              process.env.SNAPPAY_RETURN_URL.startsWith("http")
-                ? process.env.SNAPPAY_RETURN_URL
-                : absoluteCallback,
+            returnURL: preferredReturnUrl,
             transactionId,
             cartList: [
               {
