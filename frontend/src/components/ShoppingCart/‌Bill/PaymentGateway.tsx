@@ -1,58 +1,54 @@
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import classNames from "classnames";
 
-function ShoppingCartBillPaymentGateway() {
-  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState<
-    number | null
-  >(null);
+interface Props {
+  selected: "mellat" | "snappay";
+  onChange: (gw: "mellat" | "snappay") => void;
+  snappEligible?: boolean;
+  snappMessage?: string;
+}
 
-  const paymentGateways = [
+function ShoppingCartBillPaymentGateway({ selected, onChange, snappEligible = true, snappMessage }: Props) {
+  const paymentGateways: Array<{ id: "mellat" | "snappay"; name: string; img: string; disabled?: boolean; helper?: string }> = [
     {
-      id: 1,
-      name: "زرین پال",
-      img: "/images/cart/zarinpal.jpeg",
-    },
-    {
-      id: 2,
-      name: "سامان",
-      img: "/images/cart/saman.png",
-    },
-    {
-      id: 3,
+      id: "mellat",
       name: "ملت",
       img: "/images/cart/melat.png",
+    },
+    {
+      id: "snappay",
+      name: "اسنپ پی (اقساطی)",
+      img: "/images/cart/snappay.png",
+      disabled: !snappEligible,
+      helper: snappMessage,
     },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      <span className="text-neutral-800 lg:text-xl text-2xl">
-        درگاه پرداخت خود را انتخاب کنید
-      </span>
+      <span className="text-neutral-800 lg:text-xl text-2xl">درگاه پرداخت خود را انتخاب کنید</span>
 
       <div className="flex items-center gap-2">
-        {paymentGateways.map((paymentGateway) => (
+        {paymentGateways.map((pg) => (
           <button
-            key={paymentGateway.id}
-            onClick={() => setSelectedPaymentGateway(paymentGateway.id)}
+            key={pg.id}
+            onClick={() => !pg.disabled && onChange(pg.id)}
             className={classNames(
               "bg-stone-50 p-4 rounded-lg text-nowrap w-full border border-stone-50 flex items-center flex-col gap-2",
-              selectedPaymentGateway === paymentGateway.id && "!border-pink-600"
+              selected === pg.id && "!border-pink-600",
+              pg.disabled && "opacity-50 cursor-not-allowed"
             )}
+            type="button"
           >
             <div className="w-16 h-16 relative">
-              <Image
-                src={paymentGateway.img}
-                alt={paymentGateway.name}
-                fill
-                className="object-cover"
-              />
+              <Image src={pg.img} alt={pg.name} fill className="object-cover" />
             </div>
 
-            <span className="text-neutral-600 lg:text-xs text-sm">
-              {paymentGateway.name} درگاه پرداخت
-            </span>
+            <span className="text-neutral-600 lg:text-xs text-sm">{pg.name} درگاه پرداخت</span>
+            {pg.disabled && pg.helper && (
+              <span className="text-[10px] text-amber-700">{pg.helper}</span>
+            )}
           </button>
         ))}
       </div>
