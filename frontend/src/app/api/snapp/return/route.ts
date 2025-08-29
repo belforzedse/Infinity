@@ -31,12 +31,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.redirect(location, { status: 302 });
     }
 
-    // Otherwise, fallback: send to success/failure based on status
+    // Otherwise, inspect payload to decide success/failure or missing order
+    let json: any = null;
+    try {
+      json = await res.json();
+    } catch {}
+
     if (res.ok) {
-      return NextResponse.redirect("/orders/success", { status: 302 });
-    } else {
-      return NextResponse.redirect("/orders/failure", { status: 302 });
+      const orderId = json?.data?.orderId || json?.orderId;
+      return NextResponse.redirect(
+        orderId ? `/orders/success?orderId=${orderId}` : "/orders/success",
+        { status: 302 }
+      );
     }
+
+    // If backend reports invalid order id or anything else, go to failure (preserving error message if any)
+    const errorMsg = encodeURIComponent(
+      json?.error?.message || json?.data?.error || "payment_failed"
+    );
+    return NextResponse.redirect(`/orders/failure?error=${errorMsg}`, {
+      status: 302,
+    });
   } catch (err) {
     return NextResponse.redirect("/orders/failure", { status: 302 });
   }
