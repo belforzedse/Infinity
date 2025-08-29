@@ -330,10 +330,7 @@ export default factories.createCoreController(
 
         // Determine gateway (default: Mellat) and build absolute callback URL
         const selectedGateway = String(gateway || "mellat").toLowerCase();
-        const serverBaseUrl = strapi.config.get(
-          "server.url",
-          "http://localhost:1337"
-        );
+        const serverBaseUrl = "https://api.infinity.rgbgroup.ir/api";
         const absoluteCallback = `${serverBaseUrl}${
           (callbackURL || "/orders/payment-callback").startsWith("/") ? "" : "/"
         }${callbackURL || "/orders/payment-callback"}`;
@@ -341,7 +338,7 @@ export default factories.createCoreController(
         let paymentResult: any = null;
 
         if (selectedGateway === "snappay") {
-          // Build SnappPay cart payload
+          // Build SnappPay token request payload
           const orderItems = await strapi.entityService.findMany(
             "api::order-item.order-item",
             {
@@ -427,7 +424,11 @@ export default factories.createCoreController(
             externalSourceAmount: externalSourceIrr,
             mobile: customerMobile,
             paymentMethodTypeDto: "INSTALLMENT" as const,
-            returnURL: absoluteCallback,
+            returnURL:
+              process.env.SNAPPAY_RETURN_URL &&
+              process.env.SNAPPAY_RETURN_URL.startsWith("http")
+                ? process.env.SNAPPAY_RETURN_URL
+                : absoluteCallback,
             transactionId,
             cartList: [
               {
