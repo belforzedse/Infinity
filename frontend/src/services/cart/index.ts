@@ -155,6 +155,9 @@ export interface FinalizeCartRequest {
   description?: string;
   note?: string;
   callbackURL?: string;
+  addressId?: number;
+  gateway?: "mellat" | "snappay";
+  mobile?: string;
 }
 
 export interface FinalizeCartResponse {
@@ -173,6 +176,27 @@ export interface FinalizeCartResponse {
   };
   requestId?: string;
 }
+
+/**
+ * Query SnappPay eligibility based on current cart and (optional) shipping
+ */
+export const getSnappEligible = async (
+  params: { shippingId?: number; shippingCost?: number } = {}
+): Promise<{
+  eligible: boolean;
+  title?: string;
+  description?: string;
+  amountIRR?: number;
+}> => {
+  const qs = new URLSearchParams();
+  if (params.shippingId) qs.set("shippingId", String(params.shippingId));
+  if (params.shippingCost) qs.set("shippingCost", String(params.shippingCost));
+  const url = `/payment-gateway/snapp-eligible${
+    qs.toString() ? `?${qs.toString()}` : ""
+  }`;
+  const response = await apiClient.get<{ data: any }>(url);
+  return response.data?.data || { eligible: false };
+};
 
 export interface CreateOrderRequest {
   shipping_address_id: number;
@@ -290,17 +314,17 @@ export const finalizeCart = async (
 ): Promise<FinalizeCartResponse> => {
   console.log("=== FINALIZE CART REQUEST ===");
   console.log("Request data:", data);
-  
+
   const response = await apiClient.post<FinalizeCartResponse>(
     "/carts/finalize",
     data
   );
-  
+
   console.log("=== FINALIZE CART RAW RESPONSE ===");
   console.log("Full response:", response);
   console.log("Response.data:", response.data);
   console.log("Response.data type:", typeof response.data);
-  
+
   return response.data;
 };
 
@@ -337,6 +361,7 @@ const CartService = {
   checkCartStock,
   finalizeCart,
   createOrder,
+  getSnappEligible,
 };
 
 export default CartService;
