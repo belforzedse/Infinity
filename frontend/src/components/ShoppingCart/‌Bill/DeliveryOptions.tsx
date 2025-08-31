@@ -1,7 +1,12 @@
 import React from "react";
 import CustomRadioGroup from "./CustomRadioGroup";
 import { ShippingMethod } from "@/services/shipping";
-import { Controller, Control, UseFormSetValue } from "react-hook-form";
+import {
+  Controller,
+  Control,
+  UseFormSetValue,
+  useWatch,
+} from "react-hook-form";
 import { FormData } from "./index";
 
 interface Props {
@@ -16,7 +21,41 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
   selectedShipping,
   control,
 }) => {
-  if (shippingMethods.length === 0) {
+  // watch the selected address to get province and city info
+  const selectedAddress = useWatch({ control, name: "address" });
+
+  // filter shipping methods based on selected address
+  const getFilteredShippingMethods = () => {
+    if (!selectedAddress?.name) {
+      return shippingMethods;
+    }
+
+    // extract province and city from address name
+    // Format: "Address - City, Province"
+    const addressParts = selectedAddress.name.split(" - ");
+    if (addressParts.length < 2) {
+      return shippingMethods;
+    }
+
+    const locationPart = addressParts[addressParts.length - 1]; // "City, Province"
+    const [city, province] = locationPart.split(", ");
+
+    // Check if province is golestan and city is gorgan
+    if (province?.trim() === "گلستان" && city?.trim() === "گرگان") {
+      // show ONLY "پیک" delivery option AND in-person pickup option
+      return shippingMethods.filter(
+        (method) =>
+          method.attributes.Title.includes("پیک") ||
+          method.attributes.Title.includes("حضوری")
+      );
+    }
+
+    return shippingMethods;
+  };
+
+  const filteredShippingMethods = getFilteredShippingMethods();
+
+  if (filteredShippingMethods.length === 0) {
     return (
       <div className="text-gray-500 p-4 text-center">
         در حال حاضر هیچ روش ارسالی موجود نیست
@@ -24,8 +63,8 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
     );
   }
 
-  // Map shipping methods to radio options
-  const deliveryOptions = shippingMethods.map((method) => ({
+  // map filtered shipping methods to radio options
+  const deliveryOptions = filteredShippingMethods.map((method) => ({
     id: method.id.toString(),
     value: method.id.toString(),
     method: method,
@@ -54,7 +93,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
             value={field.value?.id.toString() || ""}
             name="delivery-method"
             onChange={(selectedValue) => {
-              const selected = shippingMethods.find(
+              const selected = filteredShippingMethods.find(
                 (method) => method.id.toString() === selectedValue
               );
               if (selected) {
