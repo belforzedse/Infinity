@@ -50,7 +50,11 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
       );
     }
 
-    return shippingMethods;
+    return shippingMethods.filter(
+      (method) =>
+        method.attributes.Title.includes("تیپاکس") ||
+        method.attributes.Title.includes("پست")
+    );
   };
 
   const filteredShippingMethods = getFilteredShippingMethods();

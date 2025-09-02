@@ -33,7 +33,7 @@ export default function CartDrawer() {
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-end text-center">
+          <div className="flex min-h-full items-center justify-end  text-neutral-800 text-center">
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-out duration-300"
