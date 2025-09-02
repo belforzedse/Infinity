@@ -20,6 +20,22 @@ const options = [
   { id: 5, name: "۵ عدد" },
 ];
 
+/**
+ * Props for the PDPHeroInfoAction component
+ * @interface PDPHeroInfoActionProps
+ * @property {string} productId - Unique identifier for the product
+ * @property {string} name - Name of the product
+ * @property {string} category - Product category
+ * @property {number} price - Product price
+ * @property {string} image - Product image URL
+ * @property {string} [color] - Selected color variation (optional)
+ * @property {string} [size] - Selected size variation (optional)
+ * @property {string} [model] - Selected model variation (optional)
+ * @property {string} [variationId] - Selected product variation ID (optional)
+ * @property {boolean} [hasStock] - Whether product is in stock (defaults to true)
+ * @property {any} [currentVariation] - Current variation data for stock validation
+ * @property {any} [productData] - Full product data for additional validation
+ */
 interface PDPHeroInfoActionProps {
   productId: string;
   name: string;
@@ -35,6 +51,24 @@ interface PDPHeroInfoActionProps {
   productData?: any; // Add product data for stock validation
 }
 
+/**
+ * Product Detail Page Hero Action Component
+ * 
+ * Renders the action buttons section of a product detail page, including:
+ * - Add to cart functionality with quantity selection
+ * - Share product button
+ * - Add to favorites button
+ * - Navigate to comments button
+ * 
+ * Features:
+ * - Real-time stock validation
+ * - Quantity adjustment based on available stock
+ * - Toast notifications for user feedback
+ * - URL sharing with clipboard support
+ * 
+ * @param {PDPHeroInfoActionProps} props Component props
+ * @returns {JSX.Element} Rendered component
+ */
 export default function PDPHeroInfoAction({
   productId = "",
   name = "",
@@ -73,25 +107,39 @@ export default function PDPHeroInfoAction({
   );
 
   // Get available stock count for current variation
-  const availableStock = currentVariation ? getAvailableStockCount(currentVariation) : 0;
+  const availableStock = currentVariation
+    ? getAvailableStockCount(currentVariation)
+    : 0;
 
   // Validate if selected quantity is available
+  /**
+   * Validates if requested quantity is available in stock
+   * @param {number} requestedQuantity - Quantity to validate
+   * @returns {boolean} True if quantity is available, false otherwise
+   */
   const validateQuantity = (requestedQuantity: number): boolean => {
     if (!currentVariation) {
       return false;
     }
-    
+
     return hasStockForVariation(currentVariation, requestedQuantity);
   };
 
   // Enhanced add to cart handler with stock validation
+  /**
+   * Handles adding items to cart with stock validation
+   * @param {number} requestedQuantity - Quantity to add to cart
+   */
   const handleAddToCart = (requestedQuantity: number = 1) => {
     console.log("=== ADD TO CART DEBUG ===");
     console.log("Requested quantity:", requestedQuantity);
     console.log("Current variation ID being sent to cart:", variationId);
-    console.log("Current variation object we're checking stock for:", currentVariation);
+    console.log(
+      "Current variation object we're checking stock for:",
+      currentVariation
+    );
     console.log("Available stock count:", availableStock);
-    
+
     // Validate stock before adding to cart
     if (!validateQuantity(requestedQuantity)) {
       console.log("❌ Stock validation failed");
@@ -118,6 +166,10 @@ export default function PDPHeroInfoAction({
   };
 
   // Handle share button click
+  /**
+   * Handles sharing product URL via clipboard
+   * Shows toast notification on success
+   */
   const handleShare = () => {
     const currentUrl = window.location.href;
 
@@ -144,6 +196,10 @@ export default function PDPHeroInfoAction({
   };
 
   // Handle scroll to comments
+  /**
+   * Scrolls to product comments section
+   * Uses data attribute if available, falls back to class selector
+   */
   const handleScrollToComments = () => {
     // Find the comments section element
     const commentsSection = document.querySelector("[data-comments-section]");
@@ -179,19 +235,29 @@ export default function PDPHeroInfoAction({
   }, []);
 
   // Handle quantity change
+  /**
+   * Handles quantity selection changes with stock validation
+   * Shows error toast if selected quantity exceeds available stock
+   * @param {any} option - Selected quantity option
+   */
   const handleQuantityChange = (option: any) => {
     const newQuantity = option.id;
-    
+
     // Validate the new quantity against available stock
     if (!validateQuantity(newQuantity)) {
       toast.error(`موجودی کافی نیست. موجودی فعلی: ${availableStock} عدد`);
       return;
     }
-    
+
     setQuantity(newQuantity);
   };
 
   // Generate options based on available stock (limit to max 5 or available stock)
+  /**
+   * Generates quantity options based on available stock
+   * Limits maximum options to 5 or available stock, whichever is lower
+   * @returns {Array<{id: number, name: string}>} Array of quantity options
+   */
   const generateQuantityOptions = () => {
     const maxOptions = Math.min(5, availableStock);
     return Array.from({ length: maxOptions }, (_, i) => ({
@@ -200,10 +266,12 @@ export default function PDPHeroInfoAction({
     }));
   };
 
-  const dynamicOptions = availableStock > 0 ? generateQuantityOptions() : options;
+  const dynamicOptions =
+    availableStock > 0 ? generateQuantityOptions() : options;
 
   // Find the current option based on quantity
-  const currentOption = dynamicOptions.find((opt) => opt.id === quantity) || null;
+  const currentOption =
+    dynamicOptions.find((opt) => opt.id === quantity) || null;
 
   return (
     <div className="flex gap-3 items-center flex-col md:flex-row relative">

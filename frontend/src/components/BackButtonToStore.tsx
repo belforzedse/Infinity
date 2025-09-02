@@ -29,3 +29,4 @@ export default function BackButtonToStore({ isResponsive = true }: Props) {
     </Link>
   );
 }
+     

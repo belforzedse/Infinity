@@ -3,9 +3,10 @@ import Logo from "@/components/Kits/Logo";
 import superAdminSidebar from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
-import { useState } from "react";
+import React, { useState, Fragment } from "react";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
+import SettingsIcon from "../Icons/SettingsIcon";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -122,22 +123,20 @@ export default function SuperAdminLayoutSidebar({
                 </div>
 
                 {item.children.length > 0 && openMenus[item.label] && (
-                  <div className="flex flex-col gap-2 pr-5 py-2">
+                  <div className="mt-2 rounded-xl border border-neutral-100 bg-neutral-50/80 overflow-hidden">
                     {item.children.map((child, index) => (
-                      <>
+                      <Fragment key={child.href ?? child.label ?? index}>
                         <Link
-                          key={child.href}
                           href={child.href}
-                          className="text-neutral-600 text-xs hover:text-pink-500 transition-colors"
                           onClick={(e) => e.stopPropagation()}
+                          className="block px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
                         >
                           {child.label}
                         </Link>
-
                         {index !== item.children.length - 1 && (
-                          <div className="w-full h-[1px] bg-slate-100"></div>
+                          <div className="mx-4 h-px bg-neutral-100" />
                         )}
-                      </>
+                      </Fragment>
                     ))}
                   </div>
                 )}
@@ -147,7 +146,7 @@ export default function SuperAdminLayoutSidebar({
 
           <div className="w-full h-[1px] bg-neutral-100"></div>
 
-          {/* <div className="flex items-center cursor-pointer py-1.5 px-2">
+          <div className="flex items-center cursor-pointer py-1.5 px-2">
             <Link
               href={"/super-admin/settings"}
               className="flex items-center gap-2"
@@ -159,7 +158,7 @@ export default function SuperAdminLayoutSidebar({
                 </span>
               </div>
             </Link>
-          </div> */}
+          </div>
 
           <div className="flex items-center cursor-pointer py-1.5 px-2">
             <Link
