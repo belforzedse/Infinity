@@ -21,16 +21,27 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
   selectedShipping,
   control,
 }) => {
+<<<<<<< HEAD
   // watch the selected address to get province and city info
   const selectedAddress = useWatch({ control, name: "address" });
 
   // filter shipping methods based on selected address
+=======
+  // Watch the selected address to get province and city info
+  const selectedAddress = useWatch({ control, name: "address" });
+
+  // Filter shipping methods based on location
+>>>>>>> f5fe39b035c5185cdc72fcba7d4d082064d67756
   const getFilteredShippingMethods = () => {
     if (!selectedAddress?.name) {
       return shippingMethods;
     }
 
+<<<<<<< HEAD
     // extract province and city from address name
+=======
+    // Extract province and city from address name
+>>>>>>> f5fe39b035c5185cdc72fcba7d4d082064d67756
     // Format: "Address - City, Province"
     const addressParts = selectedAddress.name.split(" - ");
     if (addressParts.length < 2) {
@@ -40,6 +51,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
     const locationPart = addressParts[addressParts.length - 1]; // "City, Province"
     const [city, province] = locationPart.split(", ");
 
+<<<<<<< HEAD
     // Check if province is golestan and city is gorgan
     if (province?.trim() === "گلستان" && city?.trim() === "گرگان") {
       // show ONLY "پیک" delivery option AND in-person pickup option
@@ -55,6 +67,17 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
         method.attributes.Title.includes("تیپاکس") ||
         method.attributes.Title.includes("پست")
     );
+=======
+    // Check if province is "گلستان" and city is "گرگان"
+    if (province?.trim() === "گلستان" && city?.trim() === "گرگان") {
+      // Only show "پیک" delivery option
+      return shippingMethods.filter((method) =>
+        method.attributes.Title.includes("پیک")
+      );
+    }
+
+    return shippingMethods;
+>>>>>>> f5fe39b035c5185cdc72fcba7d4d082064d67756
   };
 
   const filteredShippingMethods = getFilteredShippingMethods();
@@ -67,7 +90,11 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
     );
   }
 
+<<<<<<< HEAD
   // map filtered shipping methods to radio options
+=======
+  // Map filtered shipping methods to radio options
+>>>>>>> f5fe39b035c5185cdc72fcba7d4d082064d67756
   const deliveryOptions = filteredShippingMethods.map((method) => ({
     id: method.id.toString(),
     value: method.id.toString(),
