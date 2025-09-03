@@ -63,15 +63,27 @@ export default function PLPPagination({
 
   const pageNumbers = generatePageNumbers();
 
+  const scrollToTop = () => {
+    if (typeof window === "undefined") return;
+    const anchor = document.querySelector<HTMLElement>("[data-plp-top]");
+    if (anchor) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const handlePrevious = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
+      scrollToTop();
     }
   };
 
   const handleNext = () => {
     if (currentPage < totalPages) {
       onPageChange(currentPage + 1);
+      scrollToTop();
     }
   };
 
@@ -113,7 +125,10 @@ export default function PLPPagination({
             return (
               <button
                 key={pageNum}
-                onClick={() => onPageChange(pageNum)}
+                onClick={() => {
+                  onPageChange(pageNum);
+                  scrollToTop();
+                }}
                 className={cn(
                   "text-sm flex h-8 w-8 items-center justify-center rounded-md font-medium transition-colors",
                   isActive

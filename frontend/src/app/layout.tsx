@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`font-peyda-fanum antialiased`}>
+      <body className={`font-peyda-fanum antialiased preload-blur`}>
         <CartProvider>
           <NuqsAdapter>
             <Providers>{children}</Providers>
