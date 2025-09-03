@@ -20,11 +20,11 @@ export default function SuperAdminLayoutHeader({
   const me = useMe();
 
   return (
-    <header className="w-full lg:h-[76px] h-fit rounded-2xl lg:bg-white flex items-center justify-between lg:px-6 border-b border-neutral-100">
+    <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 lg:h-[76px] lg:bg-white lg:px-6">
       {/* Mobile Menu Button */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden flex items-center justify-center w-10 h-10 border border-slate-200 hover:bg-neutral-100 rounded-full"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 hover:bg-neutral-100 lg:hidden"
       >
         <MenuIcon />
       </button>
@@ -34,7 +34,7 @@ export default function SuperAdminLayoutHeader({
       </div>
 
       {/* Search Section */}
-      <div className="flex-1 max-w-[400px] lg:block hidden">
+      <div className="hidden max-w-[400px] flex-1 lg:block">
         {/* <div className="relative">
           <input
             type="text"
@@ -51,22 +51,25 @@ export default function SuperAdminLayoutHeader({
       </div>
 
       {/* User Profile Section */}
-      <div className="flex items-center lg:gap-6 gap-2">
+      <div className="flex items-center gap-2 lg:gap-6">
         <div className="flex items-center gap-4">
-          <div className="flex items-center lg:gap-4 gap-1 cursor-pointer">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-neutral-100">
-              <img
+          <div className="flex cursor-pointer items-center gap-1 lg:gap-4">
+            <div className="h-9 w-9 overflow-hidden rounded-full bg-neutral-100">
+              <Image
                 src="https://img.icons8.com/ios/100/000000/user-male-circle.png"
                 alt="No photo"
-                className="w-full h-full object-cover"
-                loading="lazy"
+                width={36}
+                height={36}
+                className="object-cover"
+                unoptimized
+                loader={({ src }) => src}
               />
             </div>
-            <div className="lg:flex flex-col gap-1 hidden">
-              <span className="text-neutral-600 text-sm !leading-none">
+            <div className="hidden flex-col gap-1 lg:flex">
+              <span className="text-sm !leading-none text-neutral-600">
                 {me?.data?.FirstName} {me?.data?.LastName}
               </span>
-              <span className="text-neutral-600 text-xs !leading-none">
+              <span className="text-xs !leading-none text-neutral-600">
                 {me?.data?.Phone}
               </span>
             </div>

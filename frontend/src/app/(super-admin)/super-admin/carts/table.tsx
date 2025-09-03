@@ -103,7 +103,7 @@ export const columns: ColumnDef<Cart>[] = [
       const fullName = `${firstName || ""} ${lastName || ""}`;
 
       return (
-        <span className="text-foreground-primary text-xs">
+        <span className="text-xs text-foreground-primary">
           {fullName.trim() || " - "}
         </span>
       );
@@ -114,7 +114,7 @@ export const columns: ColumnDef<Cart>[] = [
     header: "شماره تلفن",
     cell: ({ row }) => {
       const phone = row.original?.attributes?.user?.data?.attributes?.Phone;
-      return <span className="text-foreground-primary text-xs">{phone}</span>;
+      return <span className="text-xs text-foreground-primary">{phone}</span>;
     },
   },
   {
@@ -139,7 +139,7 @@ export const columns: ColumnDef<Cart>[] = [
               }
               width={48}
               height={48}
-              className="w-12 h-12 rounded-lg overflow-hidden object-cover"
+              className="h-12 w-12 overflow-hidden rounded-lg object-cover"
             />
           ))}
           {items.length > 5 && (
@@ -166,7 +166,7 @@ export const columns: ColumnDef<Cart>[] = [
     cell: ({ row }) => {
       const price = row.original?.attributes?.cart_items?.data?.reduce(
         (acc, item) => acc + Number(item.attributes.Sum),
-        0
+        0,
       );
 
       return <SuperAdminTableCellSimplePrice price={price} />;
@@ -180,24 +180,24 @@ export const columns: ColumnDef<Cart>[] = [
       return (
         <div
           className={twMerge(
-            "flex items-center justify-center w-[118px] h-[29px] rounded-md",
+            "flex h-[29px] w-[118px] items-center justify-center rounded-md",
             status === "Pending"
               ? "bg-blue-600"
               : status === "Payment"
-              ? "bg-amber-500"
-              : status === "Left"
-              ? "bg-red-600"
-              : "bg-gray-400"
+                ? "bg-amber-500"
+                : status === "Left"
+                  ? "bg-red-600"
+                  : "bg-gray-400",
           )}
         >
           <span className="text-xs text-white">
             {status === "Pending"
               ? "در حال تصمیم گیری"
               : status === "Payment"
-              ? "در انتظار پرداخت"
-              : status === "Left"
-              ? "رها شده"
-              : "خالی"}
+                ? "در انتظار پرداخت"
+                : status === "Left"
+                  ? "رها شده"
+                  : "خالی"}
           </span>
         </div>
       );
@@ -213,7 +213,7 @@ export const MobileTable = ({ data }: Props) => {
   if (!data) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data.map((row) => (
         <MobileTableRowBox
           key={row.id}
@@ -221,7 +221,7 @@ export const MobileTable = ({ data }: Props) => {
           row={row}
           header={
             <>
-              <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
+              <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
                 <div className="flex gap-1">
                   <span className="text-xs text-neutral-400">
                     {row?.attributes?.cart_items?.data?.length}
@@ -237,19 +237,19 @@ export const MobileTable = ({ data }: Props) => {
                       row?.attributes?.Status === "Pending"
                         ? "text-blue-600"
                         : row?.attributes?.Status === "Payment"
-                        ? "text-amber-500"
-                        : row?.attributes?.Status === "Left"
-                        ? "text-red-600"
-                        : "text-gray-400"
+                          ? "text-amber-500"
+                          : row?.attributes?.Status === "Left"
+                            ? "text-red-600"
+                            : "text-gray-400",
                     )}
                   >
                     {row?.attributes?.Status === "Pending"
                       ? "در حال تصمیم گیری"
                       : row?.attributes?.Status === "Payment"
-                      ? "در انتظار پرداخت"
-                      : row?.attributes?.Status === "Left"
-                      ? "رها شده"
-                      : "خالی"}
+                        ? "در انتظار پرداخت"
+                        : row?.attributes?.Status === "Left"
+                          ? "رها شده"
+                          : "خالی"}
                   </span>
                 </div>
 
@@ -257,9 +257,9 @@ export const MobileTable = ({ data }: Props) => {
                   {priceFormatter(
                     row?.attributes?.cart_items?.data?.reduce(
                       (acc, item) => acc + Number(item.attributes.Sum),
-                      0
+                      0,
                     ),
-                    " تومان"
+                    " تومان",
                   )}
                 </span>
               </div>

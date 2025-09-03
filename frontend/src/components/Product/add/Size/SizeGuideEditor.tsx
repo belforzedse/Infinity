@@ -14,10 +14,10 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
   onColumnTitleEdit,
 }) => {
   const [data, setData] = useState<any[]>(
-    initialData.length > 0 ? initialData : [{ size: "" }]
+    initialData.length > 0 ? initialData : [{ size: "" }],
   );
   const [editingColumnTitle, setEditingColumnTitle] = useState<string | null>(
-    null
+    null,
   );
   const [localColumns, setLocalColumns] =
     useState<{ key: string; title: string }[]>(columns);
@@ -68,7 +68,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
         const newRow = { ...row };
         delete newRow[columnKey];
         return newRow;
-      })
+      }),
     );
 
     // Notify parent component about the removed column
@@ -109,27 +109,27 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
     // Update local columns state
     setLocalColumns(
       localColumns.map((col) =>
-        col.key === columnKey ? { ...col, title: newTitle } : col
-      )
+        col.key === columnKey ? { ...col, title: newTitle } : col,
+      ),
     );
 
     setEditingColumnTitle(null);
   };
 
   return (
-    <div className="w-full bg-white rounded-xl p-5">
-      <div className="flex justify-between items-center mb-4">
+    <div className="w-full rounded-xl bg-white p-5">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-medium text-neutral-800">
           ویرایش راهنمای سایز
         </h3>
         <div className="flex gap-2">
           <button
             onClick={addColumn}
-            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm flex items-center gap-1"
+            className="text-sm flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-white shadow-sm hover:bg-blue-700"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -145,11 +145,11 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
           </button>
           <button
             onClick={addRow}
-            className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-sm flex items-center gap-1"
+            className="text-sm flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-white shadow-sm hover:bg-green-700"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -165,7 +165,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
           </button>
           <button
             onClick={handleSave}
-            className="px-3 py-1.5 text-sm bg-actions-primary text-white rounded-lg hover:bg-primary/90 shadow-sm"
+            className="hover:bg-primary/90 text-sm rounded-lg bg-actions-primary px-3 py-1.5 text-white shadow-sm"
           >
             ذخیره راهنما
           </button>
@@ -173,16 +173,16 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full bg-white rounded-lg border border-slate-100">
+        <table className="w-full rounded-lg border border-slate-100 bg-white">
           <thead className="bg-stone-50">
             <tr>
-              <th className="p-3 text-sm font-medium text-neutral-800 border-l border-slate-100">
+              <th className="text-sm border-l border-slate-100 p-3 font-medium text-neutral-800">
                 سایز
               </th>
               {localColumns.map((column) => (
                 <th
                   key={column.key}
-                  className="p-3 text-sm font-medium text-neutral-800 border-l border-slate-100 group relative"
+                  className="group text-sm relative border-l border-slate-100 p-3 font-medium text-neutral-800"
                 >
                   <div className="flex items-center justify-between">
                     {editingColumnTitle === column.key ? (
@@ -196,28 +196,28 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                           if (e.key === "Enter") {
                             handleColumnTitleChange(
                               column.key,
-                              e.currentTarget.value
+                              e.currentTarget.value,
                             );
                           }
                         }}
-                        className="w-full p-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="focus:ring-primary w-full rounded border border-slate-200 p-1 focus:outline-none focus:ring-1"
                         autoFocus
                       />
                     ) : (
                       <span
                         onClick={() => handleColumnTitleClick(column.key)}
-                        className="cursor-pointer hover:text-primary"
+                        className="hover:text-primary cursor-pointer"
                       >
                         {column.title}
                       </span>
                     )}
                     <button
                       onClick={() => removeColumn(column.key)}
-                      className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600"
+                      className="text-red-500 opacity-0 group-hover:opacity-100 hover:text-red-600"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4"
+                        className="h-4 w-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -233,7 +233,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                   </div>
                 </th>
               ))}
-              <th className="p-3 text-sm font-medium text-neutral-800 w-10"></th>
+              <th className="text-sm w-10 p-3 font-medium text-neutral-800"></th>
             </tr>
           </thead>
           <tbody>
@@ -242,21 +242,21 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                 key={rowIndex}
                 className={rowIndex !== 0 ? "border-t border-slate-100" : ""}
               >
-                <td className="p-3 border-l border-slate-100">
+                <td className="border-l border-slate-100 p-3">
                   <input
                     type="text"
                     value={row.size}
                     onChange={(e) =>
                       updateCell(rowIndex, "size", e.target.value)
                     }
-                    className="w-full p-1.5 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="focus:ring-primary w-full rounded border border-slate-200 p-1.5 focus:outline-none focus:ring-1"
                     placeholder="سایز"
                   />
                 </td>
                 {localColumns.map((column) => (
                   <td
                     key={column.key}
-                    className="p-3 border-l border-slate-100"
+                    className="border-l border-slate-100 p-3"
                   >
                     <input
                       type="text"
@@ -264,7 +264,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                       onChange={(e) =>
                         updateCell(rowIndex, column.key, e.target.value)
                       }
-                      className="w-full p-1.5 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="focus:ring-primary w-full rounded border border-slate-200 p-1.5 focus:outline-none focus:ring-1"
                       placeholder="مقدار"
                     />
                   </td>
@@ -276,7 +276,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4"
+                      className="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

@@ -13,7 +13,7 @@ export default function SuperAdminTableCellActionButton(props: Props) {
 
   return (
     <Link
-      className={`w-auto px-2 md:px-0 md:w-[26px] h-[26px] rounded-md bg-actions-primary flex gap-1 items-center justify-center ${
+      className={`flex h-[26px] w-auto items-center justify-center gap-1 rounded-md bg-actions-primary px-2 md:w-[26px] md:px-0 ${
         variant === "primary" ? "bg-actions-primary" : "bg-slate-200"
       }`}
       onClick={onClick}

@@ -96,7 +96,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   // Add effect to handle selectedImage changes
   useEffect(() => {
     const selectedIndex = assets.findIndex(
-      (asset) => asset.id === selectedImage
+      (asset) => asset.id === selectedImage,
     );
     if (selectedIndex !== -1) {
       scrollToImage(selectedIndex);
@@ -106,23 +106,23 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   return (
     <div
       ref={scrollContainerRef}
-      className="md:h-[473px] overflow-x-auto md:overflow-x-hidden md:overflow-y-auto w-full md:w-[139px] relative h-auto"
+      className="relative h-auto w-full overflow-x-auto md:h-[473px] md:w-[139px] md:overflow-y-auto md:overflow-x-hidden"
     >
-      <div className="flex flex-row-reverse md:flex-col gap-2 w-fit md:w-full">
+      <div className="flex w-fit flex-row-reverse gap-2 md:w-full md:flex-col">
         {assets.map((asset) => (
           <div
             key={asset.id}
             onClick={() => {
               setSelectedImage(asset.id);
             }}
-            className="rounded-2xl overflow-hidden md:w-[139px] md:h-[132px] w-[84px] h-[70px] relative cursor-pointer"
+            className="relative h-[70px] w-[84px] cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
           >
             <div className={asset.id === selectedImage ? "opacity-50" : ""}>
               <Image fill src={asset.thumbnail} alt={asset.alt} />
             </div>
 
             {asset.type === "video" && (
-              <button className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+              <button className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
                 <Image
                   width={24}
                   height={24}
@@ -138,7 +138,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
       {/* Blur */}
       {showBlur && (
         <div
-          className="h-[71px] w-[40px] md:w-full hidden md:block md:sticky bottom-0 left-0 md:left-0"
+          className="bottom-0 left-0 hidden h-[71px] w-[40px] md:sticky md:left-0 md:block md:w-full"
           style={{
             background:
               "linear-gradient(181.25deg, rgba(255, 255, 255, 0) 44.29%, #FFFFFF 85.78%)",

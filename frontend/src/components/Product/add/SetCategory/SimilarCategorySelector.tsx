@@ -26,22 +26,22 @@ const SimilarCategorySelector: React.FC<SimilarCategorySelectorProps> = ({
     <div className="flex flex-col gap-1">
       <h2 className="text-base text-neutral-600">دسته بندی های مشابه</h2>
 
-      <div className="bg-white rounded-lg border border-slate-100 px-5 py-3 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-white px-5 py-3">
         <Combobox<categoryResponseType, false>
           value={undefined}
           onChange={handleSelectOtherCategory}
         >
           <div className="relative">
             <Combobox.Input
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-neutral-800"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-neutral-800"
               onChange={(event) => setCategorySearchQuery(event.target.value)}
               displayValue={() => categorySearchQuery}
               placeholder="دسته بندی را انتخاب کنید"
             />
-            <Combobox.Options className="absolute mt-1 w-full bg-white border border-slate-200 rounded-lg py-1 shadow-lg z-[99999]">
+            <Combobox.Options className="absolute z-[99999] mt-1 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
               {filteredTags.length === 0 ? (
-                <button className="px-3 py-2 text-neutral-800 flex items-center gap-2">
-                  <span className="text-neutral-500 text-xs">
+                <button className="flex items-center gap-2 px-3 py-2 text-neutral-800">
+                  <span className="text-xs text-neutral-500">
                     نتیجه ای یافت نشد
                   </span>
                 </button>
@@ -51,7 +51,7 @@ const SimilarCategorySelector: React.FC<SimilarCategorySelectorProps> = ({
                     key={category.id}
                     value={category}
                     className={({ active }) =>
-                      `px-3 py-2 cursor-pointer text-neutral-800  ${
+                      `cursor-pointer px-3 py-2 text-neutral-800 ${
                         active ? "bg-slate-100" : "bg-white"
                       }`
                     }

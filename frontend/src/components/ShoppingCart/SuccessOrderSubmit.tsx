@@ -26,8 +26,8 @@ function ShoppingCartSuccessOrderSubmit() {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center lg:gap-6 gap-3 w-full h-full">
-        <div className="relative md:w-56 md:h-60 w-32 h-36 lg:mb-2 mb-4">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-3 lg:gap-6">
+        <div className="relative mb-4 h-36 w-32 md:h-60 md:w-56 lg:mb-2">
           <Image
             src="/images/cart/success-order.png"
             alt="success order"
@@ -37,17 +37,17 @@ function ShoppingCartSuccessOrderSubmit() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-2">
-          <span className="lg:text-3xl text-2xl text-neutral-800">
+          <span className="text-2xl text-neutral-800 lg:text-3xl">
             سفارش با موفقیت ثبت شد!
           </span>
 
           {orderNumber && (
-            <span className="text-neutral-800 lg:text-xl text-lg">
+            <span className="text-lg text-neutral-800 lg:text-xl">
               شماره سفارش: {orderNumber}
             </span>
           )}
 
-          <span className="text-neutral-800 lg:text-xl text-lg">
+          <span className="text-lg text-neutral-800 lg:text-xl">
             ممنون از خریدتون
           </span>
         </div>
@@ -55,7 +55,7 @@ function ShoppingCartSuccessOrderSubmit() {
         <div className="flex gap-4">
           <button
             onClick={viewOrder}
-            className="bg-pink-500 text-white px-6 py-2 rounded-lg lg:text-sm text-base"
+            className="text-base rounded-lg bg-pink-500 px-6 py-2 text-white lg:text-sm"
           >
             مشاهده سفارش
           </button>

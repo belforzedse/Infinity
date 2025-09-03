@@ -45,7 +45,7 @@ export default function RegisterInfoPage() {
       const res = await AuthService.register(
         formData.firstName,
         formData.lastName,
-        formData.password
+        formData.password,
       );
 
       if (res.message) {
@@ -73,7 +73,7 @@ export default function RegisterInfoPage() {
       </AuthTitle>
 
       <form onSubmit={handleSubmit} className="space-y-7">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <div>
             <Text variant="label" className="mb-2 md:mb-2.5">
               نام

@@ -66,7 +66,7 @@ export default function Page() {
             headers: {
               Authorization: `Bearer ${STRAPI_TOKEN}`,
             },
-          }
+          },
         );
 
         const rule = (response as any).data;
@@ -106,7 +106,7 @@ export default function Page() {
           transformedData.terms.push({
             category: "product",
             tags: rule.attributes.product_variations.data.map((item: any) =>
-              item.id.toString()
+              item.id.toString(),
             ),
             tagLabels: productTagLabels,
           });
@@ -125,14 +125,14 @@ export default function Page() {
           transformedData.terms.push({
             category: "category",
             tags: rule.attributes.product_categories.data.map((item: any) =>
-              item.id.toString()
+              item.id.toString(),
             ),
             tagLabels: categoryTagLabels,
           });
         }
 
         setData(transformedData);
-      } catch (error) {
+      } catch {
         toast.error("خطا در دریافت اطلاعات");
       } finally {
         setLoading(false);
@@ -174,12 +174,12 @@ export default function Page() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
 
           toast.success("قانون تخفیف با موفقیت بروزرسانی شد");
           router.push("/super-admin/coupons/rules");
-        } catch (error) {
+        } catch {
           toast.error("خطایی رخ داده است");
         }
       }}

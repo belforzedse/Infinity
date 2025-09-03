@@ -51,7 +51,7 @@ export default function SuperAdminLayoutSidebar({
       <div
         className={clsx(
           "fixed inset-0 bg-black bg-opacity-50 transition-opacity lg:hidden",
-          isOpen ? "opacity-100 z-40" : "opacity-0 pointer-events-none"
+          isOpen ? "z-40 opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
       />
@@ -59,15 +59,15 @@ export default function SuperAdminLayoutSidebar({
       <div
         id="sidebar"
         className={clsx(
-          "fixed lg:static top-0 right-0 h-full z-50 lg:z-auto",
+          "fixed right-0 top-0 z-50 h-full lg:static lg:z-auto",
           "w-[280px] lg:w-auto",
           "transform transition-transform duration-300 ease-in-out lg:transform-none",
           isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0",
-          "bg-white p-3 rounded-tl-xl rounded-bl-xl flex flex-col gap-4"
+          "flex flex-col gap-4 rounded-bl-xl rounded-tl-xl bg-white p-3",
         )}
       >
         <button
-          className="lg:hidden absolute top-4 left-4 p-2 hover:bg-neutral-100 rounded-full"
+          className="absolute left-4 top-4 rounded-full p-2 hover:bg-neutral-100 lg:hidden"
           onClick={onClose}
         >
           <svg
@@ -104,8 +104,9 @@ export default function SuperAdminLayoutSidebar({
                     role="button"
                     tabIndex={0}
                     className={clsx(
-                      "flex items-center justify-between cursor-pointer py-1.5 px-2",
-                      hasChildren && "mb-2"
+                      "flex cursor-pointer items-center justify-between px-2 py-1.5 rounded-lg",
+                      "transition-colors duration-150 hover:bg-neutral-50",
+                      hasChildren && "mb-2",
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -121,7 +122,7 @@ export default function SuperAdminLayoutSidebar({
                     {hasChildren ? (
                       <div className="flex items-center gap-2">
                         {item.icon}
-                        <span className="text-neutral-600 text-sm font-medium">
+                        <span className="text-sm font-medium text-neutral-600">
                           {item.label}
                         </span>
                       </div>
@@ -133,7 +134,7 @@ export default function SuperAdminLayoutSidebar({
                       >
                         <div className="flex items-center gap-2">
                           {item.icon}
-                          <span className="text-neutral-600 text-sm font-medium">
+                          <span className="text-sm font-medium text-neutral-600">
                             {item.label}
                           </span>
                         </div>
@@ -143,8 +144,9 @@ export default function SuperAdminLayoutSidebar({
                     {hasChildren && (
                       <div
                         className={clsx(
-                          "transition-transform duration-200",
-                          isOpenMenu && "rotate-180"
+                          "transition-transform duration-200 p-1 rounded-md",
+                          "transition-colors duration-150 hover:bg-neutral-50",
+                          isOpenMenu && "rotate-180",
                         )}
                       >
                         <ChevronDownIcon />
@@ -154,21 +156,32 @@ export default function SuperAdminLayoutSidebar({
 
                   {/* Submenu */}
                   {hasChildren && isOpenMenu && (
-                    <div className="mt-2 rounded-xl border border-neutral-100 bg-neutral-50/80 overflow-hidden">
-                      {item.children.map((child, index) => (
-                        <Fragment key={child.href ?? child.label ?? index}>
-                          <Link
-                            href={child.href}
-                            onClick={(e) => e.stopPropagation()}
-                            className="block px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
-                          >
-                            {child.label}
-                          </Link>
-                          {index !== item.children.length - 1 && (
-                            <div className="mx-4 h-px bg-neutral-100" />
-                          )}
-                        </Fragment>
-                      ))}
+                    <div className="mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
+                      {item.children.map((child, index) => {
+                        const curr = pathname.replace(/\/$/, "");
+                        const href = (child.href ?? "").replace(/\/$/, "");
+                        const active = !!href && (curr === href || curr.startsWith(href + "/"));
+                        return (
+                          <Fragment key={child.href ?? child.label ?? index}>
+                            <Link
+                              href={child.href}
+                              onClick={(e) => e.stopPropagation()}
+                              className={clsx(
+                                "block px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                "transition-colors duration-150",
+                                active
+                                  ? "bg-neutral-100 text-neutral-900 font-medium"
+                                  : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
+                              )}
+                            >
+                              {child.label}
+                            </Link>
+                            {index !== item.children.length - 1 && (
+                              <div className="mx-4 h-px bg-neutral-100" />
+                            )}
+                          </Fragment>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -176,30 +189,30 @@ export default function SuperAdminLayoutSidebar({
             })}
           </div>
 
-          <div className="w-full h-[1px] bg-neutral-100" />
+          <div className="h-[1px] w-full bg-neutral-100" />
 
-          <div className="flex items-center cursor-pointer py-1.5 px-2">
+          <div className="flex cursor-pointer items-center px-2 py-1.5">
             <Link
               href={"/super-admin/settings"}
               className="flex items-center gap-2"
             >
               <div className="flex items-center gap-2">
                 <SettingsIcon />
-                <span className="text-neutral-600 text-sm font-medium">
+                <span className="text-sm font-medium text-neutral-600">
                   تنظیمات سایت
                 </span>
               </div>
             </Link>
           </div>
 
-          <div className="flex items-center cursor-pointer py-1.5 px-2">
+          <div className="flex cursor-pointer items-center px-2 py-1.5">
             <Link
               href={"/super-admin/logout"}
               className="flex items-center gap-2"
             >
               <div className="flex items-center gap-2">
                 <ExitIcon />
-                <span className="text-neutral-600 text-sm font-medium">
+                <span className="text-sm font-medium text-neutral-600">
                   خروج
                 </span>
               </div>

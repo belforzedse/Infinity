@@ -14,7 +14,7 @@ export default function PDPHeroInfoModel(props: Props) {
   const { models, onModelChange, selectedModel: externalSelectedModel } = props;
 
   const [internalSelectedModel, setInternalSelectedModel] = useState<string>(
-    models[0]?.id || ""
+    models[0]?.id || "",
   );
 
   // Use either the external selected model if provided, or the internal state
@@ -37,14 +37,14 @@ export default function PDPHeroInfoModel(props: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-foreground-primary text-xl">انتخاب مدل</span>
+      <span className="text-xl text-foreground-primary">انتخاب مدل</span>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         {models.map((model) => (
           <button
             key={model.id}
             onClick={() => handleModelClick(model.id)}
-            className={`py-1 px-4 rounded-3xl text-sm transition-colors ${
+            className={`text-sm rounded-3xl px-4 py-1 transition-colors ${
               model.id === selectedModel
                 ? "bg-slate-800 text-white"
                 : "border border-slate-300 text-slate-800 hover:bg-slate-100"

@@ -27,7 +27,7 @@ export type FormData = {
   notes?: string;
 };
 
-type Props = {}; 
+type Props = {};
 
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +51,9 @@ function ShoppingCartBillForm({}: Props) {
   // Gateway selection state
   const [gateway, setGateway] = useState<"mellat" | "snappay">("mellat");
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
-  const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
+  const [snappMessage, setSnappMessage] = useState<string | undefined>(
+    undefined,
+  );
 
   // Naive eligibility (we don't have amount here; we can rely on backend final validation)
   // Optionally, you can request a lightweight endpoint to compute amount and check eligibility.
@@ -106,7 +108,7 @@ function ShoppingCartBillForm({}: Props) {
           stockValid.itemsRemoved?.length
         ) {
           toast.error(
-            "برخی از کالاهای سبد خرید شما به دلیل موجودی تغییر کرده‌اند"
+            "برخی از کالاهای سبد خرید شما به دلیل موجودی تغییر کرده‌اند",
           );
         }
       }
@@ -175,13 +177,15 @@ function ShoppingCartBillForm({}: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <span className="lg:text-3xl text-lg text-neutral-800">اطلاعات صورت حساب</span>
+      <span className="text-lg text-neutral-800 lg:text-3xl">
+        اطلاعات صورت حساب
+      </span>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg">{error}</div>
+        <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>
       )}
 
-      <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ShoppingCartBillInformationForm
           register={register}
           errors={errors}
@@ -189,7 +193,7 @@ function ShoppingCartBillForm({}: Props) {
           setValue={setValue}
         />
 
-        <div className="flex flex-col gap-6 mb-20">
+        <div className="mb-20 flex flex-col gap-6">
           <ShoppingCartBillDeliveryForm
             control={control}
             setValue={setValue}
@@ -205,8 +209,8 @@ function ShoppingCartBillForm({}: Props) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`text-white bg-pink-500 lg:py-4 py-3 rounded-lg text-nowrap w-full lg:text-base text-xl ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            className={`text-xl w-full text-nowrap rounded-lg bg-pink-500 py-3 text-white lg:text-base lg:py-4 ${
+              isSubmitting ? "cursor-not-allowed opacity-70" : ""
             }`}
           >
             {isSubmitting ? "در حال پردازش..." : "پرداخت"}

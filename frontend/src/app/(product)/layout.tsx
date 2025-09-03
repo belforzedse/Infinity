@@ -14,11 +14,11 @@ export default function ProductLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div dir="rtl" className="pb-[81px] md:pb-0 bg-white">
+    <div dir="rtl" className="bg-white pb-[81px] md:pb-0">
       <header>
         <div className="hidden md:block">
           <div className="px-10 py-4">
-            <div className="max-w-[1440px] mx-auto">
+            <div className="mx-auto max-w-[1440px]">
               <div className="flex items-center justify-between">
                 <DesktopHeaderActions />
                 <Logo />

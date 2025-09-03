@@ -95,7 +95,7 @@ export default function CategoriesModal({
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="div"
-                  className="flex items-center justify-between mb-4"
+                  className="mb-4 flex items-center justify-between"
                 >
                   <h3 className="text-lg font-medium leading-6 text-gray-900">
                     دسته بندی ها
@@ -117,7 +117,7 @@ export default function CategoriesModal({
                       className="flex flex-col items-center gap-2"
                     >
                       <div
-                        className="rounded-full p-4 flex items-center justify-center w-20 h-20"
+                        className="flex h-20 w-20 items-center justify-center rounded-full p-4"
                         style={{ backgroundColor: category.backgroundColor }}
                       >
                         <Image

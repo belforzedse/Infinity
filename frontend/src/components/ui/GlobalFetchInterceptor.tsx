@@ -11,10 +11,15 @@ export default function GlobalFetchInterceptor() {
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
       // Ignore static asset and Next internal data prefetch requests
       try {
-        const raw = typeof input === "string" ? input : (input as any).url || "";
+        const raw =
+          typeof input === "string" ? input : (input as any).url || "";
         const url = new URL(raw, window.location.href);
-        const isStatic = /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(url.pathname);
-        const isNextInternal = url.pathname.startsWith("/_next") ||
+        const isStatic =
+          /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
+            url.pathname,
+          );
+        const isNextInternal =
+          url.pathname.startsWith("/_next") ||
           url.searchParams.has("_rsc") ||
           url.search.includes("__next");
         if (isStatic || isNextInternal) {

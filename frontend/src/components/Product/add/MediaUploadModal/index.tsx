@@ -24,7 +24,7 @@ export default function MediaUploadModal({
   const [activeTab, setActiveTab] = useState<TabType>("افزودن رسانه");
   const [dragActive, setDragActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
-    null
+    null,
   );
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -57,7 +57,7 @@ export default function MediaUploadModal({
       closeIcon={<DeleteIcon className="text-pink-500" />}
       titleClassName="!justify-end"
     >
-      <div className="grid grid-cols-5 h-full min-h-[600px] gap-3">
+      <div className="grid h-full min-h-[600px] grid-cols-5 gap-3">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <MediaUploader
           dragActive={dragActive}

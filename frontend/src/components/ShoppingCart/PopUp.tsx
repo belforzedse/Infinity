@@ -17,17 +17,14 @@ function PopUp({ isOpen, onClose }: Props) {
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
+          isOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
       />
 
       {/* Popup */}
       <div
-        className={`fixed top-0 left-0 h-full w-[321px] bg-white z-50 
-          transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          flex flex-col`}
+        className={`fixed left-0 top-0 z-50 h-full w-[321px] transform bg-white transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"} flex flex-col`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4">
@@ -35,17 +32,17 @@ function PopUp({ isOpen, onClose }: Props) {
 
           <button
             onClick={onClose}
-            className="border border-slate-200 rounded-full flex justify-center items-center w-8 h-8"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200"
           >
-            <CloseIcon className="w-6 h-6 text-pink-600" />
+            <CloseIcon className="h-6 w-6 text-pink-600" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-2 border border-slate-200 mx-4 rounded-lg">
+          <div className="mx-4 rounded-lg border border-slate-200 p-2">
             <div className="flex gap-3">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden relative">
+              <div className="relative h-24 w-24 overflow-hidden rounded-lg bg-gray-100">
                 <Image
                   src="/images/clothes-sm.jpg"
                   alt="Product"
@@ -53,22 +50,22 @@ function PopUp({ isOpen, onClose }: Props) {
                   fill
                 />
               </div>
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-1 flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <CategoryIcon className="w-4 h-4 text-neutral-400" />
+                    <CategoryIcon className="h-4 w-4 text-neutral-400" />
                     <span className="text-sm text-neutral-400">
                       شال و روسری
                     </span>
                   </div>
                   <button>
-                    <DeleteIcon className="w-4 h-4 text-pink-600" />
+                    <DeleteIcon className="h-4 w-4 text-pink-600" />
                   </button>
                 </div>
                 <span className="text-xs text-neutral-800">
                   شال چهار خونه موهر S00361
                 </span>
-                <div className="bg-slate-100 py-1 px-3 rounded-lg flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-lg bg-slate-100 px-3 py-1">
                   <span className="text-sm text-neutral-400">۱×</span>
                   <span className="text-sm text-neutral-800">
                     ۳۹۸,۰۰۰ تومان
@@ -80,22 +77,22 @@ function PopUp({ isOpen, onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 flex flex-col gap-2">
-          <div className="flex justify-between items-center py-2 px-1.5 border-t border-slate-200">
-            <span className="text-sm text-neutral-800 text-base">جمع جزء:</span>
-            <span className="text-sm text-neutral-800 text-lg">
+        <div className="flex flex-col gap-2 p-4">
+          <div className="flex items-center justify-between border-t border-slate-200 px-1.5 py-2">
+            <span className="text-sm text-base text-neutral-800">جمع جزء:</span>
+            <span className="text-sm text-lg text-neutral-800">
               ۳۹۸,۰۰۰ تومان
             </span>
           </div>
           <button
             onClick={onClose}
-            className="w-full text-center py-2 text-sm text-slate-500 bg-slate-200 rounded-lg"
+            className="text-sm w-full rounded-lg bg-slate-200 py-2 text-center text-slate-500"
           >
             مشاهده سبد خرید
           </button>
           <button
             onClick={onClose}
-            className="w-full py-2 bg-pink-500 text-white rounded-lg text-sm"
+            className="text-sm w-full rounded-lg bg-pink-500 py-2 text-white"
           >
             تسویه حساب
           </button>

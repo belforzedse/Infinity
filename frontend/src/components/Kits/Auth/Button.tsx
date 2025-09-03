@@ -26,10 +26,9 @@ export default function AuthButton({
   return (
     <button
       className={clsx(
-        "h-[54px] bg-pink-500/90 hover:bg-pink-500 disabled:bg-pink-300 disabled:cursor-not-allowed",
-        "text-white rounded-lg text-xl transition-colors",
+        "btn btn-primary text-xl h-[54px]",
         fullWidth && "w-full",
-        className
+        className,
       )}
       {...props}
     >

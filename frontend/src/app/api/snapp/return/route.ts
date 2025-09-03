@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const pairs: string[] = [];
     form.forEach((value, key) => {
       pairs.push(
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
       );
     });
     const body = pairs.join("&");
@@ -41,13 +41,13 @@ export async function POST(req: NextRequest) {
       const orderId = json?.data?.orderId || json?.orderId;
       return NextResponse.redirect(
         orderId ? `/orders/success?orderId=${orderId}` : "/orders/success",
-        { status: 302 }
+        { status: 302 },
       );
     }
 
     // If backend reports invalid order id or anything else, go to failure (preserving error message if any)
     const errorMsg = encodeURIComponent(
-      json?.error?.message || json?.data?.error || "payment_failed"
+      json?.error?.message || json?.data?.error || "payment_failed",
     );
     return NextResponse.redirect(`/orders/failure?error=${errorMsg}`, {
       status: 302,

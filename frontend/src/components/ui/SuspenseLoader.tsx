@@ -18,19 +18,19 @@ export default function SuspenseLoader({
     <div
       className={clsx(
         fullscreen && "min-h-[50vh] md:min-h-screen",
-        "w-full flex items-center justify-center",
-        className
+        "flex w-full items-center justify-center",
+        className,
       )}
       dir="rtl"
     >
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
-          <div className="h-12 w-12 rounded-full border-2 border-pink-200 animate-spin border-t-pink-500" />
-          <div className="absolute inset-0 -z-10 blur-xl bg-gradient-to-tr from-pink-200/40 to-purple-200/30 rounded-full" />
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-pink-200 border-t-pink-500" />
+          <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-tr from-pink-200/40 to-purple-200/30 blur-xl" />
         </div>
         <div className="text-sm text-neutral-600">{message}</div>
-        <div className="w-52 h-1.5 overflow-hidden rounded-full bg-neutral-100">
-          <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 animate-[loaderSlide_1.2s_ease-in-out_infinite]" />
+        <div className="h-1.5 w-52 overflow-hidden rounded-full bg-neutral-100">
+          <div className="h-full w-1/3 animate-[loaderSlide_1.2s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-pink-500 to-purple-500" />
         </div>
       </div>
 
@@ -50,4 +50,3 @@ export default function SuspenseLoader({
     </div>
   );
 }
-

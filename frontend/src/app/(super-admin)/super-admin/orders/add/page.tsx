@@ -57,7 +57,7 @@ export default function Page() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
 
           toast.success("سفارش با موفقیت ثبت شد");

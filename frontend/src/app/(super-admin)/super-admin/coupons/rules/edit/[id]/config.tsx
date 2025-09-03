@@ -38,14 +38,14 @@ export const config: UpsertPageConfigType<CouponRule> = {
   actionButtons: (props) => (
     <>
       <button
-        className="px-5 py-2 rounded-xl bg-slate-200 text-slate-500 text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 md:flex-none"
         onClick={props.onCancel}
       >
         بیخیال شدن
       </button>
 
       <button
-        className="px-5 py-2 rounded-xl bg-actions-primary text-white text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-actions-primary px-5 py-2 text-white md:flex-none"
         onClick={props.onSubmit}
       >
         ذخیره
@@ -115,8 +115,8 @@ export const config: UpsertPageConfigType<CouponRule> = {
               name: "terms",
               helper: () => (
                 <span className="text-sm text-actions-primary">
-                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر خود را برای
-                  اعمال تخفیف از فیلد مقابل انتخاب نمایید.
+                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر
+                  خود را برای اعمال تخفیف از فیلد مقابل انتخاب نمایید.
                 </span>
               ),
               type: "terms",
@@ -142,7 +142,7 @@ export const config: UpsertPageConfigType<CouponRule> = {
                           headers: {
                             Authorization: `Bearer ${STRAPI_TOKEN}`,
                           },
-                        }
+                        },
                       );
 
                     return (response as any).data.map((item: any) => ({
@@ -157,7 +157,7 @@ export const config: UpsertPageConfigType<CouponRule> = {
                           headers: {
                             Authorization: `Bearer ${STRAPI_TOKEN}`,
                           },
-                        }
+                        },
                       );
 
                     return (response as any).data.map((item: any) => ({

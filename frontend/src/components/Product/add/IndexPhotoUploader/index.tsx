@@ -25,9 +25,9 @@ const IndexPhotoUploader: React.FC<IndexPhotoUploaderProps> = ({
   } = useIndexImageUpload({ onImageUpload, onImageDelete, isEditMode });
 
   return (
-    <div className="flex flex-col items-center gap-2 bg-white py-5 rounded-xl">
+    <div className="flex flex-col items-center gap-2 rounded-xl bg-white py-5">
       <div
-        className="text-sm text-neutral-600 mb-0.5"
+        className="text-sm mb-0.5 text-neutral-600"
         style={{ direction: "rtl" }}
       >
         تصویر شاخص

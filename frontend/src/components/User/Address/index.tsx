@@ -41,15 +41,15 @@ const AddressContainer = () => {
   const renderAddresses = () => {
     if (loading) {
       return (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="flex min-h-[200px] items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="flex justify-center items-center min-h-[200px]">
+        <div className="flex min-h-[200px] items-center justify-center">
           <p className="text-red-500">{error}</p>
         </div>
       );
@@ -57,7 +57,7 @@ const AddressContainer = () => {
 
     if (addresses.length === 0) {
       return (
-        <div className="flex justify-center items-center min-h-[200px] border border-gray-200 rounded-lg p-4">
+        <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-gray-200 p-4">
           <p className="text-gray-500">
             هیچ آدرسی ثبت نشده است. لطفا یک آدرس جدید اضافه کنید.
           </p>
@@ -66,7 +66,7 @@ const AddressContainer = () => {
     }
 
     return (
-      <div className="flex flex-col lg:gap-4 gap-2">
+      <div className="flex flex-col gap-2 lg:gap-4">
         {addresses.map((address) => (
           <AddressCard
             key={address.id}

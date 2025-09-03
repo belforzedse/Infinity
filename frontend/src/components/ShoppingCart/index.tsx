@@ -23,14 +23,14 @@ function ShoppingCart() {
   if (submitOrderStep === SubmitOrderStep.Bill) return <ShoppingCartBillForm />;
 
   return (
-    <div className="flex flex-col gap-6 items-end pb-20 ">
-      <span className="text-3xl text-neutral-800 w-full">سبد خرید</span>
+    <div className="flex flex-col items-end gap-6 pb-20">
+      <span className="text-3xl w-full text-neutral-800">سبد خرید</span>
 
       {submitOrderStep === SubmitOrderStep.Table && (
         <>
           <ShoppingCartDesktopTable
             cartItems={cartItems}
-            className="lg:block hidden"
+            className="hidden lg:block"
           />
 
           <ShoppingCartMobileTable
@@ -40,7 +40,7 @@ function ShoppingCart() {
 
           <button
             onClick={() => setSubmitOrderStep(SubmitOrderStep.Bill)}
-            className="bg-pink-500 w-fit text-sm text-white px-6 py-2 rounded-lg"
+            className="text-sm w-fit rounded-lg bg-pink-500 px-6 py-2 text-white"
           >
             ادامه فرآیند خرید و تسویه حساب
           </button>

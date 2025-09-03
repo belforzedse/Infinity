@@ -19,7 +19,7 @@ interface SetCategoryTableProps {
 const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
   const setCategoriesData = useSetAtom(productCategoryDataAtom);
   const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination
+    productCategoryDataAtomPagination,
   );
 
   const handleDelete = async (id: string) => {
@@ -34,37 +34,37 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
       <table className="w-full">
         <thead>
           <tr>
-            <th className="text-right text-slate-400 text-xs">نام</th>
-            <th className="text-right text-slate-400 text-xs">نامک</th>
-            <th className="text-right text-slate-400 text-xs">والد</th>
+            <th className="text-xs text-right text-slate-400">نام</th>
+            <th className="text-xs text-right text-slate-400">نامک</th>
+            <th className="text-xs text-right text-slate-400">والد</th>
             <th className="text-right"></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {categories.map((category, index) => (
             <tr key={index} className="">
-              <td className="py-3 text-right text-sm text-neutral-800">
+              <td className="text-sm py-3 text-right text-neutral-800">
                 {category.attributes.Title}
               </td>
-              <td className="py-3 text-right text-sm text-neutral-800">
+              <td className="text-sm py-3 text-right text-neutral-800">
                 {category.attributes.Slug}
               </td>
-              <td className="py-3 text-right text-sm text-neutral-800">
+              <td className="text-sm py-3 text-right text-neutral-800">
                 {category.attributes.Parent ? category.attributes.Parent : ""}
               </td>
-              <td className="py-3 text-right text-sm text-neutral-800">
+              <td className="text-sm py-3 text-right text-neutral-800">
                 <div className="flex items-center justify-end gap-2">
                   <button
                     onClick={() => {}}
-                    className="text-slate-500 bg-slate-100 w-6 h-6 flex justify-center items-center rounded-md"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
                   >
                     <EditIcon />
                   </button>
                   <button
                     onClick={() => handleDelete(category.id.toString())}
-                    className="text-slate-500 bg-slate-100 w-6 h-6 flex justify-center items-center rounded-md"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
                   >
-                    <DeleteIcon className="w-5 h-5" />
+                    <DeleteIcon className="h-5 w-5" />
                   </button>
                 </div>
               </td>
