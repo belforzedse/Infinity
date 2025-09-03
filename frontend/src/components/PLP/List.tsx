@@ -327,7 +327,7 @@ export default function PLPList({
           {searchQuery && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold">
-                نتایج جستجو برای: "{searchQuery}"
+                نتایج جستجو برای: &quot;{searchQuery}&quot;
               </h2>
             </div>
           )}

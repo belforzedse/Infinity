@@ -110,7 +110,7 @@ export const config: UpsertPageConfigType<CouponRule> = {
               name: "terms",
               helper: () => (
                 <span className="text-sm text-actions-primary">
-                  شما می توانید از دسته بندی" محصولات" موارد مد نظر خود را برای
+                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر خود را برای
                   اعمال تخفیف از فیلد مقابل انتخاب نمایید.
                 </span>
               ),

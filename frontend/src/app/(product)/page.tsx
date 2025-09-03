@@ -3,6 +3,7 @@ import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
+import Image from "next/image";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 
 interface ProductCardProps {
@@ -230,49 +231,62 @@ export default async function Home() {
     <div className="mt-5 md:mt-8 px-4 md:px-8 lg:px-16 max-w-screen-xl mx-auto pb-8 md:pb-16">
       {/* Hero section with responsive images */}
       <div className="hidden md:block">
-        <img
+        <Image
           src="/images/index-img1-desktop.png"
           alt="Hero Banner"
+          width={1920}
+          height={560}
           className="w-full rounded-lg object-cover"
+          priority
         />
       </div>
       <div className="md:hidden">
-        <img
+        <Image
           src="/images/index-img1-mobile.png"
           alt="Hero Banner Mobile"
+          width={750}
+          height={520}
           className="w-full rounded-lg"
+          priority
         />
       </div>
 
       {/* Secondary banners section */}
       <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-4">
         <div className="md:w-1/2">
-        <Link href={`/plp?category=shirt`}>
-          <img
-            src="/images/index-img2-desktop.png"
-            alt="Banner"
-            className="w-full h-full rounded-lg object-cover"
-          />
+          <Link href={`/plp?category=shirt`}>
+            <Image
+              src="/images/index-img2-desktop.png"
+              alt="Banner"
+              width={1200}
+              height={600}
+              className="w-full h-full rounded-lg object-cover"
+            />
           </Link>
         </div>
 
         <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
           <div className="w-1/2 md:w-full">
-          <Link href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}>
-            <img
-              src="/images/index-img3-desktop.png"
-              alt="Banner"
-              className="w-full h-full rounded-lg object-cover"
-            /></Link>
+            <Link href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}>
+              <Image
+                src="/images/index-img3-desktop.png"
+                alt="Banner"
+                width={600}
+                height={600}
+                className="w-full h-full rounded-lg object-cover"
+              />
+            </Link>
           </div>
 
           <div className="w-1/2 md:w-full">
-          <Link href={`/plp?category=skirt`}>
-            <img
-              src="/images/index-img4-desktop.png"
-              alt="Banner"
-              className="w-full h-full rounded-lg object-cover"
-            />
+            <Link href={`/plp?category=skirt`}>
+              <Image
+                src="/images/index-img4-desktop.png"
+                alt="Banner"
+                width={600}
+                height={600}
+                className="w-full h-full rounded-lg object-cover"
+              />
             </Link>
           </div>
         </div>
@@ -317,10 +331,12 @@ export default async function Home() {
                 className="rounded-full p-4 flex items-center justify-center w-24 h-24 md:w-28 md:h-28 transition-transform hover:scale-105"
                 style={{ backgroundColor: category.backgroundColor }}
               >
-                <img
+                <Image
                   src={category.image}
                   alt={category.name}
-                  className="h-16 md:h-20"
+                  width={80}
+                  height={80}
+                  className="h-16 md:h-20 w-auto"
                 />
               </div>
               <span className="mt-2 text-sm md:text-base">{category.name}</span>

@@ -1,4 +1,5 @@
 import DeleteIcon from "@/components/Product/Icons/DeleteIcon";
+import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 import { SelectedImageDetailsSection } from "../../types";
 import DetailsSectionText from "./text";
@@ -30,9 +31,11 @@ export default function DetailsSection({
             </h3>
 
             <div className="flex gap-2 border-b pb-3 mb-3 border-slate-100">
-              <img
+              <Image
                 src={selectedImage.url}
                 alt={selectedImage.name}
+                width={70}
+                height={70}
                 className="w-[70px] h-[70px] object-cover rounded-md"
               />
 

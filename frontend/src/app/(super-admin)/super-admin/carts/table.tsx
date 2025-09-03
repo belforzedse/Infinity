@@ -6,6 +6,7 @@ import { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
+import Image from "next/image";
 
 export type Cart = {
   id: string;
@@ -125,18 +126,20 @@ export const columns: ColumnDef<Cart>[] = [
       return (
         <div className="flex items-center gap-2">
           {items.slice(0, 5).map((item) => (
-            <img
+            <Image
               key={item?.attributes?.product_variation?.data?.id}
               src={
                 API_BASE_URL.split("/api")[0] +
-                item?.attributes?.product_variation?.data?.attributes?.product
-                  ?.data?.attributes?.CoverImage?.data?.attributes?.url
+                (item?.attributes?.product_variation?.data?.attributes?.product
+                  ?.data?.attributes?.CoverImage?.data?.attributes?.url || "")
               }
               alt={
                 item?.attributes?.product_variation?.data?.attributes?.product
-                  ?.data?.attributes?.CoverImage?.data?.attributes?.name
+                  ?.data?.attributes?.CoverImage?.data?.attributes?.name || ""
               }
-              className="w-12 h-12 rounded-lg overflow-hidden"
+              width={48}
+              height={48}
+              className="w-12 h-12 rounded-lg overflow-hidden object-cover"
             />
           ))}
           {items.length > 5 && (

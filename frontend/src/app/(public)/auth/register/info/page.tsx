@@ -36,7 +36,7 @@ export default function RegisterInfoPage() {
     if (!phoneNumber) {
       router.push("/auth");
     }
-  }, [phoneNumber]);
+  }, [phoneNumber, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -263,7 +263,7 @@ export default function CategoriesListField({
       {/* Helper Text */}
       <div className="text-sm text-slate-500">
         <p>• برای تغییر ترتیب، آیتم‌ها را با کشیدن جابجا کنید.</p>
-        <p>• با کلیک روی "حذف" می‌توانید یک دسته بندی را حذف کنید.</p>
+        <p>• با کلیک روی &quot;حذف&quot; می‌توانید یک دسته بندی را حذف کنید.</p>
       </div>
     </div>
   );

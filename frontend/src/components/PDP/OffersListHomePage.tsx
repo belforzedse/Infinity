@@ -94,9 +94,9 @@ export default function OffersListHomePage(props: Props) {
           }}
         >
           {products.map((product) => (
-            <Link key={product.id} href={`/pdp/${product.id}`} className="snap-start">
+            <div key={product.id} className="snap-start">
               <ProductCard {...product} />
-            </Link>
+            </div>
           ))}
         </div>
 
@@ -116,9 +116,9 @@ export default function OffersListHomePage(props: Props) {
       {/* Desktop grid view */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
         {displayedProducts.map((product) => (
-          <Link key={product.id} href={`/pdp/${product.id}`} className="h-full">
+          <div key={product.id} className="h-full">
             <ProductCard {...product} />
-          </Link>
+          </div>
         ))}
       </div>
 

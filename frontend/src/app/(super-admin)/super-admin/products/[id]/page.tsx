@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect } from "react";
+import { use, useEffect, useMemo } from "react";
 import SetDetails from "@/components/Product/add/SetCategory/SetCategory";
 import Tabs from "@/components/Kits/Tabs";
 import { TabItem } from "@/types/Tabs";
@@ -28,7 +28,7 @@ export default function EditProductsPage({
   const { fetchAllCategories } = useProductCategory();
   const { handleFetchTags } = useProductTag();
 
-  const getProductParams = {
+  const getProductParams = useMemo(() => ({
     Files: true,
     Media: true,
     CoverImage: true,
@@ -36,7 +36,7 @@ export default function EditProductsPage({
     product_tags: true,
     product_variations: true,
     product_other_categories: true,
-  };
+  }), []);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -49,12 +49,12 @@ export default function EditProductsPage({
     };
 
     fetchProduct();
-  }, [id, setProductData]);
+  }, [id, setProductData, getProductParams]);
 
   useEffect(() => {
     fetchAllCategories();
     handleFetchTags();
-  }, []);
+  }, [fetchAllCategories, handleFetchTags]);
 
   const handleUpdateProduct = async () => {
     try {
@@ -93,15 +93,13 @@ export default function EditProductsPage({
         <SetDetails isEditMode />
       </div>
       <div className="col-span-2 flex-1 lg:order-2 order-1 h-fit">
-        <Tabs
-          tabs={tabs}
-          children={[
+        <Tabs tabs={tabs} tabsClassName="!bg-transparent">
+          {[
             <Overall key={"overall"} productData={productData} isEditMode />,
             <Variables key={"variables"} productId={Number(id)} />,
             <Sizes key={"sizes"} productId={Number(id)} />,
           ]}
-          tabsClassName="!bg-transparent"
-        />
+        </Tabs>
       </div>
 
       <div className="border-t border-slate-200 flex justify-end items-center col-span-3 pt-2.5 mt-2 gap-2 order-3">

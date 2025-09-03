@@ -8,6 +8,7 @@ import { API_BASE_URL } from "@/constants/api";
 import { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import { ColumnDef } from "@tanstack/react-table";
+import Image from "next/image";
 
 export type Product = {
   id: string;
@@ -63,14 +64,16 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center gap-2">
-          <img
+          <Image
             src={
               API_BASE_URL.split("/api")[0] +
               row.original?.attributes?.CoverImage?.data?.attributes?.formats
                 ?.thumbnail?.url
             }
             alt={row.original?.attributes?.CoverImage?.data?.attributes?.name}
-            className="w-12 h-12 rounded-xl overflow-hidden"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-xl overflow-hidden object-cover"
           />
 
           <div className="flex gap-2 flex-col">
@@ -172,14 +175,16 @@ export const MobileTable = ({ data }: Props) => {
         >
           <input type="checkbox" className="w-5 h-5" />
 
-          <img
+          <Image
             src={
               API_BASE_URL.split("/api")[0] +
               row?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail
                 ?.url
             }
             alt={row?.attributes?.CoverImage?.data?.attributes?.name}
-            className="w-12 h-12 rounded-lg"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-lg object-cover"
           />
 
           <div className="flex flex-col gap-2 flex-1">

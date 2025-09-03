@@ -3,10 +3,11 @@ import Logo from "@/components/Kits/Logo";
 import superAdminSidebar from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
 import SettingsIcon from "../Icons/SettingsIcon";
+import { useRouter, usePathname } from "next/navigation";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -17,18 +18,36 @@ export default function SuperAdminLayoutSidebar({
   isOpen,
   onClose,
 }: SuperAdminLayoutSidebarProps) {
-  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const toggleMenu = (label: string) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
+  // Auto-open the section that matches current path
+  useEffect(() => {
+    const next: Record<string, boolean> = {};
+    const curr = pathname.replace(/\/$/, "");
+    superAdminSidebar.forEach((it) => {
+      const base = (it.href ?? "").replace(/\/$/, "");
+      if (
+        it.children.length > 0 &&
+        base &&
+        (curr === base || curr.startsWith(base + "/"))
+      ) {
+        next[it.label] = true;
+      }
+    });
+    setOpenMenus((p) => ({ ...p, ...next }));
+  }, [pathname]);
+
+  const openAndNavigate = (item: (typeof superAdminSidebar)[number]) => {
+    if (item.href) router.push(item.href);
+    if (item.children.length > 0) {
+      setOpenMenus((p) => ({ ...p, [item.label]: true }));
+    }
   };
 
   return (
     <>
-      {/* Overlay */}
       <div
         className={clsx(
           "fixed inset-0 bg-black bg-opacity-50 transition-opacity lg:hidden",
@@ -37,7 +56,6 @@ export default function SuperAdminLayoutSidebar({
         onClick={onClose}
       />
 
-      {/* Sidebar */}
       <div
         id="sidebar"
         className={clsx(
@@ -48,7 +66,6 @@ export default function SuperAdminLayoutSidebar({
           "bg-white p-3 rounded-tl-xl rounded-bl-xl flex flex-col gap-4"
         )}
       >
-        {/* Close button for mobile */}
         <button
           className="lg:hidden absolute top-4 left-4 p-2 hover:bg-neutral-100 rounded-full"
           onClick={onClose}
@@ -76,75 +93,90 @@ export default function SuperAdminLayoutSidebar({
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-6">
-            {superAdminSidebar.map((item) => (
-              <div key={item.label} className="flex flex-col">
-                <div
-                  className={clsx(
-                    "flex items-center justify-between cursor-pointer py-1.5 px-2",
-                    item.children.length > 0 && "mb-2"
-                  )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    item.children.length > 0 && toggleMenu(item.label);
-                  }}
-                >
-                  {item.children.length > 0 ? (
-                    <div className="flex items-center gap-2">
-                      {item.icon}
-                      <span className="text-neutral-600 text-sm font-medium">
-                        {item.label}
-                      </span>
-                    </div>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className="flex items-center gap-2"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+            {superAdminSidebar.map((item) => {
+              const hasChildren = item.children.length > 0;
+              const isOpenMenu = !!openMenus[item.label];
+
+              return (
+                <div key={item.label} className="flex flex-col">
+                  {/* Parent row */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className={clsx(
+                      "flex items-center justify-between cursor-pointer py-1.5 px-2",
+                      hasChildren && "mb-2"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAndNavigate(item);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openAndNavigate(item);
+                      }
+                    }}
+                  >
+                    {hasChildren ? (
                       <div className="flex items-center gap-2">
                         {item.icon}
                         <span className="text-neutral-600 text-sm font-medium">
                           {item.label}
                         </span>
                       </div>
-                    </Link>
-                  )}
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className="flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center gap-2">
+                          {item.icon}
+                          <span className="text-neutral-600 text-sm font-medium">
+                            {item.label}
+                          </span>
+                        </div>
+                      </Link>
+                    )}
 
-                  {item.children.length > 0 && (
-                    <div
-                      className={clsx(
-                        "transition-transform duration-200",
-                        openMenus[item.label] && "rotate-180"
-                      )}
-                    >
-                      <ChevronDownIcon />
+                    {hasChildren && (
+                      <div
+                        className={clsx(
+                          "transition-transform duration-200",
+                          isOpenMenu && "rotate-180"
+                        )}
+                      >
+                        <ChevronDownIcon />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submenu */}
+                  {hasChildren && isOpenMenu && (
+                    <div className="mt-2 rounded-xl border border-neutral-100 bg-neutral-50/80 overflow-hidden">
+                      {item.children.map((child, index) => (
+                        <Fragment key={child.href ?? child.label ?? index}>
+                          <Link
+                            href={child.href}
+                            onClick={(e) => e.stopPropagation()}
+                            className="block px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+                          >
+                            {child.label}
+                          </Link>
+                          {index !== item.children.length - 1 && (
+                            <div className="mx-4 h-px bg-neutral-100" />
+                          )}
+                        </Fragment>
+                      ))}
                     </div>
                   )}
                 </div>
-
-                {item.children.length > 0 && openMenus[item.label] && (
-                  <div className="mt-2 rounded-xl border border-neutral-100 bg-neutral-50/80 overflow-hidden">
-                    {item.children.map((child, index) => (
-                      <Fragment key={child.href ?? child.label ?? index}>
-                        <Link
-                          href={child.href}
-                          onClick={(e) => e.stopPropagation()}
-                          className="block px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
-                        >
-                          {child.label}
-                        </Link>
-                        {index !== item.children.length - 1 && (
-                          <div className="mx-4 h-px bg-neutral-100" />
-                        )}
-                      </Fragment>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          <div className="w-full h-[1px] bg-neutral-100"></div>
+          <div className="w-full h-[1px] bg-neutral-100" />
 
           <div className="flex items-center cursor-pointer py-1.5 px-2">
             <Link
