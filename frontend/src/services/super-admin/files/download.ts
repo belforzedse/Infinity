@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { ApiResponse } from "@/types/api";
+// removed unused import: ApiResponse from "@/types/api"
 import { toast } from "react-hot-toast";
 
 interface FileFormat {

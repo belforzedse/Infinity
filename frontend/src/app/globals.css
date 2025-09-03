@@ -7,12 +7,12 @@
   --foreground: #171717;
 }
 
-
-
 body {
   color: var(--foreground);
   background: var(--background);  
 }
+
+/* (Removed global hover styles to limit scope to super-admin navbar) */
 
 @layer utilities {
   .scrollbar-hide {

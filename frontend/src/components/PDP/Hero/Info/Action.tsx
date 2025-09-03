@@ -9,7 +9,10 @@ import { useState, useEffect, useRef } from "react";
 import Select from "@/components/Kits/Form/Select";
 import useProductLike from "@/hooks/useProductLike";
 import useAddToCart from "@/hooks/useAddToCart";
-import { hasStockForVariation, getAvailableStockCount } from "@/services/product/product";
+import {
+  hasStockForVariation,
+  getAvailableStockCount,
+} from "@/services/product/product";
 import toast from "react-hot-toast";
 
 const options = [
@@ -53,19 +56,19 @@ interface PDPHeroInfoActionProps {
 
 /**
  * Product Detail Page Hero Action Component
- * 
+ *
  * Renders the action buttons section of a product detail page, including:
  * - Add to cart functionality with quantity selection
  * - Share product button
  * - Add to favorites button
  * - Navigate to comments button
- * 
+ *
  * Features:
  * - Real-time stock validation
  * - Quantity adjustment based on available stock
  * - Toast notifications for user feedback
  * - URL sharing with clipboard support
- * 
+ *
  * @param {PDPHeroInfoActionProps} props Component props
  * @returns {JSX.Element} Rendered component
  */
@@ -103,7 +106,7 @@ export default function PDPHeroInfoAction({
       size,
       model,
       variationId,
-    }
+    },
   );
 
   // Get available stock count for current variation
@@ -136,7 +139,7 @@ export default function PDPHeroInfoAction({
     console.log("Current variation ID being sent to cart:", variationId);
     console.log(
       "Current variation object we're checking stock for:",
-      currentVariation
+      currentVariation,
     );
     console.log("Available stock count:", availableStock);
 
@@ -213,7 +216,7 @@ export default function PDPHeroInfoAction({
     } else {
       // If the element doesn't exist with the data attribute, try to find it by component name
       const pdpCommentElement = document.querySelector(
-        ".flex.gap-4.flex-col-reverse.md\\:flex-row"
+        ".flex.gap-4.flex-col-reverse.md\\:flex-row",
       );
 
       if (pdpCommentElement) {
@@ -274,10 +277,10 @@ export default function PDPHeroInfoAction({
     dynamicOptions.find((opt) => opt.id === quantity) || null;
 
   return (
-    <div className="flex gap-3 items-center flex-col md:flex-row relative">
-      <div className="flex gap-3 items-center w-full md:w-auto">
+    <div className="relative flex flex-col items-center gap-3 md:flex-row">
+      <div className="flex w-full items-center gap-3 md:w-auto">
         <button
-          className="flex-1 md:w-12 md:flex-auto h-12 flex items-center justify-center shadow-md rounded-xl"
+          className="flex h-12 flex-1 items-center justify-center rounded-xl shadow-md md:w-12 md:flex-auto"
           onClick={handleShare}
           aria-label="کپی لینک محصول"
         >
@@ -285,7 +288,7 @@ export default function PDPHeroInfoAction({
         </button>
 
         <button
-          className="flex-1 md:w-12 md:flex-auto h-12 flex items-center justify-center shadow-md rounded-xl"
+          className="flex h-12 flex-1 items-center justify-center rounded-xl shadow-md md:w-12 md:flex-auto"
           onClick={handleScrollToComments}
           aria-label="مشاهده نظرات"
         >
@@ -293,8 +296,8 @@ export default function PDPHeroInfoAction({
         </button>
 
         <button
-          className={`flex-1 md:w-12 md:flex-auto h-12 flex items-center justify-center shadow-md rounded-xl ${
-            isLoading ? "opacity-50 cursor-wait" : ""
+          className={`flex h-12 flex-1 items-center justify-center rounded-xl shadow-md md:w-12 md:flex-auto ${
+            isLoading ? "cursor-wait opacity-50" : ""
           }`}
           onClick={toggleLike}
           disabled={isLoading}
@@ -309,17 +312,17 @@ export default function PDPHeroInfoAction({
         </button>
       </div>
 
-      <div className="flex gap-3 flex-1 w-full">
+      <div className="flex w-full flex-1 gap-3">
         {!hasStock ? (
           <Button
-            className="flex-1 flex items-center justify-center bg-gray-400 text-white text-base py-3 rounded-xl cursor-not-allowed"
+            className="text-base flex flex-1 cursor-not-allowed items-center justify-center rounded-xl bg-gray-400 py-3 text-white"
             text="ناموجود"
             disabled={true}
           />
         ) : !isInCart ? (
           <Button
-            className={`flex-1 flex items-center justify-center bg-actions-primary text-white text-base py-3 rounded-xl ${
-              isAdding ? "opacity-50 cursor-wait" : ""
+            className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 text-white ${
+              isAdding ? "cursor-wait opacity-50" : ""
             }`}
             text="افزودن به سبد خرید"
             leftIcon={<BasketIcon />}
@@ -334,7 +337,7 @@ export default function PDPHeroInfoAction({
         ) : (
           <>
             <Button
-              className="flex-1 flex items-center justify-center bg-actions-primary text-white text-base py-3 rounded-xl"
+              className="text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 text-white"
               text="افزودن"
               leftIcon={<BasketIcon />}
               onClick={() => handleAddToCart(quantity)}
@@ -351,7 +354,7 @@ export default function PDPHeroInfoAction({
       </div>
 
       {showShareToast && (
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-4 py-2 rounded-lg text-sm">
+        <div className="text-sm absolute -top-12 left-1/2 -translate-x-1/2 transform rounded-lg bg-black bg-opacity-80 px-4 py-2 text-white">
           لینک کپی شد
         </div>
       )}

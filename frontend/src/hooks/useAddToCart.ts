@@ -1,6 +1,6 @@
 import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+// removed unused import: useRouter from "next/navigation"
 import toast from "react-hot-toast";
 
 interface UseAddToCartProps {
@@ -26,7 +26,7 @@ export default function useAddToCart({
   model,
   variationId,
 }: UseAddToCartProps) {
-  const router = useRouter();
+  // removed unused: router
   const {
     addToCart: addToCartContext,
     openDrawer,
@@ -97,8 +97,7 @@ export default function useAddToCart({
 
     try {
       // Check if user is logged in by looking for accessToken in localStorage
-      const accessToken = localStorage.getItem("accessToken");
-      const isLoggedIn = !!accessToken;
+      const accessToken = localStorage.getItem("accessToken"); // removed unused: isLoggedIn
 
       // Add to cart - if logged in, we'll use local storage for now, but this could be extended
       // to use an API endpoint for authenticated users in the future

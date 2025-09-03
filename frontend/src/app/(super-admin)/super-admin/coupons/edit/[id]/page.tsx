@@ -80,7 +80,7 @@ export default function Page() {
             headers: {
               Authorization: `Bearer ${STRAPI_TOKEN}`,
             },
-          }
+          },
         );
 
         const discount = (response as any).data.attributes;
@@ -118,7 +118,7 @@ export default function Page() {
               category: "user",
               tags:
                 discount.local_users?.data?.map((user: any) =>
-                  user.id.toString()
+                  user.id.toString(),
                 ) || [],
               tagLabels: userTagLabels,
             },
@@ -126,7 +126,7 @@ export default function Page() {
               category: "product",
               tags:
                 discount.product_variations?.data?.map((product: any) =>
-                  product.id.toString()
+                  product.id.toString(),
                 ) || [],
               tagLabels: productTagLabels,
             },
@@ -186,7 +186,7 @@ export default function Page() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
 
           toast.success("کد تخفیف با موفقیت بروزرسانی شد");

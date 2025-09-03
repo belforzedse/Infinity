@@ -137,7 +137,7 @@ export default function PLPList({
       if (category) {
         queryParams.append(
           "filters[product_main_category][Slug][$eq]",
-          category
+          category,
         );
       }
 
@@ -145,7 +145,7 @@ export default function PLPList({
       if (available === "true") {
         queryParams.append(
           "filters[product_variations][IsPublished][$eq]",
-          "true"
+          "true",
         );
       }
 
@@ -153,13 +153,13 @@ export default function PLPList({
       if (minPrice) {
         queryParams.append(
           "filters[product_variations][Price][$gte]",
-          minPrice
+          minPrice,
         );
       }
       if (maxPrice) {
         queryParams.append(
           "filters[product_variations][Price][$lte]",
-          maxPrice
+          maxPrice,
         );
       }
 
@@ -172,7 +172,7 @@ export default function PLPList({
       if (material) {
         queryParams.append(
           "filters[product_variations][Material][$eq]",
-          material
+          material,
         );
       }
 
@@ -237,14 +237,14 @@ export default function PLPList({
       (variation) => {
         const price = variation.attributes.Price;
         return price && parseInt(price) > 0;
-      }
+      },
     );
 
     // If showAvailableOnly is true, also check if any variation is published
     if (available === "true") {
       const hasAvailableVariation =
         product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished
+          (variation) => variation.attributes.IsPublished,
         );
       if (!(hasValidPrice && hasAvailableVariation)) return false;
     } else if (!hasValidPrice) {
@@ -255,7 +255,7 @@ export default function PLPList({
     if (discountOnly === "true") {
       const hasDiscount = product.attributes.product_variations?.data?.some(
         (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0
+          (variation.attributes as any)?.general_discounts?.data?.length > 0,
       );
       if (!hasDiscount) return false;
     }
@@ -298,9 +298,9 @@ export default function PLPList({
 
   return (
     <div className="container mx-auto px-4">
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
-        <div className="hidden md:flex flex-col w-[269px] gap-7">
+        <div className="hidden w-[269px] flex-col gap-7 md:flex">
           <Filter showAvailableOnly={available === "true"} />
 
           <SidebarSuggestions
@@ -319,7 +319,7 @@ export default function PLPList({
         {/* Main content */}
         <div className="flex-1">
           {/* Mobile filter buttons */}
-          <div className="md:hidden mb-4">
+          <div className="mb-4 md:hidden">
             <PLPListMobileFilter />
           </div>
 
@@ -338,7 +338,7 @@ export default function PLPList({
           ) : (
             <>
               {/* Desktop view - ProductCard */}
-              <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="hidden grid-cols-2 gap-4 md:grid lg:grid-cols-3">
                 {validProducts.map((product) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
@@ -346,7 +346,7 @@ export default function PLPList({
                       (variation) => {
                         const price = variation.attributes.Price;
                         return price && parseInt(price) > 0;
-                      }
+                      },
                     );
 
                   const hasDiscount =
@@ -360,7 +360,7 @@ export default function PLPList({
                           .attributes.Amount
                       : undefined;
                   const price = parseInt(
-                    firstValidVariation?.attributes?.Price || "0"
+                    firstValidVariation?.attributes?.Price || "0",
                   );
                   const discountPrice =
                     hasDiscount && discount
@@ -392,7 +392,7 @@ export default function PLPList({
               </div>
 
               {/* Mobile view - ProductSmallCard */}
-              <div className="md:hidden flex flex-col gap-3">
+              <div className="flex flex-col gap-3 md:hidden">
                 {validProducts.map((product) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
@@ -400,7 +400,7 @@ export default function PLPList({
                       (variation) => {
                         const price = variation.attributes.Price;
                         return price && parseInt(price) > 0;
-                      }
+                      },
                     );
 
                   const hasDiscount =
@@ -414,7 +414,7 @@ export default function PLPList({
                           .attributes.Amount
                       : undefined;
                   const price = parseInt(
-                    firstValidVariation?.attributes?.Price || "0"
+                    firstValidVariation?.attributes?.Price || "0",
                   );
                   const discountPrice =
                     hasDiscount && discount

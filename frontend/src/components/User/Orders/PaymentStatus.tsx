@@ -39,8 +39,8 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-2">
-        <div className="animate-spin w-5 h-5 border-2 border-pink-500 rounded-full border-t-transparent"></div>
-        <span className="mr-2 text-sm text-gray-500">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-pink-500 border-t-transparent"></div>
+        <span className="text-sm mr-2 text-gray-500">
           در حال بررسی وضعیت پرداخت...
         </span>
       </div>
@@ -48,7 +48,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   }
 
   if (error) {
-    return <div className="text-red-500 text-sm">{error}</div>;
+    return <div className="text-sm text-red-500">{error}</div>;
   }
 
   return (
@@ -57,10 +57,10 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
         <span className="text-sm ml-2">وضعیت پرداخت:</span>
         {isPaid ? (
           <div className="flex items-center">
-            <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center">
+            <div className="text-xs flex items-center rounded-full bg-green-100 px-2 py-1 text-green-700">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3 ml-1"
+                className="ml-1 h-3 w-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -77,10 +77,10 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
           </div>
         ) : (
           <div className="flex items-center">
-            <div className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full flex items-center">
+            <div className="text-xs flex items-center rounded-full bg-orange-100 px-2 py-1 text-orange-700">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3 ml-1"
+                className="ml-1 h-3 w-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -98,7 +98,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
         )}
       </div>
       {orderStatus && (
-        <div className="text-sm text-gray-600 mt-1">
+        <div className="text-sm mt-1 text-gray-600">
           <span className="ml-1">وضعیت سفارش:</span>
           <span className="text-gray-800">
             {getStatusTranslation(orderStatus)}

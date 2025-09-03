@@ -12,8 +12,8 @@ export default function TextField({ value, onChange, readOnly }: Props) {
       type="text"
       disabled={readOnly}
       readOnly={readOnly}
-      className={`w-full border border-neutral-200 rounded-lg py-3 px-5 text-sm ${
-        readOnly ? " text-slate-500" : ""
+      className={`text-sm w-full rounded-lg border border-neutral-200 px-5 py-3 ${
+        readOnly ? "text-slate-500" : ""
       }`}
       value={value}
       onChange={(e) => onChange(e.target.value)}

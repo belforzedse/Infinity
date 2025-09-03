@@ -77,7 +77,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
 
   return (
     <>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-3xl text-[#202224]">
             {isRecycleBinOpen ? "زباله‌دان" : title}
@@ -108,7 +108,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
           )}
         </div>
       </div>
-      <div className="mt-3 p-7 bg-white rounded-2xl">{children}</div>
+      <div className="card mt-3 p-7">{children}</div>
       {hasPagination && (
         <SuperAdminPagination
           className="mt-4"

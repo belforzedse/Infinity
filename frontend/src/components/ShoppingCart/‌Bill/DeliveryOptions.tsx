@@ -45,7 +45,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
       return shippingMethods.filter(
         (method) =>
           method.attributes.Title.includes("پیک") ||
-          method.attributes.Title.includes("حضوری")
+          method.attributes.Title.includes("حضوری"),
       );
     }
 
@@ -53,7 +53,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
     return shippingMethods.filter(
       (method) =>
         method.attributes.Title.includes("تیپاکس") ||
-        method.attributes.Title.includes("پست")
+        method.attributes.Title.includes("پست"),
     );
   };
 
@@ -61,7 +61,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
 
   if (filteredShippingMethods.length === 0) {
     return (
-      <div className="text-gray-500 p-4 text-center">
+      <div className="p-4 text-center text-gray-500">
         در حال حاضر هیچ روش ارسالی موجود نیست
       </div>
     );
@@ -74,11 +74,11 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
     value: method.id.toString(),
     method: method,
     content: (
-      <div className="flex justify-between items-center w-full">
-        <span className="text-neutral-800 lg:text-base text-sm">
+      <div className="flex w-full items-center justify-between">
+        <span className="text-sm text-neutral-800 lg:text-base">
           {method.attributes.Title}
         </span>
-        <span className="text-black lg:text-base text-sm">
+        <span className="text-sm text-black lg:text-base">
           {method.attributes.Price === 0
             ? "رایگان"
             : `${method.attributes.Price.toLocaleString()} تومان`}
@@ -99,7 +99,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
             name="delivery-method"
             onChange={(selectedValue) => {
               const selected = filteredShippingMethods.find(
-                (method) => method.id.toString() === selectedValue
+                (method) => method.id.toString() === selectedValue,
               );
               if (selected) {
                 field.onChange(selected);

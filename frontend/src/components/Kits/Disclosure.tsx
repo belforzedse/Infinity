@@ -23,7 +23,7 @@ export default function DisclosureItem({
       <Disclosure as="div" defaultOpen={defaultOpen}>
         <DisclosureButton className="group flex w-full items-center justify-between">
           {title}
-          <ArrowDownIcon className="rotate-180 group-data-[open]:rotate-0 w-6 h-6" />
+          <ArrowDownIcon className="h-6 w-6 rotate-180 group-data-[open]:rotate-0" />
         </DisclosureButton>
         <DisclosurePanel className="mt-2">{children}</DisclosurePanel>
       </Disclosure>

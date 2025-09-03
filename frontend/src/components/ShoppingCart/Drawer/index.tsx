@@ -33,7 +33,7 @@ export default function CartDrawer() {
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-end  text-neutral-800 text-center">
+          <div className="flex min-h-full items-center justify-end text-center text-neutral-800">
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-out duration-300"
@@ -43,8 +43,8 @@ export default function CartDrawer() {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="w-full max-w-md min-h-screen transform overflow-hidden bg-white shadow-xl transition-all">
-                <div className="flex flex-col h-full">
+              <Dialog.Panel className="min-h-screen w-full max-w-md transform overflow-hidden bg-white shadow-xl transition-all">
+                <div className="flex h-full flex-col">
                   <CartDrawerHeader />
 
                   {cartItems.length === 0 ? (

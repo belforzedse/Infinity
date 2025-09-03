@@ -57,9 +57,9 @@ export default function OffersListHomePage(props: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center gap-1">
           {icon}
-          <span className="text-foreground-primary text-2xl md:text-3xl">
+          <span className="text-2xl text-foreground-primary md:text-3xl">
             {title}
           </span>
         </div>
@@ -75,7 +75,7 @@ export default function OffersListHomePage(props: Props) {
           {/* Desktop: navigate to PLP with appropriate filters */}
           <Link
             href={getPlpHref()}
-            className="hidden md:block text-pink-600 text-sm hover:underline"
+            className="text-sm hidden text-pink-600 hover:underline md:block"
           >
             مشاهده همه
           </Link>
@@ -86,7 +86,7 @@ export default function OffersListHomePage(props: Props) {
       <div className="md:hidden">
         <div
           ref={scrollRef}
-          className="gap-5 overflow-x-auto flex snap-x snap-mandatory scrollbar-hide"
+          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
@@ -101,10 +101,10 @@ export default function OffersListHomePage(props: Props) {
         </div>
 
         {!isShowAllProducts && products.length > 4 && (
-          <div className="flex items-center justify-center mt-4">
+          <div className="mt-4 flex items-center justify-center">
             <Link
               href={getPlpHref()}
-              className="text-foreground-primary text-base flex items-center gap-1"
+              className="text-base flex items-center gap-1 text-foreground-primary"
             >
               <span>مشاهده همه</span>
               <ArrowLeftIcon />
@@ -114,7 +114,7 @@ export default function OffersListHomePage(props: Props) {
       </div>
 
       {/* Desktop grid view */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+      <div className="hidden gap-4 gap-y-6 md:grid md:grid-cols-2 lg:grid-cols-4">
         {displayedProducts.map((product) => (
           <div key={product.id} className="h-full">
             <ProductCard {...product} />
@@ -124,10 +124,10 @@ export default function OffersListHomePage(props: Props) {
 
       {/* Desktop view more button */}
       {!isShowAllProducts && products.length > 8 && (
-        <div className="hidden md:flex items-center justify-center mt-6">
+        <div className="mt-6 hidden items-center justify-center md:flex">
           <Link
             href={getPlpHref()}
-            className="text-foreground-primary text-base flex items-center gap-1 hover:text-pink-600 transition-colors py-2 px-4 border border-pink-100 rounded-full hover:bg-pink-50"
+            className="text-base flex items-center gap-1 rounded-full border border-pink-100 px-4 py-2 text-foreground-primary transition-colors hover:bg-pink-50 hover:text-pink-600"
           >
             <span>مشاهده محصولات بیشتر</span>
             <ArrowLeftIcon />

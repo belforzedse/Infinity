@@ -54,8 +54,8 @@ const PLPBottomNavigation = () => {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-fuchsia-50 rounded-t-xl md:hidden z-30">
-        <div className="flex justify-between items-center px-4 py-2.5">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white md:hidden">
+        <div className="flex items-center justify-between px-4 py-2.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -66,7 +66,7 @@ const PLPBottomNavigation = () => {
                 onClick={item.onClick}
                 className={`flex w-[74px] flex-col items-center gap-1 p-2 ${
                   isActive
-                    ? "text-pink-600 bg-pink-50 rounded-lg"
+                    ? "rounded-lg bg-pink-50 text-pink-600"
                     : "text-neutral-800"
                 }`}
               >

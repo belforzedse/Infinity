@@ -16,7 +16,7 @@ export default function VerificationInput({
 
   const processInput = (
     e: React.ChangeEvent<HTMLInputElement>,
-    slot: number
+    slot: number,
   ) => {
     const num = e.target.value;
     if (/[^0-9]/.test(num)) return;
@@ -35,7 +35,7 @@ export default function VerificationInput({
 
   const onKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    slot: number
+    slot: number,
   ) => {
     if (e.key === "Backspace" && !code[slot] && slot !== length - 1) {
       e.preventDefault();
@@ -77,7 +77,7 @@ export default function VerificationInput({
   }, [length]);
 
   return (
-    <div className="flex gap-3 w-full">
+    <div className="flex w-full gap-3">
       {code.map((digit, index) => (
         <input
           key={index}
@@ -93,8 +93,7 @@ export default function VerificationInput({
           ref={(el) => {
             inputs.current[index] = el;
           }}
-          className="w-[18%] aspect-square bg-slate-200 rounded-[10px] text-center text-2xl focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all
-                     hover:bg-slate-100 focus:bg-slate-100"
+          className="text-2xl aspect-square w-[18%] rounded-[10px] bg-slate-200 text-center transition-all hover:bg-slate-100 focus:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-pink-400"
           style={{
             caretColor: "transparent",
             direction: "ltr",

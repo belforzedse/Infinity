@@ -46,7 +46,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
       try {
         setIsLoadingCategories(true);
         const response = await fetch(
-          `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`
+          `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`,
         );
 
         if (!response.ok) {
@@ -77,7 +77,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setCategory(id);
     },
-    [setCategory]
+    [setCategory],
   );
 
   // Availability filter handler
@@ -85,7 +85,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (checked: boolean) => {
       setAvailable(checked ? "true" : null);
     },
-    [setAvailable]
+    [setAvailable],
   );
 
   // Price filter handler
@@ -94,7 +94,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
       setMinPrice(min.toString());
       setMaxPrice(max.toString());
     },
-    [setMinPrice, setMaxPrice]
+    [setMinPrice, setMaxPrice],
   );
 
   // Size filter handler
@@ -102,7 +102,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setSize(id);
     },
-    [setSize]
+    [setSize],
   );
 
   // Material filter handler
@@ -110,7 +110,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setMaterial(id);
     },
-    [setMaterial]
+    [setMaterial],
   );
 
   // Season filter handler
@@ -118,7 +118,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setSeason(id);
     },
-    [setSeason]
+    [setSeason],
   );
 
   // Gender filter handler
@@ -126,7 +126,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setGender(id);
     },
-    [setGender]
+    [setGender],
   );
 
   // Usage filter handler
@@ -134,7 +134,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setUsage(id);
     },
-    [setUsage]
+    [setUsage],
   );
 
   return (

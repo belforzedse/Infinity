@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import "../styles/fonts.css";
+import "../styles/components.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";

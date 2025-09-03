@@ -73,15 +73,15 @@ export const columns: ColumnDef<Product>[] = [
             alt={row.original?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
             height={48}
-            className="w-12 h-12 rounded-xl overflow-hidden object-cover"
+            className="h-12 w-12 overflow-hidden rounded-xl object-cover"
           />
 
-          <div className="flex gap-2 flex-col">
-            <span className="text-foreground-primary text-xs !leading-none">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs !leading-none text-foreground-primary">
               {row.original?.attributes?.Title}
             </span>
 
-            <span className="text-foreground-secondary text-xs !leading-none">
+            <span className="text-xs !leading-none text-foreground-secondary">
               {
                 row.original?.attributes?.product_variations?.data?.[0]
                   ?.attributes?.SKU
@@ -119,11 +119,11 @@ export const columns: ColumnDef<Product>[] = [
       const sum = row.original?.attributes?.product_variations?.data?.reduce(
         (acc, curr) =>
           acc + curr?.attributes?.product_stock?.data?.attributes?.Count,
-        0
+        0,
       );
 
       return (
-        <span className="text-right px-2 py-1 text-white bg-green-600 rounded-xl">
+        <span className="rounded-xl bg-green-600 px-2 py-1 text-right text-white">
           {sum} عدد در انبار
         </span>
       );
@@ -138,7 +138,7 @@ export const columns: ColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           <RemoveActionButton
             isRemoved={!!row.original?.attributes?.removedAt}
             id={row.original?.id.toString()}
@@ -167,13 +167,13 @@ type Props = {
 
 export const MobileTable = ({ data }: Props) => {
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data?.map((row) => (
         <div
           key={row?.id}
-          className="p-3 bg-white rounded-lg w-full min-h-[76px] flex items-center gap-2"
+          className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
         >
-          <input type="checkbox" className="w-5 h-5" />
+          <input type="checkbox" className="h-5 w-5" />
 
           <Image
             src={
@@ -184,11 +184,11 @@ export const MobileTable = ({ data }: Props) => {
             alt={row?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
             height={48}
-            className="w-12 h-12 rounded-lg object-cover"
+            className="h-12 w-12 rounded-lg object-cover"
           />
 
-          <div className="flex flex-col gap-2 flex-1">
-            <div className="flex justify-between items-center w-full">
+          <div className="flex flex-1 flex-col gap-2">
+            <div className="flex w-full items-center justify-between">
               <span className="text-sm text-neutral-800">
                 {row?.attributes?.Title}
                 {
@@ -197,12 +197,12 @@ export const MobileTable = ({ data }: Props) => {
                 }
               </span>
 
-              <button className="flex items-center justify-center rounded-full border border-neutral-600 w-6 h-6">
+              <button className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600">
                 <ShowMoreIcon />
               </button>
             </div>
 
-            <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
+            <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex gap-1">
                 <span className="text-xs text-neutral-400">
                   {
@@ -216,7 +216,7 @@ export const MobileTable = ({ data }: Props) => {
                     (acc, curr) =>
                       acc +
                       curr?.attributes?.product_stock?.data?.attributes?.Count,
-                    0
+                    0,
                   )}
                   عدد در انبار
                 </span>
@@ -226,7 +226,7 @@ export const MobileTable = ({ data }: Props) => {
                 {priceFormatter(
                   +row?.attributes?.product_variations?.data?.[0]?.attributes
                     ?.Price,
-                  " تومان"
+                  " تومان",
                 )}
               </span>
             </div>

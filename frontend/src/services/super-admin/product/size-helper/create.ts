@@ -8,7 +8,7 @@ interface CreateSizeHelperData {
 }
 
 export const createProductSizeHelper = async (
-  data: CreateSizeHelperData
+  data: CreateSizeHelperData,
 ): Promise<ApiResponse<any>> => {
   const response = await apiClient.post<ApiResponse<any>>(
     ENDPOINTS.PRODUCT.SIZE_HELPER,
@@ -17,7 +17,7 @@ export const createProductSizeHelper = async (
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -25,7 +25,7 @@ export const createProductSizeHelper = async (
 
 export const updateProductSizeHelper = async (
   id: number,
-  data: CreateSizeHelperData
+  data: CreateSizeHelperData,
 ): Promise<ApiResponse<any>> => {
   const response = await apiClient.put<ApiResponse<any>>(
     `${ENDPOINTS.PRODUCT.SIZE_HELPER}/${id}`,
@@ -34,7 +34,7 @@ export const updateProductSizeHelper = async (
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 
   return response.data;

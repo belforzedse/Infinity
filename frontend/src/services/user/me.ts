@@ -1,5 +1,5 @@
 import { apiClient } from "../index";
-import { ENDPOINTS, HTTP_STATUS } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
 
 export interface MeResponse {
@@ -18,7 +18,9 @@ export interface MeResponse {
   isAdmin?: boolean;
 }
 
-export const me = async (requireAdmin: boolean = false): Promise<MeResponse> => {
+export const me = async (
+  requireAdmin: boolean = false,
+): Promise<MeResponse> => {
   const endpoint = `${ENDPOINTS.USER.ME}`;
   const accessToken = localStorage.getItem("accessToken");
 

@@ -45,7 +45,7 @@ export default async function PDP({
   // If we still don't have product data, just return a message
   if (!productData && error) {
     return (
-      <div className="flex flex-col gap-8 items-center justify-center p-10">
+      <div className="flex flex-col items-center justify-center gap-8 p-10">
         <h1 className="text-2xl font-bold">محصول مورد نظر یافت نشد</h1>
         <p>لطفا محصول دیگری را انتخاب کنید یا به صفحه اصلی بازگردید.</p>
         <Link href="/" className="text-blue-500 hover:underline">
@@ -75,7 +75,7 @@ export default async function PDP({
   // Get IDs of other categories this product belongs to
   const otherCategoryIds =
     productData?.attributes.product_other_categories?.data?.map((cat) =>
-      cat.id.toString()
+      cat.id.toString(),
     ) || [];
 
   // Fetch related products from same main category and other categories
@@ -94,7 +94,7 @@ export default async function PDP({
     } else {
       console.error(
         "Error fetching main category products:",
-        results[0].reason
+        results[0].reason,
       );
     }
 
@@ -103,7 +103,7 @@ export default async function PDP({
     } else {
       console.error(
         "Error fetching other categories products:",
-        results[1].reason
+        results[1].reason,
       );
     }
   } catch (error) {

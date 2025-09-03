@@ -4,6 +4,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import AreaLineChart from "@/components/SuperAdmin/Reports/AreaLineChart";
+import { faNum } from "@/utils/faNum";
 
 const months = [
   "فروردین",
@@ -36,18 +37,18 @@ const salesSumData = months.map((m) => ({
 
 export default function ReportsPage() {
   const [period, setPeriod] = React.useState<"ماهانه" | "هفتگی" | "روزانه">(
-    "ماهانه"
+    "ماهانه",
   );
   const [product, setProduct] = React.useState("محصول خاصی");
   const [gateway, setGateway] = React.useState("درگاه پرداخت");
   const [shipping, setShipping] = React.useState("روش های حمل و نقل");
 
   return (
-    <div className="px-6 py-6 space-y-8" dir="rtl">
+    <div className="space-y-8 px-6 py-6" dir="rtl">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">گزارش ها</h1>
-        <nav className="text-sm text-slate-500 space-x-2 space-x-reverse">
-          <span className="text-pink-500 font-medium">کلی</span>
+        <nav className="text-sm space-x-2 space-x-reverse text-slate-500">
+          <span className="font-medium text-pink-500">کلی</span>
           <span className="mx-2">/</span>
           <span>جزئی</span>
           <span className="mx-2">/</span>
@@ -95,7 +96,7 @@ export default function ReportsPage() {
 
           <div className="flex items-center gap-2 text-slate-500">
             <span className="text-sm">بازه زمانی</span>
-            <button className="h-9 rounded-lg border border-slate-200 px-3 text-sm hover:bg-slate-50">
+            <button className="text-sm h-9 rounded-lg border border-slate-200 px-3 hover:bg-slate-50">
               انتخاب
             </button>
           </div>
@@ -151,7 +152,7 @@ export default function ReportsPage() {
 
           <div className="flex items-center gap-2 text-slate-500">
             <span className="text-sm">بازه زمانی</span>
-            <button className="h-9 rounded-lg border border-slate-200 px-3 text-sm hover:bg-slate-50">
+            <button className="text-sm h-9 rounded-lg border border-slate-200 px-3 hover:bg-slate-50">
               انتخاب
             </button>
           </div>
@@ -167,7 +168,7 @@ export default function ReportsPage() {
             data={salesSumData}
             xKey="ماه"
             yKey="مقدار"
-            valueFormatter={(v) => `${v.toLocaleString("fa-IR")} تومان`}
+            valueFormatter={(v) => `${faNum(v)} تومان`}
           />
         </div>
       </section>
@@ -182,9 +183,9 @@ function Select({
   return (
     <select
       className={clsx(
-        "h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700",
+        "text-sm h-9 rounded-lg border border-slate-200 bg-white px-3 text-slate-700",
         "focus:outline-none focus:ring-2 focus:ring-pink-500/40",
-        className
+        className,
       )}
       {...props}
     />

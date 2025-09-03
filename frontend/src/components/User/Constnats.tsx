@@ -1,10 +1,10 @@
 import AccountIcon from "@/components/User/Icons/AccountIcon";
 import UserOrdersIcon from "@/components/User/Icons/UserOrdersIcon";
 import UserFavoritesIcon from "@/components/User/Icons/UserFavoritesIcon";
-import UserScoresIcon from "@/components/User/Icons/UserScoresIcon";
+// removed unused import: UserScoresIcon from "@/components/User/Icons/UserScoresIcon"
 import UserWalletIcon from "@/components/User/Icons/UserWalletIcon";
 import UserAddressesIcon from "@/components/User/Icons/UserAddressesIcon";
-import UserPasswordIcon from "@/components/User/Icons/UserPasswordIcon";
+// removed unused import: UserPasswordIcon from "@/components/User/Icons/UserPasswordIcon"
 import LogoutIcon from "@/components/Icons/LogoutIcon";
 import { OrderStatus, PersianOrderStatus } from "@/constants/enums";
 

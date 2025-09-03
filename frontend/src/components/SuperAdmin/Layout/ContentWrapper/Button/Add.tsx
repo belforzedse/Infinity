@@ -10,7 +10,7 @@ export default function SuperAdminLayoutContentWrapperButtonAdd({
 }) {
   return (
     <Link href={path ?? "#"}>
-      <button className="text-sm text-slate-700 flex items-center gap-1 py-1 px-3 border border-slate-400 bg-white rounded-lg w-full md:w-auto justify-center">
+      <button className="text-sm flex w-full items-center justify-center gap-1 rounded-lg border border-slate-400 bg-white px-3 py-1 text-slate-700 md:w-auto">
         <PlusIcon />
         <span className="text-foreground-primary">{text}</span>
       </button>

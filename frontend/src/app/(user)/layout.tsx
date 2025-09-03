@@ -11,7 +11,7 @@ export default function PublicLayout({
 }) {
   return (
     <div className="public-layout bg-white pt-5">
-      <div className="container mx-auto lg:p-0 px-4">
+      <div className="container mx-auto px-4 lg:p-0">
         <Header />
 
         {children}

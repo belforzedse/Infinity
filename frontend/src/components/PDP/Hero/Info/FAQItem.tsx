@@ -14,23 +14,23 @@ export default function PDPHeroInfoFAQItem(props: Props) {
 
   return (
     <Disclosure as="div" className="w-full">
-      <DisclosureButton className=" text-neutral-800 w-full border-b pb-2 text-right flex items-center justify-between group">
+      <DisclosureButton className="group flex w-full items-center justify-between border-b pb-2 text-right text-neutral-800">
         {title}
 
         <div>
-          <span className=" text-foreground-primary text-lg  group-data-[open]:hidden">
+          <span className="text-lg text-foreground-primary group-data-[open]:hidden">
             +
           </span>
-          <span className="text-foreground-primary text-lg  group-data-[open]:block hidden">
+          <span className="text-lg hidden text-foreground-primary group-data-[open]:block">
             -
           </span>
         </div>
       </DisclosureButton>
 
-      <div className="overflow-hidden py-2  ">
+      <div className="overflow-hidden py-2">
         <DisclosurePanel
           transition
-          className=" text-neutral-500 origin-top transition duration-200 ease-out data-[closed]:-translate-y-6 data-[closed]:opacity-0"
+          className="origin-top text-neutral-500 transition duration-200 ease-out data-[closed]:-translate-y-6 data-[closed]:opacity-0"
         >
           {content}
         </DisclosurePanel>

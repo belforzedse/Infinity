@@ -8,10 +8,10 @@ import BackButtonToStore from "../BackButtonToStore";
 
 const UserHeader: React.FC = () => {
   return (
-    <header className="bg-[#F5F5F4] w-full flex lg:flex-row flex-row-reverse items-center justify-between rounded-2xl lg:px-10 px-3 lg:mb-8 mb-3 lg:py-2">
+    <header className="mb-3 flex w-full flex-row-reverse items-center justify-between rounded-2xl bg-[#F5F5F4] px-3 lg:mb-8 lg:flex-row lg:px-10 lg:py-2">
       <BackButtonToStore />
 
-      <div className="w-[76px] md:w-[104px] h-[65px] md:h-[47px] relative">
+      <div className="relative h-[65px] w-[76px] md:h-[47px] md:w-[104px]">
         <Image
           src="/images/full-logo.png"
           alt="Logo"

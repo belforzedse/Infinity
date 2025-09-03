@@ -59,7 +59,7 @@ async function getProducts(
   usage?: string,
   search?: string,
   sort?: string,
-  hasDiscount?: boolean
+  hasDiscount?: boolean,
 ) {
   // Handle search queries differently
   if (search) {
@@ -197,14 +197,14 @@ async function getProducts(
       (variation) => {
         const price = variation.attributes.Price;
         return price && parseInt(price) > 0;
-      }
+      },
     );
 
     // If showAvailableOnly is true, also check if any variation is published
     if (showAvailableOnly) {
       const hasAvailableVariation =
         product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished
+          (variation) => variation.attributes.IsPublished,
         );
       return hasValidPrice && hasAvailableVariation;
     }
@@ -217,8 +217,8 @@ async function getProducts(
     filteredProducts = filteredProducts.filter((product: Product) =>
       product.attributes.product_variations?.data?.some(
         (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0
-      )
+          (variation.attributes as any)?.general_discounts?.data?.length > 0,
+      ),
     );
   }
 
@@ -273,7 +273,7 @@ export default async function PLPPage({
     usage,
     search,
     sort,
-    hasDiscount
+    hasDiscount,
   );
 
   // Determine if we're showing search results or category results
@@ -281,7 +281,7 @@ export default async function PLPPage({
 
   return (
     <>
-      <div className="mt-3 md:mt-0 md:pt-[38px] md:pb-[80px]">
+      <div className="mt-3 md:mt-0 md:pb-[80px] md:pt-[38px]">
         {/* Show hero banner only for category browsing, not search results */}
         {!isSearchResults && <PLPHeroBanner category={category} />}
 

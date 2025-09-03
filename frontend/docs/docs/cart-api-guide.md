@@ -419,13 +419,11 @@ The cart can have the following status values:
 ## Key Implementation Notes
 
 1. **Stock Management**:
-
    - The system automatically checks stock availability before adding/updating items
    - When stock is insufficient, quantities are automatically adjusted down to match available stock
    - Items with zero stock are automatically removed from the cart
 
 2. **Transaction Safety**:
-
    - When finalizing to an order, a database transaction ensures all operations succeed or fail together
    - Stock is updated and stock logs are created only when the order is successfully created
 

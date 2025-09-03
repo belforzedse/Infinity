@@ -13,11 +13,11 @@ const IndexPhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
 }) => {
   return (
     <button
-      className="w-40 h-32 aspect-video bg-slate-100 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors"
+      className="flex aspect-video h-32 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl bg-slate-100 transition-colors hover:bg-gray-100"
       onClick={onUploadButtonClick}
     >
       {imagePreview ? (
-        <div className="relative w-full h-full">
+        <div className="relative h-full w-full">
           <Image
             src={imagePreview}
             alt="Preview"
@@ -27,7 +27,7 @@ const IndexPhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
           />
         </div>
       ) : (
-        <CameraIcon className="lg:w-16 lg:h-16 w-14 h-14 text-gray-400" />
+        <CameraIcon className="h-14 w-14 text-gray-400 lg:h-16 lg:w-16" />
       )}
 
       {/* <MediaUploadModal isOpen={isOpen} onClose={() => setIsOpen(false)} /> */}
