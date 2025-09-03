@@ -172,5 +172,5 @@ export default function OrdersTabs() {
     );
   });
 
-  return <Tabs tabs={ORDER_STATUS} children={tabContent} />;
+  return <Tabs tabs={ORDER_STATUS}>{tabContent}</Tabs>;
 }

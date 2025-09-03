@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
@@ -119,9 +120,11 @@ export default function CategoriesModal({
                         className="rounded-full p-4 flex items-center justify-center w-20 h-20"
                         style={{ backgroundColor: category.backgroundColor }}
                       >
-                        <img
+                        <Image
                           src={category.image}
                           alt={category.name}
+                          width={48}
+                          height={48}
                           className="h-12 w-12 object-contain"
                         />
                       </div>

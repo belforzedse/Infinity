@@ -30,7 +30,7 @@ export default function SuperAdminLayout({
       .catch(() => {
         router.replace("/auth");
       });
-  }, []);
+  }, [router]);
 
   return (
     <>

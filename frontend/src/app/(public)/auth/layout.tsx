@@ -29,7 +29,7 @@ export default function AuthLayout({
       .catch(() => {
         // If fetch fails, stay on auth and let user log in again
       });
-  }, []);
+  }, [router]);
 
   return (
     <main className="min-h-screen bg-pink-50 flex items-start md:items-center justify-center p-4">

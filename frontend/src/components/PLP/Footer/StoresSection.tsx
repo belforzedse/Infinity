@@ -41,10 +41,19 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
 
   useEffect(() => {
     if (contactInfo) {
-      setPhone(contactInfo.Phone);
-      setWhatsapp(contactInfo.Whatsapp);
-      setInstagram(contactInfo.Instagram);
-      setTelegram(contactInfo.Telegram);
+      // Only override defaults when API provides a value
+      if (contactInfo.Phone && contactInfo.Phone.trim() !== "") {
+        setPhone(contactInfo.Phone);
+      }
+      if (typeof contactInfo.Whatsapp === "string" && contactInfo.Whatsapp.trim() !== "") {
+        setWhatsapp(contactInfo.Whatsapp);
+      }
+      if (typeof contactInfo.Instagram === "string" && contactInfo.Instagram.trim() !== "") {
+        setInstagram(contactInfo.Instagram);
+      }
+      if (typeof contactInfo.Telegram === "string" && contactInfo.Telegram.trim() !== "") {
+        setTelegram(contactInfo.Telegram);
+      }
     }
   }, [contactInfo]);
 

@@ -1,15 +1,16 @@
+import type { ReactNode } from "react";
 import ProductIcon from "@/components/SuperAdmin/Layout/Icons/ProductIcon";
 import OrdersIcon from "@/components/SuperAdmin/Layout/Icons/OrdersIcon";
 import UsersIcon from "@/components/SuperAdmin/Layout/Icons/UsersIcon";
 import CartIcon from "@/components/SuperAdmin/Layout/Icons/CartIcon";
 import ShippingIcon from "@/components/SuperAdmin/Layout/Icons/ShippingIcon";
 import PercentIcon from "@/components/SuperAdmin/Layout/Icons/PercentIcon";
-import DashboardIcon from "../components/SuperAdmin/Layout/Icons/DashboardIcon";
+import DashboardIcon from "@/components/SuperAdmin/Layout/Icons/DashboardIcon";
+import PaymentIcon from "@/components/SuperAdmin/Layout/Icons/PaymentIcon";
 import {
-  FiLayout,
-  FiMenu,
+  //FiLayout,
+  //FiMenu,
   FiUsers,
-  FiCreditCard,
   FiLayers,
   FiBell,
   FiBarChart,
@@ -17,15 +18,7 @@ import {
   FiGlobe,
 } from "react-icons/fi";
 
-// Create a styled layout icon to match others
-const LayoutIcon = () => (
-  <FiLayout className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
-
-// Create a styled menu/navigation icon
-const NavigationIcon = () => (
-  <FiMenu className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
+// Create a styled layout/menu icons (unused definitions removed)
 
 //Create a styled club icon
 const MultiUsersIcon = () => (
@@ -37,11 +30,6 @@ const PagesIcon = () => (
   <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 
-//Create a styles payment icon
-const PaymentIcon = () => (
-  <FiCreditCard className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
-
 const BellIcon = () => (
   <FiBell className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
@@ -49,11 +37,23 @@ const ChartIcon = () => (
   <FiBarChart className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 
-const ChacheIcon = () => (
+const CacheIcon = () => (
   <FiDatabase className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 
-const superAdminSidebar = [
+type SidebarChild = {
+  label: string;
+  href: string;
+};
+
+type SidebarItem = {
+  label: string;
+  href: string;
+  icon: ReactNode;
+  children: SidebarChild[];
+};
+
+const superAdminSidebar: SidebarItem[] = [
   {
     label: "پیشخوان",
     href: "/super-admin/",
@@ -67,38 +67,38 @@ const superAdminSidebar = [
     children: [
       {
         label: "ویژگی ها",
-        href: "/super-admin/products/comments",
+        href: "/super-admin/products/attributes",
       },
       {
         label: "دسته بندی ها",
-        href: "/super-admin/products",
+        href: "/super-admin/products/categories",
       },
       {
         label: "برچسب ها",
-        href: "/super-admin/products",
+        href: "/super-admin/products/tags",
       },
       {
         label: "مدیریت نظرات",
-        href: "/super-admin/products",
+        href: "/super-admin/products/comments",
       },
       {
         label: "راهنمای اندازه",
-        href: "/super-admin/products",
+        href: "/super-admin/products/size-guide",
       },
     ],
   },
   {
     label: "باشگاه مشتریان",
-    href: "/super-admin/orders",
+    href: "/super-admin/customer-club",
     icon: <MultiUsersIcon />,
     children: [
       {
         label: "عملیات ها",
-        href: "/super-admin/products/comments",
+        href: "/super-admin/customer-club/actions",
       },
       {
         label: "آیتم ها",
-        href: "/super-admin/products",
+        href: "/super-admin/customer-club/items",
       },
     ],
   },
@@ -122,7 +122,7 @@ const superAdminSidebar = [
   },
   {
     label: "مدیریت تخفیف ها",
-    href: "/super-admin/coupons",
+    href: "#",
     icon: <PercentIcon />,
     children: [
       {
@@ -181,13 +181,13 @@ const superAdminSidebar = [
 
   {
     label: "حافظه پنهان",
-    href: "/super-admin/navigation/edit",
-    icon: <ChacheIcon />,
+    href: "/super-admin/cache",
+    icon: <CacheIcon />,
     children: [],
   },
   {
     label: "سئو",
-    href: "/super-admin/navigation/edit",
+    href: "/super-admin/SEO",
     icon: <FiGlobe className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
     children: [],
   },

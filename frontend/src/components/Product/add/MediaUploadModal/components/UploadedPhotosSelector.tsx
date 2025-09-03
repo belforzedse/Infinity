@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { FilterSection } from "./FilterSection";
 
 interface UploadedPhotosSelectorProps {
@@ -63,9 +64,11 @@ export const UploadedPhotosSelector: React.FC<UploadedPhotosSelectorProps> = ({
               ${selectedPhotos.includes(photo) ? "ring-2 ring-blue-500" : ""}`}
             onClick={() => onPhotoSelect(photo)}
           >
-            <img
+            <Image
               src={photo}
               alt={`Uploaded photo ${index + 1}`}
+              width={300}
+              height={300}
               className="w-full object-cover aspect-square"
             />
           </div>
