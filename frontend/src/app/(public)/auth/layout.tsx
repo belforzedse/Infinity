@@ -5,6 +5,7 @@ import AuthIllustration from "@/components/Auth/Illustration";
 import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/services";
+import SuspenseLoader from "@/components/ui/SuspenseLoader";
 
 export default function AuthLayout({
   children,
@@ -47,7 +48,7 @@ export default function AuthLayout({
               </div>
             </div>
 
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <Suspense fallback={<SuspenseLoader />}>{children}</Suspense>
           </div>
         </div>
 

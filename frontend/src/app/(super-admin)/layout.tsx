@@ -5,6 +5,7 @@ import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/services";
+import SuspenseLoader from "@/components/ui/SuspenseLoader";
 
 export default function SuperAdminLayout({
   children,
@@ -34,7 +35,7 @@ export default function SuperAdminLayout({
 
   return (
     <>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<SuspenseLoader fullscreen /> }>
         <div className="hidden md:block">
           <Desktop>{children}</Desktop>
         </div>
