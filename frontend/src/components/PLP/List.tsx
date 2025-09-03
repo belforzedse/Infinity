@@ -297,7 +297,7 @@ export default function PLPList({
   });
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4" data-plp-top>
       <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
         <div className="hidden w-[269px] flex-col gap-7 md:flex">
