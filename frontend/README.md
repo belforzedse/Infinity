@@ -202,8 +202,11 @@ src/
 
 3. **Set up environment variables**
 
+   Copy the example file and update the values as needed:
+
    ```bash
-   NEXT_PUBLIC_API_BASE_URL=https://api.infinity.rgbgroup.ir/api
+   cp .env.example .env.local
+   # then edit .env.local
    ```
 
 4. **Run the development server**
