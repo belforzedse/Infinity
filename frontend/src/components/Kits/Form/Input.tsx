@@ -1,4 +1,6 @@
 import React, { InputHTMLAttributes, ChangeEvent } from "react";
+import { Input as UITextInput } from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 
 interface InputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
@@ -56,7 +58,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <div className="relative">
-          <input
+          <UITextInput
             ref={ref}
             id={name}
             name={name}
@@ -71,7 +73,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             pattern={pattern}
             autoComplete={autoComplete}
             dir={dir}
-            className={`input max-h-[50px] text-foreground-primary ${icon ? "pl-10" : ""} ${error ? "border-red-500" : ""} ${className || ""} `}
+            className={cn(
+              "max-h-[50px] text-foreground-primary",
+              icon && "pl-10",
+              error && "border-red-500",
+              className,
+            )}
             {...props}
           />
           {icon && (

@@ -1,5 +1,6 @@
 import { InputHTMLAttributes, ReactNode } from "react";
-import clsx from "clsx";
+import { Input } from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 import Text from "../../Text";
 
 interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -24,9 +25,9 @@ export default function AuthInput({
   return (
     <div className={parentClassNames}>
       <div className="relative">
-        <input
-          className={clsx(
-            "h-12 w-full rounded-lg border border-slate-200 bg-background-form",
+        <Input
+          className={cn(
+            "h-12 bg-background-form",
             "text-base text-foreground-muted",
             rightElement ? "pr-[4.5rem]" : "pr-4",
             leftElement ? "pl-12" : "pl-4",
