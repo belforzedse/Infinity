@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
+import { faNum } from "@/utils/faNum";
 import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
@@ -103,7 +104,7 @@ export default function ProductSalesReportPage() {
                         مجموع فروش
                       </h3>
                       <p className="text-2xl font-bold text-blue-600">
-                        {totalRevenue.toLocaleString()} تومان
+                        {faNum(totalRevenue)} تومان
                       </p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
@@ -130,7 +131,7 @@ export default function ProductSalesReportPage() {
                         تعداد فروش
                       </h3>
                       <p className="text-2xl font-bold text-green-600">
-                        {totalCount.toLocaleString()} عدد
+                        {faNum(totalCount)} عدد
                       </p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -239,15 +240,13 @@ function ProductSalesTreemap({
           <p className="mb-2 font-medium text-neutral-800">{data.name}</p>
           <div className="text-sm space-y-1">
             <p className="text-blue-600">
-              <span className="font-medium">درآمد:</span>{" "}
-              {data.revenue.toLocaleString()} تومان
+              <span className="font-medium">درآمد:</span> {faNum(data.revenue)} تومان
             </p>
             <p className="text-green-600">
-              <span className="font-medium">تعداد:</span>{" "}
-              {data.count.toLocaleString()} عدد
+              <span className="font-medium">تعداد:</span> {faNum(data.count)} عدد
             </p>
             <p className="text-amber-600">
-              <span className="font-medium">رتبه:</span> {data.rank}
+              <span className="font-medium">رتبه:</span> {faNum(data.rank)}
             </p>
           </div>
         </div>
@@ -295,12 +294,12 @@ function ProductSalesTreemap({
           </div>
         </div>
         <div className="text-xs text-neutral-500">
-          <span className="md:hidden">
-            نمایش {Math.min(rows.length, 8)} محصول از {rows.length} محصول
-          </span>
-          <span className="hidden md:inline">
-            نمایش {Math.min(rows.length, 20)} محصول از {rows.length} محصول
-          </span>
+            <span className="md:hidden">
+              نمایش {faNum(Math.min(rows.length, 8))} محصول از {faNum(rows.length)} محصول
+            </span>
+            <span className="hidden md:inline">
+              نمایش {faNum(Math.min(rows.length, 20))} محصول از {faNum(rows.length)} محصول
+            </span>
         </div>
       </div>
     </div>
