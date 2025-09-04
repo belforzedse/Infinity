@@ -2,3 +2,9 @@ include:
   - project: "infinity/devops"
     ref: main
     file: "infinity-frontend-cicd.yml"
+
+lint:
+  image: node:20
+  script:
+    - yarn install --frozen-lockfile
+    - yarn lint
