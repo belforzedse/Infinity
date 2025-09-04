@@ -33,7 +33,7 @@ export default function SuperAdminLayoutSidebar({
         base &&
         (curr === base || curr.startsWith(base + "/"))
       ) {
-        next[it.label] = true;
+        next[it.id] = true;
       }
     });
     setOpenMenus((p) => ({ ...p, ...next }));
@@ -42,7 +42,7 @@ export default function SuperAdminLayoutSidebar({
   const openAndNavigate = (item: (typeof superAdminSidebar)[number]) => {
     if (item.href) router.push(item.href);
     if (item.children.length > 0) {
-      setOpenMenus((p) => ({ ...p, [item.label]: true }));
+      setOpenMenus((p) => ({ ...p, [item.id]: true }));
     }
   };
 
@@ -95,10 +95,10 @@ export default function SuperAdminLayoutSidebar({
           <div className="flex flex-col gap-6">
             {superAdminSidebar.map((item) => {
               const hasChildren = item.children.length > 0;
-              const isOpenMenu = !!openMenus[item.label];
+              const isOpenMenu = !!openMenus[item.id];
 
               return (
-                <div key={item.label} className="flex flex-col">
+                <div key={item.id} className="flex flex-col">
                   {/* Parent row */}
                   <div
                     role="button"
@@ -143,11 +143,30 @@ export default function SuperAdminLayoutSidebar({
 
                     {hasChildren && (
                       <div
+                        role="button"
+                        tabIndex={0}
                         className={clsx(
                           "transition-transform duration-200 p-1 rounded-md",
                           "transition-colors duration-150 hover:bg-neutral-50",
                           isOpenMenu && "rotate-180",
                         )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenus((p) => ({
+                            ...p,
+                            [item.id]: !p[item.id],
+                          }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOpenMenus((p) => ({
+                              ...p,
+                              [item.id]: !p[item.id],
+                            }));
+                          }
+                        }}
                       >
                         <ChevronDownIcon />
                       </div>
@@ -162,7 +181,7 @@ export default function SuperAdminLayoutSidebar({
                         const href = (child.href ?? "").replace(/\/$/, "");
                         const active = !!href && (curr === href || curr.startsWith(href + "/"));
                         return (
-                          <Fragment key={child.href ?? child.label ?? index}>
+                          <Fragment key={child.id}>
                             <Link
                               href={child.href}
                               onClick={(e) => e.stopPropagation()}
