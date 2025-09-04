@@ -1,0 +1,53 @@
+---
+description: Frontend super-admin report pages, services, auth pattern, and dev port
+alwaysApply: false
+---
+
+# Frontend Reports (Super Admin)
+
+Pages:
+
+- `/super-admin/reports/liquidity` (Recharts LineChart)
+- `/super-admin/reports/product-sales` (Recharts Treemap; request appends `debug=1` during troubleshooting)
+- `/super-admin/reports/gateway-liquidity` (Recharts Pie/Donut)
+
+Date Inputs:
+
+- Use `zaman` Jalali `DatePicker`
+- Normalize picker outputs to valid JS `Date` before calling `.toISOString()`
+
+Auth:
+
+- All requests go through `apiClient`; it injects `Authorization: Bearer <accessToken>` from `localStorage.accessToken`
+
+Dev Port:
+
+- Next dev runs on port `2888`
+
+Chart Library:
+
+- Use `recharts` wrapped with `ResponsiveContainer`
+- Import Tooltip as alias to avoid collisions with app-level `Tooltip`: `import { Tooltip as RechartsTooltip } from 'recharts'`
+- For RTL pages, keep chart SVGs in an LTR container (`dir="ltr"`) while keeping surrounding layout RTL
+- Prefer `isAnimationActive={false}` for dashboard stability
+
+Product Sales (Treemap):
+
+- Data keys: `dataKey="revenue"`, `nameKey="display"`
+- Show full product name in custom tooltip; use shortened display text inside cells
+- Use a small rotating color palette for cells
+
+Liquidity (Line):
+
+- X axis uses Persian formatted dates
+- Y axis uses `tickFormatter` (K-format)
+
+Gateway Liquidity (Pie/Donut):
+
+- Use `innerRadius` for donut style and render percentage labels for slices > 5%
+
+Services:
+
+- Liquidity: [liquidity.ts](mdc:src/services/super-admin/reports/liquidity.ts)
+- Product Sales: [productSales.ts](mdc:src/services/super-admin/reports/productSales.ts)
+- Gateway Liquidity: [gatewayLiquidity.ts](mdc:src/services/super-admin/reports/gatewayLiquidity.ts)

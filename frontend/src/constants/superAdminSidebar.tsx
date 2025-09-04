@@ -98,6 +98,16 @@ export default [
     children: [],
   },
   {
+    label: "گزارش‌ها",
+    href: "/super-admin/reports",
+    icon: <DashboardIcon />,
+    children: [
+      { label: "مجموع نقدینگی", href: "/super-admin/reports/liquidity" },
+      { label: "فروش محصولات", href: "/super-admin/reports/product-sales" },
+      { label: "نقدینگی درگاه‌ها", href: "/super-admin/reports/gateway-liquidity" },
+    ],
+  },
+  {
     label: "مدیریت فوتر",
     href: "/super-admin/footer/edit",
     icon: <LayoutIcon />,

@@ -4,6 +4,7 @@ import Header from "@/components/SuperAdmin/Layout/Header";
 import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { UserService } from "@/services";
 
 export default function SuperAdminLayout({
   children,
@@ -13,9 +14,22 @@ export default function SuperAdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!localStorage.getItem("accessToken")) {
-      router.push("/auth");
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+    if (!token) {
+      router.replace("/auth");
+      return;
     }
+
+    // Verify admin access before rendering
+    UserService.me(true)
+      .then((me) => {
+        if (!me?.isAdmin) {
+          router.replace("/auth");
+        }
+      })
+      .catch(() => {
+        router.replace("/auth");
+      });
   }, []);
 
   return (
