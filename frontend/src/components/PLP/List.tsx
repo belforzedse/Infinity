@@ -13,6 +13,7 @@ import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL } from "@/constants/api";
+import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 
 interface Product {
   id: number;
@@ -332,8 +333,10 @@ export default function PLPList({
             </div>
           )}
 
-          {/* Show NoData component only if there are no valid products and not loading */}
-          {validProducts.length === 0 && !isLoading ? (
+          {/* Show skeleton while loading */}
+          {isLoading ? (
+            <ProductListSkeleton />
+          ) : validProducts.length === 0 ? (
             <NoData category={category || initialCategory} />
           ) : (
             <>

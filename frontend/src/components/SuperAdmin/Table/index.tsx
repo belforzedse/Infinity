@@ -19,6 +19,7 @@ import { apiClient } from "@/services";
 import { atom, useAtom } from "jotai";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
+import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
 
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData, TValue> {
@@ -199,20 +200,6 @@ export function SuperAdminTable<TData, TValue>({
     onItemDrag?.(targetRow);
   };
 
-  const LoadingSkeleton = () => (
-    <>
-      {[...Array(5)].map((_, i) => (
-        <tr key={i} className="animate-pulse">
-          {[...Array(columns.length)].map((_, j) => (
-            <td key={j} className="p-4">
-              <div className="h-4 w-3/4 rounded bg-gray-200"></div>
-            </td>
-          ))}
-        </tr>
-      ))}
-    </>
-  );
-
   return (
     <div className="w-full">
       <div className="block md:hidden">
@@ -300,7 +287,7 @@ export function SuperAdminTable<TData, TValue>({
           </thead>
           <tbody>
             {isLoading ? (
-              <LoadingSkeleton />
+              <ReportTableSkeleton columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
