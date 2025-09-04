@@ -2,7 +2,7 @@ import {
   ProductDataResponse,
   GenericRelationArray,
 } from "@/services/super-admin/product/get";
-import { EditProductData, ProductData } from "@/types/super-admin/products";
+import { EditProductData } from "@/types/super-admin/products";
 import {
   TagResponseType,
   TagAttributes,
