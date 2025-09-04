@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import clsx from "clsx";
-import AreaLineChart from "@/components/SuperAdmin/Reports/AreaLineChart";
+import AreaLineChart from "@/components/SuperAdmin/reports/AreaLineChart";
 import { faNum } from "@/utils/faNum";
 
 const months = [
