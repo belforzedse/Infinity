@@ -29,32 +29,32 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`w-[282px] flex items-center justify-between bg-stone-50 border border-slate-50 rounded-[28px] pr-5 pl-2 py-2 ${className}`}
+      className={`flex w-[282px] items-center justify-between rounded-[28px] border border-slate-50 bg-stone-50 py-2 pl-2 pr-5 ${className}`}
     >
-      <div className="flex items-center gap-1 text-sm w-full">
-        <div className="flex items-center gap-1 text-neutral-600 cursor-pointer">
+      <div className="text-sm flex w-full items-center gap-1">
+        <div className="flex cursor-pointer items-center gap-1 text-neutral-600">
           <Text className="text-neutral-600">محصولات</Text>
           <ChevronDownIcon className="text-neutral-600" />
         </div>
 
         <div className="h-[17px] w-[1px] bg-zinc-200" />
 
-        <div className="flex items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between">
           <input
             type="text"
             name="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="دنبال چی میگردی؟"
-            className="bg-transparent text-neutral-400 placeholder-neutral-400 outline-none text-right"
+            className="bg-transparent text-right text-neutral-400 placeholder-neutral-400 outline-none"
           />
 
           <div className="flex items-center gap-2">
             <button
               type="submit"
-              className="flex items-center justify-center bg-pink-500 rounded-[28px] w-[36px] h-[32px]"
+              className="flex h-[32px] w-[36px] items-center justify-center rounded-[28px] bg-pink-500"
             >
-              <SearchIcon className="text-white w-5 h-5" />
+              <SearchIcon className="h-5 w-5 text-white" />
             </button>
           </div>
         </div>

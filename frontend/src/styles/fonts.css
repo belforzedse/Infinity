@@ -1,6 +1,7 @@
 @font-face {
   font-family: "Peyda";
-  src: url("/fonts/peyda-regular.woff2") format("woff2"),
+  src:
+    url("/fonts/peyda-regular.woff2") format("woff2"),
     url("/fonts/peyda-regular.woff") format("woff");
   font-weight: 400;
   font-style: normal;
@@ -9,7 +10,8 @@
 
 @font-face {
   font-family: "Peyda";
-  src: url("/fonts/peyda-medium.woff2") format("woff2"),
+  src:
+    url("/fonts/peyda-medium.woff2") format("woff2"),
     url("/fonts/peyda-medium.woff") format("woff");
   font-weight: 500;
   font-style: normal;
@@ -18,7 +20,8 @@
 
 @font-face {
   font-family: "Peyda";
-  src: url("/fonts/peyda-bold.woff2") format("woff2"),
+  src:
+    url("/fonts/peyda-bold.woff2") format("woff2"),
     url("/fonts/peyda-bold.woff") format("woff");
   font-weight: 700;
   font-style: normal;
@@ -28,7 +31,8 @@
 /* Farsi Numerals version */
 @font-face {
   font-family: "Peyda-Fanum";
-  src: url("/fonts/peyda-regular-fanum.woff2") format("woff2"),
+  src:
+    url("/fonts/peyda-regular-fanum.woff2") format("woff2"),
     url("/fonts/peyda-regular-fanum.woff") format("woff");
   font-weight: 400;
   font-style: normal;
@@ -37,7 +41,8 @@
 
 @font-face {
   font-family: "Peyda-Fanum";
-  src: url("/fonts/peyda-medium-fanum.woff2") format("woff2"),
+  src:
+    url("/fonts/peyda-medium-fanum.woff2") format("woff2"),
     url("/fonts/peyda-medium-fanum.woff") format("woff");
 
   font-weight: 500;
@@ -47,7 +52,8 @@
 
 @font-face {
   font-family: "Peyda-Fanum";
-  src: url("/fonts/peyda-bold-fanum.woff2") format("woff2"),
+  src:
+    url("/fonts/peyda-bold-fanum.woff2") format("woff2"),
     url("/fonts/peyda-bold-fanum.woff") format("woff");
 
   font-weight: 700;

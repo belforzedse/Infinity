@@ -106,11 +106,11 @@ export interface OrdersResponse {
  */
 export const verifyPayment = async (
   orderId: number,
-  refNum: string
+  refNum: string,
 ): Promise<PaymentVerificationResponse> => {
   try {
     const response = await apiClient.get<PaymentVerificationResponse>(
-      `/orders/verify-payment?orderId=${orderId}&refNum=${refNum}`
+      `/orders/verify-payment?orderId=${orderId}&refNum=${refNum}`,
     );
     return response as any;
   } catch (error: any) {
@@ -125,11 +125,11 @@ export const verifyPayment = async (
  * @returns Order status information
  */
 export const getOrderStatus = async (
-  orderId: number
+  orderId: number,
 ): Promise<OrderStatusResponse> => {
   try {
     const response = await apiClient.get<OrderStatusResponse>(
-      `/orders/${orderId}/status`
+      `/orders/${orderId}/status`,
     );
     return response as any;
   } catch (error: any) {
@@ -144,11 +144,11 @@ export const getOrderStatus = async (
  * @returns Order payment status information
  */
 export const getOrderPaymentStatus = async (
-  orderId: number
+  orderId: number,
 ): Promise<OrderPaymentStatusResponse> => {
   try {
     const response = await apiClient.get<OrderPaymentStatusResponse>(
-      `/orders/${orderId}/payment-status`
+      `/orders/${orderId}/payment-status`,
     );
     return response.data;
   } catch (error: any) {
@@ -165,11 +165,11 @@ export const getOrderPaymentStatus = async (
  */
 export const getMyOrders = async (
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<OrdersResponse> => {
   try {
     const response = await apiClient.get(
-      `/orders/my-orders?page=${page}&pageSize=${pageSize}`
+      `/orders/my-orders?page=${page}&pageSize=${pageSize}`,
     );
 
     // Ensure response has the expected structure
@@ -201,14 +201,14 @@ export const getMyOrders = async (
                 ? {
                     ...item.product_variation.product.cover_image,
                     url: getFullImageUrl(
-                      item.product_variation.product.cover_image.url
+                      item.product_variation.product.cover_image.url,
                     ),
                   }
                 : undefined,
             },
           },
         })),
-      })
+      }),
     );
 
     // Ensure meta has the expected structure

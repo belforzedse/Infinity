@@ -19,7 +19,7 @@ export default function CheckboxField({ value, onChange, options }: Props) {
           <input
             type="checkbox"
             name={option.value}
-            className="w-4 h-4 accent-actions-primary checked:bg-actions-primary checked:text-white"
+            className="h-4 w-4 accent-actions-primary checked:bg-actions-primary checked:text-white"
             checked={value?.includes(option.value)}
             onChange={(e) => {
               const currentValues = [...(value || [])];

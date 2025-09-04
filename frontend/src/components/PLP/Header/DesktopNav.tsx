@@ -25,24 +25,24 @@ export default function PLPHeaderDesktopNav() {
 
   if (loading) {
     return (
-      <nav className="bg-stone-50 py-3 px-10">
+      <nav className="bg-stone-50 px-10 py-3">
         <div className="flex items-center justify-center gap-6">
-          <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
-          <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
-          <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
         </div>
       </nav>
     );
   }
 
   return (
-    <nav className="bg-stone-50 py-3 px-10">
+    <nav className="bg-stone-50 px-10 py-3">
       <div className="flex items-center justify-center gap-6">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="text-sm text-foreground-primary hover:text-pink-500 transition-colors flex items-center"
+            className="text-sm flex items-center text-foreground-primary transition-colors hover:text-pink-500"
           >
             {item.label}
             {item.hasDropdown && <ChevronDownIcon />}

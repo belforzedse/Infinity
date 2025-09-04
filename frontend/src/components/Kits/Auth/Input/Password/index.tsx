@@ -27,24 +27,24 @@ export default function AuthPasswordInput({
         <input
           type={showPassword ? "text" : "password"}
           className={clsx(
-            "w-full h-12 bg-background-form border border-slate-200 rounded-lg",
-            "text-base  text-foreground-muted px-12 text-left",
+            "h-12 w-full rounded-lg border border-slate-200 bg-background-form",
+            "text-base px-12 text-left text-foreground-muted",
             "focus:outline-none focus:ring-2 focus:ring-pink-400",
             error && "border-red-500",
-            className
+            className,
           )}
           {...props}
         />
-        <LockIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <LockIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
           className="absolute right-4 top-1/2 -translate-y-1/2"
         >
           {showPassword ? (
-            <EyeOffIcon className="w-5 h-5 text-slate-400" />
+            <EyeOffIcon className="h-5 w-5 text-slate-400" />
           ) : (
-            <EyeIcon className="w-5 h-5 text-slate-400" />
+            <EyeIcon className="h-5 w-5 text-slate-400" />
           )}
         </button>
       </div>

@@ -6,14 +6,14 @@ type OpenMobileTableRowProps<TData> = {
 };
 
 export function OpenMobileTableRow<TData>(
-  props: OpenMobileTableRowProps<TData>
+  props: OpenMobileTableRowProps<TData>,
 ) {
   const { columns, row } = props;
 
   return columns.slice(0, columns.length - 1).map((column, index) => {
     return (
       <div
-        className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1"
+        className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1"
         key={index}
       >
         <span className="text-xs text-neutral-400">
@@ -30,7 +30,7 @@ export function OpenMobileTableRow<TData>(
             },
           })
         ) : (
-          <span className="text-foreground-primary text-xs md:text-base">
+          <span className="text-xs text-foreground-primary md:text-base">
             {(() => {
               const accessorKey = (column as any).accessorKey as string;
               if (!accessorKey) return "";

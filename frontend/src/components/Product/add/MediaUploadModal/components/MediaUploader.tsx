@@ -20,7 +20,7 @@ export default function MediaUploader({
   onImageSelect,
 }: MediaUploaderProps) {
   const [activeView, setActiveView] = useState<MediaViewType>(
-    MediaViewEnum.UPLOAD_FILES
+    MediaViewEnum.UPLOAD_FILES,
   );
 
   const views: MediaViewType[] = [
@@ -30,18 +30,18 @@ export default function MediaUploader({
   ];
 
   return (
-    <div className="flex-1 flex flex-col col-span-3 bg-white rounded-lg overflow-hidden px-5 py-4">
+    <div className="col-span-3 flex flex-1 flex-col overflow-hidden rounded-lg bg-white px-5 py-4">
       {/* View Selector */}
-      <div className="flex border-b border-gray-200 gap-8">
+      <div className="flex gap-8 border-b border-gray-200">
         {views.map((view) => (
           <button
             key={view}
             onClick={() => setActiveView(view)}
             className={classNames(
-              "text-sm transition-colors border-b-2 pb-2",
+              "text-sm border-b-2 pb-2 transition-colors",
               view === activeView
-                ? "text-pink-500 border-pink-500"
-                : "text-gray-500 border-transparent hover:text-gray-700"
+                ? "border-pink-500 text-pink-500"
+                : "border-transparent text-gray-500 hover:text-gray-700",
             )}
           >
             {view}

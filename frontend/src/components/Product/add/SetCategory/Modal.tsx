@@ -21,7 +21,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
 
   const categoriesData = useAtomValue(productCategoryDataAtom);
   const categoriesDataPagination = useAtomValue(
-    productCategoryDataAtomPagination
+    productCategoryDataAtomPagination,
   );
 
   const filteredCategories = useMemo(() => {
@@ -30,11 +30,11 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
     return categoriesData.filter(
       (category) =>
         category.attributes.Title.toLowerCase().includes(
-          searchText.toLowerCase()
+          searchText.toLowerCase(),
         ) ||
         (category.attributes.Slug?.toLowerCase() || "").includes(
-          searchText.toLowerCase()
-        )
+          searchText.toLowerCase(),
+        ),
     );
   }, [categoriesData, searchText]);
 
@@ -47,18 +47,18 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
     >
       <div className="flex flex-col gap-4">
         <div className="flex justify-between">
-          <span className="text-neutral-600 text-base">دسته بندی محصولات</span>
+          <span className="text-base text-neutral-600">دسته بندی محصولات</span>
           <div className="relative max-w-56">
             <input
               type="text"
-              className="w-full px-4 py-2.5 bg-slate-100 text-slate-700 text-sm rounded-lg focus:outline-none text-right pr-10"
+              className="text-sm w-full rounded-lg bg-slate-100 px-4 py-2.5 pr-10 text-right text-slate-700 focus:outline-none"
               placeholder="جستجو"
               value={searchText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchText(e.target.value)
               }
             />
-            <SearchIcon className="absolute top-2.5 text-slate-500 right-2 w-6 h-6" />
+            <SearchIcon className="absolute right-2 top-2.5 h-6 w-6 text-slate-500" />
           </div>
         </div>
 

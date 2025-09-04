@@ -39,8 +39,8 @@ export default function FieldRenderer<T>({
   const isReadOnly = isStandardField(field)
     ? field.readOnly
     : isProvinceCityField(field)
-    ? field.readOnly
-    : false;
+      ? field.readOnly
+      : false;
 
   const fieldRenderers: Record<string, () => React.ReactNode> = {
     text: () => {

@@ -25,23 +25,23 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
             type="checkbox"
             checked={isSelected}
             onChange={() => onSelect(item.id)}
-            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <div className="text-sm text-neutral-400">{item.variable}</div>
         </div>
       </td>
-      <td className="p-4 text-neutral-400 border-r border-slate-100 text-sm">
+      <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         {item.price.toLocaleString()} تومان
       </td>
-      <td className="p-4 text-neutral-400 border-r border-slate-100 text-sm">
+      <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         {item.stock} عدد در انبار
       </td>
-      <td className="p-4 text-neutral-400 border-r border-slate-100 text-sm">
+      <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         {item.sku}
       </td>
-      <td className="p-4 border-r border-slate-100">
+      <td className="border-r border-slate-100 p-4">
         <span
-          className={`inline-block px-4 py-2 rounded-lg text-xs w-full text-center ${
+          className={`text-xs inline-block w-full rounded-lg px-4 py-2 text-center ${
             item.isPublished
               ? "bg-green-500 text-white"
               : "bg-yellow-500 text-white"
@@ -53,7 +53,7 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
       <td className="p-4">
         <button
           onClick={() => onEdit(item.id)}
-          className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+          className="rounded-lg bg-blue-50 p-2 text-blue-600 transition-colors hover:bg-blue-100"
         >
           ویرایش
         </button>

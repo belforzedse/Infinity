@@ -28,13 +28,13 @@ export default function OrderCard({
   orderId,
 }: Props) {
   return (
-    <div className="lg:hidden flex flex-col rounded-2xl border border-slate-100 mb-3 divide-y divide-slate-100 overflow-hidden">
+    <div className="mb-3 flex flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
       <div className="grid grid-cols-4">
-        <div className="bg-stone-50 border-l border-slate-100 flex items-center justify-start pr-3">
-          <span className="text-foreground-primary text-sm">محصول</span>
+        <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
+          <span className="text-sm text-foreground-primary">محصول</span>
         </div>
 
-        <div className="col-span-3 flex items-center gap-1 py-2 px-3">
+        <div className="col-span-3 flex items-center gap-1 px-3 py-2">
           <div className="relative h-12 w-12 overflow-hidden rounded-lg">
             <Image
               src={image}
@@ -43,55 +43,55 @@ export default function OrderCard({
               className="h-full w-full object-cover"
             />
           </div>
-          <span className="text-foreground-primary text-sm">{title}</span>
+          <span className="text-sm text-foreground-primary">{title}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-4">
-        <div className="bg-stone-50 border-l border-slate-100 flex items-center justify-start pr-3">
-          <span className="text-foreground-primary text-sm">دسته بندی</span>
+        <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
+          <span className="text-sm text-foreground-primary">دسته بندی</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
-          <span className="text-foreground-primary text-sm">{category}</span>
+          <span className="text-sm text-foreground-primary">{category}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-4">
-        <div className="bg-stone-50 border-l border-slate-100 flex items-center justify-start pr-3">
-          <span className="text-foreground-primary text-sm">تاریخ</span>
+        <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
+          <span className="text-sm text-foreground-primary">تاریخ</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
-          <span className="text-foreground-primary text-sm">
+          <span className="text-sm text-foreground-primary">
             {time} - {date}
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-4">
-        <div className="bg-stone-50 border-l border-slate-100 flex items-center justify-start pr-3">
-          <span className="text-foreground-primary text-sm">قیمت</span>
+        <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
+          <span className="text-sm text-foreground-primary">قیمت</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
-          <span className="text-foreground-primary text-sm">{price} تومان</span>
+          <span className="text-sm text-foreground-primary">{price} تومان</span>
         </div>
       </div>
 
       <div className="grid grid-cols-4">
-        <div className="bg-stone-50 border-l border-slate-100 flex items-center justify-start pr-3">
-          <span className="text-foreground-primary text-sm">وضعیت</span>
+        <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
+          <span className="text-sm text-foreground-primary">وضعیت</span>
         </div>
 
-        <div className="col-span-3 flex items-center gap-1 p-3 pl-0 justify-between">
+        <div className="col-span-3 flex items-center justify-between gap-1 p-3 pl-0">
           <div className="flex items-center gap-1">
             <div
               className={clsx(
-                "h-6 w-6 rounded-full flex items-center justify-center",
+                "flex h-6 w-6 items-center justify-center rounded-full",
                 status === PersianOrderStatus.CANCELLED && "bg-red-500",
                 status === PersianOrderStatus.INPROGRESS && "bg-yellow-500",
-                status === PersianOrderStatus.DELIVERED && "bg-green-500"
+                status === PersianOrderStatus.DELIVERED && "bg-green-500",
               )}
             >
               {status === PersianOrderStatus.CANCELLED ? (

@@ -28,9 +28,9 @@ const PLPFooter = () => {
   }, []);
 
   return (
-    <footer className="bg-stone-100 rounded-t-3xl p-3 md:px-10 md:py-6">
-      <div className="md:block hidden">
-        <div className="flex flex-row-reverse justify-between items-start max-w-[1440px] mx-auto relative">
+    <footer className="rounded-t-3xl bg-stone-100 p-3 md:px-10 md:py-6">
+      <div className="hidden md:block">
+        <div className="relative mx-auto flex max-w-[1440px] flex-row-reverse items-start justify-between">
           <LogoSection />
           <StoresSection contactInfo={footerData?.ContactUs} />
           <CustomerServiceSection

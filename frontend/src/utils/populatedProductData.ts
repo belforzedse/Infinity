@@ -30,7 +30,7 @@ interface StrapiTagData {
 }
 
 export function transformToProductData(
-  strapiProduct: ProductDataResponse
+  strapiProduct: ProductDataResponse,
 ): EditProductData {
   // Extract CoverImage URL if it exists, otherwise use an empty string
   const coverImageUrl = {

@@ -22,7 +22,7 @@ function VerifyContent() {
   }, [phoneNumber, router]);
 
   return (
-    <div className="w-full mx-auto">
+    <div className="mx-auto w-full">
       <AuthTitle
         subtitle={`لطفا کد تایید ارسال شده  به شماره همراه ${phoneNumber} را وارد نمایید`}
       >
@@ -39,7 +39,7 @@ function VerifyContent() {
 
           const response = await AuthService.resetPassword(
             data.otp.split("").reverse().join(""),
-            data.password
+            data.password,
           );
 
           if (response.message) {
@@ -57,8 +57,8 @@ export default function VerifyForgotPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full mx-auto text-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
+        <div className="mx-auto w-full p-8 text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
           <p className="text-lg">در حال بارگذاری...</p>
         </div>
       }

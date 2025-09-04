@@ -18,12 +18,12 @@ export default function SuperAdminOrderMobileOrderItem({
   item: OrderItem;
 }) {
   return (
-    <div className="border border-slate-100 rounded-xl mb-4 overflow-hidden">
+    <div className="mb-4 overflow-hidden rounded-xl border border-slate-100">
       <div className="flex border-b">
-        <div className="w-1/3 py-2 px-4 flex text-right items-center bg-gray-50 text-sm text-nowrap text-foreground-primary font-medium">
+        <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           محصول
         </div>
-        <div className="w-2/3 p-4 flex items-center gap-2 border-r">
+        <div className="flex w-2/3 items-center gap-2 border-r p-4">
           <Image
             src={item.image}
             alt={item.productName}
@@ -36,40 +36,40 @@ export default function SuperAdminOrderMobileOrderItem({
       </div>
 
       <div className="flex border-b">
-        <div className="w-1/3 py-2 px-4 flex text-right items-center bg-gray-50 text-sm text-nowrap text-foreground-primary font-medium">
+        <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           شناسه متغیر
         </div>
-        <div className="w-2/3 p-4 border-r text-xs">{item.productCode}</div>
+        <div className="text-xs w-2/3 border-r p-4">{item.productCode}</div>
       </div>
 
       <div className="flex border-b">
-        <div className="w-1/3 py-2 px-4 flex text-right items-center bg-gray-50 text-sm text-nowrap text-foreground-primary font-medium">
+        <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           رنگ
         </div>
-        <div className="w-2/3 p-4 border-r text-xs">{item.color}</div>
+        <div className="text-xs w-2/3 border-r p-4">{item.color}</div>
       </div>
 
       <div className="flex border-b">
-        <div className="w-1/3 py-2 px-4 flex text-right items-center bg-gray-50 text-sm text-nowrap text-foreground-primary font-medium">
+        <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           قیمت
         </div>
-        <div className="w-2/3 p-4 border-r text-xs">
+        <div className="text-xs w-2/3 border-r p-4">
           {priceFormatter(item.price, " تومان")}
         </div>
       </div>
 
       <div className="flex border-b">
-        <div className="w-1/3 py-2 px-4 flex text-right items-center bg-gray-50 text-sm text-nowrap text-foreground-primary font-medium">
+        <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           تعداد
         </div>
-        <div className="w-2/3 p-4 border-r text-xs">{item.quantity}</div>
+        <div className="text-xs w-2/3 border-r p-4">{item.quantity}</div>
       </div>
 
       <div className="flex">
-        <div className="w-1/3 py-2 px-4 flex text-right items-center bg-gray-50 text-sm text-nowrap text-foreground-primary font-medium">
+        <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           مجموع
         </div>
-        <div className="w-2/3 p-4 border-r text-xs">
+        <div className="text-xs w-2/3 border-r p-4">
           {priceFormatter(item.price * item.quantity, " تومان")}
         </div>
       </div>

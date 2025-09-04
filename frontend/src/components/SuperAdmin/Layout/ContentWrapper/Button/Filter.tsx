@@ -21,12 +21,12 @@ type Props = {
   setFilterIsOpen: (isFilterOpen: boolean) => void;
   filter?: FilterItem[];
   setFilter?: (
-    filter: FilterItem[] | ((prev: FilterItem[]) => FilterItem[])
+    filter: FilterItem[] | ((prev: FilterItem[]) => FilterItem[]),
   ) => void;
 };
 
 export default function SuperAdminLayoutContentWrapperButtonFilter(
-  props: Props
+  props: Props,
 ) {
   const { isFilterOpen, setFilterIsOpen, options } = props;
 
@@ -44,7 +44,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
 
   return (
     <button
-      className="text-sm text-slate-700 flex items-center justify-center gap-1 py-1 px-3 border border-slate-400 bg-white rounded-lg relative w-full md:w-auto"
+      className="text-sm relative flex w-full items-center justify-center gap-1 rounded-lg border border-slate-400 bg-white px-3 py-1 text-slate-700 md:w-auto"
       onClick={() => {
         setFilterIsOpen(!isFilterOpen);
       }}
@@ -53,13 +53,13 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
       <span className="text-foreground-primary">فیلتر پیشرفته</span>
       {isFilterOpen && (
         <div
-          className="absolute top-full w-[368px] bg-white p-3 rounded-lg border border-slate-100 left-0 cursor-auto flex gap-3 flex-col z-10"
+          className="absolute left-0 top-full z-10 flex w-[368px] cursor-auto flex-col gap-3 rounded-lg border border-slate-100 bg-white p-3"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
         >
-          <div className="flex gap-1.5 flex-col">
+          <div className="flex flex-col gap-1.5">
             {/* <div className="flex gap-2 items-center">
               <AuthInput
                 placeholder="کلمه مدنظرتو سرچ کن"
@@ -73,11 +73,11 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
             </div> */}
 
             {filter.map((item, index) => (
-              <div key={index} className="flex gap-1.5 items-center">
+              <div key={index} className="flex items-center gap-1.5">
                 <div className="flex-1">
                   <AuthInput
                     placeholder="مقدار"
-                    className="h-8 !text-xs"
+                    className="!text-xs h-8"
                     parentClassNames="flex-1 w-full"
                     value={item.value}
                     onChange={(e) => {
@@ -85,8 +85,8 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                         prev.map((filterItem, i) =>
                           i === index
                             ? { ...filterItem, value: e.target.value }
-                            : filterItem
-                        )
+                            : filterItem,
+                        ),
                       );
                     }}
                   />
@@ -114,8 +114,8 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                         prev.map((filterItem, i) =>
                           i === index
                             ? { ...filterItem, operator: id.toString() }
-                            : filterItem
-                        )
+                            : filterItem,
+                        ),
                       );
                     }}
                   />
@@ -137,15 +137,15 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                         prev.map((filterItem, i) =>
                           i === index
                             ? { ...filterItem, field: id.toString() }
-                            : filterItem
-                        )
+                            : filterItem,
+                        ),
                       );
                     }}
                   />
                 </div>
 
                 <button
-                  className="w-5 h-5 flex items-center justify-center"
+                  className="flex h-5 w-5 items-center justify-center"
                   onClick={() => {
                     setFilter((prev) => prev.filter((_, i) => i !== index));
                   }}
@@ -158,20 +158,20 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
 
           <div className="flex items-center justify-between">
             <button
-              className="flex gap-0.5 items-center"
+              className="flex items-center gap-0.5"
               onClick={() => {
                 setFilter([]);
               }}
             >
               <TrashIcon />
 
-              <span className="text-actions-primary text-xs">
+              <span className="text-xs text-actions-primary">
                 حذف همه فیلترها
               </span>
             </button>
 
             <button
-              className="h-8 bg-actions-primary flex gap-1 items-center justify-center rounded-md px-2"
+              className="flex h-8 items-center justify-center gap-1 rounded-md bg-actions-primary px-2"
               onClick={() => {
                 if ((filter.length && filter.at(-1)?.value) || !filter.length) {
                   setFilter((prev) => [
@@ -187,7 +187,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
             >
               <WhitePlusIcon />
 
-              <span className="text-white text-xs">افزودن فیلتر</span>
+              <span className="text-xs text-white">افزودن فیلتر</span>
             </button>
           </div>
         </div>

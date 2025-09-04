@@ -63,7 +63,7 @@ export interface LocationParams {
  * @returns List of provinces
  */
 export const getProvinces = async (
-  params?: LocationParams
+  params?: LocationParams,
 ): Promise<Province[]> => {
   // Build query parameters
   const queryParams: Record<string, string> = {};
@@ -101,7 +101,7 @@ export const getProvinces = async (
  */
 export const getCities = async (
   provinceId?: number,
-  params?: LocationParams
+  params?: LocationParams,
 ): Promise<City[]> => {
   // Build query parameters
   const queryParams: Record<string, string> = {};

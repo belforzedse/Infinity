@@ -4,7 +4,7 @@ export default function SuperAdminTableCellEmailLink({
   email: string;
 }) {
   return (
-    <a className="text-actions-link text-sm" href={`mailto:${email}`}>
+    <a className="text-sm text-actions-link" href={`mailto:${email}`}>
       {email}
     </a>
   );

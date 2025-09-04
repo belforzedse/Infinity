@@ -41,6 +41,6 @@ export async function updateFooter(footer: Footer): Promise<void> {
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 }

@@ -53,14 +53,14 @@ export default function OrderRow({
       <td className="px-4 py-3">
         <span className="text-xs text-neutral-800">{price} تومان</span>
       </td>
-      <td className="px-4 py-3 min-w-44">
+      <td className="min-w-44 px-4 py-3">
         <div className="flex items-center gap-2">
           <div
             className={clsx(
-              "h-6 w-6 rounded-full flex items-center justify-center",
+              "flex h-6 w-6 items-center justify-center rounded-full",
               status === PersianOrderStatus.CANCELLED && "bg-red-500",
               status === PersianOrderStatus.INPROGRESS && "bg-yellow-500",
-              status === PersianOrderStatus.DELIVERED && "bg-green-500"
+              status === PersianOrderStatus.DELIVERED && "bg-green-500",
             )}
           >
             {status === PersianOrderStatus.CANCELLED ? (
@@ -72,7 +72,7 @@ export default function OrderRow({
           <span className="text-sm text-gray-700">{status}</span>
         </div>
       </td>
-      <td className="py-3 text-left w-fit">
+      <td className="w-fit py-3 text-left">
         <div className="flex items-center gap-2">
           {orderId && <PaymentStatusButton orderId={orderId} />}
           <ShowFactorButton />

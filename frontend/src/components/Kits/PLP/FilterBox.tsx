@@ -13,20 +13,20 @@ const PLPFilterBox = ({ title, children, defaultOpen = false }: Props) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-stone-50 rounded-2xl p-4">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <div className="flex items-center justify-between">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex flex-row-reverse items-center gap-x-[81px] w-full justify-between"
+          className="flex w-full flex-row-reverse items-center justify-between gap-x-[81px]"
         >
           <div
-            className={`w-5 h-5 flex items-center justify-center transition-transform`}
+            className={`flex h-5 w-5 items-center justify-center transition-transform`}
           >
-            <span className="text-2xl !leading-none text-primary font-light">
+            <span className="text-primary text-2xl font-light !leading-none">
               {isOpen ? "-" : "+"}
             </span>
           </div>
-          <span className="text-sm font-normal text-primary">{title}</span>
+          <span className="text-primary text-sm font-normal">{title}</span>
         </button>
       </div>
       <AnimatePresence>

@@ -36,7 +36,7 @@ export interface ShippingMethodsParams {
  * @returns List of available shipping methods
  */
 export const getShippingMethods = async (
-  params?: ShippingMethodsParams
+  params?: ShippingMethodsParams,
 ): Promise<ShippingMethod[]> => {
   // Build query parameters
   const queryParams: Record<string, string> = {};

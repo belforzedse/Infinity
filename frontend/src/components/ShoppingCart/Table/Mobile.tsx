@@ -14,7 +14,7 @@ export default function ShoppingCartMobileTable({
   className,
 }: Props) {
   return (
-    <div className={`flex flex-col gap-3 w-full ${className}`}>
+    <div className={`flex w-full flex-col gap-3 ${className}`}>
       {cartItems.map((cartItem) => (
         <ShoppingCartMobileProductCard key={cartItem.id} cartItem={cartItem} />
       ))}

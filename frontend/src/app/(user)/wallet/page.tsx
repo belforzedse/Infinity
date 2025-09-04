@@ -14,12 +14,12 @@ export default function WalletPage() {
   return (
     // TODO: change contaianer to handle padding and delete padding from main
     <div
-      className="flex min-h-[60vh] bg-white overflow-hidden container mx-auto gap-10 lg:p-0 px-4"
+      className="container mx-auto flex min-h-[60vh] gap-10 overflow-hidden bg-white px-4 lg:p-0"
       dir="rtl"
     >
       <UserSidebar />
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-3">
+      <main className="flex flex-1 flex-col gap-3 overflow-y-auto">
         <BreadCrumb
           onClick={() =>
             setIsTransactionsHistoryOpen(!isTransactionsHistoryOpen)
@@ -28,10 +28,10 @@ export default function WalletPage() {
           hasBackButton={true}
           currentTitle="کیف پول"
           nextStepTitle="سوابق تراکنش"
-          icon={<TransactionsIcon className="w-5 h-5" />}
+          icon={<TransactionsIcon className="h-5 w-5" />}
         />
 
-        <div className="w-full flex lg:flex-row flex-col lg:gap-5 gap-8">
+        <div className="flex w-full flex-col gap-8 lg:flex-row lg:gap-5">
           {isTransactionsHistoryOpen ? (
             <TransactionsList
               debbitList={

@@ -22,7 +22,7 @@ const ImportCategorty = () => {
     useProductCategory();
   const setCategoriesData = useSetAtom(productCategoryDataAtom);
   const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination
+    productCategoryDataAtomPagination,
   );
 
   const [formData, setFormData] = useState<CategoryFormData>({
@@ -65,10 +65,10 @@ const ImportCategorty = () => {
   };
 
   return (
-    <div className="pb-4 border-b border-slate-50 mb-3">
+    <div className="mb-3 border-b border-slate-50 pb-4">
       <form
         onSubmit={handleSubmit}
-        className="gap-1 items-center w-full grid-cols-7 grid h-9"
+        className="grid h-9 w-full grid-cols-7 items-center gap-1"
       >
         <input
           type="text"
@@ -76,7 +76,7 @@ const ImportCategorty = () => {
           value={formData.name}
           onChange={handleChange}
           placeholder="نام"
-          className="px-4 py-1.5 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent col-span-2 min-h-9 max-h-9 text-sm text-neutral-800"
+          className="text-sm col-span-2 max-h-9 min-h-9 rounded-lg border border-slate-100 px-4 py-1.5 text-neutral-800 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -85,7 +85,7 @@ const ImportCategorty = () => {
           value={formData.slug}
           onChange={handleChange}
           placeholder="نامک"
-          className="px-4 py-1.5 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent col-span-2 min-h-9 max-h-9 text-sm text-neutral-800"
+          className="text-sm col-span-2 max-h-9 min-h-9 rounded-lg border border-slate-100 px-4 py-1.5 text-neutral-800 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <Select
@@ -106,13 +106,13 @@ const ImportCategorty = () => {
 
         <button
           type="submit"
-          className="bg-pink-50 flex justify-center gap-1 items-center border border-pink-500 text-pink-500 text-xs mr-1 rounded-lg min-h-9"
+          className="text-xs mr-1 flex min-h-9 items-center justify-center gap-1 rounded-lg border border-pink-500 bg-pink-50 text-pink-500"
         >
           <span>{isCreateCategoryLoading ? "" : "افزودن"}</span>
           <PlusIcon
             className={classNames(
-              "text-pink-500 w-3 h-3",
-              isCreateCategoryLoading && "animate-spin"
+              "h-3 w-3 text-pink-500",
+              isCreateCategoryLoading && "animate-spin",
             )}
           />
         </button>

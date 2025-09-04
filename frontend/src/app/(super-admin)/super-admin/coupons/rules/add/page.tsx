@@ -64,12 +64,12 @@ export default function Page() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
 
           toast.success("قانون تخفیف با موفقیت ثبت شد");
           router.push("/super-admin/coupons/rules");
-        } catch (error) {
+        } catch {
           toast.error("خطایی رخ داده است");
         }
       }}

@@ -18,7 +18,7 @@ export const formatQueryParams = (params: Record<string, any>): string => {
     .filter(([, value]) => value !== undefined && value !== null)
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
     )
     .join("&");
 
@@ -74,7 +74,7 @@ export const parseJwt = (token: string): any => {
       atob(base64)
         .split("")
         .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-        .join("")
+        .join(""),
     );
 
     return JSON.parse(jsonPayload);

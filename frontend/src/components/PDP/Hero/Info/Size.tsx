@@ -31,7 +31,7 @@ export default function PDPHeroInfoSize(props: Props) {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [internalSelectedSize, setInternalSelectedSize] = useState<string>(
-    sizes[0]?.id || ""
+    sizes[0]?.id || "",
   );
 
   // Use either the external selected size if provided, or the internal state
@@ -77,13 +77,13 @@ export default function PDPHeroInfoSize(props: Props) {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-foreground-primary text-xl">انتخاب سایز</span>
+          <span className="text-xl text-foreground-primary">انتخاب سایز</span>
 
           <div
-            className="flex items-center cursor-pointer"
+            className="flex cursor-pointer items-center"
             onClick={() => setOpenSizeModal(true)}
           >
-            <span className="text-actions-link underline text-xs">
+            <span className="text-xs text-actions-link underline">
               راهنمای سایز
             </span>
 
@@ -93,14 +93,14 @@ export default function PDPHeroInfoSize(props: Props) {
 
         <div className="flex gap-1">
           <div
-            className="w-5 h-5 flex items-center justify-center cursor-pointer"
+            className="flex h-5 w-5 cursor-pointer items-center justify-center"
             onClick={onPrevClick}
           >
             <ChevronRightIcon color="#262626" />
           </div>
 
           <div
-            className="w-5 h-5 flex items-center justify-center cursor-pointer"
+            className="flex h-5 w-5 cursor-pointer items-center justify-center"
             onClick={onNextClick}
           >
             <ChevronLeftIcon color="#262626" />
@@ -108,14 +108,14 @@ export default function PDPHeroInfoSize(props: Props) {
         </div>
       </div>
 
-      <div ref={scrollContainerRef} className="overflow-x-hidden w-full">
-        <div className="flex gap-2 w-fit">
+      <div ref={scrollContainerRef} className="w-full overflow-x-hidden">
+        <div className="flex w-fit gap-2">
           {sizes.map((size) => (
             <button
               key={size.id}
-              className={`w-20 h-9 py-2 px-3 rounded-lg flex items-center justify-center ${
+              className={`flex h-9 w-20 items-center justify-center rounded-lg px-3 py-2 ${
                 size.id === selectedSize
-                  ? "bg-background-primary text-foreground-primary border border-gray-300"
+                  ? "border border-gray-300 bg-background-primary text-foreground-primary"
                   : "bg-background-secondary text-foreground-muted"
               }`}
               onClick={() => handleSizeClick(size.id)}

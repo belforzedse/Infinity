@@ -19,7 +19,7 @@ export interface TagResponse {
 }
 
 export const createTag = async (
-  title: string
+  title: string,
 ): Promise<ApiResponse<TagResponse>> => {
   const endpoint = ENDPOINTS.PRODUCT.TAG;
 
@@ -33,7 +33,7 @@ export const createTag = async (
         headers: {
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      }
+      },
     );
 
     // Log the response for debugging
