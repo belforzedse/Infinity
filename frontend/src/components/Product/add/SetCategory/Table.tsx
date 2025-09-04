@@ -6,11 +6,11 @@ import {
   productCategoryDataAtomPagination,
 } from "@/atoms/super-admin/products";
 import { useSetAtom } from "jotai";
-import { deleteCategory } from "@/services/super-admin/product/cetegory/delete";
+import { deleteCategory } from "@/services/super-admin/product/category/delete";
 import {
   categoryResponseType,
   getAllCategories,
-} from "@/services/super-admin/product/cetegory/getAll";
+} from "@/services/super-admin/product/category/getAll";
 
 interface SetCategoryTableProps {
   categories: categoryResponseType[];

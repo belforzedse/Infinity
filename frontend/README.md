@@ -119,7 +119,7 @@ src/
 │  │  └─ exists.ts     # User existence check service
 │  └─ super-admin/     # Super admin services
 │     └─ product/      # Product management services
-│        └─ cetegory/  # Category management services
+│        └─ category/  # Category management services
 ├─ types/              # TypeScript type definitions
 │  └─ api.ts           # API-related types
 └─ utils/              # Utility functions
