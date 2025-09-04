@@ -27,7 +27,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+  <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"

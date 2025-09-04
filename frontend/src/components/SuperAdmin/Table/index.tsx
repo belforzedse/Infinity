@@ -53,6 +53,12 @@ type Response<TData> = {
   };
 };
 
+type FilterItem = {
+  field: string;
+  operator: string;
+  value: string | number | boolean;
+};
+
 export const refreshTable = atom(true);
 export function SuperAdminTable<TData, TValue>({
   columns,
@@ -111,17 +117,16 @@ export function SuperAdminTable<TData, TValue>({
       separator = "&";
 
       // Add filters if they exist
-      if (filter && filter.length > 0) {
-        // Add each filter to the URL
-        const filterParams = filter
-          .map((item: any) => {
-            const { field, operator, value } = item;
-
-            if (!field || !operator || !value) return "";
-
-            return `filters${field}[${operator}]=${encodeURIComponent(value)}`;
+      if (Array.isArray(filter) && filter.length > 0) {
+        const filters = filter as unknown as FilterItem[];
+        const filterParams = filters
+          .map((item) => {
+            const { field, operator, value } = item || ({} as FilterItem);
+            if (!field || !operator || value === undefined || value === null)
+              return "";
+            return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
           })
-          .filter((param: string) => param !== "")
+          .filter((param) => param !== "")
           .join("&");
 
         if (filterParams) {
@@ -135,9 +140,9 @@ export function SuperAdminTable<TData, TValue>({
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
         })
-        .then((res) => {
-          setTableData((res as any)?.data);
-          setTotalSize((res as any)?.meta?.pagination?.total);
+        .then((res: Response<TData>) => {
+          setTableData(res.data);
+          setTotalSize(res.meta?.pagination?.total ?? 0);
           setIsLoading(false);
           isFetchingRef.current = false;
         })
@@ -147,7 +152,8 @@ export function SuperAdminTable<TData, TValue>({
           isFetchingRef.current = false;
         });
     }
-  }, [url, refresh, page, pageSize]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, refresh, page, pageSize, setRefresh, setTotalSize, isLoading]);
 
   useEffect(() => {
     if (!refresh) {
@@ -158,6 +164,7 @@ export function SuperAdminTable<TData, TValue>({
 
       setRefresh(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, refresh, filter]);
 
   const table = useReactTable({

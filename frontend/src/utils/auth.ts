@@ -17,13 +17,18 @@ export const handleAuthErrors = (
   // Check for non-admin access
   const isNotAdmin = isAdminCheck === false;
 
-  if (isAuthError || isNotAdmin) {
-    // Clear the token
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
+  if (typeof window === "undefined") return;
 
-      // Redirect to auth page
-      window.location.href = "/auth";
-    }
+  if (isAuthError) {
+    // Only clear token on actual auth errors
+    localStorage.removeItem("accessToken");
+    window.location.href = "/auth";
+    return;
+  }
+
+  if (isNotAdmin) {
+    // Do NOT clear token; just send user to their account/home
+    // This avoids kicking valid users back to login during admin checks
+    window.location.href = "/account";
   }
 };

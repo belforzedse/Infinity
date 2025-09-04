@@ -44,7 +44,7 @@ export default function LoginPage() {
       } else {
         toast.error("رمز عبور یا شماره همراه اشتباه است");
       }
-    } catch (error) {
+    } catch {
       toast.error("رمز عبور یا شماره همراه اشتباه است");
     }
   };

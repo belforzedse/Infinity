@@ -55,6 +55,6 @@ export interface StrapiErrorResponse {
     status: number;
     name: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }

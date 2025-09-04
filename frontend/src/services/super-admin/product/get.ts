@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { ApiResponse, PaginatedResponse } from "@/types/api";
+import { ApiResponse } from "@/types/api";
 import { paramCreator } from "@/utils/paramCreator";
 import { TagAttributes } from "./tag/get";
 

@@ -18,13 +18,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`font-peyda-fanum antialiased preload-blur`}>
+      <body className={`font-peyda-fanum antialiased`}>
         <CartProvider>
           <NuqsAdapter>
             <Providers>{children}</Providers>
           </NuqsAdapter>
         </CartProvider>
-        <Toaster position="bottom-center" />
+        <Toaster
+          position="bottom-center"
+          containerStyle={{ zIndex: 2147483647 }}
+          toastOptions={{
+            style: { zIndex: 2147483647 },
+          }}
+        />
       </body>
     </html>
   );

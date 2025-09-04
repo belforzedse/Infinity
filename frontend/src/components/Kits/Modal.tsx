@@ -23,7 +23,7 @@ export default function Modal({
   titleClassName,
 }: Props) {
   return (
-    <Dialog open={isOpen} onClose={onClose} as="div" className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} as="div" className="relative z-[1200]">
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"

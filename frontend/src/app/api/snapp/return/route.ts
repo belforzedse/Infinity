@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function isAllowedRedirect(raw: string): boolean {
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+    const allowed = (process.env.NEXT_PUBLIC_ALLOWED_REDIRECT_ORIGINS || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    // If no allowlist provided, allow any http(s) to preserve dev behavior
+    if (allowed.length === 0) return true;
+    return allowed.some((origin) => origin === url.origin);
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
@@ -28,7 +44,12 @@ export async function POST(req: NextRequest) {
     // If backend responds with redirect, forward it
     const location = res.headers.get("location");
     if (location) {
-      return NextResponse.redirect(location, { status: 302 });
+      if (isAllowedRedirect(location)) {
+        return NextResponse.redirect(location, { status: 302 });
+      }
+      return NextResponse.redirect("/orders/failure?error=invalid_redirect", {
+        status: 302,
+      });
     }
 
     // Otherwise, inspect payload to decide success/failure or missing order
@@ -52,7 +73,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.redirect(`/orders/failure?error=${errorMsg}`, {
       status: 302,
     });
-  } catch (err) {
+  } catch {
     return NextResponse.redirect("/orders/failure", { status: 302 });
   }
 }
