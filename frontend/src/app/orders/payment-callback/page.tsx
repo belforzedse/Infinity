@@ -10,6 +10,7 @@ import {
 } from "@/atoms/Order";
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
+import logger from "@/utils/logger";
 
 function PaymentCallbackContent() {
   const [loading, setLoading] = useState(true);
@@ -29,20 +30,20 @@ function PaymentCallbackContent() {
         const resNum = searchParams.get("ResNum"); // Order ID
         const refNum = searchParams.get("RefNum"); // Payment reference number
 
-        console.log("=== PAYMENT CALLBACK DEBUG ===");
-        console.log("ResNum (Order ID):", resNum);
-        console.log("RefNum (Payment Ref):", refNum);
+        logger.info("PAYMENT CALLBACK DEBUG", { resNum, refNum });
 
         // Check localStorage for backup data
         const pendingOrderId = localStorage.getItem("pendingOrderId");
         const pendingRefId = localStorage.getItem("pendingRefId");
-        console.log("Pending Order ID from localStorage:", pendingOrderId);
-        console.log("Pending Ref ID from localStorage:", pendingRefId);
+        logger.info("Pending data from localStorage", {
+          pendingOrderId,
+          pendingRefId,
+        });
 
         if (!resNum || !refNum) {
           // Try to use localStorage data as fallback
           if (pendingOrderId && pendingRefId) {
-            console.log("⚠️ Using localStorage fallback data");
+            logger.warn("Using localStorage fallback data");
           } else {
             throw new Error("اطلاعات پرداخت ناقص است");
           }
@@ -55,12 +56,10 @@ function PaymentCallbackContent() {
           throw new Error("اطلاعات پرداخت ناقص است");
         }
 
-        console.log(
-          "✅ Verifying payment with Order ID:",
-          orderIdToVerify,
-          "Ref ID:",
-          refIdToVerify,
-        );
+        logger.info("Verifying payment", {
+          orderId: orderIdToVerify,
+          refId: refIdToVerify,
+        });
 
         // Verify payment with backend
         const verificationResult = await OrderService.verifyPayment(
@@ -68,7 +67,7 @@ function PaymentCallbackContent() {
           refIdToVerify,
         );
 
-        console.log("Payment verification result:", verificationResult);
+        logger.info("Payment verification result", verificationResult);
 
         // Store order information in atoms
         setOrderId(verificationResult.orderId);
@@ -84,38 +83,38 @@ function PaymentCallbackContent() {
             verificationResult.orderId,
           );
 
-          console.log("Payment status check:", paymentStatus);
+          logger.info("Payment status check", paymentStatus);
 
           // Set step based on payment status from direct API check
           if (paymentStatus.isPaid) {
-            console.log("✅ Payment confirmed - redirecting to success");
+            logger.info("Payment confirmed - redirecting to success");
             setSubmitOrderStep(SubmitOrderStep.Success);
             router.push("/orders/success");
             return;
           }
         } catch (statusError) {
-          console.warn(
-            "Could not verify payment status via API, using verification result only:",
-            statusError,
+          logger.warn(
+            "Could not verify payment status via API, using verification result only",
+            { error: statusError },
           );
         }
 
         // If we couldn't check or payment is not verified, use the verification result
         if (verificationResult.success) {
-          console.log(
-            "✅ Payment verified via verification API - redirecting to success",
+          logger.info(
+            "Payment verified via verification API - redirecting to success",
           );
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         } else {
-          console.log(
-            "❌ Payment verification failed - redirecting to failure",
+          logger.info(
+            "Payment verification failed - redirecting to failure",
           );
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }
       } catch (err: any) {
-        console.error("❌ Payment verification error:", err);
+        logger.error("Payment verification error", { error: err });
         setError(err.message || "خطا در بررسی وضعیت پرداخت");
         setSubmitOrderStep(SubmitOrderStep.Failure);
         router.push("/orders/failure");
