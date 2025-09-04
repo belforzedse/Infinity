@@ -78,7 +78,7 @@ export interface ProductDataResponse {
 
 export const getProduct = async (
   id: string,
-  params: PopulateObject
+  params: PopulateObject,
 ): Promise<ApiResponse<Item>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?${paramCreator(params)}`;
   const response = await apiClient.get<ApiResponse<Item>>(endpoint, {

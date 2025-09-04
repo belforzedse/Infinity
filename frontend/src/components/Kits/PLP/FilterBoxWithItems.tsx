@@ -41,7 +41,7 @@ const PLPFilterBoxWithItems = ({
   }, [initialOptions]);
 
   const filteredOptions = localOptions.filter((option) =>
-    option.label.toLowerCase().includes(searchQuery.toLowerCase())
+    option.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleCheckboxChange = (optionId: string) => {
@@ -53,7 +53,7 @@ const PLPFilterBoxWithItems = ({
           return updatedOption;
         }
         return opt;
-      })
+      }),
     );
   };
 
@@ -67,18 +67,18 @@ const PLPFilterBoxWithItems = ({
   };
 
   return (
-    <div className="bg-stone-50 rounded-2xl p-4">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <div className="flex items-center justify-between">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex flex-row-reverse items-center gap-x-[81px] w-full justify-between"
+          className="flex w-full flex-row-reverse items-center justify-between gap-x-[81px]"
         >
-          <div className="w-5 h-5 flex items-center justify-center">
-            <span className="text-2xl !leading-none text-primary font-light">
+          <div className="flex h-5 w-5 items-center justify-center">
+            <span className="text-primary text-2xl font-light !leading-none">
               {isOpen ? "-" : "+"}
             </span>
           </div>
-          <span className="text-sm font-normal text-primary">{title}</span>
+          <span className="text-primary text-sm font-normal">{title}</span>
         </button>
       </div>
       <AnimatePresence>
@@ -90,18 +90,18 @@ const PLPFilterBoxWithItems = ({
             transition={{ duration: 0.2 }}
             className="mt-4 overflow-hidden"
           >
-            <div className="bg-white rounded-lg">
+            <div className="rounded-lg bg-white">
               {hasSearch && (
                 <>
-                  <div className="flex justify-between items-center border-b border-slate-50 p-2">
+                  <div className="flex items-center justify-between border-b border-slate-50 p-2">
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={inputPlaceholder}
-                      className="text-xs text-neutral-400 text-right flex-grow outline-none bg-transparent"
+                      className="text-xs flex-grow bg-transparent text-right text-neutral-400 outline-none"
                     />
-                    <div className="w-5 h-5">
+                    <div className="h-5 w-5">
                       <SearchIcon />
                     </div>
                   </div>
@@ -109,7 +109,7 @@ const PLPFilterBoxWithItems = ({
                 </>
               )}
               <div
-                className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary scrollbar-track-slate-50 px-2"
+                className="scrollbar-thumb-primary max-h-[200px] overflow-y-auto px-2 scrollbar-thin scrollbar-track-slate-50"
                 style={
                   {
                     scrollbarWidth: "thin",
@@ -120,8 +120,8 @@ const PLPFilterBoxWithItems = ({
                 <div className="flex flex-col py-2">
                   {filteredOptions.map((option, index) => (
                     <div key={option.id}>
-                      <div className="flex flex-row-reverse items-center justify-end gap-2  py-2">
-                        <span className="text-sm text-primary">
+                      <div className="flex flex-row-reverse items-center justify-end gap-2 py-2">
+                        <span className="text-primary text-sm">
                           {option.label}
                         </span>
                         <div
@@ -129,9 +129,9 @@ const PLPFilterBoxWithItems = ({
                           onClick={() => handleOptionClick(option.id)}
                         >
                           {selectedOptions.includes(option.id) ? (
-                            <CheckIcon className="w-4 h-4 rounded" />
+                            <CheckIcon className="h-4 w-4 rounded" />
                           ) : (
-                            <div className="w-4 h-4 border border-gray-4 rounded appearance-none cursor-pointer" />
+                            <div className="border-gray-4 h-4 w-4 cursor-pointer appearance-none rounded border" />
                           )}
                         </div>
                       </div>

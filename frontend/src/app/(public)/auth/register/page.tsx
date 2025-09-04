@@ -33,7 +33,7 @@ export default function RegisterPage() {
     if (verificationCode.length === 6) {
       // TODO: Implement verification API call
       const response = await AuthService.verifyOTP(
-        verificationCode.split("").reverse().join("")
+        verificationCode.split("").reverse().join(""),
       );
 
       if (response.token) {
@@ -75,7 +75,7 @@ export default function RegisterPage() {
           <div className="flex flex-col items-end gap-4">
             <VerificationInput onChange={setVerificationCode} />
 
-            <div className="w-full flex flex-row-reverse justify-between items-center">
+            <div className="flex w-full flex-row-reverse items-center justify-between">
               <span className="text-sm text-foreground-primary/80">
                 {timeLeft}
               </span>

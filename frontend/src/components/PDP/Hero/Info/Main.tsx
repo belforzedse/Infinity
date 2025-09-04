@@ -15,7 +15,7 @@ export default function PDPHeroInfoMain(props: Props) {
         <span className="text-3xl text-foreground-primary">{title}</span>
 
         {discount ? (
-          <div className="md:py-2 py-1 px-3 bg-[#E11D48] text-white text-sm !leading-5 flex items-center justify-center rounded-3xl">
+          <div className="text-sm flex items-center justify-center rounded-3xl bg-[#E11D48] px-3 py-1 !leading-5 text-white md:py-2">
             <span>{discount}% تخفیف</span>
           </div>
         ) : (
@@ -23,9 +23,9 @@ export default function PDPHeroInfoMain(props: Props) {
         )}
       </div>
 
-      <div className="flex gap-1 items-center">
+      <div className="flex items-center gap-1">
         <GridIcon />
-        <span className="text-foreground-muted text-sm md:text-lg">
+        <span className="text-sm text-foreground-muted md:text-lg">
           {category}
         </span>
       </div>

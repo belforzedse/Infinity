@@ -30,7 +30,7 @@ class ApiClient {
    */
   async get<T>(
     endpoint: string,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("GET", endpoint, undefined, options);
   }
@@ -40,7 +40,7 @@ class ApiClient {
    */
   async getPublic<T>(
     endpoint: string,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("GET", endpoint, undefined, {
       ...options,
@@ -54,7 +54,7 @@ class ApiClient {
   async post<T>(
     endpoint: string,
     data?: any,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("POST", endpoint, data, options);
   }
@@ -65,7 +65,7 @@ class ApiClient {
   async put<T>(
     endpoint: string,
     data?: any,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("PUT", endpoint, data, options);
   }
@@ -76,7 +76,7 @@ class ApiClient {
   async patch<T>(
     endpoint: string,
     data?: any,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("PATCH", endpoint, data, options);
   }
@@ -86,7 +86,7 @@ class ApiClient {
    */
   async delete<T>(
     endpoint: string,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("DELETE", endpoint, undefined, options);
   }
@@ -98,7 +98,7 @@ class ApiClient {
     method: string,
     endpoint: string,
     data?: any,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = this.getHeaders(options?.headers, options?.skipAuth);
@@ -115,7 +115,7 @@ class ApiClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(),
-        options?.timeout || REQUEST_TIMEOUT
+        options?.timeout || REQUEST_TIMEOUT,
       );
 
       const response = await fetch(url, {
@@ -173,7 +173,7 @@ class ApiClient {
    */
   private getHeaders(
     customHeaders?: Record<string, string>,
-    skipAuth?: boolean
+    skipAuth?: boolean,
   ): HeadersInit {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

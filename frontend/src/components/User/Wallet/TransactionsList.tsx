@@ -18,11 +18,11 @@ const TransactionsList = ({
   depositList,
 }: TransactionsListProps) => {
   return (
-    <div className="w-full rounded-xl bg-white lg:border border-slate-100 lg:p-5 grid lg:grid-cols-2 grid-cols-1 gap-3">
+    <div className="grid w-full grid-cols-1 gap-3 rounded-xl border-slate-100 bg-white lg:grid-cols-2 lg:border lg:p-5">
       <TransactionHeader icon={<DepositIcon />} title="واریز" />
       <TransactionHeader icon={<DebitIcon />} title="برداشت" />
 
-      <div className="col-span-2 bg-slate-100 h-px lg:flex hidden" />
+      <div className="col-span-2 hidden h-px bg-slate-100 lg:flex" />
 
       <TransactionSection
         title="واریز"

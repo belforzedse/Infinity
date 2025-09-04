@@ -4,7 +4,7 @@ import React from "react";
 
 export const FilterSection: React.FC = () => {
   return (
-    <div className="flex items-center justify-between gap-4 my-4">
+    <div className="my-4 flex items-center justify-between gap-4">
       <div className="flex gap-2">
         <Select
           options={[
@@ -45,10 +45,10 @@ export const FilterSection: React.FC = () => {
         />
       </div>
 
-      <div className="flex items-center bg-neutral-100 rounded-lg px-1 py-1.5 gap-0.5">
-        <SearchIcon className="text-neutral-600 w-5 h-5" />
+      <div className="flex items-center gap-0.5 rounded-lg bg-neutral-100 px-1 py-1.5">
+        <SearchIcon className="h-5 w-5 text-neutral-600" />
         <input
-          className="w-full bg-transparent border-none outline-none text-sm text-neutral-600 placeholder:text-neutral-400"
+          className="text-sm w-full border-none bg-transparent text-neutral-600 outline-none placeholder:text-neutral-400"
           placeholder="جستجو"
           type="text"
         />

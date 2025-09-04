@@ -20,7 +20,7 @@ export function useProductTag(props?: UseProductTagProps) {
   const { isEditMode = false } = props || {};
 
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
   const pathname = usePathname();
   const [tags, setTags] = useState<TagResponseType[]>(productData.product_tags);
@@ -43,8 +43,8 @@ export function useProductTag(props?: UseProductTagProps) {
       const response = await getTags();
       setTagOptions(
         (response as any).filter(
-          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id)
-        )
+          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id),
+        ),
       );
     } catch (error) {
       console.error("Error fetching tags:", error);
@@ -111,7 +111,7 @@ export function useProductTag(props?: UseProductTagProps) {
       : tagOptions.filter((tag) =>
           tag.attributes.Title.replace(/\s/g, "")
             .toLowerCase()
-            .includes(query.replace(/\s/g, "").toLowerCase())
+            .includes(query.replace(/\s/g, "").toLowerCase()),
         );
 
   const handleSelect = (selectedTag: TagResponseType | null) => {

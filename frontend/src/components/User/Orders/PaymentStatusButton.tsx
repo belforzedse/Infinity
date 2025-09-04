@@ -56,17 +56,17 @@ export default function PaymentStatusButton({
       <button
         onClick={checkStatus}
         disabled={loading}
-        className={`text-sm px-3 py-1 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors ${
-          loading ? "opacity-70 cursor-wait" : ""
+        className={`text-sm rounded-lg bg-pink-50 px-3 py-1 text-pink-700 transition-colors hover:bg-pink-100 ${
+          loading ? "cursor-wait opacity-70" : ""
         } ${className}`}
       >
         {loading ? "در حال بررسی..." : "بررسی وضعیت پرداخت"}
       </button>
 
       {isOpen && (statusData || error) && (
-        <div className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-md border border-gray-200 p-3 z-10 min-w-64">
-          <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-100">
-            <h3 className="font-semibold text-sm">وضعیت سفارش</h3>
+        <div className="absolute left-0 top-full z-10 mt-2 min-w-64 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
+          <div className="mb-2 flex items-center justify-between border-b border-gray-100 pb-2">
+            <h3 className="text-sm font-semibold">وضعیت سفارش</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="text-gray-400 hover:text-gray-600"
@@ -89,21 +89,21 @@ export default function PaymentStatusButton({
           </div>
 
           {error ? (
-            <div className="text-red-500 text-sm">{error}</div>
+            <div className="text-sm text-red-500">{error}</div>
           ) : (
             statusData && (
               <div className="text-sm">
                 <div className="mb-2">
-                  <span className="text-gray-600 ml-1">وضعیت سفارش:</span>
+                  <span className="ml-1 text-gray-600">وضعیت سفارش:</span>
                   <span>{getStatusTranslation(statusData.status)}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-600 ml-2">وضعیت پرداخت:</span>
+                  <span className="ml-2 text-gray-600">وضعیت پرداخت:</span>
                   {statusData.isPaid ? (
-                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center">
+                    <span className="text-xs flex items-center rounded-full bg-green-100 px-2 py-1 text-green-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 ml-1"
+                        className="ml-1 h-3 w-3"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -118,10 +118,10 @@ export default function PaymentStatusButton({
                       پرداخت شده
                     </span>
                   ) : (
-                    <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full flex items-center">
+                    <span className="text-xs flex items-center rounded-full bg-orange-100 px-2 py-1 text-orange-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 ml-1"
+                        className="ml-1 h-3 w-3"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"

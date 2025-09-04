@@ -22,11 +22,11 @@ export default function Gallery({
         <div
           key={image.id}
           className={classNames(
-            "relative aspect-square rounded-lg overflow-hidden cursor-pointer group",
+            "group relative aspect-square cursor-pointer overflow-hidden rounded-lg",
             "border-2",
             selectedImages.includes(image.id)
               ? "border-pink-500"
-              : "border-transparent hover:border-gray-300"
+              : "border-transparent hover:border-gray-300",
           )}
           onClick={() => onSelect(image.id)}
         >
@@ -38,15 +38,15 @@ export default function Gallery({
           />
           <div
             className={classNames(
-              "absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity",
+              "absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity",
               selectedImages.includes(image.id)
                 ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
+                : "opacity-0 group-hover:opacity-100",
             )}
           >
-            <div className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
               {selectedImages.includes(image.id) && (
-                <div className="w-3 h-3 bg-white rounded-full" />
+                <div className="h-3 w-3 rounded-full bg-white" />
               )}
             </div>
           </div>

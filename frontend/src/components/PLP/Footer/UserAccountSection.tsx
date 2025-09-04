@@ -29,17 +29,17 @@ const UserAccountSection = ({ data }: UserAccountSectionProps) => {
           data.Links.map((link) => ({
             title: link.Title,
             url: link.URL,
-          }))
+          })),
         );
       }
     }
   }, [data]);
 
   return (
-    <div className="flex flex-col gap-2 md:px-[65px] md:h-full md:min-h-[324px] md:border-none pb-5 border-b border-slate-200 md:border-b-[0px]">
-      <h3 className="text-neutral-900 text-base">{title}</h3>
+    <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 md:h-full md:min-h-[324px] md:border-b-[0px] md:border-none md:px-[65px]">
+      <h3 className="text-base text-neutral-900">{title}</h3>
 
-      <div className="flex flex-row-reverse md:flex-col gap-2 items-start flex-wrap">
+      <div className="flex flex-row-reverse flex-wrap items-start gap-2 md:flex-col">
         {links.map((link, index) => (
           <FooterLink key={index} href={link.url}>
             {link.title}

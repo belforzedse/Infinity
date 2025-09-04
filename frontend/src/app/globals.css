@@ -7,17 +7,12 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: var(--background);  
 }
+
+/* (Removed global hover styles to limit scope to super-admin navbar) */
 
 @layer utilities {
   .scrollbar-hide {
@@ -51,3 +46,32 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #ec4899;
 }
+
+/* Global image fade/blur-in effect */
+@layer base {
+  img {
+    transition: opacity 400ms ease, filter 400ms ease, transform 400ms ease;
+    opacity: 0.01;
+    filter: blur(8px);
+    transform: scale(1.01);
+  }
+  img.img-loaded {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+/* Initial app blur/fade on first load */
+@layer base {
+  body {
+    transition: opacity 300ms ease, filter 300ms ease, transform 300ms ease;
+    will-change: opacity, filter, transform;
+  }
+  body.preload-blur {
+    opacity: 0.85;
+    filter: blur(14px);
+    transform: scale(1.01);
+  }
+}
+

@@ -67,20 +67,20 @@ export default function PDPHeroInfo(props: Props) {
 
   // State for selected variation properties
   const [selectedColor, setSelectedColor] = useState<string>(
-    colors.length > 0 ? colors[0].id : ""
+    colors.length > 0 ? colors[0].id : "",
   );
   const [selectedSize, setSelectedSize] = useState<string>(
-    sizes.length > 0 ? sizes[0].id : ""
+    sizes.length > 0 ? sizes[0].id : "",
   );
   const [selectedModel, setSelectedModel] = useState<string>(
-    models.length > 0 ? models[0].id : ""
+    models.length > 0 ? models[0].id : "",
   );
 
   // Calculate the current price based on selected variation
   const [currentPrice, setCurrentPrice] = useState(product.price);
   const [currentDiscount, setCurrentDiscount] = useState(product.discount || 0);
   const [currentDiscountPrice, setCurrentDiscountPrice] = useState(
-    product.discountPrice || 0
+    product.discountPrice || 0,
   );
   const [currentVariationId, setCurrentVariationId] = useState<
     string | undefined
@@ -91,13 +91,13 @@ export default function PDPHeroInfo(props: Props) {
     console.log("Product data:", productData);
     console.log(
       "Product variations:",
-      productData?.attributes?.product_variations?.data
+      productData?.attributes?.product_variations?.data,
     );
 
     if (productData?.attributes?.product_variations?.data?.length) {
       console.log(
         "Number of variations:",
-        productData.attributes.product_variations.data.length
+        productData.attributes.product_variations.data.length,
       );
 
       // Try to get the default variation (same logic as in Hero component)
@@ -108,7 +108,7 @@ export default function PDPHeroInfo(props: Props) {
               "Checking variation:",
               variation.id,
               "Published:",
-              variation.attributes.IsPublished
+              variation.attributes.IsPublished,
             );
 
             // Check if the variation is published
@@ -119,7 +119,7 @@ export default function PDPHeroInfo(props: Props) {
             const stock = variation.attributes.product_stock?.data?.attributes;
             console.log("Variation stock data:", stock);
             return stock && typeof stock.Count === "number" && stock.Count > 0;
-          }
+          },
         );
 
       console.log("Found default variation with stock:", defaultVariation);
@@ -132,7 +132,7 @@ export default function PDPHeroInfo(props: Props) {
 
       // Fallback: check if any published variation exists
       const anyPublished = productData.attributes.product_variations.data.find(
-        (variation: any) => variation.attributes.IsPublished === true
+        (variation: any) => variation.attributes.IsPublished === true,
       );
 
       console.log("Found any published variation:", anyPublished);
@@ -157,9 +157,9 @@ export default function PDPHeroInfo(props: Props) {
       // Call updateVariationDetails with the default selected values
       // This will set the correct currentVariationId based on default selections
       updateVariationDetails(
-        colors[0].id,    // Default selected color
-        sizes[0].id,     // Default selected size
-        models.length > 0 ? models[0].id : ""  // Default selected model (if any)
+        colors[0].id, // Default selected color
+        sizes[0].id, // Default selected size
+        models.length > 0 ? models[0].id : "", // Default selected model (if any)
       );
     }
   }, [productData, colors, sizes, models]); // Run when product data is loaded
@@ -186,13 +186,13 @@ export default function PDPHeroInfo(props: Props) {
   const updateVariationDetails = (
     colorId: string,
     sizeId: string,
-    modelId: string
+    modelId: string,
   ) => {
     console.log("=== UPDATE VARIATION DETAILS DEBUG ===");
     console.log("Selected color ID:", colorId);
     console.log("Selected size ID:", sizeId);
     console.log("Selected model ID:", modelId);
-    
+
     if (
       !productData ||
       !productData.attributes ||
@@ -209,13 +209,20 @@ export default function PDPHeroInfo(props: Props) {
     const sizeIdNum = sizeId ? parseInt(sizeId) : undefined;
     const modelIdNum = modelId ? parseInt(modelId) : undefined;
 
-    console.log("Converted IDs - Color:", colorIdNum, "Size:", sizeIdNum, "Model:", modelIdNum);
+    console.log(
+      "Converted IDs - Color:",
+      colorIdNum,
+      "Size:",
+      sizeIdNum,
+      "Model:",
+      modelIdNum,
+    );
 
     const variation = findProductVariation(
       productData,
       colorIdNum,
       sizeIdNum,
-      modelIdNum
+      modelIdNum,
     );
 
     console.log("Found variation:", variation);
@@ -234,7 +241,7 @@ export default function PDPHeroInfo(props: Props) {
           ((Number(variationAttributes.Price) -
             Number(variationAttributes.DiscountPrice)) /
             Number(variationAttributes.Price)) *
-            100
+            100,
         );
         setCurrentDiscount(discountPercentage);
       } else {
@@ -262,7 +269,7 @@ export default function PDPHeroInfo(props: Props) {
       setHasStock(false); // No variation found means no stock
       setCurrentVariationId(undefined);
     }
-    
+
     console.log("=== END UPDATE VARIATION DETAILS DEBUG ===");
   };
 
@@ -279,7 +286,7 @@ export default function PDPHeroInfo(props: Props) {
 
     if (currentVariationId) {
       return productData.attributes.product_variations.data.find(
-        (variation: any) => variation.id.toString() === currentVariationId
+        (variation: any) => variation.id.toString() === currentVariationId,
       );
     }
 
@@ -290,7 +297,7 @@ export default function PDPHeroInfo(props: Props) {
   const currentVariation = getCurrentVariation();
 
   return (
-    <div className="flex-1 flex flex-col gap-5 md:max-w-[688px]">
+    <div className="flex flex-1 flex-col gap-5 md:max-w-[688px]">
       <div className="hidden md:block">
         <Main
           category={product.category}

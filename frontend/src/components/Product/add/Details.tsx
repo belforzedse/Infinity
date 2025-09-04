@@ -14,11 +14,11 @@ interface DetailsProps {
 
 export default function ProductDetails({ isEditMode = false }: DetailsProps) {
   const [productAtom, setProductAtom] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     if (name === "name") {
@@ -29,8 +29,8 @@ export default function ProductDetails({ isEditMode = false }: DetailsProps) {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 bg-white p-5 rounded-xl">
-      <div className="flex flex-col lg:gap-4 gap-3">
+    <div className="flex w-full flex-col gap-6 rounded-xl bg-white p-5">
+      <div className="flex flex-col gap-3 lg:gap-4">
         <label className="text-base text-gray-700">نام محصول</label>
         <Input
           type="text"
@@ -38,7 +38,7 @@ export default function ProductDetails({ isEditMode = false }: DetailsProps) {
           value={productAtom.Title}
           onChange={handleChange}
           placeholder="نام محصول"
-          className="w-full text-right placeholder:text-gray-400 text-neutral-800"
+          className="w-full text-right text-neutral-800 placeholder:text-gray-400"
         />
       </div>
 
@@ -49,7 +49,7 @@ export default function ProductDetails({ isEditMode = false }: DetailsProps) {
           value={productAtom.Description}
           onChange={handleChange}
           placeholder="توضیحات محصول"
-          className="min-h-[150px] w-full text-right placeholder:text-gray-400 pt-2 resize-none text-neutral-800"
+          className="min-h-[150px] w-full resize-none pt-2 text-right text-neutral-800 placeholder:text-gray-400"
         />
       </div>
     </div>

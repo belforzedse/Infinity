@@ -15,8 +15,8 @@ export default function JsonField({
   rows = 10,
 }: Props) {
   return (
-    <div className="border border-slate-100 rounded-lg">
-      <div className="w-full bg-slate-50 py-2 px-5 flex items-center">
+    <div className="rounded-lg border border-slate-100">
+      <div className="flex w-full items-center bg-slate-50 px-5 py-2">
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -31,7 +31,7 @@ export default function JsonField({
         disabled={readOnly}
         readOnly={readOnly}
         rows={rows}
-        className={`w-full py-2 px-5 text-sm ${
+        className={`text-sm w-full px-5 py-2 ${
           readOnly ? "bg-slate-100 text-slate-500" : ""
         }`}
         value={value}

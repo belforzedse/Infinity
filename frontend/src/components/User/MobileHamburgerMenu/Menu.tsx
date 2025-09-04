@@ -37,7 +37,7 @@ const Menu = ({ isOpen, onClose }: Props) => {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="w-[216px] h-fit rounded-bl-xl transform overflow-hidden bg-white shadow-xl transition-all">
+              <Dialog.Panel className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all">
                 <nav className="p-5">
                   <button
                     onClick={onClose}
@@ -45,7 +45,7 @@ const Menu = ({ isOpen, onClose }: Props) => {
                   >
                     <XIcon />
                   </button>
-                  <div className="flex flex-col lg:gap-2 gap-3 lg:px-8">
+                  <div className="flex flex-col gap-3 lg:gap-2 lg:px-8">
                     {USER_SIDEBAR_ITEMS.map((item) => (
                       <SidebarItem
                         key={item.href}

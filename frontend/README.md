@@ -246,7 +246,6 @@ src/
 ## Authentication Flow
 
 1. **Registration Process**
-
    - Initial registration with phone number
    - Check if user exists before proceeding
    - SMS verification code input

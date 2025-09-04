@@ -18,18 +18,18 @@ export default function Overall({
 
   const images =
     productData?.Media?.filter((media) =>
-      media.attributes.mime.startsWith("image/")
+      media.attributes.mime.startsWith("image/"),
     ).map((media) => media.attributes.url) || [];
 
   const videos =
     productData?.Media?.filter((media) =>
-      media.attributes.mime.startsWith("video/")
+      media.attributes.mime.startsWith("video/"),
     ).map((media) => media.attributes.url) || [];
 
   const files = productData?.Files?.map((file) => file.attributes.url) || [];
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <Details isEditMode={isEditMode} />
 
       <PhotoUploader initialImages={images} isEditMode={isEditMode} />

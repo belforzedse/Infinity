@@ -18,10 +18,8 @@ export default function SuperAdminLogoutPage() {
   }, [router]);
 
   return (
-    <div className="min-h-[50vh] flex items-center justify-center text-neutral-600 text-sm">
+    <div className="text-sm flex min-h-[50vh] items-center justify-center text-neutral-600">
       در حال خروج...
     </div>
   );
 }
-
-

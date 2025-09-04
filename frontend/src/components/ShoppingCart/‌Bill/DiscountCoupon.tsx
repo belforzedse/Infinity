@@ -10,14 +10,14 @@ function ShoppingCartBillDiscountCoupon({}: Props) {
     <DisclosureItem
       title={
         <div className="flex items-center gap-1">
-          <GiftIcon className="w-6 h-6" />
-          <span className="text-neutral-800 text-xl">کد تخفیف</span>
+          <GiftIcon className="h-6 w-6" />
+          <span className="text-xl text-neutral-800">کد تخفیف</span>
         </div>
       }
-      className="bg-stone-50 rounded-2xl p-5"
+      className="rounded-2xl bg-stone-50 p-5"
     >
       <div className="flex items-center gap-2">
-        <button className="text-white bg-pink-500 lg:h-[50px] h-9 px-6 rounded-lg text-nowrap text-base">
+        <button className="text-base h-9 text-nowrap rounded-lg bg-pink-500 px-6 text-white lg:h-[50px]">
           اعمال کد
         </button>
         <Input

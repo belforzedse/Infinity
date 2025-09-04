@@ -16,7 +16,7 @@ interface Item {
 }
 
 export const deleteCategory = async (
-  id: string
+  id: string,
 ): Promise<PaginatedResponse<Item>> => {
   try {
     const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}`;

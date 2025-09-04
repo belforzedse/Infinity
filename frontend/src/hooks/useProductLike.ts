@@ -29,7 +29,7 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [likedProducts, setLikedProducts] = useAtom(likedProductsAtom);
   const [isGlobalLoading, setIsGlobalLoading] = useAtom(
-    likedProductsLoadingAtom
+    likedProductsLoadingAtom,
   );
   const [hasLoaded, setHasLoaded] = useAtom(likedProductsLoadedAtom);
 
@@ -54,7 +54,7 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const productsData = Array.isArray(response.data) ? response.data : [];
@@ -100,19 +100,19 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // Update the global state
       if (
         safeProducts.some(
-          ({ product }) => product?.id?.toString() === String(productId)
+          ({ product }) => product?.id?.toString() === String(productId),
         )
       ) {
         setLikedProducts(
           safeProducts.filter(
-            ({ product }) => product?.id?.toString() !== String(productId)
-          )
+            ({ product }) => product?.id?.toString() !== String(productId),
+          ),
         );
       } else {
         setLikedProducts([
@@ -136,7 +136,7 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
     isLiked:
       productId && productId !== ""
         ? safeProducts.some(
-            ({ product }) => product?.id?.toString() === productId.toString()
+            ({ product }) => product?.id?.toString() === productId.toString(),
           )
         : false,
     isLoading: isLoading || isGlobalLoading,

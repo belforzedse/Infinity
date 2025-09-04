@@ -9,8 +9,8 @@ const UserSidebar = () => {
   //   };
 
   return (
-    <div className="w-[240px] bg-white lg:flex hidden flex-col gap-4 rounded-lg shadow-sm mr-1">
-      <span className="text-4xl text-foreground-primary mb-4 text-right">
+    <div className="mr-1 hidden w-[240px] flex-col gap-4 rounded-lg bg-white shadow-sm lg:flex">
+      <span className="text-4xl mb-4 text-right text-foreground-primary">
         حساب من
       </span>
 

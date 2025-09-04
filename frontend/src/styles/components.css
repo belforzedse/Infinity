@@ -1,0 +1,21 @@
+@tailwind components;
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-100 bg-white shadow-sm;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-pink-500/90 text-white hover:bg-pink-500;
+  }
+  .btn-outline {
+    @apply border border-slate-200 text-slate-700 hover:bg-slate-50;
+  }
+
+  .input {
+    @apply text-sm w-full rounded-lg border border-slate-200 p-2 text-right placeholder:text-sm lg:text-lg placeholder:text-foreground-muted focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 lg:p-3;
+  }
+}

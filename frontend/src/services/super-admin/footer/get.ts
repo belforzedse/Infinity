@@ -9,7 +9,7 @@ export async function getFooter(): Promise<Footer> {
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 
   const footerData = (response as any).data.attributes;
@@ -24,7 +24,7 @@ export async function getFooter(): Promise<Footer> {
           (link: { Title: string; URL: string }) => ({
             title: link.Title || "",
             url: link.URL || "",
-          })
+          }),
         ) || [],
     },
     second: {
@@ -34,7 +34,7 @@ export async function getFooter(): Promise<Footer> {
           (link: { Title: string; URL: string }) => ({
             title: link.Title || "",
             url: link.URL || "",
-          })
+          }),
         ) || [],
     },
     third: {
@@ -44,7 +44,7 @@ export async function getFooter(): Promise<Footer> {
           (link: { Title: string; URL: string }) => ({
             title: link.Title || "",
             url: link.URL || "",
-          })
+          }),
         ) || [],
     },
     contactUs: {

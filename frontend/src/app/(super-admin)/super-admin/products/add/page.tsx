@@ -52,8 +52,8 @@ export default function AddProductsPage() {
   };
 
   return (
-    <div className="w-full grid-cols-3 lg:grid flex flex-col gap-4">
-      <div className="flex flex-col gap-4 lg:order-1 order-2">
+    <div className="flex w-full grid-cols-3 flex-col gap-4 lg:grid">
+      <div className="order-2 flex flex-col gap-4 lg:order-1">
         <IndexPhotoUploader />
         {/* TODO: delete this components  */}
         {/* <SetPrice />
@@ -61,17 +61,17 @@ export default function AddProductsPage() {
         <SetDetails />
       </div>
 
-      <div className="col-span-2 flex-1 lg:order-2 order-1 h-fit">
+      <div className="order-1 col-span-2 h-fit flex-1 lg:order-2">
         <Overall key={"overall"} />
       </div>
 
-      <div className="border-t border-slate-200 flex justify-end items-center col-span-3 pt-2.5 mt-2 gap-2 order-3">
-        <button className="rounded-xl bg-slate-200 text-slate-500 py-2 px-5 text-sm lg:w-fit w-1/2">
+      <div className="order-3 col-span-3 mt-2 flex items-center justify-end gap-2 border-t border-slate-200 pt-2.5">
+        <button className="text-sm w-1/2 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 lg:w-fit">
           بیخیال شدن
         </button>
         <button
           onClick={handleCreateProduct}
-          className="rounded-xl bg-pink-500 text-white py-2 px-5 text-sm lg:w-fit w-1/2"
+          className="text-sm w-1/2 rounded-xl bg-pink-500 px-5 py-2 text-white lg:w-fit"
         >
           ذخیره
         </button>

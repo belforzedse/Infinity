@@ -33,10 +33,10 @@ const useIndexImageUpload = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(
-    null
+    null,
   ) as React.RefObject<HTMLInputElement>;
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
   const pathname = usePathname();
 
@@ -46,13 +46,13 @@ const useIndexImageUpload = ({
       !pathname.endsWith("/add")
     ) {
       setImagePreview(
-        IMAGE_BASE_URL + productData.CoverImage.data.attributes.url
+        IMAGE_BASE_URL + productData.CoverImage.data.attributes.url,
       );
     }
   }, [productData.CoverImage, pathname]);
 
   const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -113,7 +113,7 @@ const useIndexImageUpload = ({
         return;
       }
       const response = await Download(
-        productData.CoverImage.data.id.toString()
+        productData.CoverImage.data.id.toString(),
       );
       if (response?.url) {
         window.open(IMAGE_BASE_URL + response.url, "_blank");

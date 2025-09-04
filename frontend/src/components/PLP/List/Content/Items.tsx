@@ -56,13 +56,13 @@ const products = new Array(20).fill(null).map((_, index) => {
 export default function PLPListContentItems() {
   return (
     <>
-      <div className="hidden md:flex flex-wrap gap-3 justify-between">
+      <div className="hidden flex-wrap justify-between gap-3 md:flex">
         {products.map((product) => (
           <ProductCard key={product.id} {...product} />
         ))}
       </div>
 
-      <div className="flex md:hidden flex-col gap-3">
+      <div className="flex flex-col gap-3 md:hidden">
         {products.map((product) => (
           <ProductSmallCard
             key={product.id}

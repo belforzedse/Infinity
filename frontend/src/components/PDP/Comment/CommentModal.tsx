@@ -64,7 +64,7 @@ export default function PDPCommentModal({
 
       // Show success message
       toast.success(
-        "دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده خواهد شد"
+        "دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده خواهد شد",
       );
     } catch (error: any) {
       console.error("Error submitting review:", error);
@@ -100,16 +100,16 @@ export default function PDPCommentModal({
       title="افزودن نظر"
     >
       <div className="flex flex-col gap-3.5">
-        <div className="text-right flex flex-col gap-1">
+        <div className="flex flex-col gap-1 text-right">
           <p className="text-lg text-neutral-700">{commentCount} کامنت</p>
 
-          <p className="text-right text-neutral-500 text-base">
+          <p className="text-base text-right text-neutral-500">
             شما هم از تجربه خریدتون برامون بنویسین
           </p>
         </div>
 
         {formError && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">
+          <div className="text-sm rounded-lg bg-red-50 p-3 text-red-700">
             {formError}
           </div>
         )}
@@ -119,11 +119,11 @@ export default function PDPCommentModal({
             placeholder="نظر شما"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="p-3 rounded-lg border border-gray-200 h-32 resize-none text-right"
+            className="h-32 resize-none rounded-lg border border-gray-200 p-3 text-right"
             required
           />
 
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <p className="text-sm text-foreground-muted">
               به محصولات ما امتیاز بدین!
             </p>
@@ -134,7 +134,7 @@ export default function PDPCommentModal({
                   key={star}
                   type="button"
                   onClick={() => setRating(star)}
-                  className="focus:outline-none p-1"
+                  className="p-1 focus:outline-none"
                 >
                   {star <= rating ? <StarIcon /> : <EmptyStarIcon />}
                 </button>
@@ -146,7 +146,7 @@ export default function PDPCommentModal({
             type="submit"
             className={`${
               isSubmitting ? "bg-gray-400" : "bg-actions-primary"
-            } text-white py-3 px-6 rounded-xl flex items-center justify-center gap-2 w-full md:w-auto self-end mt-5`}
+            } mt-5 flex w-full items-center justify-center gap-2 self-end rounded-xl px-6 py-3 text-white md:w-auto`}
             disabled={isSubmitting}
           >
             <span>{isSubmitting ? "در حال ارسال..." : "ثبت نظر"}</span>

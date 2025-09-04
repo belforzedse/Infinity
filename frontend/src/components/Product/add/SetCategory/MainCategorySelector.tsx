@@ -25,7 +25,7 @@ function MainCategorySelector({
 
   const CategoriesData = useAtomValue(productCategoryDataAtom);
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
 
   const onChangeMainCategory = (value: Option) => {
@@ -74,7 +74,7 @@ function MainCategorySelector({
 
       <button
         onClick={() => setIsCategoryModalOpen(true)}
-        className="w-full mb-3 flex items-center justify-center gap-1 bg-pink-500 text-white rounded-xl py-2 transition-colors"
+        className="mb-3 flex w-full items-center justify-center gap-1 rounded-xl bg-pink-500 py-2 text-white transition-colors"
       >
         <span className="text-sm">افزودن دسته بندی جدید</span>
         <PlusIcon />

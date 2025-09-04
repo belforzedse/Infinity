@@ -12,10 +12,10 @@ export default function UpsertPageContentWrapperActiveBox(props: Props) {
   const { title, label, status, onChange } = props;
 
   return (
-    <div className="bg-white rounded-2xl p-5 flex flex-col gap-2 sticky top-5">
+    <div className="sticky top-5 flex flex-col gap-2 rounded-2xl bg-white p-5">
       <span className="text-lg text-foreground-primary">{title}</span>
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <span className="text-sm text-slate-500">{label}</span>
 
         <Switch status={status ? "active" : "inactive"} onChange={onChange} />
