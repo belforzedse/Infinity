@@ -132,7 +132,7 @@ export default function GatewayLiquidityReportPage() {
                         درگاه‌های فعال
                       </h3>
                       <p className="text-2xl font-bold text-orange-600">
-                        {activeGateways} درگاه
+                        {faNum(activeGateways)} درگاه
                       </p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
@@ -234,11 +234,10 @@ function GatewayLiquidityChart({
           <p className="mb-2 font-medium text-neutral-800">{data.name}</p>
           <div className="text-sm space-y-1">
             <p className="text-purple-600">
-              <span className="font-medium">مبلغ:</span> {faNum(data.value)}{" "}
-              تومان
+              <span className="font-medium">مبلغ:</span> {faNum(data.value)} تومان
             </p>
             <p className="text-neutral-600">
-              <span className="font-medium">درصد:</span> {data.percentage}%
+              <span className="font-medium">درصد:</span> {faNum(data.percentage)}%
             </p>
           </div>
         </div>
@@ -273,7 +272,7 @@ function GatewayLiquidityChart({
         fontSize={12}
         fontWeight="bold"
       >
-        {`${(percent * 100).toFixed(0)}%`}
+        {`${faNum((percent * 100).toFixed(0))}%`}
       </text>
     );
   };
@@ -334,7 +333,7 @@ function GatewayLiquidityChart({
                       {item.name}
                     </p>
                     <p className="text-xs text-neutral-500">
-                      {item.percentage}% از کل
+                      {faNum(item.percentage)}% از کل
                     </p>
                   </div>
                 </div>
@@ -356,7 +355,7 @@ function GatewayLiquidityChart({
             >
               <span className="text-neutral-600">تعداد درگاه‌ها:</span>
               <span className="font-medium text-neutral-800">
-                {rows.length} درگاه
+                {faNum(rows.length)} درگاه
               </span>
             </div>
           </div>

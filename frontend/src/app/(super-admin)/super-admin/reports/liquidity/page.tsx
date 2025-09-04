@@ -7,6 +7,7 @@ import {
 } from "@/services/super-admin/reports/liquidity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
+import { faNum } from "@/utils/faNum";
 import {
   LineChart,
   Line,
@@ -116,7 +117,7 @@ export default function LiquidityReportPage() {
                       مجموع نقدینگی
                     </h3>
                     <p className="text-3xl font-bold text-pink-600">
-                      {data?.total?.toLocaleString?.() || 0} تومان
+                      {faNum(data?.total || 0)} تومان
                     </p>
                   </div>
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pink-100">
@@ -196,7 +197,7 @@ function LiquidityChart({
   }));
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -206,8 +207,7 @@ function LiquidityChart({
         >
           <p className="mb-2 font-medium text-neutral-800">{data.fullDate}</p>
           <p className="text-pink-600">
-            <span className="font-medium">نقدینگی:</span>{" "}
-            {data.total.toLocaleString()} تومان
+            <span className="font-medium">نقدینگی:</span> {faNum(data.total)} تومان
           </p>
         </div>
       );
@@ -232,7 +232,7 @@ function LiquidityChart({
                 interval="preserveStartEnd"
               />
               <YAxis
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+                tickFormatter={(value) => `${faNum((value / 1000).toFixed(0))}K`}
                 stroke="#6b7280"
                 fontSize={12}
               />

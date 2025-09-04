@@ -10,10 +10,13 @@ import ShoppingCartBillForm from "./‌Bill";
 import ShoppingCartMobileTable from "./Table/Mobile";
 import ShoppingCartDesktopTable from "./Table/Desktop";
 import { useCart } from "@/contexts/CartContext";
+import CartSkeleton from "@/components/Skeletons/CartSkeleton";
 
 function ShoppingCart() {
   const [submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
-  const { cartItems } = useCart();
+  const { cartItems, isLoading } = useCart();
+
+  if (isLoading) return <CartSkeleton />;
 
   if (cartItems.length === 0) return <EmptyShoppingCart />;
 

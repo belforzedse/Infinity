@@ -37,7 +37,7 @@ export default function SuperAdminLayout({
   }, [router]);
 
   return (
-    <>
+    <div dir="rtl">
       <Suspense fallback={<SuspenseLoader fullscreen />}>
         <div className="hidden md:block">
           <Desktop>{children}</Desktop>
@@ -47,7 +47,7 @@ export default function SuperAdminLayout({
           <Mobile>{children}</Mobile>
         </div>
       </Suspense>
-    </>
+    </div>
   );
 }
 

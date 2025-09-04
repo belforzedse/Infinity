@@ -17,7 +17,7 @@ export default function SuperAdminLayoutHeader({
 }: SuperAdminLayoutHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const me = useMe();
+  const { data: me, error } = useMe();
 
   return (
     <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 lg:h-[76px] lg:bg-white lg:px-6">
@@ -67,10 +67,10 @@ export default function SuperAdminLayoutHeader({
             </div>
             <div className="hidden flex-col gap-1 lg:flex">
               <span className="text-sm !leading-none text-neutral-600">
-                {me?.data?.FirstName} {me?.data?.LastName}
+                {me?.FirstName} {me?.LastName}
               </span>
               <span className="text-xs !leading-none text-neutral-600">
-                {me?.data?.Phone}
+                {me?.Phone}
               </span>
             </div>
             {/* <div className="w-[18px] h-[18px] border border-neutral-600 rounded-full flex justify-center items-center">
@@ -78,6 +78,11 @@ export default function SuperAdminLayoutHeader({
             </div> */}
           </div>
         </div>
+        {error && (
+          <span className="text-xs text-red-500" dir="rtl">
+            {error.message}
+          </span>
+        )}
 
         {/* <Image
           className="cursor-pointer"
