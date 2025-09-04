@@ -3,8 +3,8 @@
  * Helper functions for API calls
  */
 
-import { ApiError } from "@/types/api";
-import { ERROR_MESSAGES } from "@/constants/api";
+import type { ApiError } from "../types/api.ts";
+import { ERROR_MESSAGES } from "../constants/api.ts";
 
 /**
  * Format query parameters for URL
@@ -30,7 +30,10 @@ export const formatQueryParams = (params: Record<string, any>): string => {
  */
 export const handleApiError = (error: any): ApiError => {
   // Network error
-  if (error.message === "Network Error" || !navigator.onLine) {
+  if (
+    error.message === "Network Error" ||
+    (typeof navigator !== "undefined" && !navigator.onLine)
+  ) {
     return {
       message: ERROR_MESSAGES.NETWORK,
       status: 0,
@@ -70,8 +73,13 @@ export const parseJwt = (token: string): any => {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedString =
+      typeof window === "undefined"
+        ? Buffer.from(base64, "base64").toString("binary")
+        : atob(base64);
+
     const jsonPayload = decodeURIComponent(
-      atob(base64)
+      decodedString
         .split("")
         .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
         .join(""),
