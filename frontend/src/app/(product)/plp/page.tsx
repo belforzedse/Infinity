@@ -57,7 +57,9 @@ async function getProducts(
   season?: string,
   gender?: string,
   usage?: string,
-  search?: string
+  search?: string,
+  sort?: string,
+  hasDiscount?: boolean
 ) {
   // Handle search queries differently
   if (search) {
@@ -177,6 +179,11 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
+  // Sorting
+  if (sort) {
+    queryParams.append("sort[0]", sort);
+  }
+
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
 
@@ -184,7 +191,7 @@ async function getProducts(
   const data = await response.json();
 
   // Filter out products with zero price and check availability if needed
-  const filteredProducts = data.data.filter((product: Product) => {
+  let filteredProducts = data.data.filter((product: Product) => {
     // Check if any variation has a valid price
     const hasValidPrice = product.attributes.product_variations?.data?.some(
       (variation) => {
@@ -204,6 +211,16 @@ async function getProducts(
 
     return hasValidPrice;
   });
+
+  // Discount-only filter (post-fetch) if requested
+  if (hasDiscount) {
+    filteredProducts = filteredProducts.filter((product: Product) =>
+      product.attributes.product_variations?.data?.some(
+        (variation) =>
+          (variation.attributes as any)?.general_discounts?.data?.length > 0
+      )
+    );
+  }
 
   return {
     products: filteredProducts,
@@ -236,6 +253,11 @@ export default async function PLPPage({
   const gender = typeof params.gender === "string" ? params.gender : undefined;
   const usage = typeof params.usage === "string" ? params.usage : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
+  const sort = typeof params.sort === "string" ? params.sort : undefined;
+  const hasDiscount =
+    typeof params.hasDiscount === "string"
+      ? params.hasDiscount === "true"
+      : undefined;
 
   const { products, pagination } = await getProducts(
     category,
@@ -249,7 +271,9 @@ export default async function PLPPage({
     season,
     gender,
     usage,
-    search
+    search,
+    sort,
+    hasDiscount
   );
 
   // Determine if we're showing search results or category results

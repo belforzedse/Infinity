@@ -18,7 +18,7 @@ export interface MeResponse {
   isAdmin?: boolean;
 }
 
-export const me = async (): Promise<MeResponse> => {
+export const me = async (requireAdmin: boolean = false): Promise<MeResponse> => {
   const endpoint = `${ENDPOINTS.USER.ME}`;
   const accessToken = localStorage.getItem("accessToken");
 
@@ -32,8 +32,10 @@ export const me = async (): Promise<MeResponse> => {
     // Get the actual response data
     const userData = response as any;
 
-    // Check if the user is not an admin and handle redirect if needed
-    handleAuthErrors(null, userData?.isAdmin);
+    // Only enforce admin check when explicitly required
+    if (requireAdmin) {
+      handleAuthErrors(null, userData?.isAdmin);
+    }
 
     return userData;
   } catch (error: any) {

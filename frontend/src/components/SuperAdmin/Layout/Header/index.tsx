@@ -54,12 +54,12 @@ export default function SuperAdminLayoutHeader({
       <div className="flex items-center lg:gap-6 gap-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center lg:gap-4 gap-1 cursor-pointer">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-neutral-100 relative">
-              <Image
-                src="/images/super-admin.png"
-                alt="User Avatar"
-                fill
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-neutral-100">
+              <img
+                src="https://img.icons8.com/ios/100/000000/user-male-circle.png"
+                alt="No photo"
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
             <div className="lg:flex flex-col gap-1 hidden">
