@@ -6,12 +6,12 @@ import {
   productCategoryDataAtomPagination,
   productDataAtom,
 } from "@/atoms/super-admin/products";
-import { getAllCategories } from "@/services/super-admin/product/cetegory/getAll";
+import { getAllCategories } from "@/services/super-admin/product/category/getAll";
 import {
   CategoryData,
   createCategory,
-} from "@/services/super-admin/product/cetegory/create";
-import { categoryResponseType } from "@/services/super-admin/product/cetegory/getAll";
+} from "@/services/super-admin/product/category/create";
+import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import { usePathname } from "next/navigation";
 
 interface UseProductCategoryProps {

@@ -4,7 +4,7 @@ import { Combobox } from "@headlessui/react";
 import React from "react";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import ProductChip from "../../Chip";
-import { categoryResponseType } from "@/services/super-admin/product/cetegory/getAll";
+import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 
 interface SimilarCategorySelectorProps {
   isEditMode?: boolean;
