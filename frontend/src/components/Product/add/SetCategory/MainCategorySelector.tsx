@@ -9,7 +9,7 @@ import {
 import { useAtomValue, useAtom } from "jotai";
 import { productDataAtom } from "@/atoms/super-admin/products";
 import { usePathname } from "next/navigation";
-import { categoryResponseType } from "@/services/super-admin/product/cetegory/getAll";
+import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 
 interface MainCategorySelectorProps {
   isEditMode?: boolean;
