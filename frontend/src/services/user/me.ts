@@ -1,6 +1,7 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
+import { ApiError } from "@/types/api";
 
 export interface MeResponse {
   Bio: string | null;
@@ -32,7 +33,7 @@ export const me = async (
     });
 
     // Get the actual response data
-    const userData = response as any;
+    const { data: userData } = response;
 
     // Only enforce admin check when explicitly required
     if (requireAdmin) {
@@ -40,9 +41,9 @@ export const me = async (
     }
 
     return userData;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle authentication errors and redirect if needed
-    handleAuthErrors(error);
+    handleAuthErrors(error as ApiError);
 
     throw error;
   }

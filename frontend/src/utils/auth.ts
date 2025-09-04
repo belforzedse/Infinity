@@ -1,10 +1,14 @@
 import { HTTP_STATUS } from "@/constants/api";
+import { ApiError } from "@/types/api";
 
 /**
  * Handles authentication errors (401, 403) or non-admin access
  * and redirects to auth page when necessary
  */
-export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
+export const handleAuthErrors = (
+  error?: ApiError | null,
+  isAdminCheck?: boolean,
+): void => {
   // Check for auth errors
   const isAuthError =
     error?.status === HTTP_STATUS.UNAUTHORIZED ||

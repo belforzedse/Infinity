@@ -7,6 +7,11 @@ import { API_BASE_URL, REQUEST_TIMEOUT, ERROR_MESSAGES } from "@/constants/api";
 import { ApiRequestOptions, ApiResponse, ApiError } from "@/types/api";
 import { handleAuthErrors } from "@/utils/auth";
 
+interface ErrorResponse {
+  message?: string;
+  errors?: Record<string, string[]>;
+}
+
 // Export auth service
 export { default as AuthService } from "./auth";
 // Export user service
@@ -53,7 +58,7 @@ class ApiClient {
    */
   async post<T>(
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("POST", endpoint, data, options);
@@ -64,7 +69,7 @@ class ApiClient {
    */
   async put<T>(
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("PUT", endpoint, data, options);
@@ -75,7 +80,7 @@ class ApiClient {
    */
   async patch<T>(
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("PATCH", endpoint, data, options);
@@ -97,7 +102,7 @@ class ApiClient {
   private async request<T>(
     method: string,
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
@@ -127,21 +132,25 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       // Parse the response
-      const responseData = await response.json();
+      const responseData: unknown = await response.json();
 
       // Check if the response is successful
       if (!response.ok) {
         // For 400 errors, preserve the original error structure from the API
         if (response.status === 400) {
+          const parsed = responseData as { error?: { message?: string } };
           const error = {
             status: response.status,
-            message: responseData.error?.message || ERROR_MESSAGES.DEFAULT,
-            error: responseData.error || responseData,
+            message: parsed.error?.message || ERROR_MESSAGES.DEFAULT,
+            error: parsed.error || responseData,
           };
           throw error;
         }
 
-        const error = this.handleError(response.status, responseData);
+        const error = this.handleError(
+          response.status,
+          responseData as ErrorResponse,
+        );
 
         // Handle auth errors here for centralized auth redirects
         handleAuthErrors(error);
@@ -151,16 +160,21 @@ class ApiClient {
 
       // For Strapi API, just return the responseData directly
       // as it already has the format we need (data and meta properties)
-      return responseData;
-    } catch (error: any) {
-      if (error.name === "AbortError") {
+      return responseData as ApiResponse<T>;
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") {
         throw this.handleError(408, { message: ERROR_MESSAGES.TIMEOUT });
       }
 
       // If error already has our expected structure, just rethrow it
-      if (error.status && (error.message || error.error)) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "status" in error &&
+        ("message" in error || "error" in error)
+      ) {
         // Handle auth errors here for centralized auth redirects
-        handleAuthErrors(error);
+        handleAuthErrors(error as ApiError);
         throw error;
       }
 
@@ -205,7 +219,7 @@ class ApiClient {
   /**
    * Handle API errors
    */
-  private handleError(status: number, data: any): ApiError {
+  private handleError(status: number, data: ErrorResponse): ApiError {
     return {
       message: data.message || ERROR_MESSAGES.DEFAULT,
       status,
