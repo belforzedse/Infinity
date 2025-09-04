@@ -18,6 +18,7 @@
     "@headlessui/react": "^2.2.0",
     "@tanstack/react-table": "^8.21.2",
     "@types/react-beautiful-dnd": "^13.1.8",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.4.1",
     "jotai": "^2.11.1",
@@ -33,7 +34,7 @@
     "react-icons": "^5.5.0",
     "react-is": "^19.1.1",
     "recharts": "^3.1.2",
-    "tailwind-merge": "^3.0.1",
+    "tailwind-merge": "^3.3.1",
     "tailwind-scrollbar": "^3.1.0",
     "use-debounce": "^10.0.4",
     "zaman": "^2.1.1"

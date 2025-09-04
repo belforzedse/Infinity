@@ -1,4 +1,5 @@
-import { twMerge } from "tailwind-merge";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 export default function PLPButton({
   text,
@@ -16,11 +17,13 @@ export default function PLPButton({
   disabled?: boolean;
 }) {
   return (
-    <button
+    <Button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={twMerge(
-        "text-xs flex w-full items-center justify-center gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px] text-[#333]",
+      variant="outline"
+      className={cn(
+        "text-xs w-full gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px] text-[#333]",
+        "flex items-center justify-center",
         disabled && "cursor-not-allowed opacity-50",
         className,
       )}
@@ -30,6 +33,6 @@ export default function PLPButton({
         <span className="pointer-events-none">{text}</span>
         {leftIcon && <span className="pointer-events-none">{leftIcon}</span>}
       </span>
-    </button>
+    </Button>
   );
 }
