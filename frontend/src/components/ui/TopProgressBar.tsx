@@ -12,7 +12,7 @@ export default function TopProgressBar() {
   return (
     <div
       className={clsx(
-        "fixed left-0 right-0 top-0 z-[1100] h-0.5 overflow-hidden",
+        "pointer-events-none fixed left-0 right-0 top-0 z-[900] h-0.5 overflow-hidden",
         active ? "opacity-100" : "opacity-0",
         "transition-opacity duration-200",
       )}

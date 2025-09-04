@@ -5,7 +5,7 @@ import AddAddress from "@/components/User/Address/AddAddress";
 export default function AddressesPage() {
   return (
     <div
-      className="container mx-auto flex min-h-[60vh] gap-10 overflow-hidden bg-white px-4 lg:p-0"
+      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
       dir="rtl"
     >
       <UserSidebar />

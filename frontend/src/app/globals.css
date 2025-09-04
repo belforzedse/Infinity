@@ -62,16 +62,5 @@ body {
   }
 }
 
-/* Initial app blur/fade on first load */
-@layer base {
-  body {
-    transition: opacity 300ms ease, filter 300ms ease, transform 300ms ease;
-    will-change: opacity, filter, transform;
-  }
-  body.preload-blur {
-    opacity: 0.85;
-    filter: blur(14px);
-    transform: scale(1.01);
-  }
-}
+/* Removed global body blur/transform to prevent stacking context issues */
 

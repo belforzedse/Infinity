@@ -8,13 +8,11 @@ import NavigationProgress from "@/components/ui/NavigationProgress";
 import GlobalFetchInterceptor from "@/components/ui/GlobalFetchInterceptor";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import ImageEffects from "@/components/ui/ImageEffects";
-import PreloadBlur from "@/components/ui/PreloadBlur";
 import { Suspense } from "react";
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <Provider store={jotaiStore}>
-      <PreloadBlur />
       <TopProgressBar />
       <Suspense fallback={null}>
         <NavigationProgress />

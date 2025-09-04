@@ -141,7 +141,26 @@ function ShoppingCartBillForm({}: Props) {
 
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
         if (gateway === "snappay") {
-          window.location.href = cartResponse.redirectUrl!;
+          const isAllowedPaymentUrl = (raw: string) => {
+            try {
+              const url = new URL(raw);
+              if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+              const allowed = (process.env.NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS || "")
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+              if (allowed.length === 0) return true; // preserve dev behavior
+              return allowed.some((origin) => origin === url.origin);
+            } catch {
+              return false;
+            }
+          };
+          if (isAllowedPaymentUrl(cartResponse.redirectUrl!)) {
+            window.location.href = cartResponse.redirectUrl!;
+          } else {
+            toast.error("Invalid payment redirect URL");
+            router.push("/orders/failure");
+          }
         } else {
           const createPaymentForm = () => {
             const form = document.createElement("form");

@@ -16,7 +16,7 @@ export default function CartDrawer() {
     <Transition appear show={isDrawerOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="relative z-50"
+        className="relative z-[1200]"
         onClose={closeDrawer}
         dir="rtl"
       >

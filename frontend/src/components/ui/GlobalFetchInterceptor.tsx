@@ -36,7 +36,7 @@ export default function GlobalFetchInterceptor() {
       }
     }
 
-    // @ts-ignore override
+    // @ts-expect-error overriding global fetch for loading instrumentation
     window.fetch = wrappedFetch as any;
     return () => {
       // restore
