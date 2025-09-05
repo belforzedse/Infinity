@@ -33,7 +33,13 @@ export default function PLPSEOContent(props: Props) {
       </div>
 
       <div className="relative h-[289px] w-full overflow-hidden rounded-3xl md:w-[423px]">
-        <Image src={imageSrc} alt={imageAlt} fill className="object-cover" />
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 423px"
+        />
       </div>
 
       <h2 className="text-3xl text-neutral-800 md:hidden">{title}</h2>

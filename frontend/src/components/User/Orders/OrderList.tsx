@@ -75,6 +75,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
               alt={item.ProductTitle}
               fill
               className="object-cover"
+              sizes="64px"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200">

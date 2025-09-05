@@ -10,6 +10,8 @@ export default function Logo() {
           alt="Logo"
           fill
           className="object-contain"
+          sizes="(max-width: 768px) 90px, 110px"
+          priority
         />
       </div>
     </Link>

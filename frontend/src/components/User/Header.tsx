@@ -18,6 +18,7 @@ const UserHeader: React.FC = () => {
           fill
           className="object-contain"
           priority
+          sizes="(max-width: 768px) 76px, 104px"
         />
       </div>
 

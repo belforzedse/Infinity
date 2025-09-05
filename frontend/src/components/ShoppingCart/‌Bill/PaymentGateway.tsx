@@ -55,7 +55,13 @@ function ShoppingCartBillPaymentGateway({
             type="button"
           >
             <div className="relative h-16 w-16">
-              <Image src={pg.img} alt={pg.name} fill className="object-cover" />
+              <Image
+                src={pg.img}
+                alt={pg.name}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </div>
 
             <span className="text-sm text-neutral-600 lg:text-xs">
