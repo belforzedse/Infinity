@@ -174,7 +174,9 @@ export default function AccountForm() {
             placeholder="1370/06/23"
             icon={<CalenderIcon />}
             onIconClick={() => {
-              console.log("clicked");
+              if (process.env.NODE_ENV !== "production") {
+                console.log("clicked");
+              }
             }}
           />
 

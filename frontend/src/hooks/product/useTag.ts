@@ -59,7 +59,9 @@ export function useProductTag(props?: UseProductTagProps) {
       const response = await createTag(title);
 
       // Debug the response structure
-      console.log("Tag creation response:", response);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Tag creation response:", response);
+      }
 
       // Check if the response is successful
       if (response.data?.data?.id) {
@@ -73,7 +75,9 @@ export function useProductTag(props?: UseProductTagProps) {
           },
         };
 
-        console.log("New tag created:", newTag);
+        if (process.env.NODE_ENV !== "production") {
+          console.log("New tag created:", newTag);
+        }
 
         // Update the tags state
         const updatedTags = [...tags, newTag];

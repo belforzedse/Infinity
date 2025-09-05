@@ -47,7 +47,9 @@ export default function EditProductsPage({
         const result = await getProduct(id, getProductParams);
         setProductData(transformToProductData(result.data.attributes));
       } catch (error: any) {
-        console.log("error in fetching product: ", error);
+        if (process.env.NODE_ENV !== "production") {
+          console.log("error in fetching product: ", error);
+        }
       }
     };
 
@@ -61,7 +63,9 @@ export default function EditProductsPage({
 
   const handleUpdateProduct = async () => {
     try {
-      console.log("productData2", productData);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("productData2", productData);
+      }
 
       const result = await updateProduct(id, productData);
       if (result.success) {

@@ -14,7 +14,9 @@ export default function Overall({
   isEditMode = false,
 }: OverallProps) {
   // Extract media by type
-  console.log("productData", productData);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("productData", productData);
+  }
 
   const images =
     productData?.Media?.filter((media) =>

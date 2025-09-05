@@ -25,7 +25,9 @@ export default function AddProductsPage() {
   const { fetchAllCategories } = useProductCategory();
   const productData = useAtomValue(productDataAtom);
   const router = useRouter();
-  console.log("productData", productData);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("productData", productData);
+  }
   useEffect(() => {
     fetchAllCategories();
   }, []);

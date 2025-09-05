@@ -51,7 +51,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (phoneNumber) {
-      console.log("Sending OTP to", phoneNumber);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Sending OTP to", phoneNumber);
+      }
 
       AuthService.sendOTP(phoneNumber).then(() => {
         startTimer();

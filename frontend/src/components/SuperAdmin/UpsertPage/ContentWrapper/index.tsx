@@ -114,7 +114,9 @@ export default function UpsertPageContentWrapper<
   };
 
   const updateFormData = (fieldName: keyof T, value: any) => {
-    console.log(`Updating field ${String(fieldName)} with value:`, value);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Updating field ${String(fieldName)} with value:`, value);
+    }
     setFormData((prevData) => ({
       ...prevData,
       [fieldName]: value,
