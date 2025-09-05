@@ -20,7 +20,7 @@ export default function OrderSuccess() {
               src="/images/cart/success-order.png"
               alt="Success"
               fill
-              objectFit="contain"
+              className="object-contain"
               sizes="160px"
             />
           </div>
