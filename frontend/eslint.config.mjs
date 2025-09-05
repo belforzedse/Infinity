@@ -16,6 +16,10 @@ const eslintConfig = [
     plugins: { tailwindcss: tailwind },
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
       "react-hooks/rules-of-hooks": "warn",
       // Tailwind
       "tailwindcss/classnames-order": "warn",
