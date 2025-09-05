@@ -1,6 +1,7 @@
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import { API_BASE_URL } from "@/constants/api";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 
 interface Product {
@@ -187,8 +188,9 @@ async function getProducts(
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
 
-  const response = await fetch(url);
-  const data = await response.json();
+  try {
+    const response = await fetchWithTimeout(url, { timeoutMs: 15000 });
+    const data = await response.json();
 
   // Filter out products with zero price and check availability if needed
   let filteredProducts = data.data.filter((product: Product) => {
@@ -222,10 +224,22 @@ async function getProducts(
     );
   }
 
-  return {
-    products: filteredProducts,
-    pagination: data.meta.pagination,
-  };
+    return {
+      products: filteredProducts,
+      pagination: data.meta.pagination,
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return {
+      products: [],
+      pagination: {
+        page: page,
+        pageSize,
+        pageCount: 0,
+        total: 0,
+      },
+    };
+  }
 }
 
 export default async function PLPPage({

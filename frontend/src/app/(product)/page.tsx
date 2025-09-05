@@ -5,6 +5,7 @@ import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
 import Image from "next/image";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { categories } from "@/constants/categories";
 
 interface ProductCardProps {
@@ -19,11 +20,12 @@ interface ProductCardProps {
 }
 
 async function getDiscountedProducts(): Promise<ProductCardProps[]> {
-  const response = await fetch(
+  try {
+    const response = await fetchWithTimeout(
     `${API_BASE_URL}/product-variations?filters[IsPublished]=true&filters[Price][$gte]=1&populate[0]=general_discounts&populate[1]=product&filters[general_discounts][$null]=false&populate[2]=product.CoverImage&populate[3]=product.product_main_category&filters[product][Status]=Active`,
-    { cache: "no-store" },
-  );
-  const data = await response.json();
+      { cache: "no-store", timeoutMs: 15000 },
+    );
+    const data = await response.json();
 
   const uniqueProducts = data.data
     .filter((item: any) => {
@@ -63,17 +65,22 @@ async function getDiscountedProducts(): Promise<ProductCardProps[]> {
       return acc;
     }, {});
 
-  return Object.values(uniqueProducts);
+    return Object.values(uniqueProducts);
+  } catch (_err) {
+    // Fail gracefully on slow/unstable mobile networks
+    return [];
+  }
 }
 
 async function getNewProducts(): Promise<ProductCardProps[]> {
-  const response = await fetch(
+  try {
+    const response = await fetchWithTimeout(
     `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&sort[0]=createdAt:desc&pagination[limit]=20`,
-    { cache: "no-store" },
-  );
-  const data = await response.json();
+      { cache: "no-store", timeoutMs: 15000 },
+    );
+    const data = await response.json();
 
-  return data.data
+    return data.data
     .filter((item: any) => {
       return (
         item.attributes.CoverImage?.data?.attributes?.url &&
@@ -126,17 +133,21 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
         seenCount: 0,
       };
     })
-    .filter((item: any) => item !== null);
+      .filter((item: any) => item !== null);
+  } catch (_err) {
+    return [];
+  }
 }
 
 async function getFavoriteProducts(): Promise<ProductCardProps[]> {
-  const response = await fetch(
+  try {
+    const response = await fetchWithTimeout(
     `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&sort[0]=AverageRating:desc&pagination[limit]=20`,
-    { cache: "no-store" },
-  );
-  const data = await response.json();
+      { cache: "no-store", timeoutMs: 15000 },
+    );
+    const data = await response.json();
 
-  return data.data
+    return data.data
     .filter((item: any) => {
       return (
         item.attributes.AverageRating !== null &&
@@ -169,6 +180,9 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
         seenCount: item.attributes.RatingCount || 0,
       };
     });
+  } catch (_err) {
+    return [];
+  }
 }
 
 
@@ -187,7 +201,7 @@ export default async function Home() {
           width={1920}
           height={560}
           className="w-full rounded-lg object-cover"
-          priority
+          loading="lazy"
         />
       </div>
       <div className="md:hidden">
@@ -197,7 +211,7 @@ export default async function Home() {
           width={750}
           height={520}
           className="w-full rounded-lg"
-          priority
+          loading="eager"
         />
       </div>
 

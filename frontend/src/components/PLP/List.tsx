@@ -14,6 +14,7 @@ import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL } from "@/constants/api";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
+// use native fetch so user isn't timed out artificially
 
 interface Product {
   id: number;
@@ -203,12 +204,25 @@ export default function PLPList({
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
-          setProducts(data.data);
-          setPagination(data.meta.pagination);
+          setProducts(Array.isArray(data?.data) ? data.data : []);
+          setPagination(
+            data?.meta?.pagination || {
+              page: parseInt(page) || 1,
+              pageSize: 20,
+              pageCount: 0,
+              total: 0,
+            },
+          );
         })
         .catch((error) => {
           console.error("Error fetching products:", error);
+          setProducts([]);
+          setPagination({
+            page: parseInt(page) || 1,
+            pageSize: 20,
+            pageCount: 0,
+            total: 0,
+          });
         })
         .finally(() => {
           setIsLoading(false);
