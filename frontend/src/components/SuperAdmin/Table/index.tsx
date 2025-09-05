@@ -152,8 +152,7 @@ export function SuperAdminTable<TData, TValue>({
           isFetchingRef.current = false;
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, refresh, page, pageSize, setRefresh, setTotalSize, isLoading]);
+  }, [url, refresh, page, pageSize]);
 
   useEffect(() => {
     if (!refresh) {
@@ -164,7 +163,6 @@ export function SuperAdminTable<TData, TValue>({
 
       setRefresh(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, refresh, filter]);
 
   const table = useReactTable({

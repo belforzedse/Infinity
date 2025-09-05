@@ -1,7 +1,6 @@
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
 import KeyIcon from "@/components/SuperAdmin/Layout/Icons/KeyIcon";
 import PlusIcon from "@/components/SuperAdmin/Layout/Icons/PlusIcon";
-// removed unused import: ShowMoreIcon
 import { refreshTable } from "@/components/SuperAdmin/Table";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
@@ -10,12 +9,11 @@ import SuperAdminTableCellSwitch from "@/components/SuperAdmin/Table/Cells/Switc
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";
-import { ColumnDef, Row } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
-// This is a sample data type. Modify according to your needs
 export type User = {
   id: string;
   attributes: {
@@ -48,193 +46,6 @@ export type User = {
     createdAt: string;
   };
 };
-
-function UserInfoCell({ row }: { row: Row<User> }) {
-  const userInfo = row.original.attributes as {
-    user_info: {
-      data: { attributes: { FirstName: string; LastName: string } };
-    };
-  };
-  return userInfo &&
-    userInfo.user_info.data?.attributes?.FirstName &&
-    userInfo.user_info.data?.attributes?.LastName ? (
-    <span className="text-sm text-neutral-800">
-      {userInfo.user_info.data?.attributes?.FirstName}{" "}
-      {userInfo.user_info.data?.attributes?.LastName}
-    </span>
-  ) : (
-    <>-</>
-  );
-}
-
-function UserStatusCell({ row }: { row: Row<User> }) {
-  const [status, setStatus] = useState(
-    row.original.attributes.IsActive ? "active" : "inactive",
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const handleStatusChange = async (newStatus: "active" | "inactive") => {
-    setIsLoading(true);
-    try {
-      await apiClient.put(
-        `/local-users/${row.original.id}`,
-        { data: { IsActive: newStatus === "active" } },
-        { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
-      );
-      toast.success(
-        "U^OO1UOO� UcOO�O"O� O"O U.U^U?U,UOO� O�O�UOUOO� UcO�O_",
-      );
-      setStatus(newStatus);
-    } catch (error) {
-      toast.error("OrO�O O_O� O�O�UOUOO� U^OO1UOO� UcOO�O"O�");
-      console.error("Failed to update user status:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  return (
-    <SuperAdminTableCellSwitch
-      status={status as "active" | "inactive"}
-      disabled={isLoading}
-      onChange={handleStatusChange}
-    />
-  );
-}
-
-function UserWalletCell({ row }: { row: Row<User> }) {
-  const wallet = row.original.attributes.user_wallet.data?.attributes
-    .Balance as string;
-  const walletId = row.original.attributes.user_wallet.data?.id as number;
-  const [isLoading, setIsLoading] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [newBalance, setNewBalance] = useState(wallet ? wallet : "0");
-  const [, setRefresh] = useAtom(refreshTable);
-  const onClick = () => setShowWalletModal(true);
-  const handleWalletUpdate = async () => {
-    setIsLoading(true);
-    try {
-      await apiClient.put(
-        `/local-user-wallets/${walletId}`,
-        { data: { Balance: newBalance } },
-        { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
-      );
-      setShowWalletModal(false);
-      toast.success(
-        "U.U^O�U^O_UO UcUOU? U_U^U, O"O U.U^U?U,UOO� O"O�U^O�O�O3OU+UO O'O_",
-      );
-      setRefresh(true);
-    } catch (error) {
-      toast.error("OrO�O O_O� O"O�U^O�O�O3OU+UO UcUOU? U_U^U,");
-      console.error("Failed to update wallet:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  return (
-    <>
-      <button
-        className="text-sm flex items-center gap-1 rounded-lg border border-slate-400 bg-white px-3 py-1 text-slate-700 disabled:opacity-50"
-        onClick={onClick}
-        disabled={isLoading}
-      >
-        <SuperAdminTableCellSimplePrice price={wallet ? +wallet : 0} />
-        <PlusIcon />
-      </button>
-      {showWalletModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <h2 className="text-xl mb-4 font-bold">O�O�UOUOO� U.U^O�U^O_UO UcUOU? U_U^U,</h2>
-            <div className="mb-4">
-              <label className="text-sm mb-1 block font-medium">U.U^O�U^O_UO O�O_UOO_</label>
-              <input
-                type="number"
-                value={newBalance}
-                onChange={(e) => setNewBalance(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowWalletModal(false)}
-                className="rounded-md bg-gray-200 px-4 py-2"
-                disabled={isLoading}
-              >
-                OU+O�O�OU?
-              </button>
-              <button
-                onClick={handleWalletUpdate}
-                className="rounded-md bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
-                disabled={isLoading}
-              >
-                {isLoading ? "O_O� O-OU, O"O�U^O�O�O3OU+UO..." : "O�OrUOO�U�"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-function ActionsCell({ row }: { row: Row<User> }) {
-  const [, setRefresh] = useAtom(refreshTable);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [retryPassword, setRetryPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const handlePasswordUpdate = async () => {
-    if (newPassword !== retryPassword) {
-      toast.error(
-        "O�U.O� O1O"U^O� U^ O�UcO�OO� O�U+ U.O�OO"U,O� U+O_OO�U+O_",
-      );
-      return;
-    }
-    setIsLoading(true);
-    try {
-      await apiClient.put(
-        `/local-users/${row.original.id}`,
-        { data: { Password: newPassword } },
-        { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
-      );
-      setShowPasswordModal(false);
-      setNewPassword("");
-      setRetryPassword("");
-      setRefresh(true);
-      toast.success("O�U.O� O1O"U^O� O"O U.U^U?U,UOO� O�O�UOUOO� UcO�O_");
-    } catch (error) {
-      toast.error("O�U.O� O1O"U^O� U,U^UO U+UOO3O�");
-      console.error("Failed to update password:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const isRemoved = row.original.attributes.removedAt;
-  return (
-    <>
-      <div className="flex flex-row-reverse items-center gap-3 p-1">
-        <RemoveActionButton isRemoved={!!isRemoved} id={row.original.id} apiUrl={"/local-users"} />
-        <SuperAdminTableCellActionButton variant="secondary" icon={<EditIcon />} path={`/super-admin/users/edit/${row.original.id}`} />
-        <SuperAdminTableCellActionButton variant="secondary" icon={<KeyIcon />} onClick={() => setShowPasswordModal(true)} />
-      </div>
-      {showPasswordModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-96 rounded-lg bg-white p-6">
-            <h2 className="text-lg mb-4 font-bold">O�O�UOUOO� O�U.O� O1O"U^O�</h2>
-            <input type="password" placeholder="O�U.O� O1O"U^O� O�O_UOO_" className="mb-4 w-full rounded border p-2" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} disabled={isLoading} />
-            <input type="password" placeholder="O�UcO�OO� O�U.O� O1O"U^O�" className="mb-4 w-full rounded border p-2" value={retryPassword} onChange={(e) => setRetryPassword(e.target.value)} disabled={isLoading} />
-            <div className="flex justify-end gap-2">
-              <button className="rounded bg-actions-primary px-4 py-2 text-white disabled:opacity-50" onClick={handlePasswordUpdate} disabled={isLoading}>
-                {isLoading ? "O�OrUOO�U�..." : "O�OrUOO�U�"}
-              </button>
-              <button className="rounded bg-gray-200 px-4 py-2 disabled:opacity-50" onClick={() => setShowPasswordModal(false)} disabled={isLoading}>
-                OU+O�O�OU?
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -587,3 +398,4 @@ export const MobileTable = ({ data }: Props) => {
     </div>
   );
 };
+
