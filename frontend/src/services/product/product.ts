@@ -534,33 +534,43 @@ export const hasStockForVariation = (
   variation: ProductDetail["attributes"]["product_variations"]["data"][0],
   requestedQuantity: number = 1,
 ): boolean => {
-  console.log("=== STOCK CHECK DEBUG ===");
-  console.log("Variation ID:", variation?.id);
-  console.log("Full variation object:", variation);
-  console.log("Product stock data:", variation?.attributes?.product_stock);
-  console.log(
-    "Stock attributes:",
-    variation?.attributes?.product_stock?.data?.attributes,
-  );
+  if (process.env.NODE_ENV !== "production") {
+    console.log("=== STOCK CHECK DEBUG ===");
+    console.log("Variation ID:", variation?.id);
+    console.log("Full variation object:", variation);
+    console.log("Product stock data:", variation?.attributes?.product_stock);
+    console.log(
+      "Stock attributes:",
+      variation?.attributes?.product_stock?.data?.attributes,
+    );
+  }
 
   if (!variation?.attributes?.product_stock?.data?.attributes) {
-    console.log("No stock data found - returning false");
+    if (process.env.NODE_ENV !== "production") {
+      console.log("No stock data found - returning false");
+    }
     return false;
   }
 
   const stockData = variation.attributes.product_stock.data.attributes;
-  console.log("Stock data object:", stockData);
-  console.log("Available keys in stock data:", Object.keys(stockData));
+  if (process.env.NODE_ENV !== "production") {
+    console.log("Stock data object:", stockData);
+    console.log("Available keys in stock data:", Object.keys(stockData));
+  }
 
   const stockQuantity = stockData.Count;
-  console.log("Stock Count value:", stockQuantity);
-  console.log("Requested quantity:", requestedQuantity);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("Stock Count value:", stockQuantity);
+    console.log("Requested quantity:", requestedQuantity);
+  }
 
   // Updated validation: Check if stock is sufficient for the requested quantity
   const hasStock =
     typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
-  console.log("Has sufficient stock:", hasStock);
-  console.log("=== END STOCK CHECK ===");
+  if (process.env.NODE_ENV !== "production") {
+    console.log("Has sufficient stock:", hasStock);
+    console.log("=== END STOCK CHECK ===");
+  }
 
   return hasStock;
 };
