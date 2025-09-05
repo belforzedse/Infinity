@@ -1,5 +1,6 @@
 import ProductCard from "@/components/Product/Card";
 import ProductSmallCard from "@/components/Product/SmallCard";
+import { FixedSizeList as List, ListChildComponentProps } from "react-window";
 
 const products = new Array(20).fill(null).map((_, index) => {
   const template = [
@@ -54,28 +55,56 @@ const products = new Array(20).fill(null).map((_, index) => {
 });
 
 export default function PLPListContentItems() {
+  const DesktopRow = ({ index, style }: ListChildComponentProps) => (
+    <div style={style}>
+      <ProductCard key={products[index].id} {...products[index]} />
+    </div>
+  );
+
+  const MobileRow = ({ index, style }: ListChildComponentProps) => {
+    const product = products[index];
+    return (
+      <div style={style}>
+        <ProductSmallCard
+          category={product.category}
+          id={product.id}
+          title={product.title}
+          likedCount={product.seenCount}
+          price={product.price}
+          discountedPrice={product.discountPrice}
+          image={product.images[0]}
+          discount={product.discount}
+        />
+      </div>
+    );
+  };
+
+  const LIST_HEIGHT = 600;
+  const DESKTOP_ITEM_HEIGHT = 420;
+  const MOBILE_ITEM_HEIGHT = 140;
+
   return (
     <>
-      <div className="hidden flex-wrap justify-between gap-3 md:flex">
-        {products.map((product) => (
-          <ProductCard key={product.id} {...product} />
-        ))}
+      <div className="hidden md:block">
+        <List
+          height={LIST_HEIGHT}
+          itemCount={products.length}
+          itemSize={DESKTOP_ITEM_HEIGHT}
+          width="100%"
+        >
+          {DesktopRow}
+        </List>
       </div>
 
-      <div className="flex flex-col gap-3 md:hidden">
-        {products.map((product) => (
-          <ProductSmallCard
-            key={product.id}
-            category={product.category}
-            id={product.id}
-            title={product.title}
-            likedCount={product.seenCount}
-            price={product.price}
-            discountedPrice={product.discountPrice}
-            image={product.images[0]}
-            discount={product.discount}
-          />
-        ))}
+      <div className="md:hidden">
+        <List
+          height={LIST_HEIGHT}
+          itemCount={products.length}
+          itemSize={MOBILE_ITEM_HEIGHT}
+          width="100%"
+        >
+          {MobileRow}
+        </List>
       </div>
     </>
   );

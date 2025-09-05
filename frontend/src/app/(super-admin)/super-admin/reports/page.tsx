@@ -3,8 +3,13 @@
 
 import * as React from "react";
 import clsx from "clsx";
-import AreaLineChart from "@/components/SuperAdmin/reports/AreaLineChart";
+import dynamic from "next/dynamic";
 import { faNum } from "@/utils/faNum";
+
+const AreaLineChart = dynamic(
+  () => import("@/components/SuperAdmin/reports/AreaLineChart"),
+  { ssr: false },
+);
 
 const months = [
   "فروردین",
