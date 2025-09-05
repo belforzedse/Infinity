@@ -1,9 +1,12 @@
 import React from "react";
-import moment from "moment-jalaali";
+import dayjs from "dayjs";
+import jalaliday from "jalaliday/dayjs";
 import { priceFormatter } from "@/utils/price";
 import PlusIcon from "../Icons/PlusIcon";
 import MinusIcon from "../Icons/MinusIcon";
 import clsx from "clsx";
+
+dayjs.extend(jalaliday);
 
 interface TransactionsListRowProps {
   date: string;
@@ -17,15 +20,16 @@ const TransactionsListRow = ({
   amount,
 }: TransactionsListRowProps) => {
   const formatDate = (dateStr: string) => {
-    const today = moment().format("YYYY/MM/DD");
-    const inputDate = moment(dateStr).format("YYYY/MM/DD");
+    const today = dayjs().format("YYYY/MM/DD");
+    const inputDate = dayjs(dateStr).format("YYYY/MM/DD");
 
     if (today === inputDate) {
       return "امروز";
     }
 
-    return moment(dateStr)
-      .format("jYYYY/jMM/jDD")
+    return dayjs(dateStr)
+      .calendar("jalali")
+      .format("YYYY/MM/DD")
       .replace(/[0-9]/g, (d: string) =>
         String.fromCharCode(d.charCodeAt(0) + 1728),
       );
