@@ -6,13 +6,20 @@ import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
 import Footer from "@/components/PLP/Footer";
 import MobileHeader from "@/components/PLP/Header/Mobile";
 import BottomNavigation from "@/components/PLP/BottomNavigation";
-import CartDrawer from "@/components/ShoppingCart/Drawer";
+import dynamic from "next/dynamic";
+import { useCart } from "@/contexts/CartContext";
+
+const CartDrawer = dynamic(
+  () => import("@/components/ShoppingCart/Drawer"),
+  { ssr: false }
+);
 
 export default function ProductLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isDrawerOpen } = useCart();
   return (
     <div dir="rtl" className="bg-white pb-[81px] md:pb-0">
       <header>
@@ -43,7 +50,7 @@ export default function ProductLayout({
       <BottomNavigation />
 
       {/* Cart Drawer */}
-      <CartDrawer />
+      {isDrawerOpen && <CartDrawer />}
     </div>
   );
 }
