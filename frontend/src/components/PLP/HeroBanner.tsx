@@ -167,7 +167,14 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
 
         <Link href="/">
           <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
-            <Image src={imageUrl} alt={title} fill className="object-cover" />
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 517px"
+              priority
+            />
           </div>
         </Link>
       </div>

@@ -37,6 +37,7 @@ export default function OrderRow({
               alt={title}
               fill
               className="h-full w-full object-cover"
+              sizes="48px"
             />
           </div>
           <span className="text-xs text-neutral-800">{title}</span>

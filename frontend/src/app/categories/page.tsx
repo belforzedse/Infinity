@@ -21,6 +21,7 @@ export default function CategoriesPage() {
                 alt={category.name}
                 fill
                 className="p-4 object-contain"
+                sizes="96px"
               />
             </div>
             <span className="text-sm">{category.name}</span>
