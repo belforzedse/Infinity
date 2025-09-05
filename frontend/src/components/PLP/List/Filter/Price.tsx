@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
+import dynamic from "next/dynamic";
+
+// TODO: Evaluate using a lighter range slider or native `<input type="range">`
+const Slider = dynamic(() => import("rc-slider"), { ssr: false });
 
 interface PriceFilterProps {
   minPrice?: number;
@@ -27,6 +29,10 @@ const PriceFilter = ({
     min: formatPrice(minPrice),
     max: formatPrice(maxPrice),
   });
+
+  useEffect(() => {
+    import("rc-slider/assets/index.css");
+  }, []);
 
   useEffect(() => {
     setPriceRange([minPriceValue || minPrice, maxPriceValue || maxPrice]);

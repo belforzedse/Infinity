@@ -5,12 +5,22 @@ import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
-import {
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  Cell,
-  Treemap,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const RechartsTooltip = dynamic(
+  () => import("recharts").then((m) => m.Tooltip),
+  { ssr: false },
+);
+const ResponsiveContainer = dynamic(
+  () => import("recharts").then((m) => m.ResponsiveContainer),
+  { ssr: false },
+);
+const Cell = dynamic(() => import("recharts").then((m) => m.Cell), {
+  ssr: false,
+});
+const Treemap = dynamic(() => import("recharts").then((m) => m.Treemap), {
+  ssr: false,
+});
 
 export default function ProductSalesReportPage() {
   const [start, setStart] = useState<Date>(
@@ -240,10 +250,12 @@ function ProductSalesTreemap({
           <p className="mb-2 font-medium text-neutral-800">{data.name}</p>
           <div className="text-sm space-y-1">
             <p className="text-blue-600">
-              <span className="font-medium">درآمد:</span> {faNum(data.revenue)} تومان
+              <span className="font-medium">درآمد:</span> {faNum(data.revenue)}{" "}
+              تومان
             </p>
             <p className="text-green-600">
-              <span className="font-medium">تعداد:</span> {faNum(data.count)} عدد
+              <span className="font-medium">تعداد:</span> {faNum(data.count)}{" "}
+              عدد
             </p>
             <p className="text-amber-600">
               <span className="font-medium">رتبه:</span> {faNum(data.rank)}
@@ -294,12 +306,14 @@ function ProductSalesTreemap({
           </div>
         </div>
         <div className="text-xs text-neutral-500">
-            <span className="md:hidden">
-              نمایش {faNum(Math.min(rows.length, 8))} محصول از {faNum(rows.length)} محصول
-            </span>
-            <span className="hidden md:inline">
-              نمایش {faNum(Math.min(rows.length, 20))} محصول از {faNum(rows.length)} محصول
-            </span>
+          <span className="md:hidden">
+            نمایش {faNum(Math.min(rows.length, 8))} محصول از{" "}
+            {faNum(rows.length)} محصول
+          </span>
+          <span className="hidden md:inline">
+            نمایش {faNum(Math.min(rows.length, 20))} محصول از{" "}
+            {faNum(rows.length)} محصول
+          </span>
         </div>
       </div>
     </div>

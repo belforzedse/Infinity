@@ -5,14 +5,27 @@ import { faNum } from "@/utils/faNum";
 import { getGatewayLiquidity } from "@/services/super-admin/reports/gatewayLiquidity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const PieChart = dynamic(() => import("recharts").then((m) => m.PieChart), {
+  ssr: false,
+});
+const Pie = dynamic(() => import("recharts").then((m) => m.Pie), {
+  ssr: false,
+});
+const Cell = dynamic(() => import("recharts").then((m) => m.Cell), {
+  ssr: false,
+});
+const ResponsiveContainer = dynamic(
+  () => import("recharts").then((m) => m.ResponsiveContainer),
+  { ssr: false },
+);
+const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
+  ssr: false,
+});
+const Legend = dynamic(() => import("recharts").then((m) => m.Legend), {
+  ssr: false,
+});
 
 export default function GatewayLiquidityReportPage() {
   const [start, setStart] = useState<Date>(
@@ -234,10 +247,12 @@ function GatewayLiquidityChart({
           <p className="mb-2 font-medium text-neutral-800">{data.name}</p>
           <div className="text-sm space-y-1">
             <p className="text-purple-600">
-              <span className="font-medium">مبلغ:</span> {faNum(data.value)} تومان
+              <span className="font-medium">مبلغ:</span> {faNum(data.value)}{" "}
+              تومان
             </p>
             <p className="text-neutral-600">
-              <span className="font-medium">درصد:</span> {faNum(data.percentage)}%
+              <span className="font-medium">درصد:</span>{" "}
+              {faNum(data.percentage)}%
             </p>
           </div>
         </div>

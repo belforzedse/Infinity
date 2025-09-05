@@ -8,15 +8,31 @@ import {
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), {
+  ssr: false,
+});
+const Line = dynamic(() => import("recharts").then((m) => m.Line), {
+  ssr: false,
+});
+const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), {
+  ssr: false,
+});
+const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), {
+  ssr: false,
+});
+const CartesianGrid = dynamic(
+  () => import("recharts").then((m) => m.CartesianGrid),
+  { ssr: false },
+);
+const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
+  ssr: false,
+});
+const ResponsiveContainer = dynamic(
+  () => import("recharts").then((m) => m.ResponsiveContainer),
+  { ssr: false },
+);
 
 export default function LiquidityReportPage() {
   const [start, setStart] = useState<Date>(
@@ -207,7 +223,8 @@ function LiquidityChart({
         >
           <p className="mb-2 font-medium text-neutral-800">{data.fullDate}</p>
           <p className="text-pink-600">
-            <span className="font-medium">نقدینگی:</span> {faNum(data.total)} تومان
+            <span className="font-medium">نقدینگی:</span> {faNum(data.total)}{" "}
+            تومان
           </p>
         </div>
       );
@@ -232,7 +249,9 @@ function LiquidityChart({
                 interval="preserveStartEnd"
               />
               <YAxis
-                tickFormatter={(value) => `${faNum((value / 1000).toFixed(0))}K`}
+                tickFormatter={(value) =>
+                  `${faNum((value / 1000).toFixed(0))}K`
+                }
                 stroke="#6b7280"
                 fontSize={12}
               />
