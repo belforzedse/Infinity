@@ -1,9 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import CheckIcon from "../Icons/CheckIcon";
 import SearchIcon from "../Icons/SearchIcon";
+
+const MotionDiv = dynamic(
+  () => import("framer-motion").then((mod) => mod.motion.div),
+  { ssr: false },
+);
+const AnimatePresence = dynamic(
+  () => import("framer-motion").then((mod) => mod.AnimatePresence),
+  { ssr: false },
+);
 
 interface FilterOption {
   id: string;
@@ -31,6 +40,7 @@ const PLPFilterBoxWithItems = ({
   onOptionSelect,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [hasAnimated, setHasAnimated] = useState(defaultOpen);
   const [searchQuery, setSearchQuery] = useState("");
   const [localOptions, setLocalOptions] =
     useState<FilterOption[]>(initialOptions);
@@ -70,7 +80,12 @@ const PLPFilterBoxWithItems = ({
     <div className="rounded-2xl bg-stone-50 p-4">
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            if (!hasAnimated) {
+              setHasAnimated(true);
+            }
+            setIsOpen((prev) => !prev);
+          }}
           className="flex w-full flex-row-reverse items-center justify-between gap-x-[81px]"
         >
           <div className="flex h-5 w-5 items-center justify-center">
@@ -81,18 +96,19 @@ const PLPFilterBoxWithItems = ({
           <span className="text-primary text-sm font-normal">{title}</span>
         </button>
       </div>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="mt-4 overflow-hidden"
-          >
-            <div className="rounded-lg bg-white">
-              {hasSearch && (
-                <>
+      {hasAnimated && (
+        <AnimatePresence>
+          {isOpen && (
+            <MotionDiv
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="mt-4 overflow-hidden"
+            >
+              <div className="rounded-lg bg-white">
+                {hasSearch && (
+                  <>
                   <div className="flex items-center justify-between border-b border-slate-50 p-2">
                     <input
                       type="text"
@@ -142,10 +158,10 @@ const PLPFilterBoxWithItems = ({
                   ))}
                 </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </MotionDiv>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 };
