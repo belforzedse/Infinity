@@ -19,7 +19,7 @@ export const categories: Category[] = [
     name: "پلیور",
     image: "/images/categories/blouse.png",
     backgroundColor: "#F0FFED",
-    slug: "%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa",
+
   },
   {
     id: 3,
