@@ -313,18 +313,22 @@ export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
 export const finalizeCart = async (
   data: FinalizeCartRequest,
 ): Promise<FinalizeCartResponse> => {
-  console.log("=== FINALIZE CART REQUEST ===");
-  console.log("Request data:", data);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("=== FINALIZE CART REQUEST ===");
+    console.log("Request data:", data);
+  }
 
   const response = await apiClient.post<FinalizeCartResponse>(
     "/carts/finalize",
     data,
   );
 
-  console.log("=== FINALIZE CART RAW RESPONSE ===");
-  console.log("Full response:", response);
-  console.log("Response.data:", response.data);
-  console.log("Response.data type:", typeof response.data);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("=== FINALIZE CART RAW RESPONSE ===");
+    console.log("Full response:", response);
+    console.log("Response.data:", response.data);
+    console.log("Response.data type:", typeof response.data);
+  }
 
   return response.data;
 };

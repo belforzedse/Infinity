@@ -13,6 +13,12 @@ import {
   hasStockForVariation,
 } from "@/services/product/product";
 
+const debugLog = (...args: any[]) => {
+  if (process.env.NODE_ENV !== "production") {
+    console.log(...args);
+  }
+};
+
 type Props = {
   product: {
     title: string;
@@ -87,15 +93,15 @@ export default function PDPHeroInfo(props: Props) {
   >(undefined); // Will be set properly in useEffect based on default selections
   // Initialize stock status based on the initial/default variation
   const getInitialStockStatus = () => {
-    console.log("=== INITIAL STOCK STATUS DEBUG ===");
-    console.log("Product data:", productData);
-    console.log(
+    debugLog("=== INITIAL STOCK STATUS DEBUG ===");
+    debugLog("Product data:", productData);
+    debugLog(
       "Product variations:",
       productData?.attributes?.product_variations?.data,
     );
 
     if (productData?.attributes?.product_variations?.data?.length) {
-      console.log(
+      debugLog(
         "Number of variations:",
         productData.attributes.product_variations.data.length,
       );
@@ -104,7 +110,7 @@ export default function PDPHeroInfo(props: Props) {
       const defaultVariation =
         productData.attributes.product_variations.data.find(
           (variation: any) => {
-            console.log(
+            debugLog(
               "Checking variation:",
               variation.id,
               "Published:",
@@ -117,16 +123,16 @@ export default function PDPHeroInfo(props: Props) {
             }
             // Check if it has stock data and count > 0
             const stock = variation.attributes.product_stock?.data?.attributes;
-            console.log("Variation stock data:", stock);
+            debugLog("Variation stock data:", stock);
             return stock && typeof stock.Count === "number" && stock.Count > 0;
           },
         );
 
-      console.log("Found default variation with stock:", defaultVariation);
+      debugLog("Found default variation with stock:", defaultVariation);
 
       if (defaultVariation) {
         const stockStatus = hasStockForVariation(defaultVariation);
-        console.log("Default variation stock status:", stockStatus);
+        debugLog("Default variation stock status:", stockStatus);
         return stockStatus;
       }
 
@@ -135,17 +141,17 @@ export default function PDPHeroInfo(props: Props) {
         (variation: any) => variation.attributes.IsPublished === true,
       );
 
-      console.log("Found any published variation:", anyPublished);
+      debugLog("Found any published variation:", anyPublished);
 
       if (anyPublished) {
         const stockStatus = hasStockForVariation(anyPublished);
-        console.log("Any published variation stock status:", stockStatus);
+        debugLog("Any published variation stock status:", stockStatus);
         return stockStatus;
       }
     }
 
-    console.log("No variations found - returning false");
-    console.log("=== END INITIAL STOCK STATUS DEBUG ===");
+    debugLog("No variations found - returning false");
+    debugLog("=== END INITIAL STOCK STATUS DEBUG ===");
     return false;
   };
 
@@ -188,10 +194,10 @@ export default function PDPHeroInfo(props: Props) {
     sizeId: string,
     modelId: string,
   ) => {
-    console.log("=== UPDATE VARIATION DETAILS DEBUG ===");
-    console.log("Selected color ID:", colorId);
-    console.log("Selected size ID:", sizeId);
-    console.log("Selected model ID:", modelId);
+    debugLog("=== UPDATE VARIATION DETAILS DEBUG ===");
+    debugLog("Selected color ID:", colorId);
+    debugLog("Selected size ID:", sizeId);
+    debugLog("Selected model ID:", modelId);
 
     if (
       !productData ||
@@ -199,7 +205,7 @@ export default function PDPHeroInfo(props: Props) {
       !productData.attributes.product_variations ||
       !productData.attributes.product_variations.data
     ) {
-      console.log("❌ No product data available");
+      debugLog("❌ No product data available");
       return;
     }
 
@@ -209,7 +215,7 @@ export default function PDPHeroInfo(props: Props) {
     const sizeIdNum = sizeId ? parseInt(sizeId) : undefined;
     const modelIdNum = modelId ? parseInt(modelId) : undefined;
 
-    console.log(
+    debugLog(
       "Converted IDs - Color:",
       colorIdNum,
       "Size:",
@@ -225,12 +231,12 @@ export default function PDPHeroInfo(props: Props) {
       modelIdNum,
     );
 
-    console.log("Found variation:", variation);
+    debugLog("Found variation:", variation);
 
     if (variation) {
       const variationAttributes = variation.attributes;
-      console.log("✅ Variation found with ID:", variation.id);
-      console.log("Variation attributes:", variationAttributes);
+      debugLog("✅ Variation found with ID:", variation.id);
+      debugLog("Variation attributes:", variationAttributes);
 
       // Update price based on found variation
       if (variationAttributes.DiscountPrice) {
@@ -253,15 +259,15 @@ export default function PDPHeroInfo(props: Props) {
       // Check stock for this variation - validate with default quantity of 1
       // This ensures the "Add to Cart" button shows correct availability
       const stockStatus = hasStockForVariation(variation, 1);
-      console.log("Stock status for variation:", stockStatus);
+      debugLog("Stock status for variation:", stockStatus);
       setHasStock(stockStatus);
 
       // Store the current variation ID
       const variationIdString = variation.id.toString();
-      console.log("✅ Setting currentVariationId to:", variationIdString);
+      debugLog("✅ Setting currentVariationId to:", variationIdString);
       setCurrentVariationId(variationIdString);
     } else {
-      console.log("❌ No variation found for selected combination");
+      debugLog("❌ No variation found for selected combination");
       // Fallback to product default price if no variation found
       setCurrentPrice(product.price);
       setCurrentDiscountPrice(product.discountPrice || 0);
@@ -270,7 +276,7 @@ export default function PDPHeroInfo(props: Props) {
       setCurrentVariationId(undefined);
     }
 
-    console.log("=== END UPDATE VARIATION DETAILS DEBUG ===");
+    debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
   };
 
   // Get selected color and size objects

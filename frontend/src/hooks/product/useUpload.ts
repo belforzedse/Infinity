@@ -116,7 +116,9 @@ export function useUpload({
 
           if (response) {
             // Update Media or Files array in productData based on file type
-            console.log("response", response);
+            if (process.env.NODE_ENV !== "production") {
+              console.log("response", response);
+            }
 
             if (fileType === "image" || fileType === "video") {
               setProductData((prev: any) => ({

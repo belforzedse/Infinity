@@ -37,7 +37,9 @@ export const createTag = async (
     );
 
     // Log the response for debugging
-    console.log("API response for tag creation:", response.data);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("API response for tag creation:", response.data);
+    }
 
     return response.data;
   } catch (error) {
