@@ -11,6 +11,7 @@ export default function SuperAdminLayoutHeaderUserProfile() {
             alt="User Avatar"
             width={44}
             height={44}
+            sizes="44px"
             className="h-full w-full object-cover"
           />
         </div>
@@ -32,6 +33,7 @@ export default function SuperAdminLayoutHeaderUserProfile() {
         alt="Notification"
         width={30}
         height={30}
+        sizes="30px"
       />
     </div>
   );
