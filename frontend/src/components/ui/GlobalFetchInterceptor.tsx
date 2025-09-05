@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { adjustPendingRequests } from "@/atoms/loading";
+import { adjustPendingRequests, navigationInProgressAtom } from "@/atoms/loading";
+import jotaiStore from "@/lib/jotaiStore";
 
 export default function GlobalFetchInterceptor() {
   useEffect(() => {
@@ -9,21 +10,36 @@ export default function GlobalFetchInterceptor() {
     const originalFetch = window.fetch;
 
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
-      // Ignore static asset and Next internal data prefetch requests
+      // Count all non-trivial network work, but ignore pure static assets like images/fonts/css
       try {
         const raw =
           typeof input === "string" ? input : (input as any).url || "";
         const url = new URL(raw, window.location.href);
-        const isStatic =
-          /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
-            url.pathname,
-          );
+        const method = (
+          init?.method ||
+          (typeof input !== "string" && (input as any).method) ||
+          "GET"
+        ).toUpperCase();
+        // Ignore preflight/HEAD requests
+        if (method === "OPTIONS" || method === "HEAD") {
+          return originalFetch(input as any, init);
+        }
+        const isPureStatic = /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
+          url.pathname,
+        );
+        if (isPureStatic) {
+          return originalFetch(input as any, init);
+        }
         const isNextInternal =
           url.pathname.startsWith("/_next") ||
           url.searchParams.has("_rsc") ||
           url.search.includes("__next");
-        if (isStatic || isNextInternal) {
-          return originalFetch(input as any, init);
+        if (isNextInternal) {
+          // Count these only during actual navigations to avoid overlay flicker on prefetch
+          const navActive = jotaiStore.get(navigationInProgressAtom);
+          if (!navActive) {
+            return originalFetch(input as any, init);
+          }
         }
       } catch {}
 

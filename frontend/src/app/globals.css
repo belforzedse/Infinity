@@ -47,15 +47,15 @@ body {
   background: #ec4899;
 }
 
-/* Global image fade/blur-in effect */
-@layer base {
-  img {
+/* Optional image effect classes (non-global to avoid invisible images) */
+@layer components {
+  .img-fx {
     transition: opacity 400ms ease, filter 400ms ease, transform 400ms ease;
     opacity: 0.01;
     filter: blur(8px);
     transform: scale(1.01);
   }
-  img.img-loaded {
+  .img-fx.img-loaded {
     opacity: 1;
     filter: blur(0);
     transform: none;

@@ -135,20 +135,25 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
           ).then((res) => res.json())
         : Promise.resolve({ data: [] }),
       getFeaturedProducts(category),
-    ]).then(([categoryData, products]) => {
-      setFeaturedProducts(products);
+    ])
+      .then(([categoryData, products]) => {
+        setFeaturedProducts(products);
 
-      if (category && categoryData.data.length > 0) {
-        const categoryAttributes = categoryData.data[0].attributes;
-        setTitle(categoryAttributes.Title);
+        if (category && categoryData.data.length > 0) {
+          const categoryAttributes = categoryData.data[0].attributes;
+          setTitle(categoryAttributes.Title);
 
-        if (categoryAttributes.CoverImage?.data?.attributes?.url) {
-          setImageUrl(
-            `${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`,
-          );
+          if (categoryAttributes.CoverImage?.data?.attributes?.url) {
+            setImageUrl(
+              `${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`,
+            );
+          }
         }
-      }
-    });
+      })
+      .catch(() => {
+        // Keep UI usable on failures
+        setFeaturedProducts([]);
+      });
   }, [category]);
 
   return (

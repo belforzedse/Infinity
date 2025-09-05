@@ -14,7 +14,9 @@ export default function NoData({ category }: NoDataProps) {
   useEffect(() => {
     if (category) {
       const safeCategory = encodeURIComponent(category);
-      fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${safeCategory}`)
+      fetch(
+        `${API_BASE_URL}/product-categories?filters[Slug][$eq]=${safeCategory}`,
+      )
         .then((response) => response.json())
         .then((data) => {
           if (data.data.length > 0) {
