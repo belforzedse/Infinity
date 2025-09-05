@@ -134,35 +134,41 @@ export default function PDPHeroInfoAction({
    * @param {number} requestedQuantity - Quantity to add to cart
    */
   const handleAddToCart = (requestedQuantity: number = 1) => {
-    console.log("=== ADD TO CART DEBUG ===");
-    console.log("Requested quantity:", requestedQuantity);
-    console.log("Current variation ID being sent to cart:", variationId);
-    console.log(
-      "Current variation object we're checking stock for:",
-      currentVariation,
-    );
-    console.log("Available stock count:", availableStock);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("=== ADD TO CART DEBUG ===");
+      console.log("Requested quantity:", requestedQuantity);
+      console.log("Current variation ID being sent to cart:", variationId);
+      console.log(
+        "Current variation object we're checking stock for:",
+        currentVariation,
+      );
+      console.log("Available stock count:", availableStock);
+    }
 
     // Validate stock before adding to cart
     if (!validateQuantity(requestedQuantity)) {
-      console.log("❌ Stock validation failed");
+      if (process.env.NODE_ENV !== "production") {
+        console.log("❌ Stock validation failed");
+      }
       toast.error(`موجودی کافی نیست. موجودی فعلی: ${availableStock} عدد`);
       return;
     }
 
-    console.log("✅ Stock validation passed - calling addToCart");
-    console.log("Product details being sent to cart:", {
-      productId,
-      name,
-      category,
-      price,
-      image,
-      color,
-      size,
-      model,
-      variationId,
-    });
-    console.log("=== END ADD TO CART DEBUG ===");
+    if (process.env.NODE_ENV !== "production") {
+      console.log("✅ Stock validation passed - calling addToCart");
+      console.log("Product details being sent to cart:", {
+        productId,
+        name,
+        category,
+        price,
+        image,
+        color,
+        size,
+        model,
+        variationId,
+      });
+      console.log("=== END ADD TO CART DEBUG ===");
+    }
 
     // Call the original add to cart function
     addToCart(requestedQuantity);
