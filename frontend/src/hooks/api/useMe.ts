@@ -21,8 +21,15 @@ export const useMe = () => {
       .then((response) => {
         setData(response);
       })
-      .catch((err) => {
-        setError(err instanceof Error ? err : new Error("Failed to fetch user"));
+      .catch((err: unknown) => {
+        if (err instanceof Error) {
+          setError(err);
+        } else if (err && typeof err === "object" && "message" in err) {
+          const message = (err as { message?: string }).message;
+          setError(new Error(message || "Failed to fetch user"));
+        } else {
+          setError(new Error("Failed to fetch user"));
+        }
       })
       .finally(() => {
         setIsLoading(false);

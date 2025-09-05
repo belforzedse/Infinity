@@ -105,6 +105,12 @@ class ApiClient {
     data?: Record<string, unknown>,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
+    if (!this.baseUrl || this.baseUrl === "undefined") {
+      throw this.handleError(500, {
+        message: "API base URL is not configured",
+      });
+    }
+
     const url = `${this.baseUrl}${endpoint}`;
     const headers = this.getHeaders(options?.headers, options?.skipAuth);
 
