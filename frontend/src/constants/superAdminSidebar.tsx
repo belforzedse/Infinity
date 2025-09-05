@@ -138,7 +138,7 @@ const superAdminSidebar: SidebarItem[] = [
   {
     id: "discounts",
     label: "مدیریت تخفیف ها",
-    href: "#",
+    href: "/super-admin/discounts",
     icon: <PercentIcon />,
     children: [
       {
