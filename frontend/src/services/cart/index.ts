@@ -1,5 +1,6 @@
 import { apiClient } from "../index";
 // removed unused imports: ApiResponse, IMAGE_BASE_URL
+import logger from "@/utils/logger";
 
 // Types for API responses
 export interface ImageFormat {
@@ -314,8 +315,8 @@ export const finalizeCart = async (
   data: FinalizeCartRequest,
 ): Promise<FinalizeCartResponse> => {
   if (process.env.NODE_ENV !== "production") {
-    console.log("=== FINALIZE CART REQUEST ===");
-    console.log("Request data:", data);
+    logger.info("=== FINALIZE CART REQUEST ===");
+    logger.info("Request data", { data });
   }
 
   const response = await apiClient.post<FinalizeCartResponse>(
@@ -324,10 +325,10 @@ export const finalizeCart = async (
   );
 
   if (process.env.NODE_ENV !== "production") {
-    console.log("=== FINALIZE CART RAW RESPONSE ===");
-    console.log("Full response:", response);
-    console.log("Response.data:", response.data);
-    console.log("Response.data type:", typeof response.data);
+    logger.info("=== FINALIZE CART RAW RESPONSE ===");
+    logger.info("Full response", { response });
+    logger.info("Response.data", { data: response.data });
+    logger.info("Response.data type", { type: typeof response.data });
   }
 
   return response.data;

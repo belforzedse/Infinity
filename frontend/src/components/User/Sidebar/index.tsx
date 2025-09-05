@@ -4,7 +4,6 @@ import { USER_SIDEBAR_ITEMS, LOGOUT_ITEM } from "@/components/User/Constnats";
 
 const UserSidebar = () => {
   //   const handleLogout = () => {
-  //     console.log("click");
   //     /* Add logout logic here */
   //   };
 

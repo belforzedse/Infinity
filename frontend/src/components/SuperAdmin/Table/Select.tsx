@@ -32,9 +32,6 @@ const SuperAdminTableSelect = ({
     title: "",
   });
 
-  if (process.env.NODE_ENV !== "production") {
-    console.log(selectedOptionId, filterOptions);
-  }
 
   useEffect(() => {
     setTimeout(() => {

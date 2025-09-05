@@ -5,6 +5,7 @@ import AddButton from "../../Layout/ContentWrapper/Button/Add";
 import ActiveBox from "./ActiveBox";
 import FieldRenderer from "./FieldRenderer";
 import { useRouter } from "next/navigation";
+import logger from "@/utils/logger";
 import {
   Field,
   StandardField,
@@ -115,7 +116,7 @@ export default function UpsertPageContentWrapper<
 
   const updateFormData = (fieldName: keyof T, value: any) => {
     if (process.env.NODE_ENV !== "production") {
-      console.log(`Updating field ${String(fieldName)} with value:`, value);
+      logger.info(`Updating field ${String(fieldName)} with value`, { value });
     }
     setFormData((prevData) => ({
       ...prevData,

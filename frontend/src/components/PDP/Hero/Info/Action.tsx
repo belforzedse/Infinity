@@ -14,6 +14,7 @@ import {
   getAvailableStockCount,
 } from "@/services/product/product";
 import toast from "react-hot-toast";
+import logger from "@/utils/logger";
 
 const options = [
   { id: 1, name: "۱ عدد" },
@@ -135,28 +136,27 @@ export default function PDPHeroInfoAction({
    */
   const handleAddToCart = (requestedQuantity: number = 1) => {
     if (process.env.NODE_ENV !== "production") {
-      console.log("=== ADD TO CART DEBUG ===");
-      console.log("Requested quantity:", requestedQuantity);
-      console.log("Current variation ID being sent to cart:", variationId);
-      console.log(
-        "Current variation object we're checking stock for:",
+      logger.info("=== ADD TO CART DEBUG ===");
+      logger.info("Requested quantity", { requestedQuantity });
+      logger.info("Current variation ID being sent to cart", { variationId });
+      logger.info("Current variation object we're checking stock for", {
         currentVariation,
-      );
-      console.log("Available stock count:", availableStock);
+      });
+      logger.info("Available stock count", { availableStock });
     }
 
     // Validate stock before adding to cart
     if (!validateQuantity(requestedQuantity)) {
       if (process.env.NODE_ENV !== "production") {
-        console.log("❌ Stock validation failed");
+        logger.info("❌ Stock validation failed");
       }
       toast.error(`موجودی کافی نیست. موجودی فعلی: ${availableStock} عدد`);
       return;
     }
 
     if (process.env.NODE_ENV !== "production") {
-      console.log("✅ Stock validation passed - calling addToCart");
-      console.log("Product details being sent to cart:", {
+      logger.info("✅ Stock validation passed - calling addToCart");
+      logger.info("Product details being sent to cart", {
         productId,
         name,
         category,
@@ -167,7 +167,7 @@ export default function PDPHeroInfoAction({
         model,
         variationId,
       });
-      console.log("=== END ADD TO CART DEBUG ===");
+      logger.info("=== END ADD TO CART DEBUG ===");
     }
 
     // Call the original add to cart function

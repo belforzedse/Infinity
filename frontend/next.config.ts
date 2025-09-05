@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     // Do not fail production builds on type errors during iterative dev
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 };
 

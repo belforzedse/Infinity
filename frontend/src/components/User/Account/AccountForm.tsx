@@ -173,11 +173,7 @@ export default function AccountForm() {
             }
             placeholder="1370/06/23"
             icon={<CalenderIcon />}
-            onIconClick={() => {
-              if (process.env.NODE_ENV !== "production") {
-                console.log("clicked");
-              }
-            }}
+            onIconClick={() => {}}
           />
 
           <RadioGroup

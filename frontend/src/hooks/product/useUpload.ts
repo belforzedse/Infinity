@@ -1,5 +1,6 @@
 import { uploadFile } from "@/services/super-admin/files/upload";
 import { useEffect } from "react"; // removed unused: useState
+import logger from "@/utils/logger";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import {
@@ -117,7 +118,7 @@ export function useUpload({
           if (response) {
             // Update Media or Files array in productData based on file type
             if (process.env.NODE_ENV !== "production") {
-              console.log("response", response);
+              logger.info("response", { response });
             }
 
             if (fileType === "image" || fileType === "video") {

@@ -6,10 +6,29 @@
 import type { ApiError } from "../types/api.ts";
 import { ERROR_MESSAGES } from "../constants/api.ts";
 
+type QueryParams = Record<string, string | number | boolean | null | undefined>;
+
+interface ErrorLike {
+  message?: string;
+  code?: string;
+  response?: {
+    status: number;
+    data: {
+      message?: string;
+      errors?: unknown;
+    };
+  };
+}
+
+export interface JwtPayload {
+  exp?: number;
+  [key: string]: unknown;
+}
+
 /**
  * Format query parameters for URL
  */
-export const formatQueryParams = (params: Record<string, any>): string => {
+export const formatQueryParams = (params: QueryParams): string => {
   if (!params || Object.keys(params).length === 0) {
     return "";
   }
@@ -28,10 +47,11 @@ export const formatQueryParams = (params: Record<string, any>): string => {
 /**
  * Handle API errors and return a standardized error object
  */
-export const handleApiError = (error: any): ApiError => {
+export const handleApiError = (error: unknown): ApiError => {
+  const err = error as ErrorLike;
   // Network error
   if (
-    error.message === "Network Error" ||
+    err.message === "Network Error" ||
     (typeof navigator !== "undefined" && !navigator.onLine)
   ) {
     return {
@@ -41,7 +61,7 @@ export const handleApiError = (error: any): ApiError => {
   }
 
   // Timeout error
-  if (error.code === "ECONNABORTED") {
+  if (err.code === "ECONNABORTED") {
     return {
       message: ERROR_MESSAGES.TIMEOUT,
       status: 408,
@@ -49,8 +69,8 @@ export const handleApiError = (error: any): ApiError => {
   }
 
   // Server returned an error
-  if (error.response) {
-    const { status, data } = error.response;
+  if (err.response) {
+    const { status, data } = err.response;
 
     return {
       message: data.message || ERROR_MESSAGES.DEFAULT,
@@ -69,7 +89,7 @@ export const handleApiError = (error: any): ApiError => {
 /**
  * Parse JWT token and extract payload
  */
-export const parseJwt = (token: string): any => {
+export const parseJwt = (token: string): JwtPayload | null => {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -85,7 +105,7 @@ export const parseJwt = (token: string): any => {
         .join(""),
     );
 
-    return JSON.parse(jsonPayload);
+    return JSON.parse(jsonPayload) as JwtPayload;
   } catch (error) {
     console.error("Error parsing JWT token:", error);
     return null;
