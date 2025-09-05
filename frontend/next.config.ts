@@ -17,10 +17,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  eslint: {
-    // Do not fail builds on lint issues; surface them in dev/CI instead
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     // Do not fail production builds on type errors during iterative dev
     ignoreBuildErrors: true,
