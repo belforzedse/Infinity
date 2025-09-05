@@ -12,6 +12,7 @@ const EmptyShoppingCart: React.FC = () => {
           alt="empty cart"
           fill
           className="object-fill"
+          sizes="(max-width: 768px) 128px, 224px"
         />
       </div>
 
