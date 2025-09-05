@@ -5,12 +5,10 @@ import HomeIcon from "./Icons/HomeIcon";
 import CategoryIcon from "./Icons/CategoryIcon";
 import BasketIcon from "./Icons/BasketIcon";
 import ProfileIcon from "./Icons/ProfileIcon";
-import CategoriesModal from "./CategoriesModal";
 
 const PLPBottomNavigation = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -35,9 +33,8 @@ const PLPBottomNavigation = () => {
     },
     {
       label: "دسته بندی ها",
-      href: "#",
+      href: "/categories",
       icon: (isActive: boolean) => <CategoryIcon isActive={isActive} />,
-      onClick: () => setIsCategoriesModalOpen(true),
     },
     {
       label: "سبد خرید",
@@ -78,10 +75,6 @@ const PLPBottomNavigation = () => {
         </div>
       </nav>
 
-      <CategoriesModal
-        isOpen={isCategoriesModalOpen}
-        onClose={() => setIsCategoriesModalOpen(false)}
-      />
     </>
   );
 };

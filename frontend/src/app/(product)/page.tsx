@@ -5,6 +5,7 @@ import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
 import Image from "next/image";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
+import { categories } from "@/constants/categories";
 
 interface ProductCardProps {
   id: number;
@@ -170,57 +171,6 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
     });
 }
 
-const categories = [
-  {
-    id: 1,
-    name: "مانتو",
-    image: "/images/categories/coat.png",
-    backgroundColor: "#FFF8E7",
-    slug: "coat-and-mantle",
-  },
-  {
-    id: 2,
-    name: "پلیور",
-    image: "/images/categories/blouse.png",
-    backgroundColor: "#F0FFED",
-    slug: "%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa",
-  },
-  {
-    id: 3,
-    name: "دامن",
-    image: "/images/categories/skirt.png",
-    backgroundColor: "#FFF0ED",
-    slug: "skirt",
-  },
-  {
-    id: 4,
-    name: "پیرهن",
-    image: "/images/categories/dress.png",
-    backgroundColor: "#EDF6FF",
-    slug: "shirt",
-  },
-  {
-    id: 5,
-    name: "شلوار",
-    image: "/images/categories/pants.png",
-    backgroundColor: "#F0FFF7",
-    slug: "pants",
-  },
-  {
-    id: 6,
-    name: "شال و روسری",
-    image: "/images/categories/scarf.png",
-    backgroundColor: "#FFF8E7",
-    slug: "shawls-and-scarves",
-  },
-  {
-    id: 7,
-    name: "هودی",
-    image: "/images/categories/hoodie.png",
-    backgroundColor: "#FFF8E7",
-    slug: "hoodie-and-dores",
-  },
-];
 
 export default async function Home() {
   const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
