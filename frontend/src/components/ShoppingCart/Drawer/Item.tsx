@@ -38,7 +38,13 @@ export default function CartDrawerItem({ item }: CartDrawerItemProps) {
     <div className="flex flex-col overflow-hidden rounded-lg border border-slate-100">
       <div className="flex gap-3 p-3">
         <div className="relative h-20 w-20 overflow-hidden rounded-lg">
-          <Image src={imageUrl} alt={item.name} fill className="object-cover" />
+          <Image
+            src={imageUrl}
+            alt={item.name}
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
         </div>
 
         <div className="flex flex-1 flex-col gap-1">

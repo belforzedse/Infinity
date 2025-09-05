@@ -29,6 +29,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
               alt={cartItem.name}
               fill
               className="h-full w-full object-cover"
+              sizes="48px"
             />
           </div>
           <span className="text-sm text-foreground-primary">

@@ -33,6 +33,7 @@ function ShoppingCartSuccessOrderSubmit() {
             alt="success order"
             fill
             className="object-fill"
+            sizes="(max-width: 768px) 128px, 224px"
           />
         </div>
 

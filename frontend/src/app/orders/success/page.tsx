@@ -21,6 +21,7 @@ export default function OrderSuccess() {
               alt="Success"
               fill
               objectFit="contain"
+              sizes="160px"
             />
           </div>
 

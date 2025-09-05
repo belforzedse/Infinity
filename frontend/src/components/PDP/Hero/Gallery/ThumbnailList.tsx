@@ -118,7 +118,12 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
             className="relative h-[70px] w-[84px] cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
           >
             <div className={asset.id === selectedImage ? "opacity-50" : ""}>
-              <Image fill src={asset.thumbnail} alt={asset.alt} />
+              <Image
+                fill
+                src={asset.thumbnail}
+                alt={asset.alt}
+                sizes="(max-width: 768px) 84px, 139px"
+              />
             </div>
 
             {asset.type === "video" && (
