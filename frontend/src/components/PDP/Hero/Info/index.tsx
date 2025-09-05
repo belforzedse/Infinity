@@ -12,10 +12,12 @@ import {
   findProductVariation,
   hasStockForVariation,
 } from "@/services/product/product";
+import logger from "@/utils/logger";
 
 const debugLog = (...args: any[]) => {
   if (process.env.NODE_ENV !== "production") {
-    console.log(...args);
+    const [message, ...meta] = args;
+    logger.info(message, meta.length ? { meta } : undefined);
   }
 };
 

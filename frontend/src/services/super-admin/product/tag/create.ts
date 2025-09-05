@@ -1,6 +1,7 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
 import { ApiResponse } from "@/types/api";
+import logger from "@/utils/logger";
 
 interface TagAttributes {
   Title: string;
@@ -38,7 +39,7 @@ export const createTag = async (
 
     // Log the response for debugging
     if (process.env.NODE_ENV !== "production") {
-      console.log("API response for tag creation:", response.data);
+      logger.info("API response for tag creation", { response: response.data });
     }
 
     return response.data;

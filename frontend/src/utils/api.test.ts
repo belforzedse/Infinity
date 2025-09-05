@@ -3,33 +3,41 @@ import { describe, expect, test } from '@jest/globals';
 import { handleApiError, parseJwt } from './api.ts';
 import { ERROR_MESSAGES } from '../constants/api.ts';
 
+interface MutableGlobal extends NodeJS.Global {
+  navigator?: { onLine?: boolean };
+  window?: unknown;
+  atob?: (input: string) => string;
+}
+
+const g = globalThis as MutableGlobal;
+
 describe('handleApiError', () => {
   test('handles network error without navigator', () => {
-    const originalNavigator = (global as any).navigator;
+    const originalNavigator = g.navigator;
     // ensure navigator is undefined
-    delete (global as any).navigator;
+    delete g.navigator;
 
     const result = handleApiError({ message: 'Network Error' });
     expect(result).toEqual({ message: ERROR_MESSAGES.NETWORK, status: 0 });
 
     if (originalNavigator !== undefined) {
-      (global as any).navigator = originalNavigator;
+      g.navigator = originalNavigator;
     } else {
-      delete (global as any).navigator;
+      delete g.navigator;
     }
   });
 
   test('handles offline navigator', () => {
-    const originalNavigator = (global as any).navigator;
-    (global as any).navigator = { onLine: false };
+    const originalNavigator = g.navigator;
+    g.navigator = { onLine: false };
 
     const result = handleApiError({ message: 'Some error' });
     expect(result).toEqual({ message: ERROR_MESSAGES.NETWORK, status: 0 });
 
     if (originalNavigator !== undefined) {
-      (global as any).navigator = originalNavigator;
+      g.navigator = originalNavigator;
     } else {
-      delete (global as any).navigator;
+      delete g.navigator;
     }
   });
 });
@@ -44,11 +52,11 @@ describe('parseJwt', () => {
       .replace(/\//g, '_');
     const token = `header.${base64Url}.signature`;
 
-    const originalWindow = (global as any).window;
-    const originalAtob = (global as any).atob;
+    const originalWindow = g.window;
+    const originalAtob = g.atob;
     let called = false;
-    (global as any).window = {};
-    (global as any).atob = (input: string) => {
+    g.window = {};
+    g.atob = (input: string) => {
       called = true;
       return Buffer.from(input, 'base64').toString('binary');
     };
@@ -58,14 +66,14 @@ describe('parseJwt', () => {
     expect(called).toBe(true);
 
     if (originalWindow !== undefined) {
-      (global as any).window = originalWindow;
+      g.window = originalWindow;
     } else {
-      delete (global as any).window;
+      delete g.window;
     }
     if (originalAtob !== undefined) {
-      (global as any).atob = originalAtob;
+      g.atob = originalAtob;
     } else {
-      delete (global as any).atob;
+      delete g.atob;
     }
   });
 });

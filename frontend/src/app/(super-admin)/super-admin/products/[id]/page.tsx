@@ -15,6 +15,7 @@ import { updateProduct } from "@/services/super-admin/product/update";
 import { useRouter } from "next/navigation";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import { useProductTag } from "@/hooks/product/useTag";
+import logger from "@/utils/logger";
 
 export default function EditProductsPage({
   params,
@@ -48,7 +49,7 @@ export default function EditProductsPage({
         setProductData(transformToProductData(result.data.attributes));
       } catch (error: any) {
         if (process.env.NODE_ENV !== "production") {
-          console.log("error in fetching product: ", error);
+          logger.error("error in fetching product", { error });
         }
       }
     };
@@ -64,7 +65,7 @@ export default function EditProductsPage({
   const handleUpdateProduct = async () => {
     try {
       if (process.env.NODE_ENV !== "production") {
-        console.log("productData2", productData);
+        logger.info("productData2", { productData });
       }
 
       const result = await updateProduct(id, productData);

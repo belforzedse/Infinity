@@ -2,6 +2,7 @@ import { apiClient } from "@/services";
 import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api"; // removed unused: STRAPI_TOKEN
 import { ApiResponse } from "@/types/api";
 import { ProductCardProps } from "@/components/Product/Card";
+import logger from "@/utils/logger";
 
 export interface ProductMedia {
   id: number;
@@ -535,41 +536,42 @@ export const hasStockForVariation = (
   requestedQuantity: number = 1,
 ): boolean => {
   if (process.env.NODE_ENV !== "production") {
-    console.log("=== STOCK CHECK DEBUG ===");
-    console.log("Variation ID:", variation?.id);
-    console.log("Full variation object:", variation);
-    console.log("Product stock data:", variation?.attributes?.product_stock);
-    console.log(
-      "Stock attributes:",
-      variation?.attributes?.product_stock?.data?.attributes,
-    );
+    logger.info("=== STOCK CHECK DEBUG ===");
+    logger.info("Variation ID", { id: variation?.id });
+    logger.info("Full variation object", { variation });
+    logger.info("Product stock data", {
+      stock: variation?.attributes?.product_stock,
+    });
+    logger.info("Stock attributes", {
+      attrs: variation?.attributes?.product_stock?.data?.attributes,
+    });
   }
 
   if (!variation?.attributes?.product_stock?.data?.attributes) {
     if (process.env.NODE_ENV !== "production") {
-      console.log("No stock data found - returning false");
+      logger.info("No stock data found - returning false");
     }
     return false;
   }
 
   const stockData = variation.attributes.product_stock.data.attributes;
   if (process.env.NODE_ENV !== "production") {
-    console.log("Stock data object:", stockData);
-    console.log("Available keys in stock data:", Object.keys(stockData));
+    logger.info("Stock data object", { stockData });
+    logger.info("Available keys in stock data", { keys: Object.keys(stockData) });
   }
 
   const stockQuantity = stockData.Count;
   if (process.env.NODE_ENV !== "production") {
-    console.log("Stock Count value:", stockQuantity);
-    console.log("Requested quantity:", requestedQuantity);
+    logger.info("Stock Count value", { stockQuantity });
+    logger.info("Requested quantity", { requestedQuantity });
   }
 
   // Updated validation: Check if stock is sufficient for the requested quantity
   const hasStock =
     typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
   if (process.env.NODE_ENV !== "production") {
-    console.log("Has sufficient stock:", hasStock);
-    console.log("=== END STOCK CHECK ===");
+    logger.info("Has sufficient stock", { hasStock });
+    logger.info("=== END STOCK CHECK ===");
   }
 
   return hasStock;

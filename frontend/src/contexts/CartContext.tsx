@@ -243,10 +243,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         setIsLoading(true);
 
-        if (process.env.NODE_ENV !== "production") {
-          console.log(newItem);
-        }
-
         await CartService.addItemToCart(
           Number(newItem.variationId),
           newItem.quantity,
@@ -328,10 +324,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // Find cart item ID from our local state that matches the item ID
         const item = cartItems.find((item) => item.id === id);
         if (!item) return;
-
-        if (process.env.NODE_ENV !== "production") {
-          console.log(item);
-        }
 
         // Extract the cart item ID from the API
         const cartItemId = item.id;

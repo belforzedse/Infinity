@@ -3,8 +3,8 @@ include:
     ref: main
     file: "infinity-frontend-cicd.yml"
 
-lint:
+build:
   image: node:20
   script:
     - yarn install --frozen-lockfile
-    - yarn lint
+    - yarn build

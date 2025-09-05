@@ -8,6 +8,7 @@ import { productDataAtom } from "@/atoms/super-admin/products";
 import { useAtomValue } from "jotai";
 import { createProduct } from "@/services/super-admin/product/create";
 import { useRouter } from "next/navigation";
+import logger from "@/utils/logger";
 
 // Define the type for the API response
 interface ProductApiResponse {
@@ -26,7 +27,7 @@ export default function AddProductsPage() {
   const productData = useAtomValue(productDataAtom);
   const router = useRouter();
   if (process.env.NODE_ENV !== "production") {
-    console.log("productData", productData);
+    logger.info("productData", { productData });
   }
   useEffect(() => {
     fetchAllCategories();

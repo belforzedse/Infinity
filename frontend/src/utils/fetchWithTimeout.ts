@@ -14,7 +14,7 @@ export async function fetchWithTimeout(
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const res = await fetch(input as any, { ...rest, signal: controller.signal });
+    const res = await fetch(input, { ...rest, signal: controller.signal });
     return res;
   } finally {
     clearTimeout(timer);

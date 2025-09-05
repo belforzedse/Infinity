@@ -13,9 +13,6 @@ export default function PasswordChangeForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle password change submission
-    if (process.env.NODE_ENV !== "production") {
-      console.log(formData);
-    }
   };
 
   return (

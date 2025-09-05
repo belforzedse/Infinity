@@ -11,6 +11,7 @@ import {
   TagResponseType,
 } from "@/services/super-admin/product/tag/get";
 import { usePathname } from "next/navigation";
+import logger from "@/utils/logger";
 
 interface UseProductTagProps {
   isEditMode?: boolean;
@@ -60,7 +61,7 @@ export function useProductTag(props?: UseProductTagProps) {
 
       // Debug the response structure
       if (process.env.NODE_ENV !== "production") {
-        console.log("Tag creation response:", response);
+        logger.info("Tag creation response", { response });
       }
 
       // Check if the response is successful
@@ -76,7 +77,7 @@ export function useProductTag(props?: UseProductTagProps) {
         };
 
         if (process.env.NODE_ENV !== "production") {
-          console.log("New tag created:", newTag);
+          logger.info("New tag created", { newTag });
         }
 
         // Update the tags state
