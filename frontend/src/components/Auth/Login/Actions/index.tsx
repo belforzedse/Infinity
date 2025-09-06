@@ -1,5 +1,5 @@
 import Text from "@/components/Kits/Text";
-import AuthButton from "@/components/Kits/Auth/Button";
+import { Button } from "@/components/ui/Button";
 import CodeIcon from "@/components/Kits/Auth/Icons/CodeIcon";
 import OtpIcon from "@/components/Kits/Auth/Icons/OtpIcon";
 
@@ -21,21 +21,25 @@ export default function LoginActions({
       </div>
 
       <div className="mt-5 flex flex-col-reverse gap-5 md:flex-row-reverse">
-        <AuthButton
+        <Button
           onClick={onForgotPassword}
-          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
-          icon={<CodeIcon className="h-5 w-5 md:h-6 md:w-6" />}
+          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50 flex items-center justify-center gap-[4.5px]"
+          size="xl"
+          fullWidth
         >
-          فراموشی رمز عبور
-        </AuthButton>
+          <CodeIcon className="h-5 w-5 md:h-6 md:w-6" />
+          <span>فراموشی رمز عبور</span>
+        </Button>
 
-        <AuthButton
+        <Button
           onClick={onOtpLogin}
-          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
-          icon={<OtpIcon className="h-5 w-5 md:h-6 md:w-6" />}
+          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50 flex items-center justify-center gap-[4.5px]"
+          size="xl"
+          fullWidth
         >
-          ورود با رمز یکبار مصرف
-        </AuthButton>
+          <OtpIcon className="h-5 w-5 md:h-6 md:w-6" />
+          <span>ورود با رمز یکبار مصرف</span>
+        </Button>
       </div>
     </>
   );
