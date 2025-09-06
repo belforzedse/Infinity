@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Action from "./Action";
 import Color from "./Color";
 import CommentsInfo from "./CommentsInfo";
@@ -162,15 +162,13 @@ export default function PDPHeroInfo(props: Props) {
   // Initialize variation details based on default selections when component mounts
   useEffect(() => {
     if (productData && colors.length > 0 && sizes.length > 0) {
-      // Call updateVariationDetails with the default selected values
-      // This will set the correct currentVariationId based on default selections
       updateVariationDetails(
-        colors[0].id, // Default selected color
-        sizes[0].id, // Default selected size
-        models.length > 0 ? models[0].id : "", // Default selected model (if any)
+        colors[0].id,
+        sizes[0].id,
+        models.length > 0 ? models[0].id : "",
       );
     }
-  }, [productData, colors, sizes, models]); // Run when product data is loaded
+  }, [productData, colors, sizes, models, updateVariationDetails]);
 
   // Handle size change
   const handleSizeChange = (sizeId: string) => {
@@ -191,11 +189,12 @@ export default function PDPHeroInfo(props: Props) {
   };
 
   // Update variation details based on selected properties
-  const updateVariationDetails = (
-    colorId: string,
-    sizeId: string,
-    modelId: string,
-  ) => {
+  const updateVariationDetails = useCallback(
+    (
+      colorId: string,
+      sizeId: string,
+      modelId: string,
+    ) => {
     debugLog("=== UPDATE VARIATION DETAILS DEBUG ===");
     debugLog("Selected color ID:", colorId);
     debugLog("Selected size ID:", sizeId);
@@ -279,7 +278,7 @@ export default function PDPHeroInfo(props: Props) {
     }
 
     debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
-  };
+  }, [productData, product.price, product.discountPrice, product.discount]);
 
   // Get selected color and size objects
   const selectedColorObj = colors.find((color) => color.id === selectedColor);
