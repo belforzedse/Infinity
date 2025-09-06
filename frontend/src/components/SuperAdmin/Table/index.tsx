@@ -10,7 +10,7 @@ import {
   Row,
 } from "@tanstack/react-table";
 // removed unused import: getPaginationRowModel from "@tanstack/react-table"
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/tailwind";
 import { twMerge } from "tailwind-merge";
 import SuperAdminTableSelect from "./Select";
@@ -87,17 +87,15 @@ export function SuperAdminTable<TData, TValue>({
   const isFetchingRef = useRef(false);
   const fetchSeqRef = useRef(0);
 
-  const buildApiUrl = useCallback(() => {
+  const requestUrl = useMemo(() => {
     if (!url) return null;
     let apiUrl = url;
     const hasQueryParams = url.includes("?");
     let separator = hasQueryParams ? "&" : "?";
 
-    // pagination
     apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
     separator = "&";
 
-    // filters
     if (Array.isArray(filter) && filter.length > 0) {
       const filters = filter as unknown as FilterItem[];
       const filterParams = filters
@@ -115,45 +113,52 @@ export function SuperAdminTable<TData, TValue>({
     return apiUrl;
   }, [url, page, pageSize, filter]);
 
-  const fetchData = useCallback(async () => {
-    const apiUrl = buildApiUrl();
-    if (!apiUrl || isFetchingRef.current) return;
-    const seq = ++fetchSeqRef.current;
-    isFetchingRef.current = true;
-    setIsLoading(true);
-    try {
-      const res = await apiClient.get<TData[]>(apiUrl, {
-        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-      });
-      // Ignore outdated responses
-      if (seq === fetchSeqRef.current) {
-        setTableData(res.data);
-        setTotalSize(res.meta?.pagination?.total ?? 0);
-      }
-    } catch (error) {
-      if ((error as any)?.name !== "AbortError") {
-        console.error("Failed to fetch table data:", error);
-      }
-    } finally {
-      if (seq === fetchSeqRef.current) {
-        setIsLoading(false);
-        isFetchingRef.current = false;
-      }
-    }
-  }, [buildApiUrl, setTotalSize]);
+  const lastUrlRef = useRef<string | null>(null);
 
-  // Fetch on mount and when url/page/pageSize/filter changes
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const runFetch = useCallback(
+    async (apiUrl: string, { force = false }: { force?: boolean } = {}) => {
+      // Avoid duplicate fetch for identical URL unless forced
+      if (!force && lastUrlRef.current === apiUrl) return;
+      lastUrlRef.current = apiUrl;
+      if (isFetchingRef.current) return;
 
-  // If some other part of the app toggles refreshTable, refetch
+      const seq = ++fetchSeqRef.current;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const res = await apiClient.get<TData[]>(apiUrl, {
+          headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+        });
+        if (seq === fetchSeqRef.current) {
+          setTableData(res.data);
+          setTotalSize(res.meta?.pagination?.total ?? 0);
+        }
+      } catch (error) {
+        if ((error as any)?.name !== "AbortError") {
+          console.error("Failed to fetch table data:", error);
+        }
+      } finally {
+        if (seq === fetchSeqRef.current) {
+          setIsLoading(false);
+          isFetchingRef.current = false;
+        }
+      }
+    },
+    [setTotalSize],
+  );
+
+  // Fetch on first mount and when the computed request URL changes
   useEffect(() => {
-    if (refresh) {
-      fetchData();
+    if (requestUrl) runFetch(requestUrl);
+  }, [requestUrl, runFetch]);
+
+  // External refresh trigger (e.g. after mutations)
+  useEffect(() => {
+    if (refresh && requestUrl) {
+      runFetch(requestUrl, { force: true });
       setRefresh(false);
     }
-  }, [refresh, fetchData, setRefresh]);
+  }, [refresh, requestUrl, runFetch, setRefresh]);
 
   const table = useReactTable({
     data: tableData || [],
