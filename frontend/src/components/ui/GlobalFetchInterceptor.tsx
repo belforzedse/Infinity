@@ -1,12 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { adjustPendingRequests, navigationInProgressAtom } from "@/atoms/loading";
 import jotaiStore from "@/lib/jotaiStore";
 
 export default function GlobalFetchInterceptor() {
+  const recentInteraction = useRef(false);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
+    let interactionTimer: number | undefined;
+
+    const markInteraction = () => {
+      recentInteraction.current = true;
+      if (interactionTimer) {
+        try {
+          clearTimeout(interactionTimer);
+        } catch {}
+      }
+      interactionTimer = window.setTimeout(() => {
+        recentInteraction.current = false;
+        interactionTimer = undefined;
+      }, 1000);
+    };
+    window.addEventListener("pointerdown", markInteraction, true);
+    window.addEventListener("keydown", markInteraction, true);
     const originalFetch = window.fetch;
 
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
@@ -35,9 +53,9 @@ export default function GlobalFetchInterceptor() {
           url.searchParams.has("_rsc") ||
           url.search.includes("__next");
         if (isNextInternal) {
-          // Count these only during actual navigations to avoid overlay flicker on prefetch
+          // Count these only during actual navigations OR immediately after a user interaction
           const navActive = jotaiStore.get(navigationInProgressAtom);
-          if (!navActive) {
+          if (!navActive && !recentInteraction.current) {
             return originalFetch(input as any, init);
           }
         }
@@ -57,6 +75,14 @@ export default function GlobalFetchInterceptor() {
     return () => {
       // restore
       window.fetch = originalFetch;
+      window.removeEventListener("pointerdown", markInteraction, true);
+      window.removeEventListener("keydown", markInteraction, true);
+      if (interactionTimer) {
+        try {
+          clearTimeout(interactionTimer);
+        } catch {}
+        interactionTimer = undefined;
+      }
     };
   }, []);
 
