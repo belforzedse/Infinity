@@ -81,7 +81,7 @@ export default function PasswordChangeForm() {
               !formData.confirmPassword ||
               formData.newPassword !== formData.confirmPassword
             }
-            className="gap-1 bg-[#EC4899] hover:bg-[#EC4899]/80 text-white px-8 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="gap-1 bg-[#EC4899] px-8 text-white hover:bg-[#EC4899]/80 disabled:cursor-not-allowed disabled:bg-gray-300"
             fullWidth
           >
             <SaveIcon className="h-5 w-5 lg:h-6 lg:w-6" />

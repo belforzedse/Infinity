@@ -41,7 +41,7 @@ export default function AuthPasswordInput({
           variant="outline"
           size="icon"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-0 p-0"
+          className="absolute right-4 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0"
         >
           {showPassword ? (
             <EyeOffIcon className="h-5 w-5 text-slate-400" />

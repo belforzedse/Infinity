@@ -23,7 +23,7 @@ export default function LoginActions({
       <div className="mt-5 flex flex-col-reverse gap-5 md:flex-row-reverse">
         <Button
           onClick={onForgotPassword}
-          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50 flex items-center justify-center gap-[4.5px]"
+          className="flex items-center justify-center gap-[4.5px] border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
           size="xl"
           fullWidth
         >
@@ -33,7 +33,7 @@ export default function LoginActions({
 
         <Button
           onClick={onOtpLogin}
-          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50 flex items-center justify-center gap-[4.5px]"
+          className="flex items-center justify-center gap-[4.5px] border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
           size="xl"
           fullWidth
         >
