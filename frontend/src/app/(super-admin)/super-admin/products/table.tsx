@@ -73,6 +73,7 @@ export const columns: ColumnDef<Product>[] = [
             alt={row.original?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
             height={48}
+            sizes="48px"
             className="h-12 w-12 overflow-hidden rounded-xl object-cover"
           />
 
@@ -184,6 +185,7 @@ export const MobileTable = ({ data }: Props) => {
             alt={row?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
             height={48}
+            sizes="48px"
             className="h-12 w-12 rounded-lg object-cover"
           />
 
