@@ -11,8 +11,7 @@ const inputVariants = cva("input w-full", {
     },
     variant: {
       default: "",
-      auth:
-        "text-base rounded-xl border border-slate-200 bg-background-form placeholder:text-foreground-muted text-foreground-primary focus:outline-none focus:ring-2 focus:ring-pink-400",
+      auth: "text-base text-foreground-primary rounded-xl border border-slate-200 bg-background-form placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-pink-400",
     },
   },
   defaultVariants: {
