@@ -304,7 +304,6 @@ export default async function PLPPage({
           products={products}
           pagination={pagination}
           category={category}
-          showAvailableOnly={showAvailableOnly}
           searchQuery={search}
         />
       </div>
