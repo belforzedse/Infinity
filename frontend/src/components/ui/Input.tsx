@@ -2,7 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const inputVariants = cva("input", {
+const inputVariants = cva("input w-full", {
   variants: {
     size: {
       default: "h-10 px-3 py-2",
@@ -12,7 +12,7 @@ const inputVariants = cva("input", {
     variant: {
       default: "",
       auth:
-        "text-base bg-background-form text-foreground-muted focus:outline-none focus:ring-2 focus:ring-pink-400",
+        "text-base rounded-xl border border-slate-200 bg-background-form placeholder:text-foreground-muted text-foreground-primary focus:outline-none focus:ring-2 focus:ring-pink-400",
     },
   },
   defaultVariants: {
@@ -52,7 +52,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             className={cn(
               inputVariants({ size, variant }),
-              rightElement && "pr-[4.5rem]",
+              rightElement && "pr-[6rem] md:pr-[5rem]",
               leftElement && "pl-12",
               error && "border-red-500",
               className,

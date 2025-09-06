@@ -19,9 +19,10 @@ export const resetPassword = async (
     });
 
     return response as any;
-  } catch {
+  } catch (error) {
     return {
       message: "",
     };
   }
 };
+

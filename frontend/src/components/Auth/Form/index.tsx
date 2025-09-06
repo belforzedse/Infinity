@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
-import { Button } from "@/components/ui/Button";
+import AuthButton from "@/components/Kits/Auth/Button";
 import AuthTitle from "@/components/Kits/Auth/Title";
-import { Input } from "@/components/ui/Input";
+import AuthInput from "@/components/Kits/Auth/Input";
 import Text from "@/components/Kits/Text";
 
 export default function AuthForm() {
@@ -28,27 +28,26 @@ export default function AuthForm() {
             <Text variant="label" className="mb-2 md:mb-2.5">
               شماره همراه
             </Text>
-            <Input
+            <AuthInput
               type="tel"
               id="phone"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="09122032114"
-              variant="auth"
-              size="lg"
               error={error}
             />
           </div>
         </div>
 
-        <Button type="submit" disabled={isLoading} size="xl" fullWidth>
+        <AuthButton type="submit" disabled={isLoading}>
           {isLoading ? (
             <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
           ) : (
             "بررسی شماره همراه"
           )}
-        </Button>
+        </AuthButton>
       </form>
     </>
   );
 }
+

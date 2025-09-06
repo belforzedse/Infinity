@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { InputHTMLAttributes } from "react";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import clsx from "clsx";
 import Text from "../../../Text";
 import EyeIcon from "../../Icons/EyeIcon";
 import EyeOffIcon from "../../Icons/EyeOffIcon";
 import LockIcon from "../../Icons/LockIcon";
 import PasswordStrength from "./Strength";
 
-interface AuthPasswordInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+interface AuthPasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   showStrength?: boolean;
 }
@@ -27,28 +24,29 @@ export default function AuthPasswordInput({
   return (
     <div className="space-y-2">
       <div className="relative" dir="ltr">
-        <Input
+        <input
           type={showPassword ? "text" : "password"}
-          variant="auth"
-          size="lg"
-          className={cn("px-12 text-left", className)}
-          error={error}
+          className={clsx(
+            "h-12 w-full rounded-lg border border-slate-200 bg-background-form",
+            "text-base px-12 text-left text-foreground-muted",
+            "focus:outline-none focus:ring-2 focus:ring-pink-400",
+            error && "border-red-500",
+            className,
+          )}
           {...props}
         />
         <LockIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="icon"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0"
+          className="absolute right-4 top-1/2 -translate-y-1/2"
         >
           {showPassword ? (
             <EyeOffIcon className="h-5 w-5 text-slate-400" />
           ) : (
             <EyeIcon className="h-5 w-5 text-slate-400" />
           )}
-        </Button>
+        </button>
       </div>
       {showStrength && typeof value === "string" && (
         <PasswordStrength password={value} />
@@ -57,3 +55,4 @@ export default function AuthPasswordInput({
     </div>
   );
 }
+

@@ -47,8 +47,6 @@ export default function AuthLayout({
                   alt="Logo"
                   fill
                   className="object-contain"
-                  sizes="(max-width: 768px) 90px, 110px"
-                  priority
                 />
               </div>
             </div>
@@ -64,3 +62,4 @@ export default function AuthLayout({
     </main>
   );
 }
+

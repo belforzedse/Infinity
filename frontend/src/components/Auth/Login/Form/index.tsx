@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import AuthButton from "@/components/Kits/Auth/Button";
 import PhoneInput from "@/components/Kits/Auth/Input/Phone";
 import Checkbox from "@/components/Kits/Auth/Checkbox";
 import LoginIcon from "@/components/Kits/Auth/Icons/LoginIcon";
@@ -23,6 +22,12 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   const router = useRouter();
 
   const { phoneNumber } = useCheckPhoneNumber();
+
+  useEffect(() => {
+    if (!phoneNumber) {
+      router.push("/auth");
+    }
+  }, [phoneNumber]);
 
   const [formData, setFormData] = useState({
     phoneNumber,
@@ -55,22 +60,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           <Text variant="label" className="mb-2 inline-block">
             شماره همراه
           </Text>
-          {phoneNumber ? (
-            <PhoneInput value={formData.phoneNumber} onEdit={handleEditPhone} />
-          ) : (
-            <div dir="ltr">
-              <Input
-                type="tel"
-                variant="auth"
-                size="lg"
-                placeholder="09123456789"
-                value={formData.phoneNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, phoneNumber: e.target.value })
-                }
-              />
-            </div>
-          )}
+          <PhoneInput value={formData.phoneNumber} onEdit={handleEditPhone} />
         </div>
 
         <div>
@@ -96,20 +86,20 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         </div>
       </div>
 
-      <Button
+      <AuthButton
         type="submit"
         disabled={isLoading}
-        size="xl"
-        fullWidth
-        className="flex items-center justify-center gap-[4.5px]"
+        icon={
+          isLoading ? (
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          ) : (
+            <LoginIcon className="h-6 w-6" />
+          )
+        }
       >
-        {isLoading ? (
-          <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-        ) : (
-          <LoginIcon className="h-6 w-6" />
-        )}
-        <span>ورود به حساب کاربری</span>
-      </Button>
+        ورود به حساب کاربری
+      </AuthButton>
     </form>
   );
 }
+
