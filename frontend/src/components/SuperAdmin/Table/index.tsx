@@ -88,9 +88,7 @@ export function SuperAdminTable<TData, TValue>({
   const lastFilter = useRef(filter);
 
   useEffect(() => {
-    if (url && (!isLoading || refresh)) {
-      if (isFetchingRef.current) return;
-
+    if (url && (refresh || !isFetchingRef.current)) {
       isFetchingRef.current = true;
       setRefresh(false);
       setIsLoading(true);
@@ -106,9 +104,11 @@ export function SuperAdminTable<TData, TValue>({
       // Update separator for subsequent parameters
       separator = "&";
 
+      const currentFilter = lastFilter.current;
+
       // Add filters if they exist
-      if (Array.isArray(filter) && filter.length > 0) {
-        const filters = filter as unknown as FilterItem[];
+      if (Array.isArray(currentFilter) && currentFilter.length > 0) {
+        const filters = currentFilter as unknown as FilterItem[];
         const filterParams = filters
           .map((item) => {
             const { field, operator, value } = item || ({} as FilterItem);
@@ -142,7 +142,7 @@ export function SuperAdminTable<TData, TValue>({
           isFetchingRef.current = false;
         });
     }
-  }, [url, refresh, page, pageSize]);
+  }, [url, refresh, page, pageSize, setRefresh, setTotalSize]);
 
   useEffect(() => {
     if (!refresh) {
@@ -153,7 +153,7 @@ export function SuperAdminTable<TData, TValue>({
 
       setRefresh(true);
     }
-  }, [url, refresh, filter]);
+  }, [url, refresh, filter, setRefresh]);
 
   const table = useReactTable({
     data: tableData || [],
