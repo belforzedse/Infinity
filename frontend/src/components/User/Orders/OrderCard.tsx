@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
@@ -42,6 +43,7 @@ export default function OrderCard({
               fill
               className="h-full w-full object-cover"
               sizes="48px"
+              loader={imageLoader}
             />
           </div>
           <span className="text-sm text-foreground-primary">{title}</span>

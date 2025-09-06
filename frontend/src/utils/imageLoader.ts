@@ -4,22 +4,16 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "https://api.infinity.rgbgroup.ir";
 
 export default function imageLoader({ src, width, quality }: ImageLoaderProps) {
-  let url = src;
-
   try {
     const parsed = new URL(src);
     if (parsed.hostname === "uploads") {
-      url = `${BASE_URL}${parsed.pathname}`;
+      const params = [`w=${width}`];
+      if (quality) params.push(`q=${quality}`);
+      return `${BASE_URL}${parsed.pathname}?${params.join("&")}`;
     }
   } catch {
-    if (src.startsWith("/")) {
-      url = `${BASE_URL}${src}`;
-    } else {
-      url = `${BASE_URL}/${src}`;
-    }
+    // Invalid URL or relative path - return as is
   }
 
-  const params = [`w=${width}`];
-  if (quality) params.push(`q=${quality}`);
-  return `${url}?${params.join("&")}`;
+  return src;
 }
