@@ -51,8 +51,8 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
   const renderPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPageState - 2);
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const startPage = Math.max(1, currentPageState - 2);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     // Show first page
     if (startPage > 1) {
