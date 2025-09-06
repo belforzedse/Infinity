@@ -8,7 +8,9 @@ import { ApiError } from "@/types/api";
 export const handleAuthErrors = (
   error?: ApiError | null,
   isAdminCheck?: boolean,
+  suppressAuthRedirect?: boolean,
 ): void => {
+  if (suppressAuthRedirect) return;
   // Check for auth errors
   const isAuthError =
     error?.status === HTTP_STATUS.UNAUTHORIZED ||

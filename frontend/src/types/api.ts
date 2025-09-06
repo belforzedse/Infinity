@@ -30,6 +30,7 @@ export interface ApiRequestOptions {
   timeout?: number;
   withCredentials?: boolean;
   skipAuth?: boolean; // Flag to skip authentication for public endpoints
+  suppressAuthRedirect?: boolean;
 }
 
 // Pagination Types
