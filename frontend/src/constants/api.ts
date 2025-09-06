@@ -14,10 +14,6 @@ if (!strapiToken) {
 
 export const STRAPI_TOKEN = strapiToken;
 
-export const IMAGE_BASE_URL =
-  (process.env.NEXT_PUBLIC_IMAGE_BASE_URL as string | undefined) ||
-  "https://api.infinity.rgbgroup.ir";
-
 export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
 // API Versions
 export const API_VERSION = "v1";
