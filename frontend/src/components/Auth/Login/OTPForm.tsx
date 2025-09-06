@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AuthButton from "@/components/Kits/Auth/Button";
+import { Button } from "@/components/ui/Button";
 import PhoneInput from "@/components/Kits/Auth/Input/Phone";
 import VerificationInput from "../VerificationInput";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -85,17 +85,12 @@ export default function OTPLoginForm({
         </div>
       </div>
 
-      <AuthButton
-        type="submit"
-        disabled={isLoading}
-        icon={
-          isLoading && (
-            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-          )
-        }
-      >
-        ورود
-      </AuthButton>
+      <Button type="submit" disabled={isLoading} size="xl" fullWidth>
+        {isLoading && (
+          <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+        )}
+        <span>ورود</span>
+      </Button>
     </form>
   );
 }

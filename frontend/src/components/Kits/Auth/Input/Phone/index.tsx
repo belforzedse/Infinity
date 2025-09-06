@@ -1,4 +1,4 @@
-import AuthInput from "..";
+import { Input } from "@/components/ui/Input";
 import EditIcon from "../../Icons/EditIcon";
 
 interface PhoneInputProps {
@@ -25,12 +25,14 @@ export default function PhoneInput({ value, onEdit }: PhoneInputProps) {
   );
 
   return (
-    <AuthInput
+    <Input
       type="tel"
       value={faValue}
       readOnly
       className="border-slate-200 bg-slate-100"
       dir="ltr"
+      variant="auth"
+      size="lg"
       rightElement={editButton}
     />
   );

@@ -29,13 +29,10 @@ export default function AuthPasswordInput({
       <div className="relative" dir="ltr">
         <Input
           type={showPassword ? "text" : "password"}
-          className={cn(
-            "h-12 bg-background-form",
-            "text-base px-12 text-left text-foreground-muted",
-            "focus:outline-none focus:ring-2 focus:ring-pink-400",
-            error && "border-red-500",
-            className,
-          )}
+          variant="auth"
+          size="lg"
+          className={cn("px-12 text-left", className)}
+          error={error}
           {...props}
         />
         <LockIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
