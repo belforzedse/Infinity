@@ -158,6 +158,8 @@ const PLPFilterBoxWithItems = ({
                   ))}
                 </div>
               </div>
+              {/* Close rounded container */}
+              </div>
             </MotionDiv>
           )}
         </AnimatePresence>

@@ -1,5 +1,3 @@
-import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
-import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";

@@ -70,7 +70,6 @@ export default function GlobalFetchInterceptor() {
       }
     }
 
-    // @ts-expect-error overriding global fetch for loading instrumentation
     window.fetch = wrappedFetch as any;
     return () => {
       // restore

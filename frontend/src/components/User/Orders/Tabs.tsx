@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Tabs from "@/components/Kits/Tabs";
 import { PersianOrderStatus } from "@/constants/enums";
 import OrderRow from "./OrderRow";
@@ -13,30 +13,28 @@ import { faNum } from "@/utils/faNum";
 export default function OrdersTabs() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // removed unused error state
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const pageSize = 20; // Fetch more orders for tabs
 
-  useEffect(() => {
-    fetchOrders();
-  }, [page]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
 
       const response = await OrderService.getMyOrders(page, pageSize);
       setOrders(response.data);
       setPageCount(response.meta.pagination.pageCount);
     } catch (err: any) {
       console.error("Error fetching orders:", err);
-      setError(err.message || "خطا در دریافت سفارش‌ها");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   // Group orders by status
   const ordersByStatus = {

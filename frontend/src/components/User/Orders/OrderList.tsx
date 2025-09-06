@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import OrderService, { Order, OrderItem } from "@/services/order";
@@ -20,11 +20,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
   // removed unused state: total
   const pageSize = 10;
 
-  useEffect(() => {
-    fetchOrders();
-  }, [page]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -39,7 +35,11 @@ export default function OrderList({ className = "" }: OrderListProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const getStatusTranslation = (status: string): string => {
     const translations: Record<string, string> = {

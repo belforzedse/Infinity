@@ -18,7 +18,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
 
   const renderIcon = (iconElement: ReactNode) => {
     const iconClassName = clsx(
-      "w-5 h-5",
+      "h-5 w-5",
       isActive ? "text-white fill-white" : "text-pink-500",
     );
 
@@ -56,7 +56,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
       {isActive && (
         <>
           <ArrowLeftIcon />
-          <div className="absolute right-[-32px] top-0 h-14 w-1 rounded-full bg-background-pink" />
+          <div className="absolute top-0 right-[-32px] h-14 w-1 rounded-full bg-background-pink" />
         </>
       )}
     </Link>

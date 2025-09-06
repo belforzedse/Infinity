@@ -9,7 +9,8 @@ import EyeOffIcon from "../../Icons/EyeOffIcon";
 import LockIcon from "../../Icons/LockIcon";
 import PasswordStrength from "./Strength";
 
-interface AuthPasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface AuthPasswordInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   error?: string;
   showStrength?: boolean;
 }

@@ -41,17 +41,7 @@ interface TableProps<TData, TValue> {
   onItemDrag?: (row: Row<TData>) => void;
 }
 
-type Response<TData> = {
-  data: TData[];
-  meta: {
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  };
-};
+// Strapi-like response meta is returned by our ApiClient as ApiResponse<T>
 
 type FilterItem = {
   field: string;
@@ -135,12 +125,12 @@ export function SuperAdminTable<TData, TValue>({
       }
 
       apiClient
-        .get<Response<TData>>(apiUrl, {
+        .get<TData[]>(apiUrl, {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
         })
-        .then((res: Response<TData>) => {
+        .then((res) => {
           setTableData(res.data);
           setTotalSize(res.meta?.pagination?.total ?? 0);
           setIsLoading(false);

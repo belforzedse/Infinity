@@ -1,13 +1,12 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { handleApiError, parseJwt } from './api.ts';
-import { ERROR_MESSAGES } from '../constants/api.ts';
-
-interface MutableGlobal extends NodeJS.Global {
+import { handleApiError, parseJwt } from './api';
+import { ERROR_MESSAGES } from '../constants/api';
+type MutableGlobal = typeof globalThis & {
   navigator?: { onLine?: boolean };
   window?: unknown;
   atob?: (input: string) => string;
-}
+};
 
 const g = globalThis as MutableGlobal;
 
@@ -15,29 +14,29 @@ describe('handleApiError', () => {
   test('handles network error without navigator', () => {
     const originalNavigator = g.navigator;
     // ensure navigator is undefined
-    delete g.navigator;
+    delete (g as any).navigator;
 
     const result = handleApiError({ message: 'Network Error' });
     expect(result).toEqual({ message: ERROR_MESSAGES.NETWORK, status: 0 });
 
     if (originalNavigator !== undefined) {
-      g.navigator = originalNavigator;
+      (g as any).navigator = originalNavigator;
     } else {
-      delete g.navigator;
+      delete (g as any).navigator;
     }
   });
 
   test('handles offline navigator', () => {
     const originalNavigator = g.navigator;
-    g.navigator = { onLine: false };
+    (g as any).navigator = { onLine: false };
 
     const result = handleApiError({ message: 'Some error' });
     expect(result).toEqual({ message: ERROR_MESSAGES.NETWORK, status: 0 });
 
     if (originalNavigator !== undefined) {
-      g.navigator = originalNavigator;
+      (g as any).navigator = originalNavigator;
     } else {
-      delete g.navigator;
+      delete (g as any).navigator;
     }
   });
 });
@@ -55,8 +54,8 @@ describe('parseJwt', () => {
     const originalWindow = g.window;
     const originalAtob = g.atob;
     let called = false;
-    g.window = {};
-    g.atob = (input: string) => {
+    (g as any).window = {};
+    (g as any).atob = (input: string) => {
       called = true;
       return Buffer.from(input, 'base64').toString('binary');
     };
@@ -66,14 +65,14 @@ describe('parseJwt', () => {
     expect(called).toBe(true);
 
     if (originalWindow !== undefined) {
-      g.window = originalWindow;
+      (g as any).window = originalWindow;
     } else {
-      delete g.window;
+      delete (g as any).window;
     }
     if (originalAtob !== undefined) {
-      g.atob = originalAtob;
+      (g as any).atob = originalAtob;
     } else {
-      delete g.atob;
+      delete (g as any).atob;
     }
   });
 });

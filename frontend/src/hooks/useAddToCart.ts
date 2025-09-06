@@ -66,7 +66,7 @@ export default function useAddToCart({
         setQuantity(0);
       }
     }
-  }, [cartItems, cartItemId, isAdding]);
+  }, [cartItems, cartItemId, isAdding, isManuallyChanged, quantity]);
 
   // Custom quantity setter that also updates the cart when the item is already in cart
   const updateItemQuantity = (newQuantity: number) => {

@@ -70,7 +70,6 @@ const AddressContainer = () => {
         {addresses.map((address) => (
           <AddressCard
             key={address.id}
-            id={address.id}
             address={`${address.FullAddress} - ${address.shipping_city.Title}, ${address.shipping_city.shipping_province.Title}`}
             postalCode={address.PostalCode}
             description={address.Description}
