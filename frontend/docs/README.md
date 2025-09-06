@@ -11,5 +11,5 @@ Project documentation and API references for Infinity Store frontend.
 ## Notes
 
 - The frontend integrates with a Strapi v4 backend. See environment variables in the project root `README.md` and `DEVELOPMENT.md` for configuration.
-- Docker images copy `dev.env` or `main.env` to `.env` during build; adjust as needed for your deployment.
+- Dockerfiles expect required environment variables to be supplied at build time. See root docs for configuration.
 
