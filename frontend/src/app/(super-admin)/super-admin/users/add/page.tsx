@@ -3,7 +3,6 @@
 import UpsertPageContentWrapper, {
   UpsertPageConfigType,
 } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { useState } from "react";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
 import { ReactElement } from "react";
@@ -34,8 +33,8 @@ interface ActionButtonProps {
 
 // Function to fetch roles from the API
 const fetchRoles = async (
-  searchTerm: string,
-  formData?: any,
+  _searchTerm: string,
+  _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
     const response = await apiClient.get("/local-user-roles", {
@@ -200,7 +199,6 @@ const config: UpsertPageConfigType<User> = {
 };
 
 export default function Page() {
-  const [isLoading, setIsLoading] = useState(false);
 
   const initialData: User = {
     id: "",
@@ -224,7 +222,6 @@ export default function Page() {
       data={initialData}
       onSubmit={async (data: User) => {
         try {
-          setIsLoading(true);
 
           // Validate required fields
           if (
@@ -235,12 +232,10 @@ export default function Page() {
             !data.password
           ) {
             toast.error("لطفا فیلدهای ضروری را پر کنید");
-            setIsLoading(false);
             return;
           }
 
           // 1. Create the user first
-          let userId: number;
           try {
             const userResponse = await apiClient.post<{ id: number }>(
               "/sp/local-users",
@@ -269,8 +264,6 @@ export default function Page() {
               toast.error("خطا در ایجاد کاربر");
               return;
             }
-
-            userId = userResponse.data.id;
           } catch (userError) {
             console.error("Error creating user:", userError);
             toast.error("خطا در ایجاد کاربر");
@@ -281,12 +274,10 @@ export default function Page() {
 
           // Reset form or redirect
           window.location.href = "/super-admin/users";
-        } catch (error) {
-          console.error("Error creating user:", error);
-          toast.error("خطا در ایجاد کاربر");
-        } finally {
-          setIsLoading(false);
-        }
+          } catch (error) {
+            console.error("Error creating user:", error);
+            toast.error("خطا در ایجاد کاربر");
+          }
       }}
     />
   );

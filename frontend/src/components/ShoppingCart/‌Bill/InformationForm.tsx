@@ -13,7 +13,6 @@ import { FormData } from "./index";
 import CirculeInformationIcon from "../Icons/CirculeInformationIcon";
 import UserService from "@/services/user";
 import { UserAddress } from "@/services/user/addresses";
-import { MeResponse } from "@/services/user/me";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -32,7 +31,6 @@ function ShoppingCartBillInformationForm({
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<MeResponse | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,7 +51,6 @@ function ShoppingCartBillInformationForm({
     const fetchUserInfo = async () => {
       try {
         const user = await UserService.me();
-        setUserInfo(user);
 
         // Prefill form with user data
         if (user) {

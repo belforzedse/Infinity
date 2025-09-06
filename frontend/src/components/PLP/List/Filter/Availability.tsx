@@ -13,7 +13,7 @@ export default function AvailabilityFilter({
 }: AvailabilityFilterProps) {
   const [checked, setChecked] = useState(defaultChecked);
 
-  const handleChange = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleChange = () => {
     const newValue = !checked;
     setChecked(newValue);
     onChange(newValue);

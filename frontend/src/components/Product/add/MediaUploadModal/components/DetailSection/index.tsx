@@ -15,12 +15,6 @@ export default function DetailsSection({
   selectedImage,
   setSelectedImage,
 }: DetailsSectionProps) {
-  const handleCopyUrl = () => {
-    if (selectedImage?.url) {
-      navigator.clipboard.writeText(selectedImage.url);
-    }
-  };
-
   return (
     <div className="rounded-lg bg-white p-2">
       {selectedImage ? (

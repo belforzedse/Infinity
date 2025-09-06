@@ -10,7 +10,6 @@ import { FooterData, getFooterData } from "@/services/footer";
 
 const PLPFooter = () => {
   const [footerData, setFooterData] = useState<FooterData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchFooterData = async () => {
@@ -20,7 +19,7 @@ const PLPFooter = () => {
       } catch (error) {
         console.error("Failed to fetch footer data:", error);
       } finally {
-        setLoading(false);
+        // no-op
       }
     };
 

@@ -25,11 +25,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
   const [available, setAvailable] = useQueryState("available");
   const [minPrice, setMinPrice] = useQueryState("minPrice");
   const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [size, setSize] = useQueryState("size");
-  const [material, setMaterial] = useQueryState("material");
-  const [season, setSeason] = useQueryState("season");
-  const [gender, setGender] = useQueryState("gender");
-  const [usage, setUsage] = useQueryState("usage");
+  const [, setSize] = useQueryState("size");
 
   // State for categories
   const [categories, setCategories] = useState<Category[]>([]);
@@ -120,37 +116,6 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     [setSize],
   );
 
-  // Material filter handler
-  const handleMaterialSelect = useCallback(
-    (id: string) => {
-      setMaterial(id);
-    },
-    [setMaterial],
-  );
-
-  // Season filter handler
-  const handleSeasonSelect = useCallback(
-    (id: string) => {
-      setSeason(id);
-    },
-    [setSeason],
-  );
-
-  // Gender filter handler
-  const handleGenderSelect = useCallback(
-    (id: string) => {
-      setGender(id);
-    },
-    [setGender],
-  );
-
-  // Usage filter handler
-  const handleUsageSelect = useCallback(
-    (id: string) => {
-      setUsage(id);
-    },
-    [setUsage],
-  );
 
   return (
     <div className="flex flex-col gap-3">
