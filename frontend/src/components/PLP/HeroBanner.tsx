@@ -2,6 +2,7 @@
 
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -174,6 +175,7 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 517px"
               priority
+              loader={imageLoader}
             />
           </div>
         </Link>

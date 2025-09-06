@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
@@ -20,6 +21,7 @@ const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
       alt={`Uploaded image ${index + 1}`}
       fill
       className="rounded-lg object-cover"
+      loader={imageLoader}
     />
 
     <button

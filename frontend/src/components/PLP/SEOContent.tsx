@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import Voice from "../Kits/Voice";
 
 type Props = {
@@ -39,6 +40,7 @@ export default function PLPSEOContent(props: Props) {
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 423px"
+          loader={imageLoader}
         />
       </div>
 
