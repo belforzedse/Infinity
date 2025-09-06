@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
-import AuthButton from "@/components/Kits/Auth/Button";
+import { Button } from "@/components/ui/Button";
 import PhoneInput from "@/components/Kits/Auth/Input/Phone";
 import Checkbox from "@/components/Kits/Auth/Checkbox";
 import LoginIcon from "@/components/Kits/Auth/Icons/LoginIcon";
@@ -86,19 +86,20 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         </div>
       </div>
 
-      <AuthButton
+      <Button
         type="submit"
         disabled={isLoading}
-        icon={
-          isLoading ? (
-            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-          ) : (
-            <LoginIcon className="h-6 w-6" />
-          )
-        }
+        size="xl"
+        fullWidth
+        className="flex items-center justify-center gap-[4.5px]"
       >
-        ورود به حساب کاربری
-      </AuthButton>
+        {isLoading ? (
+          <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+        ) : (
+          <LoginIcon className="h-6 w-6" />
+        )}
+        <span>ورود به حساب کاربری</span>
+      </Button>
     </form>
   );
 }

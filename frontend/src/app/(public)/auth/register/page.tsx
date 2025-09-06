@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import VerificationInput from "@/components/Auth/VerificationInput";
 import { useCountdown } from "@/hooks/useCountdown";
-import AuthButton from "@/components/Kits/Auth/Button";
+import { Button } from "@/components/ui/Button";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import Text from "@/components/Kits/Text";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
@@ -99,9 +99,14 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col items-end">
-          <AuthButton type="submit" disabled={verificationCode.length !== 6}>
+          <Button
+            type="submit"
+            disabled={verificationCode.length !== 6}
+            size="xl"
+            fullWidth
+          >
             ایجاد حساب کاربری
-          </AuthButton>
+          </Button>
         </div>
       </form>
     </div>
