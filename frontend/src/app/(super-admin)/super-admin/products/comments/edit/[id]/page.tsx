@@ -83,7 +83,7 @@ export default function Page() {
       .catch((err) => {
         toast.error("دریافت اطلاعات با خطا مواجه شد");
       });
-  }, [reactionPages]);
+  }, [reactionPages, id]);
 
   useEffect(() => {
     setIsLoading(true);

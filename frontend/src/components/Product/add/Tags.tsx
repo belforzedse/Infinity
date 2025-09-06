@@ -27,7 +27,7 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
 
   useEffect(() => {
     handleFetchTags();
-  }, []);
+  }, [handleFetchTags]);
 
   return (
     <div className="flex flex-col gap-1">
