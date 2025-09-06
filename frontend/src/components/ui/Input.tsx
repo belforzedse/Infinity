@@ -12,7 +12,7 @@ const inputVariants = cva("input", {
     variant: {
       default: "",
       auth:
-        "bg-background-form text-base text-foreground-muted focus:outline-none focus:ring-2 focus:ring-pink-400",
+        "text-base bg-background-form text-foreground-muted focus:outline-none focus:ring-2 focus:ring-pink-400",
     },
   },
   defaultVariants: {
