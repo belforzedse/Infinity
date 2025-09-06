@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAtom } from "jotai";
 import {
   editProductDataAtom,
@@ -30,15 +30,7 @@ export function useProductTag(props?: UseProductTagProps) {
   const [isGetTagsLoading, setIsGetTagsLoading] = useState(false);
   const [isCreateTagLoading, setIsCreateTagLoading] = useState(false);
 
-  useEffect(() => {
-    if (!pathname.endsWith("/add") && productData.product_tags?.length > 0) {
-      setTags(productData.product_tags);
-      // Update tag options to exclude already selected tags
-      handleFetchTags();
-    }
-  }, [pathname, productData.product_tags]);
-
-  const handleFetchTags = async () => {
+  const handleFetchTags = useCallback(async () => {
     try {
       setIsGetTagsLoading(true);
       const response = await getTags();
@@ -52,7 +44,15 @@ export function useProductTag(props?: UseProductTagProps) {
     } finally {
       setIsGetTagsLoading(false);
     }
-  };
+  }, [tags]);
+
+  useEffect(() => {
+    if (!pathname.endsWith("/add") && productData.product_tags?.length > 0) {
+      setTags(productData.product_tags);
+      // Update tag options to exclude already selected tags
+      handleFetchTags();
+    }
+  }, [pathname, productData.product_tags, handleFetchTags]);
 
   const handleCreateTag = async (title: string) => {
     try {

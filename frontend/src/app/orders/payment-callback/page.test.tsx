@@ -33,7 +33,6 @@ describe('PaymentCallback page', () => {
     pushMock.mockReset();
     verifyPaymentMock.mockReset();
     paymentStatusMock.mockReset();
-    process.env.NODE_ENV = 'production';
   });
 
   it('handles payment callback without console noise', async () => {

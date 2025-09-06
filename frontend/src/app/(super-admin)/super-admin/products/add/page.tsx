@@ -31,7 +31,7 @@ export default function AddProductsPage() {
   }
   useEffect(() => {
     fetchAllCategories();
-  }, []);
+  }, [fetchAllCategories]);
 
   const handleCreateProduct = async () => {
     try {

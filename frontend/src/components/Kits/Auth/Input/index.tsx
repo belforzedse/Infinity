@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import Text from "../../Text";
 
-interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface AuthInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   error?: string | null;
   rightElement?: ReactNode;
   leftElement?: ReactNode;

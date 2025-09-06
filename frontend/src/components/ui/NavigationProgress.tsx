@@ -13,7 +13,7 @@ export default function NavigationProgress() {
   // Start on internal link clicks (event delegation)
   useEffect(() => {
     let failSafeId: number | undefined;
-    let restore: { pushState?: History["pushState"]; replaceState?: History["replaceState"]; } = {};
+    const restore: { pushState?: History["pushState"]; replaceState?: History["replaceState"]; } = {};
 
     function clearFailSafe() {
       if (failSafeId) {
@@ -73,13 +73,17 @@ export default function NavigationProgress() {
     try {
       restore.pushState = history.pushState.bind(history);
       restore.replaceState = history.replaceState.bind(history);
-      history.pushState = function (...args: any[]) {
+      history.pushState = function (
+        ...args: Parameters<History["pushState"]>
+      ) {
         setNavigationInProgress(true);
         clearFailSafe();
         failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
         return restore.pushState!(...args);
       } as any;
-      history.replaceState = function (...args: any[]) {
+      history.replaceState = function (
+        ...args: Parameters<History["replaceState"]>
+      ) {
         setNavigationInProgress(true);
         clearFailSafe();
         failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);

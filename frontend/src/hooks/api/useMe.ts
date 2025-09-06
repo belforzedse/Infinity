@@ -34,7 +34,7 @@ export const useMe = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [data]);
+  }, [data, setData]);
 
   return { data, isLoading, error };
 };

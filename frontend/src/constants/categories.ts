@@ -19,7 +19,7 @@ export const categories: Category[] = [
     name: "پلیور",
     image: "/images/categories/blouse.png",
     backgroundColor: "#F0FFED",
-
+    slug: "pullover",
   },
   {
     id: 3,

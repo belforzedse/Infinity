@@ -6,18 +6,7 @@ import ActiveBox from "./ActiveBox";
 import FieldRenderer from "./FieldRenderer";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
-import {
-  Field,
-  StandardField,
-  StandardFieldType,
-  ProvinceCityField,
-  RadioTextWithChipsField,
-  CategoriesListField,
-  isStandardField,
-  isRadioTextWithChips,
-  isProvinceCityField,
-  isCategoriesListField,
-} from "./types";
+import { Field, isStandardField, isRadioTextWithChips, isProvinceCityField, isCategoriesListField } from "./types";
 
 type ActionButtonsProps = {
   onSubmit: () => void;

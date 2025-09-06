@@ -3,8 +3,8 @@
  * Helper functions for API calls
  */
 
-import type { ApiError } from "../types/api.ts";
-import { ERROR_MESSAGES } from "../constants/api.ts";
+import type { ApiError } from "../types/api";
+import { ERROR_MESSAGES } from "../constants/api";
 
 type QueryParams = Record<string, string | number | boolean | null | undefined>;
 
@@ -75,7 +75,7 @@ export const handleApiError = (error: unknown): ApiError => {
     return {
       message: data.message || ERROR_MESSAGES.DEFAULT,
       status,
-      errors: data.errors,
+      errors: data.errors as Record<string, string[]> | undefined,
     };
   }
 

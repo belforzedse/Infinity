@@ -3,7 +3,7 @@ import { Input as UITextInput } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 
 interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> {
   label?: string;
   error?: string;
   value?: string;

@@ -55,39 +55,9 @@ export const columns: ColumnDef<Comment>[] = [
   {
     accessorKey: "attributes.Content",
     header: "متن دیدگاه",
-    cell: ({ row }) => {
-      const [isModalOpen, setIsModalOpen] = useState(false);
-      const commentContent = row.original?.attributes?.Content;
-
-      return (
-        <>
-          <button
-            className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <span className="text-xs text-slate-500">دیدن</span>
-            <ShowIcon />
-          </button>
-
-          {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-medium">متن دیدگاه</h3>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ×
-                  </button>
-                </div>
-                <p className="text-sm text-gray-700">{commentContent}</p>
-              </div>
-            </div>
-          )}
-        </>
-      );
-    },
+    cell: ({ row }) => (
+      <CommentContentCell content={row.original?.attributes?.Content} />
+    ),
   },
   {
     accessorKey: "attributes.Status",
@@ -196,3 +166,35 @@ export const MobileTable = ({ data }: Props) => {
     </div>
   );
 };
+
+function CommentContentCell({ content }: { content: string }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  return (
+    <>
+      <button
+        className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <span className="text-xs text-slate-500">دیدن</span>
+        <ShowIcon />
+      </button>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-medium">متن دیدگاه</h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-sm text-gray-700">{content}</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

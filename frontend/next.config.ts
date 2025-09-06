@@ -4,6 +4,8 @@ const imageBaseUrl =
   process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "https://api.infinity.rgbgroup.ir";
 const imageHost = new URL(imageBaseUrl);
 
+const protocol: "http" | "https" = imageHost.protocol === "https:" ? "https" : "http";
+
 const nextConfig: NextConfig = {
   output: "standalone",
   // Match the working frontend behavior to avoid double effects during dev
@@ -11,7 +13,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: imageHost.protocol.replace(":", ""),
+        protocol,
         hostname: imageHost.hostname,
         pathname: "/**",
       },
