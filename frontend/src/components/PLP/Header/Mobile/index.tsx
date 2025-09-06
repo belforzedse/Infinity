@@ -13,7 +13,7 @@ import Logo from "@/components/Kits/Logo";
 import ChevronDownIcon from "@/components/Search/Icons/ChevronDownIcon";
 import { useCart } from "@/contexts/CartContext";
 
-interface Props {}
+type Props = object;
 
 export default function PLPMobileHeader({}: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
