@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import AuthButton from "@/components/Kits/Auth/Button";
+import { Button } from "@/components/ui/Button";
 import Text from "@/components/Kits/Text";
-import AuthInput from "@/components/Kits/Auth/Input";
+import { Input } from "@/components/ui/Input";
 
 interface ForgotPasswordFormProps {
   onSubmit: (data: { phoneNumber: string }) => Promise<void>;
@@ -44,24 +44,26 @@ export default function ForgotPasswordForm({
           <Text variant="label" className="mb-2 inline-block">
             شماره همراه
           </Text>
-          <AuthInput
+          <Input
             value={formData.phoneNumber}
-            onEdit={handleEditPhone}
+            onChange={(e) => handleEditPhone(e.target.value)}
             dir="ltr"
+            variant="auth"
+            size="lg"
           />
         </div>
 
-        <AuthButton
+        <Button
           type="submit"
           disabled={isLoading}
-          icon={
-            isLoading && (
-              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-            )
-          }
+          size="xl"
+          fullWidth
         >
-          تایید شماره همراه
-        </AuthButton>
+          {isLoading && (
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          )}
+          {!isLoading && "تایید شماره همراه"}
+        </Button>
       </div>
     </form>
   );
