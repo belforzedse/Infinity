@@ -6,7 +6,7 @@ import OrderTrackingIcon from "@/components/PLP/Icons/OrderTrackingIcon";
 import UserProfileIcon from "@/components/PLP/Icons/UserProfileIcon";
 import { useCart } from "@/contexts/CartContext";
 
-type Props = {};
+type Props = object;
 
 const PLPDesktopHeaderActions = ({}: Props) => {
   const { totalItems, openDrawer } = useCart();
