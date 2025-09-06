@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import { priceFormatter } from "@/utils/price";
 
 type OrderItem = {
@@ -30,6 +31,7 @@ export default function SuperAdminOrderMobileOrderItem({
             width={48}
             height={48}
             className="rounded-xl object-cover"
+            loader={imageLoader}
           />
           <span className="text-xs">{item.productName}</span>
         </div>

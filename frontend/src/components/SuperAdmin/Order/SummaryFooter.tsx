@@ -1,5 +1,6 @@
 import { priceFormatter } from "@/utils/price";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import MobileOrderItem from "./MobileOrderItem";
 
 type Order = {
@@ -59,6 +60,7 @@ export default function SuperAdminOrderSummaryFooter({
                 width={48}
                 height={48}
                 className="rounded-xl object-cover"
+                loader={imageLoader}
               />
 
               <div className="flex flex-col gap-0.5">

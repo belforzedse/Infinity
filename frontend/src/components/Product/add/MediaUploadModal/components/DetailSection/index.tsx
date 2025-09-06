@@ -1,5 +1,6 @@
 import DeleteIcon from "@/components/Product/Icons/DeleteIcon";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import { Dispatch, SetStateAction } from "react";
 import { SelectedImageDetailsSection } from "../../types";
 import DetailsSectionText from "./text";
@@ -31,6 +32,7 @@ export default function DetailsSection({
                 width={70}
                 height={70}
                 className="h-[70px] w-[70px] rounded-md object-cover"
+                loader={imageLoader}
               />
 
               <div className="text-sm flex flex-col items-start justify-between text-gray-500">

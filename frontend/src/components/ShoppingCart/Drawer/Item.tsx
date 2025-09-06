@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import { useCart, CartItem } from "@/contexts/CartContext";
 import TrashIcon from "@/components/ShoppingCart/Icons/TrashIcon";
 import PlusIcon from "@/components/ShoppingCart/Icons/PlusIcon";
@@ -44,6 +45,7 @@ export default function CartDrawerItem({ item }: CartDrawerItemProps) {
             fill
             className="object-cover"
             sizes="80px"
+            loader={imageLoader}
           />
         </div>
 
