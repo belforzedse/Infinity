@@ -1,5 +1,6 @@
 import { atom } from "jotai";
 import jotaiStore from "@/lib/jotaiStore";
+import { startTransition } from "react";
 
 // Tracks the number of in-flight API requests
 export const pendingRequestsAtom = atom(0);
@@ -20,5 +21,7 @@ export const navigationInProgressAtom = atom(false);
 
 export function setNavigationInProgress(v: boolean) {
   const store = jotaiStore;
-  store.set(navigationInProgressAtom, v);
+  startTransition(() => {
+    store.set(navigationInProgressAtom, v);
+  });
 }
