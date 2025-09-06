@@ -3,13 +3,16 @@
 import { useAtomValue } from "jotai";
 import { isGlobalLoadingAtom, navigationInProgressAtom } from "@/atoms/loading";
 import SuspenseLoader from "./SuspenseLoader";
+import useSmoothLoading from "@/hooks/useSmoothLoading";
 
 export default function GlobalLoadingOverlay() {
   const apiLoading = useAtomValue(isGlobalLoadingAtom);
   const navLoading = useAtomValue(navigationInProgressAtom);
   const active = apiLoading || navLoading;
+  // Show immediately on navigation; keep minimum to avoid flicker
+  const visible = useSmoothLoading(active, { showDelayMs: 0, minVisibleMs: 300 });
 
-  if (!active) return null;
+  if (!visible) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[1000] flex items-start justify-center">
