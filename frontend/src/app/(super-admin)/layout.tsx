@@ -13,6 +13,7 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [verifying, setVerifying] = useState(true);
 
   useEffect(() => {
     const token =
@@ -29,6 +30,8 @@ export default function SuperAdminLayout({
       .then((me) => {
         if (!me?.isAdmin) {
           router.replace("/auth");
+        } else {
+          setVerifying(false);
         }
       })
       .catch(() => {
@@ -38,15 +41,19 @@ export default function SuperAdminLayout({
 
   return (
     <div dir="rtl">
-      <Suspense fallback={<SuspenseLoader fullscreen />}>
-        <div className="hidden md:block">
-          <Desktop>{children}</Desktop>
-        </div>
+      {verifying ? (
+        <SuspenseLoader fullscreen />
+      ) : (
+        <Suspense fallback={<SuspenseLoader fullscreen />}>
+          <div className="hidden md:block">
+            <Desktop>{children}</Desktop>
+          </div>
 
-        <div className="block md:hidden">
-          <Mobile>{children}</Mobile>
-        </div>
-      </Suspense>
+          <div className="block md:hidden">
+            <Mobile>{children}</Mobile>
+          </div>
+        </Suspense>
+      )}
     </div>
   );
 }
