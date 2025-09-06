@@ -88,7 +88,7 @@ export function SuperAdminTable<TData, TValue>({
   const lastFilter = useRef(filter);
 
   useEffect(() => {
-    if (url && (refresh || !isFetchingRef.current)) {
+    if (url && refresh && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setRefresh(false);
       setIsLoading(true);
@@ -142,7 +142,8 @@ export function SuperAdminTable<TData, TValue>({
           isFetchingRef.current = false;
         });
     }
-  }, [url, refresh, page, pageSize, setRefresh, setTotalSize]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, refresh]);
 
   useEffect(() => {
     if (!refresh) {
