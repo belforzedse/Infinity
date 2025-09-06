@@ -76,6 +76,7 @@ export default function NavigationProgress() {
       history.pushState = function (
         ...args: Parameters<History["pushState"]>
       ) {
+        // Only show loader for push navigations
         setNavigationInProgress(true);
         clearFailSafe();
         failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
@@ -84,9 +85,7 @@ export default function NavigationProgress() {
       history.replaceState = function (
         ...args: Parameters<History["replaceState"]>
       ) {
-        setNavigationInProgress(true);
-        clearFailSafe();
-        failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
+        // Do not show loader for replaceState to avoid flicker from query updates (nuqs)
         return restore.replaceState!(...args);
       } as any;
     } catch {}

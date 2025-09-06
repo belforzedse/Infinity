@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { adjustPendingRequests, navigationInProgressAtom } from "@/atoms/loading";
 import jotaiStore from "@/lib/jotaiStore";
+import { API_BASE_URL } from "@/constants/api";
 
 export default function GlobalFetchInterceptor() {
   const recentInteraction = useRef(false);
@@ -26,6 +27,12 @@ export default function GlobalFetchInterceptor() {
     window.addEventListener("pointerdown", markInteraction, true);
     window.addEventListener("keydown", markInteraction, true);
     const originalFetch = window.fetch;
+    let apiOrigin: string | null = null;
+    try {
+      apiOrigin = new URL(API_BASE_URL).origin;
+    } catch {
+      apiOrigin = null;
+    }
 
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
       // Count all non-trivial network work, but ignore pure static assets like images/fonts/css
@@ -48,16 +55,19 @@ export default function GlobalFetchInterceptor() {
         if (isPureStatic) {
           return originalFetch(input as any, init);
         }
-        const isNextInternal =
+        // Ignore Next.js internal and image proxy requests
+        if (
           url.pathname.startsWith("/_next") ||
+          url.pathname.startsWith("/_next/image") ||
           url.searchParams.has("_rsc") ||
-          url.search.includes("__next");
-        if (isNextInternal) {
-          // Count these only during actual navigations OR immediately after a user interaction
-          const navActive = jotaiStore.get(navigationInProgressAtom);
-          if (!navActive && !recentInteraction.current) {
-            return originalFetch(input as any, init);
-          }
+          url.search.includes("__next")
+        ) {
+          return originalFetch(input as any, init);
+        }
+
+        // Only count API requests to our backend origin
+        if (apiOrigin && url.origin !== apiOrigin) {
+          return originalFetch(input as any, init);
         }
       } catch {}
 
