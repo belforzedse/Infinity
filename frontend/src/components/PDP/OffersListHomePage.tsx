@@ -1,7 +1,7 @@
 "use client";
 import ProductCard, { type ProductCardProps } from "@/components/Product/Card";
 import PDPHeroNavigationButtons from "./NavigationButtons";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import ArrowLeftIcon from "./Icons/ArrowLeftIcon";
 import Link from "next/link";
 
@@ -14,7 +14,6 @@ type Props = {
 export default function OffersListHomePage(props: Props) {
   const { icon, title, products } = props;
 
-  const [isShowAllProducts, setIsShowAllProducts] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function goToNextProduct() {

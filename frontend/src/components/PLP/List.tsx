@@ -11,7 +11,7 @@ import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
 import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/constants/api";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 // use native fetch so user isn't timed out artificially
@@ -69,7 +69,6 @@ interface PLPListProps {
   products: Product[];
   pagination: Pagination;
   category?: string;
-  showAvailableOnly?: boolean;
   searchQuery?: string;
 }
 
@@ -77,22 +76,21 @@ export default function PLPList({
   products: initialProducts,
   pagination: initialPagination,
   category: initialCategory,
-  showAvailableOnly = false,
   searchQuery,
 }: PLPListProps) {
   // URL state management with nuqs
   const [category, setCategory] = useQueryState("category");
-  const [available, setAvailable] = useQueryState("available");
-  const [minPrice, setMinPrice] = useQueryState("minPrice");
-  const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [size, setSize] = useQueryState("size");
-  const [material, setMaterial] = useQueryState("material");
-  const [season, setSeason] = useQueryState("season");
-  const [gender, setGender] = useQueryState("gender");
-  const [usage, setUsage] = useQueryState("usage");
+  const [available] = useQueryState("available");
+  const [minPrice] = useQueryState("minPrice");
+  const [maxPrice] = useQueryState("maxPrice");
+  const [size] = useQueryState("size");
+  const [material] = useQueryState("material");
+  const [season] = useQueryState("season");
+  const [gender] = useQueryState("gender");
+  const [usage] = useQueryState("usage");
   const [page, setPage] = useQueryState("page", { defaultValue: "1" });
-  const [sort, setSort] = useQueryState("sort");
-  const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
+  const [sort] = useQueryState("sort");
+  const [discountOnly] = useQueryState("hasDiscount");
 
   // Local state for products and pagination
   const [products, setProducts] = useState<Product[]>(initialProducts);

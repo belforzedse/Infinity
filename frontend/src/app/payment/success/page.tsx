@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { OrderService } from "@/services";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 
 interface OrderDetails {

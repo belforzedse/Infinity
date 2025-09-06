@@ -53,9 +53,6 @@ type Props = {
     title: string;
   }[];
 
-  commentCount: number;
-  rateCount: number;
-  last24hoursSeenCount: number;
   productData?: any; // Add productData to be able to call findProductVariation
   productId: string;
 };
@@ -66,9 +63,6 @@ export default function PDPHeroInfo(props: Props) {
     sizes,
     colors,
     models = [],
-    commentCount,
-    last24hoursSeenCount,
-    rateCount,
     productData,
     productId,
   } = props;

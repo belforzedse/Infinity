@@ -38,7 +38,6 @@ const options = [
  * @property {string} [variationId] - Selected product variation ID (optional)
  * @property {boolean} [hasStock] - Whether product is in stock (defaults to true)
  * @property {any} [currentVariation] - Current variation data for stock validation
- * @property {any} [productData] - Full product data for additional validation
  */
 interface PDPHeroInfoActionProps {
   productId: string;
@@ -52,7 +51,6 @@ interface PDPHeroInfoActionProps {
   variationId?: string;
   hasStock?: boolean;
   currentVariation?: any; // Add current variation data
-  productData?: any; // Add product data for stock validation
 }
 
 /**
@@ -85,7 +83,6 @@ export default function PDPHeroInfoAction({
   variationId,
   hasStock = true,
   currentVariation,
-  productData,
 }: PDPHeroInfoActionProps) {
   const [showShareToast, setShowShareToast] = useState(false);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);

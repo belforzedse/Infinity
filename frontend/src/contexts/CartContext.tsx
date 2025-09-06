@@ -24,45 +24,6 @@ export interface CartItem {
   model?: string;
 }
 
-// New interfaces for API responses
-interface ApiCartItem {
-  id: number;
-  Count: number;
-  Sum: number;
-  product_variation: {
-    id: number;
-    Price: number;
-    product_stock: {
-      Count: number;
-    };
-    product_variation_color?: {
-      id: number;
-      Title: string;
-    };
-    product_variation_size?: {
-      id: number;
-      Title: string;
-    };
-    product_variation_model?: {
-      id: number;
-      Title: string;
-    };
-    product: {
-      Title: string;
-      SKU: string;
-      // Add any other needed product properties
-      category?: string;
-      image?: string;
-    };
-  };
-}
-
-interface ApiCart {
-  id: number;
-  Status: string;
-  cart_items: ApiCartItem[];
-}
-
 interface CartContextType {
   cartItems: CartItem[];
   isDrawerOpen: boolean;

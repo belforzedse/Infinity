@@ -8,8 +8,8 @@ import { STRAPI_TOKEN } from "@/constants/api";
 
 // Function to fetch roles from the API
 const fetchRoles = async (
-  searchTerm: string,
-  formData?: any,
+  _searchTerm: string,
+  _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
     const response = await apiClient.get("/local-user-roles", {

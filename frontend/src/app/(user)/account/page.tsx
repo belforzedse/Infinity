@@ -6,7 +6,7 @@ import AccountForm from "@/components/User/Account/AccountForm";
 import useUser from "@/hooks/useUser";
 
 export default function AccountPage() {
-  const { userData, isLoading } = useUser();
+  const { userData } = useUser();
 
   const fullName = userData
     ? `${userData.FirstName || ""} ${userData.LastName || ""}`.trim()

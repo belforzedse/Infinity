@@ -26,7 +26,6 @@ interface Props {
   options: FilterOption[];
   defaultOpen?: boolean;
   hasSearch?: boolean;
-  onOptionChange?: (option: FilterOption) => void;
   onOptionSelect?: (optionId: string) => void;
 }
 
@@ -36,7 +35,6 @@ const PLPFilterBoxWithItems = ({
   defaultOpen = false,
   hasSearch = false,
   inputPlaceholder = "سرچ کنین",
-  onOptionChange,
   onOptionSelect,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -53,19 +51,6 @@ const PLPFilterBoxWithItems = ({
   const filteredOptions = localOptions.filter((option) =>
     option.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  const handleCheckboxChange = (optionId: string) => {
-    setLocalOptions((prevOptions) =>
-      prevOptions.map((opt) => {
-        if (opt.id === optionId) {
-          const updatedOption = { ...opt, checked: !opt.checked };
-          onOptionChange?.(updatedOption);
-          return updatedOption;
-        }
-        return opt;
-      }),
-    );
-  };
 
   const handleOptionClick = (optionId: string) => {
     const newSelectedOptions = selectedOptions.includes(optionId)
