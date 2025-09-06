@@ -33,6 +33,7 @@ export default function PhoneInput({ value, onEdit }: PhoneInputProps) {
       dir="ltr"
       variant="auth"
       size="lg"
+      placeholder="09123456789"
       rightElement={editButton}
     />
   );

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
+import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import PhoneInput from "@/components/Kits/Auth/Input/Phone";
 import Checkbox from "@/components/Kits/Auth/Checkbox";
@@ -22,12 +23,6 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   const router = useRouter();
 
   const { phoneNumber } = useCheckPhoneNumber();
-
-  useEffect(() => {
-    if (!phoneNumber) {
-      router.push("/auth");
-    }
-  }, [phoneNumber, router]);
 
   const [formData, setFormData] = useState({
     phoneNumber,
@@ -60,7 +55,22 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           <Text variant="label" className="mb-2 inline-block">
             شماره همراه
           </Text>
-          <PhoneInput value={formData.phoneNumber} onEdit={handleEditPhone} />
+          {phoneNumber ? (
+            <PhoneInput value={formData.phoneNumber} onEdit={handleEditPhone} />
+          ) : (
+            <div dir="ltr">
+              <Input
+                type="tel"
+                variant="auth"
+                size="lg"
+                placeholder="09123456789"
+                value={formData.phoneNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
+              />
+            </div>
+          )}
         </div>
 
         <div>
