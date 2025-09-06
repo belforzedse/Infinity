@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/textarea";
 
 const MetaOptions: React.FC = () => {
   const [title, setTitle] = useState("");

@@ -48,7 +48,7 @@ export const columns: ColumnDef<Comment>[] = [
   {
     accessorKey: "contentType",
     header: "نوع محتوا",
-    cell: ({ row }) => {
+    cell: () => {
       return <span className="text-xs">محصول</span>;
     },
   },

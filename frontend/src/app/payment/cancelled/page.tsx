@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 
@@ -22,26 +21,8 @@ function PaymentCancelledContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleCompletePayment = () => {
-    if (orderId) {
-      // Redirect to retry payment for this order
-      router.push(`/orders/${orderId}/retry-payment`);
-    } else {
-      // Redirect back to cart
-      router.push("/cart");
-    }
-  };
-
   const handleContinueShopping = () => {
     router.push("/");
-  };
-
-  const handleViewCart = () => {
-    router.push("/cart");
-  };
-
-  const handleViewOrders = () => {
-    router.push("/orders");
   };
 
   if (loading) {

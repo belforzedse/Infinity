@@ -80,7 +80,7 @@ export default function Page() {
           ...((res as any)?.data || []),
         ]);
       })
-      .catch((err) => {
+      .catch((_err) => {
         toast.error("دریافت اطلاعات با خطا مواجه شد");
       });
   }, [reactionPages]);
@@ -115,7 +115,7 @@ export default function Page() {
         });
         setIsLoading(false);
       })
-      .catch((err) => {
+      .catch((_err) => {
         setError("دریافت اطلاعات با خطا مواجه شد");
         toast.error("دریافت اطلاعات با خطا مواجه شد");
         setIsLoading(false);
