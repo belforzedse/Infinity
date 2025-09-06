@@ -104,7 +104,7 @@ export default function SuperAdminLayoutSidebar({
                     role="button"
                     tabIndex={0}
                     className={clsx(
-                      "flex cursor-pointer items-center justify-between px-2 py-1.5 rounded-lg",
+                      "flex cursor-pointer items-center justify-between rounded-lg px-2 py-1.5",
                       "transition-colors duration-150 hover:bg-neutral-50",
                       hasChildren && "mb-2",
                     )}
@@ -146,7 +146,7 @@ export default function SuperAdminLayoutSidebar({
                         role="button"
                         tabIndex={0}
                         className={clsx(
-                          "transition-transform duration-200 p-1 rounded-md",
+                          "rounded-md p-1 transition-transform duration-200",
                           "transition-colors duration-150 hover:bg-neutral-50",
                           isOpenMenu && "rotate-180",
                         )}
@@ -186,10 +186,10 @@ export default function SuperAdminLayoutSidebar({
                               href={child.href}
                               onClick={(e) => e.stopPropagation()}
                               className={clsx(
-                                "block px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
                                 "transition-colors duration-150",
                                 active
-                                  ? "bg-neutral-100 text-neutral-900 font-medium"
+                                  ? "bg-neutral-100 font-medium text-neutral-900"
                                   : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
                               )}
                             >
