@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AuthButton from "@/components/Kits/Auth/Button";
+import { Button } from "@/components/ui/Button";
 import Text from "@/components/Kits/Text";
 import VerificationInput from "../../VerificationInput";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -122,27 +122,27 @@ export default function VerifyForgotPasswordForm({
         </div>
 
         <div className="flex flex-col gap-5 md:flex-row-reverse">
-          <AuthButton
+          <Button
             type="submit"
             disabled={isLoading}
-            icon={
-              isLoading && (
-                <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-              )
-            }
+            size="xl"
+            fullWidth
           >
-            تایید
-          </AuthButton>
+            {isLoading && (
+              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+            )}
+            <span>تایید</span>
+          </Button>
 
-          <AuthButton
+          <Button
             onClick={handleEditPhone}
             className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
-            icon={
-              <EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#db2777" />
-            }
+            size="xl"
+            fullWidth
           >
-            ویرایش شماره همراه
-          </AuthButton>
+            <EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#db2777" />
+            <span>ویرایش شماره همراه</span>
+          </Button>
         </div>
       </div>
     </form>

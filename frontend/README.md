@@ -73,7 +73,7 @@ Configure via `.env` (see `.env.example`). Notable variables:
 - `NEXT_PUBLIC_ALLOWED_REDIRECT_ORIGINS`: Comma‑separated allow‑list of origins permitted for redirects from payment callbacks; if empty, all http(s) allowed in dev
 - `NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS`: Comma‑separated allow‑list for payment gateway redirect origins; if empty, all http(s) allowed in dev
 
-Note: Some defaults exist in code for local/dev parity; provide explicit values for production.
+ `NEXT_PUBLIC_STRAPI_TOKEN` has no default and must be supplied via environment variables.
 
 ## Scripts
 
@@ -88,24 +88,34 @@ Note: Some defaults exist in code for local/dev parity; provide explicit values 
 
 Two Dockerfiles are provided:
 
-- `dev.Dockerfile`: development build (copies `dev.env` to `.env` in image)
-- `main.Dockerfile`: production build (copies `main.env` to `.env` in image)
+- `dev.Dockerfile`
+- `main.Dockerfile`
+
+Both expect required env vars at build time (e.g. `--build-arg NEXT_PUBLIC_STRAPI_TOKEN=...`).
 
 Build and run (dev):
 
 ```
-docker build -f dev.Dockerfile -t infinity-frontend:dev .
-docker run --rm -p 3000:3000 infinity-frontend:dev
+docker build -f dev.Dockerfile \
+  --build-arg NEXT_PUBLIC_STRAPI_TOKEN=your_token \
+  -t infinity-frontend:dev .
+docker run --rm -p 3000:3000 \
+  --env NEXT_PUBLIC_STRAPI_TOKEN=your_token \
+  infinity-frontend:dev
 ```
 
 Build and run (prod):
 
 ```
-docker build -f main.Dockerfile -t infinity-frontend:prod .
-docker run --rm -p 3000:3000 infinity-frontend:prod
+docker build -f main.Dockerfile \
+  --build-arg NEXT_PUBLIC_STRAPI_TOKEN=your_token \
+  -t infinity-frontend:prod .
+docker run --rm -p 3000:3000 \
+  --env NEXT_PUBLIC_STRAPI_TOKEN=your_token \
+  infinity-frontend:prod
 ```
 
-Alternatively, pass your own envs at runtime with `--env-file` and adjust the Dockerfiles to not copy the bundled `*.env`.
+To load variables from a file, use `--env-file` with `docker run`.
 
 ## Tests, Lint, Format
 
