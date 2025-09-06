@@ -16,6 +16,10 @@ export default function OffersListHomePage(props: Props) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Controls whether to show all products or a subset.
+  // Defaults to showing a subset on the homepage sections.
+  const isShowAllProducts = false;
+
   function goToNextProduct() {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({

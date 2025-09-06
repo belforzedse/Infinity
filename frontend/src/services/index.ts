@@ -4,7 +4,7 @@
  */
 
 import { API_BASE_URL, REQUEST_TIMEOUT, ERROR_MESSAGES } from "@/constants/api";
-import { ApiRequestOptions, ApiResponse } from "@/types/api";
+import { ApiRequestOptions, ApiResponse, ApiError } from "@/types/api";
 import { handleAuthErrors } from "@/utils/auth";
 
 interface ErrorResponse {
