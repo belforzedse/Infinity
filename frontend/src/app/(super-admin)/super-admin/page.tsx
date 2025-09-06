@@ -17,7 +17,6 @@ export default function SuperAdminPage() {
       {isLoading && !error && (
         <p className="text-sm text-neutral-500">در حال بارگذاری...</p>
       )}
-      .
     </ContentWrapper>
   );
 }
