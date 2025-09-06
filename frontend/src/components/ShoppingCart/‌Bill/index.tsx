@@ -27,7 +27,7 @@ export type FormData = {
   notes?: string;
 };
 
-type Props = {};
+type Props = object;
 
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
