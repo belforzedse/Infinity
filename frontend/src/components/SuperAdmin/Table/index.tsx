@@ -10,7 +10,7 @@ import {
   Row,
 } from "@tanstack/react-table";
 // removed unused import: getPaginationRowModel from "@tanstack/react-table"
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/tailwind";
 import { twMerge } from "tailwind-merge";
 import SuperAdminTableSelect from "./Select";
@@ -85,76 +85,75 @@ export function SuperAdminTable<TData, TValue>({
   const [refresh, setRefresh] = useAtom(refreshTable);
 
   const isFetchingRef = useRef(false);
-  const lastFilter = useRef(filter);
+  const fetchSeqRef = useRef(0);
 
-  useEffect(() => {
-    if (url && refresh && !isFetchingRef.current) {
-      isFetchingRef.current = true;
-      setRefresh(false);
-      setIsLoading(true);
+  const buildApiUrl = useCallback(() => {
+    if (!url) return null;
+    let apiUrl = url;
+    const hasQueryParams = url.includes("?");
+    let separator = hasQueryParams ? "&" : "?";
 
-      // Build the query parameters for Strapi
-      let apiUrl = url;
-      const hasQueryParams = url.includes("?");
-      let separator = hasQueryParams ? "&" : "?";
+    // pagination
+    apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
+    separator = "&";
 
-      // Add pagination parameters
-      apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
+    // filters
+    if (Array.isArray(filter) && filter.length > 0) {
+      const filters = filter as unknown as FilterItem[];
+      const filterParams = filters
+        .map((item) => {
+          const { field, operator, value } = item || ({} as FilterItem);
+          if (!field || !operator || value === undefined || value === null)
+            return "";
+          return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
+        })
+        .filter(Boolean)
+        .join("&");
+      if (filterParams) apiUrl = `${apiUrl}${separator}${filterParams}`;
+    }
 
-      // Update separator for subsequent parameters
-      separator = "&";
+    return apiUrl;
+  }, [url, page, pageSize, filter]);
 
-      const currentFilter = lastFilter.current;
-
-      // Add filters if they exist
-      if (Array.isArray(currentFilter) && currentFilter.length > 0) {
-        const filters = currentFilter as unknown as FilterItem[];
-        const filterParams = filters
-          .map((item) => {
-            const { field, operator, value } = item || ({} as FilterItem);
-            if (!field || !operator || value === undefined || value === null)
-              return "";
-            return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
-          })
-          .filter((param) => param !== "")
-          .join("&");
-
-        if (filterParams) {
-          apiUrl = `${apiUrl}${separator}${filterParams}`;
-        }
+  const fetchData = useCallback(async () => {
+    const apiUrl = buildApiUrl();
+    if (!apiUrl || isFetchingRef.current) return;
+    const seq = ++fetchSeqRef.current;
+    isFetchingRef.current = true;
+    setIsLoading(true);
+    try {
+      const res = await apiClient.get<TData[]>(apiUrl, {
+        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      });
+      // Ignore outdated responses
+      if (seq === fetchSeqRef.current) {
+        setTableData(res.data);
+        setTotalSize(res.meta?.pagination?.total ?? 0);
       }
-
-      apiClient
-        .get<TData[]>(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        })
-        .then((res) => {
-          setTableData(res.data);
-          setTotalSize(res.meta?.pagination?.total ?? 0);
-          setIsLoading(false);
-          isFetchingRef.current = false;
-        })
-        .catch((error) => {
-          console.error("Failed to fetch table data:", error);
-          setIsLoading(false);
-          isFetchingRef.current = false;
-        });
+    } catch (error) {
+      if ((error as any)?.name !== "AbortError") {
+        console.error("Failed to fetch table data:", error);
+      }
+    } finally {
+      if (seq === fetchSeqRef.current) {
+        setIsLoading(false);
+        isFetchingRef.current = false;
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, refresh]);
+  }, [buildApiUrl, setTotalSize]);
 
+  // Fetch on mount and when url/page/pageSize/filter changes
   useEffect(() => {
-    if (!refresh) {
-      if (isFetchingRef.current) return;
-      if (JSON.stringify(lastFilter.current) === JSON.stringify(filter)) return;
+    fetchData();
+  }, [fetchData]);
 
-      lastFilter.current = filter;
-
-      setRefresh(true);
+  // If some other part of the app toggles refreshTable, refetch
+  useEffect(() => {
+    if (refresh) {
+      fetchData();
+      setRefresh(false);
     }
-  }, [url, refresh, filter, setRefresh]);
+  }, [refresh, fetchData, setRefresh]);
 
   const table = useReactTable({
     data: tableData || [],

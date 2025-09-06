@@ -160,7 +160,7 @@ class ApiClient {
 
         // Handle auth errors here for centralized auth redirects
         if (!options?.suppressAuthRedirect) {
-          handleAuthErrors(error, undefined, options?.suppressAuthRedirect);
+          handleAuthErrors(error, undefined);
         }
 
         throw error;
