@@ -50,6 +50,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [count, setCount] = useState(0);
+  const [hasCountError, setHasCountError] = useState(false);
   const [isFilterOpen, setFilterIsOpen] = useState(false);
 
   const [refresh] = useAtom(refreshTable);
@@ -67,6 +68,12 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
         })
         .then((res) => {
           setCount((res as any)?.meta?.pagination?.total);
+          setHasCountError(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setCount(0);
+          setHasCountError(true);
         });
     }
   }, [apiUrl, refresh]);
@@ -90,6 +97,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
           {hasRecycleBin && (
             <RecycleBinButton
               count={count}
+              hasError={hasCountError}
               isRecycleBinOpen={isRecycleBinOpen}
               setIsRecycleBinOpen={setIsRecycleBinOpen}
             />
