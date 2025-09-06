@@ -4,7 +4,7 @@
  */
 
 import { API_BASE_URL, REQUEST_TIMEOUT, ERROR_MESSAGES } from "@/constants/api";
-import { ApiRequestOptions, ApiResponse, ApiError } from "@/types/api";
+import { ApiRequestOptions, ApiResponse } from "@/types/api";
 import { handleAuthErrors } from "@/utils/auth";
 
 interface ErrorResponse {
@@ -159,7 +159,9 @@ class ApiClient {
         );
 
         // Handle auth errors here for centralized auth redirects
-        handleAuthErrors(error);
+        if (!options?.suppressAuthRedirect) {
+          handleAuthErrors(error, undefined, options?.suppressAuthRedirect);
+        }
 
         throw error;
       }
@@ -179,8 +181,6 @@ class ApiClient {
         "status" in error &&
         ("message" in error || "error" in error)
       ) {
-        // Handle auth errors here for centralized auth redirects
-        handleAuthErrors(error as ApiError);
         throw error;
       }
 
