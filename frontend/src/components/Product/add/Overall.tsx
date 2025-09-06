@@ -1,8 +1,7 @@
 import Details from "@/components/Product/add/Details";
 import PhotoUploader from "@/components/Product/add/PhotoUploader";
 import FileUploader from "./FileUploader";
-import { EditProductData, ProductData } from "@/types/super-admin/products";
-import { MediaDataItem } from "@/services/super-admin/product/get";
+import { EditProductData } from "@/types/super-admin/products";
 import logger from "@/utils/logger";
 
 interface OverallProps {

@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function PDPCommentAdd(props: Props) {
-  const { rating, rateCount, productId, productReviews = [] } = props;
+  const { productId, productReviews = [] } = props;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 

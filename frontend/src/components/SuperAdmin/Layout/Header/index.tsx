@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Logo from "@/components/Kits/Logo";
 import MenuIcon from "@/components/PLP/Icons/MenuIcon";
-import SearchIcon from "../Icons/SearchIcon";
-import SmallChevronDownIcon from "../Icons/SmallChevronDownIcon";
 import { useMe } from "@/hooks/api/useMe";
 
 interface SuperAdminLayoutHeaderProps {
@@ -15,8 +12,6 @@ interface SuperAdminLayoutHeaderProps {
 export default function SuperAdminLayoutHeader({
   onMenuClick,
 }: SuperAdminLayoutHeaderProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-
   const { data: me, error } = useMe();
 
   return (

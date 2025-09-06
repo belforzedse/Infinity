@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import ShoppingCartMobileProductCard from "./MobileProductCard";
 import { CartItem } from "@/contexts/CartContext";
 

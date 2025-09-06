@@ -213,7 +213,7 @@ function GatewayLiquidityChart({
   }
 
   // Prepare data for Recharts
-  const chartData = rows.map((row, index) => ({
+  const chartData = rows.map((row) => ({
     name: row.gatewayTitle,
     value: Number(row.total),
     percentage: (
