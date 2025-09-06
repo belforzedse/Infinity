@@ -40,7 +40,7 @@ const PriceFilter = ({
       min: formatPrice(minPriceValue || minPrice),
       max: formatPrice(maxPriceValue || maxPrice),
     });
-  }, [minPriceValue, maxPriceValue]);
+  }, [minPriceValue, maxPriceValue, minPrice, maxPrice]);
 
   const handleSliderChange = (value: number | number[]) => {
     if (!Array.isArray(value)) return;
