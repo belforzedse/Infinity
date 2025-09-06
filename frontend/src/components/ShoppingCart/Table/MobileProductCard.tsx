@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import ShoppingCartQuantityControl from "../QuantityControl";
 import { CartItem } from "@/contexts/CartContext";
 import { IMAGE_BASE_URL } from "@/constants/api";
@@ -30,6 +31,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
               fill
               className="h-full w-full object-cover"
               sizes="48px"
+              loader={imageLoader}
             />
           </div>
           <span className="text-sm text-foreground-primary">

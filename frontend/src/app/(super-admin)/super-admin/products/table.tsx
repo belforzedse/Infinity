@@ -8,6 +8,7 @@ import { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 
 export type Product = {
   id: string;
@@ -74,6 +75,7 @@ export const columns: ColumnDef<Product>[] = [
             height={48}
             sizes="48px"
             className="h-12 w-12 overflow-hidden rounded-xl object-cover"
+            loader={imageLoader}
           />
 
           <div className="flex flex-col gap-2">
@@ -186,6 +188,7 @@ export const MobileTable = ({ data }: Props) => {
             height={48}
             sizes="48px"
             className="h-12 w-12 rounded-lg object-cover"
+            loader={imageLoader}
           />
 
           <div className="flex flex-1 flex-col gap-2">
