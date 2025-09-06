@@ -5,13 +5,12 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import VerificationInput from "@/components/Auth/VerificationInput";
 import { useCountdown } from "@/hooks/useCountdown";
-import { Button } from "@/components/ui/Button";
+import AuthButton from "@/components/Kits/Auth/Button";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import Text from "@/components/Kits/Text";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import { AuthService } from "@/services";
 import { useCart } from "@/contexts/CartContext";
-import logger from "@/utils/logger";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,9 +51,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (phoneNumber) {
-      if (process.env.NODE_ENV !== "production") {
-        logger.info("Sending OTP to", { phoneNumber });
-      }
+      console.log("Sending OTP to", phoneNumber);
 
       AuthService.sendOTP(phoneNumber).then(() => {
         startTimer();
@@ -99,16 +96,12 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col items-end">
-          <Button
-            type="submit"
-            disabled={verificationCode.length !== 6}
-            size="xl"
-            fullWidth
-          >
+          <AuthButton type="submit" disabled={verificationCode.length !== 6}>
             ایجاد حساب کاربری
-          </Button>
+          </AuthButton>
         </div>
       </form>
     </div>
   );
 }
+

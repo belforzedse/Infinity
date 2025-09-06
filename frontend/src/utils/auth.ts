@@ -1,16 +1,10 @@
 import { HTTP_STATUS } from "@/constants/api";
-import { ApiError } from "@/types/api";
 
 /**
  * Handles authentication errors (401, 403) or non-admin access
  * and redirects to auth page when necessary
  */
-export const handleAuthErrors = (
-  error?: ApiError | null,
-  isAdminCheck?: boolean,
-  suppressAuthRedirect?: boolean,
-): void => {
-  if (suppressAuthRedirect) return;
+export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   // Check for auth errors
   const isAuthError =
     error?.status === HTTP_STATUS.UNAUTHORIZED ||
@@ -19,18 +13,13 @@ export const handleAuthErrors = (
   // Check for non-admin access
   const isNotAdmin = isAdminCheck === false;
 
-  if (typeof window === "undefined") return;
+  if (isAuthError || isNotAdmin) {
+    // Clear the token
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
 
-  if (isAuthError) {
-    // Only clear token on actual auth errors
-    localStorage.removeItem("accessToken");
-    window.location.href = "/auth";
-    return;
-  }
-
-  if (isNotAdmin) {
-    // Do NOT clear token; just send user to their account/home
-    // This avoids kicking valid users back to login during admin checks
-    window.location.href = "/account";
+      // Redirect to auth page
+      window.location.href = "/auth";
+    }
   }
 };

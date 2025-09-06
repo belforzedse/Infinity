@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import Text from "@/components/Kits/Text";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import AuthInput from "@/components/Kits/Auth/Input";
+import AuthButton from "@/components/Kits/Auth/Button";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import { AuthService } from "@/services";
@@ -78,26 +78,22 @@ export default function RegisterInfoPage() {
             <Text variant="label" className="mb-2 md:mb-2.5">
               نام
             </Text>
-            <Input
+            <AuthInput
               type="text"
               value={formData.firstName}
               onChange={handleChange("firstName")}
               placeholder="نام"
-              variant="auth"
-              size="lg"
             />
           </div>
           <div>
             <Text variant="label" className="mb-2 md:mb-2.5">
               نام خانوادگی
             </Text>
-            <Input
+            <AuthInput
               type="text"
               value={formData.lastName}
               onChange={handleChange("lastName")}
               placeholder="نام خانوادگی"
-              variant="auth"
-              size="lg"
             />
           </div>
         </div>
@@ -106,14 +102,12 @@ export default function RegisterInfoPage() {
           <Text variant="label" className="mb-2 md:mb-2.5">
             شماره همراه
           </Text>
-          <Input
+          <AuthInput
             type="tel"
             value={formData.phoneNumber}
             onChange={handleChange("phoneNumber")}
             placeholder="09122032114"
             disabled
-            variant="auth"
-            size="lg"
           />
         </div>
 
@@ -146,7 +140,7 @@ export default function RegisterInfoPage() {
           </div>
         </div>
 
-        <Button
+        <AuthButton
           type="submit"
           disabled={
             isLoading ||
@@ -156,12 +150,11 @@ export default function RegisterInfoPage() {
             !formData.confirmPassword ||
             formData.password !== formData.confirmPassword
           }
-          size="xl"
-          fullWidth
         >
           {isLoading ? "در حال ثبت نام..." : "ایجاد حساب کاربری"}
-        </Button>
+        </AuthButton>
       </form>
     </div>
   );
 }
+
