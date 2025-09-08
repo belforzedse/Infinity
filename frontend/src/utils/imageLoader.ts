@@ -1,19 +1,22 @@
 import type { ImageLoaderProps } from "next/image";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "https://api.infinity.rgbgroup.ir";
+const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
 
 export default function imageLoader({ src, width, quality }: ImageLoaderProps) {
-  try {
-    const parsed = new URL(src);
-    if (parsed.hostname === "uploads") {
-      const params = [`w=${width}`];
-      if (quality) params.push(`q=${quality}`);
-      return `${BASE_URL}${parsed.pathname}?${params.join("&")}`;
-    }
-  } catch {
-    // Invalid URL or relative path - return as is
-  }
+  // Skip data URLs
+  if (src.startsWith("data:")) return src;
 
-  return src;
+  try {
+    // Parse against BASE_URL to support relative paths like "/uploads/..."
+    const base = BASE_URL || "http://localhost"; // safe SSR fallback
+    const url = new URL(src, base);
+    // Always include width so Next doesn't warn in dev
+    url.searchParams.set("w", String(width));
+    if (quality) url.searchParams.set("q", String(quality));
+    return url.toString();
+  } catch {
+    // Fallback: append params directly
+    const joiner = src.includes("?") ? "&" : "?";
+    return `${src}${joiner}w=${width}${quality ? `&q=${quality}` : ""}`;
+  }
 }

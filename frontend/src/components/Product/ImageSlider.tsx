@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
 import { FC, useState } from "react";
 
@@ -30,7 +30,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
             key={index}
             className="relative h-full w-full flex-none snap-start"
           >
-            <Image
+            <BlurImage
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
