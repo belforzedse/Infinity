@@ -8,6 +8,7 @@ import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
 import SettingsIcon from "../Icons/SettingsIcon";
 import { useRouter, usePathname } from "next/navigation";
+import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -21,6 +22,21 @@ export default function SuperAdminLayoutSidebar({
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const router = useRouter();
   const pathname = usePathname();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleLogout = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      }
+    } finally {
+      router.replace("/auth");
+    }
+  };
+
+  const openConfirm = () => setShowConfirm(true);
+  const closeConfirm = () => setShowConfirm(false);
 
   // Auto-open the section that matches current path
   useEffect(() => {
@@ -179,7 +195,9 @@ export default function SuperAdminLayoutSidebar({
                       {item.children.map((child, index) => {
                         const curr = pathname.replace(/\/$/, "");
                         const href = (child.href ?? "").replace(/\/$/, "");
-                        const active = !!href && (curr === href || curr.startsWith(href + "/"));
+                        const active =
+                          !!href &&
+                          (curr === href || curr.startsWith(href + "/"));
                         return (
                           <Fragment key={child.id}>
                             <Link
@@ -225,8 +243,9 @@ export default function SuperAdminLayoutSidebar({
           </div>
 
           <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <Link
-              href={"/super-admin/logout"}
+            <button
+              type="button"
+              onClick={openConfirm}
               className="flex items-center gap-2"
             >
               <div className="flex items-center gap-2">
@@ -235,7 +254,16 @@ export default function SuperAdminLayoutSidebar({
                   خروج
                 </span>
               </div>
-            </Link>
+            </button>
+            <ConfirmDialog
+              isOpen={showConfirm}
+              title="خروج از حساب کاربری"
+              description="آیا از خروج از حساب کاربری خود مطمئن هستید؟"
+              confirmText="بله، خارج شو"
+              cancelText="انصراف"
+              onConfirm={handleLogout}
+              onCancel={closeConfirm}
+            />
           </div>
         </div>
       </div>

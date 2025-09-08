@@ -18,12 +18,15 @@ export default function BlurImage({
   return (
     <Image
       {...props}
+      alt={props.alt || ""}
       placeholder={blurDataURL ? "blur" : "empty"}
       blurDataURL={blurDataURL}
       className={[
         // smooth blur-up
         "duration-700 ease-in-out",
-        loaded ? "scale-100 blur-0 grayscale-0 opacity-100" : "scale-105 blur-xl grayscale opacity-80",
+        loaded
+          ? "scale-100 opacity-100 blur-0 grayscale-0"
+          : "scale-105 opacity-80 blur-xl grayscale",
         className || "",
       ].join(" ")}
       onLoadingComplete={(img) => {
