@@ -31,7 +31,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   if (onClick) {
     return (
       <button
-        // onClick={onClick}
+        onClick={onClick}
         className="flex items-center gap-2 px-5 py-4 text-gray-700"
       >
         {renderIcon(icon)}

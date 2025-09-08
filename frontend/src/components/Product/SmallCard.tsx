@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import GridIcon from "./Icons/GridIcon";
@@ -42,7 +42,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
               ٪{discount}
             </div>
           )}
-          <Image
+          <BlurImage
             src={image}
             alt={title}
             fill
