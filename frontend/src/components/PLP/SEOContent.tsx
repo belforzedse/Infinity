@@ -40,6 +40,7 @@ export default function PLPSEOContent(props: Props) {
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 423px"
+          loading="lazy"
           loader={imageLoader}
         />
       </div>
