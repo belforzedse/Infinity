@@ -149,7 +149,7 @@ export default function NavigationProgress() {
     } catch {}
 
     return () => {
-      window.removeEventListener("click", onClick);
+      window.removeEventListener("click", onClick, true);
       window.removeEventListener("popstate", onPopState);
       clearFailSafe();
       // restore history methods
