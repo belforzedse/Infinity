@@ -18,8 +18,8 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   });
 
   return (
-    <div className="w-full bg-white p-5 rounded-xl">
-      <div className="flex justify-between items-center mb-4">
+    <div className="w-full rounded-xl bg-white p-5">
+      <div className="mb-4 flex items-center justify-between">
         <span className="text-base text-neutral-600">تصاویر</span>
         <UploadButton onUpload={(e) => handleFileUpload(e, "image")} />
       </div>

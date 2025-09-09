@@ -33,7 +33,7 @@ export default function ContentWrapperPasswordWithBtn(props: Props) {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
       setShowPasswordModal(false);
       setNewPassword("");
@@ -51,14 +51,14 @@ export default function ContentWrapperPasswordWithBtn(props: Props) {
     <div className="flex items-center gap-2">
       <input
         type="password"
-        className={`flex-1 border border-neutral-200 rounded-lg py-3 px-5 text-sm`}
+        className={`text-sm flex-1 rounded-lg border border-neutral-200 px-5 py-3`}
         disabled
         readOnly
         value={props.value}
       />
 
       <button
-        className="flex items-center gap-1 py-3 px-3 md:px-10 bg-slate-100 rounded-lg"
+        className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-3 md:px-10"
         onClick={(e) => {
           e.preventDefault();
           setShowPasswordModal(true);
@@ -70,13 +70,13 @@ export default function ContentWrapperPasswordWithBtn(props: Props) {
       </button>
 
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-lg font-bold mb-4">تغییر رمز عبور</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-96 rounded-lg bg-white p-6">
+            <h2 className="text-lg mb-4 font-bold">تغییر رمز عبور</h2>
             <input
               type="password"
               placeholder="رمز عبور جدید"
-              className="w-full p-2 mb-4 border rounded"
+              className="mb-4 w-full rounded border p-2"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               disabled={isLoading}
@@ -84,21 +84,21 @@ export default function ContentWrapperPasswordWithBtn(props: Props) {
             <input
               type="password"
               placeholder="تکرار رمز عبور"
-              className="w-full p-2 mb-4 border rounded"
+              className="mb-4 w-full rounded border p-2"
               value={retryPassword}
               onChange={(e) => setRetryPassword(e.target.value)}
               disabled={isLoading}
             />
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-actions-primary text-white rounded disabled:opacity-50"
+                className="rounded bg-actions-primary px-4 py-2 text-white disabled:opacity-50"
                 onClick={handlePasswordUpdate}
                 disabled={isLoading}
               >
                 {isLoading ? "در حال ذخیره..." : "ذخیره"}
               </button>
               <button
-                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                className="rounded bg-gray-200 px-4 py-2 disabled:opacity-50"
                 onClick={() => setShowPasswordModal(false)}
                 disabled={isLoading}
               >

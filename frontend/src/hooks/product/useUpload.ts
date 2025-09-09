@@ -1,5 +1,6 @@
 import { uploadFile } from "@/services/super-admin/files/upload";
-import { useEffect, useState } from "react";
+import { useEffect } from "react"; // removed unused: useState
+import logger from "@/utils/logger";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import {
@@ -50,7 +51,7 @@ export function useUpload({
 
   const [uploadingState, setUploadingState] = useAtom(uploadingStateAtom);
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
 
   // Initialize with initial files if provided
@@ -96,7 +97,7 @@ export function useUpload({
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    fileType: FileType
+    fileType: FileType,
   ) => {
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
@@ -116,7 +117,9 @@ export function useUpload({
 
           if (response) {
             // Update Media or Files array in productData based on file type
-            console.log("response", response);
+            if (process.env.NODE_ENV !== "production") {
+              logger.info("response", { response });
+            }
 
             if (fileType === "image" || fileType === "video") {
               setProductData((prev: any) => ({
@@ -189,7 +192,7 @@ export function useUpload({
             `${totalSuccessful} از ${newFiles.length} فایل با موفقیت آپلود شدند`,
             {
               icon: "⚠️",
-            }
+            },
           );
         }
       }
@@ -216,7 +219,7 @@ export function useUpload({
         setProductData({
           ...(productData as any),
           Media: (productData as any).Media.filter(
-            (_: any, i: number) => i !== index
+            (_: any, i: number) => i !== index,
           ),
         });
         break;
@@ -226,7 +229,7 @@ export function useUpload({
         setProductData({
           ...(productData as any),
           Media: (productData as any).Media.filter(
-            (_: any, i: number) => i !== index
+            (_: any, i: number) => i !== index,
           ),
         });
         break;
@@ -236,7 +239,7 @@ export function useUpload({
         setProductData({
           ...(productData as any),
           Files: (productData as any).Files.filter(
-            (_: any, i: number) => i !== index
+            (_: any, i: number) => i !== index,
           ),
         });
         break;

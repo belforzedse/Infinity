@@ -53,14 +53,14 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
   const strengthLevel = getStrengthLevel();
 
   return (
-    <div className="flex justify-between w-full md:items-center flex-col md:flex-row gap-2 md:gap-0">
-      <div className="flex flex-row gap-2 justify-center md:justify-end w-full md:w-auto">
+    <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
+      <div className="flex w-full flex-row justify-center gap-2 md:w-auto md:justify-end">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
             className={clsx(
-              "h-1 w-[23%] md:w-[46px] rounded-full transition-colors",
-              getStrengthColor(index, strengthLevel)
+              "h-1 w-[23%] rounded-full transition-colors md:w-[46px]",
+              getStrengthColor(index, strengthLevel),
             )}
           />
         ))}

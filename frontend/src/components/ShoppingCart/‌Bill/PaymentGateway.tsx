@@ -9,8 +9,19 @@ interface Props {
   snappMessage?: string;
 }
 
-function ShoppingCartBillPaymentGateway({ selected, onChange, snappEligible = true, snappMessage }: Props) {
-  const paymentGateways: Array<{ id: "mellat" | "snappay"; name: string; img: string; disabled?: boolean; helper?: string }> = [
+function ShoppingCartBillPaymentGateway({
+  selected,
+  onChange,
+  snappEligible = true,
+  snappMessage,
+}: Props) {
+  const paymentGateways: Array<{
+    id: "mellat" | "snappay";
+    name: string;
+    img: string;
+    disabled?: boolean;
+    helper?: string;
+  }> = [
     {
       id: "mellat",
       name: "ملت",
@@ -27,7 +38,9 @@ function ShoppingCartBillPaymentGateway({ selected, onChange, snappEligible = tr
 
   return (
     <div className="flex flex-col gap-4">
-      <span className="text-neutral-800 lg:text-xl text-2xl">درگاه پرداخت خود را انتخاب کنید</span>
+      <span className="text-2xl text-neutral-800 lg:text-xl">
+        درگاه پرداخت خود را انتخاب کنید
+      </span>
 
       <div className="flex items-center gap-2">
         {paymentGateways.map((pg) => (
@@ -35,19 +48,29 @@ function ShoppingCartBillPaymentGateway({ selected, onChange, snappEligible = tr
             key={pg.id}
             onClick={() => !pg.disabled && onChange(pg.id)}
             className={classNames(
-              "bg-stone-50 p-4 rounded-lg text-nowrap w-full border border-stone-50 flex items-center flex-col gap-2",
+              "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
               selected === pg.id && "!border-pink-600",
-              pg.disabled && "opacity-50 cursor-not-allowed"
+              pg.disabled && "cursor-not-allowed opacity-50",
             )}
             type="button"
           >
-            <div className="w-16 h-16 relative">
-              <Image src={pg.img} alt={pg.name} fill className="object-cover" />
+            <div className="relative h-16 w-16">
+              <Image
+                src={pg.img}
+                alt={pg.name}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </div>
 
-            <span className="text-neutral-600 lg:text-xs text-sm">{pg.name} درگاه پرداخت</span>
+            <span className="text-sm text-neutral-600 lg:text-xs">
+              {pg.name} درگاه پرداخت
+            </span>
             {pg.helper && (
-              <span className="text-[10px] text-amber-700 text-center leading-4">{pg.helper}</span>
+              <span className="text-center text-[10px] leading-4 text-amber-700">
+                {pg.helper}
+              </span>
             )}
           </button>
         ))}

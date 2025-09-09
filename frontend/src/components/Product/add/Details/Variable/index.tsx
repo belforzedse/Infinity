@@ -31,7 +31,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
             headers: {
               Authorization: `Bearer ${STRAPI_TOKEN}`,
             },
-          }
+          },
         );
 
         // Type assertion to work with the data
@@ -53,7 +53,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
             // Create variable name from combinations
             const variableParts = [size, color, model].filter(
-              (part) => part !== ""
+              (part) => part !== "",
             );
             const variableName = variableParts.join(" - ");
 
@@ -70,7 +70,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               sizeId: variation.attributes.product_variation_size?.data?.id,
               modelId: variation.attributes.product_variation_model?.data?.id,
             };
-          }
+          },
         );
 
         setVariables(formattedVariations);
@@ -86,7 +86,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
   const handleCheckboxChange = (id: number) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
@@ -123,7 +123,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
   };
 
   const handleSaveVariation = async (
-    updatedVariation: ProductVariableDisplay
+    updatedVariation: ProductVariableDisplay,
   ) => {
     try {
       // Update variation data
@@ -140,7 +140,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        }
+        },
       );
 
       // Update stock if it exists, or create new stock
@@ -156,7 +156,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
             headers: {
               Authorization: `Bearer ${STRAPI_TOKEN}`,
             },
-          }
+          },
         );
       } else {
         // Create new stock and link to variation
@@ -172,7 +172,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
             headers: {
               Authorization: `Bearer ${STRAPI_TOKEN}`,
             },
-          }
+          },
         );
 
         // Update stockId in local state
@@ -182,7 +182,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
       // Update local state
       setVariables((prev) =>
-        prev.map((v) => (v.id === updatedVariation.id ? updatedVariation : v))
+        prev.map((v) => (v.id === updatedVariation.id ? updatedVariation : v)),
       );
 
       setEditModalOpen(false);
@@ -194,16 +194,16 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
   return (
     <div className="w-full p-5 pt-0" dir="rtl">
-      <h2 className="text-base text-neutral-400 mb-4">متغیر های محصول</h2>
+      <h2 className="text-base mb-4 text-neutral-400">متغیر های محصول</h2>
 
       {loading ? (
-        <div className="text-center p-8">در حال بارگذاری...</div>
+        <div className="p-8 text-center">در حال بارگذاری...</div>
       ) : variables.length === 0 ? (
-        <div className="text-center p-8 border border-slate-100 rounded-lg">
+        <div className="rounded-lg border border-slate-100 p-8 text-center">
           <p className="text-slate-500">
             هیچ متغیری برای این محصول تعریف نشده است.
           </p>
-          <p className="text-slate-400 text-sm mt-2">
+          <p className="text-sm mt-2 text-slate-400">
             ابتدا ویژگی‌های محصول را تعریف کنید و سپس تنوع‌های محصول را ایجاد
             کنید.
           </p>
@@ -220,13 +220,13 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
       {/* Edit Modal - In real implementation you would have a complete modal component */}
       {editModalOpen && currentVariation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-lg">
-            <h3 className="text-lg font-medium mb-4">ویرایش متغیر محصول</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-lg rounded-xl bg-white p-6">
+            <h3 className="text-lg mb-4 font-medium">ویرایش متغیر محصول</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm mb-1">کد محصول (SKU)</label>
+                <label className="text-sm mb-1 block">کد محصول (SKU)</label>
                 <input
                   type="text"
                   value={currentVariation.sku}
@@ -236,12 +236,12 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                       sku: e.target.value,
                     })
                   }
-                  className="w-full border border-slate-300 rounded-lg p-2"
+                  className="w-full rounded-lg border border-slate-300 p-2"
                 />
               </div>
 
               <div>
-                <label className="block text-sm mb-1">قیمت (تومان)</label>
+                <label className="text-sm mb-1 block">قیمت (تومان)</label>
                 <input
                   type="number"
                   value={currentVariation.price}
@@ -251,12 +251,12 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                       price: Number(e.target.value),
                     })
                   }
-                  className="w-full border border-slate-300 rounded-lg p-2"
+                  className="w-full rounded-lg border border-slate-300 p-2"
                 />
               </div>
 
               <div>
-                <label className="block text-sm mb-1">موجودی</label>
+                <label className="text-sm mb-1 block">موجودی</label>
                 <input
                   type="number"
                   value={currentVariation.stock}
@@ -266,12 +266,12 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                       stock: Number(e.target.value),
                     })
                   }
-                  className="w-full border border-slate-300 rounded-lg p-2"
+                  className="w-full rounded-lg border border-slate-300 p-2"
                 />
               </div>
 
               <div>
-                <label className="block text-sm mb-1">وضعیت انتشار</label>
+                <label className="text-sm mb-1 block">وضعیت انتشار</label>
                 <div className="flex items-center space-x-4 space-x-reverse">
                   <label className="inline-flex items-center">
                     <input
@@ -283,9 +283,9 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                           isPublished: true,
                         })
                       }
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="mr-2 text-sm text-gray-700">
+                    <span className="text-sm mr-2 text-gray-700">
                       منتشر شده
                     </span>
                   </label>
@@ -299,21 +299,21 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                           isPublished: false,
                         })
                       }
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="mr-2 text-sm text-gray-700">پیش نویس</span>
+                    <span className="text-sm mr-2 text-gray-700">پیش نویس</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => {
                   setEditModalOpen(false);
                   setCurrentVariation(null);
                 }}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700"
+                className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700"
               >
                 انصراف
               </button>
@@ -321,7 +321,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                 onClick={() =>
                   currentVariation && handleSaveVariation(currentVariation)
                 }
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-white"
               >
                 ذخیره تغییرات
               </button>
@@ -332,10 +332,10 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium mb-4">حذف متغیر محصول</h3>
-            <p className="text-slate-600 mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6">
+            <h3 className="text-lg mb-4 font-medium">حذف متغیر محصول</h3>
+            <p className="mb-6 text-slate-600">
               آیا از حذف این متغیر محصول اطمینان دارید؟ این عمل قابل بازگشت
               نیست.
             </p>
@@ -346,13 +346,13 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                   setDeleteConfirmOpen(false);
                   setDeleteId(null);
                 }}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700"
+                className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700"
               >
                 انصراف
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                className="rounded-lg bg-red-600 px-4 py-2 text-white"
               >
                 حذف
               </button>

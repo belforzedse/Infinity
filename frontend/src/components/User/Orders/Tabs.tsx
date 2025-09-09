@@ -7,7 +7,8 @@ import OrderRow from "./OrderRow";
 import OrderCard from "./OrderCard";
 import { ORDER_STATUS } from "../Constnats";
 import OrderService, { Order } from "@/services/order";
-import PaymentStatusButton from "./PaymentStatusButton";
+// removed unused import: PaymentStatusButton from "./PaymentStatusButton"
+import { faNum } from "@/utils/faNum";
 
 export default function OrdersTabs() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -44,13 +45,13 @@ export default function OrdersTabs() {
       (order) =>
         order.Status === "Started" ||
         order.Status === "Processing" ||
-        order.Status === "Shipment"
+        order.Status === "Shipment",
     ),
     [PersianOrderStatus.DELIVERED]: orders.filter(
-      (order) => order.Status === "Done"
+      (order) => order.Status === "Done",
     ),
     [PersianOrderStatus.CANCELLED]: orders.filter(
-      (order) => order.Status === "Cancelled"
+      (order) => order.Status === "Cancelled",
     ),
   };
 
@@ -86,7 +87,7 @@ export default function OrdersTabs() {
     const totalPrice =
       order.order_items.reduce(
         (sum, item) => sum + item.Count * item.PerAmount,
-        0
+        0,
       ) + order.ShippingCost;
 
     // Map status
@@ -102,7 +103,7 @@ export default function OrdersTabs() {
       title: `سفارش شماره #${order.id}`,
       date: formatDate(order.createdAt),
       status,
-      price: totalPrice.toLocaleString(),
+      price: faNum(totalPrice),
       image,
       category,
       time: formatTime(order.createdAt),
@@ -119,10 +120,10 @@ export default function OrdersTabs() {
       <div key={value} className="w-full">
         {loading && mappedOrders.length === 0 ? (
           <div className="flex justify-center p-8">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-pink-500"></div>
+            <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
           </div>
         ) : mappedOrders.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
+          <div className="rounded-lg bg-gray-50 p-8 text-center">
             <p className="text-gray-600">سفارشی با این وضعیت یافت نشد.</p>
           </div>
         ) : (
@@ -131,7 +132,7 @@ export default function OrdersTabs() {
               <OrderCard key={order.id} {...order} />
             ))}
 
-            <div className="overflow-x-auto lg:flex hidden">
+            <div className="hidden overflow-x-auto lg:flex">
               <table className="w-full">
                 <tbody className="divide-y divide-gray-100">
                   {mappedOrders.map((order) => (
@@ -144,12 +145,12 @@ export default function OrdersTabs() {
         )}
 
         {pageCount > 1 && (
-          <div className="flex justify-center mt-4">
+          <div className="mt-4 flex justify-center">
             <div className="flex items-center gap-2">
               {page > 1 && (
                 <button
                   onClick={() => setPage(page - 1)}
-                  className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                  className="text-sm rounded-md border border-gray-300 px-3 py-1 hover:bg-gray-50"
                 >
                   قبلی
                 </button>
@@ -160,7 +161,7 @@ export default function OrdersTabs() {
               {page < pageCount && (
                 <button
                   onClick={() => setPage(page + 1)}
-                  className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                  className="text-sm rounded-md border border-gray-300 px-3 py-1 hover:bg-gray-50"
                 >
                   بعدی
                 </button>
@@ -172,5 +173,5 @@ export default function OrdersTabs() {
     );
   });
 
-  return <Tabs tabs={ORDER_STATUS} children={tabContent} />;
+  return <Tabs tabs={ORDER_STATUS}>{tabContent}</Tabs>;
 }

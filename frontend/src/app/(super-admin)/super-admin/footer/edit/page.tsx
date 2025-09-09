@@ -3,7 +3,7 @@
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { config } from "./config";
 import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
+// removed unused import: useRouter from "next/navigation"
 import { useEffect, useState } from "react";
 import { Footer } from "@/types/super-admin/footer";
 import { getFooter } from "@/services/super-admin/footer/get";
@@ -25,7 +25,7 @@ type NestedFooter = {
 } & Footer;
 
 export default function FooterEditPage() {
-  const router = useRouter();
+  // removed unused: router
   const [data, setData] = useState<NestedFooter | null>(null);
   const [loading, setLoading] = useState(true);
 

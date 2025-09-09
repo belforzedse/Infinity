@@ -4,22 +4,22 @@ export const ProductVariableHeader: React.FC = () => {
   return (
     <thead className="bg-slate-100">
       <tr>
-        <th className="p-4 text-right text-sm font-medium text-gray-900 border-l border-slate-100">
+        <th className="text-sm border-l border-slate-100 p-4 text-right font-medium text-gray-900">
           متغیر
         </th>
-        <th className="p-4 text-right text-sm font-medium text-gray-900 border-l border-slate-100">
+        <th className="text-sm border-l border-slate-100 p-4 text-right font-medium text-gray-900">
           قیمت
         </th>
-        <th className="p-4 text-right text-sm font-medium text-gray-900 border-l border-slate-100">
+        <th className="text-sm border-l border-slate-100 p-4 text-right font-medium text-gray-900">
           موجودی
         </th>
-        <th className="p-4 text-right text-sm font-medium text-gray-900 border-l border-slate-100">
+        <th className="text-sm border-l border-slate-100 p-4 text-right font-medium text-gray-900">
           کد محصول
         </th>
-        <th className="p-4 text-right text-sm font-medium text-gray-900 border-l border-slate-100">
+        <th className="text-sm border-l border-slate-100 p-4 text-right font-medium text-gray-900">
           وضعیت
         </th>
-        <th className="p-4 text-right text-sm font-medium text-gray-900">
+        <th className="text-sm p-4 text-right font-medium text-gray-900">
           عملیات
         </th>
       </tr>

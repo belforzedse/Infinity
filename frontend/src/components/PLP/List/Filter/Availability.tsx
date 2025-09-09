@@ -20,18 +20,18 @@ export default function AvailabilityFilter({
   };
 
   return (
-    <div className="bg-stone-50 rounded-2xl p-4">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-neutral-800">نمایش محصولات موجود</span>
 
         <div
-          className={`relative w-7 h-4 flex items-center ${
+          className={`relative flex h-4 w-7 items-center ${
             checked ? "bg-green-500" : "bg-gray-200"
-          } rounded-full p-1 cursor-pointer transition-colors`}
+          } cursor-pointer rounded-full p-1 transition-colors`}
           onClick={handleChange}
         >
           <div
-            className={`bg-white w-3 h-3 rounded-full shadow-md transform transition-transform ${
+            className={`h-3 w-3 transform rounded-full bg-white shadow-md transition-transform ${
               checked ? "-translate-x-2.5" : "translate-x-0"
             }`}
           />

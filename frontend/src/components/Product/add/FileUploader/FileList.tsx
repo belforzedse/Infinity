@@ -13,9 +13,9 @@ const FileList: React.FC<FileListProps> = ({
   multiple,
 }) => {
   return (
-    <div className="w-full bg-white flex flex-col gap-4 p-5 rounded-xl">
+    <div className="flex w-full flex-col gap-4 rounded-xl bg-white p-5">
       <span className="text-base text-neutral-600">{title}</span>
-      <div className="flex flex-wrap items-center gap-2.5 py-4 px-6 border border-dashed border-blue-600 rounded-xl">
+      <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-dashed border-blue-600 px-6 py-4">
         {files.map((file, index) => (
           <FileItem
             key={file.preview}

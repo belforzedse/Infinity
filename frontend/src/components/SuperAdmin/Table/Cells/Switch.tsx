@@ -41,7 +41,7 @@ export default function SuperAdminTableCellSwitch({
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${STRAPI_TOKEN}`,
                       },
-                    }
+                    },
                   )
                   .then(() => {
                     setStatus(checked ? "active" : "inactive");
@@ -54,14 +54,14 @@ export default function SuperAdminTableCellSwitch({
             : onChange
         }
         disabled={disabled}
-        className={`group inline-flex w-6 h-4 md:h-6 md:w-11 items-center rounded-full transition ${
+        className={`group inline-flex h-4 w-6 items-center rounded-full transition md:h-6 md:w-11 ${
           disabled
-            ? "bg-gray-300 cursor-not-allowed"
+            ? "cursor-not-allowed bg-gray-300"
             : "bg-gray-200 data-[checked]:bg-green-500"
         }`}
       >
         <span
-          className={`size-3 md:size-4 translate-x-0.5 md:translate-x-1 rounded-full transition ${
+          className={`size-3 translate-x-0.5 rounded-full transition md:size-4 md:translate-x-1 ${
             disabled ? "bg-gray-400" : "bg-white"
           } group-data-[checked]:translate-x-2.5 md:group-data-[checked]:translate-x-6`}
         />

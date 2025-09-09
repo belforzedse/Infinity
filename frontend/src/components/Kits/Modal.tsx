@@ -23,7 +23,7 @@ export default function Modal({
   titleClassName,
 }: Props) {
   return (
-    <Dialog open={isOpen} onClose={onClose} as="div" className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} as="div" className="relative z-[1200]">
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"
@@ -32,16 +32,16 @@ export default function Modal({
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            className={`w-full max-w-2xl transform rounded-2xl bg-white lg:px-10 lg:py-7 shadow-xl transition-all p-5 ${className}`}
+            className={`w-full max-w-2xl transform rounded-2xl bg-white p-5 shadow-xl transition-all lg:px-10 lg:py-7 ${className}`}
           >
             <DialogTitle
               className={classNames(
-                "lg:mb-4 mb-3 flex justify-between items-center",
-                titleClassName
+                "mb-3 flex items-center justify-between lg:mb-4",
+                titleClassName,
               )}
             >
               {title ? (
-                <span className="text-neutral-700 text-2xl">{title}</span>
+                <span className="text-2xl text-neutral-700">{title}</span>
               ) : null}
 
               {closeIcon ? (
@@ -49,7 +49,7 @@ export default function Modal({
               ) : (
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-full border border-slate-200 text-neutral-800"
+                  className="rounded-full border border-slate-200 p-1.5 text-neutral-800"
                   aria-label="بستن"
                 >
                   <DeleteIcon />

@@ -13,15 +13,14 @@ export default function PasswordChangeForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle password change submission
-    console.log(formData);
   };
 
   return (
-    <div className="bg-white rounded-lg space-y-6 px-0.5">
-      <form onSubmit={handleSubmit} className="lg:space-y-6 space-y-5">
-        <div className="lg:space-y-4 space-y-3">
+    <div className="space-y-6 rounded-lg bg-white px-0.5">
+      <form onSubmit={handleSubmit} className="space-y-5 lg:space-y-6">
+        <div className="space-y-3 lg:space-y-4">
           <div>
-            <label className="block text-right text-foreground-primary mb-2 lg:text-lg text-base">
+            <label className="text-base mb-2 block text-right text-foreground-primary lg:text-lg">
               رمز عبور فعلی
             </label>
             <AuthPasswordInput
@@ -37,7 +36,7 @@ export default function PasswordChangeForm() {
           </div>
 
           <div>
-            <label className="block text-right text-foreground-primary mb-2 lg:text-lg text-base">
+            <label className="text-base mb-2 block text-right text-foreground-primary lg:text-lg">
               رمز عبور جدید
             </label>
             <AuthPasswordInput
@@ -51,7 +50,7 @@ export default function PasswordChangeForm() {
           </div>
 
           <div>
-            <label className="block text-right text-foreground-primary mb-2 lg:text-lg text-base">
+            <label className="text-base mb-2 block text-right text-foreground-primary lg:text-lg">
               تکرار رمز عبور جدید
             </label>
             <AuthPasswordInput
@@ -72,7 +71,7 @@ export default function PasswordChangeForm() {
             />
           </div>
         </div>
-        <div className="w-full flex justify-end">
+        <div className="flex w-full justify-end">
           <button
             type="submit"
             disabled={
@@ -81,10 +80,10 @@ export default function PasswordChangeForm() {
               !formData.confirmPassword ||
               formData.newPassword !== formData.confirmPassword
             }
-            className="w-full lg:w-auto bg-[#EC4899] text-white rounded-lg py-2 px-8 hover:bg-[#EC4899]/80 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex gap-1 justify-center"
+            className="flex w-full justify-center gap-1 rounded-lg bg-[#EC4899] px-8 py-2 text-white transition-colors hover:bg-[#EC4899]/80 disabled:cursor-not-allowed disabled:bg-gray-300 lg:w-auto"
           >
-            <SaveIcon className="lg:w-6 lg:h-6 w-5 h-5" />
-            <span className="lg:text-sm text-base">ذخیره</span>
+            <SaveIcon className="h-5 w-5 lg:h-6 lg:w-6" />
+            <span className="text-base lg:text-sm">ذخیره</span>
           </button>
         </div>
       </form>

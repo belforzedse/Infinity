@@ -11,7 +11,7 @@ const SpecTable: React.FC<SpecTableProps> = ({ specs = [] }) => {
   // If no specs data is provided, return null
   if (!specs.length) {
     return (
-      <div className="w-full text-center p-5">
+      <div className="w-full p-5 text-center">
         <p className="text-foreground-primary">
           راهنمای سایز برای این محصول موجود نیست.
         </p>
@@ -24,16 +24,16 @@ const SpecTable: React.FC<SpecTableProps> = ({ specs = [] }) => {
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="min-w-full bg-white border-collapse">
+      <table className="min-w-full border-collapse bg-white">
         <thead>
           <tr className="bg-gray-50">
-            <th className="p-3 text-center border text-sm text-foreground-primary whitespace-nowrap">
+            <th className="text-sm whitespace-nowrap border p-3 text-center text-foreground-primary">
               سایز
             </th>
             {columnKeys.map((key) => (
               <th
                 key={key}
-                className="p-3 text-center border text-sm text-foreground-primary whitespace-nowrap"
+                className="text-sm whitespace-nowrap border p-3 text-center text-foreground-primary"
               >
                 {key}
               </th>
@@ -46,13 +46,13 @@ const SpecTable: React.FC<SpecTableProps> = ({ specs = [] }) => {
               key={index}
               className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
             >
-              <td className="p-3 text-right border text-sm text-gray-700">
+              <td className="text-sm border p-3 text-right text-gray-700">
                 {spec.size}
               </td>
               {columnKeys.map((key) => (
                 <td
                   key={key}
-                  className="p-3 text-right border text-sm text-gray-700"
+                  className="text-sm border p-3 text-right text-gray-700"
                 >
                   {spec[key]}
                 </td>

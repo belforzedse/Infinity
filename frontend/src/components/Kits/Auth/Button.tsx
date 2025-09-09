@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
-import clsx from "clsx";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface AuthButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
@@ -24,16 +25,12 @@ export default function AuthButton({
   );
 
   return (
-    <button
-      className={clsx(
-        "h-[54px] bg-pink-500/90 hover:bg-pink-500 disabled:bg-pink-300 disabled:cursor-not-allowed",
-        "text-white rounded-lg text-xl transition-colors",
-        fullWidth && "w-full",
-        className
-      )}
+    <Button
+      variant="primary"
+      className={cn("text-xl h-[54px]", fullWidth && "w-full", className)}
       {...props}
     >
       {icon ? content : children}
-    </button>
+    </Button>
   );
 }

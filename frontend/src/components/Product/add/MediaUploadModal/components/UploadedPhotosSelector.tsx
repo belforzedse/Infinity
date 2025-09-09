@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { FilterSection } from "./FilterSection";
 
 interface UploadedPhotosSelectorProps {
@@ -52,21 +53,22 @@ export const UploadedPhotosSelector: React.FC<UploadedPhotosSelectorProps> = ({
   ];
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <FilterSection />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 overflow-y-auto max-h-[60vh]">
+      <div className="grid max-h-[60vh] grid-cols-2 gap-1.5 overflow-y-auto sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {photos.map((photo, index) => (
           <div
             key={index}
-            className={`relative rounded-md overflow-hidden cursor-pointer transition-all duration-200 hover:opacity-90
-              ${selectedPhotos.includes(photo) ? "ring-2 ring-blue-500" : ""}`}
+            className={`relative cursor-pointer overflow-hidden rounded-md transition-all duration-200 hover:opacity-90 ${selectedPhotos.includes(photo) ? "ring-2 ring-blue-500" : ""}`}
             onClick={() => onPhotoSelect(photo)}
           >
-            <img
+            <Image
               src={photo}
               alt={`Uploaded photo ${index + 1}`}
-              className="w-full object-cover aspect-square"
+              width={300}
+              height={300}
+              className="aspect-square w-full object-cover"
             />
           </div>
         ))}

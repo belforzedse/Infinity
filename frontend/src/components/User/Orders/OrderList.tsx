@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import OrderService, { Order, OrderItem } from "@/services/order";
 import PaymentStatusButton from "./PaymentStatusButton";
+import { faNum } from "@/utils/faNum";
 
 interface OrderListProps {
   className?: string;
@@ -16,7 +17,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [total, setTotal] = useState(0);
+  // removed unused state: total
   const pageSize = 10;
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
       const response = await OrderService.getMyOrders(page, pageSize);
       setOrders(response.data);
       setPageCount(response.meta.pagination.pageCount);
-      setTotal(response.meta.pagination.total);
+      // removed unused: response.meta.pagination.total
     } catch (err: any) {
       console.error("Error fetching orders:", err);
       setError(err.message || "خطا در دریافت سفارش‌ها");
@@ -65,25 +66,26 @@ export default function OrderList({ className = "" }: OrderListProps) {
     return items.map((item) => (
       <div
         key={item.id}
-        className="flex items-center py-2 border-b border-gray-100 last:border-0"
+        className="flex items-center border-b border-gray-100 py-2 last:border-0"
       >
-        <div className="relative w-16 h-16 overflow-hidden rounded-md">
+        <div className="relative h-16 w-16 overflow-hidden rounded-md">
           {item.product_variation.product.cover_image ? (
             <Image
               src={item.product_variation.product.cover_image.url}
               alt={item.ProductTitle}
               fill
               className="object-cover"
+              sizes="64px"
             />
           ) : (
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center bg-gray-200">
               <span className="text-xs text-gray-500">بدون تصویر</span>
             </div>
           )}
         </div>
         <div className="mr-3 flex-grow">
           <h4 className="text-sm font-medium">{item.ProductTitle}</h4>
-          <div className="flex flex-wrap gap-x-3 mt-1 text-xs text-gray-600">
+          <div className="text-xs mt-1 flex flex-wrap gap-x-3 text-gray-600">
             {item.product_variation.product_color && (
               <span>رنگ: {item.product_variation.product_color.Title}</span>
             )}
@@ -97,12 +99,12 @@ export default function OrderList({ className = "" }: OrderListProps) {
             )}
           </div>
         </div>
-        <div className="text-left flex flex-col items-end">
+        <div className="flex flex-col items-end text-left">
           <span className="text-sm">
-            {item.Count} × {item.PerAmount.toLocaleString()} تومان
+            {item.Count} × {faNum(item.PerAmount)} تومان
           </span>
-          <span className="text-sm font-semibold mt-1">
-            {(item.Count * item.PerAmount).toLocaleString()} تومان
+          <span className="text-sm mt-1 font-semibold">
+            {faNum(item.Count * item.PerAmount)} تومان
           </span>
         </div>
       </div>
@@ -112,11 +114,11 @@ export default function OrderList({ className = "" }: OrderListProps) {
   const renderOrders = () => {
     if (orders.length === 0) {
       return (
-        <div className="bg-gray-50 rounded-lg p-8 text-center">
+        <div className="rounded-lg bg-gray-50 p-8 text-center">
           <p className="text-gray-600">شما هنوز سفارشی ثبت نکرده‌اید.</p>
           <Link
             href="/"
-            className="mt-4 inline-block bg-pink-500 text-white px-4 py-2 rounded-lg"
+            className="mt-4 inline-block rounded-lg bg-pink-500 px-4 py-2 text-white"
           >
             مشاهده محصولات
           </Link>
@@ -127,9 +129,9 @@ export default function OrderList({ className = "" }: OrderListProps) {
     return orders.map((order) => (
       <div
         key={order.id}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6"
+        className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
       >
-        <div className="bg-gray-50 p-4 flex justify-between items-center border-b border-gray-200">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4">
           <div>
             <h3 className="text-lg font-medium">سفارش #{order.id}</h3>
             <p className="text-sm text-gray-600">
@@ -137,7 +139,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
             </p>
           </div>
           <div className="flex flex-col items-end">
-            <span className="inline-flex items-center bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full mb-2">
+            <span className="text-xs mb-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-blue-700">
               {getStatusTranslation(order.Status)}
             </span>
             <PaymentStatusButton orderId={order.id} />
@@ -147,30 +149,31 @@ export default function OrderList({ className = "" }: OrderListProps) {
         <div className="p-4">
           <div className="mb-4">{renderOrderItems(order.order_items)}</div>
 
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="flex justify-between text-sm mb-2">
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <div className="text-sm mb-2 flex justify-between">
               <span>روش ارسال:</span>
               <span>{order.shipping.Title}</span>
             </div>
-            <div className="flex justify-between text-sm mb-2">
+            <div className="text-sm mb-2 flex justify-between">
               <span>هزینه ارسال:</span>
-              <span>{order.ShippingCost.toLocaleString()} تومان</span>
+              <span>{faNum(order.ShippingCost)} تومان</span>
             </div>
             {order.Note && (
-              <div className="flex justify-between text-sm mb-2">
+              <div className="text-sm mb-2 flex justify-between">
                 <span>یادداشت:</span>
                 <span>{order.Note}</span>
               </div>
             )}
-            <div className="flex justify-between font-semibold mt-3 pt-3 border-t border-gray-100">
+            <div className="mt-3 flex justify-between border-t border-gray-100 pt-3 font-semibold">
               <span>مجموع:</span>
               <span className="text-pink-600">
                 {(
                   order.order_items.reduce(
                     (sum, item) => sum + item.Count * item.PerAmount,
-                    0
+                    0,
                   ) + order.ShippingCost
-                ).toLocaleString()}{" "}
+                )}{" "}
+                {/* prices formatted above with faNum */}
                 تومان
               </span>
             </div>
@@ -184,12 +187,12 @@ export default function OrderList({ className = "" }: OrderListProps) {
     if (pageCount <= 1) return null;
 
     return (
-      <div className="flex justify-center mt-6">
+      <div className="mt-6 flex justify-center">
         <div className="flex items-center gap-2">
           {page > 1 && (
             <button
               onClick={() => setPage(page - 1)}
-              className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="rounded-md border border-gray-300 px-3 py-1 hover:bg-gray-50"
             >
               قبلی
             </button>
@@ -211,7 +214,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
               <button
                 key={pageNum}
                 onClick={() => setPage(pageNum)}
-                className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                className={`flex h-8 w-8 items-center justify-center rounded-md ${
                   page === pageNum
                     ? "bg-pink-500 text-white"
                     : "border border-gray-300 hover:bg-gray-50"
@@ -225,7 +228,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
           {page < pageCount && (
             <button
               onClick={() => setPage(page + 1)}
-              className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="rounded-md border border-gray-300 px-3 py-1 hover:bg-gray-50"
             >
               بعدی
             </button>
@@ -238,18 +241,18 @@ export default function OrderList({ className = "" }: OrderListProps) {
   if (loading && orders.length === 0) {
     return (
       <div className={`${className} flex justify-center p-8`}>
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
       </div>
     );
   }
 
   if (error && orders.length === 0) {
     return (
-      <div className={`${className} bg-red-50 p-4 rounded-lg text-red-600`}>
+      <div className={`${className} rounded-lg bg-red-50 p-4 text-red-600`}>
         <p>{error}</p>
         <button
           onClick={fetchOrders}
-          className="mt-3 text-sm bg-red-100 px-3 py-1 rounded-lg hover:bg-red-200"
+          className="text-sm mt-3 rounded-lg bg-red-100 px-3 py-1 hover:bg-red-200"
         >
           تلاش مجدد
         </button>
@@ -259,11 +262,11 @@ export default function OrderList({ className = "" }: OrderListProps) {
 
   return (
     <div className={className}>
-      <h2 className="text-xl font-semibold mb-6">سفارش‌های من</h2>
+      <h2 className="text-xl mb-6 font-semibold">سفارش‌های من</h2>
 
       {loading && (
         <div className="mb-4 flex items-center">
-          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-pink-500 ml-2"></div>
+          <div className="ml-2 h-4 w-4 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
           <span className="text-sm text-gray-600">در حال بروزرسانی...</span>
         </div>
       )}

@@ -7,7 +7,7 @@ export interface Response {
 
 export const resetPassword = async (
   otp: string,
-  password: string
+  password: string,
 ): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.RESET_PASSWORD;
 

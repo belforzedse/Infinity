@@ -31,10 +31,10 @@ export default function PLPMobileHeader({}: Props) {
 
   return (
     <header className="lg:hidden">
-      <div className="flex flex-row-reverse items-center justify-between px-4 py-3 bg-white">
+      <div className="flex flex-row-reverse items-center justify-between bg-white px-4 py-3">
         <Link
           href="/orders"
-          className="flex items-center gap-1 text-neutral-800 border border-slate-200 rounded-[28px] px-4 py-3 max-h-[43px]"
+          className="flex max-h-[43px] items-center gap-1 rounded-[28px] border border-slate-200 px-4 py-3 text-neutral-800"
         >
           <span className="text-sm">پیگیری سفارش</span>
           <OrderTrackingIcon className="text-neutral-800" />
@@ -46,17 +46,17 @@ export default function PLPMobileHeader({}: Props) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="flex items-center justify-center border border-slate-200 rounded-[28px] w-[43px] h-[43px]"
+            className="flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200"
           >
             <MenuIcon className="text-neutral-800" />
           </button>
 
           <button
             onClick={openDrawer}
-            className="flex items-center justify-center bg-pink-500 text-white rounded-[28px] w-[43px] h-[43px] relative"
+            className="relative flex h-[43px] w-[43px] items-center justify-center rounded-[28px] bg-pink-500 text-white"
           >
             <CartIcon className="text-white" />
-            <div className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center border border-slate-200 bg-white rounded-full">
+            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white">
               <span className="text-xs text-pink-500">{totalItems}</span>
             </div>
           </button>
@@ -67,11 +67,11 @@ export default function PLPMobileHeader({}: Props) {
       <div className="p-4">
         <form
           onSubmit={handleSearchSubmit}
-          className="flex flex-row-reverse items-center justify-between bg-white border border-slate-50 rounded-[28px] px-2 py-2"
+          className="flex flex-row-reverse items-center justify-between rounded-[28px] border border-slate-50 bg-white px-2 py-2"
         >
           <button
             type="submit"
-            className="flex items-center gap-[2px] bg-pink-500 text-white rounded-[28px] px-2 py-1"
+            className="flex items-center gap-[2px] rounded-[28px] bg-pink-500 px-2 py-1 text-white"
           >
             <span className="text-xs">جستجو</span>
             <SearchIcon className="text-white" />
@@ -84,7 +84,7 @@ export default function PLPMobileHeader({}: Props) {
             </div>
 
             <input
-              className="w-full mx-1 text-right outline-none"
+              className="mx-1 w-full text-right outline-none"
               placeholder="دنبال چی میگردی؟"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}

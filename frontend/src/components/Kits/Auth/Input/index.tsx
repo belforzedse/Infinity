@@ -1,5 +1,6 @@
 import { InputHTMLAttributes, ReactNode } from "react";
-import clsx from "clsx";
+import { Input } from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 import Text from "../../Text";
 
 interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -24,15 +25,15 @@ export default function AuthInput({
   return (
     <div className={parentClassNames}>
       <div className="relative">
-        <input
-          className={clsx(
-            "w-full h-12 bg-background-form border border-slate-200 rounded-lg",
+        <Input
+          className={cn(
+            "h-12 bg-background-form",
             "text-base text-foreground-muted",
             rightElement ? "pr-[4.5rem]" : "pr-4",
             leftElement ? "pl-12" : "pl-4",
             "focus:outline-none focus:ring-2 focus:ring-pink-400",
             error && "border-red-500",
-            className
+            className,
           )}
           onChange={(e) => onEdit?.(e.target.value)}
           value={value}
@@ -49,7 +50,7 @@ export default function AuthInput({
           </div>
         )}
       </div>
-      {error && <Text className="text-red-500 mt-1">{error}</Text>}
+      {error && <Text className="mt-1 text-red-500">{error}</Text>}
     </div>
   );
 }

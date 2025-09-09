@@ -9,7 +9,7 @@ export interface CategoryData {
 }
 
 export const createCategory = async (
-  category: CategoryData
+  category: CategoryData,
 ): Promise<ApiResponse<any>> => {
   const endpoint = ENDPOINTS.PRODUCT.CATEGORY;
 
@@ -23,7 +23,7 @@ export const createCategory = async (
         headers: {
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {

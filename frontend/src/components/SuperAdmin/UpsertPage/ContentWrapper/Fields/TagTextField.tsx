@@ -14,7 +14,7 @@ type Props = {
 export default function TagTextField({ value, onChange, options }: Props) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2 p-2 border border-neutral-200 rounded-lg">
+      <div className="flex flex-wrap gap-2 rounded-lg border border-neutral-200 p-2">
         {value &&
           Array.isArray(value) &&
           value.map((tag, index) => {
@@ -22,7 +22,7 @@ export default function TagTextField({ value, onChange, options }: Props) {
             return (
               <div
                 key={index}
-                className="flex items-center gap-1 px-2 py-1 bg-slate-50 rounded-md border text-slate-500 border-slate-200"
+                className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-slate-500"
               >
                 <span className="text-sm">{option?.label || tag}</span>
                 <button
@@ -41,7 +41,7 @@ export default function TagTextField({ value, onChange, options }: Props) {
           })}
         <input
           type="text"
-          className="flex-grow min-w-[100px] outline-none border-none"
+          className="min-w-[100px] flex-grow border-none outline-none"
           onKeyDown={(e) => {
             if (e.key === "Enter" && e.currentTarget.value.trim()) {
               e.preventDefault();
@@ -49,7 +49,7 @@ export default function TagTextField({ value, onChange, options }: Props) {
               const option = options?.find(
                 (opt) =>
                   opt.value === inputValue ||
-                  opt.label.toLowerCase() === inputValue.toLowerCase()
+                  opt.label.toLowerCase() === inputValue.toLowerCase(),
               );
               const tagValue = option?.value || inputValue;
 

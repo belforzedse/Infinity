@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { InputHTMLAttributes } from "react";
-import clsx from "clsx";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import Text from "../../../Text";
 import EyeIcon from "../../Icons/EyeIcon";
 import EyeOffIcon from "../../Icons/EyeOffIcon";
@@ -24,29 +26,31 @@ export default function AuthPasswordInput({
   return (
     <div className="space-y-2">
       <div className="relative" dir="ltr">
-        <input
+        <Input
           type={showPassword ? "text" : "password"}
-          className={clsx(
-            "w-full h-12 bg-background-form border border-slate-200 rounded-lg",
-            "text-base  text-foreground-muted px-12 text-left",
+          className={cn(
+            "h-12 bg-background-form",
+            "text-base px-12 text-left text-foreground-muted",
             "focus:outline-none focus:ring-2 focus:ring-pink-400",
             error && "border-red-500",
-            className
+            className,
           )}
           {...props}
         />
-        <LockIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-        <button
+        <LockIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-4 top-1/2 -translate-y-1/2"
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-0 p-0"
         >
           {showPassword ? (
-            <EyeOffIcon className="w-5 h-5 text-slate-400" />
+            <EyeOffIcon className="h-5 w-5 text-slate-400" />
           ) : (
-            <EyeIcon className="w-5 h-5 text-slate-400" />
+            <EyeIcon className="h-5 w-5 text-slate-400" />
           )}
-        </button>
+        </Button>
       </div>
       {showStrength && typeof value === "string" && (
         <PasswordStrength password={value} />

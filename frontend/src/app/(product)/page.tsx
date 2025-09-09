@@ -3,7 +3,10 @@ import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
+import Image from "next/image";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
+import { categories } from "@/constants/categories";
 
 interface ProductCardProps {
   id: number;
@@ -17,11 +20,12 @@ interface ProductCardProps {
 }
 
 async function getDiscountedProducts(): Promise<ProductCardProps[]> {
-  const response = await fetch(
+  try {
+    const response = await fetchWithTimeout(
     `${API_BASE_URL}/product-variations?filters[IsPublished]=true&filters[Price][$gte]=1&populate[0]=general_discounts&populate[1]=product&filters[general_discounts][$null]=false&populate[2]=product.CoverImage&populate[3]=product.product_main_category&filters[product][Status]=Active`,
-    { cache: "no-store" }
-  );
-  const data = await response.json();
+      { cache: "no-store", timeoutMs: 15000 },
+    );
+    const data = await response.json();
 
   const uniqueProducts = data.data
     .filter((item: any) => {
@@ -61,17 +65,22 @@ async function getDiscountedProducts(): Promise<ProductCardProps[]> {
       return acc;
     }, {});
 
-  return Object.values(uniqueProducts);
+    return Object.values(uniqueProducts);
+  } catch (_err) {
+    // Fail gracefully on slow/unstable mobile networks
+    return [];
+  }
 }
 
 async function getNewProducts(): Promise<ProductCardProps[]> {
-  const response = await fetch(
+  try {
+    const response = await fetchWithTimeout(
     `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&sort[0]=createdAt:desc&pagination[limit]=20`,
-    { cache: "no-store" }
-  );
-  const data = await response.json();
+      { cache: "no-store", timeoutMs: 15000 },
+    );
+    const data = await response.json();
 
-  return data.data
+    return data.data
     .filter((item: any) => {
       return (
         item.attributes.CoverImage?.data?.attributes?.url &&
@@ -86,7 +95,7 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
             variation.attributes.IsPublished &&
             variation.attributes.Price &&
             !isNaN(parseInt(variation.attributes.Price)) &&
-            parseInt(variation.attributes.Price) > 0
+            parseInt(variation.attributes.Price) > 0,
         );
 
       if (publishedVariations.length === 0) {
@@ -98,7 +107,7 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
           const cheapestPrice = parseInt(cheapest.attributes.Price);
           const currentPrice = parseInt(current.attributes.Price);
           return currentPrice < cheapestPrice ? current : cheapest;
-        }
+        },
       );
 
       const hasDiscount =
@@ -124,17 +133,21 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
         seenCount: 0,
       };
     })
-    .filter((item: any) => item !== null);
+      .filter((item: any) => item !== null);
+  } catch (_err) {
+    return [];
+  }
 }
 
 async function getFavoriteProducts(): Promise<ProductCardProps[]> {
-  const response = await fetch(
+  try {
+    const response = await fetchWithTimeout(
     `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&sort[0]=AverageRating:desc&pagination[limit]=20`,
-    { cache: "no-store" }
-  );
-  const data = await response.json();
+      { cache: "no-store", timeoutMs: 15000 },
+    );
+    const data = await response.json();
 
-  return data.data
+    return data.data
     .filter((item: any) => {
       return (
         item.attributes.AverageRating !== null &&
@@ -167,112 +180,79 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
         seenCount: item.attributes.RatingCount || 0,
       };
     });
+  } catch (_err) {
+    return [];
+  }
 }
 
-const categories = [
-  {
-    id: 1,
-    name: "مانتو",
-    image: "/images/categories/coat.png",
-    backgroundColor: "#FFF8E7",
-    slug: "coat-and-mantle",
-  },
-  {
-    id: 2,
-    name: "پلیور",
-    image: "/images/categories/blouse.png",
-    backgroundColor: "#F0FFED",
-    slug: "%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa",
-  },
-  {
-    id: 3,
-    name: "دامن",
-    image: "/images/categories/skirt.png",
-    backgroundColor: "#FFF0ED",
-    slug: "skirt",
-  },
-  {
-    id: 4,
-    name: "پیرهن",
-    image: "/images/categories/dress.png",
-    backgroundColor: "#EDF6FF",
-    slug: "shirt",
-  },
-  {
-    id: 5,
-    name: "شلوار",
-    image: "/images/categories/pants.png",
-    backgroundColor: "#F0FFF7",
-    slug: "pants",
-  },
-  {
-    id: 6,
-    name: "شال و روسری",
-    image: "/images/categories/scarf.png",
-    backgroundColor: "#FFF8E7",
-    slug: "shawls-and-scarves",
-  },
-  {
-    id: 7,
-    name: "هودی",
-    image: "/images/categories/hoodie.png",
-    backgroundColor: "#FFF8E7",
-    slug: "hoodie-and-dores",
-  },
-];
 
 export default async function Home() {
   const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
-    [getDiscountedProducts(), getNewProducts(), getFavoriteProducts()]
+    [getDiscountedProducts(), getNewProducts(), getFavoriteProducts()],
   );
 
   return (
-    <div className="mt-5 md:mt-8 px-4 md:px-8 lg:px-16 max-w-screen-xl mx-auto pb-8 md:pb-16">
+    <div className="mx-auto mt-5 max-w-screen-xl px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:px-16">
       {/* Hero section with responsive images */}
       <div className="hidden md:block">
-        <img
+        <Image
           src="/images/index-img1-desktop.png"
           alt="Hero Banner"
+          width={1920}
+          height={560}
           className="w-full rounded-lg object-cover"
+          loading="lazy"
         />
       </div>
       <div className="md:hidden">
-        <img
+        <Image
           src="/images/index-img1-mobile.png"
           alt="Hero Banner Mobile"
+          width={750}
+          height={520}
           className="w-full rounded-lg"
+          loading="eager"
         />
       </div>
 
       {/* Secondary banners section */}
-      <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-4">
+      <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
         <div className="md:w-1/2">
-        <Link href={`/plp?category=shirt`}>
-          <img
-            src="/images/index-img2-desktop.png"
-            alt="Banner"
-            className="w-full h-full rounded-lg object-cover"
-          />
+          <Link href={`/plp?category=shirt`}>
+            <Image
+              src="/images/index-img2-desktop.png"
+              alt="Banner"
+              width={1200}
+              height={600}
+              className="h-full w-full rounded-lg object-cover"
+            />
           </Link>
         </div>
 
         <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
           <div className="w-1/2 md:w-full">
-          <Link href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}>
-            <img
-              src="/images/index-img3-desktop.png"
-              alt="Banner"
-              className="w-full h-full rounded-lg object-cover"
-            /></Link>
+            <Link
+              href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}
+            >
+              <Image
+                src="/images/index-img3-desktop.png"
+                alt="Banner"
+                width={600}
+                height={600}
+                className="h-full w-full rounded-lg object-cover"
+              />
+            </Link>
           </div>
 
           <div className="w-1/2 md:w-full">
-          <Link href={`/plp?category=skirt`}>
-            <img
-              src="/images/index-img4-desktop.png"
-              alt="Banner"
-              className="w-full h-full rounded-lg object-cover"
-            />
+            <Link href={`/plp?category=skirt`}>
+              <Image
+                src="/images/index-img4-desktop.png"
+                alt="Banner"
+                width={600}
+                height={600}
+                className="h-full w-full rounded-lg object-cover"
+              />
             </Link>
           </div>
         </div>
@@ -293,12 +273,12 @@ export default async function Home() {
 
       {/* Categories section */}
       <div className="mt-8 md:mt-12">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-foreground-primary text-2xl md:text-3xl">
+        <div className="mb-4 flex items-center justify-between">
+          <span className="text-2xl text-foreground-primary md:text-3xl">
             دسته‌بندی‌ها
           </span>
         </div>
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-7">
           {categories.map((category, index) => (
             <Link
               key={category.id}
@@ -307,23 +287,25 @@ export default async function Home() {
                 index === categories.length - 1 && categories.length % 3 === 1
                   ? "col-span-3 mx-auto md:col-span-1 md:mx-0"
                   : index >= categories.length - (categories.length % 3) &&
-                    categories.length % 3 !== 0 &&
-                    categories.length % 3 !== 1
-                  ? "mx-auto md:mx-0"
-                  : ""
+                      categories.length % 3 !== 0 &&
+                      categories.length % 3 !== 1
+                    ? "mx-auto md:mx-0"
+                    : ""
               }`}
             >
               <div
-                className="rounded-full p-4 flex items-center justify-center w-24 h-24 md:w-28 md:h-28 transition-transform hover:scale-105"
+                className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
                 style={{ backgroundColor: category.backgroundColor }}
               >
-                <img
+                <Image
                   src={category.image}
                   alt={category.name}
-                  className="h-16 md:h-20"
+                  width={80}
+                  height={80}
+                  className="h-16 w-auto md:h-20"
                 />
               </div>
-              <span className="mt-2 text-sm md:text-base">{category.name}</span>
+              <span className="text-sm mt-2 md:text-base">{category.name}</span>
             </Link>
           ))}
         </div>
@@ -339,7 +321,7 @@ export default async function Home() {
       </div>
 
       {/* Favorite products section */}
-      <div className="mt-8 md:mt-12 mb-8 md:mb-12">
+      <div className="mb-8 mt-8 md:mb-12 md:mt-12">
         {favoriteProducts.length > 0 && (
           <>
             <OffersListHomePage

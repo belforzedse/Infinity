@@ -18,7 +18,7 @@ export default function MultilineTextField({
       disabled={readOnly}
       readOnly={readOnly}
       rows={rows}
-      className={`w-full border border-neutral-200 rounded-lg py-2 px-5 text-sm ${
+      className={`text-sm w-full rounded-lg border border-neutral-200 px-5 py-2 ${
         readOnly ? "bg-slate-100 text-slate-500" : ""
       }`}
       value={value}
