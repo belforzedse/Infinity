@@ -1,7 +1,7 @@
 import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
 // removed unused import: useRouter from "next/navigation"
-import toast from "react-hot-toast";
+import notify from "@/utils/notify";
 
 interface UseAddToCartProps {
   productId: string;
@@ -125,9 +125,9 @@ export default function useAddToCart({
 
       // Check for the specific "Not enough stock" error
       if (error.message && error.message.includes("Not enough stock")) {
-        toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+        notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
       } else {
-        toast.error("افزودن کالا به سبد خرید با خطا مواجه شد");
+        notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
       }
     } finally {
       setIsAdding(false);
