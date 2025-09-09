@@ -1,28 +1,42 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { setNavigationInProgress } from "@/atoms/loading";
-// removed unused import: useAtomValue from "jotai"
 
 export default function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lastUrlRef = useRef<string>("");
+  const failSafeRef = useRef<number | null>(null);
+
+  const clearFailSafe = useCallback(() => {
+    if (failSafeRef.current) {
+      try {
+        clearTimeout(failSafeRef.current);
+      } catch {}
+      failSafeRef.current = null;
+    }
+  }, []);
+
+  const startFailSafe = useCallback(() => {
+    clearFailSafe();
+    failSafeRef.current = window.setTimeout(
+      () => setNavigationInProgress(false),
+      2000
+    );
+  }, [clearFailSafe]);
 
   // Start on internal link clicks (event delegation)
   useEffect(() => {
-    let failSafeId: number | undefined;
-    const restore: { pushState?: History["pushState"]; replaceState?: History["replaceState"]; } = {};
-
-    function clearFailSafe() {
-      if (failSafeId) {
-        try {
-          clearTimeout(failSafeId);
-        } catch {}
-        failSafeId = undefined;
-      }
-    }
+    const restore: {
+      pushState?: History["pushState"];
+      replaceState?: History["replaceState"];
+      router?: any;
+      routerPush?: (...args: any[]) => any;
+      routerReplace?: (...args: any[]) => any;
+      navigationListener?: (e: any) => void;
+    } = {};
 
     function onClick(e: MouseEvent) {
       // Ignore modified clicks
@@ -49,27 +63,50 @@ export default function NavigationProgress() {
         const currentPathAndQuery = current.pathname + (current.search || "");
         if (nextPathAndQuery === currentPathAndQuery) return;
 
-        // Same-origin navigation likely via Next Link
+        // Start immediately so overlay appears before router acts
         setNavigationInProgress(true);
-        // Failsafe: if URL doesn't change (edge cases), clear after short delay
-        clearFailSafe();
-        failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
+        startFailSafe();
+
+        // Revert if another handler cancels the navigation
+        queueMicrotask(() => {
+          if (e.defaultPrevented) {
+            setNavigationInProgress(false);
+            clearFailSafe();
+          }
+        });
       } catch {
         // ignore
       }
     }
+
     function onPopState() {
       setNavigationInProgress(true);
-      // Failsafe for popstate as well
-      if (typeof window !== "undefined") {
-        window.setTimeout(() => setNavigationInProgress(false), 2000);
-      }
+      startFailSafe();
     }
-    // Use bubble phase so e.defaultPrevented reflects user handlers
-    window.addEventListener("click", onClick);
+
+    // Capture phase so we run before Next's internal link handler
+    window.addEventListener("click", onClick, true);
     window.addEventListener("popstate", onPopState);
 
-    // Also capture programmatic navigations (router.push/replace)
+    // Start when navigation API is used (router.push, etc.)
+    if ("navigation" in window) {
+      const onNavigate = (e: any) => {
+        try {
+          const current = new URL(window.location.href);
+          const url = new URL(e.destination?.url ?? "", current.href);
+          if (url.origin !== current.origin) return;
+          const next = url.pathname + (url.search || "");
+          const cur = current.pathname + (current.search || "");
+          if (next === cur) return;
+          setNavigationInProgress(true);
+          startFailSafe();
+        } catch {}
+      };
+      (window as any).navigation.addEventListener("navigate", onNavigate);
+      restore.navigationListener = onNavigate;
+    }
+
+    // Also capture programmatic navigations (history/router.push)
     try {
       restore.pushState = history.pushState.bind(history);
       restore.replaceState = history.replaceState.bind(history);
@@ -78,8 +115,7 @@ export default function NavigationProgress() {
       ) {
         // Only show loader for push navigations
         setNavigationInProgress(true);
-        clearFailSafe();
-        failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
+        startFailSafe();
         return restore.pushState!(...args);
       } as any;
       history.replaceState = function (
@@ -88,6 +124,26 @@ export default function NavigationProgress() {
         // Do not show loader for replaceState to avoid flicker from query updates (nuqs)
         return restore.replaceState!(...args);
       } as any;
+
+      const nextRouter: any = (window as any).next?.router;
+      if (nextRouter?.push) {
+        restore.router = nextRouter;
+        restore.routerPush = nextRouter.push.bind(nextRouter);
+        nextRouter.push = (...args: any[]) => {
+          setNavigationInProgress(true);
+          startFailSafe();
+          return restore.routerPush!(...args);
+        };
+      }
+      if (nextRouter?.replace) {
+        restore.router = nextRouter;
+        restore.routerReplace = nextRouter.replace.bind(nextRouter);
+        nextRouter.replace = (...args: any[]) => {
+          setNavigationInProgress(true);
+          startFailSafe();
+          return restore.routerReplace!(...args);
+        };
+      }
     } catch {}
 
     return () => {
@@ -97,8 +153,17 @@ export default function NavigationProgress() {
       // restore history methods
       if (restore.pushState) history.pushState = restore.pushState;
       if (restore.replaceState) history.replaceState = restore.replaceState;
+      if (restore.navigationListener && "navigation" in window)
+        (window as any).navigation.removeEventListener(
+          "navigate",
+          restore.navigationListener
+        );
+      if (restore.router && restore.routerPush)
+        restore.router.push = restore.routerPush;
+      if (restore.router && restore.routerReplace)
+        restore.router.replace = restore.routerReplace;
     };
-  }, []);
+  }, [clearFailSafe, startFailSafe]);
 
   // Stop immediately after URL changes
   useEffect(() => {
@@ -107,7 +172,8 @@ export default function NavigationProgress() {
     lastUrlRef.current = currentUrl;
 
     setNavigationInProgress(false);
-  }, [pathname, searchParams]);
+    clearFailSafe();
+  }, [pathname, searchParams, clearFailSafe]);
 
   return null;
 }
