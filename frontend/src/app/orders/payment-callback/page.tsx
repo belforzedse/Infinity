@@ -67,7 +67,7 @@ function PaymentCallbackContent() {
           refIdToVerify,
         );
 
-        logger.info("Payment verification result", verificationResult);
+        logger.info("Payment verification result", { verificationResult });
 
         // Store order information in atoms
         setOrderId(verificationResult.orderId);
@@ -83,7 +83,7 @@ function PaymentCallbackContent() {
             verificationResult.orderId,
           );
 
-          logger.info("Payment status check", paymentStatus);
+          logger.info("Payment status check", { paymentStatus });
 
           // Set step based on payment status from direct API check
           if (paymentStatus.isPaid) {

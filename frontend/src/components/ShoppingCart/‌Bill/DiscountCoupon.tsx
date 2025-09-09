@@ -3,7 +3,7 @@ import Input from "@/components/Kits/Form/Input";
 import GiftIcon from "@/components/ShoppingCart/Icons/GiftIcon";
 import React from "react";
 
-type Props = {};
+type Props = object;
 
 function ShoppingCartBillDiscountCoupon({}: Props) {
   return (

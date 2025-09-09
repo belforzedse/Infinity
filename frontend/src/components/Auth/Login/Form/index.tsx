@@ -27,7 +27,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     if (!phoneNumber) {
       router.push("/auth");
     }
-  }, [phoneNumber]);
+  }, [phoneNumber, router]);
 
   const [formData, setFormData] = useState({
     phoneNumber,
@@ -102,3 +102,4 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     </form>
   );
 }
+

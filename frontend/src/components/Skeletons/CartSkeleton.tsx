@@ -6,7 +6,7 @@ export default function CartSkeleton() {
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 rounded-lg bg-white p-4 shadow animate-pulse"
+          className="flex animate-pulse items-center gap-4 rounded-lg bg-white p-4 shadow"
         >
           <div className="h-16 w-16 rounded bg-gray-200" />
           <div className="flex-1 space-y-2">

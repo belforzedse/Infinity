@@ -120,7 +120,7 @@ export default function TermsField({
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    itemIndex: number,
+    _itemIndex: number,
   ) => {
     // Only handle arrow keys and escape for navigation
     if (e.key === "ArrowDown") {

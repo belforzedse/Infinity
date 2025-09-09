@@ -8,6 +8,7 @@ import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
 import SettingsIcon from "../Icons/SettingsIcon";
 import { useRouter, usePathname } from "next/navigation";
+import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -21,6 +22,21 @@ export default function SuperAdminLayoutSidebar({
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const router = useRouter();
   const pathname = usePathname();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleLogout = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      }
+    } finally {
+      router.replace("/auth");
+    }
+  };
+
+  const openConfirm = () => setShowConfirm(true);
+  const closeConfirm = () => setShowConfirm(false);
 
   // Auto-open the section that matches current path
   useEffect(() => {
@@ -104,7 +120,7 @@ export default function SuperAdminLayoutSidebar({
                     role="button"
                     tabIndex={0}
                     className={clsx(
-                      "flex cursor-pointer items-center justify-between px-2 py-1.5 rounded-lg",
+                      "flex cursor-pointer items-center justify-between rounded-lg px-2 py-1.5",
                       "transition-colors duration-150 hover:bg-neutral-50",
                       hasChildren && "mb-2",
                     )}
@@ -146,7 +162,7 @@ export default function SuperAdminLayoutSidebar({
                         role="button"
                         tabIndex={0}
                         className={clsx(
-                          "transition-transform duration-200 p-1 rounded-md",
+                          "rounded-md p-1 transition-transform duration-200",
                           "transition-colors duration-150 hover:bg-neutral-50",
                           isOpenMenu && "rotate-180",
                         )}
@@ -179,17 +195,19 @@ export default function SuperAdminLayoutSidebar({
                       {item.children.map((child, index) => {
                         const curr = pathname.replace(/\/$/, "");
                         const href = (child.href ?? "").replace(/\/$/, "");
-                        const active = !!href && (curr === href || curr.startsWith(href + "/"));
+                        const active =
+                          !!href &&
+                          (curr === href || curr.startsWith(href + "/"));
                         return (
                           <Fragment key={child.id}>
                             <Link
                               href={child.href}
                               onClick={(e) => e.stopPropagation()}
                               className={clsx(
-                                "block px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
                                 "transition-colors duration-150",
                                 active
-                                  ? "bg-neutral-100 text-neutral-900 font-medium"
+                                  ? "bg-neutral-100 font-medium text-neutral-900"
                                   : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
                               )}
                             >
@@ -225,8 +243,9 @@ export default function SuperAdminLayoutSidebar({
           </div>
 
           <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <Link
-              href={"/super-admin/logout"}
+            <button
+              type="button"
+              onClick={openConfirm}
               className="flex items-center gap-2"
             >
               <div className="flex items-center gap-2">
@@ -235,7 +254,16 @@ export default function SuperAdminLayoutSidebar({
                   خروج
                 </span>
               </div>
-            </Link>
+            </button>
+            <ConfirmDialog
+              isOpen={showConfirm}
+              title="خروج از حساب کاربری"
+              description="آیا از خروج از حساب کاربری خود مطمئن هستید؟"
+              confirmText="بله، خارج شو"
+              cancelText="انصراف"
+              onConfirm={handleLogout}
+              onCancel={closeConfirm}
+            />
           </div>
         </div>
       </div>

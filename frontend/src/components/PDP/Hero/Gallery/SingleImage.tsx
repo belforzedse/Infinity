@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import ChevronDownIcon from "../../Icons/ChevronDownIcon";
 import NavigationButtons from "../../NavigationButtons";
 
@@ -29,6 +30,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
             src={src}
             alt={alt || ""}
             fill
+            loader={imageLoader}
           />
         )}
 

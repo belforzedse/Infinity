@@ -13,6 +13,7 @@ export default function NavigationProgress() {
   // Start on internal link clicks (event delegation)
   useEffect(() => {
     let failSafeId: number | undefined;
+    const restore: { pushState?: History["pushState"]; replaceState?: History["replaceState"]; } = {};
 
     function clearFailSafe() {
       if (failSafeId) {
@@ -24,8 +25,6 @@ export default function NavigationProgress() {
     }
 
     function onClick(e: MouseEvent) {
-      // If another handler prevented default (e.g., opens a modal), skip
-      if (e.defaultPrevented) return;
       // Ignore modified clicks
       if (
         (e as any).metaKey ||
@@ -38,6 +37,8 @@ export default function NavigationProgress() {
       if (!el) return;
       const href = el.getAttribute("href");
       const target = el.getAttribute("target");
+      // Allow opting-out on specific links
+      if (el.getAttribute("data-nav-ignore") === "true") return;
       if (!href || href.startsWith("#") || target === "_blank") return;
       try {
         const current = new URL(window.location.href);
@@ -67,10 +68,35 @@ export default function NavigationProgress() {
     // Use bubble phase so e.defaultPrevented reflects user handlers
     window.addEventListener("click", onClick);
     window.addEventListener("popstate", onPopState);
+
+    // Also capture programmatic navigations (router.push/replace)
+    try {
+      restore.pushState = history.pushState.bind(history);
+      restore.replaceState = history.replaceState.bind(history);
+      history.pushState = function (
+        ...args: Parameters<History["pushState"]>
+      ) {
+        // Only show loader for push navigations
+        setNavigationInProgress(true);
+        clearFailSafe();
+        failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
+        return restore.pushState!(...args);
+      } as any;
+      history.replaceState = function (
+        ...args: Parameters<History["replaceState"]>
+      ) {
+        // Do not show loader for replaceState to avoid flicker from query updates (nuqs)
+        return restore.replaceState!(...args);
+      } as any;
+    } catch {}
+
     return () => {
       window.removeEventListener("click", onClick);
       window.removeEventListener("popstate", onPopState);
       clearFailSafe();
+      // restore history methods
+      if (restore.pushState) history.pushState = restore.pushState;
+      if (restore.replaceState) history.replaceState = restore.replaceState;
     };
   }, []);
 

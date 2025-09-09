@@ -12,6 +12,7 @@ const CameraIcon: React.FC<CameraIconProps> = ({ className }) => {
       viewBox="0 0 25 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      className={className}
     >
       <path
         fillRule="evenodd"

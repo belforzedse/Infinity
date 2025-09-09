@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { SelectedImageDetailsSection } from "../../types";
 import CopyIcon from "@/components/Product/Icons/CopyIcon";
 
@@ -13,8 +13,6 @@ export default function DetailsSectionText({
   selectedImage,
   setSelectedImage,
 }: DetailsSectionTextProps) {
-  const [productName, setProductName] = useState("");
-  const [productUrl, setProductUrl] = useState("");
 
   const handleCopyUrl = () => {
     if (selectedImage?.url) {

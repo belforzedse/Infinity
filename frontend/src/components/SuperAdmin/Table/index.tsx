@@ -10,7 +10,7 @@ import {
   Row,
 } from "@tanstack/react-table";
 // removed unused import: getPaginationRowModel from "@tanstack/react-table"
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/tailwind";
 import { twMerge } from "tailwind-merge";
 import SuperAdminTableSelect from "./Select";
@@ -41,17 +41,7 @@ interface TableProps<TData, TValue> {
   onItemDrag?: (row: Row<TData>) => void;
 }
 
-type Response<TData> = {
-  data: TData[];
-  meta: {
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  };
-};
+// Strapi-like response meta is returned by our ApiClient as ApiResponse<T>
 
 type FilterItem = {
   field: string;
@@ -95,75 +85,80 @@ export function SuperAdminTable<TData, TValue>({
   const [refresh, setRefresh] = useAtom(refreshTable);
 
   const isFetchingRef = useRef(false);
-  const lastFilter = useRef(filter);
+  const fetchSeqRef = useRef(0);
 
-  useEffect(() => {
-    if (url && (!isLoading || refresh)) {
+  const requestUrl = useMemo(() => {
+    if (!url) return null;
+    let apiUrl = url;
+    const hasQueryParams = url.includes("?");
+    let separator = hasQueryParams ? "&" : "?";
+
+    apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
+    separator = "&";
+
+    if (Array.isArray(filter) && filter.length > 0) {
+      const filters = filter as unknown as FilterItem[];
+      const filterParams = filters
+        .map((item) => {
+          const { field, operator, value } = item || ({} as FilterItem);
+          if (!field || !operator || value === undefined || value === null)
+            return "";
+          return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
+        })
+        .filter(Boolean)
+        .join("&");
+      if (filterParams) apiUrl = `${apiUrl}${separator}${filterParams}`;
+    }
+
+    return apiUrl;
+  }, [url, page, pageSize, filter]);
+
+  const lastUrlRef = useRef<string | null>(null);
+
+  const runFetch = useCallback(
+    async (apiUrl: string, { force = false }: { force?: boolean } = {}) => {
+      // Avoid duplicate fetch for identical URL unless forced
+      if (!force && lastUrlRef.current === apiUrl) return;
+      lastUrlRef.current = apiUrl;
       if (isFetchingRef.current) return;
 
+      const seq = ++fetchSeqRef.current;
       isFetchingRef.current = true;
-      setRefresh(false);
       setIsLoading(true);
-
-      // Build the query parameters for Strapi
-      let apiUrl = url;
-      const hasQueryParams = url.includes("?");
-      let separator = hasQueryParams ? "&" : "?";
-
-      // Add pagination parameters
-      apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
-
-      // Update separator for subsequent parameters
-      separator = "&";
-
-      // Add filters if they exist
-      if (Array.isArray(filter) && filter.length > 0) {
-        const filters = filter as unknown as FilterItem[];
-        const filterParams = filters
-          .map((item) => {
-            const { field, operator, value } = item || ({} as FilterItem);
-            if (!field || !operator || value === undefined || value === null)
-              return "";
-            return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
-          })
-          .filter((param) => param !== "")
-          .join("&");
-
-        if (filterParams) {
-          apiUrl = `${apiUrl}${separator}${filterParams}`;
-        }
-      }
-
-      apiClient
-        .get<Response<TData>>(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        })
-        .then((res: Response<TData>) => {
+      try {
+        const res = await apiClient.get<TData[]>(apiUrl, {
+          headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+        });
+        if (seq === fetchSeqRef.current) {
           setTableData(res.data);
           setTotalSize(res.meta?.pagination?.total ?? 0);
-          setIsLoading(false);
-          isFetchingRef.current = false;
-        })
-        .catch((error) => {
+        }
+      } catch (error) {
+        if ((error as any)?.name !== "AbortError") {
           console.error("Failed to fetch table data:", error);
+        }
+      } finally {
+        if (seq === fetchSeqRef.current) {
           setIsLoading(false);
           isFetchingRef.current = false;
-        });
-    }
-  }, [url, refresh, page, pageSize]);
+        }
+      }
+    },
+    [setTotalSize],
+  );
 
+  // Fetch on first mount and when the computed request URL changes
   useEffect(() => {
-    if (!refresh) {
-      if (isFetchingRef.current) return;
-      if (JSON.stringify(lastFilter.current) === JSON.stringify(filter)) return;
+    if (requestUrl) runFetch(requestUrl);
+  }, [requestUrl, runFetch]);
 
-      lastFilter.current = filter;
-
-      setRefresh(true);
+  // External refresh trigger (e.g. after mutations)
+  useEffect(() => {
+    if (refresh && requestUrl) {
+      runFetch(requestUrl, { force: true });
+      setRefresh(false);
     }
-  }, [url, refresh, filter]);
+  }, [refresh, requestUrl, runFetch, setRefresh]);
 
   const table = useReactTable({
     data: tableData || [],

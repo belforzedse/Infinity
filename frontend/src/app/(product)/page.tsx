@@ -66,7 +66,7 @@ async function getDiscountedProducts(): Promise<ProductCardProps[]> {
     }, {});
 
     return Object.values(uniqueProducts);
-  } catch (_err) {
+  } catch {
     // Fail gracefully on slow/unstable mobile networks
     return [];
   }
@@ -134,7 +134,7 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
       };
     })
       .filter((item: any) => item !== null);
-  } catch (_err) {
+  } catch {
     return [];
   }
 }
@@ -180,7 +180,7 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
         seenCount: item.attributes.RatingCount || 0,
       };
     });
-  } catch (_err) {
+  } catch {
     return [];
   }
 }

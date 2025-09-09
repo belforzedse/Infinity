@@ -1,5 +1,6 @@
 import React from "react";
-import Image from "next/image";
+import BlurImage from "@/components/ui/BlurImage";
+import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import GridIcon from "./Icons/GridIcon";
 import MoreIcon from "./Icons/MoreIcon";
@@ -41,11 +42,12 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
               ٪{discount}
             </div>
           )}
-          <Image
+          <BlurImage
             src={image}
             alt={title}
             fill
             className="rounded-xl object-cover"
+            loader={imageLoader}
           />
           <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-sm">
             <span className="text-xxs text-neutral-800">3+</span>

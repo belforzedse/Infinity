@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/utils/tailwind";
 
 const tabs = [
@@ -22,7 +23,7 @@ export default function ShippingTabs(props: { selectedTab: string }) {
   return (
     <div className="flex items-center gap-2">
       {tabs.map((tab) => (
-        <a
+        <Link
           href={tab.href}
           key={tab.id}
           className={cn(
@@ -32,7 +33,7 @@ export default function ShippingTabs(props: { selectedTab: string }) {
           )}
         >
           {tab.title}
-        </a>
+        </Link>
       ))}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 // import SizeGuide from "./Guide";
 import SizeTable from "./Table";
 import SizeGuideEditor from "./SizeGuideEditor";
@@ -20,11 +20,7 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
   const [editing, setEditing] = useState(false);
   const [helperId, setHelperId] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchSizeHelper();
-  }, [productId]);
-
-  const fetchSizeHelper = async () => {
+  const fetchSizeHelper = useCallback(async () => {
     try {
       const response = await getProductSizeHelper(productId);
       if (response.data && response.data.length > 0) {
@@ -56,7 +52,11 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchSizeHelper();
+  }, [fetchSizeHelper]);
 
   const setDefaultData = () => {
     setColumns([

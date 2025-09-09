@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import DiscountIcon from "../../Icons/DiscountIcon";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import GridIcon from "@/components/Product/Icons/GridIcon";
 import PLPButton from "@/components/Kits/PLP/Button";
 import LookBasketIcon from "../../Icons/LookBasketIcon";
@@ -93,7 +94,13 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
 
       <div className="flex items-center gap-3">
         <div className="h-[79px] w-[82px] overflow-hidden rounded-xl">
-          <Image width={82} height={79} src={imageSrc} alt="special offer" />
+          <Image
+            width={82}
+            height={79}
+            src={imageSrc}
+            alt="special offer"
+            loader={imageLoader}
+          />
         </div>
 
         <div className="flex flex-col gap-1">

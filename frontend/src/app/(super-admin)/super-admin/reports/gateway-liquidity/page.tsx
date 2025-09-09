@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { faNum } from "@/utils/faNum";
 import { getGatewayLiquidity } from "@/services/super-admin/reports/gatewayLiquidity";
 import { DatePicker } from "zaman";
@@ -23,9 +23,6 @@ const ResponsiveContainer = dynamic(
 const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
   ssr: false,
 });
-const Legend = dynamic(() => import("recharts").then((m) => m.Legend), {
-  ssr: false,
-});
 
 export default function GatewayLiquidityReportPage() {
   const [start, setStart] = useState<Date>(
@@ -36,13 +33,15 @@ export default function GatewayLiquidityReportPage() {
   const [loading, setLoading] = useState(false);
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
-  const toISO = (d: Date, fallback: Date) =>
-    isValid(d) ? d.toISOString() : fallback.toISOString();
+  const toISO = useCallback(
+    (d: Date, fallback: Date) => (isValid(d) ? d.toISOString() : fallback.toISOString()),
+    [],
+  );
   const startISO = useMemo(
     () => toISO(start, new Date(Date.now() - 30 * 86400000)),
-    [start],
+    [start, toISO],
   );
-  const endISO = useMemo(() => toISO(end, new Date()), [end]);
+  const endISO = useMemo(() => toISO(end, new Date()), [end, toISO]);
 
   const normalizeDateInput = (d: any, prev: Date): Date => {
     if (d instanceof Date) return d;
@@ -214,7 +213,7 @@ function GatewayLiquidityChart({
   }
 
   // Prepare data for Recharts
-  const chartData = rows.map((row, index) => ({
+  const chartData = rows.map((row) => ({
     name: row.gatewayTitle,
     value: Number(row.total),
     percentage: (

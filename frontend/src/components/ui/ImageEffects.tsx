@@ -7,12 +7,13 @@ export default function ImageEffects() {
     if (typeof window === "undefined") return;
 
     // Defer DOM mutations to after hydration to avoid className mismatches
-    const schedule =
-      (window as any).requestIdleCallback ||
-      ((cb: Function) => setTimeout(cb as any, 0));
-    const cancel =
-      (window as any).cancelIdleCallback ||
-      ((id: number) => clearTimeout(id));
+    const schedule: (cb: () => void) => number = (window as any)
+      .requestIdleCallback
+      ? (cb: () => void) => (window as any).requestIdleCallback(() => cb())
+      : (cb: () => void) => window.setTimeout(cb, 0);
+    const cancel: (id: number) => void = (window as any).cancelIdleCallback
+      ? (id: number) => (window as any).cancelIdleCallback(id)
+      : (id: number) => clearTimeout(id);
 
     const idleId = schedule(() => {
       const applyEffects = (img: HTMLImageElement) => {

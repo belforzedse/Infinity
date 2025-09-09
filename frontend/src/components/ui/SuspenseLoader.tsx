@@ -30,14 +30,14 @@ export default function SuspenseLoader({
         </div>
         <div className="text-sm text-neutral-600">{message}</div>
         <div className="h-1.5 w-52 overflow-hidden rounded-full bg-neutral-100">
-          <div className="h-full w-1/3 animate-[loaderSlide_1.2s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-pink-500 to-purple-500" />
+          <div className="h-full w-1/3 animate-[loaderSlide_1.2s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-pink-500 to-rose-300" />
         </div>
       </div>
 
       <style jsx>{`
         @keyframes loaderSlide {
           0% {
-            transform: translateX(-150%);
+            transform: translateX(-200%);
           }
           50% {
             transform: translateX(50%);

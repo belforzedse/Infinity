@@ -7,6 +7,7 @@ import { priceFormatter } from "@/utils/price";
 import { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 
 export type Cart = {
   id: string;
@@ -140,6 +141,7 @@ export const columns: ColumnDef<Cart>[] = [
               width={48}
               height={48}
               className="h-12 w-12 overflow-hidden rounded-lg object-cover"
+              loader={imageLoader}
             />
           ))}
           {items.length > 5 && (

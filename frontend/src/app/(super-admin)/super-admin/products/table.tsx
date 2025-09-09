@@ -1,5 +1,4 @@
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
-import EyeIcon from "@/components/SuperAdmin/Layout/Icons/EyeIcon";
 import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
@@ -9,6 +8,7 @@ import { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 
 export type Product = {
   id: string;
@@ -73,7 +73,9 @@ export const columns: ColumnDef<Product>[] = [
             alt={row.original?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
             height={48}
+            sizes="48px"
             className="h-12 w-12 overflow-hidden rounded-xl object-cover"
+            loader={imageLoader}
           />
 
           <div className="flex flex-col gap-2">
@@ -184,7 +186,9 @@ export const MobileTable = ({ data }: Props) => {
             alt={row?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
             height={48}
+            sizes="48px"
             className="h-12 w-12 rounded-lg object-cover"
+            loader={imageLoader}
           />
 
           <div className="flex flex-1 flex-col gap-2">

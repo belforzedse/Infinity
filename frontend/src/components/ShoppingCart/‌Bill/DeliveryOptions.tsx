@@ -11,14 +11,12 @@ import { FormData } from "./index";
 
 interface Props {
   shippingMethods: ShippingMethod[];
-  selectedShipping: ShippingMethod | null;
   setValue: UseFormSetValue<FormData>;
   control: Control<FormData>;
 }
 
 const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
   shippingMethods,
-  selectedShipping,
   control,
 }) => {
   // Watch the selected address to get province and city info

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import { useRef, useEffect, useState } from "react";
 
 type Props = {
@@ -123,6 +124,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
                 src={asset.thumbnail}
                 alt={asset.alt}
                 sizes="(max-width: 768px) 84px, 139px"
+                loader={imageLoader}
               />
             </div>
 
