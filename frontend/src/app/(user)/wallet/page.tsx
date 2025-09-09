@@ -6,15 +6,15 @@ import IncreaseBalance from "@/components/User/Wallet/IncreaseBalance";
 import { useState } from "react";
 import TransactionsList from "@/components/User/Wallet/TransactionsList";
 import TransactionsIcon from "@/components/User/Icons/TransactionsIcon";
+import UserContainer from "@/components/layout/UserContainer";
 
 export default function WalletPage() {
   const [isTransactionsHistoryOpen, setIsTransactionsHistoryOpen] =
     useState(false);
 
   return (
-    // TODO: change contaianer to handle padding and delete padding from main
-    <div
-      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
+    <UserContainer
+      className="flex min-h-[60vh] gap-10 bg-white"
       dir="rtl"
     >
       <UserSidebar />
@@ -55,6 +55,6 @@ export default function WalletPage() {
           )}
         </div>
       </main>
-    </div>
+    </UserContainer>
   );
 }
