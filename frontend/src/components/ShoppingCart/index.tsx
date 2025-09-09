@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import EmptyShoppingCart from "./Empty";
 import ShoppingCartSuccessOrderSubmit from "./SuccessOrderSubmit";
 import { submitOrderStepAtom } from "@/atoms/Order";
@@ -20,35 +21,77 @@ function ShoppingCart() {
 
   if (cartItems.length === 0) return <EmptyShoppingCart />;
 
-  if (submitOrderStep === SubmitOrderStep.Success)
-    return <ShoppingCartSuccessOrderSubmit />;
-
-  if (submitOrderStep === SubmitOrderStep.Bill) return <ShoppingCartBillForm />;
+  const isRTL =
+    typeof document !== "undefined"
+      ? document.documentElement.dir === "rtl"
+      : true;
+  const direction = isRTL ? 1 : -1;
+  const variants = {
+    initial: { opacity: 0, x: 50 * direction },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 * direction },
+  };
+  const transition = { duration: 0.3, ease: "easeInOut" };
 
   return (
     <div className="flex flex-col items-end gap-6 pb-20">
       <span className="text-3xl w-full text-neutral-800">سبد خرید</span>
 
-      {submitOrderStep === SubmitOrderStep.Table && (
-        <>
-          <ShoppingCartDesktopTable
-            cartItems={cartItems}
-            className="hidden lg:block"
-          />
-
-          <ShoppingCartMobileTable
-            cartItems={cartItems}
-            className="lg:hidden"
-          />
-
-          <button
-            onClick={() => setSubmitOrderStep(SubmitOrderStep.Bill)}
-            className="text-sm w-fit rounded-lg bg-pink-500 px-6 py-2 text-white"
+      <AnimatePresence mode="wait">
+        {submitOrderStep === SubmitOrderStep.Table && (
+          <motion.div
+            key="table"
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={transition}
           >
-            ادامه فرآیند خرید و تسویه حساب
-          </button>
-        </>
-      )}
+            <ShoppingCartDesktopTable
+              cartItems={cartItems}
+              className="hidden lg:block"
+            />
+
+            <ShoppingCartMobileTable
+              cartItems={cartItems}
+              className="lg:hidden"
+            />
+
+            <button
+              onClick={() => setSubmitOrderStep(SubmitOrderStep.Bill)}
+              className="text-sm w-fit rounded-lg bg-pink-500 px-6 py-2 text-white"
+            >
+              ادامه فرآیند خرید و تسویه حساب
+            </button>
+          </motion.div>
+        )}
+
+        {submitOrderStep === SubmitOrderStep.Bill && (
+          <motion.div
+            key="bill"
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={transition}
+          >
+            <ShoppingCartBillForm />
+          </motion.div>
+        )}
+
+        {submitOrderStep === SubmitOrderStep.Success && (
+          <motion.div
+            key="success"
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={transition}
+          >
+            <ShoppingCartSuccessOrderSubmit />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
