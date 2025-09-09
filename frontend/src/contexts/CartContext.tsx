@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
-import toast from "react-hot-toast";
+import notify from "@/utils/notify";
 
 // API base URL
 // const API_BASE_URL = "https://api.infinity.rgbgroup.ir/api";
@@ -216,9 +216,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
-          toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+          notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
-          toast.error("افزودن کالا به سبد خرید با خطا مواجه شد");
+          notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
         }
       } finally {
         setIsLoading(false);
@@ -299,9 +299,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
-          toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+          notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
-          toast.error("بروزرسانی سبد خرید با خطا مواجه شد");
+          notify.error("بروزرسانی سبد خرید با خطا مواجه شد");
         }
       } finally {
         setIsLoading(false);
