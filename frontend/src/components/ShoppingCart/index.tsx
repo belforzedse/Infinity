@@ -31,7 +31,7 @@ function ShoppingCart() {
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -50 * direction },
   };
-  const transition = { duration: 0.3, ease: "easeInOut" };
+  const transition = { duration: 0.3, ease: "easeInOut" } as const;
 
   return (
     <div className="flex flex-col items-end gap-6 pb-20">

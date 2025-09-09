@@ -18,6 +18,8 @@ export default function PLPListContentHeader() {
               alt="heart"
               width={20}
               height={20}
+              loading="lazy"
+              sizes="20px"
             />
           }
         />
@@ -31,6 +33,8 @@ export default function PLPListContentHeader() {
               alt="100"
               width={20}
               height={25}
+              loading="lazy"
+              sizes="20px"
             />
           }
         />
@@ -44,6 +48,8 @@ export default function PLPListContentHeader() {
               alt="fire"
               width={20}
               height={20}
+              loading="lazy"
+              sizes="20px"
             />
           }
         />

@@ -22,6 +22,7 @@ export default function CategoriesPage() {
                 fill
                 className="object-contain p-4"
                 sizes="96px"
+                loading="lazy"
               />
             </div>
             <span className="text-sm">{category.name}</span>
