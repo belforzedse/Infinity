@@ -6,9 +6,6 @@ import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import notify from "@/utils/notify";
 
-// API base URL
-// const API_BASE_URL = "https://api.infinity.rgbgroup.ir/api";
-
 export interface CartItem {
   id: string;
   slug: string;
