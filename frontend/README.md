@@ -144,6 +144,13 @@ npm run format
 - Postman collection: `docs/docs/cart-api-postman-collection.json`
 - Docs index: `docs/README.md`
 
+## Documentation
+
+Source files include inline comments and JSDoc blocks describing the purpose
+of helpers, components and utilities. Refer to the `src/lib` and
+`src/components` directories for examples of the comment style used
+throughout the project.
+
 ## Notes
 
 - Strict mode is disabled in dev to match existing behavior (`next.config.ts`)

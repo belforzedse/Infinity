@@ -2,6 +2,10 @@
 
 This guide documents the custom cart APIs for the Infinity Backend project. All APIs require authentication.
 
+For brevity, only the most common responses are shown. Fields may be omitted
+or extended by the backend without notice. Ensure your client code checks for
+required properties rather than relying on the exact structures below.
+
 ## Base URL
 
 ```

@@ -4,10 +4,16 @@ import Link from "next/link";
 import { RouteInfo } from "@/utils/routes";
 import { useState } from "react";
 
+/**
+ * Displays a searchable list of application routes. Primarily used for
+ * debugging and as a living documentation of available pages.
+ */
+
 interface RouteListProps {
   routes: RouteInfo[];
 }
 
+/** Grouping helper used to organize related routes in the UI. */
 type RouteCategory = {
   name: string;
   paths: string[];
@@ -32,14 +38,18 @@ const categories: RouteCategory[] = [
 ];
 
 export const RouteList = ({ routes }: RouteListProps) => {
+  // Local search state used to filter the rendered routes
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Returns all routes that fall under one of the provided category path
+  // prefixes. Used to render grouped sections when no search term is active.
   const getRoutesByCategory = (categoryPaths: string[]) => {
     return routes.filter((route) =>
       categoryPaths.some((path) => route.path.startsWith(path)),
     );
   };
 
+  // Routes matching the search term across name, path, or description fields
   const filteredRoutes = routes.filter(
     (route) =>
       route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,12 +70,14 @@ export const RouteList = ({ routes }: RouteListProps) => {
       </div>
 
       {searchTerm ? (
+        // When searching, flatten all results into a single grid
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredRoutes.map((route) => (
             <RouteCard key={route.path} route={route} />
           ))}
         </div>
       ) : (
+        // Otherwise, render routes grouped by their defined categories
         categories.map((category) => {
           const categoryRoutes = getRoutesByCategory(category.paths);
           if (categoryRoutes.length === 0) return null;
