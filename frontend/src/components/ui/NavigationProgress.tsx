@@ -1,28 +1,38 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { setNavigationInProgress } from "@/atoms/loading";
-// removed unused import: useAtomValue from "jotai"
 
 export default function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lastUrlRef = useRef<string>("");
+  const failSafeRef = useRef<number | null>(null);
+
+  const clearFailSafe = useCallback(() => {
+    if (failSafeRef.current) {
+      try {
+        clearTimeout(failSafeRef.current);
+      } catch {}
+      failSafeRef.current = null;
+    }
+  }, []);
+
+  const startFailSafe = useCallback(() => {
+    clearFailSafe();
+    failSafeRef.current = window.setTimeout(
+      () => setNavigationInProgress(false),
+      2000
+    );
+  }, [clearFailSafe]);
 
   // Start on internal link clicks (event delegation)
   useEffect(() => {
-    let failSafeId: number | undefined;
-    const restore: { pushState?: History["pushState"]; replaceState?: History["replaceState"]; } = {};
-
-    function clearFailSafe() {
-      if (failSafeId) {
-        try {
-          clearTimeout(failSafeId);
-        } catch {}
-        failSafeId = undefined;
-      }
-    }
+    const restore: {
+      pushState?: History["pushState"];
+      replaceState?: History["replaceState"];
+    } = {};
 
     function onClick(e: MouseEvent) {
       // Ignore modified clicks
@@ -51,20 +61,17 @@ export default function NavigationProgress() {
 
         // Same-origin navigation likely via Next Link
         setNavigationInProgress(true);
-        // Failsafe: if URL doesn't change (edge cases), clear after short delay
-        clearFailSafe();
-        failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
+        startFailSafe();
       } catch {
         // ignore
       }
     }
+
     function onPopState() {
       setNavigationInProgress(true);
-      // Failsafe for popstate as well
-      if (typeof window !== "undefined") {
-        window.setTimeout(() => setNavigationInProgress(false), 2000);
-      }
+      startFailSafe();
     }
+
     // Use bubble phase so e.defaultPrevented reflects user handlers
     window.addEventListener("click", onClick);
     window.addEventListener("popstate", onPopState);
@@ -78,8 +85,7 @@ export default function NavigationProgress() {
       ) {
         // Only show loader for push navigations
         setNavigationInProgress(true);
-        clearFailSafe();
-        failSafeId = window.setTimeout(() => setNavigationInProgress(false), 2000);
+        startFailSafe();
         return restore.pushState!(...args);
       } as any;
       history.replaceState = function (
@@ -98,7 +104,7 @@ export default function NavigationProgress() {
       if (restore.pushState) history.pushState = restore.pushState;
       if (restore.replaceState) history.replaceState = restore.replaceState;
     };
-  }, []);
+  }, [clearFailSafe, startFailSafe]);
 
   // Stop immediately after URL changes
   useEffect(() => {
@@ -107,7 +113,8 @@ export default function NavigationProgress() {
     lastUrlRef.current = currentUrl;
 
     setNavigationInProgress(false);
-  }, [pathname, searchParams]);
+    clearFailSafe();
+  }, [pathname, searchParams, clearFailSafe]);
 
   return null;
 }
