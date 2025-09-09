@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import classNames from "classnames";
 
 interface GalleryProps {
@@ -35,6 +36,7 @@ export default function Gallery({
             alt={image.title}
             fill
             className="object-cover"
+            loader={imageLoader}
           />
           <div
             className={classNames(

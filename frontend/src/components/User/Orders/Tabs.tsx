@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Tabs from "@/components/Kits/Tabs";
 import { PersianOrderStatus } from "@/constants/enums";
 import OrderRow from "./OrderRow";
 import OrderCard from "./OrderCard";
+import OrderCardSkeleton from "./OrderCardSkeleton";
+import OrderRowSkeleton from "./OrderRowSkeleton";
 import { ORDER_STATUS } from "../Constnats";
 import OrderService, { Order } from "@/services/order";
 // removed unused import: PaymentStatusButton from "./PaymentStatusButton"
@@ -13,30 +15,28 @@ import { faNum } from "@/utils/faNum";
 export default function OrdersTabs() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // removed unused error state
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const pageSize = 20; // Fetch more orders for tabs
 
-  useEffect(() => {
-    fetchOrders();
-  }, [page]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
 
       const response = await OrderService.getMyOrders(page, pageSize);
       setOrders(response.data);
       setPageCount(response.meta.pagination.pageCount);
     } catch (err: any) {
       console.error("Error fetching orders:", err);
-      setError(err.message || "خطا در دریافت سفارش‌ها");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   // Group orders by status
   const ordersByStatus = {
@@ -119,9 +119,24 @@ export default function OrdersTabs() {
     return (
       <div key={value} className="w-full">
         {loading && mappedOrders.length === 0 ? (
-          <div className="flex justify-center p-8">
-            <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
-          </div>
+          <>
+            {/* Mobile skeletons */}
+            <div className="lg:hidden">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))}
+            </div>
+            {/* Desktop skeleton rows */}
+            <div className="hidden overflow-x-auto lg:flex">
+              <table className="w-full">
+                <tbody className="divide-y divide-gray-100">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <OrderRowSkeleton key={i} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : mappedOrders.length === 0 ? (
           <div className="rounded-lg bg-gray-50 p-8 text-center">
             <p className="text-gray-600">سفارشی با این وضعیت یافت نشد.</p>

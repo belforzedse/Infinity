@@ -1,5 +1,6 @@
 "use client";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
+import { Button } from "@/components/ui/Button";
 import { useState } from "react";
 import SaveIcon from "../Icons/SaveIcon";
 
@@ -72,7 +73,7 @@ export default function PasswordChangeForm() {
           </div>
         </div>
         <div className="flex w-full justify-end">
-          <button
+          <Button
             type="submit"
             disabled={
               !formData.currentPassword ||
@@ -80,11 +81,12 @@ export default function PasswordChangeForm() {
               !formData.confirmPassword ||
               formData.newPassword !== formData.confirmPassword
             }
-            className="flex w-full justify-center gap-1 rounded-lg bg-[#EC4899] px-8 py-2 text-white transition-colors hover:bg-[#EC4899]/80 disabled:cursor-not-allowed disabled:bg-gray-300 lg:w-auto"
+            className="gap-1 bg-[#EC4899] px-8 text-white hover:bg-[#EC4899]/80 disabled:cursor-not-allowed disabled:bg-gray-300"
+            fullWidth
           >
             <SaveIcon className="h-5 w-5 lg:h-6 lg:w-6" />
             <span className="text-base lg:text-sm">ذخیره</span>
-          </button>
+          </Button>
         </div>
       </form>
     </div>

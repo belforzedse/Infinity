@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getLiquidity,
   LiquidityInterval,
@@ -44,13 +44,15 @@ export default function LiquidityReportPage() {
   const [loading, setLoading] = useState(false);
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
-  const toISO = (d: Date, fallback: Date) =>
-    isValid(d) ? d.toISOString() : fallback.toISOString();
+  const toISO = useCallback(
+    (d: Date, fallback: Date) => (isValid(d) ? d.toISOString() : fallback.toISOString()),
+    [],
+  );
   const startISO = useMemo(
     () => toISO(start, new Date(Date.now() - 30 * 86400000)),
-    [start],
+    [start, toISO],
   );
-  const endISO = useMemo(() => toISO(end, new Date()), [end]);
+  const endISO = useMemo(() => toISO(end, new Date()), [end, toISO]);
 
   const normalizeDateInput = (d: any, prev: Date): Date => {
     if (d instanceof Date) return d;

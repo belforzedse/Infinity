@@ -62,7 +62,7 @@ export default function Page() {
 
           toast.success("سفارش با موفقیت ثبت شد");
           router.push("/super-admin/orders");
-        } catch (error) {
+        } catch {
           toast.error("خطایی رخ داده است");
         }
       }}

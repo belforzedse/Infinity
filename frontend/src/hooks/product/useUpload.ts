@@ -79,7 +79,7 @@ export function useUpload({
       }));
       setFiles(otherFiles);
     }
-  }, [initialImages, initialVideos, initialFiles]);
+  }, [initialImages, initialVideos, initialFiles, images.length, videos.length, files.length, setImages, setVideos, setFiles]);
 
   const getFileType = (file: File): "image" | "video" | "other" => {
     if (file.type.startsWith("image/")) return "image";
@@ -94,6 +94,8 @@ export function useUpload({
     }
     return "/file-icon.png";
   };
+
+  // TODO: Revoke object URLs on unmount to avoid memory leaks
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -111,7 +113,7 @@ export function useUpload({
     try {
       for (const file of newFiles) {
         try {
-          const fileType = getFileType(file);
+          const fileType = getFileType(file); // FIXME: Shadows outer fileType parameter
           const previewUrl = createPreview(file);
           const response = await uploadFile(file);
 
@@ -123,6 +125,7 @@ export function useUpload({
 
             if (fileType === "image" || fileType === "video") {
               setProductData((prev: any) => ({
+                // TODO: Replace `any` usage with ProductData type
                 ...prev,
                 Media: [
                   ...((prev as any).Media || []),
@@ -133,6 +136,7 @@ export function useUpload({
               }));
             } else {
               setProductData((prev: any) => ({
+                // TODO: Replace `any` usage with ProductData type
                 ...prev,
                 Files: [
                   ...((prev as any).Files || []),
@@ -162,6 +166,7 @@ export function useUpload({
             }
           }
         } catch (error: any) {
+          // TODO: Narrow error type instead of using `any`
           uploadErrors.push(`${file.name}: ${error.message}`);
         }
       }
@@ -204,6 +209,7 @@ export function useUpload({
         });
       }
     } catch (error: any) {
+      // TODO: Provide a typed error object
       toast.error("خطا در آپلود فایل‌ها. لطفا دوباره تلاش کنید.");
       console.error("Error uploading files:", error);
     } finally {
@@ -217,7 +223,7 @@ export function useUpload({
         URL.revokeObjectURL(images[index].preview);
         setImages((prevImages) => prevImages.filter((_, i) => i !== index));
         setProductData({
-          ...(productData as any),
+          ...(productData as any), // TODO: Strongly type productData
           Media: (productData as any).Media.filter(
             (_: any, i: number) => i !== index,
           ),
@@ -227,7 +233,7 @@ export function useUpload({
         URL.revokeObjectURL(videos[index].preview);
         setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
         setProductData({
-          ...(productData as any),
+          ...(productData as any), // TODO: Strongly type productData
           Media: (productData as any).Media.filter(
             (_: any, i: number) => i !== index,
           ),
@@ -237,7 +243,7 @@ export function useUpload({
         URL.revokeObjectURL(files[index].preview);
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
         setProductData({
-          ...(productData as any),
+          ...(productData as any), // TODO: Strongly type productData
           Files: (productData as any).Files.filter(
             (_: any, i: number) => i !== index,
           ),

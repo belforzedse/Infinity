@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Action from "./Action";
 import Color from "./Color";
 import CommentsInfo from "./CommentsInfo";
@@ -53,9 +53,6 @@ type Props = {
     title: string;
   }[];
 
-  commentCount: number;
-  rateCount: number;
-  last24hoursSeenCount: number;
   productData?: any; // Add productData to be able to call findProductVariation
   productId: string;
 };
@@ -66,9 +63,6 @@ export default function PDPHeroInfo(props: Props) {
     sizes,
     colors,
     models = [],
-    commentCount,
-    last24hoursSeenCount,
-    rateCount,
     productData,
     productId,
   } = props;
@@ -159,18 +153,7 @@ export default function PDPHeroInfo(props: Props) {
 
   const [hasStock, setHasStock] = useState(getInitialStockStatus());
 
-  // Initialize variation details based on default selections when component mounts
-  useEffect(() => {
-    if (productData && colors.length > 0 && sizes.length > 0) {
-      // Call updateVariationDetails with the default selected values
-      // This will set the correct currentVariationId based on default selections
-      updateVariationDetails(
-        colors[0].id, // Default selected color
-        sizes[0].id, // Default selected size
-        models.length > 0 ? models[0].id : "", // Default selected model (if any)
-      );
-    }
-  }, [productData, colors, sizes, models]); // Run when product data is loaded
+  // moved useEffect that initializes variation details to below
 
   // Handle size change
   const handleSizeChange = (sizeId: string) => {
@@ -191,11 +174,12 @@ export default function PDPHeroInfo(props: Props) {
   };
 
   // Update variation details based on selected properties
-  const updateVariationDetails = (
-    colorId: string,
-    sizeId: string,
-    modelId: string,
-  ) => {
+  const updateVariationDetails = useCallback(
+    (
+      colorId: string,
+      sizeId: string,
+      modelId: string,
+    ) => {
     debugLog("=== UPDATE VARIATION DETAILS DEBUG ===");
     debugLog("Selected color ID:", colorId);
     debugLog("Selected size ID:", sizeId);
@@ -279,7 +263,18 @@ export default function PDPHeroInfo(props: Props) {
     }
 
     debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
-  };
+  }, [productData, product.price, product.discountPrice, product.discount]);
+
+  // Initialize variation details based on default selections when component mounts
+  useEffect(() => {
+    if (productData && colors.length > 0 && sizes.length > 0) {
+      updateVariationDetails(
+        colors[0].id,
+        sizes[0].id,
+        models.length > 0 ? models[0].id : "",
+      );
+    }
+  }, [productData, colors, sizes, models, updateVariationDetails]);
 
   // Get selected color and size objects
   const selectedColorObj = colors.find((color) => color.id === selectedColor);
@@ -361,7 +356,6 @@ export default function PDPHeroInfo(props: Props) {
         variationId={currentVariationId}
         hasStock={hasStock}
         currentVariation={currentVariation}
-        productData={productData}
       />
 
       <div className="h-[1px] bg-slate-100" />

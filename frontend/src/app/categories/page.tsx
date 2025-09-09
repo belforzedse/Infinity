@@ -20,7 +20,7 @@ export default function CategoriesPage() {
                 src={category.image}
                 alt={category.name}
                 fill
-                className="p-4 object-contain"
+                className="object-contain p-4"
                 sizes="96px"
               />
             </div>

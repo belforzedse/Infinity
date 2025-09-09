@@ -2,7 +2,7 @@
 
 import UserSidebar from "@/components/User/Sidebar";
 import BreadCrumb from "@/components/User/BreadCrumb";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ProductSmallCard from "@/components/Product/SmallCard";
 import SortIcon from "@/components/User/Icons/SortIcon";
 import ProductLikeService, {
@@ -18,11 +18,7 @@ export default function FavoritesPage() {
   const [pageCount, setPageCount] = useState(1);
   const pageSize = 12;
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [page]);
-
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -41,7 +37,11 @@ export default function FavoritesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
 
   // Map API product like to the component props format
   const mapFavoriteToProps = (favorite: ProductLike) => {

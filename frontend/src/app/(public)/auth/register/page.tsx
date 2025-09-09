@@ -11,7 +11,6 @@ import Text from "@/components/Kits/Text";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import { AuthService } from "@/services";
 import { useCart } from "@/contexts/CartContext";
-import logger from "@/utils/logger";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,9 +51,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (phoneNumber) {
-      if (process.env.NODE_ENV !== "production") {
-        logger.info("Sending OTP to", { phoneNumber });
-      }
+      console.log("Sending OTP to", phoneNumber);
 
       AuthService.sendOTP(phoneNumber).then(() => {
         startTimer();
@@ -107,3 +104,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

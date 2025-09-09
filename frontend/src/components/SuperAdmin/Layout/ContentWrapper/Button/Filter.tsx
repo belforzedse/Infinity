@@ -3,7 +3,7 @@ import FilterIcon from "../../Icons/FilterIcon";
 import FilterCloseIcon from "../../Icons/FilterCloseIcon";
 import TrashIcon from "../../Icons/TrashIcon";
 import WhitePlusIcon from "../../Icons/WhitePlusIcon";
-import AuthInput from "@/components/Kits/Auth/Input";
+import { Input } from "@/components/ui/Input";
 import { useQueryState } from "nuqs";
 
 type FilterItem = {
@@ -61,10 +61,12 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
         >
           <div className="flex flex-col gap-1.5">
             {/* <div className="flex gap-2 items-center">
-              <AuthInput
+              <Input
                 placeholder="کلمه مدنظرتو سرچ کن"
                 className="h-8 !text-xs"
-                parentClassNames="flex-1 w-full"
+                parentClassName="flex-1 w-full"
+                variant="auth"
+                size="sm"
               />
 
               <button className="w-8 h-8 bg-actions-primary flex items-center justify-center rounded-md">
@@ -75,10 +77,10 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
             {filter.map((item, index) => (
               <div key={index} className="flex items-center gap-1.5">
                 <div className="flex-1">
-                  <AuthInput
+                  <Input
                     placeholder="مقدار"
                     className="!text-xs h-8"
-                    parentClassNames="flex-1 w-full"
+                    parentClassName="flex-1 w-full"
                     value={item.value}
                     onChange={(e) => {
                       setFilter((prev) =>
@@ -89,6 +91,8 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                         ),
                       );
                     }}
+                    variant="auth"
+                    size="sm"
                   />
                 </div>
                 <div className="flex-1">

@@ -18,8 +18,8 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
 
   const renderIcon = (iconElement: ReactNode) => {
     const iconClassName = clsx(
-      "w-5 h-5",
-      isActive ? "text-white fill-white" : "text-pink-500",
+      "h-5 w-5",
+      isActive ? "fill-white text-white" : "text-pink-500",
     );
 
     if (isValidElement<{ className?: string }>(iconElement)) {
@@ -31,7 +31,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   if (onClick) {
     return (
       <button
-        // onClick={onClick}
+        onClick={onClick}
         className="flex items-center gap-2 px-5 py-4 text-gray-700"
       >
         {renderIcon(icon)}

@@ -3,22 +3,24 @@
 import { useAtomValue } from "jotai";
 import { isGlobalLoadingAtom, navigationInProgressAtom } from "@/atoms/loading";
 import clsx from "clsx";
+import useSmoothLoading from "@/hooks/useSmoothLoading";
 
 export default function TopProgressBar() {
   const apiLoading = useAtomValue(isGlobalLoadingAtom);
   const navLoading = useAtomValue(navigationInProgressAtom);
   const active = apiLoading || navLoading;
+  const visible = useSmoothLoading(active);
 
   return (
     <div
       className={clsx(
-        "pointer-events-none fixed left-0 right-0 top-0 z-[900] h-0.5 overflow-hidden",
-        active ? "opacity-100" : "opacity-0",
+        "pointer-events-none fixed left-0 right-0 top-0 z-[1400] h-0.5 overflow-hidden",
+        visible ? "opacity-100" : "opacity-0",
         "transition-opacity duration-200",
       )}
       aria-hidden
     >
-      <div className="h-full w-1/3 animate-[loaderSlide_1.2s_ease-in-out_infinite] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500" />
+      <div className="h-full w-1/3 animate-[loaderSlide_1.2s_ease-in-out_infinite] bg-gradient-to-r from-pink-500 via-purple-500 to-rose-500" />
       <style jsx>{`
         @keyframes loaderSlide {
           0% {

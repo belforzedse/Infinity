@@ -28,14 +28,12 @@ describe('ApiClient error handling', () => {
       errors: undefined,
     });
 
-    expect(handleAuthErrors).toHaveBeenCalledWith(
-      {
-        message: ERROR_MESSAGES.DEFAULT,
-        status: HTTP_STATUS.UNAUTHORIZED,
-        errors: undefined,
-      },
-      undefined,
-    );
+    expect(handleAuthErrors).toHaveBeenCalledWith({
+      message: ERROR_MESSAGES.DEFAULT,
+      status: HTTP_STATUS.UNAUTHORIZED,
+      errors: undefined,
+    });
+
   });
 
   it('preserves 400 error structure and skips auth handler', async () => {

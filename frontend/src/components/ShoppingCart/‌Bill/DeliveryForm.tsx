@@ -90,7 +90,6 @@ function ShoppingCartBillDeliveryForm({
         ) : (
           <ShoppingCartBillDeliveryOptions
             shippingMethods={shippingMethods}
-            selectedShipping={selectedShipping}
             setValue={setValue}
             control={control}
           />

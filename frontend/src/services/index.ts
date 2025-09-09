@@ -58,7 +58,7 @@ class ApiClient {
    */
   async post<T>(
     endpoint: string,
-    data?: Record<string, unknown>,
+    data?: unknown,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("POST", endpoint, data, options);
@@ -69,7 +69,7 @@ class ApiClient {
    */
   async put<T>(
     endpoint: string,
-    data?: Record<string, unknown>,
+    data?: unknown,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("PUT", endpoint, data, options);
@@ -80,7 +80,7 @@ class ApiClient {
    */
   async patch<T>(
     endpoint: string,
-    data?: Record<string, unknown>,
+    data?: unknown,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     return this.request<T>("PATCH", endpoint, data, options);
@@ -102,7 +102,7 @@ class ApiClient {
   private async request<T>(
     method: string,
     endpoint: string,
-    data?: Record<string, unknown>,
+    data?: unknown,
     options?: ApiRequestOptions,
   ): Promise<ApiResponse<T>> {
     if (!this.baseUrl || this.baseUrl === "undefined") {
@@ -159,7 +159,9 @@ class ApiClient {
         );
 
         // Handle auth errors here for centralized auth redirects
-        handleAuthErrors(error);
+        if (!options?.suppressAuthRedirect) {
+          handleAuthErrors(error, undefined);
+        }
 
         throw error;
       }
@@ -179,8 +181,6 @@ class ApiClient {
         "status" in error &&
         ("message" in error || "error" in error)
       ) {
-        // Handle auth errors here for centralized auth redirects
-        handleAuthErrors(error as ApiError);
         throw error;
       }
 

@@ -42,7 +42,7 @@ Provided via `.env` (see `.env.example`). Key variables used in code:
 
 Notes:
 
-- Some defaults exist in `src/constants/api.ts` to keep local/dev usable. Always set explicit values for production.
+- `NEXT_PUBLIC_STRAPI_TOKEN` must be provided; the build will fail if it's missing.
 - Treat tokens as secrets and avoid committing real credentials.
 
 ## NPM Scripts
@@ -95,17 +95,22 @@ Jest is configured via `jest.config.js` and `jest.setup.ts`. Next lint/TypeScrip
 
 ## Docker
 
-- `dev.Dockerfile`/`main.Dockerfile` copy `dev.env`/`main.env` to `.env` during build
+- `dev.Dockerfile` and `main.Dockerfile` expect environment variables to be provided at build time
+  (e.g. with `--build-arg`).
 - Exposes port 3000 for `npm start`
 
 Example:
 
 ```
-docker build -f dev.Dockerfile -t infinity-frontend:dev .
-docker run --rm -p 3000:3000 infinity-frontend:dev
+docker build -f dev.Dockerfile \
+  --build-arg NEXT_PUBLIC_STRAPI_TOKEN=your_token \
+  -t infinity-frontend:dev .
+docker run --rm -p 3000:3000 \
+  --env NEXT_PUBLIC_STRAPI_TOKEN=your_token \
+  infinity-frontend:dev
 ```
 
-To inject env at runtime instead, use `--env-file` and modify Dockerfiles to not copy the bundled env.
+To keep values in a file, pass `--env-file` to `docker run` instead of embedding them in the image.
 
 ## Conventions
 

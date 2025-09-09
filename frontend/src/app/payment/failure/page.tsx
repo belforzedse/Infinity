@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 
@@ -21,25 +20,6 @@ function PaymentFailureContent() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const handleRetryPayment = () => {
-    if (orderId) {
-      // Redirect to retry payment for this order
-      router.push(`/orders/${orderId}/retry-payment`);
-    } else {
-      // Redirect back to cart
-      router.push("/cart");
-    }
-  };
-
-  const handleBackToCart = () => {
-    router.push("/cart");
-  };
-
-  const handleContactSupport = () => {
-    // You can implement a support page or contact modal
-    router.push("/contact");
-  };
 
   const handleContinueShopping = () => {
     router.push("/");

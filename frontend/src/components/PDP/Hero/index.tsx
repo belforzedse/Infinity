@@ -226,12 +226,9 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
 
       <PDPHeroInfo
         colors={colors}
-        commentCount={productData?.attributes.RatingCount || 124}
-        last24hoursSeenCount={856}
         product={product}
         sizes={sizes}
         models={models}
-        rateCount={productData?.attributes.RatingCount || 40}
         productData={productData}
         productId={productId}
       />

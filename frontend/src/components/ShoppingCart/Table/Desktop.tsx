@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import React from "react";
 import ShoppingCartQuantityControl from "../QuantityControl";
 import classNames from "classnames";
@@ -47,6 +48,7 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({
                     width={48}
                     height={48}
                     className="rounded-xl"
+                    loader={imageLoader}
                   />
                   <span className="text-xs text-neutral-800">{item.name}</span>
                 </div>

@@ -1,12 +1,12 @@
 import React from "react";
 import dayjs from "dayjs";
-import jalaliday from "jalaliday/dayjs";
+import jalaliday from "jalaliday";
 import { priceFormatter } from "@/utils/price";
 import PlusIcon from "../Icons/PlusIcon";
 import MinusIcon from "../Icons/MinusIcon";
 import clsx from "clsx";
 
-dayjs.extend(jalaliday);
+dayjs.extend(jalaliday as any);
 
 interface TransactionsListRowProps {
   date: string;
@@ -27,7 +27,7 @@ const TransactionsListRow = ({
       return "امروز";
     }
 
-    return dayjs(dateStr)
+    return (dayjs(dateStr) as any)
       .calendar("jalali")
       .format("YYYY/MM/DD")
       .replace(/[0-9]/g, (d: string) =>

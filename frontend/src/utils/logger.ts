@@ -7,7 +7,8 @@ const consoleMethods: Record<LogLevel, (msg: string) => void> = {
 };
 
 const log = (level: LogLevel, message: string, meta?: Record<string, unknown>) => {
-  if (process.env.NODE_ENV === 'production') {
+  // Only log in development. Skip in test and production.
+  if (process.env.NODE_ENV !== 'development') {
     return;
   }
 
