@@ -63,9 +63,18 @@ export default function NavigationProgress() {
         const currentPathAndQuery = current.pathname + (current.search || "");
         if (nextPathAndQuery === currentPathAndQuery) return;
 
-        // Same-origin navigation likely via Next Link
+        // Start immediately so overlay appears before router acts
         setNavigationInProgress(true);
         startFailSafe();
+
+        // Revert if another handler cancels the navigation
+        queueMicrotask(() => {
+          if (e.defaultPrevented) {
+            setNavigationInProgress(false);
+            clearFailSafe();
+          }
+        });
+
       } catch {
         // ignore
       }
@@ -76,8 +85,9 @@ export default function NavigationProgress() {
       startFailSafe();
     }
 
-    // Use bubble phase so e.defaultPrevented reflects user handlers
-    window.addEventListener("click", onClick);
+    // Capture phase so we run before Next's internal link handler
+    window.addEventListener("click", onClick, true);
+
     window.addEventListener("popstate", onPopState);
 
     // Start when navigation API is used (router.push, etc.)
