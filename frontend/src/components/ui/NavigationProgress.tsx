@@ -74,6 +74,7 @@ export default function NavigationProgress() {
             clearFailSafe();
           }
         });
+
       } catch {
         // ignore
       }
@@ -86,6 +87,7 @@ export default function NavigationProgress() {
 
     // Capture phase so we run before Next's internal link handler
     window.addEventListener("click", onClick, true);
+
     window.addEventListener("popstate", onPopState);
 
     // Start when navigation API is used (router.push, etc.)
