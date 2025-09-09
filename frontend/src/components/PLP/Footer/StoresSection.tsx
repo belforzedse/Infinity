@@ -88,6 +88,8 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
               width={24}
               height={24}
               className="rounded-full"
+              loading="lazy"
+              sizes="24px"
             />
           </a>
         ))}
@@ -105,6 +107,8 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 alt="Phone"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
               <span className="text-sm text-neutral-600">{phone}</span>
             </div>
@@ -116,6 +120,8 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 alt="WhatsApp"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
               <span className="text-sm text-neutral-600">{whatsapp}</span>
             </div>
@@ -127,6 +133,8 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 alt="Instagram"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
               <span className="text-sm text-neutral-600">{instagram}</span>
             </div>
@@ -138,6 +146,8 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 alt="Pinterest"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
               <span className="text-sm text-neutral-600">{telegram}</span>
             </div>

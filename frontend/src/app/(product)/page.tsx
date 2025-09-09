@@ -201,7 +201,8 @@ export default async function Home() {
           width={1920}
           height={560}
           className="w-full rounded-lg object-cover"
-          loading="lazy"
+          priority
+          sizes="100vw"
         />
       </div>
       <div className="md:hidden">
@@ -211,7 +212,8 @@ export default async function Home() {
           width={750}
           height={520}
           className="w-full rounded-lg"
-          loading="eager"
+          priority
+          sizes="100vw"
         />
       </div>
 
@@ -225,6 +227,8 @@ export default async function Home() {
               width={1200}
               height={600}
               className="h-full w-full rounded-lg object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </Link>
         </div>
@@ -240,6 +244,8 @@ export default async function Home() {
                 width={600}
                 height={600}
                 className="h-full w-full rounded-lg object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 50vw, 50vw"
               />
             </Link>
           </div>
@@ -252,6 +258,8 @@ export default async function Home() {
                 width={600}
                 height={600}
                 className="h-full w-full rounded-lg object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 50vw, 50vw"
               />
             </Link>
           </div>
@@ -303,6 +311,8 @@ export default async function Home() {
                   width={80}
                   height={80}
                   className="h-16 w-auto md:h-20"
+                  loading="lazy"
+                  sizes="80px"
                 />
               </div>
               <span className="text-sm mt-2 md:text-base">{category.name}</span>
