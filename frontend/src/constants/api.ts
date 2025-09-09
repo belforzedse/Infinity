@@ -3,7 +3,7 @@
  * This file contains all the constants related to API calls
  */
 
-// Base URLs (with safe fallbacks for local/dev parity)
+// Base URLs 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 if (!apiBaseUrl) {
   throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
