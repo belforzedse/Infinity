@@ -27,7 +27,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+  <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -54,7 +54,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden bg-white p-6 text-right align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                  className="text-lg mb-4 font-medium leading-6 text-gray-900"
                 >
                   جستجو
                 </Dialog.Title>
@@ -65,7 +65,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
+                      className="text-sm w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
                       placeholder="جستجو در محصولات..."
                       dir="rtl"
                     />
@@ -100,7 +100,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                 <div className="mt-4">
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 text-sm font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                    className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
                     onClick={onClose}
                   >
                     بستن

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/textarea";
 
 const MetaOptions: React.FC = () => {
@@ -15,18 +15,18 @@ const MetaOptions: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg p-5">
-      <div className="lg:mb-6 mb-4">
-        <h3 className="text-base text-neutral-600 text-right mb-4">
+    <div className="w-full rounded-lg bg-white p-5">
+      <div className="mb-4 lg:mb-6">
+        <h3 className="text-base mb-4 text-right text-neutral-600">
           آپشن های متا
         </h3>
       </div>
-      <div className="lg:space-y-4 space-y-2">
+      <div className="space-y-2 lg:space-y-4">
         <Input
           id="title"
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
-          className="w-full text-right text-slate-400 border border-slate-100"
+          className="w-full border border-slate-100 text-right text-slate-400"
           placeholder="عنوان"
           dir="rtl"
         />
@@ -35,7 +35,7 @@ const MetaOptions: React.FC = () => {
           id="description"
           value={description}
           onChange={(e) => handleDescriptionChange(e.target.value)}
-          className="w-full text-right text-slate-400 border border-slate-100 min-h-36"
+          className="min-h-36 w-full border border-slate-100 text-right text-slate-400"
           placeholder="توضیحات"
           dir="rtl"
         />

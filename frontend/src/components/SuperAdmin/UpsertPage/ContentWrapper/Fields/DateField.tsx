@@ -10,9 +10,9 @@ type Props = {
 
 export default function DateField({ value, onChange, readOnly }: Props) {
   return (
-    <div className="w-full border border-neutral-200 rounded-lg flex items-center gap-2 py-3 px-5">
+    <div className="flex w-full items-center gap-2 rounded-lg border border-neutral-200 px-5 py-3">
       {readOnly ? (
-        <span className="text-sm text-slate-500 flex-1 w-full">
+        <span className="text-sm w-full flex-1 text-slate-500">
           {value?.toLocaleString("fa-IR", {
             year: "numeric",
             month: "2-digit",
@@ -28,7 +28,7 @@ export default function DateField({ value, onChange, readOnly }: Props) {
       )}
 
       <button
-        className="w-5 h-5 flex items-center justify-center"
+        className="flex h-5 w-5 items-center justify-center"
         disabled={readOnly}
       >
         <CalendarIcon />

@@ -23,12 +23,12 @@ export default function DetailsSectionText({
   };
 
   return (
-    <div className="flex flex-col gap-1 justify-between h-full">
+    <div className="flex h-full flex-col justify-between gap-1">
       <h4 className="text-xs text-right text-neutral-600">متن جایگزین</h4>
 
       <input
         type="text"
-        className="w-full border border-slate-100 text-neutral-600 rounded-md text-right py-2 px-5 text-xs"
+        className="text-xs w-full rounded-md border border-slate-100 px-5 py-2 text-right text-neutral-600"
         value={selectedImage?.name || ""}
         onChange={(e) =>
           selectedImage &&
@@ -40,13 +40,13 @@ export default function DetailsSectionText({
       />
 
       <div className="mt-3">
-        <div className="text-right mb-1 text-xs text-neutral-600">
+        <div className="text-xs mb-1 text-right text-neutral-600">
           نشانی پرونده
         </div>
         <div className="relative">
           <input
             type="text"
-            className="w-full border text-slate-400 rounded-lg p-3 border-slate-100 text-right pl-3 pr-8 text-xs"
+            className="text-xs w-full rounded-lg border border-slate-100 p-3 pl-3 pr-8 text-right text-slate-400"
             value={selectedImage?.url || ""}
             readOnly
           />

@@ -69,10 +69,10 @@ function DropdownField({
   }, [selectedProvince, name, fetchOptions, formData]);
 
   return (
-    <div className="w-full border border-neutral-200 rounded-lg overflow-hidden">
+    <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
       <div className="relative">
         <select
-          className={`w-full py-3 px-5 text-sm border-l-[20px] border-transparent ${
+          className={`text-sm w-full border-l-[20px] border-transparent px-5 py-3 ${
             readOnly ? "bg-slate-100 text-slate-500" : ""
           }`}
           disabled={readOnly}

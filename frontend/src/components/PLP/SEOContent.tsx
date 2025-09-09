@@ -22,21 +22,27 @@ export default function PLPSEOContent(props: Props) {
 
   return (
     <div
-      className={`flex gap-5 flex-col-reverse ${
+      className={`flex flex-col-reverse gap-5 ${
         direction === "ltr" ? "md:flex-row" : "md:flex-row-reverse"
       }`}
     >
-      <div className="flex flex-col gap-4 flex-1">
-        <h2 className="hidden md:block text-3xl text-neutral-800">{title}</h2>
+      <div className="flex flex-1 flex-col gap-4">
+        <h2 className="text-3xl hidden text-neutral-800 md:block">{title}</h2>
         <p className="text-sm text-neutral-500">{description}</p>
         <Voice audioSrc={audioSrc} className="mt-auto" />
       </div>
 
-      <div className="w-full relative md:w-[423px] h-[289px] overflow-hidden rounded-3xl">
-        <Image src={imageSrc} alt={imageAlt} fill className="object-cover" />
+      <div className="relative h-[289px] w-full overflow-hidden rounded-3xl md:w-[423px]">
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 423px"
+        />
       </div>
 
-      <h2 className="md:hidden text-3xl text-neutral-800">{title}</h2>
+      <h2 className="text-3xl text-neutral-800 md:hidden">{title}</h2>
     </div>
   );
 }

@@ -211,7 +211,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (item.variationId) {
             await CartService.addItemToCart(
               Number(item.variationId),
-              item.quantity
+              item.quantity,
             );
           }
         }
@@ -243,11 +243,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         setIsLoading(true);
 
-        console.log(newItem);
-
         await CartService.addItemToCart(
           Number(newItem.variationId),
-          newItem.quantity
+          newItem.quantity,
         );
 
         // Refresh cart after adding item
@@ -269,7 +267,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCartItems((prev) => {
         // Check if item already exists in cart
         const existingItemIndex = prev.findIndex(
-          (item) => item.slug === newItem.slug
+          (item) => item.slug === newItem.slug,
         );
 
         if (existingItemIndex !== -1) {
@@ -327,8 +325,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const item = cartItems.find((item) => item.id === id);
         if (!item) return;
 
-        console.log(item);
-
         // Extract the cart item ID from the API
         const cartItemId = item.id;
         if (!cartItemId) return;
@@ -352,7 +348,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Local storage implementation
       setCartItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+        prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
       );
     }
   };
@@ -399,7 +395,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   const value = {

@@ -13,7 +13,10 @@ export default function NoData({ category }: NoDataProps) {
 
   useEffect(() => {
     if (category) {
-      fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`)
+      const safeCategory = encodeURIComponent(category);
+      fetch(
+        `${API_BASE_URL}/product-categories?filters[Slug][$eq]=${safeCategory}`,
+      )
         .then((response) => response.json())
         .then((data) => {
           if (data.data.length > 0) {
@@ -27,8 +30,8 @@ export default function NoData({ category }: NoDataProps) {
   }, [category]);
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      <div className="w-32 h-32 mb-6 relative">
+    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="relative mb-6 h-32 w-32">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -37,26 +40,26 @@ export default function NoData({ category }: NoDataProps) {
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="w-full h-full text-gray-300"
+          className="h-full w-full text-gray-300"
         >
           <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
         </svg>
       </div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">محصولی یافت نشد</h2>
-      <p className="text-gray-600 mb-8 max-w-md">
+      <h2 className="text-2xl mb-2 font-bold text-gray-800">محصولی یافت نشد</h2>
+      <p className="mb-8 max-w-md text-gray-600">
         متأسفانه در حال حاضر هیچ {categoryTitle} در این دسته‌بندی موجود نیست.
         لطفاً بعداً دوباره بررسی کنید یا به صفحه اصلی برگردید.
       </p>
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <Link
           href="/"
-          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          className="bg-primary hover:bg-primary/90 rounded-lg px-6 py-3 text-white transition-colors"
         >
           بازگشت به صفحه اصلی
         </Link>
         <Link
           href="/plp"
-          className="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
+          className="rounded-lg bg-gray-100 px-6 py-3 text-gray-800 transition-colors hover:bg-gray-200"
         >
           مشاهده همه محصولات
         </Link>

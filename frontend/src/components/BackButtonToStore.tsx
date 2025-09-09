@@ -15,12 +15,12 @@ export default function BackButtonToStore({ isResponsive = true }: Props) {
   return (
     <Link href="/" className={buttonClasses}>
       <RightArrowIcon
-        className={isResponsive ? "lg:rotate-0 rotate-180" : "rotate-0"}
+        className={isResponsive ? "rotate-180 lg:rotate-0" : "rotate-0"}
       />
       <span className="text-sm">
         {isResponsive ? (
           <>
-            <span className="lg:inline hidden">بازگشت به</span> فروشگاه
+            <span className="hidden lg:inline">بازگشت به</span> فروشگاه
           </>
         ) : (
           "بازگشت به فروشگاه"

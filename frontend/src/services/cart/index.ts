@@ -1,6 +1,6 @@
 import { apiClient } from "../index";
-import { ApiResponse } from "@/types/api";
-import { IMAGE_BASE_URL } from "@/constants/api";
+// removed unused imports: ApiResponse, IMAGE_BASE_URL
+import logger from "@/utils/logger";
 
 // Types for API responses
 export interface ImageFormat {
@@ -181,7 +181,7 @@ export interface FinalizeCartResponse {
  * Query SnappPay eligibility based on current cart and (optional) shipping
  */
 export const getSnappEligible = async (
-  params: { shippingId?: number; shippingCost?: number } = {}
+  params: { shippingId?: number; shippingCost?: number } = {},
 ): Promise<{
   eligible: boolean;
   title?: string;
@@ -233,7 +233,7 @@ export const getUserCart = async (): Promise<CartResponse> => {
  */
 export const addItemToCart = async (
   productVariationId: number,
-  count: number
+  count: number,
 ): Promise<CartItemResponse> => {
   try {
     const response = await apiClient.post<CartItemResponse>("/carts/add-item", {
@@ -260,7 +260,7 @@ export const addItemToCart = async (
  */
 export const updateCartItem = async (
   cartItemId: number,
-  count: number
+  count: number,
 ): Promise<CartItemResponse> => {
   try {
     const response = await apiClient.put<CartItemResponse>(
@@ -268,7 +268,7 @@ export const updateCartItem = async (
       {
         cartItemId,
         count,
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
@@ -288,10 +288,10 @@ export const updateCartItem = async (
  * @returns Success message
  */
 export const removeCartItem = async (
-  cartItemId: number
+  cartItemId: number,
 ): Promise<{ message: string }> => {
   const response = await apiClient.delete<{ message: string }>(
-    `/carts/remove-item/${cartItemId}`
+    `/carts/remove-item/${cartItemId}`,
   );
   return response as any;
 };
@@ -301,9 +301,8 @@ export const removeCartItem = async (
  * @returns Stock check response
  */
 export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
-  const response = await apiClient.get<CartStockCheckResponse>(
-    "/carts/check-stock"
-  );
+  const response =
+    await apiClient.get<CartStockCheckResponse>("/carts/check-stock");
   return response as any;
 };
 
@@ -313,20 +312,24 @@ export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
  * @returns Response with order ID
  */
 export const finalizeCart = async (
-  data: FinalizeCartRequest
+  data: FinalizeCartRequest,
 ): Promise<FinalizeCartResponse> => {
-  console.log("=== FINALIZE CART REQUEST ===");
-  console.log("Request data:", data);
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("=== FINALIZE CART REQUEST ===");
+    logger.info("Request data", { data });
+  }
 
   const response = await apiClient.post<FinalizeCartResponse>(
     "/carts/finalize",
-    data
+    data,
   );
 
-  console.log("=== FINALIZE CART RAW RESPONSE ===");
-  console.log("Full response:", response);
-  console.log("Response.data:", response.data);
-  console.log("Response.data type:", typeof response.data);
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("=== FINALIZE CART RAW RESPONSE ===");
+    logger.info("Full response", { response });
+    logger.info("Response.data", { data: response.data });
+    logger.info("Response.data type", { type: typeof response.data });
+  }
 
   return response.data;
 };
@@ -338,12 +341,12 @@ export const finalizeCart = async (
  * @note customer_name and customer_phone are optional and will be retrieved from the user profile if not provided
  */
 export const createOrder = async (
-  data: CreateOrderRequest
+  data: CreateOrderRequest,
 ): Promise<CreateOrderResponse> => {
   try {
     const response = await apiClient.post<CreateOrderResponse>(
       "/orders/create",
-      data
+      data,
     );
     return response.data;
   } catch (error: any) {

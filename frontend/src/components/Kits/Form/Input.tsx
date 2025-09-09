@@ -1,4 +1,6 @@
 import React, { InputHTMLAttributes, ChangeEvent } from "react";
+import { Input as UITextInput } from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 
 interface InputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
@@ -42,21 +44,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onIconClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={name}
-            className="block text-right text-foreground-primary lg:mb-2 mb-1 lg:text-lg text-base"
+            className="text-base mb-1 block text-right text-foreground-primary lg:text-lg lg:mb-2"
           >
             {label}
-            {required && <span className="text-red-500 mr-1">*</span>}
+            {required && <span className="mr-1 text-red-500">*</span>}
           </label>
         )}
         <div className="relative">
-          <input
+          <UITextInput
             ref={ref}
             id={name}
             name={name}
@@ -71,38 +73,23 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             pattern={pattern}
             autoComplete={autoComplete}
             dir={dir}
-            className={`
-              w-full
-              lg:p-3 p-2
-              text-right
-              border
-              border-slate-200
-              rounded-lg
-              focus:outline-none
-              text-foreground-primary
-              placeholder:text-foreground-muted
-              placeholder:text-sm
-              disabled:bg-gray-100
-              disabled:cursor-not-allowed
-              lg:text-lg text-sm
-              max-h-[50px]
-              ${icon ? "pl-10" : ""}
-              ${error ? "border-red-500" : ""}
-              ${className || ""}
-            `}
+            className={cn(
+              "max-h-[50px] text-foreground-primary",
+              icon && "pl-10",
+              error && "border-red-500",
+              className,
+            )}
             {...props}
           />
           {icon && (
             <button
               type="button"
               onClick={onIconClick}
-              className={`absolute left-3 top-1/2 -translate-y-1/2 p-1 
-                        ${
-                          onIconClick
-                            ? "cursor-pointer hover:opacity-80"
-                            : "cursor-default"
-                        }
-                        ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`absolute left-3 top-1/2 -translate-y-1/2 p-1 ${
+                onIconClick
+                  ? "cursor-pointer hover:opacity-80"
+                  : "cursor-default"
+              } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
               disabled={disabled}
             >
               {icon}
@@ -110,11 +97,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p className="mt-1 text-right text-sm text-red-500">{error}</p>
+          <p className="text-sm mt-1 text-right text-red-500">{error}</p>
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

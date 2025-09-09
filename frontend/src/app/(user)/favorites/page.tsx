@@ -29,7 +29,7 @@ export default function FavoritesPage() {
 
       const response = await ProductLikeService.getUserFavorites(
         page,
-        pageSize
+        pageSize,
       );
 
       const productLikes = Array.isArray(response.data) ? response.data : [];
@@ -92,54 +92,54 @@ export default function FavoritesPage() {
 
   return (
     <div
-      className="flex min-h-[60vh] bg-white overflow-hidden container mx-auto gap-10 lg:p-0 px-4"
+      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
       dir="rtl"
     >
       <UserSidebar />
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-3">
+      <main className="flex flex-1 flex-col gap-3 overflow-y-auto">
         <BreadCrumb
           onClick={() => {}}
           hasBackButton={false}
           currentTitle="محصولات مورد علاقه"
-          icon={<SortIcon className="w-5 h-5" />}
+          icon={<SortIcon className="h-5 w-5" />}
           nextStepTitle="مرتب سازی"
         />
 
-        <div className="w-full flex flex-col gap-5">
+        <div className="flex w-full flex-col gap-5">
           {loading ? (
             <div className="flex justify-center p-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-pink-500"></div>
+              <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
             </div>
           ) : error ? (
-            <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <div className="rounded-lg bg-gray-50 p-8 text-center">
               <p className="text-gray-600">{error}</p>
             </div>
           ) : favorites.length === 0 ? (
-            <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <div className="rounded-lg bg-gray-50 p-8 text-center">
               <p className="text-gray-600">
                 محصولی در لیست علاقه‌مندی‌ها وجود ندارد.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {favorites.map((favorite) => (
                 <ProductSmallCard
                   key={favorite.id}
                   {...mapFavoriteToProps(favorite)}
-                  className="md:!w-full h-full"
+                  className="h-full md:!w-full"
                 />
               ))}
             </div>
           )}
 
           {pageCount > 1 && (
-            <div className="flex justify-center mt-4">
+            <div className="mt-4 flex justify-center">
               <div className="flex items-center gap-2">
                 {page > 1 && (
                   <button
                     onClick={() => setPage(page - 1)}
-                    className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                    className="text-sm rounded-md border border-gray-300 px-3 py-1 hover:bg-gray-50"
                   >
                     قبلی
                   </button>
@@ -150,7 +150,7 @@ export default function FavoritesPage() {
                 {page < pageCount && (
                   <button
                     onClick={() => setPage(page + 1)}
-                    className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                    className="text-sm rounded-md border border-gray-300 px-3 py-1 hover:bg-gray-50"
                   >
                     بعدی
                   </button>

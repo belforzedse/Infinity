@@ -12,19 +12,19 @@ export default function Checkbox({
   className = "",
 }: CheckboxProps) {
   return (
-    <label className={`flex items-center gap-2 cursor-pointer ${className}`}>
+    <label className={`flex cursor-pointer items-center gap-2 ${className}`}>
       <div
-        className="relative w-5 h-5 flex items-center justify-center"
+        className="relative flex h-5 w-5 items-center justify-center"
         onClick={() => onChange(!checked)}
       >
         <div
-          className={`w-5 h-5 border rounded transition-colors ${
+          className={`h-5 w-5 rounded border transition-colors ${
             checked ? "border-sky-600 bg-sky-600" : "border-slate-400"
           }`}
         />
         {checked && (
           <svg
-            className="w-3.5 h-3.5 text-white absolute"
+            className="absolute h-3.5 w-3.5 text-white"
             viewBox="0 0 14 14"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

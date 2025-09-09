@@ -23,7 +23,7 @@ export const TransactionSection = ({
   type,
   showOnlyMobile = false,
 }: TransactionSectionProps) => (
-  <div className="border lg:border-none border-slate-100 rounded-xl lg:p-0 p-3 flex flex-col gap-1">
+  <div className="flex flex-col gap-1 rounded-xl border border-slate-100 p-3 lg:border-none lg:p-0">
     <TransactionHeader
       icon={icon}
       title={title}
@@ -33,8 +33,8 @@ export const TransactionSection = ({
     {transactions.length > 0 ? (
       <div
         className={clsx(
-          "border rounded-xl lg:px-5 px-4 py-3 divide-y divide-slate-100 border-slate-100",
-          type === "deposit" && "lg:min-h-[50vh]"
+          "divide-y divide-slate-100 rounded-xl border border-slate-100 px-4 py-3 lg:px-5",
+          type === "deposit" && "lg:min-h-[50vh]",
           // transactions.length === 0 && "lg:border border-none"
           // TODO: do not work
         )}

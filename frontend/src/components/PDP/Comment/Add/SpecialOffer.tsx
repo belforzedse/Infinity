@@ -55,7 +55,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
   }, [endOfferDate]);
 
   return (
-    <div className="flex flex-col gap-3 p-5 rounded-3xl bg-background-secondary">
+    <div className="flex flex-col gap-3 rounded-3xl bg-background-secondary p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-3xl text-actions-primary">تخفیف ویژه</span>
@@ -63,9 +63,9 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
           <DiscountIcon />
         </div>
 
-        <div className="flex items-center gap-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-1">
           {/* hours */}
-          <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex justify-center items-center">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
             <span className="text-xs text-foreground-primary">
               {timeLeft.hours.toString().padStart(2, "0")}
             </span>
@@ -74,7 +74,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
           <span className="text-xs text-foreground-primary">:</span>
 
           {/* minutes */}
-          <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex justify-center items-center">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
             <span className="text-xs text-foreground-primary">
               {timeLeft.minutes.toString().padStart(2, "0")}
             </span>
@@ -83,7 +83,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
           <span className="text-xs text-foreground-primary">:</span>
 
           {/* seconds */}
-          <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex justify-center items-center">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
             <span className="text-xs text-foreground-primary">
               {timeLeft.seconds.toString().padStart(2, "0")}
             </span>
@@ -92,11 +92,11 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="w-[82px] h-[79px] rounded-xl overflow-hidden">
+        <div className="h-[79px] w-[82px] overflow-hidden rounded-xl">
           <Image width={82} height={79} src={imageSrc} alt="special offer" />
         </div>
 
-        <div className="flex gap-1 flex-col">
+        <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1">
             <GridIcon className="text-neutral-400" />
             <span className="text-xs text-neutral-400">{category}</span>
@@ -109,7 +109,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
       <div className="h-[1px] w-full bg-slate-100" />
 
       <div className="flex flex-col gap-3">
-        <div className="py-2 px-3 bg-[#E11D48] text-white text-[9px] !leading-5 flex items-center justify-center rounded-3xl w-fit self-end">
+        <div className="flex w-fit items-center justify-center self-end rounded-3xl bg-[#E11D48] px-3 py-2 text-[9px] !leading-5 text-white">
           <span>{discount}% تخفیف</span>
         </div>
 
@@ -123,8 +123,8 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
           <span
             className={`${
               discountPrice
-                ? " text-foreground-muted line-through text-sm"
-                : " text-neutral-700 text-xl"
+                ? "text-sm text-foreground-muted line-through"
+                : "text-xl text-neutral-700"
             }`}
           >
             {price.toLocaleString("fa-IR")}تومان
@@ -134,7 +134,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
         <PLPButton
           text="مشاهده سبد خرید"
           leftIcon={<LookBasketIcon />}
-          className="flex justify-center items-center bg-white text-actions-primary text-base"
+          className="text-base flex items-center justify-center bg-white text-actions-primary"
         />
       </div>
     </div>

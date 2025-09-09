@@ -1,13 +1,43 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getLiquidity, LiquidityInterval } from "@/services/super-admin/reports/liquidity";
+import {
+  getLiquidity,
+  LiquidityInterval,
+} from "@/services/super-admin/reports/liquidity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { faNum } from "@/utils/faNum";
+import dynamic from "next/dynamic";
+
+const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), {
+  ssr: false,
+});
+const Line = dynamic(() => import("recharts").then((m) => m.Line), {
+  ssr: false,
+});
+const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), {
+  ssr: false,
+});
+const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), {
+  ssr: false,
+});
+const CartesianGrid = dynamic(
+  () => import("recharts").then((m) => m.CartesianGrid),
+  { ssr: false },
+);
+const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
+  ssr: false,
+});
+const ResponsiveContainer = dynamic(
+  () => import("recharts").then((m) => m.ResponsiveContainer),
+  { ssr: false },
+);
 
 export default function LiquidityReportPage() {
-  const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
+  const [start, setStart] = useState<Date>(
+    new Date(Date.now() - 30 * 86400000),
+  );
   const [end, setEnd] = useState<Date>(new Date());
   const [interval, setInterval] = useState<LiquidityInterval>("day");
   const [data, setData] = useState<any>(null);
@@ -18,7 +48,7 @@ export default function LiquidityReportPage() {
     isValid(d) ? d.toISOString() : fallback.toISOString();
   const startISO = useMemo(
     () => toISO(start, new Date(Date.now() - 30 * 86400000)),
-    [start]
+    [start],
   );
   const endISO = useMemo(() => toISO(end, new Date()), [end]);
 
@@ -40,12 +70,14 @@ export default function LiquidityReportPage() {
     <ContentWrapper title="گزارش مجموع نقدینگی">
       <div className="space-y-6">
         {/* Filters Section */}
-        <div className="bg-white rounded-2xl p-5">
+        <div className="rounded-2xl bg-white p-5">
           <div className="flex flex-col gap-4">
             <h3 className="text-lg font-medium text-neutral-700">فیلترها</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
+                <label className="text-sm font-medium text-neutral-600">
+                  تاریخ شروع
+                </label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={start}
@@ -53,7 +85,9 @@ export default function LiquidityReportPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
+                <label className="text-sm font-medium text-neutral-600">
+                  تاریخ پایان
+                </label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={end}
@@ -61,11 +95,15 @@ export default function LiquidityReportPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">بازه زمانی</label>
-                <select 
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
-                  value={interval} 
-                  onChange={(e) => setInterval(e.target.value as LiquidityInterval)}
+                <label className="text-sm font-medium text-neutral-600">
+                  بازه زمانی
+                </label>
+                <select
+                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                  value={interval}
+                  onChange={(e) =>
+                    setInterval(e.target.value as LiquidityInterval)
+                  }
                 >
                   <option value="day">روزانه</option>
                   <option value="week">هفتگی</option>
@@ -77,28 +115,40 @@ export default function LiquidityReportPage() {
         </div>
 
         {/* Results Section */}
-        <div className="bg-white rounded-2xl p-5">
+        <div className="rounded-2xl bg-white p-5">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
                 <span className="text-neutral-600">در حال بارگذاری...</span>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Summary Card */}
-              <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 border border-pink-100">
+              <div className="rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">مجموع نقدینگی</h3>
+                    <h3 className="text-lg mb-2 font-medium text-neutral-700">
+                      مجموع نقدینگی
+                    </h3>
                     <p className="text-3xl font-bold text-pink-600">
-                      {data?.total?.toLocaleString?.() || 0} تومان
+                      {faNum(data?.total || 0)} تومان
                     </p>
                   </div>
-                  <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pink-100">
+                    <svg
+                      className="h-8 w-8 text-pink-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -106,7 +156,9 @@ export default function LiquidityReportPage() {
 
               {/* Chart Section */}
               <div>
-                <h3 className="text-lg font-medium text-neutral-700 mb-4">نمودار روند نقدینگی</h3>
+                <h3 className="text-lg mb-4 font-medium text-neutral-700">
+                  نمودار روند نقدینگی
+                </h3>
                 <LiquidityChart series={data?.series || []} />
               </div>
             </div>
@@ -117,42 +169,62 @@ export default function LiquidityReportPage() {
   );
 }
 
-function LiquidityChart({ series }: { series: Array<{ bucket: string; total: number }> }) {
+function LiquidityChart({
+  series,
+}: {
+  series: Array<{ bucket: string; total: number }>;
+}) {
   if (!series || series.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+          <svg
+            className="h-8 w-8 text-neutral-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
           </svg>
         </div>
-        <p className="text-neutral-500 text-sm">داده‌ای برای نمایش یافت نشد</p>
-        <p className="text-neutral-400 text-xs mt-1">لطفاً بازه زمانی دیگری انتخاب کنید</p>
+        <p className="text-sm text-neutral-500">داده‌ای برای نمایش یافت نشد</p>
+        <p className="text-xs mt-1 text-neutral-400">
+          لطفاً بازه زمانی دیگری انتخاب کنید
+        </p>
       </div>
     );
   }
 
   // Prepare data for Recharts
   const chartData = series.map((item) => ({
-    date: new Date(item.bucket).toLocaleDateString('fa-IR', { 
-      month: 'short', 
-      day: 'numeric',
-      year: series.length > 30 ? undefined : 'numeric'
+    date: new Date(item.bucket).toLocaleDateString("fa-IR", {
+      month: "short",
+      day: "numeric",
+      year: series.length > 30 ? undefined : "numeric",
     }),
-    fullDate: new Date(item.bucket).toLocaleDateString('fa-IR'),
+    fullDate: new Date(item.bucket).toLocaleDateString("fa-IR"),
     total: Number(item.total),
-    bucket: item.bucket
+    bucket: item.bucket,
   }));
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white p-4 border border-neutral-200 rounded-lg shadow-lg" dir="rtl">
-          <p className="font-medium text-neutral-800 mb-2">{data.fullDate}</p>
+        <div
+          className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg"
+          dir="rtl"
+        >
+          <p className="mb-2 font-medium text-neutral-800">{data.fullDate}</p>
           <p className="text-pink-600">
-            <span className="font-medium">نقدینگی:</span> {data.total.toLocaleString()} تومان
+            <span className="font-medium">نقدینگی:</span> {faNum(data.total)}{" "}
+            تومان
           </p>
         </div>
       );
@@ -162,7 +234,7 @@ function LiquidityChart({ series }: { series: Array<{ bucket: string; total: num
 
   return (
     <div className="w-full" dir="rtl">
-      <div className="bg-white rounded-xl border border-neutral-200 p-4">
+      <div className="rounded-xl border border-neutral-200 bg-white p-4">
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -170,28 +242,41 @@ function LiquidityChart({ series }: { series: Array<{ bucket: string; total: num
               margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 stroke="#6b7280"
                 fontSize={12}
                 interval="preserveStartEnd"
               />
-              <YAxis 
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+              <YAxis
+                tickFormatter={(value) =>
+                  `${faNum((value / 1000).toFixed(0))}K`
+                }
                 stroke="#6b7280"
                 fontSize={12}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="total" 
-                stroke="url(#liquidityGradient)" 
+              <Line
+                type="monotone"
+                dataKey="total"
+                stroke="url(#liquidityGradient)"
                 strokeWidth={3}
-                dot={{ fill: '#ec4899', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#ec4899', strokeWidth: 2, fill: '#fff' }}
+                dot={{ fill: "#ec4899", strokeWidth: 2, r: 4 }}
+                activeDot={{
+                  r: 6,
+                  stroke: "#ec4899",
+                  strokeWidth: 2,
+                  fill: "#fff",
+                }}
               />
               <defs>
-                <linearGradient id="liquidityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient
+                  id="liquidityGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
                   <stop offset="0%" stopColor="#ec4899" />
                   <stop offset="100%" stopColor="#8b5cf6" />
                 </linearGradient>
@@ -200,11 +285,14 @@ function LiquidityChart({ series }: { series: Array<{ bucket: string; total: num
           </ResponsiveContainer>
         </div>
       </div>
-      
+
       {/* Chart legend/info - RTL layout */}
-      <div className="mt-4 flex items-center justify-between text-sm text-neutral-600" dir="rtl">
+      <div
+        className="text-sm mt-4 flex items-center justify-between text-neutral-600"
+        dir="rtl"
+      >
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+          <div className="h-3 w-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500"></div>
           <span>روند نقدینگی</span>
         </div>
         <div className="text-xs text-neutral-500">
@@ -214,5 +302,3 @@ function LiquidityChart({ series }: { series: Array<{ bucket: string; total: num
     </div>
   );
 }
-
-

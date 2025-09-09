@@ -1,4 +1,4 @@
-import { categoryResponseType } from "@/services/super-admin/product/cetegory/getAll";
+import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import { PaginatedResponse } from "@/types/api";
 import { EditProductData, ProductData } from "@/types/super-admin/products";
 import { atom } from "jotai";

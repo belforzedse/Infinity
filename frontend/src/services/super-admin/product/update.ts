@@ -22,7 +22,7 @@ interface TransformedProductData
 }
 
 function transformProductDataForApi(
-  data: EditProductData
+  data: EditProductData,
 ): TransformedProductData {
   // Create a new object without the CoverImage field
   const { CoverImage, ...rest } = data;
@@ -34,7 +34,7 @@ function transformProductDataForApi(
     product_main_category: data.product_main_category?.id || null,
     product_tags: data.product_tags.map((tag) => tag.id),
     product_other_categories: data.product_other_categories.map(
-      (category) => category.id
+      (category) => category.id,
     ),
   };
 
@@ -60,7 +60,7 @@ export const updateProduct = async (id: string, body: EditProductData) => {
         headers: {
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      }
+      },
     );
 
     return { success: true, data: response.data };

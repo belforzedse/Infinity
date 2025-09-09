@@ -15,13 +15,13 @@ const SizeGuide: React.FC<SizeGuideProps> = ({ onNewTemplate }) => {
   const sizeOptions: Option[] = [{ id: 1, name: "سایز" }];
 
   return (
-    <div className="bg-white rounded-xl p-5">
-      <h2 className="text-right mb-4 text-lg text-neutral-600">راهنمای سایز</h2>
+    <div className="rounded-xl bg-white p-5">
+      <h2 className="text-lg mb-4 text-right text-neutral-600">راهنمای سایز</h2>
 
-      <div className="bg-white rounded-lg border border-slate-100 p-4">
+      <div className="rounded-lg border border-slate-100 bg-white p-4">
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1 lg:col-span-1 col-span-2">
-            <label htmlFor="size" className="text-neutral-600 text-base">
+          <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
+            <label htmlFor="size" className="text-base text-neutral-600">
               ویژگی
             </label>
             <Select
@@ -31,8 +31,8 @@ const SizeGuide: React.FC<SizeGuideProps> = ({ onNewTemplate }) => {
               placeholder="سایز"
             />
           </div>
-          <div className="flex flex-col gap-1 relative lg:col-span-1 col-span-2">
-            <label htmlFor="template" className="text-neutral-600 text-base">
+          <div className="relative col-span-2 flex flex-col gap-1 lg:col-span-1">
+            <label htmlFor="template" className="text-base text-neutral-600">
               قالب
             </label>
             <Select
@@ -43,11 +43,11 @@ const SizeGuide: React.FC<SizeGuideProps> = ({ onNewTemplate }) => {
             />
 
             <div
-              className="flex items-center gap-1 text-pink-500 cursor-pointer absolute top-1 left-0"
+              className="absolute left-0 top-1 flex cursor-pointer items-center gap-1 text-pink-500"
               onClick={onNewTemplate}
             >
               <span className="text-sm">قالب جدید</span>
-              <CirculePlusIcon className="w-6 h-6" />
+              <CirculePlusIcon className="h-6 w-6" />
             </div>
           </div>
         </div>

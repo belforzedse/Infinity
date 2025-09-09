@@ -29,7 +29,7 @@ export type StandardField<T> = {
   }>;
   fetchTerms?: (
     searchTerm: string,
-    category: string
+    category: string,
   ) => Promise<
     Array<{
       label: string;
@@ -38,7 +38,7 @@ export type StandardField<T> = {
   >;
   fetchOptions?: (
     searchTerm: string,
-    formData?: any
+    formData?: any,
   ) => Promise<
     Array<{
       label: string;
@@ -119,19 +119,19 @@ export function isStandardField<T>(field: Field<T>): field is StandardField<T> {
 }
 
 export function isRadioTextWithChips<T>(
-  field: Field<T>
+  field: Field<T>,
 ): field is RadioTextWithChipsField<T> {
   return field.type === "radio-text-with-chips";
 }
 
 export function isProvinceCityField<T>(
-  field: Field<T>
+  field: Field<T>,
 ): field is ProvinceCityField<T> {
   return field.type === "province-city";
 }
 
 export function isCategoriesListField<T>(
-  field: Field<T>
+  field: Field<T>,
 ): field is CategoriesListField<T> {
   return field.type === "categories-list";
 }

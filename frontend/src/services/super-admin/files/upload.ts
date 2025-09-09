@@ -63,7 +63,7 @@ export const uploadFile = async (file: File): Promise<Response | undefined> => {
     const data = await response.json();
 
     return data as Response;
-  } catch (error: any) {
+  } catch (_error: any) {
     toast.error("خطا در آپلود تصویر");
   }
 };

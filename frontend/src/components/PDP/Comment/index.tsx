@@ -13,14 +13,14 @@ export default function PDPComment(props: Props) {
 
   return (
     <div
-      className="flex gap-4 flex-col-reverse md:flex-row"
+      className="flex flex-col-reverse gap-4 md:flex-row"
       data-comments-section
     >
       <div className="flex-1">
         <PDPCommentList reviews={productReviews} />
       </div>
 
-      <div className="flex flex-col-reverse md:flex-col gap-4 md:w-[386px]">
+      <div className="flex flex-col-reverse gap-4 md:w-[386px] md:flex-col">
         <PDPCommentAdd
           rating={rating}
           rateCount={rateCount}

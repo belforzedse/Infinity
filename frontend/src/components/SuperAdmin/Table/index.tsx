@@ -5,11 +5,11 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   Row,
 } from "@tanstack/react-table";
+// removed unused import: getPaginationRowModel from "@tanstack/react-table"
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/tailwind";
 import { twMerge } from "tailwind-merge";
@@ -19,6 +19,7 @@ import { apiClient } from "@/services";
 import { atom, useAtom } from "jotai";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
+import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
 
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData, TValue> {
@@ -50,6 +51,12 @@ type Response<TData> = {
       total: number;
     };
   };
+};
+
+type FilterItem = {
+  field: string;
+  operator: string;
+  value: string | number | boolean;
 };
 
 export const refreshTable = atom(true);
@@ -110,17 +117,16 @@ export function SuperAdminTable<TData, TValue>({
       separator = "&";
 
       // Add filters if they exist
-      if (filter && filter.length > 0) {
-        // Add each filter to the URL
-        const filterParams = filter
-          .map((item: any) => {
-            const { field, operator, value } = item;
-
-            if (!field || !operator || !value) return "";
-
-            return `filters${field}[${operator}]=${encodeURIComponent(value)}`;
+      if (Array.isArray(filter) && filter.length > 0) {
+        const filters = filter as unknown as FilterItem[];
+        const filterParams = filters
+          .map((item) => {
+            const { field, operator, value } = item || ({} as FilterItem);
+            if (!field || !operator || value === undefined || value === null)
+              return "";
+            return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
           })
-          .filter((param: string) => param !== "")
+          .filter((param) => param !== "")
           .join("&");
 
         if (filterParams) {
@@ -134,9 +140,9 @@ export function SuperAdminTable<TData, TValue>({
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
         })
-        .then((res) => {
-          setTableData((res as any)?.data);
-          setTotalSize((res as any)?.meta?.pagination?.total);
+        .then((res: Response<TData>) => {
+          setTableData(res.data);
+          setTotalSize(res.meta?.pagination?.total ?? 0);
           setIsLoading(false);
           isFetchingRef.current = false;
         })
@@ -199,26 +205,12 @@ export function SuperAdminTable<TData, TValue>({
     onItemDrag?.(targetRow);
   };
 
-  const LoadingSkeleton = () => (
-    <>
-      {[...Array(5)].map((_, i) => (
-        <tr key={i} className="animate-pulse">
-          {[...Array(columns.length)].map((_, j) => (
-            <td key={j} className="p-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            </td>
-          ))}
-        </tr>
-      ))}
-    </>
-  );
-
   return (
     <div className="w-full">
       <div className="block md:hidden">
         <div className="flex flex-col gap-2">
           {!removeActions && (
-            <div className="flex justify-between items-center w-full">
+            <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
                 <input type="checkbox" />
                 <span className="text-xs text-foreground-primary">
@@ -235,7 +227,7 @@ export function SuperAdminTable<TData, TValue>({
                   ]}
                 />
 
-                <button className="bg-actions-primary text-white px-3 py-2 rounded-lg flex justify-between items-center">
+                <button className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white">
                   اجرا
                 </button>
               </div>
@@ -244,25 +236,25 @@ export function SuperAdminTable<TData, TValue>({
         </div>
       </div>
 
-      <div className="w-full overflow-auto hidden md:block">
-        <table className={cn("w-full caption-bottom text-sm", className)}>
+      <div className="hidden w-full overflow-auto md:block">
+        <table className={cn("text-sm w-full caption-bottom", className)}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr className="bg-slate-50 rounded-2xl" key={headerGroup.id}>
+              <tr className="rounded-2xl bg-slate-50" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <th
                       key={header.id}
                       className={twMerge(
-                        "h-12 px-4 align-middle text-foreground-primary text-sm text-right font-normal",
-                        header.column.columnDef.meta?.headerClassName
+                        "text-sm h-12 px-4 text-right align-middle font-normal text-foreground-primary",
+                        header.column.columnDef.meta?.headerClassName,
                       )}
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </th>
                   );
@@ -272,7 +264,7 @@ export function SuperAdminTable<TData, TValue>({
             {!removeActions && (
               <tr>
                 <td colSpan={columns.length}>
-                  <div className="flex justify-between items-center my-3 w-full h-auto px-4">
+                  <div className="my-3 flex h-auto w-full items-center justify-between px-4">
                     <div className="flex items-center gap-2">
                       <input type="checkbox" />
                       <span className="text-xs text-foreground-primary">
@@ -289,7 +281,7 @@ export function SuperAdminTable<TData, TValue>({
                         ]}
                       />
 
-                      <button className="bg-actions-primary text-white px-3 py-2 rounded-lg flex justify-between items-center">
+                      <button className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white">
                         اجرا
                       </button>
                     </div>
@@ -300,7 +292,7 @@ export function SuperAdminTable<TData, TValue>({
           </thead>
           <tbody>
             {isLoading ? (
-              <LoadingSkeleton />
+              <ReportTableSkeleton columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
@@ -311,15 +303,15 @@ export function SuperAdminTable<TData, TValue>({
                   onDrop={(e) => handleDrop(e, row)}
                   className={twMerge(
                     "border-b border-gray-200 transition-colors hover:bg-gray-50/50",
-                    dragOverRow?.id === row.id && "border-t-2 border-blue-500"
+                    dragOverRow?.id === row.id && "border-t-2 border-blue-500",
                   )}
                 >
                   {row.getVisibleCells().map((cell, index) => (
                     <td
                       key={cell.id}
                       className={twMerge(
-                        "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right",
-                        cell.column.columnDef.meta?.cellClassName
+                        "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
+                        cell.column.columnDef.meta?.cellClassName,
                       )}
                     >
                       {index === 0 && !removeActions ? (
@@ -332,13 +324,13 @@ export function SuperAdminTable<TData, TValue>({
                           <input type="checkbox" />
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </div>
                       ) : (
                         flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )
                       )}
                     </td>

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
+import dynamic from "next/dynamic";
+
+// TODO: Evaluate using a lighter range slider or native `<input type="range">`
+const Slider = dynamic(() => import("rc-slider"), { ssr: false });
 
 interface PriceFilterProps {
   minPrice?: number;
@@ -27,6 +29,10 @@ const PriceFilter = ({
     min: formatPrice(minPrice),
     max: formatPrice(maxPrice),
   });
+
+  useEffect(() => {
+    import("rc-slider/assets/index.css");
+  }, []);
 
   useEffect(() => {
     setPriceRange([minPriceValue || minPrice, maxPriceValue || maxPrice]);
@@ -72,29 +78,29 @@ const PriceFilter = ({
   };
 
   return (
-    <div className="flex flex-col gap-y-8 w-full">
+    <div className="flex w-full flex-col gap-y-8">
       <div className="flex flex-col gap-y-4">
         <div className="flex flex-row-reverse items-center justify-between gap-1">
-          <div className="bg-white border border-slate-200 rounded-lg w-[92px] py-1">
+          <div className="w-[92px] rounded-lg border border-slate-200 bg-white py-1">
             <input
               type="text"
               value={inputValues.max}
               placeholder={`${formatPrice(maxPrice)} هزار تومان`}
               onChange={(e) => handleInputChange(e.target.value, false)}
-              className="w-full text-xs text-center text-neutral-400 focus:outline-none"
+              className="text-xs w-full text-center text-neutral-400 focus:outline-none"
             />
           </div>
           <span className="text-xs text-neutral-800">تا</span>
-          <div className="bg-white border border-slate-200 rounded-lg  w-[92px] py-1">
+          <div className="w-[92px] rounded-lg border border-slate-200 bg-white py-1">
             <input
               type="text"
               value={inputValues.min}
               placeholder={`${formatPrice(minPrice)} هزار تومان`}
               onChange={(e) => handleInputChange(e.target.value, true)}
-              className="w-full text-xs text-center text-neutral-400 focus:outline-none"
+              className="text-xs w-full text-center text-neutral-400 focus:outline-none"
             />
           </div>
-          <span className="text-xs text-neutral-800 ">شروع از</span>
+          <span className="text-xs text-neutral-800">شروع از</span>
         </div>
 
         <div className="px-1.5 py-4">

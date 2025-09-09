@@ -4,13 +4,12 @@ import { USER_SIDEBAR_ITEMS, LOGOUT_ITEM } from "@/components/User/Constnats";
 
 const UserSidebar = () => {
   //   const handleLogout = () => {
-  //     console.log("click");
   //     /* Add logout logic here */
   //   };
 
   return (
-    <div className="w-[240px] bg-white lg:flex hidden flex-col gap-4 rounded-lg shadow-sm mr-1">
-      <span className="text-4xl text-foreground-primary mb-4 text-right">
+    <div className="mr-1 hidden w-[240px] flex-col gap-4 rounded-lg bg-white shadow-sm lg:flex">
+      <span className="text-4xl mb-4 text-right text-foreground-primary">
         حساب من
       </span>
 

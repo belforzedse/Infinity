@@ -25,7 +25,7 @@ const PLPListFilterCategory = ({
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<CategoryOption>(
-    filterOptions[0] || { id: "", title: "" }
+    filterOptions[0] || { id: "", title: "" },
   );
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const PLPListFilterCategory = ({
       filterOptions.find((option) => option.id === value) || {
         id: "",
         title: "",
-      }
+      },
     );
   }, [value, filterOptions]);
 
@@ -44,37 +44,37 @@ const PLPListFilterCategory = ({
   };
 
   return (
-    <div className="bg-stone-50 rounded-2xl p-4 rtl">
+    <div className="rtl rounded-2xl bg-stone-50 p-4">
       <div className="flex items-center justify-between pb-3">
-        <h3 className="text-sm text-primary">{title}</h3>
+        <h3 className="text-primary text-sm">{title}</h3>
       </div>
 
       <div className="mt-3">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between bg-white rounded-xl px-3 py-2"
+          className="flex w-full items-center justify-between rounded-xl bg-white px-3 py-2"
           disabled={isLoading}
         >
-          <span className="text-gray-800 text-xs">
+          <span className="text-xs text-gray-800">
             {isLoading ? "در حال بارگذاری..." : selectedOption.title}
           </span>
           <ChevronDownIcon
-            className={`w-6 h-6 transition-transform ${
+            className={`h-6 w-6 transition-transform ${
               isOpen ? "rotate-180" : ""
             }`}
           />
         </button>
 
         {isOpen && !isLoading && (
-          <div className="mt-2 bg-white rounded-xl p-3">
+          <div className="mt-2 rounded-xl bg-white p-3">
             <ul className="space-y-2">
               {filterOptions.map((option) => (
                 <li key={option.id}>
                   <button
                     onClick={() => handleOptionClick(option)}
-                    className={`w-full text-right text-xs px-2 py-1.5 rounded-lg hover:bg-stone-50 transition-colors ${
+                    className={`text-xs w-full rounded-lg px-2 py-1.5 text-right transition-colors hover:bg-stone-50 ${
                       selectedOption.id === option.id
-                        ? "bg-stone-50 text-primary"
+                        ? "text-primary bg-stone-50"
                         : "text-gray-800"
                     }`}
                   >

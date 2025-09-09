@@ -14,7 +14,7 @@ export default function AccountPage() {
 
   return (
     <div
-      className="flex lg:flex-row flex-col min-h-[60vh] bg-white overflow-hidden container mx-auto lg:gap-10 gap-1 lg:p-0 px-4"
+      className="container mx-auto flex min-h-[60vh] flex-col gap-1 bg-white px-4 lg:flex-row lg:gap-10 lg:p-0"
       dir="rtl"
     >
       <span className="text-3xl text-foreground-primary lg:hidden">
@@ -23,7 +23,7 @@ export default function AccountPage() {
 
       <UserSidebar />
 
-      <main className="flex-1 overflow-y-auto flex flex-col lg:gap-4 gap-3 lg:py-8">
+      <main className="flex flex-1 flex-col gap-3 overflow-y-auto lg:gap-4 lg:py-8">
         <WelcomNotifBar username={fullName} />
 
         <AccountForm />

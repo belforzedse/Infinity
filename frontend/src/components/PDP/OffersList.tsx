@@ -39,9 +39,9 @@ export default function PDPOffersList(props: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center gap-1">
           {icon}
-          <span className="text-foreground-primary text-3xl">{title}</span>
+          <span className="text-3xl text-foreground-primary">{title}</span>
         </div>
 
         <div className="hidden md:block">
@@ -52,7 +52,7 @@ export default function PDPOffersList(props: Props) {
         </div>
       </div>
       <div>
-        <div ref={scrollRef} className="gap-5 overflow-x-hidden hidden md:flex">
+        <div ref={scrollRef} className="hidden gap-5 overflow-x-hidden md:flex">
           {products.map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}
@@ -60,7 +60,7 @@ export default function PDPOffersList(props: Props) {
 
         <div
           ref={scrollRef}
-          className="gap-5 overflow-x-hidden md:hidden flex flex-col"
+          className="flex flex-col gap-5 overflow-x-hidden md:hidden"
         >
           {products
             .slice(0, isShowAllProducts ? products.length : 4)
@@ -80,9 +80,9 @@ export default function PDPOffersList(props: Props) {
         </div>
 
         {!isShowAllProducts && (
-          <div className="flex items-center justify-center md:hidden mt-4">
+          <div className="mt-4 flex items-center justify-center md:hidden">
             <button
-              className="text-foreground-primary text-base flex items-center gap-1"
+              className="text-base flex items-center gap-1 text-foreground-primary"
               onClick={() => setIsShowAllProducts(true)}
             >
               <span>مشاهده همه</span>
