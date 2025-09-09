@@ -32,6 +32,10 @@ export default function NavigationProgress() {
     const restore: {
       pushState?: History["pushState"];
       replaceState?: History["replaceState"];
+      router?: any;
+      routerPush?: (...args: any[]) => any;
+      routerReplace?: (...args: any[]) => any;
+      navigationListener?: (e: any) => void;
     } = {};
 
     function onClick(e: MouseEvent) {
@@ -76,7 +80,25 @@ export default function NavigationProgress() {
     window.addEventListener("click", onClick);
     window.addEventListener("popstate", onPopState);
 
-    // Also capture programmatic navigations (router.push/replace)
+    // Start when navigation API is used (router.push, etc.)
+    if ("navigation" in window) {
+      const onNavigate = (e: any) => {
+        try {
+          const current = new URL(window.location.href);
+          const url = new URL(e.destination?.url ?? "", current.href);
+          if (url.origin !== current.origin) return;
+          const next = url.pathname + (url.search || "");
+          const cur = current.pathname + (current.search || "");
+          if (next === cur) return;
+          setNavigationInProgress(true);
+          startFailSafe();
+        } catch {}
+      };
+      (window as any).navigation.addEventListener("navigate", onNavigate);
+      restore.navigationListener = onNavigate;
+    }
+
+    // Also capture programmatic navigations (history/router.push)
     try {
       restore.pushState = history.pushState.bind(history);
       restore.replaceState = history.replaceState.bind(history);
@@ -94,6 +116,26 @@ export default function NavigationProgress() {
         // Do not show loader for replaceState to avoid flicker from query updates (nuqs)
         return restore.replaceState!(...args);
       } as any;
+
+      const nextRouter: any = (window as any).next?.router;
+      if (nextRouter?.push) {
+        restore.router = nextRouter;
+        restore.routerPush = nextRouter.push.bind(nextRouter);
+        nextRouter.push = (...args: any[]) => {
+          setNavigationInProgress(true);
+          startFailSafe();
+          return restore.routerPush!(...args);
+        };
+      }
+      if (nextRouter?.replace) {
+        restore.router = nextRouter;
+        restore.routerReplace = nextRouter.replace.bind(nextRouter);
+        nextRouter.replace = (...args: any[]) => {
+          setNavigationInProgress(true);
+          startFailSafe();
+          return restore.routerReplace!(...args);
+        };
+      }
     } catch {}
 
     return () => {
@@ -103,6 +145,15 @@ export default function NavigationProgress() {
       // restore history methods
       if (restore.pushState) history.pushState = restore.pushState;
       if (restore.replaceState) history.replaceState = restore.replaceState;
+      if (restore.navigationListener && "navigation" in window)
+        (window as any).navigation.removeEventListener(
+          "navigate",
+          restore.navigationListener
+        );
+      if (restore.router && restore.routerPush)
+        restore.router.push = restore.routerPush;
+      if (restore.router && restore.routerReplace)
+        restore.router.replace = restore.routerReplace;
     };
   }, [clearFailSafe, startFailSafe]);
 
