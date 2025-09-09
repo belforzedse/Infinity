@@ -6,6 +6,7 @@ import UserSidebar from "@/components/User/Sidebar";
 import BreadCrumb from "@/components/User/BreadCrumb";
 import SortIcon from "@/components/User/Icons/SortIcon";
 import OrdersTabs from "@/components/User/Orders/Tabs";
+import UserContainer from "@/components/layout/UserContainer";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -19,9 +20,8 @@ export default function OrdersPage() {
   }, [router]);
 
   return (
-    // TODO: change contaianer to handle padding and delete padding from main
-    <div
-      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
+    <UserContainer
+      className="flex min-h-[60vh] gap-10 bg-white"
       dir="rtl"
     >
       <UserSidebar />
@@ -39,6 +39,6 @@ export default function OrdersPage() {
           <OrdersTabs />
         </div>
       </main>
-    </div>
+    </UserContainer>
   );
 }
