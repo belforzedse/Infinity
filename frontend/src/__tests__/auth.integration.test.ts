@@ -15,11 +15,14 @@ describe('Authentication flows', () => {
       json: async () => ({}),
     });
 
+
     await expect(apiClient.get('/protected')).rejects.toEqual({
+
       message: ERROR_MESSAGES.DEFAULT,
       status: HTTP_STATUS.UNAUTHORIZED,
       errors: undefined,
     });
+
 
     expect(localStorage.getItem('accessToken')).toBeNull();
   });
@@ -29,4 +32,5 @@ describe('Authentication flows', () => {
     handleAuthErrors(null, false);
     expect(localStorage.getItem('accessToken')).toBe('token');
   });
+
 });

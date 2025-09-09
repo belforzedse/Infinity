@@ -34,15 +34,18 @@ export default function NotFound() {
         {/* Main content container */}
         <div className="rounded-3xl border border-gray-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl md:p-12">
           {/* Admin badge */}
-          <div className="text-sm mb-6 inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-2 font-medium text-actions-primary">
+
+
+          <div className="text-sm mb-6 inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-2 font-medium text-pink-700">
             <Shield className="h-4 w-4" />
-            Super Admin Panel
+            ادمین
           </div>
 
           {/* Icon section */}
           <div className="relative mb-8">
             <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full border-4 border-pink-200 bg-gradient-to-br from-pink-100 to-rose-100 shadow-lg">
-              <AlertTriangle className="h-12 w-12 text-actions-primary" />
+              <AlertTriangle className="h-12 w-12 text-pink-600" />
+
             </div>
             <div className="absolute -right-2 -top-2 flex h-8 w-8 animate-bounce items-center justify-center rounded-full border-2 border-white bg-amber-400 shadow-lg">
               <Settings className="h-4 w-4 text-amber-800" />
@@ -51,7 +54,9 @@ export default function NotFound() {
 
           {/* 404 Number */}
           <div className="mb-6">
-            <h1 className="text-8xl bg-gradient-to-r from-actions-primary via-rose-500 to-pink-600 bg-clip-text font-black leading-none text-transparent md:text-9xl">
+
+            <h1 className="text-8xl bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 bg-clip-text font-black leading-none text-transparent md:text-9xl">
+
               404
             </h1>
           </div>
@@ -71,26 +76,21 @@ export default function NotFound() {
           {/* Action buttons */}
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/super-admin">
-              <Button
-                variant="primary"
-                size="lg"
-                className="flex transform items-center gap-2 rounded-xl bg-gradient-to-r from-actions-primary to-rose-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:from-pink-600 hover:to-rose-700 hover:shadow-xl"
-              >
-                <Home className="h-5 w-5" />
-                بازگشت به پیشخوان
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+
+              <button className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl">
+                {/* Gradient overlay for smooth hover effect */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-700 to-rose-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                <Home className="relative z-10 h-5 w-5" />
+                <span className="relative z-10">بازگشت به پیشخوان</span>
+                <ChevronRight className="relative z-10 h-4 w-4" />
+              </button>
             </Link>
 
             <Link href="/super-admin/dashboard">
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex transform items-center gap-2 rounded-xl border-2 border-gray-300 px-8 py-4 text-gray-700 shadow-lg transition-all duration-200 hover:scale-105 hover:bg-gray-50 hover:shadow-xl"
-              >
+              <button className="flex items-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-8 py-4 font-semibold text-gray-700 shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700 hover:shadow-xl">
                 <Shield className="h-5 w-5" />
                 داشبورد مدیریت
-              </Button>
+              </button>
             </Link>
           </div>
 
@@ -98,7 +98,8 @@ export default function NotFound() {
           <div className="mt-8 border-t border-gray-200 pt-6">
             <div className="text-sm flex items-center justify-center gap-3 text-gray-500">
               <div className="flex items-center gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-actions-primary"></div>
+
+                <div className="h-2 w-2 animate-pulse rounded-full bg-pink-500"></div>
                 سیستم عملیاتی
               </div>
               <div className="h-4 w-1 bg-gray-300"></div>
@@ -108,7 +109,8 @@ export default function NotFound() {
         </div>
 
         {/* Professional floating elements */}
-        <div className="absolute left-10 top-10 h-3 w-3 animate-ping rounded-full bg-actions-primary"></div>
+
+        <div className="absolute left-10 top-10 h-3 w-3 animate-ping rounded-full bg-pink-500"></div>
         <div className="absolute bottom-10 right-10 h-4 w-4 animate-pulse rounded-full bg-rose-400"></div>
         <div className="absolute right-20 top-1/4 h-2 w-2 animate-bounce rounded-full bg-pink-400 delay-300"></div>
 
