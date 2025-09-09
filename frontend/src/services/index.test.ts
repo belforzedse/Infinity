@@ -33,6 +33,7 @@ describe('ApiClient error handling', () => {
       status: HTTP_STATUS.UNAUTHORIZED,
       errors: undefined,
     });
+
   });
 
   it('preserves 400 error structure and skips auth handler', async () => {
