@@ -68,7 +68,7 @@ export const columns: ColumnDef<PaymentMethods>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           <SuperAdminTableCellActionButton
             variant="primary"
             icon={<RecycleIcon />}
@@ -91,90 +91,67 @@ type Props = {
 
 export const MobileTable = ({ data }: Props) => {
   return (
-    <div className="flex flex-col gap-2 mt-2">
-      {data.map((row) => {
-        const [isOpen, setIsOpen] = useState(false);
-
-        return (
-          <div
-            key={row.id}
-            className="p-3 bg-white rounded-lg w-full min-h-[76px] flex items-center gap-2"
-          >
-            <div className="flex flex-col gap-2 flex-1">
-              <div className="flex justify-between items-center w-full">
-                <div className="flex gap-2">
-                  <input type="checkbox" className="w-5 h-5" />
-
-                  <span className="text-sm text-neutral-800">{row.title}</span>
-                </div>
-
-                <button
-                  className={`flex items-center justify-center rounded-full border border-neutral-600 w-6 h-6 ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
-                  onClick={() => setIsOpen(!isOpen)}
-                >
-                  <ShowMoreIcon />
-                </button>
-              </div>
-
-              {!isOpen ? (
-                <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
-                  <div className="flex gap-1 items-center">
-                    <span className="text-xs text-neutral-400">
-                      {row.roleLevel}
-                    </span>
-                    <span className="text-xs text-neutral-400">|</span>
-                    <span className="text-sm text-neutral-400">
-                      ایجاد: {row.createdAt}
-                    </span>
-                    <span className="text-xs text-neutral-400">|</span>
-                    <span className="text-sm text-neutral-400">
-                      ویرایش: {row.updatedAt}
-                    </span>
-                  </div>
-
-                  <SuperAdminTableCellSwitch
-                    status={row.status as "active" | "inactive"}
-                  />
-                </div>
-              ) : (
-                columns.slice(0, columns.length - 1).map((column, index) => {
-                  return (
-                    <div
-                      className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1"
-                      key={index}
-                    >
-                      <span className="text-xs text-neutral-400">
-                        {column.header?.toString()}
-                      </span>
-
-                      {column?.cell ? (
-                        (column?.cell as any)?.({
-                          row: {
-                            getValue: (key: string) => {
-                              return row[key as keyof PaymentMethods];
-                            },
-                          },
-                        })
-                      ) : (
-                        <span className="text-foreground-primary text-xs md:text-base">
-                          {
-                            row[
-                              (column as any)
-                                .accessorKey as keyof PaymentMethods
-                            ] as string
-                          }
-                        </span>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        );
-      })}
+    <div className="mt-2 flex flex-col gap-2">
+      {data.map((row) => (
+        <PaymentMethodMobileRow key={row.id} row={row} />
+      ))}
     </div>
   );
 };
+
+function PaymentMethodMobileRow({ row }: { row: PaymentMethods }) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3">
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex gap-2">
+            <input type="checkbox" className="h-5 w-5" />
+            <span className="text-sm text-neutral-800">{row.title}</span>
+          </div>
+          <button
+            className={`flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 ${isOpen ? "rotate-180" : ""}`}
+            onClick={() => setIsOpen((v) => !v)}
+          >
+            <ShowMoreIcon />
+          </button>
+        </div>
+        {!isOpen ? (
+          <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-neutral-400">{row.roleLevel}</span>
+              <span className="text-xs text-neutral-400">|</span>
+              <span className="text-sm text-neutral-400">ایجاد: {row.createdAt}</span>
+              <span className="text-xs text-neutral-400">|</span>
+              <span className="text-sm text-neutral-400">ویرایش: {row.updatedAt}</span>
+            </div>
+            <SuperAdminTableCellSwitch status={row.status as "active" | "inactive"} />
+          </div>
+        ) : (
+          columns.slice(0, columns.length - 1).map((column, index) => (
+            <div
+              className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1"
+              key={index}
+            >
+              <span className="text-xs text-neutral-400">
+                {column.header?.toString()}
+              </span>
+              {column?.cell ? (
+                (column?.cell as any)?.({
+                  row: {
+                    getValue: (key: string) =>
+                      row[key as keyof PaymentMethods],
+                  },
+                })
+              ) : (
+                <span className="text-xs text-foreground-primary md:text-base">
+                  {row[(column as any).accessorKey as keyof PaymentMethods] as string}
+                </span>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

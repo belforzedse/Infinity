@@ -6,17 +6,17 @@ interface WelcomNotifBarProps {
 
 export default function WelcomNotifBar({ username }: WelcomNotifBarProps) {
   return (
-    <div className="bg-emerald-100 rounded-l-2xl lg:p-3 lg:pr-4 pr-3 py-2 flex items-center gap-2 lg:w-fit lg:pl-28 relative">
-      <div className="bg-[#10B981] rounded-full lg:h-[78px] h-[62px] w-1 absolute right-0" />
+    <div className="relative flex items-center gap-2 rounded-l-2xl bg-emerald-100 py-2 pr-3 lg:w-fit lg:p-3 lg:pl-28 lg:pr-4">
+      <div className="absolute right-0 h-[62px] w-1 rounded-full bg-[#10B981] lg:h-[78px]" />
 
-      <MessageIcon className="lg:h-10 lg:w-10 h-6 w-6" />
+      <MessageIcon className="h-6 w-6 lg:h-10 lg:w-10" />
 
-      <div className="flex items-start flex-col gap-0.5">
-        <span className="text-foreground-primary lg:text-lg text-base">
+      <div className="flex flex-col items-start gap-0.5">
+        <span className="text-base text-foreground-primary lg:text-lg">
           <span className="text-emerald-600">{username} </span>به فروشگاه بزرگ
           اینفینیتی خوش اومدی!
         </span>
-        <span className="lg:text-xs text-sm text-neutral-500">پیام سیستم</span>
+        <span className="text-sm text-neutral-500 lg:text-xs">پیام سیستم</span>
       </div>
     </div>
   );

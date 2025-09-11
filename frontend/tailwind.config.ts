@@ -35,8 +35,8 @@ export default {
         "2xl": "1536px",
       },
       fontFamily: {
-        "peyda-fanum": ["Peyda-Fanum"],
-        peyda: ["Peyda"],
+        "peyda-fanum": ["var(--font-peyda-fanum)"],
+        peyda: ["var(--font-peyda)"],
       },
 
       fontWeight: {

@@ -6,7 +6,7 @@ export default function SuperAdminPaymentMethodSidebar() {
   const [isActive, setIsActive] = useState(true);
 
   return (
-    <div className="flex gap-3 flex-col md:sticky md:top-5">
+    <div className="flex flex-col gap-3 md:sticky md:top-5">
       <ActiveBox
         title="حالت تست"
         label="تستی بودن درگاه"

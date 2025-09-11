@@ -5,30 +5,30 @@ import AddAddress from "@/components/User/Address/AddAddress";
 export default function AddressesPage() {
   return (
     <div
-      className="flex min-h-[60vh] bg-white overflow-hidden container mx-auto gap-10 lg:p-0 px-4"
+      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
       dir="rtl"
     >
       <UserSidebar />
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-7">
-        <div className="w-full flex flex-col lg:gap-6 gap-0 flex-grow">
-          <span className="lg:text-lg text-sm text-foreground-primary lg:order-1 order-2">
+      <main className="flex flex-1 flex-col gap-7 overflow-y-auto">
+        <div className="flex w-full flex-grow flex-col gap-0 lg:gap-6">
+          <span className="text-sm order-2 text-foreground-primary lg:text-lg lg:order-1">
             آدرس‌های زیر به طور پیش‌فرض در صفحه پرداخت مورد استفاده قرار
             مي‌گیرد.
           </span>
 
-          <div className="flex items-center justify-between w-full lg:order-2 order-1">
-            <span className="text-foreground-primary text-2xl lg:flex hidden">
+          <div className="order-1 flex w-full items-center justify-between lg:order-2">
+            <span className="text-2xl hidden text-foreground-primary lg:flex">
               آدرس صورت حساب
             </span>
-            <span className="text-foreground-primary text-2xl lg:hidden flex">
+            <span className="text-2xl flex text-foreground-primary lg:hidden">
               حساب من
             </span>
 
             <AddAddress />
           </div>
 
-          <div className="order-3 lg:mt-0 mt-5">
+          <div className="order-3 mt-5 lg:mt-0">
             <AddressContainer />
           </div>
         </div>

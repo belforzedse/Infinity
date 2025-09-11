@@ -72,7 +72,7 @@ export default function VerifyForgotPasswordForm({
               onChange={(value) => setFormData({ ...formData, otp: value })}
             />
 
-            <div className="w-full flex flex-row-reverse justify-between items-center">
+            <div className="flex w-full flex-row-reverse items-center justify-between">
               <span className="text-sm text-foreground-primary/80">
                 {timeLeft}
               </span>
@@ -92,7 +92,7 @@ export default function VerifyForgotPasswordForm({
           </div>
         </div>
 
-        <div className="space-y-3 flex flex-col gap-3">
+        <div className="flex flex-col gap-3 space-y-3">
           <div className="flex flex-col gap-1">
             <Text variant="label" className="mb-2 md:mb-2.5">
               رمز عبور
@@ -121,13 +121,13 @@ export default function VerifyForgotPasswordForm({
           </div>
         </div>
 
-        <div className="flex gap-5 flex-col md:flex-row-reverse">
+        <div className="flex flex-col gap-5 md:flex-row-reverse">
           <AuthButton
             type="submit"
             disabled={isLoading}
             icon={
               isLoading && (
-                <span className="inline-block w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
               )
             }
           >
@@ -136,9 +136,9 @@ export default function VerifyForgotPasswordForm({
 
           <AuthButton
             onClick={handleEditPhone}
-            className="!bg-transparent !text-pink-600 border border-pink-600 hover:!bg-pink-50"
+            className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
             icon={
-              <EditIcon className="w-5 h-5 md:w-6 md:h-6" color="#db2777" />
+              <EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#db2777" />
             }
           >
             ویرایش شماره همراه
@@ -148,3 +148,4 @@ export default function VerifyForgotPasswordForm({
     </form>
   );
 }
+

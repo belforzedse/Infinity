@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function PDPCommentAdd(props: Props) {
-  const { rating, rateCount, productId, productReviews = [] } = props;
+  const { productId, productReviews = [] } = props;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
@@ -88,18 +88,18 @@ export default function PDPCommentAdd(props: Props) {
   return (
     <>
       <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-4 p-5 rounded-3xl bg-background-secondary">
+        <div className="flex flex-col gap-4 rounded-3xl bg-background-secondary p-5">
           <span className="text-3xl text-neutral-700">
             دیدگاه و امتیاز خریداران
           </span>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-1">
-                <span className="text-green-800 text-xl">
+                <span className="text-xl text-green-800">
                   {formattedRating}
                 </span>
-                <span className="text-foreground-primary text-xs">از ۵</span>
+                <span className="text-xs text-foreground-primary">از ۵</span>
               </div>
 
               <div className="flex flex-row-reverse items-center gap-1">
@@ -110,11 +110,11 @@ export default function PDPCommentAdd(props: Props) {
                       <EmptyStarIcon key={index} />
                     ) : (
                       <StarIcon key={index} />
-                    )
+                    ),
                   )}
               </div>
 
-              <span className="text-foreground-primary text-xs mt-1">
+              <span className="text-xs mt-1 text-foreground-primary">
                 {hasReviews
                   ? `(از مجموع ${actualReviewCount} نظر)`
                   : "(هنوز دیدگاهی ثبت نشده است)"}
@@ -122,30 +122,30 @@ export default function PDPCommentAdd(props: Props) {
             </div>
 
             {hasReviews && (
-              <div className="flex-1 w-full md:w-auto">
-                <div className="flex flex-col gap-1.5 w-full">
+              <div className="w-full flex-1 md:w-auto">
+                <div className="flex w-full flex-col gap-1.5">
                   {[5, 4, 3, 2, 1].map((starCount) => (
                     <div key={starCount} className="flex items-center gap-2">
                       <div className="flex flex-row-reverse gap-0.5">
                         {Array(starCount)
                           .fill(0)
                           .map((_, i) => (
-                            <StarIcon key={i} className="w-3 h-3" />
+                            <StarIcon key={i} className="h-3 w-3" />
                           ))}
                       </div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
                         <div
-                          className="h-full bg-yellow-500 rounded-full"
+                          className="h-full rounded-full bg-yellow-500"
                           style={{
                             width: `${getPercentage(
                               ratingDistribution[
                                 starCount as keyof typeof ratingDistribution
-                              ]
+                              ],
                             )}%`,
                           }}
                         />
                       </div>
-                      <span className="text-xs text-gray-500 w-8 text-center">
+                      <span className="text-xs w-8 text-center text-gray-500">
                         {
                           ratingDistribution[
                             starCount as keyof typeof ratingDistribution
@@ -159,8 +159,8 @@ export default function PDPCommentAdd(props: Props) {
             )}
 
             {!hasReviews && (
-              <div className="flex-1 flex items-center justify-center text-center mt-2 md:mt-0">
-                <p className="text-gray-500 text-sm">
+              <div className="mt-2 flex flex-1 items-center justify-center text-center md:mt-0">
+                <p className="text-sm text-gray-500">
                   اولین نفری باشید که دیدگاه خود را برای این محصول ثبت می‌کنید
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function PDPCommentAdd(props: Props) {
         <PLPButton
           text="افزودن نظر"
           leftIcon={<MessagesIcon />}
-          className="w-full flex rounded-xl justify-center items-center text-white !bg-actions-primary text-base"
+          className="text-base flex w-full items-center justify-center rounded-xl !bg-actions-primary text-white"
           onClick={() => setIsModalOpen(true)}
         />
       </div>

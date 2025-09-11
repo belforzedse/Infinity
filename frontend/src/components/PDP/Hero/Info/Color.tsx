@@ -15,7 +15,7 @@ export default function PDPHeroInfoColor(props: Props) {
   const { colors, onColorChange, selectedColor: externalSelectedColor } = props;
 
   const [internalSelectedColor, setInternalSelectedColor] = useState<string>(
-    colors[0]?.id || ""
+    colors[0]?.id || "",
   );
 
   // Use either the external selected color if provided, or the internal state
@@ -33,16 +33,16 @@ export default function PDPHeroInfoColor(props: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-foreground-primary text-xl">انتخاب رنگ</span>
+      <span className="text-xl text-foreground-primary">انتخاب رنگ</span>
 
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
         {colors.map((color) => (
           <>
             {color.id === selectedColor ? (
-              <div className="flex gap-1 items-center p-1 rounded-3xl border border-gray-300">
+              <div className="flex items-center gap-1 rounded-3xl border border-gray-300 p-1">
                 <div
                   key={color.id}
-                  className="w-7 h-7 rounded-full"
+                  className="h-7 w-7 rounded-full"
                   style={{ backgroundColor: color.colorCode }}
                 />
 
@@ -54,7 +54,7 @@ export default function PDPHeroInfoColor(props: Props) {
               <button
                 onClick={() => handleColorClick(color.id)}
                 key={color.id}
-                className="w-7 h-7 rounded-full"
+                className="h-7 w-7 rounded-full"
                 style={{ backgroundColor: color.colorCode }}
               />
             )}

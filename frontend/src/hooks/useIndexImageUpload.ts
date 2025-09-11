@@ -33,10 +33,10 @@ const useIndexImageUpload = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(
-    null
+    null,
   ) as React.RefObject<HTMLInputElement>;
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
   const pathname = usePathname();
 
@@ -46,13 +46,13 @@ const useIndexImageUpload = ({
       !pathname.endsWith("/add")
     ) {
       setImagePreview(
-        IMAGE_BASE_URL + productData.CoverImage.data.attributes.url
+        IMAGE_BASE_URL + productData.CoverImage.data.attributes.url,
       );
     }
   }, [productData.CoverImage, pathname]);
 
   const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -60,6 +60,7 @@ const useIndexImageUpload = ({
       try {
         const response = await uploadFile(file);
         if (response && response[0]) {
+          // FIXME: Handle scenario where response array is empty or malformed
           if (!pathname.endsWith("/add")) {
             setImagePreview(IMAGE_BASE_URL + response[0].url);
           } else {
@@ -72,6 +73,7 @@ const useIndexImageUpload = ({
 
           setProductData({
             ...(productData as any),
+            // TODO: Replace cast with proper product type
             CoverImage: {
               data: {
                 id: response[0].id,
@@ -83,6 +85,7 @@ const useIndexImageUpload = ({
           toast.success("تصویر شاخص با موفقیت آپلود شد");
         }
       } catch (error: any) {
+        // TODO: Define a proper error type instead of using `any`
         toast.error("خطا در آپلود تصویر شاخص");
         console.error("Error uploading index image:", error);
         handleDelete();
@@ -113,10 +116,10 @@ const useIndexImageUpload = ({
         return;
       }
       const response = await Download(
-        productData.CoverImage.data.id.toString()
+        productData.CoverImage.data.id.toString(),
       );
       if (response?.url) {
-        window.open(IMAGE_BASE_URL + response.url, "_blank");
+        window.open(IMAGE_BASE_URL + response.url, "_blank", "noopener,noreferrer");
       } else {
         toast.error("آدرس تصویر در دسترس نیست");
       }

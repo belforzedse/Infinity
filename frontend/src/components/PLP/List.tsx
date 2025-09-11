@@ -11,8 +11,10 @@ import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
 import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/constants/api";
+import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
+// use native fetch so user isn't timed out artificially
 
 interface Product {
   id: number;
@@ -67,7 +69,6 @@ interface PLPListProps {
   products: Product[];
   pagination: Pagination;
   category?: string;
-  showAvailableOnly?: boolean;
   searchQuery?: string;
 }
 
@@ -75,22 +76,21 @@ export default function PLPList({
   products: initialProducts,
   pagination: initialPagination,
   category: initialCategory,
-  showAvailableOnly = false,
   searchQuery,
 }: PLPListProps) {
   // URL state management with nuqs
   const [category, setCategory] = useQueryState("category");
-  const [available, setAvailable] = useQueryState("available");
-  const [minPrice, setMinPrice] = useQueryState("minPrice");
-  const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [size, setSize] = useQueryState("size");
-  const [material, setMaterial] = useQueryState("material");
-  const [season, setSeason] = useQueryState("season");
-  const [gender, setGender] = useQueryState("gender");
-  const [usage, setUsage] = useQueryState("usage");
+  const [available] = useQueryState("available");
+  const [minPrice] = useQueryState("minPrice");
+  const [maxPrice] = useQueryState("maxPrice");
+  const [size] = useQueryState("size");
+  const [material] = useQueryState("material");
+  const [season] = useQueryState("season");
+  const [gender] = useQueryState("gender");
+  const [usage] = useQueryState("usage");
   const [page, setPage] = useQueryState("page", { defaultValue: "1" });
-  const [sort, setSort] = useQueryState("sort");
-  const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
+  const [sort] = useQueryState("sort");
+  const [discountOnly] = useQueryState("hasDiscount");
 
   // Local state for products and pagination
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -137,7 +137,7 @@ export default function PLPList({
       if (category) {
         queryParams.append(
           "filters[product_main_category][Slug][$eq]",
-          category
+          category,
         );
       }
 
@@ -145,7 +145,7 @@ export default function PLPList({
       if (available === "true") {
         queryParams.append(
           "filters[product_variations][IsPublished][$eq]",
-          "true"
+          "true",
         );
       }
 
@@ -153,13 +153,13 @@ export default function PLPList({
       if (minPrice) {
         queryParams.append(
           "filters[product_variations][Price][$gte]",
-          minPrice
+          minPrice,
         );
       }
       if (maxPrice) {
         queryParams.append(
           "filters[product_variations][Price][$lte]",
-          maxPrice
+          maxPrice,
         );
       }
 
@@ -172,7 +172,7 @@ export default function PLPList({
       if (material) {
         queryParams.append(
           "filters[product_variations][Material][$eq]",
-          material
+          material,
         );
       }
 
@@ -202,12 +202,25 @@ export default function PLPList({
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
-          setProducts(data.data);
-          setPagination(data.meta.pagination);
+          setProducts(Array.isArray(data?.data) ? data.data : []);
+          setPagination(
+            data?.meta?.pagination || {
+              page: parseInt(page) || 1,
+              pageSize: 20,
+              pageCount: 0,
+              total: 0,
+            },
+          );
         })
         .catch((error) => {
           console.error("Error fetching products:", error);
+          setProducts([]);
+          setPagination({
+            page: parseInt(page) || 1,
+            pageSize: 20,
+            pageCount: 0,
+            total: 0,
+          });
         })
         .finally(() => {
           setIsLoading(false);
@@ -237,14 +250,14 @@ export default function PLPList({
       (variation) => {
         const price = variation.attributes.Price;
         return price && parseInt(price) > 0;
-      }
+      },
     );
 
     // If showAvailableOnly is true, also check if any variation is published
     if (available === "true") {
       const hasAvailableVariation =
         product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished
+          (variation) => variation.attributes.IsPublished,
         );
       if (!(hasValidPrice && hasAvailableVariation)) return false;
     } else if (!hasValidPrice) {
@@ -255,7 +268,7 @@ export default function PLPList({
     if (discountOnly === "true") {
       const hasDiscount = product.attributes.product_variations?.data?.some(
         (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0
+          (variation.attributes as any)?.general_discounts?.data?.length > 0,
       );
       if (!hasDiscount) return false;
     }
@@ -297,10 +310,10 @@ export default function PLPList({
   });
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex flex-col md:flex-row gap-4">
+    <div className="container mx-auto px-4" data-plp-top>
+      <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
-        <div className="hidden md:flex flex-col w-[269px] gap-7">
+        <div className="hidden w-[269px] flex-col gap-7 md:flex">
           <Filter showAvailableOnly={available === "true"} />
 
           <SidebarSuggestions
@@ -319,7 +332,7 @@ export default function PLPList({
         {/* Main content */}
         <div className="flex-1">
           {/* Mobile filter buttons */}
-          <div className="md:hidden mb-4">
+          <div className="mb-4 md:hidden">
             <PLPListMobileFilter />
           </div>
 
@@ -327,18 +340,20 @@ export default function PLPList({
           {searchQuery && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold">
-                نتایج جستجو برای: "{searchQuery}"
+                نتایج جستجو برای: &quot;{searchQuery}&quot;
               </h2>
             </div>
           )}
 
-          {/* Show NoData component only if there are no valid products and not loading */}
-          {validProducts.length === 0 && !isLoading ? (
+          {/* Show skeleton while loading */}
+          {isLoading ? (
+            <ProductListSkeleton />
+          ) : validProducts.length === 0 ? (
             <NoData category={category || initialCategory} />
           ) : (
             <>
               {/* Desktop view - ProductCard */}
-              <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="hidden grid-cols-2 gap-4 md:grid lg:grid-cols-3">
                 {validProducts.map((product) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
@@ -346,7 +361,7 @@ export default function PLPList({
                       (variation) => {
                         const price = variation.attributes.Price;
                         return price && parseInt(price) > 0;
-                      }
+                      },
                     );
 
                   const hasDiscount =
@@ -360,7 +375,7 @@ export default function PLPList({
                           .attributes.Amount
                       : undefined;
                   const price = parseInt(
-                    firstValidVariation?.attributes?.Price || "0"
+                    firstValidVariation?.attributes?.Price || "0",
                   );
                   const discountPrice =
                     hasDiscount && discount
@@ -392,7 +407,7 @@ export default function PLPList({
               </div>
 
               {/* Mobile view - ProductSmallCard */}
-              <div className="md:hidden flex flex-col gap-3">
+              <div className="flex flex-col gap-3 md:hidden">
                 {validProducts.map((product) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
@@ -400,7 +415,7 @@ export default function PLPList({
                       (variation) => {
                         const price = variation.attributes.Price;
                         return price && parseInt(price) > 0;
-                      }
+                      },
                     );
 
                   const hasDiscount =
@@ -414,7 +429,7 @@ export default function PLPList({
                           .attributes.Amount
                       : undefined;
                   const price = parseInt(
-                    firstValidVariation?.attributes?.Price || "0"
+                    firstValidVariation?.attributes?.Price || "0",
                   );
                   const discountPrice =
                     hasDiscount && discount

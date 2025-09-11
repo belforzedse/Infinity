@@ -12,15 +12,15 @@ export default function Tabs({ tabs, children, tabsClassName }: TabsProps) {
   return (
     <div className="w-full">
       <TabGroup>
-        <TabList className="lg:flex grid grid-cols-3 lg:gap-5 gap-2 lg:border-b border-gray-200">
+        <TabList className="grid grid-cols-3 gap-2 border-gray-200 lg:flex lg:gap-5 lg:border-b">
           {tabs.map(({ key, value }) => (
             <Tab
               key={key}
               className={({ selected }) =>
-                `lg:rounded-t-lg lg:rounded-b-none rounded-md py-2 lg:text-base text-sm font-medium focus:outline-none ${tabsClassName} ${
+                `text-sm rounded-md py-2 font-medium lg:text-base focus:outline-none lg:rounded-b-none lg:rounded-t-lg ${tabsClassName} ${
                   selected
-                    ? "lg:border-b-2 lg:border-t-0 lg:border-l-0 lg:border-r-0 lg:border-pink-500 lg:bg-white bg-blue-50 border border-blue-600 lg:text-slate-700 text-blue-600"
-                    : "text-slate-400 lg:bg-white bg-slate-50 lg:border-none border border-slate-200"
+                    ? "border border-blue-600 bg-blue-50 text-blue-600 lg:border-b-2 lg:border-l-0 lg:border-r-0 lg:border-t-0 lg:border-pink-500 lg:bg-white lg:text-slate-700"
+                    : "border border-slate-200 bg-slate-50 text-slate-400 lg:border-none lg:bg-white"
                 }`
               }
             >
@@ -28,7 +28,7 @@ export default function Tabs({ tabs, children, tabsClassName }: TabsProps) {
             </Tab>
           ))}
         </TabList>
-        <TabPanels className="lg:mt-4 mt-5">
+        <TabPanels className="mt-5 lg:mt-4">
           {children.map((child, index) => (
             <TabPanel key={tabs[index].key} className="rounded-xl">
               {child}

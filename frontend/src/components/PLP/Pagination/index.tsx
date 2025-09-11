@@ -24,7 +24,7 @@ export default function PLPPagination({
   const generatePageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 7; // Show max 7 page numbers
-    
+
     if (totalPages <= maxVisiblePages) {
       // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
@@ -57,36 +57,48 @@ export default function PLPPagination({
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
   const pageNumbers = generatePageNumbers();
 
+  const scrollToTop = () => {
+    if (typeof window === "undefined") return;
+    const anchor = document.querySelector<HTMLElement>("[data-plp-top]");
+    if (anchor) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const handlePrevious = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
+      scrollToTop();
     }
   };
 
   const handleNext = () => {
     if (currentPage < totalPages) {
       onPageChange(currentPage + 1);
+      scrollToTop();
     }
   };
 
   return (
-    <div className={cn("flex items-center justify-center mt-8", className)}>
+    <div className={cn("mt-8 flex items-center justify-center", className)}>
       <div className="flex items-center space-x-1 rtl:space-x-reverse">
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
           disabled={currentPage === 1}
           className={cn(
-            "flex items-center justify-center w-8 h-8 rounded-md border transition-colors",
+            "flex h-8 w-8 items-center justify-center rounded-md border transition-colors",
             currentPage === 1
-              ? "border-gray-200 text-gray-400 cursor-not-allowed"
-              : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+              ? "cursor-not-allowed border-gray-200 text-gray-400"
+              : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
           )}
           aria-label="صفحه قبلی"
         >
@@ -94,13 +106,13 @@ export default function PLPPagination({
         </button>
 
         {/* Page Numbers */}
-        <div className="flex items-center space-x-1 rtl:space-x-reverse mx-2">
+        <div className="mx-2 flex items-center space-x-1 rtl:space-x-reverse">
           {pageNumbers.map((page, index) => {
             if (page === "...") {
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="flex items-center justify-center w-8 h-8 text-gray-500"
+                  className="flex h-8 w-8 items-center justify-center text-gray-500"
                 >
                   ...
                 </span>
@@ -113,12 +125,15 @@ export default function PLPPagination({
             return (
               <button
                 key={pageNum}
-                onClick={() => onPageChange(pageNum)}
+                onClick={() => {
+                  onPageChange(pageNum);
+                  scrollToTop();
+                }}
                 className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-md text-sm font-medium transition-colors",
+                  "text-sm flex h-8 w-8 items-center justify-center rounded-md font-medium transition-colors",
                   isActive
-                    ? "bg-primary text-white border border-primary"
-                    : "text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400"
+                    ? "bg-primary border-primary border text-white"
+                    : "border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
                 )}
                 aria-label={`صفحه ${pageNum}`}
                 aria-current={isActive ? "page" : undefined}
@@ -134,19 +149,21 @@ export default function PLPPagination({
           onClick={handleNext}
           disabled={currentPage === totalPages}
           className={cn(
-            "flex items-center justify-center w-8 h-8 rounded-md border transition-colors",
+            "flex h-8 w-8 items-center justify-center rounded-md border transition-colors",
             currentPage === totalPages
-              ? "border-gray-200 text-gray-400 cursor-not-allowed"
-              : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+              ? "cursor-not-allowed border-gray-200 text-gray-400"
+              : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
           )}
           aria-label="صفحه بعدی"
         >
-          <ChevronLeftIcon color={currentPage === totalPages ? "#9CA3AF" : "#374151"} />
+          <ChevronLeftIcon
+            color={currentPage === totalPages ? "#9CA3AF" : "#374151"}
+          />
         </button>
       </div>
 
       {/* Page Info - Mobile Only */}
-      <div className="md:hidden mt-2 text-sm text-gray-600 text-center">
+      <div className="text-sm mt-2 text-center text-gray-600 md:hidden">
         صفحه {currentPage} از {totalPages}
       </div>
     </div>

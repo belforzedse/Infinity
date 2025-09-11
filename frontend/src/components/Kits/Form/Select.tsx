@@ -34,7 +34,7 @@ export default function Select({
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {label && (
-        <label className="lg:text-lg text-base text-foreground-primary">
+        <label className="text-base text-foreground-primary lg:text-lg">
           {label}
         </label>
       )}
@@ -42,13 +42,13 @@ export default function Select({
         <div className="relative">
           <Listbox.Button
             className={classNames(
-              "relative w-full p-3 text-right rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+              "focus:ring-primary-500/20 focus:border-primary-500 text-sm relative w-full rounded-lg border p-3 text-right focus:outline-none focus:ring-2",
               {
                 "border-red-500": error,
                 "border-slate-100": !error,
                 "cursor-not-allowed opacity-75": isLoading,
               },
-              selectButtonClassName
+              selectButtonClassName,
             )}
           >
             <span className="block truncate text-neutral-600">
@@ -57,7 +57,7 @@ export default function Select({
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
               {isLoading ? (
                 <svg
-                  className="animate-spin h-5 w-5 text-gray-400"
+                  className="h-5 w-5 animate-spin text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -82,7 +82,7 @@ export default function Select({
             </span>
           </Listbox.Button>
 
-          {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm mt-1 text-red-500">{error}</p>}
 
           <Transition
             as={Fragment}
@@ -90,9 +90,9 @@ export default function Select({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-[60] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="text-base absolute z-[60] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm focus:outline-none">
               {options.length === 0 ? (
-                <div className="relative cursor-default select-none py-2 px-4 text-gray-500">
+                <div className="relative cursor-default select-none px-4 py-2 text-gray-500">
                   هیچ آدرسی یافت نشد
                 </div>
               ) : (
@@ -101,7 +101,7 @@ export default function Select({
                     key={option.id}
                     value={option}
                     className={({ active }) =>
-                      `relative cursor-pointer select-none py-2 px-4 text-gray-900 ${
+                      `relative cursor-pointer select-none px-4 py-2 text-gray-900 ${
                         active ? "bg-primary-50" : ""
                       }`
                     }

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import ChevronDownIcon from "../../Icons/ChevronDownIcon";
 import NavigationButtons from "../../NavigationButtons";
 
@@ -14,30 +15,31 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   const { type, src, alt, goToNextImage, goToPreviousImage } = props;
 
   return (
-    <div className="flex-1 h-full">
-      <div className="h-[485px] w-full relative rounded-3xl overflow-hidden">
+    <div className="h-full flex-1">
+      <div className="relative h-[485px] w-full overflow-hidden rounded-3xl">
         {type === "video" ? (
           <video
-            className="w-full h-full object-contain"
+            className="h-full w-full object-contain"
             src={src}
             controls
             loop
           />
         ) : (
           <Image
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
             src={src}
             alt={alt || ""}
             fill
+            loader={imageLoader}
           />
         )}
 
-        <button className="rounded-full w-[64px] h-[64px] bg-white items-center justify-center absolute top-2 left-2 z-10 border border-pink-200 flex-col gap-2 hidden md:flex">
+        <button className="absolute left-2 top-2 z-10 hidden h-[64px] w-[64px] flex-col items-center justify-center gap-2 rounded-full border border-pink-200 bg-white md:flex">
           <div className="text-[9px] text-pink-600">استایل بساز</div>
           <ChevronDownIcon />
         </button>
 
-        <div className="absolute bottom-3 left-[50%] translate-x-[-50%] z-10">
+        <div className="absolute bottom-3 left-[50%] z-10 translate-x-[-50%]">
           <NavigationButtons
             goToNextImage={goToNextImage}
             goToPreviousImage={goToPreviousImage}

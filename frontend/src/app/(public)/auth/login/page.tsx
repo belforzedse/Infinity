@@ -7,7 +7,7 @@ import LoginActions from "@/components/Auth/Login/Actions";
 import { AuthService, UserService } from "@/services";
 import { toast } from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
-import { useEffect } from "react";
+// removed unused import: useEffect from "react"
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function LoginPage() {
     try {
       const res = await AuthService.loginPassword(
         data.phoneNumber,
-        data.password
+        data.password,
       );
 
       if (res.token) {
@@ -44,7 +44,7 @@ export default function LoginPage() {
       } else {
         toast.error("رمز عبور یا شماره همراه اشتباه است");
       }
-    } catch (error) {
+    } catch {
       toast.error("رمز عبور یا شماره همراه اشتباه است");
     }
   };
@@ -58,7 +58,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full mx-auto">
+    <div className="mx-auto w-full">
       <AuthTitle subtitle="لطفا شماره همراه و رمز عبور خود را وارد نمایید">
         ورود به حساب کاربری
       </AuthTitle>
@@ -71,3 +71,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

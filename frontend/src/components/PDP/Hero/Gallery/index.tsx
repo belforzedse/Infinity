@@ -21,7 +21,7 @@ export default function PDPHeroGallery(props: Props) {
 
   function goToNextImage() {
     const currentIndex = assets.findIndex(
-      (asset) => asset.id === selectedImage
+      (asset) => asset.id === selectedImage,
     );
     const nextIndex = (currentIndex + 1) % assets.length;
     setSelectedImage(assets[nextIndex].id);
@@ -29,14 +29,14 @@ export default function PDPHeroGallery(props: Props) {
 
   function goToPreviousImage() {
     const currentIndex = assets.findIndex(
-      (asset) => asset.id === selectedImage
+      (asset) => asset.id === selectedImage,
     );
     const previousIndex = (currentIndex - 1 + assets.length) % assets.length;
     setSelectedImage(assets[previousIndex].id);
   }
 
   return (
-    <div className="flex-1 gap-2 md:sticky top-2 md:min-w-[640px] h-[500px] flex flex-col-reverse md:flex-row">
+    <div className="top-2 flex h-[500px] flex-1 flex-col-reverse gap-2 md:sticky md:min-w-[640px] md:flex-row">
       <ThumbnailList
         assets={assets}
         selectedImage={selectedImage}

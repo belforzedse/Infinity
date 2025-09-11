@@ -22,7 +22,7 @@ export default function LoginPage() {
     if (verificationCode.length === 6) {
       // TODO: Implement verification API call
       const response = await AuthService.verifyOTP(
-        verificationCode.split("").reverse().join("")
+        verificationCode.split("").reverse().join(""),
       );
 
       if (response.token) {
@@ -58,7 +58,7 @@ export default function LoginPage() {
   }, [phoneNumber, router]);
 
   return (
-    <div className="w-full mx-auto">
+    <div className="mx-auto w-full">
       <AuthTitle
         subtitle={`لطفا کد ارسال شده به شماره همراه  ${phoneNumber} را وارد نمایید`}
       >
@@ -73,3 +73,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

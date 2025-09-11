@@ -5,10 +5,10 @@ import Image from "next/image";
 
 export default function PLPListContentHeader() {
   return (
-    <div className="w-full flex items-center justify-between">
-      <Text className="text-foreground-primary !text-3xl">پوشاک زنانه</Text>
+    <div className="flex w-full items-center justify-between">
+      <Text className="!text-3xl text-foreground-primary">پوشاک زنانه</Text>
 
-      <div className="items-center gap-2 hidden md:flex">
+      <div className="hidden items-center gap-2 md:flex">
         <PLPButton
           text="محبوب ترین محصولات"
           className="bg-red-100 text-red-900"
@@ -18,6 +18,8 @@ export default function PLPListContentHeader() {
               alt="heart"
               width={20}
               height={20}
+              loading="lazy"
+              sizes="20px"
             />
           }
         />
@@ -31,6 +33,8 @@ export default function PLPListContentHeader() {
               alt="100"
               width={20}
               height={25}
+              loading="lazy"
+              sizes="20px"
             />
           }
         />
@@ -44,12 +48,14 @@ export default function PLPListContentHeader() {
               alt="fire"
               width={20}
               height={20}
+              loading="lazy"
+              sizes="20px"
             />
           }
         />
         <PLPButton
           text="مرتب سازی"
-          rightIcon={<SortDescIcon className="w-6 h-6" />}
+          rightIcon={<SortDescIcon className="h-6 w-6" />}
         />
       </div>
     </div>
