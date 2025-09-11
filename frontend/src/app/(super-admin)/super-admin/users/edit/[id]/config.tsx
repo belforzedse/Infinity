@@ -8,8 +8,8 @@ import { STRAPI_TOKEN } from "@/constants/api";
 
 // Function to fetch roles from the API
 const fetchRoles = async (
-  searchTerm: string,
-  formData?: any
+  _searchTerm: string,
+  _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
     const response = await apiClient.get("/local-user-roles", {
@@ -54,7 +54,7 @@ export const config: UpsertPageConfigType<User> = {
   actionButtons: (props) => (
     <>
       <button
-        className="px-5 py-2 rounded-xl bg-slate-200 text-slate-500 text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 md:flex-none"
         onClick={props.onCancel}
         disabled={props.isLoading}
       >
@@ -62,7 +62,7 @@ export const config: UpsertPageConfigType<User> = {
       </button>
 
       <button
-        className="px-5 py-2 rounded-xl bg-actions-primary text-white text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-actions-primary px-5 py-2 text-white md:flex-none"
         onClick={props.onSubmit}
         disabled={props.isLoading}
       >
@@ -74,7 +74,7 @@ export const config: UpsertPageConfigType<User> = {
     {
       title: "مشخصات کاربر",
       iconButton: (
-        <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
+        <button className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100">
           <EditIcon />
         </button>
       ),
@@ -132,7 +132,7 @@ export const config: UpsertPageConfigType<User> = {
     {
       title: "اطلاعات جزئی",
       iconButton: (
-        <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
+        <button className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100">
           <EditIcon />
         </button>
       ),

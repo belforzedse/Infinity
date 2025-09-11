@@ -1,6 +1,7 @@
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import { API_BASE_URL } from "@/constants/api";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 
 interface Product {
@@ -59,7 +60,7 @@ async function getProducts(
   usage?: string,
   search?: string,
   sort?: string,
-  hasDiscount?: boolean
+  hasDiscount?: boolean,
 ) {
   // Handle search queries differently
   if (search) {
@@ -187,8 +188,9 @@ async function getProducts(
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
 
-  const response = await fetch(url);
-  const data = await response.json();
+  try {
+    const response = await fetchWithTimeout(url, { timeoutMs: 15000 });
+    const data = await response.json();
 
   // Filter out products with zero price and check availability if needed
   let filteredProducts = data.data.filter((product: Product) => {
@@ -197,14 +199,14 @@ async function getProducts(
       (variation) => {
         const price = variation.attributes.Price;
         return price && parseInt(price) > 0;
-      }
+      },
     );
 
     // If showAvailableOnly is true, also check if any variation is published
     if (showAvailableOnly) {
       const hasAvailableVariation =
         product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished
+          (variation) => variation.attributes.IsPublished,
         );
       return hasValidPrice && hasAvailableVariation;
     }
@@ -217,15 +219,27 @@ async function getProducts(
     filteredProducts = filteredProducts.filter((product: Product) =>
       product.attributes.product_variations?.data?.some(
         (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0
-      )
+          (variation.attributes as any)?.general_discounts?.data?.length > 0,
+      ),
     );
   }
 
-  return {
-    products: filteredProducts,
-    pagination: data.meta.pagination,
-  };
+    return {
+      products: filteredProducts,
+      pagination: data.meta.pagination,
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return {
+      products: [],
+      pagination: {
+        page: page,
+        pageSize,
+        pageCount: 0,
+        total: 0,
+      },
+    };
+  }
 }
 
 export default async function PLPPage({
@@ -273,7 +287,7 @@ export default async function PLPPage({
     usage,
     search,
     sort,
-    hasDiscount
+    hasDiscount,
   );
 
   // Determine if we're showing search results or category results
@@ -281,7 +295,7 @@ export default async function PLPPage({
 
   return (
     <>
-      <div className="mt-3 md:mt-0 md:pt-[38px] md:pb-[80px]">
+      <div className="mt-3 md:mt-0 md:pb-[80px] md:pt-[38px]">
         {/* Show hero banner only for category browsing, not search results */}
         {!isSearchResults && <PLPHeroBanner category={category} />}
 
@@ -290,7 +304,6 @@ export default async function PLPPage({
           products={products}
           pagination={pagination}
           category={category}
-          showAvailableOnly={showAvailableOnly}
           searchQuery={search}
         />
       </div>

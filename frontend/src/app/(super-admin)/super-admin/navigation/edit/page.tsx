@@ -3,7 +3,7 @@
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { config } from "./config";
 import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
+// removed unused import: useRouter from "next/navigation"
 import { useEffect, useState } from "react";
 import { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
 import { getNavigation } from "@/services/super-admin/navigation/get";
@@ -15,7 +15,7 @@ interface NavigationFormData extends Omit<Navigation, "product_categories"> {
 }
 
 export default function NavigationEditPage() {
-  const router = useRouter();
+  // removed unused: router
   const [data, setData] = useState<NavigationFormData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +66,7 @@ export default function NavigationEditPage() {
           if (typeof formData.product_categories === "string") {
             try {
               productCategories = JSON.parse(formData.product_categories);
-            } catch (e) {
+            } catch {
               toast.error("خطا در فرمت دسته بندی‌ها");
               return;
             }
@@ -90,7 +90,7 @@ export default function NavigationEditPage() {
             product_categories: JSON.stringify(
               updatedNavigation.product_categories,
               null,
-              2
+              2,
             ),
           };
           setData(updatedFormData);

@@ -21,7 +21,7 @@ export default function Text({
     link: clsx(
       "text-sm transition-colors",
       disabled ? "text-foreground-muted" : "text-pink-500 hover:text-pink-600",
-      "cursor-pointer"
+      "cursor-pointer",
     ),
   };
 

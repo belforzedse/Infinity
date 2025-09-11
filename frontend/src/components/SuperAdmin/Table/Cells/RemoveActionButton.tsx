@@ -34,11 +34,11 @@ export default function RemoveActionButton(props: Props) {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
           setRefresh(true);
           toast.success(
-            isRemoved ? "با موفقیت بازیابی شد" : "با موفقیت حذف شد"
+            isRemoved ? "با موفقیت بازیابی شد" : "با موفقیت حذف شد",
           );
         } catch (error) {
           toast.error(isRemoved ? "خطا در بازیابی" : "خطا در حذف");

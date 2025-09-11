@@ -52,7 +52,7 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+      className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
       {...attributes}
       {...listeners}
     >
@@ -78,7 +78,7 @@ export default function CategoriesListField({
 }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [availableCategories, setAvailableCategories] = useState<Category[]>(
-    []
+    [],
   );
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -88,7 +88,7 @@ export default function CategoriesListField({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Parse the initial value
@@ -132,7 +132,7 @@ export default function CategoriesListField({
 
       // Check if already exists
       const alreadyExists = categories.some(
-        (cat) => cat.id === categoryToAdd.id
+        (cat) => cat.id === categoryToAdd.id,
       );
       if (alreadyExists) {
         alert("این دسته بندی قبلاً در لیست وجود دارد");
@@ -167,10 +167,10 @@ export default function CategoriesListField({
     if (active.id !== over.id) {
       setCategories((items) => {
         const oldIndex = items.findIndex(
-          (item) => item.id.toString() === active.id
+          (item) => item.id.toString() === active.id,
         );
         const newIndex = items.findIndex(
-          (item) => item.id.toString() === over.id
+          (item) => item.id.toString() === over.id,
         );
 
         const newItems = arrayMove(items, oldIndex, newIndex);
@@ -182,7 +182,7 @@ export default function CategoriesListField({
 
   // Filter available categories to exclude already selected ones
   const filteredAvailableCategories = availableCategories.filter(
-    (cat) => !categories.some((selected) => selected.id === cat.id)
+    (cat) => !categories.some((selected) => selected.id === cat.id),
   );
 
   return (
@@ -190,7 +190,7 @@ export default function CategoriesListField({
       {/* Category Selection */}
       <div className="flex gap-2">
         <select
-          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-neutral-600"
+          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-neutral-600"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
           disabled={readOnly || loading}
@@ -206,7 +206,7 @@ export default function CategoriesListField({
         <button
           onClick={handleAddCategory}
           disabled={!selectedCategory || readOnly}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg disabled:opacity-50"
+          className="rounded-lg bg-green-500 px-4 py-2 text-white disabled:opacity-50"
           type="button"
         >
           افزودن
@@ -214,8 +214,8 @@ export default function CategoriesListField({
       </div>
 
       {/* Selected Categories */}
-      <div className="border border-slate-100 rounded-lg">
-        <div className="w-full bg-slate-50 py-2 px-5 flex items-center justify-between">
+      <div className="rounded-lg border border-slate-100">
+        <div className="flex w-full items-center justify-between bg-slate-50 px-5 py-2">
           <span className="text-sm text-neutral-600">
             دسته بندی‌های انتخاب شده
           </span>
@@ -231,7 +231,7 @@ export default function CategoriesListField({
 
         <div className="p-3">
           {categories.length === 0 ? (
-            <div className="text-center py-4 text-slate-500">
+            <div className="py-4 text-center text-slate-500">
               هیچ دسته بندی انتخاب نشده است
             </div>
           ) : (
@@ -263,7 +263,7 @@ export default function CategoriesListField({
       {/* Helper Text */}
       <div className="text-sm text-slate-500">
         <p>• برای تغییر ترتیب، آیتم‌ها را با کشیدن جابجا کنید.</p>
-        <p>• با کلیک روی "حذف" می‌توانید یک دسته بندی را حذف کنید.</p>
+        <p>• با کلیک روی &quot;حذف&quot; می‌توانید یک دسته بندی را حذف کنید.</p>
       </div>
     </div>
   );

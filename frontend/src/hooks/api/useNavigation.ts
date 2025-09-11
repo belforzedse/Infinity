@@ -35,7 +35,7 @@ export interface UseNavigationResult {
 }
 
 export function useNavigation(
-  triggerFetch: boolean = true
+  triggerFetch: boolean = true,
 ): UseNavigationResult {
   const [navigation, setNavigation] = useState<NavigationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +48,7 @@ export function useNavigation(
       try {
         setLoading(true);
         const response = await fetch(
-          "https://api.infinity.rgbgroup.ir/api/navigation?populate=*"
+          "https://api.infinity.rgbgroup.ir/api/navigation?populate=*",
         );
 
         if (!response.ok) {
@@ -63,7 +63,7 @@ export function useNavigation(
               id: category.id,
               title: category.attributes.Title,
               slug: category.attributes.Slug,
-            })
+            }),
           );
 
           setNavigation(items);
@@ -73,7 +73,7 @@ export function useNavigation(
         setError(null);
       } catch (err) {
         setError(
-          err instanceof Error ? err : new Error("An unknown error occurred")
+          err instanceof Error ? err : new Error("An unknown error occurred"),
         );
         console.error("Error fetching navigation:", err);
       } finally {

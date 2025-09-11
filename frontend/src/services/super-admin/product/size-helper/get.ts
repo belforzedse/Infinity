@@ -17,7 +17,7 @@ export interface SizeHelperData {
 }
 
 export const getProductSizeHelper = async (
-  productId: number
+  productId: number,
 ): Promise<ApiResponse<SizeHelperData[]>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.SIZE_HELPER}?filters[product][id][$eq]=${productId}`;
 
@@ -27,7 +27,7 @@ export const getProductSizeHelper = async (
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 
   return response.data;

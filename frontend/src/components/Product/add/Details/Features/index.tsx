@@ -6,7 +6,7 @@ export default function VariablesFeatures({
   productId: number;
 }) {
   return (
-    <div className="w-full flex flex-col gap-4 p-5 pb-0 rounded-xl text-base text-neutral-600">
+    <div className="text-base flex w-full flex-col gap-4 rounded-xl p-5 pb-0 text-neutral-600">
       <FeaturesTable productId={productId} />
     </div>
   );

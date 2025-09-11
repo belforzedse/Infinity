@@ -41,7 +41,7 @@ export default function AuthForm() {
 
         <AuthButton type="submit" disabled={isLoading}>
           {isLoading ? (
-            <span className="inline-block w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
           ) : (
             "بررسی شماره همراه"
           )}
@@ -50,3 +50,4 @@ export default function AuthForm() {
     </>
   );
 }
+

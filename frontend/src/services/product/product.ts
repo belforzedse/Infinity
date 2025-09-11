@@ -1,7 +1,8 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN, IMAGE_BASE_URL } from "@/constants/api";
+import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api"; // removed unused: STRAPI_TOKEN
 import { ApiResponse } from "@/types/api";
 import { ProductCardProps } from "@/components/Product/Card";
+import logger from "@/utils/logger";
 
 export interface ProductMedia {
   id: number;
@@ -187,7 +188,7 @@ export interface ProductDetail {
 
 // Get product by ID instead of slug since current API doesn't have slug field
 export const getProductById = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<ProductDetail>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies`;
 
@@ -203,7 +204,7 @@ export const getProductById = async (
 
 // Keeping the original method for compatibility
 export const getProductBySlug = async (
-  slug: string
+  slug: string,
 ): Promise<ApiResponse<ProductDetail>> => {
   // Since slug is not available, let's try to get a product by ID
   // If slug can be converted to a number, we'll use it as an ID
@@ -219,7 +220,7 @@ export const getProductBySlug = async (
 
 // Create a placeholder image for non-image media types
 const getPlaceholderImage = (
-  mediaType: string
+  mediaType: string,
 ): { url: string; width: number; height: number } => {
   // Generate placeholders based on file type
   if (mediaType.startsWith("video")) {
@@ -346,7 +347,7 @@ export const getDefaultProductVariation = (product: ProductDetail) => {
       // Check if it has stock data and quantity > 0
       const stock = variation.attributes.product_stock?.data?.attributes;
       return stock && typeof stock.Count === "number" && stock.Count > 0;
-    }
+    },
   );
 
   if (publishedWithStock) {
@@ -355,7 +356,7 @@ export const getDefaultProductVariation = (product: ProductDetail) => {
 
   // If no variation with stock is found, fallback to any published variation
   const anyPublished = product.attributes.product_variations.data.find(
-    (variation) => variation.attributes.IsPublished === true
+    (variation) => variation.attributes.IsPublished === true,
   );
 
   if (anyPublished) {
@@ -456,7 +457,7 @@ export const getProductSizes = (product: ProductDetail, colorId?: number) => {
 // Helper function to get sizes with stock availability for a specific color
 export const getProductSizesWithStock = (
   product: ProductDetail,
-  colorId?: number
+  colorId?: number,
 ) => {
   if (!product.attributes.product_variations?.data?.length) {
     return [];
@@ -517,7 +518,7 @@ export const getProductModels = (product: ProductDetail) => {
 
 // Helper function to get the available stock count for a variation
 export const getAvailableStockCount = (
-  variation: ProductDetail["attributes"]["product_variations"]["data"][0]
+  variation: ProductDetail["attributes"]["product_variations"]["data"][0],
 ): number => {
   if (!variation?.attributes?.product_stock?.data?.attributes) {
     return 0;
@@ -532,35 +533,46 @@ export const getAvailableStockCount = (
 // Helper function to check if a variation has sufficient stock
 export const hasStockForVariation = (
   variation: ProductDetail["attributes"]["product_variations"]["data"][0],
-  requestedQuantity: number = 1
+  requestedQuantity: number = 1,
 ): boolean => {
-  console.log("=== STOCK CHECK DEBUG ===");
-  console.log("Variation ID:", variation?.id);
-  console.log("Full variation object:", variation);
-  console.log("Product stock data:", variation?.attributes?.product_stock);
-  console.log(
-    "Stock attributes:",
-    variation?.attributes?.product_stock?.data?.attributes
-  );
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("=== STOCK CHECK DEBUG ===");
+    logger.info("Variation ID", { id: variation?.id });
+    logger.info("Full variation object", { variation });
+    logger.info("Product stock data", {
+      stock: variation?.attributes?.product_stock,
+    });
+    logger.info("Stock attributes", {
+      attrs: variation?.attributes?.product_stock?.data?.attributes,
+    });
+  }
 
   if (!variation?.attributes?.product_stock?.data?.attributes) {
-    console.log("No stock data found - returning false");
+    if (process.env.NODE_ENV !== "production") {
+      logger.info("No stock data found - returning false");
+    }
     return false;
   }
 
   const stockData = variation.attributes.product_stock.data.attributes;
-  console.log("Stock data object:", stockData);
-  console.log("Available keys in stock data:", Object.keys(stockData));
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("Stock data object", { stockData });
+    logger.info("Available keys in stock data", { keys: Object.keys(stockData) });
+  }
 
   const stockQuantity = stockData.Count;
-  console.log("Stock Count value:", stockQuantity);
-  console.log("Requested quantity:", requestedQuantity);
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("Stock Count value", { stockQuantity });
+    logger.info("Requested quantity", { requestedQuantity });
+  }
 
   // Updated validation: Check if stock is sufficient for the requested quantity
   const hasStock =
     typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
-  console.log("Has sufficient stock:", hasStock);
-  console.log("=== END STOCK CHECK ===");
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("Has sufficient stock", { hasStock });
+    logger.info("=== END STOCK CHECK ===");
+  }
 
   return hasStock;
 };
@@ -570,7 +582,7 @@ export const findProductVariation = (
   product: ProductDetail,
   colorId?: number,
   sizeId?: number,
-  modelId?: number
+  modelId?: number,
 ) => {
   if (!product.attributes.product_variations?.data?.length) {
     return null;
@@ -597,7 +609,7 @@ export const findProductVariation = (
 export const getRelatedProductsByMainCategory = async (
   categoryId: string,
   productId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<ProductCardProps[]> => {
   // Return empty array if category ID is empty or invalid
   if (!categoryId || categoryId === "undefined" || categoryId === "null") {
@@ -619,7 +631,7 @@ export const getRelatedProductsByMainCategory = async (
 export const getRelatedProductsByOtherCategories = async (
   otherCategoryIds: string[],
   productId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<ProductCardProps[]> => {
   // Return empty array if there are no valid category IDs
   if (
@@ -632,7 +644,7 @@ export const getRelatedProductsByOtherCategories = async (
 
   // Filter out invalid category IDs
   const validCategoryIds = otherCategoryIds.filter(
-    (id) => id && id !== "undefined" && id !== "null"
+    (id) => id && id !== "undefined" && id !== "null",
   );
 
   if (validCategoryIds.length === 0) {
@@ -644,7 +656,7 @@ export const getRelatedProductsByOtherCategories = async (
     const categoryFilters = validCategoryIds
       .map(
         (id, index) =>
-          `filters[product_other_categories][id][$in][${index}]=${id}`
+          `filters[product_other_categories][id][$in][${index}]=${id}`,
       )
       .join("&");
 
@@ -655,7 +667,7 @@ export const getRelatedProductsByOtherCategories = async (
   } catch (error) {
     console.error(
       "Error fetching related products by other categories:",
-      error
+      error,
     );
     return [];
   }
@@ -677,7 +689,7 @@ const formatProductsToCardProps = (products: any[]): ProductCardProps[] => {
 
       // Get first variation with price
       const variation = product.attributes.product_variations?.data?.find(
-        (v: any) => v.attributes.Price && parseInt(v.attributes.Price) > 0
+        (v: any) => v.attributes.Price && parseInt(v.attributes.Price) > 0,
       );
 
       if (!variation) return null;

@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="w-full mx-auto">
+    <div className="mx-auto w-full">
       <AuthTitle subtitle="لطفا شماره همراه خود را جهت بازیابی رمز وارد نمایید">
         بازیابی رمز عبور
       </AuthTitle>
@@ -21,3 +21,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

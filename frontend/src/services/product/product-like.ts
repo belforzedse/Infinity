@@ -1,5 +1,5 @@
 import { apiClient } from "..";
-import { ApiResponse } from "@/types/api";
+// removed unused import: ApiResponse from "@/types/api"
 
 export interface ImageResponse {
   id: number;
@@ -76,7 +76,7 @@ const ProductLikeService = {
   getUserFavorites: async (page = 1, pageSize = 25) => {
     try {
       const response = await apiClient.get(
-        `/product-likes/user/me?page=${page}&pageSize=${pageSize}`
+        `/product-likes/user/me?page=${page}&pageSize=${pageSize}`,
       );
       return response;
     } catch (error: any) {

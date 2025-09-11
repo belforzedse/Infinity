@@ -13,7 +13,7 @@ const MobileHamburgerMenu = () => {
   return (
     <>
       <button
-        className="rounded-full w-10 h-10 bg-white border border-slate-200 lg:hidden flex items-center justify-center"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white lg:hidden"
         onClick={() => setIsOpen(true)}
         aria-label="Open menu"
       >

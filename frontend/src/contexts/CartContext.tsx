@@ -4,10 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
-import toast from "react-hot-toast";
-
-// API base URL
-// const API_BASE_URL = "https://api.infinity.rgbgroup.ir/api";
+import notify from "@/utils/notify";
 
 export interface CartItem {
   id: string;
@@ -22,45 +19,6 @@ export interface CartItem {
   color?: string;
   size?: string;
   model?: string;
-}
-
-// New interfaces for API responses
-interface ApiCartItem {
-  id: number;
-  Count: number;
-  Sum: number;
-  product_variation: {
-    id: number;
-    Price: number;
-    product_stock: {
-      Count: number;
-    };
-    product_variation_color?: {
-      id: number;
-      Title: string;
-    };
-    product_variation_size?: {
-      id: number;
-      Title: string;
-    };
-    product_variation_model?: {
-      id: number;
-      Title: string;
-    };
-    product: {
-      Title: string;
-      SKU: string;
-      // Add any other needed product properties
-      category?: string;
-      image?: string;
-    };
-  };
-}
-
-interface ApiCart {
-  id: number;
-  Status: string;
-  cart_items: ApiCartItem[];
 }
 
 interface CartContextType {
@@ -211,7 +169,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (item.variationId) {
             await CartService.addItemToCart(
               Number(item.variationId),
-              item.quantity
+              item.quantity,
             );
           }
         }
@@ -243,11 +201,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         setIsLoading(true);
 
-        console.log(newItem);
-
         await CartService.addItemToCart(
           Number(newItem.variationId),
-          newItem.quantity
+          newItem.quantity,
         );
 
         // Refresh cart after adding item
@@ -257,9 +213,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
-          toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+          notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
-          toast.error("افزودن کالا به سبد خرید با خطا مواجه شد");
+          notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
         }
       } finally {
         setIsLoading(false);
@@ -269,7 +225,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCartItems((prev) => {
         // Check if item already exists in cart
         const existingItemIndex = prev.findIndex(
-          (item) => item.slug === newItem.slug
+          (item) => item.slug === newItem.slug,
         );
 
         if (existingItemIndex !== -1) {
@@ -327,8 +283,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const item = cartItems.find((item) => item.id === id);
         if (!item) return;
 
-        console.log(item);
-
         // Extract the cart item ID from the API
         const cartItemId = item.id;
         if (!cartItemId) return;
@@ -342,9 +296,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
-          toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+          notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
-          toast.error("بروزرسانی سبد خرید با خطا مواجه شد");
+          notify.error("بروزرسانی سبد خرید با خطا مواجه شد");
         }
       } finally {
         setIsLoading(false);
@@ -352,7 +306,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Local storage implementation
       setCartItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+        prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
       );
     }
   };
@@ -399,7 +353,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   const value = {

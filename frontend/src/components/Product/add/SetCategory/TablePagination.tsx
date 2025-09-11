@@ -51,8 +51,8 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
   const renderPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPageState - 2);
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const startPage = Math.max(1, currentPageState - 2);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     // Show first page
     if (startPage > 1) {
@@ -61,21 +61,21 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
           key={1}
           onClick={() => handlePageChange(1)}
           className={cn(
-            "h-[26px] w-[26px] rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:bg-gray-100"
+            "text-xs flex h-[26px] w-[26px] items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400 hover:bg-gray-100",
           )}
         >
           1
-        </button>
+        </button>,
       );
 
       if (startPage > 2) {
         pages.push(
           <button
             key="ellipsis-start"
-            className="h-[26px] w-[26px] rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400"
+            className="text-xs flex h-[26px] w-[26px] items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400"
           >
             ...
-          </button>
+          </button>,
         );
       }
     }
@@ -87,14 +87,14 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
           key={i}
           onClick={() => handlePageChange(i)}
           className={cn(
-            "h-[26px] w-[26px] rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400",
+            "text-xs flex h-[26px] w-[26px] items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400",
             currentPageState === i
-              ? "bg-actions-primary text-white border-actions-primary"
-              : "hover:bg-gray-100"
+              ? "border-actions-primary bg-actions-primary text-white"
+              : "hover:bg-gray-100",
           )}
         >
           {i}
-        </button>
+        </button>,
       );
     }
 
@@ -104,10 +104,10 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
         pages.push(
           <button
             key="ellipsis-end"
-            className="h-[26px] w-[26px] rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400"
+            className="text-xs flex h-[26px] w-[26px] items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400"
           >
             ...
-          </button>
+          </button>,
         );
       }
 
@@ -116,11 +116,11 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
           key={totalPages}
           onClick={() => handlePageChange(totalPages)}
           className={cn(
-            "h-[26px] w-[26px] rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:bg-gray-100"
+            "text-xs flex h-[26px] w-[26px] items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400 hover:bg-gray-100",
           )}
         >
           {totalPages}
-        </button>
+        </button>,
       );
     }
 
@@ -142,7 +142,7 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
         <button
           onClick={() => handlePageChange(currentPageState + 1)}
           disabled={currentPageState === totalPages}
-          className="border rounded-3xl p-1 disabled:opacity-50 border-slate-200 bg-white text-slate-400"
+          className="rounded-3xl border border-slate-200 bg-white p-1 text-slate-400 disabled:opacity-50"
         >
           <ChevronRightIcon />
         </button>
@@ -154,7 +154,7 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
         <button
           onClick={() => handlePageChange(currentPageState - 1)}
           disabled={currentPageState === 1}
-          className="border rounded-3xl p-1 disabled:opacity-50 border-slate-200 bg-white text-slate-400"
+          className="rounded-3xl border border-slate-200 bg-white p-1 text-slate-400 disabled:opacity-50"
         >
           <ChavronLeftIcon />
         </button>

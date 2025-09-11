@@ -1,9 +1,18 @@
+/**
+ * Shape describing a navigable route within the application. Used both for
+ * generating documentation pages and the in-app route list UI.
+ */
 export interface RouteInfo {
   name: string;
   path: string;
   description: string;
 }
 
+/**
+ * Central list of known application routes. The paths here are used in
+ * development tooling such as the `RouteList` component to quickly surface
+ * available pages and their purpose.
+ */
 export const routes: RouteInfo[] = [
   {
     name: "Home",
@@ -77,12 +86,22 @@ export const routes: RouteInfo[] = [
     path: "/super-admin/coupons/rules",
     description: "Manage coupons rules",
   },
+  {
+    name: "Super Admin - Discounts",
+    path: "/super-admin/discounts",
+    description: "Overview for discount management",
+  },
 
   // Product Routes
   {
     name: "Product Listing (PLP)",
     path: "/plp",
     description: "Product Listing Page",
+  },
+  {
+    name: "Categories",
+    path: "/categories",
+    description: "Browse product categories",
   },
   {
     name: "Product Details (PDP)",

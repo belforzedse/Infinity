@@ -35,7 +35,7 @@ export async function getFooterData(): Promise<FooterData> {
           "Content-Type": "application/json",
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      }
+      },
     );
 
     // Gracefully handle missing footer (404) by returning empty structure

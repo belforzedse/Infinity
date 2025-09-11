@@ -25,7 +25,7 @@ export const getTags = async (): Promise<
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 
   return response.data;

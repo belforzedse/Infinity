@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { ApiResponse, PaginatedResponse } from "@/types/api";
+import { ApiResponse } from "@/types/api";
 import { paramCreator } from "@/utils/paramCreator";
 import { TagAttributes } from "./tag/get";
 
@@ -78,7 +78,7 @@ export interface ProductDataResponse {
 
 export const getProduct = async (
   id: string,
-  params: PopulateObject
+  params: PopulateObject,
 ): Promise<ApiResponse<Item>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?${paramCreator(params)}`;
   const response = await apiClient.get<ApiResponse<Item>>(endpoint, {

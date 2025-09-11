@@ -1,9 +1,11 @@
 "use client";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
-import { USER_SIDEBAR_ITEMS } from "@/components/User/Constnats";
+import { Fragment, useState } from "react";
+import { USER_SIDEBAR_ITEMS, LOGOUT_ITEM } from "@/components/User/Constnats";
 import SidebarItem from "@/components/User/Sidebar/SidebarItem";
 import XIcon from "../Icons/XIcon";
+import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import { useRouter } from "next/navigation";
 
 interface Props {
   isOpen: boolean;
@@ -11,9 +13,26 @@ interface Props {
 }
 
 const Menu = ({ isOpen, onClose }: Props) => {
+  const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleLogout = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+      }
+    } finally {
+      setShowConfirm(false);
+      onClose();
+      router.replace("/auth");
+    }
+  };
+
+  const openConfirm = () => setShowConfirm(true);
+  const closeConfirm = () => setShowConfirm(false);
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+    <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -37,7 +56,7 @@ const Menu = ({ isOpen, onClose }: Props) => {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="w-[216px] h-fit rounded-bl-xl transform overflow-hidden bg-white shadow-xl transition-all">
+              <Dialog.Panel className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all">
                 <nav className="p-5">
                   <button
                     onClick={onClose}
@@ -45,7 +64,7 @@ const Menu = ({ isOpen, onClose }: Props) => {
                   >
                     <XIcon />
                   </button>
-                  <div className="flex flex-col lg:gap-2 gap-3 lg:px-8">
+                  <div className="flex flex-col gap-3 lg:gap-2 lg:px-8">
                     {USER_SIDEBAR_ITEMS.map((item) => (
                       <SidebarItem
                         key={item.href}
@@ -54,8 +73,23 @@ const Menu = ({ isOpen, onClose }: Props) => {
                         text={item.text}
                       />
                     ))}
+                    <SidebarItem
+                      href=""
+                      icon={LOGOUT_ITEM.icon}
+                      text={LOGOUT_ITEM.text}
+                      onClick={openConfirm}
+                    />
                   </div>
                 </nav>
+                <ConfirmDialog
+                  isOpen={showConfirm}
+                  title="خروج از حساب کاربری"
+                  description="آیا از خروج از حساب کاربری خود مطمئن هستید؟"
+                  confirmText="بله، خارج شو"
+                  cancelText="انصراف"
+                  onConfirm={handleLogout}
+                  onCancel={closeConfirm}
+                />
               </Dialog.Panel>
             </Transition.Child>
           </div>

@@ -46,7 +46,7 @@ export function useCountdown(initialSeconds: number = 120): UseCountdownReturn {
     .toString()
     .padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`.replace(
     /[0-9]/g,
-    (d) => ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"][Number(d)]
+    (d) => ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"][Number(d)],
   );
 
   return {

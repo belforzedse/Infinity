@@ -72,7 +72,7 @@ export default function Page() {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        }
+        },
       )
       .then((res) => {
         setReactions((data) => [
@@ -80,10 +80,10 @@ export default function Page() {
           ...((res as any)?.data || []),
         ]);
       })
-      .catch((err) => {
+      .catch((_err) => {
         toast.error("دریافت اطلاعات با خطا مواجه شد");
       });
-  }, [reactionPages]);
+  }, [reactionPages, id]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -94,7 +94,7 @@ export default function Page() {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        }
+        },
       )
       .then((res) => {
         const data = (res as any)?.data as CommentResponse;
@@ -115,7 +115,7 @@ export default function Page() {
         });
         setIsLoading(false);
       })
-      .catch((err) => {
+      .catch((_err) => {
         setError("دریافت اطلاعات با خطا مواجه شد");
         toast.error("دریافت اطلاعات با خطا مواجه شد");
         setIsLoading(false);
@@ -124,19 +124,19 @@ export default function Page() {
 
   const ReactionsTable = () => {
     return (
-      <div className="w-full bg-white rounded-lg p-3 md:p-5">
-        <h2 className="text-lg md:text-xl text-right mb-2 md:mb-4">واکنش ها</h2>
-        <div className="overflow-x-auto border border-slate-100 rounded-2xl p-2 md:p-4">
+      <div className="w-full rounded-lg bg-white p-3 md:p-5">
+        <h2 className="text-lg mb-2 text-right md:text-xl md:mb-4">واکنش ها</h2>
+        <div className="overflow-x-auto rounded-2xl border border-slate-100 p-2 md:p-4">
           <table className="w-full">
             <thead>
-              <tr className="text-right px-2 bg-slate-50 rounded-xl">
-                <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-xs md:text-sm">
+              <tr className="rounded-xl bg-slate-50 px-2 text-right">
+                <th className="text-xs px-1 py-2 font-medium text-gray-600 md:text-sm md:py-2.5">
                   شناسه کاربر
                 </th>
-                <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-xs md:text-sm">
+                <th className="text-xs px-1 py-2 font-medium text-gray-600 md:text-sm md:py-2.5">
                   واکنش
                 </th>
-                <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-left text-xs md:text-sm">
+                <th className="text-xs px-1 py-2 text-left font-medium text-gray-600 md:text-sm md:py-2.5">
                   تاریخ ایجاد
                 </th>
               </tr>
@@ -144,22 +144,22 @@ export default function Page() {
             <tbody>
               {reactions?.map((reaction) => (
                 <tr key={reaction?.id} className="border-b border-gray-100">
-                  <td className="py-2 md:py-3 text-xs md:text-sm">
+                  <td className="text-xs py-2 md:text-sm md:py-3">
                     <a href="#" className="text-blue-500 hover:underline">
                       {reaction?.attributes?.user?.data?.attributes?.Phone}
                     </a>
                   </td>
-                  <td className="py-2 md:py-3 text-xs md:text-sm">
+                  <td className="text-xs py-2 md:text-sm md:py-3">
                     {reaction?.attributes?.Type === "Like" ? "لایک" : "دیسلایک"}
                   </td>
-                  <td className="py-2 md:py-3 text-slate-500 text-left text-xs md:text-sm">
+                  <td className="text-xs py-2 text-left text-slate-500 md:text-sm md:py-3">
                     {new Date(reaction?.attributes?.createdAt).toLocaleString(
                       "fa-IR",
                       {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
-                      }
+                      },
                     )}
                   </td>
                 </tr>
@@ -168,7 +168,7 @@ export default function Page() {
                 <td colSpan={3} className="py-2 md:py-3">
                   <div className="flex justify-center">
                     <button
-                      className="flex items-center text-gray-500 text-xs md:text-sm"
+                      className="text-xs flex items-center text-gray-500 md:text-sm"
                       onClick={() => setReactionPages(reactionPages + 1)}
                     >
                       <span className="ml-2">مشاهده بیشتر</span>
@@ -182,7 +182,7 @@ export default function Page() {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="md:w-4 md:h-4"
+                        className="md:h-4 md:w-4"
                       >
                         <circle cx="12" cy="12" r="10" />
                         <path d="M12 8v8M8 12h8" />
@@ -227,7 +227,7 @@ export default function Page() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
           setRevalidate(revalidate + 1);
           toast.success("ویرایش با موفقیت انجام شد");

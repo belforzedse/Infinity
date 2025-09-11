@@ -11,7 +11,7 @@ import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCoverImage } from "@/types/Product";
-import { apiClient as _ } from "@/services";
+// removed unused import alias: apiClient as _ from "@/services"
 
 export type Order = {
   id: number;
@@ -183,7 +183,7 @@ export default function EditOrderPage() {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        }
+        },
       )
       .then((res) => {
         const data = (res as any).data as OrderResponse;
@@ -216,8 +216,8 @@ export default function EditOrderPage() {
         const addr = data.attributes?.delivery_address?.data?.attributes;
         const city = addr?.shipping_city?.data?.attributes?.Title;
         const province =
-          addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes
-            ?.Title;
+          addr?.shipping_city?.data?.attributes?.shipping_province?.data
+            ?.attributes?.Title;
         const fullAddress = [addr?.FullAddress, city, province]
           .filter(Boolean)
           .join(" - ");
@@ -285,12 +285,12 @@ export default function EditOrderPage() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           )
-          .then((res) => {
+          .then(() => {
             toast.success("سفارش با موفقیت ویرایش شد");
           })
-          .catch((err) => {
+          .catch(() => {
             toast.error("خطایی رخ داده است");
           });
       }}
