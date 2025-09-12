@@ -5,13 +5,18 @@ import { isGlobalLoadingAtom, navigationInProgressAtom } from "@/atoms/loading";
 import SuspenseLoader from "./SuspenseLoader";
 import useSmoothLoading from "@/hooks/useSmoothLoading";
 import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 export default function GlobalLoadingOverlay() {
+  const pathname = usePathname();
   const apiLoading = useAtomValue(isGlobalLoadingAtom);
   const navLoading = useAtomValue(navigationInProgressAtom);
   const active = apiLoading || navLoading;
   // Show immediately on navigation; keep minimum to avoid flicker
   const visible = useSmoothLoading(active, { showDelayMs: 0, minVisibleMs: 300 });
+
+  // Skip overlay on super-admin routes where it interferes with editing UX
+  if (pathname?.startsWith("/super-admin")) return null;
 
   return (
     <AnimatePresence>
