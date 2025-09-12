@@ -390,39 +390,98 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           );
         }
 
-        // Check for applicable discounts
+        // Check for applicable discounts (coupon first, then general)
         let discountAmount = 0;
-
-        // Find active general discounts
-        const generalDiscounts = await strapi.entityService.findMany(
-          "api::general-discount.general-discount",
-          {
-            filters: {
-              IsActive: true,
-              StartDate: { $lte: new Date() },
-              EndDate: { $gte: new Date() },
-            },
-            sort: { createdAt: "desc" },
-          }
-        );
-
-        // Apply first matching discount with type assertion to access properties
-        for (const discount of generalDiscounts || []) {
-          const discountData = discount as any;
-          if (discountData.MinimumAmount <= subtotal) {
-            if (discountData.IsPercentage) {
-              discountAmount = (subtotal * discountData.Amount) / 100;
-              if (
-                discountData.MaxAmount &&
-                discountAmount > discountData.MaxAmount
-              ) {
-                discountAmount = discountData.MaxAmount;
-              }
-            } else {
-              discountAmount = discountData.Amount;
+        // If a coupon code was provided via controller, validate and compute first
+        if (shippingData?.discountCode) {
+          const code = String(shippingData.discountCode);
+          // Find active coupon
+          const matches = await strapi.entityService.findMany(
+            "api::discount.discount",
+            {
+              filters: {
+                Code: code,
+                IsActive: true,
+                StartDate: { $lte: new Date() },
+                EndDate: { $gte: new Date() },
+                removedAt: { $null: true },
+              },
+              populate: { local_users: true, product_variations: true },
+              limit: 1,
             }
-            // No need to update order as DiscountAmount field doesn't exist in schema
-            break; // Apply only one general discount
+          );
+          if (matches?.length) {
+            const coupon: any = matches[0];
+            // Enforce user eligibility if scoped
+            if (
+              !coupon.local_users?.length ||
+              coupon.local_users.some((u: any) => u.id === userId)
+            ) {
+              // Compute eligible subtotal if product-scoped
+              let eligibleSubtotal = subtotal;
+              if (coupon.product_variations?.length) {
+                const eligibleIds = new Set(
+                  coupon.product_variations.map((p: any) => p.id)
+                );
+                eligibleSubtotal = 0;
+                for (const item of cart.cart_items) {
+                  if (eligibleIds.has(item?.product_variation?.id)) {
+                    const price = Number(item?.product_variation?.Price || 0);
+                    const count = Number(item?.Count || 0);
+                    eligibleSubtotal += price * count;
+                  }
+                }
+              }
+              // Compute discount by type
+              if (coupon.Type === "Discount") {
+                discountAmount =
+                  (eligibleSubtotal * Number(coupon.Amount || 0)) / 100;
+                if (
+                  typeof coupon.LimitAmount === "number" &&
+                  coupon.LimitAmount > 0 &&
+                  discountAmount > coupon.LimitAmount
+                ) {
+                  discountAmount = coupon.LimitAmount;
+                }
+              } else {
+                discountAmount = Number(coupon.Amount || 0);
+              }
+            }
+          }
+        }
+
+        // If no coupon applied, find active general discounts
+        if (!discountAmount) {
+          const generalDiscounts = await strapi.entityService.findMany(
+            "api::general-discount.general-discount",
+            {
+              filters: {
+                IsActive: true,
+                StartDate: { $lte: new Date() },
+                EndDate: { $gte: new Date() },
+              },
+              sort: { createdAt: "desc" },
+            }
+          );
+
+          // Apply first matching discount with type assertion to access properties
+          for (const discount of generalDiscounts || []) {
+            const discountData = discount as any;
+            if (discountData.MinimumAmount <= subtotal) {
+              if (discountData.IsPercentage) {
+                discountAmount = (subtotal * discountData.Amount) / 100;
+                if (
+                  discountData.MaxAmount &&
+                  discountAmount > discountData.MaxAmount
+                ) {
+                  discountAmount = discountData.MaxAmount;
+                }
+              } else {
+                discountAmount = discountData.Amount;
+              }
+              // No need to update order as DiscountAmount field doesn't exist in schema
+              break; // Apply only one general discount
+            }
           }
         }
 
