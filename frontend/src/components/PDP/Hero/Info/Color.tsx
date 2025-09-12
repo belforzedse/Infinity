@@ -37,28 +37,28 @@ export default function PDPHeroInfoColor(props: Props) {
 
       <div className="flex items-center gap-4">
         {colors.map((color) => (
-          <>
-            {color.id === selectedColor ? (
-              <div className="flex items-center gap-1 rounded-3xl border border-gray-300 p-1">
-                <div
-                  key={color.id}
-                  className="h-7 w-7 rounded-full"
-                  style={{ backgroundColor: color.colorCode }}
-                />
-
-                <span className="text-sm text-foreground-primary">
-                  {color.title}
-                </span>
-              </div>
-            ) : (
-              <button
-                onClick={() => handleColorClick(color.id)}
-                key={color.id}
+          color.id === selectedColor ? (
+            <div
+              key={color.id}
+              className="flex items-center gap-1 rounded-3xl border border-gray-300 p-1"
+            >
+              <div
                 className="h-7 w-7 rounded-full"
                 style={{ backgroundColor: color.colorCode }}
               />
-            )}
-          </>
+
+              <span className="text-sm text-foreground-primary">
+                {color.title}
+              </span>
+            </div>
+          ) : (
+            <button
+              key={color.id}
+              onClick={() => handleColorClick(color.id)}
+              className="h-7 w-7 rounded-full"
+              style={{ backgroundColor: color.colorCode }}
+            />
+          )
         ))}
       </div>
     </div>

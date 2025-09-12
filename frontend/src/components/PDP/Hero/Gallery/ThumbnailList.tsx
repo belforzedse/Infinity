@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 
 type Props = {
   assets: {
@@ -21,6 +21,14 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   const [showBlur, setShowBlur] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const preloadSrc = useCallback((src: string) => {
+    if (typeof window === "undefined") return;
+    try {
+      const img = new window.Image();
+      img.src = src;
+    } catch {}
+  }, []);
 
   const scrollToImage = (index: number) => {
     if (scrollContainerRef.current) {
@@ -116,6 +124,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
             onClick={() => {
               setSelectedImage(asset.id);
             }}
+            onMouseEnter={() => preloadSrc(asset.src)}
             className="relative h-[70px] w-[84px] cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
           >
             <div className={asset.id === selectedImage ? "opacity-50" : ""}>
@@ -125,6 +134,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
                 alt={asset.alt}
                 sizes="(max-width: 768px) 84px, 139px"
                 loader={imageLoader}
+                loading="lazy"
               />
             </div>
 
