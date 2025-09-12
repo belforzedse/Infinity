@@ -99,6 +99,9 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     });
 
     if (!paymentResult || !paymentResult.success) {
+      const reqId = paymentResult?.requestId;
+      const errMsg = paymentResult?.error || "Payment gateway error";
+      const detailed = paymentResult?.detailedError || {};
       try {
         await strapi.entityService.create("api::order-log.order-log", {
           data: {
@@ -106,8 +109,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
             Action: "Update",
             Description: "Gateway payment request failed",
             Changes: {
-              requestId: paymentResult.requestId,
-              error: paymentResult.error,
+              requestId: reqId,
+              error: errMsg,
             },
           },
         });
@@ -122,12 +125,12 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         data: { Status: "Cancelled" },
       });
 
-      return ctx.badRequest(paymentResult.error || "Payment gateway error", {
+      return ctx.badRequest(errMsg, {
         data: {
           success: false,
-          error: paymentResult.error || "Payment gateway error",
-          debug: paymentResult.detailedError || {},
-          requestId: paymentResult.requestId,
+          error: errMsg,
+          debug: detailed,
+          requestId: reqId,
           timestamp: new Date().toISOString(),
           orderId: order.id,
           contractId: contract.id,
