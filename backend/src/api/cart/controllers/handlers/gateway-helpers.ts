@@ -148,7 +148,11 @@ export const requestSnappPayment = async (
   } catch {}
 
   const tokenResp = await snappay.requestPaymentToken(snappPayload);
-  if (!tokenResp?.successful || !tokenResp?.response?.paymentPageUrl) {
+  if (
+    !tokenResp ||
+    !tokenResp.successful ||
+    !tokenResp.response?.paymentPageUrl
+  ) {
     await strapi.entityService.update("api::order.order", order.id, {
       data: { Status: "Cancelled" },
     });
