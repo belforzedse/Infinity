@@ -21,7 +21,18 @@ export const navigationInProgressAtom = atom(false);
 
 export function setNavigationInProgress(v: boolean) {
   const store = jotaiStore;
-  startTransition(() => {
-    store.set(navigationInProgressAtom, v);
-  });
+  // Defer updates to avoid scheduling during insertion effects
+  // which can happen if callers run inside early lifecycle hooks.
+  if (typeof window !== "undefined") {
+    window.setTimeout(() => {
+      startTransition(() => {
+        store.set(navigationInProgressAtom, v);
+      });
+    }, 0);
+  } else {
+    // Fallback for non-DOM environments
+    startTransition(() => {
+      store.set(navigationInProgressAtom, v);
+    });
+  }
 }
