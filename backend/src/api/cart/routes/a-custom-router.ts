@@ -51,6 +51,15 @@ export default {
     },
     {
       method: "POST",
+      path: "/carts/apply-discount",
+      handler: "cart.applyDiscount",
+      config: {
+        auth: false,
+        middlewares: ["global::authentication"],
+      },
+    },
+    {
+      method: "POST",
       path: "/carts/finalize",
       handler: "cart.finalizeToOrder",
       config: {
