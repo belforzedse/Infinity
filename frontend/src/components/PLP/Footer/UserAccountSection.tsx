@@ -11,12 +11,12 @@ interface UserAccountSectionProps {
 const UserAccountSection = ({ data }: UserAccountSectionProps) => {
   // Fallback data in case API data is not available
   const [links, setLinks] = useState<{ title: string; url: string }[]>([
-    { title: "حساب کاربری من", url: "#" },
+    { title: "حساب کاربری من", url: "/account" },
     { title: "فروشگاه", url: "/plp" },
     { title: "سبد خرید", url: "/cart" },
-    { title: "پرداخت", url: "/checkout" },
-    { title: "ویدیوهای آموزشی", url: "#" },
-    { title: "اینفینیتی مگ", url: "#" },
+    //   { title: "پرداخت", url: "/checkout" },
+    { title: "ویدیوهای آموزشی", url: "https://infinitycolor.co/videos/" },
+    { title: "اینفینیتی مگ", url: "https://infinitycolor.co/blog/" },
   ]);
 
   const [title, setTitle] = useState<string>("حساب کاربری");
@@ -37,7 +37,7 @@ const UserAccountSection = ({ data }: UserAccountSectionProps) => {
 
   return (
     <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 md:h-full md:min-h-[324px] md:border-b-[0px] md:border-none md:px-[65px]">
-      <h3 className="text-base text-neutral-900">{title}</h3>
+      <h3 className="text-base text-neutral-900">حساب کاربری</h3>
 
       <div className="flex flex-row-reverse flex-wrap items-start gap-2 md:flex-col">
         {links.map((link, index) => (
