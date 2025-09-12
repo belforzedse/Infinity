@@ -92,13 +92,13 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     }
 
     strapi.log.info(`Payment result for Order ${order.id}:`, {
-      success: paymentResult.success,
-      error: paymentResult.error,
-      requestId: paymentResult.requestId,
-      hasDetailedError: !!paymentResult.detailedError,
+      success: paymentResult?.success,
+      error: paymentResult?.error,
+      requestId: paymentResult?.requestId,
+      hasDetailedError: !!paymentResult?.detailedError,
     });
 
-    if (!paymentResult.success) {
+    if (!paymentResult || !paymentResult.success) {
       try {
         await strapi.entityService.create("api::order-log.order-log", {
           data: {
