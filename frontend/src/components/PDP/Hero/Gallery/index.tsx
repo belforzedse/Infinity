@@ -70,6 +70,7 @@ export default function PDPHeroGallery(props: Props) {
       <SingleImage
         type={byId.get(selectedImage)?.type || "image"}
         src={byId.get(selectedImage)?.src || ""}
+        thumb={byId.get(selectedImage)?.thumbnail || ""}
         alt={byId.get(selectedImage)?.alt || ""}
         goToNextImage={goToNextImage}
         goToPreviousImage={goToPreviousImage}

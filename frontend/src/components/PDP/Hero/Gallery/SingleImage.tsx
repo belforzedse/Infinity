@@ -9,18 +9,21 @@ import { useEffect, useState } from "react";
 type Props = {
   type: "video" | "image";
   src: string;
+  thumb?: string;
   alt?: string;
   goToNextImage: () => void;
   goToPreviousImage: () => void;
 };
 
 export default function PDPHeroGallerySingleImage(props: Props) {
-  const { type, src, alt, goToNextImage, goToPreviousImage } = props;
+  const { type, src, thumb, alt, goToNextImage, goToPreviousImage } = props;
   const [isLoading, setIsLoading] = useState(true);
+  const [broken, setBroken] = useState(false);
 
   useEffect(() => {
     // Start loading state whenever src/type changes
     setIsLoading(true);
+    setBroken(false);
   }, [src, type]);
 
   // Keyboard navigation for accessibility and faster UX
@@ -50,25 +53,44 @@ export default function PDPHeroGallerySingleImage(props: Props) {
             controls
             loop
             onCanPlay={() => setIsLoading(false)}
+            onError={() => setIsLoading(false)}
+            poster={thumb}
           />
         ) : (
           <Image
             className={`h-full w-full object-cover transition-all duration-300 ease-out ${
               isLoading ? "opacity-0 scale-[1.02] blur-[2px]" : "opacity-100"
             }`}
-            src={src}
+            src={broken ? "/images/placeholders/image-placeholder.svg" : src}
             alt={alt || ""}
             fill
             loader={imageLoader}
             sizes="(max-width: 768px) 100vw, 640px"
             onLoadingComplete={() => setIsLoading(false)}
+            onError={() => {
+              setBroken(true);
+              setIsLoading(false);
+            }}
+            priority={false}
           />
         )}
 
-        {/* Soft skeleton overlay while image/video loads */}
-        {isLoading && (
+        {/* Blur-up placeholder (uses provided thumbnail) */}
+        {isLoading && thumb ? (
+          <div
+            className="absolute inset-0 scale-105 blur-md transition-opacity duration-300"
+            style={{
+              backgroundImage: `url(${thumb})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: 0.9,
+            }}
+          />
+        ) : null}
+        {/* Fallback skeleton when no thumbnail */}
+        {isLoading && !thumb ? (
           <div className="absolute inset-0 animate-pulse bg-gray-100" />
-        )}
+        ) : null}
 
         <button className="absolute left-2 top-2 z-10 hidden h-[64px] w-[64px] flex-col items-center justify-center gap-2 rounded-full border border-pink-200 bg-white md:flex">
           <div className="text-[9px] text-pink-600">استایل بساز</div>
