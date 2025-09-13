@@ -7,6 +7,7 @@ import Image from "next/image";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { categories } from "@/constants/categories";
+import HeroSlider from "@/components/Home/HeroSlider";
 
 interface ProductCardProps {
   id: number;
@@ -192,38 +193,19 @@ export default async function Home() {
   );
 
   return (
-    <div className="mx-auto mt-5 max-w-screen-xl px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:px-16">
-      {/* Hero section with responsive images */}
-      <div className="hidden md:block">
-        <Image
-          src="/images/index-img1-desktop.png"
-          alt="Hero Banner"
-          width={1920}
-          height={560}
-          className="w-full rounded-lg object-cover"
-          priority
-          sizes="100vw"
-        />
-      </div>
-      <div className="md:hidden">
-        <Image
-          src="/images/index-img1-mobile.png"
-          alt="Hero Banner Mobile"
-          width={750}
-          height={520}
-          className="w-full rounded-lg"
-          priority
-          sizes="100vw"
-        />
+    <>
+      <div className="mt-5 md:mt-8">
+        <HeroSlider />
       </div>
 
-      {/* Secondary banners section */}
-      <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
-        <div className="md:w-1/2">
-          <Link href={`/plp?category=shirt`}>
-            <Image
-              src="/images/index-img2-desktop.png"
-              alt="Banner"
+      <div className="mx-auto max-w-screen-xl px-4 pb-8 md:px-8 md:pb-16 lg:px-16">
+        {/* Secondary banners section */}
+        <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
+          <div className="md:w-1/2">
+            <Link href={`/plp?category=shirt`}>
+              <Image
+                src="/images/index-img2-desktop.png"
+                alt="Banner"
               width={1200}
               height={600}
               className="h-full w-full rounded-lg object-cover"
@@ -264,7 +246,8 @@ export default async function Home() {
             </Link>
           </div>
         </div>
-      </div>
+
+        </div>
 
       {/* Discounted products section */}
       <div className="mt-8 md:mt-12">
@@ -343,5 +326,6 @@ export default async function Home() {
         )}
       </div>
     </div>
+    </>
   );
 }
