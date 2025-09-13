@@ -222,14 +222,14 @@ export default async function Home() {
 
         {/* Secondary banners section */}
         <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
-          <div className="md:w-1/2">
+          <div className="rounded-4xl md:w-3/4">
             <Link href={`/plp?category=shirt`}>
               <Image
-                src="/images/index-img2-desktop.png"
+                src="/images/index-img2-mobile.png"
                 alt="Banner"
                 width={1200}
                 height={600}
-                className="h-full w-full rounded-lg object-cover"
+                className="h-full w-full rounded-b-[10px] rounded-t-[50px] object-cover"
                 loading="lazy"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
