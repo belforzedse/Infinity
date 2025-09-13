@@ -7,9 +7,10 @@ import ShippingIcon from "@/components/SuperAdmin/Layout/Icons/ShippingIcon";
 import PercentIcon from "@/components/SuperAdmin/Layout/Icons/PercentIcon";
 import DashboardIcon from "@/components/SuperAdmin/Layout/Icons/DashboardIcon";
 import PaymentIcon from "@/components/SuperAdmin/Layout/Icons/PaymentIcon";
+import Menu from "../components/User/MobileHamburgerMenu/Menu";
 import {
   //FiLayout,
-  //FiMenu,
+  FiMenu,
   FiUsers,
   FiLayers,
   FiBell,
@@ -19,7 +20,9 @@ import {
 } from "react-icons/fi";
 
 // Create a styled layout/menu icons (unused definitions removed)
-
+const RarMenu = () => (
+  <FiMenu className="h-5 w-5 text-pink-500" stroke="#EC4899" />
+);
 //Create a styled club icon
 const MultiUsersIcon = () => (
   <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />
@@ -68,52 +71,53 @@ const superAdminSidebar: SidebarItem[] = [
     label: "مدیریت محصولات",
     href: "/super-admin/products",
     icon: <ProductIcon />,
-    children: [
-      {
-        id: "product-attributes",
-        label: "ویژگی ها",
-        href: "/super-admin/products/attributes",
-      },
-      {
-        id: "product-categories",
-        label: "دسته بندی ها",
-        href: "/super-admin/products/categories",
-      },
-      {
-        id: "product-tags",
-        label: "برچسب ها",
-        href: "/super-admin/products/tags",
-      },
-      {
-        id: "product-comments",
-        label: "مدیریت نظرات",
-        href: "/super-admin/products/comments",
-      },
-      {
-        id: "product-size-guide",
-        label: "راهنمای اندازه",
-        href: "/super-admin/products/size-guide",
-      },
-    ],
+    children: [],
+    // children: [
+    //   {
+    //     id: "product-attributes",
+    //     label: "ویژگی ها",
+    //     href: "/super-admin/products/attributes",
+    //   },
+    //   {
+    //     id: "product-categories",
+    //     label: "دسته بندی ها",
+    //     href: "/super-admin/products/categories",
+    //   },
+    //   {
+    //     id: "product-tags",
+    //     label: "برچسب ها",
+    //     href: "/super-admin/products/tags",
+    //   },
+    //   {
+    //     id: "product-comments",
+    //     label: "مدیریت نظرات",
+    //     href: "/super-admin/products/comments",
+    //   },
+    //   {
+    //     id: "product-size-guide",
+    //     label: "راهنمای اندازه",
+    //     href: "/super-admin/products/size-guide",
+    //   },
+    // ],
   },
-  {
-    id: "customer-club",
-    label: "باشگاه مشتریان",
-    href: "/super-admin/customer-club",
-    icon: <MultiUsersIcon />,
-    children: [
-      {
-        id: "customer-club-actions",
-        label: "عملیات ها",
-        href: "/super-admin/customer-club/actions",
-      },
-      {
-        id: "customer-club-items",
-        label: "آیتم ها",
-        href: "/super-admin/customer-club/items",
-      },
-    ],
-  },
+  // {
+  //   id: "customer-club",
+  //   label: "باشگاه مشتریان",
+  //   href: "/super-admin/customer-club",
+  //   icon: <MultiUsersIcon />,
+  //   children: [
+  //     {
+  //       id: "customer-club-actions",
+  //       label: "عملیات ها",
+  //       href: "/super-admin/customer-club/actions",
+  //     },
+  //     {
+  //       id: "customer-club-items",
+  //       label: "آیتم ها",
+  //       href: "/super-admin/customer-club/items",
+  //     },
+  //   ],
+  // },
   {
     id: "orders",
     label: "مدیریت سفارشات",
@@ -176,13 +180,13 @@ const superAdminSidebar: SidebarItem[] = [
       },
     ],
   },
-  {
-    id: "pages-content",
-    label: "صفحات و محتوا",
-    href: "/super-admin/users",
-    icon: <PagesIcon />,
-    children: [],
-  },
+  // {
+  //   id: "pages-content",
+  //   label: "صفحات و محتوا",
+  //   href: "/super-admin/users",
+  //   icon: <PagesIcon />,
+  //   children: [],
+  // },
   {
     id: "users",
     label: "مدیریت کاربران",
@@ -205,20 +209,27 @@ const superAdminSidebar: SidebarItem[] = [
     children: [],
   },
 
+  // {
+  //   id: "cache",
+  //   label: "حافظه پنهان",
+  //   href: "/super-admin/cache",
+  //   icon: <CacheIcon />,
+  //   children: [],
+  // },
   {
-    id: "cache",
-    label: "حافظه پنهان",
-    href: "/super-admin/cache",
-    icon: <CacheIcon />,
+    id: "navbaredit",
+    label: "مدیریت منوی ناوبری",
+    href: "/super-admin/navigation/edit",
+    icon: <RarMenu />,
     children: [],
   },
-  {
-    id: "seo",
-    label: "سئو",
-    href: "/super-admin/SEO",
-    icon: <FiGlobe className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
-    children: [],
-  },
+  // {
+  //   id: "seo",
+  //   label: "سئو",
+  //   href: "/super-admin/SEO",
+  //   icon: <FiGlobe className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+  //   children: [],
+  // },
 ];
 
 export default superAdminSidebar;
