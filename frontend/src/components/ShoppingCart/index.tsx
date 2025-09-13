@@ -34,7 +34,7 @@ function ShoppingCart() {
   const transition = { duration: 0.3, ease: "easeInOut" } as const;
 
   return (
-    <div className="flex flex-col items-end gap-6 pb-20">
+    <div className="flex flex-col gap-6 pb-20">
       <span className="text-3xl w-full text-neutral-800">سبد خرید</span>
 
       <AnimatePresence mode="wait">
