@@ -187,6 +187,7 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
   }
 }
 
+
 export default async function Home() {
   const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
     [getDiscountedProducts(), getNewProducts(), getFavoriteProducts()],
