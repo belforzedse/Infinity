@@ -4,9 +4,8 @@ import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
-import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { categories } from "@/constants/categories";
+<<<<<<< HEAD
 
 
 import type { ProductCardProps } from "@/components/Product/Card";
@@ -179,6 +178,13 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
   }
 }
 
+=======
+import {
+  getDiscountedProducts,
+  getNewProducts,
+  getFavoriteProducts,
+} from "@/services/product/homepage";
+>>>>>>> 4cbb0c17690ac6556d072bcb77cdd35dcbcc4683
 
 export default async function Home() {
   const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
