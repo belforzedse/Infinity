@@ -8,16 +8,8 @@ import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { categories } from "@/constants/categories";
 
-interface ProductCardProps {
-  id: number;
-  images: string[];
-  category: string;
-  title: string;
-  price: number;
-  discount?: number;
-  discountPrice?: number;
-  seenCount: number;
-}
+
+import type { ProductCardProps } from "@/components/Product/Card";
 
 async function getDiscountedProducts(): Promise<ProductCardProps[]> {
   try {
