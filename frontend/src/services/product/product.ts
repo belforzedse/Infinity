@@ -557,7 +557,9 @@ export const hasStockForVariation = (
   const stockData = variation.attributes.product_stock.data.attributes;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Stock data object", { stockData });
-    logger.info("Available keys in stock data", { keys: Object.keys(stockData) });
+    logger.info("Available keys in stock data", {
+      keys: Object.keys(stockData),
+    });
   }
 
   const stockQuantity = stockData.Count;
@@ -674,7 +676,9 @@ export const getRelatedProductsByOtherCategories = async (
 };
 
 // Helper function to convert API product data to ProductCardProps format
-const formatProductsToCardProps = (products: any[]): ProductCardProps[] => {
+export const formatProductsToCardProps = (
+  products: any[],
+): ProductCardProps[] => {
   // Check if products is undefined or empty
   if (!products || !Array.isArray(products) || products.length === 0) {
     return [];
