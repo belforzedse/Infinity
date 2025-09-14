@@ -52,6 +52,54 @@ function ShoppingCartBillForm({}: Props) {
   const [gateway, setGateway] = useState<"mellat" | "snappay">("mellat");
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
   const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
+  const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
+  const [discountPreview, setDiscountPreview] = useState<{
+    discount: number;
+    summary: {
+      subtotal: number;
+      eligibleSubtotal: number;
+      tax: number;
+      shipping: number;
+      total: number;
+      taxPercent: number;
+    };
+  } | undefined>(undefined);
+
+  // Persist/restore discount code
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("discountCode");
+      if (saved) setDiscountCode(saved);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (discountCode) localStorage.setItem("discountCode", discountCode);
+      else localStorage.removeItem("discountCode");
+    } catch {}
+  }, [discountCode]);
+
+  // Refresh preview when code or shipping changes
+  useEffect(() => {
+    const run = async () => {
+      if (!discountCode) {
+        setDiscountPreview(undefined);
+        return;
+      }
+      try {
+        const res = await CartService.applyDiscount({
+          code: discountCode,
+          shippingId: watchShippingMethod ? Number(watchShippingMethod.id) : undefined,
+          shippingCost: watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined,
+        });
+        if (res?.success) {
+          setDiscountPreview({ discount: res.discount, summary: res.summary });
+        }
+      } catch {}
+    };
+    run();
+  }, [discountCode, watchShippingMethod]);
 
   // Naive eligibility (we don't have amount here; we can rely on backend final validation)
   // Optionally, you can request a lightweight endpoint to compute amount and check eligibility.
@@ -119,6 +167,7 @@ function ShoppingCartBillForm({}: Props) {
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
+        discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
@@ -194,8 +243,22 @@ function ShoppingCartBillForm({}: Props) {
             control={control}
             setValue={setValue}
             selectedShipping={watchShippingMethod}
+            discountPreview={discountPreview}
           />
-          <ShoppingCartBillDiscountCoupon />
+          <ShoppingCartBillDiscountCoupon
+            shippingId={watchShippingMethod ? Number(watchShippingMethod.id) : undefined}
+            shippingCost={watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined}
+            onApplied={(code, preview) => {
+              setDiscountCode(code);
+              setDiscountPreview(preview);
+            }}
+            appliedCode={discountCode}
+            onRemove={() => {
+              setDiscountCode(undefined);
+              setDiscountPreview(undefined);
+              try { localStorage.removeItem("discountCode"); } catch {}
+            }}
+          />
           <ShoppingCartBillPaymentGateway
             selected={gateway}
             onChange={setGateway}
