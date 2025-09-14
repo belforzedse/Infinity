@@ -160,6 +160,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       strapi.log.error("Failed to write order-log for gateway request", e);
     }
 
+    // NOTE: Do not clear cart here. Cart will be cleared on gateway callback success.
+
     return {
       data: {
         success: true,
