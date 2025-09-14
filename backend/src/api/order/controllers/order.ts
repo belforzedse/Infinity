@@ -105,6 +105,17 @@ export default factories.createCoreController(
             });
           }
 
+          // Log resolved identifiers
+          try {
+            strapi.log.info("SnappPay callback identifiers", {
+              resolvedOrderId: orderId,
+              tokenForOps,
+              incomingPaymentToken: paymentToken,
+              incomingTransactionId: transactionId,
+              state,
+            });
+          } catch {}
+
           // On callback, state OK => verify+settle; FAILED => revert
           if (String(state || "OK").toUpperCase() !== "OK") {
             const revertResult = await snappay.revert(tokenForOps);
@@ -129,6 +140,12 @@ export default factories.createCoreController(
           }
 
           const verifyResult = await snappay.verify(tokenForOps);
+          try {
+            strapi.log.info("SnappPay verify result", {
+              successful: verifyResult?.successful,
+              error: verifyResult?.errorData,
+            });
+          } catch {}
           if (!verifyResult?.successful) {
             // Verification failed; treat as failure
             await strapi.entityService.update("api::order.order", orderId, {
@@ -150,6 +167,12 @@ export default factories.createCoreController(
           }
 
           const settleResult = await snappay.settle(tokenForOps);
+          try {
+            strapi.log.info("SnappPay settle result", {
+              successful: settleResult?.successful,
+              error: settleResult?.errorData,
+            });
+          } catch {}
           if (settleResult?.successful) {
             // Decrement stock for each order item NOW (after settlement)
             try {

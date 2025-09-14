@@ -149,7 +149,16 @@ export default factories.createCoreController(
 
         // Call Snapp eligibility
         const snappay = strapi.service("api::payment-gateway.snappay");
+        strapi.log.info("SnappPay eligible request", {
+          userId,
+          amountIRR,
+        });
         const eligibleResp = await snappay.eligible(amountIRR);
+        strapi.log.info("SnappPay eligible result", {
+          successful: eligibleResp?.successful,
+          eligible: eligibleResp?.response?.eligible,
+          error: eligibleResp?.errorData,
+        });
 
         const payload = {
           eligible: !!eligibleResp?.response?.eligible,
