@@ -226,6 +226,96 @@ export function createLuxuryVariant(
   };
 }
 
+// Keyframed slide variant with per-segment eases and times
+export type LuxurySlideKFOptions = LuxurySlideFadeOptions & {
+  times?: number[]; // e.g., [0, 0.6, 1]
+  eases?: Array<string | number[]>; // one per segment
+  factors?: number[]; // multiplies offset per frame, default [1, 0.5, 0]
+};
+
+export function luxurySlideKeyframes(
+  direction: "left" | "right" | "up" | "down",
+  opts: LuxurySlideKFOptions = {},
+): Variants {
+  const {
+    distance,
+    duration,
+    ease,
+    scale,
+    springDamping,
+    springStiffness,
+    useSpring,
+    delay,
+    delayIn,
+    delayOut,
+    times,
+    eases,
+    factors,
+  } = { ...defaultLuxurySlideFadeOptions, ...opts } as any;
+
+  const getOffset = () => {
+    switch (direction) {
+      case "left":
+        return { x: -distance, y: 0 };
+      case "right":
+        return { x: distance, y: 0 };
+      case "up":
+        return { x: 0, y: -distance };
+      case "down":
+        return { x: 0, y: distance };
+    }
+  };
+
+  const offset = getOffset();
+
+  const ks = (factors && factors.length >= 2 ? factors : [1, 0.5, 0]) as number[];
+  const xFrames = offset.x ? ks.map((k) => k * offset.x) : undefined;
+  const yFrames = offset.y ? ks.map((k) => k * offset.y) : undefined;
+  const scaleFrames = typeof scale === "number" && scale !== 1 ? [scale, 1] : undefined;
+
+  const timeArray = (times && times.length === ks.length ? times : [0, 0.65, 1]) as number[];
+  const easeArray = (eases && eases.length === ks.length - 1
+    ? eases
+    : [ease || "easeOut", ease || "easeOut"]) as any[];
+
+  const baseTransition: Transition = useSpring
+    ? { type: "spring", damping: springDamping, stiffness: springStiffness, mass: 1 }
+    : { duration, ease: ease || "easeOut" } as Transition;
+
+  const enterDelay = (typeof delayIn === "number" ? delayIn : delay) || 0;
+  const exitDelay = (typeof delayOut === "number" ? delayOut : delay) || 0;
+
+  return {
+    initial: {
+      x: offset.x,
+      y: offset.y,
+      ...(scaleFrames ? { scale: scaleFrames[0] } : {}),
+    },
+    animate: {
+      ...(xFrames ? { x: xFrames } : {}),
+      ...(yFrames ? { y: yFrames } : {}),
+      ...(scaleFrames ? { scale: scaleFrames } : {}),
+      transition: {
+        ...baseTransition,
+        times: timeArray,
+        ease: easeArray as any,
+        delay: enterDelay,
+      } as any,
+    },
+    exit: {
+      ...(xFrames ? { x: [...xFrames].reverse() } : {}),
+      ...(yFrames ? { y: [...yFrames].reverse() } : {}),
+      ...(scaleFrames ? { scale: [...(scaleFrames as number[])].reverse() } : {}),
+      transition: {
+        ...baseTransition,
+        times: [...timeArray].reverse(),
+        ease: [...easeArray].reverse() as any,
+        delay: exitDelay,
+      } as any,
+    },
+  };
+}
+
 // Usage examples:
 /*
 // Basic luxury slide fade

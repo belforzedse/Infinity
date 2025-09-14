@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import DesktopHero from "./desktopHero";
 import { desktopSlides } from "./config/desktopSlides";
-import HeroPagination from "./Pagination";
+import PaginationDesktop from "./PaginationDesktop";
 
 export default function DesktopSlider() {
   const slides = useMemo(() => desktopSlides, []);
@@ -54,7 +54,7 @@ export default function DesktopSlider() {
         </button>
       </div>
       <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 lg:flex">
-        <HeroPagination
+        <PaginationDesktop
           total={slides.length}
           index={index}
           onDotClick={(i) => setIndex(i)}

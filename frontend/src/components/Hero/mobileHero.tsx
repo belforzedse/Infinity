@@ -12,10 +12,30 @@ type Props = {
 
 export default function MobileHero({ layout, playKey = 0 }: Props) {
   // Mobile-friendly, subtle animations using default slide fade
-  const heroVar = luxurySlideFade("right", { distance: 50, duration: 0.7 });
-  const primaryVar = luxurySlideFade("up", { distance: 36, duration: 0.65, delayIn: 0.06 });
-  const smallLeftVar = luxurySlideFade("right", { distance: 32, duration: 0.6, delayIn: 0.1 });
-  const smallRightVar = luxurySlideFade("left", { distance: 32, duration: 0.6, delayIn: 0.14 });
+  const heroVar = luxurySlideFade("right", {
+    distance: 50,
+    duration: 0.6,
+    delayIn: 0.2,
+    delayOut: 0.1,
+  });
+  const primaryVar = luxurySlideFade("right", {
+    distance: 200,
+    duration: 0.6,
+    delayIn: 0.5,
+    delayOut: 0.3,
+  });
+  const smallLeftVar = luxurySlideFade("left", {
+    distance: 70,
+    duration: 0.6,
+    delayIn: 0.1,
+    delayOut: 0.3,
+  });
+  const smallRightVar = luxurySlideFade("left", {
+    distance: 70,
+    duration: 0.6,
+    delayIn: 0.3,
+    delayOut: 0.2,
+  });
   return (
     <>
       {/* Hero section with responsive images */}
