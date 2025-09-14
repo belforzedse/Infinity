@@ -48,7 +48,7 @@ export default async function PDP({
       <div className="flex flex-col items-center justify-center gap-8 p-10">
         <h1 className="text-2xl font-bold">محصول مورد نظر یافت نشد</h1>
         <p>لطفا محصول دیگری را انتخاب کنید یا به صفحه اصلی بازگردید.</p>
-        <Link href="/" className="text-blue-500 hover:underline">
+        <Link href="/" className="text-blue-500">
           بازگشت به صفحه اصلی
         </Link>
       </div>

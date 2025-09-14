@@ -6,7 +6,7 @@ export default function ReportsIndexPage() {
       <ul className="list-disc space-y-2 pr-6">
         <li>
           <Link
-            className="text-pink-600 hover:underline"
+            className="text-pink-600"
             href="/super-admin/reports/liquidity"
           >
             گزارش مجموع نقدینگی در بازه
@@ -14,7 +14,7 @@ export default function ReportsIndexPage() {
         </li>
         <li>
           <Link
-            className="text-pink-600 hover:underline"
+            className="text-pink-600"
             href="/super-admin/reports/product-sales"
           >
             گزارش فروش هر محصول
@@ -22,7 +22,7 @@ export default function ReportsIndexPage() {
         </li>
         <li>
           <Link
-            className="text-pink-600 hover:underline"
+            className="text-pink-600"
             href="/super-admin/reports/gateway-liquidity"
           >
             گزارش مجموع نقدینگی هر درگاه
