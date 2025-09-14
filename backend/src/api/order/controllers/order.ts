@@ -18,11 +18,11 @@ export default factories.createCoreController(
       const q: any = (ctx.request as any).query || {};
       const b: any = (ctx.request as any).body || {};
       const state: string | undefined = (b.state ?? q.state) as any;
-      const paymentToken: string | undefined = (b.paymentToken ??
+      const paymentTokenInput: string | undefined = (b.paymentToken ??
         q.paymentToken ??
         b.payment_token ??
         q.payment_token) as any;
-      const transactionId: string | undefined = (b.transactionId ??
+      const transactionIdInput: string | undefined = (b.transactionId ??
         q.transactionId ??
         b.transaction_id ??
         q.transaction_id) as any;
@@ -59,87 +59,94 @@ export default factories.createCoreController(
           RefId,
           OrderId,
           state,
-          paymentToken,
-          transactionId,
+          paymentToken: paymentTokenInput,
+          transactionId: transactionIdInput,
           timestamp: new Date().toISOString(),
         });
 
         // If this is a SnappPay flow (state provided or paymentToken present), follow SnappPay verify+settle
-        if (state || paymentToken || transactionId) {
-          // Resolve orderId from our most recent pending SnappPay contract-transaction if OrderId is missing
+        if (state || paymentTokenInput || transactionIdInput) {
+          // Resolve orderId and token using transactionId first (exact match), then fallback to paymentToken
           let orderId: number | undefined = OrderId
             ? parseInt(OrderId, 10)
             : undefined;
+          let chosenTx: any | undefined;
 
-          if (!orderId) {
-            try {
-              // Find contract-transaction by TrackId (paymentToken) or external_id (transactionId)
-              const txList = (await strapi.entityService.findMany(
+          try {
+            if (!orderId && transactionIdInput) {
+              const exactByTx = (await strapi.entityService.findMany(
                 "api::contract-transaction.contract-transaction",
                 {
                   filters: {
-                    $or: [
-                      paymentToken ? { TrackId: paymentToken } : {},
-                      transactionId ? { external_id: transactionId } : {},
-                    ],
                     external_source: "SnappPay",
+                    external_id: transactionIdInput,
                   },
-                  populate: { contract: true },
+                  populate: { contract: { populate: { order: true } } },
                   sort: { createdAt: "desc" },
                   limit: 1,
                 }
               )) as any[];
-              if (txList?.length && txList[0]?.contract?.order) {
-                const contractOrder = txList[0].contract.order;
-                orderId =
-                  typeof contractOrder === "object" && contractOrder
-                    ? Number(contractOrder.id)
-                    : Number(contractOrder);
+              if (exactByTx?.length) {
+                chosenTx = exactByTx[0];
+                const co = chosenTx?.contract?.order;
+                orderId = typeof co === "object" && co ? Number(co.id) : Number(co);
               }
-            } catch (e) {
-              strapi.log.error(
-                "Failed to resolve order from SnappPay transaction",
-                e
-              );
             }
+
+            if (!orderId && paymentTokenInput) {
+              const byToken = (await strapi.entityService.findMany(
+                "api::contract-transaction.contract-transaction",
+                {
+                  filters: {
+                    external_source: "SnappPay",
+                    TrackId: paymentTokenInput,
+                  },
+                  populate: { contract: { populate: { order: true } } },
+                  sort: { createdAt: "desc" },
+                  limit: 1,
+                }
+              )) as any[];
+              if (byToken?.length) {
+                chosenTx = byToken[0];
+                const co = chosenTx?.contract?.order;
+                orderId = typeof co === "object" && co ? Number(co.id) : Number(co);
+              }
+            }
+          } catch (e) {
+            strapi.log.error("Failed to resolve order from SnappPay transaction", e);
           }
 
           if (!orderId || isNaN(orderId)) {
             return ctx.badRequest("Invalid order ID", {
-              data: { success: false, error: "Invalid order ID (SnappPay)" },
+              data: {
+                success: false,
+                error: "Invalid order ID (SnappPay)",
+                debug: { transactionId: transactionIdInput, paymentToken: paymentTokenInput },
+              },
             });
           }
 
           // SnappPay requires verify then settle using saved paymentToken (or from request)
           const snappay = strapi.service("api::payment-gateway.snappay");
-
-          // If we don't have paymentToken in the payload, fetch it from transaction
-          let tokenForOps = paymentToken as string | undefined;
+          let tokenForOps = paymentTokenInput as string | undefined;
+          if (!tokenForOps && chosenTx?.TrackId) tokenForOps = chosenTx.TrackId;
           if (!tokenForOps) {
-            const tx = (await strapi.entityService.findMany(
-              "api::contract-transaction.contract-transaction",
-              {
-                filters: {
-                  external_source: "SnappPay",
-                  contract: { order: { id: { $notNull: true } } },
-                },
-                sort: { createdAt: "desc" },
-                limit: 1,
-                populate: { contract: true },
-              }
-            )) as any[];
-            // Try to match by transactionId if available
-            const chosen = transactionId
-              ? tx.find((t: any) => t?.external_id === transactionId) || tx[0]
-              : tx[0];
-            tokenForOps = chosen?.TrackId;
-            if (!orderId && chosen?.contract?.order) {
-              const contractOrder = chosen.contract.order;
-              orderId =
-                typeof contractOrder === "object" && contractOrder
-                  ? Number(contractOrder.id)
-                  : Number(contractOrder);
-            }
+            // Fallback: lookup by orderId to fetch recent transaction
+            try {
+              const txForOrder = (await strapi.entityService.findMany(
+                "api::contract-transaction.contract-transaction",
+                {
+                  filters: {
+                    external_source: "SnappPay",
+                    contract: { order: { id: orderId } },
+                  },
+                  sort: { createdAt: "desc" },
+                  limit: 1,
+                }
+              )) as any[];
+              tokenForOps = txForOrder?.[0]?.TrackId;
+              if (!chosenTx && txForOrder?.length) chosenTx = txForOrder[0];
+            } catch {}
           }
 
           if (!tokenForOps) {
@@ -153,8 +160,8 @@ export default factories.createCoreController(
             strapi.log.info("SnappPay callback identifiers", {
               resolvedOrderId: orderId,
               tokenForOps,
-              incomingPaymentToken: paymentToken,
-              incomingTransactionId: transactionId,
+              incomingPaymentToken: paymentTokenInput,
+              incomingTransactionId: transactionIdInput,
               state,
             });
           } catch {}
@@ -162,18 +169,16 @@ export default factories.createCoreController(
           // On callback, state OK => verify+settle; FAILED => revert
           if (String(state || "OK").toUpperCase() !== "OK") {
             const revertResult = await snappay.revert(tokenForOps);
-            // Update order status to Cancelled
             await strapi.entityService.update("api::order.order", orderId, {
               data: { Status: "Cancelled" },
             });
-            // Log
             try {
               await strapi.entityService.create("api::order-log.order-log", {
                 data: {
                   order: orderId,
                   Action: "Update",
                   Description: "SnappPay callback FAILED (revert)",
-                  Changes: { state, transactionId },
+                  Changes: { state, transactionId: transactionIdInput },
                 },
               });
             } catch {}
@@ -190,7 +195,6 @@ export default factories.createCoreController(
             });
           } catch {}
           if (!verifyResult?.successful) {
-            // Verification failed; treat as failure
             await strapi.entityService.update("api::order.order", orderId, {
               data: { Status: "Cancelled" },
             });
