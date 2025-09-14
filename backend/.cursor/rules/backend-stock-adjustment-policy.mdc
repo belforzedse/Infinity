@@ -1,0 +1,29 @@
+---
+description: Stock is decremented only after successful payment settlement; no stock changes on finalize/gateway error
+globs: src/api/cart/**,src/api/order/**
+---
+
+## Post-Payment Stock Adjustment Policy
+
+### Policy
+
+- Do NOT decrement product stock during `finalizeCartToOrder`.
+- Decrement stock only after payment is verified and settled by the gateway callback.
+- On any finalize/gateway request failure, inventory remains unchanged.
+
+### Current Implementation
+
+- Order creation (no stock decrement):
+
+  - [createOrderAndItems](mdc:infinity-store-backend/src/api/cart/services/lib/order.ts) creates order items but does not change stock.
+
+- Stock decrement after settlement:
+  - [Order controller](mdc:infinity-store-backend/src/api/order/controllers/order.ts)
+    - SnappPay: after `settle(...)` success
+    - Mellat: after `settleTransaction(...)` success
+  - Loads `order_items.product_variation.product_stock` and subtracts `Count`.
+
+### Rationale
+
+- Prevents premature inventory reduction when payment fails.
+- Ensures stock is consistent with successful transactions only.

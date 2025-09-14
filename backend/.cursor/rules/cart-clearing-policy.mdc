@@ -1,0 +1,36 @@
+---
+description: Backend cart finalize and clearing policy; clear cart only after successful gateway request; leave cart intact on finalize/gateway error
+globs: src/api/cart/**/*.ts,src/api/order/**/*.ts
+---
+
+## Cart Finalize and Clearing Policy
+
+This rule documents when and where the shopping cart must be cleared during checkout.
+
+### Invariants
+
+- Do NOT clear the cart inside the service that creates the order/contract.
+- Clear the cart only after the payment gateway request is successfully initiated.
+- If finalize fails (stock issues or internal error) or the gateway request fails, the cart must remain unchanged.
+
+### Current Implementation
+
+- Order/contract creation and stock reservation occur in the cart service:
+
+  - [cart service](mdc:infinity-store-backend/src/api/cart/services/cart.ts) → `finalizeCartToOrder`
+  - The service no longer clears the cart.
+
+- Gateway initiation and cart clearing occur in the controller handler:
+  - [finalize handler](mdc:infinity-store-backend/src/api/cart/controllers/handlers/finalizeToOrder.ts)
+  - On gateway failure: mark order/contract as Cancelled; cart remains intact.
+  - On gateway success: clear the cart by setting `cart.Status = "Empty"` and deleting cart items.
+
+### Rationale
+
+- Preserves the user's cart on errors, allowing retry without re-adding items.
+- Avoids data loss if a gateway or network issue occurs after order creation.
+
+### Testing Notes
+
+- Simulate gateway error responses and assert cart contents remain unchanged.
+- Simulate successful gateway initiation and assert cart is emptied and items removed.

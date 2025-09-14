@@ -1,0 +1,10 @@
+Summary of Findings
+
+Total Issues: 5
+
+Detailed Issues
+- High: src/api/cart/controllers/handlers/finalizeToOrder.ts → 160-190 → Cart cleared immediately after gateway init; if user abandons or gateway page fails to load, cart is lost. → Suggested Fix: Defer cart clearing to after user is redirected and acknowledged server-side (or mark as Payment, keep items; clear only on callback success). (Confidence: Medium)
+- Medium: src/api/cart/controllers/handlers/gateway-helpers.ts → 101-110 → transactionId based on order id + short rand may collide under high concurrency. → Suggested Fix: Use a stronger unique id (e.g., base36 of Date.now()+random) and ensure length 5-10 with letters; also persist and check for existing external_id before reuse. (Confidence: Medium)
+- Low: src/api/cart/controllers/handlers/gateway-helpers.ts → 60-70 → Mobile normalization strips + but still accepts invalid lengths beyond 10 after country code. → Suggested Fix: Validate exact 12 digits with prefix 98 and 10 subscriber digits (len=12); otherwise reject. (Confidence: Medium)
+- High: src/api/cart/services/cart.ts → all → Refactor introduces multiple service calls; ensure all use same transaction context. → Suggested Fix: Consider using the transaction context (trx) passed by Strapi for all entityService calls inside finalize to maintain atomicity. (Confidence: Medium)
+- Medium: src/api/order/controllers/order.ts → 151-200,263-320 → Stock decrement happens after settlement but no compensation path on partial decrement failure. → Suggested Fix: Wrap stock decrement and status update in transaction; if any decrement fails, revert decremented items or mark order for manual review without setting Started. (Confidence: Medium)
