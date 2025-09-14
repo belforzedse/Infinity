@@ -25,6 +25,9 @@ This rule documents when and where the shopping cart must be cleared during chec
   - On gateway failure: mark order/contract as Cancelled; cart remains intact.
   - On gateway success: clear the cart by setting `cart.Status = "Empty"` and deleting cart items.
 
+### SnappPay Edge Cases
+- If SnappPay token request throws or returns without `paymentPageUrl`, treat as failure (no cart clearing).
+
 ### Rationale
 
 - Preserves the user's cart on errors, allowing retry without re-adding items.

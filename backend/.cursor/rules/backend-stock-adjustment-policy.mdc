@@ -17,11 +17,15 @@ globs: src/api/cart/**,src/api/order/**
 
   - [createOrderAndItems](mdc:infinity-store-backend/src/api/cart/services/lib/order.ts) creates order items but does not change stock.
 
-- Stock decrement after settlement:
+- Stock decrement after settlement (only on success):
   - [Order controller](mdc:infinity-store-backend/src/api/order/controllers/order.ts)
     - SnappPay: after `settle(...)` success
     - Mellat: after `settleTransaction(...)` success
   - Loads `order_items.product_variation.product_stock` and subtracts `Count`.
+
+### Error Paths
+- On finalize or gateway token failure, mark order/contract `Cancelled`. Do not modify stock.
+- On callback verify/settle failure, do not modify stock; update order status accordingly.
 
 ### Rationale
 
