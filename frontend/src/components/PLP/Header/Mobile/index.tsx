@@ -10,7 +10,6 @@ import SearchIcon from "../../Icons/SearchIcon";
 import CartIcon from "../../Icons/CartIcon";
 import MenuIcon from "../../Icons/MenuIcon";
 import Logo from "@/components/Kits/Logo";
-import ChevronDownIcon from "@/components/Search/Icons/ChevronDownIcon";
 import { useCart } from "@/contexts/CartContext";
 
 type Props = object;
@@ -31,7 +30,7 @@ export default function PLPMobileHeader({}: Props) {
 
   return (
     <header className="lg:hidden">
-      <div className="flex flex-row-reverse items-center justify-between bg-white px-4 py-3">
+      <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
         <Link
           href="/orders"
           className="flex max-h-[43px] items-center gap-1 rounded-[28px] border border-slate-200 px-4 py-3 text-neutral-800"
@@ -44,6 +43,13 @@ export default function PLPMobileHeader({}: Props) {
 
         {/* Left Section */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200"
+            aria-label="جستجو"
+          >
+            <SearchIcon className="text-neutral-800" />
+          </button>
           <button
             onClick={() => setIsMenuOpen(true)}
             className="flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200"
@@ -63,34 +69,9 @@ export default function PLPMobileHeader({}: Props) {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="p-4">
-        <form
-          onSubmit={handleSearchSubmit}
-          className="flex flex-row-reverse items-center justify-between rounded-[28px] border border-slate-50 bg-white px-2 py-2"
-        >
-          <button
-            type="submit"
-            className="flex items-center gap-[2px] rounded-[28px] bg-pink-500 px-2 py-1 text-white"
-          >
-            <span className="text-xs">جستجو</span>
-            <SearchIcon className="text-white" />
-          </button>
-
-          <div className="flex w-full">
-            <div className="flex items-center gap-1 border-l border-slate-200 px-2">
-              <span className="text-xs text-neutral-600">محصولات</span>
-              <ChevronDownIcon className="text-neutral-600" />
-            </div>
-
-            <input
-              className="mx-1 w-full text-right outline-none"
-              placeholder="دنبال چی میگردی؟"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-          </div>
-        </form>
+      {/* Search Bar hidden on mobile per request */}
+      <div className="hidden p-4">
+        <form onSubmit={handleSearchSubmit} />
       </div>
 
       {/* Mobile Menu Modal */}
