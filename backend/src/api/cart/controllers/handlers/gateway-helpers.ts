@@ -176,7 +176,27 @@ export const requestSnappPayment = async (
     items: items.length,
     cartTotal: totalCartIrr,
   });
-  const tokenResp = await snappay.requestPaymentToken(snappPayload);
+  let tokenResp;
+  try {
+    tokenResp = await snappay.requestPaymentToken(snappPayload);
+  } catch (err: any) {
+    // Defensive: cancel order/contract on hard errors too
+    try {
+      await strapi.entityService.update("api::order.order", order.id, {
+        data: { Status: "Cancelled" },
+      });
+      await strapi.entityService.update(
+        "api::contract.contract",
+        contract.id,
+        { data: { Status: "Cancelled" } }
+      );
+    } catch {}
+    return {
+      response: ctx.badRequest("SnappPay token request failed", {
+        data: { success: false, error: { message: err?.message } },
+      }),
+    };
+  }
   strapi.log.info("SnappPay token response raw", {
     successful: tokenResp?.successful,
     hasPaymentPageUrl: !!tokenResp?.response?.paymentPageUrl,
