@@ -1161,14 +1161,15 @@ The search functionality performs the following:
 4. Returns results sorted by creation date (newest first)
 5. Includes product variations, colors, sizes, models, and stock information in the response
 
-
 ## 2025-09-14 02:04 UTC
+
 - fix(gateway-snappay): normalize mobile to 98XXXXXXXXXX; stronger transactionId
 - fix(order): decrement stock only after settlement; add transactional TODO
 - refactor(cart): split ops/libs; avoid cart clear at gateway-init
 - docs: add Cursor rules and bug report artifact
 
 ## 2025-09-14 07:00 UTC
+
 - fix(snappay): preserve E.164 `+98XXXXXXXXXX` mobile across helper/service; add guard to abort on unsuccessful eligibility; wrap token request with try/catch and cancel order/contract on hard errors
 - chore(logging): add SnappPay callback identifiers and verify/settle result logs in `src/api/order/controllers/order.ts`; add eligibility request/result logs in `src/api/payment-gateway/controllers/payment-gateway.ts`
 - policy: no changes — cart cleared only after successful gateway init; stock decremented only after settlement (see Cursor rules)
