@@ -1,7 +1,6 @@
 import React from "react";
 // This page is now SSR (Server Component) by removing "use client"
 import BannerImage from "./Banners/BannerImage";
-import Link from "next/link";
 import { MobileLayout } from "./types";
 
 type Props = {
@@ -23,22 +22,16 @@ export default function MobileHero({ layout }: Props) {
         {/* Secondary banners section */}
         <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
           <div className="rounded-lg md:w-3/4">
-            <Link href={layout.secondaryPrimary.href ?? "#"}>
-              <BannerImage {...layout.secondaryPrimary} />
-            </Link>
+            <BannerImage {...layout.secondaryPrimary} />
           </div>
 
           <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
             <div className="w-1/2 md:w-full">
-              <Link href={layout.secondaryTop.href ?? "#"}>
-                <BannerImage {...layout.secondaryTop} />
-              </Link>
+              <BannerImage {...layout.secondaryTop} />
             </div>
 
             <div className="w-1/2 md:w-full">
-              <Link href={layout.secondaryBottom.href ?? "#"}>
-                <BannerImage {...layout.secondaryBottom} />
-              </Link>
+              <BannerImage {...layout.secondaryBottom} />
             </div>
           </div>
         </div>
