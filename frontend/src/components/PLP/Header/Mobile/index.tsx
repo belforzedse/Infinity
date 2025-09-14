@@ -45,21 +45,21 @@ export default function PLPMobileHeader({}: Props) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200"
+            className="pressable flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200 bg-white/50 backdrop-blur-sm transition-colors hover:bg-white/70"
             aria-label="جستجو"
           >
             <SearchIcon className="text-neutral-800" />
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200"
+            className="pressable flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200 bg-white/50 backdrop-blur-sm transition-colors hover:bg-white/70"
           >
             <MenuIcon className="text-neutral-800" />
           </button>
 
           <button
             onClick={openDrawer}
-            className="relative flex h-[43px] w-[43px] items-center justify-center rounded-[28px] bg-pink-500 text-white"
+            className="pressable relative flex h-[43px] w-[43px] items-center justify-center rounded-[28px] bg-pink-500 text-white transition-transform"
           >
             <CartIcon className="text-white" />
             <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white">
