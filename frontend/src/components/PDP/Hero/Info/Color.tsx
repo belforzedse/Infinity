@@ -48,7 +48,6 @@ export default function PDPHeroInfoColor(props: Props) {
           return (
             <div key={color.id} className="flex items-center">
               {isSelected ? (
-                {/* TODO(a11y): Consider rendering as a button with aria-pressed or using radiogroup/row role for better keyboard accessibility. */}
                 <div className="flex gap-1 items-center p-1 rounded-3xl border border-gray-300">                                                               
                   <div
                     className="w-7 h-7 rounded-full"

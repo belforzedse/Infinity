@@ -2,28 +2,34 @@
 description: PDP selectors must disable unavailable options and use type=button; default selection and a11y considerations
 globs: src/components/PDP/Hero/Info/*.tsx
 ---
+
 # PDP Variation Selectors
 
 Guidelines for color/size/model selectors on the Product Detail Page (PDP).
 
 ## Availability-aware Options
+
 - Compute disabled sets from current selection and stock: `disabledColorIds`, `disabledSizeIds`, `disabledModelIds`.
 - Buttons must reflect disabled state visually and functionally (`disabled`, `aria-disabled`, title "ناموجود").
 
 References:
+
 - Container logic: [PDPHero Info](mdc:src/components/PDP/Hero/Info/index.tsx)
 - Color: [Color.tsx](mdc:src/components/PDP/Hero/Info/Color.tsx)
 - Size: [Size.tsx](mdc:src/components/PDP/Hero/Info/Size.tsx)
 - Model: [Model.tsx](mdc:src/components/PDP/Hero/Info/Model.tsx)
 
 ## Default Selection
+
 - On initial load, auto-select the first published variation with stock, if any.
 - If product has no available variations, keep controls rendered but set `hasStock=false` and disable actions.
 
 ## Button Semantics
+
 - All interactive selector elements should be `<button type="button">` to avoid accidental form submits.
 - Selected color currently renders as a non-interactive container; consider making it a button with `aria-pressed` for better keyboard access.
 
 ## UX Notes
+
 - Show tooltips/titles for disabled options (e.g., "ناموجود").
 - Keep files under 150 LOC and avoid unnecessary re-renders; memoize where needed.
