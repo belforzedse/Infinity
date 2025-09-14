@@ -150,9 +150,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
+      // Ensure mobile format is 98XXXXXXXXXX for SnappPay API
+      const normalizedPayload = {
+        ...payload,
+        mobile: String(payload.mobile || "").replace(/^\+/, ""),
+      } as SnappPayTokenRequest;
+
       const { data } = await http.post<SnappPayTokenResponse>(
         "/api/online/payment/v1/token",
-        payload,
+        normalizedPayload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
