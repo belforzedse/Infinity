@@ -10,6 +10,50 @@ import {
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
+import type { Metadata } from "next";
+import { IMAGE_BASE_URL } from "@/constants/api";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const response = await getProductBySlug(slug);
+    const product = response?.data as ProductDetail | undefined;
+    const titleRaw = product?.attributes?.Title || "محصول";
+    const descRaw = product?.attributes?.Description || titleRaw;
+    const description = String(descRaw).slice(0, 160);
+    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+      : undefined;
+
+    const title = `خرید ${titleRaw} | اینفینیتی استور`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        url: `/pdp/${slug}`,
+        images: imageUrl ? [{ url: imageUrl }] : undefined,
+      },
+      alternates: {
+        canonical: `/pdp/${slug}`,
+      },
+    };
+  } catch {
+    const fallbackTitle = "مشاهده محصول | اینفینیتی استور";
+    return {
+      title: fallbackTitle,
+      description: "جزئیات و مشخصات کامل محصول در اینفینیتی استور",
+      alternates: { canonical: `/pdp/${slug}` },
+    };
+  }
+}
 
 // Remove mock data as we'll use real data
 // const products = new Array(20).fill(null).map((_, index) => {
