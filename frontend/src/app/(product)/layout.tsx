@@ -8,6 +8,8 @@ import MobileHeader from "@/components/PLP/Header/Mobile";
 import BottomNavigation from "@/components/PLP/BottomNavigation";
 import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
+import React from "react";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const CartDrawer = dynamic(
   () => import("@/components/ShoppingCart/Drawer"),
@@ -20,11 +22,32 @@ export default function ProductLayout({
   children: React.ReactNode;
 }) {
   const { isDrawerOpen } = useCart();
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
-    <div dir="rtl" className="bg-white antialiased scroll-smooth pb-[81px] md:pb-0">
-      <header>
+    <div dir="rtl" className="bg-white antialiased pb-[81px] md:pb-0">
+      {/* Skip to content for accessibility */}
+      <a
+        href="#content"
+        className="sr-only focus:not-sr-only fixed left-4 top-4 z-[60] rounded-md bg-black/80 px-3 py-2 text-white shadow-elevated"
+      >
+        پرش به محتوا
+      </a>
+      <header
+        className={`sticky top-0 z-50 transition-all ${
+          scrolled
+            ? "glass-panel shadow-sm"
+            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+        }`}
+      >
         <div className="hidden md:block">
-          <div className="px-10 py-4">
+          <div className="px-10 py-3">
             <div className="mx-auto max-w-[1440px]">
               <div className="flex items-center justify-between">
                 <DesktopHeaderActions />
@@ -33,7 +56,6 @@ export default function ProductLayout({
               </div>
             </div>
           </div>
-          <HeaderDesktopNav />
         </div>
 
         <div className="md:hidden">
@@ -41,7 +63,12 @@ export default function ProductLayout({
         </div>
       </header>
 
-      <section>{children}</section>
+      {/* Desktop categories/navigation (not sticky) */}
+      <div className="hidden md:block">
+        <HeaderDesktopNav />
+      </div>
+
+      <section id="content">{children}</section>
 
       <footer>
         <Footer />
@@ -51,6 +78,8 @@ export default function ProductLayout({
 
       {/* Cart Drawer */}
       {isDrawerOpen && <CartDrawer />}
+
+      <ScrollToTop />
     </div>
   );
 }
