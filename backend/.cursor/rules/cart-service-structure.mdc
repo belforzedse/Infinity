@@ -1,0 +1,53 @@
+---
+description: Cart service structure after refactor; helper modules and responsibilities
+globs: src/api/cart/services/**/*.ts
+---
+
+## Cart Service Structure
+
+The cart domain service is modularized under `src/api/cart/services/`.
+
+### Entry Service
+
+- [cart.ts](mdc:infinity-store-backend/src/api/cart/services/cart.ts)
+  - Public methods: `getUserCart`, `addCartItem`, `updateCartItem`, `removeCartItem`, `checkCartStock`, `finalizeCartToOrder`
+  - Uses helpers for fetching, stock ops, discounts, totals, order, and contract.
+
+### Helper Modules
+
+- Fetch/Create cart:
+
+  - [lib/get-user-cart.ts](mdc:infinity-store-backend/src/api/cart/services/lib/get-user-cart.ts)
+  - `getOrCreateUserCart(strapi, userId)`
+
+- Stock utilities:
+
+  - [lib/stock.ts](mdc:infinity-store-backend/src/api/cart/services/lib/stock.ts)
+  - `isStockSufficient(available, requested)`, `decrementStock(strapi, stockId, currentCount, decrementBy)`
+
+- Discounts:
+
+  - [lib/discounts.ts](mdc:infinity-store-backend/src/api/cart/services/lib/discounts.ts)
+  - `computeCouponDiscount(strapi, userId, code, subtotal, cartItems)`
+  - `findFirstActiveGeneralDiscount(strapi)`
+
+- Financials:
+
+  - [lib/financials.ts](mdc:infinity-store-backend/src/api/cart/services/lib/financials.ts)
+  - `computeTotals(subtotal, discountAmount, taxPercent, shipping)` → `{ subtotal, discount, tax, shipping, total }`
+
+- Order composition:
+
+  - [lib/order.ts](mdc:infinity-store-backend/src/api/cart/services/lib/order.ts)
+  - `resolveShippingCost(strapi, shippingId?, providedCost?)`
+  - `createOrderAndItems(strapi, userId, cart, finalShippingCost, shippingId?, description?, note?, deliveryAddressId?)` → `{ order, subtotal }`
+
+- Contract creation:
+  - [lib/contract.ts](mdc:infinity-store-backend/src/api/cart/services/lib/contract.ts)
+  - `createContract(strapi, userId, orderId, amount, taxPercent)`
+
+### Behavior Guarantees
+
+- Stock validation before order creation (`checkCartStock`).
+- Cart clearing policy is handled in controller (see [cart-clearing-policy](mdc:infinity-store-backend/.cursor/rules/cart-clearing-policy.mdc)).
+- Refactor preserved all previous behavior and API responses.
