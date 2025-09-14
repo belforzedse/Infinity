@@ -1,0 +1,39 @@
+---
+description: SEO metadata for PDP and PLP pages using Next.js App Router generateMetadata
+globs: src/app/(product)/pdp/[slug]/page.tsx,src/app/(product)/plp/page.tsx
+---
+
+## SEO Metadata (PDP / PLP)
+
+Use Next.js App Router `generateMetadata` to provide page-level SEO for product pages.
+
+### PDP (`/pdp/[slug]`)
+
+- Fetch product by slug and build metadata from product attributes.
+- Title: `خرید {Title} | اینفینیتی استور`
+- Description: product `Description` (trimmed ~160 chars), fallback to Title
+- OpenGraph: `type: website` (Next.js OG types are limited), `url: /pdp/{slug}`, image from CoverImage (`IMAGE_BASE_URL + url`)
+- Canonical: `/pdp/{slug}`
+
+Reference:
+
+- [PDP page](<mdc:infinity-store-front/src/app/(product)/pdp/[slug]/page.tsx>)
+
+### PLP (`/plp`)
+
+- Derive metadata from query context:
+  - Search: `نتایج جستجو برای "{q}" | اینفینیتی استور` and canonical `/plp?search={q}`
+  - Category: `خرید {category} | اینفینیتی استور` and canonical `/plp?category={category}`
+  - Default: `فروشگاه | اینفینیتی استور` and canonical `/plp`
+- OpenGraph: `type: website`, `url` aligned to canonical
+
+Reference:
+
+- [PLP page](<mdc:infinity-store-front/src/app/(product)/plp/page.tsx>)
+
+### Notes
+
+- Always prefer Persian titles and descriptions.
+- Keep descriptions concise (~150–160 chars).
+- Use `IMAGE_BASE_URL` for absolute image URLs in OpenGraph.
+- Next.js Metadata typings support a limited OG `type` set (e.g., `website`, `article`, etc.). Avoid custom values like `product`; omit or use `website` instead.

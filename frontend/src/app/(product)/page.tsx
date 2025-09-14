@@ -18,7 +18,7 @@ interface ProductCardProps {
 
 async function getDiscountedProducts(): Promise<ProductCardProps[]> {
   const response = await fetch(
-    `${API_BASE_URL}/product-variations?filters[IsPublished]=true&filters[Price][$gte]=1&populate[0]=general_discounts&populate[1]=product&filters[general_discounts][$null]=false&populate[2]=product.CoverImage&populate[3]=product.product_main_category&filters[product][Status]=Active`,
+    `${API_BASE_URL}/product-variations?filters[IsPublished]=true&filters[Price][$gte]=1&populate[0]=general_discounts&populate[1]=product&filters[general_discounts][$null]=false&populate[2]=product.CoverImage&populate[3]=product.product_main_category&populate[4]=product_stock&filters[product][Status]=Active&filters[product_stock][Count][$gt]=0`,
     { cache: "no-store" }
   );
   const data = await response.json();
@@ -66,7 +66,7 @@ async function getDiscountedProducts(): Promise<ProductCardProps[]> {
 
 async function getNewProducts(): Promise<ProductCardProps[]> {
   const response = await fetch(
-    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&sort[0]=createdAt:desc&pagination[limit]=20`,
+    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&populate[4]=product_variations.product_stock&filters[product_variations][product_stock][Count][$gt]=0&sort[0]=createdAt:desc&pagination[limit]=20`,
     { cache: "no-store" }
   );
   const data = await response.json();
@@ -86,7 +86,8 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
             variation.attributes.IsPublished &&
             variation.attributes.Price &&
             !isNaN(parseInt(variation.attributes.Price)) &&
-            parseInt(variation.attributes.Price) > 0
+            parseInt(variation.attributes.Price) > 0 &&
+            (variation.attributes.product_stock?.data?.attributes?.Count || 0) > 0
         );
 
       if (publishedVariations.length === 0) {
@@ -129,7 +130,7 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
 
 async function getFavoriteProducts(): Promise<ProductCardProps[]> {
   const response = await fetch(
-    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&sort[0]=AverageRating:desc&pagination[limit]=20`,
+    `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&filters[product_variations][product_stock][Count][$gt]=0&sort[0]=AverageRating:desc&pagination[limit]=20`,
     { cache: "no-store" }
   );
   const data = await response.json();
@@ -144,13 +145,33 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
       );
     })
     .map((item: any) => {
-      const firstVariation = item.attributes.product_variations.data[0];
+      const availableVariations = item.attributes.product_variations.data.filter(
+        (variation: any) =>
+          variation.attributes.IsPublished &&
+          variation.attributes.Price &&
+          !isNaN(parseInt(variation.attributes.Price)) &&
+          parseInt(variation.attributes.Price) > 0 &&
+          (variation.attributes.product_stock?.data?.attributes?.Count || 0) > 0
+      );
+
+      if (availableVariations.length === 0) {
+        return null;
+      }
+
+      const cheapestVariation = availableVariations.reduce(
+        (cheapest: any, current: any) => {
+          const cheapestPrice = parseInt(cheapest.attributes.Price);
+          const currentPrice = parseInt(current.attributes.Price);
+          return currentPrice < cheapestPrice ? current : cheapest;
+        }
+      );
+
       const hasDiscount =
-        firstVariation?.attributes?.general_discounts?.data?.length > 0;
+        cheapestVariation?.attributes?.general_discounts?.data?.length > 0;
       const discount = hasDiscount
-        ? firstVariation.attributes.general_discounts.data[0].attributes.Amount
+        ? cheapestVariation.attributes.general_discounts.data[0].attributes.Amount
         : undefined;
-      const price = parseInt(firstVariation?.attributes?.Price || "0");
+      const price = parseInt(cheapestVariation?.attributes?.Price || "0");
 
       return {
         id: item.id,
@@ -166,7 +187,8 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
         }),
         seenCount: item.attributes.RatingCount || 0,
       };
-    });
+    })
+    .filter((item: any) => item !== null);
 }
 
 const categories = [
