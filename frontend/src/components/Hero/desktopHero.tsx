@@ -21,7 +21,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
         ease: [0.35, 0.46, 0.45, 0.94] as any,
       }
     : {
-        distance: 120,
+        distance: 220,
         duration: 1.5,
         scale: 0.98,
         ease: [0.11, 1, 0.001, 1] as any,
@@ -58,11 +58,11 @@ export default function DesktopHero({ layout, slideKey }: Props) {
   return (
     <>
       {/*Desktop hero section*/}
-      <div className="hidden h-[650px] w-full lg:block">
-        <div className="grid-cols-1 grid-rows-2">
-          <div className="flex gap-10">
+      <div className="relative hidden h-[650px] w-full overflow-hidden lg:block">
+        <div className="h-full grid-cols-1 grid-rows-2">
+          <div className="flex h-full gap-10">
             <div className="h-full w-7/12 flex-none">
-              <div className="mt-11 grid grid-cols-2 grid-rows-2 gap-4">
+              <div className="mt-11 grid h-full grid-cols-2 grid-rows-[200px_1fr] gap-4">
                 <div className="col-span-2 row-span-1">
                   {/*Wide pinterest banner*/}
                   <AnimatePresence mode="wait" initial={false}>
