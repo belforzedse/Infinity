@@ -15,7 +15,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
     <div className="inline-flex h-[21px] flex-row-reverse items-center gap-4">
       <button
         onClick={openDrawer}
-        className="flex items-center gap-1 text-pink-500 hover:text-pink-600"
+        className="pressable flex items-center gap-1 text-pink-500 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <span className="text-xs">سبد خرید</span>
         <div className="relative">
@@ -30,7 +30,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
 
       <Link
         href="/wallet"
-        className="flex items-center gap-1 text-slate-400 hover:text-slate-500"
+        className="pressable flex items-center gap-1 text-slate-400 transition-colors hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <WalletIcon className="h-6 w-6" />
       </Link>
@@ -39,7 +39,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
 
       <Link
         href="/orders"
-        className="flex items-center gap-1 text-slate-400 hover:text-slate-500"
+        className="pressable flex items-center gap-1 text-slate-400 transition-colors hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <OrderTrackingIcon className="h-6 w-6" />
       </Link>
@@ -48,7 +48,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
 
       <Link
         href="/auth/login"
-        className="flex items-center gap-1 text-slate-400 hover:text-slate-500"
+        className="pressable flex items-center gap-1 text-slate-400 transition-colors hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <UserProfileIcon className="h-6 w-6" />
       </Link>
