@@ -12,6 +12,26 @@ body {
   background: var(--background);  
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #ffe4f1; /* brand-tinted */
+  color: #111827;
+}
+
+/* Accessible focus outlines on interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #ec4899; /* matches scrollbar thumb */
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 /* (Removed global hover styles to limit scope to super-admin navbar) */
 
 @layer utilities {
@@ -60,6 +80,24 @@ body {
     filter: blur(0);
     transform: none;
   }
+}
+
+/* Reusable subtle elevation */
+.shadow-elevated {
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08), 0 4px 12px rgba(17, 24, 39, 0.05);
+}
+
+/* Glassmorphism panel (iOS-like) */
+.glass-panel {
+  background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.75),
+      rgba(255, 255, 255, 0.35)
+    );
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04) inset, 0 8px 24px rgba(17, 24, 39, 0.03);
 }
 
 /* Removed global body blur/transform to prevent stacking context issues */

@@ -64,7 +64,7 @@ export default async function Home() {
               {/* desktop categories section */}
               <Reveal delay={index * 80} className="w-full" variant="fade-up" duration={600}>
                 <span className="block w-full">
-                  <div className="relative hidden h-[340px] w-full overflow-hidden lg:block">
+                  <div className="relative hidden h-[340px] w-full overflow-hidden lg:block transition-transform duration-300 will-change-transform hover:-translate-y-0.5">
                     <div
                       className="flex h-full w-full items-center justify-center"
                       style={{ backgroundColor: category.backgroundColor }}
