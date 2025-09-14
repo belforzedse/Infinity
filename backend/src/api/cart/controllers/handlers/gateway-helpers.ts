@@ -68,8 +68,8 @@ export const requestSnappPayment = async (
     };
   }
 
-  // SnappPay expects mobile as 98XXXXXXXXXX (no leading plus)
-  const mobileForSnapp = customerMobile.replace(/^\+/, "");
+  // SnappPay expects mobile as +98XXXXXXXXXX (with leading plus); keep E.164 format
+  const mobileForSnapp = customerMobile;
 
   const mapCommissionType = (_catTitle?: string) => 1 as const;
   const items = (orderItems || []).map((it: any) => {
@@ -136,7 +136,24 @@ export const requestSnappPayment = async (
 
   const snappay = strapi.service("api::payment-gateway.snappay");
   try {
+    strapi.log.info("SnappPay eligible check before token", {
+      orderId: order.id,
+      amountIRR: orderAmountIrr,
+    });
     const eligible = await snappay.eligible(orderAmountIrr);
+    strapi.log.info("SnappPay eligible response", {
+      successful: eligible?.successful,
+      eligible: eligible?.response?.eligible,
+      title: eligible?.response?.title_message,
+      error: eligible?.errorData,
+    });
+    if (eligible?.successful === false) {
+      return {
+        response: ctx.badRequest("SnappPay eligibility check failed", {
+          data: { success: false, error: eligible?.errorData },
+        }),
+      };
+    }
     if (
       eligible?.successful &&
       eligible.response &&
@@ -150,7 +167,21 @@ export const requestSnappPayment = async (
     }
   } catch {}
 
+  strapi.log.info("SnappPay token request payload", {
+    orderId: order.id,
+    transactionId,
+    returnURL: snappPayload.returnURL,
+    mobileHasPlus: snappPayload.mobile.startsWith("+"),
+    mobilePatternOk: /^\+98\d{10}$/.test(snappPayload.mobile),
+    items: items.length,
+    cartTotal: totalCartIrr,
+  });
   const tokenResp = await snappay.requestPaymentToken(snappPayload);
+  strapi.log.info("SnappPay token response raw", {
+    successful: tokenResp?.successful,
+    hasPaymentPageUrl: !!tokenResp?.response?.paymentPageUrl,
+    error: tokenResp?.errorData,
+  });
   if (
     !tokenResp ||
     !tokenResp.successful ||

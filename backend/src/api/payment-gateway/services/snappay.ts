@@ -150,11 +150,31 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
-      // Ensure mobile format is 98XXXXXXXXXX for SnappPay API
+      // Keep '+' in mobile; API error 1005 indicates pattern "+98\\d{10}"
       const normalizedPayload = {
         ...payload,
-        mobile: String(payload.mobile || "").replace(/^\+/, ""),
+        mobile: String(payload.mobile || ""),
       } as SnappPayTokenRequest;
+
+      // Guard: if helper passed without '+', normalize to +98XXXXXXXXXX
+      if (!/^\+98\d{10}$/.test(normalizedPayload.mobile)) {
+        const digits = String(normalizedPayload.mobile).replace(/\D/g, "");
+        let m = digits;
+        if (m.startsWith("0")) m = `98${m.slice(1)}`;
+        if (!m.startsWith("98") && m.length === 10) m = `98${m}`;
+        normalizedPayload.mobile = m ? `+${m}` : "";
+      }
+
+      try {
+        strapi.log.info("SnappPay token request", {
+          amount: normalizedPayload.amount,
+          hasPlus: normalizedPayload.mobile.startsWith("+"),
+          mobilePatternOk: /^\+98\d{10}$/.test(normalizedPayload.mobile),
+          returnURL: normalizedPayload.returnURL,
+          transactionId: normalizedPayload.transactionId,
+          cartTotal: normalizedPayload.cartList?.[0]?.totalAmount,
+        });
+      } catch {}
 
       const { data } = await http.post<SnappPayTokenResponse>(
         "/api/online/payment/v1/token",
@@ -167,6 +187,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           timeout: 25_000,
         }
       );
+      try {
+        strapi.log.info("SnappPay token response", {
+          successful: data?.successful,
+          hasPaymentToken: !!data?.response?.paymentToken,
+          hasPaymentPageUrl: !!data?.response?.paymentPageUrl,
+          errorCode: data?.errorData?.errorCode,
+          errorMessage: data?.errorData?.message,
+        });
+      } catch {}
       return data;
     } catch (error: any) {
       strapi.log.error("SnappPay token error", {
