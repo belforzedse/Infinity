@@ -185,11 +185,9 @@ export const requestSnappPayment = async (
       await strapi.entityService.update("api::order.order", order.id, {
         data: { Status: "Cancelled" },
       });
-      await strapi.entityService.update(
-        "api::contract.contract",
-        contract.id,
-        { data: { Status: "Cancelled" } }
-      );
+      await strapi.entityService.update("api::contract.contract", contract.id, {
+        data: { Status: "Cancelled" },
+      });
     } catch {}
     return {
       response: ctx.badRequest("SnappPay token request failed", {
