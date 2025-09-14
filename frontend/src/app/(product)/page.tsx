@@ -19,7 +19,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="mx-auto mt-5 max-w-screen-2xl px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
+    <div className="mx-auto mt-5 px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
       {/* Hero section with responsive images */}
       <MobileSlider />
 
@@ -41,12 +41,7 @@ export default async function Home() {
 
       {/* Categories section */}
       <div className="mt-8 md:mt-12">
-        <div className="mb-4 flex items-center justify-between">
-          <span className="text-2xl text-foreground-primary md:text-3xl">
-            دسته‌بندی‌ها
-          </span>
-        </div>
-        <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-7">
+        <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-6 lg:gap-0">
           {categories.map((category, index) => (
             <Link
               key={category.id}
@@ -61,8 +56,32 @@ export default async function Home() {
                     : ""
               }`}
             >
+              {/* desktop categories section */}
+
+              <span className="block w-full">
+                <div className="relative hidden h-[340px] w-full overflow-hidden lg:block">
+                  <div
+                    className="flex h-full w-full items-center justify-center"
+                    style={{ backgroundColor: category.backgroundColor }}
+                  >
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      width={category.width}
+                      height={category.height}
+                      className="max-h-[240px] w-auto object-contain drop-shadow-md"
+                      loading="lazy"
+                      sizes="227px 317px"
+                    />
+                  </div>
+                  <span className="absolute bottom-2 left-1/2 mt-1 -translate-x-1/2 rounded-lg bg-white px-2.5 py-1.5 text-[18px] font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
+                    {category.name}
+                  </span>
+                </div>
+              </span>
+              {/* mobile categories section */}
               <div
-                className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
+                className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28 lg:hidden"
                 style={{ backgroundColor: category.backgroundColor }}
               >
                 <Image
@@ -75,7 +94,9 @@ export default async function Home() {
                   sizes="80px"
                 />
               </div>
-              <span className="text-sm mt-2 md:text-base">{category.name}</span>
+              <span className="text-sm mt-2 md:text-base lg:hidden">
+                {category.name}
+              </span>
             </Link>
           ))}
         </div>

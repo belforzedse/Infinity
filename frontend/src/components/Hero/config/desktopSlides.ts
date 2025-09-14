@@ -18,6 +18,7 @@ const baseLayout: DesktopLayout = {
     height: 600,
     className: "h-full w-full translate-y-[-2px] rounded-lg object-cover",
     loading: "lazy",
+    href: "/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa",
   },
   belowRight: {
     src: "/images/index-img4-desktop.png",
@@ -26,6 +27,7 @@ const baseLayout: DesktopLayout = {
     height: 600,
     className: "translate-y-[7px]",
     loading: "lazy",
+    href: "/plp?category=skirt",
   },
   side: {
     src: "/images/index-img2-desktop.png",
@@ -33,6 +35,7 @@ const baseLayout: DesktopLayout = {
     width: 700,
     height: 700,
     className: "object-fit h-full rounded-lg",
+    href: "/plp?category=shirt",
   },
 };
 
