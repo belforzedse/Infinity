@@ -145,7 +145,7 @@ export default function Page() {
               {reactions?.map((reaction) => (
                 <tr key={reaction?.id} className="border-b border-gray-100">
                   <td className="text-xs py-2 md:text-sm md:py-3">
-                    <a href="#" className="text-blue-500 hover:underline">
+                    <a href="#" className="text-blue-500">
                       {reaction?.attributes?.user?.data?.attributes?.Phone}
                     </a>
                   </td>

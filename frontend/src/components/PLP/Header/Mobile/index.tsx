@@ -33,7 +33,7 @@ export default function PLPMobileHeader({}: Props) {
       <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
         <Link
           href="/orders"
-          className="flex max-h-[43px] items-center gap-1 rounded-[28px] border border-slate-200 px-4 py-3 text-neutral-800"
+          className="pressable flex max-h-[43px] items-center gap-1 rounded-[28px] border border-slate-200 bg-white/60 px-4 py-3 text-neutral-800 backdrop-blur-sm transition-colors hover:bg-white/80"
         >
           <span className="text-sm">پیگیری سفارش</span>
           <OrderTrackingIcon className="text-neutral-800" />

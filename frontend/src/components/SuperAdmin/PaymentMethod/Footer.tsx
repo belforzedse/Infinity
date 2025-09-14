@@ -138,7 +138,7 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
             {latestTransactions.map((transaction) => (
               <tr key={transaction.id} className="border-b border-gray-100">
                 <td className="text-xs py-2 md:text-sm md:py-3">
-                  <a href="#" className="text-blue-500 hover:underline">
+                  <a href="#" className="text-blue-500">
                     {transaction.userCode}
                   </a>
                 </td>
