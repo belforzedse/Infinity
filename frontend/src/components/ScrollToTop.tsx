@@ -29,7 +29,10 @@ export default function ScrollToTop() {
     onScroll();
     recalcBottom();
     window.addEventListener("scroll", onScroll, { passive: true });
-    const onResize = () => { onScroll(); recalcBottom(); };
+    const onResize = () => {
+      onScroll();
+      recalcBottom();
+    };
     window.addEventListener("resize", onResize, { passive: true } as any);
 
     // Observe nav height changes if present
@@ -72,7 +75,7 @@ export default function ScrollToTop() {
         "fixed right-4 z-[60] rounded-full text-pink-600",
         "shadow-elevated transition-all motion-reduce:transition-none",
         // liquid glass gradient
-        "bg-gradient-to-br from-pink-50/70 to-white/70 backdrop-blur-xl saturate-150 ring-1 ring-white/60",
+        "bg-gradient-to-br from-pink-50/70 to-white/70 ring-1 ring-white/60 saturate-150 backdrop-blur-xl",
         "hover:from-pink-50/80 hover:to-white/80 active:scale-95",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ec4899] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
         visible

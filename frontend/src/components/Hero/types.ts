@@ -38,4 +38,3 @@ export type HeroSlideConfig = {
   desktop: DesktopLayout;
   mobile: MobileLayout;
 };
-

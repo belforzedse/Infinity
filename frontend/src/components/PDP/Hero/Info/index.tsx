@@ -58,14 +58,7 @@ type Props = {
 };
 
 export default function PDPHeroInfo(props: Props) {
-  const {
-    product,
-    sizes,
-    colors,
-    models = [],
-    productData,
-    productId,
-  } = props;
+  const { product, sizes, colors, models = [], productData, productId } = props;
 
   // State for selected variation properties
   const [selectedColor, setSelectedColor] = useState<string>(
@@ -175,95 +168,93 @@ export default function PDPHeroInfo(props: Props) {
 
   // Update variation details based on selected properties
   const updateVariationDetails = useCallback(
-    (
-      colorId: string,
-      sizeId: string,
-      modelId: string,
-    ) => {
-    debugLog("=== UPDATE VARIATION DETAILS DEBUG ===");
-    debugLog("Selected color ID:", colorId);
-    debugLog("Selected size ID:", sizeId);
-    debugLog("Selected model ID:", modelId);
+    (colorId: string, sizeId: string, modelId: string) => {
+      debugLog("=== UPDATE VARIATION DETAILS DEBUG ===");
+      debugLog("Selected color ID:", colorId);
+      debugLog("Selected size ID:", sizeId);
+      debugLog("Selected model ID:", modelId);
 
-    if (
-      !productData ||
-      !productData.attributes ||
-      !productData.attributes.product_variations ||
-      !productData.attributes.product_variations.data
-    ) {
-      debugLog("❌ No product data available");
-      return;
-    }
-
-    // Find the matching variation based on selected color, size, model
-    // Convert string IDs to numbers for the findProductVariation function
-    const colorIdNum = colorId ? parseInt(colorId) : undefined;
-    const sizeIdNum = sizeId ? parseInt(sizeId) : undefined;
-    const modelIdNum = modelId ? parseInt(modelId) : undefined;
-
-    debugLog(
-      "Converted IDs - Color:",
-      colorIdNum,
-      "Size:",
-      sizeIdNum,
-      "Model:",
-      modelIdNum,
-    );
-
-    const variation = findProductVariation(
-      productData,
-      colorIdNum,
-      sizeIdNum,
-      modelIdNum,
-    );
-
-    debugLog("Found variation:", variation);
-
-    if (variation) {
-      const variationAttributes = variation.attributes;
-      debugLog("✅ Variation found with ID:", variation.id);
-      debugLog("Variation attributes:", variationAttributes);
-
-      // Update price based on found variation
-      if (variationAttributes.DiscountPrice) {
-        setCurrentPrice(Number(variationAttributes.Price));
-        setCurrentDiscountPrice(Number(variationAttributes.DiscountPrice));
-        // Calculate discount percentage
-        const discountPercentage = Math.round(
-          ((Number(variationAttributes.Price) -
-            Number(variationAttributes.DiscountPrice)) /
-            Number(variationAttributes.Price)) *
-            100,
-        );
-        setCurrentDiscount(discountPercentage);
-      } else {
-        setCurrentPrice(Number(variationAttributes.Price));
-        setCurrentDiscountPrice(0);
-        setCurrentDiscount(0);
+      if (
+        !productData ||
+        !productData.attributes ||
+        !productData.attributes.product_variations ||
+        !productData.attributes.product_variations.data
+      ) {
+        debugLog("❌ No product data available");
+        return;
       }
 
-      // Check stock for this variation - validate with default quantity of 1
-      // This ensures the "Add to Cart" button shows correct availability
-      const stockStatus = hasStockForVariation(variation, 1);
-      debugLog("Stock status for variation:", stockStatus);
-      setHasStock(stockStatus);
+      // Find the matching variation based on selected color, size, model
+      // Convert string IDs to numbers for the findProductVariation function
+      const colorIdNum = colorId ? parseInt(colorId) : undefined;
+      const sizeIdNum = sizeId ? parseInt(sizeId) : undefined;
+      const modelIdNum = modelId ? parseInt(modelId) : undefined;
 
-      // Store the current variation ID
-      const variationIdString = variation.id.toString();
-      debugLog("✅ Setting currentVariationId to:", variationIdString);
-      setCurrentVariationId(variationIdString);
-    } else {
-      debugLog("❌ No variation found for selected combination");
-      // Fallback to product default price if no variation found
-      setCurrentPrice(product.price);
-      setCurrentDiscountPrice(product.discountPrice || 0);
-      setCurrentDiscount(product.discount || 0);
-      setHasStock(false); // No variation found means no stock
-      setCurrentVariationId(undefined);
-    }
+      debugLog(
+        "Converted IDs - Color:",
+        colorIdNum,
+        "Size:",
+        sizeIdNum,
+        "Model:",
+        modelIdNum,
+      );
 
-    debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
-  }, [productData, product.price, product.discountPrice, product.discount]);
+      const variation = findProductVariation(
+        productData,
+        colorIdNum,
+        sizeIdNum,
+        modelIdNum,
+      );
+
+      debugLog("Found variation:", variation);
+
+      if (variation) {
+        const variationAttributes = variation.attributes;
+        debugLog("✅ Variation found with ID:", variation.id);
+        debugLog("Variation attributes:", variationAttributes);
+
+        // Update price based on found variation
+        if (variationAttributes.DiscountPrice) {
+          setCurrentPrice(Number(variationAttributes.Price));
+          setCurrentDiscountPrice(Number(variationAttributes.DiscountPrice));
+          // Calculate discount percentage
+          const discountPercentage = Math.round(
+            ((Number(variationAttributes.Price) -
+              Number(variationAttributes.DiscountPrice)) /
+              Number(variationAttributes.Price)) *
+              100,
+          );
+          setCurrentDiscount(discountPercentage);
+        } else {
+          setCurrentPrice(Number(variationAttributes.Price));
+          setCurrentDiscountPrice(0);
+          setCurrentDiscount(0);
+        }
+
+        // Check stock for this variation - validate with default quantity of 1
+        // This ensures the "Add to Cart" button shows correct availability
+        const stockStatus = hasStockForVariation(variation, 1);
+        debugLog("Stock status for variation:", stockStatus);
+        setHasStock(stockStatus);
+
+        // Store the current variation ID
+        const variationIdString = variation.id.toString();
+        debugLog("✅ Setting currentVariationId to:", variationIdString);
+        setCurrentVariationId(variationIdString);
+      } else {
+        debugLog("❌ No variation found for selected combination");
+        // Fallback to product default price if no variation found
+        setCurrentPrice(product.price);
+        setCurrentDiscountPrice(product.discountPrice || 0);
+        setCurrentDiscount(product.discount || 0);
+        setHasStock(false); // No variation found means no stock
+        setCurrentVariationId(undefined);
+      }
+
+      debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
+    },
+    [productData, product.price, product.discountPrice, product.discount],
+  );
 
   // Initialize variation details based on default selections when component mounts
   useEffect(() => {

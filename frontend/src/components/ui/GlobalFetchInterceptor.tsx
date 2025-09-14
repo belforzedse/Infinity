@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { adjustPendingRequests, navigationInProgressAtom } from "@/atoms/loading";
-import jotaiStore from "@/lib/jotaiStore";
+import { adjustPendingRequests } from "@/atoms/loading";
 import { API_BASE_URL } from "@/constants/api";
 
 export default function GlobalFetchInterceptor() {
@@ -49,9 +48,10 @@ export default function GlobalFetchInterceptor() {
         if (method === "OPTIONS" || method === "HEAD") {
           return originalFetch(input as any, init);
         }
-        const isPureStatic = /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
-          url.pathname,
-        );
+        const isPureStatic =
+          /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
+            url.pathname,
+          );
         if (isPureStatic) {
           return originalFetch(input as any, init);
         }

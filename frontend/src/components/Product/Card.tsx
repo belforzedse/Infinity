@@ -35,7 +35,10 @@ const ProductCard: FC<ProductCardProps> = ({
   });
 
   return (
-    <Link href={`/pdp/${id.toString()}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded-3xl">
+    <Link
+      href={`/pdp/${id.toString()}`}
+      className="group block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+    >
       <div className="interactive-card pressable flex h-full w-[259px] flex-col rounded-3xl border border-pink-50 bg-white p-1 md:w-full">
         <div className="relative">
           <ImageSlider images={images} title={title} />

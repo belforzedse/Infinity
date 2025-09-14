@@ -43,13 +43,13 @@ function PopUp({ isOpen, onClose }: Props) {
           <div className="mx-4 rounded-lg border border-slate-200 p-2">
             <div className="flex gap-3">
               <div className="relative h-24 w-24 overflow-hidden rounded-lg bg-gray-100">
-              <Image
-                src="/images/clothes-sm.jpg"
-                alt="Product"
-                className="object-cover"
-                fill
-                sizes="96px"
-              />
+                <Image
+                  src="/images/clothes-sm.jpg"
+                  alt="Product"
+                  className="object-cover"
+                  fill
+                  sizes="96px"
+                />
               </div>
               <div className="flex flex-1 flex-col justify-between">
                 <div className="flex items-center justify-between">

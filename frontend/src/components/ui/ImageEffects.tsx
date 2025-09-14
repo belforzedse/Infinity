@@ -39,9 +39,7 @@ export default function ImageEffects() {
       };
 
       // Initial pass
-      document
-        .querySelectorAll<HTMLImageElement>("img")
-        .forEach(applyEffects);
+      document.querySelectorAll<HTMLImageElement>("img").forEach(applyEffects);
 
       // Observe for new images
       const observer = new MutationObserver((mutations) => {
@@ -50,9 +48,7 @@ export default function ImageEffects() {
             if (node instanceof HTMLImageElement) {
               applyEffects(node);
             } else if (node instanceof HTMLElement) {
-              node
-                .querySelectorAll("img")
-                .forEach((img) => applyEffects(img));
+              node.querySelectorAll("img").forEach((img) => applyEffects(img));
             }
           });
         }
@@ -77,4 +73,3 @@ export default function ImageEffects() {
 
   return null;
 }
-

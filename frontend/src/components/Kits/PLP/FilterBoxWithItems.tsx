@@ -94,56 +94,56 @@ const PLPFilterBoxWithItems = ({
               <div className="rounded-lg bg-white">
                 {hasSearch && (
                   <>
-                  <div className="flex items-center justify-between border-b border-slate-50 p-2">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={inputPlaceholder}
-                      className="text-xs flex-grow bg-transparent text-right text-neutral-400 outline-none"
-                    />
-                    <div className="h-5 w-5">
-                      <SearchIcon />
-                    </div>
-                  </div>
-                  <div className="h-[1px] bg-slate-50" />
-                </>
-              )}
-              <div
-                className="scrollbar-thumb-primary max-h-[200px] overflow-y-auto px-2 scrollbar-thin scrollbar-track-slate-50"
-                style={
-                  {
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "#EC4899 #F8FAFC",
-                  } as React.CSSProperties
-                }
-              >
-                <div className="flex flex-col py-2">
-                  {filteredOptions.map((option, index) => (
-                    <div key={option.id}>
-                      <div className="flex flex-row-reverse items-center justify-end gap-2 py-2">
-                        <span className="text-primary text-sm">
-                          {option.label}
-                        </span>
-                        <div
-                          className="relative"
-                          onClick={() => handleOptionClick(option.id)}
-                        >
-                          {selectedOptions.includes(option.id) ? (
-                            <CheckIcon className="h-4 w-4 rounded" />
-                          ) : (
-                            <div className="border-gray-4 h-4 w-4 cursor-pointer appearance-none rounded border" />
-                          )}
-                        </div>
+                    <div className="flex items-center justify-between border-b border-slate-50 p-2">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={inputPlaceholder}
+                        className="text-xs flex-grow bg-transparent text-right text-neutral-400 outline-none"
+                      />
+                      <div className="h-5 w-5">
+                        <SearchIcon />
                       </div>
-                      {index < filteredOptions.length - 1 && (
-                        <div className="h-[1px] bg-slate-50" />
-                      )}
                     </div>
-                  ))}
+                    <div className="h-[1px] bg-slate-50" />
+                  </>
+                )}
+                <div
+                  className="scrollbar-thumb-primary max-h-[200px] overflow-y-auto px-2 scrollbar-thin scrollbar-track-slate-50"
+                  style={
+                    {
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "#EC4899 #F8FAFC",
+                    } as React.CSSProperties
+                  }
+                >
+                  <div className="flex flex-col py-2">
+                    {filteredOptions.map((option, index) => (
+                      <div key={option.id}>
+                        <div className="flex flex-row-reverse items-center justify-end gap-2 py-2">
+                          <span className="text-primary text-sm">
+                            {option.label}
+                          </span>
+                          <div
+                            className="relative"
+                            onClick={() => handleOptionClick(option.id)}
+                          >
+                            {selectedOptions.includes(option.id) ? (
+                              <CheckIcon className="h-4 w-4 rounded" />
+                            ) : (
+                              <div className="border-gray-4 h-4 w-4 cursor-pointer appearance-none rounded border" />
+                            )}
+                          </div>
+                        </div>
+                        {index < filteredOptions.length - 1 && (
+                          <div className="h-[1px] bg-slate-50" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              {/* Close rounded container */}
+                {/* Close rounded container */}
               </div>
             </MotionDiv>
           )}

@@ -13,7 +13,10 @@ export default function GlobalLoadingOverlay() {
   const navLoading = useAtomValue(navigationInProgressAtom);
   const active = apiLoading || navLoading;
   // Show immediately on navigation; keep minimum to avoid flicker
-  const visible = useSmoothLoading(active, { showDelayMs: 0, minVisibleMs: 300 });
+  const visible = useSmoothLoading(active, {
+    showDelayMs: 0,
+    minVisibleMs: 300,
+  });
 
   // Skip overlay on super-admin routes where it interferes with editing UX
   if (pathname?.startsWith("/super-admin")) return null;
@@ -30,7 +33,7 @@ export default function GlobalLoadingOverlay() {
         >
           {/* Subtle backdrop to signal blocked interactions */}
           <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
-          <div className="relative mt-24 pointer-events-none">
+          <div className="pointer-events-none relative mt-24">
             <SuspenseLoader fullscreen={false} />
           </div>
         </motion.div>

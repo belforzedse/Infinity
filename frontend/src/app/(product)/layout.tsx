@@ -11,10 +11,9 @@ import { useCart } from "@/contexts/CartContext";
 import React from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 
-const CartDrawer = dynamic(
-  () => import("@/components/ShoppingCart/Drawer"),
-  { ssr: false }
-);
+const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
+  ssr: false,
+});
 
 export default function ProductLayout({
   children,
@@ -31,11 +30,11 @@ export default function ProductLayout({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return (
-    <div dir="rtl" className="bg-white antialiased pb-[81px] md:pb-0">
+    <div dir="rtl" className="bg-white pb-[81px] antialiased md:pb-0">
       {/* Skip to content for accessibility */}
       <a
         href="#content"
-        className="sr-only focus:not-sr-only fixed left-4 top-4 z-[60] rounded-md bg-black/80 px-3 py-2 text-white shadow-elevated"
+        className="shadow-elevated sr-only fixed left-4 top-4 z-[60] rounded-md bg-black/80 px-3 py-2 text-white focus:not-sr-only"
       >
         پرش به محتوا
       </a>

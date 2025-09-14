@@ -36,7 +36,7 @@ export default function PDPHeroInfoColor(props: Props) {
       <span className="text-xl text-foreground-primary">انتخاب رنگ</span>
 
       <div className="flex items-center gap-4">
-        {colors.map((color) => (
+        {colors.map((color) =>
           color.id === selectedColor ? (
             <div
               key={color.id}
@@ -58,8 +58,8 @@ export default function PDPHeroInfoColor(props: Props) {
               className="h-7 w-7 rounded-full"
               style={{ backgroundColor: color.colorCode }}
             />
-          )
-        ))}
+          ),
+        )}
       </div>
     </div>
   );

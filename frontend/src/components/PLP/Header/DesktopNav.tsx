@@ -47,7 +47,8 @@ export default function PLPHeaderDesktopNav() {
           const activeSlug = params.get("category");
           const url = new URL(item.href, "http://dummy");
           const itemSlug = url.searchParams.get("category");
-          const isActive = isHome || (isPlp && itemSlug && itemSlug === activeSlug);
+          const isActive =
+            isHome || (isPlp && itemSlug && itemSlug === activeSlug);
           return (
             <Link
               key={item.href}

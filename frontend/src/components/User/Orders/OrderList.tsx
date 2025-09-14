@@ -169,12 +169,10 @@ export default function OrderList({ className = "" }: OrderListProps) {
             <div className="mt-3 flex justify-between border-t border-gray-100 pt-3 font-semibold">
               <span>مجموع:</span>
               <span className="text-pink-600">
-                {(
-                  order.order_items.reduce(
-                    (sum, item) => sum + item.Count * item.PerAmount,
-                    0,
-                  ) + order.ShippingCost
-                )}{" "}
+                {order.order_items.reduce(
+                  (sum, item) => sum + item.Count * item.PerAmount,
+                  0,
+                ) + order.ShippingCost}{" "}
                 {/* prices formatted above with faNum */}
                 تومان
               </span>

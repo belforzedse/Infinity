@@ -74,7 +74,9 @@ export const MobileTable = ({ data }: Props) => {
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <span className="text-xs text-neutral-400">
                 {row.attributes?.createdAt
-                  ? new Date(row.attributes.createdAt).toLocaleDateString("fa-IR")
+                  ? new Date(row.attributes.createdAt).toLocaleDateString(
+                      "fa-IR",
+                    )
                   : ""}
               </span>
             </div>
@@ -84,4 +86,3 @@ export const MobileTable = ({ data }: Props) => {
     </div>
   );
 };
-

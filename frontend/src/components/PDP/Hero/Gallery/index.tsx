@@ -17,11 +17,13 @@ type Props = {
 export default function PDPHeroGallery(props: Props) {
   const { assets } = props;
 
-  const [selectedImage, setSelectedImage] = useState<string>(assets[0]?.id ?? "");
+  const [selectedImage, setSelectedImage] = useState<string>(
+    assets[0]?.id ?? "",
+  );
 
   // Memoize a lookup map to avoid repeated finds
   const byId = useMemo(() => {
-    const m = new Map<string, typeof assets[number]>();
+    const m = new Map<string, (typeof assets)[number]>();
     for (const a of assets) m.set(a.id, a);
     return m;
   }, [assets]);

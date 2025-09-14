@@ -55,6 +55,29 @@ function ShoppingCartBillForm({}: Props) {
     undefined,
   );
 
+  // Discount state
+  const [discountCode, setDiscountCode] = useState<string | undefined>(() => {
+    try {
+      return localStorage.getItem("discountCode") || undefined;
+    } catch {
+      return undefined;
+    }
+  });
+  const [discountPreview, setDiscountPreview] = useState<
+    | {
+        discount: number;
+        summary: {
+          subtotal: number;
+          eligibleSubtotal: number;
+          tax: number;
+          shipping: number;
+          total: number;
+          taxPercent: number;
+        };
+      }
+    | undefined
+  >(undefined);
+
   // Naive eligibility (we don't have amount here; we can rely on backend final validation)
   // Optionally, you can request a lightweight endpoint to compute amount and check eligibility.
   useEffect(() => {
@@ -79,6 +102,39 @@ function ShoppingCartBillForm({}: Props) {
     };
     run();
   }, [watchShippingMethod]);
+
+  // Persist discount code
+  useEffect(() => {
+    try {
+      if (discountCode) localStorage.setItem("discountCode", discountCode);
+      else localStorage.removeItem("discountCode");
+    } catch {}
+  }, [discountCode]);
+
+  // Refresh discount preview on code or shipping changes
+  useEffect(() => {
+    const run = async () => {
+      if (!discountCode) {
+        setDiscountPreview(undefined);
+        return;
+      }
+      try {
+        const res = await CartService.applyDiscount({
+          code: discountCode,
+          shippingId: watchShippingMethod
+            ? Number(watchShippingMethod.id)
+            : undefined,
+          shippingCost: watchShippingMethod
+            ? Number(watchShippingMethod.attributes?.Price || 0)
+            : undefined,
+        });
+        if (res?.success) {
+          setDiscountPreview({ discount: res.discount, summary: res.summary });
+        }
+      } catch {}
+    };
+    run();
+  }, [discountCode, watchShippingMethod]);
 
   const onSubmit = async (data: FormData) => {
     if (!data.address) {
@@ -121,6 +177,8 @@ function ShoppingCartBillForm({}: Props) {
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
+        discountCode:
+          discountCode || localStorage.getItem("discountCode") || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
@@ -144,8 +202,11 @@ function ShoppingCartBillForm({}: Props) {
           const isAllowedPaymentUrl = (raw: string) => {
             try {
               const url = new URL(raw);
-              if (url.protocol !== "http:" && url.protocol !== "https:") return false;
-              const allowed = (process.env.NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS || "")
+              if (url.protocol !== "http:" && url.protocol !== "https:")
+                return false;
+              const allowed = (
+                process.env.NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS || ""
+              )
                 .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean);
@@ -217,8 +278,30 @@ function ShoppingCartBillForm({}: Props) {
             control={control}
             setValue={setValue}
             selectedShipping={watchShippingMethod}
+            discountPreview={discountPreview}
           />
-          <ShoppingCartBillDiscountCoupon />
+          <ShoppingCartBillDiscountCoupon
+            shippingId={
+              watchShippingMethod ? Number(watchShippingMethod.id) : undefined
+            }
+            shippingCost={
+              watchShippingMethod
+                ? Number(watchShippingMethod.attributes?.Price || 0)
+                : undefined
+            }
+            onApplied={(code, preview) => {
+              setDiscountCode(code);
+              setDiscountPreview(preview);
+            }}
+            appliedCode={discountCode}
+            onRemove={() => {
+              setDiscountCode(undefined);
+              setDiscountPreview(undefined);
+              try {
+                localStorage.removeItem("discountCode");
+              } catch {}
+            }}
+          />
           <ShoppingCartBillPaymentGateway
             selected={gateway}
             onChange={setGateway}

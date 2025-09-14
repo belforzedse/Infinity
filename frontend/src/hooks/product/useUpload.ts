@@ -79,7 +79,17 @@ export function useUpload({
       }));
       setFiles(otherFiles);
     }
-  }, [initialImages, initialVideos, initialFiles, images.length, videos.length, files.length, setImages, setVideos, setFiles]);
+  }, [
+    initialImages,
+    initialVideos,
+    initialFiles,
+    images.length,
+    videos.length,
+    files.length,
+    setImages,
+    setVideos,
+    setFiles,
+  ]);
 
   const getFileType = (file: File): "image" | "video" | "other" => {
     if (file.type.startsWith("image/")) return "image";

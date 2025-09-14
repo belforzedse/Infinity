@@ -199,7 +199,6 @@ const config: UpsertPageConfigType<User> = {
 };
 
 export default function Page() {
-
   const initialData: User = {
     id: "",
     firstname: "",
@@ -222,7 +221,6 @@ export default function Page() {
       data={initialData}
       onSubmit={async (data: User) => {
         try {
-
           // Validate required fields
           if (
             !data.firstname ||
@@ -274,10 +272,10 @@ export default function Page() {
 
           // Reset form or redirect
           window.location.href = "/super-admin/users";
-          } catch (error) {
-            console.error("Error creating user:", error);
-            toast.error("خطا در ایجاد کاربر");
-          }
+        } catch (error) {
+          console.error("Error creating user:", error);
+          toast.error("خطا در ایجاد کاربر");
+        }
       }}
     />
   );

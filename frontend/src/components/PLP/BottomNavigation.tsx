@@ -86,7 +86,10 @@ const PLPBottomNavigation = () => {
 
   return (
     <>
-      <nav data-bottom-nav className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white md:hidden">
+      <nav
+        data-bottom-nav
+        className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white md:hidden"
+      >
         <div className="flex items-center justify-between px-4 py-2.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -111,13 +114,15 @@ const PLPBottomNavigation = () => {
       </nav>
       {isCategoriesMounted && (
         <div
-          className={`fixed inset-0 z-40 flex items-end justify-center md:hidden transition-opacity duration-200 ${
-            isCategoriesVisible ? "opacity-100 bg-black/40" : "opacity-0 bg-black/0"
+          className={`fixed inset-0 z-40 flex items-end justify-center transition-opacity duration-200 md:hidden ${
+            isCategoriesVisible
+              ? "bg-black/40 opacity-100"
+              : "bg-black/0 opacity-0"
           }`}
           onClick={closeCategories}
         >
           <div
-            className={`max-h-[80vh] w-full max-w-screen-sm translate-y-0 rounded-t-2xl bg-white p-4 shadow-2xl transition-transform duration-250 ease-out ${
+            className={`duration-250 max-h-[80vh] w-full max-w-screen-sm translate-y-0 rounded-t-2xl bg-white p-4 shadow-2xl transition-transform ease-out ${
               isCategoriesVisible ? "translate-y-0" : "translate-y-full"
             }`}
             style={{ transitionDuration: "250ms" }}
@@ -142,7 +147,10 @@ const PLPBottomNavigation = () => {
                   onClick={closeCategories}
                   className="flex flex-col items-center gap-2"
                 >
-                  <div className="relative h-20 w-20 overflow-hidden rounded-full" style={{ backgroundColor: category.backgroundColor }}>
+                  <div
+                    className="relative h-20 w-20 overflow-hidden rounded-full"
+                    style={{ backgroundColor: category.backgroundColor }}
+                  >
                     <Image
                       src={category.image}
                       alt={category.name}

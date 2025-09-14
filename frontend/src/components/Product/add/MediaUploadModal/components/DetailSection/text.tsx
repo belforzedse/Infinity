@@ -13,7 +13,6 @@ export default function DetailsSectionText({
   selectedImage,
   setSelectedImage,
 }: DetailsSectionTextProps) {
-
   const handleCopyUrl = () => {
     if (selectedImage?.url) {
       navigator.clipboard.writeText(selectedImage.url);

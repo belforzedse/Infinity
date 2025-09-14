@@ -107,9 +107,7 @@ function PaymentCallbackContent() {
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         } else {
-          logger.info(
-            "Payment verification failed - redirecting to failure",
-          );
+          logger.info("Payment verification failed - redirecting to failure");
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }

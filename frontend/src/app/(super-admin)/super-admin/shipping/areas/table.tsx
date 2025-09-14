@@ -100,7 +100,9 @@ function AreaMobileRow({ row }: { row: Area }) {
         {!isOpen ? (
           <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
             <div className="flex items-center gap-1">
-              <span className="text-xs text-neutral-400">{row.description}</span>
+              <span className="text-xs text-neutral-400">
+                {row.description}
+              </span>
               <span className="text-xs text-neutral-400">|</span>
               <span className="text-sm text-neutral-400">
                 ایجاد: {row.createdAt.toLocaleDateString("fa-IR")}

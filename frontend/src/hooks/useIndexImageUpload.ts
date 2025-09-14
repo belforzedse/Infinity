@@ -119,7 +119,11 @@ const useIndexImageUpload = ({
         productData.CoverImage.data.id.toString(),
       );
       if (response?.url) {
-        window.open(IMAGE_BASE_URL + response.url, "_blank", "noopener,noreferrer");
+        window.open(
+          IMAGE_BASE_URL + response.url,
+          "_blank",
+          "noopener,noreferrer",
+        );
       } else {
         toast.error("آدرس تصویر در دسترس نیست");
       }
