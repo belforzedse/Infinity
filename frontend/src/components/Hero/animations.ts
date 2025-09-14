@@ -10,6 +10,9 @@ export type LuxurySlideFadeOptions = {
   springDamping?: number; // spring damping (10-40)
   springStiffness?: number; // spring stiffness (100-400)
   useSpring?: boolean; // use spring animation instead of ease
+  delay?: number; // legacy: apply to both enter/exit
+  delayIn?: number; // enter delay only
+  delayOut?: number; // exit delay only
 };
 
 export const defaultLuxurySlideFadeOptions: Required<LuxurySlideFadeOptions> = {
@@ -22,6 +25,9 @@ export const defaultLuxurySlideFadeOptions: Required<LuxurySlideFadeOptions> = {
   springDamping: 25,
   springStiffness: 200,
   useSpring: false,
+  delay: 0,
+  delayIn: 0,
+  delayOut: 0,
 };
 
 export function luxurySlideFade(
@@ -38,6 +44,9 @@ export function luxurySlideFade(
     springDamping,
     springStiffness,
     useSpring,
+    delay,
+    delayIn,
+    delayOut,
   } = { ...defaultLuxurySlideFadeOptions, ...opts };
 
   const getOffset = () => {
@@ -84,6 +93,7 @@ export function luxurySlideFade(
       transition: {
         ...transition,
         staggerChildren: stagger,
+        delay: (typeof delayIn === "number" ? delayIn : delay) || 0,
       } as any,
     },
     exit: {
@@ -95,6 +105,7 @@ export function luxurySlideFade(
       transition: {
         ...transition,
         staggerChildren: stagger * 0.5,
+        delay: (typeof delayOut === "number" ? delayOut : delay) || 0,
       } as any,
     },
   };

@@ -14,11 +14,47 @@ export default function DesktopHero({ layout, slideKey }: Props) {
   const prefersReduced = useReducedMotion();
   // Slower, more pronounced outside motion for high-end feel
   const outsideOpts = prefersReduced
-    ? { distance: 32, duration: 0.9, scale: 0.98, ease: [0.25, 0.46, 0.45, 0.94] as any }
-    : { distance: 120, duration: 1.1, scale: 0.96, ease: [0.23, 1, 0.32, 1] as any };
+    ? {
+        distance: 160,
+        duration: 0.99,
+        scale: 0.98,
+        ease: [0.35, 0.46, 0.45, 0.94] as any,
+      }
+    : {
+        distance: 220,
+        duration: 1.1,
+        scale: 0.98,
+        ease: [0.21, 1, 0.22, 1] as any,
+      };
 
-  const leftVariants = luxurySlideFade("left", outsideOpts);
-  const rightVariants = luxurySlideFade("right", outsideOpts);
+  // Per-element sequencing: control each small tile independently
+  const smallLeftDelayIn = 0.24;
+  const smallLeftDelayOut = 0.0;
+  const smallRightDelayIn = 0.0;
+  const smallRightDelayOut = 0.14;
+  const bigDelay = 0.24;
+  const wideDelay = 0.3;
+
+  const belowLeftVariants = luxurySlideFade("right", {
+    ...outsideOpts,
+    delayIn: smallLeftDelayIn,
+    delayOut: smallLeftDelayOut,
+  });
+  const belowRightVariants = luxurySlideFade("right", {
+    ...outsideOpts,
+    delayIn: smallRightDelayIn,
+    delayOut: smallRightDelayOut,
+  });
+  const sideVariants = luxurySlideFade("left", {
+    ...outsideOpts,
+    delayIn: bigDelay,
+    delayOut: bigDelay,
+  });
+  const wideTextVariants = luxurySlideFade("right", {
+    ...outsideOpts,
+    delayIn: wideDelay,
+    delayOut: wideDelay,
+  });
   return (
     <>
       {/*Desktop hero section*/}
@@ -32,7 +68,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`text-${slideKey}`}
-                      variants={rightVariants}
+                      variants={wideTextVariants}
                       initial="initial"
                       animate="animate"
                       exit="exit"
@@ -52,7 +88,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`belowLeft-${slideKey}`}
-                      variants={rightVariants}
+                      variants={belowLeftVariants}
                       initial="initial"
                       animate="animate"
                       exit="exit"
@@ -65,7 +101,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`belowRight-${slideKey}`}
-                      variants={rightVariants}
+                      variants={belowRightVariants}
                       initial="initial"
                       animate="animate"
                       exit="exit"
@@ -81,7 +117,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`side-${slideKey}`}
-                  variants={leftVariants}
+                  variants={sideVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
