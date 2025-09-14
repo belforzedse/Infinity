@@ -3,6 +3,7 @@ import BannerImage from "./Banners/BannerImage";
 import TextBanner from "./Banners/TextBanner";
 import { DesktopLayout } from "./types";
 import { AnimatePresence, motion } from "framer-motion";
+import { slideFade, transitions } from "./animations";
 
 type Props = {
   layout: DesktopLayout;
@@ -23,10 +24,11 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`text-${slideKey}`}
-                      initial={{ opacity: 0, x: -40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -40 }}
-                      transition={{ duration: 0.45, ease: "easeOut" }}
+                      variants={slideFade("left")}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={transitions.base}
                     >
                       <TextBanner
                         title={layout.textBanner.title}
@@ -43,14 +45,11 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`belowLeft-${slideKey}`}
-                      initial={{ opacity: 0, x: -40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -40 }}
-                      transition={{
-                        duration: 0.45,
-                        ease: "easeOut",
-                        delay: 0.05,
-                      }}
+                      variants={slideFade("left")}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ ...transitions.base, delay: 0.05 }}
                     >
                       <BannerImage {...layout.belowLeft} />
                     </motion.div>
@@ -60,14 +59,11 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`belowRight-${slideKey}`}
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 40 }}
-                      transition={{
-                        duration: 0.45,
-                        ease: "easeOut",
-                        delay: 0.1,
-                      }}
+                      variants={slideFade("right")}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ ...transitions.base, delay: 0.1 }}
                     >
                       <BannerImage {...layout.belowRight} />
                     </motion.div>
@@ -80,10 +76,11 @@ export default function DesktopHero({ layout, slideKey }: Props) {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`side-${slideKey}`}
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 40 }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  variants={slideFade("right")}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={transitions.base}
                 >
                   <BannerImage {...layout.side} />
                 </motion.div>
