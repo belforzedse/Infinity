@@ -151,6 +151,41 @@ export default factories.createCoreController(
 
           const settleResult = await snappay.settle(tokenForOps);
           if (settleResult?.successful) {
+            // Decrement stock for each order item NOW (after settlement)
+            try {
+              const orderWithItems = await strapi.entityService.findOne(
+                "api::order.order",
+                orderId,
+                {
+                  populate: {
+                    order_items: {
+                      populate: {
+                        product_variation: {
+                          populate: { product_stock: true },
+                        },
+                      },
+                    },
+                  },
+                }
+              );
+              // TODO: Consider wrapping stock decrements and status update in a transaction for atomicity
+              for (const it of orderWithItems?.order_items || []) {
+                const v = it?.product_variation;
+                if (v?.product_stock?.id && typeof it?.Count === "number") {
+                  const stockId = v.product_stock.id as number;
+                  const current = Number(v.product_stock.Count || 0);
+                  const dec = Number(it.Count || 0);
+                  await strapi.entityService.update(
+                    "api::product-stock.product-stock",
+                    stockId,
+                    { data: { Count: current - dec } }
+                  );
+                }
+              }
+            } catch (e) {
+              strapi.log.error("Failed to decrement stock after settlement", e);
+            }
+
             await strapi.entityService.update("api::order.order", orderId, {
               data: { Status: "Started" },
             });
@@ -263,6 +298,40 @@ export default factories.createCoreController(
 
           if (settlementResult.success) {
             // Update order status to Started (Paid)
+            // Decrement stock for each order item NOW (after settlement)
+            try {
+              const orderWithItems = await strapi.entityService.findOne(
+                "api::order.order",
+                orderId,
+                {
+                  populate: {
+                    order_items: {
+                      populate: {
+                        product_variation: {
+                          populate: { product_stock: true },
+                        },
+                      },
+                    },
+                  },
+                }
+              );
+              for (const it of orderWithItems?.order_items || []) {
+                const v = it?.product_variation;
+                if (v?.product_stock?.id && typeof it?.Count === "number") {
+                  const stockId = v.product_stock.id as number;
+                  const current = Number(v.product_stock.Count || 0);
+                  const dec = Number(it.Count || 0);
+                  await strapi.entityService.update(
+                    "api::product-stock.product-stock",
+                    stockId,
+                    { data: { Count: current - dec } }
+                  );
+                }
+              }
+            } catch (e) {
+              strapi.log.error("Failed to decrement stock after settlement", e);
+            }
+
             await strapi.entityService.update("api::order.order", orderId, {
               data: {
                 Status: "Started",
