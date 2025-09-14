@@ -37,3 +37,4 @@ Reference:
 - Keep descriptions concise (~150–160 chars).
 - Use `IMAGE_BASE_URL` for absolute image URLs in OpenGraph.
 - Next.js Metadata typings support a limited OG `type` set (e.g., `website`, `article`, etc.). Avoid custom values like `product`; omit or use `website` instead.
+- Ensure `alternates.canonical` always matches the current route and query context.
