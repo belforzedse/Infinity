@@ -2,8 +2,8 @@ import React from "react";
 import BannerImage from "./Banners/BannerImage";
 import TextBanner from "./Banners/TextBanner";
 import { DesktopLayout } from "./types";
-import { AnimatePresence, motion } from "framer-motion";
-import { slideFade, transitions } from "./animations";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { luxuryPresets, luxurySlideFade } from "./animations";
 
 type Props = {
   layout: DesktopLayout;
@@ -11,6 +11,14 @@ type Props = {
 };
 
 export default function DesktopHero({ layout, slideKey }: Props) {
+  const prefersReduced = useReducedMotion();
+  // Slower, more pronounced outside motion for high-end feel
+  const outsideOpts = prefersReduced
+    ? { distance: 32, duration: 0.9, scale: 0.98, ease: [0.25, 0.46, 0.45, 0.94] as any }
+    : { distance: 120, duration: 1.1, scale: 0.96, ease: [0.23, 1, 0.32, 1] as any };
+
+  const leftVariants = luxurySlideFade("left", outsideOpts);
+  const rightVariants = luxurySlideFade("right", outsideOpts);
   return (
     <>
       {/*Desktop hero section*/}
@@ -21,14 +29,13 @@ export default function DesktopHero({ layout, slideKey }: Props) {
               <div className="mt-11 grid grid-cols-2 grid-rows-2 gap-4">
                 <div className="col-span-2 row-span-1">
                   {/*Wide pinterest banner*/}
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`text-${slideKey}`}
-                      variants={slideFade("left")}
+                      variants={rightVariants}
                       initial="initial"
                       animate="animate"
                       exit="exit"
-                      transition={transitions.base}
                     >
                       <TextBanner
                         title={layout.textBanner.title}
@@ -42,28 +49,26 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                 </div>
                 {/* the 2 banners below the wide banner */}
                 <div className="col-span-1 col-start-1 row-span-1 row-start-2">
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`belowLeft-${slideKey}`}
-                      variants={slideFade("left")}
+                      variants={rightVariants}
                       initial="initial"
                       animate="animate"
                       exit="exit"
-                      transition={{ ...transitions.base, delay: 0.05 }}
                     >
                       <BannerImage {...layout.belowLeft} />
                     </motion.div>
                   </AnimatePresence>
                 </div>
                 <div className="col-span-1 col-start-2 row-span-1 row-start-2">
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`belowRight-${slideKey}`}
-                      variants={slideFade("right")}
+                      variants={rightVariants}
                       initial="initial"
                       animate="animate"
                       exit="exit"
-                      transition={{ ...transitions.base, delay: 0.1 }}
                     >
                       <BannerImage {...layout.belowRight} />
                     </motion.div>
@@ -73,14 +78,13 @@ export default function DesktopHero({ layout, slideKey }: Props) {
             </div>
             {/* Side banner */}
             <div className="h-full w-4/12 flex-1">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`side-${slideKey}`}
-                  variants={slideFade("right")}
+                  variants={leftVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  transition={transitions.base}
                 >
                   <BannerImage {...layout.side} />
                 </motion.div>
