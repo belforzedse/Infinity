@@ -19,6 +19,7 @@ type Props = {
   onSizeChange?: (sizeId: string) => void;
   selectedSize?: string;
   sizeHelper?: ProductSizeHelper | null;
+  disabledSizeIds?: string[];
 };
 
 export default function PDPHeroInfoSize(props: Props) {
@@ -27,6 +28,7 @@ export default function PDPHeroInfoSize(props: Props) {
     onSizeChange,
     selectedSize: externalSelectedSize,
     sizeHelper,
+    disabledSizeIds = [],
   } = props;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -110,19 +112,26 @@ export default function PDPHeroInfoSize(props: Props) {
 
       <div ref={scrollContainerRef} className="overflow-x-hidden w-full">
         <div className="flex gap-2 w-fit">
-          {sizes.map((size) => (
-            <button
-              key={size.id}
-              className={`w-20 h-9 py-2 px-3 rounded-lg flex items-center justify-center ${
-                size.id === selectedSize
-                  ? "bg-background-primary text-foreground-primary border border-gray-300"
-                  : "bg-background-secondary text-foreground-muted"
-              }`}
-              onClick={() => handleSizeClick(size.id)}
-            >
-              <span className="text-xs">{size.title}</span>
-            </button>
-          ))}
+          {sizes.map((size) => {
+            const isSelected = size.id === selectedSize;
+            const isDisabled = disabledSizeIds.includes(size.id);
+            return (
+              <button
+                key={size.id}
+                className={`w-20 h-9 py-2 px-3 rounded-lg flex items-center justify-center ${
+                  isSelected
+                    ? "bg-background-primary text-foreground-primary border border-gray-300"
+                    : "bg-background-secondary text-foreground-muted"
+                } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={() => (isDisabled ? undefined : handleSizeClick(size.id))}
+                disabled={isDisabled}
+                aria-disabled={isDisabled}
+                title={isDisabled ? "ناموجود" : size.title}
+              >
+                <span className="text-xs">{size.title}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -9,10 +9,16 @@ type Props = {
   }[];
   onColorChange?: (colorId: string) => void;
   selectedColor?: string;
+  disabledColorIds?: string[];
 };
 
 export default function PDPHeroInfoColor(props: Props) {
-  const { colors, onColorChange, selectedColor: externalSelectedColor } = props;
+  const {
+    colors,
+    onColorChange,
+    selectedColor: externalSelectedColor,
+    disabledColorIds = [],
+  } = props;
 
   const [internalSelectedColor, setInternalSelectedColor] = useState<string>(
     colors[0]?.id || ""
@@ -36,30 +42,37 @@ export default function PDPHeroInfoColor(props: Props) {
       <span className="text-foreground-primary text-xl">انتخاب رنگ</span>
 
       <div className="flex gap-4 items-center">
-        {colors.map((color) => (
-          <>
-            {color.id === selectedColor ? (
-              <div className="flex gap-1 items-center p-1 rounded-3xl border border-gray-300">
-                <div
-                  key={color.id}
-                  className="w-7 h-7 rounded-full"
-                  style={{ backgroundColor: color.colorCode }}
-                />
+        {colors.map((color) => {
+          const isSelected = color.id === selectedColor;
+          const isDisabled = disabledColorIds.includes(color.id);
+          return (
+            <div key={color.id} className="flex items-center">
+              {isSelected ? (
+                <div className="flex gap-1 items-center p-1 rounded-3xl border border-gray-300">
+                  <div
+                    className="w-7 h-7 rounded-full"
+                    style={{ backgroundColor: color.colorCode }}
+                  />
 
-                <span className="text-sm text-foreground-primary">
-                  {color.title}
-                </span>
-              </div>
-            ) : (
-              <button
-                onClick={() => handleColorClick(color.id)}
-                key={color.id}
-                className="w-7 h-7 rounded-full"
-                style={{ backgroundColor: color.colorCode }}
-              />
-            )}
-          </>
-        ))}
+                  <span className="text-sm text-foreground-primary">
+                    {color.title}
+                  </span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => (isDisabled ? undefined : handleColorClick(color.id))}
+                  className={`w-7 h-7 rounded-full ${
+                    isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  style={{ backgroundColor: color.colorCode }}
+                  disabled={isDisabled}
+                  aria-disabled={isDisabled}
+                  title={isDisabled ? "ناموجود" : color.title}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

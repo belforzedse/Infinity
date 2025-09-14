@@ -85,6 +85,10 @@ export default function PDPHeroInfo(props: Props) {
   const [currentVariationId, setCurrentVariationId] = useState<
     string | undefined
   >(undefined); // Will be set properly in useEffect based on default selections
+  // Disabled option states based on availability of combinations
+  const [disabledColorIds, setDisabledColorIds] = useState<string[]>([]);
+  const [disabledSizeIds, setDisabledSizeIds] = useState<string[]>([]);
+  const [disabledModelIds, setDisabledModelIds] = useState<string[]>([]);
   // Initialize stock status based on the initial/default variation
   const getInitialStockStatus = () => {
     console.log("=== INITIAL STOCK STATUS DEBUG ===");
@@ -151,35 +155,120 @@ export default function PDPHeroInfo(props: Props) {
 
   const [hasStock, setHasStock] = useState(getInitialStockStatus());
 
-  // Initialize variation details based on default selections when component mounts
-  useEffect(() => {
-    if (productData && colors.length > 0 && sizes.length > 0) {
-      // Call updateVariationDetails with the default selected values
-      // This will set the correct currentVariationId based on default selections
-      updateVariationDetails(
-        colors[0].id,    // Default selected color
-        sizes[0].id,     // Default selected size
-        models.length > 0 ? models[0].id : ""  // Default selected model (if any)
-      );
+  // Compute disabled options for current selection context
+  const computeDisabledOptions = (
+    colorId: string,
+    sizeId: string,
+    modelId: string
+  ) => {
+    if (!productData?.attributes?.product_variations?.data?.length) {
+      setDisabledColorIds(colors.map((c) => c.id));
+      setDisabledSizeIds(sizes.map((s) => s.id));
+      setDisabledModelIds(models.map((m) => m.id));
+      return;
     }
-  }, [productData, colors, sizes, models]); // Run when product data is loaded
+
+    const variations = productData.attributes.product_variations.data;
+    const toNum = (v?: string) => (v ? parseInt(v) : undefined);
+    const selColor = toNum(colorId);
+    const selSize = toNum(sizeId);
+    const selModel = toNum(modelId);
+    const isInStock = (v: any) =>
+      v?.attributes?.IsPublished &&
+      typeof v?.attributes?.product_stock?.data?.attributes?.Count ===
+        "number" &&
+      v.attributes.product_stock.data.attributes.Count > 0;
+    const match = (v: any, c?: number, s?: number, m?: number) => {
+      const vc = v.attributes.product_variation_color?.data?.id;
+      const vs = v.attributes.product_variation_size?.data?.id;
+      const vm = v.attributes.product_variation_model?.data?.id;
+      return (c ? vc === c : true) && (s ? vs === s : true) && (m ? vm === m : true);
+    };
+
+    // Disabled colors given current size/model
+    const disabledColors = colors
+      .filter((c) =>
+        !variations.some(
+          (v: any) => isInStock(v) && match(v, parseInt(c.id), selSize, selModel)
+        )
+      )
+      .map((c) => c.id);
+
+    // Disabled sizes given current color/model
+    const disabledSizes = sizes
+      .filter((s) =>
+        !variations.some(
+          (v: any) => isInStock(v) && match(v, selColor, parseInt(s.id), selModel)
+        )
+      )
+      .map((s) => s.id);
+
+    // Disabled models given current color/size
+    const disabledModels = models
+      .filter((m) =>
+        !variations.some(
+          (v: any) => isInStock(v) && match(v, selColor, selSize, parseInt(m.id))
+        )
+      )
+      .map((m) => m.id);
+
+    setDisabledColorIds(disabledColors);
+    setDisabledSizeIds(disabledSizes);
+    setDisabledModelIds(disabledModels);
+  };
+
+  // Initialize variation details: pick first available (in-stock) combination if possible
+  useEffect(() => {
+    if (!productData || colors.length === 0 || sizes.length === 0) return;
+
+    const variations = productData.attributes?.product_variations?.data || [];
+    const inStockVar = variations.find((v: any) =>
+      v?.attributes?.IsPublished &&
+      typeof v?.attributes?.product_stock?.data?.attributes?.Count === "number" &&
+      v.attributes.product_stock.data.attributes.Count > 0
+    );
+
+    if (inStockVar) {
+      const cId = inStockVar.attributes.product_variation_color?.data?.id?.toString() || colors[0].id;
+      const sId = inStockVar.attributes.product_variation_size?.data?.id?.toString() || sizes[0].id;
+      const mId =
+        inStockVar.attributes.product_variation_model?.data?.id?.toString() ||
+        (models.length > 0 ? models[0].id : "");
+
+      setSelectedColor(cId);
+      setSelectedSize(sId);
+      setSelectedModel(mId);
+      updateVariationDetails(cId, sId, mId);
+      computeDisabledOptions(cId, sId, mId);
+    } else {
+      // No stock anywhere; still compute disabled to reflect unavailability
+      const c0 = colors[0]?.id || "";
+      const s0 = sizes[0]?.id || "";
+      const m0 = models[0]?.id || "";
+      updateVariationDetails(c0, s0, m0);
+      computeDisabledOptions(c0, s0, m0);
+    }
+  }, [productData, colors, sizes, models]);
 
   // Handle size change
   const handleSizeChange = (sizeId: string) => {
     setSelectedSize(sizeId);
     updateVariationDetails(selectedColor, sizeId, selectedModel);
+    computeDisabledOptions(selectedColor, sizeId, selectedModel);
   };
 
   // Handle color change
   const handleColorChange = (colorId: string) => {
     setSelectedColor(colorId);
     updateVariationDetails(colorId, selectedSize, selectedModel);
+    computeDisabledOptions(colorId, selectedSize, selectedModel);
   };
 
   // Handle model change
   const handleModelChange = (modelId: string) => {
     setSelectedModel(modelId);
     updateVariationDetails(selectedColor, selectedSize, modelId);
+    computeDisabledOptions(selectedColor, selectedSize, modelId);
   };
 
   // Update variation details based on selected properties
@@ -315,12 +404,14 @@ export default function PDPHeroInfo(props: Props) {
           onSizeChange={handleSizeChange}
           selectedSize={selectedSize}
           sizeHelper={productData?.attributes?.product_size_helper?.data}
+          disabledSizeIds={disabledSizeIds}
         />
 
         <Color
           colors={colors}
           onColorChange={handleColorChange}
           selectedColor={selectedColor}
+          disabledColorIds={disabledColorIds}
         />
 
         {models.length > 0 && (
@@ -328,6 +419,7 @@ export default function PDPHeroInfo(props: Props) {
             models={models}
             onModelChange={handleModelChange}
             selectedModel={selectedModel}
+            disabledModelIds={disabledModelIds}
           />
         )}
       </div>
