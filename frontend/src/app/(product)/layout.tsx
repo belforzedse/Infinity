@@ -21,7 +21,7 @@ export default function ProductLayout({
 }) {
   const { isDrawerOpen } = useCart();
   return (
-    <div dir="rtl" className="bg-white pb-[81px] md:pb-0">
+    <div dir="rtl" className="bg-white antialiased scroll-smooth pb-[81px] md:pb-0">
       <header>
         <div className="hidden md:block">
           <div className="px-10 py-4">

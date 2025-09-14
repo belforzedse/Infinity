@@ -22,19 +22,19 @@ export default async function Home() {
   return (
     <div className="mx-auto mt-5 px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
       {/* Hero section with responsive images */}
-      <Reveal>
+      <Reveal variant="zoom-in" duration={650}>
         <MobileSlider />
       </Reveal>
 
       {/* Desktop hero banner */}
-      <Reveal delay={100}>
+      <Reveal delay={100} variant="zoom-in" duration={650}>
         <DesktopSlider />
       </Reveal>
 
       {/* Discounted products section */}
       <div className="mt-8 md:mt-12">
         {discountedProducts.length > 0 && (
-          <Reveal>
+          <Reveal variant="fade-up" duration={700}>
             <OffersListHomePage
               icon={<OffIcon />}
               title="تخفیف‌های وسوسه انگیز"
@@ -62,7 +62,7 @@ export default async function Home() {
               }`}
             >
               {/* desktop categories section */}
-              <Reveal delay={index * 80} className="w-full">
+              <Reveal delay={index * 80} className="w-full" variant="fade-up" duration={600}>
                 <span className="block w-full">
                   <div className="relative hidden h-[340px] w-full overflow-hidden lg:block">
                     <div
@@ -86,7 +86,7 @@ export default async function Home() {
                 </span>
               </Reveal>
               {/* mobile categories section */}
-              <Reveal delay={index * 80} className="lg:hidden">
+              <Reveal delay={index * 80} className="lg:hidden" variant="fade-up" duration={600}>
                 <div
                   className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
                   style={{ backgroundColor: category.backgroundColor }}
@@ -112,7 +112,7 @@ export default async function Home() {
 
       {/* New products section */}
       <div className="mt-8 md:mt-12">
-        <Reveal>
+        <Reveal variant="fade-up" duration={700}>
           <OffersListHomePage
             icon={<NewIcon />}
             title="جدیدترین ها"
@@ -124,7 +124,7 @@ export default async function Home() {
       {/* Favorite products section */}
       <div className="mb-8 mt-8 md:mb-12 md:mt-12">
         {favoriteProducts.length > 0 && (
-          <Reveal>
+          <Reveal variant="fade-up" duration={700}>
             <OffersListHomePage
               icon={<NewIcon />}
               title="محبوب ترین ها"
