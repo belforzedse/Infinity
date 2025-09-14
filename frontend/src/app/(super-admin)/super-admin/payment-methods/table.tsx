@@ -121,11 +121,17 @@ function PaymentMethodMobileRow({ row }: { row: PaymentMethods }) {
             <div className="flex items-center gap-1">
               <span className="text-xs text-neutral-400">{row.roleLevel}</span>
               <span className="text-xs text-neutral-400">|</span>
-              <span className="text-sm text-neutral-400">ایجاد: {row.createdAt}</span>
+              <span className="text-sm text-neutral-400">
+                ایجاد: {row.createdAt}
+              </span>
               <span className="text-xs text-neutral-400">|</span>
-              <span className="text-sm text-neutral-400">ویرایش: {row.updatedAt}</span>
+              <span className="text-sm text-neutral-400">
+                ویرایش: {row.updatedAt}
+              </span>
             </div>
-            <SuperAdminTableCellSwitch status={row.status as "active" | "inactive"} />
+            <SuperAdminTableCellSwitch
+              status={row.status as "active" | "inactive"}
+            />
           </div>
         ) : (
           columns.slice(0, columns.length - 1).map((column, index) => (
@@ -139,13 +145,16 @@ function PaymentMethodMobileRow({ row }: { row: PaymentMethods }) {
               {column?.cell ? (
                 (column?.cell as any)?.({
                   row: {
-                    getValue: (key: string) =>
-                      row[key as keyof PaymentMethods],
+                    getValue: (key: string) => row[key as keyof PaymentMethods],
                   },
                 })
               ) : (
                 <span className="text-xs text-foreground-primary md:text-base">
-                  {row[(column as any).accessorKey as keyof PaymentMethods] as string}
+                  {
+                    row[
+                      (column as any).accessorKey as keyof PaymentMethods
+                    ] as string
+                  }
                 </span>
               )}
             </div>

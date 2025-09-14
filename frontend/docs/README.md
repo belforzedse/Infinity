@@ -16,4 +16,3 @@ Project documentation and API references for Infinity Store frontend.
 Inline code is documented with JSDoc comments to aid contributors in
 understanding utilities and components. See the project root README for
 additional pointers on comment conventions.
-

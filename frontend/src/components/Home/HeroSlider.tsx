@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
+import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
 interface Slide {
   desktop: string;
@@ -22,33 +22,33 @@ interface Slide {
 
 const slides: Slide[] = [
   {
-    desktop: '/images/index-img1-desktop.png',
-    mobile: '/images/index-img1-mobile.png',
-    alt: 'Hero Banner 1',
+    desktop: "/images/index-img1-desktop.png",
+    mobile: "/images/index-img1-mobile.png",
+    alt: "Hero Banner 1",
     sideTop: {
-      desktop: '/images/index-img3-desktop.png',
-      mobile: '/images/index-img3-mobile.png',
-      alt: 'Side Top Banner 1',
+      desktop: "/images/index-img3-desktop.png",
+      mobile: "/images/index-img3-mobile.png",
+      alt: "Side Top Banner 1",
     },
     sideBottom: {
-      desktop: '/images/index-img4-desktop.png',
-      mobile: '/images/index-img4-mobile.png',
-      alt: 'Side Bottom Banner 1',
+      desktop: "/images/index-img4-desktop.png",
+      mobile: "/images/index-img4-mobile.png",
+      alt: "Side Bottom Banner 1",
     },
   },
   {
-    desktop: '/images/index-img2-desktop.png',
-    mobile: '/images/index-img2-mobile.png',
-    alt: 'Hero Banner 2',
+    desktop: "/images/index-img2-desktop.png",
+    mobile: "/images/index-img2-mobile.png",
+    alt: "Hero Banner 2",
     sideTop: {
-      desktop: '/images/index-img3-desktop.png',
-      mobile: '/images/index-img3-mobile.png',
-      alt: 'Side Top Banner 2',
+      desktop: "/images/index-img3-desktop.png",
+      mobile: "/images/index-img3-mobile.png",
+      alt: "Side Top Banner 2",
     },
     sideBottom: {
-      desktop: '/images/index-img4-desktop.png',
-      mobile: '/images/index-img4-mobile.png',
-      alt: 'Side Bottom Banner 2',
+      desktop: "/images/index-img4-desktop.png",
+      mobile: "/images/index-img4-mobile.png",
+      alt: "Side Bottom Banner 2",
     },
   },
 ];
@@ -83,7 +83,7 @@ export default function HeroSlider() {
                 priority={index === 0}
               />
             </div>
-            <div className="relative col-start-4 col-span-4 row-span-2">
+            <div className="relative col-span-4 col-start-4 row-span-2">
               <Image
                 src={slide.sideTop.desktop}
                 alt={slide.sideTop.alt}
@@ -101,7 +101,7 @@ export default function HeroSlider() {
                 priority={index === 0}
               />
             </div>
-            <div className="relative col-start-4 col-span-4 row-start-3 row-span-2">
+            <div className="relative col-span-4 col-start-4 row-span-2 row-start-3">
               <Image
                 src={slide.sideBottom.desktop}
                 alt={slide.sideBottom.alt}
@@ -125,4 +125,3 @@ export default function HeroSlider() {
     </Swiper>
   );
 }
-

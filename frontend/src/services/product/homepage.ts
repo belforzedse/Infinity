@@ -14,6 +14,11 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.general_discounts&` +
+    `populate[4]=product_variations.product_stock&` +
+    // Hide zero-price and zero-stock variations
+    `filters[product_variations][Price][$gte]=1&` +
+    // Hide zero-stock items
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
     `pagination[limit]=20`;
 
   try {
@@ -42,6 +47,11 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.general_discounts&` +
+    `populate[4]=product_variations.product_stock&` +
+    // Hide zero-price and zero-stock variations
+    `filters[product_variations][Price][$gte]=1&` +
+    // Hide zero-stock items
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
     `sort[0]=createdAt:desc&pagination[limit]=20`;
 
   try {
@@ -63,6 +73,11 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.general_discounts&` +
+    `populate[4]=product_variations.product_stock&` +
+    // Hide zero-price and zero-stock variations
+    `filters[product_variations][Price][$gte]=1&` +
+    // Hide zero-stock items
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
     `sort[0]=AverageRating:desc&pagination[limit]=20`;
 
   try {

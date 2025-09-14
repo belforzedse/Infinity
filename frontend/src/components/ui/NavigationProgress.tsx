@@ -23,7 +23,7 @@ export default function NavigationProgress() {
     clearFailSafe();
     failSafeRef.current = window.setTimeout(
       () => setNavigationInProgress(false),
-      2000
+      2000,
     );
   }, [clearFailSafe]);
 
@@ -74,7 +74,6 @@ export default function NavigationProgress() {
             clearFailSafe();
           }
         });
-
       } catch {
         // ignore
       }
@@ -112,9 +111,7 @@ export default function NavigationProgress() {
     try {
       restore.pushState = history.pushState.bind(history);
       restore.replaceState = history.replaceState.bind(history);
-      history.pushState = function (
-        ...args: Parameters<History["pushState"]>
-      ) {
+      history.pushState = function (...args: Parameters<History["pushState"]>) {
         // Only show loader for push navigations
         setNavigationInProgress(true);
         startFailSafe();
@@ -158,7 +155,7 @@ export default function NavigationProgress() {
       if (restore.navigationListener && "navigation" in window)
         (window as any).navigation.removeEventListener(
           "navigate",
-          restore.navigationListener
+          restore.navigationListener,
         );
       if (restore.router && restore.routerPush)
         restore.router.push = restore.routerPush;

@@ -58,4 +58,3 @@ export const mobileSlides: MobileLayout[] = [
   baseMobile,
   baseMobile,
 ];
-

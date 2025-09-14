@@ -32,7 +32,8 @@ export default function ProductSalesReportPage() {
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
   const toISO = useCallback(
-    (d: Date, fallback: Date) => (isValid(d) ? d.toISOString() : fallback.toISOString()),
+    (d: Date, fallback: Date) =>
+      isValid(d) ? d.toISOString() : fallback.toISOString(),
     [],
   );
   const startISO = useMemo(

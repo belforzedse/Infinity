@@ -5,10 +5,9 @@ import Header from "@/components/User/Header";
 import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
 
-const CartDrawer = dynamic(
-  () => import("@/components/ShoppingCart/Drawer"),
-  { ssr: false }
-);
+const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
+  ssr: false,
+});
 
 export default function PublicLayout({
   children,

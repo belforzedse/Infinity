@@ -75,10 +75,13 @@ export default function Reveal({
       ref={ref}
       className={[
         className ?? "",
-        "transition-all ease-out will-change-transform motion-reduce:transition-none motion-reduce:transform-none motion-reduce:blur-0",
+        "transition-all ease-out will-change-transform motion-reduce:transform-none motion-reduce:blur-0 motion-reduce:transition-none",
         shown ? shownByVariant[variant] : hiddenByVariant[variant],
       ].join(" ")}
-      style={{ transitionDelay: `${delay}ms`, transitionDuration: `${duration}ms` }}
+      style={{
+        transitionDelay: `${delay}ms`,
+        transitionDuration: `${duration}ms`,
+      }}
     >
       {children}
     </div>

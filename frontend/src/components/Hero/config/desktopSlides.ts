@@ -44,4 +44,3 @@ export const desktopSlides: DesktopLayout[] = [
   baseLayout,
   baseLayout,
 ];
-

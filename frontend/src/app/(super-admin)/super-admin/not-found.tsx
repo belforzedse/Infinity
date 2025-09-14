@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import {
   Shield,
   Home,
@@ -35,7 +34,6 @@ export default function NotFound() {
         <div className="rounded-3xl border border-gray-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl md:p-12">
           {/* Admin badge */}
 
-
           <div className="text-sm mb-6 inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-2 font-medium text-pink-700">
             <Shield className="h-4 w-4" />
             ادمین
@@ -45,7 +43,6 @@ export default function NotFound() {
           <div className="relative mb-8">
             <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full border-4 border-pink-200 bg-gradient-to-br from-pink-100 to-rose-100 shadow-lg">
               <AlertTriangle className="h-12 w-12 text-pink-600" />
-
             </div>
             <div className="absolute -right-2 -top-2 flex h-8 w-8 animate-bounce items-center justify-center rounded-full border-2 border-white bg-amber-400 shadow-lg">
               <Settings className="h-4 w-4 text-amber-800" />
@@ -54,9 +51,7 @@ export default function NotFound() {
 
           {/* 404 Number */}
           <div className="mb-6">
-
             <h1 className="text-8xl bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 bg-clip-text font-black leading-none text-transparent md:text-9xl">
-
               404
             </h1>
           </div>
@@ -76,7 +71,6 @@ export default function NotFound() {
           {/* Action buttons */}
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/super-admin">
-
               <button className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl">
                 {/* Gradient overlay for smooth hover effect */}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-700 to-rose-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -98,7 +92,6 @@ export default function NotFound() {
           <div className="mt-8 border-t border-gray-200 pt-6">
             <div className="text-sm flex items-center justify-center gap-3 text-gray-500">
               <div className="flex items-center gap-2">
-
                 <div className="h-2 w-2 animate-pulse rounded-full bg-pink-500"></div>
                 سیستم عملیاتی
               </div>

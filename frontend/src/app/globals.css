@@ -9,7 +9,7 @@
 
 body {
   color: var(--foreground);
-  background: var(--background);  
+  background: var(--background);
 }
 
 html {
@@ -70,7 +70,10 @@ textarea:focus-visible {
 /* Optional image effect classes (non-global to avoid invisible images) */
 @layer components {
   .img-fx {
-    transition: opacity 400ms ease, filter 400ms ease, transform 400ms ease;
+    transition:
+      opacity 400ms ease,
+      filter 400ms ease,
+      transform 400ms ease;
     opacity: 0.01;
     filter: blur(8px);
     transform: scale(1.01);
@@ -84,20 +87,24 @@ textarea:focus-visible {
 
 /* Reusable subtle elevation */
 .shadow-elevated {
-  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08), 0 4px 12px rgba(17, 24, 39, 0.05);
+  box-shadow:
+    0 10px 30px rgba(17, 24, 39, 0.08),
+    0 4px 12px rgba(17, 24, 39, 0.05);
 }
 
 /* Glassmorphism panel (iOS-like) */
 .glass-panel {
   background: linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.75),
-      rgba(255, 255, 255, 0.35)
-    );
+    to bottom,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.35)
+  );
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   backdrop-filter: blur(18px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04) inset, 0 8px 24px rgba(17, 24, 39, 0.03);
+  box-shadow:
+    0 1px 0 rgba(17, 24, 39, 0.04) inset,
+    0 8px 24px rgba(17, 24, 39, 0.03);
 }
 
 /* Removed global body blur/transform to prevent stacking context issues */
@@ -118,7 +125,11 @@ textarea:focus-visible {
   right: 0;
   bottom: -1px;
   height: 18px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0)
+  );
   filter: blur(8px);
   opacity: 0.85;
   pointer-events: none;
@@ -132,7 +143,11 @@ textarea:focus-visible {
   bottom: -14px;
   width: 84%;
   height: 28px;
-  background: radial-gradient(60% 90% at 50% 0%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(
+    60% 90% at 50% 0%,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0) 70%
+  );
   filter: blur(10px);
   opacity: 0.6;
   pointer-events: none;
@@ -144,10 +159,15 @@ textarea:focus-visible {
   button,
   [role="button"] {
     cursor: pointer;
-    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease,
-      transform 120ms ease, box-shadow 200ms ease, opacity 150ms ease;
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      transform 120ms ease,
+      box-shadow 200ms ease,
+      opacity 150ms ease;
   }
-  
+
   @media (hover: hover) {
     a:hover,
     button:hover,
@@ -172,9 +192,12 @@ textarea:focus-visible {
   input,
   select,
   textarea {
-    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
   }
-  
+
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
@@ -193,19 +216,27 @@ textarea:focus-visible {
 
 @layer utilities {
   /* Tap highlight tint for mobile */
-  * { -webkit-tap-highlight-color: rgba(236,72,153,.15); }
+  * {
+    -webkit-tap-highlight-color: rgba(236, 72, 153, 0.15);
+  }
 }
 
 @layer components {
   /* Pressable utility for cards/buttons */
   .pressable {
-    transition: transform 160ms ease, box-shadow 200ms ease, filter 160ms ease;
+    transition:
+      transform 160ms ease,
+      box-shadow 200ms ease,
+      filter 160ms ease;
   }
   .pressable:active {
     transform: translateY(1px) scale(0.99);
   }
   .interactive-card {
-    transition: transform 200ms ease, box-shadow 240ms ease, filter 200ms ease;
+    transition:
+      transform 200ms ease,
+      box-shadow 240ms ease,
+      filter 200ms ease;
   }
   @media (hover: hover) {
     .interactive-card:hover {

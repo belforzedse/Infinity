@@ -59,7 +59,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
         ) : (
           <Image
             className={`h-full w-full object-cover transition-all duration-300 ease-out ${
-              isLoading ? "opacity-0 scale-[1.02] blur-[2px]" : "opacity-100"
+              isLoading ? "scale-[1.02] opacity-0 blur-[2px]" : "opacity-100"
             }`}
             src={broken ? "/images/placeholders/image-placeholder.svg" : src}
             alt={alt || ""}

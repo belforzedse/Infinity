@@ -131,13 +131,16 @@ function NotificationMobileRow({ row }: { row: Notification }) {
               {column?.cell ? (
                 (column?.cell as any)?.({
                   row: {
-                    getValue: (key: string) =>
-                      row[key as keyof Notification],
+                    getValue: (key: string) => row[key as keyof Notification],
                   },
                 })
               ) : (
                 <span className="text-xs text-foreground-primary md:text-base">
-                  {row[(column as any).accessorKey as keyof Notification] as string}
+                  {
+                    row[
+                      (column as any).accessorKey as keyof Notification
+                    ] as string
+                  }
                 </span>
               )}
             </div>

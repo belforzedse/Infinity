@@ -32,7 +32,6 @@ const SuperAdminTableSelect = ({
     title: "",
   });
 
-
   useEffect(() => {
     setTimeout(() => {
       setSelectedOption(

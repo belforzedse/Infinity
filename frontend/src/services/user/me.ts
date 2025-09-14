@@ -21,7 +21,11 @@ export interface MeResponse {
 
 type MaybeApiResponse<T> = T | { data: T };
 function hasData<T>(p: unknown): p is { data: T } {
-  return typeof p === "object" && p !== null && "data" in (p as Record<string, unknown>);
+  return (
+    typeof p === "object" &&
+    p !== null &&
+    "data" in (p as Record<string, unknown>)
+  );
 }
 
 export const me = async (
@@ -49,14 +53,19 @@ export const me = async (
       const hasAdminRole = Array.isArray(rolesUnknown)
         ? rolesUnknown.some((r: unknown) => {
             if (typeof r === "string") return r === "admin";
-            if (typeof r === "object" && r && "name" in (r as Record<string, unknown>)) {
+            if (
+              typeof r === "object" &&
+              r &&
+              "name" in (r as Record<string, unknown>)
+            ) {
               const name = (r as { name?: unknown }).name;
               return name === "admin";
             }
             return false;
           })
         : false;
-      const isAdmin = !!(userData as { isAdmin?: boolean }).isAdmin ||
+      const isAdmin =
+        !!(userData as { isAdmin?: boolean }).isAdmin ||
         !!(userData as unknown as { IsAdmin?: boolean }).IsAdmin ||
         hasAdminRole;
       handleAuthErrors(null, isAdmin);

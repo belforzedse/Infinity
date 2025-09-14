@@ -1,8 +1,8 @@
-import { render, fireEvent } from '@testing-library/react';
-import AuthForm from './index';
+import { render, fireEvent } from "@testing-library/react";
+import AuthForm from "./index";
 
 const mockCheck = jest.fn();
-jest.mock('@/hooks/useCheckPhoneNumber', () => ({
+jest.mock("@/hooks/useCheckPhoneNumber", () => ({
   useCheckPhoneNumber: () => ({
     isLoading: false,
     error: null,
@@ -10,14 +10,14 @@ jest.mock('@/hooks/useCheckPhoneNumber', () => ({
   }),
 }));
 
-describe('AuthForm component', () => {
-  it('submits phone number for checking', () => {
+describe("AuthForm component", () => {
+  it("submits phone number for checking", () => {
     const { getByPlaceholderText, container } = render(<AuthForm />);
-    const input = getByPlaceholderText('09122032114');
-    fireEvent.change(input, { target: { value: '09123456789' } });
-    const form = container.querySelector('form');
-    if (!form) throw new Error('form not found');
+    const input = getByPlaceholderText("09122032114");
+    fireEvent.change(input, { target: { value: "09123456789" } });
+    const form = container.querySelector("form");
+    if (!form) throw new Error("form not found");
     fireEvent.submit(form);
-    expect(mockCheck).toHaveBeenCalledWith('09123456789');
+    expect(mockCheck).toHaveBeenCalledWith("09123456789");
   });
 });

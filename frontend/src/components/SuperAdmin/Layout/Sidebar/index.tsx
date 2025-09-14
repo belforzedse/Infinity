@@ -4,6 +4,7 @@ import superAdminSidebar from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
 import React, { useState, Fragment, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
 import SettingsIcon from "../Icons/SettingsIcon";
@@ -183,44 +184,62 @@ export default function SuperAdminLayoutSidebar({
                             }));
                           }
                         }}
+                        aria-expanded={isOpenMenu}
+                        aria-controls={`submenu-${item.id}`}
                       >
                         <ChevronDownIcon />
                       </div>
                     )}
                   </div>
 
-                  {/* Submenu */}
-                  {hasChildren && isOpenMenu && (
-                    <div className="mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
-                      {item.children.map((child, index) => {
-                        const curr = pathname.replace(/\/$/, "");
-                        const href = (child.href ?? "").replace(/\/$/, "");
-                        const active =
-                          !!href &&
-                          (curr === href || curr.startsWith(href + "/"));
-                        return (
-                          <Fragment key={child.id}>
-                            <Link
-                              href={child.href}
-                              onClick={(e) => e.stopPropagation()}
-                              className={clsx(
-                                "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
-                                "transition-colors duration-150",
-                                active
-                                  ? "bg-neutral-100 font-medium text-neutral-900"
-                                  : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
+                  {/* Submenu with expand/collapse animation */}
+                  <AnimatePresence initial={false}>
+                    {hasChildren && isOpenMenu && (
+                      <motion.div
+                        key={`${item.id}-submenu`}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                        className="mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50"
+                        id={`submenu-${item.id}`}
+                      >
+                        {item.children.map((child, index) => {
+                          const curr = pathname.replace(/\/$/, "");
+                          const href = (child.href ?? "").replace(/\/$/, "");
+                          const active =
+                            !!href && (curr === href || curr.startsWith(href + "/"));
+                          return (
+                            <Fragment key={child.id}>
+                              <motion.div
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                transition={{ duration: 0.15, delay: index * 0.03 }}
+                              >
+                                <Link
+                                  href={child.href}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className={clsx(
+                                    "block px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                    "transition-colors duration-150",
+                                    active
+                                      ? "bg-neutral-100 font-medium text-neutral-900"
+                                      : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
+                                  )}
+                                >
+                                  {child.label}
+                                </Link>
+                              </motion.div>
+                              {index !== item.children.length - 1 && (
+                                <div className="mx-4 h-px bg-neutral-100" />
                               )}
-                            >
-                              {child.label}
-                            </Link>
-                            {index !== item.children.length - 1 && (
-                              <div className="mx-4 h-px bg-neutral-100" />
-                            )}
-                          </Fragment>
-                        );
-                      })}
-                    </div>
-                  )}
+                            </Fragment>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}

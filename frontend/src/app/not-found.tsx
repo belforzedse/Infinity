@@ -30,7 +30,6 @@ export default function NotFound() {
           {/* Icon and 404 section */}
           <div className="mb-8">
             <div className="relative mb-6 inline-block">
-
               <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg">
                 <MapPin className="h-12 w-12 text-white" />
               </div>
@@ -38,7 +37,6 @@ export default function NotFound() {
                 <span className="text-xs font-bold text-amber-800">!</span>
               </div>
             </div>
-
 
             <div className="text-7xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text font-black leading-none text-transparent md:text-8xl">
               404
@@ -60,7 +58,6 @@ export default function NotFound() {
           {/* Action buttons */}
           <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/">
-
               <button className="group relative flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl">
                 {/* Gradient overlay for smooth hover effect */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-600 to-rose-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -81,7 +78,6 @@ export default function NotFound() {
           <div className="rounded-2xl border border-pink-200 bg-pink-50 p-6">
             <div className="mb-3 flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100">
-
                 <span className="text-sm text-pink-600">💡</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-800">راهنمایی</h3>

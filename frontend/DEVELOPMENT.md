@@ -9,7 +9,7 @@ This guide covers local development, environment, and project conventions for th
 
 ## Setup
 
-1) Clone and install
+1. Clone and install
 
 ```
 git clone <repo-url>
@@ -17,14 +17,14 @@ cd infinity-frontend
 npm install   # or: yarn install
 ```
 
-2) Configure environment
+2. Configure environment
 
 ```
 cp .env.example .env
 # Fill values to match your backend
 ```
 
-3) Run in development
+3. Run in development
 
 ```
 npm run dev   # serves on http://localhost:2888
@@ -124,4 +124,3 @@ To keep values in a file, pass `--env-file` to `docker run` instead of embedding
 - Port mismatches: dev runs on 2888; production/server runs on 3000
 - Missing envs: check `.env` and that values are accessible with `NEXT_PUBLIC_*`
 - Image domains: images are unoptimized; configure proper host/loader for production
-

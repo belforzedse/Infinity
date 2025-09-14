@@ -6,7 +6,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply text-sm inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
     @apply bg-pink-500/90 text-white hover:bg-pink-500;
@@ -16,6 +16,6 @@
   }
 
   .input {
-    @apply flex w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-right placeholder:text-foreground-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-100;
+    @apply text-sm flex w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-right placeholder:text-foreground-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-100;
   }
 }

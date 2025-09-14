@@ -37,7 +37,7 @@ const UserAccountSection = ({ data }: UserAccountSectionProps) => {
 
   return (
     <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 md:h-full md:min-h-[324px] md:border-b-[0px] md:border-none md:px-[65px]">
-      <h3 className="text-base text-neutral-900">حساب کاربری</h3>
+      <h3 className="text-base text-neutral-900">{title}</h3>
 
       <div className="flex flex-row-reverse flex-wrap items-start gap-2 md:flex-col">
         {links.map((link, index) => (

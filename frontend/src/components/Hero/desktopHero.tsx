@@ -3,7 +3,7 @@ import BannerImage from "./Banners/BannerImage";
 import TextBanner from "./Banners/TextBanner";
 import { DesktopLayout } from "./types";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { luxuryPresets, luxurySlideFade } from "./animations";
+import { luxurySlideFade } from "./animations";
 
 type Props = {
   layout: DesktopLayout;

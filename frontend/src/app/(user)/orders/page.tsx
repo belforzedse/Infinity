@@ -20,10 +20,7 @@ export default function OrdersPage() {
   }, [router]);
 
   return (
-    <UserContainer
-      className="flex min-h-[60vh] gap-10 bg-white"
-      dir="rtl"
-    >
+    <UserContainer className="flex min-h-[60vh] gap-10 bg-white" dir="rtl">
       <UserSidebar />
 
       <main className="flex flex-1 flex-col gap-4 overflow-y-auto">

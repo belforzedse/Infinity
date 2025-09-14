@@ -329,7 +329,7 @@ export const columns: ColumnDef<User>[] = [
     header: "نقش",
   },
   {
-    accessorKey: "attributes", 
+    accessorKey: "attributes",
     header: "وضعیت",
     cell: ({ row }) => <StatusCell row={row} />,
   },
@@ -404,4 +404,3 @@ export const MobileTable = ({ data }: Props) => {
     </div>
   );
 };
-

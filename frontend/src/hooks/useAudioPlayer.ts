@@ -214,7 +214,13 @@ export const useAudioPlayer = ({
       audio.pause();
       audio.src = "";
     };
-  }, [audioSrc, handleTimeUpdate, handleLoadedMetadata, handleEnded, handleError]);
+  }, [
+    audioSrc,
+    handleTimeUpdate,
+    handleLoadedMetadata,
+    handleEnded,
+    handleError,
+  ]);
 
   const getProgress = () => {
     if (!audioDuration) return 0;

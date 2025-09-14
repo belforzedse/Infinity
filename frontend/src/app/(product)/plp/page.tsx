@@ -3,6 +3,7 @@ import PLPList from "@/components/PLP/List";
 import { API_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
+import type { Metadata } from "next";
 
 interface Product {
   id: number;
@@ -192,37 +193,37 @@ async function getProducts(
     const response = await fetchWithTimeout(url, { timeoutMs: 15000 });
     const data = await response.json();
 
-  // Filter out products with zero price and check availability if needed
-  let filteredProducts = data.data.filter((product: Product) => {
-    // Check if any variation has a valid price
-    const hasValidPrice = product.attributes.product_variations?.data?.some(
-      (variation) => {
-        const price = variation.attributes.Price;
-        return price && parseInt(price) > 0;
-      },
-    );
+    // Filter out products with zero price and check availability if needed
+    let filteredProducts = data.data.filter((product: Product) => {
+      // Check if any variation has a valid price
+      const hasValidPrice = product.attributes.product_variations?.data?.some(
+        (variation) => {
+          const price = variation.attributes.Price;
+          return price && parseInt(price) > 0;
+        },
+      );
 
-    // If showAvailableOnly is true, also check if any variation is published
-    if (showAvailableOnly) {
-      const hasAvailableVariation =
+      // If showAvailableOnly is true, also check if any variation is published
+      if (showAvailableOnly) {
+        const hasAvailableVariation =
+          product.attributes.product_variations?.data?.some(
+            (variation) => variation.attributes.IsPublished,
+          );
+        return hasValidPrice && hasAvailableVariation;
+      }
+
+      return hasValidPrice;
+    });
+
+    // Discount-only filter (post-fetch) if requested
+    if (hasDiscount) {
+      filteredProducts = filteredProducts.filter((product: Product) =>
         product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished,
-        );
-      return hasValidPrice && hasAvailableVariation;
+          (variation) =>
+            (variation.attributes as any)?.general_discounts?.data?.length > 0,
+        ),
+      );
     }
-
-    return hasValidPrice;
-  });
-
-  // Discount-only filter (post-fetch) if requested
-  if (hasDiscount) {
-    filteredProducts = filteredProducts.filter((product: Product) =>
-      product.attributes.product_variations?.data?.some(
-        (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0,
-      ),
-    );
-  }
 
     return {
       products: filteredProducts,
@@ -309,4 +310,62 @@ export default async function PLPPage({
       </div>
     </>
   );
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const category =
+    typeof params.category === "string" ? params.category : undefined;
+  const search = typeof params.search === "string" ? params.search : undefined;
+
+  const isSearch = !!search;
+  const baseTitle = "فروشگاه | اینفینیتی استور";
+
+  if (isSearch) {
+    const q = search?.slice(0, 60) || "";
+    const title = `نتایج جستجو برای "${q}" | اینفینیتی استور`;
+    const description = `مشاهده نتایج جستجو برای «${q}» در فروشگاه اینفینیتی استور. جدیدترین و محبوب‌ترین محصولات.`;
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        url: `/plp?search=${encodeURIComponent(q)}`,
+      },
+      alternates: {
+        canonical: `/plp${q ? `?search=${encodeURIComponent(q)}` : ""}`,
+      },
+    };
+  }
+
+  if (category) {
+    const title = `خرید ${category} | اینفینیتی استور`;
+    const description = `خرید ${category} با بهترین قیمت و ارسال سریع از اینفینیتی استور. جدیدترین محصولات ${category}.`;
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        url: `/plp?category=${encodeURIComponent(category)}`,
+      },
+      alternates: {
+        canonical: `/plp?category=${encodeURIComponent(category)}`,
+      },
+    };
+  }
+
+  return {
+    title: baseTitle,
+    description:
+      "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
+    alternates: { canonical: "/plp" },
+  };
 }

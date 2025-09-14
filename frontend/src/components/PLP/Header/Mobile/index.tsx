@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import MobileMenu from "./MobileMenu";
 import MobileSearch from "./MobileSearch";
@@ -17,16 +16,9 @@ type Props = object;
 export default function PLPMobileHeader({}: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
   const { totalItems, openDrawer } = useCart();
-  const router = useRouter();
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchInput.trim()) return;
-
-    router.push(`/plp?search=${encodeURIComponent(searchInput.trim())}`);
-  };
+  // Search is handled within the MobileSearch modal
 
   return (
     <header className="lg:hidden">
@@ -69,10 +61,7 @@ export default function PLPMobileHeader({}: Props) {
         </div>
       </div>
 
-      {/* Search Bar hidden on mobile per request */}
-      <div className="hidden p-4">
-        <form onSubmit={handleSearchSubmit} />
-      </div>
+      {/* Search Bar managed via MobileSearch modal */}
 
       {/* Mobile Menu Modal */}
       <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />

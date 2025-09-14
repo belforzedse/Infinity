@@ -116,7 +116,6 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     [setSize],
   );
 
-
   return (
     <div className="flex flex-col gap-3">
       <PLPListFilterCategory

@@ -13,21 +13,39 @@ type Props = {
   control: Control<FormData>;
   setValue: UseFormSetValue<FormData>;
   selectedShipping: ShippingMethod | null;
+  discountPreview?: {
+    discount: number;
+    summary: {
+      subtotal: number;
+      eligibleSubtotal: number;
+      tax: number;
+      shipping: number;
+      total: number;
+      taxPercent: number;
+    };
+  };
 };
 
 function ShoppingCartBillDeliveryForm({
   control,
   setValue,
   selectedShipping,
+  discountPreview,
 }: Props) {
   const { totalPrice } = useCart();
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate total price including shipping
+  // Calculate totals (prefer backend preview when available)
   const shippingCost = selectedShipping?.attributes.Price || 0;
-  const finalTotal = totalPrice + shippingCost;
+  const subtotal = discountPreview?.summary?.subtotal ?? totalPrice;
+  const discountAmount = discountPreview?.discount ?? 0;
+  const taxAmount = discountPreview?.summary?.tax ?? 0;
+  const effectiveShipping = discountPreview?.summary?.shipping ?? shippingCost;
+  const finalTotal =
+    discountPreview?.summary?.total ??
+    subtotal - discountAmount + taxAmount + effectiveShipping;
 
   useEffect(() => {
     const fetchShippingMethods = async () => {
@@ -63,12 +81,11 @@ function ShoppingCartBillDeliveryForm({
 
       <div className="flex flex-col items-end justify-between border-b border-slate-200 pb-4 lg:flex-row lg:items-center">
         <span className="text-xl w-full text-neutral-800">مجموع سبد خرید</span>
-
         <div className="flex items-center gap-2">
           <span className="text-base text-nowrap text-black lg:text-sm">
             {totalPrice.toLocaleString()} تومان
           </span>
-          <button className="flex items-center">
+          <button className="flex items-center" type="button">
             <span className="text-sm text-nowrap text-pink-600 lg:text-xs">
               مشاهده سبد خرید
             </span>
@@ -105,18 +122,54 @@ function ShoppingCartBillDeliveryForm({
         <ShoppingCartBillDeliveryTime />
       </DisclosureItem> */}
 
-      <div className="flex items-center justify-between">
-        <span className="text-lg text-neutral-800 lg:text-xl">قابل پرداخت</span>
-        <span className="text-2xl text-pink-600">
-          {finalTotal.toLocaleString()} تومان
-        </span>
-      </div>
-
-      {shippingCost > 0 && (
-        <div className="text-xs text-left text-gray-500">
-          * شامل {shippingCost.toLocaleString()} تومان هزینه ارسال
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-neutral-600 lg:text-base">جمع جزء</span>
+          <span className="text-sm text-neutral-800 lg:text-base">
+            {subtotal.toLocaleString()} تومان
+          </span>
         </div>
-      )}
+
+        {discountAmount > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-neutral-600 lg:text-base">تخفیف</span>
+            <span className="text-sm text-green-600 lg:text-base">
+              -{discountAmount.toLocaleString()} تومان
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-neutral-600 lg:text-base">مالیات</span>
+          <span className="text-sm text-neutral-800 lg:text-base">
+            {taxAmount.toLocaleString()} تومان
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-neutral-600 lg:text-base">
+            هزینه ارسال
+          </span>
+          <span className="text-sm text-neutral-800 lg:text-base">
+            {effectiveShipping.toLocaleString()} تومان
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-lg text-neutral-800 lg:text-xl">
+            قابل پرداخت
+          </span>
+          <span className="text-2xl text-pink-600">
+            {finalTotal.toLocaleString()} تومان
+          </span>
+        </div>
+
+        {effectiveShipping > 0 && (
+          <div className="text-xs text-left text-gray-500">
+            * شامل {effectiveShipping.toLocaleString()} تومان هزینه ارسال
+          </div>
+        )}
+      </div>
     </div>
   );
 }

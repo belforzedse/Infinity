@@ -39,7 +39,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
   return (
     <>
       {/* Hero section with responsive images */}
-      <div className="lg:hidden overflow-hidden">
+      <div className="overflow-hidden lg:hidden">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`hero-${playKey}`}
@@ -58,7 +58,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
         </AnimatePresence>
 
         {/* Secondary banners section */}
-        <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4 overflow-hidden">
+        <div className="mt-4 flex flex-col gap-2 overflow-hidden md:flex-row md:gap-4">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`primary-${playKey}`}
@@ -72,7 +72,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4 overflow-hidden">
+          <div className="flex gap-2 overflow-hidden md:w-1/2 md:flex-col md:gap-4">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`small-left-${playKey}`}

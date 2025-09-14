@@ -158,6 +158,8 @@ export interface FinalizeCartRequest {
   addressId?: number;
   gateway?: "mellat" | "snappay";
   mobile?: string;
+  // Optional discount code to apply at checkout
+  discountCode?: string;
 }
 
 export interface FinalizeCartResponse {
@@ -176,6 +178,33 @@ export interface FinalizeCartResponse {
   };
   requestId?: string;
 }
+
+/**
+ * Apply a discount code and get a pricing preview
+ */
+export const applyDiscount = async (params: {
+  code: string;
+  shippingId?: number;
+  shippingCost?: number;
+}): Promise<{
+  success: boolean;
+  code: string;
+  type: "Discount" | "Cash";
+  amount: number;
+  discount: number;
+  summary: {
+    subtotal: number;
+    eligibleSubtotal: number;
+    tax: number;
+    shipping: number;
+    total: number;
+    taxPercent: number;
+  };
+}> => {
+  const response = await apiClient.post<any>("/carts/apply-discount", params);
+  // ApiClient may return already-unwrapped data; normalize common shapes
+  return (response as any)?.data ?? (response as any);
+};
 
 /**
  * Query SnappPay eligibility based on current cart and (optional) shipping
@@ -368,6 +397,7 @@ const CartService = {
   finalizeCart,
   createOrder,
   getSnappEligible,
+  applyDiscount,
 };
 
 export default CartService;

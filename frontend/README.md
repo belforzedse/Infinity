@@ -29,21 +29,21 @@ Design: Figma — https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infinity-S
 
 ## Quick Start
 
-1) Clone and enter the project
+1. Clone and enter the project
 
 ```
 git clone <repo-url>
 cd infinity-frontend
 ```
 
-2) Configure environment
+2. Configure environment
 
 ```
 cp .env.example .env
 # Edit values to match your backend/hosts
 ```
 
-3) Install dependencies
+3. Install dependencies
 
 ```
 # with npm
@@ -53,7 +53,7 @@ npm install
 yarn install
 ```
 
-4) Run the dev server (port 2888)
+4. Run the dev server (port 2888)
 
 ```
 npm run dev
@@ -73,7 +73,7 @@ Configure via `.env` (see `.env.example`). Notable variables:
 - `NEXT_PUBLIC_ALLOWED_REDIRECT_ORIGINS`: Comma‑separated allow‑list of origins permitted for redirects from payment callbacks; if empty, all http(s) allowed in dev
 - `NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS`: Comma‑separated allow‑list for payment gateway redirect origins; if empty, all http(s) allowed in dev
 
- `NEXT_PUBLIC_STRAPI_TOKEN` has no default and must be supplied via environment variables.
+`NEXT_PUBLIC_STRAPI_TOKEN` has no default and must be supplied via environment variables.
 
 ## Scripts
 
@@ -159,4 +159,3 @@ throughout the project.
 ## License
 
 No license file is included in this repository. All rights reserved unless otherwise specified.
-

@@ -62,9 +62,14 @@ export default async function Home() {
               }`}
             >
               {/* desktop categories section */}
-              <Reveal delay={index * 80} className="w-full" variant="fade-up" duration={600}>
+              <Reveal
+                delay={index * 80}
+                className="w-full"
+                variant="fade-up"
+                duration={600}
+              >
                 <span className="block w-full">
-                  <div className="relative hidden h-[340px] w-full overflow-hidden lg:block transition-transform duration-300 will-change-transform hover:-translate-y-0.5">
+                  <div className="relative hidden h-[340px] w-full overflow-hidden transition-transform duration-300 will-change-transform hover:-translate-y-0.5 lg:block">
                     <div
                       className="flex h-full w-full items-center justify-center"
                       style={{ backgroundColor: category.backgroundColor }}
@@ -86,7 +91,12 @@ export default async function Home() {
                 </span>
               </Reveal>
               {/* mobile categories section */}
-              <Reveal delay={index * 80} className="lg:hidden" variant="fade-up" duration={600}>
+              <Reveal
+                delay={index * 80}
+                className="lg:hidden"
+                variant="fade-up"
+                duration={600}
+              >
                 <div
                   className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
                   style={{ backgroundColor: category.backgroundColor }}
