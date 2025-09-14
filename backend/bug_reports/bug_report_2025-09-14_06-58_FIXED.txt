@@ -1,0 +1,48 @@
+
+Summary of Findings
+- Critical: SnappPay mobile formatting mismatch between gateway helper and service; API likely expects +98XXXXXXXXXX but helper strips '+'.
+- Medium: SnappPay eligibility failure path (eligible.successful === false) not handled; code proceeds to token request anyway.
+- Low: Logging checks for mobileHasPlus after stripping '+' (misleading); minor clarity issue.
+- Low: Missing try/catch around requestPaymentToken in helper; upstream service has try/catch but helper would benefit from defensive error handling.
+
+Detailed Issues
+1) File → src/api/cart/controllers/handlers/gateway-helpers.ts → Lines 61-73, 116-124, 163-179
+   Problem:
+   - Mobile number normalized to +98 format (normalizeIranMobile) but then stripped of leading '+' before building SnappPay payload (mobileForSnapp = customerMobile.replace(/^\+/, "")). The SnappPay service was updated to keep '+' and comments indicate API error 1005 expects pattern "+98\d{10}". Passing a number without '+' likely causes token failures.
+   Suggested Fix:
+   - Do not strip '+'. Pass the E.164-like representation consistently end-to-end.
+   - Change line 72 to: `const mobileForSnapp = customerMobile;` and ensure service forwards as-is.
+   - Alternatively, in the service, prepend '+' if missing: `if (!/^\+98\d{10}$/.test(payload.mobile)) payload.mobile = '+' + payload.mobile.replace(/^\+/, '')`.
+   Confidence: High
+
+2) File → src/api/payment-gateway/services/snappay.ts → Around Lines 150-180
+   Problem:
+   - Service logs and comments imply the API expects mobile pattern "+98\d{10}" and now preserves '+'. However, if upstream helper passes a number without '+', the service forwards it unchanged, causing a format mismatch.
+   Suggested Fix:
+   - Add a normalization guard before POST:
+     `if (!/^\+98\d{10}$/.test(normalizedPayload.mobile)) normalizedPayload.mobile = '+' + String(normalizedPayload.mobile).replace(/^\+/, '')`
+   - Keep a single source of truth for mobile normalization (helper or service), not both.
+   Confidence: High
+
+3) File → src/api/cart/controllers/handlers/gateway-helpers.ts → Lines 137-161
+   Problem:
+   - Eligibility API failure (eligible.successful === false) does not short-circuit. The code only treats explicit `eligible.response.eligible === false` as an error and otherwise proceeds to token request. Transient eligibility API failures may cascade to a token call and end up cancelling order/contract.
+   Suggested Fix:
+   - If `eligible?.successful === false`, return a 503/BadRequest with a clear message and do not attempt token request. Example:
+     `if (!eligible?.successful) return { response: ctx.badRequest('SnappPay eligibility check failed', { data: { success:false, error: eligible?.errorData }}) }`
+   Confidence: Medium
+
+4) File → src/api/cart/controllers/handlers/gateway-helpers.ts → Lines 163-171
+   Problem:
+   - `mobileHasPlus` log will always be false because the helper strips '+'. The `mobilePatternOk` check adds '+' back for the regex test. This log can mislead diagnosis.
+   Suggested Fix:
+   - Remove stripping or update the log to reflect the sent format. After adopting fix #1, `mobileHasPlus` should be true.
+   Confidence: High
+
+5) File → src/api/cart/controllers/handlers/gateway-helpers.ts → Lines 174-179
+   Problem:
+   - No try/catch wrapping `requestPaymentToken`. If the service throws (e.g., network error), subsequent code might not mark order/contract appropriately.
+   Suggested Fix:
+   - Wrap token call in try/catch and handle exceptions similar to unsuccessful token response: cancel order/contract and return 400 with error details.
+   Confidence: Medium
+
