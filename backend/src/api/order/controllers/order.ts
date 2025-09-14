@@ -28,6 +28,22 @@ export default factories.createCoreController(
         q.transaction_id) as any;
 
       try {
+        // Log raw request payload and query for diagnostics
+        try {
+          strapi.log.info("Payment callback raw input", {
+            method: (ctx.request as any).method,
+            ip: (ctx.request as any).ip,
+            query: (ctx.request as any).query,
+            body: (ctx.request as any).body,
+            headers: {
+              "content-type": ctx.request.header["content-type"],
+              "user-agent": ctx.request.header["user-agent"],
+              "x-forwarded-for": ctx.request.header["x-forwarded-for"],
+            },
+            timestamp: new Date().toISOString(),
+          });
+        } catch {}
+
         // Log all callback parameters for debugging
         strapi.log.info("Payment callback received:", {
           ResCode,
