@@ -89,7 +89,8 @@ export default factories.createCoreController(
               if (exactByTx?.length) {
                 chosenTx = exactByTx[0];
                 const co = chosenTx?.contract?.order;
-                orderId = typeof co === "object" && co ? Number(co.id) : Number(co);
+                orderId =
+                  typeof co === "object" && co ? Number(co.id) : Number(co);
               }
             }
 
@@ -109,11 +110,15 @@ export default factories.createCoreController(
               if (byToken?.length) {
                 chosenTx = byToken[0];
                 const co = chosenTx?.contract?.order;
-                orderId = typeof co === "object" && co ? Number(co.id) : Number(co);
+                orderId =
+                  typeof co === "object" && co ? Number(co.id) : Number(co);
               }
             }
           } catch (e) {
-            strapi.log.error("Failed to resolve order from SnappPay transaction", e);
+            strapi.log.error(
+              "Failed to resolve order from SnappPay transaction",
+              e
+            );
           }
 
           if (!orderId || isNaN(orderId)) {
@@ -121,7 +126,10 @@ export default factories.createCoreController(
               data: {
                 success: false,
                 error: "Invalid order ID (SnappPay)",
-                debug: { transactionId: transactionIdInput, paymentToken: paymentTokenInput },
+                debug: {
+                  transactionId: transactionIdInput,
+                  paymentToken: paymentTokenInput,
+                },
               },
             });
           }
@@ -265,7 +273,7 @@ export default factories.createCoreController(
                   order: orderId,
                   Action: "Update",
                   Description: "SnappPay callback success (verify+settle)",
-                  Changes: { transactionId },
+                  Changes: { transactionId: transactionIdInput },
                 },
               });
             } catch {}
