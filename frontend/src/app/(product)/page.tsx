@@ -19,7 +19,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="mx-auto mt-5 max-w-screen-xl px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
+    <div className="mx-auto mt-5 max-w-screen-2xl px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
       {/* Hero section with responsive images */}
       <MobileSlider />
 

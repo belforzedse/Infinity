@@ -1,7 +1,5 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 // Import Swiper styles
@@ -9,8 +7,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import MobileHero from "./mobileHero";
+import { mobileSlides } from "./config/mobileSlides";
 
 export default function MobileSlider() {
+  const slides = mobileSlides;
   return (
     <div className="mobile-slider-container">
       <Swiper
@@ -47,21 +47,11 @@ export default function MobileSlider() {
         }}
         className="mobile-hero-swiper"
       >
-        <SwiperSlide>
-          <MobileHero />
-        </SwiperSlide>
-        <SwiperSlide>
-          <MobileHero />
-        </SwiperSlide>
-        <SwiperSlide>
-          <MobileHero />
-        </SwiperSlide>
-        <SwiperSlide>
-          <MobileHero />
-        </SwiperSlide>
-        <SwiperSlide>
-          <MobileHero />
-        </SwiperSlide>
+        {slides.map((layout, idx) => (
+          <SwiperSlide key={idx}>
+            <MobileHero layout={layout} />
+          </SwiperSlide>
+        ))}
       </Swiper>
 
       <style jsx>{`

@@ -1,8 +1,15 @@
 import React from "react";
 import BannerImage from "./Banners/BannerImage";
 import TextBanner from "./Banners/TextBanner";
+import { DesktopLayout } from "./types";
+import { AnimatePresence, motion } from "framer-motion";
 
-export default function DesktopHero() {
+type Props = {
+  layout: DesktopLayout;
+  slideKey: string | number;
+};
+
+export default function DesktopHero({ layout, slideKey }: Props) {
   return (
     <>
       {/*Desktop hero section*/}
@@ -13,46 +20,74 @@ export default function DesktopHero() {
               <div className="mt-11 grid grid-cols-2 grid-rows-2 gap-4">
                 <div className="col-span-2 row-span-1">
                   {/*Wide pinterest banner*/}
-                  <TextBanner
-                    title="لباس‌هایی از قلــــــب پینترست..."
-                    subtitle="برای خاص پسندها"
-                    className="h-[200px] w-full gap-[8px] rounded-3xl bg-stone-50 px-[36px] pb-[36px] pt-[30px]"
-                    titleClassName="text-[54px] font-bold leading-[150%] text-red-900"
-                    subtitleClassName="leading[110%] text-[34px] font-medium text-gray-600"
-                  />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`text-${slideKey}`}
+                      initial={{ opacity: 0, x: -40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
+                    >
+                      <TextBanner
+                        title={layout.textBanner.title}
+                        subtitle={layout.textBanner.subtitle}
+                        className={layout.textBanner.className}
+                        titleClassName={layout.textBanner.titleClassName}
+                        subtitleClassName={layout.textBanner.subtitleClassName}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
                 {/* the 2 banners below the wide banner */}
                 <div className="col-span-1 col-start-1 row-span-1 row-start-2">
-                  <BannerImage
-                    src="/images/index-img3-desktop.png"
-                    alt="Banner"
-                    width={600}
-                    height={600}
-                    className="h-full w-full translate-y-[-2px] rounded-lg object-cover"
-                    loading="lazy"
-                  />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`belowLeft-${slideKey}`}
+                      initial={{ opacity: 0, x: -40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      transition={{
+                        duration: 0.45,
+                        ease: "easeOut",
+                        delay: 0.05,
+                      }}
+                    >
+                      <BannerImage {...layout.belowLeft} />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
                 <div className="col-span-1 col-start-2 row-span-1 row-start-2">
-                  <BannerImage
-                    src="/images/index-img4-desktop.png"
-                    alt="Banner"
-                    width={600}
-                    height={600}
-                    loading="lazy"
-                    className="translate-y-[7px]"
-                  />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`belowRight-${slideKey}`}
+                      initial={{ opacity: 0, x: 40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 40 }}
+                      transition={{
+                        duration: 0.45,
+                        ease: "easeOut",
+                        delay: 0.1,
+                      }}
+                    >
+                      <BannerImage {...layout.belowRight} />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
             {/* Side banner */}
             <div className="h-full w-4/12 flex-1">
-              <BannerImage
-                src="/images/index-img2-desktop.png"
-                alt="Hero Banner Mobile"
-                width={700}
-                height={700}
-                className="object-fit h-full rounded-lg"
-              />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`side-${slideKey}`}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 40 }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                >
+                  <BannerImage {...layout.side} />
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </div>
