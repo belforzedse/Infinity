@@ -11,7 +11,7 @@ export default function DesktopSlider() {
   useEffect(() => {
     const id = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
-    }, 3000);
+    }, 7000);
     return () => clearInterval(id);
   }, [slides.length]);
 

@@ -21,19 +21,19 @@ export default function DesktopHero({ layout, slideKey }: Props) {
         ease: [0.35, 0.46, 0.45, 0.94] as any,
       }
     : {
-        distance: 220,
-        duration: 1.1,
+        distance: 120,
+        duration: 1.5,
         scale: 0.98,
-        ease: [0.21, 1, 0.22, 1] as any,
+        ease: [0.11, 1, 0.001, 1] as any,
       };
 
   // Per-element sequencing: control each small tile independently
-  const smallLeftDelayIn = 0.24;
+  const smallLeftDelayIn = 0.22;
   const smallLeftDelayOut = 0.0;
   const smallRightDelayIn = 0.0;
   const smallRightDelayOut = 0.14;
   const bigDelay = 0.24;
-  const wideDelay = 0.3;
+  const wideDelay = 0.28;
 
   const belowLeftVariants = luxurySlideFade("right", {
     ...outsideOpts,
