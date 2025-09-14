@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import DesktopHero from "./desktopHero";
 import { desktopSlides } from "./config/desktopSlides";
+import HeroPagination from "./Pagination";
 
 export default function DesktopSlider() {
   const slides = useMemo(() => desktopSlides, []);
@@ -21,30 +22,45 @@ export default function DesktopSlider() {
     <div className="desktop-slider-container relative">
       <DesktopHero layout={slides[index]} slideKey={index} />
 
-      {/* RTL-friendly controls: Next on left (←), Prev on right (→) */}
-      <button
-        aria-label="Next"
-        onClick={next}
-        className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-pink-500 shadow hover:bg-pink-100 lg:flex"
-      >
-        ‹
-      </button>
-      <button
-        aria-label="Previous"
-        onClick={prev}
-        className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-pink-500 shadow hover:bg-pink-100 lg:flex"
-      >
-        ›
-      </button>
+      {/* Bottom controls: arrows + dots in one pill */}
+      <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-2xl bg-white/80 px-2 py-1 shadow ring-1 ring-black/5 backdrop-blur-md lg:hidden">
+        {/* RTL-friendly: Next on the left */}
+        <button
+          aria-label="Next"
+          onClick={next}
+          className="mx-1 rounded-full p-1 text-pink-600 transition hover:bg-pink-50"
+        >
+          ‹
+        </button>
 
-      {/* Dots */}
-      <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-2xl bg-white/80 px-3 py-1 lg:flex">
-        {slides.map((_, i) => (
-          <span
-            key={i}
-            className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-pink-500" : "w-2 bg-gray-300"}`}
-          />
-        ))}
+        <div className="flex items-center gap-1">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => setIndex(i)}
+              className={`h-1.5 rounded-full transition-all ${i === index ? "w-9 bg-pink-600" : "w-3 bg-pink-200"}`}
+            />
+          ))}
+        </div>
+
+        {/* Prev on the right */}
+        <button
+          aria-label="Previous"
+          onClick={prev}
+          className="mx-1 rounded-full p-1 text-pink-600 transition hover:bg-pink-50"
+        >
+          ›
+        </button>
+      </div>
+      <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 lg:flex">
+        <HeroPagination
+          total={slides.length}
+          index={index}
+          onDotClick={(i) => setIndex(i)}
+          onNext={next}
+          onPrev={prev}
+        />
       </div>
     </div>
   );
