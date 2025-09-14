@@ -51,6 +51,7 @@ export default function PDPHeroInfoModel(props: Props) {
           const isDisabled = disabledModelIds.includes(model.id);
           return (
             <button
+              type="button"
               key={model.id}
               onClick={() => (isDisabled ? undefined : handleModelClick(model.id))}
               className={`py-1 px-4 rounded-3xl text-sm transition-colors ${

@@ -117,6 +117,7 @@ export default function PDPHeroInfoSize(props: Props) {
             const isDisabled = disabledSizeIds.includes(size.id);
             return (
               <button
+                type="button"
                 key={size.id}
                 className={`w-20 h-9 py-2 px-3 rounded-lg flex items-center justify-center ${
                   isSelected
