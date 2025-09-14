@@ -12,6 +12,7 @@ import {
 } from "@/services/product/homepage";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
+import Reveal from "@/components/Reveal";
 
 export default async function Home() {
   const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
@@ -21,21 +22,25 @@ export default async function Home() {
   return (
     <div className="mx-auto mt-5 px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
       {/* Hero section with responsive images */}
-      <MobileSlider />
+      <Reveal>
+        <MobileSlider />
+      </Reveal>
 
       {/* Desktop hero banner */}
-      <DesktopSlider />
+      <Reveal delay={100}>
+        <DesktopSlider />
+      </Reveal>
 
       {/* Discounted products section */}
       <div className="mt-8 md:mt-12">
         {discountedProducts.length > 0 && (
-          <>
+          <Reveal>
             <OffersListHomePage
               icon={<OffIcon />}
               title="تخفیف‌های وسوسه انگیز"
               products={discountedProducts}
             />
-          </>
+          </Reveal>
         )}
       </div>
 
@@ -57,46 +62,49 @@ export default async function Home() {
               }`}
             >
               {/* desktop categories section */}
-
-              <span className="block w-full">
-                <div className="relative hidden h-[340px] w-full overflow-hidden lg:block">
-                  <div
-                    className="flex h-full w-full items-center justify-center"
-                    style={{ backgroundColor: category.backgroundColor }}
-                  >
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      width={category.width}
-                      height={category.height}
-                      className="max-h-[240px] w-auto object-contain drop-shadow-md"
-                      loading="lazy"
-                      sizes="227px 317px"
-                    />
+              <Reveal delay={index * 80} className="w-full">
+                <span className="block w-full">
+                  <div className="relative hidden h-[340px] w-full overflow-hidden lg:block">
+                    <div
+                      className="flex h-full w-full items-center justify-center"
+                      style={{ backgroundColor: category.backgroundColor }}
+                    >
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        width={category.width}
+                        height={category.height}
+                        className="max-h-[240px] w-auto object-contain drop-shadow-md"
+                        loading="lazy"
+                        sizes="227px 317px"
+                      />
+                    </div>
+                    <span className="absolute bottom-2 left-1/2 mt-1 -translate-x-1/2 rounded-lg bg-white px-2.5 py-1.5 text-[18px] font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
+                      {category.name}
+                    </span>
                   </div>
-                  <span className="absolute bottom-2 left-1/2 mt-1 -translate-x-1/2 rounded-lg bg-white px-2.5 py-1.5 text-[18px] font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
-                    {category.name}
-                  </span>
-                </div>
-              </span>
+                </span>
+              </Reveal>
               {/* mobile categories section */}
-              <div
-                className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28 lg:hidden"
-                style={{ backgroundColor: category.backgroundColor }}
-              >
-                <Image
-                  src={category.image}
-                  alt={category.name}
-                  width={80}
-                  height={80}
-                  className="h-16 w-auto md:h-20"
-                  loading="lazy"
-                  sizes="80px"
-                />
-              </div>
-              <span className="text-sm mt-2 md:text-base lg:hidden">
-                {category.name}
-              </span>
+              <Reveal delay={index * 80} className="lg:hidden">
+                <div
+                  className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
+                  style={{ backgroundColor: category.backgroundColor }}
+                >
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    width={80}
+                    height={80}
+                    className="h-16 w-auto md:h-20"
+                    loading="lazy"
+                    sizes="80px"
+                  />
+                </div>
+                <span className="text-sm mt-2 md:text-base">
+                  {category.name}
+                </span>
+              </Reveal>
             </Link>
           ))}
         </div>
@@ -104,23 +112,25 @@ export default async function Home() {
 
       {/* New products section */}
       <div className="mt-8 md:mt-12">
-        <OffersListHomePage
-          icon={<NewIcon />}
-          title="جدیدترین ها"
-          products={newProducts}
-        />
+        <Reveal>
+          <OffersListHomePage
+            icon={<NewIcon />}
+            title="جدیدترین ها"
+            products={newProducts}
+          />
+        </Reveal>
       </div>
 
       {/* Favorite products section */}
       <div className="mb-8 mt-8 md:mb-12 md:mt-12">
         {favoriteProducts.length > 0 && (
-          <>
+          <Reveal>
             <OffersListHomePage
               icon={<NewIcon />}
               title="محبوب ترین ها"
               products={favoriteProducts}
             />
-          </>
+          </Reveal>
         )}
       </div>
     </div>
