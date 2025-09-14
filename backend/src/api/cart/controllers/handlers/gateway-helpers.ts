@@ -68,6 +68,9 @@ export const requestSnappPayment = async (
     };
   }
 
+  // SnappPay expects mobile as 98XXXXXXXXXX (no leading plus)
+  const mobileForSnapp = customerMobile.replace(/^\+/, "");
+
   const mapCommissionType = (_catTitle?: string) => 1 as const;
   const items = (orderItems || []).map((it: any) => {
     const pname =
@@ -98,9 +101,9 @@ export const requestSnappPayment = async (
   const orderAmountIrr = totalCartIrr - discountIrr - externalSourceIrr;
 
   const baseId = `O${order.id}`;
-  const suffix = (Date.now() % 1000).toString();
-  let transactionId = `${baseId}${suffix}`;
-  if (transactionId.length > 10) transactionId = transactionId.slice(0, 10);
+  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  // SnappPay requires unique transactionId (5-10 chars, include letters)
+  let transactionId = `${baseId}${rand}`.slice(0, 10);
 
   const frontendBase = process.env.FRONTEND_BASE_URL;
   const preferredReturnUrl =
@@ -114,7 +117,7 @@ export const requestSnappPayment = async (
     amount: orderAmountIrr,
     discountAmount: discountIrr,
     externalSourceAmount: externalSourceIrr,
-    mobile: customerMobile,
+    mobile: mobileForSnapp,
     paymentMethodTypeDto: "INSTALLMENT" as const,
     returnURL: preferredReturnUrl,
     transactionId,
