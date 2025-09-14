@@ -29,7 +29,7 @@ export default function HeroPagination({
   return (
     <div
       className={clsx(
-        "py-1backdrop-blur-md flex items-center gap-2 rounded-2xl bg-white/80 px-2",
+        "py-1backdrop-blur-md flex items-center gap-2 rounded-2xl px-2",
         className,
       )}
     >
@@ -39,7 +39,7 @@ export default function HeroPagination({
           aria-label="Next"
           onClick={onNext}
           className={clsx(
-            "mx-1 rounded-full p-1 text-pink-600 transition hover:bg-pink-50",
+            "mx-1 mt-1 rounded-full p-1 text-[30px] text-pink-600 transition hover:bg-pink-50",
             arrowClassName,
           )}
         >
@@ -56,7 +56,7 @@ export default function HeroPagination({
             onClick={() => onDotClick?.(i)}
             className={clsx(
               "h-1.5 rounded-full transition-all",
-              i === index ? "w-6 bg-pink-600" : "w-2 bg-gray-300",
+              i === index ? "w-12 bg-pink-600" : "w-4 bg-pink-100",
               i === index ? dotActiveClassName : dotClassName,
             )}
           />
@@ -69,7 +69,7 @@ export default function HeroPagination({
           aria-label="Previous"
           onClick={onPrev}
           className={clsx(
-            "mx-1 rounded-full p-1 text-pink-600 transition hover:bg-pink-50",
+            "mx-1 mt-1 rounded-full p-1 text-[30px] text-pink-600 transition hover:bg-pink-50",
             arrowClassName,
           )}
         >
