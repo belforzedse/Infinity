@@ -23,7 +23,7 @@ export const categories: Category[] = [
     name: "پلیور",
     image: "/images/categories/pullover.webp",
     backgroundColor: "#F0FFED",
-    slug: "pullover",
+    slug: "پلیور-و-بافت",
     width: 194,
     height: 219,
   },
