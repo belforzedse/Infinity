@@ -13,8 +13,13 @@ export default factories.createCoreController(
       const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } =
         ctx.request.body;
 
-      // SnappPay callback fields (returnURL POST): transactionId/state/amount may be posted, but we rely on paymentToken via stored transaction
-      const { state, paymentToken, transactionId } = ctx.request.body as any;
+      // SnappPay callback fields may arrive via POST body or GET query
+      // Normalize from both sources and accept common aliases
+      const q: any = (ctx.request as any).query || {};
+      const b: any = (ctx.request as any).body || {};
+      const state: string | undefined = (b.state ?? q.state) as any;
+      const paymentToken: string | undefined = (b.paymentToken ?? q.paymentToken ?? b.payment_token ?? q.payment_token) as any;
+      const transactionId: string | undefined = (b.transactionId ?? q.transactionId ?? b.transaction_id ?? q.transaction_id) as any;
 
       try {
         // Log all callback parameters for debugging
@@ -56,7 +61,10 @@ export default factories.createCoreController(
                 }
               )) as any[];
               if (txList?.length && txList[0]?.contract?.order) {
-                orderId = txList[0].contract.order;
+                const contractOrder = txList[0].contract.order;
+                orderId = typeof contractOrder === "object" && contractOrder
+                  ? Number(contractOrder.id)
+                  : Number(contractOrder);
               }
             } catch (e) {
               strapi.log.error(
@@ -95,8 +103,12 @@ export default factories.createCoreController(
               ? tx.find((t: any) => t?.external_id === transactionId) || tx[0]
               : tx[0];
             tokenForOps = chosen?.TrackId;
-            if (!orderId && chosen?.contract?.order)
-              orderId = chosen.contract.order;
+            if (!orderId && chosen?.contract?.order) {
+              const contractOrder = chosen.contract.order;
+              orderId = typeof contractOrder === "object" && contractOrder
+                ? Number(contractOrder.id)
+                : Number(contractOrder);
+            }
           }
 
           if (!tokenForOps) {
