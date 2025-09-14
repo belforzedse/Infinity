@@ -689,3 +689,7 @@ yarn build
 - fix(seo): add PDP/PLP generateMetadata with supported Open Graph types
 - feat(home): filter zero-stock items in homepage queries
 - docs: add Cursor rules for SEO and availability; add bug report artifact
+
+## 2025-09-14 07:05 UTC
+- fix(pdp): add `type="button"` to variation selector buttons (color/size/model)
+- chore(a11y): add TODO to improve selected color state semantics for keyboard access
