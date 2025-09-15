@@ -66,7 +66,11 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
           Title: i.Title,
         }));
         // Deduplicate by id to avoid React key collisions if API returns duplicates
-        const unique = Array.from(new Map(items.map((it) => [it.id, it])).values());
+        const unique = Array.from(
+          new Map(
+            items.map((it: { id: number; Title: string }) => [it.id, it]),
+          ).values(),
+        ) as Array<{ id: number; Title: string }>;
         setSuggestions(unique);
         setOpen(unique.length > 0);
       } catch (err) {
