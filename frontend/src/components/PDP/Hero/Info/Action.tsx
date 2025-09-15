@@ -324,10 +324,11 @@ export default function PDPHeroInfoAction({
           />
         ) : !isInCart ? (
           <Button
-            className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 text-white ${
+            className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100 ${
               isAdding ? "cursor-wait opacity-50" : ""
             }`}
             text="افزودن به سبد خرید"
+            variant="primary"
             leftIcon={<BasketIcon />}
             onClick={
               isAdding
@@ -340,8 +341,9 @@ export default function PDPHeroInfoAction({
         ) : (
           <>
             <Button
-              className="text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 text-white"
+              className="text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100"
               text="افزودن"
+              variant="primary"
               leftIcon={<BasketIcon />}
               onClick={() => handleAddToCart(quantity)}
             />

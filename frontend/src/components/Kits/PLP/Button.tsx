@@ -8,6 +8,7 @@ export default function PLPButton({
   leftIcon,
   onClick,
   disabled = false,
+  variant = "outline",
 }: {
   text: string;
   className?: string;
@@ -15,14 +16,15 @@ export default function PLPButton({
   leftIcon?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  variant?: "primary" | "outline";
 }) {
   return (
     <Button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      variant="outline"
+      variant={variant}
       className={cn(
-        "text-xs w-full gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px] text-[#333]",
+        "text-xs w-full gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px]",
         "flex items-center justify-center",
         disabled && "cursor-not-allowed opacity-50",
         className,

@@ -175,7 +175,8 @@ export default function PDPCommentAdd(props: Props) {
         <PLPButton
           text="افزودن نظر"
           leftIcon={<MessagesIcon />}
-          className="text-base flex w-full items-center justify-center rounded-xl !bg-actions-primary text-white"
+          variant="primary"
+          className="text-base flex w-full items-center justify-center rounded-xl !bg-actions-primary !text-gray-100"
           onClick={() => setIsModalOpen(true)}
         />
       </div>
