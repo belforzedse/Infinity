@@ -84,12 +84,27 @@ type Props = {
     };
   };
 };
-
+const nf = new Intl.NumberFormat("fa-IR");
 export default function Invoice({ order }: Props) {
   const attrs = order.attributes;
-  const shipping = attrs.ShippingCost ?? 0;
-  const subtotal = attrs.contract?.data?.attributes?.Amount ?? 0;
+  // robust number coercion (handles strings)
+  const toNum = (v: unknown) =>
+    typeof v === "number" ? v : Number(String(v ?? 0).replace(/[^\d.-]/g, "")); // strip commas etc.
+
+  const shipping = toNum(attrs.ShippingCost);
+  const subtotal = toNum(attrs.contract?.data?.attributes?.Amount);
   const total = subtotal + shipping;
+
+  // (optional) also compute from line items to detect mismatches
+  const itemsTotal = (attrs.order_items?.data ?? []).reduce(
+    (sum: number, it: any) => {
+      const a = it?.attributes || {};
+      return sum + toNum(a.PerAmount) * toNum(a.Count);
+    },
+    0,
+  );
+  // if you want to display/compare:
+  // const mathMismatch = Math.abs(itemsTotal - subtotal) > 1;
 
   const fullName =
     `${attrs.user?.data?.attributes?.user_info?.data?.attributes?.FirstName ?? ""} ${attrs.user?.data?.attributes?.user_info?.data?.attributes?.LastName ?? ""}`.trim();
@@ -97,9 +112,9 @@ export default function Invoice({ order }: Props) {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-white p-8 font-peyda-fanum print:p-0"
+      className="min-h-screen w-full bg-white p-8 font-peyda-fanum"
     >
-      <div className="mx-auto max-w-4xl border border-black p-4">
+      <div className="mx-auto w-full print:max-w-none">
         {/* Header */}
         <div className="mb-2 flex items-start justify-between border border-black p-2">
           <Image
@@ -109,7 +124,7 @@ export default function Invoice({ order }: Props) {
             height="120"
             sizes="(max-width: 80) 76px, 104px"
           />
-          <div className="text-sm text-right leading-6">
+          <div className="text-lg text-right leading-6">
             <p>عنوان: فروشگاه پوشاک اینفینیتی</p>
             <p>تاریخ چاپ: {new Date().toLocaleDateString("fa-IR")}</p>
             <p>
@@ -120,7 +135,7 @@ export default function Invoice({ order }: Props) {
             </p>
             <p>شناسه سفارش: {order.id}</p>
           </div>
-          <div className="text-sm mb-2 p-2">
+          <div className="text-lg mb-2 p-2">
             <p>
               <span>آدرس فروشگاه:</span>
               گلستان، گرگان،<br></br> بلوار ناهارخوران، نبش عدالت ۶۸،<br></br>{" "}
@@ -131,8 +146,8 @@ export default function Invoice({ order }: Props) {
 
         {/* Store address */}
 
-        <div className="text-sm mb-2 border border-black p-2 leading-6">
-          <p>
+        <div className="text-lg mb-2 border border-black p-2 leading-6">
+          <p className="text-lg">
             <span className="font-bold">گیرنده:</span> {fullName || "نامشخص"}
           </p>
           <p>
@@ -165,7 +180,7 @@ export default function Invoice({ order }: Props) {
         </div>
 
         {/* Product Table */}
-        <table className="text-sm mb-2 w-full border">
+        <table className="text-lg mb-2 w-full border">
           <thead className="bg-gray-200">
             <tr className="border">
               <th className="border p-2">ردیف</th>
@@ -181,14 +196,13 @@ export default function Invoice({ order }: Props) {
               const a = item.attributes || {};
               const count = Number(a.Count ?? 0);
               const unit = Number(a.PerAmount ?? 0);
-              const lineTotal = count * unit;
+              const itemsTotal = count * unit;
 
               // If you have these relations populated, they render; otherwise they stay empty.
               const color = a.product_color?.data?.attributes?.Title || "";
               const size = a.product_size?.data?.attributes?.Title || "";
 
               // Safer formatter
-              const nf = new Intl.NumberFormat("fa-IR");
 
               return (
                 <tr key={item.id} className="break-inside-avoid">
@@ -200,7 +214,7 @@ export default function Invoice({ order }: Props) {
                     <div className="flex flex-col">
                       <span>{a.ProductTitle || "—"}</span>
                       {(color || size) && (
-                        <span className="text-xs mt-1 text-neutral-600">
+                        <span className="text-sm mt-1 text-neutral-600">
                           {color ? `رنگ: ${color}` : ""}{" "}
                           {size ? ` | سایز: ${size}` : ""}
                         </span>
@@ -215,7 +229,7 @@ export default function Invoice({ order }: Props) {
                   <td className="border p-2 text-center">{nf.format(count)}</td>
 
                   <td className="border p-2 text-center font-bold">
-                    {nf.format(lineTotal)} تومان
+                    {nf.format(itemsTotal)} تومان
                   </td>
                 </tr>
               );
@@ -224,20 +238,30 @@ export default function Invoice({ order }: Props) {
         </table>
 
         {/* Row below table */}
-        <p className="text-sm mb-2">
+        <p className="text-lg mb-2">
           تعداد کل: {attrs.order_items.data.length}
         </p>
 
         {/* Summary Table */}
-        <div className="flex w-full justify-end">
-          <table className="text-sm w-60 border border-black">
+        <div className="flex w-full justify-center justify-self-auto">
+          <table className="text-lg w-full border border-black">
             <tbody>
               <tr className="border border-black">
                 <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">
                   مبلغ کل
                 </td>
                 <td className="w-1/2 border p-2 text-center">
-                  {subtotal.toLocaleString("fa-IR")} تومان
+                  {nf.format(subtotal)}
+                  تومان
+                </td>
+              </tr>
+              <tr className="border border-black">
+                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">
+                  هزینه ارسال{" "}
+                </td>
+                <td className="w-1/2 border p-2 text-center">
+                  {nf.format(shipping)}
+                  تومان
                 </td>
               </tr>
               <tr className="border border-black">
@@ -245,7 +269,7 @@ export default function Invoice({ order }: Props) {
                   مبلغ نهایی
                 </td>
                 <td className="w-1/2 border p-2 text-center">
-                  {total.toLocaleString("fa-IR")} تومان
+                  {nf.format(total)} تومان
                 </td>
               </tr>
             </tbody>
