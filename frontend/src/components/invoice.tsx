@@ -116,47 +116,60 @@ export default function Invoice({ order }: Props) {
     >
       <div className="mx-auto w-full print:max-w-none">
         {/* Header */}
-        <div className="mb-2 flex items-start justify-between border border-black p-2">
-          <Image
-            src="/images/full-logo.png"
-            alt="Logo"
-            width="120"
-            height="120"
-            sizes="(max-width: 80) 76px, 104px"
-          />
-          <div className="text-lg text-right leading-6">
-            <p>عنوان: فروشگاه پوشاک اینفینیتی</p>
-            <p>تاریخ چاپ: {new Date().toLocaleDateString("fa-IR")}</p>
-            <p>
-              {new Date().toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-            <p>شناسه سفارش: {order.id}</p>
+        <div className="mb-10 grid grid-cols-1 grid-rows-1 border border-black">
+          <div className="flex items-start justify-around p-6">
+            <div className="text-lg justify-center text-right align-middle leading-6">
+              <p className="justify-self-middle justify-center">
+                عنوان: فروشگاه پوشاک اینفینیتی
+              </p>
+            </div>
+            <Image
+              src="/images/logo_PDF.webp"
+              alt="Logo"
+              width="300"
+              height="300"
+              sizes="(max-width: 200) 200px, 200px"
+            />
+            <div className="text-lg mb-2 p-2">
+              <p>
+                تاریخ چاپ: {new Date().toLocaleDateString("fa-IR")}{" "}
+                {new Date().toLocaleTimeString("fa-IR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              <p></p>
+              <p>شناسه سفارش: {order.id}</p>
+            </div>
           </div>
-          <div className="text-lg mb-2 p-2">
-            <p>
-              <span>آدرس فروشگاه:</span>
-              گلستان، گرگان،<br></br> بلوار ناهارخوران، نبش عدالت ۶۸،<br></br>{" "}
-              کد پستی ۴۹۱۶۹۷۳۳۸۱
-            </p>
+          <div className="bg-slate-gray-100 row-start-2 h-[20px] w-full justify-end justify-self-auto bg-gray-100 px-6 pb-10 pt-4">
+            <div>
+              <p className="justify-end">
+                <span className="font-bold text-gray-700">آدرس فروشگاه:</span>
+                گلستان، گرگان، بلوار ناهارخوران، نبش عدالت ۶۸، کد پستی
+                ۴۹۱۶۹۷۳۳۸۱
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Store address */}
 
-        <div className="text-lg mb-2 border border-black p-2 leading-6">
+        <div className="text-lg mb-2 justify-normal border border-black p-6 text-center leading-6">
           <p className="text-lg">
-            <span className="font-bold">گیرنده:</span> {fullName || "نامشخص"}
-          </p>
-          <p>
+            <span className="font-bold">گیرنده:</span>{" "}
+            <span> {fullName || "نامشخص"} </span>
             <span className="font-bold">شماره تماس:</span>{" "}
             {attrs.user.data.attributes.Phone}
           </p>
           <p>
             <span className="font-bold">تاریخ سفارش:</span>{" "}
             {new Date(attrs.Date).toLocaleDateString("fa-IR")}
+            {" --- "}
+            {new Date().toLocaleTimeString("fa-IR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </p>
           {attrs.delivery_address?.data?.attributes?.FullAddress && (
             <p>
