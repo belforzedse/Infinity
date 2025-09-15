@@ -1,8 +1,11 @@
 "use client";
 // TODO: Refactor Me!
 import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 export default function SuperAdminOrderSidebar() {
+  const router = useRouter();
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     message: "",
     type: "sms",
@@ -73,13 +76,23 @@ export default function SuperAdminOrderSidebar() {
           </div>
 
           <div className="flex w-full gap-2">
-            <button className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5">
+            <button
+              onClick={() => {
+                if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
+              }}
+              className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
+            >
               <span className="text-sm text-neutral-500">دانلود فاکتور</span>
 
               <DownloadIcon />
             </button>
 
-            <button className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5">
+            <button
+              onClick={() => {
+                if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
+              }}
+              className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
+            >
               <span className="text-sm text-neutral-500">پرینت فاکتور</span>
 
               <PrintIcon />

@@ -125,7 +125,13 @@ export const columns: ColumnDef<Product>[] = [
       );
 
       return (
-        <span className="rounded-xl bg-green-600 px-2 py-1 text-right text-white">
+        <span
+          className={
+            sum === 0
+              ? "rounded-xl bg-red-600 px-2 py-1 text-right text-white"
+              : "rounded-xl bg-green-600 px-2 py-1 text-right text-white"
+          }
+        >
           {sum} عدد در انبار
         </span>
       );
