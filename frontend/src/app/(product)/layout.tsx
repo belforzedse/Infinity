@@ -48,10 +48,16 @@ export default function ProductLayout({
         <div className="hidden md:block">
           <div className="px-10 py-3">
             <div className="mx-auto max-w-[1440px]">
-              <div className="flex items-center justify-between">
-                <DesktopHeaderActions />
-                <Logo />
-                <DesktopSearch />
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+                <div className="justify-self-start">
+                  <DesktopHeaderActions />
+                </div>
+                <div className="justify-self-center">
+                  <Logo />
+                </div>
+                <div className="justify-self-end">
+                  <DesktopSearch />
+                </div>
               </div>
             </div>
           </div>

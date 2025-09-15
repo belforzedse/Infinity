@@ -37,7 +37,7 @@ export default function HeroPagination({
         <button
           type="button"
           aria-label="Next"
-          onClick={onNext}
+          onClick={onPrev}
           className={clsx(
             "mx-1 mt-1 rounded-full p-1 text-[30px] text-pink-600 transition hover:bg-pink-50",
             arrowClassName,
@@ -67,7 +67,7 @@ export default function HeroPagination({
         <button
           type="button"
           aria-label="Previous"
-          onClick={onPrev}
+          onClick={onNext}
           className={clsx(
             "mx-1 mt-1 rounded-full p-1 text-[30px] text-pink-600 transition hover:bg-pink-50",
             arrowClassName,
