@@ -29,6 +29,7 @@
     "nuqs": "^2.4.1",
     "rc-slider": "^11.1.8",
     "react": "^19.0.0",
+    "react-barcode": "^1.6.1",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",

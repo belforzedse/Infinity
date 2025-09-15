@@ -61,6 +61,13 @@ export type Order = {
     };
   };
 };
+const bulkPrint = (selectedIds: string[]) => {
+  if (!selectedIds.length) return;
+  const url = `/super-admin/orders/print/bulk?ids=${selectedIds.join(",")}`;
+  window.open(url, "_blank"); // ✅ One tab only
+};
+
+
 
 export const columns: ColumnDef<Order>[] = [
   {
