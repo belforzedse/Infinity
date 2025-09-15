@@ -22,6 +22,7 @@ export default function ProductsPage() {
   const [sortedProductIds, setSortedProductIds] = useState<number[] | null>(null);
   const [customPageData, setCustomPageData] = useState<Product[] | null>(null);
   const [buildingIndex, setBuildingIndex] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
 
   const getAllProductsLite = useCallback(async () => {
     // Fetch product list with minimal payload for stock aggregation
@@ -129,12 +130,14 @@ export default function ProductsPage() {
   useEffect(() => {
     const run = async () => {
       if (!sortedProductIds) return;
+      setPageLoading(true);
       const p = Math.max(1, parseInt(page || "1", 10));
       const ps = Math.max(1, parseInt(pageSize || "25", 10));
       const start = (p - 1) * ps;
       const ids = sortedProductIds.slice(start, start + ps);
       if (ids.length === 0) {
         setCustomPageData([]);
+        setPageLoading(false);
         return;
       }
       const res = await apiClient.get(
@@ -151,6 +154,7 @@ export default function ProductsPage() {
         (a, b) => ids.indexOf(Number(a.id)) - ids.indexOf(Number(b.id)),
       );
       setCustomPageData(rows);
+      setPageLoading(false);
     };
     run();
   }, [sortedProductIds, page, pageSize, isRecycleBinOpen]);
@@ -211,6 +215,7 @@ export default function ProductsPage() {
           <SuperAdminTable
             columns={columns}
             data={customPageData || []}
+            loading={buildingIndex || pageLoading || customPageData === null}
             mobileTable={(data) => <MobileTable data={data as Product[]} />}
             removeActions
           />

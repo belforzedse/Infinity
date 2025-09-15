@@ -34,6 +34,7 @@ interface TableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data?: TData[];
   url?: string;
+  loading?: boolean;
   removeActions?: boolean;
   className?: string;
   draggable?: boolean;
@@ -67,6 +68,7 @@ export function SuperAdminTable<TData, TValue>({
   columns,
   data,
   url,
+  loading,
   className,
   removeActions,
   draggable,
@@ -101,7 +103,7 @@ export function SuperAdminTable<TData, TValue>({
   const [bulkAction, setBulkAction] = useState<string>("");
   const [draggedRow, setDraggedRow] = useState<Row<TData> | null>(null);
   const [dragOverRow, setDragOverRow] = useState<Row<TData> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
   const [refresh, setRefresh] = useAtom(refreshTable);
 
   const isFetchingRef = useRef(false);
@@ -144,7 +146,7 @@ export function SuperAdminTable<TData, TValue>({
 
       const seq = ++fetchSeqRef.current;
       isFetchingRef.current = true;
-      setIsLoading(true);
+      setInternalLoading(true);
       try {
         const res = await apiClient.get<TData[]>(apiUrl, {
           headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
@@ -159,7 +161,7 @@ export function SuperAdminTable<TData, TValue>({
         }
       } finally {
         if (seq === fetchSeqRef.current) {
-          setIsLoading(false);
+          setInternalLoading(false);
           isFetchingRef.current = false;
         }
       }
@@ -229,6 +231,8 @@ export function SuperAdminTable<TData, TValue>({
     setDragOverRow(null);
     onItemDrag?.(targetRow);
   };
+
+  const isLoading = loading ?? internalLoading;
 
   return (
     <div className="w-full">
