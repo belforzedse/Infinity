@@ -13,6 +13,7 @@ type Props = {
 
     id: string;
     attributes: {
+      paymentGateway?: string; // <- normalized from print page
       Date: string;
       createdAt: string;
       Description?: string;
@@ -63,6 +64,20 @@ type Props = {
             PerAmount: number;
             ProductTitle: string;
             ProductSKU: string;
+            product_color?: {
+              data?: {
+                attributes?: {
+                  Title?: string;
+                };
+              };
+            };
+            product_size?: {
+              data?: {
+                attributes?: {
+                  Title?: string;
+                };
+              };
+            };
           };
         }>;
       };
@@ -140,12 +155,7 @@ export default function Invoice({ order }: Props) {
               {attrs.delivery_address.data.attributes.PostalCode}
             </p>
           )}
-          {attrs.PaymentMethod && (
-            <p>
-              <span className="font-bold">درگاه پرداخت:</span>{" "}
-              {attrs.PaymentMethod}
-            </p>
-          )}
+
           {attrs.shipping?.data?.attributes?.Name && (
             <p>
               <span className="font-bold">روش حمل و نقل:</span>{" "}
@@ -168,19 +178,44 @@ export default function Invoice({ order }: Props) {
           </thead>
           <tbody>
             {attrs.order_items.data.map((item, index) => {
-              const a = item.attributes;
-              const totalRow = a.Count * a.PerAmount;
+              const a = item.attributes || {};
+              const count = Number(a.Count ?? 0);
+              const unit = Number(a.PerAmount ?? 0);
+              const lineTotal = count * unit;
+
+              // If you have these relations populated, they render; otherwise they stay empty.
+              const color = a.product_color?.data?.attributes?.Title || "";
+              const size = a.product_size?.data?.attributes?.Title || "";
+
+              // Safer formatter
+              const nf = new Intl.NumberFormat("fa-IR");
+
               return (
-                <tr key={item.id}>
+                <tr key={item.id} className="break-inside-avoid">
                   <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2">{a.ProductSKU}</td>
-                  <td className="border p-2">{a.ProductTitle}</td>
-                  <td className="border p-2 text-center">
-                    {a.PerAmount.toLocaleString("fa-IR")} تومان
+
+                  <td className="border p-2">{a.ProductSKU || "—"}</td>
+
+                  <td className="border p-2">
+                    <div className="flex flex-col">
+                      <span>{a.ProductTitle || "—"}</span>
+                      {(color || size) && (
+                        <span className="text-xs mt-1 text-neutral-600">
+                          {color ? `رنگ: ${color}` : ""}{" "}
+                          {size ? ` | سایز: ${size}` : ""}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="border p-2 text-center">{a.Count}</td>
+
+                  <td className="border p-2 text-center">
+                    {nf.format(unit)} تومان
+                  </td>
+
+                  <td className="border p-2 text-center">{nf.format(count)}</td>
+
                   <td className="border p-2 text-center font-bold">
-                    {totalRow.toLocaleString("fa-IR")} تومان
+                    {nf.format(lineTotal)} تومان
                   </td>
                 </tr>
               );
@@ -219,7 +254,11 @@ export default function Invoice({ order }: Props) {
 
         {/* Footer - Payment method */}
         <div className="text-sm mt-6 font-bold">
-          روش پرداخت: {attrs.PaymentMethod || "نامشخص"}
+          روش پرداخت:{" "}
+          {attrs.paymentGateway ||
+            attrs.PaymentMethod ||
+            attrs.Description ||
+            "نامشخص"}{" "}
         </div>
       </div>
     </div>
