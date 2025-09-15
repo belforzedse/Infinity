@@ -51,10 +51,25 @@ const baseMobile: MobileLayout = {
   },
 };
 
-export const mobileSlides: MobileLayout[] = [
-  baseMobile,
-  baseMobile,
-  baseMobile,
-  baseMobile,
-  baseMobile,
-];
+// Avoid shared references and add light per-slide polish
+const clone = (m: MobileLayout): MobileLayout => ({
+  heroDesktop: { ...m.heroDesktop },
+  heroMobile: { ...m.heroMobile },
+  secondaryPrimary: { ...m.secondaryPrimary },
+  secondaryTop: { ...m.secondaryTop },
+  secondaryBottom: { ...m.secondaryBottom },
+});
+
+const m1 = clone(baseMobile);
+// Better LCP on first image in mobile
+m1.heroMobile.priority = true;
+m1.heroDesktop.priority = true;
+
+const m2 = clone(baseMobile);
+// Subtle visual variety
+m2.secondaryTop.className = `${m2.secondaryTop.className} brightness-105`;
+
+const m3 = clone(baseMobile);
+m3.secondaryPrimary.className = `${m3.secondaryPrimary.className} contrast-[1.03]`;
+
+export const mobileSlides: MobileLayout[] = [m1, m2, m3];

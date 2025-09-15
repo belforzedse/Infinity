@@ -39,8 +39,24 @@ const baseLayout: DesktopLayout = {
   },
 };
 
-export const desktopSlides: DesktopLayout[] = [
-  baseLayout,
-  baseLayout,
-  baseLayout,
-];
+// Clone helper to avoid shared references and allow per-slide tweaks
+const clone = (d: DesktopLayout): DesktopLayout => ({
+  textBanner: { ...d.textBanner },
+  belowLeft: { ...d.belowLeft },
+  belowRight: { ...d.belowRight },
+  side: { ...d.side },
+});
+
+const slide1 = clone(baseLayout);
+// Improve LCP on first slide
+slide1.side.priority = true;
+slide1.side.loading = "eager";
+slide1.side.sizes = "(min-width: 1024px) 42vw, 100vw";
+
+const slide2 = clone(baseLayout);
+slide2.side.className = `${slide2.side.className} contrast-[1.02]`;
+
+const slide3 = clone(baseLayout);
+slide3.belowRight.className = `${slide3.belowRight.className} brightness-105`;
+
+export const desktopSlides: DesktopLayout[] = [slide1, slide2, slide3];

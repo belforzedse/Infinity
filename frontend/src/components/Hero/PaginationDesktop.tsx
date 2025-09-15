@@ -29,7 +29,7 @@ export default function HeroPagination({
   return (
     <div
       className={clsx(
-        "py-1backdrop-blur-md flex items-center gap-2 rounded-2xl px-2",
+        "py-1 backdrop-blur-md flex items-center gap-2 rounded-2xl px-2",
         className,
       )}
     >

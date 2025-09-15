@@ -65,8 +65,10 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
           id: i.id,
           Title: i.Title,
         }));
-        setSuggestions(items);
-        setOpen(items.length > 0);
+        // Deduplicate by id to avoid React key collisions if API returns duplicates
+        const unique = Array.from(new Map(items.map((it) => [it.id, it])).values());
+        setSuggestions(unique);
+        setOpen(unique.length > 0);
       } catch (err) {
         if (!mounted) return;
         setSuggestions([]);
@@ -153,6 +155,9 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
             onKeyDown={onKeyDown}
             placeholder="دنبال چی میگردی؟"
             className="bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
+            role="combobox"
+            aria-expanded={open}
+            aria-controls="plp-desktop-suggestions"
           />
 
           <div className="flex items-center gap-2">
