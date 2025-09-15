@@ -33,6 +33,24 @@ export default function GlobalFetchInterceptor() {
       apiOrigin = null;
     }
 
+    const hasSkipHeader = (input: RequestInfo | URL, init?: RequestInit) => {
+      try {
+        let headers: Headers | null = null;
+        if (init?.headers) headers = new Headers(init.headers as any);
+        else if (typeof input !== "string" && (input as any).headers)
+          headers = new Headers((input as any).headers);
+        if (!headers) return false;
+        const v =
+          headers.get("x-skip-global-loader") ||
+          headers.get("X-Skip-Global-Loader") ||
+          headers.get("x-skip-global-loading") ||
+          headers.get("X-Skip-Global-Loading");
+        return v === "1" || v === "true";
+      } catch {
+        return false;
+      }
+    };
+
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
       // Count all non-trivial network work, but ignore pure static assets like images/fonts/css
       try {
@@ -62,6 +80,11 @@ export default function GlobalFetchInterceptor() {
           url.searchParams.has("_rsc") ||
           url.search.includes("__next")
         ) {
+          return originalFetch(input as any, init);
+        }
+
+        // Respect opt-out header for components that shouldn't trigger global loader
+        if (hasSkipHeader(input, init)) {
           return originalFetch(input as any, init);
         }
 
