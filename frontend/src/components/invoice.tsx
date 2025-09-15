@@ -166,7 +166,7 @@ export default function Invoice({ order }: Props) {
             <span className="font-bold">تاریخ سفارش:</span>{" "}
             {new Date(attrs.Date).toLocaleDateString("fa-IR")}
             {" --- "}
-            {new Date().toLocaleTimeString("fa-IR", {
+            {new Date(attrs.createdAt).toLocaleTimeString("fa-IR", {
               hour: "2-digit",
               minute: "2-digit",
             })}
