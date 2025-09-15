@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
-import "./globals.css";
 import "../styles/components.css";
+import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";
