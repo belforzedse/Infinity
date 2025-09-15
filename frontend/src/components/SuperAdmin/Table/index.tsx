@@ -39,6 +39,19 @@ interface TableProps<TData, TValue> {
   draggable?: boolean;
   mobileTable?: (data: TData[] | undefined) => React.ReactNode;
   onItemDrag?: (row: Row<TData>) => void;
+  // Enable row selection + bulk actions
+  enableSelection?: boolean;
+  getRowId?: (row: TData) => string;
+  bulkOptions?: { id: string; title: string }[];
+  onBulkAction?: (actionId: string, selectedRows: TData[]) => void | Promise<void>;
+  // Optional client-side sorting when API sort is not feasible
+  clientSort?:
+    | undefined
+    | {
+        key: string;
+        direction: "asc" | "desc";
+        getValue: (row: TData) => number;
+      };
 }
 
 // Strapi-like response meta is returned by our ApiClient as ApiResponse<T>
@@ -59,6 +72,11 @@ export function SuperAdminTable<TData, TValue>({
   draggable,
   onItemDrag,
   mobileTable,
+  enableSelection,
+  getRowId,
+  bulkOptions,
+  onBulkAction,
+  clientSort,
 }: TableProps<TData, TValue>) {
   const [filter] = useQueryState("filter", {
     defaultValue: [],
@@ -79,6 +97,8 @@ export function SuperAdminTable<TData, TValue>({
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [tableData, setTableData] = useState(data);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<string>("");
   const [draggedRow, setDraggedRow] = useState<Row<TData> | null>(null);
   const [dragOverRow, setDragOverRow] = useState<Row<TData> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -161,7 +181,17 @@ export function SuperAdminTable<TData, TValue>({
   }, [refresh, requestUrl, runFetch, setRefresh]);
 
   const table = useReactTable({
-    data: tableData || [],
+    data: useMemo(() => {
+      if (!tableData) return [] as TData[];
+      if (!clientSort) return tableData;
+      const factor = clientSort.direction === "asc" ? 1 : -1;
+      return [...tableData].sort((a, b) => {
+        const va = Number(clientSort.getValue(a) ?? 0);
+        const vb = Number(clientSort.getValue(b) ?? 0);
+        if (va === vb) return 0;
+        return va > vb ? factor : -1 * factor;
+      });
+    }, [tableData, clientSort]) as TData[],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -204,10 +234,26 @@ export function SuperAdminTable<TData, TValue>({
     <div className="w-full">
       <div className="block md:hidden">
         <div className="flex flex-col gap-2">
-          {!removeActions && (
+          {enableSelection && (
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={
+                    !!tableData && selectedIds.size > 0 &&
+                    selectedIds.size === tableData.length
+                  }
+                  onChange={(e) => {
+                    if (!tableData) return;
+                    const next = new Set<string>();
+                    if (e.target.checked) {
+                      tableData.forEach((row) =>
+                        next.add((getRowId?.(row) || String((row as any)?.id)) ?? ""),
+                      );
+                    }
+                    setSelectedIds(next);
+                  }}
+                />
                 <span className="text-xs text-foreground-primary">
                   انتخاب همه
                 </span>
@@ -215,14 +261,23 @@ export function SuperAdminTable<TData, TValue>({
 
               <div className="flex items-center gap-2">
                 <SuperAdminTableSelect
-                  options={[
-                    { id: "0", title: "اقدام دسته جمعی" },
-                    { id: "1", title: "کاربر" },
-                    { id: "2", title: "ادمین" },
-                  ]}
+                  selectedOption={bulkAction}
+                  onOptionSelect={(id) => setBulkAction(String(id))}
+                  options={[{ id: "", title: "اقدام دسته جمعی" }, ...(bulkOptions || [])]}
                 />
 
-                <button className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white">
+                <button
+                  onClick={() => {
+                    if (!onBulkAction || !tableData || !bulkAction) return;
+                    const rows = tableData.filter((r) =>
+                      selectedIds.has(
+                        (getRowId?.(r) || String((r as any)?.id)) ?? "",
+                      ),
+                    );
+                    onBulkAction(bulkAction, rows);
+                  }}
+                  className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white"
+                >
                   اجرا
                 </button>
               </div>
@@ -256,12 +311,30 @@ export function SuperAdminTable<TData, TValue>({
                 })}
               </tr>
             ))}
-            {!removeActions && (
+            {enableSelection && (
               <tr>
                 <td colSpan={columns.length}>
                   <div className="my-3 flex h-auto w-full items-center justify-between px-4">
                     <div className="flex items-center gap-2">
-                      <input type="checkbox" />
+                      <input
+                        type="checkbox"
+                        checked={
+                          !!tableData && selectedIds.size > 0 &&
+                          selectedIds.size === tableData.length
+                        }
+                        onChange={(e) => {
+                          if (!tableData) return;
+                          const next = new Set<string>();
+                          if (e.target.checked) {
+                            tableData.forEach((row) =>
+                              next.add(
+                                (getRowId?.(row) || String((row as any)?.id)) ?? "",
+                              ),
+                            );
+                          }
+                          setSelectedIds(next);
+                        }}
+                      />
                       <span className="text-xs text-foreground-primary">
                         انتخاب همه
                       </span>
@@ -269,14 +342,23 @@ export function SuperAdminTable<TData, TValue>({
 
                     <div className="flex items-center gap-2">
                       <SuperAdminTableSelect
-                        options={[
-                          { id: "0", title: "اقدام دسته جمعی" },
-                          { id: "1", title: "کاربر" },
-                          { id: "2", title: "ادمین" },
-                        ]}
+                        selectedOption={bulkAction}
+                        onOptionSelect={(id) => setBulkAction(String(id))}
+                        options={[{ id: "", title: "اقدام دسته جمعی" }, ...(bulkOptions || [])]}
                       />
 
-                      <button className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white">
+                      <button
+                        onClick={() => {
+                          if (!onBulkAction || !tableData || !bulkAction) return;
+                          const rows = tableData.filter((r) =>
+                            selectedIds.has(
+                              (getRowId?.(r) || String((r as any)?.id)) ?? "",
+                            ),
+                          );
+                          onBulkAction(bulkAction, rows);
+                        }}
+                        className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white"
+                      >
                         اجرا
                       </button>
                     </div>
@@ -309,14 +391,29 @@ export function SuperAdminTable<TData, TValue>({
                         cell.column.columnDef.meta?.cellClassName,
                       )}
                     >
-                      {index === 0 && !removeActions ? (
+                      {index === 0 && enableSelection ? (
                         <div className="flex items-center gap-2">
                           {draggable && (
                             <div className="cursor-move">
                               <DragIcon />
                             </div>
                           )}
-                          <input type="checkbox" />
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(
+                              (getRowId?.(row.original as TData) ||
+                                String((row.original as any)?.id)) ?? "",
+                            )}
+                            onChange={(e) => {
+                              const id =
+                                (getRowId?.(row.original as TData) ||
+                                  String((row.original as any)?.id)) ?? "";
+                              const next = new Set(selectedIds);
+                              if (e.target.checked) next.add(id);
+                              else next.delete(id);
+                              setSelectedIds(next);
+                            }}
+                          />
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
