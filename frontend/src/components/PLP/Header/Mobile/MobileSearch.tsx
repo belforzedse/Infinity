@@ -42,12 +42,10 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(
-          q,
-        )}&page=1&pageSize=8`;
+        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=8&_skip_global_loader=1`;
         const res = await fetch(url, {
           cache: "no-store",
-          headers: { "X-Skip-Global-Loader": "1" },
+          headers: { Accept: "application/json" },
           signal: controller.signal,
         });
         if (!mounted) return;

@@ -51,6 +51,19 @@ export default function GlobalFetchInterceptor() {
       }
     };
 
+    const hasSkipParam = (url: URL) => {
+      try {
+        const v =
+          url.searchParams.get("_skip_global_loader") ||
+          url.searchParams.get("skip_global_loader") ||
+          url.searchParams.get("_skipLoader") ||
+          url.searchParams.get("skipLoader");
+        return v === "1" || v === "true";
+      } catch {
+        return false;
+      }
+    };
+
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
       // Count all non-trivial network work, but ignore pure static assets like images/fonts/css
       try {
@@ -83,8 +96,8 @@ export default function GlobalFetchInterceptor() {
           return originalFetch(input as any, init);
         }
 
-        // Respect opt-out header for components that shouldn't trigger global loader
-        if (hasSkipHeader(input, init)) {
+        // Respect opt-out header or query param for components that shouldn't trigger global loader
+        if (hasSkipHeader(input, init) || hasSkipParam(url)) {
           return originalFetch(input as any, init);
         }
 

@@ -6,6 +6,7 @@ import SearchIcon from "./Icons/SearchIcon";
 import Text from "../Kits/Text";
 import ChevronDownIcon from "./Icons/ChevronDownIcon";
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PLPDesktopSearchProps {
   className?: string;
@@ -23,6 +24,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLFormElement | null>(null);
   const router = useRouter();
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,13 +52,11 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(
-          q,
-        )}&page=1&pageSize=8`;
+        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=8&_skip_global_loader=1`;
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
-          headers: { "X-Skip-Global-Loader": "1" },
+          headers: { Accept: "application/json" },
           signal: controller.signal,
         });
         if (!mounted) return;
@@ -116,10 +116,12 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
   };
 
   return (
-    <form
+    <motion.form
       onSubmit={handleSubmit}
       ref={containerRef}
       className={`relative flex w-[320px] items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200 md:w-[360px] lg:w-[420px] ${className}`}
+      animate={{ scale: isFocused ? 1.02 : 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
     >
       <div className="text-sm flex w-full items-center gap-1">
         <div className="flex cursor-pointer items-center gap-1 text-neutral-800">
@@ -138,72 +140,92 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
               setSearchQuery(e.target.value);
               setOpen(true);
             }}
+            onFocus={() => {
+              setIsFocused(true);
+              if (searchQuery.trim().length >= 2) setOpen(true);
+            }}
+            onBlur={() => {
+              // Give time for clicks inside dropdown
+              setTimeout(() => {
+                if (!open) setIsFocused(false);
+              }, 80);
+            }}
             onKeyDown={onKeyDown}
             placeholder="دنبال چی میگردی؟"
             className="bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
           />
 
           <div className="flex items-center gap-2">
-            <button
+            <motion.button
               type="submit"
               className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm"
+              whileTap={{ scale: 0.95 }}
             >
               <SearchIcon className="h-5 w-5 text-white" />
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
 
       {/* Suggestions dropdown */}
-      {open && (
-        <div
-          className="absolute inset-x-0 top-full z-50 mt-2 w-full min-w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
-          role="listbox"
-          aria-label="پیشنهادهای جستجو"
-        >
-          {loading && (
-            <div className="text-xs px-3 py-2 text-neutral-500">
-              در حال جستجو…
-            </div>
-          )}
-          {!loading && suggestions.length === 0 && (
-            <div className="text-xs px-3 py-2 text-neutral-500">
-              موردی یافت نشد
-            </div>
-          )}
-          {!loading &&
-            suggestions.map((s, idx) => (
-              <button
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute inset-x-0 top-full z-[1000] mt-2 w-full min-w-[280px] max-h-80 overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
+            role="listbox"
+            aria-label="پیشنهادهای جستجو"
+          >
+            {loading && (
+              <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>
+            )}
+            {!loading && suggestions.length === 0 && (
+              <div className="text-xs px-3 py-2 text-neutral-500">موردی یافت نشد</div>
+            )}
+            {!loading &&
+              suggestions.map((s, idx) => (
+                <motion.button
+                  type="button"
+                  key={s.id}
+                  onClick={() => router.push(`/pdp/${s.id}`)}
+                  className={`text-sm block w-full cursor-pointer truncate bg-white/0 px-3 py-2 text-right transition-colors ${
+                    activeIndex === idx
+                      ? "bg-pink-50 text-pink-700"
+                      : "hover:bg-slate-50"
+                  }`}
+                  role="option"
+                  aria-selected={activeIndex === idx}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.15, delay: idx * 0.03 }}
+                >
+                  {s.Title}
+                </motion.button>
+              ))}
+            {!loading && suggestions.length > 0 && (
+              <motion.button
                 type="button"
-                key={s.id}
-                onClick={() => router.push(`/pdp/${s.id}`)}
-                className={`text-sm block w-full cursor-pointer truncate bg-white/0 px-3 py-2 text-right transition-colors ${
-                  activeIndex === idx
-                    ? "bg-pink-50 text-pink-700"
-                    : "hover:bg-slate-50"
-                }`}
-                role="option"
-                aria-selected={activeIndex === idx}
+                onClick={() =>
+                  router.push(
+                    `/plp?search=${encodeURIComponent(searchQuery.trim())}`,
+                  )
+                }
+                className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
-                {s.Title}
-              </button>
-            ))}
-          {!loading && suggestions.length > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                router.push(
-                  `/plp?search=${encodeURIComponent(searchQuery.trim())}`,
-                )
-              }
-              className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
-            >
-              مشاهده همه نتایج
-            </button>
-          )}
-        </div>
-      )}
-    </form>
+                مشاهده همه نتایج
+              </motion.button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.form>
   );
 };
 
