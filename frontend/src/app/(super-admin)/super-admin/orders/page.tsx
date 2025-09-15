@@ -31,12 +31,14 @@ export default function OrdersPage() {
         getRowId={(row) => (row as any)?.id?.toString?.()}
         onBulkAction={async (actionId, rows) => {
           if (actionId === "print") {
-            rows.forEach((r) => {
-              const id = (r as any)?.id;
-              if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
-            });
+            const ids = rows.map((r: any) => r.id).filter(Boolean);
+            if (ids.length) {
+              const url = `/super-admin/orders/print/bulk?ids=${ids.join(",")}`;
+              window.open(url, "_blank"); // open only ONE tab ✅
+            }
             return;
           }
+
           if (actionId === "markDone") {
             const { apiClient } = await import("@/services");
             const { STRAPI_TOKEN } = await import("@/constants/api");
