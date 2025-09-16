@@ -28,7 +28,7 @@ export default function PLPMobileHeader({}: Props) {
           className="pressable flex max-h-[43px] items-center gap-1 rounded-[28px] border border-slate-200 bg-white/60 px-4 py-3 text-neutral-800 backdrop-blur-sm transition-colors hover:bg-white/80"
         >
           <span className="text-sm">پیگیری سفارش</span>
-          <OrderTrackingIcon className="text-neutral-800" />
+          <OrderTrackingIcon className="scale-150 text-neutral-800" />
         </Link>
 
         <Logo />
@@ -40,7 +40,7 @@ export default function PLPMobileHeader({}: Props) {
             className="pressable flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200 bg-white/50 backdrop-blur-sm transition-colors hover:bg-white/70"
             aria-label="جستجو"
           >
-            <SearchIcon className="text-neutral-800" />
+            <SearchIcon className="scale-150 text-neutral-800" />
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}

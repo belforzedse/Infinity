@@ -92,10 +92,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
           <div className="absolute inset-0 animate-pulse bg-gray-100" />
         ) : null}
 
-        <button className="absolute left-2 top-2 z-10 hidden h-[64px] w-[64px] flex-col items-center justify-center gap-2 rounded-full border border-pink-200 bg-white md:flex">
-          <div className="text-[9px] text-pink-600">استایل بساز</div>
-          <ChevronDownIcon />
-        </button>
+
 
         <div className="absolute bottom-3 left-[50%] z-10 translate-x-[-50%]">
           <NavigationButtons

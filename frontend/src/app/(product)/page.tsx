@@ -111,7 +111,7 @@ export default async function Home() {
                     sizes="80px"
                   />
                 </div>
-                <span className="text-sm mt-2 md:text-base">
+                <span className="text-sm mx-auto mt-2 block text-center md:text-base">
                   {category.name}
                 </span>
               </Reveal>
