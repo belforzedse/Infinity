@@ -6,12 +6,8 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-  typescript:{
-    ignoreBuildErrors: true,
-  },
   images: {
     unoptimized: true,
   },
 };
-
 module.exports = nextConfig;

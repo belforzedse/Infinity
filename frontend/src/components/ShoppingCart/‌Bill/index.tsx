@@ -27,12 +27,12 @@ export type FormData = {
   notes?: string;
 };
 
-type Props = {};
+type Props = object;
 
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
+  const [, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const router = useRouter();
@@ -51,55 +51,32 @@ function ShoppingCartBillForm({}: Props) {
   // Gateway selection state
   const [gateway, setGateway] = useState<"mellat" | "snappay">("mellat");
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
-  const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
-  const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
-  const [discountPreview, setDiscountPreview] = useState<{
-    discount: number;
-    summary: {
-      subtotal: number;
-      eligibleSubtotal: number;
-      tax: number;
-      shipping: number;
-      total: number;
-      taxPercent: number;
-    };
-  } | undefined>(undefined);
+  const [snappMessage, setSnappMessage] = useState<string | undefined>(
+    undefined,
+  );
 
-  // Persist/restore discount code
-  useEffect(() => {
+  // Discount state
+  const [discountCode, setDiscountCode] = useState<string | undefined>(() => {
     try {
-      const saved = localStorage.getItem("discountCode");
-      if (saved) setDiscountCode(saved);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      if (discountCode) localStorage.setItem("discountCode", discountCode);
-      else localStorage.removeItem("discountCode");
-    } catch {}
-  }, [discountCode]);
-
-  // Refresh preview when code or shipping changes
-  useEffect(() => {
-    const run = async () => {
-      if (!discountCode) {
-        setDiscountPreview(undefined);
-        return;
+      return localStorage.getItem("discountCode") || undefined;
+    } catch {
+      return undefined;
+    }
+  });
+  const [discountPreview, setDiscountPreview] = useState<
+    | {
+        discount: number;
+        summary: {
+          subtotal: number;
+          eligibleSubtotal: number;
+          tax: number;
+          shipping: number;
+          total: number;
+          taxPercent: number;
+        };
       }
-      try {
-        const res = await CartService.applyDiscount({
-          code: discountCode,
-          shippingId: watchShippingMethod ? Number(watchShippingMethod.id) : undefined,
-          shippingCost: watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined,
-        });
-        if (res?.success) {
-          setDiscountPreview({ discount: res.discount, summary: res.summary });
-        }
-      } catch {}
-    };
-    run();
-  }, [discountCode, watchShippingMethod]);
+    | undefined
+  >(undefined);
 
   // Naive eligibility (we don't have amount here; we can rely on backend final validation)
   // Optionally, you can request a lightweight endpoint to compute amount and check eligibility.
@@ -118,13 +95,46 @@ function ShoppingCartBillForm({}: Props) {
         setSnappEligible(!!res.eligible);
         const msg = res.title || res.description;
         setSnappMessage(msg);
-      } catch (e) {
+      } catch {
         setSnappEligible(true);
         setSnappMessage(undefined);
       }
     };
     run();
   }, [watchShippingMethod]);
+
+  // Persist discount code
+  useEffect(() => {
+    try {
+      if (discountCode) localStorage.setItem("discountCode", discountCode);
+      else localStorage.removeItem("discountCode");
+    } catch {}
+  }, [discountCode]);
+
+  // Refresh discount preview on code or shipping changes
+  useEffect(() => {
+    const run = async () => {
+      if (!discountCode) {
+        setDiscountPreview(undefined);
+        return;
+      }
+      try {
+        const res = await CartService.applyDiscount({
+          code: discountCode,
+          shippingId: watchShippingMethod
+            ? Number(watchShippingMethod.id)
+            : undefined,
+          shippingCost: watchShippingMethod
+            ? Number(watchShippingMethod.attributes?.Price || 0)
+            : undefined,
+        });
+        if (res?.success) {
+          setDiscountPreview({ discount: res.discount, summary: res.summary });
+        }
+      } catch {}
+    };
+    run();
+  }, [discountCode, watchShippingMethod]);
 
   const onSubmit = async (data: FormData) => {
     if (!data.address) {
@@ -154,7 +164,7 @@ function ShoppingCartBillForm({}: Props) {
           stockValid.itemsRemoved?.length
         ) {
           toast.error(
-            "برخی از کالاهای سبد خرید شما به دلیل موجودی تغییر کرده‌اند"
+            "برخی از کالاهای سبد خرید شما به دلیل موجودی تغییر کرده‌اند",
           );
         }
       }
@@ -167,7 +177,8 @@ function ShoppingCartBillForm({}: Props) {
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
-        discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
+        discountCode:
+          discountCode || localStorage.getItem("discountCode") || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
@@ -188,7 +199,29 @@ function ShoppingCartBillForm({}: Props) {
 
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
         if (gateway === "snappay") {
-          window.location.href = cartResponse.redirectUrl!;
+          const isAllowedPaymentUrl = (raw: string) => {
+            try {
+              const url = new URL(raw);
+              if (url.protocol !== "http:" && url.protocol !== "https:")
+                return false;
+              const allowed = (
+                process.env.NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS || ""
+              )
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+              if (allowed.length === 0) return true; // preserve dev behavior
+              return allowed.some((origin) => origin === url.origin);
+            } catch {
+              return false;
+            }
+          };
+          if (isAllowedPaymentUrl(cartResponse.redirectUrl!)) {
+            window.location.href = cartResponse.redirectUrl!;
+          } else {
+            toast.error("Invalid payment redirect URL");
+            router.push("/orders/failure");
+          }
         } else {
           const createPaymentForm = () => {
             const form = document.createElement("form");
@@ -224,13 +257,15 @@ function ShoppingCartBillForm({}: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <span className="lg:text-3xl text-lg text-neutral-800">اطلاعات صورت حساب</span>
+      <span className="text-lg text-neutral-800 lg:text-3xl">
+        اطلاعات صورت حساب
+      </span>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg">{error}</div>
+        <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>
       )}
 
-      <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ShoppingCartBillInformationForm
           register={register}
           errors={errors}
@@ -238,7 +273,7 @@ function ShoppingCartBillForm({}: Props) {
           setValue={setValue}
         />
 
-        <div className="flex flex-col gap-6 mb-20">
+        <div className="mb-20 flex flex-col gap-6">
           <ShoppingCartBillDeliveryForm
             control={control}
             setValue={setValue}
@@ -246,8 +281,14 @@ function ShoppingCartBillForm({}: Props) {
             discountPreview={discountPreview}
           />
           <ShoppingCartBillDiscountCoupon
-            shippingId={watchShippingMethod ? Number(watchShippingMethod.id) : undefined}
-            shippingCost={watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined}
+            shippingId={
+              watchShippingMethod ? Number(watchShippingMethod.id) : undefined
+            }
+            shippingCost={
+              watchShippingMethod
+                ? Number(watchShippingMethod.attributes?.Price || 0)
+                : undefined
+            }
             onApplied={(code, preview) => {
               setDiscountCode(code);
               setDiscountPreview(preview);
@@ -256,7 +297,9 @@ function ShoppingCartBillForm({}: Props) {
             onRemove={() => {
               setDiscountCode(undefined);
               setDiscountPreview(undefined);
-              try { localStorage.removeItem("discountCode"); } catch {}
+              try {
+                localStorage.removeItem("discountCode");
+              } catch {}
             }}
           />
           <ShoppingCartBillPaymentGateway
@@ -268,8 +311,8 @@ function ShoppingCartBillForm({}: Props) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`text-white bg-pink-500 lg:py-4 py-3 rounded-lg text-nowrap w-full lg:text-base text-xl ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            className={`text-xl w-full text-nowrap rounded-lg bg-pink-500 py-3 text-white lg:text-base lg:py-4 ${
+              isSubmitting ? "cursor-not-allowed opacity-70" : ""
             }`}
           >
             {isSubmitting ? "در حال پردازش..." : "پرداخت"}

@@ -20,16 +20,16 @@ const IndexPhotoUploaderActionButtons: React.FC<ActionButtonsProps> = ({
   return (
     <div className="flex gap-2">
       <button className={primaryButtonClassNames} onClick={onPreviewClick}>
-        <EyeIcon className="w-6 h-6" />
+        <EyeIcon className="h-6 w-6" />
       </button>
       <button className={primaryButtonClassNames} onClick={onDeleteClick}>
-        <DeleteIcon className="w-6 h-6" />
+        <DeleteIcon className="h-6 w-6" />
       </button>
       <button
-        className="bg-pink-500 rounded-xl text-white hover:bg-pink-600 transition-colors h-12 w-12 flex justify-center items-center"
+        className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500 text-white transition-colors hover:bg-pink-600"
         onClick={onEditClick}
       >
-        <EditIcon className="w-6 h-6" />
+        <EditIcon className="h-6 w-6" />
       </button>
     </div>
   );

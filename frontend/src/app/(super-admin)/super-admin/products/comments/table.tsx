@@ -48,46 +48,16 @@ export const columns: ColumnDef<Comment>[] = [
   {
     accessorKey: "contentType",
     header: "نوع محتوا",
-    cell: ({ row }) => {
+    cell: () => {
       return <span className="text-xs">محصول</span>;
     },
   },
   {
     accessorKey: "attributes.Content",
     header: "متن دیدگاه",
-    cell: ({ row }) => {
-      const [isModalOpen, setIsModalOpen] = useState(false);
-      const commentContent = row.original?.attributes?.Content;
-
-      return (
-        <>
-          <button
-            className="flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <span className="text-xs text-slate-500">دیدن</span>
-            <ShowIcon />
-          </button>
-
-          {isModalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-4 rounded-lg max-w-lg w-full max-h-[80vh] overflow-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium">متن دیدگاه</h3>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ×
-                  </button>
-                </div>
-                <p className="text-sm text-gray-700">{commentContent}</p>
-              </div>
-            </div>
-          )}
-        </>
-      );
-    },
+    cell: ({ row }) => (
+      <CommentContentCell content={row.original?.attributes?.Content} />
+    ),
   },
   {
     accessorKey: "attributes.Status",
@@ -100,18 +70,18 @@ export const columns: ColumnDef<Comment>[] = [
               row.original?.attributes?.Status === "Accepted"
                 ? "text-green-600"
                 : row.original?.attributes?.Status === "Rejected"
-                ? "text-red-600"
-                : "text-yellow-600"
+                  ? "text-red-600"
+                  : "text-yellow-600"
             } text-xs`}
           >
             {row.original?.attributes?.Status === "Accepted"
               ? "تایید شده"
               : row.original?.attributes?.Status === "Rejected"
-              ? "رد شده"
-              : "درحال بررسی"}
+                ? "رد شده"
+                : "درحال بررسی"}
           </span>
 
-          <span className="text-xs text-foreground-primary text-right">
+          <span className="text-xs text-right text-foreground-primary">
             {(
               new Date(row.original?.attributes?.createdAt) || new Date()
             ).toLocaleString("fa-IR", {
@@ -141,7 +111,7 @@ export const columns: ColumnDef<Comment>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           <RemoveActionButton
             isRemoved={!!row.original?.attributes?.removedAt}
             id={row.original?.id.toString()}
@@ -167,7 +137,7 @@ export const MobileTable = ({ data }: Props) => {
   if (!data) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data.map((row) => (
         <MobileTableRowBox
           key={row.id}
@@ -175,17 +145,17 @@ export const MobileTable = ({ data }: Props) => {
           row={row}
           headTitle={row.attributes?.user?.data?.attributes?.Phone}
           header={
-            <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
+            <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex gap-1">
                 <span className="text-xs text-neutral-400">
                   {row.attributes?.Status === "Accepted"
                     ? "تایید شده"
                     : row.attributes?.Status === "Rejected"
-                    ? "رد شده"
-                    : "درحال بررسی"}
+                      ? "رد شده"
+                      : "درحال بررسی"}
                 </span>
                 <span className="text-xs text-neutral-400">|</span>
-                <span className="text-xs text-neutral-400 overflow-hidden text-ellipsis whitespace-nowrap max-w-[70vw] inline-block">
+                <span className="text-xs inline-block max-w-[70vw] overflow-hidden text-ellipsis whitespace-nowrap text-neutral-400">
                   {row.attributes?.Content}
                 </span>
               </div>
@@ -196,3 +166,35 @@ export const MobileTable = ({ data }: Props) => {
     </div>
   );
 };
+
+function CommentContentCell({ content }: { content: string }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  return (
+    <>
+      <button
+        className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <span className="text-xs text-slate-500">دیدن</span>
+        <ShowIcon />
+      </button>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-medium">متن دیدگاه</h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-sm text-gray-700">{content}</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

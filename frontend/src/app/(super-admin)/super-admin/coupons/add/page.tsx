@@ -68,12 +68,12 @@ export default function Page() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
 
           toast.success("کد تخفیف با موفقیت ثبت شد");
           router.push("/super-admin/coupons");
-        } catch (error) {
+        } catch {
           toast.error("خطایی رخ داده است");
         }
       }}

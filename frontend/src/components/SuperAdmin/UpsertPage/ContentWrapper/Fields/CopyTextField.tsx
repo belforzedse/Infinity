@@ -9,9 +9,9 @@ type Props = {
 
 export default function CopyTextField({ value, onChange, readOnly }: Props) {
   return (
-    <div className="w-full border border-neutral-200 rounded-lg flex items-center gap-2 py-3 px-5">
+    <div className="flex w-full items-center gap-2 rounded-lg border border-neutral-200 px-5 py-3">
       <button
-        className="w-5 h-5 flex items-center justify-center"
+        className="flex h-5 w-5 items-center justify-center"
         onClick={(e) => {
           e.preventDefault();
           navigator.clipboard.writeText(value);
@@ -23,7 +23,7 @@ export default function CopyTextField({ value, onChange, readOnly }: Props) {
       <input
         type="text"
         dir="ltr"
-        className={`flex-1 text-sm ${readOnly ? "text-slate-500" : ""}`}
+        className={`text-sm flex-1 ${readOnly ? "text-slate-500" : ""}`}
         disabled={readOnly}
         readOnly={readOnly}
         value={value}

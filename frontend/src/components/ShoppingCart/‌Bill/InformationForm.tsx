@@ -13,7 +13,6 @@ import { FormData } from "./index";
 import CirculeInformationIcon from "../Icons/CirculeInformationIcon";
 import UserService from "@/services/user";
 import { UserAddress } from "@/services/user/addresses";
-import { MeResponse } from "@/services/user/me";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -32,7 +31,6 @@ function ShoppingCartBillInformationForm({
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<MeResponse | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,7 +51,6 @@ function ShoppingCartBillInformationForm({
     const fetchUserInfo = async () => {
       try {
         const user = await UserService.me();
-        setUserInfo(user);
 
         // Prefill form with user data
         if (user) {
@@ -80,8 +77,8 @@ function ShoppingCartBillInformationForm({
   };
 
   return (
-    <div className="lg:col-span-2 col-span-1 space-y-3 px-0.5">
-      <div className="grid lg:grid-cols-2 grid-cols-1 gap-3">
+    <div className="col-span-1 space-y-3 px-0.5 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Input
           {...register("fullName")}
           name="fullName"
@@ -122,30 +119,30 @@ function ShoppingCartBillInformationForm({
           )}
         />
         <button
-          className="absolute top-2 left-0 flex gap-0.5"
+          className="absolute left-0 top-2 flex gap-0.5"
           type="button"
           onClick={handleAddAddress}
         >
-          <span className="text-pink-500 text-xs">افزودن آدرس</span>
-          <CirculePlusIcon className="w-5 h-5" />
+          <span className="text-xs text-pink-500">افزودن آدرس</span>
+          <CirculePlusIcon className="h-5 w-5" />
         </button>
       </div>
 
       <div className="w-full">
-        <label className="block text-right text-foreground-primary lg:mb-2 mb-1 lg:text-lg text-base">
+        <label className="text-base mb-1 block text-right text-foreground-primary lg:text-lg lg:mb-2">
           توضیحات سفارش (در صورت نیاز)
         </label>
         <textarea
           {...register("notes")}
           placeholder="توضیحات سفارش"
-          className="w-full lg:p-3 p-2 text-right border border-slate-200 rounded-lg focus:outline-none text-foreground-primary placeholder:text-foreground-muted placeholder:text-sm lg:text-lg text-sm resize-none"
+          className="text-sm w-full resize-none rounded-lg border border-slate-200 p-2 text-right text-foreground-primary placeholder:text-sm lg:text-lg placeholder:text-foreground-muted focus:outline-none lg:p-3"
           rows={3}
         />
       </div>
 
-      <div className="flex items-center gap-1 bg-pink-50 rounded-lg lg:p-5 p-4">
-        <CirculeInformationIcon className="w-6 h-6" />
-        <span className="text-pink-600 lg:text-base text-sm">
+      <div className="flex items-center gap-1 rounded-lg bg-pink-50 p-4 lg:p-5">
+        <CirculeInformationIcon className="h-6 w-6" />
+        <span className="text-sm text-pink-600 lg:text-base">
           برای دریافت فاکتور، بعد از دریافت سفارش به حساب کاربری و صفحه جزئیات
           سفارش سر بزنید
         </span>

@@ -1,5 +1,6 @@
 import React from "react";
-import Image from "next/image";
+import BlurImage from "@/components/ui/BlurImage";
+import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import GridIcon from "./Icons/GridIcon";
 import MoreIcon from "./Icons/MoreIcon";
@@ -34,56 +35,57 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
       href={`/pdp/${id}`}
       className={clsx("w-full md:w-[269px]", className)}
     >
-      <div className="flex flex-row gap-2 p-2 rounded-2xl border border-slate-200 bg-white md:w-full h-[116px]">
-        <div className="relative w-24 h-[100px]">
+      <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
+        <div className="relative h-[100px] w-24">
           {discount && discount > 0 && (
-            <div className="absolute top-0 left-0 bg-rose-600 text-white text-xs px-2 py-0.5  rounded-br-xl rounded-tl-xl z-10">
+            <div className="text-xs absolute left-0 top-0 z-10 rounded-br-xl rounded-tl-xl bg-rose-600 px-2 py-0.5 text-white">
               ٪{discount}
             </div>
           )}
-          <Image
+          <BlurImage
             src={image}
             alt={title}
             fill
-            className="object-cover rounded-xl"
+            className="rounded-xl object-cover"
+            loader={imageLoader}
           />
-          <div className="absolute bottom-1 right-1 bg-stone-50 rounded-xl px-2 py-1 flex items-center gap-0.5 shadow-sm">
+          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-sm">
             <span className="text-xxs text-neutral-800">3+</span>
             <div className="relative w-4">
-              <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 absolute left-0 top-1/2 -translate-y-1/2" />
-              <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-pink-600 to-pink-400 absolute left-1.5 top-1/2 -translate-y-1/2" />
+              <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
+              <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 justify-between py-0.5">
+        <div className="flex flex-1 flex-col justify-between py-0.5">
           <div className="flex items-center justify-between gap-1">
             <div className="flex items-center gap-1">
-              <GridIcon className="w-4 h-4 text-neutral-400" />
+              <GridIcon className="h-4 w-4 text-neutral-400" />
               <span className="text-xs text-neutral-400">{category}</span>
             </div>
             <div className="flex items-center justify-between">
               <button>
-                <MoreIcon className="w-6 h-6 text-pink-500" />
+                <MoreIcon className="h-6 w-6 text-pink-500" />
               </button>
             </div>
           </div>
 
           <div className="flex flex-col gap-0.5">
-            <h3 className="text-xs text-neutral-800 line-clamp-1">{title}</h3>
+            <h3 className="text-xs line-clamp-1 text-neutral-800">{title}</h3>
             <div className="flex items-center gap-0.5">
-              <HeartIcon className="w-2 h-2 text-pink-600" />
+              <HeartIcon className="h-2 w-2 text-pink-600" />
               <span className="text-[10px] text-pink-600">
                 {likedCount} نفر این محصول را پسندیدند!
               </span>
             </div>
           </div>
 
-          <div className="bg-stone-100 rounded-lg px-3 py-1 md:p-1">
+          <div className="rounded-lg bg-stone-100 px-3 py-1 md:p-1">
             <div className="flex justify-between md:justify-center">
-              <div className="md:hidden text-xs text-neutral-500">قیمت</div>
+              <div className="text-xs text-neutral-500 md:hidden">قیمت</div>
 
-              <div className="flex justify-end md:justify-center items-center gap-1">
+              <div className="flex items-center justify-end gap-1 md:justify-center">
                 <span
                   className={`text-xs ${
                     discountedPrice ? "text-pink-600" : "text-neutral-800"

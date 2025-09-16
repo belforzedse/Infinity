@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 // import SizeGuide from "./Guide";
 import SizeTable from "./Table";
 import SizeGuideEditor from "./SizeGuideEditor";
@@ -20,11 +20,7 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
   const [editing, setEditing] = useState(false);
   const [helperId, setHelperId] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchSizeHelper();
-  }, [productId]);
-
-  const fetchSizeHelper = async () => {
+  const fetchSizeHelper = useCallback(async () => {
     try {
       const response = await getProductSizeHelper(productId);
       if (response.data && response.data.length > 0) {
@@ -34,13 +30,13 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
         if (helperData && helperData.length > 0) {
           const firstRow = helperData[0];
           const columnKeys = Object.keys(firstRow).filter(
-            (key) => key !== "size"
+            (key) => key !== "size",
           );
           setColumns(
             columnKeys.map((key) => ({
               key,
               title: key, // Use the key as the title initially
-            }))
+            })),
           );
           setSizeData(helperData);
         } else {
@@ -56,7 +52,11 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchSizeHelper();
+  }, [fetchSizeHelper]);
 
   const setDefaultData = () => {
     setColumns([
@@ -110,8 +110,8 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
       // Update existing column title
       setColumns(
         columns.map((col) =>
-          col.key === columnKey ? { ...col, title: newTitle } : col
-        )
+          col.key === columnKey ? { ...col, title: newTitle } : col,
+        ),
       );
     } else {
       // Add new column
@@ -137,18 +137,18 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
         <div className="relative">
           <button
             onClick={() => setEditing(true)}
-            className="absolute top-4 right-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md transition-colors duration-200"
+            className="text-sm absolute right-4 top-4 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-md transition-colors duration-200 hover:bg-blue-700"
           >
             ویرایش راهنما
           </button>
           <SizeTable data={sizeData} columns={columns} title="راهنمای سایز" />
         </div>
       ) : (
-        <div className="text-center py-8">
-          <p className="text-neutral-600 mb-4">راهنمای سایز موجود نیست</p>
+        <div className="py-8 text-center">
+          <p className="mb-4 text-neutral-600">راهنمای سایز موجود نیست</p>
           <button
             onClick={() => setEditing(true)}
-            className="px-6 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md transition-colors duration-200"
+            className="text-sm rounded-lg bg-blue-600 px-6 py-2.5 text-white shadow-md transition-colors duration-200 hover:bg-blue-700"
           >
             ایجاد راهنمای سایز
           </button>

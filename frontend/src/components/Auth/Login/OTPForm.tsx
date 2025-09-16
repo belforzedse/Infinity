@@ -64,7 +64,7 @@ export default function OTPLoginForm({
           <div className="flex flex-col items-end">
             <VerificationInput onChange={setVerificationCode} />
 
-            <div className="w-full flex flex-row-reverse justify-between items-center">
+            <div className="flex w-full flex-row-reverse items-center justify-between">
               <span className="text-sm text-foreground-primary/80">
                 {timeLeft}
               </span>
@@ -90,7 +90,7 @@ export default function OTPLoginForm({
         disabled={isLoading}
         icon={
           isLoading && (
-            <span className="inline-block w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
           )
         }
       >

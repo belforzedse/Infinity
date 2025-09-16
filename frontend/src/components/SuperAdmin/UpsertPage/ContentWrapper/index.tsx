@@ -5,16 +5,11 @@ import AddButton from "../../Layout/ContentWrapper/Button/Add";
 import ActiveBox from "./ActiveBox";
 import FieldRenderer from "./FieldRenderer";
 import { useRouter } from "next/navigation";
+import logger from "@/utils/logger";
 import {
   Field,
-  StandardField,
-  StandardFieldType,
-  ProvinceCityField,
-  RadioTextWithChipsField,
-  CategoriesListField,
   isStandardField,
   isRadioTextWithChips,
-  isProvinceCityField,
   isCategoriesListField,
 } from "./types";
 
@@ -89,7 +84,7 @@ const desktopColSpan = {
 } as const;
 
 export default function UpsertPageContentWrapper<
-  T extends { createdAt: Date; updatedAt: Date }
+  T extends { createdAt: Date; updatedAt: Date },
 >(props: Props<T>) {
   const { config, data, footer, onSubmit: onSubmitProp } = props;
 
@@ -114,7 +109,9 @@ export default function UpsertPageContentWrapper<
   };
 
   const updateFormData = (fieldName: keyof T, value: any) => {
-    console.log(`Updating field ${String(fieldName)} with value:`, value);
+    if (process.env.NODE_ENV !== "production") {
+      logger.info(`Updating field ${String(fieldName)} with value`, { value });
+    }
     setFormData((prevData) => ({
       ...prevData,
       [fieldName]: value,
@@ -122,9 +119,9 @@ export default function UpsertPageContentWrapper<
   };
 
   return (
-    <div className="mt-0 md:mt-7 flex flex-col gap-2 md:gap-4">
+    <div className="mt-0 flex flex-col gap-2 md:mt-7 md:gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-foreground-primary text-3xl">
+        <span className="text-3xl text-foreground-primary">
           {config.headTitle}
         </span>
 
@@ -136,15 +133,15 @@ export default function UpsertPageContentWrapper<
         )}
       </div>
 
-      <form className="w-full mt-3 md:mt-0" onSubmit={onSubmit}>
-        <div className="grid grid-cols-12 gap-3 w-full">
+      <form className="mt-3 w-full md:mt-0" onSubmit={onSubmit}>
+        <div className="grid w-full grid-cols-12 gap-3">
           {/* Form Section */}
           <div className="col-span-12 md:col-span-9">
             {config.config.map((item, index) => (
-              <div key={index} className="bg-white rounded-2xl p-3 md:p-5 mb-3">
+              <div key={index} className="mb-3 rounded-2xl bg-white p-3 md:p-5">
                 <div className="flex flex-col gap-4">
                   {/* Header Section */}
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <span className="text-xl text-neutral-600">
                       {typeof item.title === "function"
                         ? item.title(data ?? ({} as T))
@@ -158,10 +155,10 @@ export default function UpsertPageContentWrapper<
                   {item.sections.map((section, sectionIndex) => (
                     <div
                       key={sectionIndex}
-                      className="p-3 md:p-5 grid grid-cols-12 gap-5 auto-rows-auto border border-slate-100 rounded-2xl"
+                      className="grid auto-rows-auto grid-cols-12 gap-5 rounded-2xl border border-slate-100 p-3 md:p-5"
                     >
                       {section.header && (
-                        <div className="col-span-12 flex justify-between items-center">
+                        <div className="col-span-12 flex items-center justify-between">
                           <span className="text-xl text-foreground-primary">
                             {section.header.title}
                           </span>
@@ -175,25 +172,25 @@ export default function UpsertPageContentWrapper<
                             isStandardField(field)
                               ? String(field.name)
                               : isRadioTextWithChips(field)
-                              ? String(field.name)
-                              : isCategoriesListField(field)
-                              ? String(field.name)
-                              : `${String(field.provinceField)}-${String(
-                                  field.cityField
-                                )}`
+                                ? String(field.name)
+                                : isCategoriesListField(field)
+                                  ? String(field.name)
+                                  : `${String(field.provinceField)}-${String(
+                                      field.cityField,
+                                    )}`
                           }
                           className={`${
                             mobileColSpan[
                               field.mobileColSpan as keyof typeof mobileColSpan
                             ]
-                          }  ${
+                          } ${
                             desktopColSpan[
                               field.colSpan as keyof typeof desktopColSpan
                             ]
                           } flex flex-col gap-1`}
                         >
                           {field.label && (
-                            <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-between">
                               <span className="text-base text-neutral-600">
                                 {field.label}
                               </span>
@@ -220,8 +217,8 @@ export default function UpsertPageContentWrapper<
           </div>
 
           {/* Mobile Action Buttons */}
-          <div className="col-span-12 w-full flex md:hidden">
-            <div className="flex gap-2 items-center w-full">
+          <div className="col-span-12 flex w-full md:hidden">
+            <div className="flex w-full items-center gap-2">
               {config.actionButtons({
                 onSubmit: onSubmit,
                 onCancel: onCancel,
@@ -231,9 +228,9 @@ export default function UpsertPageContentWrapper<
           </div>
 
           {/* Timestamp Section - Fixed position */}
-          <div className="col-span-12 md:col-span-3 mt-3 md:mt-0 flex flex-col gap-3">
+          <div className="col-span-12 mt-3 flex flex-col gap-3 md:col-span-3 md:mt-0">
             {config.showTimestamp && (
-              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 md:sticky md:top-5">
+              <div className="flex flex-col gap-3 rounded-2xl bg-white p-5 md:sticky md:top-5">
                 {/* Create At Section */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -254,7 +251,7 @@ export default function UpsertPageContentWrapper<
                 </div>
 
                 {/* Divider */}
-                <div className="w-full h-[1px] bg-slate-100" />
+                <div className="h-[1px] w-full bg-slate-100" />
 
                 {/* Update At Section */}
                 <div className="flex items-center justify-between">
@@ -281,7 +278,7 @@ export default function UpsertPageContentWrapper<
               <ActiveBox
                 title={config.isActiveBox.header}
                 label={config.isActiveBox.label(
-                  formData[config.isActiveBox.key] as boolean
+                  formData[config.isActiveBox.key] as boolean,
                 )}
                 status={formData[config.isActiveBox.key] as boolean}
                 onChange={(checked) => {
@@ -299,9 +296,9 @@ export default function UpsertPageContentWrapper<
         </div>
 
         {/* Desktop Action Buttons */}
-        <div className="grid-cols-12 w-full mt-4 hidden md:grid">
+        <div className="mt-4 hidden w-full grid-cols-12 md:grid">
           <div className="col-span-9">
-            <div className="flex justify-end gap-2 items-center">
+            <div className="flex items-center justify-end gap-2">
               {config.actionButtons({
                 onSubmit: onSubmit,
                 onCancel: onCancel,
@@ -312,7 +309,7 @@ export default function UpsertPageContentWrapper<
         </div>
       </form>
 
-      <div className="grid grid-cols-12 mt-9">
+      <div className="mt-9 grid grid-cols-12">
         <div className="col-span-12 md:col-span-9">
           {typeof footer === "function" ? footer(data ?? ({} as T)) : footer}
         </div>

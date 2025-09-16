@@ -25,35 +25,35 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
           id: "1",
           src: "/images/pdp/image-1.png",
           thumbnail: "/images/pdp/image-1-th.png",
-          type: "image" as "image",
+          type: "image" as const,
         },
         {
           alt: "alt",
           id: "2",
           src: "/images/pdp/image-2.png",
           thumbnail: "/images/pdp/image-2-th.png",
-          type: "image" as "image",
+          type: "image" as const,
         },
         {
           alt: "alt",
           id: "3",
           src: "/images/pdp/video-1.mp4",
           thumbnail: "/images/pdp/video-1-th.png",
-          type: "video" as "video",
+          type: "video" as const,
         },
         {
           alt: "alt",
           id: "4",
           src: "/images/pdp/image-1.png",
           thumbnail: "/images/pdp/image-1-th.png",
-          type: "image" as "image",
+          type: "image" as const,
         },
         {
           alt: "alt",
           id: "5",
           src: "/images/pdp/image-2.png",
           thumbnail: "/images/pdp/image-2-th.png",
-          type: "image" as "image",
+          type: "image" as const,
         },
       ];
 
@@ -213,7 +213,7 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-7 relative">
+    <div className="relative flex flex-col gap-4 md:flex-row md:gap-7">
       <div className="md:hidden">
         <Main
           category={product.category}
@@ -226,12 +226,9 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
 
       <PDPHeroInfo
         colors={colors}
-        commentCount={productData?.attributes.RatingCount || 124}
-        last24hoursSeenCount={856}
         product={product}
         sizes={sizes}
         models={models}
-        rateCount={productData?.attributes.RatingCount || 40}
         productData={productData}
         productId={productId}
       />

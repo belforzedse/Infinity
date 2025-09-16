@@ -8,7 +8,7 @@ export interface Response {
 export const register = async (
   firstName: string,
   lastName: string,
-  password: string
+  password: string,
 ): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.REGISTER;
 
@@ -23,7 +23,7 @@ export const register = async (
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
-    }
+    },
   );
 
   return response as any;

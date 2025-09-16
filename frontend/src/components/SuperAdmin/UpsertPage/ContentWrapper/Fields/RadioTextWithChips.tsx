@@ -49,7 +49,7 @@ export default function RadioTextWithChips({
               onChange={() => onValueChange(option.value)}
               type="radio"
               name={name}
-              className="w-4 h-4 accent-actions-primary checked:bg-actions-primary checked:text-white"
+              className="h-4 w-4 accent-actions-primary checked:bg-actions-primary checked:text-white"
             />
             <span className="text-base text-neutral-600">{option.label}</span>
           </div>
@@ -65,10 +65,10 @@ export default function RadioTextWithChips({
                 <div key={chip.value}>
                   <button
                     className={twMerge(
-                      "px-2 py-1 bg-slate-50 rounded-md border text-gray-400 border-slate-200",
+                      "rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-gray-400",
                       chip.value === chipsValue
-                        ? "bg-pink-50 text-actions-primary border-actions-primary"
-                        : ""
+                        ? "border-actions-primary bg-pink-50 text-actions-primary"
+                        : "",
                     )}
                     onClick={() => onChipsChange(chip.value)}
                   >
@@ -82,7 +82,7 @@ export default function RadioTextWithChips({
 
       <textarea
         rows={6}
-        className={`w-full border border-neutral-200 rounded-lg py-2 px-5 text-sm`}
+        className={`text-sm w-full rounded-lg border border-neutral-200 px-5 py-2`}
         placeholder={descriptionPlaceholder}
         value={textValue}
         onChange={(e) => onTextChange(e.target.value)}

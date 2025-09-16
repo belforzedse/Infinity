@@ -90,7 +90,7 @@ export default function TermsField({
         // Filter out already selected tags from suggestions
         const currentTags = value[activeTermIndex]?.tags || [];
         const filteredResults = results.filter(
-          (option) => !currentTags.includes(option.value)
+          (option) => !currentTags.includes(option.value),
         );
 
         setSuggestions(filteredResults);
@@ -109,7 +109,7 @@ export default function TermsField({
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    itemIndex: number
+    itemIndex: number,
   ) => {
     const newSearchTerms = [...searchTerms];
     newSearchTerms[itemIndex] = e.target.value;
@@ -120,13 +120,13 @@ export default function TermsField({
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    itemIndex: number
+    _itemIndex: number,
   ) => {
     // Only handle arrow keys and escape for navigation
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveItemIndex((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : prev
+        prev < suggestions.length - 1 ? prev + 1 : prev,
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -174,7 +174,7 @@ export default function TermsField({
 
   const handleCategoryChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
-    itemIndex: number
+    itemIndex: number,
   ) => {
     const updatedTerms = [...value];
     updatedTerms[itemIndex] = {
@@ -206,7 +206,7 @@ export default function TermsField({
         // Filter out already selected tags from suggestions
         const currentTags = value[itemIndex]?.tags || [];
         const filteredResults = results.filter(
-          (option) => !currentTags.includes(option.value)
+          (option) => !currentTags.includes(option.value),
         );
 
         setSuggestions(filteredResults);
@@ -242,13 +242,13 @@ export default function TermsField({
     <div className="flex flex-col gap-10 md:gap-2">
       {value?.map((item, itemIndex) => (
         <div
-          className="flex gap-2 md:gap-4 w-full flex-col md:flex-row"
+          className="flex w-full flex-col gap-2 md:flex-row md:gap-4"
           key={itemIndex}
         >
           <div className="w-full md:w-1/2">
-            <div className="border border-neutral-200 rounded-lg overflow-hidden">
+            <div className="overflow-hidden rounded-lg border border-neutral-200">
               <select
-                className={`w-full py-3 px-5 text-sm border-l-[20px] border-transparent ${
+                className={`text-sm w-full border-l-[20px] border-transparent px-5 py-3 ${
                   readOnly ? "bg-slate-100 text-slate-500" : ""
                 }`}
                 disabled={readOnly}
@@ -269,7 +269,7 @@ export default function TermsField({
           </div>
           <div className="w-full md:w-1/2">
             <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap gap-2 p-2 border border-neutral-200 rounded-lg">
+              <div className="flex flex-wrap gap-2 rounded-lg border border-neutral-200 p-2">
                 {Array.isArray(item?.tags) &&
                   item?.tags.map((tag: string, index: number) => {
                     // Get the label for the tag
@@ -278,7 +278,7 @@ export default function TermsField({
                     return (
                       <div
                         key={index}
-                        className="flex items-center gap-1 px-2 py-1 bg-slate-50 rounded-md border text-slate-500 border-slate-200"
+                        className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-slate-500"
                       >
                         <span className="text-sm">{tagLabel}</span>
                         <button
@@ -306,11 +306,11 @@ export default function TermsField({
                       </div>
                     );
                   })}
-                <div className="relative flex-grow min-w-[100px]">
+                <div className="relative min-w-[100px] flex-grow">
                   <input
                     ref={inputRef}
                     type="text"
-                    className="w-full outline-none border-none"
+                    className="w-full border-none outline-none"
                     value={searchTerms[itemIndex] || ""}
                     onChange={(e) => handleInputChange(e, itemIndex)}
                     onFocus={() => handleSearchFocus(itemIndex)}
@@ -324,17 +324,17 @@ export default function TermsField({
                     (suggestions.length > 0 || isLoading) && (
                       <div
                         ref={suggestionsRef}
-                        className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-md max-h-60 overflow-y-auto"
+                        className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-md"
                       >
                         {isLoading ? (
-                          <div className="text-center text-gray-500 p-2">
+                          <div className="p-2 text-center text-gray-500">
                             در حال بارگذاری...
                           </div>
                         ) : (
                           suggestions.map((option, index) => (
                             <div
                               key={option.value}
-                              className={`p-2 cursor-pointer hover:bg-gray-100 ${
+                              className={`cursor-pointer p-2 hover:bg-gray-100 ${
                                 index === activeItemIndex ? "bg-gray-100" : ""
                               }`}
                               onClick={() =>
@@ -358,7 +358,7 @@ export default function TermsField({
         {options.length > value.length && (
           <button
             type="button"
-            className="px-3 py-1 bg-blue-50 border border-actions-link rounded-md flex items-center gap-1"
+            className="flex items-center gap-1 rounded-md border border-actions-link bg-blue-50 px-3 py-1"
             onClick={() => {
               const updatedTerms = [...(value || [])];
               updatedTerms.push({

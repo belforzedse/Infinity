@@ -50,6 +50,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [count, setCount] = useState(0);
+  const [hasCountError, setHasCountError] = useState(false);
   const [isFilterOpen, setFilterIsOpen] = useState(false);
 
   const [refresh] = useAtom(refreshTable);
@@ -67,6 +68,12 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
         })
         .then((res) => {
           setCount((res as any)?.meta?.pagination?.total);
+          setHasCountError(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setCount(0);
+          setHasCountError(true);
         });
     }
   }, [apiUrl, refresh]);
@@ -77,7 +84,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
 
   return (
     <>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-3xl text-[#202224]">
             {isRecycleBinOpen ? "زباله‌دان" : title}
@@ -90,6 +97,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
           {hasRecycleBin && (
             <RecycleBinButton
               count={count}
+              hasError={hasCountError}
               isRecycleBinOpen={isRecycleBinOpen}
               setIsRecycleBinOpen={setIsRecycleBinOpen}
             />
@@ -108,7 +116,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
           )}
         </div>
       </div>
-      <div className="mt-3 p-7 bg-white rounded-2xl">{children}</div>
+      <div className="card mt-3 p-7">{children}</div>
       {hasPagination && (
         <SuperAdminPagination
           className="mt-4"

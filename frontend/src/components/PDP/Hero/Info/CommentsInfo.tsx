@@ -11,10 +11,10 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
   const { commentCount, rateCount, last24hoursSeenCount } = props;
 
   return (
-    <div className="flex md:items-center md:justify-between flex-col md:flex-row">
-      <div className="flex gap-3 items-center">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center gap-3">
         <span className="text-base text-foreground-primary">
-          <span className="text-actions-link underline cursor-pointer">
+          <span className="cursor-pointer text-actions-link underline">
             {commentCount > 0 ? `${commentCount} دیدگاه` : "بدون دیدگاه"}
           </span>{" "}
           برای این محصول
@@ -22,10 +22,10 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
 
         {rateCount > 0 && (
           <>
-            <div className="w-[1px] h-[24px] bg-slate-300" />
+            <div className="h-[24px] w-[1px] bg-slate-300" />
 
-            <div className="flex gap-1 items-center">
-              <span className="text-sm md:text-xs text-foreground-primary">
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-foreground-primary md:text-xs">
                 ({rateCount}) نفر
               </span>
 
@@ -36,7 +36,7 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
       </div>
 
       {last24hoursSeenCount > 0 && (
-        <div className="flex gap-1 items-center mt-2 md:mt-0">
+        <div className="mt-2 flex items-center gap-1 md:mt-0">
           <Image
             width={16}
             height={16}
@@ -44,7 +44,7 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
             src="/images/icons/eye.png"
           />
 
-          <span className="text-sm md:text-xs text-foreground-primary">
+          <span className="text-sm text-foreground-primary md:text-xs">
             محصول محبوب!
             <span className="text-[#DB2777]">
               {" "}
