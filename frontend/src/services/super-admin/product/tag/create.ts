@@ -1,6 +1,7 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
 import { ApiResponse } from "@/types/api";
+import logger from "@/utils/logger";
 
 interface TagAttributes {
   Title: string;
@@ -19,7 +20,7 @@ export interface TagResponse {
 }
 
 export const createTag = async (
-  title: string
+  title: string,
 ): Promise<ApiResponse<TagResponse>> => {
   const endpoint = ENDPOINTS.PRODUCT.TAG;
 
@@ -33,11 +34,13 @@ export const createTag = async (
         headers: {
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      }
+      },
     );
 
     // Log the response for debugging
-    console.log("API response for tag creation:", response.data);
+    if (process.env.NODE_ENV !== "production") {
+      logger.info("API response for tag creation", { response: response.data });
+    }
 
     return response.data;
   } catch (error) {

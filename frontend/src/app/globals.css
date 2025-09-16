@@ -7,17 +7,32 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   color: var(--foreground);
   background: var(--background);
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #ffe4f1; /* brand-tinted */
+  color: #111827;
+}
+
+/* Accessible focus outlines on interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #ec4899; /* matches scrollbar thumb */
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* (Removed global hover styles to limit scope to super-admin navbar) */
 
 @layer utilities {
   .scrollbar-hide {
@@ -50,4 +65,183 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #ec4899;
+}
+
+/* Optional image effect classes (non-global to avoid invisible images) */
+@layer components {
+  .img-fx {
+    transition:
+      opacity 400ms ease,
+      filter 400ms ease,
+      transform 400ms ease;
+    opacity: 0.01;
+    filter: blur(8px);
+    transform: scale(1.01);
+  }
+  .img-fx.img-loaded {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+/* Reusable subtle elevation */
+.shadow-elevated {
+  box-shadow:
+    0 10px 30px rgba(17, 24, 39, 0.08),
+    0 4px 12px rgba(17, 24, 39, 0.05);
+}
+
+/* Glassmorphism panel (iOS-like) */
+.glass-panel {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.35)
+  );
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 1px 0 rgba(17, 24, 39, 0.04) inset,
+    0 8px 24px rgba(17, 24, 39, 0.03);
+}
+
+/* Removed global body blur/transform to prevent stacking context issues */
+
+/* Enhanced glass header edge with thicker, warped bottom highlight */
+.glass-header {
+  position: relative;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.65);
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  overflow: hidden;
+}
+
+.glass-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 18px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0)
+  );
+  filter: blur(8px);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.glass-header::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -14px;
+  width: 84%;
+  height: 28px;
+  background: radial-gradient(
+    60% 90% at 50% 0%,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0) 70%
+  );
+  filter: blur(10px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ---------- Global interactive polish ---------- */
+@layer base {
+  a,
+  button,
+  [role="button"] {
+    cursor: pointer;
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      transform 120ms ease,
+      box-shadow 200ms ease,
+      opacity 150ms ease;
+  }
+
+  @media (hover: hover) {
+    a:hover,
+    button:hover,
+    [role="button"]:hover {
+      filter: brightness(0.98);
+    }
+  }
+
+  a:active,
+  button:active,
+  [role="button"]:active {
+    transform: translateY(0.5px) scale(0.985);
+  }
+
+  button:disabled,
+  [aria-disabled="true"],
+  [disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  input,
+  select,
+  textarea {
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.5);
+    border-color: rgb(244, 114, 182);
+  }
+
+  input:invalid,
+  select:invalid,
+  textarea:invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
+  }
+}
+
+@layer utilities {
+  /* Tap highlight tint for mobile */
+  * {
+    -webkit-tap-highlight-color: rgba(236, 72, 153, 0.15);
+  }
+}
+
+@layer components {
+  /* Pressable utility for cards/buttons */
+  .pressable {
+    transition:
+      transform 160ms ease,
+      box-shadow 200ms ease,
+      filter 160ms ease;
+  }
+  .pressable:active {
+    transform: translateY(1px) scale(0.99);
+  }
+  .interactive-card {
+    transition:
+      transform 200ms ease,
+      box-shadow 240ms ease,
+      filter 200ms ease;
+  }
+  @media (hover: hover) {
+    .interactive-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(17, 24, 39, 0.08);
+    }
+  }
 }

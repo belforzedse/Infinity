@@ -34,7 +34,7 @@ export default function PLPListMobileFilter() {
 
       <PLPButton
         text="مرتب سازی"
-        rightIcon={<SortDescIcon className="w-6 h-6" />}
+        rightIcon={<SortDescIcon className="h-6 w-6" />}
       />
 
       <AvailabilityFilter
@@ -45,23 +45,23 @@ export default function PLPListMobileFilter() {
       {/* Backdrop */}
       <div
         onClick={handleClose}
-        className={`w-[100vw] h-[100vh] fixed top-0 right-0 bg-gray-500/50 z-20 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`fixed right-0 top-0 z-20 h-[100vh] w-[100vw] bg-gray-500/50 transition-opacity duration-300 ${
+          isOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
         {/* Sidebar */}
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`w-[70vw] bg-white h-full flex flex-col gap-[18px] pb-8 px-4 overflow-y-auto transition-transform duration-300 ${
+          className={`flex h-full w-[70vw] flex-col gap-[18px] overflow-y-auto bg-white px-4 pb-8 transition-transform duration-300 ${
             isOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="flex items-center justify-between sticky top-0 bg-white pt-8 pb-4 z-30">
+          <div className="sticky top-0 z-30 flex items-center justify-between bg-white pb-4 pt-8">
             <span className="text-lg">همه فیلتر‌ها</span>
 
             <button
               onClick={handleClose}
-              className="w-8 h-8 flex items-center justify-center border border-slate-200 rounded-full"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200"
             >
               <XIcon />
             </button>
@@ -71,7 +71,7 @@ export default function PLPListMobileFilter() {
 
           <PLPButton
             text="اعمال فیلتر ها"
-            className="w-full bg-pink-500 text-white flex items-center justify-center !text-base"
+            className="!text-base flex w-full items-center justify-center bg-pink-500 text-white"
             onClick={handleApplyFilters}
           />
         </div>

@@ -109,27 +109,27 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
   const {} = props;
 
   return (
-    <div className="bg-white rounded-xl p-5 mt-0 md:mt-6">
-      <h2 className="text-lg md:text-xl text-right mb-2 md:mb-4">
+    <div className="mt-0 rounded-xl bg-white p-5 md:mt-6">
+      <h2 className="text-lg mb-2 text-right md:text-xl md:mb-4">
         تراکنش های اخیر
       </h2>
-      <div className="overflow-x-auto border border-slate-100 rounded-2xl p-2 md:p-4">
+      <div className="overflow-x-auto rounded-2xl border border-slate-100 p-2 md:p-4">
         <table className="w-full">
           <thead>
-            <tr className="text-right px-2 bg-slate-50 rounded-xl">
-              <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-xs md:text-sm">
+            <tr className="rounded-xl bg-slate-50 px-2 text-right">
+              <th className="text-xs px-1 py-2 font-medium text-gray-600 md:text-sm md:py-2.5">
                 شناسه کاربر
               </th>
-              <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-xs md:text-sm">
+              <th className="text-xs px-1 py-2 font-medium text-gray-600 md:text-sm md:py-2.5">
                 مبلغ
               </th>
-              <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-xs md:text-sm">
+              <th className="text-xs px-1 py-2 font-medium text-gray-600 md:text-sm md:py-2.5">
                 وضعیت
               </th>
-              <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-right text-xs md:text-sm">
+              <th className="text-xs px-1 py-2 text-right font-medium text-gray-600 md:text-sm md:py-2.5">
                 تاریخ ایجاد
               </th>
-              <th className="py-2 md:py-2.5 px-1 font-medium text-gray-600 text-left text-xs md:text-sm">
+              <th className="text-xs px-1 py-2 text-left font-medium text-gray-600 md:text-sm md:py-2.5">
                 عملیات
               </th>
             </tr>
@@ -137,36 +137,36 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
           <tbody>
             {latestTransactions.map((transaction) => (
               <tr key={transaction.id} className="border-b border-gray-100">
-                <td className="py-2 md:py-3 text-xs md:text-sm">
-                  <a href="#" className="text-blue-500 hover:underline">
+                <td className="text-xs py-2 md:text-sm md:py-3">
+                  <a href="#" className="text-blue-500">
                     {transaction.userCode}
                   </a>
                 </td>
-                <td className="py-2 md:py-3 text-xs md:text-sm">
+                <td className="text-xs py-2 md:text-sm md:py-3">
                   {transaction.amount.toLocaleString()} تومان
                 </td>
-                <td className="py-2 md:py-3 text-xs md:text-sm">
+                <td className="text-xs py-2 md:text-sm md:py-3">
                   <span
-                    className={`px-2 py-1 rounded-md text-xs ${
+                    className={`text-xs rounded-md px-2 py-1 ${
                       transaction.status === "success"
                         ? "text-green-700"
                         : transaction.status === "pending"
-                        ? "text-yellow-700"
-                        : "text-red-700"
+                          ? "text-yellow-700"
+                          : "text-red-700"
                     }`}
                   >
                     {transaction.status === "success"
                       ? "موفق"
                       : transaction.status === "pending"
-                      ? "در انتظار"
-                      : "ناموفق"}
+                        ? "در انتظار"
+                        : "ناموفق"}
                   </span>
                 </td>
-                <td className="py-2 md:py-3 text-slate-500 text-right text-xs md:text-sm">
+                <td className="text-xs py-2 text-right text-slate-500 md:text-sm md:py-3">
                   {transaction.createdAt.toLocaleDateString("fa-IR")}
                 </td>
-                <td className="py-2 md:py-3 flex items-center justify-end">
-                  <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
+                <td className="flex items-center justify-end py-2 md:py-3">
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100">
                     <EyeIcon />
                   </button>
                 </td>
@@ -175,7 +175,7 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
             <tr>
               <td colSpan={5} className="py-2 md:py-3">
                 <div className="flex justify-center">
-                  <button className="flex items-center text-gray-500 text-xs md:text-sm">
+                  <button className="text-xs flex items-center text-gray-500 md:text-sm">
                     <span className="ml-2">مشاهده بیشتر</span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -187,7 +187,7 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="md:w-4 md:h-4"
+                      className="md:h-4 md:w-4"
                     >
                       <circle cx="12" cy="12" r="10" />
                       <path d="M12 8v8M8 12h8" />

@@ -1,7 +1,8 @@
 "use client";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +11,10 @@ interface Props {
 
 export default function MobileSearch({ isOpen, onClose }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<
+    Array<{ id: number; Title: string }>
+  >([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -25,9 +30,45 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
+  // Debounced suggestions (native fetch to avoid global overlays)
+  useEffect(() => {
+    let mounted = true;
+    const controller = new AbortController();
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=8&_skip_global_loader=1`;
+        const res = await fetch(url, {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+          signal: controller.signal,
+        });
+        if (!mounted) return;
+        const json = await res.json();
+        setSuggestions((json?.data || []).map((i: any) => ({ id: i.id, Title: i.Title })));
+      } catch (e) {
+        if (!mounted) return;
+        setSuggestions([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      mounted = false;
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [searchQuery]);
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -54,7 +95,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden bg-white p-6 text-right align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                  className="text-lg mb-4 font-medium leading-6 text-gray-900"
                 >
                   جستجو
                 </Dialog.Title>
@@ -65,7 +106,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
+                      className="text-sm w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
                       placeholder="جستجو در محصولات..."
                       dir="rtl"
                     />
@@ -97,10 +138,46 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                   </form>
                 </div>
 
+                {/* Suggestions */}
+                <div className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white" dir="rtl">
+                  {loading && (
+                    <div className="px-3 py-2 text-xs text-gray-500">در حال جستجو…</div>
+                  )}
+                  {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
+                    <div className="px-3 py-2 text-xs text-gray-500">موردی یافت نشد</div>
+                  )}
+                  {!loading &&
+                    suggestions.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          router.push(`/pdp/${s.id}`);
+                        }}
+                        className="block w-full cursor-pointer truncate bg-transparent px-3 py-2 text-right text-sm hover:bg-gray-50"
+                      >
+                        {s.Title}
+                      </button>
+                    ))}
+                  {!loading && suggestions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                      }}
+                      className="block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-xs text-pink-700 hover:bg-gray-50"
+                    >
+                      مشاهده همه نتایج
+                    </button>
+                  )}
+                </div>
+
                 <div className="mt-4">
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 text-sm font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                    className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
                     onClick={onClose}
                   >
                     بستن

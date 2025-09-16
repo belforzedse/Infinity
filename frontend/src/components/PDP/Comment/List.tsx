@@ -94,7 +94,7 @@ export default function PDPCommentList({ reviews }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-3xl text-neutral-700 hidden md:block">
+        <span className="text-3xl hidden text-neutral-700 md:block">
           {reviews?.length > 0
             ? "دیدگاه کاربران"
             : "شماهم دیدگاه خودتونو ثبت کنین"}
@@ -102,43 +102,43 @@ export default function PDPCommentList({ reviews }: Props) {
 
         <div className="relative">
           <PLPButton
-            className="w-full md:w-auto flex items-center justify-center"
+            className="flex w-full items-center justify-center md:w-auto"
             text={
               sortOption === "newest"
                 ? "جدیدترین"
                 : sortOption === "oldest"
-                ? "قدیمی‌ترین"
-                : sortOption === "highestRating"
-                ? "بیشترین امتیاز"
-                : "کمترین امتیاز"
+                  ? "قدیمی‌ترین"
+                  : sortOption === "highestRating"
+                    ? "بیشترین امتیاز"
+                    : "کمترین امتیاز"
             }
-            rightIcon={<SortDescIcon className="w-6 h-6" />}
+            rightIcon={<SortDescIcon className="h-6 w-6" />}
             onClick={() => setShowSortOptions(!showSortOptions)}
           />
 
           {showSortOptions && (
-            <div className="absolute top-full right-0 mt-1 w-48 rounded-lg bg-white shadow-lg z-10 border border-gray-200">
+            <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
               <ul className="py-1">
                 <li
-                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
-                    sortOption === "newest" ? "bg-gray-50 text-primary" : ""
+                  className={`cursor-pointer px-4 py-2 hover:bg-gray-100 ${
+                    sortOption === "newest" ? "text-primary bg-gray-50" : ""
                   }`}
                   onClick={() => handleSortSelect("newest")}
                 >
                   جدیدترین
                 </li>
                 <li
-                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
-                    sortOption === "oldest" ? "bg-gray-50 text-primary" : ""
+                  className={`cursor-pointer px-4 py-2 hover:bg-gray-100 ${
+                    sortOption === "oldest" ? "text-primary bg-gray-50" : ""
                   }`}
                   onClick={() => handleSortSelect("oldest")}
                 >
                   قدیمی‌ترین
                 </li>
                 <li
-                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                  className={`cursor-pointer px-4 py-2 hover:bg-gray-100 ${
                     sortOption === "highestRating"
-                      ? "bg-gray-50 text-primary"
+                      ? "text-primary bg-gray-50"
                       : ""
                   }`}
                   onClick={() => handleSortSelect("highestRating")}
@@ -146,9 +146,9 @@ export default function PDPCommentList({ reviews }: Props) {
                   بیشترین امتیاز
                 </li>
                 <li
-                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                  className={`cursor-pointer px-4 py-2 hover:bg-gray-100 ${
                     sortOption === "lowestRating"
-                      ? "bg-gray-50 text-primary"
+                      ? "text-primary bg-gray-50"
                       : ""
                   }`}
                   onClick={() => handleSortSelect("lowestRating")}
@@ -205,7 +205,7 @@ export default function PDPCommentList({ reviews }: Props) {
                     username: "پشتیبانی اینفینیتی",
                     date: safeParseDate(
                       review.attributes.product_review_replies?.data[0]
-                        ?.attributes.createdAt || ""
+                        ?.attributes.createdAt || "",
                     ),
                     comment:
                       review.attributes.product_review_replies?.data[0]
@@ -219,12 +219,12 @@ export default function PDPCommentList({ reviews }: Props) {
           })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-          <NoDataIcon className="w-20 h-20 text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-800 mb-2">
+        <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+          <NoDataIcon className="mb-4 h-20 w-20 text-gray-300" />
+          <h3 className="text-lg mb-2 font-medium text-gray-800">
             هنوز دیدگاهی ثبت نشده است
           </h3>
-          <p className="text-gray-600 max-w-md mb-4">
+          <p className="mb-4 max-w-md text-gray-600">
             اولین نفری باشید که دیدگاه خود را درباره این محصول ثبت می‌کنید.
           </p>
         </div>

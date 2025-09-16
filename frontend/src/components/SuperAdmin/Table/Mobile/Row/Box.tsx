@@ -17,17 +17,17 @@ export default function MobileTableRowBox<TData>({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="p-3 bg-white rounded-lg w-full min-h-[76px] flex items-center gap-2">
-      <div className="flex flex-col gap-2 flex-1">
-        <div className="flex justify-between items-center w-full">
+    <div className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3">
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex w-full items-center justify-between">
           <div className="flex gap-2">
-            <input type="checkbox" className="w-5 h-5" />
+            <input type="checkbox" className="h-5 w-5" />
 
             <span className="text-sm text-neutral-800">{headTitle}</span>
           </div>
 
           <button
-            className={`flex items-center justify-center rounded-full border border-neutral-600 w-6 h-6 ${
+            className={`flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 ${
               isOpen ? "rotate-180" : ""
             }`}
             onClick={() => setIsOpen(!isOpen)}

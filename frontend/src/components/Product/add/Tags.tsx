@@ -27,25 +27,25 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
 
   useEffect(() => {
     handleFetchTags();
-  }, []);
+  }, [handleFetchTags]);
 
   return (
     <div className="flex flex-col gap-1">
       <h2 className="text-base text-neutral-600">تگ ها</h2>
 
-      <div className="bg-white rounded-lg border border-slate-100 px-5 py-3 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-white px-5 py-3">
         <Combobox<TagResponseType, false>
           value={undefined}
           onChange={handleSelect}
         >
           <div className="relative">
             <Combobox.Input
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-neutral-800"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-neutral-800"
               onChange={(event) => setQuery(event.target.value)}
               displayValue={() => query}
               placeholder="تگ جدید را انتخاب کنید"
             />
-            <Combobox.Options className="absolute mt-1 w-full bg-white border border-slate-200 rounded-lg py-1 shadow-lg z-[99999]">
+            <Combobox.Options className="absolute z-[99999] mt-1 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
               {filteredTags.length === 0 ? (
                 <button
                   onClick={() => {
@@ -53,15 +53,15 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
                       handleCreateTag(query);
                     }
                   }}
-                  className="px-3 py-2 text-neutral-800 flex items-center gap-2"
+                  className="flex items-center gap-2 px-3 py-2 text-neutral-800"
                 >
-                  <span className="text-neutral-500 text-xs">
+                  <span className="text-xs text-neutral-500">
                     {isCreateTagLoading ? "ایجاد تگ........" : "ایجاد تگ جدید"}
                   </span>
                   <PlusIcon
                     className={classNames(
-                      "w-4 h-4",
-                      isCreateTagLoading && "animate-spin"
+                      "h-4 w-4",
+                      isCreateTagLoading && "animate-spin",
                     )}
                   />
                 </button>
@@ -71,7 +71,7 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
                     key={tag.id}
                     value={tag}
                     className={({ active }) =>
-                      `px-3 py-2 cursor-pointer text-neutral-800 ${
+                      `cursor-pointer px-3 py-2 text-neutral-800 ${
                         active ? "bg-slate-100" : "bg-white"
                       }`
                     }

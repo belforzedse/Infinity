@@ -1,0 +1,4 @@
+include:
+  - project: 'infinity/devops'
+    ref: main
+    file: 'infinity-frontend-cicd.yml'

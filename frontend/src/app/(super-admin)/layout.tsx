@@ -4,6 +4,8 @@ import Header from "@/components/SuperAdmin/Layout/Header";
 import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { UserService } from "@/services";
+import SuspenseLoader from "@/components/ui/SuspenseLoader";
 
 export default function SuperAdminLayout({
   children,
@@ -11,33 +13,56 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [verifying, setVerifying] = useState(true);
 
   useEffect(() => {
-    if (!localStorage.getItem("accessToken")) {
-      router.push("/auth");
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+    if (!token) {
+      router.replace("/auth");
+      return;
     }
-  }, []);
+
+    // Verify admin access before rendering
+    UserService.me(true)
+      .then((me) => {
+        if (!me?.isAdmin) {
+          router.replace("/auth");
+        } else {
+          setVerifying(false);
+        }
+      })
+      .catch(() => {
+        router.replace("/auth");
+      });
+  }, [router]);
 
   return (
-    <>
-      <Suspense fallback={<div>Loading...</div>}>
-        <div className="hidden md:block">
-          <Desktop>{children}</Desktop>
-        </div>
+    <div dir="rtl">
+      {verifying ? (
+        <SuspenseLoader fullscreen />
+      ) : (
+        <Suspense fallback={<SuspenseLoader fullscreen />}>
+          <div className="hidden md:block">
+            <Desktop>{children}</Desktop>
+          </div>
 
-        <div className="block md:hidden">
-          <Mobile>{children}</Mobile>
-        </div>
-      </Suspense>
-    </>
+          <div className="block md:hidden">
+            <Mobile>{children}</Mobile>
+          </div>
+        </Suspense>
+      )}
+    </div>
   );
 }
 
 function Mobile({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <div className="bg-neutral-50 p-4 min-h-screen">
-      <div className="w-full flex flex-col gap-4">
+    <div className="min-h-screen bg-neutral-50 p-4">
+      <div className="flex w-full flex-col gap-4">
         <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
         <Sidebar
           isOpen={isSidebarOpen}
@@ -51,11 +76,11 @@ function Mobile({ children }: { children: React.ReactNode }) {
 
 function Desktop({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-neutral-50 flex gap-5 pl-10 min-h-screen">
+    <div className="flex min-h-screen gap-5 bg-neutral-50 pl-10">
       <div className="w-[250px]">
         <Sidebar isOpen={true} onClose={() => {}} />
       </div>
-      <div className="w-full flex-1 flex flex-col lg:gap-7 gap-4 p-4">
+      <div className="flex w-full flex-1 flex-col gap-4 p-4 lg:gap-7">
         <Header onMenuClick={() => {}} />
         {children}
       </div>

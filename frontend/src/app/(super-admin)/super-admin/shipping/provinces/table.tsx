@@ -49,7 +49,7 @@ export const columns: ColumnDef<Province>[] = [
     },
     cell: () => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           {/* <SuperAdminTableCellActionButton
             variant="secondary"
             icon={<EditIcon />}
@@ -68,7 +68,7 @@ export const MobileTable = ({ data }: Props) => {
   if (!data) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data.map((row) => {
         return (
           <MobileTableRowBox
@@ -77,8 +77,8 @@ export const MobileTable = ({ data }: Props) => {
             row={row}
             header={
               <>
-                <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
-                  <div className="flex gap-1 items-center">
+                <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
+                  <div className="flex items-center gap-1">
                     <span className="text-xs text-neutral-400">
                       {row.attributes?.Title}
                     </span>
@@ -90,14 +90,14 @@ export const MobileTable = ({ data }: Props) => {
                     <span className="text-sm text-neutral-400">
                       ایجاد:{" "}
                       {new Date(row.attributes?.createdAt).toLocaleDateString(
-                        "fa-IR"
+                        "fa-IR",
                       )}
                     </span>
                     <span className="text-xs text-neutral-400">|</span>
                     <span className="text-sm text-neutral-400">
                       ویرایش:{" "}
                       {new Date(row.attributes?.updatedAt).toLocaleDateString(
-                        "fa-IR"
+                        "fa-IR",
                       )}
                     </span>
                   </div>

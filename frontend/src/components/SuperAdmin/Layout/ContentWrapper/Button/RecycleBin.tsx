@@ -2,12 +2,14 @@ type Props = {
   count: number;
   isRecycleBinOpen?: boolean;
   setIsRecycleBinOpen?: (isRecycleBinOpen: boolean) => void;
+  hasError?: boolean;
 };
 
 export default function SuperAdminLayoutContentWrapperButtonRecycleBin({
   count,
   isRecycleBinOpen,
   setIsRecycleBinOpen,
+  hasError,
 }: Props) {
   return (
     <span
@@ -18,7 +20,17 @@ export default function SuperAdminLayoutContentWrapperButtonRecycleBin({
         {isRecycleBinOpen ? "مشاهده جدید" : "مشاهده زباله‌دان"}
       </span>
       {!isRecycleBinOpen && (
-        <span className="text-foreground-muted">({count})</span>
+        <span className="text-foreground-muted">
+          (
+          {hasError ? (
+            <span className="text-red-500" title="خطا در دریافت تعداد">
+              !
+            </span>
+          ) : (
+            count
+          )}
+          )
+        </span>
       )}
     </span>
   );
