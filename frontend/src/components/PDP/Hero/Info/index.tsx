@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Action from "./Action";
 import Color from "./Color";
 import CommentsInfo from "./CommentsInfo";
@@ -70,6 +70,68 @@ export default function PDPHeroInfo(props: Props) {
   const [selectedModel, setSelectedModel] = useState<string>(
     models.length > 0 ? models[0].id : "",
   );
+
+  // Compute disabled ids for colors, sizes and models based on productData stock
+  const { disabledColors, disabledSizes, disabledModels, availableVariations } =
+    useMemo(() => {
+      const disabledColors: string[] = [];
+      const disabledSizes: string[] = [];
+      const disabledModels: string[] = [];
+
+      if (!productData?.attributes?.product_variations?.data) {
+        return { disabledColors, disabledSizes, disabledModels };
+      }
+
+      const variations: any[] = productData.attributes.product_variations.data;
+
+      // Helper to mark option id as enabled when any variation containing it has stock
+      const colorHasStock: Record<string, boolean> = {};
+      const sizeHasStock: Record<string, boolean> = {};
+      const modelHasStock: Record<string, boolean> = {};
+
+      const availableVars: any[] = [];
+      variations.forEach((variation) => {
+        // require published + stock to be considered purchasable
+        const published = variation.attributes.IsPublished === true;
+        const stockOk = hasStockForVariation(variation, 1);
+        const purchasable = published && stockOk;
+        if (purchasable) availableVars.push(variation);
+
+        // variation relations may be missing; guard
+        const colorRel = variation.attributes.product_variation_color?.data;
+        const sizeRel = variation.attributes.product_variation_size?.data;
+        const modelRel = variation.attributes.product_variation_model?.data;
+
+        if (colorRel)
+          colorHasStock[colorRel.id.toString()] =
+            colorHasStock[colorRel.id.toString()] || purchasable;
+        if (sizeRel)
+          sizeHasStock[sizeRel.id.toString()] =
+            sizeHasStock[sizeRel.id.toString()] || purchasable;
+        if (modelRel)
+          modelHasStock[modelRel.id.toString()] =
+            modelHasStock[modelRel.id.toString()] || purchasable;
+      });
+
+      colors.forEach((c) => {
+        if (!colorHasStock[c.id]) disabledColors.push(c.id);
+      });
+
+      sizes.forEach((s) => {
+        if (!sizeHasStock[s.id]) disabledSizes.push(s.id);
+      });
+
+      models.forEach((m) => {
+        if (!modelHasStock[m.id]) disabledModels.push(m.id);
+      });
+
+      return {
+        disabledColors,
+        disabledSizes,
+        disabledModels,
+        availableVariations: availableVars,
+      };
+    }, [productData, colors, sizes, models]);
 
   // Calculate the current price based on selected variation
   const [currentPrice, setCurrentPrice] = useState(product.price);
@@ -258,14 +320,64 @@ export default function PDPHeroInfo(props: Props) {
 
   // Initialize variation details based on default selections when component mounts
   useEffect(() => {
-    if (productData && colors.length > 0 && sizes.length > 0) {
+    if (!productData || !productData.attributes?.product_variations?.data)
+      return;
+
+    // If there's exactly one available variation (stock), auto-select it
+    const availableVariations =
+      productData.attributes.product_variations.data.filter((v: any) =>
+        hasStockForVariation(v, 1),
+      );
+    if (availableVariations.length === 1) {
+      const v = availableVariations[0];
+      const colorId =
+        v.attributes.product_variation_color?.data?.id?.toString() ||
+        colors[0]?.id ||
+        "";
+      const sizeId =
+        v.attributes.product_variation_size?.data?.id?.toString() ||
+        sizes[0]?.id ||
+        "";
+      const modelId =
+        v.attributes.product_variation_model?.data?.id?.toString() ||
+        models[0]?.id ||
+        "";
+
+      setSelectedColor(colorId);
+      setSelectedSize(sizeId);
+      setSelectedModel(modelId);
+      updateVariationDetails(colorId, sizeId, modelId);
+      return;
+    }
+
+    // Otherwise use first non-disabled/defaults
+    const firstColor =
+      colors.find((c) => !disabledColors.includes(c.id)) || colors[0];
+    const firstSize =
+      sizes.find((s) => !disabledSizes.includes(s.id)) || sizes[0];
+    const firstModel =
+      models.find((m) => !disabledModels.includes(m.id)) || models[0];
+
+    if (firstColor && firstSize) {
+      setSelectedColor(firstColor.id);
+      setSelectedSize(firstSize.id);
+      if (firstModel) setSelectedModel(firstModel.id);
       updateVariationDetails(
-        colors[0].id,
-        sizes[0].id,
-        models.length > 0 ? models[0].id : "",
+        firstColor.id,
+        firstSize.id,
+        firstModel ? firstModel.id : "",
       );
     }
-  }, [productData, colors, sizes, models, updateVariationDetails]);
+  }, [
+    productData,
+    colors,
+    sizes,
+    models,
+    updateVariationDetails,
+    disabledColors,
+    disabledSizes,
+    disabledModels,
+  ]);
 
   // Get selected color and size objects
   const selectedColorObj = colors.find((color) => color.id === selectedColor);
@@ -292,6 +404,35 @@ export default function PDPHeroInfo(props: Props) {
 
   return (
     <div className="flex flex-1 flex-col gap-5 md:max-w-[688px]">
+      {process.env.NODE_ENV !== "production" && (
+        <div
+          className="dev-debug-panel"
+          style={{
+            backgroundColor: "#f8fafc",
+            padding: 12,
+            fontSize: 12,
+            color: "#334155",
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>DEV DEBUG: variations</div>
+          <div style={{ marginTop: 8 }}>
+            <div>
+              Available variation IDs:{" "}
+              {availableVariations && availableVariations.length
+                ? availableVariations.map((v: any) => v.id).join(", ")
+                : "(none)"}
+            </div>
+            <div>Disabled colors: {disabledColors.join(", ") || "(none)"}</div>
+            <div>Disabled sizes: {disabledSizes.join(", ") || "(none)"}</div>
+            <div>Disabled models: {disabledModels.join(", ") || "(none)"}</div>
+            <div>
+              Selected: color={selectedColor} size={selectedSize} model=
+              {selectedModel}
+            </div>
+            <div>CurrentVariationId: {currentVariationId || "(none)"}</div>
+          </div>
+        </div>
+      )}
       <div className="hidden md:block">
         <Main
           category={product.category}
@@ -315,6 +456,7 @@ export default function PDPHeroInfo(props: Props) {
           sizes={sizes}
           onSizeChange={handleSizeChange}
           selectedSize={selectedSize}
+          disabledSizeIds={disabledSizes}
           sizeHelper={productData?.attributes?.product_size_helper?.data}
         />
 
@@ -322,6 +464,7 @@ export default function PDPHeroInfo(props: Props) {
           colors={colors}
           onColorChange={handleColorChange}
           selectedColor={selectedColor}
+          disabledColorIds={disabledColors}
         />
 
         {models.length > 0 && (
@@ -329,6 +472,7 @@ export default function PDPHeroInfo(props: Props) {
             models={models}
             onModelChange={handleModelChange}
             selectedModel={selectedModel}
+            disabledModelIds={disabledModels}
           />
         )}
       </div>

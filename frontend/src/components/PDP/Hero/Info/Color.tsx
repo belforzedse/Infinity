@@ -45,30 +45,31 @@ export default function PDPHeroInfoColor(props: Props) {
         {colors.map((color) => {
           const isSelected = color.id === selectedColor;
           const isDisabled = disabledColorIds.includes(color.id);
-
           return (
             <div key={color.id} className="flex items-center">
+              {/* TODO(a11y): Consider rendering as a button with aria-pressed or using radiogroup/row role for better keyboard accessibility. */}
               {isSelected ? (
                 <div className="flex items-center gap-1 rounded-3xl border border-gray-300 p-1">
                   <div
                     className="h-7 w-7 rounded-full"
                     style={{ backgroundColor: color.colorCode }}
                   />
+
                   <span className="text-sm text-foreground-primary">
                     {color.title}
                   </span>
                 </div>
               ) : (
                 <button
+                  type="button"
                   onClick={() =>
                     isDisabled ? undefined : handleColorClick(color.id)
                   }
-                  className={`h-7 w-7 rounded-full ${
-                    isDisabled
-                      ? "cursor-not-allowed opacity-30"
-                      : "cursor-pointer"
-                  }`}
-                  style={{ backgroundColor: color.colorCode }}
+                  className="h-7 w-7 rounded-full border"
+                  style={{
+                    backgroundColor: isDisabled ? "#e5e7eb" : color.colorCode,
+                    opacity: isDisabled ? 0.45 : 1,
+                  }}
                   disabled={isDisabled}
                   aria-disabled={isDisabled}
                   title={isDisabled ? "ناموجود" : color.title}
