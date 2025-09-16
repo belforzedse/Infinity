@@ -2,7 +2,7 @@ import {
   ProductDataResponse,
   GenericRelationArray,
 } from "@/services/super-admin/product/get";
-import { EditProductData, ProductData } from "@/types/super-admin/products";
+import { EditProductData } from "@/types/super-admin/products";
 import {
   TagResponseType,
   TagAttributes,
@@ -30,7 +30,7 @@ interface StrapiTagData {
 }
 
 export function transformToProductData(
-  strapiProduct: ProductDataResponse
+  strapiProduct: ProductDataResponse,
 ): EditProductData {
   // Extract CoverImage URL if it exists, otherwise use an empty string
   const coverImageUrl = {

@@ -14,7 +14,7 @@ type StandardFieldType =
   | "terms"
   | "json";
 
-type FieldType = StandardFieldType | "province-city" | "radio-text-with-chips";
+// removed unused FieldType alias
 
 // Define basic field types similar to those in the original component
 type StandardField<T> = {

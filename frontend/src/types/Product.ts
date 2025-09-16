@@ -1,3 +1,29 @@
+// Shared product and variation types used across the frontend
+export type Variation = {
+  id: number;
+  attributes: {
+    IsPublished?: boolean;
+    Price?: string | number;
+    DiscountPrice?: string | number;
+    product_stock?: { data?: { attributes?: { Count?: number } } } | null;
+    product_variation_color?: { data?: { id: number; attributes?: any } } | null;
+    product_variation_size?: { data?: { id: number; attributes?: any } } | null;
+    product_variation_model?: { data?: { id: number; attributes?: any } } | null;
+    [k: string]: any;
+  };
+};
+
+export type ProductData = {
+  attributes: {
+    product_variations?: { data?: Variation[] };
+    product_size_helper?: any;
+    CoverImage?: any;
+    Description?: string;
+    CleaningTips?: string;
+    ReturnConditions?: string;
+    [k: string]: any;
+  };
+};
 export type ProductCoverImage = {
   data: {
     id: string;

@@ -7,21 +7,16 @@ import PLPFilterBox from "@/components/Kits/PLP/FilterBox";
 import PLPFilterBoxWithItems from "@/components/Kits/PLP/FilterBoxWithItems";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
-import { API_BASE_URL, ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { categories as staticCategories } from "@/constants/categories";
 
 interface FilterProps {
   showAvailableOnly?: boolean;
 }
 
 interface Category {
-  id: number;
-  attributes: {
-    Title: string;
-    Slug?: string;
-    Parent?: string;
-    createdAt?: string;
-    updatedAt?: string;
-  };
+  id: string;
+  title: string;
 }
 
 export default function Filter({ showAvailableOnly = false }: FilterProps) {
@@ -30,11 +25,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
   const [available, setAvailable] = useQueryState("available");
   const [minPrice, setMinPrice] = useQueryState("minPrice");
   const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [size, setSize] = useQueryState("size");
-  const [material, setMaterial] = useQueryState("material");
-  const [season, setSeason] = useQueryState("season");
-  const [gender, setGender] = useQueryState("gender");
-  const [usage, setUsage] = useQueryState("usage");
+  const [, setSize] = useQueryState("size");
 
   // State for categories
   const [categories, setCategories] = useState<Category[]>([]);
@@ -46,7 +37,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
       try {
         setIsLoadingCategories(true);
         const response = await fetch(
-          `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`
+          `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`,
         );
 
         if (!response.ok) {
@@ -54,9 +45,29 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
         }
 
         const data = await response.json();
-        setCategories(data.data);
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          setCategories(
+            data.data.map((cat: any) => ({
+              id: cat.attributes.Slug || cat.id.toString(),
+              title: cat.attributes.Title,
+            })),
+          );
+        } else {
+          setCategories(
+            staticCategories.map((cat) => ({
+              id: cat.slug,
+              title: cat.name,
+            })),
+          );
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
+        setCategories(
+          staticCategories.map((cat) => ({
+            id: cat.slug,
+            title: cat.name,
+          })),
+        );
       } finally {
         setIsLoadingCategories(false);
       }
@@ -77,7 +88,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setCategory(id);
     },
-    [setCategory]
+    [setCategory],
   );
 
   // Availability filter handler
@@ -85,7 +96,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (checked: boolean) => {
       setAvailable(checked ? "true" : null);
     },
-    [setAvailable]
+    [setAvailable],
   );
 
   // Price filter handler
@@ -94,7 +105,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
       setMinPrice(min.toString());
       setMaxPrice(max.toString());
     },
-    [setMinPrice, setMaxPrice]
+    [setMinPrice, setMaxPrice],
   );
 
   // Size filter handler
@@ -102,39 +113,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     (id: string) => {
       setSize(id);
     },
-    [setSize]
-  );
-
-  // Material filter handler
-  const handleMaterialSelect = useCallback(
-    (id: string) => {
-      setMaterial(id);
-    },
-    [setMaterial]
-  );
-
-  // Season filter handler
-  const handleSeasonSelect = useCallback(
-    (id: string) => {
-      setSeason(id);
-    },
-    [setSeason]
-  );
-
-  // Gender filter handler
-  const handleGenderSelect = useCallback(
-    (id: string) => {
-      setGender(id);
-    },
-    [setGender]
-  );
-
-  // Usage filter handler
-  const handleUsageSelect = useCallback(
-    (id: string) => {
-      setUsage(id);
-    },
-    [setUsage]
+    [setSize],
   );
 
   return (
@@ -143,8 +122,8 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
         value={category || ""}
         title="دسته بندی محصولات"
         filterOptions={categories.map((cat) => ({
-          id: cat.attributes.Slug || cat.id.toString(),
-          title: cat.attributes.Title,
+          id: cat.id,
+          title: cat.title,
         }))}
         onOptionSelect={(optionId: string | number) =>
           handleCategorySelect(optionId.toString())

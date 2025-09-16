@@ -84,7 +84,7 @@ export default function AccountForm() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg flex flex-col lg:gap-4 gap-2 p-4">
+      <div className="flex flex-col gap-2 rounded-lg bg-white p-4 lg:gap-4">
         <span className="text-xl text-foreground-primary">
           در حال بارگذاری...
         </span>
@@ -94,13 +94,13 @@ export default function AccountForm() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg flex flex-col lg:gap-4 gap-2 p-4">
+      <div className="flex flex-col gap-2 rounded-lg bg-white p-4 lg:gap-4">
         <span className="text-xl text-red-500">
           خطا در بارگذاری اطلاعات کاربر
         </span>
         <button
           onClick={refetch}
-          className="bg-[#EC4899] text-white rounded-lg py-2 px-4 w-fit"
+          className="w-fit rounded-lg bg-[#EC4899] px-4 py-2 text-white"
         >
           تلاش مجدد
         </button>
@@ -109,13 +109,13 @@ export default function AccountForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg flex flex-col lg:gap-4 gap-2">
+    <div className="flex flex-col gap-2 rounded-lg bg-white lg:gap-4">
       <span className="text-xl text-foreground-primary">
         اطلاعات حساب کاربری
       </span>
 
-      <form onSubmit={handleSubmit} className="flex flex-col lg:gap-6 gap-3">
-        <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-4 gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 lg:gap-6">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
           <Input
             label="نام"
             name="firstName"
@@ -137,7 +137,7 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-4 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
           <Input
             label="کد ملی"
             name="nationalId"
@@ -163,7 +163,7 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-4 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
           <Input
             label="تاریخ تولد"
             name="birthDate"
@@ -173,9 +173,7 @@ export default function AccountForm() {
             }
             placeholder="1370/06/23"
             icon={<CalenderIcon />}
-            onIconClick={() => {
-              console.log("clicked");
-            }}
+            onIconClick={() => {}}
           />
 
           <RadioGroup
@@ -187,14 +185,14 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="w-full flex items-end justify-end lg:mt-0 mt-2">
+        <div className="mt-2 flex w-full items-end justify-end lg:mt-0">
           <button
             type="submit"
-            className="bg-[#EC4899] text-white rounded-lg lg:py-2 py-2.5 px-8 lg:w-fit w-full justify-center flex items-center gap-1 disabled:bg-pink-300 disabled:cursor-not-allowed"
+            className="flex w-full items-center justify-center gap-1 rounded-lg bg-[#EC4899] px-8 py-2.5 text-white disabled:cursor-not-allowed disabled:bg-pink-300 lg:w-fit lg:py-2"
             disabled={isSaving}
           >
-            <SaveIcon className="lg:h-6 lg:w-6 h-5 w-5" />
-            <span className="lg:text-sm text-base">
+            <SaveIcon className="h-5 w-5 lg:h-6 lg:w-6" />
+            <span className="text-base lg:text-sm">
               {isSaving ? "در حال ذخیره..." : "ذخیره تغییرات"}
             </span>
           </button>

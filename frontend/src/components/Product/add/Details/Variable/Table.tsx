@@ -22,7 +22,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
   return (
     <>
       {/* Desktop Table View */}
-      <div className="hidden md:block w-full overflow-hidden bg-white rounded-lg border border-slate-100">
+      <div className="hidden w-full overflow-hidden rounded-lg border border-slate-100 bg-white md:block">
         <table className="w-full table-fixed">
           <ProductVariableHeader />
           <tbody>
@@ -41,7 +41,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:hidden">
         {variables.map((item) => (
           <ProductVariableCard
             key={item.id}

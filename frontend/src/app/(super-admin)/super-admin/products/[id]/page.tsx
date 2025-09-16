@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect } from "react";
+import { use, useEffect, useMemo } from "react";
 import SetDetails from "@/components/Product/add/SetCategory/SetCategory";
 import Tabs from "@/components/Kits/Tabs";
 import { TabItem } from "@/types/Tabs";
@@ -15,6 +15,7 @@ import { updateProduct } from "@/services/super-admin/product/update";
 import { useRouter } from "next/navigation";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import { useProductTag } from "@/hooks/product/useTag";
+import logger from "@/utils/logger";
 
 export default function EditProductsPage({
   params,
@@ -28,15 +29,18 @@ export default function EditProductsPage({
   const { fetchAllCategories } = useProductCategory();
   const { handleFetchTags } = useProductTag();
 
-  const getProductParams = {
-    Files: true,
-    Media: true,
-    CoverImage: true,
-    product_main_category: true,
-    product_tags: true,
-    product_variations: true,
-    product_other_categories: true,
-  };
+  const getProductParams = useMemo(
+    () => ({
+      Files: true,
+      Media: true,
+      CoverImage: true,
+      product_main_category: true,
+      product_tags: true,
+      product_variations: true,
+      product_other_categories: true,
+    }),
+    [],
+  );
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,21 +48,25 @@ export default function EditProductsPage({
         const result = await getProduct(id, getProductParams);
         setProductData(transformToProductData(result.data.attributes));
       } catch (error: any) {
-        console.log("error in fetching product: ", error);
+        if (process.env.NODE_ENV !== "production") {
+          logger.error("error in fetching product", { error });
+        }
       }
     };
 
     fetchProduct();
-  }, [id, setProductData]);
+  }, [id, setProductData, getProductParams]);
 
   useEffect(() => {
     fetchAllCategories();
     handleFetchTags();
-  }, []);
+  }, [fetchAllCategories, handleFetchTags]);
 
   const handleUpdateProduct = async () => {
     try {
-      console.log("productData2", productData);
+      if (process.env.NODE_ENV !== "production") {
+        logger.info("productData2", { productData });
+      }
 
       const result = await updateProduct(id, productData);
       if (result.success) {
@@ -85,35 +93,33 @@ export default function EditProductsPage({
   ];
 
   return (
-    <div className="w-full grid-cols-3 lg:grid flex flex-col gap-4">
-      <div className="flex flex-col gap-4 lg:order-1 order-2">
+    <div className="flex w-full grid-cols-3 flex-col gap-4 lg:grid">
+      <div className="order-2 flex flex-col gap-4 lg:order-1">
         <IndexPhotoUploader isEditMode />
         {/* <SetPrice />
         <SetStatus /> */}
         <SetDetails isEditMode />
       </div>
-      <div className="col-span-2 flex-1 lg:order-2 order-1 h-fit">
-        <Tabs
-          tabs={tabs}
-          children={[
+      <div className="order-1 col-span-2 h-fit flex-1 lg:order-2">
+        <Tabs tabs={tabs} tabsClassName="!bg-transparent">
+          {[
             <Overall key={"overall"} productData={productData} isEditMode />,
             <Variables key={"variables"} productId={Number(id)} />,
             <Sizes key={"sizes"} productId={Number(id)} />,
           ]}
-          tabsClassName="!bg-transparent"
-        />
+        </Tabs>
       </div>
 
-      <div className="border-t border-slate-200 flex justify-end items-center col-span-3 pt-2.5 mt-2 gap-2 order-3">
+      <div className="order-3 col-span-3 mt-2 flex items-center justify-end gap-2 border-t border-slate-200 pt-2.5">
         <button
-          className="rounded-xl bg-slate-200 text-slate-500 py-2 px-5 text-sm lg:w-fit w-1/2"
+          className="text-sm w-1/2 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 lg:w-fit"
           onClick={() => router.push("/super-admin/products")}
         >
           بیخیال شدن
         </button>
         <button
           onClick={handleUpdateProduct}
-          className="rounded-xl bg-pink-500 text-white py-2 px-5 text-sm lg:w-fit w-1/2"
+          className="text-sm w-1/2 rounded-xl bg-pink-500 px-5 py-2 text-white lg:w-fit"
         >
           ذخیره
         </button>

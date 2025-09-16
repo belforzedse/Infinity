@@ -2,6 +2,7 @@
 
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -66,6 +67,9 @@ interface ProcessedProduct {
 function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
   let url = `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&pagination[pageSize]=6`;
 
+  // Only show products whose Title contains کیف، کفش، or صندل
+  url += `&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل`;
+
   if (category) {
     url += `&filters[product_main_category][Slug][$eq]=${category}`;
   }
@@ -80,7 +84,7 @@ function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
           (variation) => {
             const price = variation.attributes.Price;
             return price && parseInt(price) > 0;
-          }
+          },
         );
       });
 
@@ -123,7 +127,7 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
   const [title, setTitle] = useState("همه محصولات");
   const [imageUrl, setImageUrl] = useState("/images/off-section.png");
   const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>(
-    []
+    [],
   );
 
   useEffect(() => {
@@ -131,38 +135,51 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
     Promise.all([
       category
         ? fetch(
-            `${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`
+            `${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`,
           ).then((res) => res.json())
         : Promise.resolve({ data: [] }),
       getFeaturedProducts(category),
-    ]).then(([categoryData, products]) => {
-      setFeaturedProducts(products);
+    ])
+      .then(([categoryData, products]) => {
+        setFeaturedProducts(products);
 
-      if (category && categoryData.data.length > 0) {
-        const categoryAttributes = categoryData.data[0].attributes;
-        setTitle(categoryAttributes.Title);
+        if (category && categoryData.data.length > 0) {
+          const categoryAttributes = categoryData.data[0].attributes;
+          setTitle(categoryAttributes.Title);
 
-        if (categoryAttributes.CoverImage?.data?.attributes?.url) {
-          setImageUrl(
-            `${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`
-          );
+          if (categoryAttributes.CoverImage?.data?.attributes?.url) {
+            setImageUrl(
+              `${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`,
+            );
+          }
         }
-      }
-    });
+      })
+      .catch(() => {
+        // Keep UI usable on failures
+        setFeaturedProducts([]);
+      });
   }, [category]);
 
   return (
-    <div className="w-full p-4 md:py-6 md:px-10 bg-background-secondary">
-      <div className="flex flex-col md:flex-row gap-3 max-w-[1440px] mx-auto">
-        <div className="flex flex-1 gap-3 flex-wrap pt-4 md:pt-0">
+    <div className="w-full bg-background-secondary p-4 md:px-10 md:py-6">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-3 md:flex-row">
+        <div className="flex flex-1 flex-wrap gap-3 pt-4 md:pt-0">
           {featuredProducts.map((product) => (
             <ProductSmallCard key={product.id} {...product} />
           ))}
         </div>
 
         <Link href="/">
-          <div className="w-full md:w-[517px] h-[244px] relative rounded-2xl overflow-hidden">
-            <Image src={imageUrl} alt={title} fill className="object-cover" />
+          <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 517px"
+              priority
+              loader={imageLoader}
+            />
           </div>
         </Link>
       </div>

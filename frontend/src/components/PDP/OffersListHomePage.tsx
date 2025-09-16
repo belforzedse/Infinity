@@ -1,7 +1,7 @@
 "use client";
 import ProductCard, { type ProductCardProps } from "@/components/Product/Card";
 import PDPHeroNavigationButtons from "./NavigationButtons";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import ArrowLeftIcon from "./Icons/ArrowLeftIcon";
 import Link from "next/link";
 
@@ -14,8 +14,11 @@ type Props = {
 export default function OffersListHomePage(props: Props) {
   const { icon, title, products } = props;
 
-  const [isShowAllProducts, setIsShowAllProducts] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Controls whether to show all products or a subset.
+  // Defaults to showing a subset on the homepage sections.
+  const isShowAllProducts = false;
 
   function goToNextProduct() {
     if (scrollRef.current) {
@@ -57,9 +60,9 @@ export default function OffersListHomePage(props: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center gap-1">
           {icon}
-          <span className="text-foreground-primary text-2xl md:text-3xl">
+          <span className="text-2xl text-foreground-primary md:text-3xl">
             {title}
           </span>
         </div>
@@ -75,7 +78,7 @@ export default function OffersListHomePage(props: Props) {
           {/* Desktop: navigate to PLP with appropriate filters */}
           <Link
             href={getPlpHref()}
-            className="hidden md:block text-pink-600 text-sm hover:underline"
+            className="text-sm hidden text-pink-600 underline-offset-4 transition-colors hover:text-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
           >
             مشاهده همه
           </Link>
@@ -86,7 +89,7 @@ export default function OffersListHomePage(props: Props) {
       <div className="md:hidden">
         <div
           ref={scrollRef}
-          className="gap-5 overflow-x-auto flex snap-x snap-mandatory scrollbar-hide"
+          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
@@ -94,17 +97,17 @@ export default function OffersListHomePage(props: Props) {
           }}
         >
           {products.map((product) => (
-            <Link key={product.id} href={`/pdp/${product.id}`} className="snap-start">
+            <div key={product.id} className="snap-start">
               <ProductCard {...product} />
-            </Link>
+            </div>
           ))}
         </div>
 
         {!isShowAllProducts && products.length > 4 && (
-          <div className="flex items-center justify-center mt-4">
+          <div className="mt-4 flex items-center justify-center">
             <Link
               href={getPlpHref()}
-              className="text-foreground-primary text-base flex items-center gap-1"
+              className="text-base flex items-center gap-1 text-foreground-primary underline-offset-4 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               <span>مشاهده همه</span>
               <ArrowLeftIcon />
@@ -114,20 +117,20 @@ export default function OffersListHomePage(props: Props) {
       </div>
 
       {/* Desktop grid view */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+      <div className="hidden gap-4 gap-y-6 md:grid md:grid-cols-2 lg:grid-cols-4">
         {displayedProducts.map((product) => (
-          <Link key={product.id} href={`/pdp/${product.id}`} className="h-full">
+          <div key={product.id} className="h-full">
             <ProductCard {...product} />
-          </Link>
+          </div>
         ))}
       </div>
 
       {/* Desktop view more button */}
       {!isShowAllProducts && products.length > 8 && (
-        <div className="hidden md:flex items-center justify-center mt-6">
+        <div className="mt-6 hidden items-center justify-center md:flex">
           <Link
             href={getPlpHref()}
-            className="text-foreground-primary text-base flex items-center gap-1 hover:text-pink-600 transition-colors py-2 px-4 border border-pink-100 rounded-full hover:bg-pink-50"
+            className="pressable text-base flex items-center gap-1 rounded-full border border-pink-100 px-4 py-2 text-foreground-primary transition-colors hover:bg-pink-50 hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             <span>مشاهده محصولات بیشتر</span>
             <ArrowLeftIcon />

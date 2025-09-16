@@ -23,16 +23,16 @@ const UploadButton: React.FC<UploadButtonProps> = ({
   return (
     <label
       className={classNames(
-        "flex items-center px-3 py-2 bg-blue-50 border border-blue-600 text-blue-600 rounded-lg cursor-pointer hover:bg-blue-200 transition-colors min-w-32 justify-between",
-        isLoading && "opacity-50 cursor-not-allowed pointer-events-none",
-        className
+        "flex min-w-32 cursor-pointer items-center justify-between rounded-lg border border-blue-600 bg-blue-50 px-3 py-2 text-blue-600 transition-colors hover:bg-blue-200",
+        isLoading && "pointer-events-none cursor-not-allowed opacity-50",
+        className,
       )}
     >
       <span className="text-sm">
         {isLoading ? "در حال آپلود..." : "اضافه کردن"}
       </span>
       <PlusIcon
-        className={classNames("w-4 h-4", isLoading && "animate-spin")}
+        className={classNames("h-4 w-4", isLoading && "animate-spin")}
       />
       <input
         type="file"

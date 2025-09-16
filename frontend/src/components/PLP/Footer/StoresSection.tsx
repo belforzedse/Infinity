@@ -35,24 +35,42 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
   const [phone, setPhone] = useState<string>("017-325-304-39");
   const [whatsapp, setWhatsapp] = useState<string | null>("0901-655-25-30");
   const [instagram, setInstagram] = useState<string | null>(
-    "infinity.color_boutique"
+    "infinity.color_boutique",
   );
   const [telegram, setTelegram] = useState<string | null>("InfinityColorShop");
 
   useEffect(() => {
     if (contactInfo) {
-      setPhone(contactInfo.Phone);
-      setWhatsapp(contactInfo.Whatsapp);
-      setInstagram(contactInfo.Instagram);
-      setTelegram(contactInfo.Telegram);
+      // Only override defaults when API provides a value
+      if (contactInfo.Phone && contactInfo.Phone.trim() !== "") {
+        setPhone(contactInfo.Phone);
+      }
+      if (
+        typeof contactInfo.Whatsapp === "string" &&
+        contactInfo.Whatsapp.trim() !== ""
+      ) {
+        setWhatsapp(contactInfo.Whatsapp);
+      }
+      if (
+        typeof contactInfo.Instagram === "string" &&
+        contactInfo.Instagram.trim() !== ""
+      ) {
+        setInstagram(contactInfo.Instagram);
+      }
+      if (
+        typeof contactInfo.Telegram === "string" &&
+        contactInfo.Telegram.trim() !== ""
+      ) {
+        setTelegram(contactInfo.Telegram);
+      }
     }
   }, [contactInfo]);
 
   return (
-    <div className="flex flex-col gap-4 relative md:px-[65px] md:border-r border-slate-200 md:h-full md:min-h-[324px]">
-      <h3 className="text-neutral-900 text-base">فروشگاه های حضوری</h3>
+    <div className="relative flex flex-col gap-4 border-slate-200 md:h-full md:min-h-[324px] md:border-r md:px-[65px]">
+      <h3 className="text-base text-neutral-900">فروشگاه های حضوری</h3>
 
-      <p className="text-neutral-500 text-sm text-right md:max-w-[233px]">
+      <p className="text-sm text-right text-neutral-500 md:max-w-[233px]">
         گرگان، بلوار ناهارخوران نبش عدالت 68، گنبد کاووس، ابتدای بلوار دانشجو
       </p>
       <div className="flex gap-2">
@@ -70,58 +88,68 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
               width={24}
               height={24}
               className="rounded-full"
+              loading="lazy"
+              sizes="24px"
             />
           </a>
         ))}
       </div>
 
-      <div className="w-full h-[1px] bg-slate-200 my-2" />
+      <div className="my-2 h-[1px] w-full bg-slate-200" />
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-neutral-900 text-base">ارتباط با ما</h3>
-        <div className="flex flex-col gap-2 items-start">
+        <h3 className="text-base text-neutral-900">ارتباط با ما</h3>
+        <div className="flex flex-col items-start gap-2">
           {phone && (
-            <div className="flex items-center gap-1 justify-end">
+            <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/phone.png"
                 alt="Phone"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
-              <span className="text-neutral-600 text-sm">{phone}</span>
+              <span className="text-sm text-neutral-600">{phone}</span>
             </div>
           )}
           {whatsapp && (
-            <div className="flex items-center gap-1 justify-end">
+            <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/whatsapp.png"
                 alt="WhatsApp"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
-              <span className="text-neutral-600 text-sm">{whatsapp}</span>
+              <span className="text-sm text-neutral-600">{whatsapp}</span>
             </div>
           )}
           {instagram && (
-            <div className="flex items-center gap-1 justify-end">
+            <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/instagram.png"
                 alt="Instagram"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
-              <span className="text-neutral-600 text-sm">{instagram}</span>
+              <span className="text-sm text-neutral-600">{instagram}</span>
             </div>
           )}
           {telegram && (
-            <div className="flex items-center gap-1 justify-end">
+            <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/pinterest.png"
                 alt="Pinterest"
                 width={16}
                 height={16}
+                loading="lazy"
+                sizes="16px"
               />
-              <span className="text-neutral-600 text-sm">{telegram}</span>
+              <span className="text-sm text-neutral-600">{telegram}</span>
             </div>
           )}
         </div>

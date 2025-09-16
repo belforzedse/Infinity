@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAtom } from "jotai";
 import {
   editProductDataAtom,
@@ -11,6 +11,7 @@ import {
   TagResponseType,
 } from "@/services/super-admin/product/tag/get";
 import { usePathname } from "next/navigation";
+import logger from "@/utils/logger";
 
 interface UseProductTagProps {
   isEditMode?: boolean;
@@ -20,7 +21,7 @@ export function useProductTag(props?: UseProductTagProps) {
   const { isEditMode = false } = props || {};
 
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
   const pathname = usePathname();
   const [tags, setTags] = useState<TagResponseType[]>(productData.product_tags);
@@ -29,29 +30,29 @@ export function useProductTag(props?: UseProductTagProps) {
   const [isGetTagsLoading, setIsGetTagsLoading] = useState(false);
   const [isCreateTagLoading, setIsCreateTagLoading] = useState(false);
 
-  useEffect(() => {
-    if (!pathname.endsWith("/add") && productData.product_tags?.length > 0) {
-      setTags(productData.product_tags);
-      // Update tag options to exclude already selected tags
-      handleFetchTags();
-    }
-  }, [pathname, productData.product_tags]);
-
-  const handleFetchTags = async () => {
+  const handleFetchTags = useCallback(async () => {
     try {
       setIsGetTagsLoading(true);
       const response = await getTags();
       setTagOptions(
         (response as any).filter(
-          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id)
-        )
+          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id),
+        ),
       );
     } catch (error) {
       console.error("Error fetching tags:", error);
     } finally {
       setIsGetTagsLoading(false);
     }
-  };
+  }, [tags]);
+
+  useEffect(() => {
+    if (!pathname.endsWith("/add") && productData.product_tags?.length > 0) {
+      setTags(productData.product_tags);
+      // Update tag options to exclude already selected tags
+      handleFetchTags();
+    }
+  }, [pathname, productData.product_tags, handleFetchTags]);
 
   const handleCreateTag = async (title: string) => {
     try {
@@ -59,7 +60,9 @@ export function useProductTag(props?: UseProductTagProps) {
       const response = await createTag(title);
 
       // Debug the response structure
-      console.log("Tag creation response:", response);
+      if (process.env.NODE_ENV !== "production") {
+        logger.info("Tag creation response", { response });
+      }
 
       // Check if the response is successful
       if (response.data?.data?.id) {
@@ -73,7 +76,9 @@ export function useProductTag(props?: UseProductTagProps) {
           },
         };
 
-        console.log("New tag created:", newTag);
+        if (process.env.NODE_ENV !== "production") {
+          logger.info("New tag created", { newTag });
+        }
 
         // Update the tags state
         const updatedTags = [...tags, newTag];
@@ -111,7 +116,7 @@ export function useProductTag(props?: UseProductTagProps) {
       : tagOptions.filter((tag) =>
           tag.attributes.Title.replace(/\s/g, "")
             .toLowerCase()
-            .includes(query.replace(/\s/g, "").toLowerCase())
+            .includes(query.replace(/\s/g, "").toLowerCase()),
         );
 
   const handleSelect = (selectedTag: TagResponseType | null) => {
