@@ -13,8 +13,6 @@ import {
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
-import type { Metadata } from "next";
-import { IMAGE_BASE_URL } from "@/constants/api";
 
 export async function generateMetadata({
   params,
@@ -28,8 +26,9 @@ export async function generateMetadata({
     const titleRaw = product?.attributes?.Title || "محصول";
     const descRaw = product?.attributes?.Description || titleRaw;
     const description = String(descRaw).slice(0, 160);
-    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
-      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+    const imageUrl =
+      product?.attributes?.CoverImage?.data?.attributes?.url ?
+        `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
     const title = `خرید ${titleRaw} | اینفینیتی استور`;
@@ -57,55 +56,6 @@ export async function generateMetadata({
     };
   }
 }
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  try {
-    const response = await getProductBySlug(slug);
-    const product = response?.data as ProductDetail | undefined;
-    const titleRaw = product?.attributes?.Title || "محصول";
-    const descRaw = product?.attributes?.Description || titleRaw;
-    const description = String(descRaw).slice(0, 160);
-    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
-      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-      : undefined;
-
-    const title = `خرید ${titleRaw} | اینفینیتی استور`;
-
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        type: "website",
-        url: `/pdp/${slug}`,
-        images: imageUrl ? [{ url: imageUrl }] : undefined,
-      },
-      alternates: {
-        canonical: `/pdp/${slug}`,
-      },
-    };
-  } catch {
-    const fallbackTitle = "مشاهده محصول | اینفینیتی استور";
-    return {
-      title: fallbackTitle,
-      description: "جزئیات و مشخصات کامل محصول در اینفینیتی استور",
-      alternates: { canonical: `/pdp/${slug}` },
-    };
-  }
-}
-
-// Remove mock data as we'll use real data
-// const products = new Array(20).fill(null).map((_, index) => {
-//   const template = [
-//     ... existing mock products ...
-//   }
-// });
 
 export default async function PDP({
   params,
@@ -163,7 +113,7 @@ export default async function PDP({
   // Get IDs of other categories this product belongs to
   const otherCategoryIds =
     productData?.attributes.product_other_categories?.data?.map((cat) =>
-      cat.id.toString(),
+      cat.id.toString()
     ) || [];
 
   // Fetch related products from same main category and other categories
@@ -182,7 +132,7 @@ export default async function PDP({
     } else {
       console.error(
         "Error fetching main category products:",
-        results[0].reason,
+        results[0].reason
       );
     }
 
@@ -191,7 +141,7 @@ export default async function PDP({
     } else {
       console.error(
         "Error fetching other categories products:",
-        results[1].reason,
+        results[1].reason
       );
     }
   } catch (error) {

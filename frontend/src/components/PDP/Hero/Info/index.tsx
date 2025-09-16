@@ -107,13 +107,13 @@ export default function PDPHeroInfo(props: Props) {
 
   // State for selected variation properties
   const [selectedColor, setSelectedColor] = useState<string>(
-    colors.length > 0 ? colors[0].id : "",
+    colors.length > 0 ? colors[0].id : ""
   );
   const [selectedSize, setSelectedSize] = useState<string>(
-    sizes.length > 0 ? sizes[0].id : "",
+    sizes.length > 0 ? sizes[0].id : ""
   );
   const [selectedModel, setSelectedModel] = useState<string>(
-    models.length > 0 ? models[0].id : "",
+    models.length > 0 ? models[0].id : ""
   );
 
   // Compute disabled ids for colors, sizes and models based on productData stock
@@ -187,7 +187,7 @@ export default function PDPHeroInfo(props: Props) {
   const [currentPrice, setCurrentPrice] = useState(product.price);
   const [currentDiscount, setCurrentDiscount] = useState(product.discount || 0);
   const [currentDiscountPrice, setCurrentDiscountPrice] = useState(
-    product.discountPrice || 0,
+    product.discountPrice || 0
   );
   const [currentVariationId, setCurrentVariationId] = useState<
     string | undefined
@@ -198,13 +198,13 @@ export default function PDPHeroInfo(props: Props) {
     debugLog("Product data:", productData);
     debugLog(
       "Product variations:",
-      productData?.attributes?.product_variations?.data,
+      productData?.attributes?.product_variations?.data
     );
 
     if (productData?.attributes?.product_variations?.data?.length) {
       debugLog(
         "Number of variations:",
-        productData.attributes.product_variations.data.length,
+        productData.attributes.product_variations.data.length
       );
 
       // Try to get the default variation (same logic as in Hero component)
@@ -215,7 +215,7 @@ export default function PDPHeroInfo(props: Props) {
               "Checking variation:",
               variation.id,
               "Published:",
-              variation.attributes.IsPublished,
+              variation.attributes.IsPublished
             );
 
             // Check if the variation is published
@@ -226,7 +226,7 @@ export default function PDPHeroInfo(props: Props) {
             const stock = variation.attributes.product_stock?.data?.attributes;
             debugLog("Variation stock data:", stock);
             return stock && typeof stock.Count === "number" && stock.Count > 0;
-          },
+          }
         );
 
       debugLog("Found default variation with stock:", defaultVariation);
@@ -239,7 +239,7 @@ export default function PDPHeroInfo(props: Props) {
 
       // Fallback: check if any published variation exists
       const anyPublished = productData.attributes.product_variations.data.find(
-        (variation: any) => variation.attributes.IsPublished === true,
+        (variation: any) => variation.attributes.IsPublished === true
       );
 
       debugLog("Found any published variation:", anyPublished);
@@ -308,14 +308,14 @@ export default function PDPHeroInfo(props: Props) {
         "Size:",
         sizeIdNum,
         "Model:",
-        modelIdNum,
+        modelIdNum
       );
 
       const variation = findProductVariation(
         productData as any,
         colorIdNum,
         sizeIdNum,
-        modelIdNum,
+        modelIdNum
       );
 
       debugLog("Found variation:", variation);
@@ -334,7 +334,7 @@ export default function PDPHeroInfo(props: Props) {
             ((Number(variationAttributes.Price) -
               Number(variationAttributes.DiscountPrice)) /
               Number(variationAttributes.Price)) *
-              100,
+              100
           );
           setCurrentDiscount(discountPercentage);
         } else {
@@ -365,7 +365,7 @@ export default function PDPHeroInfo(props: Props) {
 
       debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
     },
-    [productData, product.price, product.discountPrice, product.discount],
+    [productData, product.price, product.discountPrice, product.discount]
   );
 
   // Initialize variation details based on default selections when component mounts
@@ -376,7 +376,7 @@ export default function PDPHeroInfo(props: Props) {
     // If there's exactly one available variation (stock), auto-select it
     const availableVariations =
       productData.attributes.product_variations.data.filter((v: any) =>
-        hasStockForVariation(v as any, 1),
+        hasStockForVariation(v as any, 1)
       );
     if (availableVariations.length === 1) {
       const v = availableVariations[0];
@@ -415,7 +415,7 @@ export default function PDPHeroInfo(props: Props) {
       updateVariationDetails(
         firstColor.id,
         firstSize.id,
-        firstModel ? firstModel.id : "",
+        firstModel ? firstModel.id : ""
       );
     }
   }, [
@@ -442,7 +442,7 @@ export default function PDPHeroInfo(props: Props) {
 
     if (currentVariationId) {
       return productData.attributes.product_variations.data.find(
-        (variation: any) => variation.id.toString() === currentVariationId,
+        (variation: any) => variation.id.toString() === currentVariationId
       );
     }
 
@@ -480,9 +480,9 @@ export default function PDPHeroInfo(props: Props) {
               <div style={{ marginTop: 8 }}>
                 <div>
                   Available variation IDs:{" "}
-                  {availableVariations && availableVariations.length
-                    ? availableVariations.map((v: any) => v.id).join(", ")
-                    : "(none)"}
+                  {availableVariations && availableVariations.length ?
+                    availableVariations.map((v: any) => v.id).join(", ")
+                  : "(none)"}
                 </div>
                 <div>
                   Disabled colors: {disabledColors.join(", ") || "(none)"}
