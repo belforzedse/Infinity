@@ -192,10 +192,6 @@ export default function PDPHeroInfo(props: Props) {
   const [currentVariationId, setCurrentVariationId] = useState<
     string | undefined
   >(undefined); // Will be set properly in useEffect based on default selections
-  // Disabled option states based on availability of combinations
-  const [disabledColorIds, setDisabledColorIds] = useState<string[]>([]);
-  const [disabledSizeIds, setDisabledSizeIds] = useState<string[]>([]);
-  const [disabledModelIds, setDisabledModelIds] = useState<string[]>([]);
   // Initialize stock status based on the initial/default variation
   const getInitialStockStatus = () => {
     debugLog("=== INITIAL STOCK STATUS DEBUG ===");
@@ -268,21 +264,18 @@ export default function PDPHeroInfo(props: Props) {
   const handleSizeChange = (sizeId: string) => {
     setSelectedSize(sizeId);
     updateVariationDetails(selectedColor, sizeId, selectedModel);
-    computeDisabledOptions(selectedColor, sizeId, selectedModel);
   };
 
   // Handle color change
   const handleColorChange = (colorId: string) => {
     setSelectedColor(colorId);
     updateVariationDetails(colorId, selectedSize, selectedModel);
-    computeDisabledOptions(colorId, selectedSize, selectedModel);
   };
 
   // Handle model change
   const handleModelChange = (modelId: string) => {
     setSelectedModel(modelId);
     updateVariationDetails(selectedColor, selectedSize, modelId);
-    computeDisabledOptions(selectedColor, selectedSize, modelId);
   };
 
   // Update variation details based on selected properties
@@ -535,7 +528,6 @@ export default function PDPHeroInfo(props: Props) {
           selectedSize={selectedSize}
           disabledSizeIds={disabledSizes}
           sizeHelper={productData?.attributes?.product_size_helper?.data}
-          disabledSizeIds={disabledSizeIds}
         />
 
         <Color
