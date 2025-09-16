@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import React from "react";
+import Barcode from "react-barcode";
 type Props = {
   order: {
     shipping?: {
@@ -256,8 +257,8 @@ export default function Invoice({ order }: Props) {
         </p>
 
         {/* Summary Table */}
-        <div className="flex w-full justify-center justify-self-auto">
-          <table className="text-lg w-full border border-black">
+        <div className="flex w-full justify-around justify-self-stretch">
+          <table className="text-lg w-3/4 border border-black">
             <tbody>
               <tr className="border border-black">
                 <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">
@@ -287,6 +288,20 @@ export default function Invoice({ order }: Props) {
               </tr>
             </tbody>
           </table>
+          <div className="flex justify-start">
+            <div style={{ width: "180px", height: "30px" }}>
+              <Barcode
+                value={String(order.id)}
+                format="CODE128"
+                width={2}
+                height={30}
+                displayValue={false}
+                margin={0}
+                background="#ffffff"
+                lineColor="#000000"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Footer - Payment method */}
