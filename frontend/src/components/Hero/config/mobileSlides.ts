@@ -27,7 +27,7 @@ const baseMobile: MobileLayout = {
     className: "h-full w-full rounded-b-[10px] rounded-t-[10px] object-cover",
     loading: "lazy",
     sizes: "(max-width: 768px) 100vw, 50vw",
-    href: "/plp?category=shirt",
+    href: "https://infinitycolor.co/shop/skirt/",
   },
   secondaryTop: {
     src: "/images/index-img3-desktop.png",
@@ -37,7 +37,7 @@ const baseMobile: MobileLayout = {
     className: "h-full w-full rounded-lg object-cover",
     loading: "lazy",
     sizes: "(max-width: 768px) 50vw, 50vw",
-    href: "/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa",
+    href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
   },
   secondaryBottom: {
     src: "/images/index-img4-desktop.png",
@@ -47,7 +47,7 @@ const baseMobile: MobileLayout = {
     className: "h-full w-full rounded-lg object-cover",
     loading: "lazy",
     sizes: "(max-width: 768px) 50vw, 50vw",
-    href: "/plp?category=skirt",
+    href: "https://infinitycolor.co/shop/skirt/",
   },
 };
 
