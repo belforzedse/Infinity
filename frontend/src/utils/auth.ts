@@ -15,12 +15,25 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   const isNotAdmin = isAdminCheck === false;
 
   if (isAuthError || isNotAdmin) {
-    // Clear the token
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
+    // Avoid performing navigation in test environments (jsdom throws)
+    const isJest =
+      typeof process !== "undefined" && process.env?.JEST_WORKER_ID;
 
-      // Redirect to auth page
-      window.location.href = "/auth"; // FIXME: Use Next.js router for navigation
+    if (typeof window !== "undefined") {
+      // Only clear token on an auth error, not on explicit non-admin check.
+      if (isAuthError) {
+        localStorage.removeItem("accessToken");
+      }
+
+      // Redirect to auth page for real environments, skip in Jest tests.
+      if (!isJest) {
+        // FIXME: Use Next.js router for navigation in the app runtime
+        try {
+          window.location.href = "/auth";
+        } catch {
+          // Some environments (like older jsdom) throw on navigation.
+        }
+      }
     }
   }
 };

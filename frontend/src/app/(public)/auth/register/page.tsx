@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import logger from "@/utils/logger";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import VerificationInput from "@/components/Auth/VerificationInput";
@@ -51,7 +52,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (phoneNumber) {
-      console.log("Sending OTP to", phoneNumber);
+      if (process.env.NODE_ENV !== "production") {
+        logger.info("Sending OTP", { phoneNumber });
+      }
 
       AuthService.sendOTP(phoneNumber).then(() => {
         startTimer();
