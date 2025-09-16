@@ -160,7 +160,9 @@ class ApiClient {
 
         // Handle auth errors here for centralized auth redirects
         if (!options?.suppressAuthRedirect) {
-          handleAuthErrors(error, undefined);
+          // Call auth error handler with only the error object. The second
+          // parameter is optional and tests expect a single-argument call.
+          handleAuthErrors(error);
         }
 
         throw error;

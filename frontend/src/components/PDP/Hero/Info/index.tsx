@@ -53,8 +53,40 @@ type Props = {
     title: string;
   }[];
 
-  productData?: any; // Add productData to be able to call findProductVariation
+  // Minimal typed shape for productData used in this component
+  productData?: ProductData | null; // Add productData to be able to call findProductVariation
   productId: string;
+};
+
+// Minimal types used by this component (narrowed from Strapi shape)
+type Variation = {
+  id: number;
+  attributes: {
+    IsPublished?: boolean;
+    Price?: string | number;
+    DiscountPrice?: string | number;
+    product_stock?: { data?: { attributes?: { Count?: number } } } | null;
+    product_variation_color?: {
+      data?: { id: number; attributes?: any };
+    } | null;
+    product_variation_size?: { data?: { id: number; attributes?: any } } | null;
+    product_variation_model?: {
+      data?: { id: number; attributes?: any };
+    } | null;
+    [k: string]: any;
+  };
+};
+
+type ProductData = {
+  attributes: {
+    product_variations?: { data?: Variation[] };
+    product_size_helper?: any;
+    CoverImage?: any;
+    Description?: string;
+    CleaningTips?: string;
+    ReturnConditions?: string;
+    [k: string]: any;
+  };
 };
 
 export default function PDPHeroInfo(props: Props) {
@@ -182,7 +214,7 @@ export default function PDPHeroInfo(props: Props) {
       debugLog("Found default variation with stock:", defaultVariation);
 
       if (defaultVariation) {
-        const stockStatus = hasStockForVariation(defaultVariation);
+        const stockStatus = hasStockForVariation(defaultVariation as any);
         debugLog("Default variation stock status:", stockStatus);
         return stockStatus;
       }
@@ -195,7 +227,7 @@ export default function PDPHeroInfo(props: Props) {
       debugLog("Found any published variation:", anyPublished);
 
       if (anyPublished) {
-        const stockStatus = hasStockForVariation(anyPublished);
+        const stockStatus = hasStockForVariation(anyPublished as any);
         debugLog("Any published variation stock status:", stockStatus);
         return stockStatus;
       }
@@ -262,7 +294,7 @@ export default function PDPHeroInfo(props: Props) {
       );
 
       const variation = findProductVariation(
-        productData,
+        productData as any,
         colorIdNum,
         sizeIdNum,
         modelIdNum,
@@ -326,7 +358,7 @@ export default function PDPHeroInfo(props: Props) {
     // If there's exactly one available variation (stock), auto-select it
     const availableVariations =
       productData.attributes.product_variations.data.filter((v: any) =>
-        hasStockForVariation(v, 1),
+        hasStockForVariation(v as any, 1),
       );
     if (availableVariations.length === 1) {
       const v = availableVariations[0];
