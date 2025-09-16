@@ -50,7 +50,7 @@ export default async function Home() {
           {categories.map((category, index) => (
             <Link
               key={category.id}
-              href={`/plp?category=${category.slug}`}
+              href={category.href}
               className={`flex flex-col items-center ${
                 index === categories.length - 1 && categories.length % 3 === 1
                   ? "col-span-3 mx-auto md:col-span-1 md:mx-0"

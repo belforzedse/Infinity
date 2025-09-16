@@ -3,11 +3,13 @@
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { MobileTable, columns, Product } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
+import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
+import { appendTitleFilter } from "@/constants/productFilters";
 
 export default function ProductsPage() {
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
@@ -16,13 +18,18 @@ export default function ProductsPage() {
   >("newest");
   const [page] = useQueryState("page", { defaultValue: "1" });
   const [pageSize] = useQueryState("pageSize", { defaultValue: "25" });
-  const [, setTotalSize] = useQueryState("totalSize", { defaultValue: 0 });
+  const [, setTotalSize] = useQueryState<number>("totalSize", {
+    defaultValue: 0,
+    parse: (value: string | undefined) => Number(value) || 0,
+    serialize: (value: number) => String(value),
+  });
 
   // For global sort modes, we build an index of product IDs sorted server-assist
   const [sortedProductIds, setSortedProductIds] = useState<number[] | null>(null);
   const [customPageData, setCustomPageData] = useState<Product[] | null>(null);
   const [buildingIndex, setBuildingIndex] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
+  const [settings, setSettings] = useState<{filterPublicProductsByTitle: boolean} | null>(null);
 
   const getAllProductsLite = useCallback(async () => {
     // Fetch product list with minimal payload for stock aggregation
@@ -32,17 +39,21 @@ export default function ProductsPage() {
     let total = 0;
     const items: any[] = [];
     while (true) {
-      const res = await apiClient.get(
-        `/products?pagination[page]=${current}&pagination[pageSize]=${perPage}` +
-          (isRecycleBinOpen
-            ? `&filters[removedAt][$null]=false`
-            : `&filters[removedAt][$null]=true`) +
-          `&fields[0]=id` +
-          `&populate[0]=product_variations` +
-          `&populate[1]=product_variations.product_stock` +
-          `&populate[2]=product_main_category`,
-        { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
-      );
+      // Respect super-admin toggled setting for filtering public products
+      let endpoint = `/products?pagination[page]=${current}&pagination[pageSize]=${perPage}` +
+        (isRecycleBinOpen
+          ? `&filters[removedAt][$null]=false`
+          : `&filters[removedAt][$null]=true`) +
+        `&fields[0]=id` +
+        `&populate[0]=product_variations` +
+        `&populate[1]=product_variations.product_stock` +
+        `&populate[2]=product_main_category`;
+
+      if (settings?.filterPublicProductsByTitle && !isRecycleBinOpen) {
+        endpoint = appendTitleFilter(endpoint);
+      }
+
+      const res = await apiClient.get(endpoint, { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } });
       const data = (res as any).data as any[];
       total = (res as any).meta?.pagination?.total || total;
       items.push(...data);
@@ -80,7 +91,7 @@ export default function ProductsPage() {
     try {
       const rows = await getProductSales({});
       // Aggregate by product via mapping variation -> product (batched)
-      const varIds = rows.map((r) => r.productVariationId);
+  const varIds = rows.map((r: any) => r.productVariationId);
       const chunk = 200;
       const varToProduct: Record<number, number> = {};
       for (let i = 0; i < varIds.length; i += chunk) {
@@ -88,14 +99,14 @@ export default function ProductsPage() {
         // Fetch products that contain these variations
         const res = await apiClient.get(
           `/products?filters[product_variations][id][$in]=${part.join(",")}` +
-            (isRecycleBinOpen
-              ? `&filters[removedAt][$null]=false`
-              : `&filters[removedAt][$null]=true`) +
-            `&fields[0]=id&populate[0]=product_variations`,
-          { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
-        );
+              (isRecycleBinOpen
+                ? `&filters[removedAt][$null]=false`
+                : `&filters[removedAt][$null]=true`) +
+              `&fields[0]=id&populate[0]=product_variations`,
+            { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
+          );
         const prods = (res as any).data as any[];
-        prods.forEach((p) => {
+        prods.forEach((p: any) => {
           const pid = Number(p.id);
           (p?.attributes?.product_variations?.data || []).forEach((v: any) => {
             varToProduct[Number(v.id)] = pid;
@@ -103,7 +114,7 @@ export default function ProductsPage() {
         });
       }
       const productSales: Record<number, number> = {};
-      rows.forEach((r) => {
+      rows.forEach((r: any) => {
         const pid = varToProduct[r.productVariationId];
         if (!pid) return;
         productSales[pid] = (productSales[pid] || 0) + Number(r.totalCount || 0);
@@ -141,11 +152,17 @@ export default function ProductsPage() {
         return;
       }
       const res = await apiClient.get(
-        `/products?filters[id][$in]=${ids.join(",")}` +
-          (isRecycleBinOpen
-            ? `&filters[removedAt][$null]=false`
-            : `&filters[removedAt][$null]=true`) +
-          `&populate[0]=CoverImage&populate[1]=product_variations&populate[2]=product_variations.product_stock&populate[3]=product_main_category`,
+        (() => {
+          let ep = `/products?filters[id][$in]=${ids.join(",")}` +
+            (isRecycleBinOpen
+              ? `&filters[removedAt][$null]=false`
+              : `&filters[removedAt][$null]=true`) +
+            `&populate[0]=CoverImage&populate[1]=product_variations&populate[2]=product_variations.product_stock&populate[3]=product_main_category`;
+          if (settings?.filterPublicProductsByTitle && !isRecycleBinOpen) {
+            ep = appendTitleFilter(ep);
+          }
+          return ep;
+        })(),
         { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
       );
       const rows = ((res as any).data as Product[]).slice();
@@ -159,8 +176,25 @@ export default function ProductsPage() {
     run();
   }, [sortedProductIds, page, pageSize, isRecycleBinOpen]);
 
+  // Fetch settings once on mount
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const s = await getSuperAdminSettings();
+        if (!mounted) return;
+        setSettings({ filterPublicProductsByTitle: s.filterPublicProductsByTitle });
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // We prefer server-side sorting. This fallback is disabled to avoid page-only sort.
-  const clientSort = undefined;
+  const _clientSort = undefined;
 
   return (
     <ContentWrapper

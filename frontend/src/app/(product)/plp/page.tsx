@@ -68,9 +68,14 @@ async function getProducts(
     try {
       // Use the search service
       const searchResults = await searchProducts(search, page, pageSize);
+      // Only keep search results where Title contains کیف, کفش, or صندل
+      const filtered = searchResults.data.filter((item) => {
+        const title = (item.Title || "").toString();
+        return /کیف|کفش|صندل/.test(title);
+      });
 
       return {
-        products: searchResults.data.map((item) => {
+        products: filtered.map((item) => {
           // Transform search API format to match product data format
           return {
             id: item.id,
@@ -105,7 +110,10 @@ async function getProducts(
             },
           };
         }),
-        pagination: searchResults.meta.pagination,
+        pagination: {
+          ...searchResults.meta.pagination,
+          total: filtered.length,
+        },
       };
     } catch (error) {
       console.error("Error searching products:", error);
@@ -137,6 +145,11 @@ async function getProducts(
 
   // Add filters
   queryParams.append("filters[Status][$eq]", "Active");
+
+  // Only show products whose Title contains کیف، کفش، or صندل
+  queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
+  queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
+  queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
 
   // Category filter
   if (category) {
