@@ -35,8 +35,24 @@ export async function getFooterData(): Promise<FooterData> {
           "Content-Type": "application/json",
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      }
+      },
     );
+
+    // Gracefully handle missing footer (404) by returning empty structure
+    if (response.status === 404) {
+      return {
+        CustomerSupport: "",
+        First: { Header: "", Links: [] },
+        Second: { Header: "", Links: [] },
+        Third: { Header: "", Links: [] },
+        ContactUs: {
+          Phone: "",
+          Whatsapp: null,
+          Instagram: null,
+          Telegram: null,
+        },
+      };
+    }
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -45,8 +61,8 @@ export async function getFooterData(): Promise<FooterData> {
     const result = await response.json();
     return result.data.attributes;
   } catch (error) {
-    console.error("Error fetching footer data:", error);
-    // Return empty data structure if API fails
+    // Be quiet in production for footer; return safe defaults
+    console.warn("Footer data unavailable:", error);
     return {
       CustomerSupport: "",
       First: { Header: "", Links: [] },

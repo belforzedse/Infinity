@@ -67,7 +67,7 @@ export interface ProductSearchItem {
 export const searchProducts = async (
   q: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<ProductSearchResponse> => {
   if (!q) {
     throw new Error("Search query (q) is required");
@@ -75,7 +75,7 @@ export const searchProducts = async (
 
   try {
     const endpoint = `${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(
-      q
+      q,
     )}&page=${page}&pageSize=${pageSize}`;
     const response = await apiClient.getPublic<ProductSearchResponse>(endpoint);
     return response as unknown as ProductSearchResponse;
@@ -83,7 +83,7 @@ export const searchProducts = async (
     console.error(
       "Error searching products:",
       JSON.stringify(error),
-      error?.toString()
+      error?.toString(),
     );
     throw error;
   }

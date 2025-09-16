@@ -5,8 +5,8 @@ interface AuthTitleProps {
 
 export default function AuthTitle({ children, subtitle }: AuthTitleProps) {
   return (
-    <div className="text-center space-y-2 md:space-y-3">
-      <h1 className="text-4xl text-foreground-primary font-normal">
+    <div className="space-y-2 text-center md:space-y-3">
+      <h1 className="text-4xl font-normal text-foreground-primary">
         {children}
       </h1>
       {subtitle && (

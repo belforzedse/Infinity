@@ -3,7 +3,7 @@
 import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type Order } from "./page";
 import Link from "next/link";
-import ArrowLeftIcon from "@/components/SuperAdmin/UpsertPage/Icons/ArrowLeftIcon";
+//import ArrowLeftIcon from "@/components/SuperAdmin/UpsertPage/Icons/ArrowLeftIcon";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 
 export const config: UpsertPageConfigType<Order> = {
@@ -15,14 +15,14 @@ export const config: UpsertPageConfigType<Order> = {
   actionButtons: (props) => (
     <>
       <button
-        className="px-5 py-2 rounded-xl bg-slate-200 text-slate-500 text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 md:flex-none"
         onClick={props.onCancel}
       >
         بیخیال شدن
       </button>
 
       <button
-        className="px-5 py-2 rounded-xl bg-actions-primary text-white text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-actions-primary px-5 py-2 text-white md:flex-none"
         onClick={props.onSubmit}
       >
         ذخیره
@@ -39,6 +39,22 @@ export const config: UpsertPageConfigType<Order> = {
               name: "orderDate",
               type: "date",
               label: "تاریخ سفارش",
+              colSpan: 4,
+              mobileColSpan: 12,
+              readOnly: true,
+            },
+            {
+              name: "createdAt",
+              type: "date",
+              label: "زمان ثبت (دقیق)",
+              colSpan: 4,
+              mobileColSpan: 12,
+              readOnly: true,
+            },
+            {
+              name: "updatedAt",
+              type: "date",
+              label: "آخرین بروزرسانی",
               colSpan: 4,
               mobileColSpan: 12,
               readOnly: true,
@@ -86,7 +102,7 @@ export const config: UpsertPageConfigType<Order> = {
               labelAction: (data) => (
                 <Link
                   href={`/super-admin/users/edit/${data.userId}`}
-                  className="flex items-center gap-1 text-sm text-actions-link"
+                  className="text-sm flex items-center gap-1 text-actions-link"
                 >
                   <span>پروفایل</span>
                   <span>{">"}</span>
@@ -99,7 +115,7 @@ export const config: UpsertPageConfigType<Order> = {
           header: {
             title: "صورت حساب",
             iconButton: (
-              <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
+              <button className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100">
                 <EditIcon />
               </button>
             ),
@@ -111,6 +127,44 @@ export const config: UpsertPageConfigType<Order> = {
               rows: 5,
               colSpan: 12,
               mobileColSpan: 12,
+            },
+          ],
+        },
+        {
+          header: { title: "پرداخت و ارسال" },
+          fields: [
+            {
+              name: "paymentGateway",
+              type: "copy-text",
+              label: "درگاه پرداخت",
+              colSpan: 6,
+              mobileColSpan: 12,
+              readOnly: true,
+            },
+            {
+              name: "shipping",
+              type: "copy-text",
+              label: "هزینه ارسال",
+              colSpan: 6,
+              mobileColSpan: 12,
+              readOnly: true,
+            },
+            {
+              name: "address",
+              type: "multiline-text",
+              label: "آدرس ارسال",
+              rows: 3,
+              colSpan: 9,
+              mobileColSpan: 12,
+              readOnly: true,
+            },
+            {
+              name: "postalCode",
+              type: "copy-text",
+              label: "کدپستی",
+              colSpan: 3,
+              mobileColSpan: 12,
+              readOnly: true,
             },
           ],
         },

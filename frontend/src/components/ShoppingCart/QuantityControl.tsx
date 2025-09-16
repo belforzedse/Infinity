@@ -23,20 +23,20 @@ function ShoppingCartQuantityControl({ itemId, quantity }: Props) {
   };
 
   return (
-    <div className="flex items-center gap-6 bg-stone-50 rounded-lg py-2 px-5 lg:w-fit w-full lg:justify-normal justify-between">
+    <div className="flex w-full items-center justify-between gap-6 rounded-lg bg-stone-50 px-5 py-2 lg:w-fit lg:justify-normal">
       <div className="flex items-center gap-0">
         <button
           onClick={() => handleQuantityChange(itemId, 1)}
-          className="lg:w-8 lg:h-8 w-6 h-6 flex items-center justify-center text-neutral-800 border-slate-100 rounded-md border bg-white"
+          className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-100 bg-white text-neutral-800 lg:h-8 lg:w-8"
         >
           <PlusIcon />
         </button>
-        <span className="w-8 text-center text-sm text-neutral-800">
+        <span className="text-sm w-8 text-center text-neutral-800">
           {quantity}
         </span>
         <button
           onClick={() => handleQuantityChange(itemId, -1)}
-          className="lg:w-8 lg:h-8 w-6 h-6 flex items-center justify-center text-neutral-800 border-slate-100 rounded-md border bg-white"
+          className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-100 bg-white text-neutral-800 lg:h-8 lg:w-8"
         >
           <MinusIcon />
         </button>
@@ -45,7 +45,7 @@ function ShoppingCartQuantityControl({ itemId, quantity }: Props) {
         onClick={() => handleQuantityChange(itemId, 0)}
         className="flex items-center justify-center text-rose-500"
       >
-        <TrashIcon className="w-5 h-5" />
+        <TrashIcon className="h-5 w-5" />
       </button>
     </div>
   );

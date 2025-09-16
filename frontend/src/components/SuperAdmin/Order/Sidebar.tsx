@@ -1,17 +1,20 @@
 "use client";
 // TODO: Refactor Me!
 import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 export default function SuperAdminOrderSidebar() {
+  const router = useRouter();
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     message: "",
     type: "sms",
   });
 
   return (
-    <div className="flex gap-3 flex-col  sticky top-5">
+    <div className="sticky top-5 flex flex-col gap-3">
       {/* Notification to User */}
-      <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white p-5">
         <div className="flex flex-col gap-2">
           <div className="flex flex-col">
             <span className="text-lg text-foreground-primary">
@@ -23,9 +26,9 @@ export default function SuperAdminOrderSidebar() {
             </span>
           </div>
 
-          <div className="w-full border border-neutral-200 rounded-lg overflow-hidden">
+          <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
             <select
-              className={`w-full py-3 px-5 text-sm border-l-[20px] border-transparent`}
+              className={`text-sm w-full border-l-[20px] border-transparent px-5 py-3`}
               value={formData.type}
               onChange={(e) => {
                 setFormData({
@@ -42,7 +45,7 @@ export default function SuperAdminOrderSidebar() {
           <textarea
             rows={3}
             placeholder="متن اعلان"
-            className={`w-full border border-neutral-200 rounded-lg py-2 px-5 text-sm`}
+            className={`text-sm w-full rounded-lg border border-neutral-200 px-5 py-2`}
             value={formData.message}
             onChange={(e) => {
               setFormData({
@@ -53,8 +56,8 @@ export default function SuperAdminOrderSidebar() {
           />
         </div>
 
-        <div className="flex mt-3 justify-end">
-          <button className="py-1 px-2 flex gap-1 bg-actions-primary rounded-md items-center">
+        <div className="mt-3 flex justify-end">
+          <button className="flex items-center gap-1 rounded-md bg-actions-primary px-2 py-1">
             <span className="text-sm text-white">ارسال پیام</span>
 
             <SendIcon />
@@ -62,7 +65,7 @@ export default function SuperAdminOrderSidebar() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white p-5">
         <div className="flex flex-col gap-2">
           <div className="flex flex-col">
             <span className="text-lg text-foreground-primary">فاکتور</span>
@@ -72,14 +75,24 @@ export default function SuperAdminOrderSidebar() {
             </span>
           </div>
 
-          <div className="flex gap-2 w-full">
-            <button className="bg-slate-100 rounded-md py-1.5 flex-1 flex gap-1 items-center justify-center">
+          <div className="flex w-full gap-2">
+            <button
+              onClick={() => {
+                if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
+              }}
+              className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
+            >
               <span className="text-sm text-neutral-500">دانلود فاکتور</span>
 
               <DownloadIcon />
             </button>
 
-            <button className="bg-slate-100 rounded-md py-1.5 flex-1 flex gap-1 items-center justify-center">
+            <button
+              onClick={() => {
+                if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
+              }}
+              className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
+            >
               <span className="text-sm text-neutral-500">پرینت فاکتور</span>
 
               <PrintIcon />
@@ -88,20 +101,22 @@ export default function SuperAdminOrderSidebar() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
-        <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white p-5">
+        <div className="flex items-center justify-between">
           <span className="text-lg text-foreground-primary">
-            یادداشت های سفارش
+            یادداشت های سیستم پرداخت
           </span>
-
-          <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
-            <PlusIcon />
-          </button>
         </div>
 
-        <span className="text-sm text-neutral-400">
-          هنوز یادداشتی وجود ندارد
-        </span>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm text-neutral-400">
+            رویدادهای درگاه (درخواست، ارجاع، بازگشت) در جزئیات سفارش نمایش داده
+            می‌شود.
+          </span>
+          <span className="text-xs text-neutral-400">
+            برای مشاهده کامل، به بخش جزئیات پرداخت در بدنه صفحه مراجعه کنید.
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -205,22 +220,4 @@ function PrintIcon() {
   );
 }
 
-function PlusIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M10.0001 4.16669V15.8334M4.16675 10H15.8334"
-        stroke="#475569"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+// Removed unused PlusIcon

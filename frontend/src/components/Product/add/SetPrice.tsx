@@ -7,10 +7,10 @@ const SetPrice: React.FC = () => {
   const [price, setPrice] = useState<string>("");
 
   return (
-    <div className="bg-white rounded-xl p-5 w-full flex flex-col gap-4">
-      <div className="flex items-center gap-3 w-full justify-between">
+    <div className="flex w-full flex-col gap-4 rounded-xl bg-white p-5">
+      <div className="flex w-full items-center justify-between gap-3">
         <h2 className="text-base text-neutral-600">قیمت محصول</h2>
-        <div className="bg-gray-50 h-9 w-9 rounded-lg flex items-center justify-center text-gray-600">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 text-gray-600">
           <SettingIcon />
         </div>
       </div>
@@ -20,7 +20,7 @@ const SetPrice: React.FC = () => {
         type="text"
         value={price}
         onChange={(e) => setPrice(e.target.value)}
-        className="px-4 py-2 border w-full border-slate-100 rounded-xl text-base outline-none transition-colors duration-200 ease-in-out focus:border-blue-500 text-right placeholder-slate-400"
+        className="text-base w-full rounded-xl border border-slate-100 px-4 py-2 text-right placeholder-slate-400 outline-none transition-colors duration-200 ease-in-out focus:border-blue-500"
         placeholder="قیمت"
         dir="rtl"
       />

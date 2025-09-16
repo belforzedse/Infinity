@@ -2,7 +2,7 @@
 
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { config } from "./config";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import UserService from "@/services/user";

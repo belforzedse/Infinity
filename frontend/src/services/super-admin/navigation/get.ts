@@ -21,7 +21,7 @@ export async function getNavigation(): Promise<Navigation> {
         id: category.id,
         title: category.attributes.Title || "",
         slug: category.attributes.Slug || "",
-      })
+      }),
     ),
     createdAt: new Date(navigationData.createdAt || Date.now()),
     updatedAt: new Date(navigationData.updatedAt || Date.now()),

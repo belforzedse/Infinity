@@ -6,7 +6,7 @@ export interface UserExistsResponse {
 }
 
 export const checkUserExists = async (
-  phoneNumber: string
+  phoneNumber: string,
 ): Promise<UserExistsResponse> => {
   const endpoint = ENDPOINTS.AUTH.EXISTS;
 

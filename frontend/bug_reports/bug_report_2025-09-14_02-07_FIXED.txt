@@ -1,0 +1,5 @@
+Summary of Findings
+No critical issues detected in current diffs (metadata + filters).
+
+Detailed Issues
+- Low: Review OG titles/descriptions for Persian length ~160 chars; OK.

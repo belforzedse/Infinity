@@ -9,11 +9,11 @@ const ShoppingCartCounter = () => {
   return (
     <button
       onClick={openDrawer}
-      className="relative bg-foreground-pink rounded-full w-14 h-14 lg:flex hidden items-center justify-center"
+      className="relative hidden h-14 w-14 items-center justify-center rounded-full bg-foreground-pink lg:flex"
     >
       <BasketIcon />
 
-      <div className="absolute top-0 right-0 rounded-full w-5 h-5 flex items-center justify-center border border-slate-200 text-xs bg-white text-foreground-pink leading-6">
+      <div className="text-xs absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white leading-6 text-foreground-pink">
         {totalItems}
       </div>
     </button>

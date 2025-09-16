@@ -4,7 +4,7 @@ import { Navigation } from "@/types/super-admin/navigation";
 
 export async function updateNavigation(navigation: Navigation): Promise<void> {
   const categoryIds = navigation.product_categories.map(
-    (category) => category.id
+    (category) => category.id,
   );
 
   await apiClient.put(
@@ -18,6 +18,6 @@ export async function updateNavigation(navigation: Navigation): Promise<void> {
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    }
+    },
   );
 }

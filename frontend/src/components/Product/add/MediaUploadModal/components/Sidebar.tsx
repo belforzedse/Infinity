@@ -10,7 +10,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const tabs: TabType[] = ["افزودن رسانه", "ایجاد گالری", "تصویر محصول"];
 
   return (
-    <div className="flex flex-col gap-1 col-span-1">
+    <div className="col-span-1 flex flex-col gap-1">
       {tabs.map((tab) => (
         <TabItem
           key={tab}

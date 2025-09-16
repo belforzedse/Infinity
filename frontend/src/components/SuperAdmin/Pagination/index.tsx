@@ -47,6 +47,42 @@ export default function SuperAdminPagination({
     await setPage("1"); // Reset to first page when changing page size
   };
 
+  // Generate compact page items with ellipsis
+  const getPageItems = (): (number | string)[] => {
+    const maxVisible = 5;
+    if (totalPages <= maxVisible) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const items: (number | string)[] = [];
+    const first = 1;
+    const last = totalPages;
+
+    if (currentPage <= 3) {
+      // 1,2,3,4,...,last
+      items.push(1, 2, 3, 4, "…", last);
+      return items;
+    }
+
+    if (currentPage >= totalPages - 2) {
+      // first, ..., last-3,last-2,last-1,last
+      items.push(first, "…", last - 3, last - 2, last - 1, last);
+      return items;
+    }
+
+    // first, ..., current-1,current,current+1, ..., last
+    items.push(
+      first,
+      "…",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "…",
+      last,
+    );
+    return items;
+  };
+
   return (
     <div className={cn("flex items-center justify-between", className)}>
       <SuperAdminTableSelect
@@ -60,32 +96,46 @@ export default function SuperAdminPagination({
       />
       <div className="flex items-center gap-2">
         <button
-          className="border rounded-3xl p-1 disabled:opacity-50 border-slate-200 bg-white"
+          className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
           <ChevronRightIcon />
         </button>
         <div className="flex flex-row-reverse items-center gap-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-            (pageNumber) => (
+          {getPageItems().map((item, idx) => {
+            if (typeof item === "string") {
+              return (
+                <span
+                  key={`ellipsis-${idx}`}
+                  className={
+                    "text-xs flex h-8 w-8 select-none items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400"
+                  }
+                >
+                  {item}
+                </span>
+              );
+            }
+
+            const pageNumber = item as number;
+            return (
               <button
                 key={pageNumber}
                 className={cn(
-                  "h-8 w-8 rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400",
+                  "text-xs flex h-8 w-8 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400",
                   currentPage === pageNumber
                     ? "bg-actions-primary text-white"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-gray-100",
                 )}
                 onClick={() => handlePageChange(pageNumber)}
               >
                 {pageNumber}
               </button>
-            )
-          )}
+            );
+          })}
         </div>
         <button
-          className="border rounded-3xl p-1 disabled:opacity-50 border-slate-200 bg-white"
+          className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >

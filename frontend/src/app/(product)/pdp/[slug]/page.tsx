@@ -4,12 +4,101 @@ import OffersList from "@/components/PDP/OffersList";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
 import { ProductReview } from "@/components/PDP/Comment/List";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { IMAGE_BASE_URL } from "@/constants/api";
 import {
   getProductBySlug,
   ProductDetail,
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
+import type { Metadata } from "next";
+import { IMAGE_BASE_URL } from "@/constants/api";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const response = await getProductBySlug(slug);
+    const product = response?.data as ProductDetail | undefined;
+    const titleRaw = product?.attributes?.Title || "محصول";
+    const descRaw = product?.attributes?.Description || titleRaw;
+    const description = String(descRaw).slice(0, 160);
+    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+      : undefined;
+
+    const title = `خرید ${titleRaw} | اینفینیتی استور`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        url: `/pdp/${slug}`,
+        images: imageUrl ? [{ url: imageUrl }] : undefined,
+      },
+      alternates: {
+        canonical: `/pdp/${slug}`,
+      },
+    };
+  } catch {
+    const fallbackTitle = "مشاهده محصول | اینفینیتی استور";
+    return {
+      title: fallbackTitle,
+      description: "جزئیات و مشخصات کامل محصول در اینفینیتی استور",
+      alternates: { canonical: `/pdp/${slug}` },
+    };
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const response = await getProductBySlug(slug);
+    const product = response?.data as ProductDetail | undefined;
+    const titleRaw = product?.attributes?.Title || "محصول";
+    const descRaw = product?.attributes?.Description || titleRaw;
+    const description = String(descRaw).slice(0, 160);
+    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+      : undefined;
+
+    const title = `خرید ${titleRaw} | اینفینیتی استور`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        url: `/pdp/${slug}`,
+        images: imageUrl ? [{ url: imageUrl }] : undefined,
+      },
+      alternates: {
+        canonical: `/pdp/${slug}`,
+      },
+    };
+  } catch {
+    const fallbackTitle = "مشاهده محصول | اینفینیتی استور";
+    return {
+      title: fallbackTitle,
+      description: "جزئیات و مشخصات کامل محصول در اینفینیتی استور",
+      alternates: { canonical: `/pdp/${slug}` },
+    };
+  }
+}
 
 // Remove mock data as we'll use real data
 // const products = new Array(20).fill(null).map((_, index) => {
@@ -44,12 +133,12 @@ export default async function PDP({
   // If we still don't have product data, just return a message
   if (!productData && error) {
     return (
-      <div className="flex flex-col gap-8 items-center justify-center p-10">
+      <div className="flex flex-col items-center justify-center gap-8 p-10">
         <h1 className="text-2xl font-bold">محصول مورد نظر یافت نشد</h1>
         <p>لطفا محصول دیگری را انتخاب کنید یا به صفحه اصلی بازگردید.</p>
-        <a href="/" className="text-blue-500 hover:underline">
+        <Link href="/" className="text-blue-500">
           بازگشت به صفحه اصلی
-        </a>
+        </Link>
       </div>
     );
   }
@@ -74,7 +163,7 @@ export default async function PDP({
   // Get IDs of other categories this product belongs to
   const otherCategoryIds =
     productData?.attributes.product_other_categories?.data?.map((cat) =>
-      cat.id.toString()
+      cat.id.toString(),
     ) || [];
 
   // Fetch related products from same main category and other categories
@@ -93,7 +182,7 @@ export default async function PDP({
     } else {
       console.error(
         "Error fetching main category products:",
-        results[0].reason
+        results[0].reason,
       );
     }
 
@@ -102,7 +191,7 @@ export default async function PDP({
     } else {
       console.error(
         "Error fetching other categories products:",
-        results[1].reason
+        results[1].reason,
       );
     }
   } catch (error) {

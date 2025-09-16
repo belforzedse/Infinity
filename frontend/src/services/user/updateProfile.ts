@@ -12,7 +12,7 @@ export interface UpdateProfileRequest {
 }
 
 export const updateProfile = async (
-  data: UpdateProfileRequest
+  data: UpdateProfileRequest,
 ): Promise<MeResponse> => {
   const endpoint = `${ENDPOINTS.USER.ME}`;
   const accessToken = localStorage.getItem("accessToken");

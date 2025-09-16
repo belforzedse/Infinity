@@ -159,26 +159,26 @@ export default function AddAddress({ onAddressAdded }: Props) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1 text-sm lg:text-base text-primary-600 font-medium"
+        className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
       >
-        <span className="text-sm lg:text-base text-foreground-pink">
+        <span className="text-sm text-foreground-pink lg:text-base">
           افزودن آدرس
         </span>
-        <CirculePlusIcon className="w-5 h-5" />
+        <CirculePlusIcon className="h-5 w-5" />
       </button>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <form
           onSubmit={handleSubmit}
-          className="grid lg:grid-cols-2 grid-cols-1 gap-3"
+          className="grid grid-cols-1 gap-3 lg:grid-cols-2"
         >
-          <span className="lg:col-span-2 text-lg lg:text-2xl text-foreground-primary mb-1">
+          <span className="text-lg mb-1 text-foreground-primary lg:text-2xl lg:col-span-2">
             افزودن آدرس
           </span>
 
           {/* User Info Display */}
           {userInfo && (
-            <div className="col-span-2 flex flex-col lg:flex-row gap-3 bg-slate-50 p-3 rounded-lg mb-2">
+            <div className="col-span-2 mb-2 flex flex-col gap-3 rounded-lg bg-slate-50 p-3 lg:flex-row">
               <div className="flex-1">
                 <span className="text-sm text-gray-500">
                   نام و نام خانوادگی:
@@ -220,15 +220,15 @@ export default function AddAddress({ onAddressAdded }: Props) {
               !selectedProvince
                 ? "لطفا ابتدا استان را انتخاب کنید"
                 : loadingCities
-                ? "در حال دریافت شهرها..."
-                : "شهر محل سکونت خود را انتخاب نمایید"
+                  ? "در حال دریافت شهرها..."
+                  : "شهر محل سکونت خود را انتخاب نمایید"
             }
             error={errorCities || undefined}
             className="col-span-2 lg:col-span-1"
           />
 
-          <div className="flex flex-col gap-1 col-span-2 lg:col-span-1">
-            <label className="lg:text-lg text-base text-foreground-primary">
+          <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
+            <label className="text-base text-foreground-primary lg:text-lg">
               جزئیات آدرس (اختیاری)
             </label>
             <input
@@ -236,12 +236,12 @@ export default function AddAddress({ onAddressAdded }: Props) {
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="جزئیات آدرس"
-              className="w-full p-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+              className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
             />
           </div>
 
-          <div className="flex flex-col gap-1 col-span-2 lg:col-span-1">
-            <label className="lg:text-lg text-base text-foreground-primary">
+          <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
+            <label className="text-base text-foreground-primary lg:text-lg">
               کد پستی
             </label>
             <input
@@ -254,15 +254,15 @@ export default function AddAddress({ onAddressAdded }: Props) {
               pattern="[0-9]{10}"
               maxLength={10}
               required
-              className="w-full p-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+              className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
             />
             <span className="text-xs text-gray-500">
               کد پستی باید ۱۰ رقم باشد
             </span>
           </div>
 
-          <div className="flex flex-col gap-1 col-span-2">
-            <label className="lg:text-lg text-base text-foreground-primary">
+          <div className="col-span-2 flex flex-col gap-1">
+            <label className="text-base text-foreground-primary lg:text-lg">
               آدرس دقیق محل سکونت
             </label>
             <textarea
@@ -271,20 +271,20 @@ export default function AddAddress({ onAddressAdded }: Props) {
               onChange={(e) => setFullAddress(e.target.value)}
               placeholder="آدرس کامل شامل خیابان، کوچه، پلاک و..."
               required
-              className="w-full p-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none"
+              className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full resize-none rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
             />
           </div>
 
-          <div className="flex justify-end col-span-2 mt-3">
+          <div className="col-span-2 mt-3 flex justify-end">
             <button
               type="submit"
               disabled={loading || !selectedCity}
-              className={`bg-foreground-pink text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors flex items-center gap-2 px-8 py-2 lg:w-fit w-full justify-center ${
-                loading || !selectedCity ? "opacity-70 cursor-not-allowed" : ""
+              className={`hover:bg-primary-700 text-sm flex w-full items-center justify-center gap-2 rounded-lg bg-foreground-pink px-8 py-2 font-medium text-white transition-colors lg:w-fit ${
+                loading || !selectedCity ? "cursor-not-allowed opacity-70" : ""
               }`}
             >
-              <SaveIcon className="w-5 h-5" />
-              <span className="lg:text-sm text-base">
+              <SaveIcon className="h-5 w-5" />
+              <span className="text-base lg:text-sm">
                 {loading ? "در حال ذخیره..." : "ذخیره آدرس"}
               </span>
             </button>
