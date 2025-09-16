@@ -4,24 +4,16 @@
  */
 
 // Base URLs
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ;
-if (!apiBaseUrl) {
-  throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
-}
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const API_BASE_URL = apiBaseUrl;
 
 const strapiToken = process.env.NEXT_PUBLIC_STRAPI_TOKEN;
 
-if (!strapiToken) {
-  throw new Error("NEXT_PUBLIC_STRAPI_TOKEN is not defined");
-}
 
 export const STRAPI_TOKEN = strapiToken;
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
-if (!imageBaseUrl) {
-  throw new Error("NEXT_PUBLIC_IMAGE_BASE_URL is not defined");
-}
+
 export const IMAGE_BASE_URL = imageBaseUrl;
 // API Versions
 export const API_VERSION = "v1";
