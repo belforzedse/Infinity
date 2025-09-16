@@ -1,5 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api"; // removed unused: STRAPI_TOKEN
+import { appendTitleFilter } from "@/constants/productFilters";
 import { ApiResponse } from "@/types/api";
 import { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
@@ -618,7 +619,9 @@ export const getRelatedProductsByMainCategory = async (
     return [];
   }
 
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&pagination[limit]=${limit}`;
+  const endpoint = appendTitleFilter(
+    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&pagination[limit]=${limit}`,
+  );
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -662,7 +665,9 @@ export const getRelatedProductsByOtherCategories = async (
       )
       .join("&");
 
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&pagination[limit]=${limit}`;
+    const endpoint = appendTitleFilter(
+      `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&pagination[limit]=${limit}`,
+    );
 
     const response = await apiClient.get<any>(endpoint);
     return formatProductsToCardProps((response as any).data);
