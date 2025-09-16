@@ -31,7 +31,7 @@ export default function PDPHeroInfoModel(props: Props) {
       })
       .map((m) => m.id);
 
-    return [...new Set([...autoDisabled, ...disabledModelIds])];
+    return Array.from(new Set([...autoDisabled, ...disabledModelIds]));
   };
 
   const actualDisabledModelIds = getDisabledModelIds();
