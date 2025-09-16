@@ -1,3 +1,19 @@
+import { getUserCart } from "./base";
+import {
+  addItemToCart,
+  updateCartItem,
+  removeCartItem,
+  finalizeCart,
+} from "./mutations";
+import { checkCartStock, getSnappEligible } from "./queries";
+import { applyDiscount } from "./discount";
+import type {
+  CartResponse,
+  CartItemResponse,
+  CartStockCheckResponse,
+  FinalizeCartRequest,
+  FinalizeCartResponse,
+} from "./types/cart";
 import { apiClient } from "../index";
 // removed unused imports: ApiResponse, IMAGE_BASE_URL
 import logger from "@/utils/logger";
@@ -230,28 +246,15 @@ export const getSnappEligible = async (
   return payload || { eligible: false };
 };
 
-export interface CreateOrderRequest {
-  shipping_address_id: number;
-  shipping_method_id: number;
-  customer_name?: string;
-  customer_phone?: string;
-  notes?: string;
-}
-
-export interface CreateOrderResponse {
-  success: boolean;
-  message: string;
-  orderId: number;
-  orderNumber: string;
-}
-
-/**
- * Get the user's cart
- * @returns Cart response with items
- */
-export const getUserCart = async (): Promise<CartResponse> => {
-  const response = await apiClient.get<CartResponse>("/carts/me");
-  return response.data;
+export {
+  getUserCart,
+  addItemToCart,
+  updateCartItem,
+  removeCartItem,
+  checkCartStock,
+  finalizeCart,
+  getSnappEligible,
+  applyDiscount,
 };
 
 /**
@@ -395,7 +398,6 @@ const CartService = {
   removeCartItem,
   checkCartStock,
   finalizeCart,
-  createOrder,
   getSnappEligible,
   applyDiscount,
 };

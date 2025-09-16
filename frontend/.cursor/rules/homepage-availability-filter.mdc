@@ -1,0 +1,27 @@
+---
+description: Home page product availability; filter out zero-stock items in queries and mappings
+globs: src/app/(product)/page.tsx,src/components/PDP/OffersListHomePage.tsx
+---
+
+## Home Page Availability Filter
+
+Ensure home page sections only display available products (stock > 0).
+
+### Query Requirements
+
+- Discounted products (variations): populate `product_stock` and require `filters[product_stock][Count][$gt]=0` on `/product-variations`.
+- New products and Popular products (products): populate `product_variations.product_stock` and require `filters[product_variations][product_stock][Count][$gt]=0` on `/products`.
+
+References:
+
+- [Home page component](<mdc:infinity-store-front/src/app/(product)/page.tsx>)
+
+### Mapping Guards
+
+- When choosing a variation to display, further filter variations to `IsPublished && Price > 0 && product_stock.Count > 0` before selecting the cheapest.
+- Exclude any product that ends up with no available variation after filtering.
+
+### Rationale
+
+- Prevents showing out-of-stock items in featured lists (UX and conversion).
+- Keeps product cards consistent with PLP availability behavior.

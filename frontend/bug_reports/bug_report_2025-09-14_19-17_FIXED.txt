@@ -1,0 +1,37 @@
+
+Summary of Findings
+- Medium: Buttons lack explicit type="button"; may submit forms unintentionally.
+- Medium: Color selected state is a non-interactive <div>; a11y/keyboard issues.
+- Low: Internal default selection may pick a disabled option before external state arrives.
+- Low: Size scroller next/prev scroll direction may be reversed in RTL.
+
+Detailed Issues
+1) File → src/components/PDP/Hero/Info/Color.tsx → ~49-76 (button inside map)
+   Problem: Missing `type="button"` on interactive buttons. In a parent form, default type="submit" can trigger form submission.
+   Suggested Fix: Add `type="button"` to all buttons.
+   Confidence: High
+
+2) File → src/components/PDP/Hero/Info/Size.tsx → ~103-131 (button inside map)
+   Problem: Missing `type="button"` on buttons; same risk of unintended submission.
+   Suggested Fix: Add `type="button"` to all buttons.
+   Confidence: High
+
+3) File → src/components/PDP/Hero/Info/Model.tsx → ~45-70 (button inside map)
+   Problem: Missing `type="button"` on buttons; same risk of unintended submission.
+   Suggested Fix: Add `type="button"` to all buttons.
+   Confidence: High
+
+4) File → src/components/PDP/Hero/Info/Color.tsx → ~34-55 (selected swatch)
+   Problem: When selected, the color renders a <div> (non-interactive). This prevents keyboard toggling and consistent semantics.
+   Suggested Fix: Render as a `button` with `aria-pressed={true}` and `type="button"`, or add `role="button"` and keyboard handlers (Enter/Space) if keeping <div>.
+   Confidence: Medium
+
+5) File → src/components/PDP/Hero/Info/* → initial internal state
+   Problem: Internal default selects first item regardless of `disabled*Ids`. If external selected props arrive later, there may be a momentary mismatch/flicker selecting a disabled option.
+   Suggested Fix: Initialize internal selection to the first non-disabled ID when external selection is undefined. Alternatively, keep internal empty and rely entirely on external selection.
+   Confidence: Medium
+
+6) File → src/components/PDP/Hero/Info/Size.tsx → ~40-64 (scroll handlers)
+   Problem: `onNextClick` scrolls left: -200 and `onPrevClick` scrolls left: 200 which might be reversed for RTL expectations.
+   Suggested Fix: Verify design for RTL. If needed, invert the scroll directions or compute based on document direction.
+   Confidence: Low
