@@ -9,6 +9,7 @@ export default function PLPButton({
   onClick,
   disabled = false,
   variant = "outline",
+  fullWidth = true,
 }: {
   text: string;
   className?: string;
@@ -17,6 +18,7 @@ export default function PLPButton({
   onClick?: () => void;
   disabled?: boolean;
   variant?: "primary" | "outline";
+  fullWidth?: boolean;
 }) {
   return (
     <Button
@@ -24,16 +26,17 @@ export default function PLPButton({
       disabled={disabled}
       variant={variant}
       className={cn(
-        "text-xs w-full gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px]",
+        "text-xs gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px]",
         "flex items-center justify-center",
+        fullWidth ? "w-full" : "inline-flex",
         disabled && "cursor-not-allowed opacity-50",
         className,
       )}
     >
       <span className="pointer-events-none flex items-center justify-center gap-1">
-        {rightIcon && <span className="pointer-events-none">{rightIcon}</span>}
-        <span className="pointer-events-none">{text}</span>
         {leftIcon && <span className="pointer-events-none">{leftIcon}</span>}
+        <span className="pointer-events-none">{text}</span>
+        {rightIcon && <span className="pointer-events-none">{rightIcon}</span>}
       </span>
     </Button>
   );

@@ -13,12 +13,27 @@ import {
   hasStockForVariation,
 } from "@/services/product/product";
 import logger from "@/utils/logger";
+import type { ProductData } from "@/types/Product";
+
+// Runtime-aware debug logger. It checks NODE_ENV and a runtime flag stored
+// in localStorage (`pdp_debug`) or the build-time env `NEXT_PUBLIC_PDP_DEBUG`.
+const isDebugActive = () => {
+  if (process.env.NODE_ENV === "production") return false;
+  try {
+    if (typeof window !== "undefined") {
+      const ls = localStorage.getItem("pdp_debug");
+      if (ls !== null) return ls === "1";
+    }
+  } catch {
+    // ignore localStorage access errors
+  }
+  return process.env.NEXT_PUBLIC_PDP_DEBUG === "true";
+};
 
 const debugLog = (...args: any[]) => {
-  if (process.env.NODE_ENV !== "production") {
-    const [message, ...meta] = args;
-    logger.info(message, meta.length ? { meta } : undefined);
-  }
+  if (!isDebugActive()) return;
+  const [message, ...meta] = args;
+  logger.info(message, meta.length ? { meta } : undefined);
 };
 
 type Props = {
@@ -59,38 +74,36 @@ type Props = {
 };
 
 // Minimal types used by this component (narrowed from Strapi shape)
-type Variation = {
-  id: number;
-  attributes: {
-    IsPublished?: boolean;
-    Price?: string | number;
-    DiscountPrice?: string | number;
-    product_stock?: { data?: { attributes?: { Count?: number } } } | null;
-    product_variation_color?: {
-      data?: { id: number; attributes?: any };
-    } | null;
-    product_variation_size?: { data?: { id: number; attributes?: any } } | null;
-    product_variation_model?: {
-      data?: { id: number; attributes?: any };
-    } | null;
-    [k: string]: any;
-  };
-};
-
-type ProductData = {
-  attributes: {
-    product_variations?: { data?: Variation[] };
-    product_size_helper?: any;
-    CoverImage?: any;
-    Description?: string;
-    CleaningTips?: string;
-    ReturnConditions?: string;
-    [k: string]: any;
-  };
-};
+// Reuse shared types from `src/types/product.ts`
 
 export default function PDPHeroInfo(props: Props) {
   const { product, sizes, colors, models = [], productData, productId } = props;
+
+  // Runtime toggle for debug panel (persisted in localStorage)
+  const [isDebugEnabled, setIsDebugEnabled] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const val = localStorage.getItem("pdp_debug");
+        if (val !== null) return val === "1";
+      }
+    } catch {
+      // ignore
+    }
+    return (
+      process.env.NEXT_PUBLIC_PDP_DEBUG === "true" &&
+      process.env.NODE_ENV !== "production"
+    );
+  });
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("pdp_debug", isDebugEnabled ? "1" : "0");
+      }
+    } catch {
+      // ignore
+    }
+  }, [isDebugEnabled]);
 
   // State for selected variation properties
   const [selectedColor, setSelectedColor] = useState<string>(
@@ -111,7 +124,12 @@ export default function PDPHeroInfo(props: Props) {
       const disabledModels: string[] = [];
 
       if (!productData?.attributes?.product_variations?.data) {
-        return { disabledColors, disabledSizes, disabledModels };
+        return {
+          disabledColors,
+          disabledSizes,
+          disabledModels,
+          availableVariations: [],
+        };
       }
 
       const variations: any[] = productData.attributes.product_variations.data;
@@ -437,32 +455,52 @@ export default function PDPHeroInfo(props: Props) {
   return (
     <div className="flex flex-1 flex-col gap-5 md:max-w-[688px]">
       {process.env.NODE_ENV !== "production" && (
-        <div
-          className="dev-debug-panel"
-          style={{
-            backgroundColor: "#f8fafc",
-            padding: 12,
-            fontSize: 12,
-            color: "#334155",
-          }}
-        >
-          <div style={{ fontWeight: 600 }}>DEV DEBUG: variations</div>
-          <div style={{ marginTop: 8 }}>
-            <div>
-              Available variation IDs:{" "}
-              {availableVariations && availableVariations.length
-                ? availableVariations.map((v: any) => v.id).join(", ")
-                : "(none)"}
-            </div>
-            <div>Disabled colors: {disabledColors.join(", ") || "(none)"}</div>
-            <div>Disabled sizes: {disabledSizes.join(", ") || "(none)"}</div>
-            <div>Disabled models: {disabledModels.join(", ") || "(none)"}</div>
-            <div>
-              Selected: color={selectedColor} size={selectedSize} model=
-              {selectedModel}
-            </div>
-            <div>CurrentVariationId: {currentVariationId || "(none)"}</div>
+        <div>
+          <div className="mb-2">
+            <button
+              type="button"
+              onClick={() => setIsDebugEnabled((s) => !s)}
+              className="text-xs rounded bg-slate-100 px-2 py-1 text-slate-800"
+            >
+              {isDebugEnabled ? "Hide PDP Debug" : "Show PDP Debug"}
+            </button>
           </div>
+
+          {isDebugEnabled && (
+            <div
+              className="dev-debug-panel"
+              style={{
+                backgroundColor: "#f8fafc",
+                padding: 12,
+                fontSize: 12,
+                color: "#334155",
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>DEV DEBUG: variations</div>
+              <div style={{ marginTop: 8 }}>
+                <div>
+                  Available variation IDs:{" "}
+                  {availableVariations && availableVariations.length
+                    ? availableVariations.map((v: any) => v.id).join(", ")
+                    : "(none)"}
+                </div>
+                <div>
+                  Disabled colors: {disabledColors.join(", ") || "(none)"}
+                </div>
+                <div>
+                  Disabled sizes: {disabledSizes.join(", ") || "(none)"}
+                </div>
+                <div>
+                  Disabled models: {disabledModels.join(", ") || "(none)"}
+                </div>
+                <div>
+                  Selected: color={selectedColor} size={selectedSize} model=
+                  {selectedModel}
+                </div>
+                <div>CurrentVariationId: {currentVariationId || "(none)"}</div>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <div className="hidden md:block">
