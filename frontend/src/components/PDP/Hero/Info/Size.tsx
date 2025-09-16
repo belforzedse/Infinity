@@ -54,7 +54,7 @@ export default function PDPHeroInfoSize(props: Props) {
       .map((size) => size.id);
 
     // Combine with manually disabled sizes
-    return [...new Set([...autoDisabled, ...disabledSizeIds])];
+    return Array.from(new Set([...autoDisabled, ...disabledSizeIds]));
   };
 
   const actualDisabledSizeIds = getDisabledSizeIds();
