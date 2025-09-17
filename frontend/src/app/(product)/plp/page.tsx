@@ -69,10 +69,10 @@ async function getProducts(
     try {
       // Use the search service
       const searchResults = await searchProducts(search, page, pageSize);
-      // Only keep search results where Title contains کیف, کفش, صندل, or کتونی
+      // Only keep search results where Title contains کیف, کفش, صندل, کتونی, or ونس
       const filtered = searchResults.data.filter((item) => {
         const title = (item.Title || "").toString();
-        return /کیف|کفش|صندل|کتونی/.test(title);
+        return /کیف|کفش|صندل|کتونی|ونس/.test(title);
       });
 
       return {
@@ -149,11 +149,12 @@ async function getProducts(
   // Add filters
   queryParams.append("filters[Status][$eq]", "Active");
 
-  // Only show products whose Title contains کیف، کفش، صندل، or کتونی
+  // Only show products whose Title contains کیف، کفش، صندل، کتونی، or ونس
   queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
   queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
   queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
   queryParams.append("filters[$or][3][Title][$containsi]", "کتونی");
+  queryParams.append("filters[$or][4][Title][$containsi]", "ونس");
 
   // Category filter
   if (category) {
