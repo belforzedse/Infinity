@@ -41,7 +41,7 @@ export default function OffersListHomePage(props: Props) {
   function getPlpHref(): string {
     // Map known section titles to PLP filters/sort
     if (title.includes("تخفیف")) {
-      return "/plp?hasDiscount=true";
+      return "/plp?discount=true";
     }
     if (title.includes("جدید")) {
       return "/plp?sort=createdAt:desc";
