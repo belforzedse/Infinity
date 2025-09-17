@@ -30,6 +30,7 @@ export default function ProductsPage() {
   const [buildingIndex, setBuildingIndex] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
   const [settings, setSettings] = useState<{filterPublicProductsByTitle: boolean} | null>(null);
+  const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
 
   const getAllProductsLite = useCallback(async () => {
     // Fetch product list with minimal payload for stock aggregation
@@ -49,7 +50,11 @@ export default function ProductsPage() {
         `&populate[1]=product_variations.product_stock` +
         `&populate[2]=product_main_category`;
 
-      if (settings?.filterPublicProductsByTitle && !isRecycleBinOpen) {
+      const shouldApplyTitleFilter = localTitleFilter !== null
+        ? localTitleFilter
+        : settings?.filterPublicProductsByTitle;
+
+      if (shouldApplyTitleFilter && !isRecycleBinOpen) {
         endpoint = appendTitleFilter(endpoint);
       }
 
@@ -62,7 +67,7 @@ export default function ProductsPage() {
       current += 1;
     }
     return items;
-  }, [isRecycleBinOpen]);
+  }, [isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle]);
 
   const buildStockIndex = useCallback(async () => {
     setBuildingIndex(true);
@@ -135,7 +140,7 @@ export default function ProductsPage() {
     setCustomPageData(null);
     if (sort === "stock-asc" || sort === "stock-desc") buildStockIndex();
     else if (sort === "sales-asc" || sort === "sales-desc") buildSalesIndex();
-  }, [sort, buildStockIndex, buildSalesIndex]);
+  }, [sort, buildStockIndex, buildSalesIndex, localTitleFilter]);
 
   // Fetch current page data when using custom index
   useEffect(() => {
@@ -158,7 +163,11 @@ export default function ProductsPage() {
               ? `&filters[removedAt][$null]=false`
               : `&filters[removedAt][$null]=true`) +
             `&populate[0]=CoverImage&populate[1]=product_variations&populate[2]=product_variations.product_stock&populate[3]=product_main_category`;
-          if (settings?.filterPublicProductsByTitle && !isRecycleBinOpen) {
+          const shouldApplyTitleFilter = localTitleFilter !== null
+            ? localTitleFilter
+            : settings?.filterPublicProductsByTitle;
+
+          if (shouldApplyTitleFilter && !isRecycleBinOpen) {
             ep = appendTitleFilter(ep);
           }
           return ep;
@@ -174,7 +183,7 @@ export default function ProductsPage() {
       setPageLoading(false);
     };
     run();
-  }, [sortedProductIds, page, pageSize, isRecycleBinOpen]);
+  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle]);
 
   // Fetch settings once on mount
   useEffect(() => {
@@ -209,20 +218,42 @@ export default function ProductsPage() {
       setIsRecycleBinOpen={setIsRecycleBinOpen}
       apiUrl={"/products"}
     >
-      <div className="mb-3 flex items-center gap-2">
-        <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
-        <select
-          className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
-          value={sort}
-          onChange={(e) => setSort(e.target.value as any)}
-        >
-          <option value="newest">جدیدترین</option>
-          <option value="oldest">قدیمی‌ترین</option>
-          <option value="stock-desc">موجودی: بیشترین</option>
-          <option value="stock-asc">موجودی: کمترین</option>
-          <option value="sales-desc">فروش: بیشترین</option>
-          <option value="sales-asc">فروش: کمترین</option>
-        </select>
+      <div className="mb-3 flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
+          <select
+            className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as any)}
+          >
+            <option value="newest">جدیدترین</option>
+            <option value="oldest">قدیمی‌ترین</option>
+            <option value="stock-desc">موجودی: بیشترین</option>
+            <option value="stock-asc">موجودی: کمترین</option>
+            <option value="sales-desc">فروش: بیشترین</option>
+            <option value="sales-asc">فروش: کمترین</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل:</label>
+          <select
+            className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
+            value={localTitleFilter === null ? "global" : localTitleFilter ? "on" : "off"}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "global") {
+                setLocalTitleFilter(null);
+              } else {
+                setLocalTitleFilter(value === "on");
+              }
+            }}
+          >
+            <option value="global">پیش‌فرض سایت ({settings?.filterPublicProductsByTitle ? "فعال" : "غیرفعال"})</option>
+            <option value="on">فعال</option>
+            <option value="off">غیرفعال</option>
+          </select>
+        </div>
       </div>
       {sort === "newest" || sort === "oldest" ? (
         <SuperAdminTable
@@ -233,8 +264,17 @@ export default function ProductsPage() {
               (isRecycleBinOpen
                 ? "&filters[removedAt][$null]=false"
                 : "&filters[removedAt][$null]=true");
-            if (sort === "newest") return base + "&sort[0]=createdAt:desc";
-            return base + "&sort[0]=createdAt:asc";
+            const shouldApplyTitleFilter = localTitleFilter !== null
+              ? localTitleFilter
+              : settings?.filterPublicProductsByTitle;
+
+            let sortedBase = base;
+            if (shouldApplyTitleFilter && !isRecycleBinOpen) {
+              sortedBase = appendTitleFilter(sortedBase);
+            }
+
+            if (sort === "newest") return sortedBase + "&sort[0]=createdAt:desc";
+            return sortedBase + "&sort[0]=createdAt:asc";
           })()}
           mobileTable={(data) => <MobileTable data={data} />}
           removeActions
