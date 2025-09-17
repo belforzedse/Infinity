@@ -38,7 +38,14 @@ interface TableProps<TData, TValue> {
   removeActions?: boolean;
   className?: string;
   draggable?: boolean;
-  mobileTable?: (data: TData[] | undefined) => React.ReactNode;
+  mobileTable?: (
+    data: TData[] | undefined,
+    selectionProps?: {
+      enableSelection: boolean;
+      selectedIds: Set<string>;
+      onSelectionChange: (id: string, selected: boolean) => void;
+    }
+  ) => React.ReactNode;
   onItemDrag?: (row: Row<TData>) => void;
   // Enable row selection + bulk actions
   enableSelection?: boolean;
@@ -445,7 +452,23 @@ export function SuperAdminTable<TData, TValue>({
       </div>
 
       {mobileTable && (
-        <div className="block md:hidden">{mobileTable(tableData)}</div>
+        <div className="block md:hidden">
+          {mobileTable(
+            tableData,
+            enableSelection
+              ? {
+                  enableSelection: true,
+                  selectedIds,
+                  onSelectionChange: (id: string, selected: boolean) => {
+                    const next = new Set(selectedIds);
+                    if (selected) next.add(id);
+                    else next.delete(id);
+                    setSelectedIds(next);
+                  },
+                }
+              : undefined
+          )}
+        </div>
       )}
     </div>
   );

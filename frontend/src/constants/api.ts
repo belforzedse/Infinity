@@ -9,7 +9,8 @@ const apiBaseUrl =
   "https://api.infinity.rgbgroup.ir/api";
 export const API_BASE_URL = apiBaseUrl;
 
-const strapiToken = process.env.NEXT_PUBLIC_STRAPI_TOKEN;
+const strapiToken = process.env.NEXT_PUBLIC_STRAPI_TOKEN || "STRAPI_API_TOKEN"
+;
 
 export const STRAPI_TOKEN = strapiToken;
 
