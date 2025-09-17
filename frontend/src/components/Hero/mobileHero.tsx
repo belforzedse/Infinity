@@ -39,7 +39,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
   return (
     <>
       {/* Hero section with responsive images */}
-      <div className="overflow-hidden lg:hidden">
+      <div className="overflow-hidden">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`hero-${playKey}`}

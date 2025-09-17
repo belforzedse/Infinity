@@ -58,7 +58,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
   return (
     <>
       {/*Desktop hero section*/}
-      <div className="relative hidden h-[650px] w-full overflow-hidden lg:block">
+      <div className="relative h-[650px] w-full overflow-hidden">
         <div className="h-full grid-cols-1 grid-rows-2">
           <div className="flex h-full gap-10">
             <div className="h-full w-7/12 flex-none">
