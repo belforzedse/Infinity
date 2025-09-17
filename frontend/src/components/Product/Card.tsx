@@ -38,6 +38,21 @@ const ProductCard: FC<ProductCardProps> = ({
     productId: id.toString(),
   });
 
+  // Debug: Log product card data
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`ProductCard ${id} pricing:`, {
+      price,
+      discountPrice,
+      discount,
+      title: title.substring(0, 30),
+      hasDiscountLogic: !!(discountPrice && discountPrice > 0)
+    });
+  }
+
+  // Temporary test: Force discount for testing (REMOVE AFTER TESTING)
+  // const testDiscountPrice = id === 1 ? Math.floor(price * 0.8) : discountPrice;
+  // const testDiscount = id === 1 ? 20 : discount;
+
   return (
     <Link
       href={`/pdp/${id.toString()}`}
@@ -123,15 +138,15 @@ const ProductCard: FC<ProductCardProps> = ({
               </span>
             ) : (
               <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
-                {discountPrice && (
+                {discountPrice && discountPrice > 0 && discountPrice < price && (
                   <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
-                    {faNum(discountPrice || price)} تومان
+                    {faNum(discountPrice)} تومان
                   </span>
                 )}
 
                 <span
                   className={`${
-                    discountPrice
+                    discountPrice && discountPrice > 0 && discountPrice < price
                       ? "text-xs text-foreground-muted line-through"
                       : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
                   }`}

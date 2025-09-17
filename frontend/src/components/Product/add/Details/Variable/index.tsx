@@ -37,6 +37,19 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         // Type assertion to work with the data
         const variations = (response as any).data as ProductVariable[];
 
+        // Debug: Log the API response to see what we're getting
+        if (process.env.NODE_ENV !== "production") {
+          console.log("Product variations API response:", variations);
+          variations.forEach((variation, index) => {
+            console.log(`Variation ${index}:`, {
+              id: variation.id,
+              DiscountPrice: variation.attributes.DiscountPrice,
+              Price: variation.attributes.Price,
+              attributes: variation.attributes
+            });
+          });
+        }
+
         // Transform API data to display format
         const formattedVariations = variations.map(
           (variation: ProductVariable) => {
@@ -61,7 +74,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               id: variation.id,
               sku: variation.attributes.SKU || "",
               price: variation.attributes.Price || 0,
-              discountPrice: variation.attributes.DiscountPrice || undefined,
+              discountPrice: variation.attributes.DiscountPrice ? Number(variation.attributes.DiscountPrice) : undefined,
               stock:
                 variation.attributes.product_stock?.data?.attributes.Count || 0,
               stockId: variation.attributes.product_stock?.data?.id,
@@ -73,6 +86,19 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
             };
           },
         );
+
+        // Debug: Log the formatted variations
+        if (process.env.NODE_ENV !== "production") {
+          console.log("Formatted variations:", formattedVariations);
+          formattedVariations.forEach((variation, index) => {
+            console.log(`Formatted variation ${index}:`, {
+              id: variation.id,
+              price: variation.price,
+              discountPrice: variation.discountPrice,
+              variable: variation.variable
+            });
+          });
+        }
 
         setVariables(formattedVariations);
       } catch (error) {
