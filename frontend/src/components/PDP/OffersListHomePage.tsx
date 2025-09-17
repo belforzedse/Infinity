@@ -22,8 +22,15 @@ export default function OffersListHomePage(props: Props) {
 
   function goToNextProduct() {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        left: scrollRef.current.scrollLeft + 400,
+      // Check if we're on mobile or desktop
+      const isMobile = window.innerWidth < 768;
+      // Mobile: Card width (259px) + gap (20px) = 279px per card
+      // Desktop: Card width (256px) + gap (16px) = 272px per card
+      const cardSize = isMobile ? 279 : 272;
+      // Scroll by 4 cards worth of space
+      const scrollAmount = cardSize * 4;
+      scrollRef.current.scrollBy({
+        left: scrollAmount,
         behavior: "smooth",
       });
     }
@@ -31,8 +38,15 @@ export default function OffersListHomePage(props: Props) {
 
   function goToPreviousProduct() {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        left: scrollRef.current.scrollLeft - 400,
+      // Check if we're on mobile or desktop
+      const isMobile = window.innerWidth < 768;
+      // Mobile: Card width (259px) + gap (20px) = 279px per card
+      // Desktop: Card width (256px) + gap (16px) = 272px per card
+      const cardSize = isMobile ? 279 : 272;
+      // Scroll by 4 cards worth of space
+      const scrollAmount = cardSize * 4;
+      scrollRef.current.scrollBy({
+        left: -scrollAmount,
         behavior: "smooth",
       });
     }
@@ -41,7 +55,7 @@ export default function OffersListHomePage(props: Props) {
   function getPlpHref(): string {
     // Map known section titles to PLP filters/sort
     if (title.includes("تخفیف")) {
-      return "/plp?discount=true";
+      return "/plp?hasDiscount=true";
     }
     if (title.includes("جدید")) {
       return "/plp?sort=createdAt:desc";
@@ -53,9 +67,10 @@ export default function OffersListHomePage(props: Props) {
   }
 
   // Display only first 8 products on desktop in grid layout
-  const displayedProducts = isShowAllProducts
-    ? products
-    : products.slice(0, isShowAllProducts ? products.length : 8);
+  const displayedProducts =
+    isShowAllProducts ? products : (
+      products.slice(0, isShowAllProducts ? products.length : 4)
+    );
 
   return (
     <div className="flex flex-col gap-3">
@@ -86,18 +101,20 @@ export default function OffersListHomePage(props: Props) {
       </div>
 
       {/* Mobile scrollable view */}
-      <div className="md:hidden">
+      <div className="md:hidden overflow-hidden">
         <div
           ref={scrollRef}
-          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto"
+          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
             msOverflowStyle: "none",
+            width: "1096px", // 4 * 259px + 3 * 20px = 1036px + 60px = 1096px
+            maxWidth: "100vw",
           }}
         >
           {products.map((product) => (
-            <div key={product.id} className="snap-start">
+            <div key={product.id} className="snap-start flex-shrink-0">
               <ProductCard {...product} />
             </div>
           ))}
@@ -116,13 +133,25 @@ export default function OffersListHomePage(props: Props) {
         )}
       </div>
 
-      {/* Desktop grid view */}
-      <div className="hidden gap-4 gap-y-6 md:grid md:grid-cols-2 lg:grid-cols-4">
-        {displayedProducts.map((product) => (
-          <div key={product.id} className="h-full">
-            <ProductCard {...product} />
-          </div>
-        ))}
+      {/* Desktop horizontal scroll view */}
+      <div className="hidden md:block overflow-hidden">
+        <div
+          ref={scrollRef}
+          className="scrollbar-hide flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            width: "1072px", // 4 * 256px + 3 * 16px = 1024px + 48px = 1072px
+            maxWidth: "100%",
+          }}
+        >
+          {products.map((product) => (
+            <div key={product.id} className="snap-start flex-shrink-0 w-64">
+              <ProductCard {...product} />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Desktop view more button */}
