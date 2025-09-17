@@ -1,7 +1,7 @@
 "use client";
 import ProductCard, { type ProductCardProps } from "@/components/Product/Card";
 import PDPHeroNavigationButtons from "./NavigationButtons";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import ArrowLeftIcon from "./Icons/ArrowLeftIcon";
 import Link from "next/link";
 
@@ -15,40 +15,69 @@ export default function OffersListHomePage(props: Props) {
   const { icon, title, products } = props;
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Controls whether to show all products or a subset.
   // Defaults to showing a subset on the homepage sections.
   const isShowAllProducts = false;
 
+  // Calculate pagination
+  const productsPerPage = 5;
+  const totalPages = Math.ceil(products.length / productsPerPage);
+  const startIndex = currentPage * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = products.slice(startIndex, endIndex);
+
   function goToNextProduct() {
-    if (scrollRef.current) {
-      // Check if we're on mobile or desktop
-      const isMobile = window.innerWidth < 768;
-      // Mobile: Card width (259px) + gap (20px) = 279px per card
-      // Desktop: Card width (256px) + gap (16px) = 272px per card
-      const cardSize = isMobile ? 279 : 272;
-      // Scroll by 4 cards worth of space
-      const scrollAmount = cardSize * 4;
-      scrollRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: "smooth",
-      });
+    // Check if we're on mobile or desktop
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // Mobile: Original scroll behavior
+      if (scrollRef.current) {
+        const cardSize = 279; // Card width (259px) + gap (20px)
+        const scrollAmount = cardSize * 5;
+        scrollRef.current.scrollBy({
+          left: scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    } else {
+      // Desktop: Pagination - go to next page
+      if (currentPage < totalPages - 1 && !isAnimating) {
+        setIsAnimating(true);
+        setTimeout(() => {
+          setCurrentPage(currentPage + 1);
+          setTimeout(() => setIsAnimating(false), 50);
+        }, 150);
+      }
     }
   }
 
   function goToPreviousProduct() {
-    if (scrollRef.current) {
-      // Check if we're on mobile or desktop
-      const isMobile = window.innerWidth < 768;
-      // Mobile: Card width (259px) + gap (20px) = 279px per card
-      // Desktop: Card width (256px) + gap (16px) = 272px per card
-      const cardSize = isMobile ? 279 : 272;
-      // Scroll by 4 cards worth of space
-      const scrollAmount = cardSize * 4;
-      scrollRef.current.scrollBy({
-        left: -scrollAmount,
-        behavior: "smooth",
-      });
+    // Check if we're on mobile or desktop
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // Mobile: Original scroll behavior
+      if (scrollRef.current) {
+        const cardSize = 279; // Card width (259px) + gap (20px)
+        const scrollAmount = cardSize * 5;
+        scrollRef.current.scrollBy({
+          left: -scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    } else {
+      // Desktop: Pagination - go to previous page
+      if (currentPage > 0 && !isAnimating) {
+        setIsAnimating(true);
+        setTimeout(() => {
+          setCurrentPage(currentPage - 1);
+          setTimeout(() => setIsAnimating(false), 50);
+        }, 150);
+      }
     }
   }
 
@@ -66,13 +95,53 @@ export default function OffersListHomePage(props: Props) {
     return "/plp";
   }
 
-  // Display only first 8 products on desktop in grid layout
+  // Display only first 10 products on desktop in grid layout (2 rows of 5)
   const displayedProducts =
     isShowAllProducts ? products : (
-      products.slice(0, isShowAllProducts ? products.length : 4)
+      products.slice(0, isShowAllProducts ? products.length : 5)
     );
 
   return (
+    <>
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes fadeOut {
+          from {
+            opacity: 1;
+            transform: scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .smooth-scroll {
+          scroll-behavior: smooth;
+          transition: scroll-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      `}</style>
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
@@ -90,6 +159,15 @@ export default function OffersListHomePage(props: Props) {
             />
           </div>
 
+          {/* Desktop pagination indicator */}
+          {totalPages > 1 && (
+            <div className="hidden md:flex items-center gap-1 text-xs text-neutral-500">
+              <span>{currentPage + 1}</span>
+              <span>/</span>
+              <span>{totalPages}</span>
+            </div>
+          )}
+
           {/* Desktop: navigate to PLP with appropriate filters */}
           <Link
             href={getPlpHref()}
@@ -101,26 +179,33 @@ export default function OffersListHomePage(props: Props) {
       </div>
 
       {/* Mobile scrollable view */}
-      <div className="md:hidden overflow-hidden">
+      <div className="md:hidden overflow-hidden w-full">
         <div
           ref={scrollRef}
-          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth"
+          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth smooth-scroll transition-transform duration-300 ease-out"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
             msOverflowStyle: "none",
-            width: "1096px", // 4 * 259px + 3 * 20px = 1036px + 60px = 1096px
-            maxWidth: "100vw",
+            width: "100%",
+            maxWidth: "none",
           }}
         >
-          {products.map((product) => (
-            <div key={product.id} className="snap-start flex-shrink-0">
+          {products.map((product, index) => (
+            <div
+              key={product.id}
+              className="snap-start flex-shrink-0 transform transition-all duration-200 ease-out hover:scale-[1.02]"
+              style={{
+                animationDelay: `${index * 60}ms`,
+                animation: `fadeInUp 0.3s ease-out forwards ${index * 60}ms`
+              }}
+            >
               <ProductCard {...product} />
             </div>
           ))}
         </div>
 
-        {!isShowAllProducts && products.length > 4 && (
+        {!isShowAllProducts && products.length > 5 && (
           <div className="mt-4 flex items-center justify-center">
             <Link
               href={getPlpHref()}
@@ -133,21 +218,19 @@ export default function OffersListHomePage(props: Props) {
         )}
       </div>
 
-      {/* Desktop horizontal scroll view */}
-      <div className="hidden md:block overflow-hidden">
+      {/* Desktop grid view - exactly 5 cards in 1 row */}
+      <div className="hidden md:block">
         <div
           ref={scrollRef}
-          className="scrollbar-hide flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth"
-          style={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            width: "1072px", // 4 * 256px + 3 * 16px = 1024px + 48px = 1072px
-            maxWidth: "100%",
-          }}
+          className={`grid grid-cols-5 gap-4 transition-all duration-300 ease-out ${
+            isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+          }`}
         >
-          {products.map((product) => (
-            <div key={product.id} className="snap-start flex-shrink-0 w-64">
+          {currentProducts.map((product, index) => (
+            <div
+              key={product.id}
+              className="transform transition-all duration-200 ease-out hover:scale-[1.02] hover:-translate-y-1"
+            >
               <ProductCard {...product} />
             </div>
           ))}
@@ -155,7 +238,7 @@ export default function OffersListHomePage(props: Props) {
       </div>
 
       {/* Desktop view more button */}
-      {!isShowAllProducts && products.length > 8 && (
+      {!isShowAllProducts && products.length > 5 && (
         <div className="mt-6 hidden items-center justify-center md:flex">
           <Link
             href={getPlpHref()}
@@ -167,5 +250,6 @@ export default function OffersListHomePage(props: Props) {
         </div>
       )}
     </div>
+    </>
   );
 }
