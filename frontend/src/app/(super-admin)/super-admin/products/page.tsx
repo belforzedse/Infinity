@@ -246,7 +246,7 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل:</label>
+            <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل، کتونی:</label>
             <select
               className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
               value={localTitleFilter === null ? "global" : localTitleFilter ? "on" : "off"}

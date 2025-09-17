@@ -45,7 +45,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
       try {
         // Use regular products endpoint for live preview to support title filtering
         let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=8&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
-        // Add کیف کفش صندل filter to live preview suggestions
+        // Add کیف کفش صندل کتونی filter to live preview suggestions
         url = appendTitleFilter(url);
         const res = await fetch(url, {
           cache: "no-store",

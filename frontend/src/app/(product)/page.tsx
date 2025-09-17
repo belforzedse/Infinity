@@ -52,13 +52,15 @@ export default async function Home() {
               key={category.id}
               href={category.href}
               className={`flex flex-col items-center ${
-                index === categories.length - 1 && categories.length % 3 === 1
-                  ? "col-span-3 mx-auto md:col-span-1 md:mx-0"
-                  : index >= categories.length - (categories.length % 3) &&
-                      categories.length % 3 !== 0 &&
-                      categories.length % 3 !== 1
-                    ? "mx-auto md:mx-0"
-                    : ""
+                index === categories.length - 1 && categories.length % 3 === 1 ?
+                  "col-span-3 mx-auto md:col-span-1 md:mx-0"
+                : (
+                  index >= categories.length - (categories.length % 3) &&
+                  categories.length % 3 !== 0 &&
+                  categories.length % 3 !== 1
+                ) ?
+                  "mx-auto md:mx-0"
+                : ""
               }`}
             >
               {/* desktop categories section */}
@@ -119,29 +121,55 @@ export default async function Home() {
           ))}
         </div>
       </div>
-
-      {/* New products section */}
-      <div className="mt-8 md:mt-12">
-        <Reveal variant="fade-up" duration={700}>
-          <OffersListHomePage
-            icon={<NewIcon />}
-            title="جدیدترین ها"
-            products={newProducts}
-          />
-        </Reveal>
-      </div>
-
-      {/* Favorite products section */}
-      <div className="mb-8 mt-8 md:mb-12 md:mt-12">
-        {favoriteProducts.length > 0 && (
+      <div className="hidden md:block">
+        {/* New products section */}
+        <div className="mt-8 md:mt-12">
           <Reveal variant="fade-up" duration={700}>
             <OffersListHomePage
               icon={<NewIcon />}
-              title="محبوب ترین ها"
-              products={favoriteProducts}
+              title="جدیدترین ها"
+              products={newProducts}
             />
           </Reveal>
-        )}
+        </div>
+
+        {/* Favorite products section */}
+        <div className="mb-8 mt-8 md:mb-12 md:mt-12">
+          {favoriteProducts.length > 0 && (
+            <Reveal variant="fade-up" duration={700}>
+              <OffersListHomePage
+                icon={<NewIcon />}
+                title="محبوب ترین ها"
+                products={favoriteProducts}
+              />
+            </Reveal>
+          )}
+        </div>
+      </div>
+      <div className="md:hidden">
+        {/* New products section */}
+        <div className="mt-8 md:mt-12">
+          <Reveal variant="blur-up" duration={1500}>
+            <OffersListHomePage
+              icon={<NewIcon />}
+              title="جدیدترین ها"
+              products={newProducts}
+            />
+          </Reveal>
+        </div>
+
+        {/* Favorite products section */}
+        <div className="mb-8 mt-8 md:mb-12 md:mt-12">
+          {favoriteProducts.length > 0 && (
+            <Reveal variant="fade-up" duration={700}>
+              <OffersListHomePage
+                icon={<NewIcon />}
+                title="محبوب ترین ها"
+                products={favoriteProducts}
+              />
+            </Reveal>
+          )}
+        </div>
       </div>
     </div>
   );
