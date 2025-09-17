@@ -31,6 +31,7 @@ export default function ProductsPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [settings, setSettings] = useState<{filterPublicProductsByTitle: boolean} | null>(null);
   const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getAllProductsLite = useCallback(async () => {
     // Fetch product list with minimal payload for stock aggregation
@@ -58,6 +59,10 @@ export default function ProductsPage() {
         endpoint = appendTitleFilter(endpoint);
       }
 
+      if (searchQuery.trim()) {
+        endpoint += `&filters[Title][$containsi]=${encodeURIComponent(searchQuery.trim())}`;
+      }
+
       const res = await apiClient.get(endpoint, { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } });
       const data = (res as any).data as any[];
       total = (res as any).meta?.pagination?.total || total;
@@ -67,7 +72,7 @@ export default function ProductsPage() {
       current += 1;
     }
     return items;
-  }, [isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle]);
+  }, [isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, searchQuery]);
 
   const buildStockIndex = useCallback(async () => {
     setBuildingIndex(true);
@@ -170,6 +175,10 @@ export default function ProductsPage() {
           if (shouldApplyTitleFilter && !isRecycleBinOpen) {
             ep = appendTitleFilter(ep);
           }
+
+          if (searchQuery.trim()) {
+            ep += `&filters[Title][$containsi]=${encodeURIComponent(searchQuery.trim())}`;
+          }
           return ep;
         })(),
         { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
@@ -183,7 +192,7 @@ export default function ProductsPage() {
       setPageLoading(false);
     };
     run();
-  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle]);
+  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, searchQuery]);
 
   // Fetch settings once on mount
   useEffect(() => {
@@ -218,41 +227,62 @@ export default function ProductsPage() {
       setIsRecycleBinOpen={setIsRecycleBinOpen}
       apiUrl={"/products"}
     >
-      <div className="mb-3 flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
-          <select
-            className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
-            value={sort}
-            onChange={(e) => setSort(e.target.value as any)}
-          >
-            <option value="newest">جدیدترین</option>
-            <option value="oldest">قدیمی‌ترین</option>
-            <option value="stock-desc">موجودی: بیشترین</option>
-            <option value="stock-asc">موجودی: کمترین</option>
-            <option value="sales-desc">فروش: بیشترین</option>
-            <option value="sales-asc">فروش: کمترین</option>
-          </select>
+      <div className="mb-3 space-y-3">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
+            <select
+              className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as any)}
+            >
+              <option value="newest">جدیدترین</option>
+              <option value="oldest">قدیمی‌ترین</option>
+              <option value="stock-desc">موجودی: بیشترین</option>
+              <option value="stock-asc">موجودی: کمترین</option>
+              <option value="sales-desc">فروش: بیشترین</option>
+              <option value="sales-asc">فروش: کمترین</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل:</label>
+            <select
+              className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
+              value={localTitleFilter === null ? "global" : localTitleFilter ? "on" : "off"}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "global") {
+                  setLocalTitleFilter(null);
+                } else {
+                  setLocalTitleFilter(value === "on");
+                }
+              }}
+            >
+              <option value="global">پیش‌فرض سایت ({settings?.filterPublicProductsByTitle ? "فعال" : "غیرفعال"})</option>
+              <option value="on">فعال</option>
+              <option value="off">غیرفعال</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل:</label>
-          <select
-            className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
-            value={localTitleFilter === null ? "global" : localTitleFilter ? "on" : "off"}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === "global") {
-                setLocalTitleFilter(null);
-              } else {
-                setLocalTitleFilter(value === "on");
-              }
-            }}
-          >
-            <option value="global">پیش‌فرض سایت ({settings?.filterPublicProductsByTitle ? "فعال" : "غیرفعال"})</option>
-            <option value="on">فعال</option>
-            <option value="off">غیرفعال</option>
-          </select>
+          <label className="text-sm text-neutral-600">جستجو:</label>
+          <input
+            type="text"
+            placeholder="جستجو در عنوان محصولات..."
+            className="rounded-lg border border-neutral-300 px-3 py-1 text-sm w-64"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="text-sm text-neutral-500 hover:text-neutral-700"
+            >
+              پاک کردن
+            </button>
+          )}
         </div>
       </div>
       {sort === "newest" || sort === "oldest" ? (
@@ -271,6 +301,10 @@ export default function ProductsPage() {
             let sortedBase = base;
             if (shouldApplyTitleFilter && !isRecycleBinOpen) {
               sortedBase = appendTitleFilter(sortedBase);
+            }
+
+            if (searchQuery.trim()) {
+              sortedBase += `&filters[Title][$containsi]=${encodeURIComponent(searchQuery.trim())}`;
             }
 
             if (sort === "newest") return sortedBase + "&sort[0]=createdAt:desc";

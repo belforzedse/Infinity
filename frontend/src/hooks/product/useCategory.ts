@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import {
   editProductDataAtom,
@@ -57,16 +57,19 @@ export function useProductCategory(props?: UseProductCategoryProps) {
     }
   }, [pathname, productData.product_other_categories, CategoriesData]);
 
-  const fetchAllCategories = async () => {
+  const fetchAllCategories = useCallback(async () => {
     setIsGetCategoriesLoading(true);
     try {
       const categories = await getAllCategories();
       setCategoriesData((categories as any).data);
       setCategoriesDataPagination((categories as any).meta);
+    } catch (error) {
+      console.error("Failed to get product categories:", error);
+      // Don't throw error, just log it to prevent crashes
     } finally {
       setIsGetCategoriesLoading(false);
     }
-  };
+  }, [setCategoriesData, setCategoriesDataPagination]);
 
   const filteredTags =
     categorySearchQuery === ""
