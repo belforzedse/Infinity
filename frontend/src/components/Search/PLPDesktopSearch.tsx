@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
 import Text from "../Kits/Text";
 import ChevronDownIcon from "./Icons/ChevronDownIcon";
-import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
 import { motion, AnimatePresence } from "framer-motion";
 
