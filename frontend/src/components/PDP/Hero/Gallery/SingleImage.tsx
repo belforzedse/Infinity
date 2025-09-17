@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
-import ChevronDownIcon from "../../Icons/ChevronDownIcon";
 import NavigationButtons from "../../NavigationButtons";
 import { useEffect, useState } from "react";
 

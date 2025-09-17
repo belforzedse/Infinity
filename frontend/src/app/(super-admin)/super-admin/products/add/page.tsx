@@ -32,7 +32,7 @@ export default function AddProductsPage() {
   useEffect(() => {
     // Only fetch categories once on mount to prevent multiple API calls
     fetchAllCategories();
-  }, []); // Remove fetchAllCategories from dependency array
+  }, [fetchAllCategories]);
 
   const handleCreateProduct = async () => {
     try {

@@ -61,7 +61,7 @@ export type Order = {
     };
   };
 };
-const bulkPrint = (selectedIds: string[]) => {
+const _bulkPrint = (selectedIds: string[]) => {
   if (!selectedIds.length) return;
   const url = `/super-admin/orders/print/bulk?ids=${selectedIds.join(",")}`;
   window.open(url, "_blank"); // ✅ One tab only
