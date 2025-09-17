@@ -16,7 +16,7 @@ import Reveal from "@/components/Reveal";
 
 export default async function Home() {
   const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
-    [getDiscountedProducts(), getNewProducts(), getFavoriteProducts()],
+    [getDiscountedProducts(), getNewProducts(), getFavoriteProducts()]
   );
 
   return (
@@ -161,7 +161,7 @@ export default async function Home() {
         {/* Favorite products section */}
         <div className="mb-8 mt-8 md:mb-12 md:mt-12">
           {favoriteProducts.length > 0 && (
-            <Reveal variant="fade-up" duration={700}>
+            <Reveal variant="blur-up" duration={1500}>
               <OffersListHomePage
                 icon={<NewIcon />}
                 title="محبوب ترین ها"
