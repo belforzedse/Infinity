@@ -52,6 +52,13 @@ interface Product {
               };
             }>;
           };
+          product_stock?: {
+            data?: {
+              attributes?: {
+                Count?: number;
+              };
+            };
+          };
         };
       }>;
     };
@@ -125,6 +132,7 @@ export default function PLPList({
       queryParams.append("populate[1]", "product_main_category");
       queryParams.append("populate[2]", "product_variations");
       queryParams.append("populate[3]", "product_variations.general_discounts");
+      queryParams.append("populate[4]", "product_variations.product_stock");
 
       // Add pagination
       queryParams.append("pagination[page]", page);
@@ -316,6 +324,16 @@ export default function PLPList({
     };
   });
 
+  // Helper function to check if a product has available stock
+  const checkStockAvailability = (product: Product) => {
+    return product.attributes.product_variations?.data?.some(
+      (variation) => {
+        const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+        return typeof stockCount === 'number' && stockCount > 0;
+      }
+    ) || false;
+  };
+
   return (
     <div className="container mx-auto px-4" data-plp-top>
       <div className="flex flex-col gap-4 md:flex-row">
@@ -361,7 +379,7 @@ export default function PLPList({
             <>
               {/* Desktop view - ProductCard */}
               <div className="hidden grid-cols-2 gap-4 md:grid lg:grid-cols-3">
-                {validProducts.map((product) => {
+                {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
                     product.attributes.product_variations?.data?.find(
@@ -388,6 +406,8 @@ export default function PLPList({
                     hasDiscount && discount
                       ? price * (1 - discount / 100)
                       : undefined;
+
+                  const isAvailable = checkStockAvailability(product);
 
                   return (
                     <ProductCard
@@ -408,6 +428,8 @@ export default function PLPList({
                       colorsCount={
                         product.attributes.product_variations?.data?.length || 0
                       }
+                      isAvailable={isAvailable}
+                      priority={index < 6}
                     />
                   );
                 })}
@@ -415,7 +437,7 @@ export default function PLPList({
 
               {/* Mobile view - ProductSmallCard */}
               <div className="flex flex-col gap-3 md:hidden">
-                {validProducts.map((product) => {
+                {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
                     product.attributes.product_variations?.data?.find(
@@ -443,6 +465,8 @@ export default function PLPList({
                       ? price * (1 - discount / 100)
                       : undefined;
 
+                  const isAvailable = checkStockAvailability(product);
+
                   return (
                     <ProductSmallCard
                       key={product.id}
@@ -457,6 +481,8 @@ export default function PLPList({
                       discountedPrice={discountPrice}
                       discount={discount}
                       image={`${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`}
+                      isAvailable={isAvailable}
+                      priority={index < 3}
                     />
                   );
                 })}

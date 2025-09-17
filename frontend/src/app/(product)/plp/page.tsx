@@ -138,6 +138,7 @@ async function getProducts(
   queryParams.append("populate[1]", "product_main_category");
   queryParams.append("populate[2]", "product_variations");
   queryParams.append("populate[3]", "product_variations.general_discounts");
+  queryParams.append("populate[4]", "product_variations.product_stock");
 
   // Add pagination
   queryParams.append("pagination[page]", page.toString());

@@ -171,9 +171,12 @@ export const columns: ColumnDef<Product>[] = [
 
 type Props = {
   data: Product[] | undefined;
+  enableSelection?: boolean;
+  selectedIds?: Set<string>;
+  onSelectionChange?: (id: string, selected: boolean) => void;
 };
 
-export const MobileTable = ({ data }: Props) => {
+export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionChange }: Props) => {
   return (
     <div className="mt-2 flex flex-col gap-2">
       {data?.map((row) => (
@@ -181,7 +184,16 @@ export const MobileTable = ({ data }: Props) => {
           key={row?.id}
           className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
         >
-          <input type="checkbox" className="h-5 w-5" />
+          {enableSelection ? (
+            <input
+              type="checkbox"
+              className="h-5 w-5"
+              checked={selectedIds?.has(row.id) || false}
+              onChange={(e) => onSelectionChange?.(row.id, e.target.checked)}
+            />
+          ) : (
+            <input type="checkbox" className="h-5 w-5" />
+          )}
 
           <Image
             src={

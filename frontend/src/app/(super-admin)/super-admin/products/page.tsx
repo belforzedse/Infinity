@@ -3,13 +3,16 @@
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { MobileTable, columns, Product } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
 import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
 import { appendTitleFilter } from "@/constants/productFilters";
+import toast from "react-hot-toast";
+import { useAtom } from "jotai";
+import { refreshTable } from "@/components/SuperAdmin/Table";
 
 export default function ProductsPage() {
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
@@ -32,6 +35,7 @@ export default function ProductsPage() {
   const [settings, setSettings] = useState<{filterPublicProductsByTitle: boolean} | null>(null);
   const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [, setRefresh] = useAtom(refreshTable);
 
   const getAllProductsLite = useCallback(async () => {
     // Fetch product list with minimal payload for stock aggregation
@@ -211,6 +215,197 @@ export default function ProductsPage() {
     };
   }, []);
 
+  // Bulk actions handler
+  const handleBulkAction = useCallback(async (actionId: string, selectedProducts: Product[]) => {
+    if (!selectedProducts.length) {
+      toast.error("هیچ محصولی انتخاب نشده است");
+      return;
+    }
+
+    try {
+      switch (actionId) {
+        case "remove_stock":
+          // Remove stock from all selected products
+          let removedStockCount = 0;
+          for (const product of selectedProducts) {
+            for (const variation of product.attributes.product_variations.data) {
+              if (variation.attributes.product_stock?.data?.id) {
+                try {
+                  await apiClient.put(
+                    `/product-stocks/${variation.attributes.product_stock.data.id}`,
+                    {
+                      data: { Count: 0 }
+                    },
+                    {
+                      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
+                    }
+                  );
+                  removedStockCount++;
+                } catch (error) {
+                  console.error(`Failed to remove stock for variation ${variation.id}:`, error);
+                }
+              }
+            }
+          }
+          toast.success(`موجودی ${removedStockCount} تنوع محصول با موفقیت حذف شد`);
+          break;
+
+        case "soft_delete":
+          // Soft delete selected products
+          let deletedCount = 0;
+          for (const product of selectedProducts) {
+            try {
+              await apiClient.put(
+                `/products/${product.id}`,
+                {
+                  data: { removedAt: new Date().toISOString() }
+                },
+                {
+                  headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
+                }
+              );
+              deletedCount++;
+            } catch (error) {
+              console.error(`Failed to delete product ${product.id}:`, error);
+            }
+          }
+          toast.success(`${deletedCount} محصول با موفقیت حذف شد`);
+          break;
+
+        case "restore":
+          // Restore selected products
+          let restoredCount = 0;
+          for (const product of selectedProducts) {
+            try {
+              await apiClient.put(
+                `/products/${product.id}`,
+                {
+                  data: { removedAt: null }
+                },
+                {
+                  headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
+                }
+              );
+              restoredCount++;
+            } catch (error) {
+              console.error(`Failed to restore product ${product.id}:`, error);
+            }
+          }
+          toast.success(`${restoredCount} محصول با موفقیت بازیابی شد`);
+          break;
+
+        case "set_stock":
+          // Set stock to a specific value
+          const stockValue = prompt("مقدار موجودی جدید را وارد کنید:");
+          if (stockValue && !isNaN(Number(stockValue))) {
+            const newStock = Math.max(0, Number(stockValue));
+            let updatedStockCount = 0;
+            for (const product of selectedProducts) {
+              for (const variation of product.attributes.product_variations.data) {
+                if (variation.attributes.product_stock?.data?.id) {
+                  try {
+                    await apiClient.put(
+                      `/product-stocks/${variation.attributes.product_stock.data.id}`,
+                      {
+                        data: { Count: newStock }
+                      },
+                      {
+                        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
+                      }
+                    );
+                    updatedStockCount++;
+                  } catch (error) {
+                    console.error(`Failed to update stock for variation ${variation.id}:`, error);
+                  }
+                }
+              }
+            }
+            toast.success(`موجودی ${updatedStockCount} تنوع محصول به ${newStock} تنظیم شد`);
+          } else if (stockValue !== null) {
+            toast.error("مقدار موجودی معتبر نیست");
+            return;
+          } else {
+            return; // User cancelled
+          }
+          break;
+
+        case "publish":
+          // Publish selected products
+          let publishedCount = 0;
+          for (const product of selectedProducts) {
+            for (const variation of product.attributes.product_variations.data) {
+              try {
+                await apiClient.put(
+                  `/product-variations/${variation.id}`,
+                  {
+                    data: { IsPublished: true }
+                  },
+                  {
+                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
+                  }
+                );
+                publishedCount++;
+              } catch (error) {
+                console.error(`Failed to publish variation ${variation.id}:`, error);
+              }
+            }
+          }
+          toast.success(`${publishedCount} تنوع محصول منتشر شد`);
+          break;
+
+        case "unpublish":
+          // Unpublish selected products
+          let unpublishedCount = 0;
+          for (const product of selectedProducts) {
+            for (const variation of product.attributes.product_variations.data) {
+              try {
+                await apiClient.put(
+                  `/product-variations/${variation.id}`,
+                  {
+                    data: { IsPublished: false }
+                  },
+                  {
+                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
+                  }
+                );
+                unpublishedCount++;
+              } catch (error) {
+                console.error(`Failed to unpublish variation ${variation.id}:`, error);
+              }
+            }
+          }
+          toast.success(`${unpublishedCount} تنوع محصول از انتشار خارج شد`);
+          break;
+
+        default:
+          toast.error("عملیات نامعتبر");
+          return;
+      }
+
+      // Refresh the table after successful operation
+      setRefresh(true);
+    } catch (error) {
+      console.error("Bulk action error:", error);
+      toast.error("خطا در انجام عملیات دسته‌جمعی");
+    }
+  }, [setRefresh]);
+
+  // Bulk action options
+  const bulkOptions = useMemo(() => {
+    if (isRecycleBinOpen) {
+      return [
+        { id: "restore", title: "بازیابی محصولات" },
+      ];
+    }
+    return [
+      { id: "remove_stock", title: "حذف موجودی" },
+      { id: "set_stock", title: "تنظیم موجودی" },
+      { id: "publish", title: "انتشار محصولات" },
+      { id: "unpublish", title: "لغو انتشار محصولات" },
+      { id: "soft_delete", title: "حذف محصولات" },
+    ];
+  }, [isRecycleBinOpen]);
+
   // We prefer server-side sorting. This fallback is disabled to avoid page-only sort.
   const _clientSort = undefined;
 
@@ -271,7 +466,7 @@ export default function ProductsPage() {
           <input
             type="text"
             placeholder="جستجو در عنوان محصولات..."
-            className="rounded-lg border border-neutral-300 px-3 py-1 text-sm w-64"
+            className="w-64 rounded-lg border border-neutral-300 px-3 py-1 text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -310,8 +505,19 @@ export default function ProductsPage() {
             if (sort === "newest") return sortedBase + "&sort[0]=createdAt:desc";
             return sortedBase + "&sort[0]=createdAt:asc";
           })()}
-          mobileTable={(data) => <MobileTable data={data} />}
+          mobileTable={(data, selectionProps) => (
+            <MobileTable
+              data={data}
+              enableSelection={selectionProps?.enableSelection}
+              selectedIds={selectionProps?.selectedIds}
+              onSelectionChange={selectionProps?.onSelectionChange}
+            />
+          )}
           removeActions
+          enableSelection
+          getRowId={(row: Product) => row.id}
+          bulkOptions={bulkOptions}
+          onBulkAction={handleBulkAction}
         />
       ) : (
         <div>
@@ -324,8 +530,19 @@ export default function ProductsPage() {
             columns={columns}
             data={customPageData || []}
             loading={buildingIndex || pageLoading || customPageData === null}
-            mobileTable={(data) => <MobileTable data={data as Product[]} />}
+            mobileTable={(data, selectionProps) => (
+              <MobileTable
+                data={data as Product[]}
+                enableSelection={selectionProps?.enableSelection}
+                selectedIds={selectionProps?.selectedIds}
+                onSelectionChange={selectionProps?.onSelectionChange}
+              />
+            )}
             removeActions
+            enableSelection
+            getRowId={(row: Product) => row.id}
+            bulkOptions={bulkOptions}
+            onBulkAction={handleBulkAction}
           />
         </div>
       )}
