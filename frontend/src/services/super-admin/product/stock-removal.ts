@@ -21,13 +21,13 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
     while (true) {
       const endpoint = `/products?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate[0]=product_variations&populate[1]=product_variations.product_stock&filters[Status][$eq]=Active`;
 
-      const response = await apiClient.get(endpoint, {
+      const response = await apiClient.get<any>(endpoint, {
         headers: {
           Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
       });
 
-      const products = response.data?.data || [];
+      const products = response?.data || [];
 
       if (products.length === 0) {
         break;
@@ -42,7 +42,7 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
       allMatchingProducts.push(...matchingProducts);
 
       // Check if we have more pages
-      const totalPages = Math.ceil((response.data?.meta?.pagination?.total || 0) / pageSize);
+      const totalPages = Math.ceil((response?.meta?.pagination?.total || 0) / pageSize);
       if (page >= totalPages) {
         break;
       }

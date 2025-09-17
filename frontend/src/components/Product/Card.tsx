@@ -17,6 +17,8 @@ export interface ProductCardProps {
   discount?: number;
   discountPrice?: number;
   colorsCount?: number;
+  isAvailable?: boolean;
+  priority?: boolean;
 }
 
 const ProductCard: FC<ProductCardProps> = ({
@@ -29,6 +31,8 @@ const ProductCard: FC<ProductCardProps> = ({
   discount,
   discountPrice,
   colorsCount,
+  isAvailable = true,
+  priority = false,
 }) => {
   const { isLiked, isLoading, toggleLike } = useProductLike({
     productId: id.toString(),
@@ -41,7 +45,7 @@ const ProductCard: FC<ProductCardProps> = ({
     >
       <div className="interactive-card pressable flex h-full w-[259px] flex-col rounded-3xl border border-pink-50 bg-white p-1 md:w-full">
         <div className="relative">
-          <ImageSlider images={images} title={title} />
+          <ImageSlider images={images} title={title} priority={priority} />
 
           <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
             {discount ? (
@@ -113,23 +117,29 @@ const ProductCard: FC<ProductCardProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-sm text-stone-500">قیمت</span>
 
-            <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
-              {discountPrice && (
-                <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
-                  {faNum(discountPrice || price)} تومان
-                </span>
-              )}
-
-              <span
-                className={`${
-                  discountPrice
-                    ? "text-xs text-foreground-muted line-through"
-                    : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
-                }`}
-              >
-                {faNum(price)} تومان
+            {!isAvailable ? (
+              <span className="text-base font-medium text-red-600 md:text-lg">
+                ناموجود
               </span>
-            </div>
+            ) : (
+              <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
+                {discountPrice && (
+                  <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
+                    {faNum(discountPrice || price)} تومان
+                  </span>
+                )}
+
+                <span
+                  className={`${
+                    discountPrice
+                      ? "text-xs text-foreground-muted line-through"
+                      : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
+                  }`}
+                >
+                  {faNum(price)} تومان
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

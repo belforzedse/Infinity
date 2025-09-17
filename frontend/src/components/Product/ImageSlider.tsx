@@ -7,9 +7,10 @@ import { FC, useState } from "react";
 interface ImageSliderProps {
   images: string[];
   title: string;
+  priority?: boolean;
 }
 
-const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
+const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -36,7 +37,8 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
               fill
               className="select-none object-cover"
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
-              loading="lazy"
+              priority={priority && index === 0}
+              loading={priority && index === 0 ? "eager" : "lazy"}
               loader={imageLoader}
             />
           </div>

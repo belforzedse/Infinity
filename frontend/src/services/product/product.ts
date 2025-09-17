@@ -710,8 +710,16 @@ export const formatProductsToCardProps = (
         : undefined;
       const price = parseInt(variation.attributes.Price);
 
-      return {
-        id: product.id.toString(),
+      // Check if any variation has stock available
+      const isAvailable = product.attributes.product_variations?.data?.some(
+        (v: any) => {
+          const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
+          return typeof stockCount === 'number' && stockCount > 0;
+        }
+      ) || false;
+
+      const result: ProductCardProps = {
+        id: parseInt(product.id),
         images: [
           `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
         ],
@@ -720,12 +728,16 @@ export const formatProductsToCardProps = (
           "",
         title: product.attributes.Title,
         price,
-        ...(hasDiscount && {
-          discount,
-          discountPrice: price * (1 - discount! / 100),
-        }),
         seenCount: product.attributes.RatingCount || 0,
+        isAvailable,
       };
+
+      if (hasDiscount) {
+        result.discount = discount;
+        result.discountPrice = price * (1 - discount / 100);
+      }
+
+      return result;
     })
     .filter((product): product is ProductCardProps => product !== null);
 };
