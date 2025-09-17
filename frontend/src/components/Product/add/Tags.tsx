@@ -28,7 +28,7 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
   useEffect(() => {
     // Only fetch tags once on mount to prevent infinite loops
     handleFetchTags();
-  }, []); // Empty dependency array to run only once
+  }, [handleFetchTags]);
 
   return (
     <div className="flex flex-col gap-1">

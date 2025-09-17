@@ -3,6 +3,7 @@ export interface ProductVariable {
   attributes: {
     SKU: string;
     Price: number;
+    DiscountPrice?: number;
     IsPublished?: boolean;
     product: {
       data: {
@@ -48,6 +49,7 @@ export interface ProductVariableDisplay {
   id: number;
   sku: string;
   price: number;
+  discountPrice?: number;
   stock: number;
   stockId?: number;
   variable: string;

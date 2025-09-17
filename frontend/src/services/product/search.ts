@@ -36,6 +36,7 @@ export interface ProductSearchItem {
   product_variations: {
     id: number;
     Price: number;
+    DiscountPrice?: number;
     product_variation_color: {
       id: number;
       Title: string;

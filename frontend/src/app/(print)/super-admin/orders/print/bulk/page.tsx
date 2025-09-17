@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN, API_BASE_URL } from "@/constants/api";
+import { STRAPI_TOKEN } from "@/constants/api";
 import Invoice from "@/components/invoice";
 
 type StrapiOrder = {
@@ -69,13 +69,13 @@ function transformOrder(raw: StrapiOrder) {
 
 export default function BulkPrintPage() {
   const params = useSearchParams();
-  const ids = params.get("ids")?.split(",").filter(Boolean) ?? [];
+  const idsParam = params.get("ids")?.split(",").filter(Boolean) ?? [];
   const [orders, setOrders] = useState<StrapiOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const hasPrinted = useRef(false);
 
   useEffect(() => {
-    if (!ids.length) {
+    if (!idsParam.length) {
       setLoading(false);
       return;
     }
@@ -83,7 +83,7 @@ export default function BulkPrintPage() {
     const fetchOrders = async () => {
       try {
         const results = await Promise.all(
-          ids.map((id) =>
+          idsParam.map((id) =>
             apiClient
               .get(
                 `/orders/${id}?populate[0]=user
@@ -106,7 +106,7 @@ export default function BulkPrintPage() {
     };
 
     fetchOrders();
-  }, [ids]);
+  }, [idsParam]);
 
   useEffect(() => {
     if (orders.length && !hasPrinted.current) {

@@ -55,6 +55,7 @@ interface ProductVariation {
     };
     SKU?: string;
     Price?: number;
+    DiscountPrice?: number;
   };
 }
 
@@ -313,6 +314,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               product_variation_model: parseInt(model.id),
               SKU: sku,
               Price: 0, // Default price is 0
+              DiscountPrice: null, // Default discount price is null
             });
           }
         }

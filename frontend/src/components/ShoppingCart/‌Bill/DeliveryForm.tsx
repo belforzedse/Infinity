@@ -4,7 +4,6 @@ import ChevronLeftIcon from "@/components/Product/Icons/ChevronLeftIcon";
 import React, { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { submitOrderStepAtom } from "@/atoms/Order";
-import { SubmitOrderStep } from "@/types/Order";
 import DisclosureItem from "@/components/Kits/Disclosure";
 import ShoppingCartBillDeliveryOptions from "./DeliveryOptions";
 import { useCart } from "@/contexts/CartContext";

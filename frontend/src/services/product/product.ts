@@ -620,7 +620,7 @@ export const getRelatedProductsByMainCategory = async (
   }
 
   const endpoint = appendTitleFilter(
-    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&pagination[limit]=${limit}`,
+    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`,
   );
 
   try {
@@ -666,7 +666,7 @@ export const getRelatedProductsByOtherCategories = async (
       .join("&");
 
     const endpoint = appendTitleFilter(
-      `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.general_discounts&pagination[limit]=${limit}`,
+      `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`,
     );
 
     const response = await apiClient.get<any>(endpoint);
@@ -696,19 +696,60 @@ export const formatProductsToCardProps = (
         return null;
       }
 
-      // Get first variation with price
+      // Get first variation with price AND stock
       const variation = product.attributes.product_variations?.data?.find(
-        (v: any) => v.attributes.Price && parseInt(v.attributes.Price) > 0,
+        (v: any) => {
+          const hasPrice = v.attributes.Price && parseInt(v.attributes.Price) > 0;
+          const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
+          const hasStock = typeof stockCount === 'number' && stockCount > 0;
+          return hasPrice && hasStock;
+        }
       );
 
       if (!variation) return null;
 
-      const hasDiscount =
-        variation.attributes.general_discounts?.data?.length > 0;
-      const discount = hasDiscount
-        ? variation.attributes.general_discounts.data[0].attributes.Amount
-        : undefined;
+      // Debug: Log raw variation data to see what fields are available
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`Raw variation data for product ${product.id}:`, {
+          variationId: variation.id,
+          attributes: variation.attributes,
+          availableFields: Object.keys(variation.attributes),
+          hasGeneralDiscounts: !!variation.attributes.general_discounts
+        });
+      }
+
       const price = parseInt(variation.attributes.Price);
+
+      // Check for general_discounts relationship first
+      const generalDiscounts = variation.attributes.general_discounts?.data;
+      let discountPrice = undefined;
+      let discount = undefined;
+
+      if (generalDiscounts && generalDiscounts.length > 0) {
+        // Use general_discounts relationship
+        const discountAmount = generalDiscounts[0].attributes.Amount;
+        discount = discountAmount;
+        discountPrice = Math.round(price * (1 - discountAmount / 100));
+      } else if (variation.attributes.DiscountPrice) {
+        // Fallback to DiscountPrice field (if it exists)
+        discountPrice = parseInt(variation.attributes.DiscountPrice.toString());
+        const hasDiscount = discountPrice && discountPrice < price;
+        discount = hasDiscount
+          ? Math.round(((price - discountPrice) / price) * 100)
+          : undefined;
+      }
+
+      // Debug: Log pricing calculations
+      if (process.env.NODE_ENV !== "production" && (discount || discountPrice)) {
+        console.log(`formatProductsToCardProps - Product ${product.id}:`, {
+          title: product.attributes.Title.substring(0, 30),
+          originalPrice: price,
+          discountPrice,
+          discount,
+          generalDiscounts: generalDiscounts,
+          variationData: variation.attributes
+        });
+      }
 
       // Check if any variation has stock available
       const isAvailable = product.attributes.product_variations?.data?.some(
@@ -732,9 +773,9 @@ export const formatProductsToCardProps = (
         isAvailable,
       };
 
-      if (hasDiscount) {
+      if (discount && discountPrice) {
         result.discount = discount;
-        result.discountPrice = price * (1 - discount / 100);
+        result.discountPrice = discountPrice;
       }
 
       return result;
