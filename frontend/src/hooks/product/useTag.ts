@@ -30,21 +30,37 @@ export function useProductTag(props?: UseProductTagProps) {
   const [isGetTagsLoading, setIsGetTagsLoading] = useState(false);
   const [isCreateTagLoading, setIsCreateTagLoading] = useState(false);
 
-  const handleFetchTags = useCallback(async () => {
+  const [allTagsCache, setAllTagsCache] = useState<TagResponseType[]>([]);
+
+  const fetchAllTags = useCallback(async () => {
     try {
       setIsGetTagsLoading(true);
       const response = await getTags();
-      setTagOptions(
-        (response as any).filter(
-          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id),
-        ),
-      );
+      const tagData = response as any;
+      setAllTagsCache(tagData);
+      return tagData;
     } catch (error) {
-      console.error("Error fetching tags:", error);
+      console.error("Failed to get product tags:", error);
+      return [];
     } finally {
       setIsGetTagsLoading(false);
     }
-  }, [tags]);
+  }, []);
+
+  // Update tag options whenever tags or cached data changes
+  useEffect(() => {
+    if (allTagsCache.length > 0) {
+      setTagOptions(
+        allTagsCache.filter(
+          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id),
+        ),
+      );
+    }
+  }, [allTagsCache, tags]);
+
+  const handleFetchTags = useCallback(async () => {
+    await fetchAllTags();
+  }, [fetchAllTags]);
 
   useEffect(() => {
     if (!pathname.endsWith("/add") && productData.product_tags?.length > 0) {

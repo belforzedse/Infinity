@@ -17,16 +17,20 @@ export const getTags = async (): Promise<
   PaginatedResponse<TagResponseType>
 > => {
   const endpoint = `${ENDPOINTS.PRODUCT.TAG}`;
-  //const accessToken = localStorage.getItem("accessToken");
 
-  const response = await apiClient.get<PaginatedResponse<TagResponseType>>(
-    endpoint,
-    {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
+  try {
+    const response = await apiClient.get<PaginatedResponse<TagResponseType>>(
+      endpoint,
+      {
+        headers: {
+          Authorization: `Bearer ${STRAPI_TOKEN}`,
+        },
       },
-    },
-  );
+    );
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    console.error("Failed to get product tags:", error);
+    throw error;
+  }
 };
