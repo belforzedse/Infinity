@@ -61,7 +61,7 @@ export default function EditProductsPage({
     // Only fetch categories and tags once on mount to prevent infinite loops
     fetchAllCategories();
     handleFetchTags();
-  }, []); // Empty dependency array to run only once
+  }, [fetchAllCategories, handleFetchTags]);
 
   const handleUpdateProduct = async () => {
     try {

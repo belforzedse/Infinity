@@ -31,7 +31,16 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
         </div>
       </td>
       <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
-        {item.price.toLocaleString()} تومان
+        <div className="flex flex-col">
+          {item.discountPrice && (
+            <span className="text-sm text-pink-600 font-medium">
+              {item.discountPrice.toLocaleString()} تومان
+            </span>
+          )}
+          <span className={item.discountPrice ? "text-xs text-gray-500 line-through" : "text-sm"}>
+            {item.price.toLocaleString()} تومان
+          </span>
+        </div>
       </td>
       <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         {item.stock} عدد در انبار

@@ -61,6 +61,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               id: variation.id,
               sku: variation.attributes.SKU || "",
               price: variation.attributes.Price || 0,
+              discountPrice: variation.attributes.DiscountPrice || undefined,
               stock:
                 variation.attributes.product_stock?.data?.attributes.Count || 0,
               stockId: variation.attributes.product_stock?.data?.id,
@@ -133,6 +134,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           data: {
             SKU: updatedVariation.sku,
             Price: updatedVariation.price,
+            DiscountPrice: updatedVariation.discountPrice || null,
             IsPublished: updatedVariation.isPublished,
           },
         },
@@ -241,7 +243,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">قیمت (تومان)</label>
+                <label className="text-sm mb-1 block">قیمت اصلی (تومان)</label>
                 <input
                   type="number"
                   value={currentVariation.price}
@@ -252,6 +254,22 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                     })
                   }
                   className="w-full rounded-lg border border-slate-300 p-2"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm mb-1 block">قیمت تخفیف‌دار (تومان) - اختیاری</label>
+                <input
+                  type="number"
+                  value={currentVariation.discountPrice || ""}
+                  onChange={(e) =>
+                    setCurrentVariation({
+                      ...currentVariation,
+                      discountPrice: e.target.value ? Number(e.target.value) : undefined,
+                    })
+                  }
+                  className="w-full rounded-lg border border-slate-300 p-2"
+                  placeholder="قیمت تخفیف‌دار وارد کنید"
                 />
               </div>
 

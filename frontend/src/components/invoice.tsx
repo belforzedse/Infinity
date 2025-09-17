@@ -97,7 +97,7 @@ export default function Invoice({ order }: Props) {
   const total = subtotal + shipping;
 
   // (optional) also compute from line items to detect mismatches
-  const itemsTotal = (attrs.order_items?.data ?? []).reduce(
+  const _itemsTotal = (attrs.order_items?.data ?? []).reduce(
     (sum: number, it: any) => {
       const a = it?.attributes || {};
       return sum + toNum(a.PerAmount) * toNum(a.Count);

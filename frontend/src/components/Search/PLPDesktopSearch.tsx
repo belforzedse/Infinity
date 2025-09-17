@@ -77,7 +77,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
         ) as Array<{ id: number; Title: string }>;
         setSuggestions(unique);
         setOpen(unique.length > 0);
-      } catch (err) {
+      } catch (_err) {
         if (!mounted) return;
         setSuggestions([]);
         setOpen(false);

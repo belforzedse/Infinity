@@ -26,9 +26,16 @@ export const ProductVariableCard: React.FC<ProductVariableCardProps> = ({
       {/* Price */}
       <div className="text-sm flex flex-col gap-0.5 pt-2">
         <span className="text-gray-500">قیمت</span>
-        <span className="text-gray-900">
-          {item.price.toLocaleString()} تومان
-        </span>
+        <div className="flex flex-col">
+          {item.discountPrice && (
+            <span className="text-sm text-pink-600 font-medium">
+              {item.discountPrice.toLocaleString()} تومان
+            </span>
+          )}
+          <span className={item.discountPrice ? "text-xs text-gray-500 line-through" : "text-gray-900"}>
+            {item.price.toLocaleString()} تومان
+          </span>
+        </div>
       </div>
 
       {/* Stock */}
