@@ -2,7 +2,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
 
 interface Props {
