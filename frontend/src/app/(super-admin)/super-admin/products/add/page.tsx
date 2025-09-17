@@ -30,8 +30,9 @@ export default function AddProductsPage() {
     logger.info("productData", { productData });
   }
   useEffect(() => {
+    // Only fetch categories once on mount to prevent multiple API calls
     fetchAllCategories();
-  }, [fetchAllCategories]);
+  }, []); // Remove fetchAllCategories from dependency array
 
   const handleCreateProduct = async () => {
     try {

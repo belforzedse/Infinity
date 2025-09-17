@@ -19,11 +19,11 @@ export default function DesktopSlider() {
   const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
 
   return (
-    <div className="desktop-slider-container relative">
+    <div className="desktop-slider-container relative hidden">
       <DesktopHero layout={slides[index]} slideKey={index} />
 
       {/* Bottom controls: arrows + dots in one pill */}
-      <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-2xl bg-white/80 px-2 py-1 shadow ring-1 ring-black/5 backdrop-blur-md lg:hidden">
+      <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-2xl bg-white/80 px-2 py-1 shadow ring-1 ring-black/5 backdrop-blur-md">
         {/* RTL-friendly: Next on the left */}
         <button
           aria-label="Next"
@@ -53,7 +53,7 @@ export default function DesktopSlider() {
           ›
         </button>
       </div>
-      <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 lg:flex">
+      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2">
         <PaginationDesktop
           total={slides.length}
           index={index}
@@ -62,6 +62,13 @@ export default function DesktopSlider() {
           onPrev={prev}
         />
       </div>
+      <style jsx>{`
+        @media (min-width: 1190px) {
+          .desktop-slider-container {
+            display: block;
+          }
+        }
+      `}</style>
     </div>
   );
 }

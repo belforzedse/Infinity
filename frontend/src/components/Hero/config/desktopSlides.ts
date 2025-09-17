@@ -4,9 +4,11 @@ const baseTextBanner = {
   title: "لباس‌هایی از قلــــــب پینترست...",
   subtitle: "برای خاص پسندها",
   className:
-    "h-[200px] w-full gap-[8px] rounded-3xl bg-stone-50 px-[36px] pb-[36px] pt-[30px]",
-  titleClassName: "text-[54px] font-bold leading-[150%] text-red-900",
-  subtitleClassName: "leading[110%] text-[34px] font-medium text-gray-600",
+    "2xl:h-[200px] w-full gap-[8px] rounded-3xl bg-stone-50 px-[36px] pb-[36px] pt-[30px]",
+  titleClassName:
+    "lg:text-[44px] 2xl:text-[54px] font-bold leading-[150%] text-red-900",
+  subtitleClassName:
+    "leading[110%] lg:text-[30px] 2xl:text-[34px] font-medium text-gray-600",
 };
 
 const baseLayout: DesktopLayout = {
