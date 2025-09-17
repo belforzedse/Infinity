@@ -34,6 +34,7 @@ interface Product {
           SKU: string;
           Price: string;
           IsPublished: boolean;
+          DiscountPrice?: string;
           general_discounts?: {
             data: Array<{
               attributes: {
@@ -103,6 +104,7 @@ async function getProducts(
                   attributes: {
                     SKU: "",
                     Price: variation.Price.toString(),
+                    DiscountPrice: variation.DiscountPrice?.toString(),
                     IsPublished: true,
                   },
                 })),
@@ -137,8 +139,8 @@ async function getProducts(
   queryParams.append("populate[0]", "CoverImage");
   queryParams.append("populate[1]", "product_main_category");
   queryParams.append("populate[2]", "product_variations");
-  queryParams.append("populate[3]", "product_variations.general_discounts");
-  queryParams.append("populate[4]", "product_variations.product_stock");
+  queryParams.append("populate[3]", "product_variations.product_stock");
+  queryParams.append("populate[4]", "product_variations.general_discounts");
 
   // Add pagination
   queryParams.append("pagination[page]", page.toString());
@@ -234,8 +236,13 @@ async function getProducts(
     if (hasDiscount) {
       filteredProducts = filteredProducts.filter((product: Product) =>
         product.attributes.product_variations?.data?.some(
-          (variation) =>
-            (variation.attributes as any)?.general_discounts?.data?.length > 0,
+          (variation) => {
+            const price = parseFloat(variation.attributes.Price);
+            const discountPrice = variation.attributes.DiscountPrice
+              ? parseFloat(variation.attributes.DiscountPrice)
+              : null;
+            return discountPrice && discountPrice < price;
+          }
         ),
       );
     }
