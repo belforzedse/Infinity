@@ -67,8 +67,8 @@ interface ProcessedProduct {
 function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
   let url = `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&pagination[pageSize]=6`;
 
-  // Only show products whose Title contains کیف، کفش، or صندل
-  url += `&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل`;
+  // Only show products whose Title contains کیف، کفش، صندل، or کتونی
+  url += `&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل&filters[$or][3][Title][$containsi]=کتونی`;
 
   if (category) {
     url += `&filters[product_main_category][Slug][$eq]=${category}`;

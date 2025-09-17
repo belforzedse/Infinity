@@ -1,7 +1,7 @@
 // Product title filters used throughout the app
-// Matches titles that contain کیف, کفش, or صندل (case-insensitive, substring)
+// Matches titles that contain کیف, کفش, صندل, or کتونی (case-insensitive, substring)
 export const PRODUCT_TITLE_FILTER =
-  "&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل";
+  "&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل&filters[$or][3][Title][$containsi]=کتونی";
 
 /**
  * Helper to append the product title filter to an endpoint safely.

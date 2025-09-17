@@ -133,11 +133,12 @@ export default function PLPList({
       // Add filters
       queryParams.append("filters[Status][$eq]", "Active");
 
-  // Only show products whose Title contains کیف, کفش, or صندل
+  // Only show products whose Title contains کیف, کفش, صندل, or کتونی
   // We append the $or filters as separate params to keep URLSearchParams usage
   queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
   queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
   queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
+  queryParams.append("filters[$or][3][Title][$containsi]", "کتونی");
 
       // Category filter
       if (category) {
