@@ -84,11 +84,11 @@ export default function ProductSalesReportPage() {
         try {
           // Method 1: Try dynamic import
           XLSX = await import("xlsx");
-        } catch (error) {
+        } catch (_error) {
           try {
             // Method 2: Try another dynamic import (fallback)
             XLSX = (await import("xlsx")).default;
-          } catch (requireError) {
+          } catch (_requireError) {
             throw new Error("xlsx package not found");
           }
         }

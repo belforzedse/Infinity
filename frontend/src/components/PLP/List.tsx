@@ -45,6 +45,7 @@ interface Product {
           SKU: string;
           Price: string;
           IsPublished: boolean;
+          DiscountPrice?: string;
           general_discounts?: {
             data: Array<{
               attributes: {
@@ -131,8 +132,7 @@ export default function PLPList({
       queryParams.append("populate[0]", "CoverImage");
       queryParams.append("populate[1]", "product_main_category");
       queryParams.append("populate[2]", "product_variations");
-      queryParams.append("populate[3]", "product_variations.general_discounts");
-      queryParams.append("populate[4]", "product_variations.product_stock");
+      queryParams.append("populate[3]", "product_variations.product_stock");
 
       // Add pagination
       queryParams.append("pagination[page]", page);
@@ -268,13 +268,14 @@ export default function PLPList({
       },
     );
 
-    // If showAvailableOnly is true, also check if any variation is published
+    // If showAvailableOnly is true, check if any variation is published AND has stock
     if (available === "true") {
       const hasAvailableVariation =
         product.attributes.product_variations?.data?.some(
           (variation) => variation.attributes.IsPublished,
         );
-      if (!(hasValidPrice && hasAvailableVariation)) return false;
+      const hasStock = checkStockAvailability(product);
+      if (!(hasValidPrice && hasAvailableVariation && hasStock)) return false;
     } else if (!hasValidPrice) {
       return false;
     }
@@ -282,8 +283,20 @@ export default function PLPList({
     // Discount-only filter
     if (discountOnly === "true") {
       const hasDiscount = product.attributes.product_variations?.data?.some(
-        (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0,
+        (variation) => {
+          // Check for general_discounts first
+          const generalDiscounts = variation.attributes.general_discounts?.data;
+          if (generalDiscounts && generalDiscounts.length > 0) {
+            return true;
+          }
+
+          // Fallback to DiscountPrice field
+          const price = parseFloat(variation.attributes.Price);
+          const discountPrice = variation.attributes.DiscountPrice
+            ? parseFloat(variation.attributes.DiscountPrice)
+            : null;
+          return discountPrice && discountPrice < price;
+        }
       );
       if (!hasDiscount) return false;
     }
@@ -299,17 +312,26 @@ export default function PLPList({
         return price && parseInt(price) > 0;
       });
 
-    const hasDiscount =
-      firstValidVariation?.attributes?.general_discounts?.data &&
-      firstValidVariation.attributes.general_discounts.data.length > 0;
-    const discount =
-      hasDiscount && firstValidVariation.attributes.general_discounts?.data
-        ? firstValidVariation.attributes.general_discounts.data[0].attributes
-            .Amount
-        : undefined;
     const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-    const discountPrice =
-      hasDiscount && discount ? price * (1 - discount / 100) : undefined;
+
+    // Check for general_discounts relationship first
+    const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
+    let discountPrice = undefined;
+    let discount = undefined;
+
+    if (generalDiscounts && generalDiscounts.length > 0) {
+      // Use general_discounts relationship
+      const discountAmount = generalDiscounts[0].attributes.Amount;
+      discount = discountAmount;
+      discountPrice = Math.round(price * (1 - discountAmount / 100));
+    } else if (firstValidVariation?.attributes?.DiscountPrice) {
+      // Fallback to DiscountPrice field (if it exists)
+      discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+      const hasDiscount = discountPrice && discountPrice < price;
+      discount = hasDiscount
+        ? Math.round(((price - discountPrice) / price) * 100)
+        : undefined;
+    }
 
     return {
       id: product.id,
@@ -389,23 +411,40 @@ export default function PLPList({
                       },
                     );
 
-                  const hasDiscount =
-                    firstValidVariation?.attributes?.general_discounts?.data &&
-                    firstValidVariation.attributes.general_discounts.data
-                      .length > 0;
-                  const discount =
-                    hasDiscount &&
-                    firstValidVariation.attributes.general_discounts?.data
-                      ? firstValidVariation.attributes.general_discounts.data[0]
-                          .attributes.Amount
-                      : undefined;
                   const price = parseInt(
                     firstValidVariation?.attributes?.Price || "0",
                   );
-                  const discountPrice =
-                    hasDiscount && discount
-                      ? price * (1 - discount / 100)
+
+                  // Check for general_discounts relationship first
+                  const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
+                  let discountPrice = undefined;
+                  let discount = undefined;
+
+                  if (generalDiscounts && generalDiscounts.length > 0) {
+                    // Use general_discounts relationship
+                    const discountAmount = generalDiscounts[0].attributes.Amount;
+                    discount = discountAmount;
+                    discountPrice = Math.round(price * (1 - discountAmount / 100));
+                  } else if (firstValidVariation?.attributes?.DiscountPrice) {
+                    // Fallback to DiscountPrice field (if it exists)
+                    discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+                    const hasDiscount = discountPrice && discountPrice < price;
+                    discount = hasDiscount
+                      ? Math.round(((price - discountPrice) / price) * 100)
                       : undefined;
+                  }
+
+                  // Debug: Log pricing calculations for PLP desktop view
+                  if (process.env.NODE_ENV !== "production" && (discount || discountPrice)) {
+                    console.log(`PLP Desktop - Product ${product.id}:`, {
+                      title: product.attributes.Title.substring(0, 30),
+                      originalPrice: price,
+                      discountPrice,
+                      discount,
+                      generalDiscounts: generalDiscounts,
+                      variationData: firstValidVariation?.attributes
+                    });
+                  }
 
                   const isAvailable = checkStockAvailability(product);
 
@@ -447,23 +486,28 @@ export default function PLPList({
                       },
                     );
 
-                  const hasDiscount =
-                    firstValidVariation?.attributes?.general_discounts?.data &&
-                    firstValidVariation.attributes.general_discounts.data
-                      .length > 0;
-                  const discount =
-                    hasDiscount &&
-                    firstValidVariation.attributes.general_discounts?.data
-                      ? firstValidVariation.attributes.general_discounts.data[0]
-                          .attributes.Amount
-                      : undefined;
                   const price = parseInt(
                     firstValidVariation?.attributes?.Price || "0",
                   );
-                  const discountPrice =
-                    hasDiscount && discount
-                      ? price * (1 - discount / 100)
+
+                  // Check for general_discounts relationship first
+                  const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
+                  let discountPrice = undefined;
+                  let discount = undefined;
+
+                  if (generalDiscounts && generalDiscounts.length > 0) {
+                    // Use general_discounts relationship
+                    const discountAmount = generalDiscounts[0].attributes.Amount;
+                    discount = discountAmount;
+                    discountPrice = Math.round(price * (1 - discountAmount / 100));
+                  } else if (firstValidVariation?.attributes?.DiscountPrice) {
+                    // Fallback to DiscountPrice field (if it exists)
+                    discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+                    const hasDiscount = discountPrice && discountPrice < price;
+                    discount = hasDiscount
+                      ? Math.round(((price - discountPrice) / price) * 100)
                       : undefined;
+                  }
 
                   const isAvailable = checkStockAvailability(product);
 

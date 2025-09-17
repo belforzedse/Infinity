@@ -38,6 +38,7 @@ export type Product = {
           IsPublished: boolean;
           SKU: string;
           Price: string;
+          DiscountPrice?: string;
           createdAt: string;
           updatedAt: string;
           product_stock: {
@@ -101,18 +102,30 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "attributes.product_variations.data[0].attributes.Price",
     header: "قیمت",
-    cell: ({ row }) =>
-      row.original?.attributes?.product_variations?.data?.[0]?.attributes
-        ?.Price ? (
-        <SuperAdminTableCellSimplePrice
-          price={
-            +row.original?.attributes?.product_variations?.data?.[0]?.attributes
-              ?.Price
-          }
-        />
-      ) : (
-        "-"
-      ),
+    cell: ({ row }) => {
+      const variation = row.original?.attributes?.product_variations?.data?.[0]?.attributes;
+      if (!variation?.Price) return "-";
+
+      const price = +variation.Price;
+      const discountPrice = variation.DiscountPrice ? +variation.DiscountPrice : null;
+
+      return (
+        <div className="flex flex-col">
+          {discountPrice && (
+            <span className="text-pink-600 font-medium">
+              <SuperAdminTableCellSimplePrice
+                price={discountPrice}
+              />
+            </span>
+          )}
+          <span className={discountPrice ? "text-gray-500 line-through text-xs" : ""}>
+            <SuperAdminTableCellSimplePrice
+              price={price}
+            />
+          </span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "inventory",
@@ -244,13 +257,26 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                 </span>
               </div>
 
-              <span className="text-xs text-neutral-800">
-                {priceFormatter(
-                  +row?.attributes?.product_variations?.data?.[0]?.attributes
-                    ?.Price,
-                  " تومان",
+              <div className="flex flex-col">
+                {row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice && (
+                  <span className="text-xs text-pink-600 font-medium">
+                    {priceFormatter(
+                      +row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice,
+                      " تومان",
+                    )}
+                  </span>
                 )}
-              </span>
+                <span className={`text-xs ${
+                  row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice
+                    ? "text-gray-500 line-through"
+                    : "text-neutral-800"
+                }`}>
+                  {priceFormatter(
+                    +row?.attributes?.product_variations?.data?.[0]?.attributes?.Price,
+                    " تومان",
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         </div>

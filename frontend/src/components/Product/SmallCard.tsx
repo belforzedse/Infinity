@@ -99,13 +99,13 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
                 <div className="flex items-center justify-end gap-1 md:justify-center">
                   <span
                     className={`text-xs ${
-                      discountedPrice ? "text-pink-600" : "text-neutral-800"
+                      discountedPrice && discountedPrice > 0 && discountedPrice < price ? "text-pink-600" : "text-neutral-800"
                     } font-medium`}
                   >
-                    {(discountedPrice || price)?.toLocaleString()} تومان
+                    {(discountedPrice && discountedPrice > 0 && discountedPrice < price ? discountedPrice : price)?.toLocaleString()} تومان
                   </span>
 
-                  {discountedPrice && (
+                  {discountedPrice && discountedPrice > 0 && discountedPrice < price && (
                     <span className="text-[10px] text-neutral-400 line-through">
                       {price?.toLocaleString()} تومان
                     </span>

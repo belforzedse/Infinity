@@ -14,8 +14,8 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
       `populate[0]=CoverImage&` +
       `populate[1]=product_main_category&` +
       `populate[2]=product_variations&` +
-      `populate[3]=product_variations.general_discounts&` +
-      `populate[4]=product_variations.product_stock&` +
+      `populate[3]=product_variations.product_stock&` +
+      `populate[4]=product_variations.general_discounts&` +
       // Hide zero-price and zero-stock variations
       `filters[product_variations][Price][$gte]=1&` +
       // Hide zero-stock items
@@ -25,12 +25,33 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
 
   try {
     const response = await apiClient.get<any>(endpoint);
-    const discounted = (response as any)?.data?.filter((product: any) =>
-      product.attributes.product_variations?.data?.some(
-        (variation: any) =>
-          variation.attributes.general_discounts?.data?.length > 0,
-      ),
-    );
+    const discounted = (response as any)?.data?.filter((product: any) => {
+      // Check if product has any variation with stock AND discount
+      return product.attributes.product_variations?.data?.some(
+        (variation: any) => {
+          // Check if variation has stock
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          const hasStock = typeof stockCount === 'number' && stockCount > 0;
+
+          if (!hasStock) return false;
+
+          // Check for discounts
+          const price = parseFloat(variation.attributes.Price);
+
+          // Check for general_discounts first
+          const generalDiscounts = variation.attributes.general_discounts?.data;
+          if (generalDiscounts && generalDiscounts.length > 0) {
+            return true;
+          }
+
+          // Fallback to DiscountPrice field
+          const discountPrice = variation.attributes.DiscountPrice
+            ? parseFloat(variation.attributes.DiscountPrice)
+            : null;
+          return discountPrice && discountPrice < price;
+        }
+      );
+    });
 
     return formatProductsToCardProps(discounted);
   } catch (error) {
@@ -48,8 +69,8 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
       `populate[0]=CoverImage&` +
       `populate[1]=product_main_category&` +
       `populate[2]=product_variations&` +
-      `populate[3]=product_variations.general_discounts&` +
-      `populate[4]=product_variations.product_stock&` +
+      `populate[3]=product_variations.product_stock&` +
+      `populate[4]=product_variations.general_discounts&` +
       // Hide zero-price and zero-stock variations
       `filters[product_variations][Price][$gte]=1&` +
       // Hide zero-stock items
@@ -75,8 +96,8 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
       `populate[0]=CoverImage&` +
       `populate[1]=product_main_category&` +
       `populate[2]=product_variations&` +
-      `populate[3]=product_variations.general_discounts&` +
-      `populate[4]=product_variations.product_stock&` +
+      `populate[3]=product_variations.product_stock&` +
+      `populate[4]=product_variations.general_discounts&` +
       // Hide zero-price and zero-stock variations
       `filters[product_variations][Price][$gte]=1&` +
       // Hide zero-stock items
