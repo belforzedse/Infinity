@@ -58,9 +58,10 @@ export default function EditProductsPage({
   }, [id, setProductData, getProductParams]);
 
   useEffect(() => {
+    // Only fetch categories and tags once on mount to prevent infinite loops
     fetchAllCategories();
     handleFetchTags();
-  }, [fetchAllCategories, handleFetchTags]);
+  }, []); // Empty dependency array to run only once
 
   const handleUpdateProduct = async () => {
     try {

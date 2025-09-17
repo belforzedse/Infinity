@@ -28,7 +28,7 @@ export default function MobileSlider() {
   };
 
   return (
-    <div ref={hostRef} className="mobile-slider-container block lg:hidden">
+    <div ref={hostRef} className="mobile-slider-container block">
       <MobileHero layout={slides[index]} playKey={playKey} />
 
       {/* Pagination below content, not overlaying images */}
@@ -48,6 +48,11 @@ export default function MobileSlider() {
       <style jsx>{`
         .mobile-slider-container {
           width: 100%;
+        }
+        @media (min-width: 1190px) {
+          .mobile-slider-container {
+            display: none;
+          }
         }
       `}</style>
     </div>

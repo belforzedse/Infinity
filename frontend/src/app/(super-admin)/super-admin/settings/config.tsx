@@ -32,7 +32,7 @@ export const config: UpsertPageConfigType<SuperAdminSettings> = {
             {
               name: "filterPublicProductsByTitle",
               type: "checkbox",
-              label: "فیلتر نمایش محصولات عمومی (کیف/کفش/صندل)",
+              label: "فیلتر نمایش محصولات عمومی (کیف/کفش/صندل/کتونی)",
               colSpan: 12,
               mobileColSpan: 12,
             },

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
 import Text from "../Kits/Text";
 import ChevronDownIcon from "./Icons/ChevronDownIcon";
-import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL } from "@/constants/api";
+import { appendTitleFilter } from "@/constants/productFilters";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PLPDesktopSearchProps {
@@ -52,7 +53,10 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=8&_skip_global_loader=1`;
+        // Use regular products endpoint for live preview to support title filtering
+        let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=8&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
+        // Add کیف کفش صندل کتونی filter to live preview suggestions
+        url = appendTitleFilter(url);
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -63,7 +67,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
         const json = await res.json();
         const items = (json?.data || []).map((i: any) => ({
           id: i.id,
-          Title: i.Title,
+          Title: i.attributes?.Title || i.Title,
         }));
         // Deduplicate by id to avoid React key collisions if API returns duplicates
         const unique = Array.from(
