@@ -260,100 +260,149 @@ export default function PLPList({
 
   // Filter out products with zero price by checking all variations
   const validProducts = products.filter((product) => {
-    // Check if any variation has a valid price
-    const hasValidPrice = product.attributes.product_variations?.data?.some(
-      (variation) => {
-        const price = variation.attributes.Price;
-        return price && parseInt(price) > 0;
-      },
-    );
+    try {
+      // Basic product structure validation
+      if (!product?.attributes?.product_variations?.data) {
+        return false;
+      }
 
-    // If showAvailableOnly is true, check if any variation is published AND has stock
-    if (available === "true") {
-      const hasAvailableVariation =
-        product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished,
+      // Check if any variation has a valid price
+      const hasValidPrice = product.attributes.product_variations.data.some(
+        (variation) => {
+          if (!variation?.attributes?.Price) return false;
+          const price = parseInt(variation.attributes.Price);
+          return !isNaN(price) && price > 0;
+        },
+      );
+
+      // If showAvailableOnly is true, check if any variation is published AND has stock
+      if (available === "true") {
+        const hasAvailableVariation = product.attributes.product_variations.data.some(
+          (variation) => variation?.attributes?.IsPublished === true,
         );
-      const hasStock = checkStockAvailability(product);
-      if (!(hasValidPrice && hasAvailableVariation && hasStock)) return false;
-    } else if (!hasValidPrice) {
+        const hasStock = checkStockAvailability(product);
+        if (!(hasValidPrice && hasAvailableVariation && hasStock)) return false;
+      } else if (!hasValidPrice) {
+        return false;
+      }
+
+      // Discount-only filter
+      if (discountOnly === "true") {
+        const hasDiscount = product.attributes.product_variations.data.some(
+          (variation) => {
+            if (!variation?.attributes) return false;
+
+            // Check for general_discounts first
+            const generalDiscounts = variation.attributes.general_discounts?.data;
+            if (generalDiscounts && Array.isArray(generalDiscounts) && generalDiscounts.length > 0) {
+              return true;
+            }
+
+            // Fallback to DiscountPrice field
+            const price = parseFloat(variation.attributes.Price || "0");
+            const discountPrice = variation.attributes.DiscountPrice
+              ? parseFloat(variation.attributes.DiscountPrice)
+              : null;
+            return discountPrice && !isNaN(discountPrice) && !isNaN(price) && discountPrice < price;
+          }
+        );
+        if (!hasDiscount) return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.warn('Error filtering product:', error, product);
       return false;
     }
-
-    // Discount-only filter
-    if (discountOnly === "true") {
-      const hasDiscount = product.attributes.product_variations?.data?.some(
-        (variation) => {
-          // Check for general_discounts first
-          const generalDiscounts = variation.attributes.general_discounts?.data;
-          if (generalDiscounts && generalDiscounts.length > 0) {
-            return true;
-          }
-
-          // Fallback to DiscountPrice field
-          const price = parseFloat(variation.attributes.Price);
-          const discountPrice = variation.attributes.DiscountPrice
-            ? parseFloat(variation.attributes.DiscountPrice)
-            : null;
-          return discountPrice && discountPrice < price;
-        }
-      );
-      if (!hasDiscount) return false;
-    }
-
-    return true;
   });
 
   // Create sample products for sidebar suggestions
   const sidebarProducts = validProducts.slice(0, 3).map((product) => {
-    const firstValidVariation =
-      product.attributes.product_variations?.data?.find((variation) => {
-        const price = variation.attributes.Price;
-        return price && parseInt(price) > 0;
+    try {
+      const firstValidVariation = product.attributes.product_variations?.data?.find((variation) => {
+        if (!variation?.attributes?.Price) return false;
+        const price = parseInt(variation.attributes.Price);
+        return !isNaN(price) && price > 0;
       });
 
-    const price = parseInt(firstValidVariation?.attributes?.Price || "0");
+      const price = parseInt(firstValidVariation?.attributes?.Price || "0");
+      if (isNaN(price) || price <= 0) {
+        throw new Error('Invalid price for sidebar product');
+      }
 
-    // Check for general_discounts relationship first
-    const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
-    let discountPrice = undefined;
-    let discount = undefined;
+      // Check for general_discounts relationship first
+      const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
+      let discountPrice = undefined;
+      let discount = undefined;
 
-    if (generalDiscounts && generalDiscounts.length > 0) {
-      // Use general_discounts relationship
-      const discountAmount = generalDiscounts[0].attributes.Amount;
-      discount = discountAmount;
-      discountPrice = Math.round(price * (1 - discountAmount / 100));
-    } else if (firstValidVariation?.attributes?.DiscountPrice) {
-      // Fallback to DiscountPrice field (if it exists)
-      discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
-      const hasDiscount = discountPrice && discountPrice < price;
-      discount = hasDiscount
-        ? Math.round(((price - discountPrice) / price) * 100)
-        : undefined;
+      if (generalDiscounts && Array.isArray(generalDiscounts) && generalDiscounts.length > 0) {
+        // Use general_discounts relationship
+        const discountAmount = generalDiscounts[0]?.attributes?.Amount;
+        if (typeof discountAmount === 'number' && discountAmount > 0) {
+          discount = discountAmount;
+          discountPrice = Math.round(price * (1 - discountAmount / 100));
+        }
+      } else if (firstValidVariation?.attributes?.DiscountPrice) {
+        // Fallback to DiscountPrice field (if it exists)
+        const parsedDiscountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+        if (!isNaN(parsedDiscountPrice) && parsedDiscountPrice < price) {
+          discountPrice = parsedDiscountPrice;
+          discount = Math.round(((price - discountPrice) / price) * 100);
+        }
+      }
+
+      return {
+        id: product.id,
+        title: product.attributes.Title || '',
+        category: product.attributes.product_main_category?.data?.attributes?.Title || "",
+        likedCount: product.attributes.RatingCount || 0,
+        price: price,
+        discountedPrice: discountPrice,
+        discount: discount,
+        image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url || ''}`,
+      };
+    } catch (error) {
+      console.warn('Error creating sidebar product:', error, product);
+      // Return a fallback product object
+      return {
+        id: product.id,
+        title: product.attributes?.Title || 'محصول نامشخص',
+        category: '',
+        likedCount: 0,
+        price: 0,
+        discountedPrice: undefined,
+        discount: undefined,
+        image: '',
+      };
     }
-
-    return {
-      id: product.id,
-      title: product.attributes.Title,
-      category:
-        product.attributes.product_main_category?.data?.attributes?.Title || "",
-      likedCount: product.attributes.RatingCount || 0,
-      price: price,
-      discountedPrice: discountPrice,
-      discount: discount,
-      image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
-    };
-  });
+  }).filter(product => product.price > 0); // Filter out invalid products
 
   // Helper function to check if a product has available stock
   const checkStockAvailability = (product: Product) => {
-    return product.attributes.product_variations?.data?.some(
-      (variation) => {
-        const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-        return typeof stockCount === 'number' && stockCount > 0;
+    try {
+      if (!product?.attributes?.product_variations?.data) {
+        return false;
       }
-    ) || false;
+
+      return product.attributes.product_variations.data.some(
+        (variation) => {
+          if (!variation?.attributes) {
+            return false;
+          }
+
+          const stockData = variation.attributes.product_stock?.data;
+          if (!stockData?.attributes) {
+            return false;
+          }
+
+          const stockCount = stockData.attributes.Count;
+          return typeof stockCount === 'number' && stockCount > 0;
+        }
+      );
+    } catch (error) {
+      console.warn('Error checking stock availability:', error);
+      return false;
+    }
   };
 
   return (

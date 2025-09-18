@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AvailabilityFilterProps {
   onChange: (checked: boolean) => void;
@@ -12,6 +12,11 @@ export default function AvailabilityFilter({
   defaultChecked = false,
 }: AvailabilityFilterProps) {
   const [checked, setChecked] = useState(defaultChecked);
+
+  // Sync internal state with prop changes
+  useEffect(() => {
+    setChecked(defaultChecked);
+  }, [defaultChecked]);
 
   const handleChange = () => {
     const newValue = !checked;
