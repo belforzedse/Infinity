@@ -23,7 +23,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
   const selectedAddress = useWatch({ control, name: "address" });
 
   // Check if address is selected to determine if delivery options should be disabled
-  const isAddressSelected = selectedAddress && selectedAddress.value && selectedAddress.value.trim() !== "";
+  const isAddressSelected = selectedAddress && selectedAddress.id && selectedAddress.name;
   // Filter shipping methods based on location
   const getFilteredShippingMethods = () => {
     if (!selectedAddress?.name) {
@@ -105,13 +105,11 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
             name="delivery-method"
             disabled={!isAddressSelected}
             onChange={(selectedValue) => {
-              if (isAddressSelected) {
-                const selected = filteredShippingMethods.find(
-                  (method) => method.id.toString() === selectedValue,
-                );
-                if (selected) {
-                  field.onChange(selected);
-                }
+              const selected = filteredShippingMethods.find(
+                (method) => method.id.toString() === selectedValue,
+              );
+              if (selected) {
+                field.onChange(selected);
               }
             }}
           />
