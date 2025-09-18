@@ -73,10 +73,20 @@ export default function CartDrawerItem({ item }: CartDrawerItemProps) {
             </div>
           )}
 
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-800">
-              {item.price.toLocaleString()} تومان
+          <div className="mt-2 flex flex-col items-start gap-1">
+            {item.originalPrice && item.originalPrice > item.price && (
+              <span className="text-xs text-neutral-500 line-through">
+                {item.originalPrice.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+              </span>
+            )}
+            <span className="text-sm font-semibold text-pink-600">
+              {item.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
             </span>
+            {item.discountPercentage && item.discountPercentage > 0 && (
+              <span className="text-xs text-green-600">
+                -{item.discountPercentage}%
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -218,7 +218,7 @@ export const logBundleInfo = () => {
 };
 
 // Export all debug utilities
-export default {
+const debugUtils = {
   log,
   withDebug,
   debugAPI,
@@ -230,3 +230,5 @@ export default {
   logBundleInfo,
   DEBUG,
 };
+
+export default debugUtils;

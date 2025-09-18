@@ -55,7 +55,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
         if (!mounted) return;
         const json = await res.json();
         setSuggestions((json?.data || []).map((i: any) => ({ id: i.id, Title: i.attributes?.Title || i.Title })));
-      } catch (_e) {
+      } catch {
         if (!mounted) return;
         setSuggestions([]);
       } finally {
