@@ -122,6 +122,25 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
     const tax = (taxable * taxPercent) / 100;
     const total = Math.max(subtotal - discountAmount + tax + finalShipping, 0);
 
+    // Re-check SnappPay eligibility with discounted total (convert toman → IRR)
+    let snappEligible: any = null;
+    let amountIRR: number | undefined;
+    try {
+      amountIRR = Math.round(total) * 10;
+      const snappay = strapi.service("api::payment-gateway.snappay");
+      snappEligible = await snappay.eligible(amountIRR);
+      try {
+        strapi.log.info("SnappPay eligible after apply-discount", {
+          amountIRR,
+          successful: snappEligible?.successful,
+          eligible: snappEligible?.response?.eligible,
+          error: snappEligible?.errorData,
+        });
+      } catch {}
+    } catch (e) {
+      strapi.log.error("Failed SnappPay eligibility check after discount", e);
+    }
+
     return {
       data: {
         success: true,
@@ -137,6 +156,15 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
           total: Math.round(total),
           taxPercent,
         },
+        snappEligible: snappEligible
+          ? {
+              successful: !!snappEligible.successful,
+              eligible: !!snappEligible.response?.eligible,
+              title: snappEligible.response?.title_message,
+              description: snappEligible.response?.description,
+              amountIRR,
+            }
+          : undefined,
       },
     };
   } catch (error: any) {
