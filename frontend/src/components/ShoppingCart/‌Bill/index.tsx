@@ -158,11 +158,12 @@ function ShoppingCartBillForm({}: Props) {
         shipping: Number(data.shippingMethod.id),
         shippingCost: Number(data.shippingMethod.attributes.Price),
         note: data.notes || undefined,
-        callbackURL: "/orders/payment-callback",
+        callbackURL: "https://new.infinitycolor.co/orders/payment-callback",
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
-        discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
+        discountCode:
+          discountCode || localStorage.getItem("discountCode") || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
