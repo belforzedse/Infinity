@@ -10,7 +10,11 @@ export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
 };
 
 export const getSnappEligible = async (
-  params: { shippingId?: number; shippingCost?: number } = {}
+  params: {
+    shippingId?: number;
+    shippingCost?: number;
+    discountCode?: string;
+  } = {}
 ): Promise<{
   eligible: boolean;
   title?: string;
@@ -20,6 +24,7 @@ export const getSnappEligible = async (
   const qs = new URLSearchParams();
   if (params.shippingId) qs.set("shippingId", String(params.shippingId));
   if (params.shippingCost) qs.set("shippingCost", String(params.shippingCost));
+  if (params.discountCode) qs.set("discountCode", String(params.discountCode));
   const url = `/payment-gateway/snapp-eligible${
     qs.toString() ? `?${qs.toString()}` : ""
   }`;

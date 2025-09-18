@@ -101,8 +101,7 @@ function ShoppingCartBillForm({}: Props) {
     run();
   }, [discountCode, watchShippingMethod]);
 
-  // Naive eligibility (we don't have amount here; we can rely on backend final validation)
-  // Optionally, you can request a lightweight endpoint to compute amount and check eligibility.
+  // Re-check SnappPay eligibility when shipping or discount changes
   useEffect(() => {
     const run = async () => {
       try {
@@ -114,6 +113,7 @@ function ShoppingCartBillForm({}: Props) {
         const res = await CartService.getSnappEligible({
           shippingId: Number(watchShippingMethod.id),
           shippingCost: Number(watchShippingMethod.attributes?.Price || 0),
+          discountCode: discountCode,
         });
         setSnappEligible(!!res.eligible);
         const msg = res.title || res.description;
@@ -124,7 +124,7 @@ function ShoppingCartBillForm({}: Props) {
       }
     };
     run();
-  }, [watchShippingMethod]);
+  }, [watchShippingMethod, discountCode]);
 
   const onSubmit = async (data: FormData) => {
     if (!data.address) {
