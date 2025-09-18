@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Debug utilities for development mode
 export const DEBUG = process.env.NODE_ENV === 'development';
 

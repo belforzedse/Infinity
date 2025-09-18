@@ -159,7 +159,7 @@ const DebugNetwork: React.FC = () => {
           <option value="all">All</option>
           <option value="success">Success (2xx)</option>
           <option value="error">Errors (4xx/5xx)</option>
-          <option value="slow">Slow (>1s)</option>
+          <option value="slow">Slow ({'>'}1s)</option>
         </select>
         <button
           onClick={clearRequests}

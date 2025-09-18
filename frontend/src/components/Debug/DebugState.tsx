@@ -13,7 +13,7 @@ const DebugState: React.FC = () => {
   useEffect(() => {
     const updateStorageData = () => {
       // Local Storage
-      const localStorage = {};
+      const localStorage: Record<string, any> = {};
       for (let i = 0; i < window.localStorage.length; i++) {
         const key = window.localStorage.key(i);
         if (key) {
@@ -28,7 +28,7 @@ const DebugState: React.FC = () => {
       setLocalStorageData(localStorage);
 
       // Session Storage
-      const sessionStorage = {};
+      const sessionStorage: Record<string, any> = {};
       for (let i = 0; i < window.sessionStorage.length; i++) {
         const key = window.sessionStorage.key(i);
         if (key) {
@@ -43,7 +43,7 @@ const DebugState: React.FC = () => {
       setSessionStorageData(sessionStorage);
 
       // Cookies
-      const cookies = {};
+      const cookies: Record<string, any> = {};
       if (document.cookie) {
         document.cookie.split(';').forEach(cookie => {
           const [key, value] = cookie.trim().split('=');
