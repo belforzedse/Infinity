@@ -16,7 +16,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ enabled = process.env.NODE_ENV 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [position, setPosition] = useState({ x: 20, y: 20 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [_isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     // Keyboard shortcut to toggle debug panel
