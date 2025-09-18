@@ -39,7 +39,7 @@ function ShoppingCartBillDeliveryForm({
     subtotalBeforeDiscount,
     cartDiscountTotal,
   } = useCart();
-  const [_, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
+  const [, _setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,10 +65,7 @@ function ShoppingCartBillDeliveryForm({
         });
         setShippingMethods(methods);
 
-        // Set the first shipping method as default if there are any methods and none is selected
-        if (methods.length > 0 && !selectedShipping) {
-          setValue("shippingMethod", methods[0]);
-        }
+        // No default selection - let user choose explicitly
       } catch (err) {
         console.error("Failed to fetch shipping methods:", err);
         setError("خطا در دریافت روش‌های ارسال");

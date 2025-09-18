@@ -63,7 +63,7 @@ const DebugPerformance: React.FC = () => {
         });
 
         // Page Load Time
-        const loadTime = navigation.loadEventEnd - navigation.navigationStart;
+        const loadTime = navigation.loadEventEnd - navigation.fetchStart;
         newMetrics.push({
           name: 'Load Time',
           value: Math.round(loadTime),
