@@ -32,7 +32,7 @@ type Props = Record<string, never>;
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
+  const [_submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const router = useRouter();
@@ -118,7 +118,7 @@ function ShoppingCartBillForm({}: Props) {
         setSnappEligible(!!res.eligible);
         const msg = res.title || res.description;
         setSnappMessage(msg);
-      } catch (e) {
+      } catch {
         setSnappEligible(true);
         setSnappMessage(undefined);
       }

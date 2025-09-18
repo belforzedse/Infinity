@@ -16,7 +16,7 @@ const DebugPerformance: React.FC = () => {
 
   useEffect(() => {
     setRenderCount(prev => prev + 1);
-  });
+  }, []);
 
   useEffect(() => {
     const updateMetrics = () => {
@@ -54,7 +54,7 @@ const DebugPerformance: React.FC = () => {
         });
 
         // DOM Content Loaded
-        const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.navigationStart;
+        const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart;
         newMetrics.push({
           name: 'DOM Ready',
           value: Math.round(domContentLoaded),
@@ -63,7 +63,7 @@ const DebugPerformance: React.FC = () => {
         });
 
         // Page Load Time
-        const loadTime = navigation.loadEventEnd - navigation.navigationStart;
+        const loadTime = navigation.loadEventEnd - navigation.fetchStart;
         newMetrics.push({
           name: 'Load Time',
           value: Math.round(loadTime),
@@ -165,9 +165,9 @@ const DebugPerformance: React.FC = () => {
     const startTime = performance.now();
 
     // Simulate some work
-    let result = 0;
+    let _result = 0;
     for (let i = 0; i < 1000000; i++) {
-      result += Math.random();
+      _result += Math.random();
     }
 
     const endTime = performance.now();
