@@ -21,6 +21,9 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
 }) => {
   // Watch the selected address to get province and city info
   const selectedAddress = useWatch({ control, name: "address" });
+
+  // Check if address is selected to determine if delivery options should be disabled
+  const isAddressSelected = selectedAddress && selectedAddress.value && selectedAddress.value.trim() !== "";
   // Filter shipping methods based on location
   const getFilteredShippingMethods = () => {
     if (!selectedAddress?.name) {
@@ -87,6 +90,11 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
 
   return (
     <div dir="rtl">
+      {!isAddressSelected && (
+        <div className="mb-3 p-2 text-center text-sm text-amber-600 bg-amber-50 rounded-lg">
+          ابتدا آدرس تحویل را انتخاب کنید
+        </div>
+      )}
       <Controller
         control={control}
         name="shippingMethod"
@@ -95,12 +103,15 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
             options={deliveryOptions}
             value={field.value?.id.toString() || ""}
             name="delivery-method"
+            disabled={!isAddressSelected}
             onChange={(selectedValue) => {
-              const selected = filteredShippingMethods.find(
-                (method) => method.id.toString() === selectedValue,
-              );
-              if (selected) {
-                field.onChange(selected);
+              if (isAddressSelected) {
+                const selected = filteredShippingMethods.find(
+                  (method) => method.id.toString() === selectedValue,
+                );
+                if (selected) {
+                  field.onChange(selected);
+                }
               }
             }}
           />

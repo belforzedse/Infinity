@@ -69,12 +69,13 @@ function transformOrder(raw: StrapiOrder) {
 
 export default function BulkPrintPage() {
   const params = useSearchParams();
-  const idsParam = params.get("ids")?.split(",").filter(Boolean) ?? [];
   const [orders, setOrders] = useState<StrapiOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const hasPrinted = useRef(false);
 
   useEffect(() => {
+    const idsParam = params.get("ids")?.split(",").filter(Boolean) ?? [];
+
     if (!idsParam.length) {
       setLoading(false);
       return;
@@ -106,7 +107,7 @@ export default function BulkPrintPage() {
     };
 
     fetchOrders();
-  }, [idsParam]);
+  }, [params]);
 
   useEffect(() => {
     if (orders.length && !hasPrinted.current) {
