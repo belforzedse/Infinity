@@ -76,12 +76,12 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     fetchCategories();
   }, []);
 
-  // Initialize available state from prop
+  // Initialize available state from prop - run only once on mount
   useEffect(() => {
-    if (showAvailableOnly && !available) {
+    if (showAvailableOnly && available !== "true") {
       setAvailable("true");
     }
-  }, [showAvailableOnly, available, setAvailable]);
+  }, [showAvailableOnly, setAvailable]); // Remove 'available' from deps to prevent loops
 
   // Category filter handler
   const handleCategorySelect = useCallback(
