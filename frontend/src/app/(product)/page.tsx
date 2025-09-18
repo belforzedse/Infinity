@@ -20,7 +20,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="mx-auto mt-5 px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:max-w-screen-2xl lg:px-16">
+    <div className="mx-auto mt-5 px-4 pb-8 md:mt-8 md:px-8 md:pb-16 lg:px-10 xl:max-w-[1800px]">
       {/* Hero section with responsive images */}
       <Reveal variant="zoom-in" duration={650}>
         <MobileSlider />
