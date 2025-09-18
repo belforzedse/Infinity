@@ -400,7 +400,7 @@ export default function PLPList({
           ) : (
             <>
               {/* Desktop view - ProductCard */}
-              <div className="hidden grid-cols-2 gap-4 md:grid lg:grid-cols-3">
+              <div className="hidden grid-cols-2 gap-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
