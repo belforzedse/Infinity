@@ -14,6 +14,8 @@ export interface CartItem {
   name: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   quantity: number;
   image: string;
   color?: string;
@@ -32,6 +34,8 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  subtotalBeforeDiscount: number;
+  cartDiscountTotal: number;
   isLoading: boolean;
   checkCartStock: () => Promise<boolean>;
   migrateLocalCartToApi: () => Promise<void>;
@@ -111,6 +115,53 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       };
 
+      const parseNumericValue = (value: unknown): number | undefined => {
+        if (value === null || value === undefined) return undefined;
+        if (typeof value === "number") {
+          return Number.isFinite(value) ? value : undefined;
+        }
+        if (typeof value === "string") {
+          const cleaned = value.replace(/,/g, "").trim();
+          if (!cleaned) return undefined;
+          const parsed = parseFloat(cleaned);
+          return Number.isNaN(parsed) ? undefined : parsed;
+        }
+        return undefined;
+      };
+
+      const extractGeneralDiscountPercent = (variation: any): number | undefined => {
+        if (!variation) return undefined;
+
+        const candidateGroups = [
+          variation.general_discounts,
+          variation.general_discount,
+        ];
+
+        for (const group of candidateGroups) {
+          if (!group) continue;
+
+          const nodes = Array.isArray(group)
+            ? group
+            : Array.isArray(group?.data)
+              ? group.data
+              : group?.data
+                ? [group.data]
+                : [group];
+
+          for (const node of nodes) {
+            const amount =
+              node?.attributes?.Amount ??
+              node?.Amount ??
+              node?.attributes?.amount ??
+              node?.amount;
+            const parsedAmount = parseNumericValue(amount);
+            if (parsedAmount !== undefined) return parsedAmount;
+          }
+        }
+
+        return undefined;
+      };
+
       // Transform API cart format to local format
       const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
         const variation = item.product_variation;
@@ -123,10 +174,64 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const category = product.product_main_category?.Title || "Unknown";
 
         // Parse price to ensure it's a number
-        const price =
-          typeof variation.Price === "string"
-            ? parseFloat(variation.Price)
-            : variation.Price;
+        const basePrice = parseNumericValue(variation.Price) ?? 0;
+        const listedDiscountPrice = parseNumericValue(
+          (variation as any)?.DiscountPrice
+        );
+        const generalDiscountPercent = extractGeneralDiscountPercent(variation);
+
+        let finalUnitPrice = basePrice;
+        if (
+          listedDiscountPrice &&
+          listedDiscountPrice > 0 &&
+          (finalUnitPrice === 0 || listedDiscountPrice < finalUnitPrice)
+        ) {
+          finalUnitPrice = listedDiscountPrice;
+        }
+
+        if (
+          generalDiscountPercent &&
+          generalDiscountPercent > 0 &&
+          generalDiscountPercent < 100 &&
+          basePrice > 0
+        ) {
+          const computed = Math.round(
+            basePrice * (1 - generalDiscountPercent / 100)
+          );
+          if (computed > 0 && (finalUnitPrice === 0 || computed < finalUnitPrice)) {
+            finalUnitPrice = computed;
+          }
+        }
+
+        const lineSum = parseNumericValue(item.Sum);
+        if (
+          lineSum &&
+          item.Count &&
+          item.Count > 0
+        ) {
+          const derivedUnitPrice = lineSum / item.Count;
+          if (
+            Number.isFinite(derivedUnitPrice) &&
+            derivedUnitPrice > 0 &&
+            (finalUnitPrice === 0 || derivedUnitPrice < finalUnitPrice)
+          ) {
+            finalUnitPrice = derivedUnitPrice;
+          }
+        }
+
+        if (finalUnitPrice === 0 && listedDiscountPrice) {
+          finalUnitPrice = listedDiscountPrice;
+        }
+        if (finalUnitPrice === 0 && basePrice > 0) {
+          finalUnitPrice = basePrice;
+        }
+
+        const hasDiscount =
+          basePrice > 0 && finalUnitPrice > 0 && finalUnitPrice < basePrice;
+        const originalPrice = hasDiscount ? basePrice : undefined;
+        const discountPercentage = hasDiscount
+          ? Math.round(((basePrice - finalUnitPrice) / basePrice) * 100)
+          : undefined;
 
         return {
           id: String(item.id),
@@ -135,7 +240,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           variationId: String(variation.id),
           name: product.Title,
           category: category,
-          price: price,
+          price: finalUnitPrice,
+          originalPrice,
+          discountPercentage,
           quantity: item.Count,
           image: imageUrl,
           color: variation.product_variation_color?.Title,
@@ -231,7 +338,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (existingItemIndex !== -1) {
           // Update quantity if item exists
           const updatedItems = [...prev];
-          updatedItems[existingItemIndex].quantity += newItem.quantity;
+          const existingItem = updatedItems[existingItemIndex];
+          updatedItems[existingItemIndex] = {
+            ...existingItem,
+            quantity: existingItem.quantity + newItem.quantity,
+            price: newItem.price,
+            originalPrice:
+              newItem.originalPrice ?? existingItem.originalPrice,
+            discountPercentage:
+              newItem.discountPercentage ?? existingItem.discountPercentage,
+          };
           return updatedItems;
         } else {
           // Add new item
@@ -356,6 +472,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     0,
   );
 
+  const subtotalBeforeDiscount = cartItems.reduce((sum, item) => {
+    const unit = item.originalPrice && item.originalPrice > 0 ? item.originalPrice : item.price;
+    return sum + unit * item.quantity;
+  }, 0);
+
+  const cartDiscountTotal = subtotalBeforeDiscount > totalPrice
+    ? subtotalBeforeDiscount - totalPrice
+    : 0;
+
   const value = {
     cartItems,
     isDrawerOpen,
@@ -367,6 +492,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     clearCart,
     totalItems,
     totalPrice,
+    subtotalBeforeDiscount,
+    cartDiscountTotal,
     isLoading,
     checkCartStock,
     migrateLocalCartToApi,

@@ -44,6 +44,8 @@ interface PDPHeroInfoActionProps {
   name: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   image: string;
   color?: string;
   size?: string;
@@ -76,6 +78,8 @@ export default function PDPHeroInfoAction({
   name = "",
   category = "",
   price = 0,
+  originalPrice,
+  discountPercentage,
   image = "",
   color,
   size,
@@ -99,6 +103,8 @@ export default function PDPHeroInfoAction({
       name,
       category,
       price,
+      originalPrice,
+      discountPercentage,
       image,
       color,
       size,
