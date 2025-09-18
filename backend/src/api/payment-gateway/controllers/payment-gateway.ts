@@ -3,6 +3,7 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { computeCouponDiscount } from "../../cart/services/lib/discounts";
 import { Strapi } from "@strapi/strapi";
 
 export default factories.createCoreController(
@@ -78,6 +79,9 @@ export default factories.createCoreController(
         const shippingCostParam = ctx.request.query?.shippingCost
           ? Number(ctx.request.query.shippingCost)
           : undefined;
+        const discountCodeParam =
+          (ctx.request.query?.discountCode as string | undefined) ||
+          (ctx.request.body?.discountCode as string | undefined);
 
         // Load user cart
         const cartService = strapi.service("api::cart.cart");
@@ -97,31 +101,49 @@ export default factories.createCoreController(
           subtotal += Number(price) * Number(count);
         }
 
-        // Discounts (general discounts like finalize logic)
+        // Discounts: apply coupon first if provided, otherwise fallback to general discount
         let discountAmount = 0;
-        const generalDiscounts = await strapi.entityService.findMany(
-          "api::general-discount.general-discount",
-          {
-            filters: {
-              IsActive: true,
-              StartDate: { $lte: new Date() },
-              EndDate: { $gte: new Date() },
-            },
-            sort: { createdAt: "desc" },
+        if (discountCodeParam) {
+          try {
+            discountAmount = await computeCouponDiscount(
+              strapi as any,
+              userId,
+              String(discountCodeParam),
+              subtotal,
+              cart.cart_items
+            );
+          } catch (e) {
+            strapi.log.error(
+              "Failed to compute coupon discount for eligibility",
+              e
+            );
           }
-        );
-        for (const discount of generalDiscounts || []) {
-          const d = discount as any;
-          if (d.MinimumAmount <= subtotal) {
-            if (d.IsPercentage) {
-              discountAmount = (subtotal * d.Amount) / 100;
-              if (d.MaxAmount && discountAmount > d.MaxAmount) {
-                discountAmount = d.MaxAmount;
-              }
-            } else {
-              discountAmount = d.Amount;
+        }
+        if (!discountAmount) {
+          const generalDiscounts = await strapi.entityService.findMany(
+            "api::general-discount.general-discount",
+            {
+              filters: {
+                IsActive: true,
+                StartDate: { $lte: new Date() },
+                EndDate: { $gte: new Date() },
+              },
+              sort: { createdAt: "desc" },
             }
-            break;
+          );
+          for (const discount of generalDiscounts || []) {
+            const d = discount as any;
+            if (d.MinimumAmount <= subtotal) {
+              if (d.IsPercentage) {
+                discountAmount = (subtotal * d.Amount) / 100;
+                if (d.MaxAmount && discountAmount > d.MaxAmount) {
+                  discountAmount = d.MaxAmount;
+                }
+              } else {
+                discountAmount = d.Amount;
+              }
+              break;
+            }
           }
         }
 
@@ -152,6 +174,8 @@ export default factories.createCoreController(
         strapi.log.info("SnappPay eligible request", {
           userId,
           amountIRR,
+          hasDiscountCode: !!discountCodeParam,
+          discountToman: Math.round(discountAmount),
         });
         const eligibleResp = await snappay.eligible(amountIRR);
         strapi.log.info("SnappPay eligible result", {
