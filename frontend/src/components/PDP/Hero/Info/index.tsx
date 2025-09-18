@@ -554,6 +554,8 @@ export default function PDPHeroInfo(props: Props) {
         name={product.title}
         category={product.category}
         price={currentDiscountPrice > 0 ? currentDiscountPrice : currentPrice}
+        originalPrice={currentDiscountPrice > 0 ? currentPrice : undefined}
+        discountPercentage={currentDiscount > 0 ? currentDiscount : undefined}
         image={productData?.attributes?.CoverImage?.data?.attributes?.url || ""}
         color={selectedColorObj?.title}
         size={selectedSizeObj?.title}
