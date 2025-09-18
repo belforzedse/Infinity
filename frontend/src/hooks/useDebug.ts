@@ -32,7 +32,7 @@ export const useDebug = (componentName: string, options: DebugOptions = {}) => {
         console.warn(`🐌 ${componentName} slow render: ${renderTime.toFixed(2)}ms`);
       }
     }
-  });
+  }, [options.logRenders, options.performanceProfiling, componentName, renderCount]);
 
   const logProps = (props: any) => {
     if (process.env.NODE_ENV !== 'development' || !options.logProps) return;

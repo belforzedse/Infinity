@@ -34,21 +34,25 @@ function ShoppingCartBillDeliveryForm({
   selectedShipping,
   discountPreview,
 }: Props) {
-  const { totalPrice } = useCart();
-  const [_, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
+  const {
+    totalPrice,
+    subtotalBeforeDiscount,
+    cartDiscountTotal,
+  } = useCart();
+  const [, _setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate totals (prefer backend preview when available)
   const shippingCost = selectedShipping?.attributes.Price || 0;
-  const subtotal = discountPreview?.summary?.subtotal ?? totalPrice;
-  const discountAmount = discountPreview?.discount ?? 0;
+  const subtotal = discountPreview?.summary?.subtotal ?? subtotalBeforeDiscount;
+  const discountAmount = discountPreview?.discount ?? cartDiscountTotal;
   const taxAmount = discountPreview?.summary?.tax ?? 0;
   const effectiveShipping = discountPreview?.summary?.shipping ?? shippingCost;
   const finalTotal =
     discountPreview?.summary?.total ??
-    subtotal - discountAmount + taxAmount + effectiveShipping;
+    Math.max(0, subtotal - discountAmount + taxAmount + effectiveShipping);
 
   useEffect(() => {
     const fetchShippingMethods = async () => {
@@ -61,10 +65,7 @@ function ShoppingCartBillDeliveryForm({
         });
         setShippingMethods(methods);
 
-        // Set the first shipping method as default if there are any methods and none is selected
-        if (methods.length > 0 && !selectedShipping) {
-          setValue("shippingMethod", methods[0]);
-        }
+        // No default selection - let user choose explicitly
       } catch (err) {
         console.error("Failed to fetch shipping methods:", err);
         setError("خطا در دریافت روش‌های ارسال");
