@@ -20,7 +20,7 @@ Modern, RTL‑first e‑commerce frontend built with Next.js (App Router), TypeS
 - Notifications: react-hot-toast
 - Backend: Strapi v4 (via REST APIs)
 
-Design: Figma — https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infinity-Store-(%D8%B5%D9%81%D8%AD%D9%87-%D8%B3%D8%A7%D8%B2)?node-id=6095-753
+the design: Figma — https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infinity-Store-(%D8%B5%D9%81%D8%AD%D9%87-%D8%B3%D8%A7%D8%B2)?node-id=6095-753
 
 ## Requirements
 
