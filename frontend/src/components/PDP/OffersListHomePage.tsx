@@ -1,7 +1,7 @@
 "use client";
 import ProductCard, { type ProductCardProps } from "@/components/Product/Card";
 import PDPHeroNavigationButtons from "./NavigationButtons";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import ArrowLeftIcon from "./Icons/ArrowLeftIcon";
 import Link from "next/link";
 
@@ -17,13 +17,32 @@ export default function OffersListHomePage(props: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1440);
 
   // Controls whether to show all products or a subset.
   // Defaults to showing a subset on the homepage sections.
   const isShowAllProducts = false;
 
-  // Calculate pagination
-  const productsPerPage = 5;
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setCurrentPage(0); // Reset to first page on resize
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate pagination - responsive products per page
+  const getProductsPerPage = () => {
+    if (windowWidth >= 1440) return 5; // 1440px+ (5 products)
+    if (windowWidth >= 1024) return 4; // 1024-1440px (4 products)
+    if (windowWidth >= 768) return 3;  // tablets (3 products)
+    return 2; // phones (2 products)
+  };
+
+  const productsPerPage = getProductsPerPage();
   const totalPages = Math.ceil(products.length / productsPerPage);
   const startIndex = currentPage * productsPerPage;
   const endIndex = startIndex + productsPerPage;
@@ -218,11 +237,11 @@ export default function OffersListHomePage(props: Props) {
         )}
       </div>
 
-      {/* Desktop grid view - exactly 5 cards in 1 row */}
+      {/* Desktop grid view - responsive columns */}
       <div className="hidden md:block">
         <div
           ref={scrollRef}
-          className={`grid grid-cols-5 gap-4 transition-all duration-300 ease-out ${
+          className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 transition-all duration-300 ease-out ${
             isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
           }`}
         >
