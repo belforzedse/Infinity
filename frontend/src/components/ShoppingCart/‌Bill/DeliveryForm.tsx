@@ -34,7 +34,11 @@ function ShoppingCartBillDeliveryForm({
   selectedShipping,
   discountPreview,
 }: Props) {
-  const { totalPrice } = useCart();
+  const {
+    totalPrice,
+    subtotalBeforeDiscount,
+    cartDiscountTotal,
+  } = useCart();
   const [_, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,13 +46,13 @@ function ShoppingCartBillDeliveryForm({
 
   // Calculate totals (prefer backend preview when available)
   const shippingCost = selectedShipping?.attributes.Price || 0;
-  const subtotal = discountPreview?.summary?.subtotal ?? totalPrice;
-  const discountAmount = discountPreview?.discount ?? 0;
+  const subtotal = discountPreview?.summary?.subtotal ?? subtotalBeforeDiscount;
+  const discountAmount = discountPreview?.discount ?? cartDiscountTotal;
   const taxAmount = discountPreview?.summary?.tax ?? 0;
   const effectiveShipping = discountPreview?.summary?.shipping ?? shippingCost;
   const finalTotal =
     discountPreview?.summary?.total ??
-    subtotal - discountAmount + taxAmount + effectiveShipping;
+    Math.max(0, subtotal - discountAmount + taxAmount + effectiveShipping);
 
   useEffect(() => {
     const fetchShippingMethods = async () => {

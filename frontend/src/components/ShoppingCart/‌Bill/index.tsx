@@ -158,7 +158,7 @@ function ShoppingCartBillForm({}: Props) {
         shipping: Number(data.shippingMethod.id),
         shippingCost: Number(data.shippingMethod.attributes.Price),
         note: data.notes || undefined,
-        callbackURL: "https://new.infinitycolor.co/orders/payment-callback",
+        callbackURL: "/orders/payment-callback",
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),

@@ -8,6 +8,8 @@ interface UseAddToCartProps {
   name: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   image: string;
   color?: string;
   size?: string;
@@ -20,6 +22,8 @@ export default function useAddToCart({
   name,
   category,
   price,
+  originalPrice,
+  discountPercentage,
   image,
   color,
   size,
@@ -111,6 +115,8 @@ export default function useAddToCart({
         name,
         category,
         price,
+        originalPrice,
+        discountPercentage,
         quantity: actualQuantity,
         image,
         color,
