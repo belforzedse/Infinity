@@ -136,7 +136,7 @@ export const requestSnappPayment = async (
 
   const snappay = strapi.service("api::payment-gateway.snappay");
   try {
-    strapi.log.info("SnappPay eligible check before token", {
+    strapi.log.info("SnappPaay eligible check before token", {
       orderId: order.id,
       amountIRR: orderAmountIrr,
     });
