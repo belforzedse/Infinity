@@ -6,6 +6,7 @@ import { NuqsAdapter } from "nuqs/adapters/next";
 import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";
 import { peyda, peydaFanum } from "@/styles/fonts";
+import { DebugPanel } from "@/components/Debug";
 export const metadata: Metadata = {
   title: "اینفینیتی ∞ Infinity",
   description: "فروشگاه پوشاک اینفینیتی",
@@ -44,6 +45,7 @@ export default function RootLayout({
             style: { zIndex: 2147483647 },
           }}
         />
+        <DebugPanel />
       </body>
     </html>
   );

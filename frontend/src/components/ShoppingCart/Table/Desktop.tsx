@@ -56,8 +56,21 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({
               <td className="text-xs w-36 p-4 text-center text-neutral-800">
                 {item.category}
               </td>
-              <td className="text-xs w-40 p-4 text-neutral-800">
-                {item.price.toLocaleString()} تومان
+              <td className="w-40 p-4 text-neutral-800">
+                {item.originalPrice && item.originalPrice > item.price ? (
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[11px] text-neutral-400 line-through">
+                      {item.originalPrice.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+                    </span>
+                    <span className="text-sm font-semibold text-pink-600">
+                      {item.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-neutral-800">
+                    {item.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+                  </span>
+                )}
               </td>
               <td className="p-4">
                 <ShoppingCartQuantityControl
@@ -66,7 +79,20 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({
                 />
               </td>
               <td className="text-base p-4 text-left text-neutral-800">
-                {(item.price * item.quantity).toLocaleString()} تومان
+                {item.originalPrice && item.originalPrice > item.price ? (
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="text-sm text-neutral-400 line-through">
+                      {(item.originalPrice * item.quantity).toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+                    </span>
+                    <span className="text-base font-semibold text-pink-600">
+                      {(item.price * item.quantity).toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+                    </span>
+                  </div>
+                ) : (
+                  <span>
+                    {(item.price * item.quantity).toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+                  </span>
+                )}
               </td>
             </tr>
           ))}
