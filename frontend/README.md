@@ -694,3 +694,10 @@ yarn build
 
 - fix(pdp): add `type="button"` to variation selector buttons (color/size/model)
 - chore(a11y): add TODO to improve selected color state semantics for keyboard access
+
+### Checkout Stability Improvements
+- Stabilized  deps in  using primitives.
+- Added  merging and passed to  for consistent totals.
+- Preserved SnappPay eligibility on errors; removed silent catches.
+- Removed localStorage fallback in finalize payload; rely on state.
+- Typed cart query responses and added error-safe fallbacks.
