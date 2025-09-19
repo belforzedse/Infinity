@@ -14,6 +14,8 @@ type Order = {
   items: OrderItem[];
   shipping: number;
   subtotal: number;
+  discount?: number;
+  tax?: number;
   contractStatus:
     | "Not Ready"
     | "Confirmed"
@@ -36,8 +38,10 @@ type OrderItem = {
 
 export default function SuperAdminOrderSummaryFooter({
   order,
+  onReload,
 }: {
   order: Order | undefined;
+  onReload?: () => void;
 }) {
   if (!order) return null;
 
@@ -114,6 +118,24 @@ export default function SuperAdminOrderSummaryFooter({
             {priceFormatter(order.subtotal, " تومان")}
           </p>
         </div>
+        {typeof order.discount === "number" ? (
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-slate-500">تخفیف</p>
+            <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>
+            <p className="text-base text-foreground-primary">
+              {priceFormatter(order.discount, " تومان")}
+            </p>
+          </div>
+        ) : null}
+        {typeof order.tax === "number" ? (
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-slate-500">مالیات</p>
+            <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>
+            <p className="text-base text-foreground-primary">
+              {priceFormatter(order.tax, " تومان")}
+            </p>
+          </div>
+        ) : null}
         <div className="flex items-center gap-3">
           <p className="text-sm text-slate-500">هزینه حمل و نقل (تیپاکس)</p>
           <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>
@@ -177,7 +199,10 @@ export default function SuperAdminOrderSummaryFooter({
                     ? "بارکد با موفقیت ایجاد شد"
                     : "درخواست ارسال شد"
                 );
-                // no hard reload to keep page SPA; admin can refresh manually
+                // Refresh parent data to reflect ShippingWeight/Barcode changes
+                try {
+                  onReload && (await onReload());
+                } catch {}
               } catch (e) {
                 alert("خطا در ایجاد بارکد Anipo");
               }
