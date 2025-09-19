@@ -1,0 +1,29 @@
+Summary of Findings
+- Medium: Shipping preview uses raw variation Price for sum; may misreport declared value when discounts apply.
+- Low: shippingPreview returns via assignment to ctx.body; stylistic oddity, not harmful.
+- Low: Anipo keyword missing leads to 400 in preview; finalize flow silently falls back to base shipping. Consider clearer messaging.
+
+Detailed Issues
+2) File → src/api/cart/controllers/handlers/shippingPreview.ts
+   Lines → 60-68
+   Problem → Declared value `sum` for Anipo is computed from raw variation `Price` and item `Count`. If discounts are applied, the declared value may differ, leading to over/under-estimation of shipping fees.
+   Suggested Fix → Consider using the same subtotal basis used in checkout (post-discount subtotal if policy requires), or at minimum prefer `DiscountPrice` when available: price = variation.DiscountPrice ?? variation.Price.
+   Confidence → Medium
+
+3) File → src/api/cart/controllers/handlers/shippingPreview.ts
+   Lines → 22-26
+   Problem → Returns using `return (ctx.body = { ... })`. This works but is unconventional compared to other handlers that set `ctx.body` or return `this.transformResponse`. Consistency aids maintainability.
+   Suggested Fix → Replace with `ctx.body = { success: true, shipping: 0 }; return;` or just `ctx.body = ...;` without `return` if the framework handles it.
+   Confidence → High
+
+4) File → src/api/cart/services/cart.ts
+   Lines → 116-162 (Anipo override path)
+   Problem → When `ANIPO_KEYWORD` is missing, `barcodePrice` returns `{ ok: false, error: 'missing_keyword' }`. The finalize flow silently keeps the base shipping cost without indicating why dynamic pricing was skipped.
+   Suggested Fix → Optionally log a warning or attach a note in the order log when Anipo is unavailable (missing keyword or network error) to aid operational visibility.
+   Confidence → Medium
+
+Context Notes (not issues)
+- Product schema added `Weight` (default 100) and is populated in the cart fetch; weight calculation aligns with Anipo’s grams expectation.
+- Order schema adds shipping barcode/tax/weight fields for future use; current changes only write `ShippingCost`.
+- Route `/carts/shipping-preview` is protected via `global::authentication` while `auth: false` avoids Strapi’s default auth; consistent with existing routes.
+
