@@ -162,6 +162,18 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   }> {
     const { keyword } = getConfig();
     if (!keyword) return { ok: false, error: "missing_keyword" };
+    // Normalize phone for Anipo: expects max 12 chars, local format 0XXXXXXXXXX
+    const normalizePhoneForAnipo = (raw?: string) => {
+      const d = String(raw || "").replace(/\D/g, "");
+      // Remove leading country code 98 if present
+      let n = d;
+      if (n.startsWith("98")) n = n.substring(2);
+      // Ensure 0-prefixed local number
+      if (n && !n.startsWith("0")) n = `0${n}`;
+      // Trim to 12 chars just in case (Anipo limit)
+      return n.substring(0, 12);
+    };
+
     const body: GetBarcodeRequest = {
       keyword,
       ordersData: {
@@ -174,7 +186,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         name: input.name,
         postcode: input.postcode || "",
         national_code: input.nationalCode || "",
-        call_number: input.callNumber || "",
+        call_number: normalizePhoneForAnipo(input.callNumber),
         address: input.address,
         weight: Math.max(1, Math.floor(input.weight || 1)),
         boxSizeId: input.boxSizeId,
