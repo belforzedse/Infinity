@@ -97,6 +97,26 @@ The project includes JSON data files in the `database` directory that can be use
 
 - `iran-cities.json` - Complete list of all Iranian provinces and their cities in Persian.
 
+## 🚚 Shipping Preview & Anipo
+
+- Endpoint: `POST /api/carts/shipping-preview`
+  - Auth: via `global::authentication` middleware
+  - Body: `{ addressId: number, shippingId: number }`
+  - Returns: `{ success: boolean, shipping: number, weight?: number }`
+  - Declared value uses `DiscountPrice` when available to align with checkout.
+
+Environment variables for Anipo:
+
+```
+ANIPO_KEYWORD=
+# Optional (defaults to https://panel.anipo.ir)
+ANIPO_BASE_URL=
+```
+
+Behavior notes:
+- Shipping method id=4 (buy-in-person) returns zero shipping.
+- If Anipo preview is unavailable during finalize, an order-log is recorded for observability.
+
 ## 🛠️ Migrations
 
 This project includes database migrations to set up necessary data. To run migrations:
