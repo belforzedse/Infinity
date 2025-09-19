@@ -17,27 +17,23 @@ export const shippingPreviewHandler = (strapi: Strapi) => async (ctx: any) => {
 
   try {
     if (!addressId) {
-      strapi.log.warn("[anipo] shipping-preview missing addressId", {
-        userId: user?.id,
-        shippingId,
-      });
+      strapi.log.warn(
+        `[anipo] shipping-preview missing addressId userId=${user?.id} shippingId=${shippingId}`
+      );
       return ctx.badRequest("addressId is required");
     }
     if (!shippingId) {
-      strapi.log.warn("[anipo] shipping-preview missing shippingId", {
-        userId: user?.id,
-        addressId,
-      });
+      strapi.log.warn(
+        `[anipo] shipping-preview missing shippingId userId=${user?.id} addressId=${addressId}`
+      );
       return ctx.badRequest("shippingId is required");
     }
 
     // If excluded method (id=4), return zero
     if (Number(shippingId) === 4) {
-      strapi.log.info("[anipo] shipping-preview excluded shippingId=4 → 0", {
-        userId: user?.id,
-        addressId,
-        shippingId,
-      });
+      strapi.log.info(
+        `[anipo] shipping-preview excluded shippingId=4 userId=${user?.id} addressId=${addressId}`
+      );
       ctx.body = { success: true, shipping: 0 };
       return;
     }
@@ -46,9 +42,9 @@ export const shippingPreviewHandler = (strapi: Strapi) => async (ctx: any) => {
     const cartService = strapi.service("api::cart.cart");
     const cart = await cartService.getUserCart(user.id);
     if (!cart?.cart_items?.length) {
-      strapi.log.warn("[anipo] shipping-preview empty cart", {
-        userId: user?.id,
-      });
+      strapi.log.warn(`
+        [anipo] shipping-preview empty cart userId=${user?.id}
+      `);
       return ctx.badRequest("Cart is empty");
     }
 
@@ -64,12 +60,7 @@ export const shippingPreviewHandler = (strapi: Strapi) => async (ctx: any) => {
     );
     if (!address?.shipping_city?.Code) {
       strapi.log.warn(
-        "[anipo] shipping-preview city code missing for address",
-        {
-          userId: user?.id,
-          addressId,
-          shippingId,
-        }
+        `[anipo] shipping-preview city code missing userId=${user?.id} addressId=${addressId} shippingId=${shippingId}`
       );
       return ctx.badRequest("Address city code is missing");
     }
@@ -96,41 +87,32 @@ export const shippingPreviewHandler = (strapi: Strapi) => async (ctx: any) => {
       isnonstandard: 0 as 0,
       smsservice: 0 as 0,
     };
-    strapi.log.info("[anipo] shipping-preview request", {
-      userId: user?.id,
-      addressId,
-      shippingId,
-      payload: anipoPayload,
-    });
+    strapi.log.info(
+      `[anipo] shipping-preview request userId=${
+        user?.id
+      } addressId=${addressId} shippingId=${shippingId} payload=${JSON.stringify(
+        anipoPayload
+      )}`
+    );
     const result = await anipo.barcodePrice(anipoPayload);
 
     if (!result.ok) {
-      strapi.log.error("[anipo] shipping-preview response error", {
-        userId: user?.id,
-        addressId,
-        shippingId,
-        error: result.error,
-      });
+      strapi.log.error(
+        `[anipo] shipping-preview response error userId=${user?.id} addressId=${addressId} shippingId=${shippingId} error=${result.error}`
+      );
       return ctx.badRequest("Failed to fetch shipping price", {
         data: { success: false, error: result.error },
       });
     }
 
-    strapi.log.info("[anipo] shipping-preview response ok", {
-      userId: user?.id,
-      addressId,
-      shippingId,
-      price: result.price,
-    });
+    strapi.log.info(
+      `[anipo] shipping-preview response ok userId=${user?.id} addressId=${addressId} shippingId=${shippingId} price=${result.price}`
+    );
     ctx.body = { success: true, shipping: result.price || 0, weight };
   } catch (error: any) {
-    strapi.log.error("[anipo] shipping-preview exception", {
-      userId: user?.id,
-      addressId,
-      shippingId,
-      error: error?.message,
-      stack: error?.stack,
-    });
+    strapi.log.error(
+      `[anipo] shipping-preview exception userId=${user?.id} addressId=${addressId} shippingId=${shippingId} error=${error?.message} stack=${error?.stack}`
+    );
     return ctx.badRequest("Error computing shipping preview", {
       data: { success: false, error: error?.message },
     });

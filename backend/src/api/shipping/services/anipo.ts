@@ -9,6 +9,7 @@ type BarcodePriceRequest = {
     sum: number; // IRR
     isnonstandard: 0 | 1;
     smsservice: 0 | 1;
+    PayTypeID?: number; // optional byte flag required by upstream (workaround)
   };
 };
 
@@ -68,6 +69,14 @@ function maskKeyword<T extends { keyword?: string }>(obj: T): T | any {
   return clone;
 }
 
+function toJson(obj: any): string {
+  try {
+    return JSON.stringify(obj);
+  } catch {
+    return String(obj);
+  }
+}
+
 export default ({ strapi }: { strapi: Strapi }) => ({
   async barcodePrice(params: {
     cityCode: number;
@@ -86,22 +95,24 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         sum: Math.max(0, Math.floor(params.sum || 0)),
         isnonstandard: params.isnonstandard ?? 0,
         smsservice: params.smsservice ?? 0,
+        PayTypeID: 0,
       },
     };
     try {
-      strapi.log.info("[anipo] http request", {
-        endpoint: "/backend/api/barcodePrice/",
-        body: maskKeyword(body),
-      });
+      strapi.log.info(
+        `[anipo] http request endpoint=/backend/api/barcodePrice/ body=${toJson(
+          maskKeyword(body)
+        )}`
+      );
       const res = await http().post<BarcodePriceResponse>(
         "/backend/api/barcodePrice/",
         body
       );
-      strapi.log.info("[anipo] http response", {
-        endpoint: "/backend/api/barcodePrice/",
-        status: res.status,
-        body: res.data,
-      });
+      strapi.log.info(
+        `[anipo] http response endpoint=/backend/api/barcodePrice/ status=${
+          res.status
+        } body=${toJson(res.data)}`
+      );
       if (res.data?.status && typeof res.data.data === "number") {
         return { ok: true, price: res.data.data };
       }
@@ -114,14 +125,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       try {
         reqBody = typeof reqBody === "string" ? JSON.parse(reqBody) : reqBody;
       } catch {}
-      strapi.log.error("[anipo] http error", {
-        endpoint: "/backend/api/barcodePrice/",
-        message: e?.message,
-        status,
-        url,
-        request: maskKeyword(reqBody),
-        response: responseData,
-      });
+      strapi.log.error(
+        `[anipo] http error endpoint=/backend/api/barcodePrice/ message=${
+          e?.message
+        } status=${status} url=${url} request=${toJson(
+          maskKeyword(reqBody)
+        )} response=${toJson(responseData)}`
+      );
       return { ok: false, error: "network_error" };
     }
   },
@@ -173,19 +183,20 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     };
     try {
-      strapi.log.info("[anipo] http request", {
-        endpoint: "/backend/api/getBarcode/",
-        body: maskKeyword(body),
-      });
+      strapi.log.info(
+        `[anipo] http request endpoint=/backend/api/getBarcode/ body=${toJson(
+          maskKeyword(body)
+        )}`
+      );
       const res = await http().post<GetBarcodeResponse>(
         "/backend/api/getBarcode/",
         body
       );
-      strapi.log.info("[anipo] http response", {
-        endpoint: "/backend/api/getBarcode/",
-        status: res.status,
-        body: res.data,
-      });
+      strapi.log.info(
+        `[anipo] http response endpoint=/backend/api/getBarcode/ status=${
+          res.status
+        } body=${toJson(res.data)}`
+      );
       if (res.data?.status && res.data.data) {
         return { ok: true, data: res.data.data };
       }
@@ -198,14 +209,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       try {
         reqBody = typeof reqBody === "string" ? JSON.parse(reqBody) : reqBody;
       } catch {}
-      strapi.log.error("[anipo] http error", {
-        endpoint: "/backend/api/getBarcode/",
-        message: e?.message,
-        status,
-        url,
-        request: maskKeyword(reqBody),
-        response: responseData,
-      });
+      strapi.log.error(
+        `[anipo] http error endpoint=/backend/api/getBarcode/ message=${
+          e?.message
+        } status=${status} url=${url} request=${toJson(
+          maskKeyword(reqBody)
+        )} response=${toJson(responseData)}`
+      );
       return { ok: false, error: "network_error" };
     }
   },
@@ -228,7 +238,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
       return { ok: false, error: data?.message || "anipo_error" };
     } catch (e: any) {
-      strapi.log.error("Anipo remaining error", e?.message || e);
+      strapi.log.error(
+        `[anipo] remaining error message=${e?.message} response=${toJson(
+          e?.response?.data
+        )}`
+      );
       return { ok: false, error: "network_error" };
     }
   },
@@ -254,7 +268,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
       return { ok: false, error: data?.message || "anipo_error" };
     } catch (e: any) {
-      strapi.log.error("Anipo paymentGatewayLink error", e?.message || e);
+      strapi.log.error(
+        `[anipo] paymentGatewayLink error message=${
+          e?.message
+        } response=${toJson(e?.response?.data)}`
+      );
       return { ok: false, error: "network_error" };
     }
   },
