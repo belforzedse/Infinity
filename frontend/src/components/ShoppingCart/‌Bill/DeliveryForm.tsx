@@ -27,6 +27,7 @@ type Props = {
       taxPercent: number;
     };
   };
+  shippingPreviewShipping?: number;
 };
 
 function ShoppingCartBillDeliveryForm({
@@ -34,6 +35,7 @@ function ShoppingCartBillDeliveryForm({
   setValue,
   selectedShipping,
   discountPreview,
+  shippingPreviewShipping,
 }: Props) {
   const { totalPrice } = useCart();
   const [_, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
@@ -46,8 +48,13 @@ function ShoppingCartBillDeliveryForm({
   const subtotal = discountPreview?.summary?.subtotal ?? totalPrice;
   const discountAmount = discountPreview?.discount ?? 0;
   const taxAmount = discountPreview?.summary?.tax ?? 0;
-  const effectiveShipping = discountPreview?.summary?.shipping ?? shippingCost;
-  const finalTotal = discountPreview?.summary?.total ?? subtotal - discountAmount + taxAmount + effectiveShipping;
+  const effectiveShipping =
+    discountPreview?.summary?.shipping ??
+    shippingPreviewShipping ??
+    shippingCost;
+  const finalTotal =
+    discountPreview?.summary?.total ??
+    subtotal - discountAmount + taxAmount + effectiveShipping;
 
   useEffect(() => {
     const fetchShippingMethods = async () => {
@@ -155,14 +162,18 @@ function ShoppingCartBillDeliveryForm({
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-neutral-600 lg:text-base text-sm">هزینه ارسال</span>
+          <span className="text-neutral-600 lg:text-base text-sm">
+            هزینه ارسال
+          </span>
           <span className="text-neutral-800 lg:text-base text-sm">
             {effectiveShipping.toLocaleString()} تومان
           </span>
         </div>
 
         <div className="flex justify-between items-center pt-2">
-          <span className="text-neutral-800 lg:text-xl text-lg">قابل پرداخت</span>
+          <span className="text-neutral-800 lg:text-xl text-lg">
+            قابل پرداخت
+          </span>
           <span className="text-pink-600 text-2xl">
             {finalTotal.toLocaleString()} تومان
           </span>

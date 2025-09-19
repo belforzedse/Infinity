@@ -47,23 +47,43 @@ function ShoppingCartBillForm({}: Props) {
   } = useForm<FormData>();
 
   const watchShippingMethod = watch("shippingMethod");
+  const watchAddress = watch("address");
+  const shippingId = watchShippingMethod
+    ? Number(watchShippingMethod.id)
+    : undefined;
+  const shippingCost = watchShippingMethod
+    ? Number(watchShippingMethod.attributes?.Price || 0)
+    : undefined;
+  const addressId = watchAddress
+    ? Number((watchAddress as any)?.id)
+    : undefined;
 
   // Gateway selection state
   const [gateway, setGateway] = useState<"mellat" | "snappay">("mellat");
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
-  const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
-  const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
-  const [discountPreview, setDiscountPreview] = useState<{
-    discount: number;
-    summary: {
-      subtotal: number;
-      eligibleSubtotal: number;
-      tax: number;
-      shipping: number;
-      total: number;
-      taxPercent: number;
-    };
-  } | undefined>(undefined);
+  const [snappMessage, setSnappMessage] = useState<string | undefined>(
+    undefined
+  );
+  const [discountCode, setDiscountCode] = useState<string | undefined>(
+    undefined
+  );
+  const [discountPreview, setDiscountPreview] = useState<
+    | {
+        discount: number;
+        summary: {
+          subtotal: number;
+          eligibleSubtotal: number;
+          tax: number;
+          shipping: number;
+          total: number;
+          taxPercent: number;
+        };
+      }
+    | undefined
+  >(undefined);
+  const [shippingPreview, setShippingPreview] = useState<
+    { shipping: number; weight?: number } | undefined
+  >(undefined);
 
   // Persist/restore discount code
   useEffect(() => {
@@ -80,7 +100,7 @@ function ShoppingCartBillForm({}: Props) {
     } catch {}
   }, [discountCode]);
 
-  // Refresh preview when code or shipping changes
+  // Refresh discount preview when code or shipping changes (stable deps)
   useEffect(() => {
     const run = async () => {
       if (!discountCode) {
@@ -90,41 +110,84 @@ function ShoppingCartBillForm({}: Props) {
       try {
         const res = await CartService.applyDiscount({
           code: discountCode,
-          shippingId: watchShippingMethod ? Number(watchShippingMethod.id) : undefined,
-          shippingCost: watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined,
+          shippingId,
+          shippingCost,
         });
         if (res?.success) {
           setDiscountPreview({ discount: res.discount, summary: res.summary });
         }
-      } catch {}
+      } catch (e) {
+        console.error("applyDiscount failed:", e);
+      }
     };
     run();
-  }, [discountCode, watchShippingMethod]);
+  }, [discountCode, shippingId, shippingCost]);
 
-  // Re-check SnappPay eligibility when shipping or discount changes
+  // Fetch shipping preview on address or shipping change
   useEffect(() => {
     const run = async () => {
       try {
-        if (!watchShippingMethod) {
+        if (!addressId || !shippingId) return;
+        const preview = await CartService.getShippingPreview({
+          addressId,
+          shippingId,
+        });
+        if (preview?.success) {
+          setShippingPreview({
+            shipping: preview.shipping,
+            weight: preview.weight,
+          });
+          // Merge with discount preview totals if exists
+          setDiscountPreview((prev) => {
+            if (!prev) return prev;
+            const { subtotal, eligibleSubtotal, taxPercent } = prev.summary;
+            const tax = prev.summary.tax;
+            const shipping = preview.shipping || 0;
+            const total = subtotal - prev.discount + tax + shipping;
+            return {
+              discount: prev.discount,
+              summary: {
+                subtotal,
+                eligibleSubtotal,
+                tax,
+                shipping,
+                total,
+                taxPercent,
+              },
+            };
+          });
+        }
+      } catch (e) {
+        console.error("getShippingPreview failed:", e);
+      }
+    };
+    run();
+  }, [addressId, shippingId]);
+
+  // Re-check SnappPay eligibility when shipping or discount changes (stable deps)
+  useEffect(() => {
+    const run = async () => {
+      try {
+        if (!shippingId) {
           setSnappEligible(true);
           setSnappMessage(undefined);
           return;
         }
         const res = await CartService.getSnappEligible({
-          shippingId: Number(watchShippingMethod.id),
-          shippingCost: Number(watchShippingMethod.attributes?.Price || 0),
-          discountCode: discountCode,
+          shippingId,
+          shippingCost,
+          discountCode,
         });
         setSnappEligible(!!res.eligible);
         const msg = res.title || res.description;
         setSnappMessage(msg);
       } catch (e) {
-        setSnappEligible(true);
-        setSnappMessage(undefined);
+        // Keep previous eligibility/message on error to avoid incorrect enablement
+        console.error("getSnappEligible failed:", e);
       }
     };
     run();
-  }, [watchShippingMethod, discountCode]);
+  }, [shippingId, shippingCost, discountCode]);
 
   const onSubmit = async (data: FormData) => {
     if (!data.address) {
@@ -167,7 +230,7 @@ function ShoppingCartBillForm({}: Props) {
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
-        discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
+        discountCode: discountCode || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
@@ -224,7 +287,9 @@ function ShoppingCartBillForm({}: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <span className="lg:text-3xl text-lg text-neutral-800">اطلاعات صورت حساب</span>
+      <span className="lg:text-3xl text-lg text-neutral-800">
+        اطلاعات صورت حساب
+      </span>
 
       {error && (
         <div className="bg-red-50 text-red-600 p-3 rounded-lg">{error}</div>
@@ -244,10 +309,17 @@ function ShoppingCartBillForm({}: Props) {
             setValue={setValue}
             selectedShipping={watchShippingMethod}
             discountPreview={discountPreview}
+            shippingPreviewShipping={shippingPreview?.shipping}
           />
           <ShoppingCartBillDiscountCoupon
-            shippingId={watchShippingMethod ? Number(watchShippingMethod.id) : undefined}
-            shippingCost={watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined}
+            shippingId={
+              watchShippingMethod ? Number(watchShippingMethod.id) : undefined
+            }
+            shippingCost={
+              watchShippingMethod
+                ? Number(watchShippingMethod.attributes?.Price || 0)
+                : undefined
+            }
             onApplied={(code, preview) => {
               setDiscountCode(code);
               setDiscountPreview(preview);
@@ -256,7 +328,9 @@ function ShoppingCartBillForm({}: Props) {
             onRemove={() => {
               setDiscountCode(undefined);
               setDiscountPreview(undefined);
-              try { localStorage.removeItem("discountCode"); } catch {}
+              try {
+                localStorage.removeItem("discountCode");
+              } catch {}
             }}
           />
           <ShoppingCartBillPaymentGateway
