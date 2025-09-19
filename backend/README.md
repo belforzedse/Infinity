@@ -114,6 +114,7 @@ ANIPO_BASE_URL=
 ```
 
 Behavior notes:
+
 - Shipping method id=4 (buy-in-person) returns zero shipping.
 - If Anipo preview is unavailable during finalize, an order-log is recorded for observability.
 
