@@ -15,6 +15,7 @@ interface Props {
   status: PersianOrderStatus;
   title: string;
   orderId?: number;
+  shippingBarcode?: string;
 }
 
 export default function OrderRow({
@@ -26,6 +27,7 @@ export default function OrderRow({
   status,
   title,
   orderId,
+  shippingBarcode,
 }: Props) {
   return (
     <tr className="hover:bg-gray-50">
@@ -75,6 +77,16 @@ export default function OrderRow({
       <td className="py-3 text-left w-fit">
         <div className="flex items-center gap-2">
           {orderId && <PaymentStatusButton orderId={orderId} />}
+          {shippingBarcode ? (
+            <a
+              href={`https://anipo.ir/checkconsignment/?code=${shippingBarcode}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              رهگیری مرسوله
+            </a>
+          ) : null}
           <ShowFactorButton />
         </div>
       </td>

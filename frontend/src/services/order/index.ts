@@ -74,6 +74,7 @@ export interface Order {
   Date: string;
   Type: string;
   ShippingCost: number;
+  ShippingBarcode?: string;
   Description?: string;
   Note?: string;
   createdAt: string;

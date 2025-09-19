@@ -107,6 +107,7 @@ export default function OrdersTabs() {
       category,
       time: formatTime(order.createdAt),
       orderId: order.id,
+      shippingBarcode: (order as any).ShippingBarcode,
     };
   };
 
