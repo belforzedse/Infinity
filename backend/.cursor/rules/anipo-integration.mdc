@@ -1,0 +1,76 @@
+---
+description: Anipo shipping integration (pricing preview, barcode issuance), endpoints, env, logging
+---
+
+# Anipo Shipping Integration (Backend)
+
+This document describes the backend integration with Anipo for shipping cost preview and barcode issuance.
+
+## Environment Variables
+
+- `ANIPO_KEYWORD` (required): API keyword provided by Anipo
+- `ANIPO_BASE_URL` (optional): Defaults to `https://panel.anipo.ir`
+
+## Service
+
+- File: [src/api/shipping/services/anipo.ts](mdc:src/api/shipping/services/anipo.ts)
+  - Methods:
+    - `barcodePrice({ cityCode, weight, sum, isnonstandard=0, smsservice=0 })`
+      - POST `/backend/api/barcodePrice/`
+      - Note: Sends `PayTypeID: 0` defensively (upstream may expect a byte)
+    - `getBarcode({ orderId, provinceCode, provinceName, cityName, name, postcode, nationalCode, callNumber, address, weight, boxSizeId?, isnonstandard=0, sum })`
+      - POST `/backend/api/getBarcode/`
+    - `remaining()` → POST `/backend/api/remaining/`
+    - `paymentGatewayLink({ price, callbackUrl })` → POST `/backend/api/paymentGatewayLink/`
+  - Logging: all requests/responses/errors are logged as single strings with JSON payloads (keyword masked).
+
+## Endpoints
+
+### 1) Shipping Preview (cart)
+
+- Route: `POST /carts/shipping-preview`
+- Controller: [src/api/cart/controllers/handlers/shippingPreview.ts](mdc:src/api/cart/controllers/handlers/shippingPreview.ts)
+- Auth: `global::authentication`
+- Body: `{ addressId: number, shippingId: number }`
+- Behavior:
+  - If `shippingId === 4` (خرید حضوری) → returns `{ shipping: 0 }`
+  - Computes weight from cart items using `product.Weight` (default 100g per product if missing)
+  - Computes declared value `sum` from cart subtotal
+  - Calls `anipo.barcodePrice` and returns `{ success, shipping, weight }`
+  - Detailed logs (request, response, errors) to aid troubleshooting
+
+### 2) Generate Barcode (order)
+
+- Route: `POST /orders/:id/anipo-barcode`
+- Controller: `order.generateAnipoBarcode` in [src/api/order/controllers/order.ts](mdc:src/api/order/controllers/order.ts)
+- Auth: `global::authentication`
+- Behavior:
+  - Loads order with `delivery_address.shipping_city.shipping_province` and `order_items` (with products)
+  - Skips if `ShippingBarcode` already exists (returns `{ already: true }`)
+  - Computes weight from items (default 100g/product), declared value as items subtotal + shipping
+  - Uses address fields to call `anipo.getBarcode`
+  - On success, updates order fields:
+    - `ShippingBarcode`
+    - `ShippingPostPrice`
+    - `ShippingTax`
+    - `ShippingWeight`
+    - `ShippingBoxSizeId`
+
+## Order Fields (Strapi Order Content-Type)
+
+- `ShippingBarcode: string`
+- `ShippingPostPrice: integer`
+- `ShippingTax: integer`
+- `ShippingWeight: integer`
+- `ShippingBoxSizeId: integer`
+
+These are persisted on the order after successful barcode issuance.
+
+## Pricing Policy
+
+- When computing shipping totals during checkout, for shipping methods other than id=4, the Anipo price replaces the shipping cost.
+
+## Notes
+
+- Province/city codes must be present on address relations. Ensure `shipping_province.Code` and `shipping_city.Title` are populated.
+- Logger format: Always a single string, embed payloads via `JSON.stringify` and mask `keyword`.
