@@ -5,7 +5,11 @@ import {
   removeCartItem,
   finalizeCart,
 } from "./mutations";
-import { checkCartStock, getSnappEligible } from "./queries";
+import {
+  checkCartStock,
+  getSnappEligible,
+  getShippingPreview,
+} from "./queries";
 import { applyDiscount } from "./discount";
 import type {
   CartResponse,
@@ -32,6 +36,7 @@ export {
   checkCartStock,
   finalizeCart,
   getSnappEligible,
+  getShippingPreview,
   applyDiscount,
 };
 
@@ -43,6 +48,7 @@ const CartService = {
   checkCartStock,
   finalizeCart,
   getSnappEligible,
+  getShippingPreview,
   applyDiscount,
 };
 
