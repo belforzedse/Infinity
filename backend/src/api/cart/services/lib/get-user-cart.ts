@@ -13,7 +13,7 @@ export const getOrCreateUserCart = async (strapi: Strapi, userId: number) => {
               product_variation_size: true,
               product_variation_model: true,
               product: {
-                fields: ["Title", "SKU"],
+                fields: ["Title", "SKU", "Weight"],
                 populate: {
                   CoverImage: true,
                   product_main_category: true,

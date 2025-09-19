@@ -14,6 +14,9 @@ export const resolveShippingCost = async (
   shippingId?: number,
   providedCost?: number
 ) => {
+  // If excluded method (id=4), price is 0 regardless
+  if (shippingId && Number(shippingId) === 4) return 0;
+
   const cost = providedCost ? parseInt(String(providedCost)) : 0;
   if (cost || !shippingId) return cost;
   const shipping = await strapi.entityService.findOne(
