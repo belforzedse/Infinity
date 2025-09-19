@@ -3,6 +3,7 @@ import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 
 interface ProductCardProps {
@@ -87,7 +88,8 @@ async function getNewProducts(): Promise<ProductCardProps[]> {
             variation.attributes.Price &&
             !isNaN(parseInt(variation.attributes.Price)) &&
             parseInt(variation.attributes.Price) > 0 &&
-            (variation.attributes.product_stock?.data?.attributes?.Count || 0) > 0
+            (variation.attributes.product_stock?.data?.attributes?.Count || 0) >
+              0
         );
 
       if (publishedVariations.length === 0) {
@@ -145,14 +147,16 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
       );
     })
     .map((item: any) => {
-      const availableVariations = item.attributes.product_variations.data.filter(
-        (variation: any) =>
-          variation.attributes.IsPublished &&
-          variation.attributes.Price &&
-          !isNaN(parseInt(variation.attributes.Price)) &&
-          parseInt(variation.attributes.Price) > 0 &&
-          (variation.attributes.product_stock?.data?.attributes?.Count || 0) > 0
-      );
+      const availableVariations =
+        item.attributes.product_variations.data.filter(
+          (variation: any) =>
+            variation.attributes.IsPublished &&
+            variation.attributes.Price &&
+            !isNaN(parseInt(variation.attributes.Price)) &&
+            parseInt(variation.attributes.Price) > 0 &&
+            (variation.attributes.product_stock?.data?.attributes?.Count || 0) >
+              0
+        );
 
       if (availableVariations.length === 0) {
         return null;
@@ -169,7 +173,8 @@ async function getFavoriteProducts(): Promise<ProductCardProps[]> {
       const hasDiscount =
         cheapestVariation?.attributes?.general_discounts?.data?.length > 0;
       const discount = hasDiscount
-        ? cheapestVariation.attributes.general_discounts.data[0].attributes.Amount
+        ? cheapestVariation.attributes.general_discounts.data[0].attributes
+            .Amount
         : undefined;
       const price = parseInt(cheapestVariation?.attributes?.Price || "0");
 
@@ -269,32 +274,35 @@ export default async function Home() {
       {/* Secondary banners section */}
       <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-4">
         <div className="md:w-1/2">
-        <Link href={`/plp?category=shirt`}>
-          <img
-            src="/images/index-img2-desktop.png"
-            alt="Banner"
-            className="w-full h-full rounded-lg object-cover"
-          />
+          <Link href={`/plp?category=shirt`}>
+            <img
+              src="/images/index-img2-desktop.png"
+              alt="Banner"
+              className="w-full h-full rounded-lg object-cover"
+            />
           </Link>
         </div>
 
         <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
           <div className="w-1/2 md:w-full">
-          <Link href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}>
-            <img
-              src="/images/index-img3-desktop.png"
-              alt="Banner"
-              className="w-full h-full rounded-lg object-cover"
-            /></Link>
+            <Link
+              href={`/plp?category=%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa`}
+            >
+              <img
+                src="/images/index-img3-desktop.png"
+                alt="Banner"
+                className="w-full h-full rounded-lg object-cover"
+              />
+            </Link>
           </div>
 
           <div className="w-1/2 md:w-full">
-          <Link href={`/plp?category=skirt`}>
-            <img
-              src="/images/index-img4-desktop.png"
-              alt="Banner"
-              className="w-full h-full rounded-lg object-cover"
-            />
+            <Link href={`/plp?category=skirt`}>
+              <img
+                src="/images/index-img4-desktop.png"
+                alt="Banner"
+                className="w-full h-full rounded-lg object-cover"
+              />
             </Link>
           </div>
         </div>
@@ -375,3 +383,17 @@ export default async function Home() {
     </div>
   );
 }
+
+export const metadata: Metadata = {
+  title: "صفحه اصلی | اینفینیتی استور",
+  description:
+    "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "صفحه اصلی | اینفینیتی استور",
+    description:
+      "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+    type: "website",
+    url: "/",
+  },
+};
