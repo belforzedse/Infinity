@@ -81,7 +81,8 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           | "Cancelled";
         type ContractType = "Cash" | "Credit";
 
-        const finalShippingCost = await resolveShippingCost(
+        // Resolve base shipping cost (will be replaced by Anipo for non-4)
+        let finalShippingCost = await resolveShippingCost(
           strapi as any,
           shippingData.shippingId,
           shippingData.shippingCost
@@ -111,6 +112,73 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           shippingData.note,
           shippingData.addressId
         );
+
+        // Replace shipping cost using Anipo for non-4 (buy-in-person)
+        if (Number(shippingData.shippingId) !== 4) {
+          // Compute weight
+          let totalWeight = 0;
+          for (const item of cart.cart_items) {
+            const product = item?.product_variation?.product;
+            const weight = Number(product?.Weight ?? 100) || 100;
+            const count = Number(item?.Count || 0);
+            totalWeight += weight * count;
+          }
+          if (totalWeight <= 0) totalWeight = 100;
+
+          // Load address for codes
+          if (shippingData.addressId) {
+            const address: any = await strapi.entityService.findOne(
+              "api::local-user-address.local-user-address",
+              Number(shippingData.addressId),
+              {
+                populate: {
+                  shipping_city: { populate: { shipping_province: true } },
+                },
+              }
+            );
+            const cityCode = Number(address?.shipping_city?.Code || 0);
+            if (cityCode) {
+              const anipo: any = strapi.service("api::shipping.anipo");
+              const preview = await anipo.barcodePrice({
+                cityCode,
+                weight: totalWeight,
+                sum: subtotal,
+                isnonstandard: 0,
+                smsservice: 0,
+              });
+              if (preview?.ok && typeof preview.price === "number") {
+                finalShippingCost = Math.max(0, Math.floor(preview.price));
+                // Persist new shipping cost on order
+                await strapi.entityService.update(
+                  "api::order.order",
+                  order.id,
+                  {
+                    data: { ShippingCost: finalShippingCost },
+                  }
+                );
+              } else {
+                // Log why Anipo-based shipping override was skipped for observability
+                try {
+                  await strapi.entityService.create(
+                    "api::order-log.order-log",
+                    {
+                      data: {
+                        order: order.id,
+                        Action: "Update",
+                        Description: `Anipo shipping preview unavailable/skipped: ${String(
+                          preview?.error || "no_price"
+                        )}`,
+                        PerformedBy: String(userId),
+                      },
+                    }
+                  );
+                } catch (_) {
+                  // Swallow logging errors to avoid affecting checkout flow
+                }
+              }
+            }
+          }
+        }
 
         let discountAmount = 0;
         if (shippingData?.discountCode) {
@@ -163,7 +231,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
         // Contract now has all financial details we need
         // No need to update the order with financial fields that don't exist in schema
         await strapi.entityService.update("api::order.order", order.id, {
-          data: { contract: contract.id },
+          data: { contract: contract.id, ShippingCost: finalShippingCost },
         });
 
         // Note: Do not clear the cart here. Cart will be cleared only after
