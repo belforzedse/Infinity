@@ -16,6 +16,10 @@
       "type": "string",
       "required": true
     },
+    "Weight": {
+      "type": "integer",
+      "default": 100
+    },
     "CoverImage": {
       "type": "media",
       "multiple": false,
