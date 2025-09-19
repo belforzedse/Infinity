@@ -28,11 +28,11 @@ function PaymentCallbackContent() {
         // Get parameters from URL
         const resNum = searchParams.get("ResNum"); // Order ID
         const refNum = searchParams.get("RefNum"); // Payment reference number
-        
+
         console.log("=== PAYMENT CALLBACK DEBUG ===");
         console.log("ResNum (Order ID):", resNum);
         console.log("RefNum (Payment Ref):", refNum);
-        
+
         // Check localStorage for backup data
         const pendingOrderId = localStorage.getItem("pendingOrderId");
         const pendingRefId = localStorage.getItem("pendingRefId");
@@ -55,7 +55,12 @@ function PaymentCallbackContent() {
           throw new Error("اطلاعات پرداخت ناقص است");
         }
 
-        console.log("✅ Verifying payment with Order ID:", orderIdToVerify, "Ref ID:", refIdToVerify);
+        console.log(
+          "✅ Verifying payment with Order ID:",
+          orderIdToVerify,
+          "Ref ID:",
+          refIdToVerify
+        );
 
         // Verify payment with backend
         const verificationResult = await OrderService.verifyPayment(
@@ -97,11 +102,15 @@ function PaymentCallbackContent() {
 
         // If we couldn't check or payment is not verified, use the verification result
         if (verificationResult.success) {
-          console.log("✅ Payment verified via verification API - redirecting to success");
+          console.log(
+            "✅ Payment verified via verification API - redirecting to success"
+          );
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         } else {
-          console.log("❌ Payment verification failed - redirecting to failure");
+          console.log(
+            "❌ Payment verification failed - redirecting to failure"
+          );
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }

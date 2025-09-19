@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 
@@ -10,7 +9,7 @@ function PaymentFailureContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const error = searchParams.get("error");
-  
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -109,7 +108,9 @@ function PaymentFailureContent() {
               <div className="space-y-2 text-right">
                 <p className="text-gray-700">
                   <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-orange-700">#{orderId}</span>
+                  <span className="mr-2 font-semibold text-orange-700">
+                    #{orderId}
+                  </span>
                 </p>
                 <p className="text-gray-700">
                   <span className="font-medium">وضعیت:</span>
@@ -119,7 +120,7 @@ function PaymentFailureContent() {
                   سفارش شما تکمیل نشده است و می‌توانید مجدداً تلاش کنید.
                 </p>
               </div>
-              
+
               {orderId && <PaymentStatus orderId={parseInt(orderId)} />}
             </div>
           )}
@@ -180,16 +181,18 @@ function PaymentFailureContent() {
 
 export default function PaymentFailure() {
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-10">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-          <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-10">
+          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <PaymentFailureContent />
     </Suspense>
   );
-} 
+}
