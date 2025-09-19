@@ -10,7 +10,7 @@ function PaymentCancelledContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const reason = searchParams.get("reason");
-  
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,17 +117,20 @@ function PaymentCancelledContent() {
               <div className="space-y-2 text-right">
                 <p className="text-gray-700">
                   <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-orange-700">#{orderId}</span>
+                  <span className="mr-2 font-semibold text-orange-700">
+                    #{orderId}
+                  </span>
                 </p>
                 <p className="text-gray-700">
                   <span className="font-medium">وضعیت:</span>
                   <span className="mr-2 text-orange-600">در انتظار پرداخت</span>
                 </p>
                 <p className="text-orange-700 text-sm mt-2">
-                  سفارش شما تکمیل نشده است. می‌توانید هر زمان که بخواهید پرداخت را انجام دهید.
+                  سفارش شما تکمیل نشده است. می‌توانید هر زمان که بخواهید پرداخت
+                  را انجام دهید.
                 </p>
               </div>
-              
+
               {orderId && <PaymentStatus orderId={parseInt(orderId)} />}
             </div>
           )}
@@ -139,10 +142,9 @@ function PaymentCancelledContent() {
                 دلیل لغو
               </h3>
               <p className="text-gray-700 text-right">
-                {reason === "user-cancelled" 
-                  ? "لغو توسط کاربر" 
-                  : decodeURIComponent(reason)
-                }
+                {reason === "user-cancelled"
+                  ? "لغو توسط کاربر"
+                  : decodeURIComponent(reason)}
               </p>
             </div>
           )}
@@ -199,16 +201,18 @@ function PaymentCancelledContent() {
 
 export default function PaymentCancelled() {
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-10">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-          <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-10">
+          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <PaymentCancelledContent />
     </Suspense>
   );
-} 
+}

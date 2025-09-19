@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { OrderService } from "@/services";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 
 interface OrderDetails {
@@ -33,7 +30,7 @@ function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
-  
+
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +48,7 @@ function PaymentSuccessContent() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // You may need to implement this method in OrderService
       // For now, we'll use a placeholder structure
       setOrderDetails({
@@ -63,8 +60,8 @@ function PaymentSuccessContent() {
         order_items: [],
         shipping: {
           Title: "ارسال عادی",
-          Price: 0
-        }
+          Price: 0,
+        },
       });
     } catch (err: any) {
       console.error("Error fetching order details:", err);
@@ -144,7 +141,9 @@ function PaymentSuccessContent() {
               <div className="space-y-2 text-right">
                 <p className="text-gray-700">
                   <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-green-700">#{orderId}</span>
+                  <span className="mr-2 font-semibold text-green-700">
+                    #{orderId}
+                  </span>
                 </p>
                 {orderDetails && (
                   <>
@@ -154,12 +153,14 @@ function PaymentSuccessContent() {
                     </p>
                     <p className="text-gray-700">
                       <span className="font-medium">تاریخ:</span>
-                      <span className="mr-2">{new Date().toLocaleDateString('fa-IR')}</span>
+                      <span className="mr-2">
+                        {new Date().toLocaleDateString("fa-IR")}
+                      </span>
                     </p>
                   </>
                 )}
               </div>
-              
+
               {orderId && <PaymentStatus orderId={parseInt(orderId)} />}
             </div>
           )}
@@ -217,16 +218,18 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccess() {
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-10">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-          <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-10">
+          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <PaymentSuccessContent />
     </Suspense>
   );
-} 
+}
