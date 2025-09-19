@@ -11,6 +11,7 @@ import { updateItemHandler } from "./handlers/updateItem";
 import { removeItemHandler } from "./handlers/removeItem";
 import { checkStockHandler } from "./handlers/checkStock";
 import { finalizeToOrderHandler } from "./handlers/finalizeToOrder";
+import { shippingPreviewHandler } from "./handlers/shippingPreview";
 
 export default factories.createCoreController(
   "api::cart.cart",
@@ -41,6 +42,10 @@ export default factories.createCoreController(
 
     async finalizeToOrder(ctx) {
       return finalizeToOrderHandler(strapi)(ctx);
+    },
+
+    async shippingPreview(ctx) {
+      return shippingPreviewHandler(strapi)(ctx);
     },
   })
 );

@@ -67,5 +67,14 @@ export default {
         middlewares: ["global::authentication"],
       },
     },
+    {
+      method: "POST",
+      path: "/carts/shipping-preview",
+      handler: "cart.shippingPreview",
+      config: {
+        auth: false,
+        middlewares: ["global::authentication"],
+      },
+    },
   ],
 };
