@@ -129,6 +129,7 @@ export const shippingPreviewHandler = (strapi: Strapi) => async (ctx: any) => {
       addressId,
       shippingId,
       error: error?.message,
+      stack: error?.stack,
     });
     return ctx.badRequest("Error computing shipping preview", {
       data: { success: false, error: error?.message },

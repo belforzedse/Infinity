@@ -61,6 +61,13 @@ function http(): AxiosInstance {
   return axios.create({ baseURL: baseUrl, timeout: 15000 });
 }
 
+function maskKeyword<T extends { keyword?: string }>(obj: T): T | any {
+  if (!obj) return obj;
+  const clone: any = JSON.parse(JSON.stringify(obj));
+  if (clone.keyword) clone.keyword = "***";
+  return clone;
+}
+
 export default ({ strapi }: { strapi: Strapi }) => ({
   async barcodePrice(params: {
     cityCode: number;
@@ -82,16 +89,39 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     };
     try {
-      const { data } = await http().post<BarcodePriceResponse>(
+      strapi.log.info("[anipo] http request", {
+        endpoint: "/backend/api/barcodePrice/",
+        body: maskKeyword(body),
+      });
+      const res = await http().post<BarcodePriceResponse>(
         "/backend/api/barcodePrice/",
         body
       );
-      if (data?.status && typeof data.data === "number") {
-        return { ok: true, price: data.data };
+      strapi.log.info("[anipo] http response", {
+        endpoint: "/backend/api/barcodePrice/",
+        status: res.status,
+        body: res.data,
+      });
+      if (res.data?.status && typeof res.data.data === "number") {
+        return { ok: true, price: res.data.data };
       }
-      return { ok: false, error: data?.message || "anipo_error" };
+      return { ok: false, error: res.data?.message || "anipo_error" };
     } catch (e: any) {
-      strapi.log.error("Anipo barcodePrice error", e?.message || e);
+      const status = e?.response?.status;
+      const responseData = e?.response?.data;
+      const url = e?.config?.url;
+      let reqBody: any = e?.config?.data;
+      try {
+        reqBody = typeof reqBody === "string" ? JSON.parse(reqBody) : reqBody;
+      } catch {}
+      strapi.log.error("[anipo] http error", {
+        endpoint: "/backend/api/barcodePrice/",
+        message: e?.message,
+        status,
+        url,
+        request: maskKeyword(reqBody),
+        response: responseData,
+      });
       return { ok: false, error: "network_error" };
     }
   },
@@ -143,16 +173,39 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     };
     try {
-      const { data } = await http().post<GetBarcodeResponse>(
+      strapi.log.info("[anipo] http request", {
+        endpoint: "/backend/api/getBarcode/",
+        body: maskKeyword(body),
+      });
+      const res = await http().post<GetBarcodeResponse>(
         "/backend/api/getBarcode/",
         body
       );
-      if (data?.status && data.data) {
-        return { ok: true, data: data.data };
+      strapi.log.info("[anipo] http response", {
+        endpoint: "/backend/api/getBarcode/",
+        status: res.status,
+        body: res.data,
+      });
+      if (res.data?.status && res.data.data) {
+        return { ok: true, data: res.data.data };
       }
-      return { ok: false, error: data?.message || "anipo_error" };
+      return { ok: false, error: res.data?.message || "anipo_error" };
     } catch (e: any) {
-      strapi.log.error("Anipo getBarcode error", e?.message || e);
+      const status = e?.response?.status;
+      const responseData = e?.response?.data;
+      const url = e?.config?.url;
+      let reqBody: any = e?.config?.data;
+      try {
+        reqBody = typeof reqBody === "string" ? JSON.parse(reqBody) : reqBody;
+      } catch {}
+      strapi.log.error("[anipo] http error", {
+        endpoint: "/backend/api/getBarcode/",
+        message: e?.message,
+        status,
+        url,
+        request: maskKeyword(reqBody),
+        response: responseData,
+      });
       return { ok: false, error: "network_error" };
     }
   },
