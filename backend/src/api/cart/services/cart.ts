@@ -113,18 +113,23 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           shippingData.addressId
         );
 
+        // Always compute and persist order shipping weight from items (in grams)
+        let totalWeight = 0;
+        for (const item of cart.cart_items) {
+          const product = item?.product_variation?.product;
+          const weight = Number(product?.Weight ?? 100) || 100;
+          const count = Number(item?.Count || 0);
+          totalWeight += weight * count;
+        }
+        if (totalWeight <= 0) totalWeight = 100;
+        try {
+          await strapi.entityService.update("api::order.order", order.id, {
+            data: { ShippingWeight: totalWeight } as any,
+          });
+        } catch (_) {}
+
         // Replace shipping cost using Anipo for non-4 (buy-in-person)
         if (Number(shippingData.shippingId) !== 4) {
-          // Compute weight
-          let totalWeight = 0;
-          for (const item of cart.cart_items) {
-            const product = item?.product_variation?.product;
-            const weight = Number(product?.Weight ?? 100) || 100;
-            const count = Number(item?.Count || 0);
-            totalWeight += weight * count;
-          }
-          if (totalWeight <= 0) totalWeight = 100;
-
           // Load address for codes
           if (shippingData.addressId) {
             const address: any = await strapi.entityService.findOne(
