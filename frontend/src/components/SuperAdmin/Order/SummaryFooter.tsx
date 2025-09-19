@@ -162,9 +162,34 @@ export default function SuperAdminOrderSummaryFooter({
           </p> */}
         </div>
 
-        <p className="text-sm md:text-xl text-foreground-primary">
-          {priceFormatter(order.total, " تومان")}
-        </p>
+        <div className="flex items-center gap-3">
+          <button
+            className="px-3 py-2 bg-actions-primary text-white rounded-md text-xs md:text-sm"
+            onClick={async () => {
+              try {
+                const mod = await import("@/services/order");
+                const res = await mod.default.generateAnipoBarcode(order.id);
+                // simple feedback; page reload is handled externally if needed
+                alert(
+                  res?.already
+                    ? "بارکد قبلاً ثبت شده است"
+                    : res?.success
+                    ? "بارکد با موفقیت ایجاد شد"
+                    : "درخواست ارسال شد"
+                );
+                // no hard reload to keep page SPA; admin can refresh manually
+              } catch (e) {
+                alert("خطا در ایجاد بارکد Anipo");
+              }
+            }}
+          >
+            صدور بارکد Anipo
+          </button>
+
+          <p className="text-sm md:text-xl text-foreground-primary">
+            {priceFormatter(order.total, " تومان")}
+          </p>
+        </div>
       </div>
     </div>
   );

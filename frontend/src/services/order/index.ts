@@ -247,6 +247,15 @@ const OrderService = {
   getOrderStatus,
   getOrderPaymentStatus,
   getMyOrders,
+  async generateAnipoBarcode(orderId: number): Promise<any> {
+    try {
+      const res = await apiClient.post(`/orders/${orderId}/anipo-barcode`, {});
+      return res as any;
+    } catch (error: any) {
+      console.error("Error generating Anipo barcode:", error);
+      throw error;
+    }
+  },
 };
 
 export default OrderService;
