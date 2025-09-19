@@ -15,6 +15,7 @@ interface Props {
   status: PersianOrderStatus;
   title: string;
   orderId?: number;
+  shippingBarcode?: string;
 }
 
 export default function OrderCard({
@@ -26,6 +27,7 @@ export default function OrderCard({
   status,
   title,
   orderId,
+  shippingBarcode,
 }: Props) {
   return (
     <div className="lg:hidden flex flex-col rounded-2xl border border-slate-100 mb-3 divide-y divide-slate-100 overflow-hidden">
@@ -105,6 +107,16 @@ export default function OrderCard({
 
           <div className="flex items-center gap-2">
             {orderId && <PaymentStatusButton orderId={orderId} />}
+            {shippingBarcode ? (
+              <a
+                href={`https://anipo.ir/checkconsignment/?code=${shippingBarcode}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                رهگیری مرسوله
+              </a>
+            ) : null}
             <ShowFactorButton />
           </div>
         </div>
