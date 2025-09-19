@@ -36,6 +36,12 @@ export type Order = {
   shipping: number;
   subtotal: number;
   total: number;
+  // Anipo fields
+  shippingBarcode?: string;
+  shippingPostPrice?: number;
+  shippingTax?: number;
+  shippingWeight?: number;
+  shippingBoxSizeId?: number;
 };
 
 type OrderResponse = {
@@ -47,6 +53,11 @@ type OrderResponse = {
     Date: string;
     Status: string;
     ShippingCost: number;
+    ShippingBarcode?: string;
+    ShippingPostPrice?: number;
+    ShippingTax?: number;
+    ShippingWeight?: number;
+    ShippingBoxSizeId?: number;
     delivery_address?: {
       data: {
         id: string;
@@ -216,8 +227,8 @@ export default function EditOrderPage() {
         const addr = data.attributes?.delivery_address?.data?.attributes;
         const city = addr?.shipping_city?.data?.attributes?.Title;
         const province =
-          addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes
-            ?.Title;
+          addr?.shipping_city?.data?.attributes?.shipping_province?.data
+            ?.attributes?.Title;
         const fullAddress = [addr?.FullAddress, city, province]
           .filter(Boolean)
           .join(" - ");
@@ -248,6 +259,11 @@ export default function EditOrderPage() {
           subtotal,
           total,
           contractStatus: data.attributes?.contract?.data?.attributes?.Status,
+          shippingBarcode: data.attributes?.ShippingBarcode,
+          shippingPostPrice: data.attributes?.ShippingPostPrice,
+          shippingTax: data.attributes?.ShippingTax,
+          shippingWeight: data.attributes?.ShippingWeight,
+          shippingBoxSizeId: data.attributes?.ShippingBoxSizeId,
         });
       })
       .catch((err) => {
