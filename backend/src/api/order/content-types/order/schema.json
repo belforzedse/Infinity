@@ -77,6 +77,29 @@
       "min": 0,
       "default": 0
     },
+    "ShippingBarcode": {
+      "type": "string"
+    },
+    "ShippingPostPrice": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "ShippingTax": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "ShippingWeight": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "ShippingBoxSizeId": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
     "external_id": {
       "type": "string",
       "unique": false
