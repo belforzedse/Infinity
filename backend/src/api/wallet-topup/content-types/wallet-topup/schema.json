@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "wallet_topups",
+  "info": {
+    "singularName": "wallet-topup",
+    "pluralName": "wallet-topups",
+    "displayName": "WalletTopup"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Amount": {
+      "type": "biginteger",
+      "required": true,
+      "min": "0"
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": ["Pending", "Success", "Failed", "Cancelled"],
+      "required": true,
+      "default": "Pending"
+    },
+    "SaleOrderId": {
+      "type": "string",
+      "unique": true
+    },
+    "RefId": {
+      "type": "string"
+    },
+    "SaleReferenceId": {
+      "type": "string"
+    },
+    "Note": {
+      "type": "text"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user.local-user"
+    },
+    "Date": {
+      "type": "datetime"
+    }
+  }
+}
+
+
