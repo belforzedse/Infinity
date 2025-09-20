@@ -303,7 +303,7 @@ export default function EditOrderPage() {
 
   useEffect(() => {
     load();
-  }, [id, load]);
+  }, [id]);
 
   if (loading) {
     return <div>Loading...</div>;
