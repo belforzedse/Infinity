@@ -525,7 +525,7 @@ export default function ProductsPage() {
           )}
           {debouncedSearchQuery && (
             <span className="text-xs text-green-600">
-              نتایج برای: "{debouncedSearchQuery}"
+              نتایج برای: &quot;{debouncedSearchQuery}&quot;
             </span>
           )}
         </div>
@@ -563,7 +563,7 @@ export default function ProductsPage() {
               onSelectionChange={selectionProps?.onSelectionChange}
             />
           )}
-          removeActions
+          _removeActions
           enableSelection
           getRowId={(row: Product) => row.id}
           bulkOptions={bulkOptions}
@@ -588,7 +588,7 @@ export default function ProductsPage() {
                 onSelectionChange={selectionProps?.onSelectionChange}
               />
             )}
-            removeActions
+            _removeActions
             enableSelection
             getRowId={(row: Product) => row.id}
             bulkOptions={bulkOptions}

@@ -1,7 +1,5 @@
 import { apiClient } from "../index";
 import {
-  AddItemRequest,
-  UpdateItemRequest,
   FinalizeCartRequest,
   FinalizeCartResponse,
   CartItemResponse,

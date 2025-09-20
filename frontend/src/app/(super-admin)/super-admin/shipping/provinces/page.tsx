@@ -22,7 +22,7 @@ export default function ShippingProvincesPage() {
         ]}
       >
         <SuperAdminTable
-          removeActions
+          _removeActions
           columns={columns}
           url="/shipping-provinces"
           mobileTable={(data) => <MobileTable data={data} />}
