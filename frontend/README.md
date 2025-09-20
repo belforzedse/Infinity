@@ -117,45 +117,12 @@ docker run --rm -p 3000:3000 \
 
 To load variables from a file, use `--env-file` with `docker run`.
 
-## Tests, Lint, Format
+- fix(pdp): add `type="button"` to variation selector buttons (color/size/model)
+- chore(a11y): add TODO to improve selected color state semantics for keyboard access
 
-```
-npm test
-npm run lint
-npm run format
-```
-
-## Project Structure (selected)
-
-- `src/app`: Next.js App Router routes (public, admin, super‑admin)
-- `src/components`: UI components and kits (auth, PLP/PDP, cart, etc.)
-- `src/services`: API service layer (auth, product, cart, user, etc.)
-- `src/constants`: API endpoints, config constants
-- `src/hooks`: Custom React hooks
-- `src/types`: Shared TypeScript types/interfaces
-- `src/utils`: Helpers (API utils, auth, formatting)
-- `public`: Static assets
-- `docs`: Additional documentation
-
-## Additional Docs
-
-- Developer guide: `DEVELOPMENT.md`
-- Cart API guide: `docs/docs/cart-api-guide.md`
-- Postman collection: `docs/docs/cart-api-postman-collection.json`
-- Docs index: `docs/README.md`
-
-## Documentation
-
-Source files include inline comments and JSDoc blocks describing the purpose
-of helpers, components and utilities. Refer to the `src/lib` and
-`src/components` directories for examples of the comment style used
-throughout the project.
-
-## Notes
-
-- Strict mode is disabled in dev to match existing behavior (`next.config.ts`)
-- Images are unoptimized in config; configure a loader/host for production
-
-## License
-
-No license file is included in this repository. All rights reserved unless otherwise specified.
+### Checkout Stability Improvements
+- Stabilized  deps in  using primitives.
+- Added  merging and passed to  for consistent totals.
+- Preserved SnappPay eligibility on errors; removed silent catches.
+- Removed localStorage fallback in finalize payload; rely on state.
+- Typed cart query responses and added error-safe fallbacks.

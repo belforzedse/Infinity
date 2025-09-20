@@ -1,0 +1,11 @@
+Summary of Fix Application
+- Addressed High/Medium issues in ShoppingCart Bill component and cart queries.
+
+Changes Implemented
+- Stabilized useEffect deps using primitives: shippingId, shippingCost, addressId.
+- Added shippingPreview state; merged into totals; passed to DeliveryForm.
+- Preserved SnappPay eligibility on error; removed silent catches; added logs.
+- Finalize payload now uses in-memory discountCode only (no localStorage fallback).
+- Typed cart queries with ApiResponse; added error-safe defaults and logs.
+
+Status: FIXED (Critical/High/Medium items)

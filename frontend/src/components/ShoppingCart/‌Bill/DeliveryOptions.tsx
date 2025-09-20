@@ -82,7 +82,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
         <span className="text-sm text-black lg:text-base">
           {method.attributes.Price === 0
             ? "رایگان"
-            : `${method.attributes.Price.toLocaleString()} تومان`}
+            : `${method.attributes.Price.toLocaleString()} تومان (تقریبی)`}
         </span>
       </div>
     ),

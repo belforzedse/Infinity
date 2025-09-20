@@ -26,6 +26,7 @@ type Props = {
       taxPercent: number;
     };
   };
+  shippingPreviewShipping?: number;
 };
 
 function ShoppingCartBillDeliveryForm({
@@ -33,6 +34,7 @@ function ShoppingCartBillDeliveryForm({
   setValue,
   selectedShipping,
   discountPreview,
+  shippingPreviewShipping,
 }: Props) {
   const {
     totalPrice,

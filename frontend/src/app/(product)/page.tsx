@@ -174,3 +174,17 @@ export default async function Home() {
     </div>
   );
 }
+
+export const metadata: Metadata = {
+  title: "صفحه اصلی | اینفینیتی استور",
+  description:
+    "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "صفحه اصلی | اینفینیتی استور",
+    description:
+      "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+    type: "website",
+    url: "/",
+  },
+};
