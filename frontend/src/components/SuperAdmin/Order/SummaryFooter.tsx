@@ -1,6 +1,7 @@
 import { priceFormatter } from "@/utils/price";
 import Image from "next/image";
 import MobileOrderItem from "./MobileOrderItem";
+import AnipoBarcodeDialog from "./AnipoBarcodeDialog";
 import { useState } from "react";
 
 type Order = {
@@ -44,9 +45,34 @@ export default function SuperAdminOrderSummaryFooter({
   order: Order | undefined;
   onReload?: () => void;
 }) {
-  const [showBarcodeForm, setShowBarcodeForm] = useState(false);
-  const [customWeight, setCustomWeight] = useState("");
-  const [customBoxSize, setCustomBoxSize] = useState("3");
+  const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateBarcode = async (weight?: number, boxSizeId?: number) => {
+    if (!order) return;
+
+    setIsGenerating(true);
+    try {
+      const mod = await import("@/services/order");
+      const res = await mod.default.generateAnipoBarcode(order.id, weight, boxSizeId);
+      alert(
+        res?.already
+          ? "بارکد قبلاً ثبت شده است"
+          : res?.success
+          ? "بارکد با موفقیت ایجاد شد"
+          : "درخواست ارسال شد"
+      );
+      if (onReload) {
+        await onReload();
+      }
+      setShowBarcodeDialog(false);
+    } catch (error) {
+      console.error("Error generating Anipo barcode:", error);
+      alert("خطا در ایجاد بارکد Anipo");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   if (!order) return null;
 
@@ -190,90 +216,26 @@ export default function SuperAdminOrderSummaryFooter({
         </div>
 
         <div className="flex items-center gap-3">
-          {!showBarcodeForm ? (
-            <button
-              className="px-3 py-2 bg-actions-primary text-white rounded-md text-xs md:text-sm"
-              onClick={() => setShowBarcodeForm(true)}
-            >
-              صدور بارکد Anipo
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-600">وزن (گرم)</label>
-                <input
-                  type="number"
-                  placeholder="100"
-                  value={customWeight}
-                  onChange={(e) => setCustomWeight(e.target.value)}
-                  className="px-2 py-1 border border-gray-300 rounded text-xs w-20"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-600">سایز جعبه</label>
-                <select
-                  value={customBoxSize}
-                  onChange={(e) => setCustomBoxSize(e.target.value)}
-                  className="px-2 py-1 border border-gray-300 rounded text-xs w-32"
-                >
-                  <option value="1">سایز ۱ (100×100×150)</option>
-                  <option value="2">سایز ۲ (100×150×200)</option>
-                  <option value="3">سایز ۳ (150×200×200)</option>
-                  <option value="4">سایز ۴ (200×200×300)</option>
-                  <option value="5">سایز ۵ (350×250×200)</option>
-                  <option value="6">سایز ۶ (200×250×450)</option>
-                  <option value="7">سایز ۷ (250×300×400)</option>
-                  <option value="8">سایز ۸ (300×400×450)</option>
-                  <option value="9">سایز ۹ (350×450×550)</option>
-                  <option value="10">سایز ۱۰ (ابعاد بزرگتر)</option>
-                </select>
-              </div>
-              <button
-                className="px-3 py-1 bg-green-600 text-white rounded text-xs"
-                onClick={async () => {
-                  try {
-                    const mod = await import("@/services/order");
-                    const weight = customWeight ? parseInt(customWeight) : undefined;
-                    const boxSize = customBoxSize ? parseInt(customBoxSize) : undefined;
-                    const res = await mod.default.generateAnipoBarcode(order.id, weight, boxSize);
-                    alert(
-                      res?.already
-                        ? "بارکد قبلاً ثبت شده است"
-                        : res?.success
-                        ? "بارکد با موفقیت ایجاد شد"
-                        : "درخواست ارسال شد"
-                    );
-                    try {
-                      if (onReload) {
-                        await onReload();
-                      }
-                    } catch {}
-                    setShowBarcodeForm(false);
-                  } catch (e) {
-                    alert("خطا در ایجاد بارکد Anipo");
-                  }
-                }}
-              >
-                ایجاد
-              </button>
-              <button
-                className="px-3 py-1 bg-gray-400 text-white rounded text-xs"
-                onClick={() => {
-                  setShowBarcodeForm(false);
-                  setCustomWeight("");
-                  setCustomBoxSize("3");
-                }}
-              >
-                انصراف
-              </button>
-            </div>
-          )}
+          <button
+            className="px-3 py-2 bg-actions-primary text-white rounded-md text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setShowBarcodeDialog(true)}
+            disabled={isGenerating}
+          >
+            صدور بارکد Anipo
+          </button>
 
           <p className="text-sm md:text-xl text-foreground-primary">
             {priceFormatter(order.total, " تومان")}
           </p>
         </div>
       </div>
+
+      <AnipoBarcodeDialog
+        isOpen={showBarcodeDialog}
+        onClose={() => setShowBarcodeDialog(false)}
+        onGenerate={handleGenerateBarcode}
+        loading={isGenerating}
+      />
     </div>
   );
 }

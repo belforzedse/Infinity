@@ -55,7 +55,7 @@ export default function OrdersPage() {
         }}
         columns={columns}
         url={
-          "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract"
+          "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract&fields[0]=id&fields[1]=Description&fields[2]=Note&fields[3]=Status&fields[4]=Date&fields[5]=ShippingBarcode&fields[6]=createdAt&fields[7]=updatedAt"
         }
         mobileTable={(data) => <MobileTable data={data} />}
       />

@@ -1,12 +1,10 @@
-// removed unused import: ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon"
-import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import { priceFormatter } from "@/utils/price";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
-import EyeIcon from "@/components/SuperAdmin/Layout/Icons/EyeIcon";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
+import OrderRowActions from "@/components/SuperAdmin/Order/OrderRowActions";
 
 export type Order = {
   id: string;
@@ -15,6 +13,7 @@ export type Order = {
     Note: string;
     Status: string;
     Date: string;
+    ShippingBarcode?: string;
     createdAt: string;
     updatedAt: string;
     user: {
@@ -155,6 +154,19 @@ export const columns: ColumnDef<Order>[] = [
     },
   },
   {
+    accessorKey: "attributes.ShippingBarcode",
+    header: "کد رهگیری",
+    cell: ({ row }) => {
+      const barcode = row.original?.attributes?.ShippingBarcode;
+
+      return (
+        <span className="text-sm text-foreground-primary">
+          {barcode || "-"}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "createdAt",
     header: "عملیات",
     meta: {
@@ -163,18 +175,10 @@ export const columns: ColumnDef<Order>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex flex-row-reverse items-center gap-3 p-1">
-          <SuperAdminTableCellActionButton
-            variant="secondary"
-            path={`/super-admin/orders/edit/${row.original.id}`}
-            icon={<EyeIcon />}
-          />
-
-          {/* <SuperAdminTableCellActionButton
-            variant="secondary"
-            icon={<PrintIcon />}
-          /> */}
-        </div>
+        <OrderRowActions
+          orderId={row.original.id}
+          shippingBarcode={row.original.attributes.ShippingBarcode}
+        />
       );
     },
   },
@@ -257,6 +261,14 @@ export const MobileTable = ({ data }: Props) => {
                     {row?.attributes?.Status === "Cancelled" && "لغو شده"}
                   </span>
                 </div>
+                {row?.attributes?.ShippingBarcode && (
+                  <>
+                    <span className="text-xs text-neutral-400">|</span>
+                    <span className="text-xs text-neutral-600 font-medium">
+                      {row.attributes.ShippingBarcode}
+                    </span>
+                  </>
+                )}
               </div>
 
               <span className="text-xs text-neutral-800">
@@ -270,6 +282,12 @@ export const MobileTable = ({ data }: Props) => {
             </div>
           }
           headTitle={"#" + row.id}
+          actions={
+            <OrderRowActions
+              orderId={row.id}
+              shippingBarcode={row.attributes.ShippingBarcode}
+            />
+          }
         />
       ))}
     </div>
