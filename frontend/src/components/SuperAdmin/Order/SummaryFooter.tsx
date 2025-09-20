@@ -49,6 +49,8 @@ export default function SuperAdminOrderSummaryFooter({
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerateBarcode = async (weight?: number, boxSizeId?: number) => {
+    if (!order) return;
+
     setIsGenerating(true);
     try {
       const mod = await import("@/services/order");
@@ -64,7 +66,8 @@ export default function SuperAdminOrderSummaryFooter({
         await onReload();
       }
       setShowBarcodeDialog(false);
-    } catch (e) {
+    } catch (error) {
+      console.error("Error generating Anipo barcode:", error);
       alert("خطا در ایجاد بارکد Anipo");
     } finally {
       setIsGenerating(false);
