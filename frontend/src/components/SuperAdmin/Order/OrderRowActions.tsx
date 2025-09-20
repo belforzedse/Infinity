@@ -51,8 +51,8 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
   };
 
   const handlePrintBarcode = () => {
-    // Placeholder for print barcode functionality
-    alert("قابلیت پرینت بارکد در حال توسعه است");
+    const url = `/super-admin/orders/anipo-barcode/${orderId}`;
+    window.open(url, "_blank");
   };
 
   return (
