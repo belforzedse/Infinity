@@ -14,6 +14,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
+  const [currentBarcode, setCurrentBarcode] = useState(shippingBarcode);
 
   const handlePrintReceipt = () => {
     const url = `/super-admin/orders/print/${orderId}`;
@@ -28,6 +29,10 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
 
       if (res?.success || res?.already) {
         setHasBarcode(true);
+        // If API returns the barcode number, update it
+        if (res?.barcode) {
+          setCurrentBarcode(res.barcode);
+        }
         alert(
           res?.already
             ? "بارکد قبلاً ثبت شده است"
@@ -77,7 +82,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
         {hasBarcode ? (
           <button
             onClick={handlePrintBarcode}
-            className="flex h-8 w-8 items-center justify-center rounded-md bg-green-50 text-green-600 transition-colors hover:bg-green-100"
+            className="flex items-center gap-1 px-3 py-1 rounded-md bg-green-50 text-green-600 transition-colors hover:bg-green-100 text-xs"
             title="پرینت بارکد"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -89,12 +94,13 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
               <path d="M13 8V16"></path>
               <path d="M17 8V16"></path>
             </svg>
+            <span>پرینت بارکد</span>
           </button>
         ) : (
           <button
             onClick={() => setShowBarcodeDialog(true)}
             disabled={isGenerating}
-            className="flex h-8 w-8 items-center justify-center rounded-md bg-orange-50 text-orange-600 transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 px-3 py-1 rounded-md bg-orange-50 text-orange-600 transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
             title="صدور بارکد"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -102,6 +108,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
               <path d="M12 8V16"></path>
               <path d="M8 12H16"></path>
             </svg>
+            <span>صدور بارکد</span>
           </button>
         )}
       </div>
