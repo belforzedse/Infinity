@@ -1,17 +1,15 @@
-# Infinity Store Frontend - Release Notes
+# Release Notes
 
-## 2025-09-14 07:05 UTC
+## Anipo Frontend
 
-### Fixes
+- Shipping preview calls /carts/shipping-preview on address/shipping change
+- User orders list shows tracking link when ShippingBarcode exists
+- Super Admin order details display Anipo fields (barcode, post price, tax, weight, box size)
 
-- PDP selectors: ensure buttons use `type="button"` to avoid unintended form submissions.
+## 2025-09-20
 
-### Accessibility
-
-- Added TODO note to improve selected color state semantics (keyboard operability / aria roles).
-
-### Files Changed
-
-- `src/components/PDP/Hero/Info/Color.tsx`
-- `src/components/PDP/Hero/Info/Size.tsx`
-- `src/components/PDP/Hero/Info/Model.tsx`
+- Super Admin: Anipo barcode button + server-side metadata via ClientLayout.
+- SEO: Local favicon in public and Next.js icons metadata.
+- SEO: Home and auth page metadata added (server-only).
+- Next.js fix: Removed metadata from client pages to avoid runtime errors.
+- Wallet: Added wallet service (balance fetch, start top-up), wallet as checkout payment method with balance display/disable logic, POST form redirect to Mellat with RefId, and wallet/snappay assets.

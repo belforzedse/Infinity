@@ -1,6 +1,34 @@
 import { apiClient } from "../index";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
+// Simple cache implementation for orders
+class OrderCache {
+  private cache = new Map<string, { data: any; timestamp: number }>();
+  private readonly TTL = 5 * 60 * 1000; // 5 minutes
+
+  get(key: string) {
+    const item = this.cache.get(key);
+    if (!item) return null;
+
+    if (Date.now() - item.timestamp > this.TTL) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return item.data;
+  }
+
+  set(key: string, data: any) {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  clear() {
+    this.cache.clear();
+  }
+}
+
+const orderCache = new OrderCache();
+
 /**
  * Interface for order payment verification
  */
@@ -74,6 +102,7 @@ export interface Order {
   Date: string;
   Type: string;
   ShippingCost: number;
+  ShippingBarcode?: string;
   Description?: string;
   Note?: string;
   createdAt: string;
@@ -106,11 +135,11 @@ export interface OrdersResponse {
  */
 export const verifyPayment = async (
   orderId: number,
-  refNum: string,
+  refNum: string
 ): Promise<PaymentVerificationResponse> => {
   try {
     const response = await apiClient.get<PaymentVerificationResponse>(
-      `/orders/verify-payment?orderId=${orderId}&refNum=${refNum}`,
+      `/orders/verify-payment?orderId=${orderId}&refNum=${refNum}`
     );
     return response as any;
   } catch (error: any) {
@@ -125,11 +154,11 @@ export const verifyPayment = async (
  * @returns Order status information
  */
 export const getOrderStatus = async (
-  orderId: number,
+  orderId: number
 ): Promise<OrderStatusResponse> => {
   try {
     const response = await apiClient.get<OrderStatusResponse>(
-      `/orders/${orderId}/status`,
+      `/orders/${orderId}/status`
     );
     return response as any;
   } catch (error: any) {
@@ -144,11 +173,11 @@ export const getOrderStatus = async (
  * @returns Order payment status information
  */
 export const getOrderPaymentStatus = async (
-  orderId: number,
+  orderId: number
 ): Promise<OrderPaymentStatusResponse> => {
   try {
     const response = await apiClient.get<OrderPaymentStatusResponse>(
-      `/orders/${orderId}/payment-status`,
+      `/orders/${orderId}/payment-status`
     );
     return response.data;
   } catch (error: any) {
@@ -165,11 +194,19 @@ export const getOrderPaymentStatus = async (
  */
 export const getMyOrders = async (
   page: number = 1,
-  pageSize: number = 10,
+  pageSize: number = 10
 ): Promise<OrdersResponse> => {
+  const cacheKey = `orders_${page}_${pageSize}`;
+
+  // Check cache first
+  const cachedData = orderCache.get(cacheKey);
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const response = await apiClient.get(
-      `/orders/my-orders?page=${page}&pageSize=${pageSize}`,
+      `/orders/my-orders?page=${page}&pageSize=${pageSize}`
     );
 
     // Ensure response has the expected structure
@@ -201,14 +238,14 @@ export const getMyOrders = async (
                 ? {
                     ...item.product_variation.product.cover_image,
                     url: getFullImageUrl(
-                      item.product_variation.product.cover_image.url,
+                      item.product_variation.product.cover_image.url
                     ),
                   }
                 : undefined,
             },
           },
         })),
-      }),
+      })
     );
 
     // Ensure meta has the expected structure
@@ -219,12 +256,17 @@ export const getMyOrders = async (
       total: ordersWithFullImageUrls.length,
     };
 
-    return {
+    const result = {
       data: ordersWithFullImageUrls,
       meta: {
         pagination,
       },
     };
+
+    // Cache the result
+    orderCache.set(cacheKey, result);
+
+    return result;
   } catch (error: any) {
     console.error("Error fetching user orders:", error);
     throw error;
@@ -246,6 +288,15 @@ const OrderService = {
   getOrderStatus,
   getOrderPaymentStatus,
   getMyOrders,
+  async generateAnipoBarcode(orderId: number): Promise<any> {
+    try {
+      const res = await apiClient.post(`/orders/${orderId}/anipo-barcode`, {});
+      return res as any;
+    } catch (error: any) {
+      console.error("Error generating Anipo barcode:", error);
+      throw error;
+    }
+  },
 };
 
 export default OrderService;

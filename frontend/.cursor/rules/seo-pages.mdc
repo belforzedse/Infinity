@@ -1,23 +1,33 @@
 ---
-description: SEO metadata for PDP and PLP pages using Next.js App Router generateMetadata
-globs: src/app/(product)/pdp/[slug]/page.tsx,src/app/(product)/plp/page.tsx
+description: SEO metadata guidelines and current implementation across pages (Layout, Home, PDP/PLP, Auth, User, Orders/Payment)
+globs: src/app/layout.tsx,src/app/(product)/page.tsx,src/app/(product)/plp/page.tsx,src/app/(product)/pdp/[slug]/page.tsx,src/app/(public)/auth/**/page.tsx,src/app/(user)/**/page.tsx,src/app/orders/**/page.tsx,src/app/payment/**/page.tsx,src/app/(super-admin)/**
 ---
 
-## SEO Metadata (PDP / PLP)
+## SEO Metadata (App Router)
 
-Use Next.js App Router `generateMetadata` to provide page-level SEO for product pages.
+Use Next.js App Router `generateMetadata` or `export const metadata` to provide page-level SEO.
+
+### Global (Root Layout)
+
+- Persian defaults set in `metadata` (title template, description, OpenGraph siteName/locale)
+- Favicon is served locally from `/favicon.png` in `public`
+- Reference: [layout.tsx](mdc:infinity-store-front/src/app/layout.tsx)
+
+### Home (`/`)
+
+- Title: «صفحه اصلی | اینفینیتی استور»
+- Description: concise Persian summary of storefront
+- Canonical: `/`
+- Reference: [home page](<mdc:infinity-store-front/src/app/(product)/page.tsx>)
 
 ### PDP (`/pdp/[slug]`)
 
-- Fetch product by slug and build metadata from product attributes.
+- Fetch product by slug and build metadata from product attributes
 - Title: `خرید {Title} | اینفینیتی استور`
-- Description: product `Description` (trimmed ~160 chars), fallback to Title
-- OpenGraph: `type: website` (Next.js OG types are limited), `url: /pdp/{slug}`, image from CoverImage (`IMAGE_BASE_URL + url`)
+- Description: product `Description` (trim ~160 chars), fallback to Title
+- OpenGraph: `type: website`, `url: /pdp/{slug}`, `images` from CoverImage (`IMAGE_BASE_URL + url`)
 - Canonical: `/pdp/{slug}`
-
-Reference:
-
-- [PDP page](<mdc:infinity-store-front/src/app/(product)/pdp/[slug]/page.tsx>)
+- Reference: [PDP page](<mdc:infinity-store-front/src/app/(product)/pdp/[slug]/page.tsx>)
 
 ### PLP (`/plp`)
 
@@ -26,15 +36,54 @@ Reference:
   - Category: `خرید {category} | اینفینیتی استور` and canonical `/plp?category={category}`
   - Default: `فروشگاه | اینفینیتی استور` and canonical `/plp`
 - OpenGraph: `type: website`, `url` aligned to canonical
+- Reference: [PLP page](<mdc:infinity-store-front/src/app/(product)/plp/page.tsx>)
 
-Reference:
+### Auth Pages (`/auth/*`)
 
-- [PLP page](<mdc:infinity-store-front/src/app/(product)/plp/page.tsx>)
+- Use `export const metadata` with `robots: { index: false, follow: false }`
+- Set canonical to the specific route (e.g., `/auth/login`, `/auth/login/otp`, `/auth/forgot-password`, `/auth/forgot-password/verify`, `/auth/register`, `/auth/register/info`)
+- References:
+  - [Auth index](<mdc:infinity-store-front/src/app/(public)/auth/page.tsx>)
+  - [Login](<mdc:infinity-store-front/src/app/(public)/auth/login/page.tsx>)
+  - [Login OTP](<mdc:infinity-store-front/src/app/(public)/auth/login/otp/page.tsx>)
+  - [Register](<mdc:infinity-store-front/src/app/(public)/auth/register/page.tsx>)
+  - [Register Info](<mdc:infinity-store-front/src/app/(public)/auth/register/info/page.tsx>)
+  - [Forgot Password](<mdc:infinity-store-front/src/app/(public)/auth/forgot-password/page.tsx>)
+  - [Forgot Password Verify](<mdc:infinity-store-front/src/app/(public)/auth/forgot-password/verify/page.tsx>)
+
+### User Area (`/account`, `/orders`, `/cart`, `/addresses`, `/wallet`, `/favorites`, `/password`)
+
+- Provide meaningful Persian titles/descriptions per page
+- Canonicals set to the clean path
+- References:
+  - [Account](<mdc:infinity-store-front/src/app/(user)/account/page.tsx>)
+  - [Orders](<mdc:infinity-store-front/src/app/(user)/orders/page.tsx>)
+  - [Cart](<mdc:infinity-store-front/src/app/(user)/cart/page.tsx>)
+  - [Addresses](<mdc:infinity-store-front/src/app/(user)/addresses/page.tsx>)
+  - [Wallet](<mdc:infinity-store-front/src/app/(user)/wallet/page.tsx>)
+  - [Favorites](<mdc:infinity-store-front/src/app/(user)/favorites/page.tsx>)
+  - [Password](<mdc:infinity-store-front/src/app/(user)/password/page.tsx>)
+
+### Orders & Payment Flows
+
+- `orders/payment-callback`, `orders/success`, `orders/failure`, `payment/success`, `payment/failure`, `payment/cancelled`
+- Set `robots: { index: false, follow: false }` and appropriate canonicals
+- References:
+  - [Payment Callback](mdc:infinity-store-front/src/app/orders/payment-callback/page.tsx)
+  - [Orders Success](mdc:infinity-store-front/src/app/orders/success/page.tsx)
+  - [Orders Failure](mdc:infinity-store-front/src/app/orders/failure/page.tsx)
+  - [Payment Success](mdc:infinity-store-front/src/app/payment/success/page.tsx)
+  - [Payment Failure](mdc:infinity-store-front/src/app/payment/failure/page.tsx)
+  - [Payment Cancelled](mdc:infinity-store-front/src/app/payment/cancelled/page.tsx)
+
+### Super Admin (`/super-admin/*`)
+
+- Private/admin section; should not be indexed. Prefer route-group layout `metadata.robots` or per-page metadata as needed
+- Reference: [Super Admin layout](<mdc:infinity-store-front/src/app/(super-admin)/layout.tsx>)
 
 ### Notes
 
-- Always prefer Persian titles and descriptions.
-- Keep descriptions concise (~150–160 chars).
-- Use `IMAGE_BASE_URL` for absolute image URLs in OpenGraph.
-- Next.js Metadata typings support a limited OG `type` set (e.g., `website`, `article`, etc.). Avoid custom values like `product`; omit or use `website` instead.
-- Ensure `alternates.canonical` always matches the current route and query context.
+- Use Persian titles and concise descriptions (~150–160 chars)
+- OpenGraph `type` should be one of Next types (e.g., `website`)
+- Use `IMAGE_BASE_URL` for absolute image URLs in OpenGraph
+- Ensure `alternates.canonical` always matches current route/query context

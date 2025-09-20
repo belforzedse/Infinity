@@ -35,7 +35,7 @@ interface TableProps<TData, TValue> {
   data?: TData[];
   url?: string;
   loading?: boolean;
-  removeActions?: boolean;
+  _removeActions?: boolean;
   className?: string;
   draggable?: boolean;
   mobileTable?: (
@@ -77,7 +77,7 @@ export function SuperAdminTable<TData, TValue>({
   url,
   loading,
   className,
-  removeActions,
+  _removeActions,
   draggable,
   onItemDrag,
   mobileTable,

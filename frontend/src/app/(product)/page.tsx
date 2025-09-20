@@ -4,6 +4,7 @@ import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 import { categories } from "@/constants/categories";
 import {
   getDiscountedProducts,
@@ -174,3 +175,17 @@ export default async function Home() {
     </div>
   );
 }
+
+export const metadata: Metadata = {
+  title: "صفحه اصلی | اینفینیتی استور",
+  description:
+    "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "صفحه اصلی | اینفینیتی استور",
+    description:
+      "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+    type: "website",
+    url: "/",
+  },
+};
