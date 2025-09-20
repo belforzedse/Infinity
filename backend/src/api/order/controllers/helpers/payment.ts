@@ -258,9 +258,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         await strapi.entityService.update("api::order.order", orderId, {
           data: { Status: "Started" },
         });
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
+        // Auto barcode generation disabled - manual generation required
+        // try {
+        //   await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+        // } catch {}
         try {
           await strapi.entityService.create("api::order-log.order-log", {
             data: {
@@ -406,9 +407,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             Status: "Started",
           },
         });
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
+        // Auto barcode generation disabled - manual generation required
+        // try {
+        //   await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+        // } catch {}
 
         strapi.log.info(`Payment successful for Order ${orderId}:`, {
           orderId,
