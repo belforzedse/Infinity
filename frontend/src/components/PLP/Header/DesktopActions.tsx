@@ -16,13 +16,13 @@ const PLPDesktopHeaderActions = ({}: Props) => {
       <button
         onClick={openDrawer}
         aria-label="سبد خرید"
-        className="pressable flex items-center gap-1 text-pink-500 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="pressable flex items-center gap-1 text-pink-500 transition-all duration-200 hover:text-pink-600 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-95"
       >
         <span className="text-xs sr-only md:not-sr-only">سبد خرید</span>
         <div className="relative">
           <ShoppingCartIcon className="h-6 w-6" />
-          <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-slate-200 bg-white">
-            <span className="text-xs text-pink-500">{totalItems}</span>
+          <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-slate-200 bg-white transition-all duration-200">
+            <span className="text-xs text-pink-500 font-medium">{totalItems}</span>
           </div>
         </div>
       </button>
@@ -32,7 +32,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
       <Link
         href="/wallet"
         aria-label="کیف پول"
-        className="pressable flex items-center gap-1 text-slate-400 transition-colors hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="pressable flex items-center gap-1 text-slate-400 transition-all duration-200 hover:text-slate-500 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-95"
       >
         <WalletIcon className="h-6 w-6" />
       </Link>
@@ -42,7 +42,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
       <Link
         href="/orders"
         aria-label="پیگیری سفارش"
-        className="pressable flex items-center gap-1 text-slate-400 transition-colors hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="pressable flex items-center gap-1 text-slate-400 transition-all duration-200 hover:text-slate-500 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-95"
       >
         <OrderTrackingIcon className="h-6 w-6" />
       </Link>
@@ -52,7 +52,7 @@ const PLPDesktopHeaderActions = ({}: Props) => {
       <Link
         href="/auth/login"
         aria-label="ورود"
-        className="pressable flex items-center gap-1 text-slate-400 transition-colors hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="pressable flex items-center gap-1 text-slate-400 transition-all duration-200 hover:text-slate-500 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-95"
       >
         <UserProfileIcon className="h-6 w-6" />
       </Link>

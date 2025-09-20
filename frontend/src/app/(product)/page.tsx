@@ -4,6 +4,7 @@ import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 import { categories } from "@/constants/categories";
 import {
   getDiscountedProducts,
