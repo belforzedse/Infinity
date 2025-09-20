@@ -1,0 +1,34 @@
+---
+alwaysApply: false
+description: Frontend wallet service and checkout wallet payment option
+---
+
+## Frontend Wallet Flows
+
+### Wallet Service
+
+- Service file: [src/services/wallet/index.ts](mdc:infinity-store-front/src/services/wallet/index.ts)
+- Exposes:
+  - `getMyWallet()` → GET `/local-user-wallet/me`, returns wallet balance (IRR)
+  - `startTopup(amountIrr)` → POST `/wallet/charge-intent`, returns Mellat `redirectUrl`/`refId`
+
+### Wallet Page Components
+
+- Balance component displays real wallet balance (IRR → toman): [src/components/User/Wallet/Balance.tsx](mdc:infinity-store-front/src/components/User/Wallet/Balance.tsx)
+- IncreaseBalance triggers top-up via Mellat using `startTopup`: [src/components/User/Wallet/IncreaseBalance.tsx](mdc:infinity-store-front/src/components/User/Wallet/IncreaseBalance.tsx)
+
+### Checkout – Wallet as Payment Method
+
+- Payment gateway selector supports `wallet`, `mellat`, `snappay`: [src/components/ShoppingCart/‌Bill/PaymentGateway.tsx](mdc:infinity-store-front/src/components/ShoppingCart/‌Bill/PaymentGateway.tsx)
+  - Shows wallet balance (toman) and disables wallet when balance < required amount.
+  - Displays helper CTA linking to `/wallet` when insufficient.
+- Bill index computes required amount and passes balance/required to gateway component: [src/components/ShoppingCart/‌Bill/index.tsx](mdc:infinity-store-front/src/components/ShoppingCart/‌Bill/index.tsx)
+
+### Assets
+
+- Wallet icon: [public/images/cart/wallet.svg](mdc:infinity-store-front/public/images/cart/wallet.svg)
+
+### Notes
+
+- Units: frontend receives wallet in IRR; displays toman using `(irr / 10).toLocaleString()`.
+- Top-up callback redirect handled by backend to `https://infinity.rgbgroup.ir/wallet?status=...`.

@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { ShippingMethod } from "@/services/shipping";
 import { CartService } from "@/services";
 import toast from "react-hot-toast";
+import WalletService from "@/services/wallet";
+import { useCart } from "@/contexts/CartContext";
 
 export type FormData = {
   fullName: string;
@@ -59,7 +61,9 @@ function ShoppingCartBillForm({}: Props) {
     : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"mellat" | "snappay">("mellat");
+  const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">(
+    "mellat"
+  );
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
   const [snappMessage, setSnappMessage] = useState<string | undefined>(
     undefined
@@ -84,6 +88,8 @@ function ShoppingCartBillForm({}: Props) {
   const [shippingPreview, setShippingPreview] = useState<
     { shipping: number; weight?: number } | undefined
   >(undefined);
+  const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
+  const { totalPrice } = useCart();
 
   // Persist/restore discount code
   useEffect(() => {
@@ -189,6 +195,18 @@ function ShoppingCartBillForm({}: Props) {
     run();
   }, [shippingId, shippingCost, discountCode]);
 
+  // Load wallet balance once
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const res = await WalletService.getMyWallet();
+        if (res?.success && res.data)
+          setWalletBalanceIrr(Number(res.data.balance || 0));
+      } catch {}
+    };
+    run();
+  }, []);
+
   const onSubmit = async (data: FormData) => {
     if (!data.address) {
       setError("لطفا یک آدرس انتخاب کنید");
@@ -285,6 +303,18 @@ function ShoppingCartBillForm({}: Props) {
     }
   };
 
+  // Compute required amount (toman -> IRR) for wallet enablement, independent of discountPreview presence
+  // Fallbacks: subtotal + tax + shipping when no discount is applied
+  const shippingToman = shippingPreview?.shipping ?? shippingCost ?? 0;
+  const discountToman = discountPreview?.discount ?? 0;
+  const subtotalToman = totalPrice;
+  const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
+  const totalToman = Math.max(
+    0,
+    Math.round(subtotalToman - discountToman + taxToman + shippingToman)
+  );
+  const requiredAmountIrr = totalToman * 10;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <span className="lg:text-3xl text-lg text-neutral-800">
@@ -338,6 +368,8 @@ function ShoppingCartBillForm({}: Props) {
             onChange={setGateway}
             snappEligible={snappEligible}
             snappMessage={snappMessage}
+            walletBalanceIrr={walletBalanceIrr}
+            requiredAmountIrr={requiredAmountIrr}
           />
           <button
             type="submit"
