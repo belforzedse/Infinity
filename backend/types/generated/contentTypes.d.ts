@@ -644,7 +644,7 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
-    EndDate: Attribute.DateTime;
+    EndDate: Attribute.DateTime & Attribute.Required;
     IsActive: Attribute.Boolean & Attribute.DefaultTo<false>;
     LimitAmount: Attribute.Integer;
     LimitUsage: Attribute.Integer;
@@ -659,7 +659,7 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
       'api::product-variation.product-variation'
     >;
     removedAt: Attribute.DateTime;
-    StartDate: Attribute.DateTime;
+    StartDate: Attribute.DateTime & Attribute.Required;
     Type: Attribute.Enumeration<['Discount', 'Cash']> &
       Attribute.DefaultTo<'Discount'>;
     updatedAt: Attribute.DateTime;
@@ -741,7 +741,7 @@ export interface ApiGeneralDiscountGeneralDiscount
       'admin::user'
     > &
       Attribute.Private;
-    EndDate: Attribute.DateTime;
+    EndDate: Attribute.DateTime & Attribute.Required;
     IsActive: Attribute.Boolean & Attribute.DefaultTo<false>;
     LimitAmount: Attribute.Integer;
     product_categories: Attribute.Relation<
@@ -755,7 +755,7 @@ export interface ApiGeneralDiscountGeneralDiscount
       'api::product-variation.product-variation'
     >;
     removedAt: Attribute.DateTime;
-    StartDate: Attribute.DateTime;
+    StartDate: Attribute.DateTime & Attribute.Required;
     Type: Attribute.Enumeration<['Discount', 'Cash']> &
       Attribute.DefaultTo<'Discount'>;
     updatedAt: Attribute.DateTime;
@@ -1324,6 +1324,11 @@ export interface ApiOrderOrder extends Schema.CollectionType {
     > &
       Attribute.Private;
     Date: Attribute.DateTime & Attribute.Required;
+    delivery_address: Attribute.Relation<
+      'api::order.order',
+      'manyToOne',
+      'api::local-user-address.local-user-address'
+    >;
     Description: Attribute.Text;
     external_id: Attribute.String;
     external_source: Attribute.String;
@@ -1338,7 +1343,40 @@ export interface ApiOrderOrder extends Schema.CollectionType {
       'manyToOne',
       'api::shipping.shipping'
     >;
+    ShippingBarcode: Attribute.String;
+    ShippingBoxSizeId: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
     ShippingCost: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
+    ShippingPostPrice: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
+    ShippingTax: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
+    ShippingWeight: Attribute.Integer &
       Attribute.SetMinMax<
         {
           min: 0;
@@ -2199,6 +2237,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    Weight: Attribute.Integer & Attribute.DefaultTo<100>;
   };
 }
 
@@ -2250,6 +2289,7 @@ export interface ApiShippingProvinceShippingProvince
     draftAndPublish: false;
   };
   attributes: {
+    Code: Attribute.String & Attribute.Unique;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       'api::shipping-province.shipping-province',
@@ -2314,6 +2354,57 @@ export interface ApiShippingShipping extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+  };
+}
+
+export interface ApiWalletTopupWalletTopup extends Schema.CollectionType {
+  collectionName: 'wallet_topups';
+  info: {
+    displayName: 'WalletTopup';
+    pluralName: 'wallet-topups';
+    singularName: 'wallet-topup';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Amount: Attribute.BigInteger &
+      Attribute.Required &
+      Attribute.SetMinMax<
+        {
+          min: '0';
+        },
+        string
+      >;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::wallet-topup.wallet-topup',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Date: Attribute.DateTime;
+    Note: Attribute.Text;
+    RefId: Attribute.String;
+    SaleOrderId: Attribute.String & Attribute.Unique;
+    SaleReferenceId: Attribute.String;
+    Status: Attribute.Enumeration<
+      ['Pending', 'Success', 'Failed', 'Cancelled']
+    > &
+      Attribute.Required &
+      Attribute.DefaultTo<'Pending'>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::wallet-topup.wallet-topup',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    user: Attribute.Relation<
+      'api::wallet-topup.wallet-topup',
+      'manyToOne',
+      'api::local-user.local-user'
+    >;
   };
 }
 
@@ -2795,6 +2886,7 @@ declare module '@strapi/types' {
       'api::shipping-city.shipping-city': ApiShippingCityShippingCity;
       'api::shipping-province.shipping-province': ApiShippingProvinceShippingProvince;
       'api::shipping.shipping': ApiShippingShipping;
+      'api::wallet-topup.wallet-topup': ApiWalletTopupWalletTopup;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
