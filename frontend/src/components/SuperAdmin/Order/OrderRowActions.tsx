@@ -50,9 +50,9 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
     }
   };
 
-  const handlePrintBarcode = () => {
-    const url = `/super-admin/orders/anipo-barcode/${orderId}`;
-    window.open(url, "_blank");
+  const handleIssuedBarcode = () => {
+    // Just a visual indicator that barcode has been issued
+    // No action needed as it's already generated
   };
 
   return (
@@ -81,20 +81,14 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
         {/* Anipo Barcode Button */}
         {hasBarcode ? (
           <button
-            onClick={handlePrintBarcode}
-            className="flex items-center gap-1 px-3 py-1 rounded-md bg-green-50 text-green-600 transition-colors hover:bg-green-100 text-xs"
-            title="پرینت بارکد"
+            onClick={handleIssuedBarcode}
+            className="flex items-center gap-1 px-3 py-1 rounded-md bg-green-50 text-green-600 cursor-default text-xs"
+            title="بارکد صادر شده"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 5V19H21V5H3Z"></path>
-              <path d="M7 8V16"></path>
-              <path d="M11 8V16"></path>
-              <path d="M15 8V16"></path>
-              <path d="M9 8V16"></path>
-              <path d="M13 8V16"></path>
-              <path d="M17 8V16"></path>
+              <path d="M20 6L9 17l-5-5"></path>
             </svg>
-            <span>پرینت بارکد</span>
+            <span>صادر شده</span>
           </button>
         ) : (
           <button
