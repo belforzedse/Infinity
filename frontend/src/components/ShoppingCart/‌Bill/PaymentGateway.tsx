@@ -62,7 +62,7 @@ function ShoppingCartBillPaymentGateway({
         درگاه پرداخت خود را انتخاب کنید
       </span>
 
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-2 gap-2 w-full">
         {paymentGateways.map((pg) => (
           <button
             key={pg.id}
