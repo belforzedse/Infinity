@@ -161,7 +161,7 @@ export default function Invoice({ order }: Props) {
             <span className="font-bold">گیرنده:</span>{" "}
             <span> {fullName || "نامشخص"} </span>
             <span className="font-bold">شماره تماس:</span>{" "}
-            {attrs.user.data.attributes.Phone}
+            {attrs.user?.data?.attributes?.Phone || "نامشخص"}
           </p>
           <p>
             <span className="font-bold">تاریخ سفارش:</span>{" "}
