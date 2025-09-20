@@ -4,14 +4,15 @@ import OffersList from "@/components/PDP/OffersList";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
 import { ProductReview } from "@/components/PDP/Comment/List";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { IMAGE_BASE_URL } from "@/constants/api";
 import {
   getProductBySlug,
   ProductDetail,
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
-import type { Metadata } from "next";
-import { IMAGE_BASE_URL } from "@/constants/api";
 
 export async function generateMetadata({
   params,
@@ -25,8 +26,9 @@ export async function generateMetadata({
     const titleRaw = product?.attributes?.Title || "محصول";
     const descRaw = product?.attributes?.Description || titleRaw;
     const description = String(descRaw).slice(0, 160);
-    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
-      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+    const imageUrl =
+      product?.attributes?.CoverImage?.data?.attributes?.url ?
+        `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
     const title = `خرید ${titleRaw} | اینفینیتی استور`;
@@ -55,13 +57,6 @@ export async function generateMetadata({
   }
 }
 
-// Remove mock data as we'll use real data
-// const products = new Array(20).fill(null).map((_, index) => {
-//   const template = [
-//     ... existing mock products ...
-//   }
-// });
-
 export default async function PDP({
   params,
 }: {
@@ -88,12 +83,12 @@ export default async function PDP({
   // If we still don't have product data, just return a message
   if (!productData && error) {
     return (
-      <div className="flex flex-col gap-8 items-center justify-center p-10">
+      <div className="flex flex-col items-center justify-center gap-8 p-10">
         <h1 className="text-2xl font-bold">محصول مورد نظر یافت نشد</h1>
         <p>لطفا محصول دیگری را انتخاب کنید یا به صفحه اصلی بازگردید.</p>
-        <a href="/" className="text-blue-500 hover:underline">
+        <Link href="/" className="text-blue-500">
           بازگشت به صفحه اصلی
-        </a>
+        </Link>
       </div>
     );
   }

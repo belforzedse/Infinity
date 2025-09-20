@@ -2,7 +2,7 @@ import Logo from "../../Kits/Logo";
 
 const LogoSection = () => {
   return (
-    <div className="relative md:pr-6 md:border-r md:border-slate-200 w-full md:w-auto md:h-full md:min-h-[324px] flex items-center justify-center">
+    <div className="relative flex w-full items-center justify-center md:h-full md:min-h-[324px] md:w-auto md:border-r md:border-slate-200 md:pr-6">
       <Logo />
     </div>
   );

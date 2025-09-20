@@ -11,17 +11,17 @@ export default function PhoneInput({ value, onEdit }: PhoneInputProps) {
     <button
       type="button"
       onClick={onEdit}
-      className="flex flex-row-reverse items-center gap-1 bg-sky-600 hover:bg-sky-700 text-white px-2 py-1 rounded transition-colors"
+      className="flex flex-row-reverse items-center gap-1 rounded bg-sky-600 px-2 py-1 text-white transition-colors hover:bg-sky-700"
     >
       <span className="text-sm">ویرایش</span>
-      <EditIcon className="w-4 h-4" />
+      <EditIcon className="h-4 w-4" />
     </button>
   );
 
   // Convert English numbers to Persian
   const faValue = value.replace(
     /\d/g,
-    (d) => ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"][Number(d)]
+    (d) => ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"][Number(d)],
   );
 
   return (
@@ -29,7 +29,7 @@ export default function PhoneInput({ value, onEdit }: PhoneInputProps) {
       type="tel"
       value={faValue}
       readOnly
-      className="bg-slate-100 border-slate-200"
+      className="border-slate-200 bg-slate-100"
       dir="ltr"
       rightElement={editButton}
     />

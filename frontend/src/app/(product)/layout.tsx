@@ -6,27 +6,61 @@ import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
 import Footer from "@/components/PLP/Footer";
 import MobileHeader from "@/components/PLP/Header/Mobile";
 import BottomNavigation from "@/components/PLP/BottomNavigation";
-import CartDrawer from "@/components/ShoppingCart/Drawer";
+import dynamic from "next/dynamic";
+import { useCart } from "@/contexts/CartContext";
+import React from "react";
+import ScrollToTop from "@/components/ScrollToTop";
+
+const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
+  ssr: false,
+});
 
 export default function ProductLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isDrawerOpen } = useCart();
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
-    <div dir="rtl" className="pb-[81px] md:pb-0 bg-white">
-      <header>
+    <div dir="rtl" className="bg-white pb-[81px] antialiased md:pb-0">
+      {/* Skip to content for accessibility */}
+      <a
+        href="#content"
+        className="shadow-elevated sr-only fixed left-4 top-4 z-[60] rounded-md bg-black/80 px-3 py-2 text-white focus:not-sr-only"
+      >
+        پرش به محتوا
+      </a>
+      <header
+        className={`sticky top-0 z-50 transition-all ${
+          scrolled
+            ? "glass-panel shadow-sm"
+            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+        }`}
+      >
         <div className="hidden md:block">
-          <div className="px-10 py-4">
-            <div className="max-w-[1440px] mx-auto">
-              <div className="flex items-center justify-between">
-                <DesktopHeaderActions />
-                <Logo />
-                <DesktopSearch />
+          <div className="px-10 py-3">
+            <div className="mx-auto max-w-[1440px]">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+                <div className="justify-self-start">
+                  <DesktopHeaderActions />
+                </div>
+                <div className="justify-self-center">
+                  <Logo />
+                </div>
+                <div className="justify-self-end">
+                  <DesktopSearch />
+                </div>
               </div>
             </div>
           </div>
-          <HeaderDesktopNav />
         </div>
 
         <div className="md:hidden">
@@ -34,7 +68,12 @@ export default function ProductLayout({
         </div>
       </header>
 
-      <section>{children}</section>
+      {/* Desktop categories/navigation (not sticky) */}
+      <div className="hidden md:block">
+        <HeaderDesktopNav />
+      </div>
+
+      <section id="content">{children}</section>
 
       <footer>
         <Footer />
@@ -43,7 +82,9 @@ export default function ProductLayout({
       <BottomNavigation />
 
       {/* Cart Drawer */}
-      <CartDrawer />
+      {isDrawerOpen && <CartDrawer />}
+
+      <ScrollToTop />
     </div>
   );
 }

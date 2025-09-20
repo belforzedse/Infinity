@@ -1,5 +1,4 @@
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
-import EyeIcon from "@/components/SuperAdmin/Layout/Icons/EyeIcon";
 import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
@@ -8,6 +7,8 @@ import { API_BASE_URL } from "@/constants/api";
 import { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import { ColumnDef } from "@tanstack/react-table";
+import Image from "next/image";
+import imageLoader from "@/utils/imageLoader";
 
 export type Product = {
   id: string;
@@ -37,6 +38,7 @@ export type Product = {
           IsPublished: boolean;
           SKU: string;
           Price: string;
+          DiscountPrice?: string;
           createdAt: string;
           updatedAt: string;
           product_stock: {
@@ -63,22 +65,26 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center gap-2">
-          <img
+          <Image
             src={
               API_BASE_URL.split("/api")[0] +
               row.original?.attributes?.CoverImage?.data?.attributes?.formats
                 ?.thumbnail?.url
             }
             alt={row.original?.attributes?.CoverImage?.data?.attributes?.name}
-            className="w-12 h-12 rounded-xl overflow-hidden"
+            width={48}
+            height={48}
+            sizes="48px"
+            className="h-12 w-12 overflow-hidden rounded-xl object-cover"
+            loader={imageLoader}
           />
 
-          <div className="flex gap-2 flex-col">
-            <span className="text-foreground-primary text-xs !leading-none">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs !leading-none text-foreground-primary">
               {row.original?.attributes?.Title}
             </span>
 
-            <span className="text-foreground-secondary text-xs !leading-none">
+            <span className="text-xs !leading-none text-foreground-secondary">
               {
                 row.original?.attributes?.product_variations?.data?.[0]
                   ?.attributes?.SKU
@@ -96,18 +102,30 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "attributes.product_variations.data[0].attributes.Price",
     header: "قیمت",
-    cell: ({ row }) =>
-      row.original?.attributes?.product_variations?.data?.[0]?.attributes
-        ?.Price ? (
-        <SuperAdminTableCellSimplePrice
-          price={
-            +row.original?.attributes?.product_variations?.data?.[0]?.attributes
-              ?.Price
-          }
-        />
-      ) : (
-        "-"
-      ),
+    cell: ({ row }) => {
+      const variation = row.original?.attributes?.product_variations?.data?.[0]?.attributes;
+      if (!variation?.Price) return "-";
+
+      const price = +variation.Price;
+      const discountPrice = variation.DiscountPrice ? +variation.DiscountPrice : null;
+
+      return (
+        <div className="flex flex-col">
+          {discountPrice && (
+            <span className="text-pink-600 font-medium">
+              <SuperAdminTableCellSimplePrice
+                price={discountPrice}
+              />
+            </span>
+          )}
+          <span className={discountPrice ? "text-gray-500 line-through text-xs" : ""}>
+            <SuperAdminTableCellSimplePrice
+              price={price}
+            />
+          </span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "inventory",
@@ -116,11 +134,17 @@ export const columns: ColumnDef<Product>[] = [
       const sum = row.original?.attributes?.product_variations?.data?.reduce(
         (acc, curr) =>
           acc + curr?.attributes?.product_stock?.data?.attributes?.Count,
-        0
+        0,
       );
 
       return (
-        <span className="text-right px-2 py-1 text-white bg-green-600 rounded-xl">
+        <span
+          className={
+            sum === 0
+              ? "rounded-xl bg-red-600 px-2 py-1 text-right text-white"
+              : "rounded-xl bg-green-600 px-2 py-1 text-right text-white"
+          }
+        >
           {sum} عدد در انبار
         </span>
       );
@@ -135,7 +159,7 @@ export const columns: ColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           <RemoveActionButton
             isRemoved={!!row.original?.attributes?.removedAt}
             id={row.original?.id.toString()}
@@ -160,30 +184,46 @@ export const columns: ColumnDef<Product>[] = [
 
 type Props = {
   data: Product[] | undefined;
+  enableSelection?: boolean;
+  selectedIds?: Set<string>;
+  onSelectionChange?: (id: string, selected: boolean) => void;
 };
 
-export const MobileTable = ({ data }: Props) => {
+export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionChange }: Props) => {
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data?.map((row) => (
         <div
           key={row?.id}
-          className="p-3 bg-white rounded-lg w-full min-h-[76px] flex items-center gap-2"
+          className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
         >
-          <input type="checkbox" className="w-5 h-5" />
+          {enableSelection ? (
+            <input
+              type="checkbox"
+              className="h-5 w-5"
+              checked={selectedIds?.has(row.id) || false}
+              onChange={(e) => onSelectionChange?.(row.id, e.target.checked)}
+            />
+          ) : (
+            <input type="checkbox" className="h-5 w-5" />
+          )}
 
-          <img
+          <Image
             src={
               API_BASE_URL.split("/api")[0] +
               row?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail
                 ?.url
             }
             alt={row?.attributes?.CoverImage?.data?.attributes?.name}
-            className="w-12 h-12 rounded-lg"
+            width={48}
+            height={48}
+            sizes="48px"
+            className="h-12 w-12 rounded-lg object-cover"
+            loader={imageLoader}
           />
 
-          <div className="flex flex-col gap-2 flex-1">
-            <div className="flex justify-between items-center w-full">
+          <div className="flex flex-1 flex-col gap-2">
+            <div className="flex w-full items-center justify-between">
               <span className="text-sm text-neutral-800">
                 {row?.attributes?.Title}
                 {
@@ -192,12 +232,12 @@ export const MobileTable = ({ data }: Props) => {
                 }
               </span>
 
-              <button className="flex items-center justify-center rounded-full border border-neutral-600 w-6 h-6">
+              <button className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600">
                 <ShowMoreIcon />
               </button>
             </div>
 
-            <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
+            <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex gap-1">
                 <span className="text-xs text-neutral-400">
                   {
@@ -211,19 +251,32 @@ export const MobileTable = ({ data }: Props) => {
                     (acc, curr) =>
                       acc +
                       curr?.attributes?.product_stock?.data?.attributes?.Count,
-                    0
+                    0,
                   )}
                   عدد در انبار
                 </span>
               </div>
 
-              <span className="text-xs text-neutral-800">
-                {priceFormatter(
-                  +row?.attributes?.product_variations?.data?.[0]?.attributes
-                    ?.Price,
-                  " تومان"
+              <div className="flex flex-col">
+                {row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice && (
+                  <span className="text-xs text-pink-600 font-medium">
+                    {priceFormatter(
+                      +row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice,
+                      " تومان",
+                    )}
+                  </span>
                 )}
-              </span>
+                <span className={`text-xs ${
+                  row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice
+                    ? "text-gray-500 line-through"
+                    : "text-neutral-800"
+                }`}>
+                  {priceFormatter(
+                    +row?.attributes?.product_variations?.data?.[0]?.attributes?.Price,
+                    " تومان",
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         </div>

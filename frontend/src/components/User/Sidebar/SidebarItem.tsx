@@ -18,8 +18,8 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
 
   const renderIcon = (iconElement: ReactNode) => {
     const iconClassName = clsx(
-      "w-5 h-5",
-      isActive ? "text-white fill-white" : "text-pink-500"
+      "h-5 w-5",
+      isActive ? "fill-white text-white" : "text-pink-500",
     );
 
     if (isValidElement<{ className?: string }>(iconElement)) {
@@ -31,8 +31,8 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   if (onClick) {
     return (
       <button
-        // onClick={onClick}
-        className="flex items-center gap-2 py-4 px-5 text-gray-700"
+        onClick={onClick}
+        className="flex items-center gap-2 px-5 py-4 text-gray-700"
       >
         {renderIcon(icon)}
         <span className="text-base">{text}</span>
@@ -43,9 +43,9 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 py-4 px-5 relative ${
+      className={`relative flex items-center gap-2 px-5 py-4 ${
         isActive
-          ? "justify-between gap-2 bg-background-pink text-white rounded-lg"
+          ? "justify-between gap-2 rounded-lg bg-background-pink text-white"
           : "text-gray-700 hover:text-pink-500"
       }`}
     >
@@ -56,7 +56,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
       {isActive && (
         <>
           <ArrowLeftIcon />
-          <div className="bg-background-pink w-1 rounded-full h-14 absolute right-[-32px] top-0" />
+          <div className="absolute right-[-32px] top-0 h-14 w-1 rounded-full bg-background-pink" />
         </>
       )}
     </Link>

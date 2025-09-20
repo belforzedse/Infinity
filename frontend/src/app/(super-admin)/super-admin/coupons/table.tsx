@@ -39,7 +39,7 @@ export const columns: ColumnDef<Coupon>[] = [
     cell: ({ row }) => {
       const type = row.original?.attributes?.Type as string;
       return (
-        <span className="text-foreground-primary text-xs md:text-base">
+        <span className="text-xs text-foreground-primary md:text-base">
           {type === "Cash" ? "ثابت" : "درصدی"}
         </span>
       );
@@ -57,7 +57,7 @@ export const columns: ColumnDef<Coupon>[] = [
       const discount = row.original?.attributes?.Amount as number;
 
       return (
-        <span className="text-foreground-primary text-xs md:text-base">
+        <span className="text-xs text-foreground-primary md:text-base">
           {type === "Cash"
             ? priceFormatter(discount, " تومان")
             : `${discount}%`}
@@ -77,7 +77,7 @@ export const columns: ColumnDef<Coupon>[] = [
       const maxUses = row.original?.attributes?.LimitUsage as number;
 
       return (
-        <span className="text-foreground-primary text-xs md:text-base">
+        <span className="text-xs text-foreground-primary md:text-base">
           {maxUses}/{usedTimes}
         </span>
       );
@@ -125,7 +125,7 @@ export const columns: ColumnDef<Coupon>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           <RemoveActionButton
             id={row.original.id}
             isRemoved={!!row.original?.attributes?.removedAt}
@@ -151,7 +151,7 @@ export const MobileTable = ({ data }: Props) => {
   if (!data) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data.map((row) => {
         return (
           <MobileTableRowBox
@@ -160,8 +160,8 @@ export const MobileTable = ({ data }: Props) => {
             row={row}
             header={
               <>
-                <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
-                  <div className="flex gap-1 items-center">
+                <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
+                  <div className="flex items-center gap-1">
                     <span className="text-xs text-neutral-400">
                       {row?.attributes?.Type === "Cash"
                         ? priceFormatter(row?.attributes?.Amount, " تومان")
@@ -175,7 +175,7 @@ export const MobileTable = ({ data }: Props) => {
                     <span className="text-xs text-neutral-400">|</span>
                     <span className="text-sm text-green-700">
                       {new Date(
-                        row?.attributes?.StartDate as string
+                        row?.attributes?.StartDate as string,
                       ).toLocaleDateString("fa-IR")}
                     </span>
                   </div>

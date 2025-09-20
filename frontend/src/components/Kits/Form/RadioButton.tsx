@@ -27,11 +27,11 @@ interface RadioGroupProps {
 const RadioButton = React.forwardRef<HTMLInputElement, RadioButtonProps>(
   (
     { label, name, value, checked, onChange, className = "", ...props },
-    ref
+    ref,
   ) => {
     return (
-      <label className={`flex items-center gap-2 cursor-pointer ${className}`}>
-        <div className="relative flex items-center justify-center w-5 h-5">
+      <label className={`flex cursor-pointer items-center gap-2 ${className}`}>
+        <div className="relative flex h-5 w-5 items-center justify-center">
           <input
             type="radio"
             ref={ref}
@@ -39,17 +39,15 @@ const RadioButton = React.forwardRef<HTMLInputElement, RadioButtonProps>(
             value={value}
             checked={checked}
             onChange={onChange}
-            className="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 
-                     checked:border-[#DB2777] transition-colors duration-200 
-                     cursor-pointer"
+            className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-gray-300 transition-colors duration-200 checked:border-[#DB2777]"
             {...props}
           />
-          <div className="absolute w-3 h-3 rounded-full bg-[#DB2777] scale-0 peer-checked:scale-100 transition-transform duration-200" />
+          <div className="absolute h-3 w-3 scale-0 rounded-full bg-[#DB2777] transition-transform duration-200 peer-checked:scale-100" />
         </div>
         <span className="text-sm text-gray-800">{label}</span>
       </label>
     );
-  }
+  },
 );
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
@@ -63,7 +61,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <label className="text-foreground-primary mb-3 text-lg">{label}</label>
+        <label className="text-lg mb-3 text-foreground-primary">{label}</label>
       )}
       <div className={`flex items-center gap-4 ${className}`}>
         {options.map((option) => (

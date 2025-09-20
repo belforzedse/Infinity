@@ -1,6 +1,7 @@
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import { API_BASE_URL } from "@/constants/api";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import type { Metadata } from "next";
 
@@ -33,6 +34,7 @@ interface Product {
           SKU: string;
           Price: string;
           IsPublished: boolean;
+          DiscountPrice?: string;
           general_discounts?: {
             data: Array<{
               attributes: {
@@ -60,16 +62,21 @@ async function getProducts(
   usage?: string,
   search?: string,
   sort?: string,
-  hasDiscount?: boolean
+  hasDiscount?: boolean,
 ) {
   // Handle search queries differently
   if (search) {
     try {
       // Use the search service
       const searchResults = await searchProducts(search, page, pageSize);
+      // Only keep search results where Title contains کیف, کفش, صندل, کتونی, or ونس
+      const filtered = searchResults.data.filter((item) => {
+        const title = (item.Title || "").toString();
+        return /کیف|کفش|صندل|کتونی|ونس/.test(title);
+      });
 
       return {
-        products: searchResults.data.map((item) => {
+        products: filtered.map((item) => {
           // Transform search API format to match product data format
           return {
             id: item.id,
@@ -97,6 +104,7 @@ async function getProducts(
                   attributes: {
                     SKU: "",
                     Price: variation.Price.toString(),
+                    DiscountPrice: variation.DiscountPrice?.toString(),
                     IsPublished: true,
                   },
                 })),
@@ -104,7 +112,10 @@ async function getProducts(
             },
           };
         }),
-        pagination: searchResults.meta.pagination,
+        pagination: {
+          ...searchResults.meta.pagination,
+          total: filtered.length,
+        },
       };
     } catch (error) {
       console.error("Error searching products:", error);
@@ -128,7 +139,8 @@ async function getProducts(
   queryParams.append("populate[0]", "CoverImage");
   queryParams.append("populate[1]", "product_main_category");
   queryParams.append("populate[2]", "product_variations");
-  queryParams.append("populate[3]", "product_variations.general_discounts");
+  queryParams.append("populate[3]", "product_variations.product_stock");
+  queryParams.append("populate[4]", "product_variations.general_discounts");
 
   // Add pagination
   queryParams.append("pagination[page]", page.toString());
@@ -136,6 +148,13 @@ async function getProducts(
 
   // Add filters
   queryParams.append("filters[Status][$eq]", "Active");
+
+  // Only show products whose Title contains کیف، کفش، صندل، کتونی، or ونس
+  queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
+  queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
+  queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
+  queryParams.append("filters[$or][3][Title][$containsi]", "کتونی");
+  queryParams.append("filters[$or][4][Title][$containsi]", "ونس");
 
   // Category filter
   if (category) {
@@ -188,45 +207,63 @@ async function getProducts(
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
 
-  const response = await fetch(url);
-  const data = await response.json();
+  try {
+    const response = await fetchWithTimeout(url, { timeoutMs: 15000 });
+    const data = await response.json();
 
-  // Filter out products with zero price and check availability if needed
-  let filteredProducts = data.data.filter((product: Product) => {
-    // Check if any variation has a valid price
-    const hasValidPrice = product.attributes.product_variations?.data?.some(
-      (variation) => {
-        const price = variation.attributes.Price;
-        return price && parseInt(price) > 0;
+    // Filter out products with zero price and check availability if needed
+    let filteredProducts = data.data.filter((product: Product) => {
+      // Check if any variation has a valid price
+      const hasValidPrice = product.attributes.product_variations?.data?.some(
+        (variation) => {
+          const price = variation.attributes.Price;
+          return price && parseInt(price) > 0;
+        },
+      );
+
+      // If showAvailableOnly is true, also check if any variation is published
+      if (showAvailableOnly) {
+        const hasAvailableVariation =
+          product.attributes.product_variations?.data?.some(
+            (variation) => variation.attributes.IsPublished,
+          );
+        return hasValidPrice && hasAvailableVariation;
       }
-    );
 
-    // If showAvailableOnly is true, also check if any variation is published
-    if (showAvailableOnly) {
-      const hasAvailableVariation =
+      return hasValidPrice;
+    });
+
+    // Discount-only filter (post-fetch) if requested
+    if (hasDiscount) {
+      filteredProducts = filteredProducts.filter((product: Product) =>
         product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished
-        );
-      return hasValidPrice && hasAvailableVariation;
+          (variation) => {
+            const price = parseFloat(variation.attributes.Price);
+            const discountPrice = variation.attributes.DiscountPrice
+              ? parseFloat(variation.attributes.DiscountPrice)
+              : null;
+            return discountPrice && discountPrice < price;
+          }
+        ),
+      );
     }
 
-    return hasValidPrice;
-  });
-
-  // Discount-only filter (post-fetch) if requested
-  if (hasDiscount) {
-    filteredProducts = filteredProducts.filter((product: Product) =>
-      product.attributes.product_variations?.data?.some(
-        (variation) =>
-          (variation.attributes as any)?.general_discounts?.data?.length > 0
-      )
-    );
+    return {
+      products: filteredProducts,
+      pagination: data.meta.pagination,
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return {
+      products: [],
+      pagination: {
+        page: page,
+        pageSize,
+        pageCount: 0,
+        total: 0,
+      },
+    };
   }
-
-  return {
-    products: filteredProducts,
-    pagination: data.meta.pagination,
-  };
 }
 
 export default async function PLPPage({
@@ -274,7 +311,7 @@ export default async function PLPPage({
     usage,
     search,
     sort,
-    hasDiscount
+    hasDiscount,
   );
 
   // Determine if we're showing search results or category results
@@ -282,7 +319,7 @@ export default async function PLPPage({
 
   return (
     <>
-      <div className="mt-3 md:mt-0 md:pt-[38px] md:pb-[80px]">
+      <div className="mt-3 md:mt-0 md:pb-[80px] md:pt-[38px]">
         {/* Show hero banner only for category browsing, not search results */}
         {!isSearchResults && <PLPHeroBanner category={category} />}
 
@@ -291,7 +328,6 @@ export default async function PLPPage({
           products={products}
           pagination={pagination}
           category={category}
-          showAvailableOnly={showAvailableOnly}
           searchQuery={search}
         />
       </div>
@@ -305,7 +341,8 @@ export async function generateMetadata({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const category = typeof params.category === "string" ? params.category : undefined;
+  const category =
+    typeof params.category === "string" ? params.category : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
 
   const isSearch = !!search;
@@ -350,7 +387,8 @@ export async function generateMetadata({
 
   return {
     title: baseTitle,
-    description: "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
+    description:
+      "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
     alternates: { canonical: "/plp" },
   };
 }

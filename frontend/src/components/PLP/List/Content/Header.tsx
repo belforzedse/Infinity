@@ -5,52 +5,77 @@ import Image from "next/image";
 
 export default function PLPListContentHeader() {
   return (
-    <div className="w-full flex items-center justify-between">
-      <Text className="text-foreground-primary !text-3xl">پوشاک زنانه</Text>
+    <div className="w-full">
+      <div className="flex w-full items-center justify-between">
+        <Text className="!text-3xl text-foreground-primary">پوشاک زنانه</Text>
 
-      <div className="items-center gap-2 hidden md:flex">
-        <PLPButton
-          text="محبوب ترین محصولات"
-          className="bg-red-100 text-red-900"
-          leftIcon={
-            <Image
-              src="/images/heart-image-icon.png"
-              alt="heart"
-              width={20}
-              height={20}
-            />
-          }
-        />
+        <div className="hidden md:flex">
+          <PLPButton
+            text="مرتب سازی"
+            rightIcon={<SortDescIcon className="h-6 w-6" />}
+            className="!px-3 !py-2"
+            fullWidth={false}
+          />
+        </div>
+      </div>
 
-        <PLPButton
-          text="محصولات تخفیف دار"
-          className="bg-blue-100 text-blue-900"
-          leftIcon={
-            <Image
-              src="/images/100-image-icon.png"
-              alt="100"
-              width={20}
-              height={25}
-            />
-          }
-        />
+      {/* Pills row */}
+      <div className="mt-4 flex w-full justify-center">
+        <div className="inline-flex items-center justify-center gap-3 rounded-2xl bg-white px-3 py-2 shadow-sm">
+          <PLPButton
+            text="محبوب ترین محصولات"
+            className="rounded-full bg-red-100 px-4 py-2 text-red-900"
+            leftIcon={
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
+                <Image
+                  src="/images/heart-image-icon.png"
+                  alt="heart"
+                  width={18}
+                  height={18}
+                  loading="lazy"
+                  sizes="18px"
+                />
+              </span>
+            }
+            fullWidth={false}
+          />
 
-        <PLPButton
-          text="پر فروش ترین محصولات"
-          className="bg-orange-100 text-orange-900"
-          leftIcon={
-            <Image
-              src="/images/fire-image-icon.png"
-              alt="fire"
-              width={20}
-              height={20}
-            />
-          }
-        />
-        <PLPButton
-          text="مرتب سازی"
-          rightIcon={<SortDescIcon className="w-6 h-6" />}
-        />
+          <PLPButton
+            text="محصولات تخفیف دار"
+            className="rounded-full bg-blue-100 px-4 py-2 text-blue-900"
+            leftIcon={
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
+                <Image
+                  src="/images/100-image-icon.png"
+                  alt="100"
+                  width={18}
+                  height={18}
+                  loading="lazy"
+                  sizes="18px"
+                />
+              </span>
+            }
+            fullWidth={false}
+          />
+
+          <PLPButton
+            text="پر فروش ترین محصولات"
+            className="rounded-full bg-orange-100 px-4 py-2 text-orange-900"
+            leftIcon={
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
+                <Image
+                  src="/images/fire-image-icon.png"
+                  alt="fire"
+                  width={18}
+                  height={18}
+                  loading="lazy"
+                  sizes="18px"
+                />
+              </span>
+            }
+            fullWidth={false}
+          />
+        </div>
       </div>
     </div>
   );

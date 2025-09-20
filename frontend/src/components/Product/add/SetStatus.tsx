@@ -13,7 +13,7 @@ const statusOptions: Option[] = [
 
 const SetStatus: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<Option | null>(
-    statusOptions[0]
+    statusOptions[0],
   );
   const [count, setCount] = useState(120);
 
@@ -37,13 +37,13 @@ const SetStatus: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white p-5 rounded-xl flex flex-col gap-4">
-      <div className="flex items-center justify-between w-full">
+    <div className="flex w-full flex-col gap-4 rounded-xl bg-white p-5">
+      <div className="flex w-full items-center justify-between">
         <h2 className="text-base text-neutral-600">وضعیت</h2>
         <div className="h-3 w-3 rounded-full bg-green-400" />
       </div>
 
-      <div className="flex flex-col gap-3 items-center justify-between w-full">
+      <div className="flex w-full flex-col items-center justify-between gap-3">
         <Select
           className="w-full"
           value={selectedStatus}
@@ -52,22 +52,22 @@ const SetStatus: React.FC = () => {
           placeholder="انتخاب وضعیت"
         />
 
-        <div className="border border-slate-100 w-full rounded-lg py-2 px-3 flex items-center justify-between">
+        <div className="flex w-full items-center justify-between rounded-lg border border-slate-100 px-3 py-2">
           <span className="text-sm text-neutral-600">تعداد</span>
 
-          <div className="flex items-center gap-1 max-w-14 border border-slate-100 p-1 rounded">
+          <div className="flex max-w-14 items-center gap-1 rounded border border-slate-100 p-1">
             <div className="flex flex-col gap-0.5">
               <button
                 onClick={handleIncrement}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 transition-colors hover:text-gray-600"
               >
-                <ChevronUpIcon className="w-2 h-2" />
+                <ChevronUpIcon className="h-2 w-2" />
               </button>
               <button
                 onClick={handleDecrement}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 transition-colors hover:text-gray-600"
               >
-                <ChevronDownIcon className="w-2 h-2" />
+                <ChevronDownIcon className="h-2 w-2" />
               </button>
             </div>
 
@@ -75,7 +75,7 @@ const SetStatus: React.FC = () => {
               type="text"
               value={count}
               onChange={handleInputChange}
-              className="w-full text-xs text-black font-medium bg-transparent text-center focus:outline-none"
+              className="text-xs w-full bg-transparent text-center font-medium text-black focus:outline-none"
             />
           </div>
         </div>

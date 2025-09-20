@@ -26,13 +26,13 @@ export default function AuthInput({
       <div className="relative">
         <input
           className={clsx(
-            "w-full h-12 bg-background-form border border-slate-200 rounded-lg",
+            "h-12 w-full rounded-lg border border-slate-200 bg-background-form",
             "text-base text-foreground-muted",
             rightElement ? "pr-[4.5rem]" : "pr-4",
             leftElement ? "pl-12" : "pl-4",
             "focus:outline-none focus:ring-2 focus:ring-pink-400",
             error && "border-red-500",
-            className
+            className,
           )}
           onChange={(e) => onEdit?.(e.target.value)}
           value={value}
@@ -49,7 +49,7 @@ export default function AuthInput({
           </div>
         )}
       </div>
-      {error && <Text className="text-red-500 mt-1">{error}</Text>}
+      {error && <Text className="mt-1 text-red-500">{error}</Text>}
     </div>
   );
 }

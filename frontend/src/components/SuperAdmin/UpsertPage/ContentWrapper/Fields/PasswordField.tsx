@@ -12,7 +12,7 @@ export default function PasswordField({ value, onChange, readOnly }: Props) {
       type="password"
       disabled={readOnly}
       readOnly={readOnly}
-      className={`flex-1 border border-neutral-200 rounded-lg py-3 px-5 text-sm ${
+      className={`text-sm flex-1 rounded-lg border border-neutral-200 px-5 py-3 ${
         readOnly ? "text-slate-500" : ""
       }`}
       value={value}

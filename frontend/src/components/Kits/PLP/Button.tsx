@@ -1,4 +1,5 @@
-import { twMerge } from "tailwind-merge";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 export default function PLPButton({
   text,
@@ -7,6 +8,8 @@ export default function PLPButton({
   leftIcon,
   onClick,
   disabled = false,
+  variant = "outline",
+  fullWidth = true,
 }: {
   text: string;
   className?: string;
@@ -14,22 +17,27 @@ export default function PLPButton({
   leftIcon?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  variant?: "primary" | "outline";
+  fullWidth?: boolean;
 }) {
   return (
-    <button
+    <Button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={twMerge(
-        "bg-background-secondary text-[#333] text-xs px-3 py-1 rounded-lg flex items-center justify-center gap-1 !leading-[32px] w-full",
-        disabled && "opacity-50 cursor-not-allowed",
-        className
+      variant={variant}
+      className={cn(
+        "text-xs gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px]",
+        "flex items-center justify-center",
+        fullWidth ? "w-full" : "inline-flex",
+        disabled && "cursor-not-allowed opacity-50",
+        className,
       )}
     >
-      <span className="flex items-center justify-center gap-1 pointer-events-none">
-        {rightIcon && <span className="pointer-events-none">{rightIcon}</span>}
-        <span className="pointer-events-none">{text}</span>
+      <span className="pointer-events-none flex items-center justify-center gap-1">
         {leftIcon && <span className="pointer-events-none">{leftIcon}</span>}
+        <span className="pointer-events-none">{text}</span>
+        {rightIcon && <span className="pointer-events-none">{rightIcon}</span>}
       </span>
-    </button>
+    </Button>
   );
 }

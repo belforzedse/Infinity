@@ -13,28 +13,28 @@ const IncreaseBalance = () => {
   };
 
   return (
-    <div className="w-full lg:w-3/5 flex flex-col items-end gap-4">
-      <div className="w-full p-5 bg-slate-100 rounded-xl h-fit">
-        <span className="text-2xl lg:text-4xl text-foreground-primary">
+    <div className="flex w-full flex-col items-end gap-4 lg:w-3/5">
+      <div className="h-fit w-full rounded-xl bg-slate-100 p-5">
+        <span className="text-2xl text-foreground-primary lg:text-4xl">
           شارژ سریع کیف پول
         </span>
 
-        <div className="mb-2 mt-4 w-full bg-white border border-slate-100 rounded-lg h-14 flex justify-center items-center">
-          <span className="text-slate-800 text-lg lg:text-3xl">
+        <div className="mb-2 mt-4 flex h-14 w-full items-center justify-center rounded-lg border border-slate-100 bg-white">
+          <span className="text-lg text-slate-800 lg:text-3xl">
             {priceFormatter(Number(increaseAmount))} تومان
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 lg:gap-3">
           {PREDEFINED_INCREASE_BALANCE_AMOUNTS.map((amount) => (
             <button
               key={amount}
               onClick={() => handleAmountSelect(amount)}
-              className={`py-2 px-3 rounded-lg border bg-white ${
+              className={`rounded-lg border bg-white px-3 py-2 ${
                 increaseAmount === amount
-                  ? "border-blue-500 text-blue-500 lg:text-xl text-lg"
+                  ? "text-lg border-blue-500 text-blue-500 lg:text-xl"
                   : "border border-slate-100 text-slate-400 hover:border-blue-500 hover:text-blue-500"
-              } transition-all duration-200 text-center`}
+              } text-center transition-all duration-200`}
             >
               {priceFormatter(amount)} تومان
             </button>

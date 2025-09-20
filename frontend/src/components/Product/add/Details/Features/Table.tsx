@@ -55,6 +55,7 @@ interface ProductVariation {
     };
     SKU?: string;
     Price?: number;
+    DiscountPrice?: number;
   };
 }
 
@@ -116,14 +117,14 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         const [colorsRes, sizesRes, modelsRes] = await Promise.all([
           apiClient.get<ApiResponse<ApiFeature[]>>(
             "/product-variation-colors",
-            { headers: authHeader }
+            { headers: authHeader },
           ),
           apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes", {
             headers: authHeader,
           }),
           apiClient.get<ApiResponse<ApiFeature[]>>(
             "/product-variation-models",
-            { headers: authHeader }
+            { headers: authHeader },
           ),
         ]);
 
@@ -139,7 +140,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
             ApiResponse<ProductVariation[]>
           >(
             `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
-            { headers: authHeader }
+            { headers: authHeader },
           );
 
           const existingVariations = (existingVariationsRes as any).data || [];
@@ -213,7 +214,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       return availableOptions[type].filter(
         (option) =>
           option.attributes.Title.toLowerCase().includes(query) &&
-          !selectedIds.includes(String(option.id))
+          !selectedIds.includes(String(option.id)),
       );
     };
 
@@ -226,7 +227,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
   const handleInputChange = (
     type: "colors" | "sizes" | "models",
-    value: string
+    value: string,
   ) => {
     setInputValues((prev) => ({
       ...prev,
@@ -236,11 +237,11 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
   const addFeature = (
     type: "colors" | "sizes" | "models",
-    item: ApiFeature
+    item: ApiFeature,
   ) => {
     // Check if this item is already selected
     const isDuplicate = features[type].some(
-      (feature) => feature.id === String(item.id)
+      (feature) => feature.id === String(item.id),
     );
 
     if (isDuplicate) return;
@@ -273,7 +274,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   const generateSKU = (
     colorCode: string,
     sizeCode: string,
-    modelCode: string
+    modelCode: string,
   ) => {
     const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
     return `${productId}-${colorCode}-${sizeCode}-${modelCode}-${randomPart}`;
@@ -313,6 +314,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               product_variation_model: parseInt(model.id),
               SKU: sku,
               Price: 0, // Default price is 0
+              DiscountPrice: null, // Default discount price is null
             });
           }
         }
@@ -323,7 +325,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         ApiResponse<ProductVariation[]>
       >(
         `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
-        { headers: authHeader }
+        { headers: authHeader },
       );
 
       const existingVariations = (existingVariationsRes as any).data || [];
@@ -351,7 +353,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         await apiClient.post(
           "/product-variations",
           { data: combination },
-          { headers: authHeader }
+          { headers: authHeader },
         );
       }
 
@@ -366,29 +368,29 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="w-full border border-slate-100 rounded-xl">
+      <div className="w-full rounded-xl border border-slate-100">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-slate-100">
-              <th className="w-[20%] py-2 px-4 text-right text-gray-900 font-normal border-l border-slate-100">
+              <th className="w-[20%] border-l border-slate-100 px-4 py-2 text-right font-normal text-gray-900">
                 ویژگی
               </th>
-              <th className="w-[80%] py-2 px-4 text-right text-gray-900 font-normal">
+              <th className="w-[80%] px-4 py-2 text-right font-normal text-gray-900">
                 مقدارها
               </th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-slate-100">
-              <td className="py-3 px-4 text-right text-sm text-gray-900 border-l border-slate-100">
+              <td className="text-sm border-l border-slate-100 px-4 py-3 text-right text-gray-900">
                 رنگ
               </td>
-              <td className="py-3 px-4">
-                <div className="flex flex-wrap gap-2 items-center">
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap items-center gap-2">
                   {features.colors.map((color) => (
                     <div
                       key={color.id}
-                      className="flex items-center gap-2 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg"
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-2 py-1"
                     >
                       <span className="text-sm text-slate-500">
                         {color.value}
@@ -401,10 +403,10 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       </button>
                     </div>
                   ))}
-                  <div className="relative flex-1 min-w-[140px]">
+                  <div className="relative min-w-[140px] flex-1">
                     <input
                       type="text"
-                      className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm"
+                      className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
                       placeholder="جستجوی رنگ..."
                       value={inputValues.colors}
                       onChange={(e) =>
@@ -413,12 +415,12 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                     />
                     {inputValues.colors &&
                       filteredOptions.colors.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                           {filteredOptions.colors.map((option) => (
                             <div
                               key={option.id}
                               onClick={() => addFeature("colors", option)}
-                              className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
                             >
                               {option.attributes.Title}
                             </div>
@@ -430,15 +432,15 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               </td>
             </tr>
             <tr className="border-b border-slate-100">
-              <td className="py-3 px-4 text-right text-sm text-gray-900 border-l border-slate-100">
+              <td className="text-sm border-l border-slate-100 px-4 py-3 text-right text-gray-900">
                 سایز
               </td>
-              <td className="py-3 px-4">
-                <div className="flex flex-wrap gap-2 items-center">
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap items-center gap-2">
                   {features.sizes.map((size) => (
                     <div
                       key={size.id}
-                      className="flex items-center gap-2 bg-slate-100 border border-slate-100 px-2 py-1 rounded-lg"
+                      className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
                     >
                       <span className="text-sm text-slate-500">
                         {size.value}
@@ -451,10 +453,10 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       </button>
                     </div>
                   ))}
-                  <div className="relative flex-1 min-w-[140px]">
+                  <div className="relative min-w-[140px] flex-1">
                     <input
                       type="text"
-                      className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm"
+                      className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
                       placeholder="جستجوی سایز..."
                       value={inputValues.sizes}
                       onChange={(e) =>
@@ -462,12 +464,12 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       }
                     />
                     {inputValues.sizes && filteredOptions.sizes.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                         {filteredOptions.sizes.map((option) => (
                           <div
                             key={option.id}
                             onClick={() => addFeature("sizes", option)}
-                            className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                            className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
                           >
                             {option.attributes.Title}
                           </div>
@@ -479,15 +481,15 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               </td>
             </tr>
             <tr>
-              <td className="py-3 px-4 text-right text-sm text-gray-900 border-l border-slate-100">
+              <td className="text-sm border-l border-slate-100 px-4 py-3 text-right text-gray-900">
                 مدل
               </td>
-              <td className="py-3 px-4">
-                <div className="flex flex-wrap gap-2 items-center">
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap items-center gap-2">
                   {features.models.map((model) => (
                     <div
                       key={model.id}
-                      className="flex items-center gap-2 bg-slate-100 border border-slate-100 px-2 py-1 rounded-lg"
+                      className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
                     >
                       <span className="text-sm text-slate-500">
                         {model.value}
@@ -500,10 +502,10 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       </button>
                     </div>
                   ))}
-                  <div className="relative flex-1 min-w-[140px]">
+                  <div className="relative min-w-[140px] flex-1">
                     <input
                       type="text"
-                      className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm"
+                      className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
                       placeholder="جستجوی مدل..."
                       value={inputValues.models}
                       onChange={(e) =>
@@ -512,12 +514,12 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                     />
                     {inputValues.models &&
                       filteredOptions.models.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                           {filteredOptions.models.map((option) => (
                             <div
                               key={option.id}
                               onClick={() => addFeature("models", option)}
-                              className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
                             >
                               {option.attributes.Title}
                             </div>
@@ -532,7 +534,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         </table>
       </div>
 
-      <div className="flex items-center justify-between p-4 border border-slate-100 rounded-xl">
+      <div className="flex items-center justify-between rounded-xl border border-slate-100 p-4">
         <div className="text-sm text-slate-600">
           <p>
             تعداد تنوع‌های محصول:{" "}
@@ -548,7 +550,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         <button
           onClick={generateVariations}
           disabled={isGeneratingVariations || variationsCount === 0}
-          className={`px-4 py-2 rounded-lg text-sm text-white ${
+          className={`text-sm rounded-lg px-4 py-2 text-white ${
             isGeneratingVariations || variationsCount === 0
               ? "bg-blue-300"
               : "bg-blue-600 hover:bg-blue-700"

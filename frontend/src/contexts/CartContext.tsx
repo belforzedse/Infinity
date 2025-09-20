@@ -4,10 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
-import toast from "react-hot-toast";
-
-// API base URL
-// const API_BASE_URL = "https://api.infinity.rgbgroup.ir/api";
+import notify from "@/utils/notify";
 
 export interface CartItem {
   id: string;
@@ -17,50 +14,13 @@ export interface CartItem {
   name: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   quantity: number;
   image: string;
   color?: string;
   size?: string;
   model?: string;
-}
-
-// New interfaces for API responses
-interface ApiCartItem {
-  id: number;
-  Count: number;
-  Sum: number;
-  product_variation: {
-    id: number;
-    Price: number;
-    product_stock: {
-      Count: number;
-    };
-    product_variation_color?: {
-      id: number;
-      Title: string;
-    };
-    product_variation_size?: {
-      id: number;
-      Title: string;
-    };
-    product_variation_model?: {
-      id: number;
-      Title: string;
-    };
-    product: {
-      Title: string;
-      SKU: string;
-      // Add any other needed product properties
-      category?: string;
-      image?: string;
-    };
-  };
-}
-
-interface ApiCart {
-  id: number;
-  Status: string;
-  cart_items: ApiCartItem[];
 }
 
 interface CartContextType {
@@ -74,6 +34,8 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  subtotalBeforeDiscount: number;
+  cartDiscountTotal: number;
   isLoading: boolean;
   checkCartStock: () => Promise<boolean>;
   migrateLocalCartToApi: () => Promise<void>;
@@ -153,6 +115,53 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       };
 
+      const parseNumericValue = (value: unknown): number | undefined => {
+        if (value === null || value === undefined) return undefined;
+        if (typeof value === "number") {
+          return Number.isFinite(value) ? value : undefined;
+        }
+        if (typeof value === "string") {
+          const cleaned = value.replace(/,/g, "").trim();
+          if (!cleaned) return undefined;
+          const parsed = parseFloat(cleaned);
+          return Number.isNaN(parsed) ? undefined : parsed;
+        }
+        return undefined;
+      };
+
+      const extractGeneralDiscountPercent = (variation: any): number | undefined => {
+        if (!variation) return undefined;
+
+        const candidateGroups = [
+          variation.general_discounts,
+          variation.general_discount,
+        ];
+
+        for (const group of candidateGroups) {
+          if (!group) continue;
+
+          const nodes = Array.isArray(group)
+            ? group
+            : Array.isArray(group?.data)
+              ? group.data
+              : group?.data
+                ? [group.data]
+                : [group];
+
+          for (const node of nodes) {
+            const amount =
+              node?.attributes?.Amount ??
+              node?.Amount ??
+              node?.attributes?.amount ??
+              node?.amount;
+            const parsedAmount = parseNumericValue(amount);
+            if (parsedAmount !== undefined) return parsedAmount;
+          }
+        }
+
+        return undefined;
+      };
+
       // Transform API cart format to local format
       const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
         const variation = item.product_variation;
@@ -165,10 +174,64 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const category = product.product_main_category?.Title || "Unknown";
 
         // Parse price to ensure it's a number
-        const price =
-          typeof variation.Price === "string"
-            ? parseFloat(variation.Price)
-            : variation.Price;
+        const basePrice = parseNumericValue(variation.Price) ?? 0;
+        const listedDiscountPrice = parseNumericValue(
+          (variation as any)?.DiscountPrice
+        );
+        const generalDiscountPercent = extractGeneralDiscountPercent(variation);
+
+        let finalUnitPrice = basePrice;
+        if (
+          listedDiscountPrice &&
+          listedDiscountPrice > 0 &&
+          (finalUnitPrice === 0 || listedDiscountPrice < finalUnitPrice)
+        ) {
+          finalUnitPrice = listedDiscountPrice;
+        }
+
+        if (
+          generalDiscountPercent &&
+          generalDiscountPercent > 0 &&
+          generalDiscountPercent < 100 &&
+          basePrice > 0
+        ) {
+          const computed = Math.round(
+            basePrice * (1 - generalDiscountPercent / 100)
+          );
+          if (computed > 0 && (finalUnitPrice === 0 || computed < finalUnitPrice)) {
+            finalUnitPrice = computed;
+          }
+        }
+
+        const lineSum = parseNumericValue(item.Sum);
+        if (
+          lineSum &&
+          item.Count &&
+          item.Count > 0
+        ) {
+          const derivedUnitPrice = lineSum / item.Count;
+          if (
+            Number.isFinite(derivedUnitPrice) &&
+            derivedUnitPrice > 0 &&
+            (finalUnitPrice === 0 || derivedUnitPrice < finalUnitPrice)
+          ) {
+            finalUnitPrice = derivedUnitPrice;
+          }
+        }
+
+        if (finalUnitPrice === 0 && listedDiscountPrice) {
+          finalUnitPrice = listedDiscountPrice;
+        }
+        if (finalUnitPrice === 0 && basePrice > 0) {
+          finalUnitPrice = basePrice;
+        }
+
+        const hasDiscount =
+          basePrice > 0 && finalUnitPrice > 0 && finalUnitPrice < basePrice;
+        const originalPrice = hasDiscount ? basePrice : undefined;
+        const discountPercentage = hasDiscount
+          ? Math.round(((basePrice - finalUnitPrice) / basePrice) * 100)
+          : undefined;
 
         return {
           id: String(item.id),
@@ -177,7 +240,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           variationId: String(variation.id),
           name: product.Title,
           category: category,
-          price: price,
+          price: finalUnitPrice,
+          originalPrice,
+          discountPercentage,
           quantity: item.Count,
           image: imageUrl,
           color: variation.product_variation_color?.Title,
@@ -211,7 +276,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (item.variationId) {
             await CartService.addItemToCart(
               Number(item.variationId),
-              item.quantity
+              item.quantity,
             );
           }
         }
@@ -243,11 +308,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         setIsLoading(true);
 
-        console.log(newItem);
-
         await CartService.addItemToCart(
           Number(newItem.variationId),
-          newItem.quantity
+          newItem.quantity,
         );
 
         // Refresh cart after adding item
@@ -257,9 +320,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
-          toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+          notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
-          toast.error("افزودن کالا به سبد خرید با خطا مواجه شد");
+          notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
         }
       } finally {
         setIsLoading(false);
@@ -269,13 +332,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCartItems((prev) => {
         // Check if item already exists in cart
         const existingItemIndex = prev.findIndex(
-          (item) => item.slug === newItem.slug
+          (item) => item.slug === newItem.slug,
         );
 
         if (existingItemIndex !== -1) {
           // Update quantity if item exists
           const updatedItems = [...prev];
-          updatedItems[existingItemIndex].quantity += newItem.quantity;
+          const existingItem = updatedItems[existingItemIndex];
+          updatedItems[existingItemIndex] = {
+            ...existingItem,
+            quantity: existingItem.quantity + newItem.quantity,
+            price: newItem.price,
+            originalPrice:
+              newItem.originalPrice ?? existingItem.originalPrice,
+            discountPercentage:
+              newItem.discountPercentage ?? existingItem.discountPercentage,
+          };
           return updatedItems;
         } else {
           // Add new item
@@ -327,8 +399,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const item = cartItems.find((item) => item.id === id);
         if (!item) return;
 
-        console.log(item);
-
         // Extract the cart item ID from the API
         const cartItemId = item.id;
         if (!cartItemId) return;
@@ -342,9 +412,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
-          toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+          notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
-          toast.error("بروزرسانی سبد خرید با خطا مواجه شد");
+          notify.error("بروزرسانی سبد خرید با خطا مواجه شد");
         }
       } finally {
         setIsLoading(false);
@@ -352,7 +422,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Local storage implementation
       setCartItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+        prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
       );
     }
   };
@@ -399,8 +469,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
+
+  const subtotalBeforeDiscount = cartItems.reduce((sum, item) => {
+    const unit = item.originalPrice && item.originalPrice > 0 ? item.originalPrice : item.price;
+    return sum + unit * item.quantity;
+  }, 0);
+
+  const cartDiscountTotal = subtotalBeforeDiscount > totalPrice
+    ? subtotalBeforeDiscount - totalPrice
+    : 0;
 
   const value = {
     cartItems,
@@ -413,6 +492,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     clearCart,
     totalItems,
     totalPrice,
+    subtotalBeforeDiscount,
+    cartDiscountTotal,
     isLoading,
     checkCartStock,
     migrateLocalCartToApi,

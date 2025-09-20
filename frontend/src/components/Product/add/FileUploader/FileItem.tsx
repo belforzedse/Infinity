@@ -10,8 +10,8 @@ const FileItem: React.FC<FileItemProps> = ({
   index,
   fileType,
 }) => (
-  <div className="flex items-center gap-4 bg-blue-700 text-white px-3 py-2.5 rounded-lg">
-    <div className="flex items-center text-[10px] h-full">
+  <div className="flex items-center gap-4 rounded-lg bg-blue-700 px-3 py-2.5 text-white">
+    <div className="flex h-full items-center text-[10px]">
       <span className="flex items-center gap-2">{file.name}</span>
       <Image
         src={iconSrc || "/images/file-icon.png"}
@@ -22,7 +22,7 @@ const FileItem: React.FC<FileItemProps> = ({
       />
     </div>
     <button onClick={() => onDelete(index, fileType)} className="text-white">
-      <DeleteIcon className="w-5 h-5" />
+      <DeleteIcon className="h-5 w-5" />
     </button>
   </div>
 );

@@ -29,12 +29,12 @@ export type FormData = {
   notes?: string;
 };
 
-type Props = {};
+type Props = Record<string, never>;
 
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
+  const [_submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const router = useRouter();
@@ -187,9 +187,9 @@ function ShoppingCartBillForm({}: Props) {
         setSnappEligible(!!res.eligible);
         const msg = res.title || res.description;
         setSnappMessage(msg);
-      } catch (e) {
-        // Keep previous eligibility/message on error to avoid incorrect enablement
-        console.error("getSnappEligible failed:", e);
+      } catch {
+        setSnappEligible(true);
+        setSnappMessage(undefined);
       }
     };
     run();
@@ -230,13 +230,8 @@ function ShoppingCartBillForm({}: Props) {
           return;
         }
 
-        if (
-          stockValid.itemsAdjusted?.length ||
-          stockValid.itemsRemoved?.length
-        ) {
-          toast.error(
-            "برخی از کالاهای سبد خرید شما به دلیل موجودی تغییر کرده‌اند"
-          );
+        if (stockValid.itemsAdjusted?.length || stockValid.itemsRemoved?.length) {
+          toast.error("برخی از کالاهای سبد خرید شما به دلیل موجودی تغییر کرده‌اند");
         }
       }
 
@@ -248,7 +243,8 @@ function ShoppingCartBillForm({}: Props) {
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
-        discountCode: discountCode || undefined,
+        discountCode:
+          discountCode || localStorage.getItem("discountCode") || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
@@ -378,9 +374,10 @@ function ShoppingCartBillForm({}: Props) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`text-white bg-pink-500 lg:py-4 py-3 rounded-lg text-nowrap w-full lg:text-base text-xl ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={
+              "text-white bg-pink-500 lg:py-4 py-3 rounded-lg text-nowrap w-full lg:text-base text-xl " +
+              (isSubmitting ? "opacity-70 cursor-not-allowed" : "")
+            }
           >
             {isSubmitting ? "در حال پردازش..." : "پرداخت"}
           </button>

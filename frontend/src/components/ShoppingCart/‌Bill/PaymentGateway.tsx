@@ -68,14 +68,20 @@ function ShoppingCartBillPaymentGateway({
             key={pg.id}
             onClick={() => !pg.disabled && onChange(pg.id)}
             className={classNames(
-              "bg-stone-50 p-4 rounded-lg text-nowrap w-full border border-stone-50 flex items-center flex-col gap-2",
+              "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
               selected === pg.id && "!border-pink-600",
-              pg.disabled && "opacity-50 cursor-not-allowed"
+              pg.disabled && "cursor-not-allowed opacity-50",
             )}
             type="button"
           >
-            <div className="w-16 h-16 relative">
-              <Image src={pg.img} alt={pg.name} fill className="object-cover" />
+            <div className="relative h-16 w-16">
+              <Image
+                src={pg.img}
+                alt={pg.name}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </div>
 
             <span className="text-neutral-600 lg:text-xs text-sm">

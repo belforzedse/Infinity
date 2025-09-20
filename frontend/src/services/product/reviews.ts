@@ -12,7 +12,7 @@ import { ENDPOINTS } from "@/constants/api";
 export const submitProductReview = async (
   productId: string,
   rate: number,
-  content: string
+  content: string,
 ) => {
   const endpoint = ENDPOINTS.PRODUCT.REVIEWS.SUBMIT;
   const accessToken = localStorage.getItem("accessToken");
@@ -33,7 +33,7 @@ export const submitProductReview = async (
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     return response as any;

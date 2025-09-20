@@ -1,0 +1,90 @@
+/* --- FULL VIEWPORT OVERLAY (hides app chrome) --- */
+.print-layout-overlay {
+  position: fixed; /* cover the entire viewport, hide underlying header/sidebar/FAB */
+  inset: 0;
+  z-index: 9999; /* above everything else */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 24px; /* screen padding */
+  background: #f5f5f5;
+}
+
+/* A4 page preview on screen */
+.print-wrapper {
+  width: 100%;
+  max-width: 210mm; /* A4 width */
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 0; /* your invoice component handles its own padding/borders */
+}
+
+/* Page size + margins for printed output */
+@page {
+  size: A4;
+  margin: 12mm 12mm 14mm 12mm; /* top right bottom left */
+}
+
+/* Print reset: pure white, no overlay chrome, no borders/shadows */
+@media print {
+  html,
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #ffffff !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .print-layout-overlay {
+    position: static !important;
+    inset: auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+  .print-wrapper {
+    border: none !important;
+    box-shadow: none !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* Keep rows/blocks together across pages */
+table {
+  border-collapse: collapse;
+}
+thead {
+  display: table-header-group;
+}
+tfoot {
+  display: table-footer-group;
+}
+tr,
+.break-inside-avoid {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* One invoice per page for bulk */
+.break-after-page,
+.print\:break-after-page {
+  break-after: page;
+  page-break-after: always;
+}
+
+/* Hide anything you explicitly mark as no-print */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Image safety */
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
