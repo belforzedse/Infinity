@@ -19,7 +19,7 @@ export default function SuspenseLoader({
       className={clsx(
         fullscreen && "min-h-[50vh] md:min-h-screen",
         "flex w-full items-center justify-center",
-        className,
+        className
       )}
       dir="rtl"
     >
@@ -37,13 +37,13 @@ export default function SuspenseLoader({
       <style jsx>{`
         @keyframes loaderSlide {
           0% {
-            transform: translateX(-200%);
+            transform: translateX(-300%);
           }
           50% {
             transform: translateX(50%);
           }
           100% {
-            transform: translateX(250%);
+            transform: translateX(300%);
           }
         }
       `}</style>
