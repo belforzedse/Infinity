@@ -12,7 +12,7 @@ export default function SuperAdminLayoutHeaderSearch() {
         placeholder="جستجو"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full h-11 bg-neutral-100 border border-neutral-100 rounded-[20px] pr-12 pl-4 text-neutral-900 placeholder:text-neutral-600 focus:outline-none focus:border-neutral-200"
+        className="h-11 w-full rounded-[20px] border border-neutral-100 bg-neutral-100 pl-4 pr-12 text-neutral-900 placeholder:text-neutral-600 focus:border-neutral-200 focus:outline-none"
         dir="rtl"
       />
       <div className="absolute right-4 top-1/2 -translate-y-1/2">

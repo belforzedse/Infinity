@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { faNum } from "@/utils/faNum";
 import { FC } from "react";
 import HeartIcon from "./Icons/HeartIcon";
 import GridIcon from "./Icons/GridIcon";
@@ -16,6 +17,8 @@ export interface ProductCardProps {
   discount?: number;
   discountPrice?: number;
   colorsCount?: number;
+  isAvailable?: boolean;
+  priority?: boolean;
 }
 
 const ProductCard: FC<ProductCardProps> = ({
@@ -28,20 +31,40 @@ const ProductCard: FC<ProductCardProps> = ({
   discount,
   discountPrice,
   colorsCount,
+  isAvailable = true,
+  priority = false,
 }) => {
   const { isLiked, isLoading, toggleLike } = useProductLike({
     productId: id.toString(),
   });
 
-  return (
-    <Link href={`/pdp/${id.toString()}`} className="block">
-      <div className="w-[259px] md:w-full rounded-3xl border border-pink-50 bg-white p-1 transition-all hover:shadow-md flex flex-col h-full">
-        <div className="relative">
-          <ImageSlider images={images} title={title} />
+  // Debug: Log product card data
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`ProductCard ${id} pricing:`, {
+      price,
+      discountPrice,
+      discount,
+      title: title.substring(0, 30),
+      hasDiscountLogic: !!(discountPrice && discountPrice > 0)
+    });
+  }
 
-          <div className="absolute left-1 right-1 top-1 flex justify-between items-center">
+  // Temporary test: Force discount for testing (REMOVE AFTER TESTING)
+  // const testDiscountPrice = id === 1 ? Math.floor(price * 0.8) : discountPrice;
+  // const testDiscount = id === 1 ? 20 : discount;
+
+  return (
+    <Link
+      href={`/pdp/${id.toString()}`}
+      className="group block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+    >
+      <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">
+        <div className="relative">
+          <ImageSlider images={images} title={title} priority={priority} />
+
+          <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
             {discount ? (
-              <div className="rounded-tr-3xl rounded-bl-3xl bg-rose-600 px-3 py-1 flex items-center">
+              <div className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1">
                 <span className="text-xs text-white">٪{discount} تخفیف</span>
               </div>
             ) : (
@@ -49,8 +72,8 @@ const ProductCard: FC<ProductCardProps> = ({
             )}
             <button
               className={`flex h-8 w-8 items-center justify-center rounded-3xl ${
-                isLoading ? "opacity-50 cursor-wait" : "hover:bg-white/80"
-              } bg-white/50 backdrop-blur transition-colors z-10`}
+                isLoading ? "cursor-wait opacity-50" : "hover:bg-white/80"
+              } z-10 bg-white/50 backdrop-blur transition-colors`}
               onClick={toggleLike}
               disabled={isLoading}
               aria-label={
@@ -59,7 +82,7 @@ const ProductCard: FC<ProductCardProps> = ({
             >
               <HeartIcon
                 className={`h-3 w-3 ${
-                  isLiked ? "text-pink-600 fill-pink-600" : "stroke-neutral-500"
+                  isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500"
                 }`}
                 filled={isLiked}
               />
@@ -67,17 +90,17 @@ const ProductCard: FC<ProductCardProps> = ({
           </div>
 
           {colorsCount && colorsCount > 0 && (
-            <div className="absolute bottom-2 right-2 bg-stone-50 rounded-xl px-2 py-1 flex items-center gap-0.5 shadow-md">
+            <div className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-md">
               <span className="text-xxs text-neutral-800">3+</span>
               <div className="relative w-4">
-                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 absolute left-0 top-1/2 -translate-y-1/2" />
-                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-pink-600 to-pink-400 absolute left-1.5 top-1/2 -translate-y-1/2" />
+                <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
+                <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
               </div>
             </div>
           )}
         </div>
 
-        <div className="px-1 py-4 flex-grow">
+        <div className="flex-grow px-1 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <GridIcon className="text-neutral-400" />
@@ -85,7 +108,7 @@ const ProductCard: FC<ProductCardProps> = ({
             </div>
           </div>
 
-          <h3 className="mt-0.5 text-sm md:text-base text-neutral-800 line-clamp-1">
+          <h3 className="text-sm mt-0.5 line-clamp-1 text-neutral-800 md:text-base">
             {title}
           </h3>
 
@@ -98,34 +121,40 @@ const ProductCard: FC<ProductCardProps> = ({
                 height={8}
                 className="h-2 w-2"
               />
-              <span className="text-[9px] md:text-xs text-pink-800">
+              <span className="text-[9px] text-pink-800 md:text-xs">
                 {seenCount} نفر در ۲۴ ساعت گذشته آن را دیده‌اند!
               </span>
             </div>
           )}
         </div>
 
-        <div className="rounded-2xl bg-stone-100 px-3 py-2 mt-auto">
+        <div className="mt-auto rounded-2xl bg-stone-100 px-3 py-2">
           <div className="flex items-center justify-between">
             <span className="text-sm text-stone-500">قیمت</span>
 
-            <div className="flex flex-col md:flex-row items-end md:items-center gap-2">
-              {discountPrice && (
-                <span className="text-base md:text-lg text-pink-600 whitespace-nowrap">
-                  {(discountPrice || price).toLocaleString("fa-IR")} تومان
-                </span>
-              )}
-
-              <span
-                className={`${
-                  discountPrice
-                    ? "text-foreground-muted line-through text-xs"
-                    : "text-neutral-700 text-base md:text-lg whitespace-nowrap"
-                }`}
-              >
-                {price.toLocaleString("fa-IR")} تومان
+            {!isAvailable ? (
+              <span className="text-base font-medium text-red-600 md:text-lg">
+                ناموجود
               </span>
-            </div>
+            ) : (
+              <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
+                {discountPrice && discountPrice > 0 && discountPrice < price && (
+                  <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
+                    {faNum(discountPrice)} تومان
+                  </span>
+                )}
+
+                <span
+                  className={`${
+                    discountPrice && discountPrice > 0 && discountPrice < price
+                      ? "text-xs text-foreground-muted line-through"
+                      : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
+                  }`}
+                >
+                  {faNum(price)} تومان
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

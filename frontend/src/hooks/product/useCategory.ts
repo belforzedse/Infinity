@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import {
   editProductDataAtom,
@@ -6,12 +6,12 @@ import {
   productCategoryDataAtomPagination,
   productDataAtom,
 } from "@/atoms/super-admin/products";
-import { getAllCategories } from "@/services/super-admin/product/cetegory/getAll";
+import { getAllCategories } from "@/services/super-admin/product/category/getAll";
 import {
   CategoryData,
   createCategory,
-} from "@/services/super-admin/product/cetegory/create";
-import { categoryResponseType } from "@/services/super-admin/product/cetegory/getAll";
+} from "@/services/super-admin/product/category/create";
+import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import { usePathname } from "next/navigation";
 
 interface UseProductCategoryProps {
@@ -23,10 +23,10 @@ export function useProductCategory(props?: UseProductCategoryProps) {
 
   const [CategoriesData, setCategoriesData] = useAtom(productCategoryDataAtom);
   const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination
+    productCategoryDataAtomPagination,
   );
   const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom
+    isEditMode ? editProductDataAtom : productDataAtom,
   );
   const pathname = usePathname();
 
@@ -50,23 +50,26 @@ export function useProductCategory(props?: UseProductCategoryProps) {
         CategoriesData.filter(
           (category) =>
             !productData.product_other_categories.some(
-              (selectedCat) => selectedCat.id === category.id
-            )
-        )
+              (selectedCat) => selectedCat.id === category.id,
+            ),
+        ),
       );
     }
   }, [pathname, productData.product_other_categories, CategoriesData]);
 
-  const fetchAllCategories = async () => {
+  const fetchAllCategories = useCallback(async () => {
     setIsGetCategoriesLoading(true);
     try {
       const categories = await getAllCategories();
       setCategoriesData((categories as any).data);
       setCategoriesDataPagination((categories as any).meta);
+    } catch (error) {
+      console.error("Failed to get product categories:", error);
+      // Don't throw error, just log it to prevent crashes
     } finally {
       setIsGetCategoriesLoading(false);
     }
-  };
+  }, [setCategoriesData, setCategoriesDataPagination]);
 
   const filteredTags =
     categorySearchQuery === ""
@@ -74,11 +77,11 @@ export function useProductCategory(props?: UseProductCategoryProps) {
       : categoryOptions.filter((category) =>
           category.attributes.Title.replace(/\s/g, "")
             .toLowerCase()
-            .includes(categorySearchQuery.replace(/\s/g, "").toLowerCase())
+            .includes(categorySearchQuery.replace(/\s/g, "").toLowerCase()),
         );
 
   const handleSelectOtherCategory = (
-    selectedCategory: categoryResponseType | null
+    selectedCategory: categoryResponseType | null,
   ) => {
     if (!selectedCategory) {
       return;
@@ -86,7 +89,7 @@ export function useProductCategory(props?: UseProductCategoryProps) {
 
     if (
       !productData.product_other_categories.find(
-        (cat) => cat.id === selectedCategory.id
+        (cat) => cat.id === selectedCategory.id,
       ) &&
       categoryOptions.find((cat) => cat.id === selectedCategory.id)
     ) {
@@ -96,8 +99,8 @@ export function useProductCategory(props?: UseProductCategoryProps) {
       ];
       setCategoryOptions(
         categoryOptions.filter(
-          (category) => category.id !== selectedCategory.id
-        )
+          (category) => category.id !== selectedCategory.id,
+        ),
       );
       setCategorySearchQuery("");
       setProductData({
@@ -120,7 +123,7 @@ export function useProductCategory(props?: UseProductCategoryProps) {
     const updatedCategories = (
       productData as any
     ).product_other_categories.filter(
-      (category: categoryResponseType) => category.id !== categoryToRemove.id
+      (category: categoryResponseType) => category.id !== categoryToRemove.id,
     );
     setCategoryOptions([...categoryOptions, categoryToRemove]);
     setProductData({

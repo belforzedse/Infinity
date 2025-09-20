@@ -15,7 +15,7 @@ const SizeTable: React.FC<SizeTableProps> = ({
 }) => {
   // Ensure data is always an array
   const [localData, setLocalData] = useState<any[]>(
-    Array.isArray(data) ? data : []
+    Array.isArray(data) ? data : [],
   );
   const [editingCell, setEditingCell] = useState<{
     rowIndex: number;
@@ -53,28 +53,28 @@ const SizeTable: React.FC<SizeTableProps> = ({
 
   if (!Array.isArray(localData) || localData.length === 0) {
     return (
-      <div className="text-center py-8 text-neutral-500">
+      <div className="py-8 text-center text-neutral-500">
         هیچ داده‌ای موجود نیست
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-white rounded-xl p-5">
+    <div className="w-full rounded-xl bg-white p-5">
       {title && (
-        <h3 className="text-lg font-medium text-neutral-800 mb-4">{title}</h3>
+        <h3 className="text-lg mb-4 font-medium text-neutral-800">{title}</h3>
       )}
       <div className="overflow-x-auto">
-        <table className="w-full bg-white rounded-lg border border-slate-100">
+        <table className="w-full rounded-lg border border-slate-100 bg-white">
           <thead className="bg-stone-50">
             <tr>
-              <th className="p-3 text-sm font-medium text-neutral-800 border-l border-slate-100">
+              <th className="text-sm border-l border-slate-100 p-3 font-medium text-neutral-800">
                 سایز
               </th>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="p-3 text-sm font-medium text-neutral-800 border-l border-slate-100"
+                  className="text-sm border-l border-slate-100 p-3 font-medium text-neutral-800"
                 >
                   {column.title}
                 </th>
@@ -87,7 +87,7 @@ const SizeTable: React.FC<SizeTableProps> = ({
                 key={rowIndex}
                 className={rowIndex !== 0 ? "border-t border-slate-100" : ""}
               >
-                <td className="p-3 border-l border-slate-100">
+                <td className="border-l border-slate-100 p-3">
                   {editingCell?.rowIndex === rowIndex &&
                   editingCell?.column === "size" ? (
                     <input
@@ -95,13 +95,13 @@ const SizeTable: React.FC<SizeTableProps> = ({
                       value={row.size || ""}
                       onChange={(e) => handleCellChange(e.target.value)}
                       onBlur={handleCellBlur}
-                      className="w-full p-1.5 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="focus:ring-primary w-full rounded border border-slate-200 p-1.5 focus:outline-none focus:ring-1"
                       autoFocus
                     />
                   ) : (
                     <div
                       onClick={() => handleCellClick(rowIndex, "size")}
-                      className="cursor-pointer hover:bg-slate-50 p-1.5 rounded"
+                      className="cursor-pointer rounded p-1.5 hover:bg-slate-50"
                     >
                       {row.size}
                     </div>
@@ -110,7 +110,7 @@ const SizeTable: React.FC<SizeTableProps> = ({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className="p-3 border-l border-slate-100"
+                    className="border-l border-slate-100 p-3"
                   >
                     {editingCell?.rowIndex === rowIndex &&
                     editingCell?.column === column.key ? (
@@ -119,13 +119,13 @@ const SizeTable: React.FC<SizeTableProps> = ({
                         value={row[column.key] || ""}
                         onChange={(e) => handleCellChange(e.target.value)}
                         onBlur={handleCellBlur}
-                        className="w-full p-1.5 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="focus:ring-primary w-full rounded border border-slate-200 p-1.5 focus:outline-none focus:ring-1"
                         autoFocus
                       />
                     ) : (
                       <div
                         onClick={() => handleCellClick(rowIndex, column.key)}
-                        className="cursor-pointer hover:bg-slate-50 p-1.5 rounded"
+                        className="cursor-pointer rounded p-1.5 hover:bg-slate-50"
                       >
                         {row[column.key]}
                       </div>

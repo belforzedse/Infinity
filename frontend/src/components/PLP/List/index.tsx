@@ -19,10 +19,10 @@ const heroBannerProducts = new Array(4).fill(null).map((_, index) => ({
 
 export default function PLPList() {
   return (
-    <div className="p-3 md:px-10 md:py-3">
-      <div className="max-w-[1440px] mx-auto">
-        <div className="flex gap-4 flex-col md:flex-row">
-          <div className="w-[269px] flex-col gap-7 hidden md:flex">
+    <div className="p-3 md:px-10 md:py-3" data-plp-top>
+      <div className="mx-auto max-w-[1440px]">
+        <div className="flex flex-col gap-4 md:flex-row">
+          <div className="hidden w-[269px] flex-col gap-7 md:flex">
             <Filter />
 
             <SidebarSuggestions
@@ -42,7 +42,7 @@ export default function PLPList() {
             <PLPListMobileFilter />
           </div>
 
-          <div className="flex-1 flex flex-col gap-3">
+          <div className="flex flex-1 flex-col gap-3">
             <Content />
 
             <div className="mt-3 flex flex-col gap-5">

@@ -1,14 +1,16 @@
 "use client";
 
-import Image from "next/image";
+import BlurImage from "@/components/ui/BlurImage";
+import imageLoader from "@/utils/imageLoader";
 import { FC, useState } from "react";
 
 interface ImageSliderProps {
   images: string[];
   title: string;
+  priority?: boolean;
 }
 
-const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
+const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -19,7 +21,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
   };
 
   return (
-    <div className="relative h-[270px] md:h-[300px] w-full overflow-hidden rounded-2xl">
+    <div className="relative h-[270px] w-full overflow-hidden rounded-2xl md:h-[300px]">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
         onScroll={handleScroll}
@@ -29,13 +31,15 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
             key={index}
             className="relative h-full w-full flex-none snap-start"
           >
-            <Image
+            <BlurImage
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
-              className="object-cover select-none"
+              className="select-none object-cover"
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
-              priority={index === 0}
+              priority={priority && index === 0}
+              loading={priority && index === 0 ? "eager" : "lazy"}
+              loader={imageLoader}
             />
           </div>
         ))}
@@ -48,8 +52,8 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title }) => {
               key={index}
               className={`h-0.5 rounded-full transition-all duration-300 ${
                 currentSlide === index
-                  ? "bg-foreground-primary w-7 "
-                  : "bg-white w-[9px]"
+                  ? "w-7 bg-foreground-primary"
+                  : "w-[9px] bg-white"
               }`}
             />
           ))}

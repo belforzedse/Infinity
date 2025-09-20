@@ -15,13 +15,16 @@ const CustomerServiceSection = ({
 }: CustomerServiceSectionProps) => {
   // Fallback data in case API data is not available
   const [links, setLinks] = useState<{ title: string; url: string }[]>([
-    { title: "سوالات متداول", url: "#" },
-    { title: "شرایط و مقررات تعویض و مرجوع", url: "#" },
+    { title: "سوالات متداول", url: "https://infinitycolor.co/سوالات-متداول/" },
+    {
+      title: "شرایط و مقررات تعویض و مرجوع",
+      url: "https://infinitycolor.co/شرایط-و-مقررات-تعویض-و-مرجوع/",
+    },
   ]);
 
   const [title, setTitle] = useState<string>("خدمات مشتریان");
   const [supportText, setSupportText] = useState<string>(
-    "شنبه تا پنج شنبه (غیر از روزهای تعطیل) از ساعت9 صبح الی 17 پاسخگوی شما هستیم."
+    "شنبه تا پنج شنبه (غیر از روزهای تعطیل) از ساعت9 صبح الی 17 پاسخگوی شما هستیم.",
   );
 
   useEffect(() => {
@@ -32,7 +35,7 @@ const CustomerServiceSection = ({
           data.Links.map((link) => ({
             title: link.Title,
             url: link.URL,
-          }))
+          })),
         );
       }
     }
@@ -43,9 +46,9 @@ const CustomerServiceSection = ({
   }, [data, customerSupport]);
 
   return (
-    <div className="flex flex-col gap-6 relative md:px-[65px] pb-5 md:border-r border-b md:border-b-[0px] border-slate-200 md:h-full md:min-h-[324px]">
+    <div className="relative flex flex-col gap-6 border-b border-slate-200 pb-5 md:h-full md:min-h-[324px] md:border-b-[0px] md:border-r md:px-[65px]">
       <div className="flex flex-col gap-2 border-b border-slate-200 pb-6">
-        <h3 className="text-neutral-900 text-base">{title}</h3>
+        <h3 className="text-base text-neutral-900">{title}</h3>
         <div className="flex flex-col items-start gap-2">
           {links.map((link, index) => (
             <FooterLink key={index} href={link.url}>
@@ -56,8 +59,8 @@ const CustomerServiceSection = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-neutral-900 text-base">پشتیبانی مشتریان</h3>
-        <p className="text-neutral-500 text-sm text-right md:max-w-[233px]">
+        <h3 className="text-base text-neutral-900">پشتیبانی مشتریان</h3>
+        <p className="text-sm text-right text-neutral-500 md:max-w-[233px]">
           {supportText}
         </p>
       </div>

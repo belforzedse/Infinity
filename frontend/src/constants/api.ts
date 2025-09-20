@@ -4,16 +4,20 @@
  */
 
 // Base URLs
-export const API_BASE_URL =
+const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "https://api.infinity.rgbgroup.ir/api";
+export const API_BASE_URL = apiBaseUrl;
 
-export const STRAPI_TOKEN =
-  process.env.NEXT_PUBLIC_STRAPI_TOKEN ||
-  "STRAPI_API_TOKEN";
+const strapiToken = process.env.NEXT_PUBLIC_STRAPI_TOKEN || "STRAPI_API_TOKEN"
+;
 
-export const IMAGE_BASE_URL = "https://api.infinity.rgbgroup.ir";
+export const STRAPI_TOKEN = strapiToken;
 
+const imageBaseUrl =
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinity.rgbgroup.ir";
+
+export const IMAGE_BASE_URL = imageBaseUrl;
 // API Versions
 export const API_VERSION = "v1";
 

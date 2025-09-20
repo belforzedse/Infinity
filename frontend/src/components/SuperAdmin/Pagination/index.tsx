@@ -71,7 +71,15 @@ export default function SuperAdminPagination({
     }
 
     // first, ..., current-1,current,current+1, ..., last
-    items.push(first, "…", currentPage - 1, currentPage, currentPage + 1, "…", last);
+    items.push(
+      first,
+      "…",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "…",
+      last,
+    );
     return items;
   };
 
@@ -88,7 +96,7 @@ export default function SuperAdminPagination({
       />
       <div className="flex items-center gap-2">
         <button
-          className="border rounded-3xl p-1 disabled:opacity-50 border-slate-200 bg-white"
+          className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -101,7 +109,7 @@ export default function SuperAdminPagination({
                 <span
                   key={`ellipsis-${idx}`}
                   className={
-                    "h-8 w-8 rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400 select-none"
+                    "text-xs flex h-8 w-8 select-none items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400"
                   }
                 >
                   {item}
@@ -114,10 +122,10 @@ export default function SuperAdminPagination({
               <button
                 key={pageNumber}
                 className={cn(
-                  "h-8 w-8 rounded-3xl text-xs flex items-center justify-center bg-white border border-slate-200 text-slate-400",
+                  "text-xs flex h-8 w-8 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400",
                   currentPage === pageNumber
                     ? "bg-actions-primary text-white"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-gray-100",
                 )}
                 onClick={() => handlePageChange(pageNumber)}
               >
@@ -127,7 +135,7 @@ export default function SuperAdminPagination({
           })}
         </div>
         <button
-          className="border rounded-3xl p-1 disabled:opacity-50 border-slate-200 bg-white"
+          className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >

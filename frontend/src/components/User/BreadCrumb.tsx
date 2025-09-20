@@ -22,11 +22,11 @@ const BreadCrumb = ({
 
   return (
     <>
-      <span className="text-foreground-primary text-3xl lg:hidden">
+      <span className="text-3xl text-foreground-primary lg:hidden">
         حساب من
       </span>
-      <div className="flex items-center justify-between w-full">
-        <span className="text-foreground-primary lg:text-4xl text-xl">
+      <div className="flex w-full items-center justify-between">
+        <span className="text-xl text-foreground-primary lg:text-4xl">
           {isNextStep ? nextStepTitle : currentTitle}
         </span>
 
@@ -34,8 +34,8 @@ const BreadCrumb = ({
           onClick={onClick}
           className={clsx(
             isNextStep
-              ? "bg-pink-500 text-white rounded-lg p-2"
-              : "flex items-center gap-1 py-2 px-4 bg-background-secondary rounded-lg"
+              ? "rounded-lg bg-pink-500 p-2 text-white"
+              : "flex items-center gap-1 rounded-lg bg-background-secondary px-4 py-2",
           )}
         >
           {isNextStep ? (

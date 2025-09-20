@@ -32,22 +32,22 @@ const Voice: React.FC<VoiceProps> = ({ onPlay, className, audioSrc }) => {
   if (error) {
     return (
       <div
-        className={`w-[303px] bg-stone-50 rounded-xl p-2.5 ${className || ""}`}
+        className={`w-[303px] rounded-xl bg-stone-50 p-2.5 ${className || ""}`}
       >
-        <p className="text-red-500 text-xs text-center">{error}</p>
+        <p className="text-xs text-center text-red-500">{error}</p>
       </div>
     );
   }
 
   return (
     <div
-      className={`w-[303px] flex flex-row-reverse items-center gap-2 bg-stone-50 rounded-xl p-2.5 ${
+      className={`flex w-[303px] flex-row-reverse items-center gap-2 rounded-xl bg-stone-50 p-2.5 ${
         className || ""
       }`}
     >
       <button
         onClick={handlePlay}
-        className="w-8 h-8 flex items-center justify-center bg-pink-500 rounded-full"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-500"
         disabled={!audioDuration}
       >
         {playing ? <PauseIcon /> : <PlayIcon />}
@@ -55,7 +55,7 @@ const Voice: React.FC<VoiceProps> = ({ onPlay, className, audioSrc }) => {
 
       <div
         ref={progressRef}
-        className="flex flex-row-reverse items-center gap-1.5 cursor-pointer touch-none"
+        className="flex cursor-pointer touch-none flex-row-reverse items-center gap-1.5"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -73,7 +73,7 @@ const Voice: React.FC<VoiceProps> = ({ onPlay, className, audioSrc }) => {
         ))}
       </div>
 
-      <div className="flex gap-2 text-neutral-500 text-xs ml-auto">
+      <div className="text-xs ml-auto flex gap-2 text-neutral-500">
         <span>{formatTime(audioDuration)}</span>
       </div>
     </div>

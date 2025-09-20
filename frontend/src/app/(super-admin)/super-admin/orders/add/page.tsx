@@ -57,12 +57,12 @@ export default function Page() {
               headers: {
                 Authorization: `Bearer ${STRAPI_TOKEN}`,
               },
-            }
+            },
           );
 
           toast.success("سفارش با موفقیت ثبت شد");
           router.push("/super-admin/orders");
-        } catch (error) {
+        } catch {
           toast.error("خطایی رخ داده است");
         }
       }}

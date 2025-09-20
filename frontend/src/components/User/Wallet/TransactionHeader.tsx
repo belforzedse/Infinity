@@ -11,11 +11,11 @@ export const TransactionHeader = ({
 }) => (
   <div
     className={clsx(
-      "items-center gap-1 col-span-1",
-      showOnlyMobile ? "flex lg:hidden" : "lg:flex hidden"
+      "col-span-1 items-center gap-1",
+      showOnlyMobile ? "flex lg:hidden" : "hidden lg:flex",
     )}
   >
     {icon}
-    <span className="text-foreground-primary text-2xl">{title}</span>
+    <span className="text-2xl text-foreground-primary">{title}</span>
   </div>
 );

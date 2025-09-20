@@ -91,7 +91,7 @@ export default function ProvinceCityField({
     if (provinceValue) {
       // Find the selected province
       const selectedProvince = provinces.find(
-        (province) => province.id.toString() === provinceValue
+        (province) => province.id.toString() === provinceValue,
       );
 
       if (selectedProvince && selectedProvince.cities) {
@@ -122,10 +122,10 @@ export default function ProvinceCityField({
   return (
     <div className="grid grid-cols-2 gap-4">
       {/* Province Dropdown */}
-      <div className="w-full border border-neutral-200 rounded-lg overflow-hidden">
+      <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
         <div className="relative">
           <select
-            className={`w-full py-3 px-5 text-sm border-l-[20px] border-transparent ${
+            className={`text-sm w-full border-l-[20px] border-transparent px-5 py-3 ${
               readOnly ? "bg-slate-100 text-slate-500" : ""
             } ${loading ? "opacity-50" : ""}`}
             disabled={readOnly || loading}
@@ -143,10 +143,10 @@ export default function ProvinceCityField({
       </div>
 
       {/* City Dropdown */}
-      <div className="w-full border border-neutral-200 rounded-lg overflow-hidden">
+      <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
         <div className="relative">
           <select
-            className={`w-full py-3 px-5 text-sm border-l-[20px] border-transparent ${
+            className={`text-sm w-full border-l-[20px] border-transparent px-5 py-3 ${
               readOnly ? "bg-slate-100 text-slate-500" : ""
             } ${loading ? "opacity-50" : ""}`}
             disabled={readOnly || !provinceValue || loading}

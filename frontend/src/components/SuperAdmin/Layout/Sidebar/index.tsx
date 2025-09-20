@@ -3,9 +3,13 @@ import Logo from "@/components/Kits/Logo";
 import superAdminSidebar from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
-import { useState } from "react";
+import React, { useState, Fragment, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
+import SettingsIcon from "../Icons/SettingsIcon";
+import { useRouter, usePathname } from "next/navigation";
+import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -16,40 +20,71 @@ export default function SuperAdminLayoutSidebar({
   isOpen,
   onClose,
 }: SuperAdminLayoutSidebarProps) {
-  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const router = useRouter();
+  const pathname = usePathname();
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const toggleMenu = (label: string) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
+  const handleLogout = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      }
+    } finally {
+      router.replace("/auth");
+    }
+  };
+
+  const openConfirm = () => setShowConfirm(true);
+  const closeConfirm = () => setShowConfirm(false);
+
+  // Auto-open the section that matches current path
+  useEffect(() => {
+    const next: Record<string, boolean> = {};
+    const curr = pathname.replace(/\/$/, "");
+    superAdminSidebar.forEach((it) => {
+      const base = (it.href ?? "").replace(/\/$/, "");
+      if (
+        it.children.length > 0 &&
+        base &&
+        (curr === base || curr.startsWith(base + "/"))
+      ) {
+        next[it.id] = true;
+      }
+    });
+    setOpenMenus((p) => ({ ...p, ...next }));
+  }, [pathname]);
+
+  const openAndNavigate = (item: (typeof superAdminSidebar)[number]) => {
+    if (item.href) router.push(item.href);
+    if (item.children.length > 0) {
+      setOpenMenus((p) => ({ ...p, [item.id]: true }));
+    }
   };
 
   return (
     <>
-      {/* Overlay */}
       <div
         className={clsx(
           "fixed inset-0 bg-black bg-opacity-50 transition-opacity lg:hidden",
-          isOpen ? "opacity-100 z-40" : "opacity-0 pointer-events-none"
+          isOpen ? "z-40 opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
       />
 
-      {/* Sidebar */}
       <div
         id="sidebar"
         className={clsx(
-          "fixed lg:static top-0 right-0 h-full z-50 lg:z-auto",
+          "fixed right-0 top-0 z-50 h-full lg:static lg:z-auto",
           "w-[280px] lg:w-auto",
           "transform transition-transform duration-300 ease-in-out lg:transform-none",
           isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0",
-          "bg-white p-3 rounded-tl-xl rounded-bl-xl flex flex-col gap-4"
+          "flex flex-col gap-4 rounded-bl-xl rounded-tl-xl bg-white p-3",
         )}
       >
-        {/* Close button for mobile */}
         <button
-          className="lg:hidden absolute top-4 left-4 p-2 hover:bg-neutral-100 rounded-full"
+          className="absolute left-4 top-4 rounded-full p-2 hover:bg-neutral-100 lg:hidden"
           onClick={onClose}
         >
           <svg
@@ -75,104 +110,179 @@ export default function SuperAdminLayoutSidebar({
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-6">
-            {superAdminSidebar.map((item) => (
-              <div key={item.label} className="flex flex-col">
-                <div
-                  className={clsx(
-                    "flex items-center justify-between cursor-pointer py-1.5 px-2",
-                    item.children.length > 0 && "mb-2"
-                  )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    item.children.length > 0 && toggleMenu(item.label);
-                  }}
-                >
-                  {item.children.length > 0 ? (
-                    <div className="flex items-center gap-2">
-                      {item.icon}
-                      <span className="text-neutral-600 text-sm font-medium">
-                        {item.label}
-                      </span>
-                    </div>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className="flex items-center gap-2"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+            {superAdminSidebar.map((item) => {
+              const hasChildren = item.children.length > 0;
+              const isOpenMenu = !!openMenus[item.id];
+
+              return (
+                <div key={item.id} className="flex flex-col">
+                  {/* Parent row */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className={clsx(
+                      "flex cursor-pointer items-center justify-between rounded-lg px-2 py-1.5",
+                      "transition-colors duration-150 hover:bg-neutral-50",
+                      hasChildren && "mb-2",
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAndNavigate(item);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openAndNavigate(item);
+                      }
+                    }}
+                  >
+                    {hasChildren ? (
                       <div className="flex items-center gap-2">
                         {item.icon}
-                        <span className="text-neutral-600 text-sm font-medium">
+                        <span className="text-sm font-medium text-neutral-600">
                           {item.label}
                         </span>
                       </div>
-                    </Link>
-                  )}
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className="flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center gap-2">
+                          {item.icon}
+                          <span className="text-sm font-medium text-neutral-600">
+                            {item.label}
+                          </span>
+                        </div>
+                      </Link>
+                    )}
 
-                  {item.children.length > 0 && (
-                    <div
-                      className={clsx(
-                        "transition-transform duration-200",
-                        openMenus[item.label] && "rotate-180"
-                      )}
-                    >
-                      <ChevronDownIcon />
-                    </div>
-                  )}
-                </div>
-
-                {item.children.length > 0 && openMenus[item.label] && (
-                  <div className="flex flex-col gap-2 pr-5 py-2">
-                    {item.children.map((child, index) => (
-                      <>
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          className="text-neutral-600 text-xs hover:text-pink-500 transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {child.label}
-                        </Link>
-
-                        {index !== item.children.length - 1 && (
-                          <div className="w-full h-[1px] bg-slate-100"></div>
+                    {hasChildren && (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className={clsx(
+                          "rounded-md p-1 transition-transform duration-200",
+                          "transition-colors duration-150 hover:bg-neutral-50",
+                          isOpenMenu && "rotate-180",
                         )}
-                      </>
-                    ))}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenus((p) => ({
+                            ...p,
+                            [item.id]: !p[item.id],
+                          }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOpenMenus((p) => ({
+                              ...p,
+                              [item.id]: !p[item.id],
+                            }));
+                          }
+                        }}
+                        aria-expanded={isOpenMenu}
+                        aria-controls={`submenu-${item.id}`}
+                      >
+                        <ChevronDownIcon />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Submenu with expand/collapse animation */}
+                  <AnimatePresence initial={false}>
+                    {hasChildren && isOpenMenu && (
+                      <motion.div
+                        key={`${item.id}-submenu`}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                        className="mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50"
+                        id={`submenu-${item.id}`}
+                      >
+                        {item.children.map((child, index) => {
+                          const curr = pathname.replace(/\/$/, "");
+                          const href = (child.href ?? "").replace(/\/$/, "");
+                          const active =
+                            !!href && (curr === href || curr.startsWith(href + "/"));
+                          return (
+                            <Fragment key={child.id}>
+                              <motion.div
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                transition={{ duration: 0.15, delay: index * 0.03 }}
+                              >
+                                <Link
+                                  href={child.href}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className={clsx(
+                                    "block px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                    "transition-colors duration-150",
+                                    active
+                                      ? "bg-neutral-100 font-medium text-neutral-900"
+                                      : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
+                                  )}
+                                >
+                                  {child.label}
+                                </Link>
+                              </motion.div>
+                              {index !== item.children.length - 1 && (
+                                <div className="mx-4 h-px bg-neutral-100" />
+                              )}
+                            </Fragment>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="w-full h-[1px] bg-neutral-100"></div>
+          <div className="h-[1px] w-full bg-neutral-100" />
 
-          {/* <div className="flex items-center cursor-pointer py-1.5 px-2">
+          <div className="flex cursor-pointer items-center px-2 py-1.5">
             <Link
               href={"/super-admin/settings"}
               className="flex items-center gap-2"
             >
               <div className="flex items-center gap-2">
                 <SettingsIcon />
-                <span className="text-neutral-600 text-sm font-medium">
+                <span className="text-sm font-medium text-neutral-600">
                   تنظیمات سایت
                 </span>
               </div>
             </Link>
-          </div> */}
+          </div>
 
-          <div className="flex items-center cursor-pointer py-1.5 px-2">
-            <Link
-              href={"/super-admin/logout"}
+          <div className="flex cursor-pointer items-center px-2 py-1.5">
+            <button
+              type="button"
+              onClick={openConfirm}
               className="flex items-center gap-2"
             >
               <div className="flex items-center gap-2">
                 <ExitIcon />
-                <span className="text-neutral-600 text-sm font-medium">
+                <span className="text-sm font-medium text-neutral-600">
                   خروج
                 </span>
               </div>
-            </Link>
+            </button>
+            <ConfirmDialog
+              isOpen={showConfirm}
+              title="خروج از حساب کاربری"
+              description="آیا از خروج از حساب کاربری خود مطمئن هستید؟"
+              confirmText="بله، خارج شو"
+              cancelText="انصراف"
+              onConfirm={handleLogout}
+              onCancel={closeConfirm}
+            />
           </div>
         </div>
       </div>

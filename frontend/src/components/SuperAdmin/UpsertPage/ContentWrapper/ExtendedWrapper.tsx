@@ -13,13 +13,13 @@ type Props<T> = {
 };
 
 function isCustomField<T>(
-  field: ExtendedField<T>
+  field: ExtendedField<T>,
 ): field is ExtendedField<T> & { type: "custom" } {
   return field.type === "custom";
 }
 
 export default function ExtendedUpsertPageContentWrapper<
-  T extends { createdAt: Date; updatedAt: Date }
+  T extends { createdAt: Date; updatedAt: Date },
 >(props: Props<T>) {
   const { config, data, onSubmit } = props;
 
@@ -31,7 +31,7 @@ export default function ExtendedUpsertPageContentWrapper<
       sections: section.sections.map((subsection) => ({
         ...subsection,
         fields: subsection.fields.filter(
-          (field) => !isCustomField(field)
+          (field) => !isCustomField(field),
         ) as any,
       })),
     })),
@@ -65,7 +65,7 @@ export default function ExtendedUpsertPageContentWrapper<
                         className="mb-6"
                       >
                         {field.label && (
-                          <label className="block text-sm font-medium mb-2">
+                          <label className="text-sm mb-2 block font-medium">
                             {field.label}
                           </label>
                         )}

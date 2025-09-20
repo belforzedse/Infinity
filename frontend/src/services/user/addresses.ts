@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { HTTP_STATUS } from "@/constants/api";
+// removed unused import: HTTP_STATUS from "@/constants/api"
 import { handleAuthErrors } from "@/utils/auth";
 
 // Use the central auth error handler instead of local implementation
@@ -71,7 +71,7 @@ export const getUserAddresses = async (): Promise<UserAddress[]> => {
 };
 
 export const addUserAddress = async (
-  address: AddAddressRequest
+  address: AddAddressRequest,
 ): Promise<UserAddress> => {
   const token = localStorage.getItem("accessToken");
 
@@ -102,7 +102,7 @@ export const addUserAddress = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return response.data as UserAddress;
@@ -115,7 +115,7 @@ export const addUserAddress = async (
 
 export const updateUserAddress = async (
   id: number,
-  address: AddAddressRequest
+  address: AddAddressRequest,
 ): Promise<UserAddress> => {
   const token = localStorage.getItem("accessToken");
 
@@ -131,7 +131,7 @@ export const updateUserAddress = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return response.data as UserAddress;

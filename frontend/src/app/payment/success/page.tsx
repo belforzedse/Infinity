@@ -90,9 +90,9 @@ function PaymentSuccessContent() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-10">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-          <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="mx-auto max-w-2xl rounded-lg bg-white p-8 shadow-md">
+          <div className="flex h-40 items-center justify-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
           </div>
         </div>
       </div>
@@ -101,11 +101,11 @@ function PaymentSuccessContent() {
 
   return (
     <div className="container mx-auto px-4 py-10" dir="rtl">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+      <div className="mx-auto max-w-2xl rounded-lg bg-white p-8 shadow-md">
         <div className="flex flex-col items-center text-center">
           {/* Success Icon */}
-          <div className="relative w-24 h-24 mb-6">
-            <div className="w-full h-full rounded-full bg-green-100 flex items-center justify-center">
+          <div className="relative mb-6 h-24 w-24">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-green-100">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-12 w-12 text-green-500"
@@ -124,18 +124,18 @@ function PaymentSuccessContent() {
           </div>
 
           {/* Success Message */}
-          <h1 className="text-3xl font-bold text-green-600 mb-4">
+          <h1 className="text-3xl mb-4 font-bold text-green-600">
             پرداخت با موفقیت انجام شد!
           </h1>
 
-          <p className="text-gray-700 mb-6 text-lg">
+          <p className="text-lg mb-6 text-gray-700">
             پرداخت شما با موفقیت پردازش شد و سفارش شما ثبت گردید.
           </p>
 
           {/* Order Information */}
           {orderId && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 w-full">
-              <h3 className="text-lg font-semibold text-green-800 mb-3">
+            <div className="mb-6 w-full rounded-lg border border-green-200 bg-green-50 p-6">
+              <h3 className="text-lg mb-3 font-semibold text-green-800">
                 اطلاعات سفارش
               </h3>
               <div className="space-y-2 text-right">
@@ -166,11 +166,11 @@ function PaymentSuccessContent() {
           )}
 
           {/* Next Steps */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 w-full">
-            <h3 className="text-lg font-semibold text-blue-800 mb-3">
+          <div className="mb-6 w-full rounded-lg border border-blue-200 bg-blue-50 p-6">
+            <h3 className="text-lg mb-3 font-semibold text-blue-800">
               مراحل بعدی
             </h3>
-            <div className="text-right space-y-2 text-gray-700">
+            <div className="space-y-2 text-right text-gray-700">
               <p>✅ سفارش شما در حال پردازش است</p>
               <p>✅ ایمیل تایید برای شما ارسال خواهد شد</p>
               <p>✅ می‌توانید وضعیت سفارش خود را پیگیری کنید</p>
@@ -180,23 +180,23 @@ function PaymentSuccessContent() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 w-full">
-              <p className="text-red-600 text-center">{error}</p>
+            <div className="mb-6 w-full rounded-lg border border-red-200 bg-red-50 p-4">
+              <p className="text-center text-red-600">{error}</p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+          <div className="flex w-full max-w-md flex-col gap-4 sm:flex-row">
             <button
               onClick={handleViewOrder}
-              className="bg-pink-500 text-white py-3 px-6 rounded-lg text-center hover:bg-pink-600 transition-colors flex-1"
+              className="flex-1 rounded-lg bg-pink-500 px-6 py-3 text-center text-white transition-colors hover:bg-pink-600"
             >
               مشاهده جزئیات سفارش
             </button>
 
             <button
               onClick={handleContinueShopping}
-              className="bg-gray-100 text-gray-800 py-3 px-6 rounded-lg text-center hover:bg-gray-200 transition-colors flex-1"
+              className="flex-1 rounded-lg bg-gray-100 px-6 py-3 text-center text-gray-800 transition-colors hover:bg-gray-200"
             >
               ادامه خرید
             </button>
@@ -205,7 +205,7 @@ function PaymentSuccessContent() {
           <div className="mt-4 w-full max-w-md">
             <button
               onClick={handleViewDashboard}
-              className="w-full bg-blue-100 text-blue-800 py-3 px-6 rounded-lg text-center hover:bg-blue-200 transition-colors"
+              className="w-full rounded-lg bg-blue-100 px-6 py-3 text-center text-blue-800 transition-colors hover:bg-blue-200"
             >
               رفتن به داشبورد
             </button>
@@ -221,9 +221,9 @@ export default function PaymentSuccess() {
     <Suspense
       fallback={
         <div className="container mx-auto px-4 py-10">
-          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+          <div className="mx-auto max-w-2xl rounded-lg bg-white p-8 shadow-md">
+            <div className="flex h-40 items-center justify-center">
+              <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
             </div>
           </div>
         </div>

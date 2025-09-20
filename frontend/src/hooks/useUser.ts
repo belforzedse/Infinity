@@ -22,7 +22,7 @@ export default function useUser(): UseUserReturnType {
       setUserData(data);
     } catch (err) {
       setError(
-        err instanceof Error ? err : new Error("Failed to fetch user data")
+        err instanceof Error ? err : new Error("Failed to fetch user data"),
       );
       console.error("Error fetching user data:", err);
     } finally {

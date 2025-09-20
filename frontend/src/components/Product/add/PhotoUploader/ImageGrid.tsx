@@ -9,8 +9,8 @@ const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({
   previews,
   onRemoveFile,
 }) => (
-  <div className="border border-dashed border-blue-600 rounded-xl px-6 py-4 min-h-44">
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  <div className="min-h-44 rounded-xl border border-dashed border-blue-600 px-6 py-4">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       {previews.map((preview, index) => (
         <PhotoUploaderImagePreview
           key={index}

@@ -3,7 +3,6 @@
 import UpsertPageContentWrapper, {
   UpsertPageConfigType,
 } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { useState } from "react";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
 import { ReactElement } from "react";
@@ -34,8 +33,8 @@ interface ActionButtonProps {
 
 // Function to fetch roles from the API
 const fetchRoles = async (
-  searchTerm: string,
-  formData?: any
+  _searchTerm: string,
+  _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
     const response = await apiClient.get("/local-user-roles", {
@@ -76,7 +75,7 @@ const config: UpsertPageConfigType<User> = {
   actionButtons: (props: ActionButtonProps): ReactElement => (
     <>
       <button
-        className="px-5 py-2 rounded-xl bg-slate-200 text-slate-500 text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 md:flex-none"
         onClick={props.onCancel}
         disabled={props.isLoading}
       >
@@ -84,7 +83,7 @@ const config: UpsertPageConfigType<User> = {
       </button>
 
       <button
-        className="px-5 py-2 rounded-xl bg-actions-primary text-white text-sm flex-1 md:flex-none"
+        className="text-sm flex-1 rounded-xl bg-actions-primary px-5 py-2 text-white md:flex-none"
         onClick={props.onSubmit}
         disabled={props.isLoading}
       >
@@ -96,7 +95,7 @@ const config: UpsertPageConfigType<User> = {
     {
       title: "مشخصات کاربر",
       iconButton: (
-        <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
+        <button className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100">
           <EditIcon />
         </button>
       ),
@@ -154,7 +153,7 @@ const config: UpsertPageConfigType<User> = {
     {
       title: "اطلاعات جزئی",
       iconButton: (
-        <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
+        <button className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100">
           <EditIcon />
         </button>
       ),
@@ -200,8 +199,6 @@ const config: UpsertPageConfigType<User> = {
 };
 
 export default function Page() {
-  const [isLoading, setIsLoading] = useState(false);
-
   const initialData: User = {
     id: "",
     firstname: "",
@@ -224,8 +221,6 @@ export default function Page() {
       data={initialData}
       onSubmit={async (data: User) => {
         try {
-          setIsLoading(true);
-
           // Validate required fields
           if (
             !data.firstname ||
@@ -235,12 +230,10 @@ export default function Page() {
             !data.password
           ) {
             toast.error("لطفا فیلدهای ضروری را پر کنید");
-            setIsLoading(false);
             return;
           }
 
           // 1. Create the user first
-          let userId: number;
           try {
             const userResponse = await apiClient.post<{ id: number }>(
               "/sp/local-users",
@@ -259,18 +252,16 @@ export default function Page() {
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken"
+                    "accessToken",
                   )}`,
                 },
-              }
+              },
             );
 
             if (!userResponse.data || !userResponse.data.id) {
               toast.error("خطا در ایجاد کاربر");
               return;
             }
-
-            userId = userResponse.data.id;
           } catch (userError) {
             console.error("Error creating user:", userError);
             toast.error("خطا در ایجاد کاربر");
@@ -284,8 +275,6 @@ export default function Page() {
         } catch (error) {
           console.error("Error creating user:", error);
           toast.error("خطا در ایجاد کاربر");
-        } finally {
-          setIsLoading(false);
         }
       }}
     />

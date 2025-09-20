@@ -1,4 +1,4 @@
-import { categoryResponseType } from "@/services/super-admin/product/cetegory/getAll";
+import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import {
   CoverImageField,
   MediaDataItem,

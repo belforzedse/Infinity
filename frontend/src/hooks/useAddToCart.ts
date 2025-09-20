@@ -1,13 +1,15 @@
 import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+// removed unused import: useRouter from "next/navigation"
+import notify from "@/utils/notify";
 
 interface UseAddToCartProps {
   productId: string;
   name: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   image: string;
   color?: string;
   size?: string;
@@ -20,13 +22,15 @@ export default function useAddToCart({
   name,
   category,
   price,
+  originalPrice,
+  discountPercentage,
   image,
   color,
   size,
   model,
   variationId,
 }: UseAddToCartProps) {
-  const router = useRouter();
+  // removed unused: router
   const {
     addToCart: addToCartContext,
     openDrawer,
@@ -66,7 +70,7 @@ export default function useAddToCart({
         setQuantity(0);
       }
     }
-  }, [cartItems, cartItemId, isAdding]);
+  }, [cartItems, cartItemId, isAdding, isManuallyChanged, quantity]);
 
   // Custom quantity setter that also updates the cart when the item is already in cart
   const updateItemQuantity = (newQuantity: number) => {
@@ -97,8 +101,7 @@ export default function useAddToCart({
 
     try {
       // Check if user is logged in by looking for accessToken in localStorage
-      const accessToken = localStorage.getItem("accessToken");
-      const isLoggedIn = !!accessToken;
+      localStorage.getItem("accessToken"); // removed unused: isLoggedIn
 
       // Add to cart - if logged in, we'll use local storage for now, but this could be extended
       // to use an API endpoint for authenticated users in the future
@@ -112,6 +115,8 @@ export default function useAddToCart({
         name,
         category,
         price,
+        originalPrice,
+        discountPercentage,
         quantity: actualQuantity,
         image,
         color,
@@ -126,9 +131,9 @@ export default function useAddToCart({
 
       // Check for the specific "Not enough stock" error
       if (error.message && error.message.includes("Not enough stock")) {
-        toast.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
+        notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
       } else {
-        toast.error("افزودن کالا به سبد خرید با خطا مواجه شد");
+        notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
       }
     } finally {
       setIsAdding(false);

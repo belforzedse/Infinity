@@ -7,7 +7,7 @@ export interface Response {
 
 export const loginPassword = async (
   phone: string,
-  password: string
+  password: string,
 ): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.LOGIN_PASSWORD;
 

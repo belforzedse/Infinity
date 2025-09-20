@@ -5,12 +5,12 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   Row,
 } from "@tanstack/react-table";
-import { useEffect, useRef, useState } from "react";
+// removed unused import: getPaginationRowModel from "@tanstack/react-table"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/tailwind";
 import { twMerge } from "tailwind-merge";
 import SuperAdminTableSelect from "./Select";
@@ -19,6 +19,7 @@ import { apiClient } from "@/services";
 import { atom, useAtom } from "jotai";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
+import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
 
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData, TValue> {
@@ -33,23 +34,40 @@ interface TableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data?: TData[];
   url?: string;
+  loading?: boolean;
   removeActions?: boolean;
   className?: string;
   draggable?: boolean;
-  mobileTable?: (data: TData[] | undefined) => React.ReactNode;
+  mobileTable?: (
+    data: TData[] | undefined,
+    selectionProps?: {
+      enableSelection: boolean;
+      selectedIds: Set<string>;
+      onSelectionChange: (id: string, selected: boolean) => void;
+    }
+  ) => React.ReactNode;
   onItemDrag?: (row: Row<TData>) => void;
+  // Enable row selection + bulk actions
+  enableSelection?: boolean;
+  getRowId?: (row: TData) => string;
+  bulkOptions?: { id: string; title: string }[];
+  onBulkAction?: (actionId: string, selectedRows: TData[]) => void | Promise<void>;
+  // Optional client-side sorting when API sort is not feasible
+  clientSort?:
+    | undefined
+    | {
+        key: string;
+        direction: "asc" | "desc";
+        getValue: (row: TData) => number;
+      };
 }
 
-type Response<TData> = {
-  data: TData[];
-  meta: {
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  };
+// Strapi-like response meta is returned by our ApiClient as ApiResponse<T>
+
+type FilterItem = {
+  field: string;
+  operator: string;
+  value: string | number | boolean;
 };
 
 export const refreshTable = atom(true);
@@ -57,11 +75,17 @@ export function SuperAdminTable<TData, TValue>({
   columns,
   data,
   url,
+  loading,
   className,
   removeActions,
   draggable,
   onItemDrag,
   mobileTable,
+  enableSelection,
+  getRowId,
+  bulkOptions,
+  onBulkAction,
+  clientSort,
 }: TableProps<TData, TValue>) {
   const [filter] = useQueryState("filter", {
     defaultValue: [],
@@ -82,85 +106,101 @@ export function SuperAdminTable<TData, TValue>({
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [tableData, setTableData] = useState(data);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<string>("");
   const [draggedRow, setDraggedRow] = useState<Row<TData> | null>(null);
   const [dragOverRow, setDragOverRow] = useState<Row<TData> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
   const [refresh, setRefresh] = useAtom(refreshTable);
 
   const isFetchingRef = useRef(false);
-  const lastFilter = useRef(filter);
+  const fetchSeqRef = useRef(0);
 
-  useEffect(() => {
-    if (url && (!isLoading || refresh)) {
+  const requestUrl = useMemo(() => {
+    if (!url) return null;
+    let apiUrl = url;
+    const hasQueryParams = url.includes("?");
+    let separator = hasQueryParams ? "&" : "?";
+
+    apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
+    separator = "&";
+
+    if (Array.isArray(filter) && filter.length > 0) {
+      const filters = filter as unknown as FilterItem[];
+      const filterParams = filters
+        .map((item) => {
+          const { field, operator, value } = item || ({} as FilterItem);
+          if (!field || !operator || value === undefined || value === null)
+            return "";
+          return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
+        })
+        .filter(Boolean)
+        .join("&");
+      if (filterParams) apiUrl = `${apiUrl}${separator}${filterParams}`;
+    }
+
+    return apiUrl;
+  }, [url, page, pageSize, filter]);
+
+  const lastUrlRef = useRef<string | null>(null);
+
+  const runFetch = useCallback(
+    async (apiUrl: string, { force = false }: { force?: boolean } = {}) => {
+      // Avoid duplicate fetch for identical URL unless forced
+      if (!force && lastUrlRef.current === apiUrl) return;
+      lastUrlRef.current = apiUrl;
       if (isFetchingRef.current) return;
 
+      const seq = ++fetchSeqRef.current;
       isFetchingRef.current = true;
-      setRefresh(false);
-      setIsLoading(true);
-
-      // Build the query parameters for Strapi
-      let apiUrl = url;
-      const hasQueryParams = url.includes("?");
-      let separator = hasQueryParams ? "&" : "?";
-
-      // Add pagination parameters
-      apiUrl = `${apiUrl}${separator}pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
-
-      // Update separator for subsequent parameters
-      separator = "&";
-
-      // Add filters if they exist
-      if (filter && filter.length > 0) {
-        // Add each filter to the URL
-        const filterParams = filter
-          .map((item: any) => {
-            const { field, operator, value } = item;
-
-            if (!field || !operator || !value) return "";
-
-            return `filters${field}[${operator}]=${encodeURIComponent(value)}`;
-          })
-          .filter((param: string) => param !== "")
-          .join("&");
-
-        if (filterParams) {
-          apiUrl = `${apiUrl}${separator}${filterParams}`;
+      setInternalLoading(true);
+      try {
+        const res = await apiClient.get<TData[]>(apiUrl, {
+          headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+        });
+        if (seq === fetchSeqRef.current) {
+          setTableData(res.data);
+          setTotalSize(res.meta?.pagination?.total ?? 0);
+        }
+      } catch (error) {
+        if ((error as any)?.name !== "AbortError") {
+          console.error("Failed to fetch table data:", error);
+        }
+      } finally {
+        if (seq === fetchSeqRef.current) {
+          setInternalLoading(false);
+          isFetchingRef.current = false;
         }
       }
+    },
+    [setTotalSize],
+  );
 
-      apiClient
-        .get<Response<TData>>(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        })
-        .then((res) => {
-          setTableData((res as any)?.data);
-          setTotalSize((res as any)?.meta?.pagination?.total);
-          setIsLoading(false);
-          isFetchingRef.current = false;
-        })
-        .catch((error) => {
-          console.error("Failed to fetch table data:", error);
-          setIsLoading(false);
-          isFetchingRef.current = false;
-        });
-    }
-  }, [url, refresh, page, pageSize]);
-
+  // Fetch on first mount and when the computed request URL changes
   useEffect(() => {
-    if (!refresh) {
-      if (isFetchingRef.current) return;
-      if (JSON.stringify(lastFilter.current) === JSON.stringify(filter)) return;
+    if (requestUrl) runFetch(requestUrl);
+  }, [requestUrl, runFetch]);
 
-      lastFilter.current = filter;
-
-      setRefresh(true);
+  // External refresh trigger (e.g. after mutations)
+  useEffect(() => {
+    if (refresh && requestUrl) {
+      runFetch(requestUrl, { force: true });
+      setRefresh(false);
     }
-  }, [url, refresh, filter]);
+  }, [refresh, requestUrl, runFetch, setRefresh]);
 
   const table = useReactTable({
-    data: tableData || [],
+    data: useMemo(() => {
+      if (!tableData) return [] as TData[];
+      if (!clientSort) return tableData;
+      const factor = clientSort.direction === "asc" ? 1 : -1;
+      return [...tableData].sort((a, b) => {
+        const va = Number(clientSort.getValue(a) ?? 0);
+        const vb = Number(clientSort.getValue(b) ?? 0);
+        if (va === vb) return 0;
+        return va > vb ? factor : -1 * factor;
+      });
+    }, [tableData, clientSort]) as TData[],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -199,28 +239,32 @@ export function SuperAdminTable<TData, TValue>({
     onItemDrag?.(targetRow);
   };
 
-  const LoadingSkeleton = () => (
-    <>
-      {[...Array(5)].map((_, i) => (
-        <tr key={i} className="animate-pulse">
-          {[...Array(columns.length)].map((_, j) => (
-            <td key={j} className="p-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            </td>
-          ))}
-        </tr>
-      ))}
-    </>
-  );
+  const isLoading = loading ?? internalLoading;
 
   return (
     <div className="w-full">
       <div className="block md:hidden">
         <div className="flex flex-col gap-2">
-          {!removeActions && (
-            <div className="flex justify-between items-center w-full">
+          {enableSelection && (
+            <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={
+                    !!tableData && selectedIds.size > 0 &&
+                    selectedIds.size === tableData.length
+                  }
+                  onChange={(e) => {
+                    if (!tableData) return;
+                    const next = new Set<string>();
+                    if (e.target.checked) {
+                      tableData.forEach((row) =>
+                        next.add((getRowId?.(row) || String((row as any)?.id)) ?? ""),
+                      );
+                    }
+                    setSelectedIds(next);
+                  }}
+                />
                 <span className="text-xs text-foreground-primary">
                   انتخاب همه
                 </span>
@@ -228,14 +272,23 @@ export function SuperAdminTable<TData, TValue>({
 
               <div className="flex items-center gap-2">
                 <SuperAdminTableSelect
-                  options={[
-                    { id: "0", title: "اقدام دسته جمعی" },
-                    { id: "1", title: "کاربر" },
-                    { id: "2", title: "ادمین" },
-                  ]}
+                  selectedOption={bulkAction}
+                  onOptionSelect={(id) => setBulkAction(String(id))}
+                  options={[{ id: "", title: "اقدام دسته جمعی" }, ...(bulkOptions || [])]}
                 />
 
-                <button className="bg-actions-primary text-white px-3 py-2 rounded-lg flex justify-between items-center">
+                <button
+                  onClick={() => {
+                    if (!onBulkAction || !tableData || !bulkAction) return;
+                    const rows = tableData.filter((r) =>
+                      selectedIds.has(
+                        (getRowId?.(r) || String((r as any)?.id)) ?? "",
+                      ),
+                    );
+                    onBulkAction(bulkAction, rows);
+                  }}
+                  className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white"
+                >
                   اجرا
                 </button>
               </div>
@@ -244,37 +297,55 @@ export function SuperAdminTable<TData, TValue>({
         </div>
       </div>
 
-      <div className="w-full overflow-auto hidden md:block">
-        <table className={cn("w-full caption-bottom text-sm", className)}>
+      <div className="hidden w-full overflow-auto md:block">
+        <table className={cn("text-sm w-full caption-bottom", className)}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr className="bg-slate-50 rounded-2xl" key={headerGroup.id}>
+              <tr className="rounded-2xl bg-slate-50" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <th
                       key={header.id}
                       className={twMerge(
-                        "h-12 px-4 align-middle text-foreground-primary text-sm text-right font-normal",
-                        header.column.columnDef.meta?.headerClassName
+                        "text-sm h-12 px-4 text-right align-middle font-normal text-foreground-primary",
+                        header.column.columnDef.meta?.headerClassName,
                       )}
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </th>
                   );
                 })}
               </tr>
             ))}
-            {!removeActions && (
+            {enableSelection && (
               <tr>
                 <td colSpan={columns.length}>
-                  <div className="flex justify-between items-center my-3 w-full h-auto px-4">
+                  <div className="my-3 flex h-auto w-full items-center justify-between px-4">
                     <div className="flex items-center gap-2">
-                      <input type="checkbox" />
+                      <input
+                        type="checkbox"
+                        checked={
+                          !!tableData && selectedIds.size > 0 &&
+                          selectedIds.size === tableData.length
+                        }
+                        onChange={(e) => {
+                          if (!tableData) return;
+                          const next = new Set<string>();
+                          if (e.target.checked) {
+                            tableData.forEach((row) =>
+                              next.add(
+                                (getRowId?.(row) || String((row as any)?.id)) ?? "",
+                              ),
+                            );
+                          }
+                          setSelectedIds(next);
+                        }}
+                      />
                       <span className="text-xs text-foreground-primary">
                         انتخاب همه
                       </span>
@@ -282,14 +353,23 @@ export function SuperAdminTable<TData, TValue>({
 
                     <div className="flex items-center gap-2">
                       <SuperAdminTableSelect
-                        options={[
-                          { id: "0", title: "اقدام دسته جمعی" },
-                          { id: "1", title: "کاربر" },
-                          { id: "2", title: "ادمین" },
-                        ]}
+                        selectedOption={bulkAction}
+                        onOptionSelect={(id) => setBulkAction(String(id))}
+                        options={[{ id: "", title: "اقدام دسته جمعی" }, ...(bulkOptions || [])]}
                       />
 
-                      <button className="bg-actions-primary text-white px-3 py-2 rounded-lg flex justify-between items-center">
+                      <button
+                        onClick={() => {
+                          if (!onBulkAction || !tableData || !bulkAction) return;
+                          const rows = tableData.filter((r) =>
+                            selectedIds.has(
+                              (getRowId?.(r) || String((r as any)?.id)) ?? "",
+                            ),
+                          );
+                          onBulkAction(bulkAction, rows);
+                        }}
+                        className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white"
+                      >
                         اجرا
                       </button>
                     </div>
@@ -300,7 +380,7 @@ export function SuperAdminTable<TData, TValue>({
           </thead>
           <tbody>
             {isLoading ? (
-              <LoadingSkeleton />
+              <ReportTableSkeleton columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
@@ -311,34 +391,49 @@ export function SuperAdminTable<TData, TValue>({
                   onDrop={(e) => handleDrop(e, row)}
                   className={twMerge(
                     "border-b border-gray-200 transition-colors hover:bg-gray-50/50",
-                    dragOverRow?.id === row.id && "border-t-2 border-blue-500"
+                    dragOverRow?.id === row.id && "border-t-2 border-blue-500",
                   )}
                 >
                   {row.getVisibleCells().map((cell, index) => (
                     <td
                       key={cell.id}
                       className={twMerge(
-                        "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right",
-                        cell.column.columnDef.meta?.cellClassName
+                        "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
+                        cell.column.columnDef.meta?.cellClassName,
                       )}
                     >
-                      {index === 0 && !removeActions ? (
+                      {index === 0 && enableSelection ? (
                         <div className="flex items-center gap-2">
                           {draggable && (
                             <div className="cursor-move">
                               <DragIcon />
                             </div>
                           )}
-                          <input type="checkbox" />
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(
+                              (getRowId?.(row.original as TData) ||
+                                String((row.original as any)?.id)) ?? "",
+                            )}
+                            onChange={(e) => {
+                              const id =
+                                (getRowId?.(row.original as TData) ||
+                                  String((row.original as any)?.id)) ?? "";
+                              const next = new Set(selectedIds);
+                              if (e.target.checked) next.add(id);
+                              else next.delete(id);
+                              setSelectedIds(next);
+                            }}
+                          />
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </div>
                       ) : (
                         flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )
                       )}
                     </td>
@@ -357,7 +452,23 @@ export function SuperAdminTable<TData, TValue>({
       </div>
 
       {mobileTable && (
-        <div className="block md:hidden">{mobileTable(tableData)}</div>
+        <div className="block md:hidden">
+          {mobileTable(
+            tableData,
+            enableSelection
+              ? {
+                  enableSelection: true,
+                  selectedIds,
+                  onSelectionChange: (id: string, selected: boolean) => {
+                    const next = new Set(selectedIds);
+                    if (selected) next.add(id);
+                    else next.delete(id);
+                    setSelectedIds(next);
+                  },
+                }
+              : undefined
+          )}
+        </div>
       )}
     </div>
   );

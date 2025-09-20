@@ -3,13 +3,32 @@
  * Helper functions for API calls
  */
 
-import { ApiError } from "@/types/api";
-import { ERROR_MESSAGES } from "@/constants/api";
+import type { ApiError } from "../types/api";
+import { ERROR_MESSAGES } from "../constants/api";
+
+type QueryParams = Record<string, string | number | boolean | null | undefined>;
+
+interface ErrorLike {
+  message?: string;
+  code?: string;
+  response?: {
+    status: number;
+    data: {
+      message?: string;
+      errors?: unknown;
+    };
+  };
+}
+
+export interface JwtPayload {
+  exp?: number;
+  [key: string]: unknown;
+}
 
 /**
  * Format query parameters for URL
  */
-export const formatQueryParams = (params: Record<string, any>): string => {
+export const formatQueryParams = (params: QueryParams): string => {
   if (!params || Object.keys(params).length === 0) {
     return "";
   }
@@ -18,7 +37,7 @@ export const formatQueryParams = (params: Record<string, any>): string => {
     .filter(([, value]) => value !== undefined && value !== null)
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
     )
     .join("&");
 
@@ -28,9 +47,13 @@ export const formatQueryParams = (params: Record<string, any>): string => {
 /**
  * Handle API errors and return a standardized error object
  */
-export const handleApiError = (error: any): ApiError => {
+export const handleApiError = (error: unknown): ApiError => {
+  const err = error as ErrorLike;
   // Network error
-  if (error.message === "Network Error" || !navigator.onLine) {
+  if (
+    err.message === "Network Error" ||
+    (typeof navigator !== "undefined" && !navigator.onLine)
+  ) {
     return {
       message: ERROR_MESSAGES.NETWORK,
       status: 0,
@@ -38,7 +61,7 @@ export const handleApiError = (error: any): ApiError => {
   }
 
   // Timeout error
-  if (error.code === "ECONNABORTED") {
+  if (err.code === "ECONNABORTED") {
     return {
       message: ERROR_MESSAGES.TIMEOUT,
       status: 408,
@@ -46,13 +69,13 @@ export const handleApiError = (error: any): ApiError => {
   }
 
   // Server returned an error
-  if (error.response) {
-    const { status, data } = error.response;
+  if (err.response) {
+    const { status, data } = err.response;
 
     return {
       message: data.message || ERROR_MESSAGES.DEFAULT,
       status,
-      errors: data.errors,
+      errors: data.errors as Record<string, string[]> | undefined,
     };
   }
 
@@ -66,18 +89,23 @@ export const handleApiError = (error: any): ApiError => {
 /**
  * Parse JWT token and extract payload
  */
-export const parseJwt = (token: string): any => {
+export const parseJwt = (token: string): JwtPayload | null => {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedString =
+      typeof window === "undefined"
+        ? Buffer.from(base64, "base64").toString("binary")
+        : atob(base64);
+
     const jsonPayload = decodeURIComponent(
-      atob(base64)
+      decodedString
         .split("")
         .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-        .join("")
+        .join(""),
     );
 
-    return JSON.parse(jsonPayload);
+    return JSON.parse(jsonPayload) as JwtPayload;
   } catch (error) {
     console.error("Error parsing JWT token:", error);
     return null;

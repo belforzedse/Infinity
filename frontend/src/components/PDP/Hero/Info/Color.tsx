@@ -21,7 +21,7 @@ export default function PDPHeroInfoColor(props: Props) {
   } = props;
 
   const [internalSelectedColor, setInternalSelectedColor] = useState<string>(
-    colors[0]?.id || ""
+    colors[0]?.id || "",
   );
 
   // Use either the external selected color if provided, or the internal state
@@ -39,18 +39,19 @@ export default function PDPHeroInfoColor(props: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-foreground-primary text-xl">انتخاب رنگ</span>
+      <span className="text-xl text-foreground-primary">انتخاب رنگ</span>
 
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
         {colors.map((color) => {
           const isSelected = color.id === selectedColor;
           const isDisabled = disabledColorIds.includes(color.id);
           return (
             <div key={color.id} className="flex items-center">
+              {/* TODO(a11y): Consider rendering as a button with aria-pressed or using radiogroup/row role for better keyboard accessibility. */}
               {isSelected ? (
-                <div className="flex gap-1 items-center p-1 rounded-3xl border border-gray-300">                                                               
+                <div className="flex items-center gap-1 rounded-3xl border border-gray-300 p-1">
                   <div
-                    className="w-7 h-7 rounded-full"
+                    className="h-7 w-7 rounded-full"
                     style={{ backgroundColor: color.colorCode }}
                   />
 
@@ -61,11 +62,14 @@ export default function PDPHeroInfoColor(props: Props) {
               ) : (
                 <button
                   type="button"
-                  onClick={() => (isDisabled ? undefined : handleColorClick(color.id))}
-                  className={`w-7 h-7 rounded-full ${
-                    isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
-                  }`}
-                  style={{ backgroundColor: color.colorCode }}
+                  onClick={() =>
+                    isDisabled ? undefined : handleColorClick(color.id)
+                  }
+                  className="h-7 w-7 rounded-full border"
+                  style={{
+                    backgroundColor: isDisabled ? "#e5e7eb" : color.colorCode,
+                    opacity: isDisabled ? 0.45 : 1,
+                  }}
                   disabled={isDisabled}
                   aria-disabled={isDisabled}
                   title={isDisabled ? "ناموجود" : color.title}

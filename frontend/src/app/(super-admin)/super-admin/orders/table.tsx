@@ -1,4 +1,4 @@
-import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
+// removed unused import: ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon"
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import { priceFormatter } from "@/utils/price";
@@ -61,6 +61,13 @@ export type Order = {
     };
   };
 };
+const _bulkPrint = (selectedIds: string[]) => {
+  if (!selectedIds.length) return;
+  const url = `/super-admin/orders/print/bulk?ids=${selectedIds.join(",")}`;
+  window.open(url, "_blank"); // ✅ One tab only
+};
+
+
 
 export const columns: ColumnDef<Order>[] = [
   {
@@ -68,7 +75,7 @@ export const columns: ColumnDef<Order>[] = [
     header: "سفارش",
     cell: ({ row }) => {
       return (
-        <span className="text-foreground-primary text-sm">
+        <span className="text-sm text-foreground-primary">
           #{row.original.id}
         </span>
       );
@@ -88,7 +95,7 @@ export const columns: ColumnDef<Order>[] = [
       const fullName = `${firstName || ""} ${lastName || ""}`;
 
       return (
-        <span className="text-foreground-primary text-sm">
+        <span className="text-sm text-foreground-primary">
           {fullName.trim() || " - "}
         </span>
       );
@@ -112,16 +119,16 @@ export const columns: ColumnDef<Order>[] = [
       return (
         <div
           className={twMerge(
-            "w-[92px] h-[29px] rounded-md flex items-center justify-center",
+            "flex h-[29px] w-[92px] items-center justify-center rounded-md",
             status === "Paying" && "bg-blue-600",
             status === "Started" && "bg-yellow-600",
             status === "Shipment" && "bg-indigo-600",
             status === "Done" && "bg-green-600",
             status === "Returned" && "bg-orange-600",
-            status === "Cancelled" && "bg-red-600"
+            status === "Cancelled" && "bg-red-600",
           )}
         >
-          <span className="text-white text-xs">
+          <span className="text-xs text-white">
             {status === "Paying" && "در حال پرداخت"}
             {status === "Started" && "درحال پردازش"}
             {status === "Shipment" && "در حال ارسال"}
@@ -143,7 +150,7 @@ export const columns: ColumnDef<Order>[] = [
       return price ? (
         <SuperAdminTableCellSimplePrice price={price} />
       ) : (
-        <span className="text-foreground-primary text-sm">سفارش دستی</span>
+        <span className="text-sm text-foreground-primary">سفارش دستی</span>
       );
     },
   },
@@ -156,7 +163,7 @@ export const columns: ColumnDef<Order>[] = [
     },
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-3 p-1 flex-row-reverse">
+        <div className="flex flex-row-reverse items-center gap-3 p-1">
           <SuperAdminTableCellActionButton
             variant="secondary"
             path={`/super-admin/orders/edit/${row.original.id}`}
@@ -181,7 +188,7 @@ function DateAgo(props: { date: Date }) {
 
   if (diffInSeconds < 60) {
     return (
-      <span className="text-neutral-400 md:text-foreground-primary text-xs md:text-base">
+      <span className="text-xs text-neutral-400 md:text-base md:text-foreground-primary">
         {diffInSeconds} ثانیه پیش
       </span>
     );
@@ -190,7 +197,7 @@ function DateAgo(props: { date: Date }) {
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
     return (
-      <span className="text-neutral-400 md:text-foreground-primary text-xs md:text-base">
+      <span className="text-xs text-neutral-400 md:text-base md:text-foreground-primary">
         {diffInMinutes} دقیقه پیش
       </span>
     );
@@ -199,7 +206,7 @@ function DateAgo(props: { date: Date }) {
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 12) {
     return (
-      <span className="text-neutral-400 md:text-foreground-primary text-xs md:text-base">
+      <span className="text-xs text-neutral-400 md:text-base md:text-foreground-primary">
         {diffInHours} ساعت پیش
       </span>
     );
@@ -216,15 +223,15 @@ export const MobileTable = ({ data }: Props) => {
   if (!data) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-2">
+    <div className="mt-2 flex flex-col gap-2">
       {data.map((row) => (
         <MobileTableRowBox
           key={row.id}
           columns={columns}
           row={row}
           header={
-            <div className="bg-stone-50 w-full flex justify-between items-center rounded-[4px] px-2 py-1">
-              <div className="flex gap-1 items-center">
+            <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
+              <div className="flex items-center gap-1">
                 <span className="text-xs text-neutral-400">
                   {row?.attributes?.user?.data?.attributes?.Phone}
                 </span>
@@ -238,7 +245,7 @@ export const MobileTable = ({ data }: Props) => {
                     row?.attributes?.Status === "Shipment" && "text-indigo-600",
                     row?.attributes?.Status === "Done" && "text-green-600",
                     row?.attributes?.Status === "Returned" && "text-orange-600",
-                    row?.attributes?.Status === "Cancelled" && "text-red-600"
+                    row?.attributes?.Status === "Cancelled" && "text-red-600",
                   )}
                 >
                   <span className="text-xs">
@@ -256,7 +263,7 @@ export const MobileTable = ({ data }: Props) => {
                 {row?.attributes?.contract?.data?.attributes?.Amount
                   ? priceFormatter(
                       row?.attributes?.contract?.data?.attributes?.Amount,
-                      " تومان"
+                      " تومان",
                     )
                   : "سفارش دستی"}
               </span>

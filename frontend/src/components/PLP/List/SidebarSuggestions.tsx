@@ -16,8 +16,8 @@ export default function PLPListSidebarSuggestions({
 }: Props) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-1 items-center">
-        <div className="w-6 h-6">{icon}</div>
+      <div className="flex items-center gap-1">
+        <div className="h-6 w-6">{icon}</div>
         <Text className="text-2xl text-foreground-primary">{title}</Text>
       </div>
 

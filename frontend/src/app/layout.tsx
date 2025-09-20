@@ -1,24 +1,24 @@
-import type { Metadata } from "next";
-import { Provider } from "jotai";
+import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
+import "../styles/components.css";
 import "./globals.css";
-import "../styles/fonts.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import { CartProvider } from "@/contexts/CartContext";
-
+import Providers from "./Providers";
+import { peyda, peydaFanum } from "@/styles/fonts";
+import { DebugPanel } from "@/components/Debug";
 export const metadata: Metadata = {
-  title: {
-    default: "اینفینیتی استور",
-    template: "%s | اینفینیتی استور",
-  },
-  description:
-    "خرید آنلاین پوشاک زنانه با کیفیت و ارسال سریع از اینفینیتی استور.",
-  icons: { icon: "/favicon.png" },
-  openGraph: {
-    type: "website",
-    siteName: "اینفینیتی استور",
-    locale: "fa_IR",
-  },
+  title: "اینفینیتی ∞ Infinity",
+  description: "فروشگاه پوشاک اینفینیتی",
+};
+
+// Ensure proper mobile scaling and responsiveness
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -27,14 +27,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
-      <body className={`font-peyda-fanum antialiased`}>
-        <Provider>
-          <CartProvider>
-            <NuqsAdapter>{children}</NuqsAdapter>
-          </CartProvider>
-        </Provider>
-        <Toaster position="bottom-center" />
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`${peyda.variable} ${peydaFanum.variable}`}
+    >
+      <body className={`${peydaFanum.className} antialiased`}>
+        <CartProvider>
+          <NuqsAdapter>
+            <Providers>{children}</Providers>
+          </NuqsAdapter>
+        </CartProvider>
+        <Toaster
+          position="bottom-center"
+          containerStyle={{ zIndex: 2147483647 }}
+          toastOptions={{
+            style: { zIndex: 2147483647 },
+          }}
+        />
+        <DebugPanel />
       </body>
     </html>
   );
