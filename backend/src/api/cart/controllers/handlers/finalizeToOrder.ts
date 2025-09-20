@@ -106,9 +106,45 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         );
       } catch {}
 
-      // TODO: Wallet flow settlement
-      // Per backend-stock-adjustment-policy, do NOT decrement stock or update order status here.
-      // Stock decrement and status transition must occur after a dedicated wallet settlement callback.
+      // Immediately mark order as paid (Started) and decrement stock (wallet is instant-settlement)
+      try {
+        const orderWithItems = await strapi.entityService.findOne(
+          "api::order.order",
+          order.id,
+          {
+            populate: {
+              order_items: {
+                populate: {
+                  product_variation: { populate: { product_stock: true } },
+                },
+              },
+            },
+          }
+        );
+        for (const it of orderWithItems?.order_items || []) {
+          const v = it?.product_variation;
+          if (v?.product_stock?.id && typeof it?.Count === "number") {
+            const stockId = v.product_stock.id as number;
+            const current = Number(v.product_stock.Count || 0);
+            const dec = Number(it.Count || 0);
+            await strapi.entityService.update(
+              "api::product-stock.product-stock",
+              stockId,
+              { data: { Count: current - dec } }
+            );
+          }
+        }
+      } catch (e) {
+        strapi.log.error("Failed to decrement stock for wallet payment", e);
+      }
+
+      try {
+        await strapi.entityService.update("api::order.order", order.id, {
+          data: { Status: "Started" },
+        });
+      } catch (e) {
+        strapi.log.error("Failed to update order status to Started (wallet)", e);
+      }
 
       // Write order-log
       try {
@@ -116,13 +152,11 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           data: {
             order: order.id,
             Action: "Update",
-            Description: "Wallet debit recorded (pending settlement)",
+            Description: "Wallet payment success (instant settlement)",
             Changes: { method: "wallet" },
           },
         });
       } catch {}
-
-      // Cart clearing left to existing behavior (no-op here)
 
       return {
         data: {
