@@ -3,8 +3,9 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
+import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
 
 interface Props {
   isOpen: boolean;
@@ -14,7 +15,16 @@ interface Props {
 export default function MobileSearch({ isOpen, onClose }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<
-    Array<{ id: number; Title: string }>
+    Array<{
+      id: number;
+      Title: string;
+      Price?: number;
+      DiscountPrice?: number;
+      Discount?: number;
+      category?: string;
+      image?: string;
+      isAvailable?: boolean;
+    }>
   >([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -44,8 +54,8 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        // Use regular products endpoint for live preview to support title filtering
-        let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=8&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
+        // Start with basic search
+        let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=6&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
         // Add کیف کفش صندل کتونی filter to live preview suggestions
         url = appendTitleFilter(url);
         const res = await fetch(url, {
@@ -55,7 +65,23 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
         });
         if (!mounted) return;
         const json = await res.json();
-        setSuggestions((json?.data || []).map((i: any) => ({ id: i.id, Title: i.attributes?.Title || i.Title })));
+
+        // Debug: Log the response
+        console.log("Mobile Search API response:", json);
+
+        const items = (json?.data || []).map((i: any) => ({
+          id: i.id,
+          Title: i.attributes?.Title || i.Title,
+          Price: i.attributes?.Price || undefined,
+          DiscountPrice: i.attributes?.DiscountPrice || undefined,
+          Discount: i.attributes?.Discount || undefined,
+          category: i.attributes?.product_category?.data?.attributes?.Title || undefined,
+          image: i.attributes?.CoverImage?.data?.attributes?.url
+            ? `${IMAGE_BASE_URL}${i.attributes.CoverImage.data.attributes.url}`
+            : undefined,
+          isAvailable: i.attributes?.IsAvailable ?? true,
+        }));
+        setSuggestions(items);
       } catch {
         if (!mounted) return;
         setSuggestions([]);
@@ -112,7 +138,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="text-sm w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
-                      placeholder="جستجو در محصولات..."
+                      placeholder="دنبال چی میگردی؟"
                       dir="rtl"
                     />
                     <button
@@ -179,22 +205,22 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                         exit={{ opacity: 0 }}
                       >
                         {suggestions.map((s, idx) => (
-                          <motion.button
+                          <SearchSuggestionCard
                             key={s.id}
-                            type="button"
+                            id={s.id}
+                            title={s.Title}
+                            price={s.Price}
+                            discountPrice={s.DiscountPrice}
+                            discount={s.Discount}
+                            category={s.category}
+                            image={s.image}
+                            isAvailable={s.isAvailable}
                             onClick={() => {
                               onClose();
                               router.push(`/pdp/${s.id}`);
                             }}
-                            className="block w-full cursor-pointer truncate bg-transparent px-3 py-2 text-right text-sm hover:bg-gray-50 transition-colors"
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.15, delay: idx * 0.03 }}
-                            whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            {s.Title}
-                          </motion.button>
+                            index={idx}
+                          />
                         ))}
                         <motion.button
                           type="button"
