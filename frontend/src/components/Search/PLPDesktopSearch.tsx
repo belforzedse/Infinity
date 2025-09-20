@@ -3,11 +3,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
-import Text from "../Kits/Text";
-import ChevronDownIcon from "./Icons/ChevronDownIcon";
-import { API_BASE_URL } from "@/constants/api";
-import { appendTitleFilter } from "@/constants/productFilters";
+import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { motion, AnimatePresence } from "framer-motion";
+import SearchSuggestionCard from "./SearchSuggestionCard";
 
 interface PLPDesktopSearchProps {
   className?: string;
@@ -18,7 +16,16 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<
-    Array<{ id: number; Title: string }>
+    Array<{
+      id: number;
+      Title: string;
+      Price?: number;
+      DiscountPrice?: number;
+      Discount?: number;
+      category?: string;
+      image?: string;
+      isAvailable?: boolean;
+    }>
   >([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,10 +60,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        // Use regular products endpoint for live preview to support title filtering
-        let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=8&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
-        // Add کیف کفش صندل کتونی filter to live preview suggestions
-        url = appendTitleFilter(url);
+        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=6&_skip_global_loader=1`;
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -65,16 +69,47 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
         });
         if (!mounted) return;
         const json = await res.json();
-        const items = (json?.data || []).map((i: any) => ({
-          id: i.id,
-          Title: i.attributes?.Title || i.Title,
-        }));
+
+        // Debug: Log the response
+        console.log("Search API response:", json);
+
+        const items = (json?.data || []).map((raw: any) => {
+          const attrs = raw?.attributes ? raw.attributes : raw;
+          const id = raw.id;
+          const title = attrs?.Title ?? raw?.Title;
+
+          // Compute image URL (prefer thumbnail/small for preview; fallback to original and nested shapes)
+          const img: any = attrs?.CoverImage;
+          const thumb = img?.formats?.thumbnail?.url || img?.formats?.small?.url;
+          const original = img?.url || img?.data?.attributes?.url;
+          const imageUrl = thumb
+            ? `${IMAGE_BASE_URL}${thumb}`
+            : original
+            ? `${IMAGE_BASE_URL}${original}`
+            : undefined;
+
+          // Category title from possible shapes
+          const categoryTitle =
+            attrs?.product_main_category?.Title ??
+            attrs?.product_category?.Title ??
+            attrs?.product_category?.data?.attributes?.Title ??
+            undefined;
+
+          return {
+            id,
+            Title: title,
+            Price: attrs?.Price ?? undefined,
+            DiscountPrice: attrs?.DiscountPrice ?? undefined,
+            Discount: attrs?.Discount ?? undefined,
+            category: categoryTitle,
+            image: imageUrl,
+            isAvailable: attrs?.IsAvailable ?? true,
+          };
+        });
         // Deduplicate by id to avoid React key collisions if API returns duplicates
         const unique = Array.from(
-          new Map(
-            items.map((it: { id: number; Title: string }) => [it.id, it]),
-          ).values(),
-        ) as Array<{ id: number; Title: string }>;
+          new Map(items.map((it: any) => [it.id, it])).values()
+        );
         setSuggestions(unique);
         setOpen(unique.length > 0);
       } catch {
@@ -114,7 +149,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex(
-        (prev) => (prev - 1 + suggestions.length) % suggestions.length,
+        (prev) => (prev - 1 + suggestions.length) % suggestions.length
       );
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
@@ -133,51 +168,40 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
       animate={{ scale: isFocused ? 1.02 : 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 22 }}
     >
-      <div className="text-sm flex w-full items-center gap-1">
-        <div className="flex cursor-pointer items-center gap-1 text-neutral-800">
-          <Text className="font-medium text-neutral-800">محصولات</Text>
-          <ChevronDownIcon className="text-neutral-800" />
-        </div>
+      <div className="flex w-full items-center justify-between px-2">
+        <input
+          type="text"
+          name="search"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => {
+            setIsFocused(true);
+            if (searchQuery.trim().length >= 2) setOpen(true);
+          }}
+          onBlur={() => {
+            // Give time for clicks inside dropdown
+            setTimeout(() => {
+              if (!open) setIsFocused(false);
+            }, 80);
+          }}
+          onKeyDown={onKeyDown}
+          placeholder="دنبال چی میگردی؟"
+          className="flex-1 bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none text-sm"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="plp-desktop-suggestions"
+        />
 
-        <div className="h-[18px] w-[1px] bg-zinc-300" />
-
-        <div className="flex w-full items-center justify-between">
-          <input
-            type="text"
-            name="search"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => {
-              setIsFocused(true);
-              if (searchQuery.trim().length >= 2) setOpen(true);
-            }}
-            onBlur={() => {
-              // Give time for clicks inside dropdown
-              setTimeout(() => {
-                if (!open) setIsFocused(false);
-              }, 80);
-            }}
-            onKeyDown={onKeyDown}
-            placeholder="دنبال چی میگردی؟"
-            className="bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
-            role="combobox"
-            aria-expanded={open}
-            aria-controls="plp-desktop-suggestions"
-          />
-
-          <div className="flex items-center gap-2">
-            <motion.button
-              type="submit"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm"
-              whileTap={{ scale: 0.95 }}
-            >
-              <SearchIcon className="h-5 w-5 text-white" />
-            </motion.button>
-          </div>
-        </div>
+        <motion.button
+          type="submit"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm"
+          whileTap={{ scale: 0.95 }}
+        >
+          <SearchIcon className="h-5 w-5 text-white" />
+        </motion.button>
       </div>
 
       {/* Suggestions dropdown */}
@@ -188,43 +212,43 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute inset-x-0 top-full z-[1000] mt-2 w-full min-w-[280px] max-h-80 overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
+            className="absolute inset-x-0 top-full z-[1000] mt-2 w-full min-w-[320px] max-h-96 overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
             role="listbox"
             aria-label="پیشنهادهای جستجو"
           >
             {loading && (
-              <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>
+              <div className="text-xs px-3 py-2 text-neutral-500">
+                در حال جستجو…
+              </div>
             )}
             {!loading && suggestions.length === 0 && (
-              <div className="text-xs px-3 py-2 text-neutral-500">موردی یافت نشد</div>
+              <div className="text-xs px-3 py-2 text-neutral-500">
+                موردی یافت نشد
+              </div>
             )}
             {!loading &&
               suggestions.map((s, idx) => (
-                <motion.button
-                  type="button"
+                <SearchSuggestionCard
                   key={s.id}
+                  id={s.id}
+                  title={s.Title}
+                  price={s.Price}
+                  discountPrice={s.DiscountPrice}
+                  discount={s.Discount}
+                  category={s.category}
+                  image={s.image}
+                  isAvailable={s.isAvailable}
                   onClick={() => router.push(`/pdp/${s.id}`)}
-                  className={`text-sm block w-full cursor-pointer truncate bg-white/0 px-3 py-2 text-right transition-colors ${
-                    activeIndex === idx
-                      ? "bg-pink-50 text-pink-700"
-                      : "hover:bg-slate-50"
-                  }`}
-                  role="option"
-                  aria-selected={activeIndex === idx}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.15, delay: idx * 0.03 }}
-                >
-                  {s.Title}
-                </motion.button>
+                  index={idx}
+                  isActive={activeIndex === idx}
+                />
               ))}
             {!loading && suggestions.length > 0 && (
               <motion.button
                 type="button"
                 onClick={() =>
                   router.push(
-                    `/plp?search=${encodeURIComponent(searchQuery.trim())}`,
+                    `/plp?search=${encodeURIComponent(searchQuery.trim())}`
                   )
                 }
                 className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
@@ -243,3 +267,4 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
 };
 
 export default PLPDesktopSearch;
+
