@@ -10,7 +10,8 @@
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
       "Bash(sed:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

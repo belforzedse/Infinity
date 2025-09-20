@@ -32,7 +32,7 @@ export default function ClientLayout({
       .catch(() => {
         router.replace("/auth");
       });
-  }, []);
+  }, [router]);
 
   return (
     <>
