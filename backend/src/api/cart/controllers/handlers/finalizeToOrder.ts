@@ -143,7 +143,10 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           data: { Status: "Started" },
         });
       } catch (e) {
-        strapi.log.error("Failed to update order status to Started (wallet)", e);
+        strapi.log.error(
+          "Failed to update order status to Started (wallet)",
+          e
+        );
       }
 
       // Write order-log
