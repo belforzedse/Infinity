@@ -7,6 +7,17 @@ import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchSuggestionCard from "./SearchSuggestionCard";
 
+type Suggestion = {
+  id: number;
+  Title: string;
+  Price?: number;
+  DiscountPrice?: number;
+  Discount?: number;
+  category?: string;
+  image?: string;
+  isAvailable?: boolean;
+};
+
 interface PLPDesktopSearchProps {
   className?: string;
 }
@@ -15,18 +26,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
   className = "",
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<
-    Array<{
-      id: number;
-      Title: string;
-      Price?: number;
-      DiscountPrice?: number;
-      Discount?: number;
-      category?: string;
-      image?: string;
-      isAvailable?: boolean;
-    }>
-  >([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -95,7 +95,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
             attrs?.product_category?.data?.attributes?.Title ??
             undefined;
 
-          return {
+          const item: Suggestion = {
             id,
             Title: title,
             Price: attrs?.Price ?? undefined,
@@ -105,10 +105,11 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
             image: imageUrl,
             isAvailable: attrs?.IsAvailable ?? true,
           };
-        });
+          return item;
+        }) as Suggestion[];
         // Deduplicate by id to avoid React key collisions if API returns duplicates
-        const unique = Array.from(
-          new Map(items.map((it: any) => [it.id, it])).values()
+        const unique: Suggestion[] = Array.from(
+          new Map<number, Suggestion>(items.map((it) => [it.id, it])).values()
         );
         setSuggestions(unique);
         setOpen(unique.length > 0);
