@@ -359,7 +359,7 @@ export default function PLPList({
         price: price,
         discountedPrice: discountPrice,
         discount: discount,
-        image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url || ''}`,
+        image: product.attributes.CoverImage?.data?.attributes?.url ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}` : '',
       };
     } catch (error) {
       console.warn('Error creating sidebar product:', error, product);

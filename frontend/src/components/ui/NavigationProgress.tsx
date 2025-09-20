@@ -94,7 +94,9 @@ export default function NavigationProgress() {
       const onNavigate = (e: any) => {
         try {
           const current = new URL(window.location.href);
-          const url = new URL(e.destination?.url ?? "", current.href);
+          const destinationUrl = e.destination?.url;
+          if (!destinationUrl) return;
+          const url = new URL(destinationUrl, current.href);
           if (url.origin !== current.origin) return;
           const next = url.pathname + (url.search || "");
           const cur = current.pathname + (current.search || "");

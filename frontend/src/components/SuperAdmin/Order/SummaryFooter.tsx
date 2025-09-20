@@ -201,7 +201,9 @@ export default function SuperAdminOrderSummaryFooter({
                 );
                 // Refresh parent data to reflect ShippingWeight/Barcode changes
                 try {
-                  onReload && (await onReload());
+                  if (onReload) {
+                    await onReload();
+                  }
                 } catch {}
               } catch (e) {
                 alert("خطا در ایجاد بارکد Anipo");

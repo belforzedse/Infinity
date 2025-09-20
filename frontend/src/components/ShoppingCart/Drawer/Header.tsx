@@ -2,7 +2,11 @@ import React from "react";
 import { useCart } from "@/contexts/CartContext";
 import XIcon from "@/components/User/Icons/XIcon";
 
-export default function CartDrawerHeader() {
+interface CartDrawerHeaderProps {
+  onClose?: () => void;
+}
+
+export default function CartDrawerHeader({ onClose }: CartDrawerHeaderProps) {
   const { closeDrawer, totalItems } = useCart();
 
   return (
@@ -12,7 +16,7 @@ export default function CartDrawerHeader() {
         <span className="text-sm text-neutral-500">({totalItems} کالا)</span>
       </div>
       <button
-        onClick={closeDrawer}
+        onClick={onClose || closeDrawer}
         className="rounded-full p-2 transition-colors hover:bg-slate-50"
         aria-label="Close cart"
       >
