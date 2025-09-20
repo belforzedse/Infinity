@@ -26,7 +26,7 @@ export default function ProductsCommentsPage() {
       apiUrl={"/product-reviews"}
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           isRecycleBinOpen

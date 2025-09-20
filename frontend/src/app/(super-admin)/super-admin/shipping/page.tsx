@@ -32,7 +32,7 @@ export default function ShippingPage() {
       >
         <SuperAdminTable
           columns={columns}
-          removeActions
+          _removeActions
           url={
             isRecycleBinOpen
               ? "/shippings?filters[removedAt][$null]=false"

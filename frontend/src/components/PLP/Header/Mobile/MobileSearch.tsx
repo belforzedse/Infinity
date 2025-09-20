@@ -2,6 +2,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
 
@@ -96,7 +97,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden bg-white p-6 text-right align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
                   className="text-lg mb-4 font-medium leading-6 text-gray-900"
@@ -143,40 +144,77 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                 </div>
 
                 {/* Suggestions */}
-                <div className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white" dir="rtl">
-                  {loading && (
-                    <div className="px-3 py-2 text-xs text-gray-500">در حال جستجو…</div>
-                  )}
-                  {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
-                    <div className="px-3 py-2 text-xs text-gray-500">موردی یافت نشد</div>
-                  )}
-                  {!loading &&
-                    suggestions.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => {
-                          onClose();
-                          router.push(`/pdp/${s.id}`);
-                        }}
-                        className="block w-full cursor-pointer truncate bg-transparent px-3 py-2 text-right text-sm hover:bg-gray-50"
+                <motion.div
+                  className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white"
+                  dir="rtl"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <AnimatePresence mode="wait">
+                    {loading && (
+                      <motion.div
+                        className="px-3 py-2 text-xs text-gray-500"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                       >
-                        {s.Title}
-                      </button>
-                    ))}
-                  {!loading && suggestions.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
-                      }}
-                      className="block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-xs text-pink-700 hover:bg-gray-50"
-                    >
-                      مشاهده همه نتایج
-                    </button>
-                  )}
-                </div>
+                        در حال جستجو…
+                      </motion.div>
+                    )}
+                    {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
+                      <motion.div
+                        className="px-3 py-2 text-xs text-gray-500"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        موردی یافت نشد
+                      </motion.div>
+                    )}
+                    {!loading && suggestions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {suggestions.map((s, idx) => (
+                          <motion.button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              onClose();
+                              router.push(`/pdp/${s.id}`);
+                            }}
+                            className="block w-full cursor-pointer truncate bg-transparent px-3 py-2 text-right text-sm hover:bg-gray-50 transition-colors"
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.15, delay: idx * 0.03 }}
+                            whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            {s.Title}
+                          </motion.button>
+                        ))}
+                        <motion.button
+                          type="button"
+                          onClick={() => {
+                            onClose();
+                            router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                          }}
+                          className="block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-xs text-pink-700 hover:bg-gray-50 transition-colors"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: suggestions.length * 0.03 }}
+                          whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          مشاهده همه نتایج
+                        </motion.button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
 
                 <div className="mt-4">
                   <button

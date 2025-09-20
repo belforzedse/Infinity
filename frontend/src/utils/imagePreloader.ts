@@ -14,7 +14,7 @@ interface PreloadOptions {
 export const preloadImage = (src: string, options: PreloadOptions = {}) => {
   if (typeof window === 'undefined') return;
 
-  const { priority = false, sizes = '(max-width: 768px) 100vw, 50vw', quality = 75 } = options;
+  const { priority = false, sizes: _sizes = '(max-width: 768px) 100vw, 50vw', quality: _quality = 75 } = options;
 
   // Create a link element for preloading
   const link = document.createElement('link');

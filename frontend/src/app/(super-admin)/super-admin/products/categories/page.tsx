@@ -24,7 +24,7 @@ export default function CategoriesPage() {
       ]}
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           isRecycleBinOpen

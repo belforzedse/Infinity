@@ -69,7 +69,13 @@ export default function GlobalFetchInterceptor() {
       try {
         const raw =
           typeof input === "string" ? input : (input as any).url || "";
-        const url = new URL(raw, window.location.href);
+        if (!raw) return originalFetch(input, init);
+        let url;
+        try {
+          url = new URL(raw, window.location.href);
+        } catch {
+          return originalFetch(input, init);
+        }
         const method = (
           init?.method ||
           (typeof input !== "string" && (input as any).method) ||

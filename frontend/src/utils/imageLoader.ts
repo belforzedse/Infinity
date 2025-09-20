@@ -3,8 +3,8 @@ import type { ImageLoaderProps } from "next/image";
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
 
 export default function imageLoader({ src, width, quality = 75 }: ImageLoaderProps) {
-  // Skip data URLs
-  if (src.startsWith("data:")) return src;
+  // Skip data URLs and empty sources
+  if (!src || src.startsWith("data:")) return src;
 
   try {
     // Parse against BASE_URL to support relative paths like "/uploads/..."

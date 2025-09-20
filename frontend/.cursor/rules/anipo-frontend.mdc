@@ -1,0 +1,38 @@
+---
+description: Frontend updates for Anipo (shipping preview in checkout; tracking link in user orders; Super Admin order details Anipo fields)
+---
+
+# Anipo Frontend Integration
+
+## Checkout Shipping Preview
+
+- Endpoint: `POST /carts/shipping-preview`
+- Service: [src/services/cart/queries.ts](mdc:src/services/cart/queries.ts)
+  - `getShippingPreview({ addressId, shippingId })` → `{ success, shipping, weight? }`
+- UI: [src/components/ShoppingCart/‌Bill/index.tsx](mdc:src/components/ShoppingCart/‌Bill/index.tsx)
+  - Triggers preview when address or shipping method changes
+  - Non-zero shipping options are labeled as approximate in DeliveryOptions (price validated on selection)
+
+## User Orders - Tracking Button
+
+- Components:
+  - [src/components/User/Orders/OrderCard.tsx](mdc:src/components/User/Orders/OrderCard.tsx)
+  - [src/components/User/Orders/OrderRow.tsx](mdc:src/components/User/Orders/OrderRow.tsx)
+- Props now accept `shippingBarcode` and render a link:
+  - `https://anipo.ir/checkconsignment/?code=<ShippingBarcode>`
+- Mapping: [src/components/User/Orders/Tabs.tsx](mdc:src/components/User/Orders/Tabs.tsx)
+  - Passes `ShippingBarcode` from each order
+- Order service type extended: [src/services/order/index.ts](mdc:src/services/order/index.ts)
+  - `Order` includes optional `ShippingBarcode`
+
+## Super Admin - Order Details
+
+- Page: [src/app/(super-admin)/super-admin/orders/edit/[id]/page.tsx](<mdc:src/app/(super-admin)/super-admin/orders/edit/[id]/page.tsx>)
+  - Maps and displays Anipo fields: `ShippingBarcode`, `ShippingPostPrice`, `ShippingTax`, `ShippingWeight`, `ShippingBoxSizeId`
+- Config: [src/app/(super-admin)/super-admin/orders/edit/[id]/config.tsx](<mdc:src/app/(super-admin)/super-admin/orders/edit/[id]/config.tsx>)
+  - Shows the fields read-only under “پرداخت و ارسال”
+
+## Notes
+
+- The tracking link is shown only when a barcode exists.
+- Shipping preview is recalculated when address or shipping method changes.

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { priceFormatter } from "@/utils/price";
 import { PREDEFINED_INCREASE_BALANCE_AMOUNTS } from "../Constnats";
 import LeftUpArrowIcon from "../Icons/LeftUpArrowIcon";
+import WalletService from "@/services/wallet";
 
 const IncreaseBalance = () => {
   const [increaseAmount, setIncreaseAmount] = useState(50000);
@@ -41,7 +42,34 @@ const IncreaseBalance = () => {
         </div>
       </div>
 
-      <button className="flex w-full items-center justify-center gap-1 rounded-lg bg-pink-500 px-10 py-3 text-white lg:w-fit">
+      <button
+        className="bg-pink-500 text-white px-10 py-3 rounded-lg flex items-center gap-1 lg:w-fit w-full justify-center"
+        onClick={async () => {
+          try {
+            // UI shows toman; backend expects IRR
+            const amountIrr = Number(increaseAmount) * 10;
+            const res = await WalletService.startTopup(amountIrr);
+            if (res.success && res.redirectUrl) {
+              // Mellat requires POST with RefId; if URL is the Mellat start pay URL, create a form
+              const form = document.createElement("form");
+              form.method = "POST";
+              form.action = res.redirectUrl;
+              form.style.display = "none";
+              if (res.refId) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "RefId";
+                input.value = String(res.refId);
+                form.appendChild(input);
+              }
+              document.body.appendChild(form);
+              form.submit();
+            }
+          } catch (e) {
+            console.error("startTopup failed", e);
+          }
+        }}
+      >
         <span>پرداخت آنلاین</span>
         <LeftUpArrowIcon />
       </button>

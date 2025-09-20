@@ -19,7 +19,7 @@ export default function CartsPage() {
     >
       <SuperAdminTable
         columns={columns}
-        removeActions
+        _removeActions
         url="/carts?populate[0]=user&populate[1]=cart_items&populate[2]=cart_items.product_variation&populate[3]=cart_items.product_variation.product&populate[4]=cart_items.product_variation.product.CoverImage&populate[5]=user.user_info"
         mobileTable={(data) => <MobileTable data={data} />}
       />

@@ -7,7 +7,6 @@ import ShippingIcon from "@/components/SuperAdmin/Layout/Icons/ShippingIcon";
 import PercentIcon from "@/components/SuperAdmin/Layout/Icons/PercentIcon";
 import DashboardIcon from "@/components/SuperAdmin/Layout/Icons/DashboardIcon";
 import PaymentIcon from "@/components/SuperAdmin/Layout/Icons/PaymentIcon";
-import Menu from "../components/User/MobileHamburgerMenu/Menu";
 import {
   //FiLayout,
   FiMenu,
@@ -16,7 +15,6 @@ import {
   FiBell,
   FiBarChart,
   FiDatabase,
-  FiGlobe,
 } from "react-icons/fi";
 
 // Create a styled layout/menu icons (unused definitions removed)
@@ -24,12 +22,12 @@ const RarMenu = () => (
   <FiMenu className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 //Create a styled club icon
-const MultiUsersIcon = () => (
+const _MultiUsersIcon = () => (
   <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 
 //Create a styled Pages icon
-const PagesIcon = () => (
+const _PagesIcon = () => (
   <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 
@@ -40,7 +38,7 @@ const ChartIcon = () => (
   <FiBarChart className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 
-const CacheIcon = () => (
+const _CacheIcon = () => (
   <FiDatabase className="h-5 w-5 text-pink-500" stroke="#EC4899" />
 );
 

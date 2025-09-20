@@ -37,7 +37,7 @@ export default function UsersPage() {
       ]}
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           isRecycleBinOpen
