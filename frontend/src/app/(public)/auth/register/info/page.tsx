@@ -27,7 +27,7 @@ export default function RegisterInfoPage() {
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
-    phoneNumber,
+    phoneNumber: phoneNumber || "",
     password: "",
     confirmPassword: "",
   });

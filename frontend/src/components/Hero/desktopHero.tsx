@@ -13,8 +13,9 @@ type Props = {
 export default function DesktopHero({ layout, slideKey }: Props) {
   const prefersReduced = useReducedMotion();
   // Slower, more pronounced outside motion for high-end feel
-  const outsideOpts = prefersReduced
-    ? {
+  const outsideOpts =
+    prefersReduced ?
+      {
         distance: 160,
         duration: 0.99,
         scale: 0.98,
@@ -62,7 +63,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
         <div className="h-full grid-cols-1 grid-rows-2">
           <div className="flex h-full gap-10">
             <div className="h-full w-7/12 flex-none">
-              <div className="mt-11 grid h-full grid-cols-2 grid-rows-[200px_1fr] gap-4">
+              <div className="mt-11 grid h-[calc(100%-2.75rem)] grid-cols-2 grid-rows-[200px_1fr] gap-4">
                 <div className="col-span-2 row-span-1">
                   {/*Wide pinterest banner*/}
                   <AnimatePresence mode="wait" initial={false}>
@@ -84,7 +85,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                   </AnimatePresence>
                 </div>
                 {/* the 2 banners below the wide banner */}
-                <div className="col-span-1 col-start-1 row-span-1 row-start-2">
+                <div className="col-span-1 col-start-1 row-span-1 row-start-2 overflow-hidden">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`belowLeft-${slideKey}`}
@@ -97,7 +98,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                     </motion.div>
                   </AnimatePresence>
                 </div>
-                <div className="col-span-1 col-start-2 row-span-1 row-start-2">
+                <div className="col-span-1 col-start-2 row-span-1 row-start-2 overflow-hidden">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`belowRight-${slideKey}`}
