@@ -35,7 +35,15 @@ export type Order = {
   items: OrderItem[];
   shipping: number;
   subtotal: number;
+  discount?: number;
+  tax?: number;
   total: number;
+  // Anipo fields
+  shippingBarcode?: string;
+  shippingPostPrice?: number;
+  shippingTax?: number;
+  shippingWeight?: number;
+  shippingBoxSizeId?: number;
 };
 
 type OrderResponse = {
@@ -47,6 +55,11 @@ type OrderResponse = {
     Date: string;
     Status: string;
     ShippingCost: number;
+    ShippingBarcode?: string;
+    ShippingPostPrice?: number;
+    ShippingTax?: number;
+    ShippingWeight?: number;
+    ShippingBoxSizeId?: number;
     delivery_address?: {
       data: {
         id: string;
@@ -174,9 +187,9 @@ export default function EditOrderPage() {
 
   const { id } = useParams();
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
-    apiClient
+    return apiClient
       .get(
         `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway`,
         {
@@ -187,8 +200,6 @@ export default function EditOrderPage() {
       )
       .then((res) => {
         const data = (res as any).data as OrderResponse;
-        const subtotal = data.attributes?.contract?.data?.attributes?.Amount;
-        const total = +subtotal + +data.attributes?.ShippingCost;
 
         const items = data.attributes?.order_items?.data?.map((item) => ({
           id: +item.id,
@@ -205,6 +216,30 @@ export default function EditOrderPage() {
               ?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail
               ?.url,
         }));
+
+        // Compute financials
+        const shippingCost = Number(data.attributes?.ShippingCost || 0);
+        const itemsSubtotal = (items || []).reduce(
+          (sum: number, it: any) =>
+            sum + Number(it.price || 0) * Number(it.quantity || 0),
+          0
+        );
+        const contractAmount = Number(
+          data.attributes?.contract?.data?.attributes?.Amount || 0
+        );
+        const taxPercent = Number(
+          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 10
+        );
+        // Use items subtotal for "موارد جمع جزء" and contract amount (already includes shipping/tax) for total.
+        const subtotal = itemsSubtotal;
+        const total = contractAmount || itemsSubtotal + shippingCost;
+        // Derive discount and tax from identities:
+        // total = subtotal - discount + tax + shipping
+        // tax = (subtotal - discount) * (taxPercent/100)
+        const r = taxPercent / 100;
+        const preTaxBase = (total - shippingCost) / (1 + r); // equals (subtotal - discount)
+        const discount = Math.max(0, Math.round(subtotal - preTaxBase));
+        const tax = Math.max(0, Math.round(preTaxBase * r));
 
         const userName =
           (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes
@@ -241,22 +276,33 @@ export default function EditOrderPage() {
           address: fullAddress || undefined,
           postalCode: addr?.PostalCode,
           paymentGateway,
-          shipping: data.attributes?.ShippingCost,
+          shipping: shippingCost,
           userId: data.attributes?.user?.data?.id,
           userName: userName.trim() || data.attributes?.user?.data?.id,
           items: items,
           subtotal,
+          discount,
+          tax,
           total,
           contractStatus: data.attributes?.contract?.data?.attributes?.Status,
+          shippingBarcode: data.attributes?.ShippingBarcode,
+          shippingPostPrice: data.attributes?.ShippingPostPrice,
+          shippingTax: data.attributes?.ShippingTax,
+          shippingWeight: data.attributes?.ShippingWeight,
+          shippingBoxSizeId: data.attributes?.ShippingBoxSizeId,
         });
       })
       .catch((err) => {
-        setError(err.response.data.error);
+        setError(err.response?.data?.error || "error");
         toast.error("خطایی رخ داده است");
       })
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    load();
   }, [id]);
 
   if (loading) {
@@ -296,7 +342,7 @@ export default function EditOrderPage() {
       }}
       footer={
         <>
-          <Footer order={data} />
+          <Footer order={data} onReload={load} />
           {data?.id ? <GatewayLogs orderId={data.id} /> : null}
         </>
       }

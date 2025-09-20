@@ -1,0 +1,18 @@
+---
+description: Favicon policy and location for frontend
+---
+
+# Favicon
+
+- The site favicon is stored locally at: [`infinity-store-front/public/favicon.png`](mdc:infinity-store-front/public/favicon.png)
+- Root layout references it via Next.js Metadata icons:
+
+```tsx
+// src/app/layout.tsx
+export const metadata = {
+  // ...
+  icons: { icon: "/favicon.png" },
+};
+```
+
+- If new sizes are needed, add variants to `public/` (e.g., `favicon-32x32.png`, `apple-touch-icon.png`) and extend `metadata.icons` accordingly.
