@@ -21,7 +21,7 @@ export default function SizeGuidePage() {
       filterOptions={[{ id: "[Title]", title: "نام" }]}
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           isRecycleBinOpen

@@ -21,7 +21,7 @@ export default function TagsPage() {
       filterOptions={[{ id: "[Title]", title: "نام" }]}
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           isRecycleBinOpen

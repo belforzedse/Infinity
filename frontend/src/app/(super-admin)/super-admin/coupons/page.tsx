@@ -22,7 +22,7 @@ export default function CouponsPage() {
       hasPagination
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           isRecycleBinOpen
