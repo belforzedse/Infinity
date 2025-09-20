@@ -270,7 +270,7 @@ function ShoppingCartBillForm({}: Props) {
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
         if (gateway === "snappay") {
           window.location.href = cartResponse.redirectUrl!;
-        } else {
+        } else if (gateway === "mellat") {
           const createPaymentForm = () => {
             const form = document.createElement("form");
             form.method = "POST";
@@ -290,6 +290,10 @@ function ShoppingCartBillForm({}: Props) {
             const form = createPaymentForm();
             form.submit();
           }, 500);
+        } else if (gateway === "wallet") {
+          // Wallet flow returns no redirect; just move to success
+          setSubmitOrderStep(SubmitOrderStep.Success);
+          router.push("/orders/success");
         }
       } else {
         setSubmitOrderStep(SubmitOrderStep.Success);
