@@ -34,12 +34,18 @@ export default function OrderRow({
       <td className="py-3 pl-4">
         <div className="flex items-center gap-1">
           <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-gray-200">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              className="h-full w-full object-cover"
-            />
+            {image ? (
+              <Image
+                src={image}
+                alt={title}
+                fill
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-400 text-xs">تصویر</span>
+              </div>
+            )}
           </div>
           <span className="text-xs text-neutral-800">{title}</span>
         </div>

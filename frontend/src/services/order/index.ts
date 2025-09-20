@@ -1,6 +1,34 @@
 import { apiClient } from "../index";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
+// Simple cache implementation for orders
+class OrderCache {
+  private cache = new Map<string, { data: any; timestamp: number }>();
+  private readonly TTL = 5 * 60 * 1000; // 5 minutes
+
+  get(key: string) {
+    const item = this.cache.get(key);
+    if (!item) return null;
+
+    if (Date.now() - item.timestamp > this.TTL) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return item.data;
+  }
+
+  set(key: string, data: any) {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  clear() {
+    this.cache.clear();
+  }
+}
+
+const orderCache = new OrderCache();
+
 /**
  * Interface for order payment verification
  */
@@ -168,6 +196,14 @@ export const getMyOrders = async (
   page: number = 1,
   pageSize: number = 10
 ): Promise<OrdersResponse> => {
+  const cacheKey = `orders_${page}_${pageSize}`;
+
+  // Check cache first
+  const cachedData = orderCache.get(cacheKey);
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const response = await apiClient.get(
       `/orders/my-orders?page=${page}&pageSize=${pageSize}`
@@ -220,12 +256,17 @@ export const getMyOrders = async (
       total: ordersWithFullImageUrls.length,
     };
 
-    return {
+    const result = {
       data: ordersWithFullImageUrls,
       meta: {
         pagination,
       },
     };
+
+    // Cache the result
+    orderCache.set(cacheKey, result);
+
+    return result;
   } catch (error: any) {
     console.error("Error fetching user orders:", error);
     throw error;

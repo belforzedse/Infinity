@@ -2,8 +2,15 @@
 
 import { IMAGE_BASE_URL } from "@/constants/api";
 import NoData from "./NoData";
-import ProductCard from "@/components/Product/Card";
-import ProductSmallCard from "@/components/Product/SmallCard";
+import dynamic from "next/dynamic";
+
+// Lazy load heavy components
+const ProductCard = dynamic(() => import("@/components/Product/Card"), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-48 rounded-lg" />,
+});
+const ProductSmallCard = dynamic(() => import("@/components/Product/SmallCard"), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-24 rounded-lg" />,
+});
 import Filter from "./List/Filter";
 import PLPListMobileFilter from "./List/MobileFilter";
 import HeartIcon from "./Icons/HeartIcon";
@@ -11,7 +18,8 @@ import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
 import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { API_BASE_URL } from "@/constants/api";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 // use native fetch so user isn't timed out artificially
@@ -112,154 +120,142 @@ export default function PLPList({
     }
   }, [initialCategory, category, setCategory]);
 
-  // Fetch products when filters change
-  useEffect(() => {
+  // Define fetchProducts function with useCallback
+  const fetchProducts = useCallback(() => {
     // Skip fetch if this is a search results page managed by server component
     if (searchQuery) {
       return;
     }
 
-    const fetchProducts = () => {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      // Base URL with required fields and pagination
-      const baseUrl = `${API_BASE_URL}/products`;
+    // Base URL with required fields and pagination
+    const baseUrl = `${API_BASE_URL}/products`;
 
-      // Build query parameters
-      const queryParams = new URLSearchParams();
+    // Build query parameters
+    const queryParams = new URLSearchParams();
 
-      // Add required fields
-      queryParams.append("populate[0]", "CoverImage");
-      queryParams.append("populate[1]", "product_main_category");
-      queryParams.append("populate[2]", "product_variations");
-      queryParams.append("populate[3]", "product_variations.product_stock");
+    // Add required fields
+    queryParams.append("populate[0]", "CoverImage");
+    queryParams.append("populate[1]", "product_main_category");
+    queryParams.append("populate[2]", "product_variations");
+    queryParams.append("populate[3]", "product_variations.product_stock");
 
-      // Add pagination
-      queryParams.append("pagination[page]", page);
-      queryParams.append("pagination[pageSize]", "20");
+    // Add pagination
+    queryParams.append("pagination[page]", page);
+    queryParams.append("pagination[pageSize]", "20");
 
-      // Add filters
-      queryParams.append("filters[Status][$eq]", "Active");
+    // Add filters
+    queryParams.append("filters[Status][$eq]", "Active");
 
-  // Only show products whose Title contains کیف, کفش, صندل, or کتونی
-  // We append the $or filters as separate params to keep URLSearchParams usage
-  queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
-  queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
-  queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
-  queryParams.append("filters[$or][3][Title][$containsi]", "کتونی");
+    // Only show products whose Title contains کیف, کفش, صندل, or کتونی
+    // We append the $or filters as separate params to keep URLSearchParams usage
+    queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
+    queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
+    queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
+    queryParams.append("filters[$or][3][Title][$containsi]", "کتونی");
 
-      // Category filter
-      if (category) {
-        queryParams.append(
-          "filters[product_main_category][Slug][$eq]",
-          category,
-        );
-      }
+    // Category filter
+    if (category) {
+      queryParams.append(
+        "filters[product_main_category][Slug][$eq]",
+        category,
+      );
+    }
 
-      // Availability filter
-      if (available === "true") {
-        queryParams.append(
-          "filters[product_variations][IsPublished][$eq]",
-          "true",
-        );
-      }
+    // Availability filter
+    if (available === "true") {
+      queryParams.append(
+        "filters[product_variations][IsPublished][$eq]",
+        "true",
+      );
+    }
 
-      // Price range filters
-      if (minPrice) {
-        queryParams.append(
-          "filters[product_variations][Price][$gte]",
-          minPrice,
-        );
-      }
-      if (maxPrice) {
-        queryParams.append(
-          "filters[product_variations][Price][$lte]",
-          maxPrice,
-        );
-      }
+    // Price range filters
+    if (minPrice) {
+      queryParams.append(
+        "filters[product_variations][Price][$gte]",
+        minPrice,
+      );
+    }
+    if (maxPrice) {
+      queryParams.append(
+        "filters[product_variations][Price][$lte]",
+        maxPrice,
+      );
+    }
 
-      // Size filter
-      if (size) {
-        queryParams.append("filters[product_variations][Size][$eq]", size);
-      }
+    // Size filter
+    if (size) {
+      queryParams.append("filters[product_variations][Size][$eq]", size);
+    }
 
-      // Material filter
-      if (material) {
-        queryParams.append(
-          "filters[product_variations][Material][$eq]",
-          material,
-        );
-      }
+    // Material filter
+    if (material) {
+      queryParams.append(
+        "filters[product_variations][Material][$eq]",
+        material,
+      );
+    }
 
-      // Season filter
-      if (season) {
-        queryParams.append("filters[product_variations][Season][$eq]", season);
-      }
+    // Season filter
+    if (season) {
+      queryParams.append("filters[product_variations][Season][$eq]", season);
+    }
 
-      // Gender filter
-      if (gender) {
-        queryParams.append("filters[product_variations][Gender][$eq]", gender);
-      }
+    // Gender filter
+    if (gender) {
+      queryParams.append("filters[product_variations][Gender][$eq]", gender);
+    }
 
-      // Usage filter
-      if (usage) {
-        queryParams.append("filters[product_variations][Usage][$eq]", usage);
-      }
+    // Usage filter
+    if (usage) {
+      queryParams.append("filters[product_variations][Usage][$eq]", usage);
+    }
 
-      // Sorting
-      if (sort) {
-        queryParams.append("sort[0]", sort);
-      }
+    // Sorting
+    if (sort) {
+      queryParams.append("sort[0]", sort);
+    }
 
-      // Construct final URL
-      const url = `${baseUrl}?${queryParams.toString()}`;
+    // Construct final URL
+    const url = `${baseUrl}?${queryParams.toString()}`;
 
-      fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-          setProducts(Array.isArray(data?.data) ? data.data : []);
-          setPagination(
-            data?.meta?.pagination || {
-              page: parseInt(page) || 1,
-              pageSize: 20,
-              pageCount: 0,
-              total: 0,
-            },
-          );
-        })
-        .catch((error) => {
-          console.error("Error fetching products:", error);
-          setProducts([]);
-          setPagination({
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setProducts(Array.isArray(data?.data) ? data.data : []);
+        setPagination(
+          data?.meta?.pagination || {
             page: parseInt(page) || 1,
             pageSize: 20,
             pageCount: 0,
             total: 0,
-          });
-        })
-        .finally(() => {
-          setIsLoading(false);
+          },
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+        setPagination({
+          page: parseInt(page) || 1,
+          pageSize: 20,
+          pageCount: 0,
+          total: 0,
         });
-    };
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [page, category, available, minPrice, maxPrice, size, material, season, gender, usage, sort, searchQuery]);
 
+  // Fetch products when dependencies change
+  useEffect(() => {
     fetchProducts();
-  }, [
-    category,
-    available,
-    minPrice,
-    maxPrice,
-    size,
-    material,
-    season,
-    gender,
-    usage,
-    page,
-    sort,
-    searchQuery,
-  ]);
+  }, [fetchProducts]);
 
-  // Filter out products with zero price by checking all variations
-  const validProducts = products.filter((product) => {
+  // Memoize expensive filtering operations
+  const validProducts = useMemo(() => products.filter((product) => {
     try {
       // Basic product structure validation
       if (!product?.attributes?.product_variations?.data) {
@@ -314,10 +310,10 @@ export default function PLPList({
       console.warn('Error filtering product:', error, product);
       return false;
     }
-  });
+  }), [products, available, discountOnly]);
 
-  // Create sample products for sidebar suggestions
-  const sidebarProducts = validProducts.slice(0, 3).map((product) => {
+  // Memoize sidebar products
+  const sidebarProducts = useMemo(() => validProducts.slice(0, 3).map((product) => {
     try {
       const firstValidVariation = product.attributes.product_variations?.data?.find((variation) => {
         if (!variation?.attributes?.Price) return false;
@@ -359,7 +355,7 @@ export default function PLPList({
         price: price,
         discountedPrice: discountPrice,
         discount: discount,
-        image: product.attributes.CoverImage?.data?.attributes?.url ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}` : '',
+        image: product.attributes.CoverImage?.data?.attributes?.url ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}` : '/images/placeholders/product-placeholder.png',
       };
     } catch (error) {
       console.warn('Error creating sidebar product:', error, product);
@@ -375,10 +371,10 @@ export default function PLPList({
         image: '',
       };
     }
-  }).filter(product => product.price > 0); // Filter out invalid products
+  }).filter(product => product.price > 0), [validProducts]); // Filter out invalid products
 
-  // Helper function to check if a product has available stock
-  const checkStockAvailability = (product: Product) => {
+  // Memoize stock availability check
+  const checkStockAvailability = useCallback((product: Product) => {
     try {
       if (!product?.attributes?.product_variations?.data) {
         return false;
@@ -403,7 +399,7 @@ export default function PLPList({
       console.warn('Error checking stock availability:', error);
       return false;
     }
-  };
+  }, []);
 
   return (
     <div className="container mx-auto px-4" data-plp-top>
@@ -449,7 +445,7 @@ export default function PLPList({
           ) : (
             <>
               {/* Desktop view - ProductCard */}
-              <div className="hidden grid-cols-2 gap-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="hidden grid-cols-2 gap-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
                 {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
                   const firstValidVariation =
@@ -501,9 +497,9 @@ export default function PLPList({
                     <ProductCard
                       key={product.id}
                       id={product.id}
-                      images={[
-                        `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
-                      ]}
+                      images={product.attributes.CoverImage?.data?.attributes?.url ? [
+                        `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
+                      ] : ['/images/placeholders/product-placeholder.png']}
                       category={
                         product.attributes.product_main_category?.data
                           ?.attributes?.Title || ""
@@ -573,7 +569,7 @@ export default function PLPList({
                       price={price}
                       discountedPrice={discountPrice}
                       discount={discount}
-                      image={`${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`}
+                      image={product.attributes.CoverImage?.data?.attributes?.url ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}` : '/images/placeholders/product-placeholder.png'}
                       isAvailable={isAvailable}
                       priority={index < 3}
                     />

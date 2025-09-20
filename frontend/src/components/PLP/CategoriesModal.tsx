@@ -61,7 +61,7 @@ export default function CategoriesModal({
                   {categories.map((category) => (
                     <Link
                       key={category.id}
-                      href={`/plp?category=${category.slug}`}
+                      href={category.href}
                       onClick={onClose}
                       className="flex flex-col items-center gap-2"
                     >

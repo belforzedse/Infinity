@@ -4,6 +4,7 @@ import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { MobileTable, columns, Product } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { useCallback, useEffect, useState, useMemo } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
@@ -35,7 +36,25 @@ export default function ProductsPage() {
   const [settings, setSettings] = useState<{filterPublicProductsByTitle: boolean} | null>(null);
   const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [, setRefresh] = useAtom(refreshTable);
+
+  // Debounce search input to avoid excessive API calls
+  const debouncedSearch = useDebouncedCallback((query: string) => {
+    setDebouncedSearchQuery(query);
+  }, 500);
+
+  // Trigger debounced search when searchQuery changes
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
+
+  // Cancel any pending debounced calls on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   const getAllProductsLite = useCallback(async () => {
     // Fetch product list with minimal payload for stock aggregation
@@ -63,8 +82,8 @@ export default function ProductsPage() {
         endpoint = appendTitleFilter(endpoint);
       }
 
-      if (searchQuery.trim()) {
-        endpoint += `&filters[Title][$containsi]=${encodeURIComponent(searchQuery.trim())}`;
+      if (debouncedSearchQuery.trim()) {
+        endpoint += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
       }
 
       const res = await apiClient.get(endpoint, { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } });
@@ -76,10 +95,12 @@ export default function ProductsPage() {
       current += 1;
     }
     return items;
-  }, [isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, searchQuery]);
+  }, [isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery]);
 
   const buildStockIndex = useCallback(async () => {
+    if (buildingIndex) return; // Prevent concurrent builds
     setBuildingIndex(true);
+
     try {
       const items = await getAllProductsLite();
       const byStock = items
@@ -95,12 +116,15 @@ export default function ProductsPage() {
       const ids = byStock.map((x: any) => x.id);
       setSortedProductIds(sort === "stock-asc" ? ids : ids.slice().reverse());
       setTotalSize(ids.length);
+    } catch (error) {
+      console.error("Error building stock index:", error);
     } finally {
       setBuildingIndex(false);
     }
-  }, [getAllProductsLite, setTotalSize, sort]);
+  }, [sort, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery, setTotalSize, buildingIndex]);
 
   const buildSalesIndex = useCallback(async () => {
+    if (buildingIndex) return; // Prevent concurrent builds
     setBuildingIndex(true);
     try {
       const rows = await getProductSales({});
@@ -138,18 +162,29 @@ export default function ProductsPage() {
         .map(([pid]) => Number(pid));
       setSortedProductIds(sort === "sales-asc" ? ids : ids.slice().reverse());
       setTotalSize(ids.length);
+    } catch (error) {
+      console.error("Error building sales index:", error);
     } finally {
       setBuildingIndex(false);
     }
-  }, [setTotalSize, sort, isRecycleBinOpen]);
+  }, [sort, isRecycleBinOpen, setTotalSize, buildingIndex]);
 
   // Build global sorted index for stock/sales
   useEffect(() => {
+    // Prevent infinite loops by checking if already building
+    if (buildingIndex) return;
+
+    // Reset state when dependencies change
     setSortedProductIds(null);
     setCustomPageData(null);
-    if (sort === "stock-asc" || sort === "stock-desc") buildStockIndex();
-    else if (sort === "sales-asc" || sort === "sales-desc") buildSalesIndex();
-  }, [sort, buildStockIndex, buildSalesIndex, localTitleFilter]);
+
+    // Only rebuild if we need custom sorting
+    if (sort === "stock-asc" || sort === "stock-desc") {
+      buildStockIndex();
+    } else if (sort === "sales-asc" || sort === "sales-desc") {
+      buildSalesIndex();
+    }
+  }, [sort, localTitleFilter, debouncedSearchQuery, isRecycleBinOpen, buildingIndex]);
 
   // Fetch current page data when using custom index
   useEffect(() => {
@@ -180,8 +215,8 @@ export default function ProductsPage() {
             ep = appendTitleFilter(ep);
           }
 
-          if (searchQuery.trim()) {
-            ep += `&filters[Title][$containsi]=${encodeURIComponent(searchQuery.trim())}`;
+          if (debouncedSearchQuery.trim()) {
+            ep += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
           }
           return ep;
         })(),
@@ -196,7 +231,7 @@ export default function ProductsPage() {
       setPageLoading(false);
     };
     run();
-  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, searchQuery]);
+  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery]);
 
   // Fetch settings once on mount
   useEffect(() => {
@@ -463,20 +498,35 @@ export default function ProductsPage() {
 
         <div className="flex items-center gap-2">
           <label className="text-sm text-neutral-600">جستجو:</label>
-          <input
-            type="text"
-            placeholder="جستجو در عنوان محصولات..."
-            className="w-64 rounded-lg border border-neutral-300 px-3 py-1 text-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="جستجو در عنوان محصولات..."
+              className="w-64 rounded-lg border border-neutral-300 px-3 py-1 pr-8 text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery !== debouncedSearchQuery && (
+              <div className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+              </div>
+            )}
+          </div>
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery("")}
+              onClick={() => {
+                setSearchQuery("");
+                setDebouncedSearchQuery("");
+              }}
               className="text-sm text-neutral-500 hover:text-neutral-700"
             >
               پاک کردن
             </button>
+          )}
+          {debouncedSearchQuery && (
+            <span className="text-xs text-green-600">
+              نتایج برای: "{debouncedSearchQuery}"
+            </span>
           )}
         </div>
       </div>
@@ -498,8 +548,8 @@ export default function ProductsPage() {
               sortedBase = appendTitleFilter(sortedBase);
             }
 
-            if (searchQuery.trim()) {
-              sortedBase += `&filters[Title][$containsi]=${encodeURIComponent(searchQuery.trim())}`;
+            if (debouncedSearchQuery.trim()) {
+              sortedBase += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
             }
 
             if (sort === "newest") return sortedBase + "&sort[0]=createdAt:desc";
