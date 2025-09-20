@@ -8,11 +8,13 @@ export default function MobileTableRowBox<TData>({
   columns,
   header,
   headTitle,
+  actions,
 }: {
   columns: ColumnDef<TData>[];
   row: TData & { attributes: any; id: string };
   header: React.ReactNode;
   headTitle: string;
+  actions?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -26,14 +28,17 @@ export default function MobileTableRowBox<TData>({
             <span className="text-sm text-neutral-800">{headTitle}</span>
           </div>
 
-          <button
-            className={`flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 ${
-              isOpen ? "rotate-180" : ""
-            }`}
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <ShowMoreIcon />
-          </button>
+          <div className="flex items-center gap-2">
+            {actions && <div className="flex items-center">{actions}</div>}
+            <button
+              className={`flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <ShowMoreIcon />
+            </button>
+          </div>
         </div>
 
         {!isOpen ? (
