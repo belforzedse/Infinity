@@ -297,7 +297,15 @@ const OrderService = {
       const res = await apiClient.post(`/orders/${orderId}/anipo-barcode`, body);
       return res as any;
     } catch (error: any) {
-      console.error("Error generating Anipo barcode:", error);
+      console.error("Error generating Anipo barcode:", {
+        error,
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+        orderId,
+        weight,
+        boxSizeId
+      });
       throw error;
     }
   },
