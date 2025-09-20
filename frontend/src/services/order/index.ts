@@ -288,9 +288,13 @@ const OrderService = {
   getOrderStatus,
   getOrderPaymentStatus,
   getMyOrders,
-  async generateAnipoBarcode(orderId: number): Promise<any> {
+  async generateAnipoBarcode(orderId: number, weight?: number, boxSizeId?: number): Promise<any> {
     try {
-      const res = await apiClient.post(`/orders/${orderId}/anipo-barcode`, {});
+      const body: any = {};
+      if (weight !== undefined) body.weight = weight;
+      if (boxSizeId !== undefined) body.boxSizeId = boxSizeId;
+
+      const res = await apiClient.post(`/orders/${orderId}/anipo-barcode`, body);
       return res as any;
     } catch (error: any) {
       console.error("Error generating Anipo barcode:", error);
