@@ -2,6 +2,7 @@ import type { Strapi } from "@strapi/strapi";
 
 export async function generateAnipoBarcodeHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
+  const { weight: customWeight, boxSizeId: customBoxSizeId } = ctx.request.body || {};
   try {
     const order: any = await strapi.entityService.findOne(
       "api::order.order",
@@ -33,15 +34,19 @@ export async function generateAnipoBarcodeHandler(strapi: Strapi, ctx: any) {
       return;
     }
 
-    // Compute weight based on items (default 100g each product if missing)
+    // Use custom weight if provided, otherwise compute from items
     let weight = 0;
-    for (const it of order.order_items || []) {
-      const product = it?.product_variation?.product;
-      const w = Number(product?.Weight ?? 100) || 100;
-      const count = Number(it?.Count || 0);
-      weight += w * count;
+    if (customWeight && Number(customWeight) > 0) {
+      weight = Number(customWeight);
+    } else {
+      for (const it of order.order_items || []) {
+        const product = it?.product_variation?.product;
+        const w = Number(product?.Weight ?? 100) || 100;
+        const count = Number(it?.Count || 0);
+        weight += w * count;
+      }
+      if (weight <= 0) weight = 100;
     }
-    if (weight <= 0) weight = 100;
 
     const address = order?.delivery_address;
     const cityName = address?.shipping_city?.Title || "";
@@ -72,7 +77,7 @@ export async function generateAnipoBarcodeHandler(strapi: Strapi, ctx: any) {
       callNumber: address?.Phone || order?.user?.Phone || "",
       address: address?.FullAddress || "",
       weight,
-      boxSizeId: order?.ShippingBoxSizeId || undefined,
+      boxSizeId: customBoxSizeId ? Number(customBoxSizeId) : (order?.ShippingBoxSizeId || undefined),
       isnonstandard: 0,
       sum,
     });
