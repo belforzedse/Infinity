@@ -64,6 +64,80 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       (callbackURL || "/orders/payment-callback").startsWith("/") ? "" : "/"
     }${callbackURL || "/orders/payment-callback"}`;
 
+    // Wallet payment path (full wallet only)
+    if (String(gateway || "").toLowerCase() === "wallet") {
+      // Compute total amount from contract (toman -> IRR inside wallet storage uses IRR)
+      const totalToman = Math.round(contract.Amount || 0);
+      const totalIrr = totalToman * 10;
+
+      // Load wallet
+      const wallet = await strapi.db
+        .query("api::local-user-wallet.local-user-wallet")
+        .findOne({ where: { user: user.id } });
+
+      if (!wallet || Number(wallet.Balance || 0) < totalIrr) {
+        return ctx.badRequest("Wallet balance is insufficient", {
+          data: { success: false, error: "insufficient_wallet" },
+        });
+      }
+
+      // Deduct and persist atomically
+      const newBalance = Number(wallet.Balance || 0) - totalIrr;
+      await strapi.entityService.update(
+        "api::local-user-wallet.local-user-wallet",
+        wallet.id,
+        { data: { Balance: newBalance, LastTransactionDate: new Date() } }
+      );
+
+      // Transaction record (Minus)
+      try {
+        await strapi.entityService.create(
+          "api::local-user-wallet-transaction.local-user-wallet-transaction",
+          {
+            data: {
+              Amount: totalIrr,
+              Type: "Minus",
+              Date: new Date(),
+              Cause: "Order Payment",
+              ReferenceId: String(order.id),
+              user_wallet: wallet.id,
+            },
+          }
+        );
+      } catch {}
+
+      // TODO: Wallet flow settlement
+      // Per backend-stock-adjustment-policy, do NOT decrement stock or update order status here.
+      // Stock decrement and status transition must occur after a dedicated wallet settlement callback.
+
+      // Write order-log
+      try {
+        await strapi.entityService.create("api::order-log.order-log", {
+          data: {
+            order: order.id,
+            Action: "Update",
+            Description: "Wallet debit recorded (pending settlement)",
+            Changes: { method: "wallet" },
+          },
+        });
+      } catch {}
+
+      // Cart clearing left to existing behavior (no-op here)
+
+      return {
+        data: {
+          success: true,
+          message: "Order paid via wallet.",
+          orderId: order.id,
+          contractId: contract.id,
+          redirectUrl: "",
+          refId: "",
+          financialSummary: financialSummary,
+          requestId: "wallet",
+        },
+      };
+    }
+
     let paymentResult: any = null;
 
     if (selectedGateway === "snappay") {
