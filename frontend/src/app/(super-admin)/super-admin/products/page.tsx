@@ -121,7 +121,7 @@ export default function ProductsPage() {
     } finally {
       setBuildingIndex(false);
     }
-  }, [sort, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery, setTotalSize, buildingIndex]);
+  }, [getAllProductsLite, sort, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery, setTotalSize, buildingIndex]);
 
   const buildSalesIndex = useCallback(async () => {
     if (buildingIndex) return; // Prevent concurrent builds
@@ -184,7 +184,7 @@ export default function ProductsPage() {
     } else if (sort === "sales-asc" || sort === "sales-desc") {
       buildSalesIndex();
     }
-  }, [sort, localTitleFilter, debouncedSearchQuery, isRecycleBinOpen, buildingIndex]);
+  }, [buildSalesIndex, buildStockIndex, sort, localTitleFilter, debouncedSearchQuery, isRecycleBinOpen, buildingIndex]);
 
   // Fetch current page data when using custom index
   useEffect(() => {

@@ -31,12 +31,9 @@ const nextConfig = {
     optimizePackageImports: ["@heroicons/react", "lucide-react", "react-icons", "framer-motion"],
     scrollRestoration: true,
     optimizeCss: true,
-    instrumentationHook: true,
   },
   // Enable compression
   compress: true,
-  // Performance optimizations
-  swcMinify: true,
   poweredByHeader: false,
   generateEtags: false,
   // Bundle analyzer (uncomment for analysis)
