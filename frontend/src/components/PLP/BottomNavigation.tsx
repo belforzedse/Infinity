@@ -135,7 +135,7 @@ const PLPBottomNavigation = () => {
                 onClick={closeCategories}
                 className="rounded p-2 text-neutral-500 hover:bg-neutral-100"
               >
-                ✕
+                ×
               </button>
             </div>
 

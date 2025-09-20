@@ -64,10 +64,10 @@ export default function OffersListHomePage(props: Props) {
       }
     } else {
       // Desktop: Pagination - go to next page
-      if (currentPage < totalPages - 1 && !isAnimating) {
+      if (currentPage > 0 && !isAnimating) {
         setIsAnimating(true);
         setTimeout(() => {
-          setCurrentPage(currentPage + 1);
+          setCurrentPage(currentPage - 1);
           setTimeout(() => setIsAnimating(false), 50);
         }, 150);
       }
@@ -90,10 +90,11 @@ export default function OffersListHomePage(props: Props) {
       }
     } else {
       // Desktop: Pagination - go to previous page
-      if (currentPage > 0 && !isAnimating) {
+
+      if (currentPage < totalPages - 1 && !isAnimating) {
         setIsAnimating(true);
         setTimeout(() => {
-          setCurrentPage(currentPage - 1);
+          setCurrentPage(currentPage + 1);
           setTimeout(() => setIsAnimating(false), 50);
         }, 150);
       }

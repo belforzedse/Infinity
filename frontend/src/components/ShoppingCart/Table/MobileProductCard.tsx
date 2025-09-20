@@ -16,7 +16,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
     <div className="flex w-full flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">{"U.O-O\uFFFDU^U,"}</span>
+          <span className="text-sm text-foreground-primary">نام محصول</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 px-3 py-2">
@@ -42,7 +42,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">{"O_O3O\uFFFDU\uFFFD O\"U+O_UO"}</span>
+          <span className="text-sm text-foreground-primary">دسته بندی</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
@@ -54,7 +54,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">{"U,UOU.O\uFFFD"}</span>
+          <span className="text-sm text-foreground-primary">قیمت</span>
         </div>
 
         <div className="col-span-3 flex flex-col items-end gap-1 p-3">
@@ -71,7 +71,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">{"O\uFFFDO1O_O\u0015O_"}</span>
+          <span className="text-sm text-foreground-primary">تعداد</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
@@ -84,7 +84,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">{"O\uFFFDU.O1 U+U\uFFFD O\u0015UOUO"}</span>
+          <span className="text-sm text-foreground-primary">قیمت کل</span>
         </div>
 
         <div className="col-span-3 flex flex-col items-end gap-1 p-3">

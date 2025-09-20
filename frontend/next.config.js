@@ -8,7 +8,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
@@ -28,10 +28,20 @@ const nextConfig = {
   },
   // Optimize bundle size
   experimental: {
-    optimizePackageImports: ["@heroicons/react", "lucide-react"],
+    optimizePackageImports: ["@heroicons/react", "lucide-react", "react-icons", "framer-motion"],
     scrollRestoration: true,
+    optimizeCss: true,
+    instrumentationHook: true,
   },
   // Enable compression
   compress: true,
+  // Performance optimizations
+  swcMinify: true,
+  poweredByHeader: false,
+  generateEtags: false,
+  // Bundle analyzer (uncomment for analysis)
+  // bundleAnalyzer: {
+  //   enabled: process.env.ANALYZE === 'true',
+  // },
 };
 module.exports = nextConfig;
