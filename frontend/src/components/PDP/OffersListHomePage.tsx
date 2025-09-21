@@ -162,114 +162,114 @@ export default function OffersListHomePage(props: Props) {
           transition: scroll-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          {icon}
-          <span className="text-2xl text-foreground-primary md:text-3xl">
-            {title}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden md:block">
-            <PDPHeroNavigationButtons
-              goToNextImage={goToNextProduct}
-              goToPreviousImage={goToPreviousProduct}
-            />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            {icon}
+            <span className="text-2xl text-foreground-primary md:text-3xl">
+              {title}
+            </span>
           </div>
 
-          {/* Desktop pagination indicator */}
-          {totalPages > 1 && (
-            <div className="hidden md:flex items-center gap-1 text-xs text-neutral-500">
-              <span>{currentPage + 1}</span>
-              <span>/</span>
-              <span>{totalPages}</span>
+          <div className="flex items-center gap-2">
+            <div className="hidden md:block">
+              <PDPHeroNavigationButtons
+                goToNextImage={goToNextProduct}
+                goToPreviousImage={goToPreviousProduct}
+              />
             </div>
-          )}
 
-          {/* Desktop: navigate to PLP with appropriate filters */}
-          <Link
-            href={getPlpHref()}
-            className="text-sm hidden text-pink-600 underline-offset-4 transition-colors hover:text-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
-          >
-            مشاهده همه
-          </Link>
-        </div>
-      </div>
+            {/* Desktop pagination indicator */}
+            {totalPages > 1 && (
+              <div className="text-xs hidden items-center gap-1 text-neutral-500 md:flex">
+                <span>{currentPage + 1}</span>
+                <span>/</span>
+                <span>{totalPages}</span>
+              </div>
+            )}
 
-      {/* Mobile scrollable view */}
-      <div className="md:hidden overflow-hidden w-full">
-        <div
-          ref={scrollRef}
-          className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth smooth-scroll transition-transform duration-300 ease-out"
-          style={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            width: "100%",
-            maxWidth: "none",
-          }}
-        >
-          {products.map((product, index) => (
-            <div
-              key={product.id}
-              className="snap-start flex-shrink-0 transform transition-all duration-200 ease-out hover:scale-[1.02]"
-              style={{
-                animationDelay: `${index * 60}ms`,
-                animation: `fadeInUp 0.3s ease-out forwards ${index * 60}ms`
-              }}
-            >
-              <ProductCard {...product} />
-            </div>
-          ))}
-        </div>
-
-        {!isShowAllProducts && products.length > 5 && (
-          <div className="mt-4 flex items-center justify-center">
+            {/* Desktop: navigate to PLP with appropriate filters */}
             <Link
               href={getPlpHref()}
-              className="text-base flex items-center gap-1 text-foreground-primary underline-offset-4 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="text-sm hidden text-pink-600 underline-offset-4 transition-colors hover:text-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
             >
-              <span>مشاهده همه</span>
+              مشاهده همه
+            </Link>
+          </div>
+        </div>
+
+        {/* Mobile scrollable view */}
+        <div className="w-full overflow-hidden md:hidden">
+          <div
+            ref={scrollRef}
+            className="scrollbar-hide smooth-scroll flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth transition-transform duration-300 ease-out"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              width: "100%",
+              maxWidth: "none",
+            }}
+          >
+            {products.map((product, index) => (
+              <div
+                key={product.id}
+                className="flex-shrink-0 transform snap-start transition-all duration-200 ease-out hover:scale-[1.02]"
+                style={{
+                  animationDelay: `${index * 60}ms`,
+                  animation: `fadeInUp 0.3s ease-out forwards ${index * 60}ms`,
+                }}
+              >
+                <ProductCard {...product} />
+              </div>
+            ))}
+          </div>
+
+          {!isShowAllProducts && products.length > 5 && (
+            <div className="mt-4 flex items-center justify-center">
+              <Link
+                href={getPlpHref()}
+                className="text-base flex items-center gap-1 text-foreground-primary underline-offset-4 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                <span>مشاهده همه</span>
+                <ArrowLeftIcon />
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop grid view - responsive columns */}
+        <div className="hidden md:block">
+          <div
+            ref={scrollRef}
+            className={`grid grid-cols-2 gap-4 transition-all duration-300 ease-out md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${
+              isAnimating ? "scale-95 opacity-0" : "scale-100 opacity-100"
+            }`}
+          >
+            {currentProducts.map((product, index) => (
+              <div
+                key={product.id}
+                className="transform transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02]"
+              >
+                <ProductCard {...product} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop view more button */}
+        {!isShowAllProducts && products.length > 5 && (
+          <div className="mt-6 hidden items-center justify-center md:flex">
+            <Link
+              href={getPlpHref()}
+              className="pressable text-base flex items-center gap-1 rounded-full border border-pink-100 px-4 py-2 text-foreground-primary transition-colors hover:bg-pink-50 hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              <span>مشاهده محصولات بیشتر</span>
               <ArrowLeftIcon />
             </Link>
           </div>
         )}
       </div>
-
-      {/* Desktop grid view - responsive columns */}
-      <div className="hidden md:block">
-        <div
-          ref={scrollRef}
-          className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 transition-all duration-300 ease-out ${
-            isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-          }`}
-        >
-          {currentProducts.map((product, index) => (
-            <div
-              key={product.id}
-              className="transform transition-all duration-200 ease-out hover:scale-[1.02] hover:-translate-y-1"
-            >
-              <ProductCard {...product} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Desktop view more button */}
-      {!isShowAllProducts && products.length > 5 && (
-        <div className="mt-6 hidden items-center justify-center md:flex">
-          <Link
-            href={getPlpHref()}
-            className="pressable text-base flex items-center gap-1 rounded-full border border-pink-100 px-4 py-2 text-foreground-primary transition-colors hover:bg-pink-50 hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <span>مشاهده محصولات بیشتر</span>
-            <ArrowLeftIcon />
-          </Link>
-        </div>
-      )}
-    </div>
     </>
   );
 }
