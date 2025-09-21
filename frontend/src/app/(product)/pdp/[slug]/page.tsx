@@ -7,6 +7,7 @@ import { ProductReview } from "@/components/PDP/Comment/List";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import logger from "@/utils/logger";
 import {
   getProductBySlug,
   ProductDetail,
@@ -77,7 +78,7 @@ export default async function PDP({
     }
   } catch (err) {
     error = err;
-    console.error("Error fetching product:", err);
+    logger.error("Error fetching product", { error: String(err) });
   }
 
   // If we still don't have product data, just return a message
@@ -130,22 +131,20 @@ export default async function PDP({
     if (results[0].status === "fulfilled") {
       sameMainCategoryProducts = results[0].value;
     } else {
-      console.error(
-        "Error fetching main category products:",
-        results[0].reason
-      );
+      logger.error("Error fetching main category products", {
+        error: String(results[0].reason),
+      });
     }
 
     if (results[1].status === "fulfilled") {
       otherCategoriesProducts = results[1].value;
     } else {
-      console.error(
-        "Error fetching other categories products:",
-        results[1].reason
-      );
+      logger.error("Error fetching other categories products", {
+        error: String(results[1].reason),
+      });
     }
   } catch (error) {
-    console.error("Error fetching related products:", error);
+    logger.error("Error fetching related products", { error: String(error) });
   }
 
   // Format product reviews data for the component

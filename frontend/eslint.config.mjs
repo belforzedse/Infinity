@@ -15,15 +15,31 @@ const eslintConfig = [
   {
     plugins: { tailwindcss: tailwind },
     rules: {
-      "@typescript-eslint/no-explicit-any": "off",
+      // TypeScript
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/ban-ts-comment": ["warn", { minimumDescriptionLength: 3 }],
+      "@typescript-eslint/consistent-type-imports": ["warn", { prefer: "type-imports" }],
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+
+      // React Hooks
       "react-hooks/rules-of-hooks": "warn",
+      "react-hooks/exhaustive-deps": "warn",
+
+      // Reduce console pollution in dev; Next strips in prod via compiler.removeConsole
+      "no-console": "warn",
+
       // Tailwind
       "tailwindcss/classnames-order": "warn",
       "tailwindcss/no-custom-classname": "off",
+
+      // Flag TODO/FIXME comments for cleanup
+      "no-warning-comments": [
+        "warn",
+        { terms: ["todo", "fixme"], location: "anywhere" },
+      ],
     },
   },
 ];
