@@ -1,13 +1,9 @@
 import React from "react";
 import CustomRadioGroup from "./CustomRadioGroup";
-import { ShippingMethod } from "@/services/shipping";
-import {
-  Controller,
-  Control,
-  UseFormSetValue,
-  useWatch,
-} from "react-hook-form";
-import { FormData } from "./index";
+import type { ShippingMethod } from "@/services/shipping";
+import type { Control, UseFormSetValue} from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
+import type { FormData } from "./index";
 
 interface Props {
   shippingMethods: ShippingMethod[];
@@ -15,10 +11,7 @@ interface Props {
   control: Control<FormData>;
 }
 
-const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
-  shippingMethods,
-  control,
-}) => {
+const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({ shippingMethods, control }) => {
   // Watch the selected address to get province and city info
   const selectedAddress = useWatch({ control, name: "address" });
 
@@ -45,16 +38,14 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
       // Show "پیک" delivery option and in-person pickup option
       return shippingMethods.filter(
         (method) =>
-          method.attributes.Title.includes("پیک") ||
-          method.attributes.Title.includes("حضوری"),
+          method.attributes.Title.includes("پیک") || method.attributes.Title.includes("حضوری"),
       );
     }
 
     // Otherwise show common courier options
     return shippingMethods.filter(
       (method) =>
-        method.attributes.Title.includes("تیپاکس") ||
-        method.attributes.Title.includes("پست"),
+        method.attributes.Title.includes("تیپاکس") || method.attributes.Title.includes("پست"),
     );
   };
 
@@ -62,9 +53,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
 
   if (filteredShippingMethods.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        در حال حاضر هیچ روش ارسالی موجود نیست
-      </div>
+      <div className="p-4 text-center text-gray-500">در حال حاضر هیچ روش ارسالی موجود نیست</div>
     );
   }
 
@@ -76,9 +65,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
     method: method,
     content: (
       <div className="flex w-full items-center justify-between">
-        <span className="text-sm text-neutral-800 lg:text-base">
-          {method.attributes.Title}
-        </span>
+        <span className="text-sm text-neutral-800 lg:text-base">{method.attributes.Title}</span>
         <span className="text-sm text-black lg:text-base">
           {method.attributes.Price === 0
             ? "رایگان"
@@ -91,7 +78,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({
   return (
     <div dir="rtl">
       {!isAddressSelected && (
-        <div className="mb-3 p-2 text-center text-sm text-amber-600 bg-amber-50 rounded-lg">
+        <div className="text-sm mb-3 rounded-lg bg-amber-50 p-2 text-center text-amber-600">
           ابتدا آدرس تحویل را انتخاب کنید
         </div>
       )}

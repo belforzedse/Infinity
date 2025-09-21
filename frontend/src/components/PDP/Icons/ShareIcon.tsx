@@ -1,12 +1,6 @@
 export default function ShareIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M7.12706 8.42842C7.995 9.29636 7.995 10.7036 7.12706 11.5715C6.25911 12.4395 4.85191 12.4395 3.98396 11.5715C3.11602 10.7036 3.11602 9.29636 3.98396 8.42842C4.85191 7.56048 6.25911 7.56048 7.12706 8.42842"
         stroke="#262626"

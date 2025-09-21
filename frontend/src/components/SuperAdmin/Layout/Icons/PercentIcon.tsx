@@ -1,12 +1,6 @@
 export default function PercentIcon() {
   return (
-    <svg
-      width="20"
-      height="21"
-      viewBox="0 0 20 21"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M15.3452 13.4882C15.9961 14.139 15.9961 15.1943 15.3452 15.8452C14.6943 16.4961 13.639 16.4961 12.9882 15.8452C12.3373 15.1943 12.3373 14.139 12.9882 13.4882C13.639 12.8373 14.6943 12.8373 15.3452 13.4882"
         stroke="#EC4899"

@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import Modal from "@/components/Kits/Modal";
 import Select from "@/components/Kits/Form/Select";
 import CirculePlusIcon from "../Icons/CirculePlusIcon";
-import { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
 import SaveIcon from "../Icons/SaveIcon";
 import UserService from "@/services/user";
-import { MeResponse } from "@/services/user/me";
-import { AddAddressRequest } from "@/services/user/addresses";
-import { getProvinces, getCities, Province, City } from "@/services/location";
+import type { MeResponse } from "@/services/user/me";
+import type { AddAddressRequest } from "@/services/user/addresses";
+import type { Province, City } from "@/services/location";
+import { getProvinces, getCities } from "@/services/location";
 import { toast } from "react-hot-toast";
 
 interface Props {
@@ -161,17 +162,12 @@ export default function AddAddress({ onAddressAdded }: Props) {
         onClick={() => setIsOpen(true)}
         className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
       >
-        <span className="text-sm text-foreground-pink lg:text-base">
-          افزودن آدرس
-        </span>
+        <span className="text-sm text-foreground-pink lg:text-base">افزودن آدرس</span>
         <CirculePlusIcon className="h-5 w-5" />
       </button>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 gap-3 lg:grid-cols-2"
-        >
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <span className="text-lg mb-1 text-foreground-primary lg:text-2xl lg:col-span-2">
             افزودن آدرس
           </span>
@@ -180,9 +176,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
           {userInfo && (
             <div className="col-span-2 mb-2 flex flex-col gap-3 rounded-lg bg-slate-50 p-3 lg:flex-row">
               <div className="flex-1">
-                <span className="text-sm text-gray-500">
-                  نام و نام خانوادگی:
-                </span>
+                <span className="text-sm text-gray-500">نام و نام خانوادگی:</span>
                 <p className="text-sm font-medium">{`${userInfo.FirstName} ${userInfo.LastName}`}</p>
               </div>
               <div className="flex-1">
@@ -241,24 +235,18 @@ export default function AddAddress({ onAddressAdded }: Props) {
           </div>
 
           <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
-            <label className="text-base text-foreground-primary lg:text-lg">
-              کد پستی
-            </label>
+            <label className="text-base text-foreground-primary lg:text-lg">کد پستی</label>
             <input
               type="text"
               value={postalCode}
-              onChange={(e) =>
-                setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 10))
-              }
+              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
               placeholder="کد پستی ۱۰ رقمی"
               pattern="[0-9]{10}"
               maxLength={10}
               required
               className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
             />
-            <span className="text-xs text-gray-500">
-              کد پستی باید ۱۰ رقم باشد
-            </span>
+            <span className="text-xs text-gray-500">کد پستی باید ۱۰ رقم باشد</span>
           </div>
 
           <div className="col-span-2 flex flex-col gap-1">

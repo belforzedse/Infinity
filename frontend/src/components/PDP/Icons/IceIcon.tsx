@@ -1,12 +1,6 @@
 export default function IceIcon() {
   return (
-    <svg
-      width="25"
-      height="25"
-      viewBox="0 0 25 25"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M12.2852 3.35596V21.356"
         stroke="#DB2777"

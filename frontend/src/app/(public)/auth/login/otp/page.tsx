@@ -14,16 +14,9 @@ export default function LoginPage() {
   const { phoneNumber } = useCheckPhoneNumber();
   const { migrateLocalCartToApi } = useCart();
 
-  const handleLogin = async ({
-    verificationCode,
-  }: {
-    verificationCode: string;
-  }) => {
+  const handleLogin = async ({ verificationCode }: { verificationCode: string }) => {
     if (verificationCode.length === 6) {
-      // TODO: Implement verification API call
-      const response = await AuthService.verifyOTP(
-        verificationCode.split("").reverse().join(""),
-      );
+      const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
       if (response.token) {
         localStorage.setItem("accessToken", response.token);
@@ -59,9 +52,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto w-full">
-      <AuthTitle
-        subtitle={`لطفا کد ارسال شده به شماره همراه  ${phoneNumber} را وارد نمایید`}
-      >
+      <AuthTitle subtitle={`لطفا کد ارسال شده به شماره همراه  ${phoneNumber} را وارد نمایید`}>
         ورود با رمز یکبار مصرف
       </AuthTitle>
 

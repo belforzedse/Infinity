@@ -1,6 +1,6 @@
-import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
-import { PaginatedResponse } from "@/types/api";
-import { EditProductData, ProductData } from "@/types/super-admin/products";
+import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
+import type { PaginatedResponse } from "@/types/api";
+import type { EditProductData, ProductData } from "@/types/super-admin/products";
 import { atom } from "jotai";
 
 export const productDataAtom = atom<ProductData>({

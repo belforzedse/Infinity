@@ -7,12 +7,7 @@ type Props = {
   rows?: number;
 };
 
-export default function MultilineTextField({
-  value,
-  onChange,
-  readOnly,
-  rows,
-}: Props) {
+export default function MultilineTextField({ value, onChange, readOnly, rows }: Props) {
   return (
     <textarea
       disabled={readOnly}

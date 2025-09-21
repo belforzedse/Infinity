@@ -9,9 +9,7 @@ export default function SuperAdminTableCellSimplePrice({
 }) {
   return (
     <span className="text-xs text-foreground-primary md:text-base">
-      {inverse
-        ? priceFormatter(price, " تومان", "")
-        : priceFormatter(price, "", "تومان ")}
+      {inverse ? priceFormatter(price, " تومان", "") : priceFormatter(price, "", "تومان ")}
     </span>
   );
 }

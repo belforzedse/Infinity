@@ -7,14 +7,10 @@ import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
 
-const RechartsTooltip = dynamic(
-  () => import("recharts").then((m) => m.Tooltip),
-  { ssr: false },
-);
-const ResponsiveContainer = dynamic(
-  () => import("recharts").then((m) => m.ResponsiveContainer),
-  { ssr: false },
-);
+const RechartsTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
+  ssr: false,
+});
 const Cell = dynamic(() => import("recharts").then((m) => m.Cell), {
   ssr: false,
 });
@@ -33,12 +29,9 @@ const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), {
 const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), {
   ssr: false,
 });
-const CartesianGrid = dynamic(
-  () => import("recharts").then((m) => m.CartesianGrid),
-  {
-    ssr: false,
-  },
-);
+const CartesianGrid = dynamic(() => import("recharts").then((m) => m.CartesianGrid), {
+  ssr: false,
+});
 const PieChart = dynamic(() => import("recharts").then((m) => m.PieChart), {
   ssr: false,
 });
@@ -61,9 +54,7 @@ const Area = dynamic(() => import("recharts").then((m) => m.Area), {
 type ChartType = "treemap" | "bar" | "pie" | "line" | "area";
 
 export default function ProductSalesReportPage() {
-  const [start, setStart] = useState<Date>(
-    new Date(Date.now() - 30 * 86400000),
-  );
+  const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,134 +62,116 @@ export default function ProductSalesReportPage() {
   const [showTop, setShowTop] = useState<number>(20);
 
   // Excel export function
-  const exportToExcel = useCallback(
-    async (data: any[], startDate: Date, endDate: Date) => {
-      if (!data || data.length === 0) {
-        alert("داده‌ای برای خروجی وجود ندارد");
-        return;
-      }
+  const exportToExcel = useCallback(async (data: any[], startDate: Date, endDate: Date) => {
+    if (!data || data.length === 0) {
+      alert("داده‌ای برای خروجی وجود ندارد");
+      return;
+    }
 
+    try {
+      // Try different import methods for XLSX
+      let XLSX;
       try {
-        // Try different import methods for XLSX
-        let XLSX;
+        // Method 1: Try dynamic import
+        XLSX = await import("xlsx");
+      } catch {
         try {
-          // Method 1: Try dynamic import
-          XLSX = await import("xlsx");
+          // Method 2: Try another dynamic import (fallback)
+          XLSX = (await import("xlsx")).default;
         } catch {
-          try {
-            // Method 2: Try another dynamic import (fallback)
-            XLSX = (await import("xlsx")).default;
-          } catch {
-            throw new Error("xlsx package not found");
-          }
-        }
-
-        // Prepare data for Excel export
-        const exportData = data.map((row, index) => ({
-          رتبه: index + 1,
-          "نام محصول": row.productTitle || "",
-          "مجموع درآمد (تومان)": Number(row.totalRevenue) || 0,
-          "تعداد فروش": Number(row.totalCount) || 0,
-          "قیمت متوسط (تومان)": Math.round(
-            (Number(row.totalRevenue) || 0) / (Number(row.totalCount) || 1),
-          ),
-          "درصد از کل درآمد":
-            (
-              ((Number(row.totalRevenue) || 0) /
-                data.reduce(
-                  (sum, item) => sum + (Number(item.totalRevenue) || 0),
-                  0,
-                )) *
-              100
-            ).toFixed(2) + "%",
-        }));
-
-        // Add summary row
-        const totalRevenue = data.reduce(
-          (sum, row) => sum + (Number(row.totalRevenue) || 0),
-          0,
-        );
-        const totalCount = data.reduce(
-          (sum, row) => sum + (Number(row.totalCount) || 0),
-          0,
-        );
-
-        exportData.push({
-          رتبه: data.length + 1,
-          "نام محصول": "مجموع کل",
-          "مجموع درآمد (تومان)": totalRevenue,
-          "تعداد فروش": totalCount,
-          "قیمت متوسط (تومان)": Math.round(totalRevenue / (totalCount || 1)),
-          "درصد از کل درآمد": "100%",
-        });
-
-        // Create worksheet
-        const ws = XLSX.utils.json_to_sheet(exportData);
-
-        // Set column widths
-        ws["!cols"] = [
-          { wch: 8 }, // رتبه
-          { wch: 40 }, // نام محصول
-          { wch: 20 }, // مجموع درآمد
-          { wch: 15 }, // تعداد فروش
-          { wch: 20 }, // قیمت متوسط
-          { wch: 18 }, // درصد از کل درآمد
-        ];
-
-        // Create workbook
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "گزارش فروش محصولات");
-
-        // Add metadata sheet
-        const metaData = [
-          { شرح: "تاریخ شروع", مقدار: startDate.toLocaleDateString("fa-IR") },
-          { شرح: "تاریخ پایان", مقدار: endDate.toLocaleDateString("fa-IR") },
-          {
-            شرح: "تاریخ تهیه گزارش",
-            مقدار: new Date().toLocaleDateString("fa-IR"),
-          },
-          { شرح: "تعداد محصولات", مقدار: String(data.length) },
-          { شرح: "مجموع درآمد", مقدار: faNum(totalRevenue) + " تومان" },
-          { شرح: "مجموع فروش", مقدار: faNum(totalCount) + " عدد" },
-        ];
-
-        const metaWs = XLSX.utils.json_to_sheet(metaData);
-        metaWs["!cols"] = [{ wch: 20 }, { wch: 30 }];
-        XLSX.utils.book_append_sheet(wb, metaWs, "اطلاعات گزارش");
-
-        // Generate filename
-        const filename = `گزارش-فروش-محصولات-${startDate.toLocaleDateString("fa-IR").replace(/\//g, "-")}-تا-${endDate.toLocaleDateString("fa-IR").replace(/\//g, "-")}.xlsx`;
-
-        // Download file
-        XLSX.writeFile(wb, filename);
-
-        // Success message
-        alert("فایل Excel با موفقیت ایجاد شد!");
-      } catch (error: unknown) {
-        console.error("Error exporting to Excel:", error);
-
-        // More specific error messages
-        if (
-          error instanceof Error &&
-          error.message.includes("xlsx package not found")
-        ) {
-          alert(
-            "پکیج xlsx یافت نشد. لطفاً دستور زیر را اجرا کنید:\nnpm install xlsx",
-          );
-        } else {
-          alert(
-            `خطا در ایجاد فایل Excel: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
+          throw new Error("xlsx package not found");
         }
       }
-    },
-    [],
-  );
+
+      // Prepare data for Excel export
+      const exportData = data.map((row, index) => ({
+        رتبه: index + 1,
+        "نام محصول": row.productTitle || "",
+        "مجموع درآمد (تومان)": Number(row.totalRevenue) || 0,
+        "تعداد فروش": Number(row.totalCount) || 0,
+        "قیمت متوسط (تومان)": Math.round(
+          (Number(row.totalRevenue) || 0) / (Number(row.totalCount) || 1),
+        ),
+        "درصد از کل درآمد":
+          (
+            ((Number(row.totalRevenue) || 0) /
+              data.reduce((sum, item) => sum + (Number(item.totalRevenue) || 0), 0)) *
+            100
+          ).toFixed(2) + "%",
+      }));
+
+      // Add summary row
+      const totalRevenue = data.reduce((sum, row) => sum + (Number(row.totalRevenue) || 0), 0);
+      const totalCount = data.reduce((sum, row) => sum + (Number(row.totalCount) || 0), 0);
+
+      exportData.push({
+        رتبه: data.length + 1,
+        "نام محصول": "مجموع کل",
+        "مجموع درآمد (تومان)": totalRevenue,
+        "تعداد فروش": totalCount,
+        "قیمت متوسط (تومان)": Math.round(totalRevenue / (totalCount || 1)),
+        "درصد از کل درآمد": "100%",
+      });
+
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(exportData);
+
+      // Set column widths
+      ws["!cols"] = [
+        { wch: 8 }, // رتبه
+        { wch: 40 }, // نام محصول
+        { wch: 20 }, // مجموع درآمد
+        { wch: 15 }, // تعداد فروش
+        { wch: 20 }, // قیمت متوسط
+        { wch: 18 }, // درصد از کل درآمد
+      ];
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "گزارش فروش محصولات");
+
+      // Add metadata sheet
+      const metaData = [
+        { شرح: "تاریخ شروع", مقدار: startDate.toLocaleDateString("fa-IR") },
+        { شرح: "تاریخ پایان", مقدار: endDate.toLocaleDateString("fa-IR") },
+        {
+          شرح: "تاریخ تهیه گزارش",
+          مقدار: new Date().toLocaleDateString("fa-IR"),
+        },
+        { شرح: "تعداد محصولات", مقدار: String(data.length) },
+        { شرح: "مجموع درآمد", مقدار: faNum(totalRevenue) + " تومان" },
+        { شرح: "مجموع فروش", مقدار: faNum(totalCount) + " عدد" },
+      ];
+
+      const metaWs = XLSX.utils.json_to_sheet(metaData);
+      metaWs["!cols"] = [{ wch: 20 }, { wch: 30 }];
+      XLSX.utils.book_append_sheet(wb, metaWs, "اطلاعات گزارش");
+
+      // Generate filename
+      const filename = `گزارش-فروش-محصولات-${startDate.toLocaleDateString("fa-IR").replace(/\//g, "-")}-تا-${endDate.toLocaleDateString("fa-IR").replace(/\//g, "-")}.xlsx`;
+
+      // Download file
+      XLSX.writeFile(wb, filename);
+
+      // Success message
+      alert("فایل Excel با موفقیت ایجاد شد!");
+    } catch (error: unknown) {
+      console.error("Error exporting to Excel:", error);
+
+      // More specific error messages
+      if (error instanceof Error && error.message.includes("xlsx package not found")) {
+        alert("پکیج xlsx یافت نشد. لطفاً دستور زیر را اجرا کنید:\nnpm install xlsx");
+      } else {
+        alert(
+          `خطا در ایجاد فایل Excel: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    }
+  }, []);
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
   const toISO = useCallback(
-    (d: Date, fallback: Date) =>
-      isValid(d) ? d.toISOString() : fallback.toISOString(),
+    (d: Date, fallback: Date) => (isValid(d) ? d.toISOString() : fallback.toISOString()),
     [],
   );
   const startISO = useMemo(
@@ -221,14 +194,8 @@ export default function ProductSalesReportPage() {
       .finally(() => setLoading(false));
   }, [startISO, endISO]);
 
-  const totalRevenue = rows.reduce(
-    (sum, row) => sum + Number(row.totalRevenue || 0),
-    0,
-  );
-  const totalCount = rows.reduce(
-    (sum, row) => sum + Number(row.totalCount || 0),
-    0,
-  );
+  const totalRevenue = rows.reduce((sum, row) => sum + Number(row.totalRevenue || 0), 0);
+  const totalCount = rows.reduce((sum, row) => sum + Number(row.totalCount || 0), 0);
   const avgRevenue = rows.length > 0 ? totalRevenue / rows.length : 0;
 
   return (
@@ -240,9 +207,7 @@ export default function ProductSalesReportPage() {
             <h3 className="text-lg font-medium text-neutral-700">فیلترها</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  تاریخ شروع
-                </label>
+                <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={start}
@@ -250,9 +215,7 @@ export default function ProductSalesReportPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  تاریخ پایان
-                </label>
+                <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={end}
@@ -279,9 +242,7 @@ export default function ProductSalesReportPage() {
                 <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                        مجموع فروش
-                      </h3>
+                      <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع فروش</h3>
                       <p className="text-2xl font-bold text-blue-600">
                         {faNum(totalRevenue)} تومان
                       </p>
@@ -307,12 +268,8 @@ export default function ProductSalesReportPage() {
                 <div className="rounded-xl border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                        تعداد فروش
-                      </h3>
-                      <p className="text-2xl font-bold text-green-600">
-                        {faNum(totalCount)} عدد
-                      </p>
+                      <h3 className="text-lg mb-2 font-medium text-neutral-700">تعداد فروش</h3>
+                      <p className="text-2xl font-bold text-green-600">{faNum(totalCount)} عدد</p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                       <svg
@@ -335,9 +292,7 @@ export default function ProductSalesReportPage() {
                 <div className="rounded-xl border border-purple-100 bg-gradient-to-r from-purple-50 to-violet-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                        متوسط درآمد
-                      </h3>
+                      <h3 className="text-lg mb-2 font-medium text-neutral-700">متوسط درآمد</h3>
                       <p className="text-2xl font-bold text-purple-600">
                         {faNum(Math.round(avgRevenue))} تومان
                       </p>
@@ -363,9 +318,7 @@ export default function ProductSalesReportPage() {
                 <div className="rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                        تعداد محصولات
-                      </h3>
+                      <h3 className="text-lg mb-2 font-medium text-neutral-700">تعداد محصولات</h3>
                       <p className="text-2xl font-bold text-orange-600">
                         {faNum(rows.length)} محصول
                       </p>
@@ -392,15 +345,11 @@ export default function ProductSalesReportPage() {
               {/* Enhanced Chart Section */}
               <div>
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-                  <h3 className="text-lg font-medium text-neutral-700">
-                    نمودار فروش محصولات
-                  </h3>
+                  <h3 className="text-lg font-medium text-neutral-700">نمودار فروش محصولات</h3>
 
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium text-neutral-600">
-                        نمایش:
-                      </label>
+                      <label className="text-sm font-medium text-neutral-600">نمایش:</label>
                       <select
                         value={showTop}
                         onChange={(e) => setShowTop(Number(e.target.value))}
@@ -459,19 +408,13 @@ export default function ProductSalesReportPage() {
                   </div>
                 </div>
 
-                <ProductSalesChart
-                  rows={rows}
-                  chartType={chartType}
-                  showTop={showTop}
-                />
+                <ProductSalesChart rows={rows} chartType={chartType} showTop={showTop} />
               </div>
 
               {/* Top Products Table */}
               {rows.length > 0 && (
                 <div>
-                  <h3 className="text-lg mb-4 font-medium text-neutral-700">
-                    محصولات پرفروش
-                  </h3>
+                  <h3 className="text-lg mb-4 font-medium text-neutral-700">محصولات پرفروش</h3>
 
                   <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white">
                     <table className="w-full">
@@ -495,37 +438,30 @@ export default function ProductSalesReportPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {rows
-                          .slice(0, Math.min(showTop, 20))
-                          .map((product, index) => (
-                            <tr
-                              key={index}
-                              className="border-b border-neutral-100 transition-colors hover:bg-neutral-50"
-                            >
-                              <td className="px-4 py-3">
-                                <span className="font-semibold text-neutral-700">
-                                  #{faNum(index + 1)}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 font-medium text-neutral-900">
-                                {product.productTitle}
-                              </td>
-                              <td className="px-4 py-3 text-right font-semibold text-blue-600">
-                                {faNum(product.totalRevenue)} تومان
-                              </td>
-                              <td className="px-4 py-3 text-right text-neutral-700">
-                                {faNum(product.totalCount)} عدد
-                              </td>
-                              <td className="px-4 py-3 text-right text-neutral-700">
-                                {faNum(
-                                  Math.round(
-                                    product.totalRevenue / product.totalCount,
-                                  ),
-                                )}{" "}
-                                تومان
-                              </td>
-                            </tr>
-                          ))}
+                        {rows.slice(0, Math.min(showTop, 20)).map((product, index) => (
+                          <tr
+                            key={index}
+                            className="border-b border-neutral-100 transition-colors hover:bg-neutral-50"
+                          >
+                            <td className="px-4 py-3">
+                              <span className="font-semibold text-neutral-700">
+                                #{faNum(index + 1)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 font-medium text-neutral-900">
+                              {product.productTitle}
+                            </td>
+                            <td className="px-4 py-3 text-right font-semibold text-blue-600">
+                              {faNum(product.totalRevenue)} تومان
+                            </td>
+                            <td className="px-4 py-3 text-right text-neutral-700">
+                              {faNum(product.totalCount)} عدد
+                            </td>
+                            <td className="px-4 py-3 text-right text-neutral-700">
+                              {faNum(Math.round(product.totalRevenue / product.totalCount))} تومان
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -571,9 +507,7 @@ function ProductSalesChart({
           </svg>
         </div>
         <p className="text-sm text-neutral-500">داده‌ای برای نمایش یافت نشد</p>
-        <p className="text-xs mt-1 text-neutral-400">
-          لطفاً بازه زمانی دیگری انتخاب کنید
-        </p>
+        <p className="text-xs mt-1 text-neutral-400">لطفاً بازه زمانی دیگری انتخاب کنید</p>
       </div>
     );
   }
@@ -584,13 +518,9 @@ function ProductSalesChart({
     .map((row, index) => ({
       name: row.productTitle,
       display:
-        row.productTitle.length > 18
-          ? row.productTitle.slice(0, 18) + "…"
-          : row.productTitle,
+        row.productTitle.length > 18 ? row.productTitle.slice(0, 18) + "…" : row.productTitle,
       shortName:
-        row.productTitle.length > 15
-          ? row.productTitle.slice(0, 15) + "…"
-          : row.productTitle,
+        row.productTitle.length > 15 ? row.productTitle.slice(0, 15) + "…" : row.productTitle,
       revenue: Number(row.totalRevenue),
       count: Number(row.totalCount),
       rank: index + 1,
@@ -619,19 +549,14 @@ function ProductSalesChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div
-          className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg"
-          dir="rtl"
-        >
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg" dir="rtl">
           <p className="mb-2 font-medium text-neutral-800">{data.name}</p>
           <div className="text-sm space-y-1">
             <p className="text-blue-600">
-              <span className="font-medium">درآمد:</span> {faNum(data.revenue)}{" "}
-              تومان
+              <span className="font-medium">درآمد:</span> {faNum(data.revenue)} تومان
             </p>
             <p className="text-green-600">
-              <span className="font-medium">تعداد:</span> {faNum(data.count)}{" "}
-              عدد
+              <span className="font-medium">تعداد:</span> {faNum(data.count)} عدد
             </p>
             <p className="text-amber-600">
               <span className="font-medium">رتبه:</span> {faNum(data.rank)}
@@ -666,10 +591,7 @@ function ProductSalesChart({
             <RechartsTooltip content={<CustomTooltip />} />
             <Bar dataKey="revenue" radius={[6, 6, 0, 0]}>
               {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
-                />
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
             </Bar>
           </BarChart>
@@ -685,9 +607,7 @@ function ProductSalesChart({
               labelLine={false}
               label={(props) => {
                 const percent = props.percent ?? 0;
-                return percent > 3
-                  ? `${props.display} (${(percent * 100).toFixed(0)}%)`
-                  : "";
+                return percent > 3 ? `${props.display} (${(percent * 100).toFixed(0)}%)` : "";
               }}
               outerRadius={140}
               fill="#8884d8"
@@ -696,10 +616,7 @@ function ProductSalesChart({
               strokeWidth={2}
             >
               {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
-                />
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
             </Pie>
             <RechartsTooltip content={<CustomTooltip />} />
@@ -804,8 +721,7 @@ function ProductSalesChart({
           </div>
         </div>
         <div className="text-xs text-neutral-500">
-          نمایش {faNum(Math.min(rows.length, showTop))} محصول از{" "}
-          {faNum(rows.length)} محصول
+          نمایش {faNum(Math.min(rows.length, showTop))} محصول از {faNum(rows.length)} محصول
         </div>
       </div>
     </div>

@@ -13,10 +13,7 @@ interface TransactionsListProps {
   depositList: Transaction[];
 }
 
-const TransactionsList = ({
-  debbitList,
-  depositList,
-}: TransactionsListProps) => {
+const TransactionsList = ({ debbitList, depositList }: TransactionsListProps) => {
   return (
     <div className="grid w-full grid-cols-1 gap-3 rounded-xl border-slate-100 bg-white lg:grid-cols-2 lg:border lg:p-5">
       <TransactionHeader icon={<DepositIcon />} title="واریز" />

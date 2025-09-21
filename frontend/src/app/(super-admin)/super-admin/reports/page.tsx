@@ -10,18 +10,12 @@ export default function ReportsIndexPage() {
           </Link>
         </li>
         <li>
-          <Link
-            className="text-pink-600"
-            href="/super-admin/reports/product-sales"
-          >
+          <Link className="text-pink-600" href="/super-admin/reports/product-sales">
             گزارش فروش هر محصول
           </Link>
         </li>
         <li>
-          <Link
-            className="text-pink-600"
-            href="/super-admin/reports/gateway-liquidity"
-          >
+          <Link className="text-pink-600" href="/super-admin/reports/gateway-liquidity">
             گزارش مجموع نقدینگی هر درگاه
           </Link>
         </li>

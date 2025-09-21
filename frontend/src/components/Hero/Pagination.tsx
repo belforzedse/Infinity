@@ -28,10 +28,7 @@ export default function HeroPagination({
 }: HeroPaginationProps) {
   return (
     <div
-      className={clsx(
-        "py-1 backdrop-blur-md flex items-center gap-2 rounded-2xl px-2",
-        className,
-      )}
+      className={clsx("flex items-center gap-2 rounded-2xl px-2 py-1 backdrop-blur-md", className)}
     >
       {showArrows && (
         <button

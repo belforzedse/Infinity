@@ -29,22 +29,16 @@ function transformOrder(raw: StrapiOrder) {
   });
 
   // --- derive latest payment gateway title like your edit page ---
-  const txList =
-    raw.attributes?.contract?.data?.attributes?.contract_transactions?.data ||
-    [];
+  const txList = raw.attributes?.contract?.data?.attributes?.contract_transactions?.data || [];
   const lastTx = txList[txList.length - 1]?.attributes;
-  const paymentGateway =
-    lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
+  const paymentGateway = lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
 
   // --- optionally compose address with city/province like edit page ---
   const addr = raw.attributes?.delivery_address?.data?.attributes;
   const city = addr?.shipping_city?.data?.attributes?.Title;
   const province =
-    addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes
-      ?.Title;
-  const composedAddress = [addr?.FullAddress, city, province]
-    .filter(Boolean)
-    .join(" - ");
+    addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes?.Title;
+  const composedAddress = [addr?.FullAddress, city, province].filter(Boolean).join(" - ");
 
   return {
     ...raw,

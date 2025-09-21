@@ -39,10 +39,7 @@ export default function RadioTextWithChips({
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2 md:gap-8">
         {options.map((option) => (
-          <div
-            key={option.value}
-            className="flex items-center gap-0.5 md:gap-2"
-          >
+          <div key={option.value} className="flex items-center gap-0.5 md:gap-2">
             <input
               value={option.value}
               checked={value === option.value}

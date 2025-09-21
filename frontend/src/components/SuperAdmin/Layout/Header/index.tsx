@@ -9,9 +9,7 @@ interface SuperAdminLayoutHeaderProps {
   onMenuClick: () => void;
 }
 
-export default function SuperAdminLayoutHeader({
-  onMenuClick,
-}: SuperAdminLayoutHeaderProps) {
+export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayoutHeaderProps) {
   const { data: me, error } = useMe();
 
   return (
@@ -64,9 +62,7 @@ export default function SuperAdminLayoutHeader({
               <span className="text-sm !leading-none text-neutral-600">
                 {me?.FirstName} {me?.LastName}
               </span>
-              <span className="text-xs !leading-none text-neutral-600">
-                {me?.Phone}
-              </span>
+              <span className="text-xs !leading-none text-neutral-600">{me?.Phone}</span>
             </div>
             {/* <div className="w-[18px] h-[18px] border border-neutral-600 rounded-full flex justify-center items-center">
               <SmallChevronDownIcon />

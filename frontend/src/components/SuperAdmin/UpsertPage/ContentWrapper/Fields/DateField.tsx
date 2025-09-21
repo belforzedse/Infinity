@@ -27,10 +27,7 @@ export default function DateField({ value, onChange, readOnly }: Props) {
         />
       )}
 
-      <button
-        className="flex h-5 w-5 items-center justify-center"
-        disabled={readOnly}
-      >
+      <button className="flex h-5 w-5 items-center justify-center" disabled={readOnly}>
         <CalendarIcon />
       </button>
     </div>

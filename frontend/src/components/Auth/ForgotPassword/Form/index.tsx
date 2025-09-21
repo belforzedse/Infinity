@@ -9,9 +9,7 @@ interface ForgotPasswordFormProps {
   onSubmit: (data: { phoneNumber: string }) => Promise<void>;
 }
 
-export default function ForgotPasswordForm({
-  onSubmit,
-}: ForgotPasswordFormProps) {
+export default function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
   const [formData, setFormData] = useState({
     phoneNumber: "", // This would come from previous step
   });
@@ -44,11 +42,7 @@ export default function ForgotPasswordForm({
           <Text variant="label" className="mb-2 inline-block">
             شماره همراه
           </Text>
-          <AuthInput
-            value={formData.phoneNumber}
-            onEdit={handleEditPhone}
-            dir="ltr"
-          />
+          <AuthInput value={formData.phoneNumber} onEdit={handleEditPhone} dir="ltr" />
         </div>
 
         <AuthButton

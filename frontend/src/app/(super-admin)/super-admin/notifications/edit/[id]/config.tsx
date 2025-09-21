@@ -1,6 +1,6 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type Notification } from "./page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 
@@ -68,8 +68,7 @@ export const config: UpsertPageConfigType<Notification> = {
               label: "نوع",
               colSpan: 12,
               mobileColSpan: 12,
-              descriptionPlaceholder:
-                "محتوای متنی مورد نظر خود را  اینجا بنویسید",
+              descriptionPlaceholder: "محتوای متنی مورد نظر خود را  اینجا بنویسید",
               options: [
                 {
                   label: "آزاد",

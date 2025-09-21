@@ -1,12 +1,6 @@
 export default function FilterIcon() {
   return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M14.5 13.5L19.707 8.293C19.895 8.105 20 7.851 20 7.586V5C20 4.448 19.552 4 19 4H5C4.448 4 4 4.448 4 5V7.586C4 7.851 4.105 8.106 4.293 8.293L9.5 13.5"
         stroke="#334155"

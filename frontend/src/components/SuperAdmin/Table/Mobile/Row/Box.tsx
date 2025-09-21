@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { OpenMobileTableRow } from "./Open";
 import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
@@ -41,11 +41,7 @@ export default function MobileTableRowBox<TData>({
           </div>
         </div>
 
-        {!isOpen ? (
-          <>{header}</>
-        ) : (
-          <OpenMobileTableRow columns={columns} row={row} />
-        )}
+        {!isOpen ? <>{header}</> : <OpenMobileTableRow columns={columns} row={row} />}
       </div>
     </div>
   );

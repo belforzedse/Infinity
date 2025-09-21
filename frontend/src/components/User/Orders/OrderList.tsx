@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
-import OrderService, { Order, OrderItem } from "@/services/order";
+import type { Order, OrderItem } from "@/services/order";
+import OrderService from "@/services/order";
 import PaymentStatusButton from "./PaymentStatusButton";
 import { faNum } from "@/utils/faNum";
 
@@ -65,10 +66,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
 
   const renderOrderItems = (items: OrderItem[]) => {
     return items.map((item) => (
-      <div
-        key={item.id}
-        className="flex items-center border-b border-gray-100 py-2 last:border-0"
-      >
+      <div key={item.id} className="flex items-center border-b border-gray-100 py-2 last:border-0">
         <div className="relative h-16 w-16 overflow-hidden rounded-md">
           {item.product_variation.product.cover_image ? (
             <Image
@@ -95,9 +93,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
               <span>سایز: {item.product_variation.product_size.Title}</span>
             )}
             {item.product_variation.product_variation_model && (
-              <span>
-                مدل: {item.product_variation.product_variation_model.Title}
-              </span>
+              <span>مدل: {item.product_variation.product_variation_model.Title}</span>
             )}
           </div>
         </div>
@@ -118,10 +114,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
       return (
         <div className="rounded-lg bg-gray-50 p-8 text-center">
           <p className="text-gray-600">شما هنوز سفارشی ثبت نکرده‌اید.</p>
-          <Link
-            href="/"
-            className="mt-4 inline-block rounded-lg bg-pink-500 px-4 py-2 text-white"
-          >
+          <Link href="/" className="mt-4 inline-block rounded-lg bg-pink-500 px-4 py-2 text-white">
             مشاهده محصولات
           </Link>
         </div>
@@ -136,9 +129,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
         <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4">
           <div>
             <h3 className="text-lg font-medium">سفارش #{order.id}</h3>
-            <p className="text-sm text-gray-600">
-              {formatDate(order.createdAt)}
-            </p>
+            <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
           </div>
           <div className="flex flex-col items-end">
             <span className="text-xs mb-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-blue-700">
@@ -169,10 +160,8 @@ export default function OrderList({ className = "" }: OrderListProps) {
             <div className="mt-3 flex justify-between border-t border-gray-100 pt-3 font-semibold">
               <span>مجموع:</span>
               <span className="text-pink-600">
-                {order.order_items.reduce(
-                  (sum, item) => sum + item.Count * item.PerAmount,
-                  0,
-                ) + order.ShippingCost}{" "}
+                {order.order_items.reduce((sum, item) => sum + item.Count * item.PerAmount, 0) +
+                  order.ShippingCost}{" "}
                 {/* prices formatted above with faNum */}
                 تومان
               </span>

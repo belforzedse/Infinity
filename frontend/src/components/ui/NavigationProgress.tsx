@@ -21,10 +21,7 @@ export default function NavigationProgress() {
 
   const startFailSafe = useCallback(() => {
     clearFailSafe();
-    failSafeRef.current = window.setTimeout(
-      () => setNavigationInProgress(false),
-      2000,
-    );
+    failSafeRef.current = window.setTimeout(() => setNavigationInProgress(false), 2000);
   }, [clearFailSafe]);
 
   // Start on internal link clicks (event delegation)
@@ -40,12 +37,7 @@ export default function NavigationProgress() {
 
     function onClick(e: MouseEvent) {
       // Ignore modified clicks
-      if (
-        (e as any).metaKey ||
-        (e as any).ctrlKey ||
-        (e as any).shiftKey ||
-        (e as any).altKey
-      )
+      if ((e as any).metaKey || (e as any).ctrlKey || (e as any).shiftKey || (e as any).altKey)
         return;
       const el = (e.target as HTMLElement)?.closest?.("a");
       if (!el) return;
@@ -119,9 +111,7 @@ export default function NavigationProgress() {
         startFailSafe();
         return restore.pushState!(...args);
       } as any;
-      history.replaceState = function (
-        ...args: Parameters<History["replaceState"]>
-      ) {
+      history.replaceState = function (...args: Parameters<History["replaceState"]>) {
         // Do not show loader for replaceState to avoid flicker from query updates (nuqs)
         return restore.replaceState!(...args);
       } as any;
@@ -155,14 +145,9 @@ export default function NavigationProgress() {
       if (restore.pushState) history.pushState = restore.pushState;
       if (restore.replaceState) history.replaceState = restore.replaceState;
       if (restore.navigationListener && "navigation" in window)
-        (window as any).navigation.removeEventListener(
-          "navigate",
-          restore.navigationListener,
-        );
-      if (restore.router && restore.routerPush)
-        restore.router.push = restore.routerPush;
-      if (restore.router && restore.routerReplace)
-        restore.router.replace = restore.routerReplace;
+        (window as any).navigation.removeEventListener("navigate", restore.navigationListener);
+      if (restore.router && restore.routerPush) restore.router.push = restore.routerPush;
+      if (restore.router && restore.routerReplace) restore.router.replace = restore.routerReplace;
     };
   }, [clearFailSafe, startFailSafe]);
 

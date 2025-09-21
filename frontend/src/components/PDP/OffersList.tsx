@@ -58,25 +58,20 @@ export default function PDPOffersList(props: Props) {
           ))}
         </div>
 
-        <div
-          ref={scrollRef}
-          className="flex flex-col gap-5 overflow-x-hidden md:hidden"
-        >
-          {products
-            .slice(0, isShowAllProducts ? products.length : 4)
-            .map((product) => (
-              <ProductSmallCard
-                key={product.id}
-                category={product.category}
-                id={product.id}
-                title={product.title}
-                likedCount={product.seenCount}
-                price={product.price}
-                discountedPrice={product.discountPrice}
-                image={product.images[0]}
-                discount={product.discount}
-              />
-            ))}
+        <div ref={scrollRef} className="flex flex-col gap-5 overflow-x-hidden md:hidden">
+          {products.slice(0, isShowAllProducts ? products.length : 4).map((product) => (
+            <ProductSmallCard
+              key={product.id}
+              category={product.category}
+              id={product.id}
+              title={product.title}
+              likedCount={product.seenCount}
+              price={product.price}
+              discountedPrice={product.discountPrice}
+              image={product.images[0]}
+              discount={product.discount}
+            />
+          ))}
         </div>
 
         {!isShowAllProducts && (

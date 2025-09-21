@@ -1,6 +1,6 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type PaymentMethod } from "./page";
 
 export const config: UpsertPageConfigType<PaymentMethod> = {

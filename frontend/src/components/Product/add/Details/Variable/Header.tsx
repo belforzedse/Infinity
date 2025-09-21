@@ -19,9 +19,7 @@ export const ProductVariableHeader: React.FC = () => {
         <th className="text-sm border-l border-slate-100 p-4 text-right font-medium text-gray-900">
           وضعیت
         </th>
-        <th className="text-sm p-4 text-right font-medium text-gray-900">
-          عملیات
-        </th>
+        <th className="text-sm p-4 text-right font-medium text-gray-900">عملیات</th>
       </tr>
     </thead>
   );

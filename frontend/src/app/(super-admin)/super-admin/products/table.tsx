@@ -4,9 +4,9 @@ import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import { API_BASE_URL } from "@/constants/api";
-import { ProductCoverImage } from "@/types/Product";
+import type { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 
@@ -68,8 +68,7 @@ export const columns: ColumnDef<Product>[] = [
           <Image
             src={
               API_BASE_URL.split("/api")[0] +
-              row.original?.attributes?.CoverImage?.data?.attributes?.formats
-                ?.thumbnail?.url
+              row.original?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail?.url
             }
             alt={row.original?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
@@ -85,10 +84,7 @@ export const columns: ColumnDef<Product>[] = [
             </span>
 
             <span className="text-xs !leading-none text-foreground-secondary">
-              {
-                row.original?.attributes?.product_variations?.data?.[0]
-                  ?.attributes?.SKU
-              }
+              {row.original?.attributes?.product_variations?.data?.[0]?.attributes?.SKU}
             </span>
           </div>
         </div>
@@ -112,16 +108,12 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className="flex flex-col">
           {discountPrice && (
-            <span className="text-pink-600 font-medium">
-              <SuperAdminTableCellSimplePrice
-                price={discountPrice}
-              />
+            <span className="font-medium text-pink-600">
+              <SuperAdminTableCellSimplePrice price={discountPrice} />
             </span>
           )}
-          <span className={discountPrice ? "text-gray-500 line-through text-xs" : ""}>
-            <SuperAdminTableCellSimplePrice
-              price={price}
-            />
+          <span className={discountPrice ? "text-xs text-gray-500 line-through" : ""}>
+            <SuperAdminTableCellSimplePrice price={price} />
           </span>
         </div>
       );
@@ -132,8 +124,7 @@ export const columns: ColumnDef<Product>[] = [
     header: "موجودی",
     cell: ({ row }) => {
       const sum = row.original?.attributes?.product_variations?.data?.reduce(
-        (acc, curr) =>
-          acc + curr?.attributes?.product_stock?.data?.attributes?.Count,
+        (acc, curr) => acc + curr?.attributes?.product_stock?.data?.attributes?.Count,
         0,
       );
 
@@ -211,8 +202,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
           <Image
             src={
               API_BASE_URL.split("/api")[0] +
-              row?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail
-                ?.url
+              row?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail?.url
             }
             alt={row?.attributes?.CoverImage?.data?.attributes?.name}
             width={48}
@@ -226,10 +216,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
             <div className="flex w-full items-center justify-between">
               <span className="text-sm text-neutral-800">
                 {row?.attributes?.Title}
-                {
-                  row?.attributes?.product_variations?.data?.[0]?.attributes
-                    ?.SKU
-                }
+                {row?.attributes?.product_variations?.data?.[0]?.attributes?.SKU}
               </span>
 
               <button className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600">
@@ -240,17 +227,12 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex gap-1">
                 <span className="text-xs text-neutral-400">
-                  {
-                    row?.attributes?.product_main_category?.data?.attributes
-                      ?.Title
-                  }
+                  {row?.attributes?.product_main_category?.data?.attributes?.Title}
                 </span>
                 <span className="text-xs text-neutral-400">|</span>
                 <span className="text-xs text-green-700">
                   {row?.attributes?.product_variations?.data?.reduce(
-                    (acc, curr) =>
-                      acc +
-                      curr?.attributes?.product_stock?.data?.attributes?.Count,
+                    (acc, curr) => acc + curr?.attributes?.product_stock?.data?.attributes?.Count,
                     0,
                   )}
                   عدد در انبار
@@ -259,18 +241,20 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
 
               <div className="flex flex-col">
                 {row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice && (
-                  <span className="text-xs text-pink-600 font-medium">
+                  <span className="text-xs font-medium text-pink-600">
                     {priceFormatter(
                       +row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice,
                       " تومان",
                     )}
                   </span>
                 )}
-                <span className={`text-xs ${
-                  row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice
-                    ? "text-gray-500 line-through"
-                    : "text-neutral-800"
-                }`}>
+                <span
+                  className={`text-xs ${
+                    row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice
+                      ? "text-gray-500 line-through"
+                      : "text-neutral-800"
+                  }`}
+                >
                   {priceFormatter(
                     +row?.attributes?.product_variations?.data?.[0]?.attributes?.Price,
                     " تومان",

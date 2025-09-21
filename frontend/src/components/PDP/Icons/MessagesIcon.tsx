@@ -1,12 +1,6 @@
 export default function MessagesIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M12.337 4.767C11.242 2.961 9.263 1.75 6.997 1.75C3.547 1.75 0.75 4.547 0.75 7.998C0.75 9.134 1.058 10.197 1.589 11.115C1.959 11.81 1.544 13.452 0.75 14.245C1.827 14.303 3.247 13.817 3.88 13.406C4.301 13.649 4.97 13.972 5.844 14.137C5.956 14.158 6.076 14.154 6.19 14.169"
         stroke="white"

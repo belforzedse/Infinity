@@ -28,9 +28,7 @@ let fetchStarted = false;
 const useProductLike = ({ productId }: UseProductLikeParams) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [likedProducts, setLikedProducts] = useAtom(likedProductsAtom);
-  const [isGlobalLoading, setIsGlobalLoading] = useAtom(
-    likedProductsLoadingAtom,
-  );
+  const [isGlobalLoading, setIsGlobalLoading] = useAtom(likedProductsLoadingAtom);
   const [hasLoaded, setHasLoaded] = useAtom(likedProductsLoadedAtom);
 
   // Ensure likedProducts is always an array
@@ -71,13 +69,7 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
     };
 
     fetchLikedProducts();
-  }, [
-    setLikedProducts,
-    setIsGlobalLoading,
-    setHasLoaded,
-    hasLoaded,
-    isGlobalLoading,
-  ]);
+  }, [setLikedProducts, setIsGlobalLoading, setHasLoaded, hasLoaded, isGlobalLoading]);
 
   // Toggle like status
   const toggleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -104,15 +96,9 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
       );
 
       // Update the global state
-      if (
-        safeProducts.some(
-          ({ product }) => product?.id?.toString() === String(productId),
-        )
-      ) {
+      if (safeProducts.some(({ product }) => product?.id?.toString() === String(productId))) {
         setLikedProducts(
-          safeProducts.filter(
-            ({ product }) => product?.id?.toString() !== String(productId),
-          ),
+          safeProducts.filter(({ product }) => product?.id?.toString() !== String(productId)),
         );
       } else {
         setLikedProducts([
@@ -135,9 +121,7 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
   return {
     isLiked:
       productId && productId !== ""
-        ? safeProducts.some(
-            ({ product }) => product?.id?.toString() === productId.toString(),
-          )
+        ? safeProducts.some(({ product }) => product?.id?.toString() === productId.toString())
         : false,
     isLoading: isLoading || isGlobalLoading,
     toggleLike,

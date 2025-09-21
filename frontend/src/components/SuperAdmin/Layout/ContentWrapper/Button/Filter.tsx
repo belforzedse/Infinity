@@ -20,14 +20,10 @@ type Props = {
   }[];
   setFilterIsOpen: (isFilterOpen: boolean) => void;
   filter?: FilterItem[];
-  setFilter?: (
-    filter: FilterItem[] | ((prev: FilterItem[]) => FilterItem[]),
-  ) => void;
+  setFilter?: (filter: FilterItem[] | ((prev: FilterItem[]) => FilterItem[])) => void;
 };
 
-export default function SuperAdminLayoutContentWrapperButtonFilter(
-  props: Props,
-) {
+export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props) {
   const { isFilterOpen, setFilterIsOpen, options } = props;
 
   const [filter, setFilter] = useQueryState<
@@ -85,9 +81,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                     onChange={(e) => {
                       setFilter((prev) =>
                         prev.map((filterItem, i) =>
-                          i === index
-                            ? { ...filterItem, value: e.target.value }
-                            : filterItem,
+                          i === index ? { ...filterItem, value: e.target.value } : filterItem,
                         ),
                       );
                     }}
@@ -116,9 +110,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                     onOptionSelect={(id) => {
                       setFilter((prev) =>
                         prev.map((filterItem, i) =>
-                          i === index
-                            ? { ...filterItem, operator: id.toString() }
-                            : filterItem,
+                          i === index ? { ...filterItem, operator: id.toString() } : filterItem,
                         ),
                       );
                     }}
@@ -139,9 +131,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
                     onOptionSelect={(id) => {
                       setFilter((prev) =>
                         prev.map((filterItem, i) =>
-                          i === index
-                            ? { ...filterItem, field: id.toString() }
-                            : filterItem,
+                          i === index ? { ...filterItem, field: id.toString() } : filterItem,
                         ),
                       );
                     }}
@@ -169,9 +159,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(
             >
               <TrashIcon />
 
-              <span className="text-xs text-actions-primary">
-                حذف همه فیلترها
-              </span>
+              <span className="text-xs text-actions-primary">حذف همه فیلترها</span>
             </button>
 
             <button

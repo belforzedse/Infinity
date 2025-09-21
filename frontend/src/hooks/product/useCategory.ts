@@ -7,11 +7,9 @@ import {
   productDataAtom,
 } from "@/atoms/super-admin/products";
 import { getAllCategories } from "@/services/super-admin/product/category/getAll";
-import {
-  CategoryData,
-  createCategory,
-} from "@/services/super-admin/product/category/create";
-import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
+import type { CategoryData} from "@/services/super-admin/product/category/create";
+import { createCategory } from "@/services/super-admin/product/category/create";
+import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import { usePathname } from "next/navigation";
 
 interface UseProductCategoryProps {
@@ -22,17 +20,12 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   const { isEditMode = false } = props || {};
 
   const [CategoriesData, setCategoriesData] = useAtom(productCategoryDataAtom);
-  const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination,
-  );
-  const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom,
-  );
+  const setCategoriesDataPagination = useSetAtom(productCategoryDataAtomPagination);
+  const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
   const pathname = usePathname();
 
   const [categorySearchQuery, setCategorySearchQuery] = useState("");
-  const [categoryOptions, setCategoryOptions] =
-    useState<categoryResponseType[]>(CategoriesData);
+  const [categoryOptions, setCategoryOptions] = useState<categoryResponseType[]>(CategoriesData);
 
   const [isGetCategoriesLoading, setIsGetCategoriesLoading] = useState(false);
   const [isCreateCategoryLoading, setIsCreateCategoryLoading] = useState(false);
@@ -42,10 +35,7 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   }, [CategoriesData]);
 
   useEffect(() => {
-    if (
-      !pathname.endsWith("/add") &&
-      productData.product_other_categories?.length > 0
-    ) {
+    if (!pathname.endsWith("/add") && productData.product_other_categories?.length > 0) {
       setCategoryOptions(
         CategoriesData.filter(
           (category) =>
@@ -80,28 +70,20 @@ export function useProductCategory(props?: UseProductCategoryProps) {
             .includes(categorySearchQuery.replace(/\s/g, "").toLowerCase()),
         );
 
-  const handleSelectOtherCategory = (
-    selectedCategory: categoryResponseType | null,
-  ) => {
+  const handleSelectOtherCategory = (selectedCategory: categoryResponseType | null) => {
     if (!selectedCategory) {
       return;
     }
 
     if (
-      !productData.product_other_categories.find(
-        (cat) => cat.id === selectedCategory.id,
-      ) &&
+      !productData.product_other_categories.find((cat) => cat.id === selectedCategory.id) &&
       categoryOptions.find((cat) => cat.id === selectedCategory.id)
     ) {
       const updatedCategories = [
         ...(productData as any).product_other_categories,
         selectedCategory,
       ];
-      setCategoryOptions(
-        categoryOptions.filter(
-          (category) => category.id !== selectedCategory.id,
-        ),
-      );
+      setCategoryOptions(categoryOptions.filter((category) => category.id !== selectedCategory.id));
       setCategorySearchQuery("");
       setProductData({
         ...(productData as any),
@@ -120,9 +102,7 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   };
 
   const removeOtherCategory = (categoryToRemove: categoryResponseType) => {
-    const updatedCategories = (
-      productData as any
-    ).product_other_categories.filter(
+    const updatedCategories = (productData as any).product_other_categories.filter(
       (category: categoryResponseType) => category.id !== categoryToRemove.id,
     );
     setCategoryOptions([...categoryOptions, categoryToRemove]);

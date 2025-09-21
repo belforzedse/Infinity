@@ -36,9 +36,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     const fetchCategories = async () => {
       try {
         setIsLoadingCategories(true);
-        const response = await fetch(
-          `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`,
-        );
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
@@ -125,9 +123,7 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
           id: cat.id,
           title: cat.title,
         }))}
-        onOptionSelect={(optionId: string | number) =>
-          handleCategorySelect(optionId.toString())
-        }
+        onOptionSelect={(optionId: string | number) => handleCategorySelect(optionId.toString())}
         isLoading={isLoadingCategories}
       />
 

@@ -9,7 +9,7 @@ export interface StockRemovalResult {
 }
 
 // Persian terms to search for
-const PERSIAN_TERMS = ['کیف', 'کفش', 'صندل', 'کتونی'];
+const PERSIAN_TERMS = ["کیف", "کفش", "صندل", "کتونی"];
 
 export const removeStockForPersianTermProducts = async (): Promise<StockRemovalResult> => {
   try {
@@ -35,8 +35,8 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
 
       // Filter products that contain any of the Persian terms in their title
       const matchingProducts = products.filter((product: any) => {
-        const title = product.attributes?.Title || '';
-        return PERSIAN_TERMS.some(term => title.includes(term));
+        const title = product.attributes?.Title || "";
+        return PERSIAN_TERMS.some((term) => title.includes(term));
       });
 
       allMatchingProducts.push(...matchingProducts);
@@ -55,7 +55,7 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
         success: true,
         totalProductsProcessed: 0,
         totalVariationsUpdated: 0,
-        message: 'هیچ محصولی با عبارات مورد نظر یافت نشد'
+        message: "هیچ محصولی با عبارات مورد نظر یافت نشد",
       };
     }
 
@@ -73,11 +73,11 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
             await apiClient.put(
               `/product-stocks/${stockData.id}`,
               {
-                data: { Count: 0 }
+                data: { Count: 0 },
               },
               {
-                headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-              }
+                headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+              },
             );
 
             totalVariationsUpdated++;
@@ -88,28 +88,27 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
       }
 
       // Small delay to avoid overwhelming the API
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
 
-    const message = `موجودی ${totalVariationsUpdated} تنوع از ${allMatchingProducts.length} محصول حاوی کلمات (${PERSIAN_TERMS.join('، ')}) با موفقیت حذف شد`;
+    const message = `موجودی ${totalVariationsUpdated} تنوع از ${allMatchingProducts.length} محصول حاوی کلمات (${PERSIAN_TERMS.join("، ")}) با موفقیت حذف شد`;
 
     return {
       success: true,
       totalProductsProcessed: allMatchingProducts.length,
       totalVariationsUpdated,
-      message
+      message,
     };
-
   } catch (error: any) {
-    console.error('Error removing stock for Persian term products:', error);
+    console.error("Error removing stock for Persian term products:", error);
 
-    const errorMessage = error.response?.data?.error?.message || 'خطا در حذف موجودی محصولات';
+    const errorMessage = error.response?.data?.error?.message || "خطا در حذف موجودی محصولات";
 
     return {
       success: false,
       totalProductsProcessed: 0,
       totalVariationsUpdated: 0,
-      message: errorMessage
+      message: errorMessage,
     };
   }
 };

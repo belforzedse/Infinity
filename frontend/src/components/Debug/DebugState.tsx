@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const DebugState: React.FC = () => {
   const [localStorageData, setLocalStorageData] = useState<any>({});
   const [sessionStorageData, setSessionStorageData] = useState<any>({});
   const [cookiesData, setCookiesData] = useState<any>({});
-  const [selectedTab, setSelectedTab] = useState('localStorage');
-  const [newKey, setNewKey] = useState('');
-  const [newValue, setNewValue] = useState('');
+  const [selectedTab, setSelectedTab] = useState("localStorage");
+  const [newKey, setNewKey] = useState("");
+  const [newValue, setNewValue] = useState("");
 
   useEffect(() => {
     const updateStorageData = () => {
@@ -45,13 +45,13 @@ const DebugState: React.FC = () => {
       // Cookies
       const cookies: Record<string, any> = {};
       if (document.cookie) {
-        document.cookie.split(';').forEach(cookie => {
-          const [key, value] = cookie.trim().split('=');
+        document.cookie.split(";").forEach((cookie) => {
+          const [key, value] = cookie.trim().split("=");
           if (key) {
             try {
-              cookies[key] = decodeURIComponent(value || '');
+              cookies[key] = decodeURIComponent(value || "");
             } catch {
-              cookies[key] = value || '';
+              cookies[key] = value || "";
             }
           }
         });
@@ -64,15 +64,15 @@ const DebugState: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const deleteItem = (key: string, storage: 'localStorage' | 'sessionStorage' | 'cookies') => {
+  const deleteItem = (key: string, storage: "localStorage" | "sessionStorage" | "cookies") => {
     switch (storage) {
-      case 'localStorage':
+      case "localStorage":
         window.localStorage.removeItem(key);
         break;
-      case 'sessionStorage':
+      case "sessionStorage":
         window.sessionStorage.removeItem(key);
         break;
-      case 'cookies':
+      case "cookies":
         document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
         break;
     }
@@ -84,34 +84,34 @@ const DebugState: React.FC = () => {
 
     try {
       switch (selectedTab) {
-        case 'localStorage':
+        case "localStorage":
           window.localStorage.setItem(newKey, newValue);
           break;
-        case 'sessionStorage':
+        case "sessionStorage":
           window.sessionStorage.setItem(newKey, newValue);
           break;
-        case 'cookies':
+        case "cookies":
           document.cookie = `${newKey}=${encodeURIComponent(newValue)}; path=/`;
           break;
       }
-      setNewKey('');
-      setNewValue('');
+      setNewKey("");
+      setNewValue("");
       console.log(`Added ${newKey} to ${selectedTab}`);
     } catch (error) {
-      console.error('Error adding item:', error);
+      console.error("Error adding item:", error);
     }
   };
 
-  const clearAll = (storage: 'localStorage' | 'sessionStorage' | 'cookies') => {
+  const clearAll = (storage: "localStorage" | "sessionStorage" | "cookies") => {
     switch (storage) {
-      case 'localStorage':
+      case "localStorage":
         window.localStorage.clear();
         break;
-      case 'sessionStorage':
+      case "sessionStorage":
         window.sessionStorage.clear();
         break;
-      case 'cookies':
-        document.cookie.split(";").forEach(cookie => {
+      case "cookies":
+        document.cookie.split(";").forEach((cookie) => {
           const eqPos = cookie.indexOf("=");
           const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
           document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
@@ -121,23 +121,23 @@ const DebugState: React.FC = () => {
     console.log(`Cleared all ${storage}`);
   };
 
-  const exportData = (storage: 'localStorage' | 'sessionStorage' | 'cookies') => {
+  const exportData = (storage: "localStorage" | "sessionStorage" | "cookies") => {
     let data;
     switch (storage) {
-      case 'localStorage':
+      case "localStorage":
         data = localStorageData;
         break;
-      case 'sessionStorage':
+      case "sessionStorage":
         data = sessionStorageData;
         break;
-      case 'cookies':
+      case "cookies":
         data = cookiesData;
         break;
     }
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${storage}_backup.json`;
     a.click();
@@ -145,11 +145,11 @@ const DebugState: React.FC = () => {
   };
 
   const formatValue = (value: any) => {
-    if (typeof value === 'string') {
-      if (value.length > 50) return value.substring(0, 50) + '...';
+    if (typeof value === "string") {
+      if (value.length > 50) return value.substring(0, 50) + "...";
       return value;
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       return JSON.stringify(value, null, 2);
     }
     return String(value);
@@ -157,10 +157,14 @@ const DebugState: React.FC = () => {
 
   const getCurrentData = () => {
     switch (selectedTab) {
-      case 'localStorage': return localStorageData;
-      case 'sessionStorage': return sessionStorageData;
-      case 'cookies': return cookiesData;
-      default: return {};
+      case "localStorage":
+        return localStorageData;
+      case "sessionStorage":
+        return sessionStorageData;
+      case "cookies":
+        return cookiesData;
+      default:
+        return {};
     }
   };
 
@@ -171,18 +175,18 @@ const DebugState: React.FC = () => {
     <div className="space-y-3">
       {/* Tabs */}
       <div className="flex space-x-1">
-        {['localStorage', 'sessionStorage', 'cookies'].map((tab) => (
+        {["localStorage", "sessionStorage", "cookies"].map((tab) => (
           <button
             key={tab}
             onClick={() => setSelectedTab(tab)}
-            className={`px-2 py-1 rounded text-xs transition-colors ${
+            className={`text-xs rounded px-2 py-1 transition-colors ${
               selectedTab === tab
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                ? "bg-purple-600 text-white"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
           >
             {tab}
-            <span className="ml-1 text-xs opacity-75">
+            <span className="text-xs ml-1 opacity-75">
               ({Object.keys(getCurrentData()).length})
             </span>
           </button>
@@ -193,13 +197,13 @@ const DebugState: React.FC = () => {
       <div className="flex space-x-1">
         <button
           onClick={() => clearAll(selectedTab as any)}
-          className="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
+          className="text-xs rounded bg-red-600 px-2 py-1 text-white hover:bg-red-700"
         >
           Clear All
         </button>
         <button
           onClick={() => exportData(selectedTab as any)}
-          className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+          className="text-xs rounded bg-blue-600 px-2 py-1 text-white hover:bg-blue-700"
         >
           Export
         </button>
@@ -212,18 +216,18 @@ const DebugState: React.FC = () => {
           value={newKey}
           onChange={(e) => setNewKey(e.target.value)}
           placeholder="Key..."
-          className="w-full rounded bg-gray-800 px-2 py-1 text-xs text-white placeholder-gray-400"
+          className="text-xs w-full rounded bg-gray-800 px-2 py-1 text-white placeholder-gray-400"
         />
         <input
           type="text"
           value={newValue}
           onChange={(e) => setNewValue(e.target.value)}
           placeholder="Value..."
-          className="w-full rounded bg-gray-800 px-2 py-1 text-xs text-white placeholder-gray-400"
+          className="text-xs w-full rounded bg-gray-800 px-2 py-1 text-white placeholder-gray-400"
         />
         <button
           onClick={addItem}
-          className="w-full rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700"
+          className="text-xs w-full rounded bg-green-600 px-2 py-1 text-white hover:bg-green-700"
         >
           Add Item
         </button>
@@ -232,24 +236,17 @@ const DebugState: React.FC = () => {
       {/* Data Display */}
       <div className="max-h-40 overflow-y-auto">
         {dataEntries.length === 0 ? (
-          <div className="text-center text-gray-400 text-xs py-4">
+          <div className="text-xs py-4 text-center text-gray-400">
             No data found in {selectedTab}
           </div>
         ) : (
           <div className="space-y-1">
             {dataEntries.map(([key, value]) => (
-              <div
-                key={key}
-                className="bg-gray-800 rounded p-2 text-xs"
-              >
+              <div key={key} className="text-xs rounded bg-gray-800 p-2">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-purple-400 font-semibold mb-1 truncate">
-                      {key}
-                    </div>
-                    <div className="text-gray-300 break-all">
-                      {formatValue(value)}
-                    </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 truncate font-semibold text-purple-400">{key}</div>
+                    <div className="break-all text-gray-300">{formatValue(value)}</div>
                   </div>
                   <button
                     onClick={() => deleteItem(key, selectedTab as any)}
@@ -267,7 +264,7 @@ const DebugState: React.FC = () => {
 
       {/* Storage Stats */}
       <div className="text-xs text-gray-400">
-        <div className="font-semibold mb-1">Storage Info:</div>
+        <div className="mb-1 font-semibold">Storage Info:</div>
         <div>localStorage: {Object.keys(localStorageData).length} items</div>
         <div>sessionStorage: {Object.keys(sessionStorageData).length} items</div>
         <div>Cookies: {Object.keys(cookiesData).length} items</div>

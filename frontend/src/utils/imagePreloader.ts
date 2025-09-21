@@ -12,18 +12,22 @@ interface PreloadOptions {
  * Preload a single image
  */
 export const preloadImage = (src: string, options: PreloadOptions = {}) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-  const { priority = false, sizes: _sizes = '(max-width: 768px) 100vw, 50vw', quality: _quality = 75 } = options;
+  const {
+    priority = false,
+    sizes: _sizes = "(max-width: 768px) 100vw, 50vw",
+    quality: _quality = 75,
+  } = options;
 
   // Create a link element for preloading
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
   link.href = src;
 
   if (priority) {
-    link.setAttribute('importance', 'high');
+    link.setAttribute("importance", "high");
   }
 
   // Add to document head
@@ -55,12 +59,12 @@ export const preloadImages = (sources: string[], options: PreloadOptions = {}) =
  * Preload images on hover for better UX
  */
 export const preloadOnHover = (element: HTMLElement, imageSrc: string) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const handleMouseEnter = () => {
     preloadImage(imageSrc, { priority: true });
-    element.removeEventListener('mouseenter', handleMouseEnter);
+    element.removeEventListener("mouseenter", handleMouseEnter);
   };
 
-  element.addEventListener('mouseenter', handleMouseEnter, { once: true });
+  element.addEventListener("mouseenter", handleMouseEnter, { once: true });
 };

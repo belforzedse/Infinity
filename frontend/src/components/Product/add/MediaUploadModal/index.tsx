@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Modal from "@/components/Kits/Modal";
-import { TabType } from "./types";
+import type { TabType } from "./types";
 import Sidebar from "./components/Sidebar";
 import MediaUploader from "./components/MediaUploader";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
@@ -17,15 +17,10 @@ interface MediaUploadModalProps {
   onClose: () => void;
 }
 
-export default function MediaUploadModal({
-  isOpen,
-  onClose,
-}: MediaUploadModalProps) {
+export default function MediaUploadModal({ isOpen, onClose }: MediaUploadModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("افزودن رسانه");
   const [dragActive, setDragActive] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
-    null,
-  );
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -67,10 +62,7 @@ export default function MediaUploadModal({
           onImageSelect={handleImageSelect}
         />
 
-        <DetailsSection
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
-        />
+        <DetailsSection selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
       </div>
     </Modal>
   );

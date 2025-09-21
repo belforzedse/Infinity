@@ -3,11 +3,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OrderService } from "@/services";
-import {
-  orderIdAtom,
-  orderNumberAtom,
-  submitOrderStepAtom,
-} from "@/atoms/Order";
+import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order";
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 
@@ -59,13 +55,13 @@ function PaymentCallbackContent() {
           "✅ Verifying payment with Order ID:",
           orderIdToVerify,
           "Ref ID:",
-          refIdToVerify
+          refIdToVerify,
         );
 
         // Verify payment with backend
         const verificationResult = await OrderService.verifyPayment(
           Number(orderIdToVerify),
-          refIdToVerify
+          refIdToVerify,
         );
 
         console.log("Payment verification result:", verificationResult);
@@ -81,7 +77,7 @@ function PaymentCallbackContent() {
         // Double-check payment status
         try {
           const paymentStatus = await OrderService.getOrderPaymentStatus(
-            verificationResult.orderId
+            verificationResult.orderId,
           );
 
           console.log("Payment status check:", paymentStatus);
@@ -96,21 +92,17 @@ function PaymentCallbackContent() {
         } catch (statusError) {
           console.warn(
             "Could not verify payment status via API, using verification result only:",
-            statusError
+            statusError,
           );
         }
 
         // If we couldn't check or payment is not verified, use the verification result
         if (verificationResult.success) {
-          console.log(
-            "✅ Payment verified via verification API - redirecting to success"
-          );
+          console.log("✅ Payment verified via verification API - redirecting to success");
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         } else {
-          console.log(
-            "❌ Payment verification failed - redirecting to failure"
-          );
+          console.log("❌ Payment verification failed - redirecting to failure");
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }
@@ -128,16 +120,16 @@ function PaymentCallbackContent() {
   }, [searchParams, router, setOrderId, setOrderNumber, setSubmitOrderStep]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex min-h-screen flex-col items-center justify-center">
       {loading ? (
-        <div className="text-center p-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
+        <div className="p-10 text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
           <p className="text-lg">در حال بررسی وضعیت پرداخت...</p>
-          <p className="text-sm text-gray-500 mt-2">لطفا صفحه را نبندید</p>
+          <p className="text-sm mt-2 text-gray-500">لطفا صفحه را نبندید</p>
         </div>
       ) : error ? (
-        <div className="text-center p-10">
-          <div className="text-red-500 text-xl mb-4">خطا در پردازش پرداخت</div>
+        <div className="p-10 text-center">
+          <div className="text-xl mb-4 text-red-500">خطا در پردازش پرداخت</div>
           <p className="text-gray-700">{error}</p>
         </div>
       ) : null}
@@ -149,9 +141,9 @@ export default function PaymentCallback() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <div className="text-center p-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
+        <div className="flex min-h-screen flex-col items-center justify-center">
+          <div className="p-10 text-center">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
             <p className="text-lg">در حال بارگذاری...</p>
           </div>
         </div>

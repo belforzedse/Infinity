@@ -8,10 +8,7 @@ interface LoginActionsProps {
   onOtpLogin: () => void;
 }
 
-export default function LoginActions({
-  onForgotPassword,
-  onOtpLogin,
-}: LoginActionsProps) {
+export default function LoginActions({ onForgotPassword, onOtpLogin }: LoginActionsProps) {
   return (
     <>
       <div className="mt-5 flex items-center gap-8">

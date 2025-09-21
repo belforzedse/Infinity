@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AddressCard from "./AddressCard";
 import UserService from "@/services/user";
-import { UserAddress } from "@/services/user/addresses";
+import type { UserAddress } from "@/services/user/addresses";
 import AddAddress from "./AddAddress";
 
 const AddressContainer = () => {
@@ -58,9 +58,7 @@ const AddressContainer = () => {
     if (addresses.length === 0) {
       return (
         <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-gray-200 p-4">
-          <p className="text-gray-500">
-            هیچ آدرسی ثبت نشده است. لطفا یک آدرس جدید اضافه کنید.
-          </p>
+          <p className="text-gray-500">هیچ آدرسی ثبت نشده است. لطفا یک آدرس جدید اضافه کنید.</p>
         </div>
       );
     }

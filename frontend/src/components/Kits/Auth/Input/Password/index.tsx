@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 import clsx from "clsx";
 import Text from "../../../Text";
 import EyeIcon from "../../Icons/EyeIcon";
@@ -48,9 +48,7 @@ export default function AuthPasswordInput({
           )}
         </button>
       </div>
-      {showStrength && typeof value === "string" && (
-        <PasswordStrength password={value} />
-      )}
+      {showStrength && typeof value === "string" && <PasswordStrength password={value} />}
       {error && <Text className="text-red-500">{error}</Text>}
     </div>
   );

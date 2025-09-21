@@ -7,8 +7,9 @@ import {
 } from "@/atoms/super-admin/products";
 import { useSetAtom } from "jotai";
 import { deleteCategory } from "@/services/super-admin/product/category/delete";
+import type {
+  categoryResponseType} from "@/services/super-admin/product/category/getAll";
 import {
-  categoryResponseType,
   getAllCategories,
 } from "@/services/super-admin/product/category/getAll";
 
@@ -18,9 +19,7 @@ interface SetCategoryTableProps {
 
 const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
   const setCategoriesData = useSetAtom(productCategoryDataAtom);
-  const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination,
-  );
+  const setCategoriesDataPagination = useSetAtom(productCategoryDataAtomPagination);
 
   const handleDelete = async (id: string) => {
     await deleteCategory(id);

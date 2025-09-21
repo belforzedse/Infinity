@@ -124,10 +124,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-lg mb-4 font-medium leading-6 text-gray-900"
-                >
+                <Dialog.Title as="h3" className="text-lg mb-4 font-medium leading-6 text-gray-900">
                   جستجو
                 </Dialog.Title>
 
@@ -141,10 +138,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       placeholder="دنبال چی میگردی؟"
                       dir="rtl"
                     />
-                    <button
-                      type="submit"
-                      className="absolute left-2 top-1/2 -translate-y-1/2"
-                    >
+                    <button type="submit" className="absolute left-2 top-1/2 -translate-y-1/2">
                       <svg
                         width="20"
                         height="20"
@@ -180,7 +174,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                   <AnimatePresence mode="wait">
                     {loading && (
                       <motion.div
-                        className="px-3 py-2 text-xs text-gray-500"
+                        className="text-xs px-3 py-2 text-gray-500"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -190,7 +184,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                     )}
                     {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
                       <motion.div
-                        className="px-3 py-2 text-xs text-gray-500"
+                        className="text-xs px-3 py-2 text-gray-500"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -228,7 +222,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                             onClose();
                             router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
                           }}
-                          className="block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-xs text-pink-700 hover:bg-gray-50 transition-colors"
+                          className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: suggestions.length * 0.03 }}

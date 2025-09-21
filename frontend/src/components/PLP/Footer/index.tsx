@@ -6,7 +6,8 @@ import StoresSection from "./StoresSection";
 import CustomerServiceSection from "./CustomerServiceSection";
 import QuickAccessSection from "./QuickAccessSection";
 import UserAccountSection from "./UserAccountSection";
-import { FooterData, getFooterData } from "@/services/footer";
+import type { FooterData} from "@/services/footer";
+import { getFooterData } from "@/services/footer";
 
 const PLPFooter = () => {
   const [footerData, setFooterData] = useState<FooterData | null>(null);

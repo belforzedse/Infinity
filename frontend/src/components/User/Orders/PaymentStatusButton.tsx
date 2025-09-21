@@ -8,10 +8,7 @@ interface PaymentStatusButtonProps {
   className?: string;
 }
 
-export default function PaymentStatusButton({
-  orderId,
-  className = "",
-}: PaymentStatusButtonProps) {
+export default function PaymentStatusButton({ orderId, className = "" }: PaymentStatusButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusData, setStatusData] = useState<{
@@ -67,10 +64,7 @@ export default function PaymentStatusButton({
         <div className="absolute left-0 top-full z-10 mt-2 min-w-64 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
           <div className="mb-2 flex items-center justify-between border-b border-gray-100 pb-2">
             <h3 className="text-sm font-semibold">وضعیت سفارش</h3>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4"

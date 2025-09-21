@@ -2,13 +2,7 @@
 
 import React from "react";
 
-type Variant =
-  | "fade-up"
-  | "fade-in"
-  | "fade-right"
-  | "fade-left"
-  | "zoom-in"
-  | "blur-up";
+type Variant = "fade-up" | "fade-in" | "fade-right" | "fade-left" | "zoom-in" | "blur-up";
 
 type RevealProps = {
   children: React.ReactNode;

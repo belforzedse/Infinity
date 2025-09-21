@@ -22,9 +22,7 @@ const BreadCrumb = ({
 
   return (
     <>
-      <span className="text-3xl text-foreground-primary lg:hidden">
-        حساب من
-      </span>
+      <span className="text-3xl text-foreground-primary lg:hidden">حساب من</span>
       <div className="flex w-full items-center justify-between">
         <span className="text-xl text-foreground-primary lg:text-4xl">
           {isNextStep ? nextStepTitle : currentTitle}

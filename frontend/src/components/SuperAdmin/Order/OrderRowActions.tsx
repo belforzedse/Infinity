@@ -14,7 +14,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
-  const [currentBarcode, setCurrentBarcode] = useState(shippingBarcode);
+  const [, setCurrentBarcode] = useState(shippingBarcode);
 
   const handlePrintReceipt = () => {
     const url = `/super-admin/orders/print/${orderId}`;
@@ -33,11 +33,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
         if (res?.barcode) {
           setCurrentBarcode(res.barcode);
         }
-        alert(
-          res?.already
-            ? "بارکد قبلاً ثبت شده است"
-            : "بارکد با موفقیت ایجاد شد"
-        );
+        alert(res?.already ? "بارکد قبلاً ثبت شده است" : "بارکد با موفقیت ایجاد شد");
       } else {
         alert("درخواست ارسال شد");
       }
@@ -71,7 +67,14 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
           className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100"
           title="پرینت فاکتور"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <polyline points="6,9 6,2 18,2 18,9"></polyline>
             <path d="m6,18 h12"></path>
             <path d="m6,14 h12 v4 h-12 z"></path>
@@ -82,10 +85,17 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
         {hasBarcode ? (
           <button
             onClick={handleIssuedBarcode}
-            className="flex items-center gap-1 px-3 py-1 rounded-md bg-green-50 text-green-600 cursor-default text-xs"
+            className="text-xs flex cursor-default items-center gap-1 rounded-md bg-green-50 px-3 py-1 text-green-600"
             title="بارکد صادر شده"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M20 6L9 17l-5-5"></path>
             </svg>
             <span>صادر شده</span>
@@ -94,10 +104,17 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
           <button
             onClick={() => setShowBarcodeDialog(true)}
             disabled={isGenerating}
-            className="flex items-center gap-1 px-3 py-1 rounded-md bg-orange-50 text-orange-600 transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+            className="text-xs flex items-center gap-1 rounded-md bg-orange-50 px-3 py-1 text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
             title="صدور بارکد"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M3 5V19H21V5H3Z"></path>
               <path d="M12 8V16"></path>
               <path d="M8 12H16"></path>

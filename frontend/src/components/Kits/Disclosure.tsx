@@ -1,8 +1,4 @@
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import ArrowDownIcon from "../Product/Icons/ArrowDownIcon";
 
 interface DisclosureItemProps {

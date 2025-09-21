@@ -25,13 +25,10 @@ describe("loginPassword", () => {
 
     const result = await loginPassword(phone, password);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.LOGIN_PASSWORD,
-      {
-        phone,
-        password,
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
+      phone,
+      password,
+    });
     expect(result).toEqual(mockResponse);
   });
 
@@ -46,11 +43,7 @@ describe("loginPassword", () => {
   });
 
   it("works with different phone number formats", async () => {
-    const phoneNumbers = [
-      "09123456789",
-      "+989123456789",
-      "989123456789",
-    ];
+    const phoneNumbers = ["09123456789", "+989123456789", "989123456789"];
     const password = "password123";
     const mockResponse = { token: "auth-token" };
 
@@ -59,13 +52,10 @@ describe("loginPassword", () => {
     for (const phone of phoneNumbers) {
       await loginPassword(phone, password);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        ENDPOINTS.AUTH.LOGIN_PASSWORD,
-        {
-          phone,
-          password,
-        }
-      );
+      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
+        phone,
+        password,
+      });
     }
   });
 
@@ -78,13 +68,10 @@ describe("loginPassword", () => {
 
     const result = await loginPassword(phone, password);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.LOGIN_PASSWORD,
-      {
-        phone: "",
-        password: "",
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
+      phone: "",
+      password: "",
+    });
     expect(result).toEqual(mockResponse);
   });
 
@@ -97,10 +84,7 @@ describe("loginPassword", () => {
 
     await loginPassword(phone, password);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.LOGIN_PASSWORD,
-      expect.any(Object)
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, expect.any(Object));
   });
 
   it("returns response as expected", async () => {
@@ -127,13 +111,10 @@ describe("loginPassword", () => {
 
     const result = await loginPassword(phone, password);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.LOGIN_PASSWORD,
-      {
-        phone,
-        password,
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
+      phone,
+      password,
+    });
     expect(result).toEqual(mockResponse);
   });
 
@@ -146,13 +127,10 @@ describe("loginPassword", () => {
 
     const result = await loginPassword(phone, password);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.LOGIN_PASSWORD,
-      {
-        phone,
-        password,
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
+      phone,
+      password,
+    });
     expect(result).toEqual(mockResponse);
   });
 });

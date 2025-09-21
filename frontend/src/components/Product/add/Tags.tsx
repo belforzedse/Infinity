@@ -6,7 +6,7 @@ import ProductChip from "../Chip";
 import PlusIcon from "@/components/User/Icons/PlusIcon";
 import { useProductTag } from "@/hooks/product/useTag";
 import classNames from "classnames";
-import { TagResponseType } from "@/services/super-admin/product/tag/get";
+import type { TagResponseType } from "@/services/super-admin/product/tag/get";
 
 interface TagsProps {
   isEditMode?: boolean;
@@ -35,10 +35,7 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
       <h2 className="text-base text-neutral-600">تگ ها</h2>
 
       <div className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-white px-5 py-3">
-        <Combobox<TagResponseType, false>
-          value={undefined}
-          onChange={handleSelect}
-        >
+        <Combobox<TagResponseType, false> value={undefined} onChange={handleSelect}>
           <div className="relative">
             <Combobox.Input
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-neutral-800"
@@ -60,10 +57,7 @@ const Tags: React.FC<TagsProps> = ({ isEditMode = false }) => {
                     {isCreateTagLoading ? "ایجاد تگ........" : "ایجاد تگ جدید"}
                   </span>
                   <PlusIcon
-                    className={classNames(
-                      "h-4 w-4",
-                      isCreateTagLoading && "animate-spin",
-                    )}
+                    className={classNames("h-4 w-4", isCreateTagLoading && "animate-spin")}
                   />
                 </button>
               ) : (

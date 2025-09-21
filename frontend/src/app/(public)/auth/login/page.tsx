@@ -19,10 +19,7 @@ export default function LoginPage() {
     rememberMe: boolean;
   }) => {
     try {
-      const res = await AuthService.loginPassword(
-        data.phoneNumber,
-        data.password,
-      );
+      const res = await AuthService.loginPassword(data.phoneNumber, data.password);
 
       if (res.token) {
         localStorage.setItem("accessToken", res.token);
@@ -64,10 +61,7 @@ export default function LoginPage() {
       </AuthTitle>
 
       <LoginForm onSubmit={handleLogin} />
-      <LoginActions
-        onForgotPassword={handleForgotPassword}
-        onOtpLogin={handleOtpLogin}
-      />
+      <LoginActions onForgotPassword={handleForgotPassword} onOtpLogin={handleOtpLogin} />
     </div>
   );
 }

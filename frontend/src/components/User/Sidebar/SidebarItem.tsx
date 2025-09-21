@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { ReactNode, cloneElement, isValidElement } from "react";
+import type { ReactNode} from "react";
+import { cloneElement, isValidElement } from "react";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import ArrowLeftIcon from "../Icons/ArrowLeftIcon";
@@ -17,10 +18,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   const isActive = pathname === href;
 
   const renderIcon = (iconElement: ReactNode) => {
-    const iconClassName = clsx(
-      "h-5 w-5",
-      isActive ? "fill-white text-white" : "text-pink-500",
-    );
+    const iconClassName = clsx("h-5 w-5", isActive ? "fill-white text-white" : "text-pink-500");
 
     if (isValidElement<{ className?: string }>(iconElement)) {
       return cloneElement(iconElement, { className: iconClassName });
@@ -30,10 +28,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
 
   if (onClick) {
     return (
-      <button
-        onClick={onClick}
-        className="flex items-center gap-2 px-5 py-4 text-gray-700"
-      >
+      <button onClick={onClick} className="flex items-center gap-2 px-5 py-4 text-gray-700">
         {renderIcon(icon)}
         <span className="text-base">{text}</span>
       </button>

@@ -1,7 +1,7 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
-import { ApiError } from "@/types/api";
+import type { ApiError } from "@/types/api";
 
 export interface MeResponse {
   Bio: string | null;
@@ -21,16 +21,10 @@ export interface MeResponse {
 
 type MaybeApiResponse<T> = T | { data: T };
 function hasData<T>(p: unknown): p is { data: T } {
-  return (
-    typeof p === "object" &&
-    p !== null &&
-    "data" in (p as Record<string, unknown>)
-  );
+  return typeof p === "object" && p !== null && "data" in (p as Record<string, unknown>);
 }
 
-export const me = async (
-  requireAdmin: boolean = false,
-): Promise<MeResponse> => {
+export const me = async (requireAdmin: boolean = false): Promise<MeResponse> => {
   const endpoint = `${ENDPOINTS.USER.ME}`;
   const accessToken = localStorage.getItem("accessToken");
 
@@ -53,11 +47,7 @@ export const me = async (
       const hasAdminRole = Array.isArray(rolesUnknown)
         ? rolesUnknown.some((r: unknown) => {
             if (typeof r === "string") return r === "admin";
-            if (
-              typeof r === "object" &&
-              r &&
-              "name" in (r as Record<string, unknown>)
-            ) {
+            if (typeof r === "object" && r && "name" in (r as Record<string, unknown>)) {
               const name = (r as { name?: unknown }).name;
               return name === "admin";
             }

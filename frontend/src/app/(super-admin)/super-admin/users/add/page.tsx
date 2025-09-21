@@ -1,11 +1,12 @@
 "use client";
 
-import UpsertPageContentWrapper, {
+import type {
   UpsertPageConfigType,
 } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import { STRAPI_TOKEN } from "@/constants/api";
 
@@ -222,13 +223,7 @@ export default function Page() {
       onSubmit={async (data: User) => {
         try {
           // Validate required fields
-          if (
-            !data.firstname ||
-            !data.lastname ||
-            !data.phone ||
-            !data.role ||
-            !data.password
-          ) {
+          if (!data.firstname || !data.lastname || !data.phone || !data.role || !data.password) {
             toast.error("لطفا فیلدهای ضروری را پر کنید");
             return;
           }
@@ -251,9 +246,7 @@ export default function Page() {
               },
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken",
-                  )}`,
+                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
               },
             );

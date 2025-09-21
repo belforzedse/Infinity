@@ -1,10 +1,6 @@
-import {
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-  Transition,
-} from "@headlessui/react";
-import { ReactNode, Fragment } from "react";
+import { Dialog, DialogPanel, DialogTitle, Transition } from "@headlessui/react";
+import type { ReactNode} from "react";
+import { Fragment } from "react";
 import DeleteIcon from "./Icons/DeleteIcon";
 import classNames from "classnames";
 
@@ -65,9 +61,7 @@ export default function Modal({
                     titleClassName,
                   )}
                 >
-                  {title ? (
-                    <span className="text-2xl text-neutral-700">{title}</span>
-                  ) : null}
+                  {title ? <span className="text-2xl text-neutral-700">{title}</span> : null}
 
                   {closeIcon ? (
                     <button onClick={onClose}>{closeIcon}</button>

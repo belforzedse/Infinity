@@ -5,14 +5,12 @@ import dynamic from "next/dynamic";
 import CheckIcon from "../Icons/CheckIcon";
 import SearchIcon from "../Icons/SearchIcon";
 
-const MotionDiv = dynamic(
-  () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false },
-);
-const AnimatePresence = dynamic(
-  () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false },
-);
+const MotionDiv = dynamic(() => import("framer-motion").then((mod) => mod.motion.div), {
+  ssr: false,
+});
+const AnimatePresence = dynamic(() => import("framer-motion").then((mod) => mod.AnimatePresence), {
+  ssr: false,
+});
 
 interface FilterOption {
   id: string;
@@ -40,8 +38,7 @@ const PLPFilterBoxWithItems = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [hasAnimated, setHasAnimated] = useState(defaultOpen);
   const [searchQuery, setSearchQuery] = useState("");
-  const [localOptions, setLocalOptions] =
-    useState<FilterOption[]>(initialOptions);
+  const [localOptions, setLocalOptions] = useState<FilterOption[]>(initialOptions);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -122,13 +119,8 @@ const PLPFilterBoxWithItems = ({
                     {filteredOptions.map((option, index) => (
                       <div key={option.id}>
                         <div className="flex flex-row-reverse items-center justify-end gap-2 py-2">
-                          <span className="text-primary text-sm">
-                            {option.label}
-                          </span>
-                          <div
-                            className="relative"
-                            onClick={() => handleOptionClick(option.id)}
-                          >
+                          <span className="text-primary text-sm">{option.label}</span>
+                          <div className="relative" onClick={() => handleOptionClick(option.id)}>
                             {selectedOptions.includes(option.id) ? (
                               <CheckIcon className="h-4 w-4 rounded" />
                             ) : (

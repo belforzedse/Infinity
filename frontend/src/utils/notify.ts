@@ -1,4 +1,5 @@
-import { toast, ToastOptions } from "react-hot-toast";
+import type { ToastOptions } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const baseOptions: ToastOptions = {
   duration: 4000,
@@ -15,8 +16,7 @@ const notify = {
     toast.success(message, { ...baseOptions, ...options }),
   error: (message: string, options?: ToastOptions) =>
     toast.error(message, { ...baseOptions, ...options }),
-  info: (message: string, options?: ToastOptions) =>
-    toast(message, { ...baseOptions, ...options }),
+  info: (message: string, options?: ToastOptions) => toast(message, { ...baseOptions, ...options }),
 };
 
 export default notify;

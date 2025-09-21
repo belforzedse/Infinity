@@ -1,9 +1,4 @@
-import {
-  formatQueryParams,
-  handleApiError,
-  parseJwt,
-  isTokenExpired,
-} from "../api";
+import { formatQueryParams, handleApiError, parseJwt, isTokenExpired } from "../api";
 import { ERROR_MESSAGES } from "@/constants/api";
 
 describe("API Utilities", () => {

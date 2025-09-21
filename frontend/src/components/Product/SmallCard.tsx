@@ -35,10 +35,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   priority = false,
 }) => {
   return (
-    <Link
-      href={`/pdp/${id}`}
-      className={clsx("w-full md:w-[269px]", className)}
-    >
+    <Link href={`/pdp/${id}`} className={clsx("w-full md:w-[269px]", className)}>
       <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
         <div className="relative h-[100px] w-24">
           {discount && discount > 0 && (
@@ -92,17 +89,21 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
               <div className="text-xs text-neutral-500 md:hidden">قیمت</div>
 
               {!isAvailable ? (
-                <span className="text-xs font-medium text-red-600">
-                  ناموجود
-                </span>
+                <span className="text-xs font-medium text-red-600">ناموجود</span>
               ) : (
                 <div className="flex items-center justify-end gap-1 md:justify-center">
                   <span
                     className={`text-xs ${
-                      discountedPrice && discountedPrice > 0 && discountedPrice < price ? "text-pink-600" : "text-neutral-800"
+                      discountedPrice && discountedPrice > 0 && discountedPrice < price
+                        ? "text-pink-600"
+                        : "text-neutral-800"
                     } font-medium`}
                   >
-                    {(discountedPrice && discountedPrice > 0 && discountedPrice < price ? discountedPrice : price)?.toLocaleString()} تومان
+                    {(discountedPrice && discountedPrice > 0 && discountedPrice < price
+                      ? discountedPrice
+                      : price
+                    )?.toLocaleString()}{" "}
+                    تومان
                   </span>
 
                   {discountedPrice && discountedPrice > 0 && discountedPrice < price && (

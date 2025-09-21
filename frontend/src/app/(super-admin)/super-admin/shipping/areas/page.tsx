@@ -1,7 +1,8 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import { Area, columns, MobileTable } from "./table";
+import type { Area} from "./table";
+import { columns, MobileTable } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import ShippingTabs from "@/components/SuperAdmin/ShippingTabs";
 

@@ -9,10 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import Select from "@/components/Kits/Form/Select";
 import useProductLike from "@/hooks/useProductLike";
 import useAddToCart from "@/hooks/useAddToCart";
-import {
-  hasStockForVariation,
-  getAvailableStockCount,
-} from "@/services/product/product";
+import { hasStockForVariation, getAvailableStockCount } from "@/services/product/product";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
 
@@ -97,26 +94,22 @@ export default function PDPHeroInfoAction({
   });
 
   // Initialize add to cart hook
-  const { quantity, setQuantity, isAdding, isInCart, addToCart } = useAddToCart(
-    {
-      productId,
-      name,
-      category,
-      price,
-      originalPrice,
-      discountPercentage,
-      image,
-      color,
-      size,
-      model,
-      variationId,
-    },
-  );
+  const { quantity, setQuantity, isAdding, isInCart, addToCart } = useAddToCart({
+    productId,
+    name,
+    category,
+    price,
+    originalPrice,
+    discountPercentage,
+    image,
+    color,
+    size,
+    model,
+    variationId,
+  });
 
   // Get available stock count for current variation
-  const availableStock = currentVariation
-    ? getAvailableStockCount(currentVariation)
-    : 0;
+  const availableStock = currentVariation ? getAvailableStockCount(currentVariation) : 0;
 
   // Validate if selected quantity is available
   /**
@@ -278,12 +271,10 @@ export default function PDPHeroInfoAction({
     }));
   };
 
-  const dynamicOptions =
-    availableStock > 0 ? generateQuantityOptions() : options;
+  const dynamicOptions = availableStock > 0 ? generateQuantityOptions() : options;
 
   // Find the current option based on quantity
-  const currentOption =
-    dynamicOptions.find((opt) => opt.id === quantity) || null;
+  const currentOption = dynamicOptions.find((opt) => opt.id === quantity) || null;
 
   return (
     <div className="relative flex flex-col items-center gap-3 md:flex-row">
@@ -310,14 +301,9 @@ export default function PDPHeroInfoAction({
           }`}
           onClick={toggleLike}
           disabled={isLoading}
-          aria-label={
-            isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"
-          }
+          aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
         >
-          <HeartIcon
-            filled={isLiked}
-            className={isLiked ? "text-pink-600" : "text-neutral-800"}
-          />
+          <HeartIcon filled={isLiked} className={isLiked ? "text-pink-600" : "text-neutral-800"} />
         </button>
       </div>
 

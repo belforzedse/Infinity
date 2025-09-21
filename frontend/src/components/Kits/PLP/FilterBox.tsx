@@ -3,14 +3,12 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 
-const MotionDiv = dynamic(
-  () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false },
-);
-const AnimatePresence = dynamic(
-  () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false },
-);
+const MotionDiv = dynamic(() => import("framer-motion").then((mod) => mod.motion.div), {
+  ssr: false,
+});
+const AnimatePresence = dynamic(() => import("framer-motion").then((mod) => mod.AnimatePresence), {
+  ssr: false,
+});
 
 interface Props {
   title: string;
@@ -36,9 +34,7 @@ const PLPFilterBox = ({ title, children, defaultOpen = false }: Props) => {
           onClick={handleToggle}
           className="flex w-full flex-row-reverse items-center justify-between gap-x-[81px]"
         >
-          <div
-            className={`flex h-5 w-5 items-center justify-center transition-transform`}
-          >
+          <div className={`flex h-5 w-5 items-center justify-center transition-transform`}>
             <span className="text-primary text-2xl font-light !leading-none">
               {isOpen ? "-" : "+"}
             </span>

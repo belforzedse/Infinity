@@ -1,7 +1,7 @@
 import Details from "@/components/Product/add/Details";
 import PhotoUploader from "@/components/Product/add/PhotoUploader";
 import FileUploader from "./FileUploader";
-import { EditProductData } from "@/types/super-admin/products";
+import type { EditProductData } from "@/types/super-admin/products";
 import logger from "@/utils/logger";
 
 interface OverallProps {
@@ -9,24 +9,21 @@ interface OverallProps {
   isEditMode?: boolean;
 }
 
-export default function Overall({
-  productData,
-  isEditMode = false,
-}: OverallProps) {
+export default function Overall({ productData, isEditMode = false }: OverallProps) {
   // Extract media by type
   if (process.env.NODE_ENV !== "production") {
     logger.info("productData", { productData });
   }
 
   const images =
-    productData?.Media?.filter((media) =>
-      media.attributes.mime.startsWith("image/"),
-    ).map((media) => media.attributes.url) || [];
+    productData?.Media?.filter((media) => media.attributes.mime.startsWith("image/")).map(
+      (media) => media.attributes.url,
+    ) || [];
 
   const videos =
-    productData?.Media?.filter((media) =>
-      media.attributes.mime.startsWith("video/"),
-    ).map((media) => media.attributes.url) || [];
+    productData?.Media?.filter((media) => media.attributes.mime.startsWith("video/")).map(
+      (media) => media.attributes.url,
+    ) || [];
 
   const files = productData?.Files?.map((file) => file.attributes.url) || [];
 

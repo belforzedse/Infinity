@@ -1,8 +1,4 @@
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 
 type Props = {
   title: string;
@@ -18,12 +14,8 @@ export default function PDPHeroInfoFAQItem(props: Props) {
         {title}
 
         <div>
-          <span className="text-lg text-foreground-primary group-data-[open]:hidden">
-            +
-          </span>
-          <span className="text-lg hidden text-foreground-primary group-data-[open]:block">
-            -
-          </span>
+          <span className="text-lg text-foreground-primary group-data-[open]:hidden">+</span>
+          <span className="text-lg hidden text-foreground-primary group-data-[open]:block">-</span>
         </div>
       </DisclosureButton>
 

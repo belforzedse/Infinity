@@ -1,7 +1,7 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
-import { User } from "./page";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
+import type { User } from "./page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";

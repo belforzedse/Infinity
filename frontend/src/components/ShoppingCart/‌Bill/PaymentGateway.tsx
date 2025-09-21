@@ -19,8 +19,7 @@ function ShoppingCartBillPaymentGateway({
   walletBalanceIrr = 0,
   requiredAmountIrr = 0,
 }: Props) {
-  const walletDisabled =
-    walletBalanceIrr < requiredAmountIrr || requiredAmountIrr <= 0;
+  const walletDisabled = walletBalanceIrr < requiredAmountIrr || requiredAmountIrr <= 0;
   const paymentGateways: Array<{
     id: "mellat" | "snappay" | "wallet";
     name: string;
@@ -58,11 +57,9 @@ function ShoppingCartBillPaymentGateway({
 
   return (
     <div className="flex flex-col gap-4">
-      <span className="text-neutral-800 lg:text-xl text-2xl">
-        درگاه پرداخت خود را انتخاب کنید
-      </span>
+      <span className="text-2xl text-neutral-800 lg:text-xl">درگاه پرداخت خود را انتخاب کنید</span>
 
-      <div className="grid grid-cols-2 gap-2 w-full">
+      <div className="grid w-full grid-cols-2 gap-2">
         {paymentGateways.map((pg) => (
           <button
             key={pg.id}
@@ -75,27 +72,17 @@ function ShoppingCartBillPaymentGateway({
             type="button"
           >
             <div className="relative h-16 w-16">
-              <Image
-                src={pg.img}
-                alt={pg.name}
-                fill
-                className="object-cover"
-                sizes="64px"
-              />
+              <Image src={pg.img} alt={pg.name} fill className="object-cover" sizes="64px" />
             </div>
 
-            <span className="text-neutral-600 lg:text-xs text-sm">
-              {pg.name} درگاه پرداخت
-            </span>
+            <span className="text-sm text-neutral-600 lg:text-xs">{pg.name} درگاه پرداخت</span>
             {pg.id === "wallet" && (
               <span className="text-[10px] text-neutral-600">
                 موجودی: {(walletBalanceIrr / 10).toLocaleString()} تومان
               </span>
             )}
             {pg.helper && (
-              <span className="text-[10px] text-amber-700 text-center leading-4">
-                {pg.helper}
-              </span>
+              <span className="text-center text-[10px] leading-4 text-amber-700">{pg.helper}</span>
             )}
           </button>
         ))}

@@ -71,7 +71,7 @@ describe("Button component", () => {
     const { getByRole } = render(
       <Button type="submit" name="test-button" data-testid="custom-button">
         Submit
-      </Button>
+      </Button>,
     );
     const button = getByRole("button");
     expect(button).toHaveAttribute("type", "submit");

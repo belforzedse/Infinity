@@ -27,11 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fa"
-      dir="rtl"
-      className={`${peyda.variable} ${peydaFanum.variable}`}
-    >
+    <html lang="fa" dir="rtl" className={`${peyda.variable} ${peydaFanum.variable}`}>
       <body className={`${peydaFanum.className} antialiased`}>
         <CartProvider>
           <NuqsAdapter>

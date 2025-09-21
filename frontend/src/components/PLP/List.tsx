@@ -6,10 +6,10 @@ import dynamic from "next/dynamic";
 
 // Lazy load heavy components
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
-  loading: () => <div className="animate-pulse bg-gray-200 h-48 rounded-lg" />,
+  loading: () => <div className="h-48 animate-pulse rounded-lg bg-gray-200" />,
 });
 const ProductSmallCard = dynamic(() => import("@/components/Product/SmallCard"), {
-  loading: () => <div className="animate-pulse bg-gray-200 h-24 rounded-lg" />,
+  loading: () => <div className="h-24 animate-pulse rounded-lg bg-gray-200" />,
 });
 import Filter from "./List/Filter";
 import PLPListMobileFilter from "./List/MobileFilter";
@@ -157,32 +157,20 @@ export default function PLPList({
 
     // Category filter
     if (category) {
-      queryParams.append(
-        "filters[product_main_category][Slug][$eq]",
-        category,
-      );
+      queryParams.append("filters[product_main_category][Slug][$eq]", category);
     }
 
     // Availability filter
     if (available === "true") {
-      queryParams.append(
-        "filters[product_variations][IsPublished][$eq]",
-        "true",
-      );
+      queryParams.append("filters[product_variations][IsPublished][$eq]", "true");
     }
 
     // Price range filters
     if (minPrice) {
-      queryParams.append(
-        "filters[product_variations][Price][$gte]",
-        minPrice,
-      );
+      queryParams.append("filters[product_variations][Price][$gte]", minPrice);
     }
     if (maxPrice) {
-      queryParams.append(
-        "filters[product_variations][Price][$lte]",
-        maxPrice,
-      );
+      queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
     }
 
     // Size filter
@@ -192,10 +180,7 @@ export default function PLPList({
 
     // Material filter
     if (material) {
-      queryParams.append(
-        "filters[product_variations][Material][$eq]",
-        material,
-      );
+      queryParams.append("filters[product_variations][Material][$eq]", material);
     }
 
     // Season filter
@@ -247,7 +232,20 @@ export default function PLPList({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [page, category, available, minPrice, maxPrice, size, material, season, gender, usage, sort, searchQuery]);
+  }, [
+    page,
+    category,
+    available,
+    minPrice,
+    maxPrice,
+    size,
+    material,
+    season,
+    gender,
+    usage,
+    sort,
+    searchQuery,
+  ]);
 
   // Fetch products when dependencies change
   useEffect(() => {
@@ -255,123 +253,144 @@ export default function PLPList({
   }, [fetchProducts]);
 
   // Memoize expensive filtering operations
-  const validProducts = useMemo(() => products.filter((product) => {
-    try {
-      // Basic product structure validation
-      if (!product?.attributes?.product_variations?.data) {
-        return false;
-      }
-
-      // Check if any variation has a valid price
-      const hasValidPrice = product.attributes.product_variations.data.some(
-        (variation) => {
-          if (!variation?.attributes?.Price) return false;
-          const price = parseInt(variation.attributes.Price);
-          return !isNaN(price) && price > 0;
-        },
-      );
-
-      // If showAvailableOnly is true, check if any variation is published AND has stock
-      if (available === "true") {
-        const hasAvailableVariation = product.attributes.product_variations.data.some(
-          (variation) => variation?.attributes?.IsPublished === true,
-        );
-        const hasStock = checkStockAvailability(product);
-        if (!(hasValidPrice && hasAvailableVariation && hasStock)) return false;
-      } else if (!hasValidPrice) {
-        return false;
-      }
-
-      // Discount-only filter
-      if (discountOnly === "true") {
-        const hasDiscount = product.attributes.product_variations.data.some(
-          (variation) => {
-            if (!variation?.attributes) return false;
-
-            // Check for general_discounts first
-            const generalDiscounts = variation.attributes.general_discounts?.data;
-            if (generalDiscounts && Array.isArray(generalDiscounts) && generalDiscounts.length > 0) {
-              return true;
-            }
-
-            // Fallback to DiscountPrice field
-            const price = parseFloat(variation.attributes.Price || "0");
-            const discountPrice = variation.attributes.DiscountPrice
-              ? parseFloat(variation.attributes.DiscountPrice)
-              : null;
-            return discountPrice && !isNaN(discountPrice) && !isNaN(price) && discountPrice < price;
+  const validProducts = useMemo(
+    () =>
+      products.filter((product) => {
+        try {
+          // Basic product structure validation
+          if (!product?.attributes?.product_variations?.data) {
+            return false;
           }
-        );
-        if (!hasDiscount) return false;
-      }
 
-      return true;
-    } catch (error) {
-      console.warn('Error filtering product:', error, product);
-      return false;
-    }
-  }), [products, available, discountOnly]);
+          // Check if any variation has a valid price
+          const hasValidPrice = product.attributes.product_variations.data.some((variation) => {
+            if (!variation?.attributes?.Price) return false;
+            const price = parseInt(variation.attributes.Price);
+            return !isNaN(price) && price > 0;
+          });
+
+          // If showAvailableOnly is true, check if any variation is published AND has stock
+          if (available === "true") {
+            const hasAvailableVariation = product.attributes.product_variations.data.some(
+              (variation) => variation?.attributes?.IsPublished === true,
+            );
+            const hasStock = checkStockAvailability(product);
+            if (!(hasValidPrice && hasAvailableVariation && hasStock)) return false;
+          } else if (!hasValidPrice) {
+            return false;
+          }
+
+          // Discount-only filter
+          if (discountOnly === "true") {
+            const hasDiscount = product.attributes.product_variations.data.some((variation) => {
+              if (!variation?.attributes) return false;
+
+              // Check for general_discounts first
+              const generalDiscounts = variation.attributes.general_discounts?.data;
+              if (
+                generalDiscounts &&
+                Array.isArray(generalDiscounts) &&
+                generalDiscounts.length > 0
+              ) {
+                return true;
+              }
+
+              // Fallback to DiscountPrice field
+              const price = parseFloat(variation.attributes.Price || "0");
+              const discountPrice = variation.attributes.DiscountPrice
+                ? parseFloat(variation.attributes.DiscountPrice)
+                : null;
+              return (
+                discountPrice && !isNaN(discountPrice) && !isNaN(price) && discountPrice < price
+              );
+            });
+            if (!hasDiscount) return false;
+          }
+
+          return true;
+        } catch (error) {
+          console.warn("Error filtering product:", error, product);
+          return false;
+        }
+      }),
+    [products, available, discountOnly],
+  );
 
   // Memoize sidebar products
-  const sidebarProducts = useMemo(() => validProducts.slice(0, 3).map((product) => {
-    try {
-      const firstValidVariation = product.attributes.product_variations?.data?.find((variation) => {
-        if (!variation?.attributes?.Price) return false;
-        const price = parseInt(variation.attributes.Price);
-        return !isNaN(price) && price > 0;
-      });
+  const sidebarProducts = useMemo(
+    () =>
+      validProducts
+        .slice(0, 3)
+        .map((product) => {
+          try {
+            const firstValidVariation = product.attributes.product_variations?.data?.find(
+              (variation) => {
+                if (!variation?.attributes?.Price) return false;
+                const price = parseInt(variation.attributes.Price);
+                return !isNaN(price) && price > 0;
+              },
+            );
 
-      const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-      if (isNaN(price) || price <= 0) {
-        throw new Error('Invalid price for sidebar product');
-      }
+            const price = parseInt(firstValidVariation?.attributes?.Price || "0");
+            if (isNaN(price) || price <= 0) {
+              throw new Error("Invalid price for sidebar product");
+            }
 
-      // Check for general_discounts relationship first
-      const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
-      let discountPrice = undefined;
-      let discount = undefined;
+            // Check for general_discounts relationship first
+            const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
+            let discountPrice = undefined;
+            let discount = undefined;
 
-      if (generalDiscounts && Array.isArray(generalDiscounts) && generalDiscounts.length > 0) {
-        // Use general_discounts relationship
-        const discountAmount = generalDiscounts[0]?.attributes?.Amount;
-        if (typeof discountAmount === 'number' && discountAmount > 0) {
-          discount = discountAmount;
-          discountPrice = Math.round(price * (1 - discountAmount / 100));
-        }
-      } else if (firstValidVariation?.attributes?.DiscountPrice) {
-        // Fallback to DiscountPrice field (if it exists)
-        const parsedDiscountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
-        if (!isNaN(parsedDiscountPrice) && parsedDiscountPrice < price) {
-          discountPrice = parsedDiscountPrice;
-          discount = Math.round(((price - discountPrice) / price) * 100);
-        }
-      }
+            if (
+              generalDiscounts &&
+              Array.isArray(generalDiscounts) &&
+              generalDiscounts.length > 0
+            ) {
+              // Use general_discounts relationship
+              const discountAmount = generalDiscounts[0]?.attributes?.Amount;
+              if (typeof discountAmount === "number" && discountAmount > 0) {
+                discount = discountAmount;
+                discountPrice = Math.round(price * (1 - discountAmount / 100));
+              }
+            } else if (firstValidVariation?.attributes?.DiscountPrice) {
+              // Fallback to DiscountPrice field (if it exists)
+              const parsedDiscountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+              if (!isNaN(parsedDiscountPrice) && parsedDiscountPrice < price) {
+                discountPrice = parsedDiscountPrice;
+                discount = Math.round(((price - discountPrice) / price) * 100);
+              }
+            }
 
-      return {
-        id: product.id,
-        title: product.attributes.Title || '',
-        category: product.attributes.product_main_category?.data?.attributes?.Title || "",
-        likedCount: product.attributes.RatingCount || 0,
-        price: price,
-        discountedPrice: discountPrice,
-        discount: discount,
-        image: product.attributes.CoverImage?.data?.attributes?.url ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}` : '/images/placeholders/product-placeholder.png',
-      };
-    } catch (error) {
-      console.warn('Error creating sidebar product:', error, product);
-      // Return a fallback product object
-      return {
-        id: product.id,
-        title: product.attributes?.Title || 'محصول نامشخص',
-        category: '',
-        likedCount: 0,
-        price: 0,
-        discountedPrice: undefined,
-        discount: undefined,
-        image: '',
-      };
-    }
-  }).filter(product => product.price > 0), [validProducts]); // Filter out invalid products
+            return {
+              id: product.id,
+              title: product.attributes.Title || "",
+              category: product.attributes.product_main_category?.data?.attributes?.Title || "",
+              likedCount: product.attributes.RatingCount || 0,
+              price: price,
+              discountedPrice: discountPrice,
+              discount: discount,
+              image: product.attributes.CoverImage?.data?.attributes?.url
+                ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+                : "/images/placeholders/product-placeholder.png",
+            };
+          } catch (error) {
+            console.warn("Error creating sidebar product:", error, product);
+            // Return a fallback product object
+            return {
+              id: product.id,
+              title: product.attributes?.Title || "محصول نامشخص",
+              category: "",
+              likedCount: 0,
+              price: 0,
+              discountedPrice: undefined,
+              discount: undefined,
+              image: "",
+            };
+          }
+        })
+        .filter((product) => product.price > 0),
+    [validProducts],
+  ); // Filter out invalid products
 
   // Memoize stock availability check
   const checkStockAvailability = useCallback((product: Product) => {
@@ -380,23 +399,21 @@ export default function PLPList({
         return false;
       }
 
-      return product.attributes.product_variations.data.some(
-        (variation) => {
-          if (!variation?.attributes) {
-            return false;
-          }
-
-          const stockData = variation.attributes.product_stock?.data;
-          if (!stockData?.attributes) {
-            return false;
-          }
-
-          const stockCount = stockData.attributes.Count;
-          return typeof stockCount === 'number' && stockCount > 0;
+      return product.attributes.product_variations.data.some((variation) => {
+        if (!variation?.attributes) {
+          return false;
         }
-      );
+
+        const stockData = variation.attributes.product_stock?.data;
+        if (!stockData?.attributes) {
+          return false;
+        }
+
+        const stockCount = stockData.attributes.Count;
+        return typeof stockCount === "number" && stockCount > 0;
+      });
     } catch (error) {
-      console.warn('Error checking stock availability:', error);
+      console.warn("Error checking stock availability:", error);
       return false;
     }
   }, []);
@@ -408,11 +425,7 @@ export default function PLPList({
         <div className="hidden w-[269px] flex-col gap-7 md:flex">
           <Filter showAvailableOnly={available === "true"} />
 
-          <SidebarSuggestions
-            title="شاید بپسندید"
-            icon={<HeartIcon />}
-            items={sidebarProducts}
-          />
+          <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
 
           <SidebarSuggestions
             title="تخفیف های آخرماه"
@@ -431,9 +444,7 @@ export default function PLPList({
           {/* Show search results title if search query exists */}
           {searchQuery && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold">
-                نتایج جستجو برای: &quot;{searchQuery}&quot;
-              </h2>
+              <h2 className="text-xl font-semibold">نتایج جستجو برای: &quot;{searchQuery}&quot;</h2>
             </div>
           )}
 
@@ -448,17 +459,14 @@ export default function PLPList({
               <div className="hidden grid-cols-2 gap-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
                 {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
-                  const firstValidVariation =
-                    product.attributes.product_variations?.data?.find(
-                      (variation) => {
-                        const price = variation.attributes.Price;
-                        return price && parseInt(price) > 0;
-                      },
-                    );
-
-                  const price = parseInt(
-                    firstValidVariation?.attributes?.Price || "0",
+                  const firstValidVariation = product.attributes.product_variations?.data?.find(
+                    (variation) => {
+                      const price = variation.attributes.Price;
+                      return price && parseInt(price) > 0;
+                    },
                   );
+
+                  const price = parseInt(firstValidVariation?.attributes?.Price || "0");
 
                   // Check for general_discounts relationship first
                   const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
@@ -487,7 +495,7 @@ export default function PLPList({
                       discountPrice,
                       discount,
                       generalDiscounts: generalDiscounts,
-                      variationData: firstValidVariation?.attributes
+                      variationData: firstValidVariation?.attributes,
                     });
                   }
 
@@ -497,21 +505,22 @@ export default function PLPList({
                     <ProductCard
                       key={product.id}
                       id={product.id}
-                      images={product.attributes.CoverImage?.data?.attributes?.url ? [
-                        `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
-                      ] : ['/images/placeholders/product-placeholder.png']}
+                      images={
+                        product.attributes.CoverImage?.data?.attributes?.url
+                          ? [
+                              `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
+                            ]
+                          : ["/images/placeholders/product-placeholder.png"]
+                      }
                       category={
-                        product.attributes.product_main_category?.data
-                          ?.attributes?.Title || ""
+                        product.attributes.product_main_category?.data?.attributes?.Title || ""
                       }
                       title={product.attributes.Title}
                       price={price}
                       seenCount={product.attributes.RatingCount || 0}
                       discount={discount}
                       discountPrice={discountPrice}
-                      colorsCount={
-                        product.attributes.product_variations?.data?.length || 0
-                      }
+                      colorsCount={product.attributes.product_variations?.data?.length || 0}
                       isAvailable={isAvailable}
                       priority={index < 6}
                     />
@@ -523,17 +532,14 @@ export default function PLPList({
               <div className="flex flex-col gap-3 md:hidden">
                 {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
-                  const firstValidVariation =
-                    product.attributes.product_variations?.data?.find(
-                      (variation) => {
-                        const price = variation.attributes.Price;
-                        return price && parseInt(price) > 0;
-                      },
-                    );
-
-                  const price = parseInt(
-                    firstValidVariation?.attributes?.Price || "0",
+                  const firstValidVariation = product.attributes.product_variations?.data?.find(
+                    (variation) => {
+                      const price = variation.attributes.Price;
+                      return price && parseInt(price) > 0;
+                    },
                   );
+
+                  const price = parseInt(firstValidVariation?.attributes?.Price || "0");
 
                   // Check for general_discounts relationship first
                   const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
@@ -562,14 +568,17 @@ export default function PLPList({
                       id={product.id}
                       title={product.attributes.Title}
                       category={
-                        product.attributes.product_main_category?.data
-                          ?.attributes?.Title || ""
+                        product.attributes.product_main_category?.data?.attributes?.Title || ""
                       }
                       likedCount={product.attributes.RatingCount || 0}
                       price={price}
                       discountedPrice={discountPrice}
                       discount={discount}
-                      image={product.attributes.CoverImage?.data?.attributes?.url ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}` : '/images/placeholders/product-placeholder.png'}
+                      image={
+                        product.attributes.CoverImage?.data?.attributes?.url
+                          ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+                          : "/images/placeholders/product-placeholder.png"
+                      }
                       isAvailable={isAvailable}
                       priority={index < 3}
                     />

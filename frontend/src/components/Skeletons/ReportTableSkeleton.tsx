@@ -5,10 +5,7 @@ interface ReportTableSkeletonProps {
   rows?: number;
 }
 
-export default function ReportTableSkeleton({
-  columns = 5,
-  rows = 5,
-}: ReportTableSkeletonProps) {
+export default function ReportTableSkeleton({ columns = 5, rows = 5 }: ReportTableSkeletonProps) {
   return (
     <>
       {[...Array(rows)].map((_, i) => (

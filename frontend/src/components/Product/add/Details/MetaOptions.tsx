@@ -16,9 +16,7 @@ const MetaOptions: React.FC = () => {
   return (
     <div className="w-full rounded-lg bg-white p-5">
       <div className="mb-4 lg:mb-6">
-        <h3 className="text-base mb-4 text-right text-neutral-600">
-          آپشن های متا
-        </h3>
+        <h3 className="text-base mb-4 text-right text-neutral-600">آپشن های متا</h3>
       </div>
       <div className="space-y-2 lg:space-y-4">
         <Input

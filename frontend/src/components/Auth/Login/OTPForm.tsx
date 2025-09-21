@@ -14,11 +14,7 @@ interface OTPLoginFormProps {
   resendCode: () => void;
 }
 
-export default function OTPLoginForm({
-  onSubmit,
-  phoneNumber,
-  resendCode,
-}: OTPLoginFormProps) {
+export default function OTPLoginForm({ onSubmit, phoneNumber, resendCode }: OTPLoginFormProps) {
   const router = useRouter();
   const [verificationCode, setVerificationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,17 +61,11 @@ export default function OTPLoginForm({
             <VerificationInput onChange={setVerificationCode} />
 
             <div className="flex w-full flex-row-reverse items-center justify-between">
-              <span className="text-sm text-foreground-primary/80">
-                {timeLeft}
-              </span>
+              <span className="text-sm text-foreground-primary/80">{timeLeft}</span>
               <div>
                 <Text variant="helper">
                   کد را دریافت نکردید؟{" "}
-                  <Text
-                    variant="link"
-                    onClick={handleResendCode}
-                    disabled={isActive}
-                  >
+                  <Text variant="link" onClick={handleResendCode} disabled={isActive}>
                     ارسال مجدد
                   </Text>
                 </Text>

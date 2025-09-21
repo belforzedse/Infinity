@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 import Text from "../../Text";
 
@@ -39,14 +39,10 @@ export default function AuthInput({
           {...props}
         />
         {rightElement && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            {rightElement}
-          </div>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightElement}</div>
         )}
         {leftElement && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2">
-            {leftElement}
-          </div>
+          <div className="absolute left-4 top-1/2 -translate-y-1/2">{leftElement}</div>
         )}
       </div>
       {error && <Text className="mt-1 text-red-500">{error}</Text>}

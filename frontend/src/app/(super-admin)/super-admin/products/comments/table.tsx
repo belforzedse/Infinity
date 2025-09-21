@@ -3,7 +3,7 @@ import ShowIcon from "@/components/SuperAdmin/Layout/Icons/ShowIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 
 // This is a sample data type. Modify according to your needs
@@ -55,9 +55,7 @@ export const columns: ColumnDef<Comment>[] = [
   {
     accessorKey: "attributes.Content",
     header: "متن دیدگاه",
-    cell: ({ row }) => (
-      <CommentContentCell content={row.original?.attributes?.Content} />
-    ),
+    cell: ({ row }) => <CommentContentCell content={row.original?.attributes?.Content} />,
   },
   {
     accessorKey: "attributes.Status",
@@ -82,9 +80,7 @@ export const columns: ColumnDef<Comment>[] = [
           </span>
 
           <span className="text-xs text-right text-foreground-primary">
-            {(
-              new Date(row.original?.attributes?.createdAt) || new Date()
-            ).toLocaleString("fa-IR", {
+            {(new Date(row.original?.attributes?.createdAt) || new Date()).toLocaleString("fa-IR", {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true,

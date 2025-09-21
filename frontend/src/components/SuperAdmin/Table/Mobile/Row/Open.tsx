@@ -1,13 +1,11 @@
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
 type OpenMobileTableRowProps<TData> = {
   columns: ColumnDef<TData>[];
   row: TData & { attributes: any; id: string };
 };
 
-export function OpenMobileTableRow<TData>(
-  props: OpenMobileTableRowProps<TData>,
-) {
+export function OpenMobileTableRow<TData>(props: OpenMobileTableRowProps<TData>) {
   const { columns, row } = props;
 
   return columns.slice(0, columns.length - 1).map((column, index) => {
@@ -16,9 +14,7 @@ export function OpenMobileTableRow<TData>(
         className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1"
         key={index}
       >
-        <span className="text-xs text-neutral-400">
-          {column.header?.toString()}
-        </span>
+        <span className="text-xs text-neutral-400">{column.header?.toString()}</span>
 
         {column?.cell ? (
           (column?.cell as any)?.({
@@ -56,9 +52,7 @@ export function OpenMobileTableRow<TData>(
               };
 
               const value = getNestedValue(row, accessorKey.split("."));
-              return typeof value === "object"
-                ? JSON.stringify(value)
-                : String(value || "");
+              return typeof value === "object" ? JSON.stringify(value) : String(value || "");
             })()}
           </span>
         )}

@@ -1,12 +1,6 @@
 export default function ShippingIcon() {
   return (
-    <svg
-      width="20"
-      height="21"
-      viewBox="0 0 20 21"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M15.5856 15.7466C16.1014 16.2624 16.1014 17.0983 15.5856 17.6133C15.0697 18.1291 14.2339 18.1291 13.7189 17.6133C13.2031 17.0974 13.2031 16.2616 13.7189 15.7466C14.2347 15.2308 15.0706 15.2308 15.5856 15.7466"
         stroke="#EC4899"

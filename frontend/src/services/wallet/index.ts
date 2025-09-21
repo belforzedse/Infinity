@@ -23,17 +23,16 @@ export const getMyWallet = async (): Promise<WalletMeResponse> => {
 };
 
 export const startTopup = async (
-  amountIrr: number
+  amountIrr: number,
 ): Promise<{
   success: boolean;
   redirectUrl?: string;
   refId?: string;
   saleOrderId?: string;
 }> => {
-  const res = await apiClient.post<ChargeIntentResponse>(
-    "/wallet/charge-intent",
-    { amount: amountIrr }
-  );
+  const res = await apiClient.post<ChargeIntentResponse>("/wallet/charge-intent", {
+    amount: amountIrr,
+  });
   return {
     success: !!res?.data?.success,
     redirectUrl: res?.data?.redirectUrl,

@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
-import heart from "@/components/PDP/Icons/HeartIcon";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { getRandomProducts } from "@/services/product/homepage";
 import HeartIcon from "@/components/PDP/Icons/HeartIcon";
@@ -18,7 +17,7 @@ export default function CartPage() {
   const { cartItems, isLoading } = useCart();
   const router = useRouter();
   const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
-  const [loadingRandom, setLoadingRandom] = useState(false);
+  const [, setLoadingRandom] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -48,17 +47,14 @@ export default function CartPage() {
       className="mx-auto mt-5 px-2 pb-8 md:mt-8 md:px-1 md:pb-16 lg:px-10 xl:max-w-[1440px]"
     >
       <div className="flex flex-col gap-6">
-        <span className="w-full text-3xl text-neutral-800">سبد خرید</span>
+        <span className="text-3xl w-full text-neutral-800">سبد خرید</span>
 
-        <ShoppingCartDesktopTable
-          cartItems={cartItems}
-          className="hidden lg:block"
-        />
+        <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
         <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
 
         <button
           onClick={() => router.push("/checkout")}
-          className="mb-10 w-fit rounded-lg bg-pink-500 px-6 py-2 text-sm text-white"
+          className="text-sm mb-10 w-fit rounded-lg bg-pink-500 px-6 py-2 text-white"
         >
           ادامه فرآیند خرید و تسویه حساب
         </button>
