@@ -33,9 +33,7 @@ export default function RegisterPage() {
     e.preventDefault();
     if (verificationCode.length === 6) {
       // TODO: Implement verification API call
-      const response = await AuthService.verifyOTP(
-        verificationCode.split("").reverse().join(""),
-      );
+      const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
       if (response.token) {
         localStorage.setItem("accessToken", response.token);
@@ -66,9 +64,7 @@ export default function RegisterPage() {
 
   return (
     <div className="space-y-8" dir="rtl">
-      <AuthTitle
-        subtitle={`لطفا کد ارسال شده به شماره همراه ${phoneNumber} را وارد نمایید`}
-      >
+      <AuthTitle subtitle={`لطفا کد ارسال شده به شماره همراه ${phoneNumber} را وارد نمایید`}>
         ایجاد حساب کاربری
       </AuthTitle>
 
@@ -79,17 +75,11 @@ export default function RegisterPage() {
             <VerificationInput onChange={setVerificationCode} />
 
             <div className="flex w-full flex-row-reverse items-center justify-between">
-              <span className="text-sm text-foreground-primary/80">
-                {timeLeft}
-              </span>
+              <span className="text-sm text-foreground-primary/80">{timeLeft}</span>
               <div>
                 <Text variant="helper">
                   کد را دریافت نکردید؟{" "}
-                  <Text
-                    variant="link"
-                    onClick={handleResendCode}
-                    disabled={isActive}
-                  >
+                  <Text variant="link" onClick={handleResendCode} disabled={isActive}>
                     ارسال مجدد
                   </Text>
                 </Text>

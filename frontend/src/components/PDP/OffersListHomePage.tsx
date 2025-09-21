@@ -17,7 +17,9 @@ export default function OffersListHomePage(props: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1440);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1440,
+  );
 
   // Controls whether to show all products or a subset.
   // Defaults to showing a subset on the homepage sections.
@@ -30,15 +32,15 @@ export default function OffersListHomePage(props: Props) {
       setCurrentPage(0); // Reset to first page on resize
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Calculate pagination - responsive products per page
   const getProductsPerPage = () => {
     if (windowWidth >= 1440) return 5; // 1440px+ (5 products)
     if (windowWidth >= 1024) return 4; // 1024-1440px (4 products)
-    if (windowWidth >= 768) return 3;  // tablets (3 products)
+    if (windowWidth >= 768) return 3; // tablets (3 products)
     return 2; // phones (2 products)
   };
 
@@ -116,10 +118,9 @@ export default function OffersListHomePage(props: Props) {
   }
 
   // Display only first 10 products on desktop in grid layout (2 rows of 5)
-  const displayedProducts =
-    isShowAllProducts ? products : (
-      products.slice(0, isShowAllProducts ? products.length : 5)
-    );
+  const displayedProducts = isShowAllProducts
+    ? products
+    : products.slice(0, isShowAllProducts ? products.length : 5);
 
   return (
     <>
@@ -166,9 +167,7 @@ export default function OffersListHomePage(props: Props) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             {icon}
-            <span className="text-2xl text-foreground-primary md:text-3xl">
-              {title}
-            </span>
+            <span className="text-2xl text-foreground-primary md:text-3xl">{title}</span>
           </div>
 
           <div className="flex items-center gap-2">

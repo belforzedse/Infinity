@@ -16,26 +16,22 @@ const Pie = dynamic(() => import("recharts").then((m) => m.Pie), {
 const Cell = dynamic(() => import("recharts").then((m) => m.Cell), {
   ssr: false,
 });
-const ResponsiveContainer = dynamic(
-  () => import("recharts").then((m) => m.ResponsiveContainer),
-  { ssr: false },
-);
+const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
+  ssr: false,
+});
 const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
   ssr: false,
 });
 
 export default function GatewayLiquidityReportPage() {
-  const [start, setStart] = useState<Date>(
-    new Date(Date.now() - 30 * 86400000),
-  );
+  const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
   const toISO = useCallback(
-    (d: Date, fallback: Date) =>
-      isValid(d) ? d.toISOString() : fallback.toISOString(),
+    (d: Date, fallback: Date) => (isValid(d) ? d.toISOString() : fallback.toISOString()),
     [],
   );
   const startISO = useMemo(
@@ -58,13 +54,8 @@ export default function GatewayLiquidityReportPage() {
       .finally(() => setLoading(false));
   }, [startISO, endISO]);
 
-  const totalLiquidity = rows.reduce(
-    (sum, row) => sum + Number(row.total || 0),
-    0,
-  );
-  const activeGateways = rows.filter(
-    (row) => Number(row.total || 0) > 0,
-  ).length;
+  const totalLiquidity = rows.reduce((sum, row) => sum + Number(row.total || 0), 0);
+  const activeGateways = rows.filter((row) => Number(row.total || 0) > 0).length;
 
   return (
     <ContentWrapper title="گزارش نقدینگی درگاه‌های پرداخت">
@@ -75,9 +66,7 @@ export default function GatewayLiquidityReportPage() {
             <h3 className="text-lg font-medium text-neutral-700">فیلترها</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  تاریخ شروع
-                </label>
+                <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={start}
@@ -85,9 +74,7 @@ export default function GatewayLiquidityReportPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  تاریخ پایان
-                </label>
+                <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={end}
@@ -114,9 +101,7 @@ export default function GatewayLiquidityReportPage() {
                 <div className="rounded-xl border border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                        مجموع نقدینگی
-                      </h3>
+                      <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع نقدینگی</h3>
                       <p className="text-2xl font-bold text-purple-600">
                         {faNum(totalLiquidity)} تومان
                       </p>
@@ -141,9 +126,7 @@ export default function GatewayLiquidityReportPage() {
                 <div className="rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-red-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                        درگاه‌های فعال
-                      </h3>
+                      <h3 className="text-lg mb-2 font-medium text-neutral-700">درگاه‌های فعال</h3>
                       <p className="text-2xl font-bold text-orange-600">
                         {faNum(activeGateways)} درگاه
                       </p>
@@ -182,11 +165,7 @@ export default function GatewayLiquidityReportPage() {
   );
 }
 
-function GatewayLiquidityChart({
-  rows,
-}: {
-  rows: Array<{ gatewayTitle: string; total: number }>;
-}) {
+function GatewayLiquidityChart({ rows }: { rows: Array<{ gatewayTitle: string; total: number }> }) {
   if (!rows || rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -206,9 +185,7 @@ function GatewayLiquidityChart({
           </svg>
         </div>
         <p className="text-sm text-neutral-500">داده‌ای برای نمایش یافت نشد</p>
-        <p className="text-xs mt-1 text-neutral-400">
-          لطفاً بازه زمانی دیگری انتخاب کنید
-        </p>
+        <p className="text-xs mt-1 text-neutral-400">لطفاً بازه زمانی دیگری انتخاب کنید</p>
       </div>
     );
   }
@@ -240,19 +217,14 @@ function GatewayLiquidityChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div
-          className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg"
-          dir="rtl"
-        >
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg" dir="rtl">
           <p className="mb-2 font-medium text-neutral-800">{data.name}</p>
           <div className="text-sm space-y-1">
             <p className="text-purple-600">
-              <span className="font-medium">مبلغ:</span> {faNum(data.value)}{" "}
-              تومان
+              <span className="font-medium">مبلغ:</span> {faNum(data.value)} تومان
             </p>
             <p className="text-neutral-600">
-              <span className="font-medium">درصد:</span>{" "}
-              {faNum(data.percentage)}%
+              <span className="font-medium">درصد:</span> {faNum(data.percentage)}%
             </p>
           </div>
         </div>
@@ -262,14 +234,7 @@ function GatewayLiquidityChart({
   };
 
   // Custom label function
-  const renderLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-  }: any) => {
+  const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
     if (percent < 0.05) return null; // Don't show labels for slices smaller than 5%
 
     const RADIAN = Math.PI / 180;
@@ -313,10 +278,7 @@ function GatewayLiquidityChart({
                     dataKey="value"
                   >
                     {chartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={colors[index % colors.length]}
-                      />
+                      <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
@@ -344,18 +306,12 @@ function GatewayLiquidityChart({
                     style={{ backgroundColor: colors[index % colors.length] }}
                   />
                   <div className="min-w-0 flex-1 text-right">
-                    <p className="text-sm truncate font-medium text-neutral-700">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {faNum(item.percentage)}% از کل
-                    </p>
+                    <p className="text-sm truncate font-medium text-neutral-700">{item.name}</p>
+                    <p className="text-xs text-neutral-500">{faNum(item.percentage)}% از کل</p>
                   </div>
                 </div>
                 <div className="flex-shrink-0 text-right" dir="ltr">
-                  <p className="text-sm font-semibold text-neutral-800">
-                    {faNum(item.value)}
-                  </p>
+                  <p className="text-sm font-semibold text-neutral-800">{faNum(item.value)}</p>
                   <p className="text-xs text-neutral-500">تومان</p>
                 </div>
               </div>
@@ -364,14 +320,9 @@ function GatewayLiquidityChart({
 
           {/* Chart summary - RTL */}
           <div className="mt-6 rounded-lg bg-gradient-to-r from-neutral-50 to-neutral-100 p-4">
-            <div
-              className="text-sm flex items-center justify-between"
-              dir="rtl"
-            >
+            <div className="text-sm flex items-center justify-between" dir="rtl">
               <span className="text-neutral-600">تعداد درگاه‌ها:</span>
-              <span className="font-medium text-neutral-800">
-                {faNum(rows.length)} درگاه
-              </span>
+              <span className="font-medium text-neutral-800">{faNum(rows.length)} درگاه</span>
             </div>
           </div>
         </div>

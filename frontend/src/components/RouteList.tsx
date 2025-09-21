@@ -44,9 +44,7 @@ export const RouteList = ({ routes }: RouteListProps) => {
   // Returns all routes that fall under one of the provided category path
   // prefixes. Used to render grouped sections when no search term is active.
   const getRoutesByCategory = (categoryPaths: string[]) => {
-    return routes.filter((route) =>
-      categoryPaths.some((path) => route.path.startsWith(path)),
-    );
+    return routes.filter((route) => categoryPaths.some((path) => route.path.startsWith(path)));
   };
 
   // Routes matching the search term across name, path, or description fields
@@ -105,12 +103,8 @@ const RouteCard = ({ route }: { route: RouteInfo }) => (
   >
     <div className="flex flex-col gap-2">
       <h3 className="text-lg font-semibold">{route.name}</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        {route.description}
-      </p>
-      <code className="text-xs rounded bg-gray-100 px-2 py-1 dark:bg-gray-900">
-        {route.path}
-      </code>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{route.description}</p>
+      <code className="text-xs rounded bg-gray-100 px-2 py-1 dark:bg-gray-900">{route.path}</code>
     </div>
   </Link>
 );

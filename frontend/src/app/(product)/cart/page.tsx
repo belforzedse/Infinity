@@ -47,17 +47,14 @@ export default function CartPage() {
       className="mx-auto mt-5 px-2 pb-8 md:mt-8 md:px-1 md:pb-16 lg:px-10 xl:max-w-[1440px]"
     >
       <div className="flex flex-col gap-6">
-        <span className="w-full text-3xl text-neutral-800">سبد خرید</span>
+        <span className="text-3xl w-full text-neutral-800">سبد خرید</span>
 
-        <ShoppingCartDesktopTable
-          cartItems={cartItems}
-          className="hidden lg:block"
-        />
+        <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
         <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
 
         <button
           onClick={() => router.push("/checkout")}
-          className="mb-10 w-fit rounded-lg bg-pink-500 px-6 py-2 text-sm text-white"
+          className="text-sm mb-10 w-fit rounded-lg bg-pink-500 px-6 py-2 text-white"
         >
           ادامه فرآیند خرید و تسویه حساب
         </button>

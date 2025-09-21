@@ -16,10 +16,7 @@ interface SuperAdminLayoutSidebarProps {
   onClose: () => void;
 }
 
-export default function SuperAdminLayoutSidebar({
-  isOpen,
-  onClose,
-}: SuperAdminLayoutSidebarProps) {
+export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminLayoutSidebarProps) {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const router = useRouter();
   const pathname = usePathname();
@@ -45,11 +42,7 @@ export default function SuperAdminLayoutSidebar({
     const curr = pathname.replace(/\/$/, "");
     superAdminSidebar.forEach((it) => {
       const base = (it.href ?? "").replace(/\/$/, "");
-      if (
-        it.children.length > 0 &&
-        base &&
-        (curr === base || curr.startsWith(base + "/"))
-      ) {
+      if (it.children.length > 0 && base && (curr === base || curr.startsWith(base + "/"))) {
         next[it.id] = true;
       }
     });
@@ -139,9 +132,7 @@ export default function SuperAdminLayoutSidebar({
                     {hasChildren ? (
                       <div className="flex items-center gap-2">
                         {item.icon}
-                        <span className="text-sm font-medium text-neutral-600">
-                          {item.label}
-                        </span>
+                        <span className="text-sm font-medium text-neutral-600">{item.label}</span>
                       </div>
                     ) : (
                       <Link
@@ -151,9 +142,7 @@ export default function SuperAdminLayoutSidebar({
                       >
                         <div className="flex items-center gap-2">
                           {item.icon}
-                          <span className="text-sm font-medium text-neutral-600">
-                            {item.label}
-                          </span>
+                          <span className="text-sm font-medium text-neutral-600">{item.label}</span>
                         </div>
                       </Link>
                     )}
@@ -207,8 +196,7 @@ export default function SuperAdminLayoutSidebar({
                         {item.children.map((child, index) => {
                           const curr = pathname.replace(/\/$/, "");
                           const href = (child.href ?? "").replace(/\/$/, "");
-                          const active =
-                            !!href && (curr === href || curr.startsWith(href + "/"));
+                          const active = !!href && (curr === href || curr.startsWith(href + "/"));
                           return (
                             <Fragment key={child.id}>
                               <motion.div
@@ -221,7 +209,7 @@ export default function SuperAdminLayoutSidebar({
                                   href={child.href}
                                   onClick={(e) => e.stopPropagation()}
                                   className={clsx(
-                                    "block px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                    "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
                                     "transition-colors duration-150",
                                     active
                                       ? "bg-neutral-100 font-medium text-neutral-900"
@@ -248,30 +236,19 @@ export default function SuperAdminLayoutSidebar({
           <div className="h-[1px] w-full bg-neutral-100" />
 
           <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <Link
-              href={"/super-admin/settings"}
-              className="flex items-center gap-2"
-            >
+            <Link href={"/super-admin/settings"} className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <SettingsIcon />
-                <span className="text-sm font-medium text-neutral-600">
-                  تنظیمات سایت
-                </span>
+                <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>
               </div>
             </Link>
           </div>
 
           <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <button
-              type="button"
-              onClick={openConfirm}
-              className="flex items-center gap-2"
-            >
+            <button type="button" onClick={openConfirm} className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <ExitIcon />
-                <span className="text-sm font-medium text-neutral-600">
-                  خروج
-                </span>
+                <span className="text-sm font-medium text-neutral-600">خروج</span>
               </div>
             </button>
             <ConfirmDialog

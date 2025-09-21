@@ -65,10 +65,7 @@ type RadioTextWithChipsField<T> = {
   }>;
 };
 
-type BaseField<T> =
-  | StandardField<T>
-  | ProvinceCityField<T>
-  | RadioTextWithChipsField<T>;
+type BaseField<T> = StandardField<T> | ProvinceCityField<T> | RadioTextWithChipsField<T>;
 
 // Add the custom field type
 type CustomField<T> = {
@@ -80,19 +77,12 @@ type CustomField<T> = {
   colSpan: number;
   mobileColSpan: number;
   readOnly?: boolean;
-  render: (props: {
-    value: any;
-    onChange: (value: any) => void;
-    data?: T;
-  }) => ReactNode;
+  render: (props: { value: any; onChange: (value: any) => void; data?: T }) => ReactNode;
 };
 
 export type ExtendedField<T> = BaseField<T> | CustomField<T>;
 
-export type ExtendedUpsertPageConfigType<T> = Omit<
-  BaseUpsertPageConfigType<T>,
-  "config"
-> & {
+export type ExtendedUpsertPageConfigType<T> = Omit<BaseUpsertPageConfigType<T>, "config"> & {
   config: {
     title: string | ((data: T) => string);
     iconButton?: ReactNode;

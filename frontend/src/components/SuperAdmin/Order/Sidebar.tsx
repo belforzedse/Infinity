@@ -17,13 +17,9 @@ export default function SuperAdminOrderSidebar() {
       <div className="flex flex-col gap-3 rounded-2xl bg-white p-5">
         <div className="flex flex-col gap-2">
           <div className="flex flex-col">
-            <span className="text-lg text-foreground-primary">
-              ارسال اعلان به مشتری
-            </span>
+            <span className="text-lg text-foreground-primary">ارسال اعلان به مشتری</span>
 
-            <span className="text-sm text-neutral-400">
-              ارسال پیامک به شماره 09210059187
-            </span>
+            <span className="text-sm text-neutral-400">ارسال پیامک به شماره 09210059187</span>
           </div>
 
           <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
@@ -70,9 +66,7 @@ export default function SuperAdminOrderSidebar() {
           <div className="flex flex-col">
             <span className="text-lg text-foreground-primary">فاکتور</span>
 
-            <span className="text-sm text-neutral-400">
-              شماره فاکتور: 841649
-            </span>
+            <span className="text-sm text-neutral-400">شماره فاکتور: 841649</span>
           </div>
 
           <div className="flex w-full gap-2">
@@ -103,15 +97,12 @@ export default function SuperAdminOrderSidebar() {
 
       <div className="flex flex-col gap-3 rounded-2xl bg-white p-5">
         <div className="flex items-center justify-between">
-          <span className="text-lg text-foreground-primary">
-            یادداشت های سیستم پرداخت
-          </span>
+          <span className="text-lg text-foreground-primary">یادداشت های سیستم پرداخت</span>
         </div>
 
         <div className="flex flex-col gap-2">
           <span className="text-sm text-neutral-400">
-            رویدادهای درگاه (درخواست، ارجاع، بازگشت) در جزئیات سفارش نمایش داده
-            می‌شود.
+            رویدادهای درگاه (درخواست، ارجاع، بازگشت) در جزئیات سفارش نمایش داده می‌شود.
           </span>
           <span className="text-xs text-neutral-400">
             برای مشاهده کامل، به بخش جزئیات پرداخت در بدنه صفحه مراجعه کنید.
@@ -124,13 +115,7 @@ export default function SuperAdminOrderSidebar() {
 
 function SendIcon() {
   return (
-    <svg
-      width="12"
-      height="13"
-      viewBox="0 0 12 13"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -145,13 +130,7 @@ function SendIcon() {
 
 function DownloadIcon() {
   return (
-    <svg
-      width="21"
-      height="21"
-      viewBox="0 0 21 21"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M10.2502 14.6667V3"
         stroke="#64748B"
@@ -179,13 +158,7 @@ function DownloadIcon() {
 
 function PrintIcon() {
   return (
-    <svg
-      width="21"
-      height="21"
-      viewBox="0 0 21 21"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M6.5835 7.16667V3.83333C6.5835 3.37333 6.95683 3 7.41683 3H14.0835C14.5435 3 14.9168 3.37333 14.9168 3.83333V7.16667"
         stroke="#64748B"

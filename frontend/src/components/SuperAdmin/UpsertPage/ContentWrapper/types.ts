@@ -118,20 +118,14 @@ export function isStandardField<T>(field: Field<T>): field is StandardField<T> {
   );
 }
 
-export function isRadioTextWithChips<T>(
-  field: Field<T>,
-): field is RadioTextWithChipsField<T> {
+export function isRadioTextWithChips<T>(field: Field<T>): field is RadioTextWithChipsField<T> {
   return field.type === "radio-text-with-chips";
 }
 
-export function isProvinceCityField<T>(
-  field: Field<T>,
-): field is ProvinceCityField<T> {
+export function isProvinceCityField<T>(field: Field<T>): field is ProvinceCityField<T> {
   return field.type === "province-city";
 }
 
-export function isCategoriesListField<T>(
-  field: Field<T>,
-): field is CategoriesListField<T> {
+export function isCategoriesListField<T>(field: Field<T>): field is CategoriesListField<T> {
   return field.type === "categories-list";
 }

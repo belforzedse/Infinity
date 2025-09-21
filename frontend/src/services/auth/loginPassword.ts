@@ -5,10 +5,7 @@ export interface Response {
   token: string;
 }
 
-export const loginPassword = async (
-  phone: string,
-  password: string,
-): Promise<Response> => {
+export const loginPassword = async (phone: string, password: string): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.LOGIN_PASSWORD;
 
   const response = await apiClient.post<Response>(endpoint, {

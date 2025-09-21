@@ -110,8 +110,8 @@ export const config: UpsertPageConfigType<CouponRule> = {
               name: "terms",
               helper: () => (
                 <span className="text-sm text-actions-primary">
-                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر
-                  خود را برای اعمال تخفیف از فیلد مقابل انتخاب نمایید.
+                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر خود را برای اعمال
+                  تخفیف از فیلد مقابل انتخاب نمایید.
                 </span>
               ),
               type: "terms",
@@ -130,30 +130,28 @@ export const config: UpsertPageConfigType<CouponRule> = {
               fetchTerms: async (searchTerm: string, category: string) => {
                 try {
                   if (category === "product") {
-                    const response =
-                      await apiClient.get<ProductVariationResponse>(
-                        `/product-variations?filters[SKU][$containsi]=${searchTerm}`,
-                        {
-                          headers: {
-                            Authorization: `Bearer ${STRAPI_TOKEN}`,
-                          },
+                    const response = await apiClient.get<ProductVariationResponse>(
+                      `/product-variations?filters[SKU][$containsi]=${searchTerm}`,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${STRAPI_TOKEN}`,
                         },
-                      );
+                      },
+                    );
 
                     return (response as any).data.map((item: any) => ({
                       label: item.attributes.SKU || `محصول ${item.id}`,
                       value: item.id.toString(),
                     }));
                   } else if (category === "category") {
-                    const response =
-                      await apiClient.get<ProductCategoryResponse>(
-                        `/product-categories?filters[Title][$containsi]=${searchTerm}`,
-                        {
-                          headers: {
-                            Authorization: `Bearer ${STRAPI_TOKEN}`,
-                          },
+                    const response = await apiClient.get<ProductCategoryResponse>(
+                      `/product-categories?filters[Title][$containsi]=${searchTerm}`,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${STRAPI_TOKEN}`,
                         },
-                      );
+                      },
+                    );
 
                     return (response as any).data.map((item: any) => ({
                       label: item.attributes.Title || `دسته بندی ${item.id}`,

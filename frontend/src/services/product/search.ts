@@ -81,11 +81,7 @@ export const searchProducts = async (
     const response = await apiClient.getPublic<ProductSearchResponse>(endpoint);
     return response as unknown as ProductSearchResponse;
   } catch (error) {
-    console.error(
-      "Error searching products:",
-      JSON.stringify(error),
-      error?.toString(),
-    );
+    console.error("Error searching products:", JSON.stringify(error), error?.toString());
     throw error;
   }
 };

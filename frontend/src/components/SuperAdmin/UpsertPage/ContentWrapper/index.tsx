@@ -6,12 +6,7 @@ import ActiveBox from "./ActiveBox";
 import FieldRenderer from "./FieldRenderer";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
-import {
-  Field,
-  isStandardField,
-  isRadioTextWithChips,
-  isCategoriesListField,
-} from "./types";
+import { Field, isStandardField, isRadioTextWithChips, isCategoriesListField } from "./types";
 
 type ActionButtonsProps = {
   onSubmit: () => void;
@@ -83,9 +78,9 @@ const desktopColSpan = {
   12: "md:col-span-12",
 } as const;
 
-export default function UpsertPageContentWrapper<
-  T extends { createdAt: Date; updatedAt: Date },
->(props: Props<T>) {
+export default function UpsertPageContentWrapper<T extends { createdAt: Date; updatedAt: Date }>(
+  props: Props<T>,
+) {
   const { config, data, footer, onSubmit: onSubmitProp } = props;
 
   const router = useRouter();
@@ -121,15 +116,10 @@ export default function UpsertPageContentWrapper<
   return (
     <div className="mt-0 flex flex-col gap-2 md:mt-7 md:gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-3xl text-foreground-primary">
-          {config.headTitle}
-        </span>
+        <span className="text-3xl text-foreground-primary">{config.headTitle}</span>
 
         {config.addButton && (
-          <AddButton
-            text={config.addButton.text}
-            path={config.addButton.path ?? "#"}
-          />
+          <AddButton text={config.addButton.text} path={config.addButton.path ?? "#"} />
         )}
       </div>
 
@@ -175,25 +165,17 @@ export default function UpsertPageContentWrapper<
                                 ? String(field.name)
                                 : isCategoriesListField(field)
                                   ? String(field.name)
-                                  : `${String(field.provinceField)}-${String(
-                                      field.cityField,
-                                    )}`
+                                  : `${String(field.provinceField)}-${String(field.cityField)}`
                           }
                           className={`${
-                            mobileColSpan[
-                              field.mobileColSpan as keyof typeof mobileColSpan
-                            ]
+                            mobileColSpan[field.mobileColSpan as keyof typeof mobileColSpan]
                           } ${
-                            desktopColSpan[
-                              field.colSpan as keyof typeof desktopColSpan
-                            ]
+                            desktopColSpan[field.colSpan as keyof typeof desktopColSpan]
                           } flex flex-col gap-1`}
                         >
                           {field.label && (
                             <div className="flex items-center justify-between">
-                              <span className="text-base text-neutral-600">
-                                {field.label}
-                              </span>
+                              <span className="text-base text-neutral-600">{field.label}</span>
 
                               {isStandardField(field) &&
                                 field.labelAction &&
@@ -236,9 +218,7 @@ export default function UpsertPageContentWrapper<
                   <div className="flex items-center gap-1">
                     <CalendarIcon />
 
-                    <span className="text-base text-neutral-600">
-                      تاریخ ایجاد
-                    </span>
+                    <span className="text-base text-neutral-600">تاریخ ایجاد</span>
                   </div>
 
                   <span className="text-sm text-slate-500">
@@ -258,9 +238,7 @@ export default function UpsertPageContentWrapper<
                   <div className="flex items-center gap-1">
                     <CalendarIcon />
 
-                    <span className="text-base text-neutral-600">
-                      تاریخ آخرین ویرایش
-                    </span>
+                    <span className="text-base text-neutral-600">تاریخ آخرین ویرایش</span>
                   </div>
 
                   <span className="text-sm text-slate-500">
@@ -277,9 +255,7 @@ export default function UpsertPageContentWrapper<
             {config.isActiveBox && (
               <ActiveBox
                 title={config.isActiveBox.header}
-                label={config.isActiveBox.label(
-                  formData[config.isActiveBox.key] as boolean,
-                )}
+                label={config.isActiveBox.label(formData[config.isActiveBox.key] as boolean)}
                 status={formData[config.isActiveBox.key] as boolean}
                 onChange={(checked) => {
                   setFormData({

@@ -37,9 +37,7 @@ export default function RemoveActionButton(props: Props) {
             },
           );
           setRefresh(true);
-          toast.success(
-            isRemoved ? "با موفقیت بازیابی شد" : "با موفقیت حذف شد",
-          );
+          toast.success(isRemoved ? "با موفقیت بازیابی شد" : "با موفقیت حذف شد");
         } catch (error) {
           toast.error(isRemoved ? "خطا در بازیابی" : "خطا در حذف");
           console.error("Failed to delete user:", error);

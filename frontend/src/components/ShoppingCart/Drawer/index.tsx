@@ -29,12 +29,7 @@ export default function CartDrawer() {
 
   return (
     <Transition appear show={isAnimating} as={Fragment}>
-      <Dialog
-        as="div"
-        className="relative z-[1200]"
-        onClose={handleClose}
-        dir="rtl"
-      >
+      <Dialog as="div" className="relative z-[1200]" onClose={handleClose} dir="rtl">
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"

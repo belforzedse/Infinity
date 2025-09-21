@@ -110,9 +110,7 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
 
   return (
     <div className="mt-0 rounded-xl bg-white p-5 md:mt-6">
-      <h2 className="text-lg mb-2 text-right md:text-xl md:mb-4">
-        تراکنش های اخیر
-      </h2>
+      <h2 className="text-lg mb-2 text-right md:text-xl md:mb-4">تراکنش های اخیر</h2>
       <div className="overflow-x-auto rounded-2xl border border-slate-100 p-2 md:p-4">
         <table className="w-full">
           <thead>
@@ -205,13 +203,7 @@ export default function SuperAdminPaymentMethodSummaryFooter(props: {
 
 function EyeIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M1.56738 9.81745C5.67213 4.5322 12.3269 4.5322 16.4316 9.81745"
         stroke="#64748B"

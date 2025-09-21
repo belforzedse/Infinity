@@ -71,15 +71,7 @@ export default function SuperAdminPagination({
     }
 
     // first, ..., current-1,current,current+1, ..., last
-    items.push(
-      first,
-      "…",
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      "…",
-      last,
-    );
+    items.push(first, "…", currentPage - 1, currentPage, currentPage + 1, "…", last);
     return items;
   };
 

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 interface LogEntry {
   id: string;
   timestamp: Date;
-  level: 'log' | 'warn' | 'error' | 'info';
+  level: "log" | "warn" | "error" | "info";
   message: string;
   data?: any;
 }
 
 const DebugConsole: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [filter, setFilter] = useState<string>('all');
-  const [command, setCommand] = useState('');
+  const [filter, setFilter] = useState<string>("all");
+  const [command, setCommand] = useState("");
   const logsEndRef = useRef<HTMLDivElement>(null);
   const originalConsole = useRef<any>({});
 
@@ -27,32 +27,32 @@ const DebugConsole: React.FC = () => {
     };
 
     // Override console methods to capture logs
-    const createLogHandler = (level: LogEntry['level']) => {
+    const createLogHandler = (level: LogEntry["level"]) => {
       return (...args: any[]) => {
         const newLog: LogEntry = {
           id: Math.random().toString(36).substr(2, 9),
           timestamp: new Date(),
           level,
-          message: args.map(arg =>
-            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-          ).join(' '),
-          data: args.length === 1 && typeof args[0] === 'object' ? args[0] : args,
+          message: args
+            .map((arg) => (typeof arg === "object" ? JSON.stringify(arg, null, 2) : String(arg)))
+            .join(" "),
+          data: args.length === 1 && typeof args[0] === "object" ? args[0] : args,
         };
 
-        setLogs(prev => [...prev.slice(-99), newLog]); // Keep last 100 logs
+        setLogs((prev) => [...prev.slice(-99), newLog]); // Keep last 100 logs
 
         // Call original console method
         originalConsole.current[level]?.(...args);
       };
     };
 
-    console.log = createLogHandler('log');
-    console.warn = createLogHandler('warn');
-    console.error = createLogHandler('error');
-    console.info = createLogHandler('info');
+    console.log = createLogHandler("log");
+    console.warn = createLogHandler("warn");
+    console.error = createLogHandler("error");
+    console.info = createLogHandler("info");
 
     // Add initial debug message
-    console.log('🐛 Debug Console initialized');
+    console.log("🐛 Debug Console initialized");
 
     return () => {
       // Restore original console methods
@@ -61,11 +61,11 @@ const DebugConsole: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  const filteredLogs = logs.filter(log => {
-    if (filter === 'all') return true;
+  const filteredLogs = logs.filter((log) => {
+    if (filter === "all") return true;
     return log.level === filter;
   });
 
@@ -74,47 +74,58 @@ const DebugConsole: React.FC = () => {
 
     try {
       // Add command to logs
-      setLogs(prev => [...prev, {
-        id: Math.random().toString(36).substr(2, 9),
-        timestamp: new Date(),
-        level: 'info',
-        message: `> ${command}`,
-      }]);
+      setLogs((prev) => [
+        ...prev,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          timestamp: new Date(),
+          level: "info",
+          message: `> ${command}`,
+        },
+      ]);
 
       // Execute command
       const result = eval(command);
 
       // Add result to logs
       if (result !== undefined) {
-        console.log('Result:', result);
+        console.log("Result:", result);
       }
     } catch (error) {
-      console.error('Command error:', error);
+      console.error("Command error:", error);
     }
 
-    setCommand('');
+    setCommand("");
   };
 
   const clearLogs = () => {
     setLogs([]);
-    console.log('🧹 Console cleared');
+    console.log("🧹 Console cleared");
   };
 
-  const getLogColor = (level: LogEntry['level']) => {
+  const getLogColor = (level: LogEntry["level"]) => {
     switch (level) {
-      case 'error': return 'text-red-400';
-      case 'warn': return 'text-yellow-400';
-      case 'info': return 'text-blue-400';
-      default: return 'text-gray-300';
+      case "error":
+        return "text-red-400";
+      case "warn":
+        return "text-yellow-400";
+      case "info":
+        return "text-blue-400";
+      default:
+        return "text-gray-300";
     }
   };
 
-  const getLogIcon = (level: LogEntry['level']) => {
+  const getLogIcon = (level: LogEntry["level"]) => {
     switch (level) {
-      case 'error': return '❌';
-      case 'warn': return '⚠️';
-      case 'info': return 'ℹ️';
-      default: return '📝';
+      case "error":
+        return "❌";
+      case "warn":
+        return "⚠️";
+      case "info":
+        return "ℹ️";
+      default:
+        return "📝";
     }
   };
 
@@ -125,7 +136,7 @@ const DebugConsole: React.FC = () => {
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="rounded bg-gray-800 px-2 py-1 text-xs text-white"
+          className="text-xs rounded bg-gray-800 px-2 py-1 text-white"
         >
           <option value="all">All</option>
           <option value="log">Logs</option>
@@ -135,19 +146,17 @@ const DebugConsole: React.FC = () => {
         </select>
         <button
           onClick={clearLogs}
-          className="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
+          className="text-xs rounded bg-red-600 px-2 py-1 text-white hover:bg-red-700"
         >
           Clear
         </button>
       </div>
 
       {/* Logs */}
-      <div className="max-h-48 overflow-y-auto bg-black rounded p-2 font-mono text-xs">
+      <div className="text-xs max-h-48 overflow-y-auto rounded bg-black p-2 font-mono">
         {filteredLogs.map((log) => (
           <div key={log.id} className={`mb-1 ${getLogColor(log.level)}`}>
-            <span className="text-gray-500 text-xs">
-              {log.timestamp.toLocaleTimeString()}
-            </span>
+            <span className="text-xs text-gray-500">{log.timestamp.toLocaleTimeString()}</span>
             <span className="ml-1">{getLogIcon(log.level)}</span>
             <span className="ml-1">{log.message}</span>
           </div>
@@ -161,13 +170,13 @@ const DebugConsole: React.FC = () => {
           type="text"
           value={command}
           onChange={(e) => setCommand(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && executeCommand()}
+          onKeyDown={(e) => e.key === "Enter" && executeCommand()}
           placeholder="Execute JavaScript..."
-          className="flex-1 rounded bg-gray-800 px-2 py-1 text-xs text-white placeholder-gray-400"
+          className="text-xs flex-1 rounded bg-gray-800 px-2 py-1 text-white placeholder-gray-400"
         />
         <button
           onClick={executeCommand}
-          className="rounded bg-purple-600 px-3 py-1 text-xs text-white hover:bg-purple-700"
+          className="text-xs rounded bg-purple-600 px-3 py-1 text-white hover:bg-purple-700"
         >
           Run
         </button>

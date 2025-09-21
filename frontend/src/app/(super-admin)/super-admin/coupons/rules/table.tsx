@@ -55,9 +55,7 @@ export const columns: ColumnDef<CouponRule>[] = [
 
       return (
         <span className="text-xs text-foreground-primary md:text-base">
-          {type === "Cash"
-            ? priceFormatter(discount, " تومان")
-            : `${discount}%`}
+          {type === "Cash" ? priceFormatter(discount, " تومان") : `${discount}%`}
         </span>
       );
     },
@@ -149,9 +147,7 @@ export const MobileTable = ({ data }: Props) => {
                     </span>
                     <span className="text-xs text-neutral-400">|</span>
                     <span className="text-sm text-green-700">
-                      {new Date(
-                        row?.attributes?.StartDate as string,
-                      ).toLocaleDateString("fa-IR")}
+                      {new Date(row?.attributes?.StartDate as string).toLocaleDateString("fa-IR")}
                     </span>
                   </div>
 

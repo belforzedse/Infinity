@@ -9,8 +9,7 @@ export async function getSuperAdminSettings(): Promise<SuperAdminSettings> {
 
     return {
       id: (res as any).data?.id || 1,
-      filterPublicProductsByTitle:
-        Boolean(data.filterPublicProductsByTitle) || false,
+      filterPublicProductsByTitle: Boolean(data.filterPublicProductsByTitle) || false,
       createdAt: new Date(data.createdAt || Date.now()),
       updatedAt: new Date(data.updatedAt || Date.now()),
     };

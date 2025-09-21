@@ -60,14 +60,11 @@ export default function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await apiClient.get<ApiResponse>(
-          `/general-discounts/${id}?populate=*`,
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
+        const response = await apiClient.get<ApiResponse>(`/general-discounts/${id}?populate=*`, {
+          headers: {
+            Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        );
+        });
 
         const rule = (response as any).data;
 
@@ -77,20 +74,12 @@ export default function Page() {
           type: rule.attributes.Type || "Discount",
           amount: rule.attributes.Amount || 0,
           limitAmount: rule.attributes.LimitAmount || 0,
-          startDate: rule.attributes.StartDate
-            ? new Date(rule.attributes.StartDate)
-            : new Date(),
-          endDate: rule.attributes.EndDate
-            ? new Date(rule.attributes.EndDate)
-            : new Date(),
+          startDate: rule.attributes.StartDate ? new Date(rule.attributes.StartDate) : new Date(),
+          endDate: rule.attributes.EndDate ? new Date(rule.attributes.EndDate) : new Date(),
           isActive: rule.attributes.IsActive || false,
           terms: [],
-          createdAt: rule.attributes.createdAt
-            ? new Date(rule.attributes.createdAt)
-            : new Date(),
-          updatedAt: rule.attributes.updatedAt
-            ? new Date(rule.attributes.updatedAt)
-            : new Date(),
+          createdAt: rule.attributes.createdAt ? new Date(rule.attributes.createdAt) : new Date(),
+          updatedAt: rule.attributes.updatedAt ? new Date(rule.attributes.updatedAt) : new Date(),
         };
 
         // Add product variations as terms with tagLabels
@@ -105,9 +94,7 @@ export default function Page() {
 
           transformedData.terms.push({
             category: "product",
-            tags: rule.attributes.product_variations.data.map((item: any) =>
-              item.id.toString(),
-            ),
+            tags: rule.attributes.product_variations.data.map((item: any) => item.id.toString()),
             tagLabels: productTagLabels,
           });
         }
@@ -124,9 +111,7 @@ export default function Page() {
 
           transformedData.terms.push({
             category: "category",
-            tags: rule.attributes.product_categories.data.map((item: any) =>
-              item.id.toString(),
-            ),
+            tags: rule.attributes.product_categories.data.map((item: any) => item.id.toString()),
             tagLabels: categoryTagLabels,
           });
         }
@@ -163,11 +148,9 @@ export default function Page() {
                 EndDate: (formData.endDate as any)?.value as Date,
                 IsActive: formData.isActive,
                 product_variations:
-                  formData.terms.find((term) => term.category === "product")
-                    ?.tags || [],
+                  formData.terms.find((term) => term.category === "product")?.tags || [],
                 product_categories:
-                  formData.terms.find((term) => term.category === "category")
-                    ?.tags || [],
+                  formData.terms.find((term) => term.category === "category")?.tags || [],
               },
             },
             {

@@ -69,8 +69,7 @@ export default function FieldRenderer<T>({
       );
     },
     "multiline-text": () => {
-      if (!isStandardField(field) || field.type !== "multiline-text")
-        return null;
+      if (!isStandardField(field) || field.type !== "multiline-text") return null;
       return (
         <MultilineTextField
           value={formData[field.name] as string}
@@ -81,14 +80,8 @@ export default function FieldRenderer<T>({
       );
     },
     "password-with-btn": () => {
-      if (!isStandardField(field) || field.type !== "password-with-btn")
-        return null;
-      return (
-        <PasswordWithBtn
-          id={data?.id as string}
-          value={formData[field.name] as string}
-        />
-      );
+      if (!isStandardField(field) || field.type !== "password-with-btn") return null;
+      return <PasswordWithBtn id={data?.id as string} value={formData[field.name] as string} />;
     },
     password: () => {
       if (!isStandardField(field) || field.type !== "password") return null;

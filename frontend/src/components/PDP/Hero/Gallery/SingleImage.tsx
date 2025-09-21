@@ -91,13 +91,8 @@ export default function PDPHeroGallerySingleImage(props: Props) {
           <div className="absolute inset-0 animate-pulse bg-gray-100" />
         ) : null}
 
-
-
         <div className="absolute bottom-3 left-[50%] z-10 translate-x-[-50%]">
-          <NavigationButtons
-            goToNextImage={goToNextImage}
-            goToPreviousImage={goToPreviousImage}
-          />
+          <NavigationButtons goToNextImage={goToNextImage} goToPreviousImage={goToPreviousImage} />
         </div>
       </div>
     </div>

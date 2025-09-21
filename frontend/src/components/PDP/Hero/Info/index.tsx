@@ -8,10 +8,7 @@ import Main from "./Main";
 import Model from "./Model";
 import Price from "./Price";
 import Size from "./Size";
-import {
-  findProductVariation,
-  hasStockForVariation,
-} from "@/services/product/product";
+import { findProductVariation, hasStockForVariation } from "@/services/product/product";
 import logger from "@/utils/logger";
 import type { ProductData } from "@/types/Product";
 
@@ -89,10 +86,7 @@ export default function PDPHeroInfo(props: Props) {
     } catch {
       // ignore
     }
-    return (
-      process.env.NEXT_PUBLIC_PDP_DEBUG === "true" &&
-      process.env.NODE_ENV !== "production"
-    );
+    return process.env.NEXT_PUBLIC_PDP_DEBUG === "true" && process.env.NODE_ENV !== "production";
   });
 
   useEffect(() => {
@@ -106,128 +100,109 @@ export default function PDPHeroInfo(props: Props) {
   }, [isDebugEnabled]);
 
   // State for selected variation properties
-  const [selectedColor, setSelectedColor] = useState<string>(
-    colors.length > 0 ? colors[0].id : ""
-  );
-  const [selectedSize, setSelectedSize] = useState<string>(
-    sizes.length > 0 ? sizes[0].id : ""
-  );
-  const [selectedModel, setSelectedModel] = useState<string>(
-    models.length > 0 ? models[0].id : ""
-  );
+  const [selectedColor, setSelectedColor] = useState<string>(colors.length > 0 ? colors[0].id : "");
+  const [selectedSize, setSelectedSize] = useState<string>(sizes.length > 0 ? sizes[0].id : "");
+  const [selectedModel, setSelectedModel] = useState<string>(models.length > 0 ? models[0].id : "");
 
   // Compute disabled ids for colors, sizes and models based on productData stock
-  const { disabledColors, disabledSizes, disabledModels, availableVariations } =
-    useMemo(() => {
-      const disabledColors: string[] = [];
-      const disabledSizes: string[] = [];
-      const disabledModels: string[] = [];
+  const { disabledColors, disabledSizes, disabledModels, availableVariations } = useMemo(() => {
+    const disabledColors: string[] = [];
+    const disabledSizes: string[] = [];
+    const disabledModels: string[] = [];
 
-      if (!productData?.attributes?.product_variations?.data) {
-        return {
-          disabledColors,
-          disabledSizes,
-          disabledModels,
-          availableVariations: [],
-        };
-      }
-
-      const variations: any[] = productData.attributes.product_variations.data;
-
-      // Helper to mark option id as enabled when any variation containing it has stock
-      const colorHasStock: Record<string, boolean> = {};
-      const sizeHasStock: Record<string, boolean> = {};
-      const modelHasStock: Record<string, boolean> = {};
-
-      const availableVars: any[] = [];
-      variations.forEach((variation) => {
-        // require published + stock to be considered purchasable
-        const published = variation.attributes.IsPublished === true;
-        const stockOk = hasStockForVariation(variation, 1);
-        const purchasable = published && stockOk;
-        if (purchasable) availableVars.push(variation);
-
-        // variation relations may be missing; guard
-        const colorRel = variation.attributes.product_variation_color?.data;
-        const sizeRel = variation.attributes.product_variation_size?.data;
-        const modelRel = variation.attributes.product_variation_model?.data;
-
-        if (colorRel)
-          colorHasStock[colorRel.id.toString()] =
-            colorHasStock[colorRel.id.toString()] || purchasable;
-        if (sizeRel)
-          sizeHasStock[sizeRel.id.toString()] =
-            sizeHasStock[sizeRel.id.toString()] || purchasable;
-        if (modelRel)
-          modelHasStock[modelRel.id.toString()] =
-            modelHasStock[modelRel.id.toString()] || purchasable;
-      });
-
-      colors.forEach((c) => {
-        if (!colorHasStock[c.id]) disabledColors.push(c.id);
-      });
-
-      sizes.forEach((s) => {
-        if (!sizeHasStock[s.id]) disabledSizes.push(s.id);
-      });
-
-      models.forEach((m) => {
-        if (!modelHasStock[m.id]) disabledModels.push(m.id);
-      });
-
+    if (!productData?.attributes?.product_variations?.data) {
       return {
         disabledColors,
         disabledSizes,
         disabledModels,
-        availableVariations: availableVars,
+        availableVariations: [],
       };
-    }, [productData, colors, sizes, models]);
+    }
+
+    const variations: any[] = productData.attributes.product_variations.data;
+
+    // Helper to mark option id as enabled when any variation containing it has stock
+    const colorHasStock: Record<string, boolean> = {};
+    const sizeHasStock: Record<string, boolean> = {};
+    const modelHasStock: Record<string, boolean> = {};
+
+    const availableVars: any[] = [];
+    variations.forEach((variation) => {
+      // require published + stock to be considered purchasable
+      const published = variation.attributes.IsPublished === true;
+      const stockOk = hasStockForVariation(variation, 1);
+      const purchasable = published && stockOk;
+      if (purchasable) availableVars.push(variation);
+
+      // variation relations may be missing; guard
+      const colorRel = variation.attributes.product_variation_color?.data;
+      const sizeRel = variation.attributes.product_variation_size?.data;
+      const modelRel = variation.attributes.product_variation_model?.data;
+
+      if (colorRel)
+        colorHasStock[colorRel.id.toString()] =
+          colorHasStock[colorRel.id.toString()] || purchasable;
+      if (sizeRel)
+        sizeHasStock[sizeRel.id.toString()] = sizeHasStock[sizeRel.id.toString()] || purchasable;
+      if (modelRel)
+        modelHasStock[modelRel.id.toString()] =
+          modelHasStock[modelRel.id.toString()] || purchasable;
+    });
+
+    colors.forEach((c) => {
+      if (!colorHasStock[c.id]) disabledColors.push(c.id);
+    });
+
+    sizes.forEach((s) => {
+      if (!sizeHasStock[s.id]) disabledSizes.push(s.id);
+    });
+
+    models.forEach((m) => {
+      if (!modelHasStock[m.id]) disabledModels.push(m.id);
+    });
+
+    return {
+      disabledColors,
+      disabledSizes,
+      disabledModels,
+      availableVariations: availableVars,
+    };
+  }, [productData, colors, sizes, models]);
 
   // Calculate the current price based on selected variation
   const [currentPrice, setCurrentPrice] = useState(product.price);
   const [currentDiscount, setCurrentDiscount] = useState(product.discount || 0);
-  const [currentDiscountPrice, setCurrentDiscountPrice] = useState(
-    product.discountPrice || 0
-  );
-  const [currentVariationId, setCurrentVariationId] = useState<
-    string | undefined
-  >(undefined); // Will be set properly in useEffect based on default selections
+  const [currentDiscountPrice, setCurrentDiscountPrice] = useState(product.discountPrice || 0);
+  const [currentVariationId, setCurrentVariationId] = useState<string | undefined>(undefined); // Will be set properly in useEffect based on default selections
   // Initialize stock status based on the initial/default variation
   const getInitialStockStatus = () => {
     debugLog("=== INITIAL STOCK STATUS DEBUG ===");
     debugLog("Product data:", productData);
-    debugLog(
-      "Product variations:",
-      productData?.attributes?.product_variations?.data
-    );
+    debugLog("Product variations:", productData?.attributes?.product_variations?.data);
 
     if (productData?.attributes?.product_variations?.data?.length) {
-      debugLog(
-        "Number of variations:",
-        productData.attributes.product_variations.data.length
-      );
+      debugLog("Number of variations:", productData.attributes.product_variations.data.length);
 
       // Try to get the default variation (same logic as in Hero component)
-      const defaultVariation =
-        productData.attributes.product_variations.data.find(
-          (variation: any) => {
-            debugLog(
-              "Checking variation:",
-              variation.id,
-              "Published:",
-              variation.attributes.IsPublished
-            );
+      const defaultVariation = productData.attributes.product_variations.data.find(
+        (variation: any) => {
+          debugLog(
+            "Checking variation:",
+            variation.id,
+            "Published:",
+            variation.attributes.IsPublished,
+          );
 
-            // Check if the variation is published
-            if (!variation.attributes.IsPublished) {
-              return false;
-            }
-            // Check if it has stock data and count > 0
-            const stock = variation.attributes.product_stock?.data?.attributes;
-            debugLog("Variation stock data:", stock);
-            return stock && typeof stock.Count === "number" && stock.Count > 0;
+          // Check if the variation is published
+          if (!variation.attributes.IsPublished) {
+            return false;
           }
-        );
+          // Check if it has stock data and count > 0
+          const stock = variation.attributes.product_stock?.data?.attributes;
+          debugLog("Variation stock data:", stock);
+          return stock && typeof stock.Count === "number" && stock.Count > 0;
+        },
+      );
 
       debugLog("Found default variation with stock:", defaultVariation);
 
@@ -239,7 +214,7 @@ export default function PDPHeroInfo(props: Props) {
 
       // Fallback: check if any published variation exists
       const anyPublished = productData.attributes.product_variations.data.find(
-        (variation: any) => variation.attributes.IsPublished === true
+        (variation: any) => variation.attributes.IsPublished === true,
       );
 
       debugLog("Found any published variation:", anyPublished);
@@ -302,21 +277,9 @@ export default function PDPHeroInfo(props: Props) {
       const sizeIdNum = sizeId ? parseInt(sizeId) : undefined;
       const modelIdNum = modelId ? parseInt(modelId) : undefined;
 
-      debugLog(
-        "Converted IDs - Color:",
-        colorIdNum,
-        "Size:",
-        sizeIdNum,
-        "Model:",
-        modelIdNum
-      );
+      debugLog("Converted IDs - Color:", colorIdNum, "Size:", sizeIdNum, "Model:", modelIdNum);
 
-      const variation = findProductVariation(
-        productData as any,
-        colorIdNum,
-        sizeIdNum,
-        modelIdNum
-      );
+      const variation = findProductVariation(productData as any, colorIdNum, sizeIdNum, modelIdNum);
 
       debugLog("Found variation:", variation);
 
@@ -331,10 +294,9 @@ export default function PDPHeroInfo(props: Props) {
           setCurrentDiscountPrice(Number(variationAttributes.DiscountPrice));
           // Calculate discount percentage
           const discountPercentage = Math.round(
-            ((Number(variationAttributes.Price) -
-              Number(variationAttributes.DiscountPrice)) /
+            ((Number(variationAttributes.Price) - Number(variationAttributes.DiscountPrice)) /
               Number(variationAttributes.Price)) *
-              100
+              100,
           );
           setCurrentDiscount(discountPercentage);
         } else {
@@ -365,33 +327,25 @@ export default function PDPHeroInfo(props: Props) {
 
       debugLog("=== END UPDATE VARIATION DETAILS DEBUG ===");
     },
-    [productData, product.price, product.discountPrice, product.discount]
+    [productData, product.price, product.discountPrice, product.discount],
   );
 
   // Initialize variation details based on default selections when component mounts
   useEffect(() => {
-    if (!productData || !productData.attributes?.product_variations?.data)
-      return;
+    if (!productData || !productData.attributes?.product_variations?.data) return;
 
     // If there's exactly one available variation (stock), auto-select it
-    const availableVariations =
-      productData.attributes.product_variations.data.filter((v: any) =>
-        hasStockForVariation(v as any, 1)
-      );
+    const availableVariations = productData.attributes.product_variations.data.filter((v: any) =>
+      hasStockForVariation(v as any, 1),
+    );
     if (availableVariations.length === 1) {
       const v = availableVariations[0];
       const colorId =
-        v.attributes.product_variation_color?.data?.id?.toString() ||
-        colors[0]?.id ||
-        "";
+        v.attributes.product_variation_color?.data?.id?.toString() || colors[0]?.id || "";
       const sizeId =
-        v.attributes.product_variation_size?.data?.id?.toString() ||
-        sizes[0]?.id ||
-        "";
+        v.attributes.product_variation_size?.data?.id?.toString() || sizes[0]?.id || "";
       const modelId =
-        v.attributes.product_variation_model?.data?.id?.toString() ||
-        models[0]?.id ||
-        "";
+        v.attributes.product_variation_model?.data?.id?.toString() || models[0]?.id || "";
 
       setSelectedColor(colorId);
       setSelectedSize(sizeId);
@@ -401,22 +355,15 @@ export default function PDPHeroInfo(props: Props) {
     }
 
     // Otherwise use first non-disabled/defaults
-    const firstColor =
-      colors.find((c) => !disabledColors.includes(c.id)) || colors[0];
-    const firstSize =
-      sizes.find((s) => !disabledSizes.includes(s.id)) || sizes[0];
-    const firstModel =
-      models.find((m) => !disabledModels.includes(m.id)) || models[0];
+    const firstColor = colors.find((c) => !disabledColors.includes(c.id)) || colors[0];
+    const firstSize = sizes.find((s) => !disabledSizes.includes(s.id)) || sizes[0];
+    const firstModel = models.find((m) => !disabledModels.includes(m.id)) || models[0];
 
     if (firstColor && firstSize) {
       setSelectedColor(firstColor.id);
       setSelectedSize(firstSize.id);
       if (firstModel) setSelectedModel(firstModel.id);
-      updateVariationDetails(
-        firstColor.id,
-        firstSize.id,
-        firstModel ? firstModel.id : ""
-      );
+      updateVariationDetails(firstColor.id, firstSize.id, firstModel ? firstModel.id : "");
     }
   }, [
     productData,
@@ -442,7 +389,7 @@ export default function PDPHeroInfo(props: Props) {
 
     if (currentVariationId) {
       return productData.attributes.product_variations.data.find(
-        (variation: any) => variation.id.toString() === currentVariationId
+        (variation: any) => variation.id.toString() === currentVariationId,
       );
     }
 
@@ -480,19 +427,13 @@ export default function PDPHeroInfo(props: Props) {
               <div style={{ marginTop: 8 }}>
                 <div>
                   Available variation IDs:{" "}
-                  {availableVariations && availableVariations.length ?
-                    availableVariations.map((v: any) => v.id).join(", ")
-                  : "(none)"}
+                  {availableVariations && availableVariations.length
+                    ? availableVariations.map((v: any) => v.id).join(", ")
+                    : "(none)"}
                 </div>
-                <div>
-                  Disabled colors: {disabledColors.join(", ") || "(none)"}
-                </div>
-                <div>
-                  Disabled sizes: {disabledSizes.join(", ") || "(none)"}
-                </div>
-                <div>
-                  Disabled models: {disabledModels.join(", ") || "(none)"}
-                </div>
+                <div>Disabled colors: {disabledColors.join(", ") || "(none)"}</div>
+                <div>Disabled sizes: {disabledSizes.join(", ") || "(none)"}</div>
+                <div>Disabled models: {disabledModels.join(", ") || "(none)"}</div>
                 <div>
                   Selected: color={selectedColor} size={selectedSize} model=
                   {selectedModel}
@@ -504,20 +445,12 @@ export default function PDPHeroInfo(props: Props) {
         </div>
       )}
       <div className="hidden md:block">
-        <Main
-          category={product.category}
-          title={product.title}
-          discount={currentDiscount}
-        />
+        <Main category={product.category} title={product.title} discount={currentDiscount} />
       </div>
 
       <div className="h-[1px] bg-slate-100" />
 
-      <Price
-        price={currentPrice}
-        discountPrice={currentDiscountPrice}
-        hasStock={hasStock}
-      />
+      <Price price={currentPrice} discountPrice={currentDiscountPrice} hasStock={hasStock} />
 
       <div className="h-[1px] bg-slate-100" />
 
@@ -569,34 +502,21 @@ export default function PDPHeroInfo(props: Props) {
 
       <div className="flex flex-col gap-7">
         <CommentsInfo
-          commentCount={
-            productData?.attributes?.product_reviews?.data?.length || 0
-          }
+          commentCount={productData?.attributes?.product_reviews?.data?.length || 0}
           rateCount={productData?.attributes?.RatingCount || 0}
-          last24hoursSeenCount={
-            productData?.attributes?.last24hoursViews || 856
-          }
+          last24hoursSeenCount={productData?.attributes?.last24hoursViews || 856}
         />
 
         {productData?.attributes?.Description && (
-          <FAQItem
-            title="جزئیات محصول"
-            content={productData.attributes.Description}
-          />
+          <FAQItem title="جزئیات محصول" content={productData.attributes.Description} />
         )}
 
         {productData?.attributes?.CleaningTips && (
-          <FAQItem
-            title="نکات شست و شو"
-            content={productData.attributes.CleaningTips}
-          />
+          <FAQItem title="نکات شست و شو" content={productData.attributes.CleaningTips} />
         )}
 
         {productData?.attributes?.ReturnConditions && (
-          <FAQItem
-            title="شرایط مرجوع"
-            content={productData.attributes.ReturnConditions}
-          />
+          <FAQItem title="شرایط مرجوع" content={productData.attributes.ReturnConditions} />
         )}
       </div>
     </div>

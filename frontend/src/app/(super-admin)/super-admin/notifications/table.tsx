@@ -58,10 +58,7 @@ export const columns: ColumnDef<Notification>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row-reverse items-center gap-3 p-1">
-          <SuperAdminTableCellActionButton
-            variant="primary"
-            icon={<RecycleIcon />}
-          />
+          <SuperAdminTableCellActionButton variant="primary" icon={<RecycleIcon />} />
 
           <SuperAdminTableCellActionButton
             variant="secondary"
@@ -125,9 +122,7 @@ function NotificationMobileRow({ row }: { row: Notification }) {
               className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1"
               key={index}
             >
-              <span className="text-xs text-neutral-400">
-                {column.header?.toString()}
-              </span>
+              <span className="text-xs text-neutral-400">{column.header?.toString()}</span>
               {column?.cell ? (
                 (column?.cell as any)?.({
                   row: {
@@ -136,11 +131,7 @@ function NotificationMobileRow({ row }: { row: Notification }) {
                 })
               ) : (
                 <span className="text-xs text-foreground-primary md:text-base">
-                  {
-                    row[
-                      (column as any).accessorKey as keyof Notification
-                    ] as string
-                  }
+                  {row[(column as any).accessorKey as keyof Notification] as string}
                 </span>
               )}
             </div>

@@ -5,8 +5,7 @@ interface Option {
   value: string;
 }
 
-interface RadioButtonProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+interface RadioButtonProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label: string;
   name: string;
   value: string;
@@ -25,10 +24,7 @@ interface RadioGroupProps {
 }
 
 const RadioButton = React.forwardRef<HTMLInputElement, RadioButtonProps>(
-  (
-    { label, name, value, checked, onChange, className = "", ...props },
-    ref,
-  ) => {
+  ({ label, name, value, checked, onChange, className = "", ...props }, ref) => {
     return (
       <label className={`flex cursor-pointer items-center gap-2 ${className}`}>
         <div className="relative flex h-5 w-5 items-center justify-center">
@@ -60,9 +56,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      {label && (
-        <label className="text-lg mb-3 text-foreground-primary">{label}</label>
-      )}
+      {label && <label className="text-lg mb-3 text-foreground-primary">{label}</label>}
       <div className={`flex items-center gap-4 ${className}`}>
         {options.map((option) => (
           <RadioButton

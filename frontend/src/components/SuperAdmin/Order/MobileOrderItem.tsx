@@ -13,11 +13,7 @@ type OrderItem = {
   image: string;
 };
 
-export default function SuperAdminOrderMobileOrderItem({
-  item,
-}: {
-  item: OrderItem;
-}) {
+export default function SuperAdminOrderMobileOrderItem({ item }: { item: OrderItem }) {
   return (
     <div className="mb-4 overflow-hidden rounded-xl border border-slate-100">
       <div className="flex border-b">
@@ -55,9 +51,7 @@ export default function SuperAdminOrderMobileOrderItem({
         <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           قیمت
         </div>
-        <div className="text-xs w-2/3 border-r p-4">
-          {priceFormatter(item.price, " تومان")}
-        </div>
+        <div className="text-xs w-2/3 border-r p-4">{priceFormatter(item.price, " تومان")}</div>
       </div>
 
       <div className="flex border-b">

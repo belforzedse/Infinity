@@ -124,9 +124,7 @@ function PaymentSuccessContent() {
           </div>
 
           {/* Success Message */}
-          <h1 className="text-3xl mb-4 font-bold text-green-600">
-            پرداخت با موفقیت انجام شد!
-          </h1>
+          <h1 className="text-3xl mb-4 font-bold text-green-600">پرداخت با موفقیت انجام شد!</h1>
 
           <p className="text-lg mb-6 text-gray-700">
             پرداخت شما با موفقیت پردازش شد و سفارش شما ثبت گردید.
@@ -135,15 +133,11 @@ function PaymentSuccessContent() {
           {/* Order Information */}
           {orderId && (
             <div className="mb-6 w-full rounded-lg border border-green-200 bg-green-50 p-6">
-              <h3 className="text-lg mb-3 font-semibold text-green-800">
-                اطلاعات سفارش
-              </h3>
+              <h3 className="text-lg mb-3 font-semibold text-green-800">اطلاعات سفارش</h3>
               <div className="space-y-2 text-right">
                 <p className="text-gray-700">
                   <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-green-700">
-                    #{orderId}
-                  </span>
+                  <span className="mr-2 font-semibold text-green-700">#{orderId}</span>
                 </p>
                 {orderDetails && (
                   <>
@@ -153,9 +147,7 @@ function PaymentSuccessContent() {
                     </p>
                     <p className="text-gray-700">
                       <span className="font-medium">تاریخ:</span>
-                      <span className="mr-2">
-                        {new Date().toLocaleDateString("fa-IR")}
-                      </span>
+                      <span className="mr-2">{new Date().toLocaleDateString("fa-IR")}</span>
                     </p>
                   </>
                 )}
@@ -167,9 +159,7 @@ function PaymentSuccessContent() {
 
           {/* Next Steps */}
           <div className="mb-6 w-full rounded-lg border border-blue-200 bg-blue-50 p-6">
-            <h3 className="text-lg mb-3 font-semibold text-blue-800">
-              مراحل بعدی
-            </h3>
+            <h3 className="text-lg mb-3 font-semibold text-blue-800">مراحل بعدی</h3>
             <div className="space-y-2 text-right text-gray-700">
               <p>✅ سفارش شما در حال پردازش است</p>
               <p>✅ ایمیل تایید برای شما ارسال خواهد شد</p>

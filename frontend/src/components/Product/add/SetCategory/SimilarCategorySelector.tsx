@@ -41,9 +41,7 @@ const SimilarCategorySelector: React.FC<SimilarCategorySelectorProps> = ({
             <Combobox.Options className="absolute z-[99999] mt-1 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
               {filteredTags.length === 0 ? (
                 <button className="flex items-center gap-2 px-3 py-2 text-neutral-800">
-                  <span className="text-xs text-neutral-500">
-                    نتیجه ای یافت نشد
-                  </span>
+                  <span className="text-xs text-neutral-500">نتیجه ای یافت نشد</span>
                 </button>
               ) : (
                 filteredTags.map((category) => (

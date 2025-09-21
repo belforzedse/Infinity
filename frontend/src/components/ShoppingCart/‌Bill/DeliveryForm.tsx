@@ -36,11 +36,7 @@ function ShoppingCartBillDeliveryForm({
   discountPreview,
   shippingPreviewShipping,
 }: Props) {
-  const {
-    totalPrice,
-    subtotalBeforeDiscount,
-    cartDiscountTotal,
-  } = useCart();
+  const { totalPrice, subtotalBeforeDiscount, cartDiscountTotal } = useCart();
   const [, _setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,9 +77,7 @@ function ShoppingCartBillDeliveryForm({
 
   return (
     <div className="flex flex-col gap-5 rounded-2xl bg-stone-50 p-5">
-      <span className="text-3xl text-neutral-800 lg:text-2xl">
-        جمع کل سبد خرید
-      </span>
+      <span className="text-3xl text-neutral-800 lg:text-2xl">جمع کل سبد خرید</span>
 
       <div className="flex flex-col items-end justify-between border-b border-slate-200 pb-4 lg:flex-row lg:items-center">
         <span className="text-xl w-full text-neutral-800">مجموع سبد خرید</span>
@@ -92,9 +86,7 @@ function ShoppingCartBillDeliveryForm({
             {totalPrice.toLocaleString()} تومان
           </span>
           <button className="flex items-center" type="button">
-            <span className="text-sm text-nowrap text-pink-600 lg:text-xs">
-              مشاهده سبد خرید
-            </span>
+            <span className="text-sm text-nowrap text-pink-600 lg:text-xs">مشاهده سبد خرید</span>
             <ChevronLeftIcon className="h-4 w-4 text-pink-600" />
           </button>
         </div>
@@ -153,21 +145,15 @@ function ShoppingCartBillDeliveryForm({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-neutral-600 lg:text-base">
-            هزینه ارسال
-          </span>
+          <span className="text-sm text-neutral-600 lg:text-base">هزینه ارسال</span>
           <span className="text-sm text-neutral-800 lg:text-base">
             {effectiveShipping.toLocaleString()} تومان
           </span>
         </div>
 
         <div className="flex items-center justify-between pt-2">
-          <span className="text-lg text-neutral-800 lg:text-xl">
-            قابل پرداخت
-          </span>
-          <span className="text-2xl text-pink-600">
-            {finalTotal.toLocaleString()} تومان
-          </span>
+          <span className="text-lg text-neutral-800 lg:text-xl">قابل پرداخت</span>
+          <span className="text-2xl text-pink-600">{finalTotal.toLocaleString()} تومان</span>
         </div>
 
         {effectiveShipping > 0 && (

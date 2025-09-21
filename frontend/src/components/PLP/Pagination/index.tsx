@@ -156,9 +156,7 @@ export default function PLPPagination({
           )}
           aria-label="صفحه بعدی"
         >
-          <ChevronLeftIcon
-            color={currentPage === totalPages ? "#9CA3AF" : "#374151"}
-          />
+          <ChevronLeftIcon color={currentPage === totalPages ? "#9CA3AF" : "#374151"} />
         </button>
       </div>
 

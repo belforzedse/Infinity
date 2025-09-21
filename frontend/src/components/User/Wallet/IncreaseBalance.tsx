@@ -15,9 +15,7 @@ const IncreaseBalance = () => {
   return (
     <div className="flex w-full flex-col items-end gap-4 lg:w-3/5">
       <div className="h-fit w-full rounded-xl bg-slate-100 p-5">
-        <span className="text-2xl text-foreground-primary lg:text-4xl">
-          شارژ سریع کیف پول
-        </span>
+        <span className="text-2xl text-foreground-primary lg:text-4xl">شارژ سریع کیف پول</span>
 
         <div className="mb-2 mt-4 flex h-14 w-full items-center justify-center rounded-lg border border-slate-100 bg-white">
           <span className="text-lg text-slate-800 lg:text-3xl">
@@ -43,7 +41,7 @@ const IncreaseBalance = () => {
       </div>
 
       <button
-        className="bg-pink-500 text-white px-10 py-3 rounded-lg flex items-center gap-1 lg:w-fit w-full justify-center"
+        className="flex w-full items-center justify-center gap-1 rounded-lg bg-pink-500 px-10 py-3 text-white lg:w-fit"
         onClick={async () => {
           try {
             // UI shows toman; backend expects IRR

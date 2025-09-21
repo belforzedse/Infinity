@@ -9,8 +9,7 @@ import TransactionsIcon from "@/components/User/Icons/TransactionsIcon";
 import UserContainer from "@/components/layout/UserContainer";
 
 export default function WalletPage() {
-  const [isTransactionsHistoryOpen, setIsTransactionsHistoryOpen] =
-    useState(false);
+  const [isTransactionsHistoryOpen, setIsTransactionsHistoryOpen] = useState(false);
 
   return (
     <UserContainer className="flex min-h-[60vh] gap-10 bg-white" dir="rtl">
@@ -18,9 +17,7 @@ export default function WalletPage() {
 
       <main className="flex flex-1 flex-col gap-3 overflow-y-auto">
         <BreadCrumb
-          onClick={() =>
-            setIsTransactionsHistoryOpen(!isTransactionsHistoryOpen)
-          }
+          onClick={() => setIsTransactionsHistoryOpen(!isTransactionsHistoryOpen)}
           isNextStepShown={isTransactionsHistoryOpen}
           hasBackButton={true}
           currentTitle="کیف پول"

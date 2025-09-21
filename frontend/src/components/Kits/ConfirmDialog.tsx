@@ -22,17 +22,10 @@ export default function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onCancel}
-      title={title}
-      className="max-w-md"
-    >
+    <Modal isOpen={isOpen} onClose={onCancel} title={title} className="max-w-md">
       <div className="flex flex-col gap-6">
         {description ? (
-          <p className="text-smtext-sm text-right text-neutral-600">
-            {description}
-          </p>
+          <p className="text-smtext-sm text-right text-neutral-600">{description}</p>
         ) : null}
 
         <div className="flex items-center justify-start gap-3">

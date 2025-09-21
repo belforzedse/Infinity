@@ -35,32 +35,26 @@ export async function getFooter(): Promise<Footer> {
       first: {
         header: footerData.First?.Header || "",
         links:
-          footerData.First?.Links?.map(
-            (link: { Title: string; URL: string }) => ({
-              title: link.Title || "",
-              url: link.URL || "",
-            }),
-          ) || [],
+          footerData.First?.Links?.map((link: { Title: string; URL: string }) => ({
+            title: link.Title || "",
+            url: link.URL || "",
+          })) || [],
       },
       second: {
         header: footerData.Second?.Header || "",
         links:
-          footerData.Second?.Links?.map(
-            (link: { Title: string; URL: string }) => ({
-              title: link.Title || "",
-              url: link.URL || "",
-            }),
-          ) || [],
+          footerData.Second?.Links?.map((link: { Title: string; URL: string }) => ({
+            title: link.Title || "",
+            url: link.URL || "",
+          })) || [],
       },
       third: {
         header: footerData.Third?.Header || "",
         links:
-          footerData.Third?.Links?.map(
-            (link: { Title: string; URL: string }) => ({
-              title: link.Title || "",
-              url: link.URL || "",
-            }),
-          ) || [],
+          footerData.Third?.Links?.map((link: { Title: string; URL: string }) => ({
+            title: link.Title || "",
+            url: link.URL || "",
+          })) || [],
       },
       contactUs: {
         phone: footerData.ContactUs?.Phone || "",

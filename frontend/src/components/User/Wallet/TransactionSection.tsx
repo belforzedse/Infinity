@@ -24,11 +24,7 @@ export const TransactionSection = ({
   showOnlyMobile = false,
 }: TransactionSectionProps) => (
   <div className="flex flex-col gap-1 rounded-xl border border-slate-100 p-3 lg:border-none lg:p-0">
-    <TransactionHeader
-      icon={icon}
-      title={title}
-      showOnlyMobile={showOnlyMobile}
-    />
+    <TransactionHeader icon={icon} title={title} showOnlyMobile={showOnlyMobile} />
 
     {transactions.length > 0 ? (
       <div

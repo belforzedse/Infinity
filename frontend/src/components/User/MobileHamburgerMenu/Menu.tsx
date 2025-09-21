@@ -58,10 +58,7 @@ const Menu = ({ isOpen, onClose }: Props) => {
             >
               <Dialog.Panel className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all">
                 <nav className="p-5">
-                  <button
-                    onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500"
-                  >
+                  <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
                     <XIcon />
                   </button>
                   <div className="flex flex-col gap-3 lg:gap-2 lg:px-8">

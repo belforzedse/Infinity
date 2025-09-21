@@ -22,12 +22,7 @@ interface Props {
   setValue: UseFormSetValue<FormData>;
 }
 
-function ShoppingCartBillInformationForm({
-  register,
-  errors,
-  control,
-  setValue,
-}: Props) {
+function ShoppingCartBillInformationForm({ register, errors, control, setValue }: Props) {
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,8 +138,7 @@ function ShoppingCartBillInformationForm({
       <div className="flex items-center gap-1 rounded-lg bg-pink-50 p-4 lg:p-5">
         <CirculeInformationIcon className="h-6 w-6" />
         <span className="text-sm text-pink-600 lg:text-base">
-          برای دریافت فاکتور، بعد از دریافت سفارش به حساب کاربری و صفحه جزئیات
-          سفارش سر بزنید
+          برای دریافت فاکتور، بعد از دریافت سفارش به حساب کاربری و صفحه جزئیات سفارش سر بزنید
         </span>
       </div>
     </div>

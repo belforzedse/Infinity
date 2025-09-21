@@ -174,9 +174,7 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
       const discountPriceStr = defaultVariation.attributes.DiscountPrice;
       if (discountPriceStr) {
         discountPrice =
-          typeof discountPriceStr === "string"
-            ? parseInt(discountPriceStr, 10)
-            : discountPriceStr;
+          typeof discountPriceStr === "string" ? parseInt(discountPriceStr, 10) : discountPriceStr;
 
         // Calculate discount percentage
         discount = Math.round(((price - discountPrice) / price) * 100);
@@ -198,11 +196,8 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
       productData?.attributes.Description ||
       "مانتو زنانه شیک و مجلسی با پارچه نخی درجه یک، مناسب برای استفاده روزمره و مهمانی",
     cleaningInstructions:
-      productData?.attributes.CleaningTips ||
-      "شستشو با آب سرد، اتو در دمای متوسط",
-    returnPolicy:
-      productData?.attributes.ReturnConditions ||
-      "۷ روز مهلت تست و بازگشت کالا",
+      productData?.attributes.CleaningTips || "شستشو با آب سرد، اتو در دمای متوسط",
+    returnPolicy: productData?.attributes.ReturnConditions || "۷ روز مهلت تست و بازگشت کالا",
     price: price,
     discount: discount,
     discountPrice: discountPrice,
@@ -215,11 +210,7 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
   return (
     <div className="relative flex flex-col gap-4 md:flex-row md:gap-7">
       <div className="md:hidden">
-        <Main
-          category={product.category}
-          title={product.title}
-          discount={product.discount}
-        />
+        <Main category={product.category} title={product.title} discount={product.discount} />
       </div>
 
       <PDPHeroGallery assets={assets} />

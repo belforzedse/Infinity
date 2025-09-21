@@ -188,9 +188,7 @@ export interface ProductDetail {
 }
 
 // Get product by ID instead of slug since current API doesn't have slug field
-export const getProductById = async (
-  id: string,
-): Promise<ApiResponse<ProductDetail>> => {
+export const getProductById = async (id: string): Promise<ApiResponse<ProductDetail>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies`;
 
   try {
@@ -204,9 +202,7 @@ export const getProductById = async (
 };
 
 // Keeping the original method for compatibility
-export const getProductBySlug = async (
-  slug: string,
-): Promise<ApiResponse<ProductDetail>> => {
+export const getProductBySlug = async (slug: string): Promise<ApiResponse<ProductDetail>> => {
   // Since slug is not available, let's try to get a product by ID
   // If slug can be converted to a number, we'll use it as an ID
   const productId = isNaN(parseInt(slug)) ? "1" : slug;
@@ -220,9 +216,7 @@ export const getProductBySlug = async (
 };
 
 // Create a placeholder image for non-image media types
-const getPlaceholderImage = (
-  mediaType: string,
-): { url: string; width: number; height: number } => {
+const getPlaceholderImage = (mediaType: string): { url: string; width: number; height: number } => {
   // Generate placeholders based on file type
   if (mediaType.startsWith("video")) {
     return {
@@ -338,18 +332,16 @@ export const getDefaultProductVariation = (product: ProductDetail) => {
   }
 
   // First try to find a published variation with stock
-  const publishedWithStock = product.attributes.product_variations.data.find(
-    (variation) => {
-      // Check if the variation is published
-      if (!variation.attributes.IsPublished) {
-        return false;
-      }
+  const publishedWithStock = product.attributes.product_variations.data.find((variation) => {
+    // Check if the variation is published
+    if (!variation.attributes.IsPublished) {
+      return false;
+    }
 
-      // Check if it has stock data and quantity > 0
-      const stock = variation.attributes.product_stock?.data?.attributes;
-      return stock && typeof stock.Count === "number" && stock.Count > 0;
-    },
-  );
+    // Check if it has stock data and quantity > 0
+    const stock = variation.attributes.product_stock?.data?.attributes;
+    return stock && typeof stock.Count === "number" && stock.Count > 0;
+  });
 
   if (publishedWithStock) {
     return publishedWithStock;
@@ -377,10 +369,7 @@ export const getProductColors = (product: ProductDetail) => {
   const colors = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (
-      variation.attributes.IsPublished &&
-      variation.attributes.product_variation_color?.data
-    ) {
+    if (variation.attributes.IsPublished && variation.attributes.product_variation_color?.data) {
       const color = variation.attributes.product_variation_color.data;
       colors.set(color.id, {
         id: color.id,
@@ -402,10 +391,7 @@ export const getProductColorsWithStock = (product: ProductDetail) => {
   const colors = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (
-      variation.attributes.IsPublished &&
-      variation.attributes.product_variation_color?.data
-    ) {
+    if (variation.attributes.IsPublished && variation.attributes.product_variation_color?.data) {
       const color = variation.attributes.product_variation_color.data;
       const hasStock = hasStockForVariation(variation);
 
@@ -432,15 +418,9 @@ export const getProductSizes = (product: ProductDetail, colorId?: number) => {
   const sizes = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (
-      variation.attributes.IsPublished &&
-      variation.attributes.product_variation_size?.data
-    ) {
+    if (variation.attributes.IsPublished && variation.attributes.product_variation_size?.data) {
       // If colorId is specified, only include sizes for that color
-      if (
-        colorId &&
-        variation.attributes.product_variation_color?.data.id !== colorId
-      ) {
+      if (colorId && variation.attributes.product_variation_color?.data.id !== colorId) {
         return;
       }
 
@@ -456,10 +436,7 @@ export const getProductSizes = (product: ProductDetail, colorId?: number) => {
 };
 
 // Helper function to get sizes with stock availability for a specific color
-export const getProductSizesWithStock = (
-  product: ProductDetail,
-  colorId?: number,
-) => {
+export const getProductSizesWithStock = (product: ProductDetail, colorId?: number) => {
   if (!product.attributes.product_variations?.data?.length) {
     return [];
   }
@@ -467,15 +444,9 @@ export const getProductSizesWithStock = (
   const sizes = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (
-      variation.attributes.IsPublished &&
-      variation.attributes.product_variation_size?.data
-    ) {
+    if (variation.attributes.IsPublished && variation.attributes.product_variation_size?.data) {
       // If colorId is specified, only include sizes for that color
-      if (
-        colorId &&
-        variation.attributes.product_variation_color?.data.id !== colorId
-      ) {
+      if (colorId && variation.attributes.product_variation_color?.data.id !== colorId) {
         return;
       }
 
@@ -502,10 +473,7 @@ export const getProductModels = (product: ProductDetail) => {
   const models = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (
-      variation.attributes.IsPublished &&
-      variation.attributes.product_variation_model?.data
-    ) {
+    if (variation.attributes.IsPublished && variation.attributes.product_variation_model?.data) {
       const model = variation.attributes.product_variation_model.data;
       models.set(model.id, {
         id: model.id,
@@ -570,8 +538,7 @@ export const hasStockForVariation = (
   }
 
   // Updated validation: Check if stock is sufficient for the requested quantity
-  const hasStock =
-    typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
+  const hasStock = typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Has sufficient stock", { hasStock });
     logger.info("=== END STOCK CHECK ===");
@@ -593,18 +560,12 @@ export const findProductVariation = (
 
   return product.attributes.product_variations.data.find((variation) => {
     const colorMatch =
-      !colorId ||
-      variation.attributes.product_variation_color?.data?.id === colorId;
-    const sizeMatch =
-      !sizeId ||
-      variation.attributes.product_variation_size?.data?.id === sizeId;
+      !colorId || variation.attributes.product_variation_color?.data?.id === colorId;
+    const sizeMatch = !sizeId || variation.attributes.product_variation_size?.data?.id === sizeId;
     const modelMatch =
-      !modelId ||
-      variation.attributes.product_variation_model?.data?.id === modelId;
+      !modelId || variation.attributes.product_variation_model?.data?.id === modelId;
 
-    return (
-      variation.attributes.IsPublished && colorMatch && sizeMatch && modelMatch
-    );
+    return variation.attributes.IsPublished && colorMatch && sizeMatch && modelMatch;
   });
 };
 
@@ -639,11 +600,7 @@ export const getRelatedProductsByOtherCategories = async (
   limit: number = 10,
 ): Promise<ProductCardProps[]> => {
   // Return empty array if there are no valid category IDs
-  if (
-    !otherCategoryIds ||
-    !Array.isArray(otherCategoryIds) ||
-    otherCategoryIds.length === 0
-  ) {
+  if (!otherCategoryIds || !Array.isArray(otherCategoryIds) || otherCategoryIds.length === 0) {
     return [];
   }
 
@@ -659,10 +616,7 @@ export const getRelatedProductsByOtherCategories = async (
   try {
     // Build filter for other categories
     const categoryFilters = validCategoryIds
-      .map(
-        (id, index) =>
-          `filters[product_other_categories][id][$in][${index}]=${id}`,
-      )
+      .map((id, index) => `filters[product_other_categories][id][$in][${index}]=${id}`)
       .join("&");
 
     const endpoint = appendTitleFilter(
@@ -672,18 +626,13 @@ export const getRelatedProductsByOtherCategories = async (
     const response = await apiClient.get<any>(endpoint);
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
-    console.error(
-      "Error fetching related products by other categories:",
-      error,
-    );
+    console.error("Error fetching related products by other categories:", error);
     return [];
   }
 };
 
 // Helper function to convert API product data to ProductCardProps format
-export const formatProductsToCardProps = (
-  products: any[],
-): ProductCardProps[] => {
+export const formatProductsToCardProps = (products: any[]): ProductCardProps[] => {
   // Check if products is undefined or empty
   if (!products || !Array.isArray(products) || products.length === 0) {
     return [];
@@ -697,14 +646,12 @@ export const formatProductsToCardProps = (
       }
 
       // Get first variation with price AND stock
-      const variation = product.attributes.product_variations?.data?.find(
-        (v: any) => {
-          const hasPrice = v.attributes.Price && parseInt(v.attributes.Price) > 0;
-          const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
-          const hasStock = typeof stockCount === 'number' && stockCount > 0;
-          return hasPrice && hasStock;
-        }
-      );
+      const variation = product.attributes.product_variations?.data?.find((v: any) => {
+        const hasPrice = v.attributes.Price && parseInt(v.attributes.Price) > 0;
+        const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
+        const hasStock = typeof stockCount === "number" && stockCount > 0;
+        return hasPrice && hasStock;
+      });
 
       if (!variation) return null;
 
@@ -714,7 +661,7 @@ export const formatProductsToCardProps = (
           variationId: variation.id,
           attributes: variation.attributes,
           availableFields: Object.keys(variation.attributes),
-          hasGeneralDiscounts: !!variation.attributes.general_discounts
+          hasGeneralDiscounts: !!variation.attributes.general_discounts,
         });
       }
 
@@ -734,9 +681,7 @@ export const formatProductsToCardProps = (
         // Fallback to DiscountPrice field (if it exists)
         discountPrice = parseInt(variation.attributes.DiscountPrice.toString());
         const hasDiscount = discountPrice && discountPrice < price;
-        discount = hasDiscount
-          ? Math.round(((price - discountPrice) / price) * 100)
-          : undefined;
+        discount = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : undefined;
       }
 
       // Debug: Log pricing calculations
@@ -747,26 +692,21 @@ export const formatProductsToCardProps = (
           discountPrice,
           discount,
           generalDiscounts: generalDiscounts,
-          variationData: variation.attributes
+          variationData: variation.attributes,
         });
       }
 
       // Check if any variation has stock available
-      const isAvailable = product.attributes.product_variations?.data?.some(
-        (v: any) => {
+      const isAvailable =
+        product.attributes.product_variations?.data?.some((v: any) => {
           const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
-          return typeof stockCount === 'number' && stockCount > 0;
-        }
-      ) || false;
+          return typeof stockCount === "number" && stockCount > 0;
+        }) || false;
 
       const result: ProductCardProps = {
         id: parseInt(product.id),
-        images: [
-          `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
-        ],
-        category:
-          product.attributes.product_main_category?.data?.attributes?.Title ||
-          "",
+        images: [`${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`],
+        category: product.attributes.product_main_category?.data?.attributes?.Title || "",
         title: product.attributes.Title,
         price,
         seenCount: product.attributes.RatingCount || 0,

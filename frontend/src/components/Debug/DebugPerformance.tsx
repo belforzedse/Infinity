@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface PerformanceMetric {
   name: string;
   value: number;
   unit: string;
-  status: 'good' | 'warning' | 'poor';
+  status: "good" | "warning" | "poor";
 }
 
 const DebugPerformance: React.FC = () => {
@@ -15,13 +15,15 @@ const DebugPerformance: React.FC = () => {
   const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
-    setRenderCount(prev => prev + 1);
+    setRenderCount((prev) => prev + 1);
   }, []);
 
   useEffect(() => {
     const updateMetrics = () => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      const paint = performance.getEntriesByType('paint');
+      const navigation = performance.getEntriesByType(
+        "navigation",
+      )[0] as PerformanceNavigationTiming;
+      const paint = performance.getEntriesByType("paint");
 
       const newMetrics: PerformanceMetric[] = [];
 
@@ -29,67 +31,67 @@ const DebugPerformance: React.FC = () => {
         // DNS Lookup Time
         const dnsTime = navigation.domainLookupEnd - navigation.domainLookupStart;
         newMetrics.push({
-          name: 'DNS Lookup',
+          name: "DNS Lookup",
           value: Math.round(dnsTime),
-          unit: 'ms',
-          status: dnsTime < 100 ? 'good' : dnsTime < 300 ? 'warning' : 'poor'
+          unit: "ms",
+          status: dnsTime < 100 ? "good" : dnsTime < 300 ? "warning" : "poor",
         });
 
         // Connection Time
         const connectTime = navigation.connectEnd - navigation.connectStart;
         newMetrics.push({
-          name: 'Connection',
+          name: "Connection",
           value: Math.round(connectTime),
-          unit: 'ms',
-          status: connectTime < 100 ? 'good' : connectTime < 300 ? 'warning' : 'poor'
+          unit: "ms",
+          status: connectTime < 100 ? "good" : connectTime < 300 ? "warning" : "poor",
         });
 
         // Time to First Byte
         const ttfb = navigation.responseStart - navigation.requestStart;
         newMetrics.push({
-          name: 'TTFB',
+          name: "TTFB",
           value: Math.round(ttfb),
-          unit: 'ms',
-          status: ttfb < 200 ? 'good' : ttfb < 500 ? 'warning' : 'poor'
+          unit: "ms",
+          status: ttfb < 200 ? "good" : ttfb < 500 ? "warning" : "poor",
         });
 
         // DOM Content Loaded
         const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart;
         newMetrics.push({
-          name: 'DOM Ready',
+          name: "DOM Ready",
           value: Math.round(domContentLoaded),
-          unit: 'ms',
-          status: domContentLoaded < 1500 ? 'good' : domContentLoaded < 3000 ? 'warning' : 'poor'
+          unit: "ms",
+          status: domContentLoaded < 1500 ? "good" : domContentLoaded < 3000 ? "warning" : "poor",
         });
 
         // Page Load Time
         const loadTime = navigation.loadEventEnd - navigation.fetchStart;
         newMetrics.push({
-          name: 'Load Time',
+          name: "Load Time",
           value: Math.round(loadTime),
-          unit: 'ms',
-          status: loadTime < 2500 ? 'good' : loadTime < 4000 ? 'warning' : 'poor'
+          unit: "ms",
+          status: loadTime < 2500 ? "good" : loadTime < 4000 ? "warning" : "poor",
         });
       }
 
       // Paint timings
-      const fcp = paint.find(entry => entry.name === 'first-contentful-paint');
+      const fcp = paint.find((entry) => entry.name === "first-contentful-paint");
       if (fcp) {
         newMetrics.push({
-          name: 'First Contentful Paint',
+          name: "First Contentful Paint",
           value: Math.round(fcp.startTime),
-          unit: 'ms',
-          status: fcp.startTime < 1800 ? 'good' : fcp.startTime < 3000 ? 'warning' : 'poor'
+          unit: "ms",
+          status: fcp.startTime < 1800 ? "good" : fcp.startTime < 3000 ? "warning" : "poor",
         });
       }
 
-      const lcp = paint.find(entry => entry.name === 'largest-contentful-paint');
+      const lcp = paint.find((entry) => entry.name === "largest-contentful-paint");
       if (lcp) {
         newMetrics.push({
-          name: 'Largest Contentful Paint',
+          name: "Largest Contentful Paint",
           value: Math.round(lcp.startTime),
-          unit: 'ms',
-          status: lcp.startTime < 2500 ? 'good' : lcp.startTime < 4000 ? 'warning' : 'poor'
+          unit: "ms",
+          status: lcp.startTime < 2500 ? "good" : lcp.startTime < 4000 ? "warning" : "poor",
         });
       }
 
@@ -98,17 +100,17 @@ const DebugPerformance: React.FC = () => {
         const memory = (performance as any).memory;
         const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
         newMetrics.push({
-          name: 'Memory Used',
+          name: "Memory Used",
           value: usedMB,
-          unit: 'MB',
-          status: usedMB < 50 ? 'good' : usedMB < 100 ? 'warning' : 'poor'
+          unit: "MB",
+          status: usedMB < 50 ? "good" : usedMB < 100 ? "warning" : "poor",
         });
       }
 
       setMetrics(newMetrics);
 
       // Web Vitals (if available)
-      if ('web-vitals' in window) {
+      if ("web-vitals" in window) {
         // This would need the web-vitals library to be installed
         // For now, we'll show placeholder data
       }
@@ -145,19 +147,25 @@ const DebugPerformance: React.FC = () => {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  const getStatusColor = (status: PerformanceMetric['status']) => {
+  const getStatusColor = (status: PerformanceMetric["status"]) => {
     switch (status) {
-      case 'good': return 'text-green-400';
-      case 'warning': return 'text-yellow-400';
-      case 'poor': return 'text-red-400';
+      case "good":
+        return "text-green-400";
+      case "warning":
+        return "text-yellow-400";
+      case "poor":
+        return "text-red-400";
     }
   };
 
-  const getStatusIcon = (status: PerformanceMetric['status']) => {
+  const getStatusIcon = (status: PerformanceMetric["status"]) => {
     switch (status) {
-      case 'good': return '✅';
-      case 'warning': return '⚠️';
-      case 'poor': return '❌';
+      case "good":
+        return "✅";
+      case "warning":
+        return "⚠️";
+      case "poor":
+        return "❌";
     }
   };
 
@@ -179,27 +187,27 @@ const DebugPerformance: React.FC = () => {
   return (
     <div className="space-y-3">
       {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-2 text-xs">
+      <div className="text-xs grid grid-cols-3 gap-2">
         <div className="rounded bg-gray-800 p-2 text-center">
           <div className="text-gray-400">FPS</div>
-          <div className="text-white font-semibold">{vitals.fps || '—'}</div>
+          <div className="font-semibold text-white">{vitals.fps || "—"}</div>
         </div>
         <div className="rounded bg-gray-800 p-2 text-center">
           <div className="text-gray-400">Renders</div>
-          <div className="text-white font-semibold">{renderCount}</div>
+          <div className="font-semibold text-white">{renderCount}</div>
         </div>
         <div className="rounded bg-gray-800 p-2 text-center">
           <div className="text-gray-400">Timing</div>
-          <div className="text-white font-semibold">{metrics.length}</div>
+          <div className="font-semibold text-white">{metrics.length}</div>
         </div>
       </div>
 
       {/* Performance Metrics */}
-      <div className="max-h-48 overflow-y-auto space-y-1">
+      <div className="max-h-48 space-y-1 overflow-y-auto">
         {metrics.map((metric, index) => (
           <div
             key={index}
-            className="flex items-center justify-between bg-gray-800 rounded p-2 text-xs"
+            className="text-xs flex items-center justify-between rounded bg-gray-800 p-2"
           >
             <div className="flex items-center space-x-2">
               <span>{getStatusIcon(metric.status)}</span>
@@ -219,7 +227,7 @@ const DebugPerformance: React.FC = () => {
       <div className="space-y-1">
         <button
           onClick={runPerformanceTest}
-          className="w-full rounded bg-purple-600 px-3 py-2 text-xs text-white hover:bg-purple-700"
+          className="text-xs w-full rounded bg-purple-600 px-3 py-2 text-white hover:bg-purple-700"
         >
           Run Performance Test
         </button>
@@ -227,11 +235,11 @@ const DebugPerformance: React.FC = () => {
         <button
           onClick={() => {
             if (performance.mark) {
-              performance.mark('debug-mark');
-              console.log('Performance mark created: debug-mark');
+              performance.mark("debug-mark");
+              console.log("Performance mark created: debug-mark");
             }
           }}
-          className="w-full rounded bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
+          className="text-xs w-full rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
         >
           Create Performance Mark
         </button>
@@ -240,9 +248,9 @@ const DebugPerformance: React.FC = () => {
           onClick={() => {
             performance.clearMarks();
             performance.clearMeasures();
-            console.log('Performance marks and measures cleared');
+            console.log("Performance marks and measures cleared");
           }}
-          className="w-full rounded bg-gray-600 px-3 py-2 text-xs text-white hover:bg-gray-700"
+          className="text-xs w-full rounded bg-gray-600 px-3 py-2 text-white hover:bg-gray-700"
         >
           Clear Marks & Measures
         </button>
@@ -250,8 +258,8 @@ const DebugPerformance: React.FC = () => {
 
       {/* Performance Tips */}
       <div className="text-xs text-gray-400">
-        <div className="font-semibold mb-1">Performance Tips:</div>
-        <ul className="space-y-1 text-xs">
+        <div className="mb-1 font-semibold">Performance Tips:</div>
+        <ul className="text-xs space-y-1">
           <li>• FCP should be &lt; 1.8s</li>
           <li>• LCP should be &lt; 2.5s</li>
           <li>• TTFB should be &lt; 200ms</li>

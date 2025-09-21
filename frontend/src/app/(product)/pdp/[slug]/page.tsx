@@ -27,9 +27,8 @@ export async function generateMetadata({
     const titleRaw = product?.attributes?.Title || "محصول";
     const descRaw = product?.attributes?.Description || titleRaw;
     const description = String(descRaw).slice(0, 160);
-    const imageUrl =
-      product?.attributes?.CoverImage?.data?.attributes?.url ?
-        `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
     const title = `خرید ${titleRaw} | اینفینیتی استور`;
@@ -58,11 +57,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function PDP({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function PDP({ params }: { params: Promise<{ slug: string }> }) {
   // Handle both Promise<{slug}> and direct {slug} parameter formats
   const { slug } = await params;
 
@@ -101,21 +96,17 @@ export default async function PDP({
     "دسته بندی";
 
   const categorySlug =
-    productData?.attributes.product_main_category?.data?.attributes.Slug ||
-    "دسته-بندی";
+    productData?.attributes.product_main_category?.data?.attributes.Slug || "دسته-بندی";
 
   const productTitle = productData?.attributes.Title || "محصول";
 
   // Fetch related products
   const productId = productData?.id.toString() || "";
-  const mainCategoryId =
-    productData?.attributes.product_main_category?.data?.id.toString() || "";
+  const mainCategoryId = productData?.attributes.product_main_category?.data?.id.toString() || "";
 
   // Get IDs of other categories this product belongs to
   const otherCategoryIds =
-    productData?.attributes.product_other_categories?.data?.map((cat) =>
-      cat.id.toString()
-    ) || [];
+    productData?.attributes.product_other_categories?.data?.map((cat) => cat.id.toString()) || [];
 
   // Fetch related products from same main category and other categories
   let sameMainCategoryProducts: any[] = [];

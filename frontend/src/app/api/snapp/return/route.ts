@@ -21,15 +21,11 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const pairs: string[] = [];
     form.forEach((value, key) => {
-      pairs.push(
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
-      );
+      pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
     });
     const body = pairs.join("&");
 
-    const apiBase =
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://api.infinity.rgbgroup.ir/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinity.rgbgroup.ir/api";
     const url = `${apiBase.replace(/\/$/, "")}/orders/payment-callback`;
 
     const res = await fetch(url, {

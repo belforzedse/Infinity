@@ -41,8 +41,7 @@ export default function VerifyForgotPasswordForm({
   };
 
   const handleChange =
-    (field: keyof typeof formData) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData({
         ...formData,
         [field]: e.target.value,
@@ -68,22 +67,14 @@ export default function VerifyForgotPasswordForm({
         <div className="space-y-3">
           <Text variant="label">کدتایید شماره همراه</Text>
           <div className="flex flex-col items-end">
-            <VerificationInput
-              onChange={(value) => setFormData({ ...formData, otp: value })}
-            />
+            <VerificationInput onChange={(value) => setFormData({ ...formData, otp: value })} />
 
             <div className="flex w-full flex-row-reverse items-center justify-between">
-              <span className="text-sm text-foreground-primary/80">
-                {timeLeft}
-              </span>
+              <span className="text-sm text-foreground-primary/80">{timeLeft}</span>
               <div>
                 <Text variant="helper">
                   کد را دریافت نکردید؟{" "}
-                  <Text
-                    variant="link"
-                    onClick={handleResendCode}
-                    disabled={isActive}
-                  >
+                  <Text variant="link" onClick={handleResendCode} disabled={isActive}>
                     ارسال مجدد
                   </Text>
                 </Text>
@@ -112,8 +103,7 @@ export default function VerifyForgotPasswordForm({
               value={formData.confirmPassword}
               onChange={handleChange("confirmPassword")}
               error={
-                formData.confirmPassword &&
-                formData.password !== formData.confirmPassword
+                formData.confirmPassword && formData.password !== formData.confirmPassword
                   ? "رمز عبور مطابقت ندارد"
                   : undefined
               }
@@ -137,9 +127,7 @@ export default function VerifyForgotPasswordForm({
           <AuthButton
             onClick={handleEditPhone}
             className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
-            icon={
-              <EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#db2777" />
-            }
+            icon={<EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#db2777" />}
           >
             ویرایش شماره همراه
           </AuthButton>

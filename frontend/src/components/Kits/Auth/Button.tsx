@@ -25,11 +25,7 @@ export default function AuthButton({
 
   return (
     <button
-      className={clsx(
-        "btn btn-primary text-xl h-[54px]",
-        fullWidth && "w-full",
-        className,
-      )}
+      className={clsx("btn btn-primary text-xl h-[54px]", fullWidth && "w-full", className)}
       {...props}
     >
       {icon ? content : children}

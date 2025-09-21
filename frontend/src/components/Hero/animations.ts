@@ -268,21 +268,14 @@ export function luxurySlideKeyframes(
 
   const offset = getOffset();
 
-  const ks = (
-    factors && factors.length >= 2 ? factors : [1, 0.5, 0]
-  ) as number[];
+  const ks = (factors && factors.length >= 2 ? factors : [1, 0.5, 0]) as number[];
   const xFrames = offset.x ? ks.map((k) => k * offset.x) : undefined;
   const yFrames = offset.y ? ks.map((k) => k * offset.y) : undefined;
-  const scaleFrames =
-    typeof scale === "number" && scale !== 1 ? [scale, 1] : undefined;
+  const scaleFrames = typeof scale === "number" && scale !== 1 ? [scale, 1] : undefined;
 
-  const timeArray = (
-    times && times.length === ks.length ? times : [0, 0.65, 1]
-  ) as number[];
+  const timeArray = (times && times.length === ks.length ? times : [0, 0.65, 1]) as number[];
   const easeArray = (
-    eases && eases.length === ks.length - 1
-      ? eases
-      : [ease || "easeOut", ease || "easeOut"]
+    eases && eases.length === ks.length - 1 ? eases : [ease || "easeOut", ease || "easeOut"]
   ) as any[];
 
   const baseTransition: Transition = useSpring
@@ -317,9 +310,7 @@ export function luxurySlideKeyframes(
     exit: {
       ...(xFrames ? { x: [...xFrames].reverse() } : {}),
       ...(yFrames ? { y: [...yFrames].reverse() } : {}),
-      ...(scaleFrames
-        ? { scale: [...(scaleFrames as number[])].reverse() }
-        : {}),
+      ...(scaleFrames ? { scale: [...(scaleFrames as number[])].reverse() } : {}),
       transition: {
         ...baseTransition,
         times: [...timeArray].reverse(),

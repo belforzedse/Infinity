@@ -68,8 +68,7 @@ export const config: UpsertPageConfigType<Notification> = {
               label: "نوع",
               colSpan: 12,
               mobileColSpan: 12,
-              descriptionPlaceholder:
-                "محتوای متنی مورد نظر خود را  اینجا بنویسید",
+              descriptionPlaceholder: "محتوای متنی مورد نظر خود را  اینجا بنویسید",
               options: [
                 {
                   label: "آزاد",

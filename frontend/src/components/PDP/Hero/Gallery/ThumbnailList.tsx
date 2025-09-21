@@ -104,9 +104,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
 
   // Add effect to handle selectedImage changes
   useEffect(() => {
-    const selectedIndex = assets.findIndex(
-      (asset) => asset.id === selectedImage,
-    );
+    const selectedIndex = assets.findIndex((asset) => asset.id === selectedImage);
     if (selectedIndex !== -1) {
       scrollToImage(selectedIndex);
     }
@@ -140,12 +138,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
 
             {asset.type === "video" && (
               <button className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
-                <Image
-                  width={24}
-                  height={24}
-                  src="/images/pdp/play-icon.png"
-                  alt="close"
-                />
+                <Image width={24} height={24} src="/images/pdp/play-icon.png" alt="close" />
               </button>
             )}
           </div>
@@ -157,8 +150,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
         <div
           className="bottom-0 left-0 hidden h-[71px] w-[40px] md:sticky md:left-0 md:block md:w-full"
           style={{
-            background:
-              "linear-gradient(181.25deg, rgba(255, 255, 255, 0) 44.29%, #FFFFFF 85.78%)",
+            background: "linear-gradient(181.25deg, rgba(255, 255, 255, 0) 44.29%, #FFFFFF 85.78%)",
             backdropFilter: "blur(4px)",
           }}
         />

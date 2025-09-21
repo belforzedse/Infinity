@@ -42,9 +42,7 @@ export default function PasswordChangeForm() {
             </label>
             <AuthPasswordInput
               value={formData.newPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, newPassword: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
               showStrength
               className="!bg-white"
             />
@@ -63,8 +61,7 @@ export default function PasswordChangeForm() {
                 })
               }
               error={
-                formData.confirmPassword &&
-                formData.newPassword !== formData.confirmPassword
+                formData.confirmPassword && formData.newPassword !== formData.confirmPassword
                   ? "رمز عبور مطابقت ندارد"
                   : undefined
               }

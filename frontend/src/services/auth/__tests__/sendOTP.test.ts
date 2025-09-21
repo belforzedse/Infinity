@@ -36,10 +36,7 @@ describe("sendOTP", () => {
 
     const result = await sendOTP(phoneNumber);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.SEND_OTP,
-      { phone: phoneNumber }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.SEND_OTP, { phone: phoneNumber });
     expect(result).toEqual(mockResponse);
   });
 
@@ -51,10 +48,7 @@ describe("sendOTP", () => {
 
     await sendOTP(phoneNumber);
 
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith(
-      "otpToken",
-      "mock-otp-token"
-    );
+    expect(sessionStorageMock.setItem).toHaveBeenCalledWith("otpToken", "mock-otp-token");
   });
 
   it("handles API errors correctly", async () => {
@@ -68,11 +62,7 @@ describe("sendOTP", () => {
   });
 
   it("works with different phone number formats", async () => {
-    const phoneNumbers = [
-      "09123456789",
-      "+989123456789",
-      "989123456789",
-    ];
+    const phoneNumbers = ["09123456789", "+989123456789", "989123456789"];
 
     const mockResponse = { otpToken: "mock-otp-token" };
     mockPost.mockResolvedValue(mockResponse);
@@ -80,10 +70,7 @@ describe("sendOTP", () => {
     for (const phoneNumber of phoneNumbers) {
       await sendOTP(phoneNumber);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        ENDPOINTS.AUTH.SEND_OTP,
-        { phone: phoneNumber }
-      );
+      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.SEND_OTP, { phone: phoneNumber });
     }
   });
 
@@ -96,10 +83,7 @@ describe("sendOTP", () => {
     const result = await sendOTP(phoneNumber);
 
     expect(result).toEqual(mockResponse);
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith(
-      "otpToken",
-      undefined
-    );
+    expect(sessionStorageMock.setItem).toHaveBeenCalledWith("otpToken", undefined);
   });
 
   it("calls correct API endpoint", async () => {
@@ -110,9 +94,6 @@ describe("sendOTP", () => {
 
     await sendOTP(phoneNumber);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.SEND_OTP,
-      expect.any(Object)
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.SEND_OTP, expect.any(Object));
   });
 });

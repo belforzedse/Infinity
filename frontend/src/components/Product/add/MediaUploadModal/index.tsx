@@ -17,15 +17,10 @@ interface MediaUploadModalProps {
   onClose: () => void;
 }
 
-export default function MediaUploadModal({
-  isOpen,
-  onClose,
-}: MediaUploadModalProps) {
+export default function MediaUploadModal({ isOpen, onClose }: MediaUploadModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("افزودن رسانه");
   const [dragActive, setDragActive] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
-    null,
-  );
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -67,10 +62,7 @@ export default function MediaUploadModal({
           onImageSelect={handleImageSelect}
         />
 
-        <DetailsSection
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
-        />
+        <DetailsSection selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
       </div>
     </Modal>
   );

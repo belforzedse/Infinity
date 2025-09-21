@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const DebugInfo: React.FC = () => {
   const [info, setInfo] = useState<any>({});
@@ -10,7 +10,7 @@ const DebugInfo: React.FC = () => {
       const now = new Date();
       setInfo({
         environment: process.env.NODE_ENV,
-        nextVersion: process.env.NEXT_PUBLIC_VERSION || 'Unknown',
+        nextVersion: process.env.NEXT_PUBLIC_VERSION || "Unknown",
         timestamp: now.toLocaleString(),
         userAgent: navigator.userAgent,
         screen: {
@@ -34,7 +34,7 @@ const DebugInfo: React.FC = () => {
         },
         url: window.location.href,
         referrer: document.referrer,
-        cookies: document.cookie.split(';').length - 1,
+        cookies: document.cookie.split(";").length - 1,
         localStorage: Object.keys(localStorage).length,
         sessionStorage: Object.keys(sessionStorage).length,
       });
@@ -46,9 +46,9 @@ const DebugInfo: React.FC = () => {
   }, []);
 
   const InfoRow: React.FC<{ label: string; value: any }> = ({ label, value }) => (
-    <div className="flex justify-between border-b border-gray-700 py-1 text-xs">
+    <div className="text-xs flex justify-between border-b border-gray-700 py-1">
       <span className="text-gray-400">{label}:</span>
-      <span className="text-white max-w-48 truncate">{String(value)}</span>
+      <span className="max-w-48 truncate text-white">{String(value)}</span>
     </div>
   );
 
@@ -60,15 +60,15 @@ const DebugInfo: React.FC = () => {
       <InfoRow label="Next.js Version" value={info.nextVersion} />
       <InfoRow label="Timestamp" value={info.timestamp} />
 
-      <div className="mt-3 text-sm font-semibold text-purple-400">Browser Info</div>
-      <InfoRow label="User Agent" value={info.userAgent?.split(' ')[0]} />
+      <div className="text-sm mt-3 font-semibold text-purple-400">Browser Info</div>
+      <InfoRow label="User Agent" value={info.userAgent?.split(" ")[0]} />
       <InfoRow label="Screen" value={`${info.screen?.width}x${info.screen?.height}`} />
       <InfoRow label="Viewport" value={`${info.viewport?.width}x${info.viewport?.height}`} />
       <InfoRow label="Pixel Ratio" value={info.screen?.pixelRatio} />
 
       {info.connection && (
         <>
-          <div className="mt-3 text-sm font-semibold text-purple-400">Connection</div>
+          <div className="text-sm mt-3 font-semibold text-purple-400">Connection</div>
           <InfoRow label="Type" value={info.connection.effectiveType} />
           <InfoRow label="Downlink" value={`${info.connection.downlink} Mbps`} />
           <InfoRow label="RTT" value={`${info.connection.rtt} ms`} />
@@ -77,16 +77,16 @@ const DebugInfo: React.FC = () => {
 
       {info.memory && (
         <>
-          <div className="mt-3 text-sm font-semibold text-purple-400">Memory Usage</div>
+          <div className="text-sm mt-3 font-semibold text-purple-400">Memory Usage</div>
           <InfoRow label="Used" value={`${info.memory.used} MB`} />
           <InfoRow label="Total" value={`${info.memory.total} MB`} />
           <InfoRow label="Limit" value={`${info.memory.limit} MB`} />
         </>
       )}
 
-      <div className="mt-3 text-sm font-semibold text-purple-400">Page Info</div>
+      <div className="text-sm mt-3 font-semibold text-purple-400">Page Info</div>
       <InfoRow label="URL" value={info.url} />
-      <InfoRow label="Referrer" value={info.referrer || 'Direct'} />
+      <InfoRow label="Referrer" value={info.referrer || "Direct"} />
       <InfoRow label="Cookies" value={info.cookies} />
       <InfoRow label="localStorage" value={info.localStorage} />
       <InfoRow label="sessionStorage" value={info.sessionStorage} />

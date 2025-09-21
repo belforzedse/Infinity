@@ -135,11 +135,11 @@ export interface OrdersResponse {
  */
 export const verifyPayment = async (
   orderId: number,
-  refNum: string
+  refNum: string,
 ): Promise<PaymentVerificationResponse> => {
   try {
     const response = await apiClient.get<PaymentVerificationResponse>(
-      `/orders/verify-payment?orderId=${orderId}&refNum=${refNum}`
+      `/orders/verify-payment?orderId=${orderId}&refNum=${refNum}`,
     );
     return response as any;
   } catch (error: any) {
@@ -153,13 +153,9 @@ export const verifyPayment = async (
  * @param orderId The order ID
  * @returns Order status information
  */
-export const getOrderStatus = async (
-  orderId: number
-): Promise<OrderStatusResponse> => {
+export const getOrderStatus = async (orderId: number): Promise<OrderStatusResponse> => {
   try {
-    const response = await apiClient.get<OrderStatusResponse>(
-      `/orders/${orderId}/status`
-    );
+    const response = await apiClient.get<OrderStatusResponse>(`/orders/${orderId}/status`);
     return response as any;
   } catch (error: any) {
     console.error("Error getting order status:", error);
@@ -173,11 +169,11 @@ export const getOrderStatus = async (
  * @returns Order payment status information
  */
 export const getOrderPaymentStatus = async (
-  orderId: number
+  orderId: number,
 ): Promise<OrderPaymentStatusResponse> => {
   try {
     const response = await apiClient.get<OrderPaymentStatusResponse>(
-      `/orders/${orderId}/payment-status`
+      `/orders/${orderId}/payment-status`,
     );
     return response.data;
   } catch (error: any) {
@@ -194,7 +190,7 @@ export const getOrderPaymentStatus = async (
  */
 export const getMyOrders = async (
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<OrdersResponse> => {
   const cacheKey = `orders_${page}_${pageSize}`;
 
@@ -205,9 +201,7 @@ export const getMyOrders = async (
   }
 
   try {
-    const response = await apiClient.get(
-      `/orders/my-orders?page=${page}&pageSize=${pageSize}`
-    );
+    const response = await apiClient.get(`/orders/my-orders?page=${page}&pageSize=${pageSize}`);
 
     // Ensure response has the expected structure
     if (!response.data || !Array.isArray(response.data)) {
@@ -225,28 +219,24 @@ export const getMyOrders = async (
     }
 
     // Add full image URLs to order items
-    const ordersWithFullImageUrls = (response.data as Order[]).map(
-      (order: Order) => ({
-        ...order,
-        order_items: order.order_items.map((item: OrderItem) => ({
-          ...item,
-          product_variation: {
-            ...item.product_variation,
-            product: {
-              ...item.product_variation.product,
-              cover_image: item.product_variation.product.cover_image
-                ? {
-                    ...item.product_variation.product.cover_image,
-                    url: getFullImageUrl(
-                      item.product_variation.product.cover_image.url
-                    ),
-                  }
-                : undefined,
-            },
+    const ordersWithFullImageUrls = (response.data as Order[]).map((order: Order) => ({
+      ...order,
+      order_items: order.order_items.map((item: OrderItem) => ({
+        ...item,
+        product_variation: {
+          ...item.product_variation,
+          product: {
+            ...item.product_variation.product,
+            cover_image: item.product_variation.product.cover_image
+              ? {
+                  ...item.product_variation.product.cover_image,
+                  url: getFullImageUrl(item.product_variation.product.cover_image.url),
+                }
+              : undefined,
           },
-        })),
-      })
-    );
+        },
+      })),
+    }));
 
     // Ensure meta has the expected structure
     const pagination = response.meta?.pagination || {
@@ -304,7 +294,7 @@ const OrderService = {
         status: error?.response?.status,
         orderId,
         weight,
-        boxSizeId
+        boxSizeId,
       });
       throw error;
     }

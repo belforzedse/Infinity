@@ -7,23 +7,16 @@ import DetailsSectionText from "./text";
 
 interface DetailsSectionProps {
   selectedImage: SelectedImageDetailsSection | null;
-  setSelectedImage: Dispatch<
-    SetStateAction<SelectedImageDetailsSection | null>
-  >;
+  setSelectedImage: Dispatch<SetStateAction<SelectedImageDetailsSection | null>>;
 }
 
-export default function DetailsSection({
-  selectedImage,
-  setSelectedImage,
-}: DetailsSectionProps) {
+export default function DetailsSection({ selectedImage, setSelectedImage }: DetailsSectionProps) {
   return (
     <div className="rounded-lg bg-white p-2">
       {selectedImage ? (
         <div className="flex h-full flex-col justify-between">
           <div className="flex flex-col justify-between">
-            <h3 className="text-base mb-3 text-right text-neutral-600">
-              جزئیات پیوست
-            </h3>
+            <h3 className="text-base mb-3 text-right text-neutral-600">جزئیات پیوست</h3>
 
             <div className="mb-3 flex gap-2 border-b border-slate-100 pb-3">
               <Image
@@ -36,9 +29,7 @@ export default function DetailsSection({
               />
 
               <div className="text-sm flex flex-col items-start justify-between text-gray-500">
-                <div className="text-[10px] leading-3">
-                  {selectedImage.name}
-                </div>
+                <div className="text-[10px] leading-3">{selectedImage.name}</div>
                 <div className="text-right text-[10px] leading-3 text-neutral-400">
                   {selectedImage.date || "آبان ۹, ۱۴۰۳"}
                 </div>
@@ -55,10 +46,7 @@ export default function DetailsSection({
               </div>
             </div>
 
-            <DetailsSectionText
-              selectedImage={selectedImage}
-              setSelectedImage={setSelectedImage}
-            />
+            <DetailsSectionText selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
           </div>
 
           <div className="flex justify-end">

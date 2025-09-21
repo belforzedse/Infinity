@@ -8,10 +8,7 @@ interface Props {
   className?: string;
 }
 
-export default function ShoppingCartMobileTable({
-  cartItems,
-  className,
-}: Props) {
+export default function ShoppingCartMobileTable({ cartItems, className }: Props) {
   return (
     <div className={`flex w-full flex-col gap-3 ${className}`}>
       {cartItems.map((cartItem) => (

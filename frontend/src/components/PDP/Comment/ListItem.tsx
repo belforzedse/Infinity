@@ -22,8 +22,7 @@ type Props = {
 };
 
 export default function PDPCommentListItem(props: Props) {
-  const { username, date, comment, plusRating, minusRating, rating, reply } =
-    props;
+  const { username, date, comment, plusRating, minusRating, rating, reply } = props;
 
   // Format date with error handling
   const formatDate = (dateObj: Date) => {
@@ -50,9 +49,7 @@ export default function PDPCommentListItem(props: Props) {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-lg text-neutral-600">
-                {username || "کاربر مهمان"}
-              </span>
+              <span className="text-lg text-neutral-600">{username || "کاربر مهمان"}</span>
 
               <button>
                 <ReplyIcon />
@@ -112,9 +109,7 @@ export default function PDPCommentListItem(props: Props) {
                 <span />
               </div>
 
-              <span className="text-xs text-[#b3b6b3]">
-                {formatDate(reply.date)}
-              </span>
+              <span className="text-xs text-[#b3b6b3]">{formatDate(reply.date)}</span>
             </div>
 
             <p className="text-sm text-neutral-600">

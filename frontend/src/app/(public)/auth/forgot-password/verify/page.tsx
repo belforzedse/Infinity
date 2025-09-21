@@ -23,9 +23,7 @@ function VerifyContent() {
 
   return (
     <div className="mx-auto w-full">
-      <AuthTitle
-        subtitle={`لطفا کد تایید ارسال شده  به شماره همراه ${phoneNumber} را وارد نمایید`}
-      >
+      <AuthTitle subtitle={`لطفا کد تایید ارسال شده  به شماره همراه ${phoneNumber} را وارد نمایید`}>
         بازیابی رمز عبور
       </AuthTitle>
 

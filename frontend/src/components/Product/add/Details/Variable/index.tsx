@@ -13,8 +13,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
   const [variables, setVariables] = useState<ProductVariableDisplay[]>([]);
   const [loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [currentVariation, setCurrentVariation] =
-    useState<ProductVariableDisplay | null>(null);
+  const [currentVariation, setCurrentVariation] = useState<ProductVariableDisplay | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -45,47 +44,38 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               id: variation.id,
               DiscountPrice: variation.attributes.DiscountPrice,
               Price: variation.attributes.Price,
-              attributes: variation.attributes
+              attributes: variation.attributes,
             });
           });
         }
 
         // Transform API data to display format
-        const formattedVariations = variations.map(
-          (variation: ProductVariable) => {
-            // Extract color, size, model details
-            const color =
-              variation.attributes.product_variation_color?.data?.attributes
-                .Title || "";
-            const size =
-              variation.attributes.product_variation_size?.data?.attributes
-                .Title || "";
-            const model =
-              variation.attributes.product_variation_model?.data?.attributes
-                .Title || "";
+        const formattedVariations = variations.map((variation: ProductVariable) => {
+          // Extract color, size, model details
+          const color = variation.attributes.product_variation_color?.data?.attributes.Title || "";
+          const size = variation.attributes.product_variation_size?.data?.attributes.Title || "";
+          const model = variation.attributes.product_variation_model?.data?.attributes.Title || "";
 
-            // Create variable name from combinations
-            const variableParts = [size, color, model].filter(
-              (part) => part !== "",
-            );
-            const variableName = variableParts.join(" - ");
+          // Create variable name from combinations
+          const variableParts = [size, color, model].filter((part) => part !== "");
+          const variableName = variableParts.join(" - ");
 
-            return {
-              id: variation.id,
-              sku: variation.attributes.SKU || "",
-              price: variation.attributes.Price || 0,
-              discountPrice: variation.attributes.DiscountPrice ? Number(variation.attributes.DiscountPrice) : undefined,
-              stock:
-                variation.attributes.product_stock?.data?.attributes.Count || 0,
-              stockId: variation.attributes.product_stock?.data?.id,
-              variable: variableName,
-              isPublished: variation.attributes.IsPublished || false,
-              colorId: variation.attributes.product_variation_color?.data?.id,
-              sizeId: variation.attributes.product_variation_size?.data?.id,
-              modelId: variation.attributes.product_variation_model?.data?.id,
-            };
-          },
-        );
+          return {
+            id: variation.id,
+            sku: variation.attributes.SKU || "",
+            price: variation.attributes.Price || 0,
+            discountPrice: variation.attributes.DiscountPrice
+              ? Number(variation.attributes.DiscountPrice)
+              : undefined,
+            stock: variation.attributes.product_stock?.data?.attributes.Count || 0,
+            stockId: variation.attributes.product_stock?.data?.id,
+            variable: variableName,
+            isPublished: variation.attributes.IsPublished || false,
+            colorId: variation.attributes.product_variation_color?.data?.id,
+            sizeId: variation.attributes.product_variation_size?.data?.id,
+            modelId: variation.attributes.product_variation_model?.data?.id,
+          };
+        });
 
         // Debug: Log the formatted variations
         if (process.env.NODE_ENV !== "production") {
@@ -95,7 +85,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               id: variation.id,
               price: variation.price,
               discountPrice: variation.discountPrice,
-              variable: variation.variable
+              variable: variation.variable,
             });
           });
         }
@@ -149,9 +139,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
     }
   };
 
-  const handleSaveVariation = async (
-    updatedVariation: ProductVariableDisplay,
-  ) => {
+  const handleSaveVariation = async (updatedVariation: ProductVariableDisplay) => {
     try {
       // Update variation data
       await apiClient.put(
@@ -228,12 +216,9 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         <div className="p-8 text-center">در حال بارگذاری...</div>
       ) : variables.length === 0 ? (
         <div className="rounded-lg border border-slate-100 p-8 text-center">
-          <p className="text-slate-500">
-            هیچ متغیری برای این محصول تعریف نشده است.
-          </p>
+          <p className="text-slate-500">هیچ متغیری برای این محصول تعریف نشده است.</p>
           <p className="text-sm mt-2 text-slate-400">
-            ابتدا ویژگی‌های محصول را تعریف کنید و سپس تنوع‌های محصول را ایجاد
-            کنید.
+            ابتدا ویژگی‌های محصول را تعریف کنید و سپس تنوع‌های محصول را ایجاد کنید.
           </p>
         </div>
       ) : (
@@ -329,9 +314,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                       }
                       className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm mr-2 text-gray-700">
-                      منتشر شده
-                    </span>
+                    <span className="text-sm mr-2 text-gray-700">منتشر شده</span>
                   </label>
                   <label className="inline-flex items-center">
                     <input
@@ -362,9 +345,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                 انصراف
               </button>
               <button
-                onClick={() =>
-                  currentVariation && handleSaveVariation(currentVariation)
-                }
+                onClick={() => currentVariation && handleSaveVariation(currentVariation)}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-white"
               >
                 ذخیره تغییرات
@@ -380,8 +361,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           <div className="w-full max-w-md rounded-xl bg-white p-6">
             <h3 className="text-lg mb-4 font-medium">حذف متغیر محصول</h3>
             <p className="mb-6 text-slate-600">
-              آیا از حذف این متغیر محصول اطمینان دارید؟ این عمل قابل بازگشت
-              نیست.
+              آیا از حذف این متغیر محصول اطمینان دارید؟ این عمل قابل بازگشت نیست.
             </p>
 
             <div className="flex justify-end gap-2">

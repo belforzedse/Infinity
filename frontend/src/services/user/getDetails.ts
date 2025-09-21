@@ -35,9 +35,7 @@ export interface GetUserResponse {
   };
 }
 
-export const getDetails = async (
-  id: string,
-): Promise<GetUserResponse["data"]> => {
+export const getDetails = async (id: string): Promise<GetUserResponse["data"]> => {
   const endpoint = `${ENDPOINTS.USER.GET_DETAILS}/${id}?populate[0]=user_info&populate[1]=user_role`;
 
   const response = await apiClient.get<GetUserResponse>(endpoint, {

@@ -3,10 +3,7 @@ import OrderRowSkeleton from "@/components/User/Orders/OrderRowSkeleton";
 
 export default function Loading() {
   return (
-    <div
-      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
-      dir="rtl"
-    >
+    <div className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0" dir="rtl">
       {/* Sidebar placeholder space to avoid big layout shift */}
       <div className="mr-1 hidden w-[240px] flex-col gap-4 rounded-lg bg-white lg:flex">
         <div className="h-8" />

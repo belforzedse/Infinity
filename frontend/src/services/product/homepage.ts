@@ -27,30 +27,28 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     const response = await apiClient.get<any>(endpoint);
     const discounted = (response as any)?.data?.filter((product: any) => {
       // Check if product has any variation with stock AND discount
-      return product.attributes.product_variations?.data?.some(
-        (variation: any) => {
-          // Check if variation has stock
-          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-          const hasStock = typeof stockCount === 'number' && stockCount > 0;
+      return product.attributes.product_variations?.data?.some((variation: any) => {
+        // Check if variation has stock
+        const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+        const hasStock = typeof stockCount === "number" && stockCount > 0;
 
-          if (!hasStock) return false;
+        if (!hasStock) return false;
 
-          // Check for discounts
-          const price = parseFloat(variation.attributes.Price);
+        // Check for discounts
+        const price = parseFloat(variation.attributes.Price);
 
-          // Check for general_discounts first
-          const generalDiscounts = variation.attributes.general_discounts?.data;
-          if (generalDiscounts && generalDiscounts.length > 0) {
-            return true;
-          }
-
-          // Fallback to DiscountPrice field
-          const discountPrice = variation.attributes.DiscountPrice
-            ? parseFloat(variation.attributes.DiscountPrice)
-            : null;
-          return discountPrice && discountPrice < price;
+        // Check for general_discounts first
+        const generalDiscounts = variation.attributes.general_discounts?.data;
+        if (generalDiscounts && generalDiscounts.length > 0) {
+          return true;
         }
-      );
+
+        // Fallback to DiscountPrice field
+        const discountPrice = variation.attributes.DiscountPrice
+          ? parseFloat(variation.attributes.DiscountPrice)
+          : null;
+        return discountPrice && discountPrice < price;
+      });
     });
 
     return formatProductsToCardProps(discounted);

@@ -1,12 +1,6 @@
 export default function PrintIcon() {
   return (
-    <svg
-      width="20"
-      height="21"
-      viewBox="0 0 20 21"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M5.83331 7.16667V3.83333C5.83331 3.37333 6.20665 3 6.66665 3H13.3333C13.7933 3 14.1666 3.37333 14.1666 3.83333V7.16667"
         stroke="#64748B"

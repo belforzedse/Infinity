@@ -15,10 +15,7 @@ type DiscountSummary = {
 };
 
 type Props = {
-  onApplied?: (
-    code: string,
-    preview: { discount: number; summary: DiscountSummary },
-  ) => void;
+  onApplied?: (code: string, preview: { discount: number; summary: DiscountSummary }) => void;
   shippingId?: number;
   shippingCost?: number;
   appliedCode?: string;
@@ -84,9 +81,7 @@ function ShoppingCartBillDiscountCoupon({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-sm text-neutral-600">کد فعال:</span>
-            <span className="text-sm font-medium text-neutral-800">
-              {appliedCode}
-            </span>
+            <span className="text-sm font-medium text-neutral-800">{appliedCode}</span>
           </div>
           <button
             type="button"

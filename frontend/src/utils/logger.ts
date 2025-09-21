@@ -6,11 +6,7 @@ const consoleMethods: Record<LogLevel, (msg: string) => void> = {
   error: console.error,
 };
 
-const log = (
-  level: LogLevel,
-  message: string,
-  meta?: Record<string, unknown>,
-) => {
+const log = (level: LogLevel, message: string, meta?: Record<string, unknown>) => {
   // Only log in development. Skip in test and production.
   if (process.env.NODE_ENV !== "development") {
     return;
@@ -22,12 +18,9 @@ const log = (
 };
 
 const logger = {
-  info: (message: string, meta?: Record<string, unknown>) =>
-    log("log", message, meta),
-  warn: (message: string, meta?: Record<string, unknown>) =>
-    log("warn", message, meta),
-  error: (message: string, meta?: Record<string, unknown>) =>
-    log("error", message, meta),
+  info: (message: string, meta?: Record<string, unknown>) => log("log", message, meta),
+  warn: (message: string, meta?: Record<string, unknown>) => log("warn", message, meta),
+  error: (message: string, meta?: Record<string, unknown>) => log("error", message, meta),
 };
 
 export default logger;

@@ -48,8 +48,7 @@ export default function TagTextField({ value, onChange, options }: Props) {
               const inputValue = e.currentTarget.value.trim();
               const option = options?.find(
                 (opt) =>
-                  opt.value === inputValue ||
-                  opt.label.toLowerCase() === inputValue.toLowerCase(),
+                  opt.value === inputValue || opt.label.toLowerCase() === inputValue.toLowerCase(),
               );
               const tagValue = option?.value || inputValue;
 

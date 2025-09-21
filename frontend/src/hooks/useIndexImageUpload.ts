@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { uploadFile } from "@/services/super-admin/files/upload";
 import { useAtom } from "jotai";
-import {
-  editProductDataAtom,
-  productDataAtom,
-} from "@/atoms/super-admin/products";
+import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import toast from "react-hot-toast";
 import { Download } from "@/services/super-admin/files/download";
 import { IMAGE_BASE_URL } from "@/constants/api";
@@ -32,28 +29,17 @@ const useIndexImageUpload = ({
 }: UseIndexImageUploadProps): UseIndexImageUploadReturn => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(
-    null,
-  ) as React.RefObject<HTMLInputElement>;
-  const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom,
-  );
+  const fileInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
+  const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
   const pathname = usePathname();
 
   useEffect(() => {
-    if (
-      productData.CoverImage?.data?.attributes?.url &&
-      !pathname.endsWith("/add")
-    ) {
-      setImagePreview(
-        IMAGE_BASE_URL + productData.CoverImage.data.attributes.url,
-      );
+    if (productData.CoverImage?.data?.attributes?.url && !pathname.endsWith("/add")) {
+      setImagePreview(IMAGE_BASE_URL + productData.CoverImage.data.attributes.url);
     }
   }, [productData.CoverImage, pathname]);
 
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setIsUploading(true);
@@ -115,15 +101,9 @@ const useIndexImageUpload = ({
         toast.error("تصویری انتخاب نشده است");
         return;
       }
-      const response = await Download(
-        productData.CoverImage.data.id.toString(),
-      );
+      const response = await Download(productData.CoverImage.data.id.toString());
       if (response?.url) {
-        window.open(
-          IMAGE_BASE_URL + response.url,
-          "_blank",
-          "noopener,noreferrer",
-        );
+        window.open(IMAGE_BASE_URL + response.url, "_blank", "noopener,noreferrer");
       } else {
         toast.error("آدرس تصویر در دسترس نیست");
       }

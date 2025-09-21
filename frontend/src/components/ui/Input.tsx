@@ -60,14 +60,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightElement && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              {rightElement}
-            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightElement}</div>
           )}
           {leftElement && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              {leftElement}
-            </div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">{leftElement}</div>
           )}
         </div>
         {error && <span className="mt-1 block text-red-500">{error}</span>}

@@ -15,15 +15,11 @@ export interface categoryResponseType {
   attributes: CategoryAttributes;
 }
 
-export const getAllCategories = async (): Promise<
-  PaginatedResponse<categoryResponseType>
-> => {
+export const getAllCategories = async (): Promise<PaginatedResponse<categoryResponseType>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}`;
   //const accessToken = localStorage.getItem("accessToken");
   try {
-    const response = await apiClient.get<
-      PaginatedResponse<categoryResponseType>
-    >(endpoint, {
+    const response = await apiClient.get<PaginatedResponse<categoryResponseType>>(endpoint, {
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },

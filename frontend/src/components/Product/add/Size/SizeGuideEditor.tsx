@@ -13,14 +13,9 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
   columns,
   onColumnTitleEdit,
 }) => {
-  const [data, setData] = useState<any[]>(
-    initialData.length > 0 ? initialData : [{ size: "" }],
-  );
-  const [editingColumnTitle, setEditingColumnTitle] = useState<string | null>(
-    null,
-  );
-  const [localColumns, setLocalColumns] =
-    useState<{ key: string; title: string }[]>(columns);
+  const [data, setData] = useState<any[]>(initialData.length > 0 ? initialData : [{ size: "" }]);
+  const [editingColumnTitle, setEditingColumnTitle] = useState<string | null>(null);
+  const [localColumns, setLocalColumns] = useState<{ key: string; title: string }[]>(columns);
 
   // Update local columns when props change
   React.useEffect(() => {
@@ -108,9 +103,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
 
     // Update local columns state
     setLocalColumns(
-      localColumns.map((col) =>
-        col.key === columnKey ? { ...col, title: newTitle } : col,
-      ),
+      localColumns.map((col) => (col.key === columnKey ? { ...col, title: newTitle } : col)),
     );
 
     setEditingColumnTitle(null);
@@ -119,9 +112,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
   return (
     <div className="w-full rounded-xl bg-white p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-medium text-neutral-800">
-          ویرایش راهنمای سایز
-        </h3>
+        <h3 className="text-lg font-medium text-neutral-800">ویرایش راهنمای سایز</h3>
         <div className="flex gap-2">
           <button
             onClick={addColumn}
@@ -189,15 +180,10 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                       <input
                         type="text"
                         defaultValue={column.title}
-                        onBlur={(e) =>
-                          handleColumnTitleChange(column.key, e.target.value)
-                        }
+                        onBlur={(e) => handleColumnTitleChange(column.key, e.target.value)}
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
-                            handleColumnTitleChange(
-                              column.key,
-                              e.currentTarget.value,
-                            );
+                            handleColumnTitleChange(column.key, e.currentTarget.value);
                           }
                         }}
                         className="focus:ring-primary w-full rounded border border-slate-200 p-1 focus:outline-none focus:ring-1"
@@ -238,32 +224,22 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
           </thead>
           <tbody>
             {data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className={rowIndex !== 0 ? "border-t border-slate-100" : ""}
-              >
+              <tr key={rowIndex} className={rowIndex !== 0 ? "border-t border-slate-100" : ""}>
                 <td className="border-l border-slate-100 p-3">
                   <input
                     type="text"
                     value={row.size}
-                    onChange={(e) =>
-                      updateCell(rowIndex, "size", e.target.value)
-                    }
+                    onChange={(e) => updateCell(rowIndex, "size", e.target.value)}
                     className="focus:ring-primary w-full rounded border border-slate-200 p-1.5 focus:outline-none focus:ring-1"
                     placeholder="سایز"
                   />
                 </td>
                 {localColumns.map((column) => (
-                  <td
-                    key={column.key}
-                    className="border-l border-slate-100 p-3"
-                  >
+                  <td key={column.key} className="border-l border-slate-100 p-3">
                     <input
                       type="text"
                       value={row[column.key] || ""}
-                      onChange={(e) =>
-                        updateCell(rowIndex, column.key, e.target.value)
-                      }
+                      onChange={(e) => updateCell(rowIndex, column.key, e.target.value)}
                       className="focus:ring-primary w-full rounded border border-slate-200 p-1.5 focus:outline-none focus:ring-1"
                       placeholder="مقدار"
                     />

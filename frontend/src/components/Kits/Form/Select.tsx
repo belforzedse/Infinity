@@ -33,11 +33,7 @@ export default function Select({
 }: SelectProps) {
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      {label && (
-        <label className="text-base text-foreground-primary lg:text-lg">
-          {label}
-        </label>
-      )}
+      {label && <label className="text-base text-foreground-primary lg:text-lg">{label}</label>}
       <Listbox value={value} onChange={onChange} disabled={isLoading}>
         <div className="relative">
           <Listbox.Button
@@ -108,9 +104,7 @@ export default function Select({
                   >
                     {({ selected }) => (
                       <span
-                        className={`block truncate ${
-                          selected ? "font-medium" : "font-normal"
-                        }`}
+                        className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
                       >
                         {option.name}
                       </span>

@@ -32,10 +32,7 @@ export default function PDPCommentAdd(props: Props) {
     // Use type assertion to access the Rate field
     const totalRating = productReviews.reduce((sum, review) => {
       // Handle both possible field names for backward compatibility
-      const reviewRate =
-        (review.attributes as any).Rate ||
-        (review.attributes as any).Rating ||
-        0;
+      const reviewRate = (review.attributes as any).Rate || (review.attributes as any).Rating || 0;
       return sum + reviewRate;
     }, 0);
 
@@ -54,10 +51,7 @@ export default function PDPCommentAdd(props: Props) {
 
     productReviews.forEach((review) => {
       // Handle both possible field names for backward compatibility
-      const rating =
-        (review.attributes as any).Rate ||
-        (review.attributes as any).Rating ||
-        0;
+      const rating = (review.attributes as any).Rate || (review.attributes as any).Rating || 0;
       if (rating >= 1 && rating <= 5) {
         distribution[rating as keyof typeof distribution]++;
       }
@@ -89,16 +83,12 @@ export default function PDPCommentAdd(props: Props) {
     <>
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-4 rounded-3xl bg-background-secondary p-5">
-          <span className="text-3xl text-neutral-700">
-            دیدگاه و امتیاز خریداران
-          </span>
+          <span className="text-3xl text-neutral-700">دیدگاه و امتیاز خریداران</span>
 
           <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-1">
-                <span className="text-xl text-green-800">
-                  {formattedRating}
-                </span>
+                <span className="text-xl text-green-800">{formattedRating}</span>
                 <span className="text-xs text-foreground-primary">از ۵</span>
               </div>
 
@@ -115,9 +105,7 @@ export default function PDPCommentAdd(props: Props) {
               </div>
 
               <span className="text-xs mt-1 text-foreground-primary">
-                {hasReviews
-                  ? `(از مجموع ${actualReviewCount} نظر)`
-                  : "(هنوز دیدگاهی ثبت نشده است)"}
+                {hasReviews ? `(از مجموع ${actualReviewCount} نظر)` : "(هنوز دیدگاهی ثبت نشده است)"}
               </span>
             </div>
 
@@ -138,19 +126,13 @@ export default function PDPCommentAdd(props: Props) {
                           className="h-full rounded-full bg-yellow-500"
                           style={{
                             width: `${getPercentage(
-                              ratingDistribution[
-                                starCount as keyof typeof ratingDistribution
-                              ],
+                              ratingDistribution[starCount as keyof typeof ratingDistribution],
                             )}%`,
                           }}
                         />
                       </div>
                       <span className="text-xs w-8 text-center text-gray-500">
-                        {
-                          ratingDistribution[
-                            starCount as keyof typeof ratingDistribution
-                          ]
-                        }
+                        {ratingDistribution[starCount as keyof typeof ratingDistribution]}
                       </span>
                     </div>
                   ))}
@@ -168,9 +150,7 @@ export default function PDPCommentAdd(props: Props) {
           </div>
         </div>
 
-        <span className="text-xs text-neutral-500">
-          شما هم از تجربه خریدتون برامون بنویسین!
-        </span>
+        <span className="text-xs text-neutral-500">شما هم از تجربه خریدتون برامون بنویسین!</span>
 
         <PLPButton
           text="افزودن نظر"

@@ -2,10 +2,7 @@ import Select, { Option } from "@/components/Kits/Form/Select";
 import React, { useEffect, useState } from "react";
 import PlusIcon from "../../Icons/PlusIcon";
 import SetCategoryModal from "./Modal";
-import {
-  editProductDataAtom,
-  productCategoryDataAtom,
-} from "@/atoms/super-admin/products";
+import { editProductDataAtom, productCategoryDataAtom } from "@/atoms/super-admin/products";
 import { useAtomValue, useAtom } from "jotai";
 import { productDataAtom } from "@/atoms/super-admin/products";
 import { usePathname } from "next/navigation";
@@ -15,18 +12,13 @@ interface MainCategorySelectorProps {
   isEditMode?: boolean;
 }
 
-function MainCategorySelector({
-  isEditMode = false,
-}: MainCategorySelectorProps) {
-  const [selectedMainCategory, setSelectedMainCategory] =
-    useState<Option | null>(null);
+function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps) {
+  const [selectedMainCategory, setSelectedMainCategory] = useState<Option | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const pathname = usePathname();
 
   const CategoriesData = useAtomValue(productCategoryDataAtom);
-  const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom,
-  );
+  const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
 
   const onChangeMainCategory = (value: Option) => {
     setSelectedMainCategory(value);

@@ -12,11 +12,7 @@ interface GalleryProps {
   selectedImages: string[];
 }
 
-export default function Gallery({
-  images,
-  onSelect,
-  selectedImages,
-}: GalleryProps) {
+export default function Gallery({ images, onSelect, selectedImages }: GalleryProps) {
   return (
     <div className="grid grid-cols-4 gap-4">
       {images.map((image) => (

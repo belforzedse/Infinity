@@ -45,18 +45,8 @@ const AnipoBarcodeLabel = (props: AnipoBarcodeProps) => {
         <div className="anipo-company-info">
           <div className="anipo-logo">
             <svg viewBox="0 0 48 48" className="anipo-logo-svg">
-              <path
-                d="M24 4L36 16L24 28L12 16Z"
-                fill="none"
-                stroke="black"
-                strokeWidth="2"
-              />
-              <path
-                d="M12 20L24 32L36 20"
-                fill="none"
-                stroke="black"
-                strokeWidth="2"
-              />
+              <path d="M24 4L36 16L24 28L12 16Z" fill="none" stroke="black" strokeWidth="2" />
+              <path d="M12 20L24 32L36 20" fill="none" stroke="black" strokeWidth="2" />
             </svg>
           </div>
           <div className="anipo-company-name">شرکت ملی پست</div>
@@ -73,44 +63,28 @@ const AnipoBarcodeLabel = (props: AnipoBarcodeProps) => {
       <div className="anipo-content">
         {/* Origin and Destination Row */}
         <div className="anipo-row anipo-origin-dest">
-          <div className="anipo-number-box">
-            {packageNumber.slice(-2) || "24"}
-          </div>
+          <div className="anipo-number-box">{packageNumber.slice(-2) || "24"}</div>
           <div className="anipo-dual-field">
-            <div className="anipo-field anipo-bordered-left">
-              {origin}
-            </div>
-            <div className="anipo-field">
-              {destination}
-            </div>
+            <div className="anipo-field anipo-bordered-left">{origin}</div>
+            <div className="anipo-field">{destination}</div>
           </div>
         </div>
 
         {/* Weight and Destination Detail Row */}
         <div className="anipo-row anipo-weight-dest">
-          <div className="anipo-field">
-            مقصد {destination}
-          </div>
-          <div className="anipo-field anipo-no-right-border">
-            وزن {weight}
-          </div>
+          <div className="anipo-field">مقصد {destination}</div>
+          <div className="anipo-field anipo-no-right-border">وزن {weight}</div>
         </div>
 
         {/* Time and Date Row */}
         <div className="anipo-row anipo-time-date">
-          <div className="anipo-field">
-            زمان {time}
-          </div>
-          <div className="anipo-field anipo-no-right-border">
-            تاریخ {date}
-          </div>
+          <div className="anipo-field">زمان {time}</div>
+          <div className="anipo-field anipo-no-right-border">تاریخ {date}</div>
         </div>
 
         {/* Fare Row */}
         <div className="anipo-row anipo-fare">
-          <div className="anipo-field anipo-full-width">
-            کرایه {fare}
-          </div>
+          <div className="anipo-field anipo-full-width">کرایه {fare}</div>
         </div>
       </div>
 
@@ -133,9 +107,21 @@ const AnipoBarcodeLabel = (props: AnipoBarcodeProps) => {
       {/* Recipient Info (for reference, not visible in print) */}
       {(recipientName || recipientPhone || recipientAddress) && (
         <div className="anipo-recipient-info print:hidden">
-          {recipientName && <div><strong>گیرنده:</strong> {recipientName}</div>}
-          {recipientPhone && <div><strong>تلفن:</strong> {recipientPhone}</div>}
-          {recipientAddress && <div><strong>آدرس:</strong> {recipientAddress}</div>}
+          {recipientName && (
+            <div>
+              <strong>گیرنده:</strong> {recipientName}
+            </div>
+          )}
+          {recipientPhone && (
+            <div>
+              <strong>تلفن:</strong> {recipientPhone}
+            </div>
+          )}
+          {recipientAddress && (
+            <div>
+              <strong>آدرس:</strong> {recipientAddress}
+            </div>
+          )}
         </div>
       )}
     </div>

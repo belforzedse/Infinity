@@ -222,13 +222,7 @@ export default function Page() {
       onSubmit={async (data: User) => {
         try {
           // Validate required fields
-          if (
-            !data.firstname ||
-            !data.lastname ||
-            !data.phone ||
-            !data.role ||
-            !data.password
-          ) {
+          if (!data.firstname || !data.lastname || !data.phone || !data.role || !data.password) {
             toast.error("لطفا فیلدهای ضروری را پر کنید");
             return;
           }
@@ -251,9 +245,7 @@ export default function Page() {
               },
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken",
-                  )}`,
+                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
               },
             );

@@ -7,16 +7,19 @@ I've created extensive test suites to ensure your application is thoroughly test
 ### 🧪 Test Categories
 
 #### 1. **API Client & Core Infrastructure Tests**
+
 - **`src/services/__tests__/apiClient.test.ts`** - Complete API client testing
 - **`src/utils/__tests__/api.test.ts`** - API utilities including JWT parsing, error handling
 - **`src/utils/__tests__/auth.test.ts`** - Authentication utilities testing
 
 #### 2. **UI Component Tests**
+
 - **`src/components/ui/Button.test.tsx`** (Enhanced) - All button variants, sizes, props
 - **`src/components/ui/Input.test.tsx`** (Enhanced) - Input component with error states, variants
 - **`src/components/Kits/__tests__/Breadcrumb.test.tsx`** - Navigation breadcrumb component
 
 #### 3. **Service Layer Tests**
+
 - **`src/services/auth/__tests__/`** - Complete authentication service testing
   - `authService.test.ts` - Service index/exports
   - `sendOTP.test.ts` - OTP sending functionality
@@ -25,19 +28,23 @@ I've created extensive test suites to ensure your application is thoroughly test
 - **`src/services/cart/__tests__/cartService.test.ts`** - Shopping cart operations
 
 #### 4. **Integration Tests**
+
 - **`src/__tests__/auth-flow.integration.test.ts`** - Complete authentication flows
 - **`src/__tests__/auth.integration.test.ts`** (Enhanced) - Auth error handling integration
 
 #### 5. **Utility Function Tests**
+
 - **`src/utils/__tests__/faNum.test.ts`** - Farsi number formatting
 - **`src/utils/__tests__/price.test.ts`** - Price formatting utilities
 
 #### 6. **Test Setup & Configuration**
+
 - **`src/__tests__/setup.test.ts`** - Global test mocks and setup
 
 ## 🎯 Test Coverage Areas
 
 ### ✅ **Fully Covered:**
+
 - **API Client**: HTTP methods, error handling, authentication headers, timeouts
 - **Authentication**: OTP flow, password login, registration, error scenarios
 - **UI Components**: Props, variants, user interactions, accessibility
@@ -45,6 +52,7 @@ I've created extensive test suites to ensure your application is thoroughly test
 - **Cart Operations**: Add/remove items, stock checking, checkout flow
 
 ### 📊 **Key Features Tested:**
+
 - **Error Handling**: Network errors, validation errors, auth failures
 - **Edge Cases**: Empty inputs, invalid data, boundary conditions
 - **User Flows**: Complete auth workflows, cart management
@@ -54,16 +62,19 @@ I've created extensive test suites to ensure your application is thoroughly test
 ## 🚀 Running Tests
 
 ### Run All Tests:
+
 ```bash
 npm test
 ```
 
 ### Run with Coverage:
+
 ```bash
 npm test -- --coverage
 ```
 
 ### Run Specific Test Suites:
+
 ```bash
 # UI Components
 npm test -- --testNamePattern="Button component|Input component|Breadcrumb"
@@ -79,6 +90,7 @@ npm test -- --testNamePattern="integration"
 ```
 
 ### Watch Mode (for development):
+
 ```bash
 npm test -- --watch
 ```
@@ -103,6 +115,7 @@ npm test -- --watch
 ## 🎉 What's Next
 
 Your test suite is now comprehensive and ready for:
+
 - **Continuous Integration**: Add to your CI/CD pipeline
 - **Pre-commit Hooks**: Run tests before code commits
 - **Code Reviews**: Use test coverage as quality metric

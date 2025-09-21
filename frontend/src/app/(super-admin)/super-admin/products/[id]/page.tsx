@@ -17,11 +17,7 @@ import { useProductCategory } from "@/hooks/product/useCategory";
 import { useProductTag } from "@/hooks/product/useTag";
 import logger from "@/utils/logger";
 
-export default function EditProductsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
   const [productData, setProductData] = useAtom(editProductDataAtom);

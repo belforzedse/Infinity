@@ -40,9 +40,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
     return (
       <div className="flex items-center justify-center p-2">
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-pink-500 border-t-transparent"></div>
-        <span className="text-sm mr-2 text-gray-500">
-          در حال بررسی وضعیت پرداخت...
-        </span>
+        <span className="text-sm mr-2 text-gray-500">در حال بررسی وضعیت پرداخت...</span>
       </div>
     );
   }
@@ -100,9 +98,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
       {orderStatus && (
         <div className="text-sm mt-1 text-gray-600">
           <span className="ml-1">وضعیت سفارش:</span>
-          <span className="text-gray-800">
-            {getStatusTranslation(orderStatus)}
-          </span>
+          <span className="text-gray-800">{getStatusTranslation(orderStatus)}</span>
         </div>
       )}
     </div>

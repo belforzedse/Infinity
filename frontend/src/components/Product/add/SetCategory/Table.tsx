@@ -18,9 +18,7 @@ interface SetCategoryTableProps {
 
 const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
   const setCategoriesData = useSetAtom(productCategoryDataAtom);
-  const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination,
-  );
+  const setCategoriesDataPagination = useSetAtom(productCategoryDataAtomPagination);
 
   const handleDelete = async (id: string) => {
     await deleteCategory(id);

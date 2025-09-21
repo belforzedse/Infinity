@@ -121,8 +121,9 @@ To load variables from a file, use `--env-file` with `docker run`.
 - chore(a11y): add TODO to improve selected color state semantics for keyboard access
 
 ### Checkout Stability Improvements
-- Stabilized  deps in  using primitives.
-- Added  merging and passed to  for consistent totals.
+
+- Stabilized deps in using primitives.
+- Added merging and passed to for consistent totals.
 - Preserved SnappPay eligibility on errors; removed silent catches.
 - Removed localStorage fallback in finalize payload; rely on state.
 - Typed cart query responses and added error-safe fallbacks.

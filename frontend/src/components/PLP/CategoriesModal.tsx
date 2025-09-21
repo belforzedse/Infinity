@@ -11,10 +11,7 @@ interface CategoriesModalProps {
   onClose: () => void;
 }
 
-export default function CategoriesModal({
-  isOpen,
-  onClose,
-}: CategoriesModalProps) {
+export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
@@ -42,17 +39,9 @@ export default function CategoriesModal({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="div"
-                  className="mb-4 flex items-center justify-between"
-                >
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">
-                    دسته بندی ها
-                  </h3>
-                  <button
-                    onClick={onClose}
-                    className="text-pink-500 hover:text-pink-600"
-                  >
+                <Dialog.Title as="div" className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">دسته بندی ها</h3>
+                  <button onClick={onClose} className="text-pink-500 hover:text-pink-600">
                     <DeleteIcon />
                   </button>
                 </Dialog.Title>
@@ -77,9 +66,7 @@ export default function CategoriesModal({
                           className="h-12 w-12 object-contain"
                         />
                       </div>
-                      <span className="text-sm text-gray-800">
-                        {category.name}
-                      </span>
+                      <span className="text-sm text-gray-800">{category.name}</span>
                     </Link>
                   ))}
                 </div>

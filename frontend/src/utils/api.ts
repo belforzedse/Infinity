@@ -35,10 +35,7 @@ export const formatQueryParams = (params: QueryParams): string => {
 
   const queryParams = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null)
-    .map(
-      ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
-    )
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
     .join("&");
 
   return queryParams ? `?${queryParams}` : "";
@@ -50,10 +47,7 @@ export const formatQueryParams = (params: QueryParams): string => {
 export const handleApiError = (error: unknown): ApiError => {
   const err = error as ErrorLike;
   // Network error
-  if (
-    err.message === "Network Error" ||
-    (typeof navigator !== "undefined" && !navigator.onLine)
-  ) {
+  if (err.message === "Network Error" || (typeof navigator !== "undefined" && !navigator.onLine)) {
     return {
       message: ERROR_MESSAGES.NETWORK,
       status: 0,

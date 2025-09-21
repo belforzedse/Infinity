@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 // Debug utilities for development mode
-export const DEBUG = process.env.NODE_ENV === 'development';
+export const DEBUG = process.env.NODE_ENV === "development";
 
 // Enhanced console logging
 export const log = {
@@ -28,7 +28,7 @@ export const log = {
   api: (method: string, url: string, data?: any) => {
     if (DEBUG) {
       console.group(`🌐 API ${method.toUpperCase()} ${url}`);
-      if (data) console.log('Payload:', data);
+      if (data) console.log("Payload:", data);
       console.groupEnd();
     }
   },
@@ -36,7 +36,7 @@ export const log = {
   render: (component: string, props?: any) => {
     if (DEBUG) {
       console.log(`🎨 ${component} rendered`);
-      if (props) console.log('Props:', props);
+      if (props) console.log("Props:", props);
     }
   },
 
@@ -48,20 +48,20 @@ export const log = {
 
   performance: (label: string, duration: number) => {
     if (DEBUG) {
-      const status = duration > 100 ? '🐌' : duration > 50 ? '⚡' : '🚀';
+      const status = duration > 100 ? "🐌" : duration > 50 ? "⚡" : "🚀";
       console.log(`${status} ${label}: ${duration.toFixed(2)}ms`);
     }
-  }
+  },
 };
 
 // Component debug wrapper
 export function withDebug<T extends React.ComponentType<any>>(
   Component: T,
-  componentName?: string
+  componentName?: string,
 ): T {
   if (!DEBUG) return Component;
 
-  const name = componentName || Component.displayName || Component.name || 'Unknown';
+  const name = componentName || Component.displayName || Component.name || "Unknown";
 
   const DebugWrapper = (props: any) => {
     log.render(name, props);
@@ -84,13 +84,13 @@ export function withDebug<T extends React.ComponentType<any>>(
 // API debug wrapper
 export function debugAPI<T extends (...args: any[]) => Promise<any>>(
   apiFunction: T,
-  apiName: string
+  apiName: string,
 ): T {
   if (!DEBUG) return apiFunction;
 
   return (async (...args: any[]) => {
     const startTime = performance.now();
-    log.api('CALL', apiName, args);
+    log.api("CALL", apiName, args);
 
     try {
       const result = await apiFunction(...args);
@@ -138,8 +138,8 @@ export const debugStorage = {
 
   clear: () => {
     localStorage.clear();
-    log.warn('Storage CLEARED');
-  }
+    log.warn("Storage CLEARED");
+  },
 };
 
 // Performance measurement utilities
@@ -155,7 +155,7 @@ export const perf = {
     if (DEBUG && performance.measure) {
       try {
         performance.measure(name, startMark, endMark);
-        const measure = performance.getEntriesByName(name, 'measure')[0];
+        const measure = performance.getEntriesByName(name, "measure")[0];
         log.performance(name, measure.duration);
         return measure.duration;
       } catch (error) {
@@ -172,16 +172,16 @@ export const perf = {
 
   timeEnd: (label: string) => {
     if (DEBUG) console.timeEnd(label);
-  }
+  },
 };
 
 // Error boundary debug helper
 export const debugError = (error: Error, errorInfo: any, component?: string) => {
   if (DEBUG) {
-    console.group(`💥 Error Boundary - ${component || 'Unknown Component'}`);
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
-    console.error('Stack:', error.stack);
+    console.group(`💥 Error Boundary - ${component || "Unknown Component"}`);
+    console.error("Error:", error);
+    console.error("Error Info:", errorInfo);
+    console.error("Stack:", error.stack);
     console.groupEnd();
   }
 };
@@ -189,7 +189,7 @@ export const debugError = (error: Error, errorInfo: any, component?: string) => 
 // Debug breakpoint utility
 export const debugBreakpoint = (condition?: boolean, message?: string) => {
   if (DEBUG && (condition === undefined || condition)) {
-    console.log(`🛑 Debug breakpoint${message ? `: ${message}` : ''}`);
+    console.log(`🛑 Debug breakpoint${message ? `: ${message}` : ""}`);
     debugger; // This will pause execution in DevTools
   }
 };
@@ -198,10 +198,10 @@ export const debugBreakpoint = (condition?: boolean, message?: string) => {
 export const trackMemory = () => {
   if (DEBUG && (performance as any).memory) {
     const memory = (performance as any).memory;
-    log.info('Memory Usage:', {
+    log.info("Memory Usage:", {
       used: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB`,
       total: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB`,
-      limit: `${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)}MB`
+      limit: `${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)}MB`,
     });
   }
 };
@@ -209,10 +209,10 @@ export const trackMemory = () => {
 // Bundle size analyzer helper
 export const logBundleInfo = () => {
   if (DEBUG) {
-    log.info('Bundle Info:', {
-      nextVersion: process.env.NEXT_PUBLIC_VERSION || 'unknown',
+    log.info("Bundle Info:", {
+      nextVersion: process.env.NEXT_PUBLIC_VERSION || "unknown",
       environment: process.env.NODE_ENV,
-      build: process.env.NEXT_PUBLIC_BUILD_ID || 'unknown',
+      build: process.env.NEXT_PUBLIC_BUILD_ID || "unknown",
     });
   }
 };

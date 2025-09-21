@@ -60,15 +60,11 @@ export default function PDPHeroInfoSize(props: Props) {
   const actualDisabledSizeIds = getDisabledSizeIds();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [internalSelectedSize, setInternalSelectedSize] = useState<string>(
-    sizes[0]?.id || "",
-  );
+  const [internalSelectedSize, setInternalSelectedSize] = useState<string>(sizes[0]?.id || "");
 
   // Use either the external selected size if provided, or the internal state
   const selectedSize =
-    externalSelectedSize !== undefined
-      ? externalSelectedSize
-      : internalSelectedSize;
+    externalSelectedSize !== undefined ? externalSelectedSize : internalSelectedSize;
 
   const [openSizeModal, setOpenSizeModal] = useState<boolean>(false);
 
@@ -114,13 +110,8 @@ export default function PDPHeroInfoSize(props: Props) {
         <div className="flex items-center gap-2">
           <span className="text-xl text-foreground-primary">انتخاب سایز</span>
 
-          <div
-            className="flex cursor-pointer items-center"
-            onClick={() => setOpenSizeModal(true)}
-          >
-            <span className="text-xs text-actions-link underline">
-              راهنمای سایز
-            </span>
+          <div className="flex cursor-pointer items-center" onClick={() => setOpenSizeModal(true)}>
+            <span className="text-xs text-actions-link underline">راهنمای سایز</span>
 
             <RulerIcon />
           </div>

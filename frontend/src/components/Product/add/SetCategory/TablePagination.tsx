@@ -147,9 +147,7 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
           <ChevronRightIcon />
         </button>
 
-        <div className="flex flex-row-reverse items-center gap-1">
-          {renderPageNumbers()}
-        </div>
+        <div className="flex flex-row-reverse items-center gap-1">{renderPageNumbers()}</div>
 
         <button
           onClick={() => handlePageChange(currentPageState - 1)}

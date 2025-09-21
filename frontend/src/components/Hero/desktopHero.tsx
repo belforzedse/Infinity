@@ -13,9 +13,8 @@ type Props = {
 export default function DesktopHero({ layout, slideKey }: Props) {
   const prefersReduced = useReducedMotion();
   // Slower, more pronounced outside motion for high-end feel
-  const outsideOpts =
-    prefersReduced ?
-      {
+  const outsideOpts = prefersReduced
+    ? {
         distance: 160,
         duration: 0.99,
         scale: 0.98,
@@ -80,9 +79,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                           subtitle={layout.textBanner.subtitle}
                           className={layout.textBanner.className}
                           titleClassName={layout.textBanner.titleClassName}
-                          subtitleClassName={
-                            layout.textBanner.subtitleClassName
-                          }
+                          subtitleClassName={layout.textBanner.subtitleClassName}
                         />
                       </motion.div>
                     </AnimatePresence>

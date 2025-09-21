@@ -58,10 +58,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Check if user is logged in
-  const isLoggedIn =
-    typeof window !== "undefined"
-      ? !!localStorage.getItem("accessToken")
-      : false;
+  const isLoggedIn = typeof window !== "undefined" ? !!localStorage.getItem("accessToken") : false;
 
   // Close drawer when path changes
   useEffect(() => {
@@ -132,10 +129,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const extractGeneralDiscountPercent = (variation: any): number | undefined => {
         if (!variation) return undefined;
 
-        const candidateGroups = [
-          variation.general_discounts,
-          variation.general_discount,
-        ];
+        const candidateGroups = [variation.general_discounts, variation.general_discount];
 
         for (const group of candidateGroups) {
           if (!group) continue;
@@ -150,10 +144,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           for (const node of nodes) {
             const amount =
-              node?.attributes?.Amount ??
-              node?.Amount ??
-              node?.attributes?.amount ??
-              node?.amount;
+              node?.attributes?.Amount ?? node?.Amount ?? node?.attributes?.amount ?? node?.amount;
             const parsedAmount = parseNumericValue(amount);
             if (parsedAmount !== undefined) return parsedAmount;
           }
@@ -175,9 +166,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Parse price to ensure it's a number
         const basePrice = parseNumericValue(variation.Price) ?? 0;
-        const listedDiscountPrice = parseNumericValue(
-          (variation as any)?.DiscountPrice
-        );
+        const listedDiscountPrice = parseNumericValue((variation as any)?.DiscountPrice);
         const generalDiscountPercent = extractGeneralDiscountPercent(variation);
 
         let finalUnitPrice = basePrice;
@@ -195,20 +184,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           generalDiscountPercent < 100 &&
           basePrice > 0
         ) {
-          const computed = Math.round(
-            basePrice * (1 - generalDiscountPercent / 100)
-          );
+          const computed = Math.round(basePrice * (1 - generalDiscountPercent / 100));
           if (computed > 0 && (finalUnitPrice === 0 || computed < finalUnitPrice)) {
             finalUnitPrice = computed;
           }
         }
 
         const lineSum = parseNumericValue(item.Sum);
-        if (
-          lineSum &&
-          item.Count &&
-          item.Count > 0
-        ) {
+        if (lineSum && item.Count && item.Count > 0) {
           const derivedUnitPrice = lineSum / item.Count;
           if (
             Number.isFinite(derivedUnitPrice) &&
@@ -226,8 +209,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           finalUnitPrice = basePrice;
         }
 
-        const hasDiscount =
-          basePrice > 0 && finalUnitPrice > 0 && finalUnitPrice < basePrice;
+        const hasDiscount = basePrice > 0 && finalUnitPrice > 0 && finalUnitPrice < basePrice;
         const originalPrice = hasDiscount ? basePrice : undefined;
         const discountPercentage = hasDiscount
           ? Math.round(((basePrice - finalUnitPrice) / basePrice) * 100)
@@ -274,10 +256,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // Add each item to the API cart
         for (const item of localCartItems) {
           if (item.variationId) {
-            await CartService.addItemToCart(
-              Number(item.variationId),
-              item.quantity,
-            );
+            await CartService.addItemToCart(Number(item.variationId), item.quantity);
           }
         }
 
@@ -308,10 +287,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         setIsLoading(true);
 
-        await CartService.addItemToCart(
-          Number(newItem.variationId),
-          newItem.quantity,
-        );
+        await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
 
         // Refresh cart after adding item
         await fetchUserCart();
@@ -331,9 +307,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Local storage implementation
       setCartItems((prev) => {
         // Check if item already exists in cart
-        const existingItemIndex = prev.findIndex(
-          (item) => item.slug === newItem.slug,
-        );
+        const existingItemIndex = prev.findIndex((item) => item.slug === newItem.slug);
 
         if (existingItemIndex !== -1) {
           // Update quantity if item exists
@@ -343,10 +317,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             ...existingItem,
             quantity: existingItem.quantity + newItem.quantity,
             price: newItem.price,
-            originalPrice:
-              newItem.originalPrice ?? existingItem.originalPrice,
-            discountPercentage:
-              newItem.discountPercentage ?? existingItem.discountPercentage,
+            originalPrice: newItem.originalPrice ?? existingItem.originalPrice,
+            discountPercentage: newItem.discountPercentage ?? existingItem.discountPercentage,
           };
           return updatedItems;
         } else {
@@ -421,9 +393,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } else {
       // Local storage implementation
-      setCartItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
-      );
+      setCartItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
     }
   };
 
@@ -467,19 +437,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const subtotalBeforeDiscount = cartItems.reduce((sum, item) => {
     const unit = item.originalPrice && item.originalPrice > 0 ? item.originalPrice : item.price;
     return sum + unit * item.quantity;
   }, 0);
 
-  const cartDiscountTotal = subtotalBeforeDiscount > totalPrice
-    ? subtotalBeforeDiscount - totalPrice
-    : 0;
+  const cartDiscountTotal =
+    subtotalBeforeDiscount > totalPrice ? subtotalBeforeDiscount - totalPrice : 0;
 
   const value = {
     cartItems,

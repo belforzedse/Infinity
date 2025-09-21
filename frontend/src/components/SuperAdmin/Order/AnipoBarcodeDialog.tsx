@@ -32,36 +32,27 @@ export default function AnipoBarcodeDialog({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="صدور بارکد Anipo"
-      className="max-w-md"
-    >
+    <Modal isOpen={isOpen} onClose={handleClose} title="صدور بارکد Anipo" className="max-w-md">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">
-              وزن (گرم)
-            </label>
+            <label className="text-sm font-medium text-gray-700">وزن (گرم)</label>
             <input
               type="number"
               placeholder="100"
               value={customWeight}
               onChange={(e) => setCustomWeight(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="text-sm rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">
-              سایز جعبه
-            </label>
+            <label className="text-sm font-medium text-gray-700">سایز جعبه</label>
             <select
               value={customBoxSize}
               onChange={(e) => setCustomBoxSize(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="text-sm rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             >
               <option value="1">سایز ۱ (100×100×150)</option>
@@ -83,7 +74,7 @@ export default function AnipoBarcodeDialog({
             type="button"
             onClick={handleGenerate}
             disabled={loading}
-            className="rounded-xl bg-actions-primary px-5 py-2.5 text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-xl bg-actions-primary px-5 py-2.5 text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "در حال ایجاد..." : "ایجاد بارکد"}
           </button>
@@ -91,7 +82,7 @@ export default function AnipoBarcodeDialog({
             type="button"
             onClick={handleClose}
             disabled={loading}
-            className="rounded-xl border border-slate-200 px-5 py-2.5 text-neutral-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-xl border border-slate-200 px-5 py-2.5 text-neutral-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             انصراف
           </button>

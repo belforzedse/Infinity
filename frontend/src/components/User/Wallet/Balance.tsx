@@ -8,8 +8,7 @@ export default function WalletBalance() {
     const run = async () => {
       try {
         const res = await WalletService.getMyWallet();
-        if (res?.success && res.data)
-          setBalanceIrr(Number(res.data.balance || 0));
+        if (res?.success && res.data) setBalanceIrr(Number(res.data.balance || 0));
       } catch {}
     };
     run();
@@ -22,10 +21,8 @@ export default function WalletBalance() {
           background: "linear-gradient(66.02deg, #EC4899 0%, #F787BF 84.01%)",
         }}
       >
-        <span className="text-white text-[20px]">کیف پول اینفینیتی</span>
-        <span className="text-white text-[36px]">
-          {(balanceIrr / 10).toLocaleString()} تومان
-        </span>
+        <span className="text-[20px] text-white">کیف پول اینفینیتی</span>
+        <span className="text-[36px] text-white">{(balanceIrr / 10).toLocaleString()} تومان</span>
       </div>
 
       <button className="flex items-center gap-1">
