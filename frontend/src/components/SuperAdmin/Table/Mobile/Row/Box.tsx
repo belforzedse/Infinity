@@ -41,11 +41,7 @@ export default function MobileTableRowBox<TData>({
           </div>
         </div>
 
-        {!isOpen ? (
-          <>{header}</>
-        ) : (
-          <OpenMobileTableRow columns={columns} row={row} />
-        )}
+        {!isOpen ? <>{header}</> : <OpenMobileTableRow columns={columns} row={row} />}
       </div>
     </div>
   );

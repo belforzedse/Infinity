@@ -7,11 +7,7 @@ export const metadata: Metadata = {
   description: "صفحه چاپ بارکد آنیپو",
 };
 
-export default function AnipoBarcodePrintLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AnipoBarcodePrintLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fa" dir="rtl">
       <body className="bg-white">{children}</body>

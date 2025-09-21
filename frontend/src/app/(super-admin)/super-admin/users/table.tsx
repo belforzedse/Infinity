@@ -48,9 +48,7 @@ export type User = {
 };
 
 const StatusCell = ({ row }: { row: Row<User> }) => {
-  const [status, setStatus] = useState(
-    row.original.attributes.IsActive ? "active" : "inactive",
-  );
+  const [status, setStatus] = useState(row.original.attributes.IsActive ? "active" : "inactive");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStatusChange = async (newStatus: "active" | "inactive") => {
@@ -85,16 +83,13 @@ const StatusCell = ({ row }: { row: Row<User> }) => {
     <SuperAdminTableCellSwitch
       status={status as "active" | "inactive"}
       disabled={isLoading}
-      onChange={() =>
-        handleStatusChange(status === "active" ? "inactive" : "active")
-      }
+      onChange={() => handleStatusChange(status === "active" ? "inactive" : "active")}
     />
   );
 };
 
 const WalletCell = ({ row }: { row: Row<User> }) => {
-  const wallet = row.original.attributes.user_wallet.data?.attributes
-    .Balance as string;
+  const wallet = row.original.attributes.user_wallet.data?.attributes.Balance as string;
   const walletId = row.original.attributes.user_wallet.data?.id as number;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -150,9 +145,7 @@ const WalletCell = ({ row }: { row: Row<User> }) => {
           <div className="w-full max-w-md rounded-lg bg-white p-6">
             <h2 className="text-xl mb-4 font-bold">تغییر موجودی کیف پول</h2>
             <div className="mb-4">
-              <label className="text-sm mb-1 block font-medium">
-                موجودی جدید
-              </label>
+              <label className="text-sm mb-1 block font-medium">موجودی جدید</label>
               <input
                 type="number"
                 value={newBalance}
@@ -230,11 +223,7 @@ const ActionsCell = ({ row }: { row: Row<User> }) => {
   return (
     <>
       <div className="flex flex-row-reverse items-center gap-3 p-1">
-        <RemoveActionButton
-          isRemoved={!!isRemoved}
-          id={row.original.id}
-          apiUrl={"/local-users"}
-        />
+        <RemoveActionButton isRemoved={!!isRemoved} id={row.original.id} apiUrl={"/local-users"} />
 
         <SuperAdminTableCellActionButton
           variant="secondary"
@@ -375,9 +364,7 @@ export const MobileTable = ({ data }: Props) => {
                 <span className="text-xs text-neutral-400">|</span>
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-neutral-400">
-                    {row.attributes?.IsActive
-                      ? "غیرفعال کردن حساب"
-                      : "فعال کردن حساب"}
+                    {row.attributes?.IsActive ? "غیرفعال کردن حساب" : "فعال کردن حساب"}
                   </span>
                   <SuperAdminTableCellSwitch
                     status={row.attributes?.IsActive ? "active" : "inactive"}

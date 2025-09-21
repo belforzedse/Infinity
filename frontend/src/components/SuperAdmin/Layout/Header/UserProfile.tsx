@@ -17,9 +17,7 @@ export default function SuperAdminLayoutHeaderUserProfile() {
         </div>
 
         <div className="hidden flex-col gap-1 md:flex">
-          <span className="text-sm !leading-none text-neutral-600">
-            مینا مخبری
-          </span>
+          <span className="text-sm !leading-none text-neutral-600">مینا مخبری</span>
           <span className="text-xs !leading-none text-neutral-600">ادمین</span>
         </div>
         <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-neutral-600">

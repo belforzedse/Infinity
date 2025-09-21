@@ -11,11 +11,7 @@ import Text from "@/components/Kits/Text";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 
 interface LoginFormProps {
-  onSubmit: (data: {
-    phoneNumber: string;
-    password: string;
-    rememberMe: boolean;
-  }) => Promise<void>;
+  onSubmit: (data: { phoneNumber: string; password: string; rememberMe: boolean }) => Promise<void>;
 }
 
 export default function LoginForm({ onSubmit }: LoginFormProps) {
@@ -69,18 +65,14 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           </Text>
           <AuthPasswordInput
             value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           />
         </div>
 
         <div className="flex items-center">
           <Checkbox
             checked={formData.rememberMe}
-            onChange={(checked) =>
-              setFormData({ ...formData, rememberMe: checked })
-            }
+            onChange={(checked) => setFormData({ ...formData, rememberMe: checked })}
             label={<Text variant="helper">مرا به خاطر بسپار</Text>}
           />
         </div>

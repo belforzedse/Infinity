@@ -18,9 +18,7 @@ export default function Breadcrumb(props: Props) {
           <Link href={breadcrumb.href ?? "#"}>
             <div
               className={`text-xs ${
-                index < breadcrumbs.length - 1
-                  ? "text-foreground-muted"
-                  : "text-foreground-primary"
+                index < breadcrumbs.length - 1 ? "text-foreground-muted" : "text-foreground-primary"
               }`}
             >
               {breadcrumb.label}

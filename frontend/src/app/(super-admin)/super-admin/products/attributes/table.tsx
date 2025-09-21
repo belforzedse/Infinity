@@ -23,9 +23,7 @@ export const columns: ColumnDef<Attribute>[] = [
     accessorKey: "createdAt",
     header: "تاریخ ایجاد",
     cell: ({ row }) =>
-      row.original.createdAt
-        ? new Date(row.original.createdAt).toLocaleDateString("fa-IR")
-        : "-",
+      row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString("fa-IR") : "-",
   },
 ];
 
@@ -47,13 +45,9 @@ export const MobileTable = ({ data }: Props) => {
             </div>
 
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
+              <span className="text-xs text-neutral-400">{row.slug || "-"}</span>
               <span className="text-xs text-neutral-400">
-                {row.slug || "-"}
-              </span>
-              <span className="text-xs text-neutral-400">
-                {row.createdAt
-                  ? new Date(row.createdAt).toLocaleDateString("fa-IR")
-                  : "-"}
+                {row.createdAt ? new Date(row.createdAt).toLocaleDateString("fa-IR") : "-"}
               </span>
             </div>
           </div>

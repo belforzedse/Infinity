@@ -36,10 +36,7 @@ const eslintConfig = [
       "tailwindcss/no-custom-classname": "off",
 
       // Flag TODO/FIXME comments for cleanup
-      "no-warning-comments": [
-        "warn",
-        { terms: ["todo", "fixme"], location: "anywhere" },
-      ],
+      "no-warning-comments": ["warn", { terms: ["todo", "fixme"], location: "anywhere" }],
     },
   },
 ];

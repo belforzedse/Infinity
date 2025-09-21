@@ -1,12 +1,6 @@
 export default function KeyIcon() {
   return (
-    <svg
-      width="16"
-      height="17"
-      viewBox="0 0 16 17"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M10.0206 6.72793C10.0206 6.58993 9.90859 6.4786 9.77059 6.4786C9.63259 6.47926 9.52059 6.59126 9.52059 6.72926C9.52059 6.86726 9.63259 6.97926 9.77059 6.9786C9.90859 6.9786 10.0206 6.8666 10.0206 6.7286"
         stroke="#64748B"

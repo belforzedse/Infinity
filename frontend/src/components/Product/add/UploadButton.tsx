@@ -28,12 +28,8 @@ const UploadButton: React.FC<UploadButtonProps> = ({
         className,
       )}
     >
-      <span className="text-sm">
-        {isLoading ? "در حال آپلود..." : "اضافه کردن"}
-      </span>
-      <PlusIcon
-        className={classNames("h-4 w-4", isLoading && "animate-spin")}
-      />
+      <span className="text-sm">{isLoading ? "در حال آپلود..." : "اضافه کردن"}</span>
+      <PlusIcon className={classNames("h-4 w-4", isLoading && "animate-spin")} />
       <input
         type="file"
         multiple={multiple}

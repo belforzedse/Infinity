@@ -31,9 +31,7 @@ const Voice: React.FC<VoiceProps> = ({ onPlay, className, audioSrc }) => {
 
   if (error) {
     return (
-      <div
-        className={`w-[303px] rounded-xl bg-stone-50 p-2.5 ${className || ""}`}
-      >
+      <div className={`w-[303px] rounded-xl bg-stone-50 p-2.5 ${className || ""}`}>
         <p className="text-xs text-center text-red-500">{error}</p>
       </div>
     );

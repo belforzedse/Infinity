@@ -62,9 +62,7 @@ export interface LocationParams {
  * @param params Optional parameters for pagination and sorting
  * @returns List of provinces
  */
-export const getProvinces = async (
-  params?: LocationParams,
-): Promise<Province[]> => {
+export const getProvinces = async (params?: LocationParams): Promise<Province[]> => {
   // Build query parameters
   const queryParams: Record<string, string> = {};
 
@@ -99,10 +97,7 @@ export const getProvinces = async (
  * @param params Optional parameters for pagination and sorting
  * @returns List of cities
  */
-export const getCities = async (
-  provinceId?: number,
-  params?: LocationParams,
-): Promise<City[]> => {
+export const getCities = async (provinceId?: number, params?: LocationParams): Promise<City[]> => {
   // Build query parameters
   const queryParams: Record<string, string> = {};
 

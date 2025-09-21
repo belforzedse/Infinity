@@ -7,16 +7,9 @@ interface SizeTableProps {
   onEdit?: (newData: any[]) => void;
 }
 
-const SizeTable: React.FC<SizeTableProps> = ({
-  data,
-  columns,
-  title,
-  onEdit,
-}) => {
+const SizeTable: React.FC<SizeTableProps> = ({ data, columns, title, onEdit }) => {
   // Ensure data is always an array
-  const [localData, setLocalData] = useState<any[]>(
-    Array.isArray(data) ? data : [],
-  );
+  const [localData, setLocalData] = useState<any[]>(Array.isArray(data) ? data : []);
   const [editingCell, setEditingCell] = useState<{
     rowIndex: number;
     column: string;
@@ -52,18 +45,12 @@ const SizeTable: React.FC<SizeTableProps> = ({
   };
 
   if (!Array.isArray(localData) || localData.length === 0) {
-    return (
-      <div className="py-8 text-center text-neutral-500">
-        هیچ داده‌ای موجود نیست
-      </div>
-    );
+    return <div className="py-8 text-center text-neutral-500">هیچ داده‌ای موجود نیست</div>;
   }
 
   return (
     <div className="w-full rounded-xl bg-white p-5">
-      {title && (
-        <h3 className="text-lg mb-4 font-medium text-neutral-800">{title}</h3>
-      )}
+      {title && <h3 className="text-lg mb-4 font-medium text-neutral-800">{title}</h3>}
       <div className="overflow-x-auto">
         <table className="w-full rounded-lg border border-slate-100 bg-white">
           <thead className="bg-stone-50">
@@ -83,13 +70,9 @@ const SizeTable: React.FC<SizeTableProps> = ({
           </thead>
           <tbody>
             {localData.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className={rowIndex !== 0 ? "border-t border-slate-100" : ""}
-              >
+              <tr key={rowIndex} className={rowIndex !== 0 ? "border-t border-slate-100" : ""}>
                 <td className="border-l border-slate-100 p-3">
-                  {editingCell?.rowIndex === rowIndex &&
-                  editingCell?.column === "size" ? (
+                  {editingCell?.rowIndex === rowIndex && editingCell?.column === "size" ? (
                     <input
                       type="text"
                       value={row.size || ""}
@@ -108,12 +91,8 @@ const SizeTable: React.FC<SizeTableProps> = ({
                   )}
                 </td>
                 {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    className="border-l border-slate-100 p-3"
-                  >
-                    {editingCell?.rowIndex === rowIndex &&
-                    editingCell?.column === column.key ? (
+                  <td key={column.key} className="border-l border-slate-100 p-3">
+                    {editingCell?.rowIndex === rowIndex && editingCell?.column === column.key ? (
                       <input
                         type="text"
                         value={row[column.key] || ""}

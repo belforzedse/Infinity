@@ -12,11 +12,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   return (
     <div className="col-span-1 flex flex-col gap-1">
       {tabs.map((tab) => (
-        <TabItem
-          key={tab}
-          isActive={activeTab === tab}
-          onClick={() => onTabChange(tab)}
-        >
+        <TabItem key={tab} isActive={activeTab === tab} onClick={() => onTabChange(tab)}>
           {tab}
         </TabItem>
       ))}

@@ -13,20 +13,15 @@ export interface TagResponseType {
   attributes: TagAttributes;
 }
 
-export const getTags = async (): Promise<
-  PaginatedResponse<TagResponseType>
-> => {
+export const getTags = async (): Promise<PaginatedResponse<TagResponseType>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.TAG}`;
 
   try {
-    const response = await apiClient.get<PaginatedResponse<TagResponseType>>(
-      endpoint,
-      {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
+    const response = await apiClient.get<PaginatedResponse<TagResponseType>>(endpoint, {
+      headers: {
+        Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    );
+    });
 
     return response.data;
   } catch (error) {

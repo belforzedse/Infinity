@@ -6,18 +6,11 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/services";
 
-export default function ClientLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) {
       router.replace("/auth");
       return;
@@ -52,13 +45,10 @@ export default function ClientLayout({
 function Mobile({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <div className="bg-neutral-50 p-4 min-h-screen">
-      <div className="w-full flex flex-col gap-4">
+    <div className="min-h-screen bg-neutral-50 p-4">
+      <div className="flex w-full flex-col gap-4">
         <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         {children}
       </div>
     </div>
@@ -67,11 +57,11 @@ function Mobile({ children }: { children: React.ReactNode }) {
 
 function Desktop({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-neutral-50 flex gap-5 pl-10 min-h-screen">
+    <div className="flex min-h-screen gap-5 bg-neutral-50 pl-10">
       <div className="w-[250px]">
         <Sidebar isOpen={true} onClose={() => {}} />
       </div>
-      <div className="w-full flex-1 flex flex-col lg:gap-7 gap-4 p-4">
+      <div className="flex w-full flex-1 flex-col gap-4 p-4 lg:gap-7">
         <Header onMenuClick={() => {}} />
         {children}
       </div>

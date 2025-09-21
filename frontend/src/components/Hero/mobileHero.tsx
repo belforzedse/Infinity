@@ -80,7 +80,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="w-1/2 md:w-full overflow-hidden"
+                className="w-1/2 overflow-hidden md:w-full"
               >
                 <BannerImage {...layout.secondaryTop} />
               </motion.div>
@@ -93,7 +93,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="w-1/2 md:w-full overflow-hidden"
+                className="w-1/2 overflow-hidden md:w-full"
               >
                 <BannerImage {...layout.secondaryBottom} />
               </motion.div>

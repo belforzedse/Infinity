@@ -215,19 +215,16 @@ async function getProducts(
     // Filter out products with zero price and check availability if needed
     let filteredProducts = data.data.filter((product: Product) => {
       // Check if any variation has a valid price
-      const hasValidPrice = product.attributes.product_variations?.data?.some(
-        (variation) => {
-          const price = variation.attributes.Price;
-          return price && parseInt(price) > 0;
-        },
-      );
+      const hasValidPrice = product.attributes.product_variations?.data?.some((variation) => {
+        const price = variation.attributes.Price;
+        return price && parseInt(price) > 0;
+      });
 
       // If showAvailableOnly is true, also check if any variation is published
       if (showAvailableOnly) {
-        const hasAvailableVariation =
-          product.attributes.product_variations?.data?.some(
-            (variation) => variation.attributes.IsPublished,
-          );
+        const hasAvailableVariation = product.attributes.product_variations?.data?.some(
+          (variation) => variation.attributes.IsPublished,
+        );
         return hasValidPrice && hasAvailableVariation;
       }
 
@@ -237,15 +234,13 @@ async function getProducts(
     // Discount-only filter (post-fetch) if requested
     if (hasDiscount) {
       filteredProducts = filteredProducts.filter((product: Product) =>
-        product.attributes.product_variations?.data?.some(
-          (variation) => {
-            const price = parseFloat(variation.attributes.Price);
-            const discountPrice = variation.attributes.DiscountPrice
-              ? parseFloat(variation.attributes.DiscountPrice)
-              : null;
-            return discountPrice && discountPrice < price;
-          }
-        ),
+        product.attributes.product_variations?.data?.some((variation) => {
+          const price = parseFloat(variation.attributes.Price);
+          const discountPrice = variation.attributes.DiscountPrice
+            ? parseFloat(variation.attributes.DiscountPrice)
+            : null;
+          return discountPrice && discountPrice < price;
+        }),
       );
     }
 
@@ -276,27 +271,21 @@ export default async function PLPPage({
   const params = await searchParams;
 
   // Extract parameters with default values
-  const category =
-    typeof params.category === "string" ? params.category : undefined;
+  const category = typeof params.category === "string" ? params.category : undefined;
   const page = typeof params.page === "string" ? parseInt(params.page) : 1;
   const showAvailableOnly =
     typeof params.available === "string" ? params.available === "true" : false;
-  const minPrice =
-    typeof params.minPrice === "string" ? params.minPrice : undefined;
-  const maxPrice =
-    typeof params.maxPrice === "string" ? params.maxPrice : undefined;
+  const minPrice = typeof params.minPrice === "string" ? params.minPrice : undefined;
+  const maxPrice = typeof params.maxPrice === "string" ? params.maxPrice : undefined;
   const size = typeof params.size === "string" ? params.size : undefined;
-  const material =
-    typeof params.material === "string" ? params.material : undefined;
+  const material = typeof params.material === "string" ? params.material : undefined;
   const season = typeof params.season === "string" ? params.season : undefined;
   const gender = typeof params.gender === "string" ? params.gender : undefined;
   const usage = typeof params.usage === "string" ? params.usage : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
   const sort = typeof params.sort === "string" ? params.sort : undefined;
   const hasDiscount =
-    typeof params.hasDiscount === "string"
-      ? params.hasDiscount === "true"
-      : undefined;
+    typeof params.hasDiscount === "string" ? params.hasDiscount === "true" : undefined;
 
   const { products, pagination } = await getProducts(
     category,
@@ -342,8 +331,7 @@ export async function generateMetadata({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const category =
-    typeof params.category === "string" ? params.category : undefined;
+  const category = typeof params.category === "string" ? params.category : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
 
   const isSearch = !!search;
@@ -388,8 +376,7 @@ export async function generateMetadata({
 
   return {
     title: baseTitle,
-    description:
-      "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
+    description: "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
     alternates: { canonical: "/plp" },
   };
 }

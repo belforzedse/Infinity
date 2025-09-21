@@ -15,9 +15,7 @@ interface Item {
   attributes: CategoryAttributes;
 }
 
-export const deleteCategory = async (
-  id: string,
-): Promise<PaginatedResponse<Item>> => {
+export const deleteCategory = async (id: string): Promise<PaginatedResponse<Item>> => {
   try {
     const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}`;
     //const accessToken = localStorage.getItem("accessToken");

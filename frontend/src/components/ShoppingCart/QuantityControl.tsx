@@ -31,9 +31,7 @@ function ShoppingCartQuantityControl({ itemId, quantity }: Props) {
         >
           <PlusIcon />
         </button>
-        <span className="text-sm w-8 text-center text-neutral-800">
-          {quantity}
-        </span>
+        <span className="text-sm w-8 text-center text-neutral-800">{quantity}</span>
         <button
           onClick={() => handleQuantityChange(itemId, -1)}
           className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-100 bg-white text-neutral-800 lg:h-8 lg:w-8"

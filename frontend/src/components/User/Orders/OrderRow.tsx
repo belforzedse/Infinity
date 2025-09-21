@@ -35,15 +35,10 @@ export default function OrderRow({
         <div className="flex items-center gap-1">
           <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-gray-200">
             {image ? (
-              <Image
-                src={image}
-                alt={title}
-                fill
-                className="h-full w-full object-cover"
-              />
+              <Image src={image} alt={title} fill className="h-full w-full object-cover" />
             ) : (
-              <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400 text-xs">تصویر</span>
+              <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                <span className="text-xs text-gray-400">تصویر</span>
               </div>
             )}
           </div>
@@ -61,26 +56,22 @@ export default function OrderRow({
       <td className="px-4 py-3">
         <span className="text-xs text-neutral-800">{price} تومان</span>
       </td>
-      <td className="px-4 py-3 min-w-44">
+      <td className="min-w-44 px-4 py-3">
         <div className="flex items-center gap-2">
           <div
             className={clsx(
-              "h-6 w-6 rounded-full flex items-center justify-center",
+              "flex h-6 w-6 items-center justify-center rounded-full",
               status === PersianOrderStatus.CANCELLED && "bg-red-500",
               status === PersianOrderStatus.INPROGRESS && "bg-yellow-500",
-              status === PersianOrderStatus.DELIVERED && "bg-green-500"
+              status === PersianOrderStatus.DELIVERED && "bg-green-500",
             )}
           >
-            {status === PersianOrderStatus.CANCELLED ? (
-              <CancelIcon />
-            ) : (
-              <TickIcon />
-            )}
+            {status === PersianOrderStatus.CANCELLED ? <CancelIcon /> : <TickIcon />}
           </div>
           <span className="text-sm text-gray-700">{status}</span>
         </div>
       </td>
-      <td className="py-3 text-left w-fit">
+      <td className="w-fit py-3 text-left">
         <div className="flex items-center gap-2">
           {orderId && <PaymentStatusButton orderId={orderId} />}
           {shippingBarcode ? (
@@ -88,7 +79,7 @@ export default function OrderRow({
               href={`https://anipo.ir/checkconsignment/?code=${shippingBarcode}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+              className="text-xs rounded-lg bg-blue-50 px-2 py-1 text-blue-700 transition-colors hover:bg-blue-100"
             >
               رهگیری مرسوله
             </a>

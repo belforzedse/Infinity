@@ -1,12 +1,6 @@
 export default function ShuffleIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M2.5 14.9825L4.48667 14.9925C5.3275 14.9967 6.11333 14.5783 6.58 13.8792L11.7542 6.11749C12.2192 5.41916 13.0042 5.00166 13.8433 5.00416L17.5 5.01749"
         stroke="#262626"

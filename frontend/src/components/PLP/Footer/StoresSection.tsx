@@ -34,9 +34,7 @@ interface StoresSectionProps {
 const StoresSection = ({ contactInfo }: StoresSectionProps) => {
   const [phone, setPhone] = useState<string>("017-325-304-39");
   const [whatsapp, setWhatsapp] = useState<string | null>("0901-655-25-30");
-  const [instagram, setInstagram] = useState<string | null>(
-    "infinity.color_boutique",
-  );
+  const [instagram, setInstagram] = useState<string | null>("infinity.color_boutique");
   const [telegram, setTelegram] = useState<string | null>("InfinityColorShop");
 
   useEffect(() => {
@@ -45,22 +43,13 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
       if (contactInfo.Phone && contactInfo.Phone.trim() !== "") {
         setPhone(contactInfo.Phone);
       }
-      if (
-        typeof contactInfo.Whatsapp === "string" &&
-        contactInfo.Whatsapp.trim() !== ""
-      ) {
+      if (typeof contactInfo.Whatsapp === "string" && contactInfo.Whatsapp.trim() !== "") {
         setWhatsapp(contactInfo.Whatsapp);
       }
-      if (
-        typeof contactInfo.Instagram === "string" &&
-        contactInfo.Instagram.trim() !== ""
-      ) {
+      if (typeof contactInfo.Instagram === "string" && contactInfo.Instagram.trim() !== "") {
         setInstagram(contactInfo.Instagram);
       }
-      if (
-        typeof contactInfo.Telegram === "string" &&
-        contactInfo.Telegram.trim() !== ""
-      ) {
+      if (typeof contactInfo.Telegram === "string" && contactInfo.Telegram.trim() !== "") {
         setTelegram(contactInfo.Telegram);
       }
     }

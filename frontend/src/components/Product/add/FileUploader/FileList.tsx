@@ -26,11 +26,7 @@ const FileList: React.FC<FileListProps> = ({
             fileType={fileType}
           />
         ))}
-        <UploadButton
-          onUpload={onUpload}
-          fileType={fileType}
-          multiple={multiple}
-        />
+        <UploadButton onUpload={onUpload} fileType={fileType} multiple={multiple} />
       </div>
     </div>
   );

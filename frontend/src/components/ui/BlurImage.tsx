@@ -13,7 +13,7 @@ const generateBlurDataURL = (width = 10, height = 10) => {
   return `data:image/svg+xml;base64,${btoa(
     `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#f3f4f6"/>
-    </svg>`
+    </svg>`,
   )}`;
 };
 
@@ -39,10 +39,8 @@ export default function BlurImage({
       quality={75}
       className={[
         // smooth blur-up transition
-        "duration-500 ease-in-out transition-all",
-        loaded && !error
-          ? "scale-100 opacity-100 blur-0"
-          : "scale-105 opacity-80 blur-sm",
+        "transition-all duration-500 ease-in-out",
+        loaded && !error ? "scale-100 opacity-100 blur-0" : "scale-105 opacity-80 blur-sm",
         error ? "opacity-50" : "",
         className || "",
       ].join(" ")}

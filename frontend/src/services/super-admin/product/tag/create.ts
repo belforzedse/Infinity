@@ -19,9 +19,7 @@ export interface TagResponse {
   meta: Record<string, unknown>;
 }
 
-export const createTag = async (
-  title: string,
-): Promise<ApiResponse<TagResponse>> => {
+export const createTag = async (title: string): Promise<ApiResponse<TagResponse>> => {
   const endpoint = ENDPOINTS.PRODUCT.TAG;
 
   try {

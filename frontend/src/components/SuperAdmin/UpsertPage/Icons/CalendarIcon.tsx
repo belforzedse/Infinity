@@ -1,12 +1,6 @@
 export default function CalendarIcon() {
   return (
-    <svg
-      width="16"
-      height="17"
-      viewBox="0 0 16 17"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M10.6666 1.83301V4.49967"
         stroke="#64748B"
@@ -19,12 +13,7 @@ export default function CalendarIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M2 6.50033H14"
-        stroke="#64748B"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M2 6.50033H14" stroke="#64748B" strokeLinecap="round" strokeLinejoin="round" />
       <path
         fillRule="evenodd"
         clipRule="evenodd"

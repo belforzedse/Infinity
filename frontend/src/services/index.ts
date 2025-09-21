@@ -33,20 +33,14 @@ class ApiClient {
   /**
    * Make a GET request
    */
-  async get<T>(
-    endpoint: string,
-    options?: ApiRequestOptions,
-  ): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>("GET", endpoint, undefined, options);
   }
 
   /**
    * Make a GET request without authentication (for public endpoints)
    */
-  async getPublic<T>(
-    endpoint: string,
-    options?: ApiRequestOptions,
-  ): Promise<ApiResponse<T>> {
+  async getPublic<T>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>("GET", endpoint, undefined, {
       ...options,
       skipAuth: true,
@@ -89,10 +83,7 @@ class ApiClient {
   /**
    * Make a DELETE request
    */
-  async delete<T>(
-    endpoint: string,
-    options?: ApiRequestOptions,
-  ): Promise<ApiResponse<T>> {
+  async delete<T>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>("DELETE", endpoint, undefined, options);
   }
 
@@ -124,10 +115,7 @@ class ApiClient {
     try {
       // Create an AbortController to handle request timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(
-        () => controller.abort(),
-        options?.timeout || REQUEST_TIMEOUT,
-      );
+      const timeoutId = setTimeout(() => controller.abort(), options?.timeout || REQUEST_TIMEOUT);
 
       const response = await fetch(url, {
         ...config,
@@ -153,10 +141,7 @@ class ApiClient {
           throw error;
         }
 
-        const error = this.handleError(
-          response.status,
-          responseData as ErrorResponse,
-        );
+        const error = this.handleError(response.status, responseData as ErrorResponse);
 
         // Handle auth errors here for centralized auth redirects
         if (!options?.suppressAuthRedirect) {
@@ -193,10 +178,7 @@ class ApiClient {
   /**
    * Get headers for the request
    */
-  private getHeaders(
-    customHeaders?: Record<string, string>,
-    skipAuth?: boolean,
-  ): HeadersInit {
+  private getHeaders(customHeaders?: Record<string, string>, skipAuth?: boolean): HeadersInit {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       Accept: "application/json",

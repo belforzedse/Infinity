@@ -1,12 +1,6 @@
 export default function BasketIcon() {
   return (
-    <svg
-      width="21"
-      height="20"
-      viewBox="0 0 21 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M7.16654 2.54419L5.4082 5.56579"
         stroke="white"

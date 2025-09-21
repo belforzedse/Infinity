@@ -1,12 +1,6 @@
 export default function SettingsIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M11.591 8.40901C12.4697 9.2877 12.4697 10.7123 11.591 11.591C10.7123 12.4697 9.2877 12.4697 8.40901 11.591C7.53033 10.7123 7.53033 9.2877 8.40901 8.40901C9.2877 7.53033 10.7123 7.53033 11.591 8.40901"
         stroke="#EC4899"

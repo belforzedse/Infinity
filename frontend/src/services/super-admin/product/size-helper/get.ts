@@ -21,14 +21,11 @@ export const getProductSizeHelper = async (
 ): Promise<ApiResponse<SizeHelperData[]>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.SIZE_HELPER}?filters[product][id][$eq]=${productId}`;
 
-  const response = await apiClient.get<ApiResponse<SizeHelperData[]>>(
-    endpoint,
-    {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
+  const response = await apiClient.get<ApiResponse<SizeHelperData[]>>(endpoint, {
+    headers: {
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
     },
-  );
+  });
 
   return response.data;
 };

@@ -18,29 +18,17 @@ import {
 } from "react-icons/fi";
 
 // Create a styled layout/menu icons (unused definitions removed)
-const RarMenu = () => (
-  <FiMenu className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
+const RarMenu = () => <FiMenu className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
 //Create a styled club icon
-const _MultiUsersIcon = () => (
-  <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
+const _MultiUsersIcon = () => <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
 
 //Create a styled Pages icon
-const _PagesIcon = () => (
-  <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
+const _PagesIcon = () => <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
 
-const BellIcon = () => (
-  <FiBell className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
-const ChartIcon = () => (
-  <FiBarChart className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
+const BellIcon = () => <FiBell className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
+const ChartIcon = () => <FiBarChart className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
 
-const _CacheIcon = () => (
-  <FiDatabase className="h-5 w-5 text-pink-500" stroke="#EC4899" />
-);
+const _CacheIcon = () => <FiDatabase className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
 
 type SidebarChild = {
   id: string;

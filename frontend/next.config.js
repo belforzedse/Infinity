@@ -10,7 +10,7 @@ const nextConfig = {
 
   // Remove console.* calls in production for both client and server bundles
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === "production",
   },
 
   images: {
@@ -31,12 +31,7 @@ const nextConfig = {
 
   // Optimize bundle size
   experimental: {
-    optimizePackageImports: [
-      "@heroicons/react",
-      "lucide-react",
-      "react-icons",
-      "framer-motion",
-    ],
+    optimizePackageImports: ["@heroicons/react", "lucide-react", "react-icons", "framer-motion"],
     scrollRestoration: true,
     optimizeCss: true,
   },

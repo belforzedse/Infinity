@@ -19,9 +19,7 @@ export default function MediaUploader({
   onDrop,
   onImageSelect,
 }: MediaUploaderProps) {
-  const [activeView, setActiveView] = useState<MediaViewType>(
-    MediaViewEnum.UPLOAD_FILES,
-  );
+  const [activeView, setActiveView] = useState<MediaViewType>(MediaViewEnum.UPLOAD_FILES);
 
   const views: MediaViewType[] = [
     MediaViewEnum.UPLOAD_FILES,

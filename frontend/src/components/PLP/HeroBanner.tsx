@@ -80,39 +80,33 @@ function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
       // Filter out products with zero price
       const filteredProducts = data.data.filter((product: ProductData) => {
         // Check if any variation has a valid price
-        return product.attributes.product_variations?.data?.some(
-          (variation) => {
-            const price = variation.attributes.Price;
-            return price && parseInt(price) > 0;
-          },
-        );
+        return product.attributes.product_variations?.data?.some((variation) => {
+          const price = variation.attributes.Price;
+          return price && parseInt(price) > 0;
+        });
       });
 
       return filteredProducts.map((product: ProductData) => {
         // Find the first variation with a valid price
-        const firstValidVariation =
-          product.attributes.product_variations.data.find((variation) => {
-            const price = variation.attributes.Price;
-            return price && parseInt(price) > 0;
-          });
+        const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
+          const price = variation.attributes.Price;
+          return price && parseInt(price) > 0;
+        });
 
         const hasDiscount =
           firstValidVariation?.attributes?.general_discounts?.data &&
           firstValidVariation.attributes.general_discounts.data.length > 0;
         const discount =
           hasDiscount && firstValidVariation.attributes.general_discounts?.data
-            ? firstValidVariation.attributes.general_discounts.data[0]
-                .attributes.Amount
+            ? firstValidVariation.attributes.general_discounts.data[0].attributes.Amount
             : 0;
         const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-        const discountedPrice =
-          hasDiscount && discount ? price * (1 - discount / 100) : price;
+        const discountedPrice = hasDiscount && discount ? price * (1 - discount / 100) : price;
 
         return {
           id: product.id,
           title: product.attributes.Title,
-          category:
-            product.attributes.product_main_category?.data?.attributes?.Title,
+          category: product.attributes.product_main_category?.data?.attributes?.Title,
           likedCount: product.attributes.RatingCount || 0,
           price,
           discountedPrice,
@@ -126,17 +120,15 @@ function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
 export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
   const [title, setTitle] = useState("همه محصولات");
   const [imageUrl, setImageUrl] = useState("/images/off-section.png");
-  const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>(
-    [],
-  );
+  const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>([]);
 
   useEffect(() => {
     // Fetch both category data and featured products in parallel
     Promise.all([
       category
-        ? fetch(
-            `${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`,
-          ).then((res) => res.json())
+        ? fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`).then((res) =>
+            res.json(),
+          )
         : Promise.resolve({ data: [] }),
       getFeaturedProducts(category),
     ])
@@ -148,9 +140,7 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
           setTitle(categoryAttributes.Title);
 
           if (categoryAttributes.CoverImage?.data?.attributes?.url) {
-            setImageUrl(
-              `${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`,
-            );
+            setImageUrl(`${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`);
           }
         }
       })

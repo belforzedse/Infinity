@@ -125,9 +125,7 @@ const PLPListFilterCategory = ({
                     onClick={() => handleOptionClick(option)}
                     onMouseEnter={() => setFocusedIndex(idx)}
                     className={`text-xs w-full rounded-lg px-2 py-1.5 text-right transition-colors hover:bg-stone-50 ${
-                      selectedOption.id === option.id
-                        ? "text-primary bg-stone-50"
-                        : "text-gray-800"
+                      selectedOption.id === option.id ? "text-primary bg-stone-50" : "text-gray-800"
                     } ${focusedIndex === idx ? "ring-primary/30 ring-2" : ""}`}
                     role="option"
                     aria-selected={selectedOption.id === option.id}

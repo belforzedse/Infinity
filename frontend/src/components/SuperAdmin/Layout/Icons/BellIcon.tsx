@@ -1,12 +1,6 @@
 export default function BellIcon() {
   return (
-    <svg
-      width="22"
-      height="23"
-      viewBox="0 0 22 23"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="22" height="23" viewBox="0 0 22 23" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M12.4667 18.5052H9.53333"
         stroke="#EC4899"

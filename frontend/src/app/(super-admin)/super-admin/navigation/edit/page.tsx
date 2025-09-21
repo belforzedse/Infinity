@@ -87,11 +87,7 @@ export default function NavigationEditPage() {
           const updatedNavigation = await getNavigation();
           const updatedFormData: NavigationFormData = {
             ...updatedNavigation,
-            product_categories: JSON.stringify(
-              updatedNavigation.product_categories,
-              null,
-              2,
-            ),
+            product_categories: JSON.stringify(updatedNavigation.product_categories, null, 2),
           };
           setData(updatedFormData);
         } catch (error) {

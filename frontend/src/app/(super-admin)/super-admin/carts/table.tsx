@@ -89,25 +89,18 @@ export type Cart = {
 
 export const columns: ColumnDef<Cart>[] = [
   {
-    accessorKey:
-      "attributes.user.data.attributes.user_info.data.attributes.FirstName",
+    accessorKey: "attributes.user.data.attributes.user_info.data.attributes.FirstName",
     header: "نام",
     cell: ({ row }) => {
       const firstName =
-        row.original?.attributes?.user?.data?.attributes?.user_info?.data
-          ?.attributes?.FirstName;
+        row.original?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.FirstName;
 
       const lastName =
-        row.original?.attributes?.user?.data?.attributes?.user_info?.data
-          ?.attributes?.LastName;
+        row.original?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.LastName;
 
       const fullName = `${firstName || ""} ${lastName || ""}`;
 
-      return (
-        <span className="text-xs text-foreground-primary">
-          {fullName.trim() || " - "}
-        </span>
-      );
+      return <span className="text-xs text-foreground-primary">{fullName.trim() || " - "}</span>;
     },
   },
   {
@@ -131,12 +124,12 @@ export const columns: ColumnDef<Cart>[] = [
               key={item?.attributes?.product_variation?.data?.id}
               src={
                 API_BASE_URL.split("/api")[0] +
-                (item?.attributes?.product_variation?.data?.attributes?.product
-                  ?.data?.attributes?.CoverImage?.data?.attributes?.url || "")
+                (item?.attributes?.product_variation?.data?.attributes?.product?.data?.attributes
+                  ?.CoverImage?.data?.attributes?.url || "")
               }
               alt={
-                item?.attributes?.product_variation?.data?.attributes?.product
-                  ?.data?.attributes?.CoverImage?.data?.attributes?.name || ""
+                item?.attributes?.product_variation?.data?.attributes?.product?.data?.attributes
+                  ?.CoverImage?.data?.attributes?.name || ""
               }
               width={48}
               height={48}
@@ -145,9 +138,7 @@ export const columns: ColumnDef<Cart>[] = [
             />
           ))}
           {items.length > 5 && (
-            <span className="text-sm text-actions-primary">
-              +{items.length - 5}
-            </span>
+            <span className="text-sm text-actions-primary">+{items.length - 5}</span>
           )}
         </div>
       );
@@ -229,9 +220,7 @@ export const MobileTable = ({ data }: Props) => {
                     {row?.attributes?.cart_items?.data?.length}
                   </span>
                   <span className="text-xs text-neutral-400">|</span>
-                  <SuperAdminTableCellFullDate
-                    date={new Date(row?.attributes?.createdAt)}
-                  />
+                  <SuperAdminTableCellFullDate date={new Date(row?.attributes?.createdAt)} />
                   <span className="text-xs text-neutral-400">|</span>
                   <span
                     className={twMerge(
@@ -269,11 +258,10 @@ export const MobileTable = ({ data }: Props) => {
           }
           headTitle={
             (
-              (row?.attributes?.user?.data?.attributes?.user_info?.data
-                ?.attributes?.FirstName || "") +
+              (row?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.FirstName ||
+                "") +
               " " +
-              (row?.attributes?.user?.data?.attributes?.user_info?.data
-                ?.attributes?.LastName || "")
+              (row?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.LastName || "")
             ).trim() || " - "
           }
         />

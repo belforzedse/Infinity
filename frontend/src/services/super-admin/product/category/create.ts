@@ -8,9 +8,7 @@ export interface CategoryData {
   Parent?: string;
 }
 
-export const createCategory = async (
-  category: CategoryData,
-): Promise<ApiResponse<any>> => {
+export const createCategory = async (category: CategoryData): Promise<ApiResponse<any>> => {
   const endpoint = ENDPOINTS.PRODUCT.CATEGORY;
 
   try {

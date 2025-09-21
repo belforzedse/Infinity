@@ -25,9 +25,7 @@ export default function PDPHeroInfoMain(props: Props) {
 
       <div className="flex items-center gap-1">
         <GridIcon />
-        <span className="text-sm text-foreground-muted md:text-lg">
-          {category}
-        </span>
+        <span className="text-sm text-foreground-muted md:text-lg">{category}</span>
       </div>
     </div>
   );

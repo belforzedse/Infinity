@@ -38,19 +38,13 @@ function ShoppingCartSuccessOrderSubmit() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-2">
-          <span className="text-2xl text-neutral-800 lg:text-3xl">
-            سفارش با موفقیت ثبت شد!
-          </span>
+          <span className="text-2xl text-neutral-800 lg:text-3xl">سفارش با موفقیت ثبت شد!</span>
 
           {orderNumber && (
-            <span className="text-lg text-neutral-800 lg:text-xl">
-              شماره سفارش: {orderNumber}
-            </span>
+            <span className="text-lg text-neutral-800 lg:text-xl">شماره سفارش: {orderNumber}</span>
           )}
 
-          <span className="text-lg text-neutral-800 lg:text-xl">
-            ممنون از خریدتون
-          </span>
+          <span className="text-lg text-neutral-800 lg:text-xl">ممنون از خریدتون</span>
         </div>
 
         <div className="flex gap-4">

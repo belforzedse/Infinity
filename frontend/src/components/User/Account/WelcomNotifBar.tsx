@@ -13,8 +13,7 @@ export default function WelcomNotifBar({ username }: WelcomNotifBarProps) {
 
       <div className="flex flex-col items-start gap-0.5">
         <span className="text-base text-foreground-primary lg:text-lg">
-          <span className="text-emerald-600">{username} </span>به فروشگاه بزرگ
-          اینفینیتی خوش اومدی!
+          <span className="text-emerald-600">{username} </span>به فروشگاه بزرگ اینفینیتی خوش اومدی!
         </span>
         <span className="text-sm text-neutral-500 lg:text-xs">پیام سیستم</span>
       </div>

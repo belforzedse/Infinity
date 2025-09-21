@@ -1,12 +1,6 @@
 export default function EyeIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M1.5675 9.81745C5.67225 4.5322 12.327 4.5322 16.4318 9.81745"
         stroke="#64748B"

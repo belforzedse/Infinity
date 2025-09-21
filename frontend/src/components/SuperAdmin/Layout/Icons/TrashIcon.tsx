@@ -16,12 +16,7 @@ export default function TrashIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M10 3.6876H2"
-        stroke="#EC4899"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M10 3.6876H2" stroke="#EC4899" strokeLinecap="round" strokeLinejoin="round" />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -30,12 +25,7 @@ export default function TrashIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M5 9.0001H7"
-        stroke="#EC4899"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M5 9.0001H7" stroke="#EC4899" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

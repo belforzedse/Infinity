@@ -54,9 +54,7 @@ export const columns: ColumnDef<PaymentMethods>[] = [
     header: "وضعیت",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      return (
-        <SuperAdminTableCellSwitch status={status as "active" | "inactive"} />
-      );
+      return <SuperAdminTableCellSwitch status={status as "active" | "inactive"} />;
     },
   },
   {
@@ -69,10 +67,7 @@ export const columns: ColumnDef<PaymentMethods>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row-reverse items-center gap-3 p-1">
-          <SuperAdminTableCellActionButton
-            variant="primary"
-            icon={<RecycleIcon />}
-          />
+          <SuperAdminTableCellActionButton variant="primary" icon={<RecycleIcon />} />
 
           <SuperAdminTableCellActionButton
             variant="secondary"
@@ -121,17 +116,11 @@ function PaymentMethodMobileRow({ row }: { row: PaymentMethods }) {
             <div className="flex items-center gap-1">
               <span className="text-xs text-neutral-400">{row.roleLevel}</span>
               <span className="text-xs text-neutral-400">|</span>
-              <span className="text-sm text-neutral-400">
-                ایجاد: {row.createdAt}
-              </span>
+              <span className="text-sm text-neutral-400">ایجاد: {row.createdAt}</span>
               <span className="text-xs text-neutral-400">|</span>
-              <span className="text-sm text-neutral-400">
-                ویرایش: {row.updatedAt}
-              </span>
+              <span className="text-sm text-neutral-400">ویرایش: {row.updatedAt}</span>
             </div>
-            <SuperAdminTableCellSwitch
-              status={row.status as "active" | "inactive"}
-            />
+            <SuperAdminTableCellSwitch status={row.status as "active" | "inactive"} />
           </div>
         ) : (
           columns.slice(0, columns.length - 1).map((column, index) => (
@@ -139,9 +128,7 @@ function PaymentMethodMobileRow({ row }: { row: PaymentMethods }) {
               className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1"
               key={index}
             >
-              <span className="text-xs text-neutral-400">
-                {column.header?.toString()}
-              </span>
+              <span className="text-xs text-neutral-400">{column.header?.toString()}</span>
               {column?.cell ? (
                 (column?.cell as any)?.({
                   row: {
@@ -150,11 +137,7 @@ function PaymentMethodMobileRow({ row }: { row: PaymentMethods }) {
                 })
               ) : (
                 <span className="text-xs text-foreground-primary md:text-base">
-                  {
-                    row[
-                      (column as any).accessorKey as keyof PaymentMethods
-                    ] as string
-                  }
+                  {row[(column as any).accessorKey as keyof PaymentMethods] as string}
                 </span>
               )}
             </div>

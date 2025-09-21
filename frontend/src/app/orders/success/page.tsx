@@ -25,14 +25,11 @@ export default function OrderSuccess() {
             />
           </div>
 
-          <h1 className="text-2xl mb-4 font-bold text-green-600">
-            سفارش شما با موفقیت ثبت شد
-          </h1>
+          <h1 className="text-2xl mb-4 font-bold text-green-600">سفارش شما با موفقیت ثبت شد</h1>
 
           <div className="mb-6 text-gray-700">
             <p className="mb-2">
-              از خرید شما متشکریم! سفارش شما با موفقیت ثبت شده و در حال پردازش
-              است.
+              از خرید شما متشکریم! سفارش شما با موفقیت ثبت شده و در حال پردازش است.
             </p>
             <p className="text-sm">
               شماره سفارش: <span className="font-semibold">{orderNumber}</span>

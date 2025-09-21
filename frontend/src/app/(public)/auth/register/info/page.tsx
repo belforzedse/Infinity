@@ -58,19 +58,16 @@ export default function RegisterInfoPage() {
     }
   };
 
-  const handleChange =
-    (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-    };
+  const handleChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
 
   return (
     <div className="space-y-8" dir="rtl">
-      <AuthTitle subtitle="لطفا اطلاعات خود را تکمیل نمایید">
-        ایجاد حساب کاربری
-      </AuthTitle>
+      <AuthTitle subtitle="لطفا اطلاعات خود را تکمیل نمایید">ایجاد حساب کاربری</AuthTitle>
 
       <form onSubmit={handleSubmit} className="space-y-7">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
@@ -131,8 +128,7 @@ export default function RegisterInfoPage() {
               value={formData.confirmPassword}
               onChange={handleChange("confirmPassword")}
               error={
-                formData.confirmPassword &&
-                formData.password !== formData.confirmPassword
+                formData.confirmPassword && formData.password !== formData.confirmPassword
                   ? "رمز عبور مطابقت ندارد"
                   : undefined
               }

@@ -1,15 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAtom } from "jotai";
-import {
-  editProductDataAtom,
-  productDataAtom,
-} from "@/atoms/super-admin/products";
+import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import toast from "react-hot-toast";
 import { createTag } from "@/services/super-admin/product/tag/create";
-import {
-  getTags,
-  TagResponseType,
-} from "@/services/super-admin/product/tag/get";
+import { getTags, TagResponseType } from "@/services/super-admin/product/tag/get";
 import { usePathname } from "next/navigation";
 import logger from "@/utils/logger";
 
@@ -20,9 +14,7 @@ interface UseProductTagProps {
 export function useProductTag(props?: UseProductTagProps) {
   const { isEditMode = false } = props || {};
 
-  const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom,
-  );
+  const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
   const pathname = usePathname();
   const [tags, setTags] = useState<TagResponseType[]>(productData.product_tags);
   const [query, setQuery] = useState("");
@@ -51,9 +43,7 @@ export function useProductTag(props?: UseProductTagProps) {
   useEffect(() => {
     if (allTagsCache.length > 0) {
       setTagOptions(
-        allTagsCache.filter(
-          (tag: any) => !tags.some((existingTag) => existingTag.id === tag.id),
-        ),
+        allTagsCache.filter((tag: any) => !tags.some((existingTag) => existingTag.id === tag.id)),
       );
     }
   }, [allTagsCache, tags]);

@@ -60,9 +60,7 @@ function PaymentFailureContent() {
           </div>
 
           {/* Error Message */}
-          <h1 className="text-3xl mb-4 font-bold text-red-600">
-            پرداخت ناموفق
-          </h1>
+          <h1 className="text-3xl mb-4 font-bold text-red-600">پرداخت ناموفق</h1>
 
           <p className="text-lg mb-6 text-gray-700">
             متاسفانه، پرداخت شما با مشکل مواجه شد و تکمیل نشده است.
@@ -71,9 +69,7 @@ function PaymentFailureContent() {
           {/* Error Details */}
           {error && (
             <div className="mb-6 w-full rounded-lg border border-red-200 bg-red-50 p-6">
-              <h3 className="text-lg mb-3 font-semibold text-red-800">
-                جزئیات خطا
-              </h3>
+              <h3 className="text-lg mb-3 font-semibold text-red-800">جزئیات خطا</h3>
               <p className="rounded bg-red-100 p-3 text-right text-red-700">
                 {decodeURIComponent(error)}
               </p>
@@ -83,15 +79,11 @@ function PaymentFailureContent() {
           {/* Order Information */}
           {orderId && (
             <div className="mb-6 w-full rounded-lg border border-orange-200 bg-orange-50 p-6">
-              <h3 className="text-lg mb-3 font-semibold text-orange-800">
-                اطلاعات سفارش
-              </h3>
+              <h3 className="text-lg mb-3 font-semibold text-orange-800">اطلاعات سفارش</h3>
               <div className="space-y-2 text-right">
                 <p className="text-gray-700">
                   <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-orange-700">
-                    #{orderId}
-                  </span>
+                  <span className="mr-2 font-semibold text-orange-700">#{orderId}</span>
                 </p>
                 <p className="text-gray-700">
                   <span className="font-medium">وضعیت:</span>
@@ -108,9 +100,7 @@ function PaymentFailureContent() {
 
           {/* Suggestions */}
           <div className="mb-6 w-full rounded-lg border border-blue-200 bg-blue-50 p-6">
-            <h3 className="text-lg mb-3 font-semibold text-blue-800">
-              راه‌حل‌های پیشنهادی
-            </h3>
+            <h3 className="text-lg mb-3 font-semibold text-blue-800">راه‌حل‌های پیشنهادی</h3>
             <div className="text-sm space-y-2 text-right text-gray-700">
               <div className="flex items-start gap-2">
                 <span className="mt-1 text-blue-500">•</span>

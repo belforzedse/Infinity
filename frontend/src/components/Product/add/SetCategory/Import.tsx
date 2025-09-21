@@ -18,12 +18,9 @@ interface CategoryFormData {
 }
 
 const ImportCategorty = () => {
-  const { categoryOptions, createMainCategory, isCreateCategoryLoading } =
-    useProductCategory();
+  const { categoryOptions, createMainCategory, isCreateCategoryLoading } = useProductCategory();
   const setCategoriesData = useSetAtom(productCategoryDataAtom);
-  const setCategoriesDataPagination = useSetAtom(
-    productCategoryDataAtomPagination,
-  );
+  const setCategoriesDataPagination = useSetAtom(productCategoryDataAtomPagination);
 
   const [formData, setFormData] = useState<CategoryFormData>({
     name: "",
@@ -66,10 +63,7 @@ const ImportCategorty = () => {
 
   return (
     <div className="mb-3 border-b border-slate-50 pb-4">
-      <form
-        onSubmit={handleSubmit}
-        className="grid h-9 w-full grid-cols-7 items-center gap-1"
-      >
+      <form onSubmit={handleSubmit} className="grid h-9 w-full grid-cols-7 items-center gap-1">
         <input
           type="text"
           name="name"
@@ -89,11 +83,7 @@ const ImportCategorty = () => {
         />
 
         <Select
-          value={
-            formData.parent
-              ? { id: formData.parent, name: formData.parent }
-              : null
-          }
+          value={formData.parent ? { id: formData.parent, name: formData.parent } : null}
           onChange={handleParentChange}
           options={categoryOptions.map((category) => ({
             id: category.id.toString(),

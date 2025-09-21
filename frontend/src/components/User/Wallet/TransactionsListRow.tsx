@@ -14,11 +14,7 @@ interface TransactionsListRowProps {
   type: "debit" | "deposit";
 }
 
-const TransactionsListRow = ({
-  type,
-  date,
-  amount,
-}: TransactionsListRowProps) => {
+const TransactionsListRow = ({ type, date, amount }: TransactionsListRowProps) => {
   const formatDate = (dateStr: string) => {
     const today = dayjs().format("YYYY/MM/DD");
     const inputDate = dayjs(dateStr).format("YYYY/MM/DD");
@@ -30,9 +26,7 @@ const TransactionsListRow = ({
     return (dayjs(dateStr) as any)
       .calendar("jalali")
       .format("YYYY/MM/DD")
-      .replace(/[0-9]/g, (d: string) =>
-        String.fromCharCode(d.charCodeAt(0) + 1728),
-      );
+      .replace(/[0-9]/g, (d: string) => String.fromCharCode(d.charCodeAt(0) + 1728));
   };
 
   const isDeposit = type === "deposit";
@@ -49,9 +43,7 @@ const TransactionsListRow = ({
           isDeposit ? "text-blue-600" : "text-red-600",
         )}
       >
-        <span className="text-base text-nowrap">
-          {priceFormatter(Number(amount))} تومان
-        </span>
+        <span className="text-base text-nowrap">{priceFormatter(Number(amount))} تومان</span>
         {isDeposit ? <PlusIcon /> : <MinusIcon />}
       </div>
     </div>

@@ -39,13 +39,10 @@ describe("verifyOTP", () => {
     const result = await verifyOTP(otp);
 
     expect(sessionStorageMock.getItem).toHaveBeenCalledWith("otpToken");
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.VERIFY_OTP,
-      {
-        otpToken,
-        otp,
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
+      otpToken,
+      otp,
+    });
     expect(result).toEqual(mockResponse);
   });
 
@@ -58,13 +55,10 @@ describe("verifyOTP", () => {
 
     const result = await verifyOTP(otp);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.VERIFY_OTP,
-      {
-        otpToken: null,
-        otp,
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
+      otpToken: null,
+      otp,
+    });
     expect(result).toEqual(mockResponse);
   });
 
@@ -90,13 +84,10 @@ describe("verifyOTP", () => {
     for (const otp of otpCodes) {
       await verifyOTP(otp);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        ENDPOINTS.AUTH.VERIFY_OTP,
-        {
-          otpToken,
-          otp,
-        }
-      );
+      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
+        otpToken,
+        otp,
+      });
     }
   });
 
@@ -110,10 +101,7 @@ describe("verifyOTP", () => {
 
     await verifyOTP(otp);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.VERIFY_OTP,
-      expect.any(Object)
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, expect.any(Object));
   });
 
   it("returns response as expected", async () => {
@@ -142,13 +130,10 @@ describe("verifyOTP", () => {
 
     const result = await verifyOTP(otp);
 
-    expect(mockPost).toHaveBeenCalledWith(
-      ENDPOINTS.AUTH.VERIFY_OTP,
-      {
-        otpToken,
-        otp: "",
-      }
-    );
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
+      otpToken,
+      otp: "",
+    });
     expect(result).toEqual(mockResponse);
   });
 });

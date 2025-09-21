@@ -12,9 +12,7 @@ type Props<T> = {
   onSubmit?: (data: T) => Promise<void>;
 };
 
-function isCustomField<T>(
-  field: ExtendedField<T>,
-): field is ExtendedField<T> & { type: "custom" } {
+function isCustomField<T>(field: ExtendedField<T>): field is ExtendedField<T> & { type: "custom" } {
   return field.type === "custom";
 }
 
@@ -30,9 +28,7 @@ export default function ExtendedUpsertPageContentWrapper<
       ...section,
       sections: section.sections.map((subsection) => ({
         ...subsection,
-        fields: subsection.fields.filter(
-          (field) => !isCustomField(field),
-        ) as any,
+        fields: subsection.fields.filter((field) => !isCustomField(field)) as any,
       })),
     })),
   };
@@ -65,14 +61,11 @@ export default function ExtendedUpsertPageContentWrapper<
                         className="mb-6"
                       >
                         {field.label && (
-                          <label className="text-sm mb-2 block font-medium">
-                            {field.label}
-                          </label>
+                          <label className="text-sm mb-2 block font-medium">{field.label}</label>
                         )}
                         {field.render({
                           value: formData[field.name],
-                          onChange: (value: any) =>
-                            handleCustomFieldChange(field.name, value),
+                          onChange: (value: any) => handleCustomFieldChange(field.name, value),
                           data: formData,
                         })}
                         {field.helper && (

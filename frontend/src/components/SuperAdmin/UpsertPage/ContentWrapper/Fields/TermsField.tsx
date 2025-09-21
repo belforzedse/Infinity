@@ -89,9 +89,7 @@ export default function TermsField({
 
         // Filter out already selected tags from suggestions
         const currentTags = value[activeTermIndex]?.tags || [];
-        const filteredResults = results.filter(
-          (option) => !currentTags.includes(option.value),
-        );
+        const filteredResults = results.filter((option) => !currentTags.includes(option.value));
 
         setSuggestions(filteredResults);
         setShowSuggestions(true);
@@ -107,10 +105,7 @@ export default function TermsField({
     return () => clearTimeout(debounceTimer);
   }, [searchTerms, activeTermIndex, fetchTerms, value]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    itemIndex: number,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, itemIndex: number) => {
     const newSearchTerms = [...searchTerms];
     newSearchTerms[itemIndex] = e.target.value;
     setSearchTerms(newSearchTerms);
@@ -118,16 +113,11 @@ export default function TermsField({
     setActiveTermIndex(itemIndex);
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    _itemIndex: number,
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, _itemIndex: number) => {
     // Only handle arrow keys and escape for navigation
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveItemIndex((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : prev,
-      );
+      setActiveItemIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveItemIndex((prev) => (prev > 0 ? prev - 1 : prev));
@@ -172,10 +162,7 @@ export default function TermsField({
     }
   };
 
-  const handleCategoryChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-    itemIndex: number,
-  ) => {
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>, itemIndex: number) => {
     const updatedTerms = [...value];
     updatedTerms[itemIndex] = {
       ...updatedTerms[itemIndex],
@@ -205,9 +192,7 @@ export default function TermsField({
 
         // Filter out already selected tags from suggestions
         const currentTags = value[itemIndex]?.tags || [];
-        const filteredResults = results.filter(
-          (option) => !currentTags.includes(option.value),
-        );
+        const filteredResults = results.filter((option) => !currentTags.includes(option.value));
 
         setSuggestions(filteredResults);
         setShowSuggestions(true);
@@ -241,10 +226,7 @@ export default function TermsField({
   return (
     <div className="flex flex-col gap-10 md:gap-2">
       {value?.map((item, itemIndex) => (
-        <div
-          className="flex w-full flex-col gap-2 md:flex-row md:gap-4"
-          key={itemIndex}
-        >
+        <div className="flex w-full flex-col gap-2 md:flex-row md:gap-4" key={itemIndex}>
           <div className="w-full md:w-1/2">
             <div className="overflow-hidden rounded-lg border border-neutral-200">
               <select
@@ -263,9 +245,7 @@ export default function TermsField({
               </select>
             </div>
 
-            {helper && itemIndex === 0 && (
-              <div className="w-full">{helper}</div>
-            )}
+            {helper && itemIndex === 0 && <div className="w-full">{helper}</div>}
           </div>
           <div className="w-full md:w-1/2">
             <div className="flex flex-col gap-2">
@@ -327,9 +307,7 @@ export default function TermsField({
                         className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-md"
                       >
                         {isLoading ? (
-                          <div className="p-2 text-center text-gray-500">
-                            در حال بارگذاری...
-                          </div>
+                          <div className="p-2 text-center text-gray-500">در حال بارگذاری...</div>
                         ) : (
                           suggestions.map((option, index) => (
                             <div
@@ -337,9 +315,7 @@ export default function TermsField({
                               className={`cursor-pointer p-2 hover:bg-gray-100 ${
                                 index === activeItemIndex ? "bg-gray-100" : ""
                               }`}
-                              onClick={() =>
-                                selectSuggestion(option, itemIndex)
-                              }
+                              onClick={() => selectSuggestion(option, itemIndex)}
                             >
                               {option.label}
                             </div>

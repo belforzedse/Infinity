@@ -4,9 +4,7 @@ interface ChevronDownIconProps {
   className?: string;
 }
 
-const ChevronDownIcon: React.FC<ChevronDownIconProps> = ({
-  className = "",
-}) => {
+const ChevronDownIcon: React.FC<ChevronDownIconProps> = ({ className = "" }) => {
   return (
     <svg
       width="17"

@@ -59,10 +59,7 @@ export default function MobileMenu({ isOpen, onClose }: Props) {
               <Dialog.Panel className="h-full w-[280px] transform overflow-hidden bg-white shadow-xl transition-all">
                 <div className="flex h-full flex-col">
                   <div className="flex items-center justify-between border-b border-slate-100 p-4">
-                    <Dialog.Title
-                      as="h3"
-                      className="text-lg font-medium text-neutral-800"
-                    >
+                    <Dialog.Title as="h3" className="text-lg font-medium text-neutral-800">
                       منو
                     </Dialog.Title>
                     <button

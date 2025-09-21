@@ -1,7 +1,5 @@
 import Text from "@/components/Kits/Text";
-import ProductSmallCard, {
-  ProductSmallCardProps,
-} from "@/components/Product/SmallCard";
+import ProductSmallCard, { ProductSmallCardProps } from "@/components/Product/SmallCard";
 
 type Props = {
   title: string;
@@ -9,11 +7,7 @@ type Props = {
   items: ProductSmallCardProps[];
 };
 
-export default function PLPListSidebarSuggestions({
-  title,
-  icon,
-  items,
-}: Props) {
+export default function PLPListSidebarSuggestions({ title, icon, items }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-1">

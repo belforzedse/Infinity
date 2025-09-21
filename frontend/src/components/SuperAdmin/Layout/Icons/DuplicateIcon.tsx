@@ -1,12 +1,6 @@
 export default function DuplicateIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M5.25 11.25H3.75C2.92125 11.25 2.25 10.5788 2.25 9.75V3.75C2.25 2.92125 2.92125 2.25 3.75 2.25H9.75C10.5788 2.25 11.25 2.92125 11.25 3.75V5.25"
         stroke="#64748B"

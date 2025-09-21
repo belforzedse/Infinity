@@ -16,9 +16,11 @@ import MobileSlider from "@/components/Hero/mobileSlider";
 import Reveal from "@/components/Reveal";
 
 export default async function Home() {
-  const [discountedProducts, newProducts, favoriteProducts] = await Promise.all(
-    [getDiscountedProducts(), getNewProducts(), getFavoriteProducts()]
-  );
+  const [discountedProducts, newProducts, favoriteProducts] = await Promise.all([
+    getDiscountedProducts(),
+    getNewProducts(),
+    getFavoriteProducts(),
+  ]);
 
   return (
     <div className="mx-auto mt-5 px-2 pb-8 md:mt-8 md:px-1 md:pb-16 lg:px-10 xl:max-w-[1440px]">
@@ -53,24 +55,17 @@ export default async function Home() {
               key={category.id}
               href={category.href}
               className={`flex flex-col items-center ${
-                index === categories.length - 1 && categories.length % 3 === 1 ?
-                  "col-span-3 mx-auto md:col-span-1 md:mx-0"
-                : (
-                  index >= categories.length - (categories.length % 3) &&
-                  categories.length % 3 !== 0 &&
-                  categories.length % 3 !== 1
-                ) ?
-                  "mx-auto md:mx-0"
-                : ""
+                index === categories.length - 1 && categories.length % 3 === 1
+                  ? "col-span-3 mx-auto md:col-span-1 md:mx-0"
+                  : index >= categories.length - (categories.length % 3) &&
+                      categories.length % 3 !== 0 &&
+                      categories.length % 3 !== 1
+                    ? "mx-auto md:mx-0"
+                    : ""
               }`}
             >
               {/* desktop categories section */}
-              <Reveal
-                delay={index * 80}
-                className="w-full"
-                variant="fade-up"
-                duration={600}
-              >
+              <Reveal delay={index * 80} className="w-full" variant="fade-up" duration={600}>
                 <span className="block w-full">
                   <div className="relative hidden h-[340px] w-full overflow-hidden transition-transform duration-300 will-change-transform hover:-translate-y-0.5 lg:block">
                     <div
@@ -94,12 +89,7 @@ export default async function Home() {
                 </span>
               </Reveal>
               {/* mobile categories section */}
-              <Reveal
-                delay={index * 80}
-                className="lg:hidden"
-                variant="fade-up"
-                duration={600}
-              >
+              <Reveal delay={index * 80} className="lg:hidden" variant="fade-up" duration={600}>
                 <div
                   className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
                   style={{ backgroundColor: category.backgroundColor }}
@@ -126,11 +116,7 @@ export default async function Home() {
         {/* New products section */}
         <div className="mt-8 md:mt-12">
           <Reveal variant="fade-up" duration={700}>
-            <OffersListHomePage
-              icon={<NewIcon />}
-              title="جدیدترین ها"
-              products={newProducts}
-            />
+            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
           </Reveal>
         </div>
 
@@ -151,11 +137,7 @@ export default async function Home() {
         {/* New products section */}
         <div className="mt-8 md:mt-12">
           <Reveal variant="blur-up" duration={1500}>
-            <OffersListHomePage
-              icon={<NewIcon />}
-              title="جدیدترین ها"
-              products={newProducts}
-            />
+            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
           </Reveal>
         </div>
 

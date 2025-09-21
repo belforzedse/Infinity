@@ -45,7 +45,7 @@ const ProductCard: FC<ProductCardProps> = ({
       discountPrice,
       discount,
       title: title.substring(0, 30),
-      hasDiscountLogic: !!(discountPrice && discountPrice > 0)
+      hasDiscountLogic: !!(discountPrice && discountPrice > 0),
     });
   }
 
@@ -63,26 +63,24 @@ const ProductCard: FC<ProductCardProps> = ({
           <ImageSlider images={images} title={title} priority={priority} />
 
           <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
-            {discount ?
+            {discount ? (
               <div className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1">
                 <span className="text-xs text-white">٪{discount} تخفیف</span>
               </div>
-            : <span />}
+            ) : (
+              <span />
+            )}
             <button
               className={`mt-[0.5px] flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-white ${
                 isLoading ? "cursor-wait opacity-50" : "hover:bg-white/80"
               } z-10 bg-white/70 backdrop-blur transition-colors`}
               onClick={toggleLike}
               disabled={isLoading}
-              aria-label={
-                isLiked ? "Remove from favorites" : "Add to favorites"
-              }
+              aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
             >
               <HeartIcon
                 className={`h-4 w-4 ${
-                  isLiked ?
-                    "fill-pink-600 text-pink-600"
-                  : "stroke-neutral-500 text-neutral-500"
+                  isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500 text-neutral-500"
                 }`}
                 filled={isLiked}
               />
@@ -108,9 +106,7 @@ const ProductCard: FC<ProductCardProps> = ({
             </div>
           </div>
 
-          <h3 className="text-sm mt-0.5 line-clamp-1 text-neutral-800 md:text-base">
-            {title}
-          </h3>
+          <h3 className="text-sm mt-0.5 line-clamp-1 text-neutral-800 md:text-base">{title}</h3>
 
           {seenCount > 0 && (
             <div className="mt-1 flex items-center gap-0.5">
@@ -132,34 +128,27 @@ const ProductCard: FC<ProductCardProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-sm text-stone-500">قیمت</span>
 
-            {!isAvailable ?
-              <span className="text-base font-medium text-red-600 md:text-lg">
-                ناموجود
-              </span>
-            : <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
-                {discountPrice &&
-                  discountPrice > 0 &&
-                  discountPrice < price && (
-                    <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
-                      {faNum(discountPrice)} تومان
-                    </span>
-                  )}
+            {!isAvailable ? (
+              <span className="text-base font-medium text-red-600 md:text-lg">ناموجود</span>
+            ) : (
+              <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
+                {discountPrice && discountPrice > 0 && discountPrice < price && (
+                  <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
+                    {faNum(discountPrice)} تومان
+                  </span>
+                )}
 
                 <span
                   className={`${
-                    (
-                      discountPrice &&
-                      discountPrice > 0 &&
-                      discountPrice < price
-                    ) ?
-                      "text-xs text-foreground-muted line-through"
-                    : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
+                    discountPrice && discountPrice > 0 && discountPrice < price
+                      ? "text-xs text-foreground-muted line-through"
+                      : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
                   }`}
                 >
                   {faNum(price)} تومان
                 </span>
               </div>
-            }
+            )}
           </div>
         </div>
       </div>

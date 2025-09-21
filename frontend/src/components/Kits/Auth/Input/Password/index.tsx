@@ -48,9 +48,7 @@ export default function AuthPasswordInput({
           )}
         </button>
       </div>
-      {showStrength && typeof value === "string" && (
-        <PasswordStrength password={value} />
-      )}
+      {showStrength && typeof value === "string" && <PasswordStrength password={value} />}
       {error && <Text className="text-red-500">{error}</Text>}
     </div>
   );

@@ -70,9 +70,7 @@ export const getUserAddresses = async (): Promise<UserAddress[]> => {
   }
 };
 
-export const addUserAddress = async (
-  address: AddAddressRequest,
-): Promise<UserAddress> => {
+export const addUserAddress = async (address: AddAddressRequest): Promise<UserAddress> => {
   const token = localStorage.getItem("accessToken");
 
   if (!token) {
@@ -95,15 +93,11 @@ export const addUserAddress = async (
   }
 
   try {
-    const response = await apiClient.post(
-      "/local-user-addresses/create",
-      address,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const response = await apiClient.post("/local-user-addresses/create", address, {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
 
     return response.data as UserAddress;
   } catch (error) {
@@ -124,15 +118,11 @@ export const updateUserAddress = async (
   }
 
   try {
-    const response = await apiClient.put(
-      `/local-user-addresses/${id}`,
-      address,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const response = await apiClient.put(`/local-user-addresses/${id}`, address, {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
 
     return response.data as UserAddress;
   } catch (error) {

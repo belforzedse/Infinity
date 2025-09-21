@@ -6,10 +6,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/super-admin" },
 };
 
-export default function SuperAdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return <ClientLayout>{children}</ClientLayout>;
 }

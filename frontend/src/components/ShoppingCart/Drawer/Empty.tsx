@@ -13,9 +13,7 @@ export default function EmptyCartDrawer() {
       </div>
 
       <div className="text-center">
-        <h3 className="text-lg mb-1 font-medium text-neutral-800">
-          سبد خرید شما خالی است
-        </h3>
+        <h3 className="text-lg mb-1 font-medium text-neutral-800">سبد خرید شما خالی است</h3>
         <p className="text-sm mb-4 text-neutral-500">
           می‌توانید برای مشاهده محصولات به فروشگاه بروید
         </p>

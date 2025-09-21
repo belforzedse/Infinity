@@ -1,12 +1,6 @@
 export default function ThumbsDownIcon() {
   return (
-    <svg
-      width="18"
-      height="19"
-      viewBox="0 0 18 19"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M5.25 11.006C5.25 11.486 5.423 11.95 5.736 12.313L10 17.25C10.854 16.823 11.25 15.822 10.92 14.926L9.75 11.75H14.152C15.465 11.75 16.421 10.507 16.085 9.238L14.894 4.738C14.662 3.861 13.868 3.25 12.961 3.25H7.25C6.145 3.25 5.25 4.145 5.25 5.25"
         stroke="#7F1D1D"

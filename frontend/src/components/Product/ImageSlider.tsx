@@ -21,21 +21,18 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
   };
 
   return (
-    <div className=" relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-auto">
+    <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-auto">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
         onScroll={handleScroll}
       >
         {images.map((image, index) => (
-          <div
-            key={index}
-            className="relative h-full w-full flex-none snap-start"
-          >
+          <div key={index} className="relative h-full w-full flex-none snap-start">
             <BlurImage
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
-              className="  select-none object-cover"
+              className="select-none object-cover"
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}
@@ -51,9 +48,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
             <div
               key={index}
               className={`h-0.5 rounded-full transition-all duration-300 ${
-                currentSlide === index ?
-                  "w-7 bg-foreground-primary"
-                : "w-[9px] bg-white"
+                currentSlide === index ? "w-7 bg-foreground-primary" : "w-[9px] bg-white"
               }`}
             />
           ))}

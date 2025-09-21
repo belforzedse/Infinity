@@ -14,12 +14,7 @@ interface Props {
   productId?: string;
 }
 
-export default function PDPCommentModal({
-  isOpen,
-  onClose,
-  commentCount,
-  productId,
-}: Props) {
+export default function PDPCommentModal({ isOpen, onClose, commentCount, productId }: Props) {
   const router = useRouter();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -63,9 +58,7 @@ export default function PDPCommentModal({
       onClose();
 
       // Show success message
-      toast.success(
-        "دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده خواهد شد",
-      );
+      toast.success("دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده خواهد شد");
     } catch (error: any) {
       console.error("Error submitting review:", error);
 
@@ -109,9 +102,7 @@ export default function PDPCommentModal({
         </div>
 
         {formError && (
-          <div className="text-sm rounded-lg bg-red-50 p-3 text-red-700">
-            {formError}
-          </div>
+          <div className="text-sm rounded-lg bg-red-50 p-3 text-red-700">{formError}</div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -124,9 +115,7 @@ export default function PDPCommentModal({
           />
 
           <div className="flex items-center justify-between">
-            <p className="text-sm text-foreground-muted">
-              به محصولات ما امتیاز بدین!
-            </p>
+            <p className="text-sm text-foreground-muted">به محصولات ما امتیاز بدین!</p>
 
             <div className="flex flex-row-reverse">
               {[1, 2, 3, 4, 5].map((star) => (

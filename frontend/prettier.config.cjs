@@ -3,7 +3,7 @@
  * - Includes Tailwind plugin to auto-order classnames
  */
 module.exports = {
-  plugins: [require("prettier-plugin-tailwindcss")],
+  plugins: ["prettier-plugin-tailwindcss"],
   tailwindConfig: "./tailwind.config.ts",
   semi: true,
   singleQuote: false,
@@ -11,4 +11,3 @@ module.exports = {
   tabWidth: 2,
   trailingComma: "all",
 };
-

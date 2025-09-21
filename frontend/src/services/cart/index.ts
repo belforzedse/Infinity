@@ -1,15 +1,6 @@
 import { getUserCart } from "./base";
-import {
-  addItemToCart,
-  updateCartItem,
-  removeCartItem,
-  finalizeCart,
-} from "./mutations";
-import {
-  checkCartStock,
-  getSnappEligible,
-  getShippingPreview,
-} from "./queries";
+import { addItemToCart, updateCartItem, removeCartItem, finalizeCart } from "./mutations";
+import { checkCartStock, getSnappEligible, getShippingPreview } from "./queries";
 import { applyDiscount } from "./discount";
 import type {
   CartResponse,

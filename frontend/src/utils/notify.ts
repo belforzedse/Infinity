@@ -15,8 +15,7 @@ const notify = {
     toast.success(message, { ...baseOptions, ...options }),
   error: (message: string, options?: ToastOptions) =>
     toast.error(message, { ...baseOptions, ...options }),
-  info: (message: string, options?: ToastOptions) =>
-    toast(message, { ...baseOptions, ...options }),
+  info: (message: string, options?: ToastOptions) => toast(message, { ...baseOptions, ...options }),
 };
 
 export default notify;

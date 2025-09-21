@@ -3,23 +3,16 @@
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAtom } from "jotai";
-import {
-  editProductDataAtom,
-  productDataAtom,
-} from "@/atoms/super-admin/products";
+import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 
 interface DetailsProps {
   isEditMode?: boolean;
 }
 
 export default function ProductDetails({ isEditMode = false }: DetailsProps) {
-  const [productAtom, setProductAtom] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom,
-  );
+  const [productAtom, setProductAtom] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === "name") {
       setProductAtom({ ...(productAtom as any), Title: value });

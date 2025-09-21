@@ -74,14 +74,11 @@ export default function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await apiClient.get<DiscountResponse>(
-          `/discounts/${id}?populate=*`,
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
+        const response = await apiClient.get<DiscountResponse>(`/discounts/${id}?populate=*`, {
+          headers: {
+            Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        );
+        });
 
         const discount = (response as any).data.attributes;
 
@@ -116,18 +113,14 @@ export default function Page() {
           terms: [
             {
               category: "user",
-              tags:
-                discount.local_users?.data?.map((user: any) =>
-                  user.id.toString(),
-                ) || [],
+              tags: discount.local_users?.data?.map((user: any) => user.id.toString()) || [],
               tagLabels: userTagLabels,
             },
             {
               category: "product",
               tags:
-                discount.product_variations?.data?.map((product: any) =>
-                  product.id.toString(),
-                ) || [],
+                discount.product_variations?.data?.map((product: any) => product.id.toString()) ||
+                [],
               tagLabels: productTagLabels,
             },
           ],
@@ -174,12 +167,9 @@ export default function Page() {
                 StartDate: (formData.startDate as any)?.value as Date,
                 EndDate: (formData.endDate as any)?.value as Date,
                 IsActive: formData.isActive,
-                local_users:
-                  formData.terms.find((term) => term.category === "user")
-                    ?.tags || [],
+                local_users: formData.terms.find((term) => term.category === "user")?.tags || [],
                 product_variations:
-                  formData.terms.find((term) => term.category === "product")
-                    ?.tags || [],
+                  formData.terms.find((term) => term.category === "product")?.tags || [],
               },
             },
             {

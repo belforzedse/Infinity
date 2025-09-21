@@ -7,11 +7,7 @@ import ShoppingCartBillInformationForm from "./InformationForm";
 import ShoppingCartBillDeliveryForm from "./DeliveryForm";
 import ShoppingCartBillDiscountCoupon from "./DiscountCoupon";
 import ShoppingCartBillPaymentGateway from "./PaymentGateway";
-import {
-  orderIdAtom,
-  orderNumberAtom,
-  submitOrderStepAtom,
-} from "@/atoms/Order";
+import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order";
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
@@ -50,27 +46,17 @@ function ShoppingCartBillForm({}: Props) {
 
   const watchShippingMethod = watch("shippingMethod");
   const watchAddress = watch("address");
-  const shippingId = watchShippingMethod
-    ? Number(watchShippingMethod.id)
-    : undefined;
+  const shippingId = watchShippingMethod ? Number(watchShippingMethod.id) : undefined;
   const shippingCost = watchShippingMethod
     ? Number(watchShippingMethod.attributes?.Price || 0)
     : undefined;
-  const addressId = watchAddress
-    ? Number((watchAddress as any)?.id)
-    : undefined;
+  const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">(
-    "mellat"
-  );
+  const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">("mellat");
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
-  const [snappMessage, setSnappMessage] = useState<string | undefined>(
-    undefined
-  );
-  const [discountCode, setDiscountCode] = useState<string | undefined>(
-    undefined
-  );
+  const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
+  const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
   const [discountPreview, setDiscountPreview] = useState<
     | {
         discount: number;
@@ -200,8 +186,7 @@ function ShoppingCartBillForm({}: Props) {
     const run = async () => {
       try {
         const res = await WalletService.getMyWallet();
-        if (res?.success && res.data)
-          setWalletBalanceIrr(Number(res.data.balance || 0));
+        if (res?.success && res.data) setWalletBalanceIrr(Number(res.data.balance || 0));
       } catch {}
     };
     run();
@@ -243,8 +228,7 @@ function ShoppingCartBillForm({}: Props) {
         addressId: Number((data.address as any)?.id),
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
-        discountCode:
-          discountCode || localStorage.getItem("discountCode") || undefined,
+        discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
       } as any;
 
       const cartResponse = await CartService.finalizeCart(finalizeData);
@@ -311,21 +295,17 @@ function ShoppingCartBillForm({}: Props) {
   const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
   const totalToman = Math.max(
     0,
-    Math.round(subtotalToman - discountToman + taxToman + shippingToman)
+    Math.round(subtotalToman - discountToman + taxToman + shippingToman),
   );
   const requiredAmountIrr = totalToman * 10;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <span className="lg:text-3xl text-lg text-neutral-800">
-        اطلاعات صورت حساب
-      </span>
+      <span className="text-lg text-neutral-800 lg:text-3xl">اطلاعات صورت حساب</span>
 
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg">{error}</div>
-      )}
+      {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
 
-      <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ShoppingCartBillInformationForm
           register={register}
           errors={errors}
@@ -333,7 +313,7 @@ function ShoppingCartBillForm({}: Props) {
           setValue={setValue}
         />
 
-        <div className="flex flex-col gap-6 mb-20">
+        <div className="mb-20 flex flex-col gap-6">
           <ShoppingCartBillDeliveryForm
             control={control}
             setValue={setValue}
@@ -342,13 +322,9 @@ function ShoppingCartBillForm({}: Props) {
             shippingPreviewShipping={shippingPreview?.shipping}
           />
           <ShoppingCartBillDiscountCoupon
-            shippingId={
-              watchShippingMethod ? Number(watchShippingMethod.id) : undefined
-            }
+            shippingId={watchShippingMethod ? Number(watchShippingMethod.id) : undefined}
             shippingCost={
-              watchShippingMethod
-                ? Number(watchShippingMethod.attributes?.Price || 0)
-                : undefined
+              watchShippingMethod ? Number(watchShippingMethod.attributes?.Price || 0) : undefined
             }
             onApplied={(code, preview) => {
               setDiscountCode(code);
@@ -375,8 +351,8 @@ function ShoppingCartBillForm({}: Props) {
             type="submit"
             disabled={isSubmitting}
             className={
-              "text-white bg-pink-500 lg:py-4 py-3 rounded-lg text-nowrap w-full lg:text-base text-xl " +
-              (isSubmitting ? "opacity-70 cursor-not-allowed" : "")
+              "text-xl w-full text-nowrap rounded-lg bg-pink-500 py-3 text-white lg:text-base lg:py-4 " +
+              (isSubmitting ? "cursor-not-allowed opacity-70" : "")
             }
           >
             {isSubmitting ? "در حال پردازش..." : "پرداخت"}

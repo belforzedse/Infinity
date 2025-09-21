@@ -28,8 +28,7 @@ export default function ShippingTabs(props: { selectedTab: string }) {
           key={tab.id}
           className={cn(
             "text-base px-2 !leading-9 text-slate-400",
-            tab.id === props.selectedTab &&
-              "border-b-2 border-actions-primary text-slate-700",
+            tab.id === props.selectedTab && "border-b-2 border-actions-primary text-slate-700",
           )}
         >
           {tab.title}

@@ -1,12 +1,6 @@
 export default function RulerIcon() {
   return (
-    <svg
-      width="16"
-      height="17"
-      viewBox="0 0 16 17"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M2.81787 10.076L4.16843 11.4272"
         stroke="#007BFF"

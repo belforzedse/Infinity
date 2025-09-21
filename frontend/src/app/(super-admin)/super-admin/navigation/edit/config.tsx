@@ -44,8 +44,8 @@ export const config: UpsertPageConfigType<NavigationFormData> = {
               fetchCategories: getProductCategories,
               helper: () => (
                 <span className="text-sm text-actions-primary">
-                  دسته بندی‌های انتخاب شده در منوی ناوبری دسکتاپ و موبایل نمایش
-                  داده می‌شوند. ترتیب آیتم‌ها مهم است.
+                  دسته بندی‌های انتخاب شده در منوی ناوبری دسکتاپ و موبایل نمایش داده می‌شوند. ترتیب
+                  آیتم‌ها مهم است.
                 </span>
               ),
             },

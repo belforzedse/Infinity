@@ -30,7 +30,7 @@ const CustomRadioGroup: React.FC<CustomRadioGroupProps> = ({
             value === option.value ? "ring-1 ring-pink-500" : ""
           } ${
             disabled
-              ? "cursor-not-allowed opacity-50 bg-gray-100"
+              ? "cursor-not-allowed bg-gray-100 opacity-50"
               : "cursor-pointer hover:bg-gray-50"
           }`}
         >

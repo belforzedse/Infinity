@@ -34,9 +34,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
               loader={imageLoader}
             />
           </div>
-          <span className="text-sm text-foreground-primary">
-            {cartItem.name}
-          </span>
+          <span className="text-sm text-foreground-primary">{cartItem.name}</span>
         </div>
       </div>
 
@@ -46,9 +44,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
-          <span className="text-sm text-foreground-primary">
-            {cartItem.category}
-          </span>
+          <span className="text-sm text-foreground-primary">{cartItem.category}</span>
         </div>
       </div>
 
@@ -75,10 +71,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
-          <ShoppingCartQuantityControl
-            quantity={cartItem.quantity}
-            itemId={cartItem.id}
-          />
+          <ShoppingCartQuantityControl quantity={cartItem.quantity} itemId={cartItem.id} />
         </div>
       </div>
 
@@ -90,11 +83,13 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
         <div className="col-span-3 flex flex-col items-end gap-1 p-3">
           {cartItem.originalPrice && cartItem.originalPrice > cartItem.price && (
             <span className="text-xs text-neutral-500 line-through">
-              {(cartItem.originalPrice * cartItem.quantity).toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+              {(cartItem.originalPrice * cartItem.quantity).toLocaleString()}{" "}
+              {"\u062A\u0648\u0645\u0627\u0646"}
             </span>
           )}
           <span className="text-base font-semibold text-pink-600">
-            {(cartItem.price * cartItem.quantity).toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+            {(cartItem.price * cartItem.quantity).toLocaleString()}{" "}
+            {"\u062A\u0648\u0645\u0627\u0646"}
           </span>
         </div>
       </div>

@@ -2,8 +2,7 @@ import React, { InputHTMLAttributes, ChangeEvent } from "react";
 import { Input as UITextInput } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 
-interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> {
+interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> {
   label?: string;
   error?: string;
   value?: string;
@@ -86,9 +85,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               onClick={onIconClick}
               className={`absolute left-3 top-1/2 -translate-y-1/2 p-1 ${
-                onIconClick
-                  ? "cursor-pointer hover:opacity-80"
-                  : "cursor-default"
+                onIconClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
               } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
               disabled={disabled}
             >
@@ -96,9 +93,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </div>
-        {error && (
-          <p className="text-sm mt-1 text-right text-red-500">{error}</p>
-        )}
+        {error && <p className="text-sm mt-1 text-right text-red-500">{error}</p>}
       </div>
     );
   },

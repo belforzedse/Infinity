@@ -46,7 +46,7 @@ describe("ApiClient", () => {
             "Content-Type": "application/json",
             Accept: "application/json",
           }),
-        })
+        }),
       );
       expect(result).toEqual(mockData);
     });
@@ -66,7 +66,7 @@ describe("ApiClient", () => {
           headers: expect.objectContaining({
             Authorization: "Bearer test-token",
           }),
-        })
+        }),
       );
     });
 
@@ -85,7 +85,7 @@ describe("ApiClient", () => {
           headers: expect.not.objectContaining({
             Authorization: expect.any(String),
           }),
-        })
+        }),
       );
     });
   });
@@ -106,7 +106,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify(postData),
-        })
+        }),
       );
       expect(result).toEqual(mockResponse);
     });
@@ -124,7 +124,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           status: 401,
           message: "Unauthorized",
-        })
+        }),
       );
     });
 
@@ -146,7 +146,7 @@ describe("ApiClient", () => {
           status: 400,
           message: "Validation failed",
           error: errorResponse.error,
-        })
+        }),
       );
     });
 
@@ -157,7 +157,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           status: 500,
           message: ERROR_MESSAGES.DEFAULT,
-        })
+        }),
       );
     });
 
@@ -166,7 +166,7 @@ describe("ApiClient", () => {
         () =>
           new Promise((resolve) => {
             setTimeout(() => resolve({ ok: true, json: () => ({}) }), 5000);
-          })
+          }),
       );
 
       const requestPromise = apiClient.get("/slow");
@@ -178,7 +178,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           status: 408,
           message: ERROR_MESSAGES.TIMEOUT,
-        })
+        }),
       );
     });
 
@@ -191,7 +191,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           status: 500,
           message: "API base URL is not configured",
-        })
+        }),
       );
 
       // Restore original value
@@ -217,7 +217,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           method: "PUT",
           body: JSON.stringify(testData),
-        })
+        }),
       );
     });
 
@@ -229,7 +229,7 @@ describe("ApiClient", () => {
         expect.objectContaining({
           method: "PATCH",
           body: JSON.stringify(testData),
-        })
+        }),
       );
     });
 
@@ -240,7 +240,7 @@ describe("ApiClient", () => {
         expect.any(String),
         expect.objectContaining({
           method: "DELETE",
-        })
+        }),
       );
     });
   });
@@ -258,7 +258,7 @@ describe("ApiClient", () => {
         expect.any(String),
         expect.objectContaining({
           credentials: "include",
-        })
+        }),
       );
     });
 
@@ -278,7 +278,7 @@ describe("ApiClient", () => {
           headers: expect.objectContaining({
             "Custom-Header": "value",
           }),
-        })
+        }),
       );
     });
 
@@ -289,12 +289,10 @@ describe("ApiClient", () => {
         json: async () => ({ message: "Unauthorized" }),
       });
 
-      await expect(
-        apiClient.get("/test", { suppressAuthRedirect: true })
-      ).rejects.toEqual(
+      await expect(apiClient.get("/test", { suppressAuthRedirect: true })).rejects.toEqual(
         expect.objectContaining({
           status: 401,
-        })
+        }),
       );
     });
   });

@@ -12,9 +12,7 @@ const statusOptions: Option[] = [
 ];
 
 const SetStatus: React.FC = () => {
-  const [selectedStatus, setSelectedStatus] = useState<Option | null>(
-    statusOptions[0],
-  );
+  const [selectedStatus, setSelectedStatus] = useState<Option | null>(statusOptions[0]);
   const [count, setCount] = useState(120);
 
   const handleIncrement = () => {
