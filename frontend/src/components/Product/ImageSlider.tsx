@@ -35,7 +35,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
-              className="select-none object-cover"
+              className="pl-[2px] rounded-[21px] select-none object-cover"
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}
