@@ -10,7 +10,7 @@ import { apiClient } from "@/services";
 import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { ProductCoverImage } from "@/types/Product";
+import type { ProductCoverImage } from "@/types/Product";
 // removed unused import alias: apiClient as _ from "@/services"
 
 export type Order = {

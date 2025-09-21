@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
-import { SuperAdminSettings } from "@/types/super-admin/settings";
+import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 export async function updateSuperAdminSettings(
   settings: Partial<SuperAdminSettings>,

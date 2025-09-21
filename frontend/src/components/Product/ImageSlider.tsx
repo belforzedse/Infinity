@@ -2,7 +2,8 @@
 
 import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 
 interface ImageSliderProps {
   images: string[];

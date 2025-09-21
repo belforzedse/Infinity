@@ -1,7 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
-import { useCart, CartItem } from "@/contexts/CartContext";
+import type { CartItem } from "@/contexts/CartContext";
+import { useCart } from "@/contexts/CartContext";
 import TrashIcon from "@/components/ShoppingCart/Icons/TrashIcon";
 import PlusIcon from "@/components/ShoppingCart/Icons/PlusIcon";
 import MinusIcon from "@/components/ShoppingCart/Icons/MinusIcon";

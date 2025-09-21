@@ -5,7 +5,7 @@ import { config } from "./config";
 import { toast } from "react-hot-toast";
 // removed unused import: useRouter from "next/navigation"
 import { useEffect, useState } from "react";
-import { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
+import type { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
 import { getNavigation } from "@/services/super-admin/navigation/get";
 import { updateNavigation } from "@/services/super-admin/navigation/update";
 

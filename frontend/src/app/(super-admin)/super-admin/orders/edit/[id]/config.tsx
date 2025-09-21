@@ -1,6 +1,6 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type Order } from "./page";
 import Link from "next/link";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";

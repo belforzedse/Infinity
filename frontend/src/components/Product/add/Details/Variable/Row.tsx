@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { ProductVariableDisplay } from "./types";
+import type { ProductVariableDisplay } from "./types";
 
 interface ProductVariableRowProps {
   item: ProductVariableDisplay;

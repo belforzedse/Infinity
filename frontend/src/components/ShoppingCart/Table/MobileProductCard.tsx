@@ -3,7 +3,7 @@
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import ShoppingCartQuantityControl from "../QuantityControl";
-import { CartItem } from "@/contexts/CartContext";
+import type { CartItem } from "@/contexts/CartContext";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
 interface Props {

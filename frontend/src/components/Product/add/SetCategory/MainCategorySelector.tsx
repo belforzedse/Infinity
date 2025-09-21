@@ -1,4 +1,5 @@
-import Select, { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
+import Select from "@/components/Kits/Form/Select";
 import React, { useEffect, useState } from "react";
 import PlusIcon from "../../Icons/PlusIcon";
 import SetCategoryModal from "./Modal";
@@ -6,7 +7,7 @@ import { editProductDataAtom, productCategoryDataAtom } from "@/atoms/super-admi
 import { useAtomValue, useAtom } from "jotai";
 import { productDataAtom } from "@/atoms/super-admin/products";
 import { usePathname } from "next/navigation";
-import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
+import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 
 interface MainCategorySelectorProps {
   isEditMode?: boolean;

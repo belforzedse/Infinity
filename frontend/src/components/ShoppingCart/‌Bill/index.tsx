@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
 import ShoppingCartBillInformationForm from "./InformationForm";
 import ShoppingCartBillDeliveryForm from "./DeliveryForm";
 import ShoppingCartBillDiscountCoupon from "./DiscountCoupon";
@@ -11,7 +11,7 @@ import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
-import { ShippingMethod } from "@/services/shipping";
+import type { ShippingMethod } from "@/services/shipping";
 import { CartService } from "@/services";
 import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";

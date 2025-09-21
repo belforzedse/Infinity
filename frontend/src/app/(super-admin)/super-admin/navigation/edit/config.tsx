@@ -1,7 +1,7 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
 import { getProductCategories } from "@/services/super-admin/navigation/getProductCategories";
 
 // Form data interface that handles both string and array types for product_categories

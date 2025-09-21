@@ -2,7 +2,7 @@
 
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
 // This is a sample data type. Modify according to your needs
 export type City = {

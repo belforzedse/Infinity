@@ -3,7 +3,7 @@
 import { atom, useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import UserService from "@/services/user";
-import { MeResponse } from "@/services/user/me";
+import type { MeResponse } from "@/services/user/me";
 
 const meAtom = atom<MeResponse | null>(null);
 

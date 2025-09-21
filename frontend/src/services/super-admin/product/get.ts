@@ -1,8 +1,8 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { ApiResponse } from "@/types/api";
+import type { ApiResponse } from "@/types/api";
 import { paramCreator } from "@/utils/paramCreator";
-import { TagAttributes } from "./tag/get";
+import type { TagAttributes } from "./tag/get";
 
 type PopulateObject = {
   [key: string]: boolean | PopulateObject;

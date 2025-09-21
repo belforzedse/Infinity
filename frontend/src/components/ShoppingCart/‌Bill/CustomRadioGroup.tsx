@@ -1,5 +1,5 @@
 import React from "react";
-import { ShippingMethod } from "@/services/shipping";
+import type { ShippingMethod } from "@/services/shipping";
 
 interface CustomRadioGroupProps {
   options: {

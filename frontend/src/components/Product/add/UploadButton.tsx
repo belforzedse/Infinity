@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import PlusIcon from "@/components/User/Icons/PlusIcon";
 import { useUpload } from "@/hooks/product/useUpload";
-import { FileType } from "./FileUploader/types";
+import type { FileType } from "./FileUploader/types";
 
 interface UploadButtonProps {
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;

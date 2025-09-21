@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getLiquidity, LiquidityInterval } from "@/services/super-admin/reports/liquidity";
+import type { LiquidityInterval } from "@/services/super-admin/reports/liquidity";
+import { getLiquidity } from "@/services/super-admin/reports/liquidity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";

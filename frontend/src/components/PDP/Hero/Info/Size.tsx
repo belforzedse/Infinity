@@ -5,7 +5,7 @@ import ChevronLeftIcon from "../../Icons/ChevronLeftIcon";
 import ChevronRightIcon from "../../Icons/ChevronRightIcon";
 import RulerIcon from "../../Icons/RulerIcon";
 import PDPHeroSizeModal from "../SizeModal";
-import { ProductSizeHelper } from "@/services/product/product";
+import type { ProductSizeHelper } from "@/services/product/product";
 
 type Props = {
   sizes: {

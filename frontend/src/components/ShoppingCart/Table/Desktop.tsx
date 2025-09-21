@@ -5,7 +5,7 @@ import imageLoader from "@/utils/imageLoader";
 import React from "react";
 import ShoppingCartQuantityControl from "../QuantityControl";
 import classNames from "classnames";
-import { CartItem } from "@/contexts/CartContext";
+import type { CartItem } from "@/contexts/CartContext";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
 interface Props {

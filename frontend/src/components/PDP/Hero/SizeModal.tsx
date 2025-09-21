@@ -1,6 +1,6 @@
 "use client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { ProductSizeHelper } from "@/services/product/product";
+import type { ProductSizeHelper } from "@/services/product/product";
 import SpecTable from "../SpecTable";
 
 type Props = {

@@ -7,7 +7,7 @@ import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveAction
 import SuperAdminTableCellSwitch from "@/components/SuperAdmin/Table/Cells/Switch";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import { priceFormatter } from "@/utils/price";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
 // This is a sample data type. Modify according to your needs
 export type CouponRule = {

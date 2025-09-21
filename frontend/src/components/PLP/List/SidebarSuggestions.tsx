@@ -1,5 +1,6 @@
 import Text from "@/components/Kits/Text";
-import ProductSmallCard, { ProductSmallCardProps } from "@/components/Product/SmallCard";
+import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
+import ProductSmallCard from "@/components/Product/SmallCard";
 
 type Props = {
   title: string;

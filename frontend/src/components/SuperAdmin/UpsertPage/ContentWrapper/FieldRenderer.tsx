@@ -15,8 +15,9 @@ import {
   ProvinceCityField,
   CategoriesListField,
 } from "./Fields";
+import type {
+  Field} from "./types";
 import {
-  Field,
   isStandardField,
   isRadioTextWithChips,
   isProvinceCityField,

@@ -1,5 +1,6 @@
 import PDPCommentAdd from "./Add";
-import PDPCommentList, { ProductReview } from "./List";
+import type { ProductReview } from "./List";
+import PDPCommentList from "./List";
 
 type Props = {
   rating: number;

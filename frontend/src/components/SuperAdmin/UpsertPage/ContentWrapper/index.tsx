@@ -1,12 +1,14 @@
 "use client";
-import { ReactNode, useState } from "react";
+import type { ReactNode} from "react";
+import { useState } from "react";
 import CalendarIcon from "../Icons/CalendarIcon";
 import AddButton from "../../Layout/ContentWrapper/Button/Add";
 import ActiveBox from "./ActiveBox";
 import FieldRenderer from "./FieldRenderer";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
-import { Field, isStandardField, isRadioTextWithChips, isCategoriesListField } from "./types";
+import type { Field} from "./types";
+import { isStandardField, isRadioTextWithChips, isCategoriesListField } from "./types";
 
 type ActionButtonsProps = {
   onSubmit: () => void;

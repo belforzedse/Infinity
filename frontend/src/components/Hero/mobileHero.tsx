@@ -1,7 +1,7 @@
 import React from "react";
 // This page is now SSR (Server Component) by removing "use client"
 import BannerImage from "./Banners/BannerImage";
-import { MobileLayout } from "./types";
+import type { MobileLayout } from "./types";
 import { AnimatePresence, motion } from "framer-motion";
 import { luxurySlideFade } from "./animations";
 

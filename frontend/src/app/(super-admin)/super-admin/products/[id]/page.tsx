@@ -2,7 +2,7 @@
 import { use, useEffect, useMemo } from "react";
 import SetDetails from "@/components/Product/add/SetCategory/SetCategory";
 import Tabs from "@/components/Kits/Tabs";
-import { TabItem } from "@/types/Tabs";
+import type { TabItem } from "@/types/Tabs";
 import Overall from "@/components/Product/add/Overall";
 import IndexPhotoUploader from "@/components/Product/add/IndexPhotoUploader";
 import Variables from "@/components/Product/add/Variables";

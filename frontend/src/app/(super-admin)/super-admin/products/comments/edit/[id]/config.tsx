@@ -1,4 +1,4 @@
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 
 export type Comment = {

@@ -14,7 +14,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
-  const [currentBarcode, setCurrentBarcode] = useState(shippingBarcode);
+  const [, setCurrentBarcode] = useState(shippingBarcode);
 
   const handlePrintReceipt = () => {
     const url = `/super-admin/orders/print/${orderId}`;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AddressCard from "./AddressCard";
 import UserService from "@/services/user";
-import { UserAddress } from "@/services/user/addresses";
+import type { UserAddress } from "@/services/user/addresses";
 import AddAddress from "./AddAddress";
 
 const AddressContainer = () => {

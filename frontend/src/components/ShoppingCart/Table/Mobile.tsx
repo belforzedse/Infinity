@@ -1,7 +1,7 @@
 "use client";
 
 import ShoppingCartMobileProductCard from "./MobileProductCard";
-import { CartItem } from "@/contexts/CartContext";
+import type { CartItem } from "@/contexts/CartContext";
 
 interface Props {
   cartItems: CartItem[];

@@ -5,7 +5,8 @@ import BreadCrumb from "@/components/User/BreadCrumb";
 import { useCallback, useEffect, useState } from "react";
 import ProductSmallCard from "@/components/Product/SmallCard";
 import SortIcon from "@/components/User/Icons/SortIcon";
-import ProductLikeService, { ProductLike } from "@/services/product/product-like";
+import type { ProductLike } from "@/services/product/product-like";
+import ProductLikeService from "@/services/product/product-like";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
 export default function FavoritesPage() {

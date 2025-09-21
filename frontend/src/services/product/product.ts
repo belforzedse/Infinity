@@ -1,8 +1,8 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api"; // removed unused: STRAPI_TOKEN
 import { appendTitleFilter } from "@/constants/productFilters";
-import { ApiResponse } from "@/types/api";
-import { ProductCardProps } from "@/components/Product/Card";
+import type { ApiResponse } from "@/types/api";
+import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
 
 export interface ProductMedia {

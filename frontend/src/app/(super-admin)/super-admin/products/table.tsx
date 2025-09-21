@@ -4,9 +4,9 @@ import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import { API_BASE_URL } from "@/constants/api";
-import { ProductCoverImage } from "@/types/Product";
+import type { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { Footer } from "@/types/super-admin/footer";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { Footer } from "@/types/super-admin/footer";
 
 type NestedFooter = {
   "first.header": string;

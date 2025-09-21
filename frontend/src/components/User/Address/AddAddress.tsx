@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import Modal from "@/components/Kits/Modal";
 import Select from "@/components/Kits/Form/Select";
 import CirculePlusIcon from "../Icons/CirculePlusIcon";
-import { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
 import SaveIcon from "../Icons/SaveIcon";
 import UserService from "@/services/user";
-import { MeResponse } from "@/services/user/me";
-import { AddAddressRequest } from "@/services/user/addresses";
-import { getProvinces, getCities, Province, City } from "@/services/location";
+import type { MeResponse } from "@/services/user/me";
+import type { AddAddressRequest } from "@/services/user/addresses";
+import type { Province, City } from "@/services/location";
+import { getProvinces, getCities } from "@/services/location";
 import { toast } from "react-hot-toast";
 
 interface Props {

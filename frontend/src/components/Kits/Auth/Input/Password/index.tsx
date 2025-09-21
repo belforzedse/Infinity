@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 import clsx from "clsx";
 import Text from "../../../Text";
 import EyeIcon from "../../Icons/EyeIcon";

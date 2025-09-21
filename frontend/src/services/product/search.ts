@@ -1,6 +1,6 @@
 import { ENDPOINTS } from "@/constants/api";
 import { apiClient } from "@/services";
-import { ImageResponse } from "../cart";
+import type { ImageResponse } from "../cart";
 
 /**
  * Product search response interface matching the API specification

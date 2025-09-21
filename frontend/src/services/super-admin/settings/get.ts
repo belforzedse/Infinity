@@ -1,5 +1,6 @@
 import { apiClient } from "@/services";
-import { SuperAdminSettings, defaultSettings } from "@/types/super-admin/settings";
+import type { SuperAdminSettings} from "@/types/super-admin/settings";
+import { defaultSettings } from "@/types/super-admin/settings";
 
 export async function getSuperAdminSettings(): Promise<SuperAdminSettings> {
   try {

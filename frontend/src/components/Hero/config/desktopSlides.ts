@@ -1,4 +1,4 @@
-import { DesktopLayout } from "../types";
+import type { DesktopLayout } from "../types";
 
 const baseTextBanner = {
   title: "لباس‌هایی از قلــــــب پینترست...",

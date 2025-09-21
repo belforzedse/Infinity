@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ProductVariable, ProductVariableDisplay } from "./types";
+import type { ProductVariable, ProductVariableDisplay } from "./types";
 import { ProductVariableTable } from "./Table";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";

@@ -8,7 +8,8 @@ import OrderCard from "./OrderCard";
 import OrderCardSkeleton from "./OrderCardSkeleton";
 import OrderRowSkeleton from "./OrderRowSkeleton";
 import { ORDER_STATUS } from "../Constnats";
-import OrderService, { Order } from "@/services/order";
+import type { Order } from "@/services/order";
+import OrderService from "@/services/order";
 // removed unused import: PaymentStatusButton from "./PaymentStatusButton"
 import { faNum } from "@/utils/faNum";
 

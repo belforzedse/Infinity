@@ -32,7 +32,6 @@ export const TransactionSection = ({
           "divide-y divide-slate-100 rounded-xl border border-slate-100 px-4 py-3 lg:px-5",
           type === "deposit" && "lg:min-h-[50vh]",
           // transactions.length === 0 && "lg:border border-none"
-          // TODO: do not work
         )}
       >
         {transactions.map((item, index) => (

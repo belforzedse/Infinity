@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { RouteInfo } from "@/utils/routes";
+import type { RouteInfo } from "@/utils/routes";
 import { useState } from "react";
 
 /**

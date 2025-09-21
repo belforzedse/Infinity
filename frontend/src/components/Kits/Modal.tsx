@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel, DialogTitle, Transition } from "@headlessui/react";
-import { ReactNode, Fragment } from "react";
+import type { ReactNode} from "react";
+import { Fragment } from "react";
 import DeleteIcon from "./Icons/DeleteIcon";
 import classNames from "classnames";
 

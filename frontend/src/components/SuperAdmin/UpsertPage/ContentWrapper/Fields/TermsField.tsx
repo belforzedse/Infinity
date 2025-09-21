@@ -1,4 +1,5 @@
-import React, { ReactNode, useState, useEffect, useRef } from "react";
+import type { ReactNode} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import BluePlusIcon from "../../Icons/BluePlusIcon";
 
 type Option = {

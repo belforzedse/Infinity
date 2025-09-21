@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes, ChangeEvent } from "react";
+import type { InputHTMLAttributes, ChangeEvent } from "react";
+import React from "react";
 import { Input as UITextInput } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 

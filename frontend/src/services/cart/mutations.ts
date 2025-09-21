@@ -1,5 +1,5 @@
 import { apiClient } from "../index";
-import { FinalizeCartRequest, FinalizeCartResponse, CartItemResponse } from "./types/cart";
+import type { FinalizeCartRequest, FinalizeCartResponse, CartItemResponse } from "./types/cart";
 
 export const addItemToCart = async (
   productVariationId: number,

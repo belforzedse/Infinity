@@ -32,7 +32,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (verificationCode.length === 6) {
-      // TODO: Implement verification API call
       const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
       if (response.token) {

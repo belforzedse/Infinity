@@ -1,7 +1,7 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
-import { ProductCardProps } from "@/components/Product/Card";
+import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
 import logger from "@/utils/logger";
 

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ContactInfo } from "@/services/footer";
+import type { ContactInfo } from "@/services/footer";
 
 const socialIcons = [
   {

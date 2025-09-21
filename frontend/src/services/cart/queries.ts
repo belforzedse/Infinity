@@ -1,5 +1,5 @@
 import { apiClient } from "../index";
-import { CartStockCheckResponse } from "./types/cart";
+import type { CartStockCheckResponse } from "./types/cart";
 import { unwrap } from "./helpers/response";
 import type { ApiResponse } from "@/types/api";
 

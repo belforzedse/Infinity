@@ -1,5 +1,5 @@
 import React from "react";
-import { FileType } from "./types";
+import type { FileType } from "./types";
 import FileList from "./FileList";
 import { useUpload } from "@/hooks/product/useUpload";
 

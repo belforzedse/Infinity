@@ -1,8 +1,9 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import type { ReactNode} from "react";
+import { useState } from "react";
 import UpsertPageContentWrapper from "./index";
-import { ExtendedUpsertPageConfigType, ExtendedField } from "./ExtendedTypes";
+import type { ExtendedUpsertPageConfigType, ExtendedField } from "./ExtendedTypes";
 
 type Props<T> = {
   config: ExtendedUpsertPageConfigType<T>;

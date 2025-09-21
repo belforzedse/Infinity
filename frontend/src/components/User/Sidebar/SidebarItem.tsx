@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { ReactNode, cloneElement, isValidElement } from "react";
+import type { ReactNode} from "react";
+import { cloneElement, isValidElement } from "react";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import ArrowLeftIcon from "../Icons/ArrowLeftIcon";
