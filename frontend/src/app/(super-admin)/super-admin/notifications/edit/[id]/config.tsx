@@ -1,6 +1,6 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type Notification } from "./page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 

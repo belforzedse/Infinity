@@ -1,6 +1,6 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type CouponRule } from "./page";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";

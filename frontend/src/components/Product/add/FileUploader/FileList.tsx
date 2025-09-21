@@ -1,5 +1,5 @@
 import React from "react";
-import { FileListProps } from "./types";
+import type { FileListProps } from "./types";
 import FileItem from "./FileItem";
 import UploadButton from "../UploadButton";
 

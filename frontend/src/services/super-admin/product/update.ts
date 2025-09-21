@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { EditProductData, ProductData } from "@/types/super-admin/products";
+import type { EditProductData, ProductData } from "@/types/super-admin/products";
 import { toast } from "react-hot-toast";
 
 interface TransformedProductData

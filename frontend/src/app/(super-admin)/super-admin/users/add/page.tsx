@@ -1,11 +1,12 @@
 "use client";
 
-import UpsertPageContentWrapper, {
+import type {
   UpsertPageConfigType,
 } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import { STRAPI_TOKEN } from "@/constants/api";
 

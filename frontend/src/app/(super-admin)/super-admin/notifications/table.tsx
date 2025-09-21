@@ -5,7 +5,7 @@ import RecycleIcon from "@/components/SuperAdmin/Layout/Icons/RecycleIcon";
 import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 
 // This is a sample data type. Modify according to your needs

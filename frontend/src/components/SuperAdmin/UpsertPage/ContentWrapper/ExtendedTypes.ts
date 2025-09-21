@@ -1,5 +1,5 @@
-import { UpsertPageConfigType as BaseUpsertPageConfigType } from "./index";
-import { ReactNode } from "react";
+import type { UpsertPageConfigType as BaseUpsertPageConfigType } from "./index";
+import type { ReactNode } from "react";
 
 type StandardFieldType =
   | "text"

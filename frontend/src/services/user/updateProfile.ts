@@ -1,6 +1,6 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
-import { MeResponse } from "./me";
+import type { MeResponse } from "./me";
 
 export interface UpdateProfileRequest {
   FirstName?: string;

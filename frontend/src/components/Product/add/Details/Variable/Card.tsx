@@ -2,7 +2,7 @@ import DeleteIcon from "@/components/Product/Icons/DeleteIcon";
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
 import clsx from "clsx";
 import React from "react";
-import { ProductVariableDisplay } from "./types";
+import type { ProductVariableDisplay } from "./types";
 
 interface ProductVariableCardProps {
   item: ProductVariableDisplay;

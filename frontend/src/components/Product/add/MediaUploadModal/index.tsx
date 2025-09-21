@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Modal from "@/components/Kits/Modal";
-import { TabType } from "./types";
+import type { TabType } from "./types";
 import Sidebar from "./components/Sidebar";
 import MediaUploader from "./components/MediaUploader";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";

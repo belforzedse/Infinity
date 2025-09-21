@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
-import OrderService, { Order, OrderItem } from "@/services/order";
+import type { Order, OrderItem } from "@/services/order";
+import OrderService from "@/services/order";
 import PaymentStatusButton from "./PaymentStatusButton";
 import { faNum } from "@/utils/faNum";
 

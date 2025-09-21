@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import { atom } from "jotai";
-import { FileType } from "@/components/Product/add/FileUploader/types";
+import type { FileType } from "@/components/Product/add/FileUploader/types";
 
 interface UploadingState {
   image: boolean;

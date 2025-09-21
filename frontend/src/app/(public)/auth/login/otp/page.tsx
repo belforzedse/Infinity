@@ -16,7 +16,6 @@ export default function LoginPage() {
 
   const handleLogin = async ({ verificationCode }: { verificationCode: string }) => {
     if (verificationCode.length === 6) {
-      // TODO: Implement verification API call
       const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
       if (response.token) {

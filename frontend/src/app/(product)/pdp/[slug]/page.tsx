@@ -3,14 +3,15 @@ import Hero from "@/components/PDP/Hero";
 import OffersList from "@/components/PDP/OffersList";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
-import { ProductReview } from "@/components/PDP/Comment/List";
+import type { ProductReview } from "@/components/PDP/Comment/List";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import logger from "@/utils/logger";
+import type {
+  ProductDetail} from "@/services/product/product";
 import {
   getProductBySlug,
-  ProductDetail,
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";

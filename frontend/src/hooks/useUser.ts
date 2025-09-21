@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { me, MeResponse } from "@/services/user/me";
+import type { MeResponse } from "@/services/user/me";
+import { me } from "@/services/user/me";
 
 interface UseUserReturnType {
   userData: MeResponse | null;

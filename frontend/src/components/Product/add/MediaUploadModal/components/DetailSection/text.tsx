@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction } from "react";
-import { SelectedImageDetailsSection } from "../../types";
+import type { Dispatch, SetStateAction } from "react";
+import type { SelectedImageDetailsSection } from "../../types";
 import CopyIcon from "@/components/Product/Icons/CopyIcon";
 
 interface DetailsSectionTextProps {

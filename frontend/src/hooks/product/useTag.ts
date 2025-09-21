@@ -3,7 +3,8 @@ import { useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import toast from "react-hot-toast";
 import { createTag } from "@/services/super-admin/product/tag/create";
-import { getTags, TagResponseType } from "@/services/super-admin/product/tag/get";
+import type { TagResponseType } from "@/services/super-admin/product/tag/get";
+import { getTags } from "@/services/super-admin/product/tag/get";
 import { usePathname } from "next/navigation";
 import logger from "@/utils/logger";
 

@@ -1,7 +1,7 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
-import { ApiError } from "@/types/api";
+import type { ApiError } from "@/types/api";
 
 export interface MeResponse {
   Bio: string | null;

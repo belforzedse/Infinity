@@ -7,7 +7,7 @@ import ShippingTabs from "@/components/SuperAdmin/ShippingTabs";
 import SuperAdminTableSelect from "@/components/SuperAdmin/Table/Select";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Province } from "../../table";
+import type { Province } from "../../table";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
 

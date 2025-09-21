@@ -6,7 +6,7 @@ import StarIcon from "../../Icons/StarIcon";
 import MessagesIcon from "../../Icons/MessagesIcon";
 import { useState, useMemo, useCallback } from "react";
 import PDPCommentModal from "../CommentModal";
-import { ProductReview } from "../List";
+import type { ProductReview } from "../List";
 import { useRouter } from "next/navigation";
 
 type Props = {

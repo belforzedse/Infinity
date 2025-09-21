@@ -5,7 +5,7 @@ import { config } from "./config";
 import { useEffect, useState } from "react";
 import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
 import { updateSuperAdminSettings } from "@/services/super-admin/settings/update";
-import { SuperAdminSettings } from "@/types/super-admin/settings";
+import type { SuperAdminSettings } from "@/types/super-admin/settings";
 import { toast } from "react-hot-toast";
 
 export default function SettingsPage() {

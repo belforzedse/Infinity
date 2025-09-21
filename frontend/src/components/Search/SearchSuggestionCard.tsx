@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { faNum } from "@/utils/faNum";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 export interface SearchSuggestionCardProps {

@@ -1,13 +1,14 @@
 "use client";
 
-import {
+import type {
   ColumnDef,
+  SortingState,
+  Row} from "@tanstack/react-table";
+import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getSortedRowModel,
-  SortingState,
-  Row,
+  getSortedRowModel
 } from "@tanstack/react-table";
 // removed unused import: getPaginationRowModel from "@tanstack/react-table"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

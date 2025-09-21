@@ -2,9 +2,9 @@ import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/Ful
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import { API_BASE_URL } from "@/constants/api";
-import { ProductCoverImage } from "@/types/Product";
+import type { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";

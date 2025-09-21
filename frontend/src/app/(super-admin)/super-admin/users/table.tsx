@@ -9,7 +9,7 @@ import SuperAdminTableCellSwitch from "@/components/SuperAdmin/Table/Cells/Switc
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";
-import { ColumnDef, Row } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { toast } from "react-hot-toast";

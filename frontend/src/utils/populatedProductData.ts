@@ -1,6 +1,6 @@
-import { ProductDataResponse, GenericRelationArray } from "@/services/super-admin/product/get";
-import { EditProductData } from "@/types/super-admin/products";
-import { TagResponseType, TagAttributes } from "@/services/super-admin/product/tag/get";
+import type { ProductDataResponse, GenericRelationArray } from "@/services/super-admin/product/get";
+import type { EditProductData } from "@/types/super-admin/products";
+import type { TagResponseType, TagAttributes } from "@/services/super-admin/product/tag/get";
 
 interface CategoryAttributes {
   Title: string;

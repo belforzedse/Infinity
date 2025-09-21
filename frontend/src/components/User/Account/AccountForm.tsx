@@ -1,5 +1,6 @@
 "use client";
-import { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import type { FormEvent, ChangeEvent} from "react";
+import { useState, useEffect } from "react";
 import Input from "@/components/Kits/Form/Input";
 import { RadioGroup } from "@/components/Kits/Form/RadioButton";
 import SaveIcon from "../Icons/SaveIcon";

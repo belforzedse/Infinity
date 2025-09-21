@@ -59,9 +59,6 @@ export default function AddProductsPage() {
     <div className="flex w-full grid-cols-3 flex-col gap-4 lg:grid">
       <div className="order-2 flex flex-col gap-4 lg:order-1">
         <IndexPhotoUploader />
-        {/* TODO: delete this components  */}
-        {/* <SetPrice />
-        <SetStatus /> */}
         <SetDetails />
       </div>
 

@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { ApiResponse } from "@/types/api";
+import type { ApiResponse } from "@/types/api";
 
 export interface CategoryData {
   Title: string;

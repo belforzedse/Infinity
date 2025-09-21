@@ -1,7 +1,7 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
-import { SuperAdminSettings } from "@/types/super-admin/settings";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
+import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 export const config: UpsertPageConfigType<SuperAdminSettings> = {
   headTitle: "تنظیمات سایت",

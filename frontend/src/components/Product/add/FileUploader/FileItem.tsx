@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
-import { FileItemProps } from "./types";
+import type { FileItemProps } from "./types";
 
 const FileItem: React.FC<FileItemProps> = ({ file, onDelete, iconSrc, index, fileType }) => (
   <div className="flex items-center gap-4 rounded-lg bg-blue-700 px-3 py-2.5 text-white">

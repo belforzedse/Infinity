@@ -1,8 +1,9 @@
 import React from "react";
 import CustomRadioGroup from "./CustomRadioGroup";
-import { ShippingMethod } from "@/services/shipping";
-import { Controller, Control, UseFormSetValue, useWatch } from "react-hook-form";
-import { FormData } from "./index";
+import type { ShippingMethod } from "@/services/shipping";
+import type { Control, UseFormSetValue} from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
+import type { FormData } from "./index";
 
 interface Props {
   shippingMethods: ShippingMethod[];

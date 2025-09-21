@@ -6,7 +6,7 @@ import ProductChip from "../Chip";
 import PlusIcon from "@/components/User/Icons/PlusIcon";
 import { useProductTag } from "@/hooks/product/useTag";
 import classNames from "classnames";
-import { TagResponseType } from "@/services/super-admin/product/tag/get";
+import type { TagResponseType } from "@/services/super-admin/product/tag/get";
 
 interface TagsProps {
   isEditMode?: boolean;

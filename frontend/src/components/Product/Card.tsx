@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { faNum } from "@/utils/faNum";
-import { FC } from "react";
+import type { FC } from "react";
 import HeartIcon from "./Icons/HeartIcon";
 import GridIcon from "./Icons/GridIcon";
 import Link from "next/link";

@@ -1,8 +1,8 @@
 import DeleteIcon from "@/components/Product/Icons/DeleteIcon";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
-import { Dispatch, SetStateAction } from "react";
-import { SelectedImageDetailsSection } from "../../types";
+import type { Dispatch, SetStateAction } from "react";
+import type { SelectedImageDetailsSection } from "../../types";
 import DetailsSectionText from "./text";
 
 interface DetailsSectionProps {

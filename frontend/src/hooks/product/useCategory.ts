@@ -7,8 +7,9 @@ import {
   productDataAtom,
 } from "@/atoms/super-admin/products";
 import { getAllCategories } from "@/services/super-admin/product/category/getAll";
-import { CategoryData, createCategory } from "@/services/super-admin/product/category/create";
-import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
+import type { CategoryData} from "@/services/super-admin/product/category/create";
+import { createCategory } from "@/services/super-admin/product/category/create";
+import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import { usePathname } from "next/navigation";
 
 interface UseProductCategoryProps {

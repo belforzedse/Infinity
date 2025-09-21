@@ -1,7 +1,8 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import { MobileTable, columns, Product } from "./table";
+import type { Product } from "./table";
+import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";

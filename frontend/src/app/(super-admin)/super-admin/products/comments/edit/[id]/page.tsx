@@ -2,7 +2,8 @@
 
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
 import { useEffect, useState } from "react";
-import { Comment, config } from "./config";
+import type { Comment} from "./config";
+import { config } from "./config";
 import { useParams } from "next/navigation";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";

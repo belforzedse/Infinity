@@ -2,7 +2,7 @@
 
 import FooterLink from "./FooterLink";
 import { useEffect, useState } from "react";
-import { FooterColumn } from "@/services/footer";
+import type { FooterColumn } from "@/services/footer";
 
 interface UserAccountSectionProps {
   data?: FooterColumn;

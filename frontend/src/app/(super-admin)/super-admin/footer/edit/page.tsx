@@ -5,7 +5,7 @@ import { config } from "./config";
 import { toast } from "react-hot-toast";
 // removed unused import: useRouter from "next/navigation"
 import { useEffect, useState } from "react";
-import { Footer } from "@/types/super-admin/footer";
+import type { Footer } from "@/types/super-admin/footer";
 import { getFooter } from "@/services/super-admin/footer/get";
 import { updateFooter } from "@/services/super-admin/footer/update";
 

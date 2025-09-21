@@ -7,9 +7,10 @@ import { submitOrderStepAtom } from "@/atoms/Order";
 import DisclosureItem from "@/components/Kits/Disclosure";
 import ShoppingCartBillDeliveryOptions from "./DeliveryOptions";
 import { useCart } from "@/contexts/CartContext";
-import { getShippingMethods, ShippingMethod } from "@/services/shipping";
-import { Control, UseFormSetValue } from "react-hook-form";
-import { FormData } from "./index";
+import type { ShippingMethod } from "@/services/shipping";
+import { getShippingMethods } from "@/services/shipping";
+import type { Control, UseFormSetValue } from "react-hook-form";
+import type { FormData } from "./index";
 
 type Props = {
   control: Control<FormData>;

@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
-import { Footer } from "@/types/super-admin/footer";
+import type { Footer } from "@/types/super-admin/footer";
 
 export async function updateFooter(footer: Footer): Promise<void> {
   await apiClient.put(

@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import { useState } from "react";
 import Uploader from "./Uploader";
-import { MediaViewEnum, MediaViewType } from "../types";
+import type { MediaViewType } from "../types";
+import { MediaViewEnum } from "../types";
 import { UploadedPhotosSelector } from "./UploadedPhotosSelector";
 
 interface MediaUploaderProps {

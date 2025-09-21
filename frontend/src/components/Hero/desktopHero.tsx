@@ -1,7 +1,7 @@
 import React from "react";
 import BannerImage from "./Banners/BannerImage";
 import TextBanner from "./Banners/TextBanner";
-import { DesktopLayout } from "./types";
+import type { DesktopLayout } from "./types";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { luxurySlideFade } from "./animations";
 

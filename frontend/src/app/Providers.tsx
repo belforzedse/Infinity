@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Provider } from "jotai";
 import jotaiStore from "@/lib/jotaiStore";
 import TopProgressBar from "@/components/ui/TopProgressBar";

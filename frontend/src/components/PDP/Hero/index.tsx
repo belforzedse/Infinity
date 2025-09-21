@@ -1,5 +1,6 @@
+import type {
+  ProductDetail} from "@/services/product/product";
 import {
-  ProductDetail,
   formatGalleryAssets,
   getDefaultProductVariation,
   getProductColors,

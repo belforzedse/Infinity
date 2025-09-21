@@ -1,6 +1,6 @@
-import { TabItem } from "@/types/Tabs";
+import type { TabItem } from "@/types/Tabs";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface TabsProps {
   tabs: TabItem[];

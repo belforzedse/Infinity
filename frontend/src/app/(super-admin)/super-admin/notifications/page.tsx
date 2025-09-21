@@ -1,7 +1,8 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import { Notification, MobileTable, columns } from "./table";
+import type { Notification} from "./table";
+import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 
 // This is sample data. Replace with your actual data fetching logic

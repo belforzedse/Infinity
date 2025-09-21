@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import PlusIcon from "../../Icons/PlusIcon";
-import Select, { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
+import Select from "@/components/Kits/Form/Select";
 import { useProductCategory } from "@/hooks/product/useCategory";
-import { CategoryData } from "@/services/super-admin/product/category/create";
+import type { CategoryData } from "@/services/super-admin/product/category/create";
 import { getAllCategories } from "@/services/super-admin/product/category/getAll";
 import {
   productCategoryDataAtom,

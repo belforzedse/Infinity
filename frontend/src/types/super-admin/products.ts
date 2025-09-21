@@ -1,6 +1,6 @@
-import { categoryResponseType } from "@/services/super-admin/product/category/getAll";
-import { CoverImageField, MediaDataItem } from "@/services/super-admin/product/get";
-import { TagResponseType } from "@/services/super-admin/product/tag/get";
+import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
+import type { CoverImageField, MediaDataItem } from "@/services/super-admin/product/get";
+import type { TagResponseType } from "@/services/super-admin/product/tag/get";
 
 export interface ProductData {
   Title: string;

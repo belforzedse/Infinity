@@ -2,7 +2,7 @@
 
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
 export type Tag = {
   id: string;

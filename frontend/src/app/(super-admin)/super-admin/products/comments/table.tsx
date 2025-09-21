@@ -3,7 +3,7 @@ import ShowIcon from "@/components/SuperAdmin/Layout/Icons/ShowIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 
 // This is a sample data type. Modify according to your needs

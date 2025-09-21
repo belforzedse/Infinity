@@ -17,7 +17,7 @@ export default function CartPage() {
   const { cartItems, isLoading } = useCart();
   const router = useRouter();
   const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
-  const [_loadingRandom, setLoadingRandom] = useState(false);
+  const [, setLoadingRandom] = useState(false);
 
   useEffect(() => {
     let mounted = true;
