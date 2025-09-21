@@ -7,11 +7,35 @@ import CartSkeleton from "@/components/Skeletons/CartSkeleton";
 import EmptyShoppingCart from "@/components/ShoppingCart/Empty";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import OffersListHomePage from "@/components/PDP/OffersListHomePage";
+import heart from "@/components/PDP/Icons/HeartIcon";
+import type { ProductCardProps } from "@/components/Product/Card";
+import { getRandomProducts } from "@/services/product/homepage";
+import HeartIcon from "@/components/PDP/Icons/HeartIcon";
 
 export default function CartPage() {
   const { cartItems, isLoading } = useCart();
   const router = useRouter();
+  const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
+  const [loadingRandom, setLoadingRandom] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      try {
+        setLoadingRandom(true);
+        const items = await getRandomProducts(60, 12);
+        if (mounted) setRandomProducts(items);
+      } finally {
+        if (mounted) setLoadingRandom(false);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   if (isLoading) return <CartSkeleton />;
   if (cartItems.length === 0) return <EmptyShoppingCart />;
@@ -34,10 +58,20 @@ export default function CartPage() {
 
         <button
           onClick={() => router.push("/checkout")}
-          className="w-fit rounded-lg bg-pink-500 px-6 py-2 text-sm text-white"
+          className="mb-10 w-fit rounded-lg bg-pink-500 px-6 py-2 text-sm text-white"
         >
           ادامه فرآیند خرید و تسویه حساب
         </button>
+
+        {randomProducts.length > 0 && (
+          <div className="mt-4">
+            <OffersListHomePage
+              icon={<HeartIcon />}
+              title="پیشناهاد ما برای شما"
+              products={randomProducts}
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   );
