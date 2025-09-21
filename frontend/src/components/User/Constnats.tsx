@@ -41,9 +41,7 @@ export const LOGOUT_ITEM = {
   text: "خروج",
 };
 
-export const PREDEFINED_INCREASE_BALANCE_AMOUNTS = [
-  50000, 100000, 150000, 200000, 250000, 300000,
-];
+export const PREDEFINED_INCREASE_BALANCE_AMOUNTS = [50000, 100000, 150000, 200000, 250000, 300000];
 
 export const ORDER_STATUS = [
   { key: "ALL", value: "همه سفارش‌ها" },

@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import CustomRadioGroup from "./CustomRadioGroup";
 
 const ShoppingCartBillDeliveryTime: React.FC = () => {
-  const [selectedDeliveryTimeOption, setSelectedDeliveryTimeOption] =
-    useState("pishtaz");
+  const [selectedDeliveryTimeOption, setSelectedDeliveryTimeOption] = useState("pishtaz");
 
   const deliveryOptions = [
     {

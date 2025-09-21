@@ -21,10 +21,7 @@ function ShoppingCart() {
 
   if (cartItems.length === 0) return <EmptyShoppingCart />;
 
-  const isRTL =
-    typeof document !== "undefined"
-      ? document.documentElement.dir === "rtl"
-      : true;
+  const isRTL = typeof document !== "undefined" ? document.documentElement.dir === "rtl" : true;
   const direction = isRTL ? 1 : -1;
   const variants = {
     initial: { opacity: 0, x: 50 * direction },
@@ -47,15 +44,9 @@ function ShoppingCart() {
             exit="exit"
             transition={transition}
           >
-            <ShoppingCartDesktopTable
-              cartItems={cartItems}
-              className="hidden lg:block"
-            />
+            <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
 
-            <ShoppingCartMobileTable
-              cartItems={cartItems}
-              className="lg:hidden"
-            />
+            <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
 
             <button
               onClick={() => setSubmitOrderStep(SubmitOrderStep.Bill)}

@@ -10,11 +10,7 @@ export interface ImagePreviewProps {
   index: number;
 }
 
-const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
-  preview,
-  onRemove,
-  index,
-}) => (
+const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({ preview, onRemove, index }) => (
   <div className="relative mb-5 flex aspect-square flex-col items-end justify-center">
     <Image
       src={IMAGE_BASE_URL + preview}
@@ -35,9 +31,7 @@ const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
       onClick={onRemove}
       className="absolute -bottom-5 right-1/2 z-50 flex translate-x-1/2 items-center gap-1"
     >
-      <span className="text-sm whitespace-nowrap text-actions-primary">
-        حذف تصویر
-      </span>
+      <span className="text-sm whitespace-nowrap text-actions-primary">حذف تصویر</span>
       <DeleteIcon className="h-4 w-4 text-actions-primary" />
     </button>
   </div>

@@ -24,10 +24,7 @@ interface UseAudioPlayerReturn {
   formatTime: (time: number) => string;
 }
 
-export const useAudioPlayer = ({
-  audioSrc,
-  onPlay,
-}: UseAudioPlayerProps): UseAudioPlayerReturn => {
+export const useAudioPlayer = ({ audioSrc, onPlay }: UseAudioPlayerProps): UseAudioPlayerReturn => {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -214,13 +211,7 @@ export const useAudioPlayer = ({
       audio.pause();
       audio.src = "";
     };
-  }, [
-    audioSrc,
-    handleTimeUpdate,
-    handleLoadedMetadata,
-    handleEnded,
-    handleError,
-  ]);
+  }, [audioSrc, handleTimeUpdate, handleLoadedMetadata, handleEnded, handleError]);
 
   const getProgress = () => {
     if (!audioDuration) return 0;

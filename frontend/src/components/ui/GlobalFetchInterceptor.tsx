@@ -67,8 +67,7 @@ export default function GlobalFetchInterceptor() {
     async function wrappedFetch(input: RequestInfo | URL, init?: RequestInit) {
       // Count all non-trivial network work, but ignore pure static assets like images/fonts/css
       try {
-        const raw =
-          typeof input === "string" ? input : (input as any).url || "";
+        const raw = typeof input === "string" ? input : (input as any).url || "";
         if (!raw) return originalFetch(input, init);
         let url;
         try {
@@ -85,10 +84,9 @@ export default function GlobalFetchInterceptor() {
         if (method === "OPTIONS" || method === "HEAD") {
           return originalFetch(input as any, init);
         }
-        const isPureStatic =
-          /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
-            url.pathname,
-          );
+        const isPureStatic = /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
+          url.pathname,
+        );
         if (isPureStatic) {
           return originalFetch(input as any, init);
         }

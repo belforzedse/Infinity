@@ -1,4 +1,4 @@
-import { MobileLayout } from "../types";
+import type { MobileLayout } from "../types";
 
 const baseMobile: MobileLayout = {
   heroDesktop: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type Coupon } from "./page";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
@@ -110,8 +110,8 @@ export const config: UpsertPageConfigType<Coupon> = {
               name: "terms",
               helper: () => (
                 <span className="text-sm text-actions-primary">
-                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر
-                  خود را برای اعمال تخفیف از فیلد مقابل انتخاب نمایید.
+                  شما می توانید از دسته بندی &quot;محصولات&quot; موارد مد نظر خود را برای اعمال
+                  تخفیف از فیلد مقابل انتخاب نمایید.
                 </span>
               ),
               type: "terms",

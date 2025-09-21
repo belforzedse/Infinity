@@ -52,8 +52,7 @@ export default function PLPHeaderDesktopNav() {
           } catch {
             itemSlug = null;
           }
-          const isActive =
-            isHome || (isPlp && itemSlug && itemSlug === activeSlug);
+          const isActive = isHome || (isPlp && itemSlug && itemSlug === activeSlug);
           return (
             <Link
               key={item.href}

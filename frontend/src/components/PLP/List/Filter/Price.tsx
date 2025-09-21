@@ -21,10 +21,7 @@ const PriceFilter = ({
   maxPriceValue,
   onPriceChange,
 }: PriceFilterProps) => {
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    minPrice,
-    maxPrice,
-  ]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([minPrice, maxPrice]);
   const [inputValues, setInputValues] = useState({
     min: formatPrice(minPrice),
     max: formatPrice(maxPrice),

@@ -19,7 +19,7 @@ export default function SuspenseLoader({
       className={clsx(
         fullscreen && "min-h-[50vh] md:min-h-screen",
         "flex w-full items-center justify-center",
-        className
+        className,
       )}
       dir="rtl"
     >

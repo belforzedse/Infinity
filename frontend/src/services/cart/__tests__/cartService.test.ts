@@ -197,7 +197,9 @@ describe("CartService", () => {
 
       mockPost.mockRejectedValueOnce(error);
 
-      await expect(CartService.finalizeCart(finalizeRequest)).rejects.toThrow("Payment processing failed");
+      await expect(CartService.finalizeCart(finalizeRequest)).rejects.toThrow(
+        "Payment processing failed",
+      );
     });
   });
 
@@ -224,7 +226,9 @@ describe("CartService", () => {
 
       mockPost.mockRejectedValueOnce(error);
 
-      await expect(CartService.applyDiscount(discountCode)).rejects.toThrow("Invalid discount code");
+      await expect(CartService.applyDiscount(discountCode)).rejects.toThrow(
+        "Invalid discount code",
+      );
     });
   });
 

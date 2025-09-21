@@ -86,9 +86,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
     <>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-3xl text-[#202224]">
-            {isRecycleBinOpen ? "زباله‌دان" : title}
-          </span>
+          <span className="text-3xl text-[#202224]">{isRecycleBinOpen ? "زباله‌دان" : title}</span>
 
           {titleSuffixComponent}
         </div>
@@ -103,9 +101,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
             />
           )}
 
-          {hasAddButton && (
-            <AddButton text={addButtonText ?? ""} path={addButtonPath ?? "#"} />
-          )}
+          {hasAddButton && <AddButton text={addButtonText ?? ""} path={addButtonPath ?? "#"} />}
 
           {hasFilterButton && (
             <FilterButton

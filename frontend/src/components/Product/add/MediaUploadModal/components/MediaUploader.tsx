@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import { useState } from "react";
 import Uploader from "./Uploader";
-import { MediaViewEnum, MediaViewType } from "../types";
+import type { MediaViewType } from "../types";
+import { MediaViewEnum } from "../types";
 import { UploadedPhotosSelector } from "./UploadedPhotosSelector";
 
 interface MediaUploaderProps {
@@ -19,9 +20,7 @@ export default function MediaUploader({
   onDrop,
   onImageSelect,
 }: MediaUploaderProps) {
-  const [activeView, setActiveView] = useState<MediaViewType>(
-    MediaViewEnum.UPLOAD_FILES,
-  );
+  const [activeView, setActiveView] = useState<MediaViewType>(MediaViewEnum.UPLOAD_FILES);
 
   const views: MediaViewType[] = [
     MediaViewEnum.UPLOAD_FILES,

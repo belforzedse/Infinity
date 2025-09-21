@@ -1,5 +1,6 @@
 import { useState } from "react";
-import Select, { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
+import Select from "@/components/Kits/Form/Select";
 import { cn } from "@/utils/tailwind";
 import ChevronRightIcon from "../../Icons/ChevronRightIcon";
 import ChavronLeftIcon from "../../Icons/ChevronLeftIcon";
@@ -147,9 +148,7 @@ const SetCategoryTablePagination: React.FC<SetCategoryTablePaginationProps> = ({
           <ChevronRightIcon />
         </button>
 
-        <div className="flex flex-row-reverse items-center gap-1">
-          {renderPageNumbers()}
-        </div>
+        <div className="flex flex-row-reverse items-center gap-1">{renderPageNumbers()}</div>
 
         <button
           onClick={() => handlePageChange(currentPageState - 1)}

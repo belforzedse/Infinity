@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Shield,
-  Home,
-  AlertTriangle,
-  Settings,
-  ChevronRight,
-} from "lucide-react";
+import { Shield, Home, AlertTriangle, Settings, ChevronRight } from "lucide-react";
 
 export default function NotFound() {
   return (

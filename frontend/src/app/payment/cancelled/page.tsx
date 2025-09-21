@@ -60,19 +60,13 @@ function PaymentCancelledContent() {
           </div>
 
           {/* Cancellation Message */}
-          <h1 className="text-3xl mb-4 font-bold text-orange-600">
-            پرداخت لغو شد
-          </h1>
+          <h1 className="text-3xl mb-4 font-bold text-orange-600">پرداخت لغو شد</h1>
 
-          <p className="text-lg mb-6 text-gray-700">
-            شما فرآیند پرداخت را لغو کردید.
-          </p>
+          <p className="text-lg mb-6 text-gray-700">شما فرآیند پرداخت را لغو کردید.</p>
 
           {/* Reassurance Section */}
           <div className="mb-6 w-full rounded-lg border border-green-200 bg-green-50 p-6">
-            <h3 className="text-lg mb-3 font-semibold text-green-800">
-              اطمینان خاطر
-            </h3>
+            <h3 className="text-lg mb-3 font-semibold text-green-800">اطمینان خاطر</h3>
             <div className="space-y-2 text-right text-green-700">
               <div className="flex items-center gap-2">
                 <span className="text-green-500">✅</span>
@@ -92,23 +86,18 @@ function PaymentCancelledContent() {
           {/* Order Information */}
           {orderId && (
             <div className="mb-6 w-full rounded-lg border border-orange-200 bg-orange-50 p-6">
-              <h3 className="text-lg mb-3 font-semibold text-orange-800">
-                اطلاعات سفارش
-              </h3>
+              <h3 className="text-lg mb-3 font-semibold text-orange-800">اطلاعات سفارش</h3>
               <div className="space-y-2 text-right">
                 <p className="text-gray-700">
                   <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-orange-700">
-                    #{orderId}
-                  </span>
+                  <span className="mr-2 font-semibold text-orange-700">#{orderId}</span>
                 </p>
                 <p className="text-gray-700">
                   <span className="font-medium">وضعیت:</span>
                   <span className="mr-2 text-orange-600">در انتظار پرداخت</span>
                 </p>
                 <p className="text-sm mt-2 text-orange-700">
-                  سفارش شما تکمیل نشده است. می‌توانید هر زمان که بخواهید پرداخت
-                  را انجام دهید.
+                  سفارش شما تکمیل نشده است. می‌توانید هر زمان که بخواهید پرداخت را انجام دهید.
                 </p>
               </div>
 
@@ -119,22 +108,16 @@ function PaymentCancelledContent() {
           {/* Cancellation Reason */}
           {reason && (
             <div className="mb-6 w-full rounded-lg border border-gray-200 bg-gray-50 p-6">
-              <h3 className="text-lg mb-3 font-semibold text-gray-800">
-                دلیل لغو
-              </h3>
+              <h3 className="text-lg mb-3 font-semibold text-gray-800">دلیل لغو</h3>
               <p className="text-right text-gray-700">
-                {reason === "user-cancelled"
-                  ? "لغو توسط کاربر"
-                  : decodeURIComponent(reason)}
+                {reason === "user-cancelled" ? "لغو توسط کاربر" : decodeURIComponent(reason)}
               </p>
             </div>
           )}
 
           {/* Next Steps */}
           <div className="mb-6 w-full rounded-lg border border-blue-200 bg-blue-50 p-6">
-            <h3 className="text-lg mb-3 font-semibold text-blue-800">
-              گزینه‌های پیش رو
-            </h3>
+            <h3 className="text-lg mb-3 font-semibold text-blue-800">گزینه‌های پیش رو</h3>
             <div className="text-sm space-y-2 text-right text-gray-700">
               <div className="flex items-start gap-2">
                 <span className="mt-1 text-blue-500">•</span>

@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { ApiResponse } from "@/types/api";
+import type { ApiResponse } from "@/types/api";
 
 export interface CategoryData {
   Title: string;
@@ -8,9 +8,7 @@ export interface CategoryData {
   Parent?: string;
 }
 
-export const createCategory = async (
-  category: CategoryData,
-): Promise<ApiResponse<any>> => {
+export const createCategory = async (category: CategoryData): Promise<ApiResponse<any>> => {
   const endpoint = ENDPOINTS.PRODUCT.CATEGORY;
 
   try {

@@ -115,17 +115,15 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
         // Fetch all available variation options
         const [colorsRes, sizesRes, modelsRes] = await Promise.all([
-          apiClient.get<ApiResponse<ApiFeature[]>>(
-            "/product-variation-colors",
-            { headers: authHeader },
-          ),
+          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors", {
+            headers: authHeader,
+          }),
           apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes", {
             headers: authHeader,
           }),
-          apiClient.get<ApiResponse<ApiFeature[]>>(
-            "/product-variation-models",
-            { headers: authHeader },
-          ),
+          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models", {
+            headers: authHeader,
+          }),
         ]);
 
         setAvailableOptions({
@@ -136,9 +134,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
         // Fetch existing product variations for this product
         if (productId) {
-          const existingVariationsRes = await apiClient.get<
-            ApiResponse<ProductVariation[]>
-          >(
+          const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
             `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
             { headers: authHeader },
           );
@@ -152,8 +148,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
           existingVariations.forEach((variation: any) => {
             if (variation.attributes.product_variation_color?.data) {
-              const colorData =
-                variation.attributes.product_variation_color.data;
+              const colorData = variation.attributes.product_variation_color.data;
               existingColors.set(String(colorData.id), {
                 id: String(colorData.id),
                 value: colorData.attributes.Title,
@@ -169,8 +164,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
             }
 
             if (variation.attributes.product_variation_model?.data) {
-              const modelData =
-                variation.attributes.product_variation_model.data;
+              const modelData = variation.attributes.product_variation_model.data;
               existingModels.set(String(modelData.id), {
                 id: String(modelData.id),
                 value: modelData.attributes.Title,
@@ -199,8 +193,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   // Generate combinations and calculate potential variations count
   useEffect(() => {
     const potentialVariationsCount =
-      features.colors.length * features.sizes.length * features.models.length ||
-      0;
+      features.colors.length * features.sizes.length * features.models.length || 0;
 
     setVariationsCount(potentialVariationsCount);
   }, [features]);
@@ -225,24 +218,16 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     });
   }, [inputValues, features, availableOptions]);
 
-  const handleInputChange = (
-    type: "colors" | "sizes" | "models",
-    value: string,
-  ) => {
+  const handleInputChange = (type: "colors" | "sizes" | "models", value: string) => {
     setInputValues((prev) => ({
       ...prev,
       [type]: value,
     }));
   };
 
-  const addFeature = (
-    type: "colors" | "sizes" | "models",
-    item: ApiFeature,
-  ) => {
+  const addFeature = (type: "colors" | "sizes" | "models", item: ApiFeature) => {
     // Check if this item is already selected
-    const isDuplicate = features[type].some(
-      (feature) => feature.id === String(item.id),
-    );
+    const isDuplicate = features[type].some((feature) => feature.id === String(item.id));
 
     if (isDuplicate) return;
 
@@ -271,11 +256,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   };
 
   // Generate a random SKU
-  const generateSKU = (
-    colorCode: string,
-    sizeCode: string,
-    modelCode: string,
-  ) => {
+  const generateSKU = (colorCode: string, sizeCode: string, modelCode: string) => {
     const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
     return `${productId}-${colorCode}-${sizeCode}-${modelCode}-${randomPart}`;
   };
@@ -321,9 +302,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       }
 
       // Fetch existing variations to avoid duplicates
-      const existingVariationsRes = await apiClient.get<
-        ApiResponse<ProductVariation[]>
-      >(
+      const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
         `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
         { headers: authHeader },
       );
@@ -333,12 +312,9 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       // Filter out combinations that already exist
       const newCombinations = combinations.filter((comb) => {
         return !existingVariations.some((existing: any) => {
-          const existingColor =
-            existing.attributes.product_variation_color?.data?.id;
-          const existingSize =
-            existing.attributes.product_variation_size?.data?.id;
-          const existingModel =
-            existing.attributes.product_variation_model?.data?.id;
+          const existingColor = existing.attributes.product_variation_color?.data?.id;
+          const existingSize = existing.attributes.product_variation_size?.data?.id;
+          const existingModel = existing.attributes.product_variation_model?.data?.id;
 
           return (
             existingColor === comb.product_variation_color &&
@@ -350,11 +326,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
       // Create new variations
       for (const combination of newCombinations) {
-        await apiClient.post(
-          "/product-variations",
-          { data: combination },
-          { headers: authHeader },
-        );
+        await apiClient.post("/product-variations", { data: combination }, { headers: authHeader });
       }
 
       alert(`${newCombinations.length} تنوع محصول با موفقیت ایجاد شد`);
@@ -375,9 +347,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               <th className="w-[20%] border-l border-slate-100 px-4 py-2 text-right font-normal text-gray-900">
                 ویژگی
               </th>
-              <th className="w-[80%] px-4 py-2 text-right font-normal text-gray-900">
-                مقدارها
-              </th>
+              <th className="w-[80%] px-4 py-2 text-right font-normal text-gray-900">مقدارها</th>
             </tr>
           </thead>
           <tbody>
@@ -392,9 +362,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       key={color.id}
                       className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-2 py-1"
                     >
-                      <span className="text-sm text-slate-500">
-                        {color.value}
-                      </span>
+                      <span className="text-sm text-slate-500">{color.value}</span>
                       <button
                         onClick={() => removeFeature("colors", color.id)}
                         className="text-slate-400"
@@ -409,24 +377,21 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
                       placeholder="جستجوی رنگ..."
                       value={inputValues.colors}
-                      onChange={(e) =>
-                        handleInputChange("colors", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("colors", e.target.value)}
                     />
-                    {inputValues.colors &&
-                      filteredOptions.colors.length > 0 && (
-                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                          {filteredOptions.colors.map((option) => (
-                            <div
-                              key={option.id}
-                              onClick={() => addFeature("colors", option)}
-                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                            >
-                              {option.attributes.Title}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                    {inputValues.colors && filteredOptions.colors.length > 0 && (
+                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                        {filteredOptions.colors.map((option) => (
+                          <div
+                            key={option.id}
+                            onClick={() => addFeature("colors", option)}
+                            className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
+                          >
+                            {option.attributes.Title}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </td>
@@ -442,9 +407,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       key={size.id}
                       className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
                     >
-                      <span className="text-sm text-slate-500">
-                        {size.value}
-                      </span>
+                      <span className="text-sm text-slate-500">{size.value}</span>
                       <button
                         onClick={() => removeFeature("sizes", size.id)}
                         className="text-slate-400"
@@ -459,9 +422,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
                       placeholder="جستجوی سایز..."
                       value={inputValues.sizes}
-                      onChange={(e) =>
-                        handleInputChange("sizes", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("sizes", e.target.value)}
                     />
                     {inputValues.sizes && filteredOptions.sizes.length > 0 && (
                       <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
@@ -491,9 +452,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       key={model.id}
                       className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
                     >
-                      <span className="text-sm text-slate-500">
-                        {model.value}
-                      </span>
+                      <span className="text-sm text-slate-500">{model.value}</span>
                       <button
                         onClick={() => removeFeature("models", model.id)}
                         className="text-slate-400"
@@ -508,24 +467,21 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
                       placeholder="جستجوی مدل..."
                       value={inputValues.models}
-                      onChange={(e) =>
-                        handleInputChange("models", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("models", e.target.value)}
                     />
-                    {inputValues.models &&
-                      filteredOptions.models.length > 0 && (
-                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                          {filteredOptions.models.map((option) => (
-                            <div
-                              key={option.id}
-                              onClick={() => addFeature("models", option)}
-                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                            >
-                              {option.attributes.Title}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                    {inputValues.models && filteredOptions.models.length > 0 && (
+                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                        {filteredOptions.models.map((option) => (
+                          <div
+                            key={option.id}
+                            onClick={() => addFeature("models", option)}
+                            className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
+                          >
+                            {option.attributes.Title}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </td>
@@ -537,13 +493,11 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       <div className="flex items-center justify-between rounded-xl border border-slate-100 p-4">
         <div className="text-sm text-slate-600">
           <p>
-            تعداد تنوع‌های محصول:{" "}
-            <span className="font-semibold">{variationsCount}</span>
+            تعداد تنوع‌های محصول: <span className="font-semibold">{variationsCount}</span>
           </p>
           {variationsCount > 0 && (
             <p className="text-xs mt-1">
-              با ترکیب ویژگی‌های انتخاب شده {variationsCount} تنوع محصول ایجاد
-              خواهد شد
+              با ترکیب ویژگی‌های انتخاب شده {variationsCount} تنوع محصول ایجاد خواهد شد
             </p>
           )}
         </div>
@@ -556,9 +510,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
-          {isGeneratingVariations
-            ? "در حال ایجاد تنوع‌ها..."
-            : "ایجاد تنوع‌های محصول"}
+          {isGeneratingVariations ? "در حال ایجاد تنوع‌ها..." : "ایجاد تنوع‌های محصول"}
         </button>
       </div>
     </div>

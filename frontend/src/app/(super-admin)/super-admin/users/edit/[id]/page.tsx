@@ -49,9 +49,7 @@ export default function Page() {
         const formattedData: User = {
           id: _user.id.toString(),
           bio: userInfo.Bio || "",
-          birthDate: userInfo.BirthDate
-            ? new Date(userInfo.BirthDate)
-            : new Date(),
+          birthDate: userInfo.BirthDate ? new Date(userInfo.BirthDate) : new Date(),
           createdAt: new Date(user.createdAt),
           gender: userInfo.Sex ? "male" : "female",
           firstname: userInfo.FirstName,

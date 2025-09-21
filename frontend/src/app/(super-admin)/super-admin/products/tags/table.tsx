@@ -2,7 +2,7 @@
 
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
 export type Tag = {
   id: string;
@@ -66,17 +66,13 @@ export const MobileTable = ({ data }: Props) => {
         >
           <div className="flex flex-1 flex-col gap-2">
             <div className="flex w-full items-center justify-between">
-              <span className="text-sm text-neutral-800">
-                {row.attributes?.Title || "-"}
-              </span>
+              <span className="text-sm text-neutral-800">{row.attributes?.Title || "-"}</span>
             </div>
 
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <span className="text-xs text-neutral-400">
                 {row.attributes?.createdAt
-                  ? new Date(row.attributes.createdAt).toLocaleDateString(
-                      "fa-IR",
-                    )
+                  ? new Date(row.attributes.createdAt).toLocaleDateString("fa-IR")
                   : ""}
               </span>
             </div>

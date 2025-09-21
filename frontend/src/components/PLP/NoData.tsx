@@ -14,9 +14,7 @@ export default function NoData({ category }: NoDataProps) {
   useEffect(() => {
     if (category) {
       const safeCategory = encodeURIComponent(category);
-      fetch(
-        `${API_BASE_URL}/product-categories?filters[Slug][$eq]=${safeCategory}`,
-      )
+      fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${safeCategory}`)
         .then((response) => response.json())
         .then((data) => {
           if (data.data.length > 0) {
@@ -47,8 +45,8 @@ export default function NoData({ category }: NoDataProps) {
       </div>
       <h2 className="text-2xl mb-2 font-bold text-gray-800">محصولی یافت نشد</h2>
       <p className="mb-8 max-w-md text-gray-600">
-        متأسفانه در حال حاضر هیچ {categoryTitle} در این دسته‌بندی موجود نیست.
-        لطفاً بعداً دوباره بررسی کنید یا به صفحه اصلی برگردید.
+        متأسفانه در حال حاضر هیچ {categoryTitle} در این دسته‌بندی موجود نیست. لطفاً بعداً دوباره
+        بررسی کنید یا به صفحه اصلی برگردید.
       </p>
       <div className="flex flex-col gap-4 sm:flex-row">
         <Link

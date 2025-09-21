@@ -1,7 +1,7 @@
 import React from "react";
 // This page is now SSR (Server Component) by removing "use client"
 import BannerImage from "./Banners/BannerImage";
-import { MobileLayout } from "./types";
+import type { MobileLayout } from "./types";
 import { AnimatePresence, motion } from "framer-motion";
 import { luxurySlideFade } from "./animations";
 
@@ -80,7 +80,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="w-1/2 md:w-full overflow-hidden"
+                className="w-1/2 overflow-hidden md:w-full"
               >
                 <BannerImage {...layout.secondaryTop} />
               </motion.div>
@@ -93,7 +93,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="w-1/2 md:w-full overflow-hidden"
+                className="w-1/2 overflow-hidden md:w-full"
               >
                 <BannerImage {...layout.secondaryBottom} />
               </motion.div>

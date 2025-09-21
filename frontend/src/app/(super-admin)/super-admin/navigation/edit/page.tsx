@@ -5,7 +5,7 @@ import { config } from "./config";
 import { toast } from "react-hot-toast";
 // removed unused import: useRouter from "next/navigation"
 import { useEffect, useState } from "react";
-import { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
+import type { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
 import { getNavigation } from "@/services/super-admin/navigation/get";
 import { updateNavigation } from "@/services/super-admin/navigation/update";
 
@@ -87,11 +87,7 @@ export default function NavigationEditPage() {
           const updatedNavigation = await getNavigation();
           const updatedFormData: NavigationFormData = {
             ...updatedNavigation,
-            product_categories: JSON.stringify(
-              updatedNavigation.product_categories,
-              null,
-              2,
-            ),
+            product_categories: JSON.stringify(updatedNavigation.product_categories, null, 2),
           };
           setData(updatedFormData);
         } catch (error) {

@@ -1,13 +1,14 @@
 "use client";
 
-import {
+import type {
   ColumnDef,
+  SortingState,
+  Row} from "@tanstack/react-table";
+import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getSortedRowModel,
-  SortingState,
-  Row,
+  getSortedRowModel
 } from "@tanstack/react-table";
 // removed unused import: getPaginationRowModel from "@tanstack/react-table"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -44,7 +45,7 @@ interface TableProps<TData, TValue> {
       enableSelection: boolean;
       selectedIds: Set<string>;
       onSelectionChange: (id: string, selected: boolean) => void;
-    }
+    },
   ) => React.ReactNode;
   onItemDrag?: (row: Row<TData>) => void;
   // Enable row selection + bulk actions
@@ -130,8 +131,7 @@ export function SuperAdminTable<TData, TValue>({
       const filterParams = filters
         .map((item) => {
           const { field, operator, value } = item || ({} as FilterItem);
-          if (!field || !operator || value === undefined || value === null)
-            return "";
+          if (!field || !operator || value === undefined || value === null) return "";
           return `filters${field}[${operator}]=${encodeURIComponent(String(value))}`;
         })
         .filter(Boolean)
@@ -251,8 +251,7 @@ export function SuperAdminTable<TData, TValue>({
                 <input
                   type="checkbox"
                   checked={
-                    !!tableData && selectedIds.size > 0 &&
-                    selectedIds.size === tableData.length
+                    !!tableData && selectedIds.size > 0 && selectedIds.size === tableData.length
                   }
                   onChange={(e) => {
                     if (!tableData) return;
@@ -265,9 +264,7 @@ export function SuperAdminTable<TData, TValue>({
                     setSelectedIds(next);
                   }}
                 />
-                <span className="text-xs text-foreground-primary">
-                  انتخاب همه
-                </span>
+                <span className="text-xs text-foreground-primary">انتخاب همه</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -281,9 +278,7 @@ export function SuperAdminTable<TData, TValue>({
                   onClick={() => {
                     if (!onBulkAction || !tableData || !bulkAction) return;
                     const rows = tableData.filter((r) =>
-                      selectedIds.has(
-                        (getRowId?.(r) || String((r as any)?.id)) ?? "",
-                      ),
+                      selectedIds.has((getRowId?.(r) || String((r as any)?.id)) ?? ""),
                     );
                     onBulkAction(bulkAction, rows);
                   }}
@@ -313,10 +308,7 @@ export function SuperAdminTable<TData, TValue>({
                     >
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   );
                 })}
@@ -330,7 +322,8 @@ export function SuperAdminTable<TData, TValue>({
                       <input
                         type="checkbox"
                         checked={
-                          !!tableData && selectedIds.size > 0 &&
+                          !!tableData &&
+                          selectedIds.size > 0 &&
                           selectedIds.size === tableData.length
                         }
                         onChange={(e) => {
@@ -338,17 +331,13 @@ export function SuperAdminTable<TData, TValue>({
                           const next = new Set<string>();
                           if (e.target.checked) {
                             tableData.forEach((row) =>
-                              next.add(
-                                (getRowId?.(row) || String((row as any)?.id)) ?? "",
-                              ),
+                              next.add((getRowId?.(row) || String((row as any)?.id)) ?? ""),
                             );
                           }
                           setSelectedIds(next);
                         }}
                       />
-                      <span className="text-xs text-foreground-primary">
-                        انتخاب همه
-                      </span>
+                      <span className="text-xs text-foreground-primary">انتخاب همه</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -362,9 +351,7 @@ export function SuperAdminTable<TData, TValue>({
                         onClick={() => {
                           if (!onBulkAction || !tableData || !bulkAction) return;
                           const rows = tableData.filter((r) =>
-                            selectedIds.has(
-                              (getRowId?.(r) || String((r as any)?.id)) ?? "",
-                            ),
+                            selectedIds.has((getRowId?.(r) || String((r as any)?.id)) ?? ""),
                           );
                           onBulkAction(bulkAction, rows);
                         }}
@@ -413,28 +400,24 @@ export function SuperAdminTable<TData, TValue>({
                             type="checkbox"
                             checked={selectedIds.has(
                               (getRowId?.(row.original as TData) ||
-                                String((row.original as any)?.id)) ?? "",
+                                String((row.original as any)?.id)) ??
+                                "",
                             )}
                             onChange={(e) => {
                               const id =
                                 (getRowId?.(row.original as TData) ||
-                                  String((row.original as any)?.id)) ?? "";
+                                  String((row.original as any)?.id)) ??
+                                "";
                               const next = new Set(selectedIds);
                               if (e.target.checked) next.add(id);
                               else next.delete(id);
                               setSelectedIds(next);
                             }}
                           />
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </div>
                       ) : (
-                        flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )
+                        flexRender(cell.column.columnDef.cell, cell.getContext())
                       )}
                     </td>
                   ))}
@@ -466,7 +449,7 @@ export function SuperAdminTable<TData, TValue>({
                     setSelectedIds(next);
                   },
                 }
-              : undefined
+              : undefined,
           )}
         </div>
       )}

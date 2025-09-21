@@ -5,9 +5,7 @@ export interface UserExistsResponse {
   hasUser: boolean;
 }
 
-export const checkUserExists = async (
-  phoneNumber: string,
-): Promise<UserExistsResponse> => {
+export const checkUserExists = async (phoneNumber: string): Promise<UserExistsResponse> => {
   const endpoint = ENDPOINTS.AUTH.EXISTS;
 
   const response = await apiClient.post<UserExistsResponse>(endpoint, {

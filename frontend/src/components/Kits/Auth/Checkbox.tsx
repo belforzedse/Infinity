@@ -5,12 +5,7 @@ interface CheckboxProps {
   className?: string;
 }
 
-export default function Checkbox({
-  checked,
-  onChange,
-  label,
-  className = "",
-}: CheckboxProps) {
+export default function Checkbox({ checked, onChange, label, className = "" }: CheckboxProps) {
   return (
     <label className={`flex cursor-pointer items-center gap-2 ${className}`}>
       <div

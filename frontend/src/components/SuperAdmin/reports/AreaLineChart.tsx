@@ -8,10 +8,7 @@ const ResponsiveContainer = dynamic(
   () => import("recharts").then((mod) => mod.ResponsiveContainer),
   { ssr: false },
 );
-const LineChart = dynamic(
-  () => import("recharts").then((mod) => mod.LineChart),
-  { ssr: false },
-);
+const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import("recharts").then((mod) => mod.Line), {
   ssr: false,
 });
@@ -21,10 +18,9 @@ const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), {
 const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), {
   ssr: false,
 });
-const CartesianGrid = dynamic(
-  () => import("recharts").then((mod) => mod.CartesianGrid),
-  { ssr: false },
-);
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), {
+  ssr: false,
+});
 const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), {
   ssr: false,
 });
@@ -55,10 +51,7 @@ export default function AreaLineChart({
   return (
     <div className="w-full">
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart
-          data={data}
-          margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
-        >
+        <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={color} stopOpacity={0.25} />
@@ -90,12 +83,7 @@ export default function AreaLineChart({
             formatter={(v) => [valueFormatter(Number(v))]}
             labelFormatter={(l) => String(l)}
           />
-          <Area
-            type="monotone"
-            dataKey={yKey}
-            stroke="none"
-            fill={`url(#${gradId})`}
-          />
+          <Area type="monotone" dataKey={yKey} stroke="none" fill={`url(#${gradId})`} />
           <Line
             type="monotone"
             dataKey={yKey}

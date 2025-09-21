@@ -1,12 +1,10 @@
-import { Dispatch, SetStateAction } from "react";
-import { SelectedImageDetailsSection } from "../../types";
+import type { Dispatch, SetStateAction } from "react";
+import type { SelectedImageDetailsSection } from "../../types";
 import CopyIcon from "@/components/Product/Icons/CopyIcon";
 
 interface DetailsSectionTextProps {
   selectedImage: SelectedImageDetailsSection | null;
-  setSelectedImage: Dispatch<
-    SetStateAction<SelectedImageDetailsSection | null>
-  >;
+  setSelectedImage: Dispatch<SetStateAction<SelectedImageDetailsSection | null>>;
 }
 
 export default function DetailsSectionText({
@@ -37,9 +35,7 @@ export default function DetailsSectionText({
       />
 
       <div className="mt-3">
-        <div className="text-xs mb-1 text-right text-neutral-600">
-          نشانی پرونده
-        </div>
+        <div className="text-xs mb-1 text-right text-neutral-600">نشانی پرونده</div>
         <div className="relative">
           <input
             type="text"

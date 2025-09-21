@@ -1,6 +1,7 @@
 import ProductCard from "@/components/Product/Card";
 import ProductSmallCard from "@/components/Product/SmallCard";
-import { FixedSizeList as List, ListChildComponentProps } from "react-window";
+import type { ListChildComponentProps } from "react-window";
+import { FixedSizeList as List } from "react-window";
 
 const products = new Array(20).fill(null).map((_, index) => {
   const template = [

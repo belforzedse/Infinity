@@ -2,17 +2,14 @@
 
 import FooterLink from "./FooterLink";
 import { useEffect, useState } from "react";
-import { FooterColumn } from "@/services/footer";
+import type { FooterColumn } from "@/services/footer";
 
 interface CustomerServiceSectionProps {
   data?: FooterColumn;
   customerSupport?: string;
 }
 
-const CustomerServiceSection = ({
-  data,
-  customerSupport,
-}: CustomerServiceSectionProps) => {
+const CustomerServiceSection = ({ data, customerSupport }: CustomerServiceSectionProps) => {
   // Fallback data in case API data is not available
   const [links, setLinks] = useState<{ title: string; url: string }[]>([
     { title: "سوالات متداول", url: "https://infinitycolor.co/سوالات-متداول/" },
@@ -60,9 +57,7 @@ const CustomerServiceSection = ({
 
       <div className="flex flex-col gap-2">
         <h3 className="text-base text-neutral-900">پشتیبانی مشتریان</h3>
-        <p className="text-sm text-right text-neutral-500 md:max-w-[233px]">
-          {supportText}
-        </p>
+        <p className="text-sm text-right text-neutral-500 md:max-w-[233px]">{supportText}</p>
       </div>
     </div>
   );

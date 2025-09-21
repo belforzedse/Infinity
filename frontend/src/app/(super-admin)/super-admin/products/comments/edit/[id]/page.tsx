@@ -2,7 +2,8 @@
 
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
 import { useEffect, useState } from "react";
-import { Comment, config } from "./config";
+import type { Comment} from "./config";
+import { config } from "./config";
 import { useParams } from "next/navigation";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
@@ -75,10 +76,7 @@ export default function Page() {
         },
       )
       .then((res) => {
-        setReactions((data) => [
-          ...(data || []),
-          ...((res as any)?.data || []),
-        ]);
+        setReactions((data) => [...(data || []), ...((res as any)?.data || [])]);
       })
       .catch((_err) => {
         toast.error("دریافت اطلاعات با خطا مواجه شد");
@@ -88,14 +86,11 @@ export default function Page() {
   useEffect(() => {
     setIsLoading(true);
     apiClient
-      .get(
-        `/product-reviews/${id}?populate[0]=user&populate[1]=user.user_info`,
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
+      .get(`/product-reviews/${id}?populate[0]=user&populate[1]=user.user_info`, {
+        headers: {
+          Authorization: `Bearer ${STRAPI_TOKEN}`,
         },
-      )
+      })
       .then((res) => {
         const data = (res as any)?.data as CommentResponse;
 
@@ -103,11 +98,9 @@ export default function Page() {
           id: data?.id,
           message: data?.attributes?.Content,
           name:
-            data?.attributes?.user?.data?.attributes?.user_info?.data
-              ?.attributes?.FirstName +
+            data?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.FirstName +
             " " +
-            data?.attributes?.user?.data?.attributes?.user_info?.data
-              ?.attributes?.LastName,
+            data?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.LastName,
           createdAt: new Date(data?.attributes?.createdAt),
           status: data?.attributes?.Status,
           username: data?.attributes?.user?.data?.attributes?.Phone,
@@ -153,14 +146,11 @@ export default function Page() {
                     {reaction?.attributes?.Type === "Like" ? "لایک" : "دیسلایک"}
                   </td>
                   <td className="text-xs py-2 text-left text-slate-500 md:text-sm md:py-3">
-                    {new Date(reaction?.attributes?.createdAt).toLocaleString(
-                      "fa-IR",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      },
-                    )}
+                    {new Date(reaction?.attributes?.createdAt).toLocaleString("fa-IR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </td>
                 </tr>
               ))}

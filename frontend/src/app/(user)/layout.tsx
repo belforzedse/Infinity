@@ -9,11 +9,7 @@ const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
 });
 
-export default function PublicLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const { isDrawerOpen } = useCart();
   return (
     <div className="public-layout bg-white pt-5">

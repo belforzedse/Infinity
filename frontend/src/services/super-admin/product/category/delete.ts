@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { PaginatedResponse } from "@/types/api";
+import type { PaginatedResponse } from "@/types/api";
 
 export interface CategoryAttributes {
   Title: string;
@@ -15,9 +15,7 @@ interface Item {
   attributes: CategoryAttributes;
 }
 
-export const deleteCategory = async (
-  id: string,
-): Promise<PaginatedResponse<Item>> => {
+export const deleteCategory = async (id: string): Promise<PaginatedResponse<Item>> => {
   try {
     const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}`;
     //const accessToken = localStorage.getItem("accessToken");

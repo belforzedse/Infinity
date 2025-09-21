@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
-import {
-  Controller,
+import type {
   UseFormRegister,
   FieldErrors,
   Control,
-  UseFormSetValue,
+  UseFormSetValue} from "react-hook-form";
+import {
+  Controller
 } from "react-hook-form";
 import Input from "@/components/Kits/Form/Input";
-import Select, { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
+import Select from "@/components/Kits/Form/Select";
 import CirculePlusIcon from "@/components/User/Icons/CirculePlusIcon";
-import { FormData } from "./index";
+import type { FormData } from "./index";
 import CirculeInformationIcon from "../Icons/CirculeInformationIcon";
 import UserService from "@/services/user";
-import { UserAddress } from "@/services/user/addresses";
+import type { UserAddress } from "@/services/user/addresses";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -22,12 +24,7 @@ interface Props {
   setValue: UseFormSetValue<FormData>;
 }
 
-function ShoppingCartBillInformationForm({
-  register,
-  errors,
-  control,
-  setValue,
-}: Props) {
+function ShoppingCartBillInformationForm({ register, errors, control, setValue }: Props) {
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,8 +140,7 @@ function ShoppingCartBillInformationForm({
       <div className="flex items-center gap-1 rounded-lg bg-pink-50 p-4 lg:p-5">
         <CirculeInformationIcon className="h-6 w-6" />
         <span className="text-sm text-pink-600 lg:text-base">
-          برای دریافت فاکتور، بعد از دریافت سفارش به حساب کاربری و صفحه جزئیات
-          سفارش سر بزنید
+          برای دریافت فاکتور، بعد از دریافت سفارش به حساب کاربری و صفحه جزئیات سفارش سر بزنید
         </span>
       </div>
     </div>

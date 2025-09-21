@@ -3,10 +3,7 @@ interface HeartIconProps {
   filled?: boolean;
 }
 
-export default function HeartIcon({
-  className = "",
-  filled = false,
-}: HeartIconProps) {
+export default function HeartIcon({ className = "", filled = false }: HeartIconProps) {
   return (
     <svg
       width="20"

@@ -1,5 +1,5 @@
 import React from "react";
-import { FileListProps } from "./types";
+import type { FileListProps } from "./types";
 import FileItem from "./FileItem";
 import UploadButton from "../UploadButton";
 
@@ -26,11 +26,7 @@ const FileList: React.FC<FileListProps> = ({
             fileType={fileType}
           />
         ))}
-        <UploadButton
-          onUpload={onUpload}
-          fileType={fileType}
-          multiple={multiple}
-        />
+        <UploadButton onUpload={onUpload} fileType={fileType} multiple={multiple} />
       </div>
     </div>
   );

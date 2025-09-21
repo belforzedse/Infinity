@@ -8,7 +8,8 @@ import OrderCard from "./OrderCard";
 import OrderCardSkeleton from "./OrderCardSkeleton";
 import OrderRowSkeleton from "./OrderRowSkeleton";
 import { ORDER_STATUS } from "../Constnats";
-import OrderService, { Order } from "@/services/order";
+import type { Order } from "@/services/order";
+import OrderService from "@/services/order";
 // removed unused import: PaymentStatusButton from "./PaymentStatusButton"
 import { faNum } from "@/utils/faNum";
 
@@ -43,16 +44,10 @@ export default function OrdersTabs() {
     "همه سفارش‌ها": orders, // All orders
     [PersianOrderStatus.INPROGRESS]: orders.filter(
       (order) =>
-        order.Status === "Started" ||
-        order.Status === "Processing" ||
-        order.Status === "Shipment",
+        order.Status === "Started" || order.Status === "Processing" || order.Status === "Shipment",
     ),
-    [PersianOrderStatus.DELIVERED]: orders.filter(
-      (order) => order.Status === "Done",
-    ),
-    [PersianOrderStatus.CANCELLED]: orders.filter(
-      (order) => order.Status === "Cancelled",
-    ),
+    [PersianOrderStatus.DELIVERED]: orders.filter((order) => order.Status === "Done"),
+    [PersianOrderStatus.CANCELLED]: orders.filter((order) => order.Status === "Cancelled"),
   };
 
   // Helper function to format date to Persian
@@ -85,10 +80,8 @@ export default function OrdersTabs() {
 
     // Calculate total price
     const totalPrice =
-      order.order_items.reduce(
-        (sum, item) => sum + item.Count * item.PerAmount,
-        0,
-      ) + order.ShippingCost;
+      order.order_items.reduce((sum, item) => sum + item.Count * item.PerAmount, 0) +
+      order.ShippingCost;
 
     // Map status
     let status = PersianOrderStatus.INPROGRESS;
@@ -113,8 +106,7 @@ export default function OrdersTabs() {
   };
 
   const tabContent = ORDER_STATUS.map(({ value }) => {
-    const statusOrders =
-      ordersByStatus[value as keyof typeof ordersByStatus] || [];
+    const statusOrders = ordersByStatus[value as keyof typeof ordersByStatus] || [];
     const mappedOrders = statusOrders.map(mapOrderToProps);
 
     return (

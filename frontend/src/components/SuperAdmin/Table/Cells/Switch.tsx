@@ -55,9 +55,7 @@ export default function SuperAdminTableCellSwitch({
         }
         disabled={disabled}
         className={`group inline-flex h-4 w-6 items-center rounded-full transition md:h-6 md:w-11 ${
-          disabled
-            ? "cursor-not-allowed bg-gray-300"
-            : "bg-gray-200 data-[checked]:bg-green-500"
+          disabled ? "cursor-not-allowed bg-gray-300" : "bg-gray-200 data-[checked]:bg-green-500"
         }`}
       >
         <span

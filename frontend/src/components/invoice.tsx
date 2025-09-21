@@ -97,13 +97,10 @@ export default function Invoice({ order }: Props) {
   const total = subtotal + shipping;
 
   // (optional) also compute from line items to detect mismatches
-  const _itemsTotal = (attrs.order_items?.data ?? []).reduce(
-    (sum: number, it: any) => {
-      const a = it?.attributes || {};
-      return sum + toNum(a.PerAmount) * toNum(a.Count);
-    },
-    0,
-  );
+  const _itemsTotal = (attrs.order_items?.data ?? []).reduce((sum: number, it: any) => {
+    const a = it?.attributes || {};
+    return sum + toNum(a.PerAmount) * toNum(a.Count);
+  }, 0);
   // if you want to display/compare:
   // const mathMismatch = Math.abs(itemsTotal - subtotal) > 1;
 
@@ -111,18 +108,13 @@ export default function Invoice({ order }: Props) {
     `${attrs.user?.data?.attributes?.user_info?.data?.attributes?.FirstName ?? ""} ${attrs.user?.data?.attributes?.user_info?.data?.attributes?.LastName ?? ""}`.trim();
 
   return (
-    <div
-      dir="rtl"
-      className="min-h-screen w-full bg-white p-8 font-peyda-fanum"
-    >
+    <div dir="rtl" className="min-h-screen w-full bg-white p-8 font-peyda-fanum">
       <div className="mx-auto w-full print:max-w-none">
         {/* Header */}
         <div className="mb-10 grid grid-cols-1 grid-rows-1 border border-black">
           <div className="flex items-start justify-around p-6">
             <div className="text-lg justify-center text-right align-middle leading-6">
-              <p className="justify-self-middle justify-center">
-                عنوان: فروشگاه پوشاک اینفینیتی
-              </p>
+              <p className="justify-self-middle justify-center">عنوان: فروشگاه پوشاک اینفینیتی</p>
             </div>
             <Image
               src="/images/logo_PDF.webp"
@@ -147,8 +139,7 @@ export default function Invoice({ order }: Props) {
             <div>
               <p className="justify-end">
                 <span className="font-bold text-gray-700">آدرس فروشگاه:</span>
-                گلستان، گرگان، بلوار ناهارخوران، نبش عدالت ۶۸، کد پستی
-                ۴۹۱۶۹۷۳۳۸۱
+                گلستان، گرگان، بلوار ناهارخوران، نبش عدالت ۶۸، کد پستی ۴۹۱۶۹۷۳۳۸۱
               </p>
             </div>
           </div>
@@ -158,8 +149,7 @@ export default function Invoice({ order }: Props) {
 
         <div className="text-lg mb-2 justify-normal border border-black p-6 text-center leading-6">
           <p className="text-lg">
-            <span className="font-bold">گیرنده:</span>{" "}
-            <span> {fullName || "نامشخص"} </span>
+            <span className="font-bold">گیرنده:</span> <span> {fullName || "نامشخص"} </span>
             <span className="font-bold">شماره تماس:</span>{" "}
             {attrs.user?.data?.attributes?.Phone || "نامشخص"}
           </p>
@@ -229,16 +219,13 @@ export default function Invoice({ order }: Props) {
                       <span>{a.ProductTitle || "—"}</span>
                       {(color || size) && (
                         <span className="text-sm mt-1 text-neutral-600">
-                          {color ? `رنگ: ${color}` : ""}{" "}
-                          {size ? ` | سایز: ${size}` : ""}
+                          {color ? `رنگ: ${color}` : ""} {size ? ` | سایز: ${size}` : ""}
                         </span>
                       )}
                     </div>
                   </td>
 
-                  <td className="border p-2 text-center">
-                    {nf.format(unit)} تومان
-                  </td>
+                  <td className="border p-2 text-center">{nf.format(unit)} تومان</td>
 
                   <td className="border p-2 text-center">{nf.format(count)}</td>
 
@@ -252,39 +239,29 @@ export default function Invoice({ order }: Props) {
         </table>
 
         {/* Row below table */}
-        <p className="text-lg mb-2">
-          تعداد کل: {attrs.order_items.data.length}
-        </p>
+        <p className="text-lg mb-2">تعداد کل: {attrs.order_items.data.length}</p>
 
         {/* Summary Table */}
         <div className="flex w-full justify-around justify-self-stretch">
           <table className="text-lg w-3/4 border border-black">
             <tbody>
               <tr className="border border-black">
-                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">
-                  مبلغ کل
-                </td>
+                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">مبلغ کل</td>
                 <td className="w-1/2 border p-2 text-center">
                   {nf.format(subtotal)}
                   تومان
                 </td>
               </tr>
               <tr className="border border-black">
-                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">
-                  هزینه ارسال{" "}
-                </td>
+                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">هزینه ارسال </td>
                 <td className="w-1/2 border p-2 text-center">
                   {nf.format(shipping)}
                   تومان
                 </td>
               </tr>
               <tr className="border border-black">
-                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">
-                  مبلغ نهایی
-                </td>
-                <td className="w-1/2 border p-2 text-center">
-                  {nf.format(total)} تومان
-                </td>
+                <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">مبلغ نهایی</td>
+                <td className="w-1/2 border p-2 text-center">{nf.format(total)} تومان</td>
               </tr>
             </tbody>
           </table>
@@ -307,10 +284,7 @@ export default function Invoice({ order }: Props) {
         {/* Footer - Payment method */}
         <div className="text-sm mt-6 font-bold">
           روش پرداخت:{" "}
-          {attrs.paymentGateway ||
-            attrs.PaymentMethod ||
-            attrs.Description ||
-            "نامشخص"}{" "}
+          {attrs.paymentGateway || attrs.PaymentMethod || attrs.Description || "نامشخص"}{" "}
         </div>
       </div>
     </div>

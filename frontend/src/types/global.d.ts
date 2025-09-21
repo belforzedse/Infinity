@@ -2,7 +2,7 @@ declare module "rc-slider/assets/index.css";
 declare module "*.css";
 
 declare module "react-window" {
-  import * as React from "react";
+  import type * as React from "react";
 
   export type ListChildComponentProps = {
     index: number;

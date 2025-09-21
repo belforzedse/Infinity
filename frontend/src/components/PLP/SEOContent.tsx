@@ -12,14 +12,7 @@ type Props = {
 };
 
 export default function PLPSEOContent(props: Props) {
-  const {
-    title,
-    description,
-    imageSrc,
-    imageAlt,
-    audioSrc,
-    direction = "rtl",
-  } = props;
+  const { title, description, imageSrc, imageAlt, audioSrc, direction = "rtl" } = props;
 
   return (
     <div

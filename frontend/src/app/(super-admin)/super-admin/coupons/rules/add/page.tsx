@@ -53,11 +53,9 @@ export default function Page() {
                 EndDate: (data.endDate as any)?.value as Date,
                 IsActive: data.isActive,
                 product_variations:
-                  data.terms.find((term) => term.category === "product")
-                    ?.tags || [],
+                  data.terms.find((term) => term.category === "product")?.tags || [],
                 product_categories:
-                  data.terms.find((term) => term.category === "category")
-                    ?.tags || [],
+                  data.terms.find((term) => term.category === "category")?.tags || [],
               },
             },
             {

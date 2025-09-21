@@ -14,9 +14,7 @@ export default function SuperAdminPage() {
           {error.message}
         </p>
       )}
-      {isLoading && !error && (
-        <p className="text-sm text-neutral-500">در حال بارگذاری...</p>
-      )}
+      {isLoading && !error && <p className="text-sm text-neutral-500">در حال بارگذاری...</p>}
     </ContentWrapper>
   );
 }

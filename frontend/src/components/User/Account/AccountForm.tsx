@@ -1,5 +1,6 @@
 "use client";
-import { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import type { FormEvent, ChangeEvent} from "react";
+import { useState, useEffect } from "react";
 import Input from "@/components/Kits/Form/Input";
 import { RadioGroup } from "@/components/Kits/Form/RadioButton";
 import SaveIcon from "../Icons/SaveIcon";
@@ -85,9 +86,7 @@ export default function AccountForm() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 rounded-lg bg-white p-4 lg:gap-4">
-        <span className="text-xl text-foreground-primary">
-          در حال بارگذاری...
-        </span>
+        <span className="text-xl text-foreground-primary">در حال بارگذاری...</span>
       </div>
     );
   }
@@ -95,13 +94,8 @@ export default function AccountForm() {
   if (error) {
     return (
       <div className="flex flex-col gap-2 rounded-lg bg-white p-4 lg:gap-4">
-        <span className="text-xl text-red-500">
-          خطا در بارگذاری اطلاعات کاربر
-        </span>
-        <button
-          onClick={refetch}
-          className="w-fit rounded-lg bg-[#EC4899] px-4 py-2 text-white"
-        >
+        <span className="text-xl text-red-500">خطا در بارگذاری اطلاعات کاربر</span>
+        <button onClick={refetch} className="w-fit rounded-lg bg-[#EC4899] px-4 py-2 text-white">
           تلاش مجدد
         </button>
       </div>
@@ -110,9 +104,7 @@ export default function AccountForm() {
 
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-white lg:gap-4">
-      <span className="text-xl text-foreground-primary">
-        اطلاعات حساب کاربری
-      </span>
+      <span className="text-xl text-foreground-primary">اطلاعات حساب کاربری</span>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 lg:gap-6">
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">

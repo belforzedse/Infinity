@@ -1,7 +1,7 @@
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import { priceFormatter } from "@/utils/price";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import OrderRowActions from "@/components/SuperAdmin/Order/OrderRowActions";
@@ -66,18 +66,12 @@ const _bulkPrint = (selectedIds: string[]) => {
   window.open(url, "_blank"); // ✅ One tab only
 };
 
-
-
 export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "id",
     header: "سفارش",
     cell: ({ row }) => {
-      return (
-        <span className="text-sm text-foreground-primary">
-          #{row.original.id}
-        </span>
-      );
+      return <span className="text-sm text-foreground-primary">#{row.original.id}</span>;
     },
   },
   {
@@ -85,19 +79,13 @@ export const columns: ColumnDef<Order>[] = [
     header: "نام",
     cell: ({ row }) => {
       const firstName =
-        row.original?.attributes?.user?.data?.attributes?.user_info?.data
-          ?.attributes?.FirstName;
+        row.original?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.FirstName;
       const lastName =
-        row.original?.attributes?.user?.data?.attributes?.user_info?.data
-          ?.attributes?.LastName;
+        row.original?.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.LastName;
 
       const fullName = `${firstName || ""} ${lastName || ""}`;
 
-      return (
-        <span className="text-sm text-foreground-primary">
-          {fullName.trim() || " - "}
-        </span>
-      );
+      return <span className="text-sm text-foreground-primary">{fullName.trim() || " - "}</span>;
     },
   },
   {
@@ -143,8 +131,7 @@ export const columns: ColumnDef<Order>[] = [
     accessorKey: "price",
     header: "مجموع",
     cell: ({ row }) => {
-      const price =
-        row.original?.attributes?.contract?.data?.attributes?.Amount;
+      const price = row.original?.attributes?.contract?.data?.attributes?.Amount;
 
       return price ? (
         <SuperAdminTableCellSimplePrice price={price} />
@@ -159,11 +146,7 @@ export const columns: ColumnDef<Order>[] = [
     cell: ({ row }) => {
       const barcode = row.original?.attributes?.ShippingBarcode;
 
-      return (
-        <span className="text-sm text-foreground-primary">
-          {barcode || "-"}
-        </span>
-      );
+      return <span className="text-sm text-foreground-primary">{barcode || "-"}</span>;
     },
   },
   {
@@ -264,7 +247,7 @@ export const MobileTable = ({ data }: Props) => {
                 {row?.attributes?.ShippingBarcode && (
                   <>
                     <span className="text-xs text-neutral-400">|</span>
-                    <span className="text-xs text-neutral-600 font-medium">
+                    <span className="text-xs font-medium text-neutral-600">
                       {row.attributes.ShippingBarcode}
                     </span>
                   </>
@@ -273,20 +256,14 @@ export const MobileTable = ({ data }: Props) => {
 
               <span className="text-xs text-neutral-800">
                 {row?.attributes?.contract?.data?.attributes?.Amount
-                  ? priceFormatter(
-                      row?.attributes?.contract?.data?.attributes?.Amount,
-                      " تومان",
-                    )
+                  ? priceFormatter(row?.attributes?.contract?.data?.attributes?.Amount, " تومان")
                   : "سفارش دستی"}
               </span>
             </div>
           }
           headTitle={"#" + row.id}
           actions={
-            <OrderRowActions
-              orderId={row.id}
-              shippingBarcode={row.attributes.ShippingBarcode}
-            />
+            <OrderRowActions orderId={row.id} shippingBarcode={row.attributes.ShippingBarcode} />
           }
         />
       ))}

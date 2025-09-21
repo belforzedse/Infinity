@@ -31,12 +31,7 @@ export default function useAddToCart({
   variationId,
 }: UseAddToCartProps) {
   // removed unused: router
-  const {
-    addToCart: addToCartContext,
-    openDrawer,
-    cartItems,
-    updateQuantity,
-  } = useCart();
+  const { addToCart: addToCartContext, openDrawer, cartItems, updateQuantity } = useCart();
   const [quantity, setQuantity] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
@@ -89,8 +84,7 @@ export default function useAddToCart({
     let actualQuantity: number;
 
     if (initialQuantity !== undefined) {
-      actualQuantity =
-        typeof initialQuantity === "number" ? initialQuantity : 1;
+      actualQuantity = typeof initialQuantity === "number" ? initialQuantity : 1;
     } else {
       actualQuantity = typeof quantity === "number" ? quantity : 1;
     }

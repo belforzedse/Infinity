@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
 import ChevronUpIcon from "../Icons/ChevronUpIcon";
-import Select, { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
+import Select from "@/components/Kits/Form/Select";
 
 const statusOptions: Option[] = [
   { id: "1", name: "فعال" },
@@ -12,9 +13,7 @@ const statusOptions: Option[] = [
 ];
 
 const SetStatus: React.FC = () => {
-  const [selectedStatus, setSelectedStatus] = useState<Option | null>(
-    statusOptions[0],
-  );
+  const [selectedStatus, setSelectedStatus] = useState<Option | null>(statusOptions[0]);
   const [count, setCount] = useState(120);
 
   const handleIncrement = () => {

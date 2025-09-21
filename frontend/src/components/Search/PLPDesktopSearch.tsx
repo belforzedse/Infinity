@@ -22,9 +22,7 @@ interface PLPDesktopSearchProps {
   className?: string;
 }
 
-const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
-  className = "",
-}) => {
+const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -85,8 +83,8 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
           const imageUrl = thumb
             ? `${IMAGE_BASE_URL}${thumb}`
             : original
-            ? `${IMAGE_BASE_URL}${original}`
-            : undefined;
+              ? `${IMAGE_BASE_URL}${original}`
+              : undefined;
 
           // Category title from possible shapes
           const categoryTitle =
@@ -109,7 +107,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
         }) as Suggestion[];
         // Deduplicate by id to avoid React key collisions if API returns duplicates
         const unique: Suggestion[] = Array.from(
-          new Map<number, Suggestion>(items.map((it) => [it.id, it])).values()
+          new Map<number, Suggestion>(items.map((it) => [it.id, it])).values(),
         );
         setSuggestions(unique);
         setOpen(unique.length > 0);
@@ -149,9 +147,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
       setActiveIndex((prev) => (prev + 1) % suggestions.length);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex(
-        (prev) => (prev - 1 + suggestions.length) % suggestions.length
-      );
+      setActiveIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
       const item = suggestions[activeIndex];
@@ -190,7 +186,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
           }}
           onKeyDown={onKeyDown}
           placeholder="دنبال چی میگردی؟"
-          className="flex-1 bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none text-sm"
+          className="text-sm flex-1 bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
           role="combobox"
           aria-expanded={open}
           aria-controls="plp-desktop-suggestions"
@@ -213,19 +209,13 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute inset-x-0 top-full z-[1000] mt-2 w-full min-w-[320px] max-h-96 overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
+            className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full min-w-[320px] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
             role="listbox"
             aria-label="پیشنهادهای جستجو"
           >
-            {loading && (
-              <div className="text-xs px-3 py-2 text-neutral-500">
-                در حال جستجو…
-              </div>
-            )}
+            {loading && <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>}
             {!loading && suggestions.length === 0 && (
-              <div className="text-xs px-3 py-2 text-neutral-500">
-                موردی یافت نشد
-              </div>
+              <div className="text-xs px-3 py-2 text-neutral-500">موردی یافت نشد</div>
             )}
             {!loading &&
               suggestions.map((s, idx) => (
@@ -247,11 +237,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
             {!loading && suggestions.length > 0 && (
               <motion.button
                 type="button"
-                onClick={() =>
-                  router.push(
-                    `/plp?search=${encodeURIComponent(searchQuery.trim())}`
-                  )
-                }
+                onClick={() => router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`)}
                 className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -268,4 +254,3 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({
 };
 
 export default PLPDesktopSearch;
-

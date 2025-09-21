@@ -11,7 +11,7 @@ const inputVariants = cva("input w-full", {
     },
     variant: {
       default: "",
-      auth: "text-base text-foreground-primary rounded-xl border border-slate-200 bg-background-form placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-pink-400",
+      auth: "text-base rounded-xl border border-slate-200 bg-background-form text-foreground-primary placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-pink-400",
     },
   },
   defaultVariants: {
@@ -60,14 +60,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightElement && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              {rightElement}
-            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightElement}</div>
           )}
           {leftElement && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              {leftElement}
-            </div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">{leftElement}</div>
           )}
         </div>
         {error && <span className="mt-1 block text-red-500">{error}</span>}

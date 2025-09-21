@@ -3,12 +3,9 @@ import { useEffect } from "react"; // removed unused: useState
 import logger from "@/utils/logger";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
-import {
-  editProductDataAtom,
-  productDataAtom,
-} from "@/atoms/super-admin/products";
+import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import { atom } from "jotai";
-import { FileType } from "@/components/Product/add/FileUploader/types";
+import type { FileType } from "@/components/Product/add/FileUploader/types";
 
 interface UploadingState {
   image: boolean;
@@ -50,9 +47,7 @@ export function useUpload({
   const [files, setFiles] = useAtom(filesAtom);
 
   const [uploadingState, setUploadingState] = useAtom(uploadingStateAtom);
-  const [productData, setProductData] = useAtom(
-    isEditMode ? editProductDataAtom : productDataAtom,
-  );
+  const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
 
   // Initialize with initial files if provided
   useEffect(() => {
@@ -107,10 +102,7 @@ export function useUpload({
 
   // TODO: Revoke object URLs on unmount to avoid memory leaks
 
-  const handleFileUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fileType: FileType,
-  ) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: FileType) => {
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
 
@@ -195,20 +187,15 @@ export function useUpload({
       }
 
       const totalSuccessful =
-        successfulImages.length +
-        successfulVideos.length +
-        successfulFiles.length;
+        successfulImages.length + successfulVideos.length + successfulFiles.length;
 
       if (totalSuccessful > 0) {
         if (totalSuccessful === newFiles.length) {
           toast.success("همه فایل‌ها با موفقیت آپلود شدند");
         } else {
-          toast(
-            `${totalSuccessful} از ${newFiles.length} فایل با موفقیت آپلود شدند`,
-            {
-              icon: "⚠️",
-            },
-          );
+          toast(`${totalSuccessful} از ${newFiles.length} فایل با موفقیت آپلود شدند`, {
+            icon: "⚠️",
+          });
         }
       }
 
@@ -234,9 +221,7 @@ export function useUpload({
         setImages((prevImages) => prevImages.filter((_, i) => i !== index));
         setProductData({
           ...(productData as any), // TODO: Strongly type productData
-          Media: (productData as any).Media.filter(
-            (_: any, i: number) => i !== index,
-          ),
+          Media: (productData as any).Media.filter((_: any, i: number) => i !== index),
         });
         break;
       case "video":
@@ -244,9 +229,7 @@ export function useUpload({
         setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
         setProductData({
           ...(productData as any), // TODO: Strongly type productData
-          Media: (productData as any).Media.filter(
-            (_: any, i: number) => i !== index,
-          ),
+          Media: (productData as any).Media.filter((_: any, i: number) => i !== index),
         });
         break;
       case "other":
@@ -254,9 +237,7 @@ export function useUpload({
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
         setProductData({
           ...(productData as any), // TODO: Strongly type productData
-          Files: (productData as any).Files.filter(
-            (_: any, i: number) => i !== index,
-          ),
+          Files: (productData as any).Files.filter((_: any, i: number) => i !== index),
         });
         break;
     }

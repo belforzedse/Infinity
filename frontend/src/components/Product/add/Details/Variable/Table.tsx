@@ -1,5 +1,5 @@
 import React from "react";
-import { ProductVariableDisplay } from "./types";
+import type { ProductVariableDisplay } from "./types";
 import { ProductVariableHeader } from "./Header";
 import { ProductVariableRow } from "./Row";
 import { ProductVariableCard } from "./Card";

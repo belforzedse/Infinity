@@ -25,9 +25,7 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
             <div className="h-[24px] w-[1px] bg-slate-300" />
 
             <div className="flex items-center gap-1">
-              <span className="text-sm text-foreground-primary md:text-xs">
-                ({rateCount}) نفر
-              </span>
+              <span className="text-sm text-foreground-primary md:text-xs">({rateCount}) نفر</span>
 
               <StarIcon />
             </div>
@@ -37,20 +35,11 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
 
       {last24hoursSeenCount > 0 && (
         <div className="mt-2 flex items-center gap-1 md:mt-0">
-          <Image
-            width={16}
-            height={16}
-            alt="eye icon"
-            src="/images/icons/eye.png"
-          />
+          <Image width={16} height={16} alt="eye icon" src="/images/icons/eye.png" />
 
           <span className="text-sm text-foreground-primary md:text-xs">
             محصول محبوب!
-            <span className="text-[#DB2777]">
-              {" "}
-              {last24hoursSeenCount} نفر{" "}
-            </span>{" "}
-            در
+            <span className="text-[#DB2777]"> {last24hoursSeenCount} نفر </span> در
             <span className="text-[#DB2777]"> 24 ساعت </span>
             گذشته آن را دیده اند!
           </span>

@@ -18,11 +18,7 @@ const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
 });
 
-export default function ProductLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ProductLayout({ children }: { children: React.ReactNode }) {
   const { isDrawerOpen } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
   const pathname = usePathname();
@@ -44,9 +40,7 @@ export default function ProductLayout({
       </a>
       <header
         className={`sticky top-0 z-50 transition-all ${
-          scrolled ?
-            "glass-panel shadow-sm"
-          : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+          scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         }`}
       >
         <div className="hidden md:block">

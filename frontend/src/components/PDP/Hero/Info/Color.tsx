@@ -20,15 +20,11 @@ export default function PDPHeroInfoColor(props: Props) {
     disabledColorIds = [],
   } = props;
 
-  const [internalSelectedColor, setInternalSelectedColor] = useState<string>(
-    colors[0]?.id || "",
-  );
+  const [internalSelectedColor, setInternalSelectedColor] = useState<string>(colors[0]?.id || "");
 
   // Use either the external selected color if provided, or the internal state
   const selectedColor =
-    externalSelectedColor !== undefined
-      ? externalSelectedColor
-      : internalSelectedColor;
+    externalSelectedColor !== undefined ? externalSelectedColor : internalSelectedColor;
 
   const handleColorClick = (colorId: string) => {
     setInternalSelectedColor(colorId);
@@ -55,16 +51,12 @@ export default function PDPHeroInfoColor(props: Props) {
                     style={{ backgroundColor: color.colorCode }}
                   />
 
-                  <span className="text-sm text-foreground-primary">
-                    {color.title}
-                  </span>
+                  <span className="text-sm text-foreground-primary">{color.title}</span>
                 </div>
               ) : (
                 <button
                   type="button"
-                  onClick={() =>
-                    isDisabled ? undefined : handleColorClick(color.id)
-                  }
+                  onClick={() => (isDisabled ? undefined : handleColorClick(color.id))}
                   className="h-7 w-7 rounded-full border"
                   style={{
                     backgroundColor: isDisabled ? "#e5e7eb" : color.colorCode,

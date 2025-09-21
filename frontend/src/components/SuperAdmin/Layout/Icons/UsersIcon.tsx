@@ -1,12 +1,6 @@
 export default function UsersIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M12.0624 3.77078C13.2014 4.90981 13.2014 6.75654 12.0624 7.89557C10.9234 9.0346 9.07665 9.0346 7.93762 7.89557C6.79859 6.75654 6.79859 4.90981 7.93762 3.77078C9.07665 2.63175 10.9234 2.63175 12.0624 3.77078"
         stroke="#EC4899"

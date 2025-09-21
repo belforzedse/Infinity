@@ -1,12 +1,6 @@
-import {
-  ProductDataResponse,
-  GenericRelationArray,
-} from "@/services/super-admin/product/get";
-import { EditProductData } from "@/types/super-admin/products";
-import {
-  TagResponseType,
-  TagAttributes,
-} from "@/services/super-admin/product/tag/get";
+import type { ProductDataResponse, GenericRelationArray } from "@/services/super-admin/product/get";
+import type { EditProductData } from "@/types/super-admin/products";
+import type { TagResponseType, TagAttributes } from "@/services/super-admin/product/tag/get";
 
 interface CategoryAttributes {
   Title: string;
@@ -29,9 +23,7 @@ interface StrapiTagData {
   attributes: TagAttributes;
 }
 
-export function transformToProductData(
-  strapiProduct: ProductDataResponse,
-): EditProductData {
+export function transformToProductData(strapiProduct: ProductDataResponse): EditProductData {
   // Extract CoverImage URL if it exists, otherwise use an empty string
   const coverImageUrl = {
     data: strapiProduct.CoverImage.data || null,
@@ -41,8 +33,7 @@ export function transformToProductData(
   const mediaIds = strapiProduct.Media.data;
 
   // Transform product_main_category to categoryResponseType or null
-  const mainCategory = strapiProduct.product_main_category
-    .data as StrapiCategory | null;
+  const mainCategory = strapiProduct.product_main_category.data as StrapiCategory | null;
 
   // Convert product_tags to TagResponseType array
   const productTags: TagResponseType[] = (
@@ -57,9 +48,7 @@ export function transformToProductData(
 
   // Transform product_other_categories into array of categoryResponseType
   const otherCategories = (
-    (
-      strapiProduct.product_other_categories as StrapiArrayResponse<StrapiCategory>
-    ).data || []
+    (strapiProduct.product_other_categories as StrapiArrayResponse<StrapiCategory>).data || []
   ).map((category) => ({
     id: category.id,
     attributes: {

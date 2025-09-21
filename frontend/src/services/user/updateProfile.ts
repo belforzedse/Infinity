@@ -1,6 +1,6 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
-import { MeResponse } from "./me";
+import type { MeResponse } from "./me";
 
 export interface UpdateProfileRequest {
   FirstName?: string;
@@ -11,9 +11,7 @@ export interface UpdateProfileRequest {
   Sex?: string;
 }
 
-export const updateProfile = async (
-  data: UpdateProfileRequest,
-): Promise<MeResponse> => {
+export const updateProfile = async (data: UpdateProfileRequest): Promise<MeResponse> => {
   const endpoint = `${ENDPOINTS.USER.ME}`;
   const accessToken = localStorage.getItem("accessToken");
 

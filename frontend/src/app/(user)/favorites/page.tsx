@@ -5,9 +5,8 @@ import BreadCrumb from "@/components/User/BreadCrumb";
 import { useCallback, useEffect, useState } from "react";
 import ProductSmallCard from "@/components/Product/SmallCard";
 import SortIcon from "@/components/User/Icons/SortIcon";
-import ProductLikeService, {
-  ProductLike,
-} from "@/services/product/product-like";
+import type { ProductLike } from "@/services/product/product-like";
+import ProductLikeService from "@/services/product/product-like";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
 export default function FavoritesPage() {
@@ -23,10 +22,7 @@ export default function FavoritesPage() {
       setLoading(true);
       setError(null);
 
-      const response = await ProductLikeService.getUserFavorites(
-        page,
-        pageSize,
-      );
+      const response = await ProductLikeService.getUserFavorites(page, pageSize);
 
       const productLikes = Array.isArray(response.data) ? response.data : [];
       setFavorites(productLikes);
@@ -59,9 +55,7 @@ export default function FavoritesPage() {
 
     // Get the category title if available
     const categoryTitle =
-      product.product_main_category?.title ||
-      product.product_main_category?.Title ||
-      "دسته‌بندی";
+      product.product_main_category?.title || product.product_main_category?.Title || "دسته‌بندی";
 
     // Get product image and prepend the base URL if the image URL doesn't already have it
     let productImage =
@@ -70,11 +64,7 @@ export default function FavoritesPage() {
       "/images/placeholders/product-placeholder.png";
 
     // Add base URL only for relative URLs (not for absolute URLs or local placeholder images)
-    if (
-      productImage &&
-      productImage.startsWith("/") &&
-      !productImage.startsWith("/images")
-    ) {
+    if (productImage && productImage.startsWith("/") && !productImage.startsWith("/images")) {
       productImage = `${IMAGE_BASE_URL}${productImage}`;
     }
 
@@ -91,10 +81,7 @@ export default function FavoritesPage() {
   };
 
   return (
-    <div
-      className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0"
-      dir="rtl"
-    >
+    <div className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0" dir="rtl">
       <UserSidebar />
 
       <main className="flex flex-1 flex-col gap-3 overflow-y-auto">
@@ -117,9 +104,7 @@ export default function FavoritesPage() {
             </div>
           ) : favorites.length === 0 ? (
             <div className="rounded-lg bg-gray-50 p-8 text-center">
-              <p className="text-gray-600">
-                محصولی در لیست علاقه‌مندی‌ها وجود ندارد.
-              </p>
+              <p className="text-gray-600">محصولی در لیست علاقه‌مندی‌ها وجود ندارد.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

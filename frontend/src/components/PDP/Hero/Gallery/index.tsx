@@ -17,9 +17,7 @@ type Props = {
 export default function PDPHeroGallery(props: Props) {
   const { assets } = props;
 
-  const [selectedImage, setSelectedImage] = useState<string>(
-    assets[0]?.id ?? "",
-  );
+  const [selectedImage, setSelectedImage] = useState<string>(assets[0]?.id ?? "");
 
   // Memoize a lookup map to avoid repeated finds
   const byId = useMemo(() => {
@@ -29,17 +27,13 @@ export default function PDPHeroGallery(props: Props) {
   }, [assets]);
 
   function goToNextImage() {
-    const currentIndex = assets.findIndex(
-      (asset) => asset.id === selectedImage,
-    );
+    const currentIndex = assets.findIndex((asset) => asset.id === selectedImage);
     const nextIndex = (currentIndex + 1) % assets.length;
     setSelectedImage(assets[nextIndex].id);
   }
 
   function goToPreviousImage() {
-    const currentIndex = assets.findIndex(
-      (asset) => asset.id === selectedImage,
-    );
+    const currentIndex = assets.findIndex((asset) => asset.id === selectedImage);
     const previousIndex = (currentIndex - 1 + assets.length) % assets.length;
     setSelectedImage(assets[previousIndex].id);
   }

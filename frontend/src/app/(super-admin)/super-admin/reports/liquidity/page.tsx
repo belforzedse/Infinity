@@ -1,10 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  getLiquidity,
-  LiquidityInterval,
-} from "@/services/super-admin/reports/liquidity";
+import type { LiquidityInterval } from "@/services/super-admin/reports/liquidity";
+import { getLiquidity } from "@/services/super-admin/reports/liquidity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
@@ -22,22 +20,18 @@ const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), {
 const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), {
   ssr: false,
 });
-const CartesianGrid = dynamic(
-  () => import("recharts").then((m) => m.CartesianGrid),
-  { ssr: false },
-);
+const CartesianGrid = dynamic(() => import("recharts").then((m) => m.CartesianGrid), {
+  ssr: false,
+});
 const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
   ssr: false,
 });
-const ResponsiveContainer = dynamic(
-  () => import("recharts").then((m) => m.ResponsiveContainer),
-  { ssr: false },
-);
+const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
+  ssr: false,
+});
 
 export default function LiquidityReportPage() {
-  const [start, setStart] = useState<Date>(
-    new Date(Date.now() - 30 * 86400000),
-  );
+  const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [interval, setInterval] = useState<LiquidityInterval>("day");
   const [data, setData] = useState<any>(null);
@@ -45,8 +39,7 @@ export default function LiquidityReportPage() {
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
   const toISO = useCallback(
-    (d: Date, fallback: Date) =>
-      isValid(d) ? d.toISOString() : fallback.toISOString(),
+    (d: Date, fallback: Date) => (isValid(d) ? d.toISOString() : fallback.toISOString()),
     [],
   );
   const startISO = useMemo(
@@ -78,9 +71,7 @@ export default function LiquidityReportPage() {
             <h3 className="text-lg font-medium text-neutral-700">فیلترها</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  تاریخ شروع
-                </label>
+                <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={start}
@@ -88,9 +79,7 @@ export default function LiquidityReportPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  تاریخ پایان
-                </label>
+                <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={end}
@@ -98,15 +87,11 @@ export default function LiquidityReportPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">
-                  بازه زمانی
-                </label>
+                <label className="text-sm font-medium text-neutral-600">بازه زمانی</label>
                 <select
                   className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
                   value={interval}
-                  onChange={(e) =>
-                    setInterval(e.target.value as LiquidityInterval)
-                  }
+                  onChange={(e) => setInterval(e.target.value as LiquidityInterval)}
                 >
                   <option value="day">روزانه</option>
                   <option value="week">هفتگی</option>
@@ -132,9 +117,7 @@ export default function LiquidityReportPage() {
               <div className="rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg mb-2 font-medium text-neutral-700">
-                      مجموع نقدینگی
-                    </h3>
+                    <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع نقدینگی</h3>
                     <p className="text-3xl font-bold text-pink-600">
                       {faNum(data?.total || 0)} تومان
                     </p>
@@ -159,9 +142,7 @@ export default function LiquidityReportPage() {
 
               {/* Chart Section */}
               <div>
-                <h3 className="text-lg mb-4 font-medium text-neutral-700">
-                  نمودار روند نقدینگی
-                </h3>
+                <h3 className="text-lg mb-4 font-medium text-neutral-700">نمودار روند نقدینگی</h3>
                 <LiquidityChart series={data?.series || []} />
               </div>
             </div>
@@ -172,11 +153,7 @@ export default function LiquidityReportPage() {
   );
 }
 
-function LiquidityChart({
-  series,
-}: {
-  series: Array<{ bucket: string; total: number }>;
-}) {
+function LiquidityChart({ series }: { series: Array<{ bucket: string; total: number }> }) {
   if (!series || series.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -196,9 +173,7 @@ function LiquidityChart({
           </svg>
         </div>
         <p className="text-sm text-neutral-500">داده‌ای برای نمایش یافت نشد</p>
-        <p className="text-xs mt-1 text-neutral-400">
-          لطفاً بازه زمانی دیگری انتخاب کنید
-        </p>
+        <p className="text-xs mt-1 text-neutral-400">لطفاً بازه زمانی دیگری انتخاب کنید</p>
       </div>
     );
   }
@@ -220,14 +195,10 @@ function LiquidityChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div
-          className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg"
-          dir="rtl"
-        >
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg" dir="rtl">
           <p className="mb-2 font-medium text-neutral-800">{data.fullDate}</p>
           <p className="text-pink-600">
-            <span className="font-medium">نقدینگی:</span> {faNum(data.total)}{" "}
-            تومان
+            <span className="font-medium">نقدینگی:</span> {faNum(data.total)} تومان
           </p>
         </div>
       );
@@ -240,21 +211,11 @@ function LiquidityChart({
       <div className="rounded-xl border border-neutral-200 bg-white p-4">
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-            >
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-              <XAxis
-                dataKey="date"
-                stroke="#6b7280"
-                fontSize={12}
-                interval="preserveStartEnd"
-              />
+              <XAxis dataKey="date" stroke="#6b7280" fontSize={12} interval="preserveStartEnd" />
               <YAxis
-                tickFormatter={(value) =>
-                  `${faNum((value / 1000).toFixed(0))}K`
-                }
+                tickFormatter={(value) => `${faNum((value / 1000).toFixed(0))}K`}
                 stroke="#6b7280"
                 fontSize={12}
               />
@@ -273,13 +234,7 @@ function LiquidityChart({
                 }}
               />
               <defs>
-                <linearGradient
-                  id="liquidityGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="0%"
-                >
+                <linearGradient id="liquidityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#ec4899" />
                   <stop offset="100%" stopColor="#8b5cf6" />
                 </linearGradient>
@@ -290,17 +245,12 @@ function LiquidityChart({
       </div>
 
       {/* Chart legend/info - RTL layout */}
-      <div
-        className="text-sm mt-4 flex items-center justify-between text-neutral-600"
-        dir="rtl"
-      >
+      <div className="text-sm mt-4 flex items-center justify-between text-neutral-600" dir="rtl">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500"></div>
           <span>روند نقدینگی</span>
         </div>
-        <div className="text-xs text-neutral-500">
-          {series.length} نقطه داده
-        </div>
+        <div className="text-xs text-neutral-500">{series.length} نقطه داده</div>
       </div>
     </div>
   );

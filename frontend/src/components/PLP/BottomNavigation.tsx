@@ -100,9 +100,7 @@ const PLPBottomNavigation = () => {
                 href={item.href}
                 onClick={item.onClick}
                 className={`flex w-[74px] flex-col items-center gap-1 p-2 ${
-                  isActive
-                    ? "rounded-lg bg-pink-50 text-pink-600"
-                    : "text-neutral-800"
+                  isActive ? "rounded-lg bg-pink-50 text-pink-600" : "text-neutral-800"
                 }`}
               >
                 {item.icon(isActive)}
@@ -115,9 +113,7 @@ const PLPBottomNavigation = () => {
       {isCategoriesMounted && (
         <div
           className={`fixed inset-0 z-40 flex items-end justify-center transition-opacity duration-200 md:hidden ${
-            isCategoriesVisible
-              ? "bg-black/40 opacity-100"
-              : "bg-black/0 opacity-0"
+            isCategoriesVisible ? "bg-black/40 opacity-100" : "bg-black/0 opacity-0"
           }`}
           onClick={closeCategories}
         >

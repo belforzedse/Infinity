@@ -98,10 +98,7 @@ describe("Authentication Flow Integration", () => {
 
       const result = await AuthService.verifyOTP(otp);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.any(String),
-        { otpToken: null, otp }
-      );
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), { otpToken: null, otp });
       expect(result.token).toBe(authToken);
     });
   });
@@ -116,10 +113,7 @@ describe("Authentication Flow Integration", () => {
 
       const result = await AuthService.loginPassword(phone, password);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.any(String),
-        { phone, password }
-      );
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), { phone, password });
       expect(result.token).toBe(authToken);
     });
 
@@ -130,7 +124,9 @@ describe("Authentication Flow Integration", () => {
 
       mockPost.mockRejectedValueOnce(error);
 
-      await expect(AuthService.loginPassword(phone, password)).rejects.toThrow("Invalid credentials");
+      await expect(AuthService.loginPassword(phone, password)).rejects.toThrow(
+        "Invalid credentials",
+      );
     });
   });
 
@@ -148,10 +144,7 @@ describe("Authentication Flow Integration", () => {
 
       const result = await AuthService.register(registrationData);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.any(String),
-        registrationData
-      );
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), registrationData);
       expect(result.token).toBe(authToken);
     });
 
@@ -166,7 +159,9 @@ describe("Authentication Flow Integration", () => {
 
       mockPost.mockRejectedValueOnce(error);
 
-      await expect(AuthService.register(registrationData)).rejects.toThrow("Phone number already exists");
+      await expect(AuthService.register(registrationData)).rejects.toThrow(
+        "Phone number already exists",
+      );
     });
   });
 
@@ -179,10 +174,7 @@ describe("Authentication Flow Integration", () => {
 
       const result = await AuthService.checkUserExists(phone);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.any(String),
-        { phone }
-      );
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), { phone });
       expect(result.exists).toBe(true);
     });
 
@@ -211,10 +203,7 @@ describe("Authentication Flow Integration", () => {
 
       const result = await AuthService.resetPassword(resetData);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.any(String),
-        resetData
-      );
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), resetData);
       expect(result.success).toBe(true);
     });
 
@@ -228,7 +217,9 @@ describe("Authentication Flow Integration", () => {
 
       mockPost.mockRejectedValueOnce(error);
 
-      await expect(AuthService.resetPassword(resetData)).rejects.toThrow("Invalid or expired token");
+      await expect(AuthService.resetPassword(resetData)).rejects.toThrow(
+        "Invalid or expired token",
+      );
     });
   });
 
@@ -297,10 +288,7 @@ describe("Authentication Flow Integration", () => {
       await AuthService.verifyOTP(otp);
 
       expect(sessionStorageMock.getItem).toHaveBeenCalledWith("otpToken");
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.any(String),
-        { otpToken: storedToken, otp }
-      );
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), { otpToken: storedToken, otp });
     });
   });
 });

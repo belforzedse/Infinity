@@ -1,12 +1,10 @@
 import { apiClient } from "../index";
-import { CartStockCheckResponse } from "./types/cart";
+import type { CartStockCheckResponse } from "./types/cart";
 import { unwrap } from "./helpers/response";
 import type { ApiResponse } from "@/types/api";
 
 export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
-  const response = await apiClient.get<CartStockCheckResponse>(
-    "/carts/check-stock"
-  );
+  const response = await apiClient.get<CartStockCheckResponse>("/carts/check-stock");
   return response as any;
 };
 
@@ -15,7 +13,7 @@ export const getSnappEligible = async (
     shippingId?: number;
     shippingCost?: number;
     discountCode?: string;
-  } = {}
+  } = {},
 ): Promise<{
   eligible: boolean;
   title?: string;
@@ -26,9 +24,7 @@ export const getSnappEligible = async (
   if (params.shippingId) qs.set("shippingId", String(params.shippingId));
   if (params.shippingCost) qs.set("shippingCost", String(params.shippingCost));
   if (params.discountCode) qs.set("discountCode", String(params.discountCode));
-  const url = `/payment-gateway/snapp-eligible${
-    qs.toString() ? `?${qs.toString()}` : ""
-  }`;
+  const url = `/payment-gateway/snapp-eligible${qs.toString() ? `?${qs.toString()}` : ""}`;
   try {
     const response = await apiClient.get<
       ApiResponse<{

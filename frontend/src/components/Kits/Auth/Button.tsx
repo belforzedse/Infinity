@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 
 interface AuthButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,11 +25,7 @@ export default function AuthButton({
 
   return (
     <button
-      className={clsx(
-        "btn btn-primary text-xl h-[54px]",
-        fullWidth && "w-full",
-        className,
-      )}
+      className={clsx("btn btn-primary text-xl h-[54px]", fullWidth && "w-full", className)}
       {...props}
     >
       {icon ? content : children}

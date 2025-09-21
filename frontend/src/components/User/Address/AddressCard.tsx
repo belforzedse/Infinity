@@ -9,19 +9,11 @@ interface Props {
   onDelete?: () => void;
 }
 
-const AddressCard = ({
-  address,
-  postalCode,
-  description,
-  onEdit,
-  onDelete,
-}: Props) => {
+const AddressCard = ({ address, postalCode, description, onEdit, onDelete }: Props) => {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3">
       <div className="flex items-center justify-between">
-        <span className="text-base font-medium text-foreground-primary">
-          {address}
-        </span>
+        <span className="text-base font-medium text-foreground-primary">{address}</span>
 
         <div className="flex shrink-0 gap-2">
           <button

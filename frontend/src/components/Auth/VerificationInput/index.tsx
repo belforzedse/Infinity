@@ -7,17 +7,11 @@ interface VerificationInputProps {
   onChange: (code: string) => void;
 }
 
-export default function VerificationInput({
-  length = 6,
-  onChange,
-}: VerificationInputProps) {
+export default function VerificationInput({ length = 6, onChange }: VerificationInputProps) {
   const [code, setCode] = useState<string[]>(Array(length).fill(""));
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const processInput = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    slot: number,
-  ) => {
+  const processInput = (e: React.ChangeEvent<HTMLInputElement>, slot: number) => {
     const num = e.target.value;
     if (/[^0-9]/.test(num)) return;
 
@@ -33,10 +27,7 @@ export default function VerificationInput({
     }
   };
 
-  const onKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    slot: number,
-  ) => {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, slot: number) => {
     if (e.key === "Backspace" && !code[slot] && slot !== length - 1) {
       e.preventDefault();
       const newCode = [...code];

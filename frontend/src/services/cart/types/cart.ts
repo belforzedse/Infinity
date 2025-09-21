@@ -1,4 +1,4 @@
-import { ImageResponse, ProductCategory } from "./media";
+import type { ImageResponse, ProductCategory } from "./media";
 
 export interface CartItemResponse {
   id: number;

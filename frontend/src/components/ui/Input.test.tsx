@@ -4,9 +4,7 @@ import { Input } from "./Input";
 describe("Input component", () => {
   it("renders and handles change events", () => {
     const handleChange = jest.fn();
-    const { getByPlaceholderText } = render(
-      <Input placeholder="name" onChange={handleChange} />,
-    );
+    const { getByPlaceholderText } = render(<Input placeholder="name" onChange={handleChange} />);
     const input = getByPlaceholderText("name");
     fireEvent.change(input, { target: { value: "John" } });
     expect(handleChange).toHaveBeenCalled();
@@ -36,7 +34,13 @@ describe("Input component", () => {
   it("applies auth variant styling", () => {
     const { getByRole } = render(<Input variant="auth" />);
     const input = getByRole("textbox");
-    expect(input).toHaveClass("text-base", "text-foreground-primary", "rounded-xl", "border", "border-slate-200");
+    expect(input).toHaveClass(
+      "text-base",
+      "text-foreground-primary",
+      "rounded-xl",
+      "border",
+      "border-slate-200",
+    );
   });
 
   it("renders right element correctly", () => {
@@ -95,9 +99,7 @@ describe("Input component", () => {
   it("positions elements correctly with absolute positioning", () => {
     const rightElement = <button>Right</button>;
     const leftElement = <span>Left</span>;
-    const { container } = render(
-      <Input rightElement={rightElement} leftElement={leftElement} />
-    );
+    const { container } = render(<Input rightElement={rightElement} leftElement={leftElement} />);
 
     const rightElementContainer = container.querySelector(".absolute.right-4");
     const leftElementContainer = container.querySelector(".absolute.left-4");
@@ -110,12 +112,7 @@ describe("Input component", () => {
 
   it("passes through all input HTML attributes", () => {
     const { getByRole } = render(
-      <Input
-        name="test-input"
-        data-testid="custom-input"
-        maxLength={50}
-        required
-      />
+      <Input name="test-input" data-testid="custom-input" maxLength={50} required />,
     );
     const input = getByRole("textbox");
     expect(input).toHaveAttribute("name", "test-input");

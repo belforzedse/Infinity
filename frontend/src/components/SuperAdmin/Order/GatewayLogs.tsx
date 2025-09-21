@@ -42,13 +42,9 @@ export default function GatewayLogs({ orderId }: { orderId: number }) {
   return (
     <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-base text-foreground-primary">
-          رویدادهای درگاه
-        </span>
+        <span className="text-base text-foreground-primary">رویدادهای درگاه</span>
       </div>
-      {loading && (
-        <div className="text-sm text-slate-500">در حال بارگذاری...</div>
-      )}
+      {loading && <div className="text-sm text-slate-500">در حال بارگذاری...</div>}
       {!loading && logs.length === 0 && (
         <div className="text-sm text-slate-500">رویدادی ثبت نشده است</div>
       )}

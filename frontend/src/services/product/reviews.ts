@@ -9,11 +9,7 @@ import { ENDPOINTS } from "@/constants/api";
  * @param content - The review content/comment
  * @returns The response from the API
  */
-export const submitProductReview = async (
-  productId: string,
-  rate: number,
-  content: string,
-) => {
+export const submitProductReview = async (productId: string, rate: number, content: string) => {
   const endpoint = ENDPOINTS.PRODUCT.REVIEWS.SUBMIT;
   const accessToken = localStorage.getItem("accessToken");
 

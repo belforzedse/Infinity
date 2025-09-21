@@ -1,34 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import DebugInfo from './DebugInfo';
-import DebugConsole from './DebugConsole';
-import DebugNetwork from './DebugNetwork';
-import DebugPerformance from './DebugPerformance';
-import DebugState from './DebugState';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import DebugInfo from "./DebugInfo";
+import DebugConsole from "./DebugConsole";
+import DebugNetwork from "./DebugNetwork";
+import DebugPerformance from "./DebugPerformance";
+import DebugState from "./DebugState";
 
 interface DebugPanelProps {
   enabled?: boolean;
 }
 
-const DebugPanel: React.FC<DebugPanelProps> = ({ enabled = process.env.NODE_ENV === 'development' }) => {
+const DebugPanel: React.FC<DebugPanelProps> = ({
+  enabled = process.env.NODE_ENV === "development",
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState("info");
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [_isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     // Keyboard shortcut to toggle debug panel
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      if (e.ctrlKey && e.shiftKey && e.key === "D") {
         e.preventDefault();
         setIsOpen(!isOpen);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -45,22 +47,22 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ enabled = process.env.NODE_ENV 
 
     const handleMouseUp = () => {
       setIsDragging(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   if (!enabled) return null;
 
   const tabs = [
-    { id: 'info', label: 'Info', icon: 'ℹ️' },
-    { id: 'console', label: 'Console', icon: '💻' },
-    { id: 'network', label: 'Network', icon: '🌐' },
-    { id: 'performance', label: 'Performance', icon: '⚡' },
-    { id: 'state', label: 'State', icon: '🔄' },
+    { id: "info", label: "Info", icon: "ℹ️" },
+    { id: "console", label: "Console", icon: "💻" },
+    { id: "network", label: "Network", icon: "🌐" },
+    { id: "performance", label: "Performance", icon: "⚡" },
+    { id: "state", label: "State", icon: "🔄" },
   ];
 
   return (
@@ -91,17 +93,14 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ enabled = process.env.NODE_ENV 
           >
             {/* Header */}
             <div
-              className="flex cursor-move items-center justify-between border-b border-gray-700 bg-gray-800 p-3 rounded-t-lg"
+              className="flex cursor-move items-center justify-between rounded-t-lg border-b border-gray-700 bg-gray-800 p-3"
               onMouseDown={handleMouseDown}
             >
               <div className="flex items-center space-x-2">
                 <span className="text-lg">🐛</span>
                 <span className="font-semibold">Debug Panel</span>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white"
-              >
+              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
                 ✕
               </button>
             </div>
@@ -112,10 +111,10 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ enabled = process.env.NODE_ENV 
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 px-2 py-2 text-xs transition-colors ${
+                  className={`text-xs flex-1 px-2 py-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-700'
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-300 hover:bg-gray-700"
                   }`}
                 >
                   <div className="flex flex-col items-center">
@@ -127,12 +126,12 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ enabled = process.env.NODE_ENV 
             </div>
 
             {/* Content */}
-            <div className="max-h-96 overflow-y-auto bg-gray-900 p-3 rounded-b-lg">
-              {activeTab === 'info' && <DebugInfo />}
-              {activeTab === 'console' && <DebugConsole />}
-              {activeTab === 'network' && <DebugNetwork />}
-              {activeTab === 'performance' && <DebugPerformance />}
-              {activeTab === 'state' && <DebugState />}
+            <div className="max-h-96 overflow-y-auto rounded-b-lg bg-gray-900 p-3">
+              {activeTab === "info" && <DebugInfo />}
+              {activeTab === "console" && <DebugConsole />}
+              {activeTab === "network" && <DebugNetwork />}
+              {activeTab === "performance" && <DebugPerformance />}
+              {activeTab === "state" && <DebugState />}
             </div>
           </motion.div>
         )}

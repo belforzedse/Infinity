@@ -1,6 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
-import { EditProductData, ProductData } from "@/types/super-admin/products";
+import type { EditProductData, ProductData } from "@/types/super-admin/products";
 import { toast } from "react-hot-toast";
 
 interface TransformedProductData
@@ -21,9 +21,7 @@ interface TransformedProductData
   Files?: number[];
 }
 
-function transformProductDataForApi(
-  data: EditProductData,
-): TransformedProductData {
+function transformProductDataForApi(data: EditProductData): TransformedProductData {
   // Create a new object without the CoverImage field
   const { CoverImage, ...rest } = data;
 
@@ -33,9 +31,7 @@ function transformProductDataForApi(
     Files: data.Files?.map((file) => +file.id),
     product_main_category: data.product_main_category?.id || null,
     product_tags: data.product_tags.map((tag) => tag.id),
-    product_other_categories: data.product_other_categories.map(
-      (category) => category.id,
-    ),
+    product_other_categories: data.product_other_categories.map((category) => category.id),
   };
 
   // Only include CoverImage if it has a new value
@@ -65,8 +61,7 @@ export const updateProduct = async (id: string, body: EditProductData) => {
 
     return { success: true, data: response.data };
   } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.error?.message || "ویرایش محصول با خطا مواجه شد";
+    const errorMessage = error.response?.data?.error?.message || "ویرایش محصول با خطا مواجه شد";
     toast.error(errorMessage);
     return { success: false, error };
   }

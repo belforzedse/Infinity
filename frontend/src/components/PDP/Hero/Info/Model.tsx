@@ -43,9 +43,7 @@ export default function PDPHeroInfoModel(props: Props) {
 
   // Use either external prop or internal state
   const selectedModel =
-    externalSelectedModel !== undefined
-      ? externalSelectedModel
-      : internalSelectedModel;
+    externalSelectedModel !== undefined ? externalSelectedModel : internalSelectedModel;
 
   const handleModelClick = (modelId: string) => {
     if (actualDisabledModelIds.includes(modelId)) return; // safety

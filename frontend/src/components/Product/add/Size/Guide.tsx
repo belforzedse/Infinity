@@ -1,5 +1,6 @@
 import CirculePlusIcon from "@/components/User/Icons/CirculePlusIcon";
-import Select, { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/Kits/Form/Select";
+import Select from "@/components/Kits/Form/Select";
 import React, { useState } from "react";
 
 interface SizeGuideProps {

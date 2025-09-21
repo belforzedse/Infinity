@@ -1,4 +1,4 @@
-import { FileWithPreview } from "@/hooks/product/useUpload";
+import type { FileWithPreview } from "@/hooks/product/useUpload";
 
 export type FileType = "image" | "video" | "other";
 

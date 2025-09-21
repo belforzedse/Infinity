@@ -1,37 +1,41 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  // Tighten React runtime checks
+  reactStrictMode: true,
+
+  // Run ESLint during builds; only errors fail the build
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
+
+  // Remove console.* calls in production for both client and server bundles
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+
   images: {
-    unoptimized: true,
+    // Enable Next Image Optimization
+    unoptimized: false,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    domains: [],
+    // Allow images from any host (http/https)
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "**",
-      },
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
     ],
   },
+
   // Optimize bundle size
   experimental: {
     optimizePackageImports: ["@heroicons/react", "lucide-react", "react-icons", "framer-motion"],
     scrollRestoration: true,
     optimizeCss: true,
   },
+
   // Enable compression
   compress: true,
   poweredByHeader: false,
@@ -41,4 +45,5 @@ const nextConfig = {
   //   enabled: process.env.ANALYZE === 'true',
   // },
 };
+
 module.exports = nextConfig;

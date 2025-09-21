@@ -40,8 +40,9 @@ function SortableItem({
   onRemove: (id: number) => void;
   readOnly?: boolean;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: category.id.toString() });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: category.id.toString(),
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -70,16 +71,9 @@ function SortableItem({
   );
 }
 
-export default function CategoriesListField({
-  value,
-  onChange,
-  readOnly,
-  fetchCategories,
-}: Props) {
+export default function CategoriesListField({ value, onChange, readOnly, fetchCategories }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [availableCategories, setAvailableCategories] = useState<Category[]>(
-    [],
-  );
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
@@ -131,9 +125,7 @@ export default function CategoriesListField({
       const categoryToAdd = JSON.parse(selectedCategory);
 
       // Check if already exists
-      const alreadyExists = categories.some(
-        (cat) => cat.id === categoryToAdd.id,
-      );
+      const alreadyExists = categories.some((cat) => cat.id === categoryToAdd.id);
       if (alreadyExists) {
         alert("این دسته بندی قبلاً در لیست وجود دارد");
         return;
@@ -166,12 +158,8 @@ export default function CategoriesListField({
 
     if (active.id !== over.id) {
       setCategories((items) => {
-        const oldIndex = items.findIndex(
-          (item) => item.id.toString() === active.id,
-        );
-        const newIndex = items.findIndex(
-          (item) => item.id.toString() === over.id,
-        );
+        const oldIndex = items.findIndex((item) => item.id.toString() === active.id);
+        const newIndex = items.findIndex((item) => item.id.toString() === over.id);
 
         const newItems = arrayMove(items, oldIndex, newIndex);
         onChange(JSON.stringify(newItems, null, 2));
@@ -216,9 +204,7 @@ export default function CategoriesListField({
       {/* Selected Categories */}
       <div className="rounded-lg border border-slate-100">
         <div className="flex w-full items-center justify-between bg-slate-50 px-5 py-2">
-          <span className="text-sm text-neutral-600">
-            دسته بندی‌های انتخاب شده
-          </span>
+          <span className="text-sm text-neutral-600">دسته بندی‌های انتخاب شده</span>
           <button
             onClick={() => {
               navigator.clipboard.writeText(value);
@@ -231,9 +217,7 @@ export default function CategoriesListField({
 
         <div className="p-3">
           {categories.length === 0 ? (
-            <div className="py-4 text-center text-slate-500">
-              هیچ دسته بندی انتخاب نشده است
-            </div>
+            <div className="py-4 text-center text-slate-500">هیچ دسته بندی انتخاب نشده است</div>
           ) : (
             <DndContext
               sensors={sensors}

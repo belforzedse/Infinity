@@ -31,9 +31,7 @@ export default function OrderFailure() {
             </svg>
           </div>
 
-          <h1 className="text-2xl mb-4 font-bold text-red-600">
-            پرداخت ناموفق
-          </h1>
+          <h1 className="text-2xl mb-4 font-bold text-red-600">پرداخت ناموفق</h1>
 
           <div className="mb-6 text-gray-700">
             <p className="mb-2">
@@ -41,8 +39,7 @@ export default function OrderFailure() {
             </p>
             {orderNumber && (
               <p className="text-sm">
-                شماره سفارش:{" "}
-                <span className="font-semibold">{orderNumber}</span>
+                شماره سفارش: <span className="font-semibold">{orderNumber}</span>
               </p>
             )}
             {orderId && (

@@ -16,9 +16,7 @@ const EmptyShoppingCart: React.FC = () => {
         />
       </div>
 
-      <span className="text-xl text-neutral-800 lg:text-3xl">
-        سبد خرید شما خالی است
-      </span>
+      <span className="text-xl text-neutral-800 lg:text-3xl">سبد خرید شما خالی است</span>
 
       <BackButtonToStore isResponsive={false} />
     </div>

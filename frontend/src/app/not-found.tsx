@@ -44,9 +44,7 @@ export default function NotFound() {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl mb-4 font-bold text-gray-800 md:text-3xl">
-            صفحه پیدا نشد
-          </h1>
+          <h1 className="text-2xl mb-4 font-bold text-gray-800 md:text-3xl">صفحه پیدا نشد</h1>
 
           {/* Description */}
           <p className="text-lg mb-8 leading-relaxed text-gray-600">
@@ -83,8 +81,8 @@ export default function NotFound() {
               <h3 className="text-lg font-semibold text-gray-800">راهنمایی</h3>
             </div>
             <p className="text-right leading-relaxed text-gray-700">
-              اگر فکر می‌کنید این یک خطاست، لطفاً آدرس URL را بررسی کنید یا از
-              منوی اصلی سایت استفاده کنید.
+              اگر فکر می‌کنید این یک خطاست، لطفاً آدرس URL را بررسی کنید یا از منوی اصلی سایت
+              استفاده کنید.
             </p>
           </div>
         </div>
@@ -93,8 +91,7 @@ export default function NotFound() {
 
         <div className="mt-8 flex items-center justify-center gap-2 text-gray-500">
           <span className="text-sm">
-            آن را که خبر شد، خبری باز نیامد / این‌جا که تویی، هیچ کسی باز
-            نیامد{" "}
+            آن را که خبر شد، خبری باز نیامد / این‌جا که تویی، هیچ کسی باز نیامد{" "}
           </span>
         </div>
       </div>

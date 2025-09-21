@@ -3,13 +3,15 @@ import Hero from "@/components/PDP/Hero";
 import OffersList from "@/components/PDP/OffersList";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
-import { ProductReview } from "@/components/PDP/Comment/List";
+import type { ProductReview } from "@/components/PDP/Comment/List";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import logger from "@/utils/logger";
+import type {
+  ProductDetail} from "@/services/product/product";
 import {
   getProductBySlug,
-  ProductDetail,
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
@@ -26,9 +28,8 @@ export async function generateMetadata({
     const titleRaw = product?.attributes?.Title || "محصول";
     const descRaw = product?.attributes?.Description || titleRaw;
     const description = String(descRaw).slice(0, 160);
-    const imageUrl =
-      product?.attributes?.CoverImage?.data?.attributes?.url ?
-        `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
     const title = `خرید ${titleRaw} | اینفینیتی استور`;
@@ -57,11 +58,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function PDP({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function PDP({ params }: { params: Promise<{ slug: string }> }) {
   // Handle both Promise<{slug}> and direct {slug} parameter formats
   const { slug } = await params;
 
@@ -77,7 +74,7 @@ export default async function PDP({
     }
   } catch (err) {
     error = err;
-    console.error("Error fetching product:", err);
+    logger.error("Error fetching product", { error: String(err) });
   }
 
   // If we still don't have product data, just return a message
@@ -100,21 +97,17 @@ export default async function PDP({
     "دسته بندی";
 
   const categorySlug =
-    productData?.attributes.product_main_category?.data?.attributes.Slug ||
-    "دسته-بندی";
+    productData?.attributes.product_main_category?.data?.attributes.Slug || "دسته-بندی";
 
   const productTitle = productData?.attributes.Title || "محصول";
 
   // Fetch related products
   const productId = productData?.id.toString() || "";
-  const mainCategoryId =
-    productData?.attributes.product_main_category?.data?.id.toString() || "";
+  const mainCategoryId = productData?.attributes.product_main_category?.data?.id.toString() || "";
 
   // Get IDs of other categories this product belongs to
   const otherCategoryIds =
-    productData?.attributes.product_other_categories?.data?.map((cat) =>
-      cat.id.toString()
-    ) || [];
+    productData?.attributes.product_other_categories?.data?.map((cat) => cat.id.toString()) || [];
 
   // Fetch related products from same main category and other categories
   let sameMainCategoryProducts: any[] = [];
@@ -130,22 +123,20 @@ export default async function PDP({
     if (results[0].status === "fulfilled") {
       sameMainCategoryProducts = results[0].value;
     } else {
-      console.error(
-        "Error fetching main category products:",
-        results[0].reason
-      );
+      logger.error("Error fetching main category products", {
+        error: String(results[0].reason),
+      });
     }
 
     if (results[1].status === "fulfilled") {
       otherCategoriesProducts = results[1].value;
     } else {
-      console.error(
-        "Error fetching other categories products:",
-        results[1].reason
-      );
+      logger.error("Error fetching other categories products", {
+        error: String(results[1].reason),
+      });
     }
   } catch (error) {
-    console.error("Error fetching related products:", error);
+    logger.error("Error fetching related products", { error: String(error) });
   }
 
   // Format product reviews data for the component

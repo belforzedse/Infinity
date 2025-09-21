@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { me, MeResponse } from "@/services/user/me";
+import type { MeResponse } from "@/services/user/me";
+import { me } from "@/services/user/me";
 
 interface UseUserReturnType {
   userData: MeResponse | null;
@@ -21,9 +22,7 @@ export default function useUser(): UseUserReturnType {
       const data = await me();
       setUserData(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch user data"),
-      );
+      setError(err instanceof Error ? err : new Error("Failed to fetch user data"));
       console.error("Error fetching user data:", err);
     } finally {
       setIsLoading(false);
@@ -32,10 +31,7 @@ export default function useUser(): UseUserReturnType {
 
   useEffect(() => {
     // Check if user is authenticated
-    const accessToken =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
+    const accessToken = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
     if (accessToken) {
       fetchUserData();

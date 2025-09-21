@@ -1,7 +1,8 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import { MobileTable, columns, Product } from "./table";
+import type { Product } from "./table";
+import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -33,7 +34,7 @@ export default function ProductsPage() {
   const [customPageData, setCustomPageData] = useState<Product[] | null>(null);
   const [buildingIndex, setBuildingIndex] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
-  const [settings, setSettings] = useState<{filterPublicProductsByTitle: boolean} | null>(null);
+  const [settings, setSettings] = useState<{ filterPublicProductsByTitle: boolean } | null>(null);
   const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -65,7 +66,8 @@ export default function ProductsPage() {
     const items: any[] = [];
     while (true) {
       // Respect super-admin toggled setting for filtering public products
-      let endpoint = `/products?pagination[page]=${current}&pagination[pageSize]=${perPage}` +
+      let endpoint =
+        `/products?pagination[page]=${current}&pagination[pageSize]=${perPage}` +
         (isRecycleBinOpen
           ? `&filters[removedAt][$null]=false`
           : `&filters[removedAt][$null]=true`) +
@@ -74,9 +76,8 @@ export default function ProductsPage() {
         `&populate[1]=product_variations.product_stock` +
         `&populate[2]=product_main_category`;
 
-      const shouldApplyTitleFilter = localTitleFilter !== null
-        ? localTitleFilter
-        : settings?.filterPublicProductsByTitle;
+      const shouldApplyTitleFilter =
+        localTitleFilter !== null ? localTitleFilter : settings?.filterPublicProductsByTitle;
 
       if (shouldApplyTitleFilter && !isRecycleBinOpen) {
         endpoint = appendTitleFilter(endpoint);
@@ -86,7 +87,9 @@ export default function ProductsPage() {
         endpoint += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
       }
 
-      const res = await apiClient.get(endpoint, { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } });
+      const res = await apiClient.get(endpoint, {
+        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      });
       const data = (res as any).data as any[];
       total = (res as any).meta?.pagination?.total || total;
       items.push(...data);
@@ -95,7 +98,12 @@ export default function ProductsPage() {
       current += 1;
     }
     return items;
-  }, [isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery]);
+  }, [
+    isRecycleBinOpen,
+    localTitleFilter,
+    settings?.filterPublicProductsByTitle,
+    debouncedSearchQuery,
+  ]);
 
   const buildStockIndex = useCallback(async () => {
     if (buildingIndex) return; // Prevent concurrent builds
@@ -121,7 +129,16 @@ export default function ProductsPage() {
     } finally {
       setBuildingIndex(false);
     }
-  }, [getAllProductsLite, sort, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery, setTotalSize, buildingIndex]);
+  }, [
+    getAllProductsLite,
+    sort,
+    isRecycleBinOpen,
+    localTitleFilter,
+    settings?.filterPublicProductsByTitle,
+    debouncedSearchQuery,
+    setTotalSize,
+    buildingIndex,
+  ]);
 
   const buildSalesIndex = useCallback(async () => {
     if (buildingIndex) return; // Prevent concurrent builds
@@ -129,7 +146,7 @@ export default function ProductsPage() {
     try {
       const rows = await getProductSales({});
       // Aggregate by product via mapping variation -> product (batched)
-  const varIds = rows.map((r: any) => r.productVariationId);
+      const varIds = rows.map((r: any) => r.productVariationId);
       const chunk = 200;
       const varToProduct: Record<number, number> = {};
       for (let i = 0; i < varIds.length; i += chunk) {
@@ -137,12 +154,12 @@ export default function ProductsPage() {
         // Fetch products that contain these variations
         const res = await apiClient.get(
           `/products?filters[product_variations][id][$in]=${part.join(",")}` +
-              (isRecycleBinOpen
-                ? `&filters[removedAt][$null]=false`
-                : `&filters[removedAt][$null]=true`) +
-              `&fields[0]=id&populate[0]=product_variations`,
-            { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
-          );
+            (isRecycleBinOpen
+              ? `&filters[removedAt][$null]=false`
+              : `&filters[removedAt][$null]=true`) +
+            `&fields[0]=id&populate[0]=product_variations`,
+          { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
+        );
         const prods = (res as any).data as any[];
         prods.forEach((p: any) => {
           const pid = Number(p.id);
@@ -184,7 +201,15 @@ export default function ProductsPage() {
     } else if (sort === "sales-asc" || sort === "sales-desc") {
       buildSalesIndex();
     }
-  }, [buildSalesIndex, buildStockIndex, sort, localTitleFilter, debouncedSearchQuery, isRecycleBinOpen, buildingIndex]);
+  }, [
+    buildSalesIndex,
+    buildStockIndex,
+    sort,
+    localTitleFilter,
+    debouncedSearchQuery,
+    isRecycleBinOpen,
+    buildingIndex,
+  ]);
 
   // Fetch current page data when using custom index
   useEffect(() => {
@@ -202,14 +227,14 @@ export default function ProductsPage() {
       }
       const res = await apiClient.get(
         (() => {
-          let ep = `/products?filters[id][$in]=${ids.join(",")}` +
+          let ep =
+            `/products?filters[id][$in]=${ids.join(",")}` +
             (isRecycleBinOpen
               ? `&filters[removedAt][$null]=false`
               : `&filters[removedAt][$null]=true`) +
             `&populate[0]=CoverImage&populate[1]=product_variations&populate[2]=product_variations.product_stock&populate[3]=product_main_category`;
-          const shouldApplyTitleFilter = localTitleFilter !== null
-            ? localTitleFilter
-            : settings?.filterPublicProductsByTitle;
+          const shouldApplyTitleFilter =
+            localTitleFilter !== null ? localTitleFilter : settings?.filterPublicProductsByTitle;
 
           if (shouldApplyTitleFilter && !isRecycleBinOpen) {
             ep = appendTitleFilter(ep);
@@ -224,14 +249,20 @@ export default function ProductsPage() {
       );
       const rows = ((res as any).data as Product[]).slice();
       // Preserve the order of ids
-      rows.sort(
-        (a, b) => ids.indexOf(Number(a.id)) - ids.indexOf(Number(b.id)),
-      );
+      rows.sort((a, b) => ids.indexOf(Number(a.id)) - ids.indexOf(Number(b.id)));
       setCustomPageData(rows);
       setPageLoading(false);
     };
     run();
-  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, localTitleFilter, settings?.filterPublicProductsByTitle, debouncedSearchQuery]);
+  }, [
+    sortedProductIds,
+    page,
+    pageSize,
+    isRecycleBinOpen,
+    localTitleFilter,
+    settings?.filterPublicProductsByTitle,
+    debouncedSearchQuery,
+  ]);
 
   // Fetch settings once on mount
   useEffect(() => {
@@ -251,90 +282,18 @@ export default function ProductsPage() {
   }, []);
 
   // Bulk actions handler
-  const handleBulkAction = useCallback(async (actionId: string, selectedProducts: Product[]) => {
-    if (!selectedProducts.length) {
-      toast.error("هیچ محصولی انتخاب نشده است");
-      return;
-    }
+  const handleBulkAction = useCallback(
+    async (actionId: string, selectedProducts: Product[]) => {
+      if (!selectedProducts.length) {
+        toast.error("هیچ محصولی انتخاب نشده است");
+        return;
+      }
 
-    try {
-      switch (actionId) {
-        case "remove_stock":
-          // Remove stock from all selected products
-          let removedStockCount = 0;
-          for (const product of selectedProducts) {
-            for (const variation of product.attributes.product_variations.data) {
-              if (variation.attributes.product_stock?.data?.id) {
-                try {
-                  await apiClient.put(
-                    `/product-stocks/${variation.attributes.product_stock.data.id}`,
-                    {
-                      data: { Count: 0 }
-                    },
-                    {
-                      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-                    }
-                  );
-                  removedStockCount++;
-                } catch (error) {
-                  console.error(`Failed to remove stock for variation ${variation.id}:`, error);
-                }
-              }
-            }
-          }
-          toast.success(`موجودی ${removedStockCount} تنوع محصول با موفقیت حذف شد`);
-          break;
-
-        case "soft_delete":
-          // Soft delete selected products
-          let deletedCount = 0;
-          for (const product of selectedProducts) {
-            try {
-              await apiClient.put(
-                `/products/${product.id}`,
-                {
-                  data: { removedAt: new Date().toISOString() }
-                },
-                {
-                  headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-                }
-              );
-              deletedCount++;
-            } catch (error) {
-              console.error(`Failed to delete product ${product.id}:`, error);
-            }
-          }
-          toast.success(`${deletedCount} محصول با موفقیت حذف شد`);
-          break;
-
-        case "restore":
-          // Restore selected products
-          let restoredCount = 0;
-          for (const product of selectedProducts) {
-            try {
-              await apiClient.put(
-                `/products/${product.id}`,
-                {
-                  data: { removedAt: null }
-                },
-                {
-                  headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-                }
-              );
-              restoredCount++;
-            } catch (error) {
-              console.error(`Failed to restore product ${product.id}:`, error);
-            }
-          }
-          toast.success(`${restoredCount} محصول با موفقیت بازیابی شد`);
-          break;
-
-        case "set_stock":
-          // Set stock to a specific value
-          const stockValue = prompt("مقدار موجودی جدید را وارد کنید:");
-          if (stockValue && !isNaN(Number(stockValue))) {
-            const newStock = Math.max(0, Number(stockValue));
-            let updatedStockCount = 0;
+      try {
+        switch (actionId) {
+          case "remove_stock":
+            // Remove stock from all selected products
+            let removedStockCount = 0;
             for (const product of selectedProducts) {
               for (const variation of product.attributes.product_variations.data) {
                 if (variation.attributes.product_stock?.data?.id) {
@@ -342,95 +301,168 @@ export default function ProductsPage() {
                     await apiClient.put(
                       `/product-stocks/${variation.attributes.product_stock.data.id}`,
                       {
-                        data: { Count: newStock }
+                        data: { Count: 0 },
                       },
                       {
-                        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-                      }
+                        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+                      },
                     );
-                    updatedStockCount++;
+                    removedStockCount++;
                   } catch (error) {
-                    console.error(`Failed to update stock for variation ${variation.id}:`, error);
+                    console.error(`Failed to remove stock for variation ${variation.id}:`, error);
                   }
                 }
               }
             }
-            toast.success(`موجودی ${updatedStockCount} تنوع محصول به ${newStock} تنظیم شد`);
-          } else if (stockValue !== null) {
-            toast.error("مقدار موجودی معتبر نیست");
+            toast.success(`موجودی ${removedStockCount} تنوع محصول با موفقیت حذف شد`);
+            break;
+
+          case "soft_delete":
+            // Soft delete selected products
+            let deletedCount = 0;
+            for (const product of selectedProducts) {
+              try {
+                await apiClient.put(
+                  `/products/${product.id}`,
+                  {
+                    data: { removedAt: new Date().toISOString() },
+                  },
+                  {
+                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+                  },
+                );
+                deletedCount++;
+              } catch (error) {
+                console.error(`Failed to delete product ${product.id}:`, error);
+              }
+            }
+            toast.success(`${deletedCount} محصول با موفقیت حذف شد`);
+            break;
+
+          case "restore":
+            // Restore selected products
+            let restoredCount = 0;
+            for (const product of selectedProducts) {
+              try {
+                await apiClient.put(
+                  `/products/${product.id}`,
+                  {
+                    data: { removedAt: null },
+                  },
+                  {
+                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+                  },
+                );
+                restoredCount++;
+              } catch (error) {
+                console.error(`Failed to restore product ${product.id}:`, error);
+              }
+            }
+            toast.success(`${restoredCount} محصول با موفقیت بازیابی شد`);
+            break;
+
+          case "set_stock":
+            // Set stock to a specific value
+            const stockValue = prompt("مقدار موجودی جدید را وارد کنید:");
+            if (stockValue && !isNaN(Number(stockValue))) {
+              const newStock = Math.max(0, Number(stockValue));
+              let updatedStockCount = 0;
+              for (const product of selectedProducts) {
+                for (const variation of product.attributes.product_variations.data) {
+                  if (variation.attributes.product_stock?.data?.id) {
+                    try {
+                      await apiClient.put(
+                        `/product-stocks/${variation.attributes.product_stock.data.id}`,
+                        {
+                          data: { Count: newStock },
+                        },
+                        {
+                          headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+                        },
+                      );
+                      updatedStockCount++;
+                    } catch (error) {
+                      console.error(`Failed to update stock for variation ${variation.id}:`, error);
+                    }
+                  }
+                }
+              }
+              toast.success(`موجودی ${updatedStockCount} تنوع محصول به ${newStock} تنظیم شد`);
+            } else if (stockValue !== null) {
+              toast.error("مقدار موجودی معتبر نیست");
+              return;
+            } else {
+              return; // User cancelled
+            }
+            break;
+
+          case "publish":
+            // Publish selected products
+            let publishedCount = 0;
+            for (const product of selectedProducts) {
+              for (const variation of product.attributes.product_variations.data) {
+                try {
+                  await apiClient.put(
+                    `/product-variations/${variation.id}`,
+                    {
+                      data: { IsPublished: true },
+                    },
+                    {
+                      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+                    },
+                  );
+                  publishedCount++;
+                } catch (error) {
+                  console.error(`Failed to publish variation ${variation.id}:`, error);
+                }
+              }
+            }
+            toast.success(`${publishedCount} تنوع محصول منتشر شد`);
+            break;
+
+          case "unpublish":
+            // Unpublish selected products
+            let unpublishedCount = 0;
+            for (const product of selectedProducts) {
+              for (const variation of product.attributes.product_variations.data) {
+                try {
+                  await apiClient.put(
+                    `/product-variations/${variation.id}`,
+                    {
+                      data: { IsPublished: false },
+                    },
+                    {
+                      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+                    },
+                  );
+                  unpublishedCount++;
+                } catch (error) {
+                  console.error(`Failed to unpublish variation ${variation.id}:`, error);
+                }
+              }
+            }
+            toast.success(`${unpublishedCount} تنوع محصول از انتشار خارج شد`);
+            break;
+
+          default:
+            toast.error("عملیات نامعتبر");
             return;
-          } else {
-            return; // User cancelled
-          }
-          break;
+        }
 
-        case "publish":
-          // Publish selected products
-          let publishedCount = 0;
-          for (const product of selectedProducts) {
-            for (const variation of product.attributes.product_variations.data) {
-              try {
-                await apiClient.put(
-                  `/product-variations/${variation.id}`,
-                  {
-                    data: { IsPublished: true }
-                  },
-                  {
-                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-                  }
-                );
-                publishedCount++;
-              } catch (error) {
-                console.error(`Failed to publish variation ${variation.id}:`, error);
-              }
-            }
-          }
-          toast.success(`${publishedCount} تنوع محصول منتشر شد`);
-          break;
-
-        case "unpublish":
-          // Unpublish selected products
-          let unpublishedCount = 0;
-          for (const product of selectedProducts) {
-            for (const variation of product.attributes.product_variations.data) {
-              try {
-                await apiClient.put(
-                  `/product-variations/${variation.id}`,
-                  {
-                    data: { IsPublished: false }
-                  },
-                  {
-                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }
-                  }
-                );
-                unpublishedCount++;
-              } catch (error) {
-                console.error(`Failed to unpublish variation ${variation.id}:`, error);
-              }
-            }
-          }
-          toast.success(`${unpublishedCount} تنوع محصول از انتشار خارج شد`);
-          break;
-
-        default:
-          toast.error("عملیات نامعتبر");
-          return;
+        // Refresh the table after successful operation
+        setRefresh(true);
+      } catch (error) {
+        console.error("Bulk action error:", error);
+        toast.error("خطا در انجام عملیات دسته‌جمعی");
       }
-
-      // Refresh the table after successful operation
-      setRefresh(true);
-    } catch (error) {
-      console.error("Bulk action error:", error);
-      toast.error("خطا در انجام عملیات دسته‌جمعی");
-    }
-  }, [setRefresh]);
+    },
+    [setRefresh],
+  );
 
   // Bulk action options
   const bulkOptions = useMemo(() => {
     if (isRecycleBinOpen) {
-      return [
-        { id: "restore", title: "بازیابی محصولات" },
-      ];
+      return [{ id: "restore", title: "بازیابی محصولات" }];
     }
     return [
       { id: "remove_stock", title: "حذف موجودی" },
@@ -462,7 +494,7 @@ export default function ProductsPage() {
           <div className="flex items-center gap-2">
             <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
             <select
-              className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
+              className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
               value={sort}
               onChange={(e) => setSort(e.target.value as any)}
             >
@@ -478,7 +510,7 @@ export default function ProductsPage() {
           <div className="flex items-center gap-2">
             <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل، کتونی:</label>
             <select
-              className="rounded-lg border border-neutral-300 px-3 py-1 text-sm"
+              className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
               value={localTitleFilter === null ? "global" : localTitleFilter ? "on" : "off"}
               onChange={(e) => {
                 const value = e.target.value;
@@ -489,7 +521,9 @@ export default function ProductsPage() {
                 }
               }}
             >
-              <option value="global">پیش‌فرض سایت ({settings?.filterPublicProductsByTitle ? "فعال" : "غیرفعال"})</option>
+              <option value="global">
+                پیش‌فرض سایت ({settings?.filterPublicProductsByTitle ? "فعال" : "غیرفعال"})
+              </option>
               <option value="on">فعال</option>
               <option value="off">غیرفعال</option>
             </select>
@@ -502,7 +536,7 @@ export default function ProductsPage() {
             <input
               type="text"
               placeholder="جستجو در عنوان محصولات..."
-              className="w-64 rounded-lg border border-neutral-300 px-3 py-1 pr-8 text-sm"
+              className="text-sm w-64 rounded-lg border border-neutral-300 px-3 py-1 pr-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -539,9 +573,8 @@ export default function ProductsPage() {
               (isRecycleBinOpen
                 ? "&filters[removedAt][$null]=false"
                 : "&filters[removedAt][$null]=true");
-            const shouldApplyTitleFilter = localTitleFilter !== null
-              ? localTitleFilter
-              : settings?.filterPublicProductsByTitle;
+            const shouldApplyTitleFilter =
+              localTitleFilter !== null ? localTitleFilter : settings?.filterPublicProductsByTitle;
 
             let sortedBase = base;
             if (shouldApplyTitleFilter && !isRecycleBinOpen) {
@@ -572,7 +605,7 @@ export default function ProductsPage() {
       ) : (
         <div>
           {buildingIndex && (
-            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            <div className="text-sm mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">
               در حال محاسبه مرتب‌سازی سراسری؛ لطفاً صبر کنید…
             </div>
           )}

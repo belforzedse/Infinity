@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { ProductVariableDisplay } from "./types";
+import type { ProductVariableDisplay } from "./types";
 
 interface ProductVariableRowProps {
   item: ProductVariableDisplay;
@@ -33,7 +33,7 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
       <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         <div className="flex flex-col">
           {item.discountPrice && (
-            <span className="text-sm text-pink-600 font-medium">
+            <span className="text-sm font-medium text-pink-600">
               {item.discountPrice.toLocaleString()} تومان
             </span>
           )}
@@ -45,15 +45,11 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
       <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         {item.stock} عدد در انبار
       </td>
-      <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
-        {item.sku}
-      </td>
+      <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">{item.sku}</td>
       <td className="border-r border-slate-100 p-4">
         <span
           className={`text-xs inline-block w-full rounded-lg px-4 py-2 text-center ${
-            item.isPublished
-              ? "bg-green-500 text-white"
-              : "bg-yellow-500 text-white"
+            item.isPublished ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
           }`}
         >
           {item.isPublished ? "منتشر شده" : "پیش نویس"}

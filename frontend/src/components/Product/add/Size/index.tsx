@@ -29,9 +29,7 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
 
         if (helperData && helperData.length > 0) {
           const firstRow = helperData[0];
-          const columnKeys = Object.keys(firstRow).filter(
-            (key) => key !== "size",
-          );
+          const columnKeys = Object.keys(firstRow).filter((key) => key !== "size");
           setColumns(
             columnKeys.map((key) => ({
               key,
@@ -108,11 +106,7 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
 
     if (columnExists) {
       // Update existing column title
-      setColumns(
-        columns.map((col) =>
-          col.key === columnKey ? { ...col, title: newTitle } : col,
-        ),
-      );
+      setColumns(columns.map((col) => (col.key === columnKey ? { ...col, title: newTitle } : col)));
     } else {
       // Add new column
       setColumns([...columns, { key: columnKey, title: newTitle }]);

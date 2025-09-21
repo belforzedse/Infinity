@@ -19,15 +19,7 @@ type Props = {
 };
 
 export default function PDPCommentAddSpecialOffer(props: Props) {
-  const {
-    endOfferDate,
-    imageSrc,
-    category,
-    title,
-    discount,
-    discountPrice,
-    price,
-  } = props;
+  const { endOfferDate, imageSrc, category, title, discount, discountPrice, price } = props;
 
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
@@ -94,13 +86,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
 
       <div className="flex items-center gap-3">
         <div className="h-[79px] w-[82px] overflow-hidden rounded-xl">
-          <Image
-            width={82}
-            height={79}
-            src={imageSrc}
-            alt="special offer"
-            loader={imageLoader}
-          />
+          <Image width={82} height={79} src={imageSrc} alt="special offer" loader={imageLoader} />
         </div>
 
         <div className="flex flex-col gap-1">
