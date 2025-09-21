@@ -21,7 +21,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
   };
 
   return (
-    <div className="relative h-[270px] w-full overflow-hidden rounded-2xl md:h-[300px]">
+    <div className="relative h-[196px] w-[168px] overflow-hidden rounded-2xl md:h-[300px] md:w-full">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
         onScroll={handleScroll}
@@ -51,9 +51,9 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
             <div
               key={index}
               className={`h-0.5 rounded-full transition-all duration-300 ${
-                currentSlide === index
-                  ? "w-7 bg-foreground-primary"
-                  : "w-[9px] bg-white"
+                currentSlide === index ?
+                  "w-7 bg-foreground-primary"
+                : "w-[9px] bg-white"
               }`}
             />
           ))}
