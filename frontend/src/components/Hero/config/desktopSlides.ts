@@ -34,9 +34,9 @@ const baseLayout: DesktopLayout = {
   side: {
     src: "/images/index-img2-desktop.png",
     alt: "Hero Side Banner",
-    width: 700,
-    height: 700,
-    className: "object-fit h-full rounded-lg",
+    width: 650,
+    height: 650,
+    className: "object-fit h-[650] w-[650px] rounded-lg",
     href: "#",
   },
 };

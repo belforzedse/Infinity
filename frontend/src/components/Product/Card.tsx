@@ -69,9 +69,9 @@ const ProductCard: FC<ProductCardProps> = ({
               </div>
             : <span />}
             <button
-              className={`flex h-8 w-8 items-center justify-center rounded-3xl ${
+              className={`mt-[0.5px] flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-white ${
                 isLoading ? "cursor-wait opacity-50" : "hover:bg-white/80"
-              } z-10 bg-white/50 backdrop-blur transition-colors`}
+              } z-10 bg-white/70 backdrop-blur transition-colors`}
               onClick={toggleLike}
               disabled={isLoading}
               aria-label={
@@ -79,8 +79,10 @@ const ProductCard: FC<ProductCardProps> = ({
               }
             >
               <HeartIcon
-                className={`h-3 w-3 ${
-                  isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500"
+                className={`h-4 w-4 ${
+                  isLiked ?
+                    "fill-pink-600 text-pink-600"
+                  : "stroke-neutral-500 text-neutral-500"
                 }`}
                 filled={isLiked}
               />

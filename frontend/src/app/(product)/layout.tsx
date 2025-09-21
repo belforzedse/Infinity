@@ -10,6 +10,8 @@ import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
 import React from "react";
 import ScrollToTop from "@/components/ScrollToTop";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
@@ -22,6 +24,7 @@ export default function ProductLayout({
 }) {
   const { isDrawerOpen } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
+  const pathname = usePathname();
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -73,7 +76,15 @@ export default function ProductLayout({
         <HeaderDesktopNav />
       </div>
 
-      <section id="content">{children}</section>
+      <motion.section
+        key={pathname}
+        id="content"
+        initial={{ opacity: 0, x: 16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+      >
+        {children}
+      </motion.section>
 
       <footer>
         <Footer />
