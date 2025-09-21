@@ -1,5 +1,6 @@
 "use client";
-import Logo from "@/components/Kits/Logo";
+import Image from "next/image";
+import Link from "next/link";
 import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
 import DesktopSearch from "@/components/Search/PLPDesktopSearch";
 import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
@@ -10,6 +11,8 @@ import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
 import React from "react";
 import ScrollToTop from "@/components/ScrollToTop";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
@@ -22,6 +25,7 @@ export default function ProductLayout({
 }) {
   const { isDrawerOpen } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
+  const pathname = usePathname();
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -40,9 +44,9 @@ export default function ProductLayout({
       </a>
       <header
         className={`sticky top-0 z-50 transition-all ${
-          scrolled
-            ? "glass-panel shadow-sm"
-            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+          scrolled ?
+            "glass-panel shadow-sm"
+          : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         }`}
       >
         <div className="hidden md:block">
@@ -53,7 +57,15 @@ export default function ProductLayout({
                   <DesktopHeaderActions />
                 </div>
                 <div className="justify-self-center">
-                  <Logo />
+                  <Link href="/">
+                    <Image
+                      alt="logo"
+                      width={132}
+                      height={75}
+                      src="/images/cropped-021.webp"
+                      className="h-[47px] w-[90px] md:h-[75px] md:w-[132px]"
+                    />
+                  </Link>
                 </div>
                 <div className="justify-self-end">
                   <DesktopSearch />
@@ -73,7 +85,15 @@ export default function ProductLayout({
         <HeaderDesktopNav />
       </div>
 
-      <section id="content">{children}</section>
+      <motion.section
+        key={pathname}
+        id="content"
+        initial={{ opacity: 0, x: 16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+      >
+        {children}
+      </motion.section>
 
       <footer>
         <Footer />

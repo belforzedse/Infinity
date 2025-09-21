@@ -21,7 +21,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
   };
 
   return (
-    <div className="relative h-[196px] w-[168px] overflow-hidden rounded-2xl md:h-[300px] md:w-full">
+    <div className=" relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[252px]">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
         onScroll={handleScroll}
@@ -35,7 +35,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
-              className="select-none object-cover"
+              className="pl-[2px] rounded-[21px] select-none object-cover"
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}

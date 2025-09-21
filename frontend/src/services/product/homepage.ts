@@ -113,3 +113,43 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
     return [];
   }
 };
+
+/**
+ * Fetch a random assortment of active, in-stock products.
+ * Strategy: fetch a larger pool and shuffle client-side.
+ */
+export const getRandomProducts = async (
+  poolSize: number = 60,
+  take: number = 20,
+): Promise<ProductCardProps[]> => {
+  const endpoint = appendTitleFilter(
+    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+      `populate[0]=CoverImage&` +
+      `populate[1]=product_main_category&` +
+      `populate[2]=product_variations&` +
+      `populate[3]=product_variations.product_stock&` +
+      `populate[4]=product_variations.general_discounts&` +
+      // Hide zero-price and zero-stock variations
+      `filters[product_variations][Price][$gte]=1&` +
+      // Hide zero-stock items
+      `filters[product_variations][product_stock][Count][$gt]=0&` +
+      `pagination[limit]=${poolSize}`,
+  );
+
+  try {
+    // Public products endpoint: avoid sending user token to prevent accidental 401/logout
+    const response = await apiClient.getPublic<any>(endpoint, {
+      suppressAuthRedirect: true,
+    });
+    const list = formatProductsToCardProps((response as any).data);
+    // Shuffle (Fisher–Yates)
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list.slice(0, take);
+  } catch (error) {
+    logger.error("Error fetching random products:", error as any);
+    return [];
+  }
+};

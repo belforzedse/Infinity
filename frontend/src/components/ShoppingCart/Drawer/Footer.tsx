@@ -24,7 +24,7 @@ export default function CartDrawerFooter() {
         </Link>
 
         <Link
-          href="/cart"
+          href="/checkout"
           className="text-sm flex-1 rounded-lg bg-pink-500 px-4 py-2 text-center text-white"
           onClick={closeDrawer}
         >
