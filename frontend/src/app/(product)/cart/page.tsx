@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
-import heart from "@/components/PDP/Icons/HeartIcon";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { getRandomProducts } from "@/services/product/homepage";
 import HeartIcon from "@/components/PDP/Icons/HeartIcon";
@@ -18,7 +17,7 @@ export default function CartPage() {
   const { cartItems, isLoading } = useCart();
   const router = useRouter();
   const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
-  const [loadingRandom, setLoadingRandom] = useState(false);
+  const [_loadingRandom, setLoadingRandom] = useState(false);
 
   useEffect(() => {
     let mounted = true;

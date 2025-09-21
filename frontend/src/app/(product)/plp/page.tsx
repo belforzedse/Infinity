@@ -3,6 +3,7 @@ import PLPList from "@/components/PLP/List";
 import { API_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
+import logger from "@/utils/logger";
 import type { Metadata } from "next";
 
 interface Product {
@@ -118,7 +119,7 @@ async function getProducts(
         },
       };
     } catch (error) {
-      console.error("Error searching products:", error);
+      logger.error("Error searching products", { error: String(error) });
       return {
         products: [],
         pagination: {
@@ -253,7 +254,7 @@ async function getProducts(
       pagination: data.meta.pagination,
     };
   } catch (error) {
-    console.error("Error fetching products:", error);
+    logger.error("Error fetching products", { error: String(error) });
     return {
       products: [],
       pagination: {
