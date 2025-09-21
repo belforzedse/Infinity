@@ -1,5 +1,6 @@
 "use client";
-import Logo from "@/components/Kits/Logo";
+import Image from "next/image";
+import Link from "next/link";
 import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
 import DesktopSearch from "@/components/Search/PLPDesktopSearch";
 import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
@@ -43,9 +44,9 @@ export default function ProductLayout({
       </a>
       <header
         className={`sticky top-0 z-50 transition-all ${
-          scrolled
-            ? "glass-panel shadow-sm"
-            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+          scrolled ?
+            "glass-panel shadow-sm"
+          : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         }`}
       >
         <div className="hidden md:block">
@@ -56,7 +57,15 @@ export default function ProductLayout({
                   <DesktopHeaderActions />
                 </div>
                 <div className="justify-self-center">
-                  <Logo />
+                  <Link href="/">
+                    <Image
+                      alt="logo"
+                      width={132}
+                      height={75}
+                      src="/images/cropped-021.webp"
+                      className="h-[47px] w-[90px] md:h-[75px] md:w-[132px]"
+                    />
+                  </Link>
                 </div>
                 <div className="justify-self-end">
                   <DesktopSearch />

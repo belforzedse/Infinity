@@ -13,7 +13,7 @@ const UserHeader: React.FC = () => {
 
       <div className="relative h-[65px] w-[76px] md:h-[47px] md:w-[104px]">
         <Image
-          src="/images/full-logo.png"
+          src="/images/cropped-02.png"
           alt="Logo"
           fill
           className="object-contain"
