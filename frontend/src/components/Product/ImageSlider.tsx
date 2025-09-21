@@ -21,7 +21,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
   };
 
   return (
-    <div className="relative h-[196px] w-[168px] overflow-hidden rounded-2xl md:h-[300px] md:w-full">
+    <div className="relative h-[196px] w-[168px] overflow-hidden rounded-[23px] md:h-[300px] md:w-full">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
         onScroll={handleScroll}
