@@ -63,13 +63,11 @@ const ProductCard: FC<ProductCardProps> = ({
           <ImageSlider images={images} title={title} priority={priority} />
 
           <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
-            {discount ? (
+            {discount ?
               <div className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1">
                 <span className="text-xs text-white">٪{discount} تخفیف</span>
               </div>
-            ) : (
-              <span />
-            )}
+            : <span />}
             <button
               className={`flex h-8 w-8 items-center justify-center rounded-3xl ${
                 isLoading ? "cursor-wait opacity-50" : "hover:bg-white/80"
@@ -100,7 +98,7 @@ const ProductCard: FC<ProductCardProps> = ({
           )}
         </div>
 
-        <div className="flex-grow px-1 py-4">
+        <div className="flex-grow px-1 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <GridIcon className="text-neutral-400" />
@@ -128,33 +126,38 @@ const ProductCard: FC<ProductCardProps> = ({
           )}
         </div>
 
-        <div className="mt-auto rounded-2xl bg-stone-100 px-3 py-2">
+        <div className="mt-auto rounded-2xl bg-stone-100 px-3 py-1.5 md:py-2">
           <div className="flex items-center justify-between">
             <span className="text-sm text-stone-500">قیمت</span>
 
-            {!isAvailable ? (
+            {!isAvailable ?
               <span className="text-base font-medium text-red-600 md:text-lg">
                 ناموجود
               </span>
-            ) : (
-              <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
-                {discountPrice && discountPrice > 0 && discountPrice < price && (
-                  <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
-                    {faNum(discountPrice)} تومان
-                  </span>
-                )}
+            : <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
+                {discountPrice &&
+                  discountPrice > 0 &&
+                  discountPrice < price && (
+                    <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
+                      {faNum(discountPrice)} تومان
+                    </span>
+                  )}
 
                 <span
                   className={`${
-                    discountPrice && discountPrice > 0 && discountPrice < price
-                      ? "text-xs text-foreground-muted line-through"
-                      : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
+                    (
+                      discountPrice &&
+                      discountPrice > 0 &&
+                      discountPrice < price
+                    ) ?
+                      "text-xs text-foreground-muted line-through"
+                    : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
                   }`}
                 >
                   {faNum(price)} تومان
                 </span>
               </div>
-            )}
+            }
           </div>
         </div>
       </div>
