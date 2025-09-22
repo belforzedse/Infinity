@@ -4,6 +4,7 @@ import { appendTitleFilter } from "@/constants/productFilters";
 import type { ApiResponse } from "@/types/api";
 import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
+import { computeDiscountForVariation, parseNumber } from "@/utils/discounts";
 
 export interface ProductMedia {
   id: number;
@@ -655,48 +656,27 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 
       if (!variation) return null;
 
-      // Debug: Log raw variation data to see what fields are available
+            const price = parseNumber(variation.attributes.Price);
+      if (!price || price <= 0) {
+        return null;
+      }
+
+      const discountEvaluation = computeDiscountForVariation({
+        Price: variation.attributes.Price,
+        DiscountPrice: variation.attributes.DiscountPrice,
+        general_discounts: variation.attributes.general_discounts,
+      });
+
       if (process.env.NODE_ENV !== "production") {
-        console.log(`Raw variation data for product ${product.id}:`, {
-          variationId: variation.id,
-          attributes: variation.attributes,
-          availableFields: Object.keys(variation.attributes),
-          hasGeneralDiscounts: !!variation.attributes.general_discounts,
-        });
-      }
-
-      const price = parseInt(variation.attributes.Price);
-
-      // Check for general_discounts relationship first
-      const generalDiscounts = variation.attributes.general_discounts?.data;
-      let discountPrice = undefined;
-      let discount = undefined;
-
-      if (generalDiscounts && generalDiscounts.length > 0) {
-        // Use general_discounts relationship
-        const discountAmount = generalDiscounts[0].attributes.Amount;
-        discount = discountAmount;
-        discountPrice = Math.round(price * (1 - discountAmount / 100));
-      } else if (variation.attributes.DiscountPrice) {
-        // Fallback to DiscountPrice field (if it exists)
-        discountPrice = parseInt(variation.attributes.DiscountPrice.toString());
-        const hasDiscount = discountPrice && discountPrice < price;
-        discount = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : undefined;
-      }
-
-      // Debug: Log pricing calculations
-      if (process.env.NODE_ENV !== "production" && (discount || discountPrice)) {
         console.log(`formatProductsToCardProps - Product ${product.id}:`, {
           title: product.attributes.Title.substring(0, 30),
-          originalPrice: price,
-          discountPrice,
-          discount,
-          generalDiscounts: generalDiscounts,
-          variationData: variation.attributes,
+          variationId: variation.id,
+          price,
+          discountEvaluation,
         });
       }
 
-      // Check if any variation has stock available
+// Check if any variation has stock available
       const isAvailable =
         product.attributes.product_variations?.data?.some((v: any) => {
           const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
@@ -713,9 +693,18 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         isAvailable,
       };
 
-      if (discount && discountPrice) {
-        result.discount = discount;
-        result.discountPrice = discountPrice;
+      if (
+        discountEvaluation &&
+        discountEvaluation.discountAmount > 0 &&
+        discountEvaluation.finalPrice < discountEvaluation.basePrice
+      ) {
+        const discountPercent =
+          discountEvaluation.discountPercent !== undefined
+            ? discountEvaluation.discountPercent
+            : Math.round((discountEvaluation.discountAmount / discountEvaluation.basePrice) * 100);
+
+        result.discount = discountPercent;
+        result.discountPrice = Math.round(discountEvaluation.finalPrice);
       }
 
       return result;

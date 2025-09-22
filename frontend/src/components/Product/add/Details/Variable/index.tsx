@@ -25,7 +25,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
       setLoading(true);
       try {
         const response = await apiClient.get(
-          `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model,product_stock&pagination[pageSize]=100`,
+          `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model,product_stock,general_discounts&pagination[pageSize]=100`,
           {
             headers: {
               Authorization: `Bearer ${STRAPI_TOKEN}`,
@@ -34,16 +34,18 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         );
 
         // Type assertion to work with the data
-        const variations = (response as any).data as ProductVariable[];
+        const variations = response.data as ProductVariable[];
 
         // Debug: Log the API response to see what we're getting
         if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
           console.log("Product variations API response:", variations);
           variations.forEach((variation, index) => {
+            // eslint-disable-next-line no-console
             console.log(`Variation ${index}:`, {
               id: variation.id,
-              DiscountPrice: variation.attributes.DiscountPrice,
               Price: variation.attributes.Price,
+              generalDiscounts: variation.attributes.general_discounts?.data,
               attributes: variation.attributes,
             });
           });
@@ -60,13 +62,29 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           const variableParts = [size, color, model].filter((part) => part !== "");
           const variableName = variableParts.join(" - ");
 
+          // Calculate discount from general_discounts
+          const basePrice = Number(variation.attributes.Price || 0);
+          let discountPrice: number | undefined = undefined;
+
+          const generalDiscounts = variation.attributes.general_discounts?.data || [];
+          if (generalDiscounts.length > 0) {
+            // Use the first active discount
+            const discount = generalDiscounts[0].attributes;
+            if (discount.Type === "Discount") {
+              // Percentage discount
+              const discountAmount = (basePrice * Number(discount.Amount || 0)) / 100;
+              discountPrice = Math.max(0, basePrice - discountAmount);
+            } else if (discount.Type === "Cash") {
+              // Fixed amount discount
+              discountPrice = Math.max(0, basePrice - Number(discount.Amount || 0));
+            }
+          }
+
           return {
             id: variation.id,
             sku: variation.attributes.SKU || "",
             price: variation.attributes.Price || 0,
-            discountPrice: variation.attributes.DiscountPrice
-              ? Number(variation.attributes.DiscountPrice)
-              : undefined,
+            discountPrice,
             stock: variation.attributes.product_stock?.data?.attributes.Count || 0,
             stockId: variation.attributes.product_stock?.data?.id,
             variable: variableName,
@@ -74,13 +92,16 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
             colorId: variation.attributes.product_variation_color?.data?.id,
             sizeId: variation.attributes.product_variation_size?.data?.id,
             modelId: variation.attributes.product_variation_model?.data?.id,
+            generalDiscounts: generalDiscounts,
           };
         });
 
         // Debug: Log the formatted variations
         if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
           console.log("Formatted variations:", formattedVariations);
           formattedVariations.forEach((variation, index) => {
+            // eslint-disable-next-line no-console
             console.log(`Formatted variation ${index}:`, {
               id: variation.id,
               price: variation.price,
@@ -148,7 +169,6 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           data: {
             SKU: updatedVariation.sku,
             Price: updatedVariation.price,
-            DiscountPrice: updatedVariation.discountPrice || null,
             IsPublished: updatedVariation.isPublished,
           },
         },
@@ -192,7 +212,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         );
 
         // Update stockId in local state
-        const stockData = (stockResponse as any).data;
+        const stockData = stockResponse.data as { id: number };
         updatedVariation.stockId = stockData.id;
       }
 
@@ -269,19 +289,24 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">قیمت تخفیف‌دار (تومان) - اختیاری</label>
-                <input
-                  type="number"
-                  value={currentVariation.discountPrice || ""}
-                  onChange={(e) =>
-                    setCurrentVariation({
-                      ...currentVariation,
-                      discountPrice: e.target.value ? Number(e.target.value) : undefined,
-                    })
-                  }
-                  className="w-full rounded-lg border border-slate-300 p-2"
-                  placeholder="قیمت تخفیف‌دار وارد کنید"
-                />
+                <label className="text-sm mb-1 block">تخفیف‌های فعال</label>
+                <div className="min-h-[40px] rounded-lg border border-slate-300 bg-slate-50 p-2">
+                  {currentVariation.generalDiscounts && currentVariation.generalDiscounts.length > 0 ? (
+                    currentVariation.generalDiscounts.map((discount, index: number) => (
+                      <div key={index} className="text-sm text-slate-600">
+                        {discount.attributes.Type === "Discount"
+                          ? `${discount.attributes.Amount}% تخفیف`
+                          : `${Number(discount.attributes.Amount).toLocaleString()} تومان تخفیف`
+                        }
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-slate-400">هیچ تخفیف فعالی تعریف نشده</div>
+                  )}
+                </div>
+                <div className="text-xs mt-1 text-slate-500">
+                  برای مدیریت تخفیف‌ها از بخش &quot;تخفیف‌های عمومی&quot; استفاده کنید
+                </div>
               </div>
 
               <div>
