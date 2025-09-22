@@ -3,7 +3,6 @@ export interface ProductVariable {
   attributes: {
     SKU: string;
     Price: number;
-    DiscountPrice?: number;
     IsPublished?: boolean;
     product: {
       data: {
@@ -42,6 +41,18 @@ export interface ProductVariable {
         };
       };
     };
+    general_discounts?: {
+      data: Array<{
+        id: number;
+        attributes: {
+          Type: "Discount" | "Cash";
+          Amount: number;
+          IsActive: boolean;
+          StartDate: string;
+          EndDate: string;
+        };
+      }>;
+    };
   };
 }
 
@@ -57,4 +68,14 @@ export interface ProductVariableDisplay {
   colorId?: number;
   sizeId?: number;
   modelId?: number;
+  generalDiscounts?: Array<{
+    id: number;
+    attributes: {
+      Type: "Discount" | "Cash";
+      Amount: number;
+      IsActive: boolean;
+      StartDate: string;
+      EndDate: string;
+    };
+  }>;
 }
