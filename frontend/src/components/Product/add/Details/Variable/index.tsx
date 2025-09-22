@@ -34,7 +34,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         );
 
         // Type assertion to work with the data
-        const variations = (response as any).data as ProductVariable[];
+        const variations = response.data as ProductVariable[];
 
         // Debug: Log the API response to see what we're getting
         if (process.env.NODE_ENV !== "production") {
@@ -98,8 +98,10 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
         // Debug: Log the formatted variations
         if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
           console.log("Formatted variations:", formattedVariations);
           formattedVariations.forEach((variation, index) => {
+            // eslint-disable-next-line no-console
             console.log(`Formatted variation ${index}:`, {
               id: variation.id,
               price: variation.price,
@@ -210,7 +212,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         );
 
         // Update stockId in local state
-        const stockData = (stockResponse as any).data;
+        const stockData = stockResponse.data as { id: number };
         updatedVariation.stockId = stockData.id;
       }
 
@@ -288,7 +290,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
               <div>
                 <label className="text-sm mb-1 block">تخفیف‌های فعال</label>
-                <div className="min-h-[40px] rounded-lg border border-slate-300 p-2 bg-slate-50">
+                <div className="min-h-[40px] rounded-lg border border-slate-300 bg-slate-50 p-2">
                   {currentVariation.generalDiscounts && currentVariation.generalDiscounts.length > 0 ? (
                     currentVariation.generalDiscounts.map((discount, index: number) => (
                       <div key={index} className="text-sm text-slate-600">
@@ -303,7 +305,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                   )}
                 </div>
                 <div className="text-xs mt-1 text-slate-500">
-                  برای مدیریت تخفیف‌ها از بخش "تخفیف‌های عمومی" استفاده کنید
+                  برای مدیریت تخفیف‌ها از بخش &quot;تخفیف‌های عمومی&quot; استفاده کنید
                 </div>
               </div>
 
