@@ -38,8 +38,10 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
         // Debug: Log the API response to see what we're getting
         if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
           console.log("Product variations API response:", variations);
           variations.forEach((variation, index) => {
+            // eslint-disable-next-line no-console
             console.log(`Variation ${index}:`, {
               id: variation.id,
               Price: variation.attributes.Price,
@@ -288,7 +290,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                 <label className="text-sm mb-1 block">تخفیف‌های فعال</label>
                 <div className="min-h-[40px] rounded-lg border border-slate-300 p-2 bg-slate-50">
                   {currentVariation.generalDiscounts && currentVariation.generalDiscounts.length > 0 ? (
-                    currentVariation.generalDiscounts.map((discount: any, index: number) => (
+                    currentVariation.generalDiscounts.map((discount, index: number) => (
                       <div key={index} className="text-sm text-slate-600">
                         {discount.attributes.Type === "Discount"
                           ? `${discount.attributes.Amount}% تخفیف`
