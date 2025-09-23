@@ -1,4 +1,5 @@
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
+import DuplicateIcon from "@/components/SuperAdmin/Layout/Icons/DuplicateIcon";
 import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
@@ -9,6 +10,7 @@ import { priceFormatter } from "@/utils/price";
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
+import { duplicateProduct } from "@/services/super-admin/product/duplicate";
 
 export type Product = {
   id: string;
@@ -56,6 +58,14 @@ export type Product = {
     };
     CoverImage: ProductCoverImage;
   };
+};
+
+const handleDuplicateProduct = async (productId: string) => {
+  const result = await duplicateProduct(productId);
+  if (result.success) {
+    // Trigger table refresh
+    window.location.reload(); // Simple refresh for now
+  }
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -157,15 +167,18 @@ export const columns: ColumnDef<Product>[] = [
             apiUrl={"/products"}
           />
 
-          {/* <SuperAdminTableCellActionButton
+          <SuperAdminTableCellActionButton
             variant="secondary"
             icon={<DuplicateIcon />}
-          /> */}
+            onClick={() => handleDuplicateProduct(row.original.id)}
+            text="دوبل کردن"
+          />
 
           <SuperAdminTableCellActionButton
             variant="secondary"
             icon={<EditIcon />}
             path={`/super-admin/products/${row.original.id}`}
+            text="ویرایش"
           />
         </div>
       );

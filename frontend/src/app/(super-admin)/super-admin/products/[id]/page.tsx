@@ -12,6 +12,7 @@ import { editProductDataAtom } from "@/atoms/super-admin/products";
 import { useAtom } from "jotai";
 import { transformToProductData } from "@/utils/populatedProductData";
 import { updateProduct } from "@/services/super-admin/product/update";
+import { duplicateProduct } from "@/services/super-admin/product/duplicate";
 import { useRouter } from "next/navigation";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import { useProductTag } from "@/hooks/product/useTag";
@@ -74,6 +75,17 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const handleDuplicateProduct = async () => {
+    try {
+      const result = await duplicateProduct(id);
+      if (result.success && result.newProductId) {
+        router.push(`/super-admin/products/${result.newProductId}`);
+      }
+    } catch (error) {
+      console.error("Error duplicating product:", error);
+    }
+  };
+
   const tabs: TabItem[] = [
     {
       key: "1",
@@ -109,14 +121,20 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
 
       <div className="order-3 col-span-3 mt-2 flex items-center justify-end gap-2 border-t border-slate-200 pt-2.5">
         <button
-          className="text-sm w-1/2 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 lg:w-fit"
+          className="text-sm w-1/3 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 lg:w-fit"
           onClick={() => router.push("/super-admin/products")}
         >
           بیخیال شدن
         </button>
         <button
+          onClick={handleDuplicateProduct}
+          className="text-sm w-1/3 rounded-xl bg-blue-500 px-5 py-2 text-white lg:w-fit"
+        >
+          کپی محصول
+        </button>
+        <button
           onClick={handleUpdateProduct}
-          className="text-sm w-1/2 rounded-xl bg-pink-500 px-5 py-2 text-white lg:w-fit"
+          className="text-sm w-1/3 rounded-xl bg-pink-500 px-5 py-2 text-white lg:w-fit"
         >
           ذخیره
         </button>
