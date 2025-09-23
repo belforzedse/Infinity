@@ -13,7 +13,9 @@
       "Bash(find:*)",
       "Bash(npm install:*)",
       "Bash(npm test:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(rm:*)",
+      "Bash(npx next build:*)"
     ],
     "deny": [],
     "ask": []
