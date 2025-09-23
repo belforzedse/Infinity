@@ -13,14 +13,14 @@ export default function SuperAdminTableCellActionButton(props: Props) {
 
   return (
     <Link
-      className={`flex h-[26px] w-auto items-center justify-center gap-1 rounded-md bg-actions-primary px-2 md:w-[26px] md:px-0 ${
+      className={`flex h-[26px] w-auto items-center justify-center gap-1 rounded-md px-2 ${
         variant === "primary" ? "bg-actions-primary" : "bg-slate-200"
-      }`}
+      } ${text ? "w-[auto]" : "w-[25px] px-0"}`}
       onClick={onClick}
       href={path ?? "#"}
     >
-      {text && <span className="text-sm text-slate-500">{text}</span>}
       {icon}
+      {text && <span className="text-xs text-slate-500">{text}</span>}
     </Link>
   );
 }
