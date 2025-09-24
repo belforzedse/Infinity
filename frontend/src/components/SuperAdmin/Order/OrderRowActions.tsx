@@ -21,6 +21,7 @@ export default function OrderRowActions({ orderId, shippingBarcode }: OrderRowAc
     window.open(url, "_blank");
   };
 
+
   const handleGenerateBarcode = async (weight?: number, boxSizeId?: number) => {
     setIsGenerating(true);
     try {

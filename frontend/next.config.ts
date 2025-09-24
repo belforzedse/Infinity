@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  eslint: { ignoreDuringBuilds: false },
+  // Skip ESLint during builds; run lint separately in CI
+  eslint: { ignoreDuringBuilds: true },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
