@@ -84,9 +84,10 @@ type Props = {
       };
     };
   };
+  isPreInvoice?: boolean;
 };
 const nf = new Intl.NumberFormat("fa-IR");
-export default function Invoice({ order }: Props) {
+export default function Invoice({ order, isPreInvoice = false }: Props) {
   const attrs = order.attributes;
   // robust number coercion (handles strings)
   const toNum = (v: unknown) =>
@@ -106,6 +107,13 @@ export default function Invoice({ order }: Props) {
 
   const fullName =
     `${attrs.user?.data?.attributes?.user_info?.data?.attributes?.FirstName ?? ""} ${attrs.user?.data?.attributes?.user_info?.data?.attributes?.LastName ?? ""}`.trim();
+
+  const getDisplayValue = (value: string | null | undefined, fallback = "نامشخص") => {
+    if (isPreInvoice) {
+      return value || "----";
+    }
+    return value || fallback;
+  };
 
   return (
     <div dir="rtl" className="min-h-screen w-full bg-white p-8 font-peyda-fanum">
@@ -149,9 +157,9 @@ export default function Invoice({ order }: Props) {
 
         <div className="text-lg mb-2 justify-normal border border-black p-6 text-center leading-6">
           <p className="text-lg">
-            <span className="font-bold">گیرنده:</span> <span> {fullName || "نامشخص"} </span>
+            <span className="font-bold">گیرنده:</span> <span> {getDisplayValue(fullName)} </span>
             <span className="font-bold">شماره تماس:</span>{" "}
-            {attrs.user?.data?.attributes?.Phone || "نامشخص"}
+            {getDisplayValue(attrs.user?.data?.attributes?.Phone)}
           </p>
           <p>
             <span className="font-bold">تاریخ سفارش:</span>{" "}
@@ -162,16 +170,16 @@ export default function Invoice({ order }: Props) {
               minute: "2-digit",
             })}
           </p>
-          {attrs.delivery_address?.data?.attributes?.FullAddress && (
+          {(attrs.delivery_address?.data?.attributes?.FullAddress || isPreInvoice) && (
             <p>
               <span className="font-bold">آدرس ارسال:</span>{" "}
-              {attrs.delivery_address.data.attributes.FullAddress}
+              {getDisplayValue(attrs.delivery_address?.data?.attributes?.FullAddress)}
             </p>
           )}
-          {attrs.delivery_address?.data?.attributes?.PostalCode && (
+          {(attrs.delivery_address?.data?.attributes?.PostalCode || isPreInvoice) && (
             <p>
               <span className="font-bold">کد پستی:</span>{" "}
-              {attrs.delivery_address.data.attributes.PostalCode}
+              {getDisplayValue(attrs.delivery_address?.data?.attributes?.PostalCode)}
             </p>
           )}
 

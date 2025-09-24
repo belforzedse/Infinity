@@ -18,7 +18,7 @@ type Order = {
   subtotal: number;
   discount?: number;
   tax?: number;
-  contractStatus: "Not Ready" | "Confirmed" | "Finished" | "Failed" | "Cancelled";
+  contractStatus?: "Not Ready" | "Confirmed" | "Finished" | "Failed" | "Cancelled";
   total: number;
 };
 
@@ -29,8 +29,8 @@ type OrderItem = {
   productCode: string;
   price: number;
   quantity: number;
-  color: string;
-  image: string;
+  color?: string;
+  image?: string;
 };
 
 export default function SuperAdminOrderSummaryFooter({
@@ -83,13 +83,17 @@ export default function SuperAdminOrderSummaryFooter({
             }`}
           >
             <div className="flex items-center gap-2">
-              <Image
-                src={item.image}
-                alt={item.productName}
-                width={48}
-                height={48}
-                className="rounded-xl object-cover"
-              />
+              {item.image ? (
+                <Image
+                  src={item.image}
+                  alt={item.productName}
+                  width={48}
+                  height={48}
+                  className="rounded-xl object-cover"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-xl bg-slate-200" aria-hidden />
+              )}
 
               <div className="flex flex-col gap-0.5">
                 <h3 className="text-sm text-foreground-primary">{item.productName}</h3>

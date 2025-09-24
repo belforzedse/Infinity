@@ -2,13 +2,100 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-export default function SuperAdminOrderSidebar() {
+interface SuperAdminOrderSidebarProps {
+  orderData?: any;
+  selectedItems?: any[];
+}
+
+export default function SuperAdminOrderSidebar({
+  orderData,
+  selectedItems = []
+}: SuperAdminOrderSidebarProps = {}) {
   const router = useRouter();
   const { id } = useParams();
   const [formData, setFormData] = useState({
     message: "",
     type: "sms",
   });
+
+  const handlePrintPreInvoice = () => {
+    if (!orderData || selectedItems.length === 0) {
+      alert("لطفا ابتدا محصولات را اضافه کنید");
+      return;
+    }
+
+    // Create a temporary order object in Strapi format for the Invoice component
+    const tempOrder = {
+      id: 'temp-preview',
+      attributes: {
+        Date: orderData.orderDate?.toISOString() || new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        Description: orderData.description || '',
+        ShippingCost: orderData.shipping || 0,
+        user: {
+          data: {
+            attributes: {
+              Phone: orderData.phoneNumber || '',
+              user_info: {
+                data: {
+                  attributes: {
+                    FirstName: orderData.userName?.split(' ')[0] || '',
+                    LastName: orderData.userName?.split(' ').slice(1).join(' ') || '',
+                  }
+                }
+              }
+            }
+          }
+        },
+        delivery_address: {
+          data: {
+            attributes: {
+              FullAddress: orderData.address || '',
+              PostalCode: orderData.postalCode || '',
+            }
+          }
+        },
+        order_items: {
+          data: selectedItems.map((item, index) => ({
+            id: index.toString(),
+            attributes: {
+              Count: item.quantity,
+              PerAmount: item.price,
+              ProductTitle: item.productName,
+              ProductSKU: item.productCode,
+            }
+          }))
+        },
+        contract: {
+          data: {
+            attributes: {
+              Amount: orderData.total || 0
+            }
+          }
+        }
+      }
+    };
+
+    // Store temp order data in sessionStorage
+    sessionStorage.setItem('tempPreInvoiceOrder', JSON.stringify(tempOrder));
+
+    // Open print page with pre-invoice flag
+    const printUrl = `/super-admin/orders/print/temp-preview?type=pre-invoice`;
+    try {
+      const printWindow = window.open(printUrl, '_blank', 'noopener,noreferrer');
+      if (!printWindow) {
+        alert('لطفا اجازه باز کردن پنجره جدید را بدهید');
+      }
+    } catch (error) {
+      console.error('Error opening pre-invoice window:', error);
+      alert('خطا در باز کردن پیش‌فاکتور');
+    }
+
+    // Clean up after a delay
+    setTimeout(() => {
+      sessionStorage.removeItem('tempPreInvoiceOrder');
+    }, 10000);
+  };
 
   return (
     <div className="sticky top-5 flex flex-col gap-3">
@@ -70,10 +157,21 @@ export default function SuperAdminOrderSidebar() {
 
           <div className="flex w-full gap-2">
             <button
-              onClick={() => {
-                if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (id) {
+                  try {
+                    window.open(`/super-admin/orders/print/${id}`, "_blank", "noopener,noreferrer");
+                  } catch (error) {
+                    console.error("Error opening print window:", error);
+                  }
+                } else {
+                  alert("لطفا ابتدا سفارش را ذخیره کنید");
+                }
               }}
               className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
+              type="button"
             >
               <span className="text-sm text-neutral-500">دانلود فاکتور</span>
 
@@ -81,13 +179,40 @@ export default function SuperAdminOrderSidebar() {
             </button>
 
             <button
-              onClick={() => {
-                if (id) window.open(`/super-admin/orders/print/${id}`, "_blank");
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (id) {
+                  try {
+                    window.open(`/super-admin/orders/print/${id}`, "_blank", "noopener,noreferrer");
+                  } catch (error) {
+                    console.error("Error opening print window:", error);
+                  }
+                } else {
+                  alert("لطفا ابتدا سفارش را ذخیره کنید");
+                }
               }}
               className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
+              type="button"
             >
               <span className="text-sm text-neutral-500">پرینت فاکتور</span>
 
+              <PrintIcon />
+            </button>
+          </div>
+
+          {/* Pre-Invoice Button - Full Width */}
+          <div className="flex w-full mt-2">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePrintPreInvoice();
+              }}
+              className="flex w-full items-center justify-center gap-1 rounded-md bg-green-50 py-1.5 hover:bg-green-100 transition-colors"
+              type="button"
+            >
+              <span className="text-sm text-green-600">چاپ پیش‌فاکتور</span>
               <PrintIcon />
             </button>
           </div>
