@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
 import Invoice from "@/components/invoice";
@@ -13,14 +13,28 @@ type StrapiOrderResponse = {
 
 export default function PrintOrderPage() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const hasPrinted = useRef(false);
+  const isPreInvoice = searchParams.get('type') === 'pre-invoice';
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Handle temp pre-invoice case
+        if (id === 'temp-preview') {
+          const tempOrderData = sessionStorage.getItem('tempPreInvoiceOrder');
+          if (tempOrderData) {
+            const tempOrder = JSON.parse(tempOrderData);
+            setOrder(tempOrder);
+            return;
+          } else {
+            throw new Error('No temp order data found');
+          }
+        }
+
         const res = await apiClient.get(
           `/orders/${id}?populate[0]=user
          &populate[1]=contract
@@ -112,5 +126,5 @@ export default function PrintOrderPage() {
 
   if (loading || !order) return <div className="p-6">در حال بارگذاری…</div>;
 
-  return <Invoice order={order} />;
+  return <Invoice order={order} isPreInvoice={isPreInvoice} />;
 }

@@ -115,6 +115,14 @@ class ApiClient {
     try {
       // Create an AbortController to handle request timeout
       const controller = new AbortController();
+      // If caller provided a signal, abort our controller when theirs aborts
+      const cleanupExternalAbort = options?.signal
+        ? (() => {
+            const onAbort = () => controller.abort();
+            options.signal!.addEventListener("abort", onAbort);
+            return () => options.signal!.removeEventListener("abort", onAbort);
+          })()
+        : undefined;
       const timeoutId = setTimeout(() => controller.abort(), options?.timeout || REQUEST_TIMEOUT);
 
       const response = await fetch(url, {
@@ -122,8 +130,9 @@ class ApiClient {
         signal: controller.signal,
       });
 
-      // Clear the timeout
+      // Clear the timeout and external abort listener
       clearTimeout(timeoutId);
+      if (cleanupExternalAbort) cleanupExternalAbort();
 
       // Parse the response
       const responseData: unknown = await response.json();

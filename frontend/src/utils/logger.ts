@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 type LogLevel = "log" | "warn" | "error";
 
 const consoleMethods: Record<LogLevel, (msg: string) => void> = {
