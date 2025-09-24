@@ -31,6 +31,7 @@ export interface ApiRequestOptions {
   withCredentials?: boolean;
   skipAuth?: boolean; // Flag to skip authentication for public endpoints
   suppressAuthRedirect?: boolean;
+  signal?: AbortSignal; // Optional external abort signal for cancellation
 }
 
 // Pagination Types

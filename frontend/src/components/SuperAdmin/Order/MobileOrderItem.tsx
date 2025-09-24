@@ -9,8 +9,8 @@ type OrderItem = {
   productCode: string;
   price: number;
   quantity: number;
-  color: string;
-  image: string;
+  color?: string;
+  image?: string;
 };
 
 export default function SuperAdminOrderMobileOrderItem({ item }: { item: OrderItem }) {
@@ -21,14 +21,18 @@ export default function SuperAdminOrderMobileOrderItem({ item }: { item: OrderIt
           محصول
         </div>
         <div className="flex w-2/3 items-center gap-2 border-r p-4">
-          <Image
-            src={item.image}
-            alt={item.productName}
-            width={48}
-            height={48}
-            className="rounded-xl object-cover"
-            loader={imageLoader}
-          />
+          {item.image ? (
+            <Image
+              src={item.image}
+              alt={item.productName}
+              width={48}
+              height={48}
+              className="rounded-xl object-cover"
+              loader={imageLoader}
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-xl bg-slate-200" aria-hidden />
+          )}
           <span className="text-xs">{item.productName}</span>
         </div>
       </div>
@@ -44,7 +48,7 @@ export default function SuperAdminOrderMobileOrderItem({ item }: { item: OrderIt
         <div className="text-sm flex w-1/3 items-center text-nowrap bg-gray-50 px-4 py-2 text-right font-medium text-foreground-primary">
           رنگ
         </div>
-        <div className="text-xs w-2/3 border-r p-4">{item.color}</div>
+        <div className="text-xs w-2/3 border-r p-4">{item.color ?? '-'}</div>
       </div>
 
       <div className="flex border-b">
