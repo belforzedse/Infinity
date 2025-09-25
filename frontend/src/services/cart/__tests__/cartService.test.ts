@@ -67,7 +67,7 @@ describe("CartService", () => {
 
       const result = await CartService.addItemToCart(addItemRequest);
 
-      expect(mockPost).toHaveBeenCalledWith("/carts/items", addItemRequest);
+      expect(mockPost).toHaveBeenCalledWith("/carts/add-item", addItemRequest);
       expect(result).toEqual(mockResponse);
     });
 
@@ -96,7 +96,7 @@ describe("CartService", () => {
 
       const result = await CartService.updateCartItem(updateRequest);
 
-      expect(mockPut).toHaveBeenCalledWith("/carts/items/456", { count: 3 });
+      expect(mockPut).toHaveBeenCalledWith("/carts/update-item", updateRequest);
       expect(result).toEqual(mockResponse);
     });
 
@@ -122,7 +122,7 @@ describe("CartService", () => {
 
       const result = await CartService.removeCartItem(cartItemId);
 
-      expect(mockDelete).toHaveBeenCalledWith("/carts/items/456");
+      expect(mockDelete).toHaveBeenCalledWith("/carts/remove-item/456");
       expect(result).toEqual(mockResponse);
     });
 
@@ -242,11 +242,11 @@ describe("CartService", () => {
         ],
       };
 
-      mockGet.mockResolvedValueOnce({ data: mockResponse });
+      mockPost.mockResolvedValueOnce({ data: mockResponse });
 
-      const result = await CartService.getShippingPreview(addressId);
+      const result = await CartService.getShippingPreview({ addressId, shippingId: 1 });
 
-      expect(mockGet).toHaveBeenCalledWith(`/carts/shipping-preview?addressId=${addressId}`);
+      expect(mockPost).toHaveBeenCalledWith("/carts/shipping-preview", { addressId, shippingId: 1 });
       expect(result).toEqual(mockResponse);
     });
   });
@@ -262,7 +262,7 @@ describe("CartService", () => {
 
       const result = await CartService.getSnappEligible();
 
-      expect(mockGet).toHaveBeenCalledWith("/carts/snapp-eligible");
+      expect(mockGet).toHaveBeenCalledWith("/payment-gateway/snapp-eligible");
       expect(result).toEqual(mockResponse);
     });
 
