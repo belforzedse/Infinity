@@ -16,28 +16,44 @@ export default function LoginPage() {
 
   const handleLogin = async ({ verificationCode }: { verificationCode: string }) => {
     if (verificationCode.length === 6) {
-      const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
+      const fallbackMessage = "Login failed. Please try again.";
 
-      if (response.token) {
-        localStorage.setItem("accessToken", response.token);
-        localStorage.setItem("refreshToken", response.token);
+      try {
+        const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
-        // Migrate local cart to API after login
-        await migrateLocalCartToApi();
-        // Fetch current user and redirect based on role
-        try {
-          const me = await UserService.me();
-          if (me?.isAdmin) {
-            router.push("/super-admin");
-          } else {
+        if (response.token) {
+          localStorage.setItem("accessToken", response.token);
+          localStorage.setItem("refreshToken", response.token);
+
+          // Migrate local cart to API after login
+          await migrateLocalCartToApi();
+          // Fetch current user and redirect based on role
+          try {
+            const me = await UserService.me();
+            if (me?.isAdmin) {
+              router.push("/super-admin");
+            } else {
+              router.push("/account");
+            }
+          } catch {
+            // Fallback to account if role fetch fails
             router.push("/account");
           }
-        } catch {
-          // Fallback to account if role fetch fails
-          router.push("/account");
+        } else {
+          toast.error(fallbackMessage);
         }
-      } else {
-        toast.error("کد تایید اشتباه است");
+      } catch (error: unknown) {
+        const errorMessage =
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message?: string }).message === "string"
+            ? (error as { message: string }).message
+            : typeof error === "string" && error
+              ? error
+              : fallbackMessage;
+
+        toast.error(errorMessage);
       }
     }
   };

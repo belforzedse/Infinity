@@ -1,14 +1,21 @@
 // Global test setup and utilities
 
-// Mock Next.js environment
-process.env.NODE_ENV = "test";
+// Mock Next.js environment - in test environment, we modify the global rather than process.env
+(global as any).__NEXT_ENV = "test";
 
 // Mock IntersectionObserver for components that might use it
 global.IntersectionObserver = class IntersectionObserver {
+  root = null;
+  rootMargin = "";
+  thresholds: ReadonlyArray<number> = [];
+
   constructor() {}
   disconnect() {}
   observe() {}
   unobserve() {}
+  takeRecords(): IntersectionObserverEntry[] {
+    return [];
+  }
 };
 
 // Mock ResizeObserver for components that might use it

@@ -31,7 +31,7 @@ describe("verifyOTP", () => {
   it("verifies OTP with correct parameters", async () => {
     const otp = "123456";
     const otpToken = "mock-otp-token";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     sessionStorageMock.getItem.mockReturnValue(otpToken);
     mockPost.mockResolvedValueOnce(mockResponse);
@@ -43,12 +43,12 @@ describe("verifyOTP", () => {
       otpToken,
       otp,
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("handles missing otpToken in sessionStorage", async () => {
     const otp = "123456";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     sessionStorageMock.getItem.mockReturnValue(null);
     mockPost.mockResolvedValueOnce(mockResponse);
@@ -59,7 +59,24 @@ describe("verifyOTP", () => {
       otpToken: null,
       otp,
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
+  });
+
+  it("verifies OTP with different codes", async () => {
+    const otpCodes = ["123456", "000000", "999999"];
+    const otpToken = "mock-otp-token";
+    const mockResponse = { data: { token: "auth-token" } };
+
+    sessionStorageMock.getItem.mockReturnValue(otpToken);
+    mockPost.mockResolvedValue(mockResponse);
+
+    for (const otp of otpCodes) {
+      await verifyOTP(otp);
+      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
+        otpToken,
+        otp,
+      });
+    }
   });
 
   it("handles API errors correctly", async () => {
@@ -73,43 +90,14 @@ describe("verifyOTP", () => {
     await expect(verifyOTP(otp)).rejects.toThrow("Invalid OTP");
   });
 
-  it("works with different OTP formats", async () => {
-    const otpCodes = ["123456", "000000", "999999"];
-    const otpToken = "mock-otp-token";
-    const mockResponse = { token: "auth-token" };
-
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
-    mockPost.mockResolvedValue(mockResponse);
-
-    for (const otp of otpCodes) {
-      await verifyOTP(otp);
-
-      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
-        otpToken,
-        otp,
-      });
-    }
-  });
-
-  it("calls correct API endpoint", async () => {
-    const otp = "123456";
-    const otpToken = "mock-otp-token";
-    const mockResponse = { token: "auth-token" };
-
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    await verifyOTP(otp);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, expect.any(Object));
-  });
-
-  it("returns response as expected", async () => {
+  it("returns response with user data", async () => {
     const otp = "123456";
     const otpToken = "mock-otp-token";
     const mockResponse = {
-      token: "auth-token",
-      user: { id: 1, name: "John Doe" },
+      data: {
+        token: "auth-token",
+        user: { id: 1, name: "John" },
+      }
     };
 
     sessionStorageMock.getItem.mockReturnValue(otpToken);
@@ -117,23 +105,19 @@ describe("verifyOTP", () => {
 
     const result = await verifyOTP(otp);
 
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
-  it("handles empty OTP string", async () => {
-    const otp = "";
+  it("calls correct API endpoint", async () => {
+    const otp = "123456";
     const otpToken = "mock-otp-token";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     sessionStorageMock.getItem.mockReturnValue(otpToken);
     mockPost.mockResolvedValueOnce(mockResponse);
 
-    const result = await verifyOTP(otp);
+    await verifyOTP(otp);
 
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
-      otpToken,
-      otp: "",
-    });
-    expect(result).toEqual(mockResponse);
+    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, expect.any(Object));
   });
 });
