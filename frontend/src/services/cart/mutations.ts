@@ -47,7 +47,9 @@ export const addItemToCart = async (
   maybeCount?: number,
 ): Promise<CartItemResponse> => {
   const payload = normaliseAddItemPayload(productVariationIdOrPayload, maybeCount);
+
   const response = await apiClient.post("/carts/add-item", payload);
+
   return unwrap<CartItemResponse>(response);
 };
 
@@ -56,12 +58,16 @@ export const updateCartItem = async (
   maybeCount?: number,
 ): Promise<CartItemResponse> => {
   const payload = normaliseUpdatePayload(cartItemIdOrPayload, maybeCount);
+
   const response = await apiClient.put("/carts/update-item", payload);
+
   return unwrap<CartItemResponse>(response);
 };
 
 export const removeCartItem = async (cartItemId: number): Promise<{ message: string }> => {
+
   const response = await apiClient.delete<{ message: string }>(`/carts/remove-item/${cartItemId}`);
+
   return unwrap<{ message: string }>(response);
 };
 
