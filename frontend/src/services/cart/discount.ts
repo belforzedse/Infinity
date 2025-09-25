@@ -1,10 +1,15 @@
 import { apiClient } from "../index";
+import { unwrap } from "./helpers/response";
 
-export const applyDiscount = async (params: {
-  code: string;
-  shippingId?: number;
-  shippingCost?: number;
-}): Promise<{
+type DiscountPayload =
+  | string
+  | {
+      code: string;
+      shippingId?: number;
+      shippingCost?: number;
+    };
+
+interface DiscountResponse {
   success: boolean;
   code: string;
   type: "Discount" | "Cash";
@@ -18,7 +23,12 @@ export const applyDiscount = async (params: {
     total: number;
     taxPercent: number;
   };
-}> => {
-  const response = await apiClient.post<any>("/carts/apply-discount", params);
-  return (response as any).data || (response as any);
+}
+
+const normaliseDiscountPayload = (payload: DiscountPayload) =>
+  typeof payload === "string" ? { code: payload } : payload;
+
+export const applyDiscount = async (payload: DiscountPayload): Promise<DiscountResponse> => {
+  const response = await apiClient.post<DiscountResponse>("/carts/apply-discount", normaliseDiscountPayload(payload));
+  return unwrap<DiscountResponse>(response);
 };

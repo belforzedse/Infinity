@@ -1,4 +1,4 @@
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, within } from "@testing-library/react";
 import { Button } from "./Button";
 
 describe("Button component", () => {
@@ -24,25 +24,25 @@ describe("Button component", () => {
   });
 
   it("applies variant classes correctly", () => {
-    const { getByRole: getPrimary } = render(<Button variant="primary">Primary</Button>);
-    const { getByRole: getOutline } = render(<Button variant="outline">Outline</Button>);
+    const primaryRender = render(<Button variant="primary">Primary</Button>);
+    const outlineRender = render(<Button variant="outline">Outline</Button>);
 
-    expect(getPrimary("button")).toHaveClass("btn-primary");
-    expect(getOutline("button")).toHaveClass("btn-outline");
+    expect(within(primaryRender.container).getByRole("button")).toHaveClass("btn-primary");
+    expect(within(outlineRender.container).getByRole("button")).toHaveClass("btn-outline");
   });
 
   it("applies size classes correctly", () => {
-    const { getByRole: getDefault } = render(<Button size="default">Default</Button>);
-    const { getByRole: getSmall } = render(<Button size="sm">Small</Button>);
-    const { getByRole: getLarge } = render(<Button size="lg">Large</Button>);
-    const { getByRole: getXL } = render(<Button size="xl">Extra Large</Button>);
-    const { getByRole: getIcon } = render(<Button size="icon">Icon</Button>);
+    const defaultRender = render(<Button size="default">Default</Button>);
+    const smallRender = render(<Button size="sm">Small</Button>);
+    const largeRender = render(<Button size="lg">Large</Button>);
+    const xlRender = render(<Button size="xl">Extra Large</Button>);
+    const iconRender = render(<Button size="icon">Icon</Button>);
 
-    expect(getDefault("button")).toHaveClass("h-10", "px-4", "py-2");
-    expect(getSmall("button")).toHaveClass("h-8", "px-3");
-    expect(getLarge("button")).toHaveClass("h-12", "px-8");
-    expect(getXL("button")).toHaveClass("text-xl", "h-[54px]", "px-8");
-    expect(getIcon("button")).toHaveClass("h-10", "w-10");
+    expect(within(defaultRender.container).getByRole("button")).toHaveClass("h-10", "px-4", "py-2");
+    expect(within(smallRender.container).getByRole("button")).toHaveClass("h-8", "px-3");
+    expect(within(largeRender.container).getByRole("button")).toHaveClass("h-12", "px-8");
+    expect(within(xlRender.container).getByRole("button")).toHaveClass("text-xl", "h-[54px]", "px-8");
+    expect(within(iconRender.container).getByRole("button")).toHaveClass("h-10", "w-10");
   });
 
   it("applies fullWidth class when prop is true", () => {

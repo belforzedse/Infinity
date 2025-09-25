@@ -51,8 +51,7 @@ describe("ApiClient error handling", () => {
   });
 
   it("throws when baseUrl is missing", async () => {
-    const client = new ApiClient();
-    (client as any).baseUrl = undefined;
+    const client = new ApiClient("undefined");
 
     await expect(client.get("/test")).rejects.toEqual({
       message: "API base URL is not configured",
