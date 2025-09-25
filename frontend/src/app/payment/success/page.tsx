@@ -63,8 +63,7 @@ function PaymentSuccessContent() {
           Price: 0,
         },
       });
-    } catch (err: any) {
-      console.error("Error fetching order details:", err);
+    } catch {
       setError("خطا در دریافت جزئیات سفارش");
     } finally {
       setLoading(false);

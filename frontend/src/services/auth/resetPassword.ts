@@ -1,24 +1,45 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
 
-export interface Response {
-  message: string;
+export interface ResetPasswordRequest {
+  otp: string;
+  newPassword: string;
+  otpToken?: string | null;
+  phone?: string;
 }
 
-export const resetPassword = async (otp: string, password: string): Promise<Response> => {
-  const endpoint = ENDPOINTS.AUTH.RESET_PASSWORD;
+export interface Response {
+  message?: string;
+  success?: boolean;
+}
+
+const resolveStoredOtpToken = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   try {
-    const response = await apiClient.post<Response>(endpoint, {
-      otpToken: sessionStorage.getItem("otpToken"),
-      otp,
-      newPassword: password,
-    });
-
-    return response as any;
+    return window.sessionStorage.getItem("otpToken");
   } catch {
-    return {
-      message: "",
-    };
+    return null;
   }
+};
+
+export const resetPassword = async (payload: ResetPasswordRequest): Promise<Response> => {
+  const endpoint = ENDPOINTS.AUTH.RESET_PASSWORD;
+
+  const otpToken = payload.otpToken ?? resolveStoredOtpToken();
+
+  if (!otpToken) {
+    throw new Error("Missing OTP token");
+  }
+
+  const response = await apiClient.post<Response>(endpoint, {
+    otpToken,
+    otp: payload.otp,
+    newPassword: payload.newPassword,
+    phone: payload.phone,
+  });
+
+  return response as Response;
 };

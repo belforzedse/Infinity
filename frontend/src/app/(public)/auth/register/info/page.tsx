@@ -42,14 +42,15 @@ export default function RegisterInfoPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await AuthService.register(
-        formData.firstName,
-        formData.lastName,
-        formData.password,
-      );
+      const res = await AuthService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        password: formData.password,
+        phone: formData.phoneNumber,
+      });
 
-      if (res.message) {
-        router.push("/super-admin");
+      if (res.token || res.message) {
+        router.push("/auth/login");
       }
     } catch (error) {
       console.error(error);

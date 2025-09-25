@@ -26,8 +26,8 @@ export { default as ProductLikeService } from "./product/product-like";
 class ApiClient {
   private baseUrl: string;
 
-  constructor() {
-    this.baseUrl = `${API_BASE_URL}`;
+  constructor(baseUrl: string = `${API_BASE_URL}`) {
+    this.baseUrl = baseUrl;
   }
 
   /**
