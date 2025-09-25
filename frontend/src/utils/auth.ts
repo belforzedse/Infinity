@@ -6,32 +6,29 @@ import { HTTP_STATUS } from "@/constants/api";
  */
 export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   // TODO: Replace `any` with a specific error type for stricter checking
-  // Check for auth errors
-  const isAuthError =
-    error?.status === HTTP_STATUS.UNAUTHORIZED || error?.status === HTTP_STATUS.FORBIDDEN;
-
-  // Check for non-admin access
+  const isUnauthorized = error?.status === HTTP_STATUS.UNAUTHORIZED;
+  const isForbidden = error?.status === HTTP_STATUS.FORBIDDEN;
   const isNotAdmin = isAdminCheck === false;
 
-  if (isAuthError || isNotAdmin) {
-    // Avoid performing navigation in test environments (jsdom throws)
-    const isJest = typeof process !== "undefined" && process.env?.JEST_WORKER_ID;
+  if (!isUnauthorized && !isForbidden && !isNotAdmin) {
+    return;
+  }
 
-    if (typeof window !== "undefined") {
-      // Only clear token on an auth error, not on explicit non-admin check.
-      if (isAuthError) {
-        localStorage.removeItem("accessToken");
-      }
+  const isJest = typeof process !== "undefined" && process.env?.JEST_WORKER_ID;
 
-      // Redirect to auth page for real environments, skip in Jest tests.
-      if (!isJest) {
-        // FIXME: Use Next.js router for navigation in the app runtime
-        try {
-          window.location.href = "/auth";
-        } catch {
-          // Some environments (like older jsdom) throw on navigation.
-        }
-      }
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (isUnauthorized) {
+    localStorage.removeItem("accessToken");
+  }
+
+  if (!isJest && (isUnauthorized || isNotAdmin)) {
+    try {
+      window.location.href = "/auth";
+    } catch {
+      // Some environments (like older jsdom) throw on navigation.
     }
   }
 };

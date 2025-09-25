@@ -3,8 +3,12 @@ import Breadcrumb from "../Breadcrumb";
 
 // Mock Next.js Link component
 jest.mock("next/link", () => {
-  return function MockLink({ href, children }: any) {
-    return <a href={href}>{children}</a>;
+  return function MockLink({ href, children, ...rest }: any) {
+    return (
+      <a href={href} {...rest}>
+        {children}
+      </a>
+    );
   };
 });
 
@@ -53,12 +57,12 @@ describe("Breadcrumb component", () => {
     const { getByText } = render(<Breadcrumb breadcrumbs={sampleBreadcrumbs} />);
 
     // Intermediate items should have muted text color
-    expect(getByText("Home").parentElement).toHaveClass("text-foreground-muted");
-    expect(getByText("Products").parentElement).toHaveClass("text-foreground-muted");
-    expect(getByText("Electronics").parentElement).toHaveClass("text-foreground-muted");
+    expect(getByText("Home")).toHaveClass("text-foreground-muted");
+    expect(getByText("Products")).toHaveClass("text-foreground-muted");
+    expect(getByText("Electronics")).toHaveClass("text-foreground-muted");
 
     // Last item should have primary text color
-    expect(getByText("Current Page").parentElement).toHaveClass("text-foreground-primary");
+    expect(getByText("Current Page")).toHaveClass("text-foreground-primary");
   });
 
   it("renders separators between breadcrumb items", () => {
@@ -81,7 +85,7 @@ describe("Breadcrumb component", () => {
     const { getByText, queryAllByTestId } = render(<Breadcrumb breadcrumbs={singleBreadcrumb} />);
 
     expect(getByText("Home")).toBeInTheDocument();
-    expect(getByText("Home").parentElement).toHaveClass("text-foreground-primary");
+    expect(getByText("Home")).toHaveClass("text-foreground-primary");
 
     // No separators for single item
     const separators = queryAllByTestId("left-arrow-icon");
@@ -105,7 +109,7 @@ describe("Breadcrumb component", () => {
     const { getByText } = render(<Breadcrumb breadcrumbs={sampleBreadcrumbs} />);
 
     sampleBreadcrumbs.forEach((breadcrumb) => {
-      expect(getByText(breadcrumb.label).parentElement).toHaveClass("text-xs");
+      expect(getByText(breadcrumb.label)).toHaveClass("text-xs");
     });
   });
 
