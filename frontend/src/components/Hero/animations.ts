@@ -1,6 +1,6 @@
 import type { Variants, Transition } from "framer-motion";
 
-type AllowedEase = Exclude<Transition["ease"], undefined>;
+type AllowedEase = string | number[] | "linear" | "easeIn" | "easeOut" | "easeInOut" | "circIn" | "circOut" | "circInOut" | "backIn" | "backOut" | "backInOut" | "anticipate";
 
 export type LuxurySlideFadeOptions = {
   distance?: number; // px

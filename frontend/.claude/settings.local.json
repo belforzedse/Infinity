@@ -15,7 +15,8 @@
       "Bash(npm test:*)",
       "Bash(npx eslint:*)",
       "Bash(rm:*)",
-      "Bash(npx next build:*)"
+      "Bash(npx next build:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
