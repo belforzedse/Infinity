@@ -34,7 +34,9 @@ export const getSnappEligible = async (
   if (params.discountCode) qs.set("discountCode", params.discountCode);
 
   const query = qs.toString();
+
   const url = `/payment-gateway/snapp-eligible${query ? `?${query}` : ""}`;
+
 
   try {
     const response = await apiClient.get<SnappEligibilityResponse>(url);
@@ -58,8 +60,10 @@ export const getShippingPreview = async (
       ? { addressId: params }
       : { addressId: params.addressId, shippingId: params.shippingId, shippingCost: params.shippingCost };
 
+
   try {
     const response = await apiClient.post<ShippingPreviewResponse>("/carts/shipping-preview", resolved);
+
     return unwrap<ShippingPreviewResponse>(response) ?? { success: false, shipping: 0 };
   } catch {
     return { success: false, shipping: 0 };
