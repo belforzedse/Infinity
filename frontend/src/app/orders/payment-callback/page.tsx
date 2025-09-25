@@ -25,21 +25,13 @@ function PaymentCallbackContent() {
         const resNum = searchParams.get("ResNum"); // Order ID
         const refNum = searchParams.get("RefNum"); // Payment reference number
 
-        console.log("=== PAYMENT CALLBACK DEBUG ===");
-        console.log("ResNum (Order ID):", resNum);
-        console.log("RefNum (Payment Ref):", refNum);
-
         // Check localStorage for backup data
         const pendingOrderId = localStorage.getItem("pendingOrderId");
         const pendingRefId = localStorage.getItem("pendingRefId");
-        console.log("Pending Order ID from localStorage:", pendingOrderId);
-        console.log("Pending Ref ID from localStorage:", pendingRefId);
 
         if (!resNum || !refNum) {
           // Try to use localStorage data as fallback
-          if (pendingOrderId && pendingRefId) {
-            console.log("⚠️ Using localStorage fallback data");
-          } else {
+          if (!(pendingOrderId && pendingRefId)) {
             throw new Error("اطلاعات پرداخت ناقص است");
           }
         }
@@ -51,20 +43,11 @@ function PaymentCallbackContent() {
           throw new Error("اطلاعات پرداخت ناقص است");
         }
 
-        console.log(
-          "✅ Verifying payment with Order ID:",
-          orderIdToVerify,
-          "Ref ID:",
-          refIdToVerify,
-        );
-
         // Verify payment with backend
         const verificationResult = await OrderService.verifyPayment(
           Number(orderIdToVerify),
           refIdToVerify,
         );
-
-        console.log("Payment verification result:", verificationResult);
 
         // Store order information in atoms
         setOrderId(verificationResult.orderId);
@@ -76,38 +59,27 @@ function PaymentCallbackContent() {
 
         // Double-check payment status
         try {
-          const paymentStatus = await OrderService.getOrderPaymentStatus(
-            verificationResult.orderId,
-          );
-
-          console.log("Payment status check:", paymentStatus);
+          const paymentStatus = await OrderService.getOrderPaymentStatus(verificationResult.orderId);
 
           // Set step based on payment status from direct API check
           if (paymentStatus.isPaid) {
-            console.log("✅ Payment confirmed - redirecting to success");
             setSubmitOrderStep(SubmitOrderStep.Success);
             router.push("/orders/success");
             return;
           }
-        } catch (statusError) {
-          console.warn(
-            "Could not verify payment status via API, using verification result only:",
-            statusError,
-          );
+        } catch {
+          // If payment status cannot be confirmed, fall back to verification result
         }
 
         // If we couldn't check or payment is not verified, use the verification result
         if (verificationResult.success) {
-          console.log("✅ Payment verified via verification API - redirecting to success");
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         } else {
-          console.log("❌ Payment verification failed - redirecting to failure");
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }
       } catch (err: any) {
-        console.error("❌ Payment verification error:", err);
         setError(err.message || "خطا در بررسی وضعیت پرداخت");
         setSubmitOrderStep(SubmitOrderStep.Failure);
         router.push("/orders/failure");

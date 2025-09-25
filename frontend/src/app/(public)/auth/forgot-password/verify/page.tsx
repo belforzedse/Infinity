@@ -35,15 +35,21 @@ function VerifyContent() {
             return;
           }
 
-          const response = await AuthService.resetPassword(
-            data.otp.split("").reverse().join(""),
-            data.password,
-          );
+          try {
+            const response = await AuthService.resetPassword({
+              otp: data.otp,
+              newPassword: data.password,
+              otpToken: typeof window !== "undefined" ? sessionStorage.getItem("otpToken") : null,
+              phone: phoneNumber || undefined,
+            });
 
-          if (response.message) {
-            router.push("/auth/login");
-          } else {
-            toast.error("کد تایید اشتباه است");
+            if (response.message || response.success) {
+              router.push("/auth/login");
+            } else {
+              toast.error("کد تایید اشتباه است");
+            }
+          } catch {
+            toast.error("کد تایید یا توکن معتبر نیست");
           }
         }}
       />

@@ -1,30 +1,24 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
 
-export interface Response {
-  message: string;
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  password: string;
+  phone?: string;
 }
 
-export const register = async (
-  firstName: string,
-  lastName: string,
-  password: string,
-): Promise<Response> => {
+export interface Response {
+  message?: string;
+  token?: string;
+}
+
+export const register = async (payload: RegisterRequest): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.REGISTER;
 
-  const response = await apiClient.post<Response>(
-    endpoint,
-    {
-      firstName,
-      lastName,
-      password,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-    },
-  );
+  const response = await apiClient.post<Response>(endpoint, payload, {
+    skipAuth: true,
+  });
 
-  return response as any;
+  return response as Response;
 };
