@@ -19,7 +19,7 @@ describe("loginPassword", () => {
   it("logs in with phone and password", async () => {
     const phone = "09123456789";
     const password = "password123";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
@@ -29,7 +29,7 @@ describe("loginPassword", () => {
       phone,
       password,
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("handles API errors correctly", async () => {
@@ -45,7 +45,7 @@ describe("loginPassword", () => {
   it("works with different phone number formats", async () => {
     const phoneNumbers = ["09123456789", "+989123456789", "989123456789"];
     const password = "password123";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     mockPost.mockResolvedValue(mockResponse);
 
@@ -62,7 +62,7 @@ describe("loginPassword", () => {
   it("handles empty credentials", async () => {
     const phone = "";
     const password = "";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
@@ -72,13 +72,13 @@ describe("loginPassword", () => {
       phone: "",
       password: "",
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("calls correct API endpoint", async () => {
     const phone = "09123456789";
     const password = "password123";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
@@ -91,21 +91,23 @@ describe("loginPassword", () => {
     const phone = "09123456789";
     const password = "password123";
     const mockResponse = {
-      token: "auth-token",
-      user: { id: 1, name: "John Doe", phone },
+      data: {
+        token: "auth-token",
+        user: { id: 1, name: "John Doe", phone },
+      }
     };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
     const result = await loginPassword(phone, password);
 
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("handles special characters in password", async () => {
     const phone = "09123456789";
     const password = "p@ssw0rd!#$%";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
@@ -115,13 +117,13 @@ describe("loginPassword", () => {
       phone,
       password,
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("handles unicode characters in credentials", async () => {
     const phone = "09123456789";
     const password = "پسورد۱۲۳";
-    const mockResponse = { token: "auth-token" };
+    const mockResponse = { data: { token: "auth-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
@@ -131,6 +133,6 @@ describe("loginPassword", () => {
       phone,
       password,
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 });
