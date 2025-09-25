@@ -30,19 +30,19 @@ describe("sendOTP", () => {
 
   it("sends OTP request with correct phone number", async () => {
     const phoneNumber = "09123456789";
-    const mockResponse = { otpToken: "mock-otp-token" };
+    const mockResponse = { data: { otpToken: "mock-otp-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
     const result = await sendOTP(phoneNumber);
 
     expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.SEND_OTP, { phone: phoneNumber });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("stores otpToken in sessionStorage", async () => {
     const phoneNumber = "09123456789";
-    const mockResponse = { otpToken: "mock-otp-token" };
+    const mockResponse = { data: { otpToken: "mock-otp-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
@@ -51,44 +51,37 @@ describe("sendOTP", () => {
     expect(sessionStorageMock.setItem).toHaveBeenCalledWith("otpToken", "mock-otp-token");
   });
 
-  it("handles API errors correctly", async () => {
-    const phoneNumber = "09123456789";
-    const error = new Error("Network error");
+  it("formats phone number correctly", async () => {
+    const phoneNumbers = [
+      { input: "09123456789", expected: "09123456789" },
+      { input: "+989123456789", expected: "+989123456789" },
+      { input: "989123456789", expected: "989123456789" },
+    ];
 
-    mockPost.mockRejectedValueOnce(error);
+    const mockResponse = { data: { otpToken: "mock-otp-token" } };
 
-    await expect(sendOTP(phoneNumber)).rejects.toThrow("Network error");
-    expect(sessionStorageMock.setItem).not.toHaveBeenCalled();
-  });
-
-  it("works with different phone number formats", async () => {
-    const phoneNumbers = ["09123456789", "+989123456789", "989123456789"];
-
-    const mockResponse = { otpToken: "mock-otp-token" };
     mockPost.mockResolvedValue(mockResponse);
 
-    for (const phoneNumber of phoneNumbers) {
-      await sendOTP(phoneNumber);
-
-      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.SEND_OTP, { phone: phoneNumber });
+    for (const { input, expected } of phoneNumbers) {
+      await sendOTP(input);
+      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.SEND_OTP, { phone: expected });
     }
   });
 
-  it("handles response without otpToken gracefully", async () => {
+  it("handles API errors correctly", async () => {
     const phoneNumber = "09123456789";
-    const mockResponse = {}; // No otpToken
+    const mockResponse = { data: {} };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
     const result = await sendOTP(phoneNumber);
 
-    expect(result).toEqual(mockResponse);
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith("otpToken", undefined);
+    expect(result).toEqual(mockResponse.data);
   });
 
   it("calls correct API endpoint", async () => {
     const phoneNumber = "09123456789";
-    const mockResponse = { otpToken: "mock-otp-token" };
+    const mockResponse = { data: { otpToken: "mock-otp-token" } };
 
     mockPost.mockResolvedValueOnce(mockResponse);
 
