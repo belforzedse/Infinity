@@ -1,11 +1,24 @@
 import { apiClient } from "../index";
 import type { CartStockCheckResponse } from "./types/cart";
 import { unwrap } from "./helpers/response";
-import type { ApiResponse } from "@/types/api";
+
+type SnappEligibilityResponse = {
+  eligible: boolean;
+  title?: string;
+  description?: string;
+  amountIRR?: number;
+};
+
+type ShippingPreviewResponse = {
+  success: boolean;
+  shipping: number;
+  weight?: number;
+  message?: string;
+};
 
 export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
   const response = await apiClient.get<CartStockCheckResponse>("/carts/check-stock");
-  return response as any;
+  return unwrap<CartStockCheckResponse>(response);
 };
 
 export const getSnappEligible = async (
@@ -14,55 +27,47 @@ export const getSnappEligible = async (
     shippingCost?: number;
     discountCode?: string;
   } = {},
-): Promise<{
-  eligible: boolean;
-  title?: string;
-  description?: string;
-  amountIRR?: number;
-}> => {
+): Promise<SnappEligibilityResponse> => {
   const qs = new URLSearchParams();
   if (params.shippingId) qs.set("shippingId", String(params.shippingId));
   if (params.shippingCost) qs.set("shippingCost", String(params.shippingCost));
-  if (params.discountCode) qs.set("discountCode", String(params.discountCode));
-  const url = `/payment-gateway/snapp-eligible${qs.toString() ? `?${qs.toString()}` : ""}`;
+  if (params.discountCode) qs.set("discountCode", params.discountCode);
+
+  const query = qs.toString();
+  const url = `/carts/snapp-eligible${query ? `?${query}` : ""}`;
+
   try {
-    const response = await apiClient.get<
-      ApiResponse<{
-        eligible: boolean;
-        title?: string;
-        description?: string;
-        amountIRR?: number;
-      }>
-    >(url);
-    return unwrap(response) || { eligible: false };
-  } catch (e) {
-    // Keep callers in control; they will preserve previous state on error
-    console.error("getSnappEligible error:", e);
+    const response = await apiClient.get<SnappEligibilityResponse>(url);
+    return unwrap<SnappEligibilityResponse>(response) ?? { eligible: false };
+  } catch {
     return { eligible: false };
   }
 };
 
-export const getShippingPreview = async (params: {
-  addressId: number;
-  shippingId: number;
-}): Promise<{
-  success: boolean;
-  shipping: number;
-  weight?: number;
-  message?: string;
-}> => {
+export const getShippingPreview = async (
+  params:
+    | number
+    | {
+        addressId: number;
+        shippingId?: number;
+        shippingCost?: number;
+      },
+): Promise<ShippingPreviewResponse> => {
+  const resolved =
+    typeof params === "number"
+      ? { addressId: params }
+      : { addressId: params.addressId, shippingId: params.shippingId, shippingCost: params.shippingCost };
+
+  const qs = new URLSearchParams({ addressId: String(resolved.addressId) });
+  if (resolved.shippingId) qs.set("shippingId", String(resolved.shippingId));
+  if (typeof resolved.shippingCost === "number") qs.set("shippingCost", String(resolved.shippingCost));
+
+  const url = `/carts/shipping-preview${qs.toString() ? `?${qs.toString()}` : ""}`;
+
   try {
-    const response = await apiClient.post<
-      ApiResponse<{
-        success: boolean;
-        shipping: number;
-        weight?: number;
-        message?: string;
-      }>
-    >("/carts/shipping-preview", params);
-    return unwrap(response) || { success: false, shipping: 0 };
-  } catch (e) {
-    console.error("getShippingPreview error:", e);
+    const response = await apiClient.get<ShippingPreviewResponse>(url);
+    return unwrap<ShippingPreviewResponse>(response) ?? { success: false, shipping: 0 };
+  } catch {
     return { success: false, shipping: 0 };
   }
 };
