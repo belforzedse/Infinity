@@ -1,4 +1,4 @@
-import { apiClient } from "../index";
+import ApiClient, { apiClient } from "../index";
 import { API_BASE_URL, ERROR_MESSAGES, HTTP_STATUS } from "@/constants/api";
 
 // Mock fetch globally
@@ -162,17 +162,21 @@ describe("ApiClient", () => {
     });
 
     it("handles request timeout", async () => {
-      mockFetch.mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            setTimeout(() => resolve({ ok: true, json: () => ({}) }), 5000);
-          }),
-      );
+      mockFetch.mockImplementationOnce((_, init: RequestInit) => {
+        return new Promise((_, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject(new DOMException("Aborted", "AbortError"));
+          });
+        });
+      });
 
-      const requestPromise = apiClient.get("/slow");
+      const requestPromise = apiClient.get("/slow", { timeout: 1000 });
 
       // Fast-forward time to trigger timeout
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(1000);
+
+      // Flush microtasks queued by the abort rejection
+      await Promise.resolve();
 
       await expect(requestPromise).rejects.toEqual(
         expect.objectContaining({
@@ -183,19 +187,14 @@ describe("ApiClient", () => {
     });
 
     it("throws error when API_BASE_URL is not configured", async () => {
-      // Temporarily override API_BASE_URL
-      const originalEnv = process.env.API_BASE_URL;
-      (API_BASE_URL as any) = "undefined";
+      const client = new ApiClient("undefined");
 
-      await expect(apiClient.get("/test")).rejects.toEqual(
+      await expect(client.get("/test")).rejects.toEqual(
         expect.objectContaining({
           status: 500,
           message: "API base URL is not configured",
         }),
       );
-
-      // Restore original value
-      (API_BASE_URL as any) = originalEnv;
     });
   });
 

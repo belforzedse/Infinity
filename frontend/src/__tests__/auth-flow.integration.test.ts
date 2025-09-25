@@ -144,7 +144,9 @@ describe("Authentication Flow Integration", () => {
 
       const result = await AuthService.register(registrationData);
 
-      expect(mockPost).toHaveBeenCalledWith(expect.any(String), registrationData);
+      expect(mockPost).toHaveBeenCalledWith(expect.any(String), registrationData, {
+        skipAuth: true,
+      });
       expect(result.token).toBe(authToken);
     });
 
@@ -196,6 +198,7 @@ describe("Authentication Flow Integration", () => {
         phone: "09123456789",
         newPassword: "newpassword123",
         otpToken: "otp-token-reset",
+        otp: "123456",
       };
       const mockResponse = { success: true };
 
@@ -212,6 +215,7 @@ describe("Authentication Flow Integration", () => {
         phone: "09123456789",
         newPassword: "newpassword123",
         otpToken: "invalid-token",
+        otp: "123456",
       };
       const error = new Error("Invalid or expired token");
 

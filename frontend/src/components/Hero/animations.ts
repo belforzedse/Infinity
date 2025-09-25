@@ -1,9 +1,11 @@
 import type { Variants, Transition } from "framer-motion";
 
+type AllowedEase = Exclude<Transition["ease"], undefined>;
+
 export type LuxurySlideFadeOptions = {
   distance?: number; // px
   duration?: number; // seconds
-  ease?: string | number[]; // easing curve
+  ease?: AllowedEase; // easing curve
   scale?: number; // scale effect (0.9 - 1.1)
   blur?: number; // blur effect in px
   stagger?: number; // stagger delay for children
@@ -94,7 +96,7 @@ export function luxurySlideFade(
         ...transition,
         staggerChildren: stagger,
         delay: (typeof delayIn === "number" ? delayIn : delay) || 0,
-      } as any,
+      },
     },
     exit: {
       opacity: 0,
@@ -106,7 +108,7 @@ export function luxurySlideFade(
         ...transition,
         staggerChildren: stagger * 0.5,
         delay: (typeof delayOut === "number" ? delayOut : delay) || 0,
-      } as any,
+      },
     },
   };
 }

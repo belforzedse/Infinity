@@ -1,4 +1,4 @@
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, within } from "@testing-library/react";
 import { Input } from "./Input";
 
 describe("Input component", () => {
@@ -22,13 +22,13 @@ describe("Input component", () => {
   });
 
   it("applies size variants correctly", () => {
-    const { getByRole: getDefault } = render(<Input size="default" />);
-    const { getByRole: getSmall } = render(<Input size="sm" />);
-    const { getByRole: getLarge } = render(<Input size="lg" />);
+    const defaultRender = render(<Input size="default" />);
+    const smallRender = render(<Input size="sm" />);
+    const largeRender = render(<Input size="lg" />);
 
-    expect(getDefault("textbox")).toHaveClass("h-10", "px-3", "py-2");
-    expect(getSmall("textbox")).toHaveClass("h-8", "px-2");
-    expect(getLarge("textbox")).toHaveClass("h-12", "px-4");
+    expect(within(defaultRender.container).getByRole("textbox")).toHaveClass("h-10", "px-3", "py-2");
+    expect(within(smallRender.container).getByRole("textbox")).toHaveClass("h-8", "px-2");
+    expect(within(largeRender.container).getByRole("textbox")).toHaveClass("h-12", "px-4");
   });
 
   it("applies auth variant styling", () => {
@@ -53,7 +53,7 @@ describe("Input component", () => {
 
   it("renders left element correctly", () => {
     const leftElement = <span>Left</span>;
-    const { getByText } = render(<Input leftElement={leftElement} />);
+    const { getByText, getByRole } = render(<Input leftElement={leftElement} />);
 
     expect(getByText("Left")).toBeInTheDocument();
     expect(getByRole("textbox")).toHaveClass("pl-12");
@@ -76,13 +76,17 @@ describe("Input component", () => {
   });
 
   it("handles different input types", () => {
-    const { getByRole: getPassword } = render(<Input type="password" />);
-    const { getByRole: getEmail } = render(<Input type="email" />);
-    const { getByRole: getNumber } = render(<Input type="number" />);
+    const passwordRender = render(<Input type="password" />);
+    const emailRender = render(<Input type="email" />);
+    const numberRender = render(<Input type="number" />);
 
-    expect(getPassword("textbox")).toHaveAttribute("type", "password");
-    expect(getEmail("textbox")).toHaveAttribute("type", "email");
-    expect(getNumber("spinbutton")).toHaveAttribute("type", "number");
+    const passwordInput = passwordRender.container.querySelector("input");
+    const emailInput = within(emailRender.container).getByRole("textbox");
+    const numberInput = within(numberRender.container).getByRole("spinbutton");
+
+    expect(passwordInput).toHaveAttribute("type", "password");
+    expect(emailInput).toHaveAttribute("type", "email");
+    expect(numberInput).toHaveAttribute("type", "number");
   });
 
   it("renders error message with red styling", () => {
