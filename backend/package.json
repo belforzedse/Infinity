@@ -13,6 +13,7 @@
     "build:prod": "NODE_ENV=production strapi build",
     "debug:mellat": "node scripts/debug-mellat.js",
     "test:mellat-v3": "node scripts/test-mellat-v3.js",
+    "test": "jest",
     "test:callback-url": "node scripts/test-callback-url.js",
     "deploy": "strapi deploy",
     "develop": "strapi develop",
@@ -33,6 +34,7 @@
     "@strapi/strapi": "4.25.21",
     "@swc/core": "^1.13.0",
     "axios": "^1.10.0",
+    "bcryptjs": "^2.4.3",
     "form-data": "^4.0.4",
     "jsonwebtoken": "^9.0.2",
     "mellat-checkout": "^0.4.0",
@@ -46,7 +48,10 @@
   "devDependencies": {
     "@strapi/typescript-utils": "4.25.21",
     "@types/minimatch": "^5.1.2",
+    "@types/jest": "^29.5.12",
     "@types/node": "^18.19.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.0.0"
   },
   "engines": {
