@@ -13,6 +13,7 @@ import React from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
+import GlassSurface from "@/components/GlassSurface";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
@@ -29,6 +30,40 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  const HeaderContent = () => (
+    <>
+      <div className="hidden md:block">
+        <div className="px-10 py-3">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+              <div className="justify-self-start">
+                <DesktopHeaderActions />
+              </div>
+              <div className="justify-self-center">
+                <Link href="/">
+                  <Image
+                    alt="logo"
+                    width={132}
+                    height={75}
+                    src="/images/cropped-021.webp"
+                    className="h-[47px] w-[90px] md:h-[75px] md:w-[132px]"
+                  />
+                </Link>
+              </div>
+              <div className="justify-self-end">
+                <DesktopSearch />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="md:hidden">
+        <MobileHeader />
+      </div>
+    </>
+  );
+
   return (
     <div dir="rtl" className="bg-white pb-[81px] antialiased md:pb-0">
       {/* Skip to content for accessibility */}
@@ -43,34 +78,29 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
           scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         }`}
       >
-        <div className="hidden md:block">
-          <div className="px-10 py-3">
-            <div className="mx-auto max-w-[1440px]">
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-                <div className="justify-self-start">
-                  <DesktopHeaderActions />
-                </div>
-                <div className="justify-self-center">
-                  <Link href="/">
-                    <Image
-                      alt="logo"
-                      width={132}
-                      height={75}
-                      src="/images/cropped-021.webp"
-                      className="h-[47px] w-[90px] md:h-[75px] md:w-[132px]"
-                    />
-                  </Link>
-                </div>
-                <div className="justify-self-end">
-                  <DesktopSearch />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="md:hidden">
-          <MobileHeader />
+        <div className="relative">
+          {scrolled && (
+            <GlassSurface
+              disableLayoutStyles
+              width="100%"
+              height="100%"
+              borderRadius={0}
+              blur={14}
+              brightness={88}
+              opacity={0.7}
+              backgroundOpacity={0.14}
+              saturation={1.3}
+              distortionScale={-80}
+              redOffset={4}
+              greenOffset={7}
+              blueOffset={9}
+              mixBlendMode="screen"
+              className="pointer-events-none absolute inset-0 -z-10 opacity-95"
+              contentClassName="hidden"
+              style={{ width: '100%', height: '100%' }}
+            />
+          )}
+          <HeaderContent />
         </div>
       </header>
 

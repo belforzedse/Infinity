@@ -1,6 +1,6 @@
-import type { Variants, Transition } from "framer-motion";
+import type { Variants, Transition, EasingDefinition } from "framer-motion";
 
-type AllowedEase = Exclude<Transition["ease"], undefined>;
+type AllowedEase = EasingDefinition;
 
 export type LuxurySlideFadeOptions = {
   distance?: number; // px
