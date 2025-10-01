@@ -24,7 +24,7 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
   return (
     <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-auto">
       <div
-        className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
+        className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         onScroll={handleScroll}
       >
         {images.map((image, index) => (

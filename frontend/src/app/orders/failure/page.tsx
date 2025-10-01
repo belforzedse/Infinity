@@ -3,12 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { useAtom } from "jotai";
-import { orderIdAtom, orderNumberAtom } from "@/atoms/Order";
+import { orderIdAtom, orderNumberAtom, transactionIdAtom } from "@/atoms/Order";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 
 export default function OrderFailure() {
   const [orderId] = useAtom(orderIdAtom);
   const [orderNumber] = useAtom(orderNumberAtom);
+  const [transactionId] = useAtom(transactionIdAtom);
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -45,6 +46,11 @@ export default function OrderFailure() {
             {orderId && (
               <p className="text-sm">
                 شناسه سفارش: <span className="font-semibold">{orderId}</span>
+              </p>
+            )}
+            {transactionId && (
+              <p className="text-sm">
+                ID تراکنش: <span className="font-semibold">{transactionId}</span>
               </p>
             )}
 

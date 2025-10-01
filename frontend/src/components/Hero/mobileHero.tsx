@@ -1,5 +1,5 @@
+"use client";
 import React from "react";
-// This page is now SSR (Server Component) by removing "use client"
 import BannerImage from "./Banners/BannerImage";
 import type { MobileLayout } from "./types";
 import { AnimatePresence, motion } from "framer-motion";
@@ -39,7 +39,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
   return (
     <>
       {/* Hero section with responsive images */}
-      <div className="overflow-hidden">
+      <div className="relative w-full overflow-hidden [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`hero-${playKey}`}
@@ -47,6 +47,8 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
             initial="initial"
             animate="animate"
             exit="exit"
+            className="absolute inset-0 h-full w-full"
+            style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
           >
             <div className="hidden md:block">
               <BannerImage {...layout.heroDesktop} />
@@ -56,9 +58,20 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
             </div>
           </motion.div>
         </AnimatePresence>
+        {/* Spacer to maintain height - renders first slide invisibly */}
+        <div className="invisible">
+          <div className="hidden md:block">
+            <BannerImage {...layout.heroDesktop} />
+          </div>
+          <div className="md:hidden">
+            <BannerImage {...layout.heroMobile} />
+          </div>
+        </div>
+      </div>
 
-        {/* Secondary banners section */}
-        <div className="mt-4 flex flex-col gap-2 overflow-hidden md:flex-row md:gap-4">
+      {/* Secondary banners section */}
+      <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
+        <div className="relative w-full overflow-hidden rounded-lg md:w-3/4 [backface-visibility:hidden] [transform:translateZ(0)]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`primary-${playKey}`}
@@ -66,13 +79,19 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="rounded-lg md:w-3/4"
+              className="absolute inset-0 h-full w-full"
+              style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
             >
               <BannerImage {...layout.secondaryPrimary} />
             </motion.div>
           </AnimatePresence>
+          <div className="invisible">
+            <BannerImage {...layout.secondaryPrimary} />
+          </div>
+        </div>
 
-          <div className="flex gap-2 overflow-hidden md:w-1/2 md:flex-col md:gap-4">
+        <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
+          <div className="relative w-1/2 overflow-hidden md:w-full [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`small-left-${playKey}`}
@@ -80,12 +99,18 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="w-1/2 overflow-hidden md:w-full"
+                className="absolute inset-0 h-full w-full"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
                 <BannerImage {...layout.secondaryTop} />
               </motion.div>
             </AnimatePresence>
+            <div className="invisible">
+              <BannerImage {...layout.secondaryTop} />
+            </div>
+          </div>
 
+          <div className="relative w-1/2 overflow-hidden md:w-full [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`small-right-${playKey}`}
@@ -93,11 +118,15 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="w-1/2 overflow-hidden md:w-full"
+                className="absolute inset-0 h-full w-full"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
                 <BannerImage {...layout.secondaryBottom} />
               </motion.div>
             </AnimatePresence>
+            <div className="invisible">
+              <BannerImage {...layout.secondaryBottom} />
+            </div>
           </div>
         </div>
       </div>

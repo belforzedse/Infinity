@@ -1,6 +1,6 @@
-import type { Variants, Transition } from "framer-motion";
+import type { Variants, Transition, EasingDefinition } from "framer-motion";
 
-type AllowedEase = string | number[] | "linear" | "easeIn" | "easeOut" | "easeInOut" | "circIn" | "circOut" | "circInOut" | "backIn" | "backOut" | "backInOut" | "anticipate";
+type AllowedEase = EasingDefinition;
 
 export type LuxurySlideFadeOptions = {
   distance?: number; // px

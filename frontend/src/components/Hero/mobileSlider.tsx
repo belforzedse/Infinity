@@ -28,7 +28,7 @@ export default function MobileSlider() {
   };
 
   return (
-    <div ref={hostRef} className="mobile-slider-container block">
+    <div ref={hostRef} className="mobile-slider-container block [touch-action:manipulation]">
       <MobileHero layout={slides[index]} playKey={playKey} />
 
       {/* Pagination below content, not overlaying images */}
