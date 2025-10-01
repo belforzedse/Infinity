@@ -6,12 +6,19 @@ interface CheckboxProps {
 }
 
 export default function Checkbox({ checked, onChange, label, className = "" }: CheckboxProps) {
+  const handleToggle = () => onChange(!checked);
+
   return (
     <label className={`flex cursor-pointer items-center gap-2 ${className}`}>
-      <div
-        className="relative flex h-5 w-5 items-center justify-center"
-        onClick={() => onChange(!checked)}
-      >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={handleToggle}
+        className="sr-only"
+        aria-checked={checked}
+      />
+
+      <div className="relative flex h-5 w-5 items-center justify-center" onClick={handleToggle}>
         <div
           className={`h-5 w-5 rounded border transition-colors ${
             checked ? "border-sky-600 bg-sky-600" : "border-slate-400"

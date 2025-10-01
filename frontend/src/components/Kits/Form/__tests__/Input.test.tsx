@@ -50,7 +50,8 @@ describe("Form Input", () => {
     expect(screen.getByRole("textbox")).toHaveAttribute("type", "email");
 
     rerender(<Input name="test" type="password" />);
-    expect(screen.getByRole("textbox", { hidden: true })).toHaveAttribute("type", "password");
+    const passwordInput = document.querySelector("input");
+    expect(passwordInput).toHaveAttribute("type", "password");
 
     rerender(<Input name="test" type="tel" />);
     expect(screen.getByRole("textbox")).toHaveAttribute("type", "tel");

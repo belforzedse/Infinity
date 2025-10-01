@@ -306,4 +306,6 @@ const OrderService = {
   },
 };
 
+export const __clearOrderCache = () => orderCache.clear();
+
 export default OrderService;

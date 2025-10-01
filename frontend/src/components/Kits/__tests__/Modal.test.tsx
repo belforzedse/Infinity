@@ -1,24 +1,32 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Modal from "../Modal";
 
-jest.mock("@headlessui/react", () => ({
-  Dialog: ({ children, onClose }: any) => (
-    <div data-testid="dialog" onClick={onClose}>
-      {children}
-    </div>
-  ),
-  DialogPanel: ({ children, className }: any) => (
-    <div data-testid="dialog-panel" className={className}>
-      {children}
-    </div>
-  ),
-  DialogTitle: ({ children, className }: any) => (
-    <div data-testid="dialog-title" className={className}>
-      {children}
-    </div>
-  ),
-  Transition: ({ children, show }: any) => (show ? <div>{children}</div> : null),
-}));
+jest.mock("@headlessui/react", () => {
+  const TransitionComponent: any = ({ children, show = true }: any) =>
+    show ? <div data-testid="transition">{children}</div> : null;
+  TransitionComponent.Child = ({ children }: any) => (
+    <div data-testid="transition-child">{children}</div>
+  );
+
+  return {
+    Dialog: ({ children, onClose }: any) => (
+      <div data-testid="dialog" onClick={onClose}>
+        {children}
+      </div>
+    ),
+    DialogPanel: ({ children, className }: any) => (
+      <div data-testid="dialog-panel" className={className}>
+        {children}
+      </div>
+    ),
+    DialogTitle: ({ children, className }: any) => (
+      <div data-testid="dialog-title" className={className}>
+        {children}
+      </div>
+    ),
+    Transition: TransitionComponent,
+  };
+});
 
 jest.mock("../Icons/DeleteIcon", () => ({
   __esModule: true,

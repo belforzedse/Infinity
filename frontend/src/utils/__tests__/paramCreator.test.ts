@@ -50,9 +50,7 @@ describe("paramCreator", () => {
       },
     });
 
-    expect(result).toBe(
-      "populate[post][populate][author][populate][profile][populate][0]=avatar",
-    );
+    expect(result).toBe("populate[post][author][profile][populate][0]=avatar");
   });
 
   it("should ignore false boolean values", () => {
@@ -96,9 +94,9 @@ describe("paramCreator", () => {
     });
 
     expect(result).toContain("populate[product][populate][0]=images");
-    expect(result).toContain("populate[product][populate][category][populate][0]=name");
+    expect(result).toContain("populate[product][category][populate][0]=name");
     expect(result).toContain(
-      "populate[product][populate][category][populate][parent][populate][0]=name",
+      "populate[product][category][parent][populate][0]=name",
     );
     expect(result).toContain("populate[product][populate][1]=variants");
     expect(result).toContain("populate[0]=reviews");

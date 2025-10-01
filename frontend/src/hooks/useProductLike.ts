@@ -25,6 +25,18 @@ interface UseProductLikeParams {
 
 let fetchStarted = false;
 
+export function setWindowLocation(url: string) {
+  window.location.href = url;
+}
+
+export const navigationUtils = {
+  setWindowLocation,
+};
+
+export const redirectToAuth = () => {
+  navigationUtils.setWindowLocation("/auth");
+};
+
 const useProductLike = ({ productId }: UseProductLikeParams) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [likedProducts, setLikedProducts] = useAtom(likedProductsAtom);
@@ -79,7 +91,7 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       // Redirect to login page if no token
-      window.location.href = "/auth";
+      redirectToAuth();
       return;
     }
 
@@ -129,3 +141,6 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
 };
 
 export default useProductLike;
+export const __resetUseProductLikeState = () => {
+  fetchStarted = false;
+};
