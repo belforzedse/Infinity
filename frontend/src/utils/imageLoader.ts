@@ -1,14 +1,13 @@
 import type { ImageLoaderProps } from "next/image";
 
-const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
-
 export default function imageLoader({ src, width, quality = 75 }: ImageLoaderProps) {
   // Skip data URLs and empty sources
   if (!src || src.startsWith("data:")) return src;
 
   try {
     // Parse against BASE_URL to support relative paths like "/uploads/..."
-    const base = BASE_URL || "http://localhost"; // safe SSR fallback
+    const envBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
+    const base = envBaseUrl || "http://localhost"; // safe SSR fallback
     const url = new URL(src, base);
 
     // Always include width so Next doesn't warn in dev

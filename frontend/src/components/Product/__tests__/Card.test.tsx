@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import ProductCard, { type ProductCardProps } from "../Card";
+import { faNum } from "@/utils/faNum";
 
 jest.mock("@/hooks/useProductLike", () => ({
   __esModule: true,
@@ -43,9 +44,9 @@ describe("ProductCard", () => {
   it("should render product card with basic information", () => {
     render(<ProductCard {...mockProps} />);
 
-    expect(screen.getByText("Product Title")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Product Title" })).toBeInTheDocument();
     expect(screen.getByText("Category Name")).toBeInTheDocument();
-    expect(screen.getByText(/100,000 تومان/)).toBeInTheDocument();
+    expect(screen.getByText(`${faNum(100000)} تومان`)).toBeInTheDocument();
   });
 
   it("should render discount badge when discount is provided", () => {
@@ -63,8 +64,8 @@ describe("ProductCard", () => {
   it("should render discounted price correctly", () => {
     render(<ProductCard {...mockProps} price={100000} discountPrice={80000} discount={20} />);
 
-    expect(screen.getByText(/80,000 تومان/)).toBeInTheDocument();
-    expect(screen.getByText(/100,000 تومان/)).toBeInTheDocument();
+    expect(screen.getByText(`${faNum(80000)} تومان`)).toBeInTheDocument();
+    expect(screen.getByText(`${faNum(100000)} تومان`)).toBeInTheDocument();
   });
 
   it("should show original price as strikethrough when discounted", () => {
@@ -73,7 +74,7 @@ describe("ProductCard", () => {
     );
 
     const strikethrough = container.querySelector(".line-through");
-    expect(strikethrough).toHaveTextContent("100,000 تومان");
+    expect(strikethrough).toHaveTextContent(`${faNum(100000)} تومان`);
   });
 
   it("should render seen count when greater than 0", () => {
@@ -176,13 +177,13 @@ describe("ProductCard", () => {
   it("should not show discounted price if it is greater than or equal to price", () => {
     render(<ProductCard {...mockProps} price={100000} discountPrice={100000} />);
 
-    const priceElements = screen.getAllByText(/100,000 تومان/);
+    const priceElements = screen.getAllByText(`${faNum(100000)} تومان`);
     expect(priceElements).toHaveLength(1);
   });
 
   it("should not show discounted price if it is 0", () => {
     render(<ProductCard {...mockProps} price={100000} discountPrice={0} />);
 
-    expect(screen.queryByText(/0 تومان/)).not.toBeInTheDocument();
+    expect(screen.queryByText(`${faNum(0)} تومان`)).not.toBeInTheDocument();
   });
 });

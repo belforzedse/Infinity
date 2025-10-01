@@ -138,15 +138,16 @@ describe("ForgotPasswordForm", () => {
     });
   });
 
-  it("should prevent default form submission", async () => {
-    const preventDefault = jest.fn();
+  it("should prevent default form submission", () => {
     mockOnSubmit.mockResolvedValue(undefined);
 
     render(<ForgotPasswordForm onSubmit={mockOnSubmit} />);
 
     const form = screen.getByTestId("auth-button").closest("form");
-    fireEvent.submit(form!, { preventDefault } as any);
+    const submitEvent = new Event("submit", { bubbles: true, cancelable: true });
 
-    expect(preventDefault).toHaveBeenCalled();
+    fireEvent(form!, submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
   });
 });

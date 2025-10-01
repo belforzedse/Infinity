@@ -4,12 +4,13 @@ import useAddToCart from "../useAddToCart";
 const mockAddToCart = jest.fn();
 const mockOpenDrawer = jest.fn();
 const mockUpdateQuantity = jest.fn();
+let cartItemsMock: Array<{ id: string; quantity: number }> = [];
 
 jest.mock("@/contexts/CartContext", () => ({
   useCart: () => ({
     addToCart: mockAddToCart,
     openDrawer: mockOpenDrawer,
-    cartItems: [],
+    cartItems: cartItemsMock,
     updateQuantity: mockUpdateQuantity,
   }),
 }));
@@ -34,6 +35,7 @@ describe("useAddToCart", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    cartItemsMock = [];
   });
 
   it("should initialize with quantity 0", () => {
@@ -44,11 +46,21 @@ describe("useAddToCart", () => {
     expect(result.current.isInCart).toBe(false);
   });
 
-  it("should update quantity", () => {
-    const { result } = renderHook(() => useAddToCart(mockProps));
+  it("should update quantity and sync cart when item exists", () => {
+    cartItemsMock = [{ id: "123---", quantity: 2 }];
+
+    const { result, rerender } = renderHook(() => useAddToCart(mockProps));
 
     act(() => {
       result.current.setQuantity(5);
+    });
+
+    expect(mockUpdateQuantity).toHaveBeenCalledWith("123---", 5);
+
+    cartItemsMock = [{ id: "123---", quantity: 5 }];
+
+    act(() => {
+      rerender();
     });
 
     expect(result.current.quantity).toBe(5);
@@ -74,11 +86,9 @@ describe("useAddToCart", () => {
   });
 
   it("should use current quantity if no initial quantity provided", () => {
-    const { result } = renderHook(() => useAddToCart(mockProps));
+    cartItemsMock = [{ id: "123---", quantity: 3 }];
 
-    act(() => {
-      result.current.setQuantity(3);
-    });
+    const { result } = renderHook(() => useAddToCart(mockProps));
 
     act(() => {
       result.current.addToCart();
