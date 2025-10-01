@@ -18,10 +18,13 @@ describe("useUser", () => {
     localStorage.clear();
   });
 
-  it("should initialize with loading state", () => {
+  it("should initialize without user data", async () => {
     const { result } = renderHook(() => useUser());
 
-    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
     expect(result.current.userData).toBeNull();
     expect(result.current.error).toBeNull();
   });

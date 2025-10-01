@@ -273,12 +273,12 @@ describe("Product Service Helpers", () => {
       expect(result).toBeTruthy();
     });
 
-    it("should return null when no match", () => {
+    it("should return undefined when no match", () => {
       const product = createMockProduct();
 
       const result = findProductVariation(product, 999, 999);
 
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
   });
 

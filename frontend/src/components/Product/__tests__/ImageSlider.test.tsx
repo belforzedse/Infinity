@@ -77,7 +77,7 @@ describe("ImageSlider", () => {
     // Initial state - first dot should be active
     const dots = container.querySelectorAll(".h-0\\.5");
     expect(dots[0]).toHaveClass("w-7");
-    expect(dots[1]).toHaveClass("w-\\[9px\\]");
+    expect(dots[1]?.classList.contains("w-[9px]")).toBe(true);
   });
 
   it("should handle empty images array", () => {
