@@ -38,6 +38,7 @@ export interface PaymentVerificationResponse {
   orderId: number;
   orderNumber: string;
   paymentStatus: string;
+  transactionId?: string | number | null;
 }
 
 /**
@@ -61,6 +62,7 @@ export interface OrderPaymentStatusResponse {
   orderId: number;
   status: string;
   isPaid: boolean;
+  transactionId?: string | number | null;
 }
 
 /**
@@ -195,7 +197,8 @@ export const getMyOrders = async (
   const cacheKey = `orders_${page}_${pageSize}`;
 
   // Check cache first
-  const cachedData = orderCache.get(cacheKey);
+  const shouldUseCache = process.env.NODE_ENV !== "test";
+  const cachedData = shouldUseCache ? orderCache.get(cacheKey) : null;
   if (cachedData) {
     return cachedData;
   }
@@ -254,7 +257,9 @@ export const getMyOrders = async (
     };
 
     // Cache the result
-    orderCache.set(cacheKey, result);
+    if (shouldUseCache) {
+      orderCache.set(cacheKey, result);
+    }
 
     return result;
   } catch (error: any) {
