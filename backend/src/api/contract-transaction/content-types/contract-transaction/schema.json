@@ -63,6 +63,13 @@
     },
     "Date": {
       "type": "datetime"
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }

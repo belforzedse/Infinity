@@ -97,6 +97,27 @@ The project includes JSON data files in the `database` directory that can be use
 
 - `iran-cities.json` - Complete list of all Iranian provinces and their cities in Persian.
 
+## 🚚 Shipping Preview & Anipo
+
+- Endpoint: `POST /api/carts/shipping-preview`
+  - Auth: via `global::authentication` middleware
+  - Body: `{ addressId: number, shippingId: number }`
+  - Returns: `{ success: boolean, shipping: number, weight?: number }`
+  - Declared value uses `DiscountPrice` when available to align with checkout.
+
+Environment variables for Anipo:
+
+```
+ANIPO_KEYWORD=
+# Optional (defaults to https://panel.anipo.ir)
+ANIPO_BASE_URL=
+```
+
+Behavior notes:
+
+- Shipping method id=4 (buy-in-person) returns zero shipping.
+- If Anipo preview is unavailable during finalize, an order-log is recorded for observability.
+
 ## 🛠️ Migrations
 
 This project includes database migrations to set up necessary data. To run migrations:
@@ -1160,3 +1181,16 @@ The search functionality performs the following:
 3. Searches product categories for the query string
 4. Returns results sorted by creation date (newest first)
 5. Includes product variations, colors, sizes, models, and stock information in the response
+
+## 2025-09-14 02:04 UTC
+
+- fix(gateway-snappay): normalize mobile to 98XXXXXXXXXX; stronger transactionId
+- fix(order): decrement stock only after settlement; add transactional TODO
+- refactor(cart): split ops/libs; avoid cart clear at gateway-init
+- docs: add Cursor rules and bug report artifact
+
+## 2025-09-14 07:00 UTC
+
+- fix(snappay): preserve E.164 `+98XXXXXXXXXX` mobile across helper/service; add guard to abort on unsuccessful eligibility; wrap token request with try/catch and cancel order/contract on hard errors
+- chore(logging): add SnappPay callback identifiers and verify/settle result logs in `src/api/order/controllers/order.ts`; add eligibility request/result logs in `src/api/payment-gateway/controllers/payment-gateway.ts`
+- policy: no changes — cart cleared only after successful gateway init; stock decremented only after settlement (see Cursor rules)

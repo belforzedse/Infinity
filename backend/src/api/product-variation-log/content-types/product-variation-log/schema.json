@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_variation_logs",
+  "info": {
+    "singularName": "product-variation-log",
+    "pluralName": "product-variation-logs",
+    "displayName": "ProductVariationLog",
+    "description": "Audit log for ProductVariation entity"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product_variation": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product-variation.product-variation"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete"],
+      "required": true
+    },
+    "Changes": {
+      "type": "json"
+    },
+    "Description": {
+      "type": "text"
+    }
+  }
+}
+
+

@@ -16,10 +16,14 @@
       "type": "string",
       "required": true
     },
+    "Weight": {
+      "type": "integer",
+      "default": 100
+    },
     "CoverImage": {
       "type": "media",
       "multiple": false,
-      "required": true,
+      "required": false,
       "allowedTypes": [
         "images"
       ]
@@ -107,6 +111,13 @@
     },
     "removedAt": {
       "type": "datetime"
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }

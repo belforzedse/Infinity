@@ -66,11 +66,46 @@
       "target": "api::shipping.shipping",
       "inversedBy": "orders"
     },
+    "delivery_address": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user-address.local-user-address"
+    },
     "ShippingCost": {
       "type": "integer",
       "required": false,
       "min": 0,
       "default": 0
+    },
+    "ShippingBarcode": {
+      "type": "string"
+    },
+    "ShippingPostPrice": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "ShippingTax": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "ShippingWeight": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "ShippingBoxSizeId": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }

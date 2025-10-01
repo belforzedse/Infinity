@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "local_user_logs",
+  "info": {
+    "singularName": "local-user-log",
+    "pluralName": "local-user-logs",
+    "displayName": "LocalUserLog",
+    "description": "Audit log for LocalUser entity"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "local_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user.local-user"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete"],
+      "required": true
+    },
+    "Changes": {
+      "type": "json"
+    },
+    "Description": {
+      "type": "text"
+    },
+    "PerformedBy": {
+      "type": "string"
+    },
+    "IP": {
+      "type": "string"
+    },
+    "UserAgent": {
+      "type": "string"
+    }
+  }
+}
+
+

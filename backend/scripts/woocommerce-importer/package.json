@@ -1,0 +1,58 @@
+{
+  "name": "woocommerce-strapi-importer",
+  "version": "1.0.0",
+  "description": "Import data from WooCommerce to Strapi with duplicate prevention and progress tracking",
+  "main": "index.js",
+  "bin": {
+    "woocommerce-importer": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "categories": "node index.js categories",
+    "products": "node index.js products",
+    "products-all": "node index.js products --all --batch-size 100",
+    "variations": "node index.js variations",
+    "variations-all": "node index.js variations --all --batch-size 100",
+    "variations-imported": "node index.js variations-imported",
+    "orders": "node index.js orders",
+    "orders-all": "node index.js orders --all --batch-size 50",
+    "users": "node index.js users",
+    "users-all": "node index.js users --all --batch-size 50",
+    "all": "node index.js all",
+    "dry-run": "node index.js categories --dry-run",
+    "status": "node index.js status",
+    "reset-progress": "node index.js reset-progress",
+    "reset-products": "node index.js reset-progress --type products",
+    "reset-variations": "node index.js reset-progress --type variations",
+    "reset-orders": "node index.js reset-progress --type orders",
+    "reset-users": "node index.js reset-progress --type users",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "woocommerce",
+    "strapi",
+    "import",
+    "e-commerce",
+    "data-migration"
+  ],
+  "author": "Infinity Store Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "commander": "^11.1.0",
+    "form-data": "^4.0.0",
+    "sharp": "^0.33.0",
+    "strapi-plugin-rest-cache": "^4.2.9"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infinity-store/woocommerce-importer"
+  },
+  "bugs": {
+    "url": "https://github.com/infinity-store/woocommerce-importer/issues"
+  },
+  "homepage": "https://github.com/infinity-store/woocommerce-importer#readme"
+}
