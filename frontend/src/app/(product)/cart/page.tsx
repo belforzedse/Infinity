@@ -8,10 +8,16 @@ import EmptyShoppingCart from "@/components/ShoppingCart/Empty";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import OffersListHomePage from "@/components/PDP/OffersListHomePage";
+import dynamic from "next/dynamic";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { getRandomProducts } from "@/services/product/homepage";
 import HeartIcon from "@/components/PDP/Icons/HeartIcon";
+
+// Lazy load offers section - not critical for initial render
+const OffersListHomePage = dynamic(() => import("@/components/PDP/OffersListHomePage"), {
+  ssr: false,
+  loading: () => <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />,
+});
 
 export default function CartPage() {
   const { cartItems, isLoading } = useCart();
@@ -20,21 +26,28 @@ export default function CartPage() {
   const [, setLoadingRandom] = useState(false);
 
   useEffect(() => {
+    // Delay fetching random products until after cart is rendered
+    if (isLoading || cartItems.length === 0) return;
+
     let mounted = true;
-    const run = async () => {
-      try {
-        setLoadingRandom(true);
-        const items = await getRandomProducts(60, 12);
-        if (mounted) setRandomProducts(items);
-      } finally {
-        if (mounted) setLoadingRandom(false);
-      }
-    };
-    run();
+    const timer = setTimeout(() => {
+      const run = async () => {
+        try {
+          setLoadingRandom(true);
+          const items = await getRandomProducts(60, 12);
+          if (mounted) setRandomProducts(items);
+        } finally {
+          if (mounted) setLoadingRandom(false);
+        }
+      };
+      run();
+    }, 500); // Delay 500ms to prioritize cart content
+
     return () => {
       mounted = false;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [isLoading, cartItems.length]);
 
   if (isLoading) return <CartSkeleton />;
   if (cartItems.length === 0) return <EmptyShoppingCart />;
