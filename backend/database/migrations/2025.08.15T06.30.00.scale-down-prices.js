@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Migration `scale-down-prices` - Divide monetary fields by 10 (remove a trailing zero)
  */
 
@@ -22,8 +22,34 @@ module.exports = {
         { table: "contract_transactions", column: "discount_amount", cast: "bigint" },
       ];
 
+      const runnable = [];
+      for (const op of operations) {
+        const hasTable = await knex.schema.hasTable(op.table);
+        if (!hasTable) {
+          console.warn(
+            `Skipping price scaling for ${op.table}.${op.column} because the table does not exist yet.`
+          );
+          continue;
+        }
+
+        const hasColumn = await knex.schema.hasColumn(op.table, op.column);
+        if (!hasColumn) {
+          console.warn(
+            `Skipping price scaling for ${op.table}.${op.column} because the column does not exist.`
+          );
+          continue;
+        }
+
+        runnable.push(op);
+      }
+
+      if (runnable.length === 0) {
+        console.log("No monetary tables available for price scaling; skipping migration.");
+        return;
+      }
+
       await knex.transaction(async (trx) => {
-        for (const op of operations) {
+        for (const op of runnable) {
           const castType = op.cast === "integer" ? "integer" : "bigint";
 
           const affected = await trx(op.table)
@@ -45,5 +71,3 @@ module.exports = {
     }
   },
 };
-
-
