@@ -3,7 +3,12 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OrderService } from "@/services";
-import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order";
+import {
+  orderIdAtom,
+  orderNumberAtom,
+  submitOrderStepAtom,
+  transactionIdAtom,
+} from "@/atoms/Order";
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 
@@ -13,6 +18,7 @@ function PaymentCallbackContent() {
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const [___, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
+  const [____, setTransactionId] = useAtom(transactionIdAtom);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -20,6 +26,7 @@ function PaymentCallbackContent() {
     const handlePaymentCallback = async () => {
       try {
         setLoading(true);
+        setTransactionId(null);
 
         // Get parameters from URL
         const resNum = searchParams.get("ResNum"); // Order ID
@@ -52,6 +59,11 @@ function PaymentCallbackContent() {
         // Store order information in atoms
         setOrderId(verificationResult.orderId);
         setOrderNumber(verificationResult.orderNumber);
+        setTransactionId(
+          verificationResult.transactionId
+            ? String(verificationResult.transactionId)
+            : null,
+        );
 
         // Clear localStorage backup data on successful verification
         localStorage.removeItem("pendingOrderId");
@@ -60,6 +72,10 @@ function PaymentCallbackContent() {
         // Double-check payment status
         try {
           const paymentStatus = await OrderService.getOrderPaymentStatus(verificationResult.orderId);
+
+          if (paymentStatus.transactionId) {
+            setTransactionId(String(paymentStatus.transactionId));
+          }
 
           // Set step based on payment status from direct API check
           if (paymentStatus.isPaid) {
@@ -82,6 +98,7 @@ function PaymentCallbackContent() {
       } catch (err: any) {
         setError(err.message || "خطا در بررسی وضعیت پرداخت");
         setSubmitOrderStep(SubmitOrderStep.Failure);
+        setTransactionId(null);
         router.push("/orders/failure");
       } finally {
         setLoading(false);
