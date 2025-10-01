@@ -12,6 +12,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   const [error, setError] = useState<string | null>(null);
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
@@ -23,9 +24,15 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
 
         setIsPaid(response.isPaid);
         setOrderStatus(response.status);
+        if (response.transactionId) {
+          setTransactionId(String(response.transactionId));
+        } else {
+          setTransactionId(null);
+        }
       } catch (err: any) {
         console.error("Error checking payment status:", err);
         setError(err.message || "خطا در بررسی وضعیت پرداخت");
+        setTransactionId(null);
       } finally {
         setLoading(false);
       }
@@ -33,6 +40,8 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
 
     if (orderId) {
       checkPaymentStatus();
+    } else {
+      setTransactionId(null);
     }
   }, [orderId]);
 
@@ -99,6 +108,12 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
         <div className="text-sm mt-1 text-gray-600">
           <span className="ml-1">وضعیت سفارش:</span>
           <span className="text-gray-800">{getStatusTranslation(orderStatus)}</span>
+        </div>
+      )}
+      {transactionId && (
+        <div className="text-sm mt-1 text-gray-600">
+          <span className="ml-1 font-medium">ID تراکنش:</span>
+          <span className="text-gray-800">{transactionId}</span>
         </div>
       )}
     </div>
