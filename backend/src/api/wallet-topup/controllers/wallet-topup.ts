@@ -42,11 +42,11 @@ export default factories.createCoreController(
 
         // Build absolute callback URL and avoid duplicate "/api" prefixes
         const configuredBase = String(
-          strapi.config.get("server.url", "https://api.new.infinitycolor.co")
+          strapi.config.get("server.url", "https://api.infinitycolor.co")
         );
         let baseUrl = configuredBase.trim();
         if (!/^https?:\/\//i.test(baseUrl)) {
-          baseUrl = "https://api.new.infinitycolor.co";
+          baseUrl = "https://api.infinitycolor.co";
         }
         baseUrl = baseUrl.replace(/\/$/, "").replace(/\/api$/i, "");
         const callbackURL = `${baseUrl}/api/wallet/payment-callback`;
