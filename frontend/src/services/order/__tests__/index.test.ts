@@ -3,6 +3,7 @@ import OrderService, {
   getOrderStatus,
   getOrderPaymentStatus,
   getMyOrders,
+  __clearOrderCache,
 } from "../index";
 import { apiClient } from "../../index";
 
@@ -16,6 +17,7 @@ jest.mock("../../index", () => ({
 describe("OrderService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    __clearOrderCache();
   });
 
   describe("verifyPayment", () => {

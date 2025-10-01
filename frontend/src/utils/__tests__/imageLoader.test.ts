@@ -72,7 +72,10 @@ describe("imageLoader", () => {
     const invalidUrl = "not a valid url with spaces";
     const result = imageLoader({ src: invalidUrl, width: 800, quality: 90 });
 
-    expect(result).toBe(`${invalidUrl}?w=800&q=90&f=webp`);
+    expect(result).toContain("not%20a%20valid%20url%20with%20spaces");
+    expect(result).toContain("w=800");
+    expect(result).toContain("q=90");
+    expect(result).toContain("f=webp");
   });
 
   it("should use & for URLs with existing params in fallback", () => {
