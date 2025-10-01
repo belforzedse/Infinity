@@ -33,10 +33,12 @@
       "type": "integer"
     },
     "StartDate": {
-      "type": "datetime"
+      "type": "datetime",
+      "required": true
     },
     "EndDate": {
-      "type": "datetime"
+      "type": "datetime",
+      "required": true
     },
     "IsActive": {
       "type": "boolean",

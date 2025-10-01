@@ -1,0 +1,30 @@
+Summary of Findings
+
+Critical
+- finalizeToOrder.ts → 109-139: Stock is decremented on wallet payment in finalize handler, violating backend-stock-adjustment-policy (stock must decrement only after verified settlement in callback). Suggested Fix: Move stock decrement and order Status update to payment callback flow for wallet payments, mirroring Mellat/SnappPay, or create a dedicated wallet-callback that settles and then decrements stock.
+
+High
+- finalizeToOrder.ts → 141-143: Order Status set to "Started" immediately on wallet path without verify/settle parity or transaction. Suggested Fix: Defer Status change to post-settlement stage and ensure alignment with payment callback policies.
+- wallet-topup.controller.ts → 42-51: callbackURL built with strapi.config.get("server.url", ...) and then appends "/api/wallet/payment-callback"; ensure this results in an absolute URL used by Mellat. If Mellat requires absolute URL including "/api", confirm server.url includes scheme/host. Suggested Fix: Use a utility to enforce absolute URL and avoid duplicate "/api" prefixes in different deployments.
+- wallet-topup.custom-router.ts → 5-10: charge-intent route uses auth: false with middleware global::authentication. Strapi still bypasses auth in some versions when auth:false is set. Suggested Fix: Remove auth:false to rely solely on middleware, or ensure policy order enforces middleware first; alternatively set auth:true and keep middleware.
+
+Medium
+- wallet-topup.controller.ts → 24: SaleOrderId = Date.now().toString() may collide under concurrency and Mellat often requires numeric in certain range and uniqueness. Suggested Fix: Use a more robust unique generator (e.g., timestamp + random suffix) and persist uniqueness; schema already has unique index on SaleOrderId.
+- wallet-topup.controller.ts → 66-72: Silent catch when updating RefId swallows errors. Suggested Fix: Log errors to strapi.log.error with request context.
+- wallet-topup.paymentCallback → 146-163 and 166-178: Multiple silent catches suppress critical failures. Suggested Fix: Log errors with context (SaleOrderId, user, amounts).
+- wallet-topup.paymentCallback → 180-191: Creating wallet if absent is good, but no transaction/locking across wallet balance update and transaction creation. Suggested Fix: Wrap balance update and transaction record in a DB transaction if supported; at least handle partial failure with compensating logs.
+- wallet-topup.paymentCallback → 193-205: Uses topup.Amount directly as IRR; ensure Front sends IRR consistently; mis-scaling risks. Suggested Fix: Document and validate units for wallet topup.
+- wallet-topup.paymentCallback → 207-222: ReferenceId is unique in wallet-transaction schema; using SaleReferenceId as unique might collide across topups if gateway reuses/upstream duplicates. Suggested Fix: Confirm uniqueness guarantee or compose a unique ReferenceId (e.g., `${SaleOrderId}-${SaleReferenceId}`) or drop unique.
+
+Low
+- finalizeToOrder.ts → building absoluteCallback but then Mellat path passes raw callbackURL (possibly relative). Suggested Fix: Pass absoluteCallback everywhere for consistency.
+
+Additional Notes
+- Order Status enum in backend is ["Paying","Started","Shipment","Done","Returned","Cancelled"]. Wallet path should adopt same callback-based transition as Mellat/SnappPay for consistency and reporting.
+- Cart clearing policy: No immediate cart clearing observed in wallet path (good), but ensure cart is cleared only after successful payment token/redirect or final settlement as per policy.
+
+Confidence
+- Critical items: High (based on explicit project rules and current code locations)
+- High items: Medium-High
+- Medium items: Medium
+- Low items: Medium

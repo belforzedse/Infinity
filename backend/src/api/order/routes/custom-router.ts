@@ -31,5 +31,13 @@ export default {
         middlewares: ["global::authentication"],
       },
     },
+    {
+      method: "POST",
+      path: "/orders/:id/anipo-barcode",
+      handler: "order.generateAnipoBarcode",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };

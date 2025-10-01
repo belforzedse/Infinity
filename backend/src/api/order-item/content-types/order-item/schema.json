@@ -55,6 +55,13 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::product-variation-model.product-variation-model"
+    },
+    "external_id": {
+      "type": "string",
+      "unique": false
+    },
+    "external_source": {
+      "type": "string"
     }
   }
 }

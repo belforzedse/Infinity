@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contract_logs",
+  "info": {
+    "singularName": "contract-log",
+    "pluralName": "contract-logs",
+    "displayName": "ContractLog",
+    "description": "Audit log for Contract entity"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "contract": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::contract.contract"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete"],
+      "required": true
+    },
+    "Changes": {
+      "type": "json"
+    },
+    "Description": {
+      "type": "text"
+    }
+  }
+}
+
+

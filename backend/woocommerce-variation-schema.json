@@ -1,0 +1,105 @@
+[
+  {
+    "id": 1004600,
+    "type": "variation",
+    "date_created": "2025-07-24T16:44:05",
+    "date_created_gmt": "2025-07-24T13:14:05",
+    "date_modified": "2025-07-24T16:56:01",
+    "date_modified_gmt": "2025-07-24T13:26:01",
+    "description": "",
+    "permalink": "https://infinitycolor.co/product/elise-top-c00575/?attribute_pa_color=%25d9%2586%25d8%25b3%25da%25a9%25d8%25a7%25d9%2581%25d9%2587-%25d8%25a7%25db%258c",
+    "sku": "",
+    "global_unique_id": "",
+    "price": "429000",
+    "regular_price": "429000",
+    "sale_price": "",
+    "date_on_sale_from": null,
+    "date_on_sale_from_gmt": null,
+    "date_on_sale_to": null,
+    "date_on_sale_to_gmt": null,
+    "on_sale": false,
+    "status": "publish",
+    "purchasable": true,
+    "virtual": false,
+    "downloadable": false,
+    "downloads": [],
+    "download_limit": -1,
+    "download_expiry": -1,
+    "tax_status": "taxable",
+    "tax_class": "",
+    "manage_stock": true,
+    "stock_quantity": 28,
+    "stock_status": "instock",
+    "backorders": "no",
+    "backorders_allowed": false,
+    "backordered": false,
+    "low_stock_amount": null,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "shipping_class": "",
+    "shipping_class_id": 0,
+    "image": {
+      "id": 1004604,
+      "date_created": "2025-07-24T21:16:40",
+      "date_created_gmt": "2025-07-24T13:16:40",
+      "date_modified": "2025-07-24T21:16:40",
+      "date_modified_gmt": "2025-07-24T13:16:40",
+      "src": "https://infinitycolor.co/wp-content/uploads/2025/07/DSC_5880-copy.jpg",
+      "name": "DSC_5880 copy",
+      "alt": ""
+    },
+    "attributes": [
+      {
+        "id": 7,
+        "name": "رنگ محصول",
+        "slug": "pa_color",
+        "option": "نسکافه ای"
+      }
+    ],
+    "menu_order": 6,
+    "meta_data": [
+      {
+        "id": 21879381,
+        "key": "_wc_cog_cost",
+        "value": ""
+      },
+      {
+        "id": 21879382,
+        "key": "_wc_cog_default_cost",
+        "value": "no"
+      }
+    ],
+    "name": "نسکافه ای",
+    "parent_id": 1004583,
+    "_links": {
+      "self": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/products/1004583/variations/1004600",
+          "targetHints": {
+            "allow": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/products/1004583/variations"
+        }
+      ],
+      "up": [
+        {
+          "href": "https://infinitycolor.co/wp-json/wc/v3/products/1004583"
+        }
+      ]
+    }
+  }
+]

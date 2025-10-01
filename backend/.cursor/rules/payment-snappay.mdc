@@ -1,0 +1,70 @@
+---
+description: SnappPay mobile format, eligibility guard, token request handling, and logging conventions
+globs: src/api/payment-gateway/**/*.ts,src/api/cart/controllers/handlers/**/*.ts,src/api/order/controllers/order.ts
+---
+
+# SnappPay Integration Policy
+
+This rule documents how to prepare payloads, validate inputs, and handle control flow for SnappPay installment payments.
+
+## Mobile Format (Required)
+
+- Always send mobile in E.164-like format with a leading plus: `+98XXXXXXXXXX`.
+- Do NOT strip the plus in helpers.
+- If upstream provided a non-plus format, normalize in the service right before POST.
+
+References:
+
+- Helper builds payload (keeps `+`): [gateway-helpers.ts](mdc:src/api/cart/controllers/handlers/gateway-helpers.ts)
+- Service normalizes as a guard: [snappay.ts](mdc:src/api/payment-gateway/services/snappay.ts)
+
+## Eligibility Guard
+
+- Call `eligible(amountIRR)` before token request.
+- If `eligible.successful === false`, short-circuit with 400 and do not call token API.
+- If `eligible.successful === true` and `eligible.response.eligible === false`, respond with 400 (ineligible amount).
+
+Reference: [gateway-helpers.ts](mdc:src/api/cart/controllers/handlers/gateway-helpers.ts)
+
+## Token Request Handling
+
+- Wrap token request with try/catch. On hard errors:
+  - Update order and contract to `Cancelled`.
+  - Return `ctx.badRequest("SnappPay token request failed", { data: { success: false, error } })`.
+- If token API responds but no `paymentPageUrl`, cancel order/contract and return 400 with gateway error.
+
+Reference: [gateway-helpers.ts](mdc:src/api/cart/controllers/handlers/gateway-helpers.ts)
+
+## Transaction ID
+
+- Generate 5–10 chars, alphanumeric; include a letter if possible.
+- Pattern used: `${"O" + order.id}${RANDOM}` truncated to 10.
+
+Reference: [gateway-helpers.ts](mdc:src/api/cart/controllers/handlers/gateway-helpers.ts)
+
+## Return URL
+
+- Prefer absolute URL from `SNAPPAY_RETURN_URL` if set and valid.
+- Else: fallback to `${FRONTEND_BASE_URL}/api/snapp/return`.
+- Else: use controller-provided absolute callback.
+
+Reference: [gateway-helpers.ts](mdc:src/api/cart/controllers/handlers/gateway-helpers.ts)
+
+## Logging Conventions
+
+- Log key checkpoints for observability:
+  - Eligibility request/response (successful, eligible, error)
+  - Token request payload summary (hasPlus, patternOk, items, totals)
+  - Token response summary (successful, hasPaymentToken/PageUrl, errorCode)
+  - Callback identifiers and verify/settle results (successful, errors)
+
+References:
+
+- Payment service logs: [snappay.ts](mdc:src/api/payment-gateway/services/snappay.ts)
+- Order controller callback logs: [order.ts](mdc:src/api/order/controllers/order.ts)
+- Controller eligibility logs: [payment-gateway.ts](mdc:src/api/payment-gateway/controllers/payment-gateway.ts)
+
+## Related Policies
+
+- Cart clearing occurs only after successful gateway initiation (see [cart-clearing-policy](mdc:.cursor/rules/cart-clearing-policy.mdc)).
+- Stock decremented only after successful settlement (see [backend-stock-adjustment-policy](mdc:.cursor/rules/backend-stock-adjustment-policy.mdc)).
