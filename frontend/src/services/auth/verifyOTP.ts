@@ -8,10 +8,14 @@ export interface Response {
 export const verifyOTP = async (otp: string): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.VERIFY_OTP;
 
-  const response = await apiClient.post<Response>(endpoint, {
-    otpToken: sessionStorage.getItem("otpToken"),
-    otp: otp,
-  });
+  const response = await apiClient.post<Response>(
+    endpoint,
+    {
+      otpToken: sessionStorage.getItem("otpToken"),
+      otp: otp,
+    },
+    { suppressAuthRedirect: true },
+  );
 
   return response as any;
 };

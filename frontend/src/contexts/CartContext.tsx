@@ -8,6 +8,7 @@ import notify from "@/utils/notify";
 
 export interface CartItem {
   id: string;
+  cartItemId?: string;
   slug: string;
   productId: string;
   variationId?: string;
@@ -157,6 +158,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
         const variation = item.product_variation;
         const product = variation.product;
+        const productId = String(product.id || "");
+        const compositeId = variation.id
+          ? `${productId}-${variation.id}`
+          : String(item.id);
 
         // Get image URL from CoverImage
         const imageUrl = getImageUrl(product.CoverImage);
@@ -216,9 +221,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           : undefined;
 
         return {
-          id: String(item.id),
+          id: compositeId,
+          cartItemId: String(item.id),
           slug: `${variation.SKU || product.id}-${variation.id}`,
-          productId: String(product.id || ""),
+          productId,
           variationId: String(variation.id),
           name: product.Title,
           category: category,
@@ -335,11 +341,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
 
         // Find cart item ID from our local state that matches the item ID
-        const item = cartItems.find((item) => item.id === id);
+        const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
         if (!item) return;
 
         // Extract the cart item ID from the API (assuming it's in the variationId field)
-        const cartItemId = item.id;
+        const cartItemId = item.cartItemId || item.id;
         if (!cartItemId) return;
 
         await CartService.removeCartItem(Number(cartItemId));
@@ -368,11 +374,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
 
         // Find cart item ID from our local state that matches the item ID
-        const item = cartItems.find((item) => item.id === id);
+        const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
         if (!item) return;
 
         // Extract the cart item ID from the API
-        const cartItemId = item.id;
+        const cartItemId = item.cartItemId || item.id;
         if (!cartItemId) return;
 
         await CartService.updateCartItem(Number(cartItemId), quantity);
