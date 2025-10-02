@@ -14,8 +14,8 @@ description: Backend wallet top-up via Mellat and wallet checkout payment flow
 - Controller: [src/api/wallet-topup/controllers/wallet-topup.ts](mdc:infinity-store-backend/src/api/wallet-topup/controllers/wallet-topup.ts)
 - Routes:
   - POST `/api/wallet/charge-intent` → creates `wallet-topup` (Status=Pending), calls Mellat V3, returns `redirectUrl`, `refId`.
-  - POST `/api/wallet/payment-callback` → verifies and settles via Mellat V3, updates top-up, credits wallet, creates `local-user-wallet-transaction` Type="Add", then redirects to FE `https://infinity.rgbgroup.ir/wallet?status=...`.
-- Callback base uses production API domain: `https://api.infinity.rgbgroup.ir/api/wallet/payment-callback`.
+  - POST `/api/wallet/payment-callback` → verifies and settles via Mellat V3, updates top-up, credits wallet, creates `local-user-wallet-transaction` Type="Add", then redirects to FE `https://new.infinitycolor.co/wallet?status=...`.
+- Callback base uses production API domain: `https://api.infinitycolor.co/api/wallet/payment-callback`.
 
 ### Checkout with Wallet Payment (Full Wallet Only)
 

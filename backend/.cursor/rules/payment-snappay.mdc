@@ -64,6 +64,36 @@ References:
 - Order controller callback logs: [order.ts](mdc:src/api/order/controllers/order.ts)
 - Controller eligibility logs: [payment-gateway.ts](mdc:src/api/payment-gateway/controllers/payment-gateway.ts)
 
+## Update and Cancel Scenarios
+
+### Revert (Before Settlement)
+
+- Used when payment is successful but service cannot be provided (e.g., out of stock).
+- Must be called BEFORE `settle()` is executed.
+- Automatically called in callback handler when state !== "OK".
+- Returns funds to customer's account.
+- Implementation: `snappay.revert(paymentToken)` (line 302-327 in snappay.ts)
+
+### Cancel (After Settlement)
+
+- Used when transaction needs to be cancelled AFTER settlement.
+- Can only be called on transactions in `settle` status.
+- Implementation: `snappay.cancel(paymentToken)` (line 274-299 in snappay.ts)
+- Use case: Order cancellation after successful payment and settlement.
+
+### Update (After Settlement)
+
+- Used when cart items or amount need to be modified AFTER settlement.
+- Only allows REDUCTION in amount (since customer already paid first installment).
+- If a product is completely removed, it must also be removed from cartItems.
+- Implementation: `snappay.update(paymentToken, updatedPayload)` would need to be added.
+- **Note**: Update API is not yet implemented in the service. Contact SnappPay support if needed.
+
+### Status Inquiry
+
+- Check transaction status at any time using: `snappay.status(paymentToken)` (line 330-358 in snappay.ts)
+- Returns current transaction state and details.
+
 ## Related Policies
 
 - Cart clearing occurs only after successful gateway initiation (see [cart-clearing-policy](mdc:.cursor/rules/cart-clearing-policy.mdc)).
