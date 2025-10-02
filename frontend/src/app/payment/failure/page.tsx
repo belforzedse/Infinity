@@ -8,6 +8,7 @@ function PaymentFailureContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const transactionId = searchParams.get("transactionId");
   const error = searchParams.get("error");
 
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,12 @@ function PaymentFailureContent() {
                   <span className="font-medium">شماره سفارش:</span>
                   <span className="mr-2 font-semibold text-orange-700">#{orderId}</span>
                 </p>
+                {transactionId && (
+                  <p className="text-gray-700">
+                    <span className="font-medium">شناسه تراکنش:</span>
+                    <span className="mr-2 font-semibold text-orange-700">{transactionId}</span>
+                  </p>
+                )}
                 <p className="text-gray-700">
                   <span className="font-medium">وضعیت:</span>
                   <span className="mr-2 text-red-600">پرداخت ناموفق</span>
