@@ -86,8 +86,9 @@ References:
 - Used when cart items or amount need to be modified AFTER settlement.
 - Only allows REDUCTION in amount (since customer already paid first installment).
 - If a product is completely removed, it must also be removed from cartItems.
-- Implementation: `snappay.update(paymentToken, updatedPayload)` would need to be added.
-- **Note**: Update API is not yet implemented in the service. Contact SnappPay support if needed.
+- Implementation: `snappay.update(paymentToken, updatedPayload)` (line 301-347 in snappay.ts)
+- Test endpoint: `POST /api/payment-gateway/test-snappay-update` with `{paymentToken, updatedCart}`
+- **Important**: updatedCart must follow same structure as original token request but with reduced items/amount.
 
 ### Status Inquiry
 
