@@ -3,6 +3,7 @@ export interface ProductVariable {
   attributes: {
     SKU: string;
     Price: number;
+    DiscountPrice?: number;
     IsPublished?: boolean;
     product: {
       data: {
