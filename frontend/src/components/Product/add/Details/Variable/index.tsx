@@ -62,12 +62,15 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           const variableParts = [size, color, model].filter((part) => part !== "");
           const variableName = variableParts.join(" - ");
 
-          // Calculate discount from general_discounts
+          // Get variation-specific discount price (priority)
           const basePrice = Number(variation.attributes.Price || 0);
-          let discountPrice: number | undefined = undefined;
+          let discountPrice: number | undefined = variation.attributes.DiscountPrice
+            ? Number(variation.attributes.DiscountPrice)
+            : undefined;
 
+          // If no variation-specific discount, calculate from general_discounts
           const generalDiscounts = variation.attributes.general_discounts?.data || [];
-          if (generalDiscounts.length > 0) {
+          if (!discountPrice && generalDiscounts.length > 0) {
             // Use the first active discount
             const discount = generalDiscounts[0].attributes;
             if (discount.Type === "Discount") {
@@ -169,6 +172,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
           data: {
             SKU: updatedVariation.sku,
             Price: updatedVariation.price,
+            DiscountPrice: updatedVariation.discountPrice || null,
             IsPublished: updatedVariation.isPublished,
           },
         },
@@ -289,7 +293,26 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">تخفیف‌های فعال</label>
+                <label className="text-sm mb-1 block">تخفیف اختصاصی این متغیر (تومان)</label>
+                <input
+                  type="number"
+                  value={currentVariation.discountPrice || ""}
+                  onChange={(e) =>
+                    setCurrentVariation({
+                      ...currentVariation,
+                      discountPrice: e.target.value ? Number(e.target.value) : undefined,
+                    })
+                  }
+                  placeholder="خالی بگذارید برای عدم تخفیف"
+                  className="w-full rounded-lg border border-slate-300 p-2"
+                />
+                <div className="text-xs mt-1 text-slate-500">
+                  تخفیف مخصوص این متغیر - مستقل از تخفیف‌های عمومی
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm mb-1 block">تخفیف‌های عمومی</label>
                 <div className="min-h-[40px] rounded-lg border border-slate-300 bg-slate-50 p-2">
                   {currentVariation.generalDiscounts && currentVariation.generalDiscounts.length > 0 ? (
                     currentVariation.generalDiscounts.map((discount, index: number) => (
