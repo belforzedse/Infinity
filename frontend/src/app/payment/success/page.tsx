@@ -30,6 +30,7 @@ function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const transactionId = searchParams.get("transactionId");
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,6 +139,12 @@ function PaymentSuccessContent() {
                   <span className="font-medium">شماره سفارش:</span>
                   <span className="mr-2 font-semibold text-green-700">#{orderId}</span>
                 </p>
+                {transactionId && (
+                  <p className="text-gray-700">
+                    <span className="font-medium">شناسه تراکنش:</span>
+                    <span className="mr-2 font-semibold text-green-700">{transactionId}</span>
+                  </p>
+                )}
                 {orderDetails && (
                   <>
                     <p className="text-gray-700">
