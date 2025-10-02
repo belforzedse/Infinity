@@ -10,7 +10,7 @@ The footer section of the application is populated via the Strapi backend API. T
 ## API Endpoint
 
 ```
-GET https://api.infinity.rgbgroup.ir/api/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs
+GET https://api.infinitycolor.co/api/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs
 ```
 
 ## Schema Structure
