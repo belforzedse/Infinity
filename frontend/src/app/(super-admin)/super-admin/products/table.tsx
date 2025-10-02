@@ -86,7 +86,7 @@ export const columns: ColumnDef<Product>[] = [
       });
 
       // Fix URL construction - ensure proper base URL
-      const baseImageUrl = API_BASE_URL.split("/api")[0]; // Should be "https://api.infinity.rgbgroup.ir"
+      const baseImageUrl = API_BASE_URL.split("/api")[0]; // Should be "https://api.infinitycolor.co"
       const imageUrl = thumbnailUrl
         ? (thumbnailUrl.startsWith('http') ? thumbnailUrl : `${baseImageUrl}${thumbnailUrl}`)
         : null;
