@@ -71,12 +71,12 @@ export const requestSnappPayment = async (
   // SnappPay expects mobile as +98XXXXXXXXXX (with leading plus); keep E.164 format
   const mobileForSnapp = customerMobile;
 
-  const mapCommissionType = (_catTitle?: string) => 1 as const;
+  const mapCommissionType = (_catTitle?: string) => 100 as const;
   const items = (orderItems || []).map((it: any) => {
     const pname =
       it.ProductTitle || it.product_variation?.product?.Title || "Item";
     const mainCatName =
-      it.product_variation?.product?.product_main_category?.Name;
+      it.product_variation?.product?.product_main_category?.Title;
     const perAmountToman = Math.round(it.PerAmount || 0);
     const perAmountIrr = perAmountToman * 10;
     return {
