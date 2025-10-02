@@ -31,4 +31,4 @@ description: Frontend wallet service and checkout wallet payment option
 ### Notes
 
 - Units: frontend receives wallet in IRR; displays toman using `(irr / 10).toLocaleString()`.
-- Top-up callback redirect handled by backend to `https://infinity.rgbgroup.ir/wallet?status=...`.
+- Top-up callback redirect handled by backend to `https://new.infinitycolor.co/wallet?status=...`.

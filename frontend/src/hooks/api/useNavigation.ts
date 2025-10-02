@@ -45,7 +45,7 @@ export function useNavigation(triggerFetch: boolean = true): UseNavigationResult
     const fetchNavigation = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://api.infinity.rgbgroup.ir/api/navigation?populate=*");
+        const response = await fetch("https://api.infinitycolor.co/api/navigation?populate=*");
 
         if (!response.ok) {
           throw new Error(`Failed to fetch navigation: ${response.status}`);
