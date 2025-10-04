@@ -39,5 +39,23 @@ export default {
         auth: false,
       },
     },
+    {
+      method: "POST",
+      path: "/orders/:id/admin/adjust-items",
+      handler: "order.adminAdjustItems",
+      config: {
+        auth: false,
+        middlewares: ["global::authentication"],
+      },
+    },
+    {
+      method: "POST",
+      path: "/orders/:id/admin/cancel",
+      handler: "order.adminCancel",
+      config: {
+        auth: false,
+        middlewares: ["global::authentication"],
+      },
+    },
   ],
 };
