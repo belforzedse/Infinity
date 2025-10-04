@@ -182,7 +182,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}`
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
+            transactionIdInput || ""
+          )}`
         );
       }
 
@@ -208,7 +210,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}`
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
+            transactionIdInput || ""
+          )}`
         );
       }
 
@@ -272,14 +276,18 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}`
+          `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
+            transactionIdInput || ""
+          )}`
         );
       } else {
         await strapi.entityService.update("api::order.order", orderId, {
           data: { Status: "Cancelled" },
         });
         return ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}`
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
+            transactionIdInput || ""
+          )}`
         );
       }
     }

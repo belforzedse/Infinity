@@ -31,7 +31,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             product_variation: {
               populate: {
                 product_stock: true,
-                product: true,
+                product: { populate: { product_main_category: true } },
               },
             },
           },
@@ -71,10 +71,11 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       });
     }
 
+    // Normalize typing for TS (Strapi returns unknown)
+    const orderItemsArr = (order.order_items || []) as any[];
+
     // Validate and compute changes
-    const orderItemsMap = new Map(
-      order.order_items.map((it: any) => [it.id, it])
-    );
+    const orderItemsMap = new Map(orderItemsArr.map((it: any) => [it.id, it]));
     const changes: Array<{
       orderItemId: number;
       oldCount: number;
@@ -115,7 +116,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
     // Recompute financials
     let newSubtotal = 0;
-    for (const it of order.order_items) {
+    for (const it of orderItemsArr) {
       const change = changes.find((c) => c.orderItemId === it.id);
       const count = change ? change.newCount : it.Count;
       newSubtotal += Number(it.PerAmount || 0) * count;
@@ -131,7 +132,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       const cityCode = order.delivery_address?.shipping_city?.Code;
       if (cityCode) {
         let totalWeight = 0;
-        for (const it of order.order_items) {
+        for (const it of orderItemsArr) {
           const change = changes.find((c) => c.orderItemId === it.id);
           const count = change ? change.newCount : it.Count;
           const weight = Number(it.product_variation?.product?.Weight || 100);
@@ -205,7 +206,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
       // Restock
       for (const change of changes) {
-        const item = orderItemsMap.get(change.orderItemId);
+        const item = orderItemsMap.get(change.orderItemId) as any;
         const stockId = item?.product_variation?.product_stock?.id;
         if (stockId && change.restockDelta > 0) {
           const stock = await strapi.db
@@ -378,20 +379,25 @@ function buildSnappPayUpdatePayload(
   newShipping: number
 ) {
   const changeMap = new Map(changes.map((c) => [c.orderItemId, c.newCount]));
-  const cartItems = order.order_items
+  const safeItems = (order.order_items || []) as any[];
+  const cartItems = safeItems
     .filter((it: any) => {
       const newCount = changeMap.get(it.id);
       return newCount === undefined ? true : newCount > 0;
     })
     .map((it: any, idx: number) => {
       const count = changeMap.get(it.id) ?? it.Count;
+      const mainCatNameFa =
+        it.product_variation?.product?.product_main_category?.Name ||
+        it.product_variation?.product?.Title ||
+        "سایر";
       return {
         id: idx + 1,
         name: it.ProductTitle || "Product",
-        category: "General",
+        category: mainCatNameFa,
         amount: Math.round(Number(it.PerAmount || 0) * 10),
         count: Number(count),
-        commissionType: 1,
+        commissionType: 100,
       };
     });
 
