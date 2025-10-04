@@ -6,6 +6,8 @@ import { factories } from "@strapi/strapi";
 import { Strapi } from "@strapi/strapi";
 import { generateAnipoBarcodeHandler } from "./helpers/generateBarcode";
 import { verifyPaymentHandler } from "./helpers/payment";
+import { adminAdjustItemsHandler } from "./helpers/adminAdjustItems";
+import { adminCancelOrderHandler } from "./helpers/adminCancel";
 
 export default factories.createCoreController(
   "api::order.order",
@@ -16,6 +18,14 @@ export default factories.createCoreController(
 
     async verifyPayment(ctx) {
       return verifyPaymentHandler(strapi as any, ctx);
+    },
+
+    async adminAdjustItems(ctx) {
+      return adminAdjustItemsHandler(strapi as any, ctx);
+    },
+
+    async adminCancel(ctx) {
+      return adminCancelOrderHandler(strapi as any, ctx);
     },
 
     async checkPaymentStatus(ctx) {

@@ -186,11 +186,15 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
         }
 
         let discountAmount = 0;
+        let discountCode: string | undefined;
+        let appliedGeneralDiscountId: number | undefined;
+
         if (shippingData?.discountCode) {
+          discountCode = String(shippingData.discountCode);
           discountAmount = await computeCouponDiscount(
             strapi as any,
             userId,
-            String(shippingData.discountCode),
+            discountCode,
             subtotal,
             cart.cart_items
           );
@@ -204,6 +208,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           for (const discount of generalDiscounts) {
             const d: any = discount;
             if (d.MinimumAmount <= subtotal) {
+              appliedGeneralDiscountId = d.id;
               if (d.IsPercentage) {
                 discountAmount = (subtotal * d.Amount) / 100;
                 if (d.MaxAmount && discountAmount > d.MaxAmount) {
@@ -233,10 +238,15 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           taxPercent
         );
 
-        // Contract now has all financial details we need
-        // No need to update the order with financial fields that don't exist in schema
+        // Persist discount metadata for admin adjustment flows
         await strapi.entityService.update("api::order.order", order.id, {
-          data: { contract: contract.id, ShippingCost: finalShippingCost },
+          data: {
+            contract: contract.id,
+            ShippingCost: finalShippingCost,
+            DiscountCode: discountCode,
+            AppliedGeneralDiscountId: appliedGeneralDiscountId,
+            AppliedDiscountAmount: Math.round(discountAmount),
+          },
         });
 
         // Note: Do not clear the cart here. Cart will be cleared only after
