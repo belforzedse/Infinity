@@ -106,6 +106,17 @@
     },
     "external_source": {
       "type": "string"
+    },
+    "DiscountCode": {
+      "type": "string"
+    },
+    "AppliedGeneralDiscountId": {
+      "type": "integer"
+    },
+    "AppliedDiscountAmount": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
     }
   }
 }
