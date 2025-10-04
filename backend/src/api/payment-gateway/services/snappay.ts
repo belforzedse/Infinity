@@ -404,4 +404,109 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       } as SnappPaySimpleResponse;
     }
   },
+
+  /** Update order (partial refund) */
+  async update(payload: {
+    transactionId: string;
+    amount: number; // IRR, new total
+    discountAmount: number; // IRR
+    externalSourceAmount: number; // IRR
+    cartList: Array<{
+      cartId: number;
+      cartItems: Array<{
+        amount: number;
+        category: string;
+        count: number;
+        id: number;
+        name: string;
+        commissionType: number;
+      }>;
+      isShipmentIncluded: boolean;
+      isTaxIncluded: boolean;
+      shippingAmount: number;
+      taxAmount: number;
+      totalAmount: number;
+    }>;
+  }) {
+    const http = createHttp();
+    try {
+      const token = await fetchAccessToken(http);
+      strapi.log.info("SnappPay update request", {
+        transactionId: payload.transactionId,
+        amount: payload.amount,
+        cartTotal: payload.cartList?.[0]?.totalAmount,
+      });
+      const { data } = await http.post<SnappPaySimpleResponse>(
+        "/api/online/payment/v1/updateOrder",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 25_000,
+        }
+      );
+      strapi.log.info("SnappPay update response", {
+        successful: data?.successful,
+        errorCode: data?.errorData?.errorCode,
+        errorMessage: data?.errorData?.message,
+      });
+      return data;
+    } catch (error: any) {
+      strapi.log.error("SnappPay update error", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      return {
+        successful: false,
+        errorData: {
+          errorCode: error.response?.status || 500,
+          message: error.message,
+          data: error.response?.data,
+        },
+      } as SnappPaySimpleResponse;
+    }
+  },
+
+  /** Cancel order (full refund) */
+  async cancelOrder(transactionId: string) {
+    const http = createHttp();
+    try {
+      const token = await fetchAccessToken(http);
+      strapi.log.info("SnappPay cancelOrder request", { transactionId });
+      const { data } = await http.post<SnappPaySimpleResponse>(
+        "/api/online/payment/v1/cancelOrder",
+        { transactionId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 25_000,
+        }
+      );
+      strapi.log.info("SnappPay cancelOrder response", {
+        successful: data?.successful,
+        errorCode: data?.errorData?.errorCode,
+        errorMessage: data?.errorData?.message,
+      });
+      return data;
+    } catch (error: any) {
+      strapi.log.error("SnappPay cancelOrder error", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      return {
+        successful: false,
+        errorData: {
+          errorCode: error.response?.status || 500,
+          message: error.message,
+          data: error.response?.data,
+        },
+      } as SnappPaySimpleResponse;
+    }
+  },
 });
