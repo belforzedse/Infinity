@@ -8,14 +8,36 @@ export type BannerImageSpec = {
   href?: string;
   loading?: "eager" | "lazy";
   priority?: boolean;
+  objectPosition?: string;
+};
+
+export type ColorScheme = {
+  background?: string;
+  titleColor?: string;
+  subtitleColor?: string;
+};
+
+export type Typography = {
+  titleFont?: string;
+  subtitleFont?: string;
+  titleSize?: string;
+  subtitleSize?: string;
+  titleWeight?: string;
+  subtitleWeight?: string;
+  titleLeading?: string;
+  subtitleLeading?: string;
+  titleTracking?: string;
+  subtitleTracking?: string;
 };
 
 export type TextBannerSpec = {
   title: string;
   subtitle?: string;
-  className: string;
-  titleClassName: string;
+  className?: string;
+  titleClassName?: string;
   subtitleClassName?: string;
+  colors?: ColorScheme;
+  typography?: Typography;
 };
 
 export type DesktopLayout = {

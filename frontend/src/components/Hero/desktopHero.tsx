@@ -58,14 +58,15 @@ export default function DesktopHero({ layout, slideKey }: Props) {
   return (
     <>
       {/*Desktop hero section*/}
-      <div className="h-[600px] w-[1358px] max-w-full">
-        <div className="relative h-[650px] w-full overflow-hidden overflow-y-auto">
-          <div className="h-full grid-cols-1 grid-rows-2">
-            <div className="flex h-full gap-10">
-              <div className="h-full w-7/12 flex-none">
-                <div className="mt-11 grid h-[calc(100%-2.75rem)] grid-cols-2 grid-rows-[200px_1fr] gap-4">
-                  <div className="col-span-2 row-span-1">
-                    {/*Wide pinterest banner*/}
+      <div className="h-[480px] w-[1358px] max-w-full">
+        <div className="relative h-full w-full">
+          <div className="h-full">
+            <div className="flex h-full items-start gap-6">
+              {/* Left section: Text banner + 2 bottom banners */}
+              <div className="w-7/12 flex-none">
+                <div className="mt-[50px] flex flex-col gap-3">
+                  {/* Text banner */}
+                  <div>
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
                         key={`text-${slideKey}`}
@@ -80,52 +81,62 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                           className={layout.textBanner.className}
                           titleClassName={layout.textBanner.titleClassName}
                           subtitleClassName={layout.textBanner.subtitleClassName}
+                          colors={layout.textBanner.colors}
+                          typography={layout.textBanner.typography}
                         />
                       </motion.div>
                     </AnimatePresence>
                   </div>
-                  {/* the 2 banners below the wide banner */}
-                  <div className="col-span-1 col-start-1 row-span-1 row-start-2 overflow-hidden">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.div
-                        key={`belowLeft-${slideKey}`}
-                        variants={belowLeftVariants}
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                      >
-                        <BannerImage {...layout.belowLeft} />
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                  <div className="col-span-1 col-start-2 row-span-1 row-start-2 overflow-hidden">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.div
-                        key={`belowRight-${slideKey}`}
-                        variants={belowRightVariants}
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                      >
-                        <BannerImage {...layout.belowRight} />
-                      </motion.div>
-                    </AnimatePresence>
+
+                  {/* Two bottom banners */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="h-[240px] overflow-hidden rounded-lg">
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                          key={`belowLeft-${slideKey}`}
+                          variants={belowLeftVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          className="h-full w-full"
+                        >
+                          <BannerImage {...layout.belowLeft} />
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                    <div className="h-[240px] overflow-hidden rounded-lg">
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                          key={`belowRight-${slideKey}`}
+                          variants={belowRightVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          className="h-full w-full"
+                        >
+                          <BannerImage {...layout.belowRight} />
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
               </div>
-              {/* Side banner */}
-              <div className="h-full w-4/12 flex-1">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={`side-${slideKey}`}
-                    variants={sideVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                  >
-                    <BannerImage {...layout.side} />
-                  </motion.div>
-                </AnimatePresence>
+
+              {/* Right section: Side banner */}
+              <div className="w-5/12 flex-none">
+                <div className="overflow-hidden rounded-lg">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={`side-${slideKey}`}
+                      variants={sideVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                    >
+                      <BannerImage {...layout.side} />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </div>

@@ -12,6 +12,7 @@ type BannerImageProps = {
   loading?: "eager" | "lazy";
   sizes?: string;
   href?: string;
+  objectPosition?: string;
 };
 
 export default function BannerImage({
@@ -24,7 +25,10 @@ export default function BannerImage({
   loading,
   sizes,
   href,
+  objectPosition,
 }: BannerImageProps) {
+  const imageStyle = objectPosition ? { objectPosition } : undefined;
+
   const img = (
     <Image
       src={src}
@@ -35,6 +39,7 @@ export default function BannerImage({
       priority={priority}
       loading={loading}
       sizes={sizes}
+      style={imageStyle}
     />
   );
 
