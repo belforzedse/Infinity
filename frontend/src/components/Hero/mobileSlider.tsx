@@ -1,11 +1,19 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import MobileHero from "./mobileHero";
-import { mobileSlides } from "./config/mobileSlides";
+import { defaultSliderConfig, type MobileLayout } from "./config";
 import PaginationMobile from "./PaginationMobile";
 
-export default function MobileSlider() {
-  const slides = useMemo(() => mobileSlides, []);
+interface MobileSliderProps {
+  slides?: MobileLayout[];
+  autoplayInterval?: number;
+}
+
+export default function MobileSlider({
+  slides: customSlides,
+  autoplayInterval = defaultSliderConfig.autoplayInterval,
+}: MobileSliderProps = {}) {
+  const slides = useMemo(() => customSlides ?? defaultSliderConfig.mobile, [customSlides]);
   const [index, setIndex] = useState(0);
   const [playKey, setPlayKey] = useState(0);
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -14,9 +22,9 @@ export default function MobileSlider() {
     const id = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
       setPlayKey((k) => k + 1);
-    }, 7000);
+    }, autoplayInterval);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [slides.length, autoplayInterval]);
 
   const next = () => {
     setIndex((i) => (i + 1) % slides.length);
@@ -28,11 +36,11 @@ export default function MobileSlider() {
   };
 
   return (
-    <div ref={hostRef} className="mobile-slider-container block [touch-action:manipulation]">
+    <div ref={hostRef} className="mobile-slider-container block space-y-6 pb-12 [touch-action:manipulation]">
       <MobileHero layout={slides[index]} playKey={playKey} />
 
       {/* Pagination below content, not overlaying images */}
-      <div className="mb-2 mt-3 flex w-full items-center justify-center">
+      <div className="flex w-full items-center justify-center">
         <PaginationMobile
           total={slides.length}
           index={index}
@@ -58,3 +66,5 @@ export default function MobileSlider() {
     </div>
   );
 }
+
+
