@@ -262,9 +262,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         await strapi.entityService.update("api::order.order", orderId, {
           data: { Status: "Started" },
         });
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
+        // Auto barcode generation disabled - manual generation required
+        // try {
+        //   await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+        // } catch {}
         try {
           await strapi.entityService.create("api::order-log.order-log", {
             data: {
@@ -334,13 +335,13 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         strapi.log.info("Payment cancelled by user:", { orderId, ResCode });
         // User cancelled - redirect to frontend cancellation page
         ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/cancelled?orderId=${orderId}&reason=user-cancelled`
+          `https://new.infinitycolor.co/payment/cancelled?orderId=${orderId}&reason=user-cancelled`
         );
       } else {
         strapi.log.error("Payment failed with ResCode:", ResCode);
         // Other payment failures - redirect to frontend failure page
         ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
+          `https://new.infinitycolor.co/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
             `Payment failed with code: ${ResCode}`
           )}`
         );
@@ -414,9 +415,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             Status: "Started",
           },
         });
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
+        // Auto barcode generation disabled - manual generation required
+        // try {
+        //   await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+        // } catch {}
 
         strapi.log.info(`Payment successful for Order ${orderId}:`, {
           orderId,
@@ -441,7 +443,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
         // Redirect to frontend success page
         ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}`
+          `https://new.infinitycolor.co/payment/success?orderId=${orderId}`
         );
       } else {
         // Settlement failed
@@ -467,7 +469,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           );
         }
         ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
+          `https://new.infinitycolor.co/payment/failure?error=${encodeURIComponent(
             settlementResult.error || "Settlement failed"
           )}`
         );
@@ -501,7 +503,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       // Redirect to frontend failure page
       ctx.redirect(
-        `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
+        `https://new.infinitycolor.co/payment/failure?error=${encodeURIComponent(
           verificationResult.error
         )}`
       );
@@ -524,7 +526,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       strapi.log.error("Failed to persist gateway internal error log", e);
     }
     ctx.redirect(
-      `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
+      `https://new.infinitycolor.co/payment/failure?error=${encodeURIComponent(
         "Internal server error"
       )}`
     );
