@@ -53,5 +53,45 @@ export default {
         middlewares: ["global::authentication"],
       },
     },
+    {
+      method: "POST",
+      path: "/payment-gateway/test-snappay-cancel",
+      handler: "payment-gateway.testSnappayCancel",
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: "POST",
+      path: "/payment-gateway/test-snappay-revert",
+      handler: "payment-gateway.testSnappayRevert",
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: "POST",
+      path: "/payment-gateway/test-snappay-status",
+      handler: "payment-gateway.testSnappayStatus",
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: "POST",
+      path: "/payment-gateway/test-snappay-update",
+      handler: "payment-gateway.testSnappayUpdate",
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 };

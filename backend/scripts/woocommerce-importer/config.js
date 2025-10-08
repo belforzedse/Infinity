@@ -19,7 +19,7 @@ module.exports = {
 
   // Strapi API Configuration
   strapi: {
-    baseUrl: 'https://api.infinity.rgbgroup.ir/api',
+    baseUrl: 'https://api.infinitycolor.co/api',
     auth: {
       token: 'STRAPI_API_TOKEN'
     },
