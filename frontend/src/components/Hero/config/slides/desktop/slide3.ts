@@ -4,7 +4,7 @@ export const slide3 = new DesktopSlideBuilder()
   .textBanner({
     title: "لباســـی که خودت را توش پیدا می‌کنی",
     subtitle: "جزئیات کوچک، تأثیر بزرگ.",
-    className: "w-full gap-[8px] rounded-3xl px-[36px] pb-3 pt-[30px]",
+    className: "w-full gap-[8px] pb-[70px] mb-[10px] rounded-3xl px-[36px] pb-3 pt-[30px]",
   })
   .colors({
     background: "bg-slate-50",
