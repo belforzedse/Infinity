@@ -3,7 +3,6 @@
  */
 
 import { factories } from "@strapi/strapi";
-import { ensurePasswordHash } from "../../auth/utils/security";
 
 export default factories.createCoreService("api::local-user.local-user", {
   async createUser(ctx, { userData, userInfoData }) {
@@ -11,19 +10,11 @@ export default factories.createCoreService("api::local-user.local-user", {
       let user = null;
       await strapi.db.transaction(async (trx) => {
         try {
-          const sanitizedUserData = { ...userData };
-
-          if (Object.prototype.hasOwnProperty.call(sanitizedUserData, "Password")) {
-            sanitizedUserData.Password = await ensurePasswordHash(
-              sanitizedUserData.Password
-            );
-          }
-
           user = await strapi.entityService.create(
             "api::local-user.local-user",
             {
               user_role: 0,
-              data: sanitizedUserData,
+              data: userData,
             }
           );
 

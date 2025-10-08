@@ -26,10 +26,6 @@
       "required": true,
       "min": "0"
     },
-    "DiscountPrice": {
-      "type": "biginteger",
-      "min": "0"
-    },
     "product": {
       "type": "relation",
       "relation": "manyToOne",

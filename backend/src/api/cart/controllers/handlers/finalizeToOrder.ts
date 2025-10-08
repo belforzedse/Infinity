@@ -59,7 +59,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     });
 
     const selectedGateway = String(gateway || "mellat").toLowerCase();
-    const serverBaseUrl = "https://api.infinitycolor.co/api";
+    const serverBaseUrl = "https://api.infinity.rgbgroup.ir/api";
     const absoluteCallback = `${serverBaseUrl}${
       (callbackURL || "/orders/payment-callback").startsWith("/") ? "" : "/"
     }${callbackURL || "/orders/payment-callback"}`;
