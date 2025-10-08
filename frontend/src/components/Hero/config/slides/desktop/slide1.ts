@@ -4,7 +4,7 @@ export const slide1 = new DesktopSlideBuilder()
   .textBanner({
     title: "لباس‌هایی از قلــــــب پینترست...",
     subtitle: "برای خاص پسندها",
-    className: "w-full gap-[8px] rounded-3xl px-[36px] pb-3 pt-[30px]",
+    className: "w-full gap-[8px] rounded-3xl px-[36px] pb-[70px] mb-[20px] pt-[30px]",
   })
   .colors({
     background: "bg-stone-50",

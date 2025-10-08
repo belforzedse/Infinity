@@ -4,7 +4,7 @@ export const slide2 = new DesktopSlideBuilder()
   .textBanner({
     title: "بزار استـــــــــایـــــــلت حرف بزنه",
     subtitle: "پوشاک کاربردی، طراحی هوشمند",
-    className: "w-full gap-[8px] rounded-3xl px-[36px] pb-3 pt-[30px]",
+    className: "w-full gap-[8px]  pb-[50px] mb-[10px] rounded-3xl px-[36px] pb-3 pt-[30px]",
   })
   .colors({
     background: "bg-slate-50",
@@ -16,7 +16,7 @@ export const slide2 = new DesktopSlideBuilder()
     subtitleSize: "lg:text-[28px] 2xl:text-[32px]",
     titleWeight: "font-extrabold",
     subtitleWeight: "font-semibold",
-    titleLeading: "leading-tight",
+    titleLeading: "leading-12",
     subtitleLeading: "leading-relaxed",
     titleTracking: "tracking-tight",
   })
