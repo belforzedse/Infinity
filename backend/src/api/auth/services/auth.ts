@@ -3,11 +3,6 @@
  */
 
 import { RedisClient } from "../../..";
-import {
-  generateOtpCode,
-  generateOtpToken,
-  hashOtpCode,
-} from "../utils/security";
 
 export default () => ({
   async hasUser(ctx, { phone }) {
@@ -35,18 +30,19 @@ export default () => ({
           },
         });
 
-      const code = generateOtpCode();
-      const otpToken = generateOtpToken();
-      const redis = await RedisClient;
+      const code = Math.random().toString().substring(2, 8);
+      const otpToken =
+        Number(new Date()).toString(36) +
+        "." +
+        Math.random().toString(36).substring(2);
 
-      await redis.set(
+      (await RedisClient).set(
         otpToken,
         JSON.stringify({
-          hash: hashOtpCode(code),
+          code,
           merchant: merchant?.id,
           phone,
-          isVerified: merchant?.IsVerified,
-          version: 1,
+          IsVerified: merchant?.IsVerified,
         }),
         {
           EX: 300,

@@ -298,54 +298,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     }
   },
 
-  /** Update purchase (after settle, reduce amount/items only) */
-  async update(paymentToken: string, payload: SnappPayTokenRequest) {
-    const http = createHttp();
-    try {
-      const token = await fetchAccessToken(http);
-
-      strapi.log.info("SnappPay update request", {
-        paymentToken,
-        newAmount: payload.amount,
-        cartItems: payload.cartList?.[0]?.cartItems?.length,
-      });
-
-      const { data } = await http.post<SnappPaySimpleResponse>(
-        "/api/online/payment/v1/update",
-        { paymentToken, ...payload },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 25_000,
-        }
-      );
-
-      strapi.log.info("SnappPay update result", {
-        successful: data?.successful,
-        errorCode: data?.errorData?.errorCode,
-        errorMessage: data?.errorData?.message,
-      });
-
-      return data;
-    } catch (error: any) {
-      strapi.log.error("SnappPay update error", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      return {
-        successful: false,
-        errorData: {
-          errorCode: error.response?.status || 500,
-          message: error.message,
-          data: error.response?.data,
-        },
-      } as SnappPaySimpleResponse;
-    }
-  },
-
   /** Revert purchase (before settle) */
   async revert(paymentToken: string) {
     const http = createHttp();
