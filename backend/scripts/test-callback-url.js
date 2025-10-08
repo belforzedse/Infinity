@@ -43,10 +43,10 @@ async function testCallbackUrl() {
     console.log('');
 
     // Test 4: Production-like URL
-    const productionUrl = formatCallbackUrl("/orders/payment-callback", "https://api.infinitycolor.co");
+    const productionUrl = formatCallbackUrl("/orders/payment-callback", "https://infinity-bck.darkube.app");
     console.log('4. Production-like URL:');
     console.log('   Input: "/orders/payment-callback"');
-    console.log('   Server: "https://api.infinitycolor.co"');
+    console.log('   Server: "https://infinity-bck.darkube.app"');
     console.log('   Output:', productionUrl);
     console.log('');
 

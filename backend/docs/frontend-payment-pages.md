@@ -1,10 +1,10 @@
 # Frontend Payment Pages Required
 
-After completing the payment integration, you need to create these 3 pages in your frontend application at `https://new.infinitycolor.co/`:
+After completing the payment integration, you need to create these 3 pages in your frontend application at `https://infinity.rgbgroup.ir/`:
 
 ## 🎉 **1. Payment Success Page**
 
-**URL:** `https://new.infinitycolor.co/payment/success`
+**URL:** `https://infinity.rgbgroup.ir/payment/success`
 
 ### URL Parameters:
 
@@ -13,7 +13,7 @@ After completing the payment integration, you need to create these 3 pages in yo
 ### Example URLs:
 
 ```
-https://new.infinitycolor.co/payment/success?orderId=123
+https://infinity.rgbgroup.ir/payment/success?orderId=123
 ```
 
 ### Page Content Should Include:
@@ -92,7 +92,7 @@ export default function PaymentSuccess() {
 
 ## ❌ **2. Payment Failure Page**
 
-**URL:** `https://new.infinitycolor.co/payment/failure`
+**URL:** `https://infinity.rgbgroup.ir/payment/failure`
 
 ### URL Parameters:
 
@@ -102,8 +102,8 @@ export default function PaymentSuccess() {
 ### Example URLs:
 
 ```
-https://new.infinitycolor.co/payment/failure?orderId=123&error=Payment%20failed%20with%20code%3A%2025
-https://new.infinitycolor.co/payment/failure?error=Settlement%20failed
+https://infinity.rgbgroup.ir/payment/failure?orderId=123&error=Payment%20failed%20with%20code%3A%2025
+https://infinity.rgbgroup.ir/payment/failure?error=Settlement%20failed
 ```
 
 ### Page Content Should Include:
@@ -182,7 +182,7 @@ export default function PaymentFailure() {
 
 ## 🚫 **3. Payment Cancelled Page**
 
-**URL:** `https://new.infinitycolor.co/payment/cancelled`
+**URL:** `https://infinity.rgbgroup.ir/payment/cancelled`
 
 ### URL Parameters:
 
@@ -192,7 +192,7 @@ export default function PaymentFailure() {
 ### Example URLs:
 
 ```
-https://new.infinitycolor.co/payment/cancelled?orderId=123&reason=user-cancelled
+https://infinity.rgbgroup.ir/payment/cancelled?orderId=123&reason=user-cancelled
 ```
 
 ### Page Content Should Include:
