@@ -12,7 +12,7 @@ export interface SliderConfig {
 export const defaultSliderConfig: SliderConfig = {
   desktop: desktopSlides,
   mobile: mobileSlides,
-  autoplayInterval: 7000,
+  autoplayInterval: 12000,
 };
 
 // Export individual configs for flexibility
