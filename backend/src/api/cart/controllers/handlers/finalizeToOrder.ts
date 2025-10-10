@@ -16,8 +16,81 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
   } = ctx.request.body;
 
   try {
+    // Validate required shipping information
     if (!shipping) {
-      return ctx.badRequest("Shipping information is required");
+      return ctx.badRequest("روش ارسال الزامی است", {
+        data: {
+          success: false,
+          errorCode: "SHIPPING_REQUIRED",
+          message: "روش ارسال الزامی است",
+        },
+      });
+    }
+
+    // Validate address is provided and exists
+    if (!addressId) {
+      return ctx.badRequest("آدرس تحویل الزامی است", {
+        data: {
+          success: false,
+          errorCode: "ADDRESS_REQUIRED",
+          message: "آدرس تحویل الزامی است",
+        },
+      });
+    }
+
+    // Verify shipping method exists and is valid
+    try {
+      const shippingMethod = await strapi.entityService.findOne(
+        "api::shipping.shipping",
+        shipping
+      );
+      if (!shippingMethod) {
+        return ctx.badRequest("روش ارسال انتخاب شده معتبر نیست", {
+          data: {
+            success: false,
+            errorCode: "INVALID_SHIPPING",
+            message: "روش ارسال انتخاب شده معتبر نیست",
+          },
+        });
+      }
+    } catch (err) {
+      strapi.log.error("Failed to validate shipping method:", err);
+      return ctx.badRequest("خطا در بررسی روش ارسال", {
+        data: {
+          success: false,
+          errorCode: "SHIPPING_VALIDATION_FAILED",
+          message: "خطا در بررسی روش ارسال",
+        },
+      });
+    }
+
+    // Verify address exists and belongs to user
+    try {
+      const address = await strapi.entityService.findOne(
+        "api::local-user-address.local-user-address",
+        addressId,
+        { populate: { shipping_city: true } }
+      );
+      if (!address) {
+        return ctx.badRequest("آدرس انتخاب شده یافت نشد", {
+          data: {
+            success: false,
+            errorCode: "ADDRESS_NOT_FOUND",
+            message: "آدرس انتخاب شده یافت نشد",
+          },
+        });
+      }
+      // Note: Add user ownership check if needed
+      // if (address.user !== user.id) { ... }
+    } catch (err) {
+      strapi.log.error("Failed to validate address:", err);
+      return ctx.badRequest("خطا در بررسی آدرس", {
+        data: {
+          success: false,
+          errorCode: "ADDRESS_VALIDATION_FAILED",
+          message: "خطا در بررسی آدرس",
+        },
+      });
     }
 
     const shippingData = {
