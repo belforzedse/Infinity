@@ -39,25 +39,59 @@ export const createOrderAndItems = async (
 ) => {
   // Validate cart items before proceeding
   if (!cart.cart_items || cart.cart_items.length === 0) {
+    console.error("=== VALIDATION ERROR: Cart is empty ===");
     throw new Error("CART_EMPTY: Cannot create order from empty cart");
   }
 
   // Pre-validate all items have required data
-  for (const item of cart.cart_items) {
+  console.log(`[Order Validation] Checking ${cart.cart_items.length} cart items for userId=${userId}`);
+
+  for (let i = 0; i < cart.cart_items.length; i++) {
+    const item = cart.cart_items[i];
     const variation = item.product_variation;
+
+    console.log(`[Order Validation] Item ${i + 1}/${cart.cart_items.length}:`, {
+      cartItemId: item.id,
+      variationId: variation?.id,
+      hasVariation: !!variation,
+      hasProduct: !!variation?.product,
+      productTitle: variation?.product?.Title || "MISSING",
+      productSKU: variation?.product?.SKU || "MISSING",
+      price: variation?.Price,
+    });
+
     if (!variation) {
+      console.error("=== VALIDATION ERROR: Missing product variation ===", { itemId: item.id });
       throw new Error(`INVALID_ITEM: Cart item ${item.id} missing product variation`);
     }
     if (!variation.product?.Title) {
+      console.error("=== VALIDATION ERROR: Missing product title ===", {
+        variationId: variation.id,
+        hasProduct: !!variation.product,
+        productKeys: variation.product ? Object.keys(variation.product) : []
+      });
       throw new Error(`MISSING_PRODUCT_TITLE: Product variation ${variation.id} missing title`);
     }
     if (!variation.product?.SKU) {
+      console.error("=== VALIDATION ERROR: Missing product SKU ===", {
+        variationId: variation.id,
+        productTitle: variation.product?.Title,
+        hasProduct: !!variation.product,
+        productKeys: variation.product ? Object.keys(variation.product) : []
+      });
       throw new Error(`MISSING_PRODUCT_SKU: Product variation ${variation.id} missing SKU`);
     }
     if (!variation.Price || Number(variation.Price) < 0) {
+      console.error("=== VALIDATION ERROR: Invalid price ===", {
+        variationId: variation.id,
+        price: variation.Price,
+        priceType: typeof variation.Price
+      });
       throw new Error(`INVALID_PRICE: Product variation ${variation.id} has invalid price`);
     }
   }
+
+  console.log("[Order Validation] ✓ All cart items validated successfully");
 
   const orderData = {
     user: userId,

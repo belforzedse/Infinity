@@ -279,7 +279,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
       return result;
     } catch (error: any) {
       // Enhanced error logging with full context
-      strapi.log.error("Order creation failed:", {
+      const errorContext = {
         userId,
         cartId: cart?.id,
         itemCount: cart?.cart_items?.length || 0,
@@ -287,7 +287,13 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
         errorMessage: error.message,
         errorStack: error.stack,
         errorName: error.name,
-      });
+      };
+
+      strapi.log.error("Order creation failed:", errorContext);
+      console.error("=== ORDER CREATION FAILED ===");
+      console.error("Error Message:", error.message);
+      console.error("Error Code:", error.message?.split(":")[0]);
+      console.error("Full Context:", JSON.stringify(errorContext, null, 2));
 
       // Parse error message to extract error code and details
       const errorMessage = error.message || "Unknown error";
