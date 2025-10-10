@@ -73,13 +73,13 @@ export const createOrderAndItems = async (
       throw new Error(`MISSING_PRODUCT_TITLE: Product variation ${variation.id} missing title`);
     }
     if (!variation.product?.SKU) {
-      console.error("=== VALIDATION ERROR: Missing product SKU ===", {
+      console.warn("=== WARNING: Missing product SKU ===", {
         variationId: variation.id,
         productTitle: variation.product?.Title,
-        hasProduct: !!variation.product,
-        productKeys: variation.product ? Object.keys(variation.product) : []
+        willUseDefault: true
       });
-      throw new Error(`MISSING_PRODUCT_SKU: Product variation ${variation.id} missing SKU`);
+      // Use a default SKU if missing instead of failing
+      // You can change this to throw an error if SKU is mandatory
     }
     if (!variation.Price || Number(variation.Price) < 0) {
       console.error("=== VALIDATION ERROR: Invalid price ===", {
@@ -133,7 +133,7 @@ export const createOrderAndItems = async (
           Count: item.Count,
           PerAmount: itemPrice,
           ProductTitle: variation.product?.Title,
-          ProductSKU: variation.product?.SKU,
+          ProductSKU: variation.product?.SKU || `VAR-${variation.id}`, // Use variation ID as fallback SKU
           product_color: variation.product_variation_color?.id || null,
           product_size: variation.product_variation_size?.id || null,
           product_variation_model: variation.product_variation_model?.id || null,
