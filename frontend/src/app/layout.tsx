@@ -5,7 +5,7 @@ import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";
-import { peyda, peydaFanum } from "@/styles/fonts";
+import { peyda, peydaFanum, rokh } from "@/styles/fonts";
 import { DebugPanel } from "@/components/Debug";
 export const metadata: Metadata = {
   title: "اینفینیتی ∞ Infinity",
@@ -27,7 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className={`${peyda.variable} ${peydaFanum.variable}`}>
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`${peyda.variable} ${peydaFanum.variable} ${rokh.variable}`}
+    >
       <body className={`${peydaFanum.className} antialiased`}>
         <CartProvider>
           <NuqsAdapter>
