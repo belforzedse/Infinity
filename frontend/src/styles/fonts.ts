@@ -80,3 +80,25 @@ export const rokh = localFont({
   display: "swap",
   variable: "--font-rokh",
 });
+
+export const kaghaz = localFont({
+  src: [
+    {
+      path: "../../public/fonts/kaghaz.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/kaghaz.woff",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/kaghaz.ttf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  variable: "--font-kaghaz",
+});

@@ -72,6 +72,9 @@ export default {
   			],
   			rokh: [
   				'var(--font-rokh)'
+  			],
+  			kaghaz: [
+  				'var(--font-kaghaz)'
   			]
   		},
   		fontWeight: {

@@ -46,7 +46,7 @@ export class DesktopSlideBuilder {
           subtitleColor: "text-gray-600",
         },
         typography: {
-          titleFont: "font-rokh",
+          titleFont: "font-kaghaz",
           titleSize: "lg:text-[44px] 2xl:text-[54px]",
           subtitleSize: "lg:text-[30px] 2xl:text-[34px]",
           titleWeight: "font-bold",

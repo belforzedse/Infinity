@@ -57,6 +57,28 @@ textarea:focus-visible {
   background: #ec4899;
 }
 
+:root {
+  --glass-bg-strong: rgba(255, 255, 255, 0.9);
+  --glass-bg-soft: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.65);
+  --glass-border-outer: rgba(255, 255, 255, 0.72);
+  --glass-border-inner: rgba(255, 255, 255, 0.28);
+  --glass-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  --glass-shadow-strong: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-bg-strong: rgba(248, 250, 252, 0.28);
+    --glass-bg-soft: rgba(248, 250, 252, 0.16);
+    --glass-highlight: rgba(255, 255, 255, 0.4);
+    --glass-border-outer: rgba(148, 163, 184, 0.42);
+    --glass-border-inner: rgba(148, 163, 184, 0.22);
+    --glass-shadow-soft: 0 1px 0 rgba(148, 163, 184, 0.25) inset;
+    --glass-shadow-strong: 0 18px 44px rgba(15, 23, 42, 0.3);
+  }
+}
+
 /* Optional image effect classes (non-global to avoid invisible images) */
 @layer components {
   .img-fx {
@@ -83,14 +105,141 @@ textarea:focus-visible {
 }
 
 /* Glassmorphism panel (iOS-like) */
-.glass-panel {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.45));
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  backdrop-filter: blur(18px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+
+:where(.glass-surface, .glass-panel, .glass-chip) {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, var(--glass-bg-strong), var(--glass-bg-soft)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+  border: 1px solid var(--glass-border-inner);
+  border-top-color: var(--glass-border-outer);
+  border-left-color: var(--glass-border-outer);
+  border-radius: inherit;
+  box-shadow: var(--glass-shadow-soft), var(--glass-shadow-strong);
+  isolation: isolate;
+  transition:
+    box-shadow 200ms ease,
+    border-color 220ms ease,
+    background 240ms ease;
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  :where(.glass-surface, .glass-panel, .glass-chip) {
+    background-color: rgba(255, 255, 255, 0.88);
+  }
+}
+
+:where(.glass-surface, .glass-panel, .glass-chip)::before,
+:where(.glass-surface, .glass-panel, .glass-chip)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+:where(.glass-surface, .glass-panel, .glass-chip)::before {
+  background:
+    radial-gradient(55% 75% at 25% 15%, var(--glass-highlight), transparent 70%),
+    linear-gradient(130deg, rgba(255, 255, 255, 0.24), transparent 50%);
+  mix-blend-mode: normal;
+  opacity: 0.6;
+}
+
+:where(.glass-surface, .glass-panel, .glass-chip)::after {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.3), transparent 65%);
+  opacity: 0.35;
+}
+
+.glass-surface {
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+@media (hover: hover) {
+  .glass-surface:hover {
+    box-shadow:
+      var(--glass-shadow-soft),
+      0 20px 42px rgba(15, 23, 42, 0.12);
+  }
+}
+
+.glass-chip {
+  border-radius: 9999px;
   box-shadow:
-    0 1px 0 rgba(17, 24, 39, 0.04) inset,
-    0 8px 24px rgba(17, 24, 39, 0.08);
+    var(--glass-shadow-soft),
+    0 10px 26px rgba(15, 23, 42, 0.1);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background 220ms ease;
+}
+
+@media (hover: hover) {
+  .glass-chip:hover {
+    box-shadow:
+      var(--glass-shadow-soft),
+      0 16px 28px rgba(15, 23, 42, 0.14);
+    transform: translateY(-1px);
+  }
+}
+
+.glass-pill {
+  position: relative;
+  border-radius: 9999px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.32)),
+    linear-gradient(110deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.14));
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.35) inset,
+    0 0 12px rgba(255, 255, 255, 0.22) inset;
+  -webkit-backdrop-filter: blur(18px) saturate(165%);
+  backdrop-filter: blur(18px) saturate(165%);
+  transition:
+    transform 160ms ease,
+    box-shadow 200ms ease,
+    background 220ms ease;
+}
+
+.glass-pill::before,
+.glass-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.glass-pill::before {
+  background:
+    radial-gradient(45% 95% at 10% 20%, rgba(255, 255, 255, 0.75), transparent 70%),
+    radial-gradient(55% 85% at 85% 10%, rgba(255, 255, 255, 0.28), transparent 65%);
+  opacity: 0.42;
+}
+
+.glass-pill::after {
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.18), transparent 55%);
+  opacity: 0.28;
+}
+
+@media (hover: hover) {
+  .glass-pill:hover {
+    transform: translateY(-0.5px) scale(1.01);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+      0 0 14px rgba(255, 255, 255, 0.25) inset;
+  }
+}
+
+.glass-panel {
+  border-bottom-width: 2px;
+  border-bottom-color: rgba(255, 255, 255, 0.58);
+  border-top-color: transparent;
 }
 
 /* Enhanced glass header edge with thicker, warped bottom highlight */
