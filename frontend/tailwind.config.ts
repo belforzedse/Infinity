@@ -69,6 +69,12 @@ export default {
   			],
   			peyda: [
   				'var(--font-peyda)'
+  			],
+  			rokh: [
+  				'var(--font-rokh)'
+  			],
+  			kaghaz: [
+  				'var(--font-kaghaz)'
   			]
   		},
   		fontWeight: {

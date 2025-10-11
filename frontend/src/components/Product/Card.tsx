@@ -71,9 +71,9 @@ const ProductCard: FC<ProductCardProps> = ({
               <span />
             )}
             <button
-              className={`mt-[0.5px] flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-white ${
-                isLoading ? "cursor-wait opacity-50" : "hover:bg-white/80"
-              } z-10 bg-white/70 backdrop-blur transition-colors`}
+              className={`glass-chip mt-[0.5px] flex h-9 w-9 items-center justify-center rounded-full ${
+                isLoading ? "cursor-wait opacity-50" : "hover:brightness-[1.05]"
+              } z-10 transition-all ring-1 ring-white/60`}
               onClick={toggleLike}
               disabled={isLoading}
               aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}

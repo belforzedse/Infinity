@@ -12,7 +12,7 @@ export const slide2 = new DesktopSlideBuilder()
     subtitleColor: "text-gray-600",
   })
   .typography({
-    titleSize: "lg:text-[48px] 2xl:text-[60px]",
+    titleSize: "lg:text-[48px] 2xl:text-[55px]",
     subtitleSize: "lg:text-[28px] 2xl:text-[32px]",
     titleWeight: "font-extrabold",
     subtitleWeight: "font-semibold",
