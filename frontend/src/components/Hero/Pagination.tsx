@@ -28,7 +28,7 @@ export default function HeroPagination({
 }: HeroPaginationProps) {
   return (
     <div
-      className={clsx("flex items-center gap-2 rounded-2xl px-2 py-1 backdrop-blur-md", className)}
+      className={clsx("glass-pill flex items-center gap-2 px-2 py-1", className)}
     >
       {showArrows && (
         <button
@@ -36,7 +36,7 @@ export default function HeroPagination({
           aria-label="Next"
           onClick={onNext}
           className={clsx(
-            "mx-1 mt-1 rounded-full p-1 text-[30px] text-pink-600 transition hover:bg-pink-50",
+            "mx-1 mt-1 rounded-full p-1 text-[28px] text-pink-500 transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/50",
             arrowClassName,
           )}
         >
@@ -53,7 +53,9 @@ export default function HeroPagination({
             onClick={() => onDotClick?.(i)}
             className={clsx(
               "h-1.5 rounded-full transition-all",
-              i === index ? "w-12 bg-pink-600" : "w-4 bg-pink-100",
+              i === index
+                ? "w-12 bg-pink-500/70 backdrop-blur-[0.2px] ring-[0.5px] ring-white/35"
+                : "w-4 bg-pink-500/20",
               i === index ? dotActiveClassName : dotClassName,
             )}
           />
@@ -66,7 +68,7 @@ export default function HeroPagination({
           aria-label="Previous"
           onClick={onPrev}
           className={clsx(
-            "mx-1 mt-1 rounded-full p-1 text-[30px] text-pink-600 transition hover:bg-pink-50",
+            "mx-1 mt-1 rounded-full p-1 text-[28px] text-pink-500 transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/50",
             arrowClassName,
           )}
         >

@@ -25,7 +25,7 @@ export default function PLPMobileHeader({}: Props) {
       <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
         <Link
           href="/orders"
-          className="pressable flex max-h-[43px] items-center gap-1 rounded-[28px] border border-slate-200 bg-white/60 px-4 py-3 text-neutral-800 backdrop-blur-sm transition-colors hover:bg-white/80"
+          className="pressable glass-chip flex max-h-[43px] items-center gap-1 px-4 py-3 text-neutral-800 transition-colors hover:text-neutral-900"
         >
           <span className="text-sm">پیگیری سفارش</span>
           <OrderTrackingIcon className="scale-150 text-neutral-800" />
@@ -37,14 +37,14 @@ export default function PLPMobileHeader({}: Props) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="pressable flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200 bg-white/50 backdrop-blur-sm transition-colors hover:bg-white/70"
+            className="pressable glass-chip flex h-[43px] w-[43px] items-center justify-center transition-colors"
             aria-label="جستجو"
           >
             <SearchIcon className="scale-150 text-neutral-800" />
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="pressable flex h-[43px] w-[43px] items-center justify-center rounded-[28px] border border-slate-200 bg-white/50 backdrop-blur-sm transition-colors hover:bg-white/70"
+            className="pressable glass-chip flex h-[43px] w-[43px] items-center justify-center transition-colors"
           >
             <MenuIcon className="text-neutral-800" />
           </button>
