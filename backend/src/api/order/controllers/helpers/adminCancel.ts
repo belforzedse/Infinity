@@ -86,7 +86,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
     }
 
     const contract = order.contract;
-    const contractId = contract?.id;
+    const contractIdNum = Number(contract?.id);
     const paidAmount = computePaidAmountToman(order);
 
     // Apply changes in transaction
@@ -117,9 +117,9 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
         data: { Status: "Cancelled" },
       });
 
-      if (contractId) {
+      if (Number.isFinite(contractIdNum)) {
         await strapi.db.query("api::contract.contract").update({
-          where: { id: contractId },
+          where: { id: contractIdNum },
           data: { Status: "Cancelled", Amount: 0 },
         });
       }
@@ -200,7 +200,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
           : 0;
 
-      if (contractId) {
+      if (Number.isFinite(contractIdNum)) {
         await strapi.db
           .query("api::contract-transaction.contract-transaction")
           .create({
@@ -210,7 +210,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
               Step: maxStep + 1,
               Status: "Success",
               external_source: "System",
-              contract: contractId,
+              contract: contractIdNum,
               Date: new Date(),
             },
           });
