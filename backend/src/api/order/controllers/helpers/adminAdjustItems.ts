@@ -19,7 +19,11 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
   try {
     // Admin guard
     const user = ctx.state.user;
-    if (!user || user.user_role?.id !== 2) {
+    const roleId =
+      typeof user?.user_role === "object"
+        ? user.user_role?.id
+        : user?.user_role;
+    if (!user || Number(roleId) !== 2) {
       return ctx.forbidden("Admin access required");
     }
 
