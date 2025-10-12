@@ -442,8 +442,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         paymentToken,
       });
       const { data } = await http.post<SnappPaySimpleResponse>(
-        "/api/online/payment/v1/cancelOrder",
-        { transactionId, paymentToken },
+        "/api/online/payment/v1/cancel",
+        { paymentToken },
         {
           headers: {
             Authorization: `Bearer ${token}`,
