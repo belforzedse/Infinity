@@ -10,11 +10,12 @@ This document contains the WooCommerce REST API schemas fetched from `https://in
 
 ---
 
+
 ## 🛍️ Product Schema (Variable Product)
 
 **Endpoint:** `/products?per_page=1`
 
-### Key Fields for Import:
+### Key Fields for Import:!!!
 ```json
 {
   "id": 1004583,
