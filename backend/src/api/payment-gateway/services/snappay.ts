@@ -389,6 +389,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         paymentToken: payload.paymentToken,
         amount: payload.amount,
         cartTotal: payload.cartList?.[0]?.totalAmount,
+        payload,
       });
       const { data } = await http.post<SnappPaySimpleResponse>(
         "/api/online/payment/v1/updateOrder",
