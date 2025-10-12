@@ -59,9 +59,14 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       return ctx.forbidden("Admin access required");
     }
 
+    const orderIdNum = Number(id);
+    if (!Number.isFinite(orderIdNum)) {
+      return ctx.badRequest("Invalid order id");
+    }
+
     // Load order with all relations
     const order = await strapi.db.query("api::order.order").findOne({
-      where: { id },
+      where: { id: orderIdNum },
       populate: {
         order_items: {
           populate: {
@@ -279,7 +284,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
       // Update order
       await strapi.db.query("api::order.order").update({
-        where: { id },
+        where: { id: orderIdNum },
         data: {
           ShippingCost: newShipping,
           Status: allRemoved ? "Cancelled" : order.Status,
@@ -288,10 +293,10 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
       // Update contract
       const contract = order.contract;
-      const contractId = contract?.id;
-      if (contractId) {
+      const contractIdNum = Number(contract?.id);
+      if (Number.isFinite(contractIdNum)) {
         await strapi.db.query("api::contract.contract").update({
-          where: { id: contractId },
+          where: { id: contractIdNum },
           data: {
             Amount: allRemoved ? 0 : newTotals.total,
             Status: allRemoved ? "Cancelled" : contract.Status,
@@ -404,7 +409,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
           : 0;
 
-      if (contractId) {
+      if (Number.isFinite(contractIdNum)) {
         await strapi.db
           .query("api::contract-transaction.contract-transaction")
           .create({
@@ -414,7 +419,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
               Step: maxStep + 1,
               Status: "Success",
               external_source: "System",
-              contract: contractId,
+              contract: contractIdNum,
               Date: new Date(),
             },
           });
