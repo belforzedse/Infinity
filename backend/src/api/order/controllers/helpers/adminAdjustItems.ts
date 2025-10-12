@@ -398,7 +398,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             Cause: allRemoved
               ? "Order Cancelled (Admin)"
               : "Order Adjustment (Admin)",
-            ReferenceId: `order-${id}-adj-${Date.now()}`,
+            ReferenceId: `order-${orderIdNum}-adj-${Date.now()}`,
             user_wallet: wallet.id,
           },
         });
@@ -428,7 +428,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       // Log
       await strapi.db.query("api::order-log.order-log").create({
         data: {
-          order: id,
+          order: orderIdNum,
           Action: "Update",
           Description: allRemoved
             ? "Admin cancelled order (all items removed)"
