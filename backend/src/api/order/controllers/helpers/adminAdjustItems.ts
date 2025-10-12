@@ -254,27 +254,31 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
       // Determine gateway and refund
       const txList = contract?.contract_transactions || [];
-      const snappayTx = [...txList]
-        .reverse()
-        .find(
-          (tx: any) =>
-            (tx?.external_source || contract?.external_source) === "SnappPay" &&
-            tx?.TrackId
-        );
+      const snappayTx = [...txList].reverse().find((tx: any) => {
+        const source = tx?.external_source || contract?.external_source;
+        return source === "SnappPay" && tx?.TrackId;
+      });
       const gatewaySource =
         snappayTx?.external_source || contract?.external_source;
       const paymentToken = snappayTx?.TrackId;
+      const transactionId = contract?.external_id;
 
       if (gatewaySource === "SnappPay") {
+        if (!transactionId) {
+          throw new Error("SNAPPAY_TRANSACTION_ID_MISSING");
+        }
         if (!paymentToken) {
-          throw new Error("SNAPPAY_TOKEN_MISSING");
+          throw new Error("SNAPPAY_PAYMENT_TOKEN_MISSING");
         }
         snappayToken = paymentToken;
         const snappay = strapi.service("api::payment-gateway.snappay");
 
         if (allRemoved) {
           // Full cancel
-          const cancelRes = await snappay.cancelOrder(paymentToken);
+          const cancelRes = await snappay.cancelOrder(
+            transactionId,
+            paymentToken
+          );
           if (!cancelRes.successful) {
             throw new Error(
               `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
@@ -285,6 +289,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           // Update
           const payload = await buildSnappPayUpdatePayload(
             strapi,
+            transactionId,
             paymentToken,
             order,
             changes,
@@ -419,6 +424,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 async function buildSnappPayUpdatePayload(
   strapi: Strapi,
   transactionId: string,
+  paymentToken: string,
   order: any,
   changes: any[],
   newTotals: any,
@@ -454,6 +460,7 @@ async function buildSnappPayUpdatePayload(
 
   return {
     transactionId,
+    paymentToken,
     amount: Math.round(newTotals.total * 10),
     discountAmount: Math.round(newTotals.discount * 10),
     externalSourceAmount: 0,

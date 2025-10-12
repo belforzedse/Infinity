@@ -360,6 +360,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /** Update order (partial refund) */
   async update(payload: {
     transactionId: string;
+    paymentToken?: string;
     amount: number; // IRR, new total
     discountAmount: number; // IRR
     externalSourceAmount: number; // IRR
@@ -385,6 +386,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       const token = await fetchAccessToken(http);
       strapi.log.info("SnappPay update request", {
         transactionId: payload.transactionId,
+        paymentToken: payload.paymentToken,
         amount: payload.amount,
         cartTotal: payload.cartList?.[0]?.totalAmount,
       });
@@ -423,14 +425,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   /** Cancel order (full refund) */
-  async cancelOrder(transactionId: string) {
+  async cancelOrder(transactionId: string, paymentToken?: string) {
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
-      strapi.log.info("SnappPay cancelOrder request", { transactionId });
+      strapi.log.info("SnappPay cancelOrder request", {
+        transactionId,
+        paymentToken,
+      });
       const { data } = await http.post<SnappPaySimpleResponse>(
         "/api/online/payment/v1/cancelOrder",
-        { transactionId },
+        { transactionId, paymentToken },
         {
           headers: {
             Authorization: `Bearer ${token}`,
