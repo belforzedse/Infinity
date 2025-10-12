@@ -23,7 +23,7 @@
 ‫ از روند خرید‬callback ‫حذف پارامتر‬
 
 5th March 2022
-
+:3
 1.1
 
 get ‫ و‬merchant eligibility ‫های‬API ‫بروزرسانی‬
