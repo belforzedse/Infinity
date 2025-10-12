@@ -56,6 +56,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
     const contract = order.contract;
     const contractId = contract?.id;
     const fullAmount = Number(contract?.Amount || 0);
+    const paidAmount = Math.max(0, fullAmount);
 
     // Apply changes in transaction
     let snappayToken: string | undefined;
@@ -138,7 +139,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           });
       }
 
-      const refundIrr = fullAmount * 10;
+      const refundIrr = paidAmount * 10;
       await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
         where: { id: wallet.id },
         data: {
@@ -192,7 +193,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           Description: "Admin cancelled order",
           Changes: {
             reason: reason || "",
-            refundToman: fullAmount,
+            refundToman: paidAmount,
             snappay: snappayToken
               ? { action: "cancel", token: snappayToken }
               : undefined,
@@ -204,7 +205,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
       return {
         data: {
           success: true,
-          refundToman: fullAmount,
+          refundToman: paidAmount,
           status: "cancelled",
           paymentToken: snappayToken ?? null,
         },
