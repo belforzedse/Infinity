@@ -1,5 +1,6 @@
 import type { Strapi } from "@strapi/strapi";
 import { computeTotals } from "../../../cart/services/lib/financials";
+import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
 
 type ItemAdjustment = {
   orderItemId: number;
@@ -259,7 +260,8 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           }
         } else {
           // Update
-          const payload = buildSnappPayUpdatePayload(
+          const payload = await buildSnappPayUpdatePayload(
+            strapi,
             transactionId,
             order,
             changes,
@@ -371,7 +373,8 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
   }
 }
 
-function buildSnappPayUpdatePayload(
+async function buildSnappPayUpdatePayload(
+  strapi: Strapi,
   transactionId: string,
   order: any,
   changes: any[],
@@ -380,26 +383,31 @@ function buildSnappPayUpdatePayload(
 ) {
   const changeMap = new Map(changes.map((c) => [c.orderItemId, c.newCount]));
   const safeItems = (order.order_items || []) as any[];
-  const cartItems = safeItems
-    .filter((it: any) => {
-      const newCount = changeMap.get(it.id);
-      return newCount === undefined ? true : newCount > 0;
-    })
-    .map((it: any, idx: number) => {
+  const filteredItems = safeItems.filter((it: any) => {
+    const newCount = changeMap.get(it.id);
+    return newCount === undefined ? true : newCount > 0;
+  });
+
+  // Map items with category mapping
+  const cartItems = await Promise.all(
+    filteredItems.map(async (it: any, idx: number) => {
       const count = changeMap.get(it.id) ?? it.Count;
       const mainCatNameFa =
         it.product_variation?.product?.product_main_category?.Name ||
         it.product_variation?.product?.Title ||
         "سایر";
+      // Map the category to SnapPay's expected format
+      const snappayCategory = await mapToSnappayCategory(strapi, mainCatNameFa);
       return {
         id: idx + 1,
         name: it.ProductTitle || "Product",
-        category: mainCatNameFa,
+        category: snappayCategory,
         amount: Math.round(Number(it.PerAmount || 0) * 10),
         count: Number(count),
         commissionType: 100,
       };
-    });
+    })
+  );
 
   return {
     transactionId,
