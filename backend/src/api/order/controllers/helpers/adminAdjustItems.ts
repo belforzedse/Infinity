@@ -8,6 +8,38 @@ type ItemAdjustment = {
   remove?: boolean;
 };
 
+const computePaidAmountToman = (order: any): number => {
+  const txList = order?.contract?.contract_transactions || [];
+  let paidIrr = 0;
+
+  if (Array.isArray(txList) && txList.length > 0) {
+    for (const tx of txList) {
+      const amountIrr = Number(tx?.Amount || 0);
+      if (!amountIrr) continue;
+      const discountIrr = Number(tx?.DiscountAmount || 0);
+      const type = String(tx?.Type || "").toLowerCase();
+      const status = String(tx?.Status || "").toLowerCase();
+
+      if (type === "gateway" && status !== "failed") {
+        paidIrr += amountIrr - discountIrr;
+      } else if (type === "return") {
+        paidIrr -= amountIrr;
+      }
+    }
+  } else {
+    const fallback = Number(order?.contract?.Amount || 0);
+    if (fallback > 0) {
+      return fallback;
+    }
+  }
+
+  const paidToman = Math.round(paidIrr / 10);
+  if (paidToman > 0) return paidToman;
+
+  const fallback = Number(order?.contract?.Amount || 0);
+  return Math.max(0, fallback);
+};
+
 export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
   const { items, reason } = ctx.request.body as {
@@ -177,7 +209,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     );
 
     const oldTotal = Number(order.contract?.Amount || 0);
-    const paidAmount = Math.max(0, oldTotal);
+    const paidAmount = computePaidAmountToman(order);
     const requestedRefund = paidAmount - Math.max(newTotals.total, 0);
     // Do not refund more than originally paid and exclude tax from the refund.
     const refundableWithoutTax = Math.max(
@@ -456,12 +488,15 @@ async function buildSnappPayUpdatePayload(
   const cartItems = await Promise.all(
     filteredItems.map(async (it: any, idx: number) => {
       const count = changeMap.get(it.id) ?? it.Count;
-      const mainCatNameFa =
-        it.product_variation?.product?.product_main_category?.Name ||
-        it.product_variation?.product?.Title ||
-        "سایر";
+      const categoryEntity =
+        it.product_variation?.product?.product_main_category;
+      const rawCategory =
+        categoryEntity?.snappay_category ||
+        categoryEntity?.Title ||
+        categoryEntity?.Name ||
+        "";
       // Map the category to SnapPay's expected format
-      const snappayCategory = await mapToSnappayCategory(strapi, mainCatNameFa);
+      const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       return {
         id: idx + 1,
         name: it.ProductTitle || "Product",

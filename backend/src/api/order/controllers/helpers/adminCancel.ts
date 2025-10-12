@@ -1,5 +1,37 @@
 import type { Strapi } from "@strapi/strapi";
 
+const computePaidAmountToman = (order: any): number => {
+  const txList = order?.contract?.contract_transactions || [];
+  let paidIrr = 0;
+
+  if (Array.isArray(txList) && txList.length > 0) {
+    for (const tx of txList) {
+      const amountIrr = Number(tx?.Amount || 0);
+      if (!amountIrr) continue;
+      const discountIrr = Number(tx?.DiscountAmount || 0);
+      const type = String(tx?.Type || "").toLowerCase();
+      const status = String(tx?.Status || "").toLowerCase();
+
+      if (type === "gateway" && status !== "failed") {
+        paidIrr += amountIrr - discountIrr;
+      } else if (type === "return") {
+        paidIrr -= amountIrr;
+      }
+    }
+  } else {
+    const fallback = Number(order?.contract?.Amount || 0);
+    if (fallback > 0) {
+      return fallback;
+    }
+  }
+
+  const paidToman = Math.round(paidIrr / 10);
+  if (paidToman > 0) return paidToman;
+
+  const fallback = Number(order?.contract?.Amount || 0);
+  return Math.max(0, fallback);
+};
+
 export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
   const { reason } = ctx.request.body as { reason?: string };
@@ -55,8 +87,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
 
     const contract = order.contract;
     const contractId = contract?.id;
-    const fullAmount = Number(contract?.Amount || 0);
-    const paidAmount = Math.max(0, fullAmount);
+    const paidAmount = computePaidAmountToman(order);
 
     // Apply changes in transaction
     let snappayToken: string | undefined;
