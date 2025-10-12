@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Project Overviewe
 
 This is **Infinity Backend**, an e-commerce backend built on **Strapi 4.25.21** (a headless CMS framework). The system handles products, shopping carts, orders, payments, user management, and more. It uses PostgreSQL for persistence and Redis for caching/sessions.
 
