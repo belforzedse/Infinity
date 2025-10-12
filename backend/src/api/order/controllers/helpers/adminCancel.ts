@@ -34,6 +34,10 @@ const computePaidAmountToman = (order: any): number => {
 
 export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
+  const orderIdNum = Number(id);
+  if (!Number.isFinite(orderIdNum)) {
+    return ctx.badRequest("Invalid order id");
+  }
   const { reason } = ctx.request.body as { reason?: string };
 
   try {
@@ -49,7 +53,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
 
     // Load order
     const order = await strapi.db.query("api::order.order").findOne({
-      where: { id },
+      where: { id: orderIdNum },
       populate: {
         order_items: {
           populate: {
