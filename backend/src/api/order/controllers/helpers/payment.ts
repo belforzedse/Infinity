@@ -216,80 +216,25 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         );
       }
 
-      const settleResult = await snappay.settle(tokenForOps);
+      await strapi.entityService.update("api::order.order", orderId, {
+        data: { Status: "Started" },
+      });
       try {
-        strapi.log.info("SnappPay settle result", {
-          successful: settleResult?.successful,
-          error: settleResult?.errorData,
+        await strapi.entityService.create("api::order-log.order-log", {
+          data: {
+            order: orderId,
+            Action: "Update",
+            Description:
+              "SnappPay verify succeeded (awaiting manual settlement)",
+            Changes: { transactionId: transactionIdInput },
+          },
         });
       } catch {}
-      if (settleResult?.successful) {
-        // Decrement stock for each order item NOW (after settlement)
-        try {
-          const orderWithItems = await strapi.entityService.findOne(
-            "api::order.order",
-            orderId,
-            {
-              populate: {
-                order_items: {
-                  populate: {
-                    product_variation: {
-                      populate: { product_stock: true },
-                    },
-                  },
-                },
-              },
-            }
-          );
-          // TODO: Consider wrapping stock decrements and status update in a transaction for atomicity
-          for (const it of orderWithItems?.order_items || []) {
-            const v = it?.product_variation;
-            if (v?.product_stock?.id && typeof it?.Count === "number") {
-              const stockId = v.product_stock.id as number;
-              const current = Number(v.product_stock.Count || 0);
-              const dec = Number(it.Count || 0);
-              await strapi.entityService.update(
-                "api::product-stock.product-stock",
-                stockId,
-                { data: { Count: current - dec } }
-              );
-            }
-          }
-        } catch (e) {
-          strapi.log.error("Failed to decrement stock after settlement", e);
-        }
-
-        await strapi.entityService.update("api::order.order", orderId, {
-          data: { Status: "Started" },
-        });
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
-        try {
-          await strapi.entityService.create("api::order-log.order-log", {
-            data: {
-              order: orderId,
-              Action: "Update",
-              Description: "SnappPay callback success (verify+settle)",
-              Changes: { transactionId: transactionIdInput },
-            },
-          });
-        } catch {}
-        return ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
-            transactionIdInput || ""
-          )}`
-        );
-      } else {
-        await strapi.entityService.update("api::order.order", orderId, {
-          data: { Status: "Cancelled" },
-        });
-        return ctx.redirect(
-          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
-            transactionIdInput || ""
-          )}`
-        );
-      }
+      return ctx.redirect(
+        `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
+          transactionIdInput || ""
+        )}`
+      );
     }
 
     // Check if payment was successful (ResCode = 0) - Mellat
