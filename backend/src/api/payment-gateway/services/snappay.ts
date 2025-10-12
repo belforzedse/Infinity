@@ -384,13 +384,20 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
-      strapi.log.info("SnappPay update request", {
-        transactionId: payload.transactionId,
-        paymentToken: payload.paymentToken,
-        amount: payload.amount,
-        cartTotal: payload.cartList?.[0]?.totalAmount,
-        payload,
-      });
+      strapi.log.info(
+        "SnappPay update request " +
+          JSON.stringify(
+            {
+              transactionId: payload.transactionId,
+              paymentToken: payload.paymentToken,
+              amount: payload.amount,
+              cartTotal: payload.cartList?.[0]?.totalAmount,
+              payload,
+            },
+            null,
+            2
+          )
+      );
       const { data } = await http.post<SnappPaySimpleResponse>(
         "/api/online/payment/v1/updateOrder",
         payload,
