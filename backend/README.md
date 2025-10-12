@@ -5,7 +5,7 @@ Strapi comes with a full featured [Command Line Interface](https://docs.strapi.i
 ## 🐳 Using Docker
 
 This project includes Docker setup for development and deployment.
-
+up and down and up and down and
 ### Development
 
 To run using Docker for development:
