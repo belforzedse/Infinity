@@ -399,7 +399,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           )
       );
       const { data } = await http.post<SnappPaySimpleResponse>(
-        "/api/online/payment/v1/",
+        "/api/online/payment/v1/update",
         payload,
         {
           headers: {
