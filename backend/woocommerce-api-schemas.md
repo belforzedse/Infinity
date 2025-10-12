@@ -85,7 +85,7 @@ This document contains the WooCommerce REST API schemas fetched from `https://in
   "meta_data": []
 }
 ```
-
+e
 ### Mapping to Our Schema:
 - `id` → External reference for duplicate checking
 - `name` → `products.title`
