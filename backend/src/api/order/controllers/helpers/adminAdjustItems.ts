@@ -119,6 +119,11 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       return ctx.badRequest("No changes to apply");
     }
 
+    const originalSubtotal = orderItemsArr.reduce(
+      (sum, it: any) => sum + Number(it.PerAmount || 0) * Number(it.Count || 0),
+      0
+    );
+
     // Recompute financials
     let newSubtotal = 0;
     for (const it of orderItemsArr) {
@@ -158,9 +163,11 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     }
 
     const taxPercent = Number(order.contract?.TaxPercent || 10);
+    const discountRate =
+      originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
     const effectiveDiscount = Math.max(
       0,
-      Math.min(discountAmount, newSubtotal)
+      Math.min(newSubtotal, Math.round(newSubtotal * discountRate))
     );
     const newTotals = computeTotals(
       newSubtotal,
