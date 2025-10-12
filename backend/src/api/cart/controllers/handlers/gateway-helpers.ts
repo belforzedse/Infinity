@@ -1,4 +1,5 @@
 import { Strapi } from "@strapi/strapi";
+import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
 
 type FinancialSummary = {
   subtotal: number;
@@ -72,24 +73,30 @@ export const requestSnappPayment = async (
   const mobileForSnapp = customerMobile;
 
   const mapCommissionType = () => 100 as const;
-  const items = (orderItems || []).map((it: any) => {
-    const pname =
-      it.ProductTitle || it.product_variation?.product?.Title || "Item";
-    const mainCatNameFa =
-      it.product_variation?.product?.product_main_category?.Name ||
-      it.product_variation?.product?.Title ||
-      "سایر";
-    const perAmountToman = Math.round(it.PerAmount || 0);
-    const perAmountIrr = perAmountToman * 10;
-    return {
-      amount: perAmountIrr,
-      category: mainCatNameFa,
-      count: Math.round(it.Count || 1),
-      id: it.product_variation?.id || it.id,
-      name: pname,
-      commissionType: mapCommissionType(),
-    };
-  });
+
+  // Map items with proper category mapping
+  const items = await Promise.all(
+    (orderItems || []).map(async (it: any) => {
+      const pname =
+        it.ProductTitle || it.product_variation?.product?.Title || "Item";
+      const mainCatNameFa =
+        it.product_variation?.product?.product_main_category?.Name ||
+        it.product_variation?.product?.Title ||
+        "سایر";
+      // Map the category to SnapPay's expected format
+      const snappayCategory = await mapToSnappayCategory(strapi, mainCatNameFa);
+      const perAmountToman = Math.round(it.PerAmount || 0);
+      const perAmountIrr = perAmountToman * 10;
+      return {
+        amount: perAmountIrr,
+        category: snappayCategory,
+        count: Math.round(it.Count || 1),
+        id: it.product_variation?.id || it.id,
+        name: pname,
+        commissionType: mapCommissionType(),
+      };
+    })
+  );
 
   const itemsTotalIrr = items.reduce(
     (sum: number, x: any) => sum + x.amount * x.count,
