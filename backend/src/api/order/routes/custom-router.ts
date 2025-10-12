@@ -57,5 +57,14 @@ export default {
         middlewares: ["global::authentication"],
       },
     },
+    {
+      method: "POST",
+      path: "/orders/:id/admin/void-barcode",
+      handler: "order.adminVoidBarcode",
+      config: {
+        auth: false,
+        middlewares: ["global::authentication"],
+      },
+    },
   ],
 };

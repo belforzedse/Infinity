@@ -8,6 +8,7 @@ import { generateAnipoBarcodeHandler } from "./helpers/generateBarcode";
 import { verifyPaymentHandler } from "./helpers/payment";
 import { adminAdjustItemsHandler } from "./helpers/adminAdjustItems";
 import { adminCancelOrderHandler } from "./helpers/adminCancel";
+import { adminVoidBarcodeHandler } from "./helpers/adminVoidBarcode";
 
 export default factories.createCoreController(
   "api::order.order",
@@ -26,6 +27,10 @@ export default factories.createCoreController(
 
     async adminCancel(ctx) {
       return adminCancelOrderHandler(strapi as any, ctx);
+    },
+
+    async adminVoidBarcode(ctx) {
+      return adminVoidBarcodeHandler(strapi as any, ctx);
     },
 
     async checkPaymentStatus(ctx) {
