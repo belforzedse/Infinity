@@ -117,7 +117,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
 
       // Update order and contract
       await strapi.db.query("api::order.order").update({
-        where: { id },
+        where: { id: orderIdNum },
         data: { Status: "Cancelled" },
       });
 
@@ -193,7 +193,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
             Type: "Add",
             Date: new Date(),
             Cause: "Order Cancelled (Admin)",
-            ReferenceId: `order-${id}-cancel-${Date.now()}`,
+            ReferenceId: `order-${orderIdNum}-cancel-${Date.now()}`,
             user_wallet: wallet.id,
           },
         });
@@ -223,7 +223,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
       // Log
       await strapi.db.query("api::order-log.order-log").create({
         data: {
-          order: id,
+          order: orderIdNum,
           Action: "Update",
           Description: "Admin cancelled order",
           Changes: {
