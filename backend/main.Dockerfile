@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 RUN yarn install --ignore-engines
-
+#:3
 COPY . .
 
 RUN yarn build
