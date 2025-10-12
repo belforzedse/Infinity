@@ -158,21 +158,29 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     }
 
     const taxPercent = Number(order.contract?.TaxPercent || 10);
+    const effectiveDiscount = Math.max(
+      0,
+      Math.min(discountAmount, newSubtotal)
+    );
     const newTotals = computeTotals(
       newSubtotal,
-      discountAmount,
+      effectiveDiscount,
       taxPercent,
       newShipping
     );
 
     const oldTotal = Number(order.contract?.Amount || 0);
-    const refundToman = oldTotal - newTotals.total;
-
-    if (refundToman <= 0) {
-      return ctx.conflict("Refund cannot be negative or zero", {
-        data: { error: "negative_refund_not_allowed", refundToman },
-      });
-    }
+    const paidAmount = Math.max(0, oldTotal);
+    const requestedRefund = paidAmount - Math.max(newTotals.total, 0);
+    // Do not refund more than originally paid and exclude tax from the refund.
+    const refundableWithoutTax = Math.max(
+      0,
+      requestedRefund - Math.max(newTotals.tax, 0)
+    );
+    const refundToman = Math.max(
+      0,
+      Math.min(paidAmount, refundableWithoutTax)
+    );
 
     if (isDryRun) {
       return {
