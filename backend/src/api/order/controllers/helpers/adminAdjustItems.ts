@@ -194,6 +194,10 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     );
 
     // Apply changes in transaction
+    let snappayToken: string | undefined;
+    let snappayPayload: any = null;
+    let snappayAction: "update" | "cancel" | undefined;
+
     return await strapi.db.transaction(async () => {
       // Update or delete order items
       for (const change of changes) {
@@ -236,37 +240,52 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       });
 
       // Update contract
-      await strapi.db.query("api::contract.contract").update({
-        where: { id: order.contract.id },
-        data: {
-          Amount: allRemoved ? 0 : newTotals.total,
-          Status: allRemoved ? "Cancelled" : order.contract.Status,
-        },
-      });
+      const contract = order.contract;
+      const contractId = contract?.id;
+      if (contractId) {
+        await strapi.db.query("api::contract.contract").update({
+          where: { id: contractId },
+          data: {
+            Amount: allRemoved ? 0 : newTotals.total,
+            Status: allRemoved ? "Cancelled" : contract.Status,
+          },
+        });
+      }
 
       // Determine gateway and refund
-      const txList = order.contract.contract_transactions || [];
-      const lastTx = txList[txList.length - 1];
-      const gatewaySource = lastTx?.external_source;
-      const transactionId = order.contract.external_id;
+      const txList = contract?.contract_transactions || [];
+      const snappayTx = [...txList]
+        .reverse()
+        .find(
+          (tx: any) =>
+            (tx?.external_source || contract?.external_source) === "SnappPay" &&
+            tx?.TrackId
+        );
+      const gatewaySource =
+        snappayTx?.external_source || contract?.external_source;
+      const paymentToken = snappayTx?.TrackId;
 
-      if (gatewaySource === "SnappPay" && transactionId) {
+      if (gatewaySource === "SnappPay") {
+        if (!paymentToken) {
+          throw new Error("SNAPPAY_TOKEN_MISSING");
+        }
+        snappayToken = paymentToken;
         const snappay = strapi.service("api::payment-gateway.snappay");
 
         if (allRemoved) {
           // Full cancel
-          const cancelRes = await snappay.cancelOrder(transactionId);
+          const cancelRes = await snappay.cancelOrder(paymentToken);
           if (!cancelRes.successful) {
-            strapi.log.error(
-              "SnappPay cancelOrder failed",
-              cancelRes.errorData
+            throw new Error(
+              `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
             );
           }
+          snappayAction = "cancel";
         } else {
           // Update
           const payload = await buildSnappPayUpdatePayload(
             strapi,
-            transactionId,
+            paymentToken,
             order,
             changes,
             newTotals,
@@ -274,8 +293,12 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           );
           const updateRes = await snappay.update(payload);
           if (!updateRes.successful) {
-            strapi.log.error("SnappPay update failed", updateRes.errorData);
+            throw new Error(
+              `SNAPPAY_UPDATE_FAILED:${updateRes.errorData?.message || ""}`
+            );
           }
+          snappayPayload = payload;
+          snappayAction = "update";
         }
       }
 
@@ -329,19 +352,21 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
           : 0;
 
-      await strapi.db
-        .query("api::contract-transaction.contract-transaction")
-        .create({
-          data: {
-            Type: "Return",
-            Amount: refundIrr,
-            Step: maxStep + 1,
-            Status: "Success",
-            external_source: "System",
-            contract: order.contract.id,
-            Date: new Date(),
-          },
-        });
+      if (contractId) {
+        await strapi.db
+          .query("api::contract-transaction.contract-transaction")
+          .create({
+            data: {
+              Type: "Return",
+              Amount: refundIrr,
+              Step: maxStep + 1,
+              Status: "Success",
+              external_source: "System",
+              contract: contractId,
+              Date: new Date(),
+            },
+          });
+      }
 
       // Log
       await strapi.db.query("api::order-log.order-log").create({
@@ -356,6 +381,13 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             refundToman,
             newTotals,
             reason: reason || "",
+            snappay: snappayToken
+              ? {
+                  action: snappayAction,
+                  token: snappayToken,
+                  payload: snappayPayload,
+                }
+              : undefined,
           },
           PerformedBy: `Admin User ${user.id}`,
         },
@@ -366,11 +398,18 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           success: true,
           refundToman,
           status: allRemoved ? "cancelled" : "adjusted",
+          paymentToken: snappayToken ?? null,
         },
       };
     });
   } catch (error: any) {
     strapi.log.error("adminAdjustItems error", error);
+    const message = String(error?.message || "");
+    if (message.startsWith("SNAPPAY_")) {
+      return ctx.badGateway("SnappPay synchronization failed", {
+        data: { error: message },
+      });
+    }
     return ctx.internalServerError("Failed to adjust items", {
       data: { error: error.message },
     });

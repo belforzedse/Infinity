@@ -7,7 +7,11 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
   try {
     // Admin guard
     const user = ctx.state.user;
-    if (!user || user.user_role?.id !== 2) {
+    const roleId =
+      typeof user?.user_role === "object"
+        ? user.user_role?.id
+        : user?.user_role;
+    if (!user || Number(roleId) !== 2) {
       return ctx.forbidden("Admin access required");
     }
 
@@ -49,9 +53,13 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
       });
     }
 
-    const fullAmount = Number(order.contract?.Amount || 0);
+    const contract = order.contract;
+    const contractId = contract?.id;
+    const fullAmount = Number(contract?.Amount || 0);
 
     // Apply changes in transaction
+    let snappayToken: string | undefined;
+
     return await strapi.db.transaction(async () => {
       // Restock all items
       for (const item of order.order_items) {
@@ -77,22 +85,37 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
         data: { Status: "Cancelled" },
       });
 
-      await strapi.db.query("api::contract.contract").update({
-        where: { id: order.contract.id },
-        data: { Status: "Cancelled", Amount: 0 },
-      });
+      if (contractId) {
+        await strapi.db.query("api::contract.contract").update({
+          where: { id: contractId },
+          data: { Status: "Cancelled", Amount: 0 },
+        });
+      }
 
       // Gateway cancel
-      const txList = order.contract.contract_transactions || [];
-      const lastTx = txList[txList.length - 1];
-      const gatewaySource = lastTx?.external_source;
-      const transactionId = order.contract.external_id;
+      const txList = contract?.contract_transactions || [];
+      const snappayTx = [...txList]
+        .reverse()
+        .find(
+          (tx: any) =>
+            (tx?.external_source || contract?.external_source) === "SnappPay" &&
+            tx?.TrackId
+        );
+      const gatewaySource =
+        snappayTx?.external_source || contract?.external_source;
+      const paymentToken = snappayTx?.TrackId;
 
-      if (gatewaySource === "SnappPay" && transactionId) {
+      if (gatewaySource === "SnappPay") {
+        if (!paymentToken) {
+          throw new Error("SNAPPAY_TOKEN_MISSING");
+        }
+        snappayToken = paymentToken;
         const snappay = strapi.service("api::payment-gateway.snappay");
-        const cancelRes = await snappay.cancelOrder(transactionId);
+        const cancelRes = await snappay.cancelOrder(paymentToken);
         if (!cancelRes.successful) {
-          strapi.log.error("SnappPay cancelOrder failed", cancelRes.errorData);
+          throw new Error(
+            `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
+          );
         }
       }
 
@@ -144,19 +167,21 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
           : 0;
 
-      await strapi.db
-        .query("api::contract-transaction.contract-transaction")
-        .create({
-          data: {
-            Type: "Return",
-            Amount: refundIrr,
-            Step: maxStep + 1,
-            Status: "Success",
-            external_source: "System",
-            contract: order.contract.id,
-            Date: new Date(),
-          },
-        });
+      if (contractId) {
+        await strapi.db
+          .query("api::contract-transaction.contract-transaction")
+          .create({
+            data: {
+              Type: "Return",
+              Amount: refundIrr,
+              Step: maxStep + 1,
+              Status: "Success",
+              external_source: "System",
+              contract: contractId,
+              Date: new Date(),
+            },
+          });
+      }
 
       // Log
       await strapi.db.query("api::order-log.order-log").create({
@@ -164,7 +189,13 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           order: id,
           Action: "Update",
           Description: "Admin cancelled order",
-          Changes: { reason: reason || "", refundToman: fullAmount },
+          Changes: {
+            reason: reason || "",
+            refundToman: fullAmount,
+            snappay: snappayToken
+              ? { action: "cancel", token: snappayToken }
+              : undefined,
+          },
           PerformedBy: `Admin User ${user.id}`,
         },
       });
@@ -174,11 +205,18 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           success: true,
           refundToman: fullAmount,
           status: "cancelled",
+          paymentToken: snappayToken ?? null,
         },
       };
     });
   } catch (error: any) {
     strapi.log.error("adminCancelOrder error", error);
+    const message = String(error?.message || "");
+    if (message.startsWith("SNAPPAY_")) {
+      return ctx.badGateway("SnappPay synchronization failed", {
+        data: { error: message },
+      });
+    }
     return ctx.internalServerError("Failed to cancel order", {
       data: { error: error.message },
     });
