@@ -68,6 +68,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     const order = await strapi.db.query("api::order.order").findOne({
       where: { id: orderIdNum },
       populate: {
+        user: true,
         order_items: {
           populate: {
             product_variation: {
@@ -363,7 +364,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       const userId = order.user?.id || order.user;
       let wallet = await strapi.db
         .query("api::local-user-wallet.local-user-wallet")
-        .findOne({ where: { user: { id: userId } } });
+        .findOne({ where: { user: userId } });
 
       if (!wallet) {
         wallet = await strapi.db
