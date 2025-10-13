@@ -192,7 +192,18 @@ function ShoppingCartBillForm({}: Props) {
     run();
   }, []);
 
+  // Validate cart has items and total price on mount
+  useEffect(() => {
+    if (totalPrice <= 0) {
+      setError("سبد خرید شما خالی است یا مبلغ نامعتبر است");
+    }
+  }, [totalPrice]);
+
   const onSubmit = async (data: FormData) => {
+    // Clear previous errors
+    setError(null);
+
+    // Validate required fields
     if (!data.address) {
       setError("لطفا یک آدرس انتخاب کنید");
       return;
@@ -203,9 +214,26 @@ function ShoppingCartBillForm({}: Props) {
       return;
     }
 
+    if (!data.phoneNumber || data.phoneNumber.trim() === "") {
+      setError("لطفا شماره تماس خود را وارد کنید");
+      return;
+    }
+
+    // Validate phone number format (basic check)
+    const cleanPhone = data.phoneNumber.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      setError("شماره تماس وارد شده معتبر نیست");
+      return;
+    }
+
+    // Validate total price is positive
+    if (totalPrice <= 0) {
+      setError("مبلغ سفارش باید بیشتر از صفر باشد");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      setError(null);
 
       const stockValid = await CartService.checkCartStock();
 
@@ -235,7 +263,67 @@ function ShoppingCartBillForm({}: Props) {
 
       if (!cartResponse.success) {
         console.error("❌ Cart finalization failed:", cartResponse);
-        setError("خطا در ثبت سفارش. لطفا مجددا تلاش کنید.");
+
+        // Extract detailed error information from response
+        const errorCode = (cartResponse as any).errorCode;
+        const errorMessage = (cartResponse as any).message || cartResponse.message;
+        const errorDetails = (cartResponse as any).details;
+
+        // Map error codes to user-friendly messages
+        let displayError = "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.";
+
+        if (errorCode) {
+          switch (errorCode) {
+            case "CART_EMPTY":
+              displayError = "سبد خرید شما خالی است";
+              break;
+            case "INVALID_ITEM":
+              displayError = "برخی از کالاهای سبد خرید معتبر نیستند. لطفاً سبد خرید خود را بررسی کنید";
+              break;
+            case "MISSING_PRODUCT_TITLE":
+            case "MISSING_PRODUCT_SKU":
+              displayError = "اطلاعات برخی از کالاها ناقص است. لطفاً با پشتیبانی تماس بگیرید";
+              break;
+            case "INVALID_PRICE":
+              displayError = "قیمت برخی از کالاها نامعتبر است. لطفاً سبد خرید خود را بروزرسانی کنید";
+              break;
+            case "ORDER_ITEM_CREATION_FAILED":
+              displayError = "خطا در ثبت اقلام سفارش. لطفاً مجدداً تلاش کنید";
+              break;
+            case "CONTRACT_CREATION_FAILED":
+              displayError = "خطا در ایجاد قرارداد. لطفاً مجدداً تلاش کنید";
+              break;
+            case "INVALID_AMOUNT":
+              displayError = "مبلغ سفارش نامعتبر است";
+              break;
+            case "SHIPPING_REQUIRED":
+              displayError = "لطفاً روش ارسال را انتخاب کنید";
+              break;
+            case "ADDRESS_REQUIRED":
+              displayError = "لطفاً آدرس تحویل را انتخاب کنید";
+              break;
+            case "INVALID_SHIPPING":
+              displayError = "روش ارسال انتخاب شده معتبر نیست";
+              break;
+            case "ADDRESS_NOT_FOUND":
+              displayError = "آدرس انتخاب شده یافت نشد. لطفاً آدرس دیگری انتخاب کنید";
+              break;
+            default:
+              // Use backend message if available
+              if (errorMessage && typeof errorMessage === "string") {
+                displayError = errorMessage;
+              }
+          }
+        } else if (errorMessage && typeof errorMessage === "string") {
+          displayError = errorMessage;
+        }
+
+        // Log error details for debugging
+        if (process.env.NODE_ENV === "development" && errorDetails) {
+          console.error("Error details:", errorDetails);
+        }
+
+        setError(displayError);
         return;
       }
 
@@ -281,7 +369,57 @@ function ShoppingCartBillForm({}: Props) {
       }
     } catch (err: any) {
       console.error("Error creating order:", err);
-      setError(err.message || "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.");
+
+      // Extract error information from the error object
+      let displayError = "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.";
+
+      // Check if error response has structured data
+      if (err.response?.data) {
+        const responseData = err.response.data;
+        const errorCode = responseData.errorCode;
+        const errorMessage = responseData.message;
+
+        if (errorCode) {
+          switch (errorCode) {
+            case "CART_EMPTY":
+              displayError = "سبد خرید شما خالی است";
+              break;
+            case "SHIPPING_REQUIRED":
+              displayError = "لطفاً روش ارسال را انتخاب کنید";
+              break;
+            case "ADDRESS_REQUIRED":
+              displayError = "لطفاً آدرس تحویل را انتخاب کنید";
+              break;
+            case "INVALID_SHIPPING":
+              displayError = "روش ارسال انتخاب شده معتبر نیست";
+              break;
+            case "ADDRESS_NOT_FOUND":
+              displayError = "آدرس انتخاب شده یافت نشد";
+              break;
+            case "SHIPPING_VALIDATION_FAILED":
+              displayError = "خطا در بررسی روش ارسال";
+              break;
+            case "ADDRESS_VALIDATION_FAILED":
+              displayError = "خطا در بررسی آدرس";
+              break;
+            default:
+              if (errorMessage && typeof errorMessage === "string") {
+                displayError = errorMessage;
+              }
+          }
+        } else if (errorMessage && typeof errorMessage === "string") {
+          displayError = errorMessage;
+        }
+      } else if (err.message) {
+        // Network or other errors
+        if (err.message.includes("Network")) {
+          displayError = "خطا در اتصال به سرور. لطفاً اتصال اینترنت خود را بررسی کنید";
+        } else {
+          displayError = err.message;
+        }
+      }
+
+      setError(displayError);
     } finally {
       setIsSubmitting(false);
     }

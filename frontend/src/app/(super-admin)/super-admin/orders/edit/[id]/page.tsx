@@ -3,6 +3,7 @@
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import Footer from "@/components/SuperAdmin/Order/SummaryFooter";
 import GatewayLogs from "@/components/SuperAdmin/Order/GatewayLogs";
+import AdjustItemsPanel from "@/components/SuperAdmin/Order/AdjustItemsPanel";
 import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
 import { useState, useEffect } from "react";
@@ -10,8 +11,8 @@ import { apiClient } from "@/services";
 import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
-import type { ProductCoverImage } from "@/types/Product";
-// removed unused import alias: apiClient as _ from "@/services"
+import { ProductCoverImage } from "@/types/Product";
+import { apiClient as _ } from "@/services";
 
 export type Order = {
   id: number;
@@ -24,8 +25,15 @@ export type Order = {
   address?: string;
   postalCode?: string;
   paymentGateway?: string;
+  transactionId?: string;
+  paymentToken?: string;
   createdAt: Date;
-  contractStatus: "Not Ready" | "Confirmed" | "Finished" | "Failed" | "Cancelled";
+  contractStatus:
+    | "Not Ready"
+    | "Confirmed"
+    | "Finished"
+    | "Failed"
+    | "Cancelled";
   updatedAt: Date;
   items: OrderItem[];
   shipping: number;
@@ -79,7 +87,13 @@ type OrderResponse = {
       data: {
         attributes: {
           Amount: number;
-          Status: "Not Ready" | "Confirmed" | "Finished" | "Failed" | "Cancelled";
+          external_id?: string;
+          Status:
+            | "Not Ready"
+            | "Confirmed"
+            | "Finished"
+            | "Failed"
+            | "Cancelled";
           contract_transactions?: {
             data: Array<{
               id: string;
@@ -186,7 +200,7 @@ export default function EditOrderPage() {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        },
+        }
       )
       .then((res) => {
         const data = (res as any).data as OrderResponse;
@@ -202,19 +216,23 @@ export default function EditOrderPage() {
           size: item.attributes?.product_size?.data?.attributes?.Title,
           image:
             API_BASE_URL.split("/api")[0] +
-            item.attributes?.product_variation?.data?.attributes?.product?.data?.attributes
-              ?.CoverImage?.data?.attributes?.formats?.thumbnail?.url,
+            item.attributes?.product_variation?.data?.attributes?.product?.data
+              ?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail
+              ?.url,
         }));
 
         // Compute financials
         const shippingCost = Number(data.attributes?.ShippingCost || 0);
         const itemsSubtotal = (items || []).reduce(
-          (sum: number, it: any) => sum + Number(it.price || 0) * Number(it.quantity || 0),
-          0,
+          (sum: number, it: any) =>
+            sum + Number(it.price || 0) * Number(it.quantity || 0),
+          0
         );
-        const contractAmount = Number(data.attributes?.contract?.data?.attributes?.Amount || 0);
+        const contractAmount = Number(
+          data.attributes?.contract?.data?.attributes?.Amount || 0
+        );
         const taxPercent = Number(
-          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 10,
+          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 10
         );
         // Use items subtotal for "موارد جمع جزء" and contract amount (already includes shipping/tax) for total.
         const subtotal = itemsSubtotal;
@@ -228,21 +246,39 @@ export default function EditOrderPage() {
         const tax = Math.max(0, Math.round(preTaxBase * r));
 
         const userName =
-          (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.FirstName || "") +
+          (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes
+            ?.FirstName || "") +
           " " +
-          (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes?.LastName || "");
+          (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes
+            ?.LastName || "");
 
         const addr = data.attributes?.delivery_address?.data?.attributes;
         const city = addr?.shipping_city?.data?.attributes?.Title;
         const province =
-          addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes?.Title;
-        const fullAddress = [addr?.FullAddress, city, province].filter(Boolean).join(" - ");
+          addr?.shipping_city?.data?.attributes?.shipping_province?.data
+            ?.attributes?.Title;
+        const fullAddress = [addr?.FullAddress, city, province]
+          .filter(Boolean)
+          .join(" - ");
 
         // Extract last gateway used from latest successful or pending contract transaction
         const txList =
-          data.attributes?.contract?.data?.attributes?.contract_transactions?.data || [];
+          data.attributes?.contract?.data?.attributes?.contract_transactions
+            ?.data || [];
         const lastTx = txList[txList.length - 1]?.attributes;
-        const paymentGateway = lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
+        const lastSnappayTx = [...txList]
+          .reverse()
+          .find(
+            (tx) =>
+              (tx?.attributes?.external_source ||
+                data.attributes?.contract?.data?.attributes?.external_source) ===
+                "SnappPay" && tx?.attributes?.TrackId
+          );
+        const paymentGateway =
+          lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
+        const transactionId =
+          data.attributes?.contract?.data?.attributes?.external_id;
+        const paymentToken = lastSnappayTx?.attributes?.TrackId;
 
         setData({
           id: +data.id,
@@ -255,6 +291,8 @@ export default function EditOrderPage() {
           address: fullAddress || undefined,
           postalCode: addr?.PostalCode,
           paymentGateway,
+          transactionId,
+          paymentToken,
           shipping: shippingCost,
           userId: data.attributes?.user?.data?.id,
           userName: userName.trim() || data.attributes?.user?.data?.id,
@@ -293,39 +331,42 @@ export default function EditOrderPage() {
   }
 
   return (
-    <UpsertPageContentWrapper<Order>
-      config={config}
-      data={data}
-      onSubmit={async (data) => {
-        apiClient
-          .put(
-            `/orders/${id}`,
-            {
-              data: {
-                Status: data.orderStatus,
-                Description: data.description,
+    <>
+      {data && <AdjustItemsPanel order={data} onSuccess={load} />}
+      <UpsertPageContentWrapper<Order>
+        config={config}
+        data={data}
+        onSubmit={async (data) => {
+          apiClient
+            .put(
+              `/orders/${id}`,
+              {
+                data: {
+                  Status: data.orderStatus,
+                  Description: data.description,
+                },
               },
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${STRAPI_TOKEN}`,
-              },
-            },
-          )
-          .then(() => {
-            toast.success("سفارش با موفقیت ویرایش شد");
-          })
-          .catch(() => {
-            toast.error("خطایی رخ داده است");
-          });
-      }}
-      footer={
-        <>
-          <Footer order={data} onReload={load} />
-          {data?.id ? <GatewayLogs orderId={data.id} /> : null}
-        </>
-      }
-      customSidebar={<Sidebar />}
-    />
+              {
+                headers: {
+                  Authorization: `Bearer ${STRAPI_TOKEN}`,
+                },
+              }
+            )
+            .then((res) => {
+              toast.success("سفارش با موفقیت ویرایش شد");
+            })
+            .catch((err) => {
+              toast.error("خطایی رخ داده است");
+            });
+        }}
+        footer={
+          <>
+            <Footer order={data} onReload={load} />
+            {data?.id ? <GatewayLogs orderId={data.id} /> : null}
+          </>
+        }
+        customSidebar={<Sidebar />}
+      />
+    </>
   );
 }
