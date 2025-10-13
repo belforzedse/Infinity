@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node load-env.js",
     "dev": "next dev -p 2888",
+    "prebuild": "node load-env.js",
     "build": "next build",
+    "prestart": "node load-env.js",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
