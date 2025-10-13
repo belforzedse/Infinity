@@ -31,49 +31,48 @@ the design: Figma — https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infini
 
 1. Clone and enter the project
 
-```
+```bash
 git clone <repo-url>
 cd infinity-frontend
 ```
 
-2. Configure environment
+2. Install dependencies
 
-```
-cp .env.example .env
-# Edit values to match your backend/hosts
-```
-
-3. Install dependencies
-
-```
-# with npm
-npm install
-
-# or with Yarn
-yarn install
+```bash
+npm install --legacy-peer-deps
 ```
 
-4. Run the dev server (port 2888)
+3. Run the dev server (port 2888)
 
-```
+```bash
 npm run dev
-# or
-yarn dev
 ```
 
 Open http://localhost:2888
 
+Environment variables are automatically loaded from `dev.env` - no manual configuration needed!
+
 ## Environment Variables
 
-Configure via `.env` (see `.env.example`). Notable variables:
+Environment variables are automatically loaded by `load-env.js`:
 
-- `NEXT_PUBLIC_API_BASE_URL`: Base URL for backend API, e.g. `https://api.example.com/api`
-- `NEXT_PUBLIC_IMAGE_BASE_URL`: Base host for media/CDN, e.g. `https://api.example.com`
-- `NEXT_PUBLIC_STRAPI_TOKEN`: Public token for Strapi‑accessible endpoints (avoid committing secrets)
-- `NEXT_PUBLIC_ALLOWED_REDIRECT_ORIGINS`: Comma‑separated allow‑list of origins permitted for redirects from payment callbacks; if empty, all http(s) allowed in dev
-- `NEXT_PUBLIC_ALLOWED_PAYMENT_ORIGINS`: Comma‑separated allow‑list for payment gateway redirect origins; if empty, all http(s) allowed in dev
+- **`dev.env`** - Development environment (auto-loaded in dev mode)
+- **`main.env`** - Production environment (auto-loaded when `NODE_ENV=production`)
+- **`.env.local`** - Personal overrides (optional, gitignored)
 
-`NEXT_PUBLIC_STRAPI_TOKEN` has no default and must be supplied via environment variables.
+Key variables:
+
+- `NEXT_PUBLIC_API_BASE_URL`: Base URL for backend API
+- `NEXT_PUBLIC_IMAGE_BASE_URL`: Base host for media/CDN
+- `NEXT_PUBLIC_STRAPI_TOKEN`: Public token for Strapi endpoints
+
+To override locally, create `.env.local`:
+
+```bash
+# .env.local (gitignored)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:1337/api
+NEXT_PUBLIC_IMAGE_BASE_URL=http://localhost:1337/
+```
 
 ## Scripts
 
@@ -86,36 +85,21 @@ Configure via `.env` (see `.env.example`). Notable variables:
 
 ## Docker
 
-Two Dockerfiles are provided:
+The `main.Dockerfile` automatically loads environment variables from `main.env`:
 
-- `dev.Dockerfile`
-- `main.Dockerfile`
+Build:
 
-Both expect required env vars at build time (e.g. `--build-arg NEXT_PUBLIC_STRAPI_TOKEN=...`).
-
-Build and run (dev):
-
-```
-docker build -f dev.Dockerfile \
-  --build-arg NEXT_PUBLIC_STRAPI_TOKEN=your_token \
-  -t infinity-frontend:dev .
-docker run --rm -p 3000:3000 \
-  --env NEXT_PUBLIC_STRAPI_TOKEN=your_token \
-  infinity-frontend:dev
+```bash
+docker build -f main.Dockerfile -t infinity-frontend:prod .
 ```
 
-Build and run (prod):
+Run:
 
-```
-docker build -f main.Dockerfile \
-  --build-arg NEXT_PUBLIC_STRAPI_TOKEN=your_token \
-  -t infinity-frontend:prod .
-docker run --rm -p 3000:3000 \
-  --env NEXT_PUBLIC_STRAPI_TOKEN=your_token \
-  infinity-frontend:prod
+```bash
+docker run --rm -p 3000:3000 infinity-frontend:prod
 ```
 
-To load variables from a file, use `--env-file` with `docker run`.
+No build args needed - environment variables are loaded automatically from `main.env`!
 
 - fix(pdp): add `type="button"` to variation selector buttons (color/size/model)
 - chore(a11y): add TODO to improve selected color state semantics for keyboard access
