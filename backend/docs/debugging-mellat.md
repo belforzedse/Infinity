@@ -11,7 +11,7 @@ This guide helps you debug issues with the Beh Pardakht Mellat payment gateway i
 Test the gateway without going through cart finalization:
 
 ```bash
-curl -X POST 'https://api.infinitycolor.co/api/payment-gateway/test-mellat' \
+curl -X POST 'https://infinity-bck.darkube.app/api/payment-gateway/test-mellat' \
   -H 'Content-Type: application/json' \
   -d '{
     "amount": 10000,
@@ -87,7 +87,7 @@ The server now logs detailed information with request IDs for tracking:
 [REQ-1234567890-abc123] Making Mellat payment request: {
   orderId: 42,
   amount: 100000,
-  callbackUrl: "https://api.infinitycolor.co/orders/payment-callback",
+  callbackUrl: "https://infinity-bck.darkube.app/orders/payment-callback",
   userId: 1,
   localDate: "20240115",
   localTime: "103000",
@@ -171,7 +171,7 @@ MELLAT_PASSWORD=your-real-password
 Use the test endpoint to verify basic gateway functionality:
 
 ```bash
-curl -X POST 'https://api.infinitycolor.co/api/payment-gateway/test-mellat' \
+curl -X POST 'https://infinity-bck.darkube.app/api/payment-gateway/test-mellat' \
   -H 'Content-Type: application/json' \
   -d '{"amount": 10000}'
 ```

@@ -28,7 +28,7 @@ The import process handles:
 
 2. **API Configuration**: The scripts are configured with:
 
-   - **Base URL**: `https://api.infinitycolor.co`
+   - **Base URL**: `https://infinity-bck.darkube.app`
    - **API Token**: Already configured in the scripts
    - **Source File**: `strapi_import_enhanced.json` (in project root)
 
@@ -132,7 +132,7 @@ node scripts/import-products.js
 Located at the top of each script:
 
 ```javascript
-const STRAPI_URL = "https://api.infinitycolor.co";
+const STRAPI_URL = "https://infinity-bck.darkube.app";
 const API_TOKEN = "your-token-here";
 const JSON_FILE_PATH = "./strapi_import_enhanced.json";
 ```

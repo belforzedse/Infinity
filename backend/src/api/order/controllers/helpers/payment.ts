@@ -182,7 +182,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://new.infinitycolor.co/payment/failure?orderId=${orderId}${transactionIdInput ? `&transactionId=${encodeURIComponent(transactionIdInput)}` : ''}`
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
+            transactionIdInput || ""
+          )}`
         );
       }
 
@@ -208,81 +210,31 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://new.infinitycolor.co/payment/failure?orderId=${orderId}${transactionIdInput ? `&transactionId=${encodeURIComponent(transactionIdInput)}` : ''}`
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
+            transactionIdInput || ""
+          )}`
         );
       }
 
-      const settleResult = await snappay.settle(tokenForOps);
+      await strapi.entityService.update("api::order.order", orderId, {
+        data: { Status: "Started" },
+      });
       try {
-        strapi.log.info("SnappPay settle result", {
-          successful: settleResult?.successful,
-          error: settleResult?.errorData,
+        await strapi.entityService.create("api::order-log.order-log", {
+          data: {
+            order: orderId,
+            Action: "Update",
+            Description:
+              "SnappPay verify succeeded (awaiting manual settlement)",
+            Changes: { transactionId: transactionIdInput },
+          },
         });
       } catch {}
-      if (settleResult?.successful) {
-        // Decrement stock for each order item NOW (after settlement)
-        try {
-          const orderWithItems = await strapi.entityService.findOne(
-            "api::order.order",
-            orderId,
-            {
-              populate: {
-                order_items: {
-                  populate: {
-                    product_variation: {
-                      populate: { product_stock: true },
-                    },
-                  },
-                },
-              },
-            }
-          );
-          // TODO: Consider wrapping stock decrements and status update in a transaction for atomicity
-          for (const it of orderWithItems?.order_items || []) {
-            const v = it?.product_variation;
-            if (v?.product_stock?.id && typeof it?.Count === "number") {
-              const stockId = v.product_stock.id as number;
-              const current = Number(v.product_stock.Count || 0);
-              const dec = Number(it.Count || 0);
-              await strapi.entityService.update(
-                "api::product-stock.product-stock",
-                stockId,
-                { data: { Count: current - dec } }
-              );
-            }
-          }
-        } catch (e) {
-          strapi.log.error("Failed to decrement stock after settlement", e);
-        }
-
-        await strapi.entityService.update("api::order.order", orderId, {
-          data: { Status: "Started" },
-        });
-        // Auto barcode generation disabled - manual generation required
-        // try {
-        //   await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        // } catch {}
-        try {
-          await strapi.entityService.create("api::order-log.order-log", {
-            data: {
-              order: orderId,
-              Action: "Update",
-              Description: "SnappPay callback success (verify+settle)",
-              Changes: { transactionId: transactionIdInput },
-            },
-          });
-        } catch {}
-        return ctx.redirect(
-          `https://new.infinitycolor.co/payment/success?orderId=${orderId}${transactionIdInput ? `&transactionId=${encodeURIComponent(transactionIdInput)}` : ''}`
-        );
-      } else {
-        await strapi.entityService.update("api::order.order", orderId, {
-          data: { Status: "Cancelled" },
-        });
-        return ctx.redirect(
-          `https://new.infinitycolor.co/payment/failure?orderId=${orderId}${transactionIdInput ? `&transactionId=${encodeURIComponent(transactionIdInput)}` : ''}`
-        );
-      }
+      return ctx.redirect(
+        `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
+          transactionIdInput || ""
+        )}`
+      );
     }
 
     // Check if payment was successful (ResCode = 0) - Mellat
@@ -327,13 +279,13 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         strapi.log.info("Payment cancelled by user:", { orderId, ResCode });
         // User cancelled - redirect to frontend cancellation page
         ctx.redirect(
-          `https://new.infinitycolor.co/payment/cancelled?orderId=${orderId}&reason=user-cancelled`
+          `https://infinity.rgbgroup.ir/payment/cancelled?orderId=${orderId}&reason=user-cancelled`
         );
       } else {
         strapi.log.error("Payment failed with ResCode:", ResCode);
         // Other payment failures - redirect to frontend failure page
         ctx.redirect(
-          `https://new.infinitycolor.co/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
             `Payment failed with code: ${ResCode}`
           )}`
         );
@@ -407,10 +359,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             Status: "Started",
           },
         });
-        // Auto barcode generation disabled - manual generation required
-        // try {
-        //   await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        // } catch {}
+        try {
+          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+        } catch {}
 
         strapi.log.info(`Payment successful for Order ${orderId}:`, {
           orderId,
@@ -435,7 +386,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
         // Redirect to frontend success page
         ctx.redirect(
-          `https://new.infinitycolor.co/payment/success?orderId=${orderId}`
+          `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}`
         );
       } else {
         // Settlement failed
@@ -461,7 +412,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           );
         }
         ctx.redirect(
-          `https://new.infinitycolor.co/payment/failure?error=${encodeURIComponent(
+          `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
             settlementResult.error || "Settlement failed"
           )}`
         );
@@ -495,7 +446,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       // Redirect to frontend failure page
       ctx.redirect(
-        `https://new.infinitycolor.co/payment/failure?error=${encodeURIComponent(
+        `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
           verificationResult.error
         )}`
       );
@@ -518,7 +469,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       strapi.log.error("Failed to persist gateway internal error log", e);
     }
     ctx.redirect(
-      `https://new.infinitycolor.co/payment/failure?error=${encodeURIComponent(
+      `https://infinity.rgbgroup.ir/payment/failure?error=${encodeURIComponent(
         "Internal server error"
       )}`
     );

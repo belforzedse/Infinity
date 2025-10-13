@@ -101,8 +101,8 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           delivery_address: shippingData.addressId || undefined,
         };
 
-        // TODO: Ensure all entityService calls inside finalize use the same transaction context (trx) for atomicity
-        const { order, subtotal } = await createOrderAndItems(
+        // Create order and items with transaction context for atomicity
+        const { order, subtotal, createdItems } = await createOrderAndItems(
           strapi as any,
           userId,
           cart,
@@ -110,8 +110,15 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           shippingData.shippingId,
           shippingData.description,
           shippingData.note,
-          shippingData.addressId
+          shippingData.addressId,
+          trx
         );
+
+        strapi.log.info("Order and items created successfully", {
+          orderId: order.id,
+          itemsCreated: createdItems.length,
+          subtotal,
+        });
 
         // Always compute and persist order shipping weight from items (in grams)
         let totalWeight = 0;
@@ -235,11 +242,19 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           userId,
           Number(order.id),
           totals.total,
-          taxPercent
+          taxPercent,
+          trx
         );
 
+        strapi.log.info("Contract created successfully", {
+          contractId: contract.id,
+          amount: totals.total,
+          orderId: order.id,
+        });
+
         // Persist discount metadata for admin adjustment flows
-        await strapi.entityService.update("api::order.order", order.id, {
+        await strapi.db.query("api::order.order").update({
+          where: { id: order.id },
           data: {
             contract: contract.id,
             ShippingCost: finalShippingCost,
@@ -247,6 +262,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
             AppliedGeneralDiscountId: appliedGeneralDiscountId,
             AppliedDiscountAmount: Math.round(discountAmount),
           },
+          ...(trx ? { transacting: trx } : {}),
         });
 
         // Note: Do not clear the cart here. Cart will be cleared only after
@@ -261,11 +277,101 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
+      // Enhanced error logging with full context
+      const errorContext = {
+        userId,
+        cartId: cart?.id,
+        itemCount: cart?.cart_items?.length || 0,
+        shippingData,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        errorName: error.name,
+      };
+
+      strapi.log.error("Order creation failed:", errorContext);
+      console.error("=== ORDER CREATION FAILED ===");
+      console.error("Error Message:", error.message);
+      console.error("Error Code:", error.message?.split(":")[0]);
+      console.error("Full Context:", JSON.stringify(errorContext, null, 2));
+
+      // Parse error message to extract error code and details
+      const errorMessage = error.message || "Unknown error";
+      let errorCode = "UNKNOWN_ERROR";
+      let userMessage = "خطا در ثبت سفارش";
+      let details = {};
+
+      // Extract error code if present (format: "ERROR_CODE: message")
+      if (errorMessage.includes(":")) {
+        const parts = errorMessage.split(":");
+        errorCode = parts[0].trim();
+        const errorDetail = parts.slice(1).join(":").trim();
+
+        // Map error codes to user-friendly Persian messages
+        switch (errorCode) {
+          case "CART_EMPTY":
+            userMessage = "سبد خرید شما خالی است";
+            break;
+          case "INVALID_ITEM":
+            userMessage = "برخی از کالاهای سبد خرید معتبر نیستند";
+            details = { detail: errorDetail };
+            break;
+          case "MISSING_PRODUCT_TITLE":
+          case "MISSING_PRODUCT_SKU":
+            userMessage = "اطلاعات برخی از کالاها ناقص است. لطفاً با پشتیبانی تماس بگیرید";
+            details = { detail: errorDetail };
+            break;
+          case "INVALID_PRICE":
+            userMessage = "قیمت برخی از کالاها نامعتبر است";
+            details = { detail: errorDetail };
+            break;
+          case "ORDER_ITEM_CREATION_FAILED":
+            userMessage = "خطا در ثبت اقلام سفارش";
+            details = { detail: errorDetail };
+            break;
+          case "CONTRACT_CREATION_FAILED":
+            userMessage = "خطا در ایجاد قرارداد";
+            details = { detail: errorDetail };
+            break;
+          case "INVALID_AMOUNT":
+            userMessage = "مبلغ سفارش نامعتبر است";
+            break;
+          case "INVALID_TAX_PERCENT":
+            userMessage = "درصد مالیات نامعتبر است";
+            break;
+          default:
+            userMessage = "خطا در ثبت سفارش. لطفاً مجدداً تلاش کنید";
+        }
+      }
+
+      // Log to order-log if we have a userId for tracking
+      try {
+        await strapi.entityService.create("api::order-log.order-log", {
+          data: {
+            order: null,
+            Action: "Create",
+            Description: `Order creation failed: ${errorCode}`,
+            Changes: {
+              userId,
+              errorCode,
+              errorMessage,
+              shippingId: shippingData?.shippingId,
+              addressId: shippingData?.addressId,
+            },
+          },
+        });
+      } catch (logError) {
+        // Swallow logging errors to avoid masking the original error
+        strapi.log.error("Failed to log order creation failure", logError);
+      }
+
       return {
         success: false,
-        message: "Error creating order",
-        error: error.message,
+        message: userMessage,
+        error: errorMessage,
+        errorCode,
+        details,
+        timestamp: new Date().toISOString(),
       };
     }
   },

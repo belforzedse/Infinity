@@ -2,7 +2,7 @@ const axios = require("axios");
 
 // Test different connection methods
 async function testSimpleConnection() {
-  const url = "https://api.infinitycolor.co";
+  const url = "https://infinity-bck.darkube.app";
   const token =
     "5ded48b60050770a36fd985fdef2a20b971cd82f26e2e8bc02d38b4fb52258c1ace5049f2bc82b8d336dd20b88d6af9bc826c49a465e4698042fac690650f70a663d357e9bc52e8a6c9cc4a5de7075e07472c6a6d55f0c9a29690a3e6717000c61bb9ba085c233311c9d7e7e1f8f3ab3ff6985a5fd7f2f4ede73204761451fd6";
 

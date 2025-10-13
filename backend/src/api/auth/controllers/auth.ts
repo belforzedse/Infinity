@@ -5,12 +5,6 @@
 import { RedisClient } from "../../../index";
 import jwt from "jsonwebtoken";
 import { validatePhone } from "../utils/validations";
-import {
-  hashPassword,
-  isBcryptHash,
-  verifyOtpCode,
-  verifyPassword,
-} from "../utils/security";
 
 export default {
   otp,
@@ -67,42 +61,25 @@ async function login(ctx) {
   try {
     const { otp, otpToken } = ctx.request.body;
 
-    const otpValue = String(otp || "").trim();
-
-    if (otpValue.length !== 6 || !otpToken?.includes(".")) {
+    if (String(otp || "").length !== 6 || !otpToken?.includes(".")) {
       ctx.badRequest("otp or otpToken is invalid");
       return;
     }
 
-    const redis = await RedisClient;
-    const cachedToken = await redis.get(otpToken);
+    const otpObj = JSON.parse(await (await RedisClient).get(otpToken));
 
-    if (!cachedToken) {
+    if (!otpObj?.code) {
       ctx.badRequest("otpToken is invalid");
       return;
     }
 
-    let otpObj;
-
-    try {
-      otpObj = JSON.parse(cachedToken);
-    } catch (error) {
-      ctx.badRequest("otpToken is invalid");
-      return;
-    }
-
-    if (!verifyOtpCode(otpValue, otpObj?.hash, otpObj?.code)) {
+    if (String(otpObj.code) !== String(otp)) {
       ctx.badRequest("otp is invalid");
       return;
     }
 
-    if (!otpObj?.phone) {
-      ctx.badRequest("otpToken is invalid");
-      return;
-    }
-
     if (otpObj.merchant) {
-      if (!otpObj.IsVerified && !otpObj.isVerified) {
+      if (!otpObj.IsVerified) {
         await strapi.entityService.update(
           "api::local-user.local-user",
           otpObj.merchant,
@@ -137,8 +114,6 @@ async function login(ctx) {
         expiresIn: "30d",
       }
     );
-
-    await redis.del(otpToken);
 
     ctx.body = {
       message: "login successful",
@@ -207,15 +182,9 @@ async function registerInfo(ctx) {
         }
       );
 
-      if (password) {
-        await strapi.entityService.update(
-          "api::local-user.local-user",
-          user.id,
-          {
-            data: { Password: await hashPassword(password) },
-          }
-        );
-      }
+      await strapi.entityService.update("api::local-user.local-user", user.id, {
+        data: { Password: password },
+      });
     });
 
     ctx.body = {
@@ -234,29 +203,16 @@ async function registerInfo(ctx) {
 async function loginWithPassword(ctx) {
   const { phone, password } = ctx.request.body;
 
-  if (!phone || !password) {
-    ctx.badRequest("phone or password is missing");
-    return;
-  }
-
   const user = await strapi.db.query("api::local-user.local-user").findOne({
     where: { Phone: { $endsWith: phone.substring(1) } },
   });
 
-  const isValid = await verifyPassword(password, user?.Password);
-
-  if (!isValid) {
+  if (user?.Password !== password) {
     ctx.unauthorized("User not found or password is incorrect");
     return;
   }
 
-  if (user && !isBcryptHash(user.Password)) {
-    await strapi.entityService.update("api::local-user.local-user", user.id, {
-      data: { Password: await hashPassword(password) },
-    });
-  }
-
-  const token = jwt.sign({ userId: user!.id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 
@@ -269,42 +225,20 @@ async function loginWithPassword(ctx) {
 async function resetPassword(ctx) {
   const { otp, otpToken, newPassword } = ctx.request.body;
 
-  if (!newPassword) {
-    ctx.badRequest("newPassword is required");
-    return;
-  }
-
-  const otpValue = String(otp || "").trim();
-
-  if (otpValue.length !== 6 || !otpToken?.includes(".")) {
+  if (String(otp || "").length !== 6 || !otpToken?.includes(".")) {
     ctx.badRequest("otp or otpToken is invalid");
     return;
   }
 
-  const redis = await RedisClient;
-  const cachedToken = await redis.get(otpToken);
+  const otpObj = JSON.parse(await (await RedisClient).get(otpToken));
 
-  if (!cachedToken) {
+  if (!otpObj?.code) {
     ctx.badRequest("otpToken is invalid");
     return;
   }
 
-  let otpObj;
-
-  try {
-    otpObj = JSON.parse(cachedToken);
-  } catch (error) {
-    ctx.badRequest("otpToken is invalid");
-    return;
-  }
-
-  if (!verifyOtpCode(otpValue, otpObj?.hash, otpObj?.code)) {
+  if (String(otpObj.code) !== String(otp)) {
     ctx.badRequest("otp is invalid");
-    return;
-  }
-
-  if (!otpObj?.merchant) {
-    ctx.badRequest("otpToken is invalid");
     return;
   }
 
@@ -322,11 +256,9 @@ async function resetPassword(ctx) {
     // update local user info password
     await strapi.entityService.update("api::local-user.local-user", user.id, {
       data: {
-        Password: await hashPassword(newPassword),
+        Password: newPassword,
       },
     });
-
-    await redis.del(otpToken);
 
     ctx.body = {
       message: "password reset successfully",
