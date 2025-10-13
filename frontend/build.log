@@ -1,0 +1,27 @@
+
+> infinity-store@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.6
+   - Environments: .env
+   - Experiments (use with caution):
+     · optimizeCss
+     · scrollRestoration
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/(super-admin)/super-admin/orders/add/page.tsx:491:25
+Type error: Property 'contractStatus' is missing in type 'import("D:/cyan/infinity-store/infinityv1/frontend/src/app/(super-admin)/super-admin/orders/add/page").Order' but required in type 'Order'.
+
+[0m [90m 489 |[39m [32m          await submitOrder(data);[39m[0m
+[0m [90m 490 |[39m [32m        }}[39m[0m
+[0m[31m[1m>[22m[39m[90m 491 |[39m [32m        footer={<Footer order={orderData as Order} onReload={() => {}} />}[39m[0m
+[0m [90m     |[39m                         [31m[1m^[22m[39m[0m
+[0m [90m 492 |[39m [32m        customSidebar={<Sidebar orderData={orderData} selectedItems={selectedItems} />}[39m[0m
+[0m [90m 493 |[39m [32m      />[39m[0m
+[0m [90m 494 |[39m[0m
+Static worker exited with code: 1 and signal: null

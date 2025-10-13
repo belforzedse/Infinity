@@ -27,7 +27,7 @@ export default function OrdersPage() {
       hasPagination
     >
       <SuperAdminTable
-        removeActions
+        _removeActions
         columns={columns}
         url={
           "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract"
