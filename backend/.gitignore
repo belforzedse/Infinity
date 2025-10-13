@@ -78,10 +78,18 @@ $RECYCLE.BIN/
 
 *#
 ssl
-.idea
 nbproject
 public/uploads/*
 !public/uploads/.gitkeep
+
+############################
+# IDE
+############################
+
+.idea
+*.swp
+*.swo
+*~
 
 ############################
 # Node.js
@@ -114,4 +122,5 @@ build
 .strapi-updater.json
 .strapi-cloud.json
 
+yarn.lock
 nul

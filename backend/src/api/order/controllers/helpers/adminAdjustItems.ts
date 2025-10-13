@@ -1,10 +1,43 @@
 import type { Strapi } from "@strapi/strapi";
 import { computeTotals } from "../../../cart/services/lib/financials";
+import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
 
 type ItemAdjustment = {
   orderItemId: number;
   newCount?: number;
   remove?: boolean;
+};
+
+const computePaidAmountToman = (order: any): number => {
+  const txList = order?.contract?.contract_transactions || [];
+  let paidIrr = 0;
+
+  if (Array.isArray(txList) && txList.length > 0) {
+    for (const tx of txList) {
+      const amountIrr = Number(tx?.Amount || 0);
+      if (!amountIrr) continue;
+      const discountIrr = Number(tx?.DiscountAmount || 0);
+      const type = String(tx?.Type || "").toLowerCase();
+      const status = String(tx?.Status || "").toLowerCase();
+
+      if (type === "gateway" && status !== "failed") {
+        paidIrr += amountIrr - discountIrr;
+      } else if (type === "return") {
+        paidIrr -= amountIrr;
+      }
+    }
+  } else {
+    const fallback = Number(order?.contract?.Amount || 0);
+    if (fallback > 0) {
+      return fallback;
+    }
+  }
+
+  const paidToman = Math.round(paidIrr / 10);
+  if (paidToman > 0) return paidToman;
+
+  const fallback = Number(order?.contract?.Amount || 0);
+  return Math.max(0, fallback);
 };
 
 export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
@@ -18,20 +51,30 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
   try {
     // Admin guard
     const user = ctx.state.user;
-    if (!user || user.user_role?.id !== 2) {
+    const roleId =
+      typeof user?.user_role === "object"
+        ? user.user_role?.id
+        : user?.user_role;
+    if (!user || Number(roleId) !== 2) {
       return ctx.forbidden("Admin access required");
+    }
+
+    const orderIdNum = Number(id);
+    if (!Number.isFinite(orderIdNum)) {
+      return ctx.badRequest("Invalid order id");
     }
 
     // Load order with all relations
     const order = await strapi.db.query("api::order.order").findOne({
-      where: { id },
+      where: { id: orderIdNum },
       populate: {
+        user: true,
         order_items: {
           populate: {
             product_variation: {
               populate: {
                 product_stock: true,
-                product: true,
+                product: { populate: { product_main_category: true } },
               },
             },
           },
@@ -71,10 +114,11 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       });
     }
 
+    // Normalize typing for TS (Strapi returns unknown)
+    const orderItemsArr = (order.order_items || []) as any[];
+
     // Validate and compute changes
-    const orderItemsMap = new Map(
-      order.order_items.map((it: any) => [it.id, it])
-    );
+    const orderItemsMap = new Map(orderItemsArr.map((it: any) => [it.id, it]));
     const changes: Array<{
       orderItemId: number;
       oldCount: number;
@@ -113,9 +157,14 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       return ctx.badRequest("No changes to apply");
     }
 
+    const originalSubtotal = orderItemsArr.reduce(
+      (sum, it: any) => sum + Number(it.PerAmount || 0) * Number(it.Count || 0),
+      0
+    );
+
     // Recompute financials
     let newSubtotal = 0;
-    for (const it of order.order_items) {
+    for (const it of orderItemsArr) {
       const change = changes.find((c) => c.orderItemId === it.id);
       const count = change ? change.newCount : it.Count;
       newSubtotal += Number(it.PerAmount || 0) * count;
@@ -131,7 +180,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       const cityCode = order.delivery_address?.shipping_city?.Code;
       if (cityCode) {
         let totalWeight = 0;
-        for (const it of order.order_items) {
+        for (const it of orderItemsArr) {
           const change = changes.find((c) => c.orderItemId === it.id);
           const count = change ? change.newCount : it.Count;
           const weight = Number(it.product_variation?.product?.Weight || 100);
@@ -152,21 +201,31 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     }
 
     const taxPercent = Number(order.contract?.TaxPercent || 10);
+    const discountRate =
+      originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
+    const effectiveDiscount = Math.max(
+      0,
+      Math.min(newSubtotal, Math.round(newSubtotal * discountRate))
+    );
     const newTotals = computeTotals(
       newSubtotal,
-      discountAmount,
+      effectiveDiscount,
       taxPercent,
       newShipping
     );
 
     const oldTotal = Number(order.contract?.Amount || 0);
-    const refundToman = oldTotal - newTotals.total;
-
-    if (refundToman <= 0) {
-      return ctx.conflict("Refund cannot be negative or zero", {
-        data: { error: "negative_refund_not_allowed", refundToman },
-      });
-    }
+    const paidAmount = computePaidAmountToman(order);
+    const requestedRefund = paidAmount - Math.max(newTotals.total, 0);
+    // Do not refund more than originally paid and exclude tax from the refund.
+    const refundableWithoutTax = Math.max(
+      0,
+      requestedRefund - Math.max(newTotals.tax, 0)
+    );
+    const refundToman = Math.max(
+      0,
+      Math.min(paidAmount, refundableWithoutTax)
+    );
 
     if (isDryRun) {
       return {
@@ -188,6 +247,10 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     );
 
     // Apply changes in transaction
+    let snappayToken: string | undefined;
+    let snappayPayload: any = null;
+    let snappayAction: "update" | "cancel" | undefined;
+
     return await strapi.db.transaction(async () => {
       // Update or delete order items
       for (const change of changes) {
@@ -205,7 +268,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
       // Restock
       for (const change of changes) {
-        const item = orderItemsMap.get(change.orderItemId);
+        const item = orderItemsMap.get(change.orderItemId) as any;
         const stockId = item?.product_variation?.product_stock?.id;
         if (stockId && change.restockDelta > 0) {
           const stock = await strapi.db
@@ -222,7 +285,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
       // Update order
       await strapi.db.query("api::order.order").update({
-        where: { id },
+        where: { id: orderIdNum },
         data: {
           ShippingCost: newShipping,
           Status: allRemoved ? "Cancelled" : order.Status,
@@ -230,36 +293,57 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       });
 
       // Update contract
-      await strapi.db.query("api::contract.contract").update({
-        where: { id: order.contract.id },
-        data: {
-          Amount: allRemoved ? 0 : newTotals.total,
-          Status: allRemoved ? "Cancelled" : order.contract.Status,
-        },
-      });
+      const contract = order.contract;
+      const contractIdNum = Number(contract?.id);
+      if (Number.isFinite(contractIdNum)) {
+        await strapi.db.query("api::contract.contract").update({
+          where: { id: contractIdNum },
+          data: {
+            Amount: allRemoved ? 0 : newTotals.total,
+            Status: allRemoved ? "Cancelled" : contract.Status,
+          },
+        });
+      }
 
       // Determine gateway and refund
-      const txList = order.contract.contract_transactions || [];
-      const lastTx = txList[txList.length - 1];
-      const gatewaySource = lastTx?.external_source;
-      const transactionId = order.contract.external_id;
+      const txList = contract?.contract_transactions || [];
+      const snappayTx = [...txList].reverse().find((tx: any) => {
+        const source = tx?.external_source || contract?.external_source;
+        return source === "SnappPay" && tx?.TrackId;
+      });
+      const gatewaySource =
+        snappayTx?.external_source || contract?.external_source;
+      const paymentToken = snappayTx?.TrackId;
+      const transactionId = contract?.external_id;
 
-      if (gatewaySource === "SnappPay" && transactionId) {
+      if (gatewaySource === "SnappPay") {
+        if (!transactionId) {
+          throw new Error("SNAPPAY_TRANSACTION_ID_MISSING");
+        }
+        if (!paymentToken) {
+          throw new Error("SNAPPAY_PAYMENT_TOKEN_MISSING");
+        }
+        snappayToken = paymentToken;
         const snappay = strapi.service("api::payment-gateway.snappay");
 
         if (allRemoved) {
           // Full cancel
-          const cancelRes = await snappay.cancelOrder(transactionId);
+          const cancelRes = await snappay.cancelOrder(
+            transactionId,
+            paymentToken
+          );
           if (!cancelRes.successful) {
-            strapi.log.error(
-              "SnappPay cancelOrder failed",
-              cancelRes.errorData
+            throw new Error(
+              `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
             );
           }
+          snappayAction = "cancel";
         } else {
           // Update
-          const payload = buildSnappPayUpdatePayload(
+          const payload = await buildSnappPayUpdatePayload(
+            strapi,
             transactionId,
+            paymentToken,
             order,
             changes,
             newTotals,
@@ -267,8 +351,12 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           );
           const updateRes = await snappay.update(payload);
           if (!updateRes.successful) {
-            strapi.log.error("SnappPay update failed", updateRes.errorData);
+            throw new Error(
+              `SNAPPAY_UPDATE_FAILED:${updateRes.errorData?.message || ""}`
+            );
           }
+          snappayPayload = payload;
+          snappayAction = "update";
         }
       }
 
@@ -311,7 +399,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             Cause: allRemoved
               ? "Order Cancelled (Admin)"
               : "Order Adjustment (Admin)",
-            ReferenceId: `order-${id}-adj-${Date.now()}`,
+            ReferenceId: `order-${orderIdNum}-adj-${Date.now()}`,
             user_wallet: wallet.id,
           },
         });
@@ -322,24 +410,26 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
           : 0;
 
-      await strapi.db
-        .query("api::contract-transaction.contract-transaction")
-        .create({
-          data: {
-            Type: "Return",
-            Amount: refundIrr,
-            Step: maxStep + 1,
-            Status: "Success",
-            external_source: "System",
-            contract: order.contract.id,
-            Date: new Date(),
-          },
-        });
+      if (Number.isFinite(contractIdNum)) {
+        await strapi.db
+          .query("api::contract-transaction.contract-transaction")
+          .create({
+            data: {
+              Type: "Return",
+              Amount: refundIrr,
+              Step: maxStep + 1,
+              Status: "Success",
+              external_source: "System",
+              contract: contractIdNum,
+              Date: new Date(),
+            },
+          });
+      }
 
       // Log
       await strapi.db.query("api::order-log.order-log").create({
         data: {
-          order: id,
+          order: orderIdNum,
           Action: "Update",
           Description: allRemoved
             ? "Admin cancelled order (all items removed)"
@@ -349,6 +439,13 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             refundToman,
             newTotals,
             reason: reason || "",
+            snappay: snappayToken
+              ? {
+                  action: snappayAction,
+                  token: snappayToken,
+                  payload: snappayPayload,
+                }
+              : undefined,
           },
           PerformedBy: `Admin User ${user.id}`,
         },
@@ -359,44 +456,67 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           success: true,
           refundToman,
           status: allRemoved ? "cancelled" : "adjusted",
+          paymentToken: snappayToken ?? null,
         },
       };
     });
   } catch (error: any) {
     strapi.log.error("adminAdjustItems error", error);
+    const message = String(error?.message || "");
+    if (message.startsWith("SNAPPAY_")) {
+      return ctx.badGateway("SnappPay synchronization failed", {
+        data: { error: message },
+      });
+    }
     return ctx.internalServerError("Failed to adjust items", {
       data: { error: error.message },
     });
   }
 }
 
-function buildSnappPayUpdatePayload(
+async function buildSnappPayUpdatePayload(
+  strapi: Strapi,
   transactionId: string,
+  paymentToken: string,
   order: any,
   changes: any[],
   newTotals: any,
   newShipping: number
 ) {
   const changeMap = new Map(changes.map((c) => [c.orderItemId, c.newCount]));
-  const cartItems = order.order_items
-    .filter((it: any) => {
-      const newCount = changeMap.get(it.id);
-      return newCount === undefined ? true : newCount > 0;
-    })
-    .map((it: any, idx: number) => {
+  const safeItems = (order.order_items || []) as any[];
+  const filteredItems = safeItems.filter((it: any) => {
+    const newCount = changeMap.get(it.id);
+    return newCount === undefined ? true : newCount > 0;
+  });
+
+  // Map items with category mapping
+  const cartItems = await Promise.all(
+    filteredItems.map(async (it: any, idx: number) => {
       const count = changeMap.get(it.id) ?? it.Count;
+      const categoryEntity =
+        it.product_variation?.product?.product_main_category;
+      const rawCategory =
+        categoryEntity?.snappay_category ||
+        categoryEntity?.Title ||
+        categoryEntity?.Name ||
+        "";
+      // Map the category to SnapPay's expected format
+      const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       return {
         id: idx + 1,
         name: it.ProductTitle || "Product",
-        category: "General",
+        category: snappayCategory,
         amount: Math.round(Number(it.PerAmount || 0) * 10),
         count: Number(count),
-        commissionType: 1,
+        commissionType: 100,
       };
-    });
+    })
+  );
 
   return {
     transactionId,
+    paymentToken,
     amount: Math.round(newTotals.total * 10),
     discountAmount: Math.round(newTotals.discount * 10),
     externalSourceAmount: 0,

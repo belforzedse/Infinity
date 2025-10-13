@@ -34,8 +34,65 @@ export const createOrderAndItems = async (
   shippingId?: number,
   description?: string,
   note?: string,
-  deliveryAddressId?: number
+  deliveryAddressId?: number,
+  trx?: any
 ) => {
+  // Validate cart items before proceeding
+  if (!cart.cart_items || cart.cart_items.length === 0) {
+    console.error("=== VALIDATION ERROR: Cart is empty ===");
+    throw new Error("CART_EMPTY: Cannot create order from empty cart");
+  }
+
+  // Pre-validate all items have required data
+  console.log(`[Order Validation] Checking ${cart.cart_items.length} cart items for userId=${userId}`);
+
+  for (let i = 0; i < cart.cart_items.length; i++) {
+    const item = cart.cart_items[i];
+    const variation = item.product_variation;
+
+    console.log(`[Order Validation] Item ${i + 1}/${cart.cart_items.length}:`, {
+      cartItemId: item.id,
+      variationId: variation?.id,
+      hasVariation: !!variation,
+      hasProduct: !!variation?.product,
+      productTitle: variation?.product?.Title || "MISSING",
+      productSKU: variation?.product?.SKU || "MISSING",
+      price: variation?.Price,
+    });
+
+    if (!variation) {
+      console.error("=== VALIDATION ERROR: Missing product variation ===", { itemId: item.id });
+      throw new Error(`INVALID_ITEM: Cart item ${item.id} missing product variation`);
+    }
+    if (!variation.product?.Title) {
+      console.error("=== VALIDATION ERROR: Missing product title ===", {
+        variationId: variation.id,
+        hasProduct: !!variation.product,
+        productKeys: variation.product ? Object.keys(variation.product) : []
+      });
+      throw new Error(`MISSING_PRODUCT_TITLE: Product variation ${variation.id} missing title`);
+    }
+    if (!variation.product?.SKU) {
+      console.warn("=== WARNING: Missing product SKU ===", {
+        variationId: variation.id,
+        productTitle: variation.product?.Title,
+        willUseDefault: true
+      });
+      // Use a default SKU if missing instead of failing
+      // You can change this to throw an error if SKU is mandatory
+    }
+    if (!variation.Price || Number(variation.Price) < 0) {
+      console.error("=== VALIDATION ERROR: Invalid price ===", {
+        variationId: variation.id,
+        price: variation.Price,
+        priceType: typeof variation.Price
+      });
+      throw new Error(`INVALID_PRICE: Product variation ${variation.id} has invalid price`);
+    }
+  }
+
+  console.log("[Order Validation] ✓ All cart items validated successfully");
+
   const orderData = {
     user: userId,
     Status: "Paying" as OrderStatus,
@@ -48,34 +105,54 @@ export const createOrderAndItems = async (
     delivery_address: deliveryAddressId || undefined,
   };
 
-  const order = await strapi.entityService.create("api::order.order", {
+  // Use transaction context if provided
+  const entityServiceOptions: any = { data: orderData };
+  if (trx) {
+    entityServiceOptions.data = { ...orderData, publishedAt: null };
+  }
+
+  const order = await strapi.db.query("api::order.order").create({
     data: orderData,
+    ...(trx ? { transacting: trx } : {}),
   });
 
   let subtotal = 0;
+  const createdItems = [];
+
   for (const item of cart.cart_items) {
     const variation = item.product_variation;
     const itemPrice = Number(variation?.Price || 0);
     const itemCount = Number(item?.Count || 0);
     subtotal += itemPrice * itemCount;
 
-    await strapi.entityService.create("api::order-item.order-item", {
-      data: {
-        order: order.id,
-        product_variation: variation.id,
-        Count: item.Count,
-        PerAmount: itemPrice,
-        ProductTitle: variation.product?.Title || "Unknown Product",
-        ProductSKU: variation.product?.SKU || "Unknown SKU",
-        product_color: variation.product_variation_color?.id,
-        product_size: variation.product_variation_size?.id,
-        product_variation_model: variation.product_variation_model?.id,
-      },
-    });
+    try {
+      const orderItem = await strapi.db.query("api::order-item.order-item").create({
+        data: {
+          order: order.id,
+          product_variation: variation.id,
+          Count: item.Count,
+          PerAmount: itemPrice,
+          ProductTitle: variation.product?.Title,
+          ProductSKU: variation.product?.SKU || `VAR-${variation.id}`, // Use variation ID as fallback SKU
+          product_color: variation.product_variation_color?.id || null,
+          product_size: variation.product_variation_size?.id || null,
+          product_variation_model: variation.product_variation_model?.id || null,
+        },
+        ...(trx ? { transacting: trx } : {}),
+      });
+      createdItems.push(orderItem);
+    } catch (error: any) {
+      strapi.log.error("Failed to create order item:", {
+        itemId: item.id,
+        variationId: variation.id,
+        error: error.message,
+      });
+      throw new Error(`ORDER_ITEM_CREATION_FAILED: ${error.message}`);
+    }
 
     // Note: Do NOT decrement stock here. Stock will be decremented after
     // successful payment settlement in the order controller.
   }
 
-  return { order, subtotal };
+  return { order, subtotal, createdItems };
 };

@@ -18,11 +18,16 @@ export default (config, { strapi }: { strapi: Strapi }) => {
           userId: string;
         };
 
-        const user = await strapi.query("api::local-user.local-user").findOne({
-          where: {
-            id: Number(userPayload.userId),
-          },
-        });
+        const user = await strapi
+          .query("api::local-user.local-user")
+          .findOne({
+            where: {
+              id: Number(userPayload.userId),
+            },
+            populate: {
+              user_role: true,
+            },
+          });
 
         if (!user) {
           ctx.notFound("User not found");
