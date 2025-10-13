@@ -52,16 +52,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * Format callback URL to be absolute
    */
   formatCallbackUrl(callbackURL?: string): string {
-    // Hardcoded production callback URL for Mellat
-    const productionCallback =
-      "https://api.infinity.rgbgroup.ir/api/orders/payment-callback";
+    // Get production callback URL from environment with fallback
+    const baseUrl =
+      process.env.URL || "https://api.infinity.rgbgroup.ir/";
+    const productionCallback = `${baseUrl.replace(/\/$/, "")}/api/orders/payment-callback`;
 
     // If a custom callback is provided and it's absolute, use it
     if (callbackURL && callbackURL.startsWith("http")) {
       return callbackURL;
     }
 
-    // Otherwise, always use the hardcoded production callback
+    // Otherwise, use the production callback from environment
     return productionCallback;
   },
 
