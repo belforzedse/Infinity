@@ -16,6 +16,7 @@
     "test:callback-url": "node scripts/test-callback-url.js",
     "deploy": "strapi deploy",
     "develop": "strapi develop",
+    "dev": "npm run develop",
     "dry-run": "node scripts/dry-run-import.js",
     "import:products": "node scripts/import-products.js",
     "retry:images": "node scripts/retry-failed-images.js",
@@ -23,7 +24,11 @@
     "start:prod": "NODE_ENV=production strapi start",
     "strapi": "strapi",
     "test:api": "node scripts/test-api-connection.js",
-    "type:generate": "strapi ts:generate-types"
+    "type:generate": "strapi ts:generate-types",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .cache build dist .tmp",
+    "logs": "pm2 logs infinity-backend --lines 100",
+    "validate": "npm run type-check"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "4.25.21",
