@@ -88,6 +88,7 @@ type OrderResponse = {
         attributes: {
           Amount: number;
           external_id?: string;
+          external_source?: string;
           Status:
             | "Not Ready"
             | "Confirmed"
@@ -101,6 +102,8 @@ type OrderResponse = {
                 Type?: string;
                 Status?: string;
                 Date?: string;
+                external_source?: string;
+                TrackId?: string;
                 payment_gateway?: {
                   data: { id: string; attributes: { Title?: string } };
                 };
