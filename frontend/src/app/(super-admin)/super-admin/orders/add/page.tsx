@@ -31,7 +31,14 @@ export type Order = {
   subtotal: number;
   discount?: number;
   tax?: number;
+  contractStatus:
+    | "Not Ready"
+    | "Confirmed"
+    | "Finished"
+    | "Failed"
+    | "Cancelled";
   total: number;
+  paymentToken?: string | null;
 };
 
 type OrderItem = {
@@ -42,9 +49,9 @@ type OrderItem = {
   productCode: string;
   price: number;
   quantity: number;
-  color?: string;
+  color: string;
   size?: string;
-  image?: string;
+  image: string;
 };
 
 export default function Page() {
@@ -72,7 +79,9 @@ export default function Page() {
     subtotal: 0,
     discount: 0,
     tax: 0,
+    contractStatus: "Not Ready",
     total: 0,
+    paymentToken: null,
   });
 
   // Track which fields are auto-filled vs manually edited
