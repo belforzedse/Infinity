@@ -3,43 +3,24 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Accept build arguments for environment variables
-ARG NEXT_PUBLIC_API_BASE_URL
-ARG NEXT_PUBLIC_IMAGE_BASE_URL
-ARG NEXT_PUBLIC_STRAPI_TOKEN
-
 # Copy package files first for better layer caching
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy source code and dev.env
+# Copy source code
 COPY . .
 
-# Set NODE_ENV to development (so dev.env is loaded)
-ENV NODE_ENV=development
+# Source dev.env and build
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN set -a && . ./dev.env && set +a && npm run build
 
-# Load environment variables from dev.env if build args not provided
-RUN if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then \
-      echo "Loading env vars from dev.env..."; \
-      set -a; \
-      . ./dev.env; \
-      set +a; \
-    else \
-      echo "Using provided build args..."; \
-    fi && \
-    echo "API URL: $NEXT_PUBLIC_API_BASE_URL" && \
-    npm run build
-
-# Production stage (runtime)
+# Runtime stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Keep NODE_ENV as development for dev builds
-ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy only necessary files from builder

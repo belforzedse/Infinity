@@ -44,9 +44,9 @@ function loadEnvFile(filename) {
   });
 }
 
-// Determine which env file to load based on NODE_ENV
-const isProduction = process.env.NODE_ENV === 'production';
-const envFile = isProduction ? 'main.env' : 'dev.env';
+// Auto-detect which env file to load: prefer dev.env if it exists, otherwise use main.env
+const devEnvExists = fs.existsSync(path.resolve(__dirname, 'dev.env'));
+const envFile = devEnvExists ? 'dev.env' : 'main.env';
 
 // Load the appropriate env file
 loadEnvFile(envFile);
