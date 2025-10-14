@@ -45,7 +45,11 @@ export function useNavigation(triggerFetch: boolean = true): UseNavigationResult
     const fetchNavigation = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://api.infinitycolor.co/api/navigation?populate=*");
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBase) {
+          throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
+        }
+        const response = await fetch(`${apiBase}/navigation?populate=*`);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch navigation: ${response.status}`);
