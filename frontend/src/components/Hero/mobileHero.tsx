@@ -91,7 +91,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
         </div>
 
         <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
-          <div className="relative w-1/2 overflow-hidden md:w-full [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative w-1/2 overflow-hidden rounded-lg md:w-full aspect-square md:aspect-auto [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`small-left-${playKey}`}
@@ -105,12 +105,12 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 <BannerImage {...layout.secondaryTop} />
               </motion.div>
             </AnimatePresence>
-            <div className="invisible">
+            <div className="invisible md:relative md:visible opacity-0 md:opacity-100">
               <BannerImage {...layout.secondaryTop} />
             </div>
           </div>
 
-          <div className="relative w-1/2 overflow-hidden md:w-full [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative w-1/2 overflow-hidden rounded-lg md:w-full aspect-square md:aspect-auto [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`small-right-${playKey}`}
@@ -124,7 +124,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
                 <BannerImage {...layout.secondaryBottom} />
               </motion.div>
             </AnimatePresence>
-            <div className="invisible">
+            <div className="invisible md:relative md:visible opacity-0 md:opacity-100">
               <BannerImage {...layout.secondaryBottom} />
             </div>
           </div>
