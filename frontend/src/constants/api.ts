@@ -2,21 +2,17 @@
  * API Constants
  * This file contains all the constants related to API calls
  */
-
 // Base URLs
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinity.rgbgroup.ir/api";
-export const API_BASE_URL = apiBaseUrl;
-
-const strapiToken =
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinity.rgbgroup.ir/api";
+export const STRAPI_TOKEN =
   process.env.NEXT_PUBLIC_STRAPI_TOKEN ||
   "STRAPI_API_TOKEN";
-export const STRAPI_TOKEN = strapiToken;
-
-const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinity.rgbgroup.ir";
-
-export const IMAGE_BASE_URL = imageBaseUrl;
+export const IMAGE_BASE_URL =
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinity.rgbgroup.ir";
 // API Versions
 export const API_VERSION = "v1";
+
 
 // Request Timeout (in milliseconds)
 export const REQUEST_TIMEOUT = 30000; // 30 seconds
