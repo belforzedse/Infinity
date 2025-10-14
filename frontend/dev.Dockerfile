@@ -21,15 +21,14 @@ COPY . .
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# If build args provided, use them; otherwise read from dev.env
+# Load environment variables from dev.env if build args not provided
 RUN if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then \
       echo "Loading env vars from dev.env..."; \
-      export $(grep -v '^#' dev.env | grep -v '^$' | xargs); \
+      set -a; \
+      . ./dev.env; \
+      set +a; \
     else \
       echo "Using provided build args..."; \
-      export NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL; \
-      export NEXT_PUBLIC_IMAGE_BASE_URL=$NEXT_PUBLIC_IMAGE_BASE_URL; \
-      export NEXT_PUBLIC_STRAPI_TOKEN=$NEXT_PUBLIC_STRAPI_TOKEN; \
     fi && \
     echo "API URL: $NEXT_PUBLIC_API_BASE_URL" && \
     npm run build

@@ -4,7 +4,7 @@
  */
 
 // Base URLs
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinity,rgbgroup.ir/api";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinity.rgbgroup.ir/api";
 export const API_BASE_URL = apiBaseUrl;
 
 const strapiToken =
@@ -12,7 +12,7 @@ const strapiToken =
   "STRAPI_API_TOKEN";
 export const STRAPI_TOKEN = strapiToken;
 
-const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinity,rgbgroup.ir";
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinity.rgbgroup.ir";
 
 export const IMAGE_BASE_URL = imageBaseUrl;
 // API Versions
