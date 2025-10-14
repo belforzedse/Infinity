@@ -26,7 +26,10 @@ export async function POST(req: NextRequest) {
     });
     const body = pairs.join("&");
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinitycolor.co/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!apiBase) {
+      throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
+    }
     const url = `${apiBase.replace(/\/$/, "")}/orders/payment-callback`;
 
     const res = await fetch(url, {
