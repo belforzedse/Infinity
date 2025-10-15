@@ -84,11 +84,16 @@ export async function mapToSnappayCategory(
   categoryName?: string
 ): Promise<string> {
   if (!categoryName) {
-    return "سایر"; // Default to "Other" if no category provided
+    return "بدون دسته بندی"; // Default to "Without category" if no category provided
   }
 
   // Normalize the input: trim whitespace
   const normalizedInput = categoryName.trim();
+
+  // If after trimming the string is empty, return default
+  if (!normalizedInput) {
+    return "بدون دسته بندی";
+  }
 
   // Get mappings from DB (with caching)
   const mappings = await getCategoryMappings(strapi);
