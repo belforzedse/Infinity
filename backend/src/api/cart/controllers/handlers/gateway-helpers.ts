@@ -79,12 +79,16 @@ export const requestSnappPayment = async (
     (orderItems || []).map(async (it: any) => {
       const pname =
         it.ProductTitle || it.product_variation?.product?.Title || "Item";
-      const mainCatNameFa =
-        it.product_variation?.product?.product_main_category?.Name ||
+      const categoryEntity =
+        it.product_variation?.product?.product_main_category;
+      const rawCategory =
+        categoryEntity?.snappay_category ||
+        categoryEntity?.Title ||
+        categoryEntity?.Name ||
         it.product_variation?.product?.Title ||
         "سایر";
       // Map the category to SnapPay's expected format
-      const snappayCategory = await mapToSnappayCategory(strapi, mainCatNameFa);
+      const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       const perAmountToman = Math.round(it.PerAmount || 0);
       const perAmountIrr = perAmountToman * 10;
       return {

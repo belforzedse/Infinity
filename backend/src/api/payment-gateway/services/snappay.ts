@@ -361,9 +361,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async update(payload: {
     transactionId: string;
     paymentToken?: string;
-    amount: number; // IRR, new total
+    amount: number; // IRR, total AFTER discount
     discountAmount: number; // IRR
     externalSourceAmount: number; // IRR
+    paymentMethodTypeDto: "INSTALLMENT"; // Required by SnappPay API v1.9
     cartList: Array<{
       cartId: number;
       cartItems: Array<{
@@ -378,7 +379,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       isTaxIncluded: boolean;
       shippingAmount: number;
       taxAmount: number;
-      totalAmount: number;
+      totalAmount: number; // IRR, total BEFORE discount (items + shipping + tax)
     }>;
   }) {
     const http = createHttp();
