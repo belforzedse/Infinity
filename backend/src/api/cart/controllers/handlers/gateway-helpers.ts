@@ -85,9 +85,8 @@ export const requestSnappPayment = async (
         categoryEntity?.snappay_category ||
         categoryEntity?.Title ||
         categoryEntity?.Name ||
-        it.product_variation?.product?.Title ||
-        "سایر";
-      // Map the category to SnapPay's expected format
+        "";
+      // Map the category to SnapPay's expected format (returns "بدون دسته بندی" if empty)
       const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       const perAmountToman = Math.round(it.PerAmount || 0);
       const perAmountIrr = perAmountToman * 10;

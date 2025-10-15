@@ -588,9 +588,8 @@ async function buildSnappPayUpdatePayload(
         categoryEntity?.snappay_category ||
         categoryEntity?.Title ||
         categoryEntity?.Name ||
-        it.product_variation?.product?.Title ||
-        "سایر";
-      // Map the category to SnapPay's expected format
+        "";
+      // Map the category to SnapPay's expected format (returns "بدون دسته بندی" if empty)
       const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       return {
         id: idx + 1,
