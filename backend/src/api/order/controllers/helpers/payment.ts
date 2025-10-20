@@ -188,6 +188,17 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         );
       }
 
+      // Check payment status before verify
+      const statusBeforeVerify = await snappay.status(tokenForOps);
+      try {
+        strapi.log.info("SnappPay status before verify", {
+          successful: statusBeforeVerify?.successful,
+          status: statusBeforeVerify?.response?.status,
+          transactionId: statusBeforeVerify?.response?.transactionId,
+          error: statusBeforeVerify?.errorData,
+        });
+      } catch {}
+
       const verifyResult = await snappay.verify(tokenForOps);
       try {
         strapi.log.info("SnappPay verify result", {
@@ -216,6 +227,154 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         );
       }
 
+      // Auto-settle SnappPay transaction (like Mellat)
+      const settleResult = await snappay.settle(tokenForOps);
+      try {
+        strapi.log.info("SnappPay settle result", {
+          successful: settleResult?.successful,
+          error: settleResult?.errorData,
+        });
+      } catch {}
+
+      const newlySettled = settleResult?.successful;
+      const alreadySettled =
+        newlySettled ||
+        settleResult?.errorData?.errorCode === 409 ||
+        /already\s+settled/i.test(
+          settleResult?.errorData?.message ||
+            settleResult?.errorData?.data ||
+            ""
+        );
+
+      // Retry settlement if it failed (not already settled)
+      const MAX_RETRIES = 2; // 2 retries = 3 total attempts
+      const RETRY_DELAY_MS = 30000; // 30 seconds as recommended by SnappPay
+      let retryCount = 0;
+      let finalSettleResult = settleResult;
+      let retrySettled = alreadySettled;
+      let retryNewlySettled = newlySettled;
+
+      if (!alreadySettled) {
+        while (retryCount < MAX_RETRIES) {
+          retryCount++;
+          strapi.log.warn(
+            `Settlement failed, retrying (${retryCount}/${MAX_RETRIES}) after ${RETRY_DELAY_MS}ms`,
+            {
+              orderId,
+              tokenForOps,
+              previousError: finalSettleResult?.errorData,
+            }
+          );
+
+          // Wait 30 seconds before retry
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+
+          // Retry settlement
+          finalSettleResult = await snappay.settle(tokenForOps);
+
+          try {
+            strapi.log.info(`SnappPay settle retry ${retryCount} result`, {
+              successful: finalSettleResult?.successful,
+              error: finalSettleResult?.errorData,
+            });
+          } catch {}
+
+          // Check if this retry succeeded or was already settled
+          retryNewlySettled = finalSettleResult?.successful;
+          retrySettled =
+            retryNewlySettled ||
+            finalSettleResult?.errorData?.errorCode === 409 ||
+            /already\s+settled/i.test(
+              finalSettleResult?.errorData?.message ||
+                finalSettleResult?.errorData?.data ||
+                ""
+            );
+
+          if (retrySettled) {
+            break; // Success! Exit retry loop
+          }
+        }
+
+        // If all retries failed, log for manual review
+        if (!retrySettled) {
+          strapi.log.error(
+            `Settlement failed after ${retryCount + 1} attempts. Manual review required.`,
+            {
+              orderId,
+              tokenForOps,
+              finalError: finalSettleResult?.errorData,
+            }
+          );
+
+          try {
+            await strapi.entityService.create("api::order-log.order-log", {
+              data: {
+                order: orderId,
+                Action: "Update",
+                Description: `SnappPay settlement failed after ${
+                  retryCount + 1
+                } attempts - MANUAL REVIEW REQUIRED`,
+                Changes: {
+                  totalAttempts: retryCount + 1,
+                  error: finalSettleResult?.errorData,
+                  transactionId: transactionIdInput,
+                },
+              },
+            });
+          } catch {}
+        }
+      }
+
+      // Check payment status after settle to confirm final state
+      const statusAfterSettle = await snappay.status(tokenForOps);
+      try {
+        strapi.log.info("SnappPay status after settle", {
+          successful: statusAfterSettle?.successful,
+          status: statusAfterSettle?.response?.status,
+          transactionId: statusAfterSettle?.response?.transactionId,
+          error: statusAfterSettle?.errorData,
+          retriesPerformed: retryCount,
+        });
+      } catch {}
+
+      // If newly settled (including after retries), decrement stock and generate barcode
+      if (retryNewlySettled) {
+        try {
+          const orderWithItems = await strapi.entityService.findOne(
+            "api::order.order",
+            orderId,
+            {
+              populate: {
+                order_items: {
+                  populate: {
+                    product_variation: { populate: { product_stock: true } },
+                  },
+                },
+              },
+            }
+          );
+          for (const it of orderWithItems?.order_items || []) {
+            const v = it?.product_variation;
+            if (v?.product_stock?.id && typeof it?.Count === "number") {
+              const stockId = v.product_stock.id as number;
+              const current = Number(v.product_stock.Count || 0);
+              const dec = Number(it.Count || 0);
+              await strapi.entityService.update(
+                "api::product-stock.product-stock",
+                stockId,
+                { data: { Count: current - dec } }
+              );
+            }
+          }
+        } catch (e) {
+          strapi.log.error("Failed to decrement stock after settlement", e);
+        }
+
+        try {
+          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+        } catch {}
+      }
+
       await strapi.entityService.update("api::order.order", orderId, {
         data: { Status: "Started" },
       });
@@ -224,9 +383,13 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           data: {
             order: orderId,
             Action: "Update",
-            Description:
-              "SnappPay verify succeeded (awaiting manual settlement)",
-            Changes: { transactionId: transactionIdInput },
+            Description: retryNewlySettled
+              ? `SnappPay verify+settle succeeded${retryCount > 0 ? ` (after ${retryCount} retries)` : ""}`
+              : "SnappPay verify succeeded (already settled)",
+            Changes: {
+              transactionId: transactionIdInput,
+              retries: retryCount,
+            },
           },
         });
       } catch {}

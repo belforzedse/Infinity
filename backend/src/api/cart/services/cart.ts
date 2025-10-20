@@ -229,7 +229,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           }
         }
 
-        const taxPercent = 10;
+        const taxPercent = 0; // Tax disabled
         const totals = computeTotals(
           subtotal,
           discountAmount,

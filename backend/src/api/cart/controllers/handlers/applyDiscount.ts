@@ -117,7 +117,7 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
     }
 
     // Compose preview totals (no persistence here)
-    const taxPercent = 10;
+    const taxPercent = 0; // Tax disabled
     const taxable = Math.max(eligibleSubtotal - discountAmount, 0);
     const tax = (taxable * taxPercent) / 100;
     const total = Math.max(subtotal - discountAmount + tax + finalShipping, 0);
