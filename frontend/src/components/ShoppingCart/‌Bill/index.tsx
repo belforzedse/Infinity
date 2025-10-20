@@ -55,7 +55,8 @@ function ShoppingCartBillForm({}: Props) {
   // Gateway selection state
   const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">("mellat");
   const [snappEligible, setSnappEligible] = useState<boolean>(true);
-  const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
+  const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
+  const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
   const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
   const [discountPreview, setDiscountPreview] = useState<
     | {
@@ -162,7 +163,8 @@ function ShoppingCartBillForm({}: Props) {
       try {
         if (!shippingId) {
           setSnappEligible(true);
-          setSnappMessage(undefined);
+          setSnappTitle(undefined);
+          setSnappDescription(undefined);
           return;
         }
         const res = await CartService.getSnappEligible({
@@ -171,11 +173,12 @@ function ShoppingCartBillForm({}: Props) {
           discountCode,
         });
         setSnappEligible(!!res.eligible);
-        const msg = res.title || res.description;
-        setSnappMessage(msg);
+        setSnappTitle(res.title);
+        setSnappDescription(res.description);
       } catch {
         setSnappEligible(true);
-        setSnappMessage(undefined);
+        setSnappTitle(undefined);
+        setSnappDescription(undefined);
       }
     };
     run();
@@ -481,7 +484,8 @@ function ShoppingCartBillForm({}: Props) {
             selected={gateway}
             onChange={setGateway}
             snappEligible={snappEligible}
-            snappMessage={snappMessage}
+            snappTitle={snappTitle}
+            snappDescription={snappDescription}
             walletBalanceIrr={walletBalanceIrr}
             requiredAmountIrr={requiredAmountIrr}
           />
