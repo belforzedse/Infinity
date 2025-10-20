@@ -157,8 +157,8 @@ export default factories.createCoreController(
           if (shipping?.Price) shippingCost = Number(shipping.Price);
         }
 
-        // Tax 10% on (subtotal - discount)
-        const taxPercent = 10;
+        // Tax disabled
+        const taxPercent = 0;
         const taxAmount = ((subtotal - discountAmount) * taxPercent) / 100;
 
         // Total (toman) → convert to IRR
