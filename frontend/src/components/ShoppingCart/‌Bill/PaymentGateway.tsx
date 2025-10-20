@@ -6,7 +6,8 @@ interface Props {
   selected: "mellat" | "snappay" | "wallet";
   onChange: (gw: "mellat" | "snappay" | "wallet") => void;
   snappEligible?: boolean;
-  snappMessage?: string;
+  snappTitle?: string;
+  snappDescription?: string;
   walletBalanceIrr?: number;
   requiredAmountIrr?: number;
 }
@@ -15,11 +16,21 @@ function ShoppingCartBillPaymentGateway({
   selected,
   onChange,
   snappEligible = true,
-  snappMessage,
+  snappTitle,
+  snappDescription,
   walletBalanceIrr = 0,
   requiredAmountIrr = 0,
 }: Props) {
   const walletDisabled = walletBalanceIrr < requiredAmountIrr || requiredAmountIrr <= 0;
+
+  // Build SnappPay helper content with title and description on two lines
+  const snappHelper = snappTitle || snappDescription ? (
+    <div className="flex flex-col gap-0.5">
+      {snappTitle && <div>{snappTitle}</div>}
+      {snappDescription && <div>{snappDescription}</div>}
+    </div>
+  ) : undefined;
+
   const paymentGateways: Array<{
     id: "mellat" | "snappay" | "wallet";
     name: string;
@@ -32,13 +43,17 @@ function ShoppingCartBillPaymentGateway({
       name: "ملت",
       img: "/images/cart/melat.png",
     },
-    {
-      id: "snappay",
-      name: "اسنپ پی (اقساطی)",
-      img: "/images/cart/snappay.png",
-      disabled: !snappEligible,
-      helper: snappMessage,
-    },
+    // Only include SnappPay if eligible (hide when false, not just disable)
+    ...(snappEligible
+      ? [
+          {
+            id: "snappay" as const,
+            name: "اسنپ پی (اقساطی)",
+            img: "/images/cart/snappay.png",
+            helper: snappHelper,
+          },
+        ]
+      : []),
     {
       id: "wallet",
       name: "کیف پول",

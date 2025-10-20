@@ -138,12 +138,14 @@ function ShoppingCartBillDeliveryForm({
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-neutral-600 lg:text-base">مالیات</span>
-          <span className="text-sm text-neutral-800 lg:text-base">
-            {taxAmount.toLocaleString()} تومان
-          </span>
-        </div>
+        {taxAmount > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-neutral-600 lg:text-base">مالیات</span>
+            <span className="text-sm text-neutral-800 lg:text-base">
+              {taxAmount.toLocaleString()} تومان
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-neutral-600 lg:text-base">هزینه ارسال</span>

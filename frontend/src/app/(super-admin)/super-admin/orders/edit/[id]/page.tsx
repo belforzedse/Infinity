@@ -235,7 +235,7 @@ export default function EditOrderPage() {
           data.attributes?.contract?.data?.attributes?.Amount || 0
         );
         const taxPercent = Number(
-          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 10
+          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 0
         );
         // Use items subtotal for "موارد جمع جزء" and contract amount (already includes shipping/tax) for total.
         const subtotal = itemsSubtotal;
