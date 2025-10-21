@@ -8,24 +8,29 @@ import BackButtonToStore from "../BackButtonToStore";
 
 const UserHeader: React.FC = () => {
   return (
-    <header className="mb-4 flex w-full items-center justify-between bg-white px-4 py-3 shadow-sm lg:mb-6 lg:px-8 lg:py-4 rounded-lg">
-      <div className="flex items-center gap-3">
-        <MobileHamburgerMenu />
-        <ShoppingCartCounter />
-      </div>
+    <header className="mb-6 flex w-full items-center justify-between bg-neutral-50 px-6 py-4 lg:mb-8 lg:rounded-2xl lg:px-10">
+      {/* Right side: Back to Store */}
+      <BackButtonToStore />
 
-      <div className="relative h-12 w-24 md:h-14 md:w-28 flex-shrink-0">
+      {/* Center: Logo */}
+      <div className="relative h-10 w-28 flex-shrink-0 md:h-12 md:w-36">
         <Image
-          src="/images/cropped-02.png"
+          src="/images/full-logo.png"
           alt="Logo"
           fill
           className="object-contain"
           priority
-          sizes="(max-width: 768px) 96px, 112px"
+          sizes="(max-width: 768px) 112px, 144px"
         />
       </div>
 
-      <BackButtonToStore />
+      {/* Left side: Cart */}
+      <div className="flex items-center">
+        <ShoppingCartCounter />
+        <div className="lg:hidden">
+          <MobileHamburgerMenu />
+        </div>
+      </div>
     </header>
   );
 };
