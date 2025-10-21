@@ -20,13 +20,13 @@ interface Props {
  */
 export default function BackButtonToStore({ isResponsive = true }: Props) {
   const buttonClasses = isResponsive
-    ? "bg-background-pink text-white flex lg:flex-row flex-row-reverse items-center gap-1 py-2 lg:px-6 px-2 rounded-lg"
-    : "bg-background-pink text-white flex flex-row items-center gap-1 py-2 lg:px-6 px-2 rounded-lg";
+    ? "bg-pink-500 hover:bg-pink-600 text-white flex lg:flex-row flex-row-reverse items-center gap-1 py-2 lg:px-6 px-4 rounded-lg transition-colors"
+    : "bg-pink-500 hover:bg-pink-600 text-white flex flex-row items-center gap-1 py-2 lg:px-6 px-4 rounded-lg transition-colors";
 
   return (
     <Link href="/" className={buttonClasses}>
       <RightArrowIcon className={isResponsive ? "rotate-180 lg:rotate-0" : "rotate-0"} />
-      <span className="text-sm">
+      <span className="text-sm font-medium">
         {isResponsive ? (
           <>
             <span className="hidden lg:inline">بازگشت به</span> فروشگاه
