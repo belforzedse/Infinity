@@ -14,14 +14,14 @@ export default function AccountPage() {
 
   return (
     <div
-      className="container mx-auto flex min-h-[60vh] flex-col gap-1 bg-white px-4 lg:flex-row lg:gap-10 lg:p-0"
+      className="container mx-auto flex min-h-[60vh] flex-col gap-4 bg-white px-4 py-4 lg:flex-row lg:gap-8 lg:px-8 lg:py-8"
       dir="rtl"
     >
-      <span className="text-3xl text-foreground-primary lg:hidden">حساب من</span>
+      <span className="text-2xl font-semibold text-foreground-primary lg:hidden">حساب من</span>
 
       <UserSidebar />
 
-      <main className="flex flex-1 flex-col gap-3 overflow-y-auto lg:gap-4 lg:py-8">
+      <main className="flex flex-1 flex-col gap-4">
         <WelcomNotifBar username={fullName} />
 
         <AccountForm />
