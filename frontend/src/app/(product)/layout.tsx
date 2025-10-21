@@ -43,10 +43,11 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
                 <Link href="/">
                   <Image
                     alt="logo"
-                    width={132}
-                    height={75}
-                    src="/images/cropped-021.webp"
-                    className="h-[47px] w-[90px] md:h-[75px] md:w-[132px]"
+                    width={210}
+                    height={72}
+                    src="/images/full-logo.png"
+                    className="h-[48px] w-[150px] object-contain md:h-[72px] md:w-[210px]"
+                    priority
                   />
                 </Link>
               </div>
@@ -97,7 +98,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
               mixBlendMode="screen"
               className="pointer-events-none absolute inset-0 -z-10 opacity-95"
               contentClassName="hidden"
-              style={{ width: '100%', height: '100%' }}
+              style={{ width: "100%", height: "100%" }}
             />
           )}
           <HeaderContent />

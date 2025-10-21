@@ -4,13 +4,13 @@ import Link from "next/link";
 export default function Logo() {
   return (
     <Link href="/">
-      <div className="relative h-[56px] w-[90px] md:h-[95px] md:w-[152px]">
+      <div className="relative h-[52px] w-[150px] md:h-[72px] md:w-[210px]">
         <Image
-          src="/images/cropped-021.webp"
+          src="/images/full-logo.png"
           alt="Logo"
           fill
           className="object-contain"
-          sizes="(max-width: 768px) 90px, 110px"
+          sizes="(max-width: 768px) 150px, 210px"
           priority
         />
       </div>
