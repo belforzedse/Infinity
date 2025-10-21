@@ -61,7 +61,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::general-discount.general-discount",
-      "inversedBy": "product_variations"
+      "mappedBy": "product_variations"
     },
     "external_id": {
       "type": "string",
