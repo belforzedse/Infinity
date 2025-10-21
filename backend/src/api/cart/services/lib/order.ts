@@ -121,7 +121,8 @@ export const createOrderAndItems = async (
 
   for (const item of cart.cart_items) {
     const variation = item.product_variation;
-    const itemPrice = Number(variation?.Price || 0);
+    // Use DiscountPrice if available, otherwise fall back to Price
+    const itemPrice = Number(variation?.DiscountPrice ?? variation?.Price ?? 0);
     const itemCount = Number(item?.Count || 0);
     subtotal += itemPrice * itemCount;
 
