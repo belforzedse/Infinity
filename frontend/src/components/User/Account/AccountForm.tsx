@@ -85,17 +85,22 @@ export default function AccountForm() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 rounded-lg bg-white p-4 lg:gap-4">
-        <span className="text-xl text-foreground-primary">در حال بارگذاری...</span>
+      <div className="flex flex-col gap-4 rounded-lg bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col gap-2 rounded-lg bg-white p-4 lg:gap-4">
-        <span className="text-xl text-red-500">خطا در بارگذاری اطلاعات کاربر</span>
-        <button onClick={refetch} className="w-fit rounded-lg bg-[#EC4899] px-4 py-2 text-white">
+      <div className="flex flex-col gap-4 rounded-lg bg-white p-6 shadow-sm">
+        <span className="text-lg font-medium text-red-600">خطا در بارگذاری اطلاعات کاربر</span>
+        <button
+          onClick={refetch}
+          className="w-fit rounded-lg bg-[#EC4899] px-6 py-2.5 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
+        >
           تلاش مجدد
         </button>
       </div>
@@ -103,11 +108,11 @@ export default function AccountForm() {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg bg-white lg:gap-4">
-      <span className="text-xl text-foreground-primary">اطلاعات حساب کاربری</span>
+    <div className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-semibold text-foreground-primary">اطلاعات حساب کاربری</h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 lg:gap-6">
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="نام"
             name="firstName"
@@ -129,7 +134,7 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="کد ملی"
             name="nationalId"
@@ -151,11 +156,11 @@ export default function AccountForm() {
             }
             placeholder="09122034113"
             dir="ltr"
-            disabled={true} // Phone number should not be editable
+            disabled={true}
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="تاریخ تولد"
             name="birthDate"
@@ -177,16 +182,23 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="mt-2 flex w-full items-end justify-end lg:mt-0">
+        <div className="flex w-full justify-end border-t border-neutral-200 pt-6">
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-1 rounded-lg bg-[#EC4899] px-8 py-2.5 text-white disabled:cursor-not-allowed disabled:bg-pink-300 lg:w-fit lg:py-2"
+            className="flex items-center justify-center gap-2 rounded-lg bg-[#EC4899] px-8 py-3 text-sm font-medium text-white transition-all hover:bg-pink-600 disabled:cursor-not-allowed disabled:bg-pink-300 disabled:hover:bg-pink-300"
             disabled={isSaving}
           >
-            <SaveIcon className="h-5 w-5 lg:h-6 lg:w-6" />
-            <span className="text-base lg:text-sm">
-              {isSaving ? "در حال ذخیره..." : "ذخیره تغییرات"}
-            </span>
+            {isSaving ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                <span>در حال ذخیره...</span>
+              </>
+            ) : (
+              <>
+                <SaveIcon className="h-5 w-5" />
+                <span>ذخیره تغییرات</span>
+              </>
+            )}
           </button>
         </div>
       </form>
