@@ -3,7 +3,6 @@
 import { IMAGE_BASE_URL } from "@/constants/api";
 import NoData from "./NoData";
 import dynamic from "next/dynamic";
-import { apiClient } from "@/services";
 
 // Lazy load heavy components
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
@@ -21,8 +20,9 @@ import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { API_BASE_URL } from "@/constants/api";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-import notify from "@/utils/notify";
+// use native fetch so user isn't timed out artificially
 
 interface Product {
   id: number;
@@ -129,6 +129,9 @@ export default function PLPList({
 
     setIsLoading(true);
 
+    // Base URL with required fields and pagination
+    const baseUrl = `${API_BASE_URL}/products`;
+
     // Build query parameters
     const queryParams = new URLSearchParams();
 
@@ -137,7 +140,6 @@ export default function PLPList({
     queryParams.append("populate[1]", "product_main_category");
     queryParams.append("populate[2]", "product_variations");
     queryParams.append("populate[3]", "product_variations.product_stock");
-    queryParams.append("populate[4]", "product_variations.general_discounts");
 
     // Add pagination
     queryParams.append("pagination[page]", page);
@@ -147,6 +149,7 @@ export default function PLPList({
     queryParams.append("filters[Status][$eq]", "Active");
 
     // Only show products whose Title contains کیف, کفش, صندل, or کتونی
+    // We append the $or filters as separate params to keep URLSearchParams usage
     queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
     queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
     queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
@@ -157,9 +160,9 @@ export default function PLPList({
       queryParams.append("filters[product_main_category][Slug][$eq]", category);
     }
 
-    // Availability filter - check for actual stock (Count > 0) not just IsPublished
+    // Availability filter
     if (available === "true") {
-      queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
+      queryParams.append("filters[product_variations][IsPublished][$eq]", "true");
     }
 
     // Price range filters
@@ -200,12 +203,11 @@ export default function PLPList({
       queryParams.append("sort[0]", sort);
     }
 
-    // Construct endpoint with query params
-    const endpoint = `/products?${queryParams.toString()}`;
+    // Construct final URL
+    const url = `${baseUrl}?${queryParams.toString()}`;
 
-    // Use apiClient instead of native fetch for better error handling, retry logic, and consistency
-    apiClient
-      .getPublic<any>(endpoint, { suppressAuthRedirect: true })
+    fetch(url)
+      .then((response) => response.json())
       .then((data) => {
         setProducts(Array.isArray(data?.data) ? data.data : []);
         setPagination(
@@ -218,8 +220,7 @@ export default function PLPList({
         );
       })
       .catch((error) => {
-        console.error("[PLP] Error fetching products:", error);
-        notify.error("خطا در بارگیری محصولات");
+        console.error("Error fetching products:", error);
         setProducts([]);
         setPagination({
           page: parseInt(page) || 1,
@@ -244,7 +245,6 @@ export default function PLPList({
     usage,
     sort,
     searchQuery,
-    discountOnly,
   ]);
 
   // Fetch products when dependencies change
