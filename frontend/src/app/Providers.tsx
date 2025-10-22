@@ -10,6 +10,7 @@ import GlobalFetchInterceptor from "@/components/ui/GlobalFetchInterceptor";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import ImageEffects from "@/components/ui/ImageEffects";
 import ServiceWorkerRegistration from "@/components/ui/ServiceWorkerRegistration";
+import AuthInitializer from "@/components/ui/AuthInitializer";
 import { Suspense } from "react";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -21,6 +22,7 @@ export default function Providers({ children }: { children: ReactNode }) {
        * individually. The order of these components generally reflects the
        * desired rendering priority for visual elements.
        */}
+      <AuthInitializer />
       <ServiceWorkerRegistration />
       <PreloadBlur />
       <TopProgressBar />
