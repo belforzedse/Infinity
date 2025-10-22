@@ -6,21 +6,13 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { categories } from "@/constants/categories";
-import {
-  getDiscountedProducts,
-  getNewProducts,
-  getFavoriteProducts,
-} from "@/services/product/homepage";
+import { getHomepageSections } from "@/services/product/homepage";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
 import Reveal from "@/components/Reveal";
 
 export default async function Home() {
-  const [discountedProducts, newProducts, favoriteProducts] = await Promise.all([
-    getDiscountedProducts(),
-    getNewProducts(),
-    getFavoriteProducts(),
-  ]);
+  const { discounted: discountedProducts, new: newProducts, favorites: favoriteProducts } = await getHomepageSections();
 
   return (
     <div className="mx-auto mt-5 px-2 pb-8 md:mt-8 md:px-1 md:pb-16 lg:px-10 xl:max-w-[1440px]">
