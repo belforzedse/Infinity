@@ -42,6 +42,10 @@ module.exports = {
 
   // Import Settings
   import: {
+    filters: {
+      // Optional list of WooCommerce category IDs to restrict imports
+      categoryIds: []
+    },
     // Batch sizes for different entities
     batchSizes: {
       categories: 100,

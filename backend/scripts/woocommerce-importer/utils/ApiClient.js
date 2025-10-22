@@ -115,15 +115,20 @@ class WooCommerceClient extends BaseApiClient {
   }
 
   /**
-   * Get products with pagination
+   * Get products with pagination and optional category filtering
    */
-  async getProducts(page = 1, perPage = 20) {
-    const response = await this.retryRequest(() => 
-      this.client.get('/products', {
-        params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
-      })
+  async getProducts(page = 1, perPage = 20, categoryId = null) {
+    const params = { page, per_page: perPage, orderby: 'id', order: 'asc' };
+
+    // Add category filter if specified
+    if (categoryId) {
+      params.category = categoryId;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/products', { params })
     );
-    
+
     return {
       data: response.data,
       totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
@@ -254,6 +259,16 @@ class StrapiClient extends BaseApiClient {
   async updateProduct(productId, updateData) {
     const response = await this.retryRequest(() => 
       this.client.put(`/products/${productId}`, { data: updateData })
+    );
+    return response.data;
+  }
+
+  /**
+   * Update an existing product variation
+   */
+  async updateProductVariation(variationId, updateData) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/product-variations/${variationId}`, { data: updateData })
     );
     return response.data;
   }
@@ -434,6 +449,16 @@ class StrapiClient extends BaseApiClient {
   async createProductStock(stockData) {
     const response = await this.retryRequest(() => 
       this.client.post('/product-stocks', { data: stockData })
+    );
+    return response.data;
+  }
+
+  /**
+   * Update an existing product stock
+   */
+  async updateProductStock(stockId, stockData) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/product-stocks/${stockId}`, { data: stockData })
     );
     return response.data;
   }
