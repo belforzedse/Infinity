@@ -278,12 +278,6 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>مالیات:</span>
-                  <span className="font-medium">
-                    {preview.newTotals.tax.toLocaleString("fa-IR")} تومان
-                  </span>
-                </div>
-                <div className="flex justify-between">
                   <span>هزینه ارسال:</span>
                   <span className="font-medium">
                     {preview.newShipping.toLocaleString("fa-IR")} تومان

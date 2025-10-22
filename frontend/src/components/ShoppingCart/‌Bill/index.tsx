@@ -54,7 +54,7 @@ function ShoppingCartBillForm({}: Props) {
 
   // Gateway selection state
   const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">("mellat");
-  const [snappEligible, setSnappEligible] = useState<boolean>(true);
+  const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
   const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
   const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
   const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
@@ -162,7 +162,8 @@ function ShoppingCartBillForm({}: Props) {
     const run = async () => {
       try {
         if (!shippingId) {
-          setSnappEligible(true);
+          // Don't show SnappPay if no shipping selected
+          setSnappEligible(false);
           setSnappTitle(undefined);
           setSnappDescription(undefined);
           return;
@@ -172,11 +173,13 @@ function ShoppingCartBillForm({}: Props) {
           shippingCost,
           discountCode,
         });
+        // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
         setSnappTitle(res.title);
         setSnappDescription(res.description);
-      } catch {
-        setSnappEligible(true);
+      } catch (error) {
+        // On error, hide SnappPay (don't show it by default)
+        setSnappEligible(false);
         setSnappTitle(undefined);
         setSnappDescription(undefined);
       }

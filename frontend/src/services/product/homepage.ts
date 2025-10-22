@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS } from "@/constants/api";
+import { ENDPOINTS, API_BASE_URL } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
@@ -24,10 +24,20 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
   );
 
   try {
-    const response = await apiClient.get<any>(endpoint);
-    const discounted = (response as any)?.data?.filter((product: any) => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    }).then(res => res.json());
+
+    const allProducts = (response as any)?.data || [];
+    logger.info(`Fetched ${allProducts.length} total products for discount check`);
+
+    const discounted = allProducts.filter((product: any) => {
       // Check if product has any variation with stock AND discount
-      return product.attributes.product_variations?.data?.some((variation: any) => {
+      const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
         // Check if variation has stock
         const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
         const hasStock = typeof stockCount === "number" && stockCount > 0;
@@ -40,6 +50,7 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
         // Check for general_discounts first
         const generalDiscounts = variation.attributes.general_discounts?.data;
         if (generalDiscounts && generalDiscounts.length > 0) {
+          logger.info(`Product ${product.id} has general_discounts:`, generalDiscounts.length);
           return true;
         }
 
@@ -47,10 +58,18 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
         const discountPrice = variation.attributes.DiscountPrice
           ? parseFloat(variation.attributes.DiscountPrice)
           : null;
-        return discountPrice && discountPrice < price;
+        if (discountPrice && discountPrice < price) {
+          logger.info(`Product ${product.id} has DiscountPrice: ${discountPrice} < ${price}`);
+          return true;
+        }
+
+        return false;
       });
+
+      return hasDiscountedVariation;
     });
 
+    logger.info(`Found ${discounted.length} discounted products`);
     return formatProductsToCardProps(discounted);
   } catch (error) {
     logger.error("Error fetching discounted products:", error as any);
@@ -77,7 +96,13 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
   );
 
   try {
-    const response = await apiClient.get<any>(endpoint);
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    }).then(res => res.json());
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
     logger.error("Error fetching new products:", error as any);
@@ -104,7 +129,13 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
   );
 
   try {
-    const response = await apiClient.get<any>(endpoint);
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    }).then(res => res.json());
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
     logger.error("Error fetching favorite products:", error as any);
