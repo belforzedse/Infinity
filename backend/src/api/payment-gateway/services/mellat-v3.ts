@@ -42,7 +42,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       timeout: 15000, // 15 seconds timeout
       apiUrl:
         process.env.MELLAT_GATEWAY_URL ||
-        "https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl",
+        "https://bpm.shaparak.ir/pgwchannel/services/pgw",
     };
 
     return new MellatCheckout(config);
@@ -148,8 +148,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         contractId: params.contractId,
       });
 
-      // Initialize the client (optional but recommended)
-      await mellat.initialize();
+      // Initialize the client (with error handling)
+      try {
+        await mellat.initialize();
+      } catch (initError) {
+        strapi.log.warn(`[${requestId}] WSDL initialization warning:`, {
+          message: initError.message,
+          note: "Proceeding with payment request despite init error"
+        });
+        // Continue anyway - sometimes initialization fails but payment still works
+      }
 
       // Request payment using mellat-checkout package
       const paymentRequest = {
