@@ -36,6 +36,13 @@ interface Product {
           Price: string;
           IsPublished: boolean;
           DiscountPrice?: string;
+          product_stock?: {
+            data?: {
+              attributes: {
+                Count: number;
+              };
+            };
+          };
           general_discounts?: {
             data: Array<{
               attributes: {
@@ -209,7 +216,10 @@ async function getProducts(
   const url = `${baseUrl}?${queryParams.toString()}`;
 
   try {
-    const response = await fetchWithTimeout(url, { timeoutMs: 15000 });
+    const response = await fetchWithTimeout(url, {
+      timeoutMs: 15000,
+      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+    });
     const data = await response.json();
 
     // Filter out products with zero price and check availability if needed
@@ -220,11 +230,12 @@ async function getProducts(
         return price && parseInt(price) > 0;
       });
 
-      // If showAvailableOnly is true, also check if any variation is published
+      // If showAvailableOnly is true, also check if any variation has stock
       if (showAvailableOnly) {
-        const hasAvailableVariation = product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished,
-        );
+        const hasAvailableVariation = product.attributes.product_variations?.data?.some((variation) => {
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          return typeof stockCount === "number" && stockCount > 0;
+        });
         return hasValidPrice && hasAvailableVariation;
       }
 
@@ -236,6 +247,14 @@ async function getProducts(
       filteredProducts = filteredProducts.filter((product: Product) =>
         product.attributes.product_variations?.data?.some((variation) => {
           const price = parseFloat(variation.attributes.Price);
+
+          // Check for general_discounts first
+          const generalDiscounts = variation.attributes.general_discounts?.data;
+          if (generalDiscounts && generalDiscounts.length > 0) {
+            return true;
+          }
+
+          // Fallback to DiscountPrice field
           const discountPrice = variation.attributes.DiscountPrice
             ? parseFloat(variation.attributes.DiscountPrice)
             : null;
