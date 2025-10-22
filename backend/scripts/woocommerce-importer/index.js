@@ -52,22 +52,41 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '50')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('-c, --categories <ids...>', 'Comma-separated WooCommerce category IDs to filter (e.g., "5,12,18")', '')
   .option('--all', 'Import all products (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
     try {
       logger.info('🛍️ Starting product import...');
-      
+
       // Override batch size if provided
       if (options.batchSize) {
         config.import.batchSizes.products = Math.min(parseInt(options.batchSize), 100);
       }
-      
+
+      // Parse category IDs if provided
+      let categoryIds = [];
+      if (options.categories) {
+        // Handle both comma-separated string and array of arguments
+        const categoryInput = Array.isArray(options.categories)
+          ? options.categories.join(',')
+          : options.categories;
+        categoryIds = categoryInput
+          .split(',')
+          .map(id => parseInt(id.trim()))
+          .filter(id => !isNaN(id));
+
+        if (categoryIds.length > 0) {
+          logger.info(`🏷️ Filtering by categories: [${categoryIds.join(', ')}]`);
+        }
+      }
+
       const importer = new ProductImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
-        dryRun: options.dryRun
+        dryRun: options.dryRun,
+        categoryIds: categoryIds
       });
       logger.success('✅ Product import completed!');
     } catch (error) {

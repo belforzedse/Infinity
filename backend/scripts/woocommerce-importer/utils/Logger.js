@@ -190,9 +190,12 @@ class Logger {
    * Log import statistics
    */
   logStats(stats) {
-    this.info('📊 Import Statistics:');
+    this.info('dY"S Import Statistics:');
     this.info(`   Total processed: ${stats.total || 0}`);
     this.info(`   Successfully imported: ${stats.success || 0}`);
+    if (typeof stats.updated === 'number') {
+      this.info(`   Updated: ${stats.updated}`);
+    }
     this.info(`   Skipped (duplicates): ${stats.skipped || 0}`);
     this.info(`   Failed: ${stats.failed || 0}`);
     this.info(`   Errors: ${stats.errors || 0}`);
@@ -212,3 +215,6 @@ class Logger {
 }
 
 module.exports = Logger; 
+
+
+

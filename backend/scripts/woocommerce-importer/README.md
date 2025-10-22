@@ -53,7 +53,7 @@ node index.js all --limit 100
 | Command | Description | Options |
 |---------|-------------|---------|
 | `categories` | Import product categories | `--limit`, `--page`, `--dry-run` |
-| `products` | Import products | `--limit`, `--page`, `--dry-run` |
+| `products` | Import products | `--limit`, `--page`, `--categories`, `--dry-run` |
 | `variations` | Import product variations | `--limit`, `--page`, `--dry-run`, `--only-imported` |
 | `variations-imported` | Import variations for imported products only | `--limit`, `--page`, `--dry-run` |
 | `orders` | Import orders | `--limit`, `--page`, `--dry-run` |
@@ -170,6 +170,84 @@ scripts/woocommerce-importer/
 │   └── ...
 └── logs/                      # Import logs (auto-created)
     └── import-2025-07-26.log
+```
+
+## ✨ New Features (Enhanced Importer)
+
+### 🏷️ Category-Based Product Filtering
+
+Import products from specific WooCommerce categories instead of all products. This is useful for:
+- Incremental imports by category
+- Targeting specific product lines
+- Avoiding duplicate processing when products belong to multiple categories
+
+**Usage:**
+```bash
+# Import products from single category (ID: 5)
+node index.js products --limit 100 --categories 5
+
+# Import products from multiple categories
+node index.js products --limit 100 --categories 5 12 18
+
+# Or using comma-separated format
+node index.js products --limit 100 --categories "5,12,18"
+
+# Dry run to test category filtering
+node index.js products --limit 50 --categories 5 --dry-run
+```
+
+**How It Works:**
+- When `--categories` is specified, the importer loops through each category ID
+- For each category, it fetches products filtered by that category from WooCommerce
+- Tracks processed product IDs to avoid importing duplicates across categories
+- Each category maintains its own progress file for resume capability
+- Products already imported from another category are skipped with debug logging
+
+**Example Output:**
+```
+🏷️ Filtering by categories: [5, 12, 18]
+📊 Resuming category 5 from page 1 (0 products already processed)
+📄 Processing page 1 from category 5 (requesting 50 items)...
+⏭️ Skipping product 42 (Blue Shirt) - already imported from another category
+```
+
+### 💰 Sale/Discount Pricing Support
+
+The importer now properly handles WooCommerce sale prices and discounts:
+
+**Price Fields Mapped:**
+- `regular_price` → Strapi `Price` field
+- `sale_price` → Strapi `DiscountPrice` field (when sale price < regular price)
+
+**How It Works:**
+1. For each variation, the importer checks both `regular_price` and `sale_price`
+2. If a valid sale price exists (> 0 and < regular price):
+   - Sets `Price` to the regular price
+   - Sets `DiscountPrice` to the sale price
+   - Logs the discount for verification
+3. If no valid discount, uses standard price logic
+
+**Example WooCommerce Data:**
+```json
+{
+  "id": 42,
+  "regular_price": "1000000",  // 1 million Toman (100k Rial after conversion)
+  "sale_price": "850000"       // 850k Toman (85k Rial after conversion)
+}
+```
+
+**Result in Strapi:**
+```json
+{
+  "SKU": "WC-1-42",
+  "Price": 10000000,      // Regular price (converted to Rial)
+  "DiscountPrice": 8500000 // Sale price (converted to Rial)
+}
+```
+
+**Logging Example:**
+```
+💰 Variation 42: Regular price 1000000, Discount price 850000
 ```
 
 ## 🔧 Advanced Usage

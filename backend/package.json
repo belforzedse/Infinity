@@ -19,6 +19,7 @@
     "dev": "npm run develop",
     "dry-run": "node scripts/dry-run-import.js",
     "import:products": "node scripts/import-products.js",
+    "import:interactive": "node scripts/interactive-importer.js",
     "retry:images": "node scripts/retry-failed-images.js",
     "start": "strapi start",
     "start:prod": "NODE_ENV=production strapi start",

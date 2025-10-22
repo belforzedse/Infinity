@@ -24,13 +24,16 @@ class VariationImporter {
     this.stats = {
       total: 0,
       success: 0,
+      updated: 0,
       skipped: 0,
       failed: 0,
       errors: 0,
       startTime: null,
       endTime: null,
       variationsCreated: 0,
+      variationsUpdated: 0,
       stocksCreated: 0,
+      stocksUpdated: 0,
       attributesCreated: 0
     };
 
@@ -256,42 +259,54 @@ class VariationImporter {
    * Import a single variation
    */
   async importSingleVariation(wcVariation, dryRun = false) {
-    this.logger.debug(`🎨 Processing variation: ${wcVariation.id} - ${wcVariation._parentProduct.name}`);
-    
-    // Check for duplicates
-    const duplicateCheck = this.duplicateTracker.checkDuplicate('variations', wcVariation);
-    if (duplicateCheck.isDuplicate) {
-      this.stats.skipped++;
-      return duplicateCheck;
-    }
-    
+    this.logger.debug(`dYZ" Processing variation: ${wcVariation.id} - ${wcVariation._parentProduct.name}`);
+
+    const existingMapping = this.duplicateTracker.getStrapiId('variations', wcVariation.id);
+    const existingStrapiId = existingMapping?.strapiId;
+
     try {
-      // Transform variation to Strapi format
       const strapiVariation = await this.transformVariation(wcVariation);
-      
+
       if (dryRun) {
-        this.logger.info(`🔍 [DRY RUN] Would import variation: ${wcVariation.id}`);
+        const mode = existingStrapiId ? 'update' : 'create';
+        this.logger.info(`dY"? [DRY RUN] Would ${mode} variation: ${wcVariation.id}`);
         this.stats.success++;
-        return { isDryRun: true, data: strapiVariation };
+        if (existingStrapiId) {
+          this.stats.updated++;
+        }
+        return { isDryRun: true, mode, data: strapiVariation };
       }
-      
-      // Create variation attributes first (color, size, model)
+
       await this.createVariationAttributes(wcVariation, strapiVariation);
-      
-      // Create the variation in Strapi
-      const result = await this.strapiClient.createProductVariation(strapiVariation);
-      
-      // Create stock record
-      if (wcVariation.manage_stock && wcVariation.stock_quantity !== null) {
-        await this.createProductStock(result.data.id, wcVariation);
-        this.stats.stocksCreated++;
+
+      let variationId = existingStrapiId;
+      let mode = 'create';
+
+      if (existingStrapiId) {
+        await this.strapiClient.updateProductVariation(existingStrapiId, strapiVariation);
+        mode = 'update';
+        this.stats.variationsUpdated++;
+        this.logger.success(`dYZ" Updated variation: ${wcVariation.id} ? ${existingStrapiId}`);
+      } else {
+        const result = await this.strapiClient.createProductVariation(strapiVariation);
+        variationId = result.data.id;
+        this.stats.variationsCreated++;
+        this.logger.success(`?o. Created variation: ${wcVariation.id} ?+' ID: ${variationId}`);
       }
-      
-      // Record the mapping
+
+      if (wcVariation.manage_stock && wcVariation.stock_quantity !== null) {
+        const stockResult = await this.createProductStock(variationId, wcVariation);
+        if (stockResult?.created) {
+          this.stats.stocksCreated++;
+        } else if (stockResult?.updated) {
+          this.stats.stocksUpdated++;
+        }
+      }
+
       this.duplicateTracker.recordMapping(
         'variations',
         wcVariation.id,
-        result.data.id,
+        variationId,
         {
           productId: wcVariation._parentProduct.id,
           sku: wcVariation.sku,
@@ -299,19 +314,20 @@ class VariationImporter {
           stockQuantity: wcVariation.stock_quantity
         }
       );
-      
+
       this.stats.success++;
-      this.stats.variationsCreated++;
-      this.logger.debug(`✅ Created variation: ${wcVariation.id} → ID: ${result.data.id}`);
-      
-      return result;
-      
+      if (mode === 'update') {
+        this.stats.updated++;
+      }
+
+      return { mode, strapiId: variationId };
     } catch (error) {
       this.stats.failed++;
-      this.logger.error(`❌ Failed to create variation ${wcVariation.id}:`, error.message);
+      this.logger.error(`??O Failed to upsert variation ${wcVariation.id}:`, error.message);
       throw error;
     }
   }
+
 
   /**
    * Transform WooCommerce variation to Strapi format
@@ -319,18 +335,32 @@ class VariationImporter {
   async transformVariation(wcVariation) {
     // Generate SKU if not provided
     let sku = wcVariation.sku || this.generateSKU(wcVariation);
-    
+
     // Ensure SKU uniqueness
     sku = await this.ensureUniqueSKU(sku);
-    
+
+    // Initialize variation object
     const strapiVariation = {
       SKU: sku,
-      Price: this.convertPrice(wcVariation.price || wcVariation.regular_price),
       IsPublished: wcVariation.status === 'publish',
       // Store WooCommerce ID for reference
       external_id: wcVariation.id.toString(),
       external_source: 'woocommerce'
     };
+
+    // Handle sale price / discount pricing
+    const regularPrice = parseFloat(wcVariation.regular_price || wcVariation.price || 0);
+    const salePrice = parseFloat(wcVariation.sale_price || 0);
+
+    // If sale price exists and is less than regular price, add discount
+    if (salePrice > 0 && salePrice < regularPrice) {
+      strapiVariation.Price = this.convertPrice(regularPrice);
+      strapiVariation.DiscountPrice = this.convertPrice(salePrice);
+      this.logger.debug(`💰 Variation ${wcVariation.id}: Regular price ${regularPrice}, Discount price ${salePrice}`);
+    } else {
+      // No valid discount, use the standard price
+      strapiVariation.Price = this.convertPrice(wcVariation.price || wcVariation.regular_price);
+    }
 
     // Link to parent product
     const parentProductStrapiId = this.productMappingCache.get(wcVariation._parentProduct.id);
@@ -549,7 +579,7 @@ class VariationImporter {
   }
 
   /**
-   * Create product stock record
+   * Create or update product stock record
    */
   async createProductStock(variationId, wcVariation) {
     const stockData = {
@@ -558,17 +588,26 @@ class VariationImporter {
       external_id: `stock_${wcVariation.id}`,
       external_source: 'woocommerce'
     };
-    
+
     try {
+      const existing = await this.strapiClient.findByExternalId('/product-stocks', stockData.external_id);
+      const existingItems = Array.isArray(existing?.data) ? existing.data : [];
+
+      if (existingItems.length > 0) {
+        const stockId = existingItems[0].id;
+        await this.strapiClient.updateProductStock(stockId, stockData);
+        this.logger.debug(`dY"? Updated stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`);
+        return { updated: true, id: stockId };
+      }
+
       const result = await this.strapiClient.createProductStock(stockData);
-      this.logger.debug(`📦 Created stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`);
-      return result;
+      this.logger.debug(`dY"? Created stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`);
+      return { created: true, id: result.data.id };
     } catch (error) {
-      this.logger.error(`❌ Failed to create stock for variation ${variationId}:`, error.message);
+      this.logger.error(`??O Failed to sync stock for variation ${variationId}:`, error.message);
       throw error;
     }
   }
-
   /**
    * Generate SKU for variation
    */
@@ -609,9 +648,11 @@ class VariationImporter {
   logFinalStats() {
     this.logger.success(`🎉 Variation import completed!`);
     this.logger.logStats(this.stats);
-    this.logger.info(`📊 Additional stats:`);
+    this.logger.info(`dY"S Additional stats:`);
     this.logger.info(`   Variations created: ${this.stats.variationsCreated}`);
+    this.logger.info(`   Variations updated: ${this.stats.variationsUpdated}`);
     this.logger.info(`   Stock records created: ${this.stats.stocksCreated}`);
+    this.logger.info(`   Stock records updated: ${this.stats.stocksUpdated}`);
     this.logger.info(`   Attributes created: ${this.stats.attributesCreated}`);
     
     // Log duplicate tracking stats
@@ -628,3 +669,7 @@ class VariationImporter {
 }
 
 module.exports = VariationImporter; 
+
+
+
+
