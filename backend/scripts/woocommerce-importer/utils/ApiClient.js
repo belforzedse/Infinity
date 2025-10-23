@@ -58,11 +58,14 @@ class WooCommerceClient extends BaseApiClient {
   constructor(config, logger) {
     super(config.woocommerce, logger);
     
+    this.consumerKey = config.woocommerce.auth.consumerKey;
+    this.consumerSecret = config.woocommerce.auth.consumerSecret;
+
     this.client = axios.create({
       baseURL: config.woocommerce.baseUrl,
       auth: {
-        username: config.woocommerce.auth.consumerKey,
-        password: config.woocommerce.auth.consumerSecret
+        username: this.consumerKey,
+        password: this.consumerSecret
       },
       timeout: 60000, // Increased to 60 seconds for slow responses
       headers: {
@@ -71,10 +74,25 @@ class WooCommerceClient extends BaseApiClient {
     });
 
     // Request interceptor for rate limiting
-    this.client.interceptors.request.use(async (config) => {
-      this.logger.info(`🔄 Making WC API request: ${config.method?.toUpperCase()} ${config.url}`);
+    this.client.interceptors.request.use(async (requestConfig) => {
+      this.logger.info(`🔄 Making WC API request: ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`);
       await this.rateLimitDelay();
-      return config;
+
+      // Some WooCommerce installations (including Infinity Store) block HTTP Basic auth
+      // headers at the web server layer. To maintain compatibility we always append
+      // the consumer key/secret as query parameters in addition to the Authorization
+      // header so the request succeeds regardless of the server configuration.
+      requestConfig.params = requestConfig.params || {};
+
+      if (!requestConfig.params.consumer_key) {
+        requestConfig.params.consumer_key = this.consumerKey;
+      }
+
+      if (!requestConfig.params.consumer_secret) {
+        requestConfig.params.consumer_secret = this.consumerSecret;
+      }
+
+      return requestConfig;
     });
 
     // Response interceptor for logging

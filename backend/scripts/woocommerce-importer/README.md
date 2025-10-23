@@ -74,6 +74,11 @@ woocommerce: {
 }
 ```
 
+> ℹ️ **Heads-up:** The importer now attaches the WooCommerce consumer key/secret as
+> query parameters on every request in addition to using HTTP basic auth. This keeps
+> the tool compatible with hosts (including Infinity Store) that strip the
+> `Authorization` header at the web server level.
+
 ### Strapi Settings
 ```javascript
 strapi: {
