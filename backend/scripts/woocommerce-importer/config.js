@@ -40,23 +40,23 @@ const toArray = (value, fallback = []) => {
 module.exports = {
   // WooCommerce API Configuration
   woocommerce: {
-    baseUrl: process.env.WC_BASE_URL || 'https://infinitycolor.co/wp-json/wc/v3',
+    baseUrl: 'https://infinitycolor.co/wp-json/wc/v3',
     auth: {
-      consumerKey: requiredEnvVar('WC_CONSUMER_KEY'),
-      consumerSecret: requiredEnvVar('WC_CONSUMER_SECRET')
+      consumerKey: 'WOOCOMMERCE_CONSUMER_KEY',
+      consumerSecret: 'WOOCOMMERCE_CONSUMER_SECRET'
     },
     // Rate limiting to avoid overwhelming the API
     rateLimiting: {
-      requestsPerSecond: toNumber(process.env.WC_REQUESTS_PER_SECOND, 2),
-      delayBetweenRequests: toNumber(process.env.WC_DELAY_BETWEEN_REQUESTS, 500) // ms
+      requestsPerSecond: 2,
+      delayBetweenRequests: 500 // ms
     }
   },
 
   // Strapi API Configuration
   strapi: {
-    baseUrl: process.env.STRAPI_BASE_URL || 'https://api.infinity.rgbgroup.ir/api',
+    baseUrl: 'https://api.infinity.rgbgroup.ir/api',
     auth: {
-      token: requiredEnvVar('STRAPI_API_TOKEN')
+      token: 'STRAPI_API_TOKEN'
     },
     endpoints: {
       categories: '/product-categories',
