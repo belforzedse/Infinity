@@ -190,7 +190,7 @@ class Logger {
    * Log import statistics
    */
   logStats(stats) {
-    this.info('dY"S Import Statistics:');
+    this.info('📊 Import Statistics:');
     this.info(`   Total processed: ${stats.total || 0}`);
     this.info(`   Successfully imported: ${stats.success || 0}`);
     if (typeof stats.updated === 'number') {

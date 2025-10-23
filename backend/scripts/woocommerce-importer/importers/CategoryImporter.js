@@ -136,20 +136,39 @@ class CategoryImporter {
     // Build category map
     categories.forEach(cat => {
       categoryMap.set(cat.id, cat);
-      if (cat.parent === 0) {
+      // Check for root categories (parent is 0, null, undefined, or falsy)
+      if (!cat.parent || cat.parent === 0) {
         rootCategories.push(cat);
       }
     });
     
+    // Track visited categories to detect cycles and prevent infinite recursion
+    const visitedCategories = new Set();
+
     // Recursive function to add categories in hierarchical order
-    const addCategoryAndChildren = (category) => {
+    const addCategoryAndChildren = (category, ancestorChain = []) => {
+      // Detect cycles: if this category is already in the ancestor chain, we have a cycle
+      if (ancestorChain.includes(category.id)) {
+        this.logger.warn(
+          `⚠️ Cycle detected in category hierarchy: ${ancestorChain.join(' → ')} → ${category.id} (${category.name})`
+        );
+        return;
+      }
+
+      // Skip if already processed (can happen with cycles)
+      if (visitedCategories.has(category.id)) {
+        return;
+      }
+
+      visitedCategories.add(category.id);
       sortedCategories.push(category);
-      
-      // Find and add children
+
+      // Find and add children, passing the updated ancestor chain
+      const newAncestorChain = [...ancestorChain, category.id];
       categories
         .filter(cat => cat.parent === category.id)
         .forEach(childCategory => {
-          addCategoryAndChildren(childCategory);
+          addCategoryAndChildren(childCategory, newAncestorChain);
         });
     };
     
@@ -282,6 +301,26 @@ class CategoryImporter {
     // Log duplicate tracking stats
     const trackingStats = this.duplicateTracker.getStats();
     this.logger.info(`📊 Duplicate tracking: ${trackingStats.categories.total} categories tracked`);
+  }
+
+  /**
+   * Provide a lightweight progress snapshot for the interactive importer.
+   */
+  loadProgressState() {
+    return {
+      lastCompletedPage: 0,
+      totalProcessed: this.stats.total || 0,
+      lastProcessedAt: this.stats.endTime
+        ? new Date(this.stats.endTime).toISOString()
+        : null
+    };
+  }
+
+  /**
+   * Categories are reprocessed every run; nothing to reset.
+   */
+  resetProgressState() {
+    this.logger.info('📂 Category importer has no persisted progress to reset');
   }
 
   /**

@@ -144,14 +144,28 @@ class UserImporter {
     this.logger.debug('📂 Loading existing user phones...');
     
     try {
-      // Get existing local users to check for phone duplicates
       const existingUsers = await this.strapiClient.getAllLocalUsers();
+      const items = Array.isArray(existingUsers?.data?.data)
+        ? existingUsers.data.data
+        : Array.isArray(existingUsers?.data)
+          ? existingUsers.data
+          : Array.isArray(existingUsers)
+            ? existingUsers
+            : [];
       
-      if (existingUsers && existingUsers.data) {
-        for (const user of existingUsers.data) {
-          if (user.Phone) {
-            this.emailCache.add(user.Phone.toLowerCase());
-          }
+      for (const entry of items) {
+        const rawPhone = entry?.attributes?.Phone ?? entry?.Phone;
+        const normalized = this.normalizePhone(rawPhone);
+        if (normalized) {
+          this.emailCache.add(normalized);
+        }
+      }
+      
+      this.logger.info(📂 Loaded  existing user phones);
+    } catch (error) {
+      this.logger.warn(?s??,? Failed to load existing phones: );
+    }
+  }
         }
       }
       
@@ -279,9 +293,7 @@ class UserImporter {
       const timestamp = Date.now();
       userPhone = `wc_${wcCustomer.id}_${timestamp}`;
       this.logger.info(`📱 Generated phone for user ${wcCustomer.id}: ${userPhone}`);
-    }
-    
-    if (this.emailCache.has(userPhone.toLowerCase())) {
+    }\r\n\r\n    const normalizedPhone = this.normalizePhone(userPhone);\r\n    if (normalizedPhone && this.emailCache.has(normalizedPhone)) {
       this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${userPhone}`);
       this.stats.skipped++;
       return { isSkipped: true, reason: 'Phone already exists' };
@@ -446,6 +458,22 @@ class UserImporter {
   }
 
   /**
+   * Normalize phone identifiers for duplicate detection.
+   */
+  normalizePhone(value) {
+    if (value === undefined || value === null) {
+      return '';
+    }
+
+    const normalized = value.toString().trim();
+    if (normalized === '') {
+      return '';
+    }
+
+    return normalized.replace(/\s+/g, '').toLowerCase();
+  }
+
+  /**
    * Extract phone number from customer data
    */
   extractPhone(wcCustomer) {
@@ -522,3 +550,6 @@ class UserImporter {
 }
 
 module.exports = UserImporter;
+
+
+
