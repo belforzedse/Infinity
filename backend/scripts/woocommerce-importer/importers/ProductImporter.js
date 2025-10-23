@@ -263,11 +263,11 @@ class ProductImporter {
       if (existingStrapiId) {
         await this.strapiClient.updateProduct(existingStrapiId, payload);
         mode = 'update';
-        this.logger.success(`?o. Updated product: ${wcProduct.name} ?+' ID: ${existingStrapiId}`);
+        this.logger.success(`✅ Updated product: ${wcProduct.name} → ID: ${existingStrapiId}`);
       } else {
         const result = await this.strapiClient.createProduct(payload);
         productId = result.data.id;
-        this.logger.success(`?o. Created product: ${wcProduct.name} ?+' ID: ${productId}`);
+        this.logger.success(`✅ Created product: ${wcProduct.name} → ID: ${productId}`);
       }
 
       if (productId) {
@@ -307,7 +307,7 @@ class ProductImporter {
       return { mode, strapiId: productId };
     } catch (error) {
       this.stats.failed++;
-      this.logger.error(`??O Failed to upsert product ${wcProduct.name}:`, error.message);
+      this.logger.error(`❌ Failed to upsert product ${wcProduct.name}:`, error.message);
       throw error;
     }
   }
