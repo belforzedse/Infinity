@@ -236,7 +236,7 @@ class ProductImporter {
    * Import a single product
    */
   async importSingleProduct(wcProduct, dryRun = false) {
-    this.logger.debug(`dY"? Processing product: ${wcProduct.id} - ${wcProduct.name}`);
+    this.logger.debug(`🔍 Processing product: ${wcProduct.id} - ${wcProduct.name}`);
 
     const existingMapping = this.duplicateTracker.getStrapiId('products', wcProduct.id);
     const existingStrapiId = existingMapping?.strapiId;
@@ -247,7 +247,7 @@ class ProductImporter {
 
       if (dryRun) {
         const mode = existingStrapiId ? 'update' : 'create';
-        this.logger.info(`dY"? [DRY RUN] Would ${mode} product: ${wcProduct.name}`);
+        this.logger.info(`🔍 [DRY RUN] Would ${mode} product: ${wcProduct.name}`);
         this.stats.success++;
         if (existingStrapiId) {
           this.stats.updated++;
@@ -281,7 +281,7 @@ class ProductImporter {
           updateData.Media = imageResults.galleryImageIds;
 
           await this.strapiClient.updateProduct(productId, updateData);
-          this.logger.success(`dY", Images synced for product: ${wcProduct.name}`);
+          this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
         }
 
         this.duplicateTracker.recordMapping(
@@ -323,13 +323,11 @@ class ProductImporter {
       ...payload
     } = strapiProduct;
 
-    const additionalCategoryIds = Array.isArray(_additionalCategories)
-      ? _additionalCategories
-          .map((item) => (typeof item === 'object' ? item?.id : item))
-          .filter(Boolean)
-      : [];
-
+    // Map additional categories to their IDs
     if (Array.isArray(_additionalCategories)) {
+      const additionalCategoryIds = _additionalCategories
+        .map((item) => (typeof item === 'object' ? item?.id : item))
+        .filter(Boolean);
       payload.product_other_categories = additionalCategoryIds;
     }
 
