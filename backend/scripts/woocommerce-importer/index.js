@@ -110,7 +110,13 @@ program
       
       // Override batch size if provided
       if (options.batchSize) {
-        config.import.batchSizes.products = Math.min(parseInt(options.batchSize), 100);
+        const parsedBatchSize = Number.parseInt(options.batchSize, 10);
+        const batchSize = Math.min(Number.isNaN(parsedBatchSize) ? 100 : parsedBatchSize, 100);
+
+        config.import.batchSizes.variations = batchSize;
+        // The variation importer still paginates parent products using the product batch size,
+        // so keep both values in sync when the flag is provided.
+        config.import.batchSizes.products = batchSize;
       }
       
       const importer = new VariationImporter(config, logger);
