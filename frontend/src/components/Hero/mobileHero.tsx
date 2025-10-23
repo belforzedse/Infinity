@@ -90,7 +90,7 @@ export default function MobileHero({ layout, playKey = 0 }: Props) {
           </div>
         </div>
 
-        <div className="flex gap-2 md:w-1/2 md:flex-col md:gap-4">
+        <div className="flex gap-2 md:w-1/4 md:flex-col md:gap-4">
           <div className="relative w-1/2 overflow-hidden rounded-lg md:w-full aspect-square md:aspect-auto [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
