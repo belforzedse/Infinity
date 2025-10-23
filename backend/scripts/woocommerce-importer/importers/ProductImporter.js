@@ -62,6 +62,7 @@ class ProductImporter {
 
       // Track processed product IDs to avoid duplicates across categories
       const processedProductIds = new Set();
+      let sessionProcessed = 0;
 
       // Process each category
       for (const categoryId of categoriesToProcess) {
@@ -110,6 +111,7 @@ class ProductImporter {
               processedProductIds.add(wcProduct.id);
               totalProcessed++;
               processedInThisSession++;
+              sessionProcessed++;
               this.stats.total = totalProcessed;
 
               // Save progress after each successful import
@@ -151,7 +153,7 @@ class ProductImporter {
         }
       }
 
-      this.logger.success(`🎉 Import session completed: ${processedInThisSession} products processed in this session`);
+      this.logger.success(`🎉 Import session completed: ${sessionProcessed} products processed in this session`);
 
     } catch (error) {
       this.stats.errors++;
