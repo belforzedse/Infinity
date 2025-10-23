@@ -60,11 +60,11 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
         </div>
       </div>
 
-      {/* Secondary section: left banners stacked (narrow), right banner large square (wide) */}
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {/* Left column - 2 stacked smaller banners (1/3 width) */}
-        <div className="col-span-1 flex flex-col gap-4">
-          <div className="relative w-full h-32 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+      {/* Secondary section: left banners stacked (smaller), right banner (bigger) */}
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        {/* Left column - 2 stacked smaller banners */}
+        <div className="flex flex-col gap-4">
+          <div className="relative h-40 w-full rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`left-top-${playKey}`}
@@ -78,12 +78,12 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
                 <BannerImage {...layout.leftTopBanner} />
               </motion.div>
             </AnimatePresence>
-            <div className="invisible h-32">
+            <div className="invisible h-40">
               <BannerImage {...layout.leftTopBanner} />
             </div>
           </div>
 
-          <div className="relative w-full h-32 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative h-40 w-full rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`left-bottom-${playKey}`}
@@ -97,14 +97,17 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
                 <BannerImage {...layout.leftBottomBanner} />
               </motion.div>
             </AnimatePresence>
-            <div className="invisible h-32">
+            <div className="invisible h-40">
               <BannerImage {...layout.leftBottomBanner} />
             </div>
           </div>
         </div>
 
-        {/* Right column - large square banner (2/3 width) */}
-        <div className="col-span-2 relative overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)] aspect-square">
+        {/* Right column - large banner (bigger) */}
+        <div
+          className="relative overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]"
+          style={{ height: "368px" }}
+        >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`right-${playKey}`}
@@ -118,7 +121,7 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
               <BannerImage {...layout.rightBanner} />
             </motion.div>
           </AnimatePresence>
-          <div className="invisible aspect-square">
+          <div className="invisible" style={{ height: "368px" }}>
             <BannerImage {...layout.rightBanner} />
           </div>
         </div>
