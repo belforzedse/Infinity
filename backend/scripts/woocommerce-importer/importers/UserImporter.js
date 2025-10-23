@@ -293,7 +293,7 @@ class UserImporter {
       this.stats.skipped++;
       return { isSkipped: true, reason: 'Phone already exists' };
     }
-    
+
     try {
       // Transform WooCommerce customer to Strapi format
       const strapiUser = await this.transformUser(wcCustomer);
@@ -339,22 +339,12 @@ class UserImporter {
         // Don't throw here - user was created successfully, just info failed
         this.logger.warn(`⚠️ User created but user info failed for ${wcCustomer.email || `ID:${wcCustomer.id}`}`);
       }
-      
-      // Add phone to cache to prevent duplicates in this session
-      const phone = this.extractPhone(wcCustomer);
-      let userPhone;
-      
-      if (phone && phone.trim() !== '') {
-        userPhone = phone;
-      } else if (wcCustomer.email && wcCustomer.email.trim() !== '') {
-        userPhone = wcCustomer.email;
-      } else {
-        const timestamp = Date.now();
-        userPhone = `wc_${wcCustomer.id}_${timestamp}`;
+
+      // Add normalized phone/email to cache to prevent duplicates in this session
+      if (normalizedPhone) {
+        this.emailCache.add(normalizedPhone);
       }
-      
-      this.emailCache.add(userPhone.toLowerCase());
-      
+
       // Record the mapping
       this.duplicateTracker.recordMapping(
         'users',
@@ -364,7 +354,7 @@ class UserImporter {
           email: wcCustomer.email || '',
           firstName: wcCustomer.first_name || '',
           lastName: wcCustomer.last_name || '',
-          phone: userPhone
+          phone: strapiUser.user.Phone
         }
       );
       
