@@ -1,9 +1,11 @@
 const axios = require("axios");
 const fs = require("fs");
 
-const STRAPI_URL = "https://infinity-bck.darkube.app";
+// Use current API base URL (not darkube which is deprecated)
+const STRAPI_URL = "https://api.infinity.rgbgroup.ir";
+// Use the standard Strapi token from frontend credentials
 const API_TOKEN =
-  "5ded48b60050770a36fd985fdef2a20b971cd82f26e2e8bc02d38b4fb52258c1ace5049f2bc82b8d336dd20b88d6af9bc826c49a465e4698042fac690650f70a663d357e9bc52e8a6c9cc4a5de7075e07472c6a6d55f0c9a29690a3e6717000c61bb9ba085c233311c9d7e7e1f8f3ab3ff6985a5fd7f2f4ede73204761451fd6";
+  "STRAPI_API_TOKEN";
 const ENHANCED_JSON_FILE = "./scarf_products_enhanced.json";
 
 const apiClient = axios.create({

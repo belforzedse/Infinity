@@ -42,11 +42,11 @@ async function testCallbackUrl() {
     console.log('   Output:', absoluteUrl);
     console.log('');
 
-    // Test 4: Production-like URL
-    const productionUrl = formatCallbackUrl("/orders/payment-callback", "https://infinity-bck.darkube.app");
+    // Test 4: Production-like URL (using current API domain, not deprecated darkube)
+    const productionUrl = formatCallbackUrl("/orders/payment-callback", "https://api.infinity.rgbgroup.ir");
     console.log('4. Production-like URL:');
     console.log('   Input: "/orders/payment-callback"');
-    console.log('   Server: "https://infinity-bck.darkube.app"');
+    console.log('   Server: "https://api.infinity.rgbgroup.ir"');
     console.log('   Output:', productionUrl);
     console.log('');
 

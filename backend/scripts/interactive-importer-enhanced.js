@@ -616,7 +616,8 @@ async function displayStrapiCategories() {
     }
     console.log(`✅ Found ${categories.length} categories\n`);
     for (const cat of categories) {
-      const name = cat.DisplayName || cat.Name || "Unknown";
+      // Strapi categories use 'Title' field, not DisplayName or Name
+      const name = cat.attributes?.Title || cat.Title || "Unknown";
       console.log(`  • ${name.padEnd(30)} (ID: ${cat.id})`);
     }
   } catch (error) {
@@ -650,7 +651,9 @@ async function handleMappingSuggestions() {
       const sugg = suggestions[i];
       console.log(`\n[${i + 1}/${suggestions.length}]`);
       console.log(`  📦 WooCommerce: ${sugg.woocommerce.name} (ID: ${sugg.woocommerce.id})`);
-      console.log(`  📁 Suggested: ${sugg.suggested.DisplayName || sugg.suggested.Name} (ID: ${sugg.suggested.id})`);
+      // Strapi categories use 'Title' field in attributes
+      const strapiName = sugg.suggested.attributes?.Title || sugg.suggested.Title || "Unknown";
+      console.log(`  📁 Suggested: ${strapiName} (ID: ${sugg.suggested.id})`);
       console.log(`  🎯 Confidence: ${sugg.confidence}%`);
 
       const accept = await askBoolean("Accept this mapping?", sugg.confidence > 80);
@@ -659,7 +662,7 @@ async function handleMappingSuggestions() {
           sugg.woocommerce.id,
           sugg.suggested.id,
           sugg.woocommerce.name,
-          sugg.suggested.DisplayName || sugg.suggested.Name
+          strapiName
         );
       }
     }

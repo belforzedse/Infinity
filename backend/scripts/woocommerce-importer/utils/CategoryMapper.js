@@ -182,7 +182,9 @@ class CategoryMapper {
     let bestScore = 0;
 
     for (const strapiCat of strapiCategories) {
-      const score = this.calculateSimilarity(wcCategory.name, strapiCat.DisplayName || strapiCat.Name || "");
+      // Strapi categories have 'Title' in attributes, not DisplayName or Name
+      const strapiName = strapiCat.attributes?.Title || strapiCat.Title || "";
+      const score = this.calculateSimilarity(wcCategory.name, strapiName);
       if (score > bestScore) {
         bestScore = score;
         bestMatch = strapiCat;

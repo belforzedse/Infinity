@@ -235,32 +235,49 @@ class CategoryImporter {
    * Transform WooCommerce category to Strapi format
    */
   async transformCategory(wcCategory) {
+    // Ensure slug is unique by appending ID if needed
+    let slug = wcCategory.slug;
+    if (!slug) {
+      slug = wcCategory.name
+        .toLowerCase()
+        .replace(/[^\u0600-\u06FF\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
+    }
+
+    // Add WooCommerce ID to slug to ensure uniqueness
+    if (!slug.endsWith(`-${wcCategory.id}`)) {
+      slug = `${slug}-${wcCategory.id}`.toLowerCase();
+    }
+
     const strapiCategory = {
       Title: wcCategory.name,
-      Slug: wcCategory.slug,
+      Slug: slug,
       // Store WooCommerce ID for reference
       external_id: wcCategory.id.toString(),
       external_source: 'woocommerce'
     };
-    
-    // Handle parent relationship
+
+    // Handle parent relationship - only set if parent exists in mappings
     if (wcCategory.parent && wcCategory.parent !== 0) {
       const parentMapping = this.duplicateTracker.getStrapiId('categories', wcCategory.parent);
       if (parentMapping && parentMapping.strapiId) {
         strapiCategory.parent = parentMapping.strapiId;
         this.logger.debug(`🔗 Linking category ${wcCategory.name} to parent ID: ${parentMapping.strapiId}`);
       } else {
-        this.logger.warn(`⚠️ Parent category ${wcCategory.parent} not found for ${wcCategory.name}`);
+        // Don't set parent if it doesn't exist - let it be a root category for now
+        this.logger.warn(`⚠️ Parent category ${wcCategory.parent} not found for ${wcCategory.name} - will import as root category`);
       }
     }
-    
+
     // Create category content if description exists
     if (wcCategory.description && wcCategory.description.trim()) {
       // Note: We'll handle category content creation separately
       // For now, we'll store the description for later processing
       strapiCategory.description_html = wcCategory.description;
     }
-    
+
     this.logger.debug(`🔄 Transformed category: ${wcCategory.name} → ${JSON.stringify(strapiCategory, null, 2)}`);
     return strapiCategory;
   }
