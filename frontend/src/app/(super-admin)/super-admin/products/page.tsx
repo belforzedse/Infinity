@@ -38,7 +38,7 @@ export default function ProductsPage() {
   const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [, setRefresh] = useAtom(refreshTable);
+  const [refresh, setRefresh] = useAtom(refreshTable);
 
   // Debounce search input to avoid excessive API calls
   const debouncedSearch = useDebouncedCallback((query: string) => {
@@ -201,6 +201,11 @@ export default function ProductsPage() {
     } else if (sort === "sales-asc" || sort === "sales-desc") {
       buildSalesIndex();
     }
+
+    // Reset refresh flag after rebuilding
+    if (refresh) {
+      setRefresh(false);
+    }
   }, [
     buildSalesIndex,
     buildStockIndex,
@@ -209,6 +214,8 @@ export default function ProductsPage() {
     debouncedSearchQuery,
     isRecycleBinOpen,
     buildingIndex,
+    refresh,
+    setRefresh,
   ]);
 
   // Fetch current page data when using custom index
