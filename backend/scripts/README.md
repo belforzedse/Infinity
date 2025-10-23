@@ -28,8 +28,8 @@ The import process handles:
 
 2. **API Configuration**: The scripts are configured with:
 
-   - **Base URL**: `https://infinity-bck.darkube.app`
-   - **API Token**: Already configured in the scripts
+   - **Base URL**: `https://api.infinity.rgbgroup.ir` (updated from deprecated darkube)
+   - **API Token**: Already configured in the scripts (frontend credentials)
    - **Source File**: `strapi_import_enhanced.json` (in project root)
 
 3. **Strapi Instance**: Your Strapi instance must be running and accessible
@@ -132,8 +132,10 @@ node scripts/import-products.js
 Located at the top of each script:
 
 ```javascript
-const STRAPI_URL = "https://infinity-bck.darkube.app";
-const API_TOKEN = "your-token-here";
+// Use current API base URL (not deprecated darkube)
+const STRAPI_URL = "https://api.infinity.rgbgroup.ir";
+// Use frontend credentials token for consistency
+const API_TOKEN = "STRAPI_API_TOKEN";
 const JSON_FILE_PATH = "./strapi_import_enhanced.json";
 ```
 

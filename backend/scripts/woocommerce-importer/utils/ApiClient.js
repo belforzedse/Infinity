@@ -232,7 +232,12 @@ class StrapiClient extends BaseApiClient {
       (error) => {
         if (error.response) {
           this.logger.error(`❌ Strapi API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`);
-          this.logger.debug('Response data:', error.response.data);
+          // Log error details at ERROR level, not DEBUG, so users can see what validation failed
+          if (error.response.data?.error) {
+            this.logger.error(`Error details: ${JSON.stringify(error.response.data.error, null, 2)}`);
+          } else if (error.response.data) {
+            this.logger.error(`Response: ${JSON.stringify(error.response.data, null, 2)}`);
+          }
         } else {
           this.logger.error(`❌ Strapi API Error: ${error.message}`);
         }
@@ -314,11 +319,12 @@ class StrapiClient extends BaseApiClient {
           }
         })
       );
-      
-      if (existingByTitle.data && existingByTitle.data.data && existingByTitle.data.data.length > 0) {
+
+      if (existingByTitle.data?.data && existingByTitle.data.data.length > 0) {
+        // Return in consistent format { data: {...} }
         return { data: existingByTitle.data.data[0] };
       }
-      
+
       // Also check by ColorCode to avoid duplicates
       const existingByColor = await this.retryRequest(() =>
         this.client.get('/product-variation-colors', {
@@ -327,13 +333,14 @@ class StrapiClient extends BaseApiClient {
           }
         })
       );
-      
-      if (existingByColor.data && existingByColor.data.data && existingByColor.data.data.length > 0) {
+
+      if (existingByColor.data?.data && existingByColor.data.data.length > 0) {
+        // Return in consistent format { data: {...} }
         return { data: existingByColor.data.data[0] };
       }
-      
+
       // If not found, create new one
-      const response = await this.retryRequest(() => 
+      const response = await this.retryRequest(() =>
         this.client.post('/product-variation-colors', { data: colorData })
       );
       return response.data;
@@ -349,11 +356,11 @@ class StrapiClient extends BaseApiClient {
             }
           })
         );
-        
-        if (existingByTitle.data && existingByTitle.data.data && existingByTitle.data.data.length > 0) {
+
+        if (existingByTitle.data?.data && existingByTitle.data.data.length > 0) {
           return { data: existingByTitle.data.data[0] };
         }
-        
+
         // Then check by ColorCode
         const existingByColor = await this.retryRequest(() =>
           this.client.get('/product-variation-colors', {
@@ -363,7 +370,7 @@ class StrapiClient extends BaseApiClient {
           })
         );
         
-        if (existingByColor.data && existingByColor.data.data && existingByColor.data.data.length > 0) {
+        if (existingByColor.data?.data && existingByColor.data.data.length > 0) {
           return { data: existingByColor.data.data[0] };
         }
       } catch (findError) {
