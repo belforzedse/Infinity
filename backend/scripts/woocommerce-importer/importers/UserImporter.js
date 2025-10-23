@@ -161,17 +161,9 @@ class UserImporter {
         }
       }
       
-      this.logger.info(📂 Loaded  existing user phones);
+      this.logger.info(`📂 Loaded ${this.emailCache.size} existing user emails`);
     } catch (error) {
-      this.logger.warn(?s??,? Failed to load existing phones: );
-    }
-  }
-        }
-      }
-      
-      this.logger.info(`📂 Loaded ${this.emailCache.size} existing user phones`);
-    } catch (error) {
-      this.logger.warn(`⚠️ Failed to load existing phones: ${error.message}`);
+      this.logger.warn(`⚠️ Failed to load existing emails: ${error.message}`);
     }
   }
 
@@ -293,7 +285,10 @@ class UserImporter {
       const timestamp = Date.now();
       userPhone = `wc_${wcCustomer.id}_${timestamp}`;
       this.logger.info(`📱 Generated phone for user ${wcCustomer.id}: ${userPhone}`);
-    }\r\n\r\n    const normalizedPhone = this.normalizePhone(userPhone);\r\n    if (normalizedPhone && this.emailCache.has(normalizedPhone)) {
+    }
+
+    const normalizedPhone = this.normalizePhone(userPhone);
+    if (normalizedPhone && this.emailCache.has(normalizedPhone)) {
       this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${userPhone}`);
       this.stats.skipped++;
       return { isSkipped: true, reason: 'Phone already exists' };
