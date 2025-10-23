@@ -370,7 +370,7 @@ class VariationImporter {
         const result = await this.strapiClient.createProductVariation(strapiVariation);
         variationId = result.data.id;
         this.stats.variationsCreated += 1;
-        this.logger.success(`?o. Created variation: ${wcVariation.id} → ID: ${variationId}`);
+        this.logger.success(`✅ Created variation: ${wcVariation.id} → ID: ${variationId}`);
       }
 
       if (wcVariation.manage_stock && wcVariation.stock_quantity !== null) {
@@ -402,7 +402,7 @@ class VariationImporter {
       return { mode, strapiId: variationId };
     } catch (error) {
       this.stats.failed += 1;
-      this.logger.error(`??O Failed to upsert variation ${wcVariation.id}:`, error.message);
+      this.logger.error(`❌ Failed to upsert variation ${wcVariation.id}:`, error.message);
       throw error;
     }
   }
