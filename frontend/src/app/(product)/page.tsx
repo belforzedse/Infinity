@@ -9,6 +9,7 @@ import { categories } from "@/constants/categories";
 import { getHomepageSections } from "@/services/product/homepage";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
+import TabletSlider from "@/components/Hero/tabletSlider";
 import Reveal from "@/components/Reveal";
 
 export default async function Home() {
@@ -19,6 +20,11 @@ export default async function Home() {
       {/* Hero section with responsive images */}
       <Reveal variant="zoom-in" duration={650}>
         <MobileSlider />
+      </Reveal>
+
+      {/* Tablet hero banner */}
+      <Reveal delay={50} variant="zoom-in" duration={650}>
+        <TabletSlider />
       </Reveal>
 
       {/* Desktop hero banner */}

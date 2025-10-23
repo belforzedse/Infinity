@@ -5,4 +5,4 @@ import * as slides from "./slides/mobile";
  * Default mobile slides configuration
  * Add or remove slides by importing from ./slides/mobile
  */
-export const mobileSlides: MobileLayout[] = [slides.slide4, slides.slide5];
+export const mobileSlides: MobileLayout[] = [slides.slide5, slides.slide4];

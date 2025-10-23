@@ -1,19 +1,19 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import MobileHero from "./mobileHero";
-import { defaultSliderConfig, type MobileLayout } from "./config";
+import TabletHero from "./tabletHero";
+import { defaultSliderConfig, type TabletLayout } from "./config";
 import PaginationMobile from "./PaginationMobile";
 
-interface MobileSliderProps {
-  slides?: MobileLayout[];
+interface TabletSliderProps {
+  slides?: TabletLayout[];
   autoplayInterval?: number;
 }
 
-export default function MobileSlider({
+export default function TabletSlider({
   slides: customSlides,
   autoplayInterval = defaultSliderConfig.autoplayInterval,
-}: MobileSliderProps = {}) {
-  const slides = useMemo(() => customSlides ?? defaultSliderConfig.mobile, [customSlides]);
+}: TabletSliderProps = {}) {
+  const slides = useMemo(() => customSlides ?? defaultSliderConfig.tablet, [customSlides]);
   const [index, setIndex] = useState(0);
   const [playKey, setPlayKey] = useState(0);
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -36,10 +36,10 @@ export default function MobileSlider({
   };
 
   return (
-    <div ref={hostRef} className="mobile-slider-container block space-y-6 pb-12 [touch-action:manipulation]">
-      <MobileHero layout={slides[index]} playKey={playKey} />
+    <div ref={hostRef} className="tablet-slider-container block space-y-6 pb-12 px-4 [touch-action:manipulation]">
+      <TabletHero layout={slides[index]} playKey={playKey} />
 
-      {/* Pagination below content, not overlaying images */}
+      {/* Pagination below content */}
       <div className="flex w-full items-center justify-center">
         <PaginationMobile
           total={slides.length}
@@ -54,11 +54,16 @@ export default function MobileSlider({
         />
       </div>
       <style jsx>{`
-        .mobile-slider-container {
+        .tablet-slider-container {
           width: 100%;
         }
-        @media (min-width: 768px) {
-          .mobile-slider-container {
+        @media (max-width: 767px) {
+          .tablet-slider-container {
+            display: none;
+          }
+        }
+        @media (min-width: 1190px) {
+          .tablet-slider-container {
             display: none;
           }
         }
@@ -66,5 +71,3 @@ export default function MobileSlider({
     </div>
   );
 }
-
-
