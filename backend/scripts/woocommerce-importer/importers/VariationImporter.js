@@ -49,11 +49,11 @@ class VariationImporter {
    * Main import method - Optimized for incremental processing
    */
   async import(options = {}) {
-    const { limit = 100, page = 1, dryRun = false, onlyImported = false } = options;
+    const { limit = 100, page = 1, dryRun = false, onlyImported = false, force = false } = options;
 
     this.stats.startTime = Date.now();
     this.logger.info(
-      `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported})`
+      `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported}, force: ${force})`
     );
     this.logger.warn(
       `⚠️  NOTE: Running concurrent import sessions may cause cache staleness. Run imports sequentially for best results.`
@@ -63,7 +63,13 @@ class VariationImporter {
       await this.loadMappingCaches();
       this.lastCacheRefreshTime = Date.now();
 
-      const progressState = this.loadProgressState();
+      // If force flag is set, ignore progress state and start from page 1
+      const progressState = force ? { lastCompletedPage: 0, totalProcessed: 0 } : this.loadProgressState();
+
+      if (force && (progressState.lastCompletedPage > 0 || progressState.totalProcessed > 0)) {
+        this.logger.warn(`⚠️ FORCE MODE: Ignoring previous progress state (was at page ${progressState.lastCompletedPage}, ${progressState.totalProcessed} processed)`);
+      }
+
       let currentPage = Math.max(page, (progressState.lastCompletedPage || 0) + 1);
       let totalProcessed = progressState.totalProcessed || 0;
 

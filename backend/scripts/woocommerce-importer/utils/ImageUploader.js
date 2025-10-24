@@ -2,7 +2,10 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
+const imagemin = require('imagemin');
+const imageminMozjpeg = require('imagemin-mozjpeg');
+const imageminOptipng = require('imagemin-optipng');
+const imageminWebp = require('imagemin-webp');
 const { promisify } = require('util');
 const { pipeline } = require('stream');
 const streamPipeline = promisify(pipeline);
@@ -190,64 +193,110 @@ class ImageUploader {
   }
 
   /**
-   * Process image: convert WebP to JPG if needed, optimize, and generate filename
+   * Process image using industry-standard imagemin library
+   * Strategy:
+   * - JPEG: Optimize with mozjpeg (lossless, maintains quality)
+   * - PNG: Optimize with optipng (lossless, preserves transparency)
+   * - WebP: Optimize with imagemin-webp
+   * - GIF: Keep as-is (no conversion - too risky)
    */
   async processImage(imageBuffer, imageUrl, prefix) {
+    const tempDir = path.join(this.tempDir, `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+    const originalFileName = this.generateFileName(imageUrl, prefix);
+
     try {
-      const metadata = await sharp(imageBuffer).metadata();
-      const originalFormat = metadata.format;
-      
-      let processedBuffer = imageBuffer;
-      let fileName = this.generateFileName(imageUrl, prefix);
-      
-      // Check if conversion is needed
-      if (originalFormat === 'webp') {
-        this.logger.debug(`🔄 Converting WebP to JPG: ${imageUrl}`);
-        
-        // Convert WebP to high-quality JPEG
-        processedBuffer = await sharp(imageBuffer)
-          .jpeg({ 
-            quality: 90,
-            progressive: true,
-            mozjpeg: true
-          })
-          .toBuffer();
-        
-        // Update filename extension
-        fileName = fileName.replace(/\.webp$/i, '.jpg');
-        if (!fileName.toLowerCase().endsWith('.jpg') && !fileName.toLowerCase().endsWith('.jpeg')) {
-          fileName = fileName.replace(/\.[^.]+$/, '.jpg');
-        }
-        
-        this.logger.success(`✅ Converted WebP to JPG: ${fileName} (${(processedBuffer.length / 1024).toFixed(2)}KB)`);
-      } else if (['jpeg', 'jpg', 'png', 'gif'].includes(originalFormat)) {
-        // Optimize existing formats without conversion
-        if (originalFormat === 'jpeg' || originalFormat === 'jpg') {
-          processedBuffer = await sharp(imageBuffer)
-            .jpeg({ quality: 90, progressive: true })
-            .toBuffer();
-        } else if (originalFormat === 'png') {
-          processedBuffer = await sharp(imageBuffer)
-            .png({ compressionLevel: 8, progressive: true })
-            .toBuffer();
-        }
-        
-        this.logger.debug(`🎨 Optimized ${originalFormat.toUpperCase()}: ${fileName}`);
-      } else {
-        this.logger.warn(`⚠️ Unsupported image format: ${originalFormat}, keeping original`);
+      // Create temp directory
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
       }
-      
+
+      // Write buffer to temp file with original extension
+      const tempFilePath = path.join(tempDir, originalFileName);
+      fs.writeFileSync(tempFilePath, imageBuffer);
+
+      const originalSizeKb = (imageBuffer.length / 1024).toFixed(2);
+      let optimizedFilePath = tempFilePath;
+      let finalFileName = originalFileName;
+
+      // Determine optimization based on file extension
+      const ext = path.extname(originalFileName).toLowerCase();
+
+      if (ext === '.jpg' || ext === '.jpeg') {
+        // JPEG: Use mozjpeg for quality optimization
+        this.logger.debug(`🔧 Optimizing JPEG with mozjpeg: ${originalFileName}`);
+        await imagemin([tempFilePath], {
+          destination: tempDir,
+          plugins: [
+            imageminMozjpeg({
+              quality: 85,
+              progressive: true
+            })
+          ]
+        });
+      } else if (ext === '.png') {
+        // PNG: Use optipng for lossless compression (preserves transparency)
+        this.logger.debug(`🔧 Optimizing PNG with optipng: ${originalFileName}`);
+        await imagemin([tempFilePath], {
+          destination: tempDir,
+          plugins: [
+            imageminOptipng({
+              optimizationLevel: 3 // Good balance between compression and speed
+            })
+          ]
+        });
+      } else if (ext === '.webp') {
+        // WebP: Use imagemin-webp for optimization
+        this.logger.debug(`🔧 Optimizing WebP: ${originalFileName}`);
+        await imagemin([tempFilePath], {
+          destination: tempDir,
+          plugins: [
+            imageminWebp({
+              quality: 85
+            })
+          ]
+        });
+      } else if (ext === '.gif') {
+        // GIF: Keep as-is (no conversion - animation and format too risky to change)
+        this.logger.debug(`🎬 Keeping GIF as-is: ${originalFileName}`);
+      } else {
+        this.logger.warn(`⚠️ Unsupported image format: ${ext}, keeping original`);
+      }
+
+      // Read optimized file
+      const processedBuffer = fs.readFileSync(optimizedFilePath);
+      const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
+      const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
+
+      // Log results
+      const logMessage = `${finalFileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`;
+      if (ext === '.jpg' || ext === '.jpeg') {
+        this.logger.success(`✅ JPEG optimized: ${logMessage}`);
+      } else if (ext === '.png') {
+        this.logger.debug(`✅ PNG optimized: ${logMessage}`);
+      } else if (ext === '.webp') {
+        this.logger.debug(`✅ WebP optimized: ${logMessage}`);
+      }
+
       return {
         buffer: processedBuffer,
-        fileName: fileName
+        fileName: finalFileName
       };
     } catch (error) {
       this.logger.error(`❌ Failed to process image:`, error.message);
-      // Fallback to original
+      // Fallback to original buffer
       return {
         buffer: imageBuffer,
         fileName: this.generateFileName(imageUrl, prefix)
       };
+    } finally {
+      // Clean up temp directory
+      try {
+        if (fs.existsSync(tempDir)) {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+      } catch (cleanupError) {
+        this.logger.warn(`⚠️ Failed to cleanup temp directory: ${cleanupError.message}`);
+      }
     }
   }
 
@@ -304,7 +353,7 @@ class ImageUploader {
   }
 
   /**
-   * Generate a clean filename for the image
+   * Generate a clean filename for the image (preserves original extension)
    */
   generateFileName(imageUrl, prefix) {
     try {
@@ -312,13 +361,13 @@ class ImageUploader {
       const originalName = path.basename(url.pathname);
       const ext = path.extname(originalName) || '.jpg';
       const baseName = path.basename(originalName, ext);
-      
+
       // Clean the filename
       const cleanBaseName = baseName
         .replace(/[^a-zA-Z0-9\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF-_]/g, '-')
         .replace(/--+/g, '-')
         .replace(/^-|-$/g, '');
-      
+
       const timestamp = Date.now();
       return `${prefix}-${cleanBaseName}-${timestamp}${ext}`;
     } catch (error) {

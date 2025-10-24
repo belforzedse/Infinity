@@ -127,21 +127,25 @@ class CategoryImporter {
 
   /**
    * Sort categories by hierarchy - parents first, then children
+   * FIX: Now includes orphaned categories (those with missing parents)
    */
   sortCategoriesByHierarchy(categories) {
     const categoryMap = new Map();
     const rootCategories = [];
     const sortedCategories = [];
-    
+
     // Build category map
     categories.forEach(cat => {
       categoryMap.set(cat.id, cat);
-      // Check for root categories (parent is 0, null, undefined, or falsy)
-      if (!cat.parent || cat.parent === 0) {
+    });
+
+    // Identify root categories: those with no parent OR parent doesn't exist in our list
+    categories.forEach(cat => {
+      if (!cat.parent || cat.parent === 0 || !categoryMap.has(cat.parent)) {
         rootCategories.push(cat);
       }
     });
-    
+
     // Track visited categories to detect cycles and prevent infinite recursion
     const visitedCategories = new Set();
 
@@ -171,13 +175,22 @@ class CategoryImporter {
           addCategoryAndChildren(childCategory, newAncestorChain);
         });
     };
-    
+
     // Start with root categories
     rootCategories.forEach(rootCategory => {
       addCategoryAndChildren(rootCategory);
     });
-    
-    this.logger.info(`🌳 Sorted categories hierarchically: ${rootCategories.length} root categories`);
+
+    if (rootCategories.length > 0) {
+      this.logger.info(`🌳 Sorted categories hierarchically: ${rootCategories.length} root categories, ${sortedCategories.length} total`);
+    }
+
+    // Log any categories that might have been orphaned
+    if (sortedCategories.length < categories.length) {
+      const orphanedCount = categories.length - sortedCategories.length;
+      this.logger.warn(`⚠️ ${orphanedCount} categories were not processed (possible cycles or missing references)`);
+    }
+
     return sortedCategories;
   }
 
