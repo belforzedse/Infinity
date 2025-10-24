@@ -21,6 +21,7 @@ import { atom, useAtom } from "jotai";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
 import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
+import { optimisticallyDeletedItems } from "@/lib/atoms/optimisticDelete";
 
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData, TValue> {
@@ -113,6 +114,7 @@ export function SuperAdminTable<TData, TValue>({
   const [dragOverRow, setDragOverRow] = useState<Row<TData> | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
   const [refresh, setRefresh] = useAtom(refreshTable);
+  const [deletedItems] = useAtom(optimisticallyDeletedItems);
 
   const isFetchingRef = useRef(false);
   const fetchSeqRef = useRef(0);
@@ -369,60 +371,68 @@ export function SuperAdminTable<TData, TValue>({
             {isLoading ? (
               <ReportTableSkeleton columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  draggable={draggable}
-                  onDragStart={() => handleDragStart(row)}
-                  onDragOver={(e) => handleDragOver(e, row)}
-                  onDrop={(e) => handleDrop(e, row)}
-                  className={twMerge(
-                    "border-b border-gray-200 transition-colors hover:bg-gray-50/50",
-                    dragOverRow?.id === row.id && "border-t-2 border-blue-500",
-                  )}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <td
-                      key={cell.id}
-                      className={twMerge(
-                        "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
-                        cell.column.columnDef.meta?.cellClassName,
-                      )}
-                    >
-                      {index === 0 && enableSelection ? (
-                        <div className="flex items-center gap-2">
-                          {draggable && (
-                            <div className="cursor-move">
-                              <DragIcon />
-                            </div>
-                          )}
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.has(
-                              (getRowId?.(row.original as TData) ||
-                                String((row.original as any)?.id)) ??
-                                "",
+              table.getRowModel().rows.map((row) => {
+                const isOptimisticallyDeleted = deletedItems.has(
+                  (getRowId?.(row.original as TData) ||
+                    String((row.original as any)?.id)) ?? ""
+                );
+
+                return (
+                  <tr
+                    key={row.id}
+                    draggable={draggable}
+                    onDragStart={() => handleDragStart(row)}
+                    onDragOver={(e) => handleDragOver(e, row)}
+                    onDrop={(e) => handleDrop(e, row)}
+                    className={twMerge(
+                      "border-b border-gray-200 transition-all duration-300 ease-out hover:bg-gray-50/50",
+                      dragOverRow?.id === row.id && "border-t-2 border-blue-500",
+                      isOptimisticallyDeleted && "opacity-30 grayscale",
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell, index) => (
+                      <td
+                        key={cell.id}
+                        className={twMerge(
+                          "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
+                          cell.column.columnDef.meta?.cellClassName,
+                        )}
+                      >
+                        {index === 0 && enableSelection ? (
+                          <div className="flex items-center gap-2">
+                            {draggable && (
+                              <div className="cursor-move">
+                                <DragIcon />
+                              </div>
                             )}
-                            onChange={(e) => {
-                              const id =
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(
                                 (getRowId?.(row.original as TData) ||
                                   String((row.original as any)?.id)) ??
-                                "";
-                              const next = new Set(selectedIds);
-                              if (e.target.checked) next.add(id);
-                              else next.delete(id);
-                              setSelectedIds(next);
-                            }}
-                          />
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      ) : (
-                        flexRender(cell.column.columnDef.cell, cell.getContext())
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
+                                  "",
+                              )}
+                              onChange={(e) => {
+                                const id =
+                                  (getRowId?.(row.original as TData) ||
+                                    String((row.original as any)?.id)) ??
+                                  "";
+                                const next = new Set(selectedIds);
+                                if (e.target.checked) next.add(id);
+                                else next.delete(id);
+                                setSelectedIds(next);
+                              }}
+                            />
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
+                        ) : (
+                          flexRender(cell.column.columnDef.cell, cell.getContext())
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={columns.length} className="h-24 text-center">
