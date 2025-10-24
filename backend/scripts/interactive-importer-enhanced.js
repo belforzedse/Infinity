@@ -754,7 +754,8 @@ async function mainMenu() {
       const page = await askNumber("Starting page", 1);
       const dryRun = await askBoolean("Dry run", false);
       const onlyImported = await askBoolean("Only for already imported products", false);
-      await runImport("variations", { limit, page, dryRun, onlyImported });
+      const force = await askBoolean("Force re-import from page 1 (ignores progress)", false);
+      await runImport("variations", { limit, page, dryRun, onlyImported, force });
       await pause();
       return true;
     }

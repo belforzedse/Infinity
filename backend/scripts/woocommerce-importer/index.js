@@ -104,10 +104,11 @@ program
   .option('--all', 'Import all variations (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--only-imported', 'Only import variations for products that are already imported', false)
+  .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import...');
-      
+
       // Override batch size if provided
       if (options.batchSize) {
         const parsedBatchSize = Number.parseInt(options.batchSize, 10);
@@ -118,13 +119,14 @@ program
         // so keep both values in sync when the flag is provided.
         config.import.batchSizes.products = batchSize;
       }
-      
+
       const importer = new VariationImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
-        onlyImported: options.onlyImported
+        onlyImported: options.onlyImported,
+        force: options.force
       });
       logger.success('✅ Variation import completed!');
     } catch (error) {
@@ -139,6 +141,7 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('--dry-run', 'Run without actually importing data', false)
+  .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import for imported products only...');
@@ -147,7 +150,8 @@ program
         limit: parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
-        onlyImported: true
+        onlyImported: true,
+        force: options.force
       });
       logger.success('✅ Variation import for imported products completed!');
     } catch (error) {
