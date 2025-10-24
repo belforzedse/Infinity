@@ -2,10 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
-const imagemin = require('imagemin');
-const imageminMozjpeg = require('imagemin-mozjpeg');
-const imageminOptipng = require('imagemin-optipng');
-const imageminWebp = require('imagemin-webp');
+const sharp = require('sharp');
 const { promisify } = require('util');
 const { pipeline } = require('stream');
 const streamPipeline = promisify(pipeline);
@@ -193,110 +190,74 @@ class ImageUploader {
   }
 
   /**
-   * Process image using industry-standard imagemin library
+   * Process image: optimize without risky conversions
    * Strategy:
-   * - JPEG: Optimize with mozjpeg (lossless, maintains quality)
-   * - PNG: Optimize with optipng (lossless, preserves transparency)
-   * - WebP: Optimize with imagemin-webp
+   * - JPEG: Optimize with Sharp (quality 85, progressive)
+   * - PNG: Optimize with Sharp (compression, preserves transparency)
+   * - WebP: Optimize with Sharp (quality 85)
    * - GIF: Keep as-is (no conversion - too risky)
    */
   async processImage(imageBuffer, imageUrl, prefix) {
-    const tempDir = path.join(this.tempDir, `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
-    const originalFileName = this.generateFileName(imageUrl, prefix);
-
     try {
-      // Create temp directory
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
-      // Write buffer to temp file with original extension
-      const tempFilePath = path.join(tempDir, originalFileName);
-      fs.writeFileSync(tempFilePath, imageBuffer);
-
+      const metadata = await sharp(imageBuffer).metadata();
+      const originalFormat = metadata.format;
       const originalSizeKb = (imageBuffer.length / 1024).toFixed(2);
-      let optimizedFilePath = tempFilePath;
-      let finalFileName = originalFileName;
 
-      // Determine optimization based on file extension
-      const ext = path.extname(originalFileName).toLowerCase();
+      let processedBuffer = imageBuffer;
+      let fileName = this.generateFileName(imageUrl, prefix);
 
-      if (ext === '.jpg' || ext === '.jpeg') {
-        // JPEG: Use mozjpeg for quality optimization
-        this.logger.debug(`🔧 Optimizing JPEG with mozjpeg: ${originalFileName}`);
-        await imagemin([tempFilePath], {
-          destination: tempDir,
-          plugins: [
-            imageminMozjpeg({
-              quality: 85,
-              progressive: true
-            })
-          ]
-        });
-      } else if (ext === '.png') {
-        // PNG: Use optipng for lossless compression (preserves transparency)
-        this.logger.debug(`🔧 Optimizing PNG with optipng: ${originalFileName}`);
-        await imagemin([tempFilePath], {
-          destination: tempDir,
-          plugins: [
-            imageminOptipng({
-              optimizationLevel: 3 // Good balance between compression and speed
-            })
-          ]
-        });
-      } else if (ext === '.webp') {
-        // WebP: Use imagemin-webp for optimization
-        this.logger.debug(`🔧 Optimizing WebP: ${originalFileName}`);
-        await imagemin([tempFilePath], {
-          destination: tempDir,
-          plugins: [
-            imageminWebp({
-              quality: 85
-            })
-          ]
-        });
-      } else if (ext === '.gif') {
-        // GIF: Keep as-is (no conversion - animation and format too risky to change)
-        this.logger.debug(`🎬 Keeping GIF as-is: ${originalFileName}`);
+      if (originalFormat === 'jpeg' || originalFormat === 'jpg') {
+        // JPEG: Optimize with quality and progressive
+        this.logger.debug(`🔧 Optimizing JPEG: ${fileName}`);
+        processedBuffer = await sharp(imageBuffer)
+          .jpeg({ quality: 85, progressive: true })
+          .toBuffer();
+
+        const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
+        const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
+        this.logger.success(`✅ JPEG optimized: ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
+
+      } else if (originalFormat === 'png') {
+        // PNG: Compress while preserving transparency
+        this.logger.debug(`🔧 Optimizing PNG: ${fileName}`);
+        processedBuffer = await sharp(imageBuffer)
+          .png({ compressionLevel: 9, progressive: true })
+          .toBuffer();
+
+        const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
+        const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
+        this.logger.debug(`✅ PNG optimized: ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
+
+      } else if (originalFormat === 'webp') {
+        // WebP: Optimize
+        this.logger.debug(`🔧 Optimizing WebP: ${fileName}`);
+        processedBuffer = await sharp(imageBuffer)
+          .webp({ quality: 85 })
+          .toBuffer();
+
+        const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
+        const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
+        this.logger.debug(`✅ WebP optimized: ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
+
+      } else if (originalFormat === 'gif') {
+        // GIF: Keep as-is (animated or static - too risky to convert)
+        this.logger.debug(`🎬 Keeping GIF as-is: ${fileName}`);
+
       } else {
-        this.logger.warn(`⚠️ Unsupported image format: ${ext}, keeping original`);
-      }
-
-      // Read optimized file
-      const processedBuffer = fs.readFileSync(optimizedFilePath);
-      const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
-      const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
-
-      // Log results
-      const logMessage = `${finalFileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`;
-      if (ext === '.jpg' || ext === '.jpeg') {
-        this.logger.success(`✅ JPEG optimized: ${logMessage}`);
-      } else if (ext === '.png') {
-        this.logger.debug(`✅ PNG optimized: ${logMessage}`);
-      } else if (ext === '.webp') {
-        this.logger.debug(`✅ WebP optimized: ${logMessage}`);
+        this.logger.warn(`⚠️ Unsupported image format: ${originalFormat}, keeping original`);
       }
 
       return {
         buffer: processedBuffer,
-        fileName: finalFileName
+        fileName: fileName
       };
     } catch (error) {
       this.logger.error(`❌ Failed to process image:`, error.message);
-      // Fallback to original buffer
+      // Fallback to original
       return {
         buffer: imageBuffer,
         fileName: this.generateFileName(imageUrl, prefix)
       };
-    } finally {
-      // Clean up temp directory
-      try {
-        if (fs.existsSync(tempDir)) {
-          fs.rmSync(tempDir, { recursive: true, force: true });
-        }
-      } catch (cleanupError) {
-        this.logger.warn(`⚠️ Failed to cleanup temp directory: ${cleanupError.message}`);
-      }
     }
   }
 
