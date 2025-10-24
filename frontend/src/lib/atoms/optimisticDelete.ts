@@ -12,7 +12,7 @@ export const optimisticallyDeletedItems = atom<
  * Atom for triggering final delete confirmation (after undo timeout expires)
  * Usage: Set this to an item ID to confirm the deletion server-side
  */
-export const pendingDeleteConfirmations = atom<Set<string>>(new Set());
+export const pendingDeleteConfirmations = atom<Set<string>>(new Set<string>());
 
 /**
  * Hook state for undo notifications
