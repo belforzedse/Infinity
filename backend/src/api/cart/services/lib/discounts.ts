@@ -39,7 +39,8 @@ export const computeCouponDiscount = async (
     eligibleSubtotal = 0;
     for (const item of cartItems) {
       if (eligibleIds.has(item?.product_variation?.id)) {
-        const price = Number(item?.product_variation?.Price || 0);
+        // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
+        const price = Number(item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0);
         const count = Number(item?.Count || 0);
         eligibleSubtotal += price * count;
       }
@@ -55,9 +56,24 @@ export const computeCouponDiscount = async (
     ) {
       discountAmount = coupon.LimitAmount;
     }
+    console.log("DEBUG: Coupon discount calculation", {
+      code,
+      couponType: coupon.Type,
+      couponAmount: coupon.Amount,
+      couponLimitAmount: coupon.LimitAmount,
+      subtotalPassed: subtotal,
+      eligibleSubtotal,
+      isProductSpecific: coupon.product_variations?.length > 0,
+      calculatedDiscount: discountAmount,
+    });
     return discountAmount;
   }
 
+  console.log("DEBUG: Fixed amount coupon", {
+    code,
+    couponType: coupon.Type,
+    couponAmount: Number(coupon.Amount || 0),
+  });
   return Number(coupon.Amount || 0);
 };
 

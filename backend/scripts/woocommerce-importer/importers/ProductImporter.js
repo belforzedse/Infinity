@@ -261,9 +261,17 @@ class ProductImporter {
       let mode = 'create';
 
       if (existingStrapiId) {
-        await this.strapiClient.updateProduct(existingStrapiId, payload);
-        mode = 'update';
-        this.logger.success(`✅ Updated product: ${wcProduct.name} → ID: ${existingStrapiId}`);
+        // Check if product has actually changed before updating
+        if (this.hasProductChanged(wcProduct, existingMapping)) {
+          await this.strapiClient.updateProduct(existingStrapiId, payload);
+          mode = 'update';
+          this.logger.success(`✅ Updated product: ${wcProduct.name} → ID: ${existingStrapiId}`);
+        } else {
+          // Product hasn't changed, skip update
+          this.logger.info(`⏭️ No changes detected, skipping: ${wcProduct.name}`);
+          this.stats.skipped++;
+          return { mode: 'skipped', strapiId: existingStrapiId };
+        }
       } else {
         const result = await this.strapiClient.createProduct(payload);
         productId = result.data.id;
@@ -271,19 +279,24 @@ class ProductImporter {
       }
 
       if (productId) {
-        const imageResults = await this.handleProductImages(wcProduct, productId);
+        // Only handle images if enabled in config
+        if (this.config.import.images.enableUpload) {
+          const imageResults = await this.handleProductImages(wcProduct, productId);
 
-        if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
-          const updateData = {};
+          if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
+            const updateData = {};
 
-          if (imageResults.coverImageId) {
-            updateData.CoverImage = imageResults.coverImageId;
+            if (imageResults.coverImageId) {
+              updateData.CoverImage = imageResults.coverImageId;
+            }
+
+            updateData.Media = imageResults.galleryImageIds;
+
+            await this.strapiClient.updateProduct(productId, updateData);
+            this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
           }
-
-          updateData.Media = imageResults.galleryImageIds;
-
-          await this.strapiClient.updateProduct(productId, updateData);
-          this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
+        } else {
+          this.logger.debug(`⏭️ Image upload disabled - skipping images for: ${wcProduct.name}`);
         }
 
         this.duplicateTracker.recordMapping(
@@ -294,7 +307,8 @@ class ProductImporter {
             name: wcProduct.name,
             slug: wcProduct.slug,
             type: wcProduct.type,
-            status: wcProduct.status
+            status: wcProduct.status,
+            rating: wcProduct.average_rating // Track rating to detect changes
           }
         );
       }
@@ -310,6 +324,38 @@ class ProductImporter {
       this.logger.error(`❌ Failed to upsert product ${wcProduct.name}:`, error.message);
       throw error;
     }
+  }
+
+  /**
+   * Check if product data has changed since last import
+   * Returns true if any key field has changed, false if unchanged
+   */
+  hasProductChanged(wcProduct, existingMapping) {
+    if (!existingMapping) {
+      return true; // New product, always import
+    }
+
+    // Compare key fields that matter
+    const changed = {
+      name: existingMapping.name !== wcProduct.name,
+      slug: existingMapping.slug !== wcProduct.slug,
+      status: existingMapping.status !== wcProduct.status,
+      description: wcProduct.description && wcProduct.description !== '',
+      price: wcProduct.price && parseFloat(wcProduct.price) > 0,
+      rating: wcProduct.average_rating !== undefined && wcProduct.average_rating !== existingMapping.rating
+    };
+
+    // Log what changed
+    const changedFields = Object.entries(changed)
+      .filter(([_, hasChanged]) => hasChanged)
+      .map(([field, _]) => field);
+
+    if (changedFields.length > 0) {
+      this.logger.debug(`📝 Product "${wcProduct.name}" changed fields: ${changedFields.join(', ')}`);
+      return true;
+    }
+
+    return false; // No changes detected
   }
 
   /**

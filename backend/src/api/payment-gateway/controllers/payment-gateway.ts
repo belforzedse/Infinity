@@ -94,9 +94,10 @@ export default factories.createCoreController(
         }
 
         // Compute subtotal (toman)
+        // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
         let subtotal = 0;
         for (const item of cart.cart_items) {
-          const price = item?.product_variation?.Price || 0;
+          const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
           const count = item?.Count || 0;
           subtotal += Number(price) * Number(count);
         }
@@ -176,6 +177,14 @@ export default factories.createCoreController(
           amountIRR,
           hasDiscountCode: !!discountCodeParam,
           discountToman: Math.round(discountAmount),
+          debugAmounts: {
+            subtotalToman: Math.round(subtotal),
+            discountToman: Math.round(discountAmount),
+            taxToman: Math.round(taxAmount),
+            shippingToman: Math.round(shippingCost),
+            totalToman,
+            totalIRR: amountIRR,
+          },
         });
         const eligibleResp = await snappay.eligible(amountIRR);
         strapi.log.info("SnappPay eligible result", {
