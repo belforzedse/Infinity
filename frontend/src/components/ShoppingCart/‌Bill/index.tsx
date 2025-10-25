@@ -168,10 +168,19 @@ function ShoppingCartBillForm({}: Props) {
           setSnappDescription(undefined);
           return;
         }
+
+        // Calculate the final amount (قابل پرداخت) to send to Snappay eligible
+        const shippingToman = shippingCost ?? 0;
+        const discountToman = discountPreview?.discount ?? 0;
+        const subtotalToman = totalPrice;
+        const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
+        const finalAmount = Math.max(
+          0,
+          Math.round(subtotalToman - discountToman + taxToman + shippingToman),
+        );
+
         const res = await CartService.getSnappEligible({
-          shippingId,
-          shippingCost,
-          discountCode,
+          amount: finalAmount,
         });
         // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
@@ -185,7 +194,7 @@ function ShoppingCartBillForm({}: Props) {
       }
     };
     run();
-  }, [shippingId, shippingCost, discountCode]);
+  }, [shippingId, shippingCost, discountCode, discountPreview, totalPrice]);
 
   // Load wallet balance once
   useEffect(() => {
