@@ -21,11 +21,12 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
     }
 
     // Compute subtotal from cart
+    // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
     let subtotal = 0;
     for (const item of cart.cart_items) {
-      const price = Number(item?.product_variation?.Price || 0);
+      const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
       const count = Number(item?.Count || 0);
-      subtotal += price * count;
+      subtotal += Number(price) * count;
     }
 
     // Optional shipping cost to preview total
@@ -87,9 +88,10 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
       for (const item of cart.cart_items) {
         const variationId = item?.product_variation?.id;
         if (eligibleIds.has(variationId)) {
-          const price = Number(item?.product_variation?.Price || 0);
+          // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
+          const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
           const count = Number(item?.Count || 0);
-          eligibleSubtotal += price * count;
+          eligibleSubtotal += Number(price) * count;
         }
       }
       if (eligibleSubtotal <= 0) {
