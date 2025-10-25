@@ -1,49 +1,87 @@
-version: "3"
+version: "3.8"
 
 services:
-  # strapi:
-  #   container_name: infinity-strapi
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   restart: unless-stopped
-  #   env_file: .env
-  #   environment:
-  #     DATABASE_CLIENT: ${DATABASE_CLIENT}
-  #     DATABASE_HOST: postgres
-  #     DATABASE_PORT: ${DATABASE_PORT}
-  #     DATABASE_NAME: ${DATABASE_NAME}
-  #     DATABASE_USERNAME: ${DATABASE_USERNAME}
-  #     DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-  #     NODE_ENV: development
-  #   volumes:
-  #     - ./:/app
-  #     - /app/node_modules
-  #   ports:
-  #     - "1337:1337"
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - infinity-network
+  strapi:
+    container_name: infinity-strapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_SCHEMA: ${DATABASE_SCHEMA}
+      DATABASE_SSL: ${DATABASE_SSL}
+      REDIS_URL: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - "1337:1337"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - infinity-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:1337/api/admin/users"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   postgres:
     container_name: infinity-postgres
-    image: postgres:14
+    image: postgres:14-alpine
     restart: unless-stopped
     env_file: .env
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_SCHEMA: ${DATABASE_SCHEMA}
     volumes:
       - infinity-data:/var/lib/postgresql/data
     ports:
       - "5434:5432"
     networks:
       - infinity-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: infinity-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - infinity-redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - infinity-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   infinity-data:
+  infinity-redis:
 
 networks:
   infinity-network:
