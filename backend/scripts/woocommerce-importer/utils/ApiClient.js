@@ -522,9 +522,9 @@ class StrapiClient extends BaseApiClient {
    * Get all local users (for phone uniqueness check)
    */
   async getAllLocalUsers() {
-    const response = await this.retryRequest(() => 
+    const response = await this.retryRequest(() =>
       this.client.get('/local-users', {
-        params: { 
+        params: {
           'pagination[pageSize]': 1000, // Get a large batch for phone checking
           'fields[0]': 'Phone' // Only get phone field for efficiency
         }
@@ -534,10 +534,66 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Find a local user by external ID
+   */
+  async findLocalUserByExternalId(externalId) {
+    if (!externalId) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/local-users', {
+        params: {
+          'filters[external_id][$eq]': externalId,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  /**
+   * Find a local user by phone number
+   */
+  async findLocalUserByPhone(phone) {
+    if (!phone) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/local-users', {
+        params: {
+          'filters[Phone][$eq]': phone,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  /**
+   * Extract the first entity from a Strapi collection response
+   */
+  extractFirstEntry(responseData) {
+    if (!responseData) {
+      return null;
+    }
+
+    const items = Array.isArray(responseData?.data) ? responseData.data : [];
+    if (items.length === 0) {
+      return null;
+    }
+
+    return items[0];
+  }
+
+  /**
    * Create local user
    */
   async createLocalUser(userData) {
-    const response = await this.retryRequest(() => 
+    const response = await this.retryRequest(() =>
       this.client.post('/local-users', { data: userData })
     );
     return response.data;
