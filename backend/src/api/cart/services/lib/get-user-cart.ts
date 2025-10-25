@@ -7,7 +7,6 @@ export const getOrCreateUserCart = async (strapi: Strapi, userId: number) => {
       cart_items: {
         populate: {
           product_variation: {
-            fields: ["id", "Price", "DiscountPrice", "Count"],
             populate: {
               product_stock: true,
               product_variation_color: true,
