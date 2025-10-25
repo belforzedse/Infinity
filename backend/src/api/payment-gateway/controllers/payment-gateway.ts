@@ -100,7 +100,10 @@ export default factories.createCoreController(
           const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
           const count = Number(item?.Count || 0);
           subtotal += Number(price) * count;
+
+          console.log(`[ELIGIBLE CALC] VarID=${item?.product_variation?.id}, DiscountPrice=${item?.product_variation?.DiscountPrice}, Price=${item?.product_variation?.Price}, Count=${count}, ItemTotal=${Number(price) * count}`);
         }
+        console.log(`[ELIGIBLE CALC] Final subtotal=${subtotal}`);
 
         // Discounts: apply coupon first if provided, otherwise fallback to general discount
         let discountAmount = 0;
