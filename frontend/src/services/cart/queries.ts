@@ -23,12 +23,14 @@ export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
 
 export const getSnappEligible = async (
   params: {
+    amount?: number;
     shippingId?: number;
     shippingCost?: number;
     discountCode?: string;
   } = {},
 ): Promise<SnappEligibilityResponse> => {
   const qs = new URLSearchParams();
+  if (params.amount) qs.set("amount", String(params.amount));
   if (params.shippingId) qs.set("shippingId", String(params.shippingId));
   if (params.shippingCost) qs.set("shippingCost", String(params.shippingCost));
   if (params.discountCode) qs.set("discountCode", params.discountCode);
