@@ -199,27 +199,51 @@ class CategoryImporter {
    */
   async importSingleCategory(wcCategory, dryRun = false) {
     this.logger.debug(`📂 Processing category: ${wcCategory.id} - ${wcCategory.name}`);
-    
-    // Check for duplicates
+
+    // Check for duplicates in mapping tracker
     const duplicateCheck = this.duplicateTracker.checkDuplicate('categories', wcCategory);
     if (duplicateCheck.isDuplicate) {
       this.stats.skipped++;
+      this.logger.debug(`⏭️ Category ${wcCategory.id} already in mappings, skipping`);
       return duplicateCheck;
     }
-    
+
     try {
       // Transform WooCommerce category to Strapi format
       const strapiCategory = await this.transformCategory(wcCategory);
-      
+
+      // Check if category already exists in Strapi database by slug
+      const existingCategory = await this.findExistingCategoryBySlug(strapiCategory.Slug);
+
+      if (existingCategory) {
+        this.stats.skipped++;
+        this.logger.warn(`📦 Category already exists in database: ${wcCategory.name} (ID: ${existingCategory.id}) - syncing mapping`);
+
+        // Record the mapping so we don't try to create it again
+        this.duplicateTracker.recordMapping(
+          'categories',
+          wcCategory.id,
+          existingCategory.id,
+          {
+            name: wcCategory.name,
+            slug: wcCategory.slug,
+            parentId: wcCategory.parent,
+            syncedFromExisting: true
+          }
+        );
+
+        return { isSynced: true, data: existingCategory };
+      }
+
       if (dryRun) {
         this.logger.info(`🔍 [DRY RUN] Would import category: ${wcCategory.name}`);
         this.stats.success++;
         return { isDryRun: true, data: strapiCategory };
       }
-      
+
       // Create category in Strapi
       const result = await this.strapiClient.createCategory(strapiCategory);
-      
+
       // Record the mapping
       this.duplicateTracker.recordMapping(
         'categories',
@@ -231,16 +255,38 @@ class CategoryImporter {
           parentId: wcCategory.parent
         }
       );
-      
+
       this.stats.success++;
       this.logger.debug(`✅ Created category: ${wcCategory.name} → ID: ${result.data.id}`);
-      
+
       return result;
-      
+
     } catch (error) {
       this.stats.failed++;
       this.logger.error(`❌ Failed to create category ${wcCategory.name}:`, error.message);
       throw error;
+    }
+  }
+
+  /**
+   * Find an existing category by slug in the Strapi database
+   */
+  async findExistingCategoryBySlug(slug) {
+    try {
+      const response = await this.strapiClient.getCategories({
+        'filters[Slug][$eq]': slug,
+        'pagination[pageSize]': 1
+      });
+
+      const categories = response.data || [];
+      if (categories.length > 0) {
+        return categories[0];
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to query existing categories by slug: ${error.message}`);
+      return null;
     }
   }
 
