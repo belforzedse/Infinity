@@ -97,10 +97,17 @@ export default factories.createCoreController(
         // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
         let subtotal = 0;
         for (const item of cart.cart_items) {
-          const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
+          const discountPrice = item?.product_variation?.DiscountPrice;
+          const regularPrice = item?.product_variation?.Price;
+          const price = discountPrice ?? regularPrice ?? 0;
           const count = item?.Count || 0;
           subtotal += Number(price) * Number(count);
+
+          // DEBUG: Log what price is being used
+          console.log(`[ELIGIBLE DEBUG] Var ID: ${item?.product_variation?.id}, DiscountPrice=${discountPrice}, RegularPrice=${regularPrice}, Using=${price}, Count=${count}`);
         }
+
+        console.log(`[ELIGIBLE DEBUG SUMMARY] shippingId=${shippingId}, shippingCostParam=${shippingCostParam}, hasCode=${!!discountCodeParam}, subtotal=${subtotal}`);
 
         // Discounts: apply coupon first if provided, otherwise fallback to general discount
         let discountAmount = 0;
