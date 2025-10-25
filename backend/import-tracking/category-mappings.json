@@ -1,0 +1,914 @@
+{
+  "15": {
+    "strapiId": 103,
+    "importedAt": "2025-10-25T10:11:46.834Z",
+    "name": "بدون دسته‌بندی",
+    "slug": "uncategory",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1331": {
+    "strapiId": 104,
+    "importedAt": "2025-10-25T10:11:47.094Z",
+    "name": "شومیز",
+    "slug": "paperback-and-tonic",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1332": {
+    "strapiId": 105,
+    "importedAt": "2025-10-25T10:11:47.345Z",
+    "name": "شومیز نخی",
+    "slug": "cotton-paper",
+    "parentId": 1331,
+    "syncedFromExisting": true
+  },
+  "1333": {
+    "strapiId": 106,
+    "importedAt": "2025-10-25T10:11:47.627Z",
+    "name": "شومیز جین",
+    "slug": "denim-paper",
+    "parentId": 1331,
+    "syncedFromExisting": true
+  },
+  "1335": {
+    "strapiId": 107,
+    "importedAt": "2025-10-25T10:11:47.865Z",
+    "name": "تونیک اسپرت",
+    "slug": "sports-tunic",
+    "parentId": 1331,
+    "syncedFromExisting": true
+  },
+  "1336": {
+    "strapiId": 108,
+    "importedAt": "2025-10-25T10:11:48.095Z",
+    "name": "شومیز مجلسی",
+    "slug": "house-paper",
+    "parentId": 1331,
+    "syncedFromExisting": true
+  },
+  "1337": {
+    "strapiId": 109,
+    "importedAt": "2025-10-25T10:11:48.589Z",
+    "name": "راحتی",
+    "slug": "house-dress",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1338": {
+    "strapiId": 110,
+    "importedAt": "2025-10-25T10:11:48.841Z",
+    "name": "تیشرت راحتی",
+    "slug": "comfortable-t-shirt",
+    "parentId": 1337,
+    "syncedFromExisting": true
+  },
+  "1340": {
+    "strapiId": 111,
+    "importedAt": "2025-10-25T10:11:49.086Z",
+    "name": "ست دوتیکه راحتی",
+    "slug": "comfort-set",
+    "parentId": 1337,
+    "syncedFromExisting": true
+  },
+  "1341": {
+    "strapiId": 112,
+    "importedAt": "2025-10-25T10:11:49.362Z",
+    "name": "تاپ و کراپ",
+    "slug": "comfortable-top",
+    "parentId": 1337,
+    "syncedFromExisting": true
+  },
+  "1345": {
+    "strapiId": 113,
+    "importedAt": "2025-10-25T10:11:49.631Z",
+    "name": "پیراهن راحتی",
+    "slug": "comfortable-shirt",
+    "parentId": 1337,
+    "syncedFromExisting": true
+  },
+  "1346": {
+    "strapiId": 114,
+    "importedAt": "2025-10-25T10:11:50.408Z",
+    "name": "شلوار",
+    "slug": "pants",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1347": {
+    "strapiId": 115,
+    "importedAt": "2025-10-25T10:11:50.641Z",
+    "name": "شلوار جین",
+    "slug": "jeans",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1349": {
+    "strapiId": 116,
+    "importedAt": "2025-10-25T10:11:50.881Z",
+    "name": "شلوار لینن",
+    "slug": "lenin-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1353": {
+    "strapiId": 117,
+    "importedAt": "2025-10-25T10:11:51.144Z",
+    "name": "شلوار دمپا",
+    "slug": "flip-flops",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1354": {
+    "strapiId": 118,
+    "importedAt": "2025-10-25T10:11:51.385Z",
+    "name": "شلوار مام استایل",
+    "slug": "mom-style-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1355": {
+    "strapiId": 119,
+    "importedAt": "2025-10-25T10:11:51.642Z",
+    "name": "شلوار راسته",
+    "slug": "straight-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1356": {
+    "strapiId": 120,
+    "importedAt": "2025-10-25T10:11:51.893Z",
+    "name": "شلوار بگ",
+    "slug": "bag-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1357": {
+    "strapiId": 121,
+    "importedAt": "2025-10-25T10:11:52.147Z",
+    "name": "شلوار نیم بگ",
+    "slug": "half-bag-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1360": {
+    "strapiId": 122,
+    "importedAt": "2025-10-25T10:11:52.497Z",
+    "name": "شلوار مام فیت",
+    "slug": "mom-fit-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "1361": {
+    "strapiId": 127,
+    "importedAt": "2025-10-25T10:11:52.998Z",
+    "name": "مانتو",
+    "slug": "coat-and-mantle",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1362": {
+    "strapiId": 128,
+    "importedAt": "2025-10-25T10:11:53.236Z",
+    "name": "کت ژاکارد",
+    "slug": "jacquard-coat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1363": {
+    "strapiId": 129,
+    "importedAt": "2025-10-25T10:11:53.494Z",
+    "name": "کت لینن",
+    "slug": "linen-coat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1364": {
+    "strapiId": 130,
+    "importedAt": "2025-10-25T10:11:53.724Z",
+    "name": "کت کرپ",
+    "slug": "crepe-coat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1365": {
+    "strapiId": 131,
+    "importedAt": "2025-10-25T10:11:53.976Z",
+    "name": "کت کتان",
+    "slug": "linen-coat-coat-and-mantle",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1366": {
+    "strapiId": 132,
+    "importedAt": "2025-10-25T10:11:54.214Z",
+    "name": "کت جین",
+    "slug": "jean-coat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1367": {
+    "strapiId": 133,
+    "importedAt": "2025-10-25T10:11:54.462Z",
+    "name": "مانتو لینن",
+    "slug": "linencoat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1368": {
+    "strapiId": 134,
+    "importedAt": "2025-10-25T10:11:54.722Z",
+    "name": "مانتو دانشجویی",
+    "slug": "student-coat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1369": {
+    "strapiId": 135,
+    "importedAt": "2025-10-25T10:11:54.951Z",
+    "name": "مانتو نخی",
+    "slug": "cotton-coat",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "1370": {
+    "strapiId": 137,
+    "importedAt": "2025-10-25T10:11:55.442Z",
+    "name": "لباس زیر",
+    "slug": "under-wear",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1371": {
+    "strapiId": 138,
+    "importedAt": "2025-10-25T10:11:55.688Z",
+    "name": "شورت فانتزی",
+    "slug": "fancy-shorts",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1372": {
+    "strapiId": 139,
+    "importedAt": "2025-10-25T10:11:55.915Z",
+    "name": "شورت کبریتی",
+    "slug": "match-shorts",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1373": {
+    "strapiId": 140,
+    "importedAt": "2025-10-25T10:11:56.154Z",
+    "name": "شورت توری",
+    "slug": "lace-shorts",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1374": {
+    "strapiId": 141,
+    "importedAt": "2025-10-25T10:11:56.392Z",
+    "name": "شورت بکلس",
+    "slug": "backless-shorts",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1375": {
+    "strapiId": 142,
+    "importedAt": "2025-10-25T10:11:56.649Z",
+    "name": "سوتین اسپرت",
+    "slug": "sports-bra",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1376": {
+    "strapiId": 143,
+    "importedAt": "2025-10-25T10:11:56.879Z",
+    "name": "سوتین توری",
+    "slug": "lace-bra",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1377": {
+    "strapiId": 144,
+    "importedAt": "2025-10-25T10:11:57.121Z",
+    "name": "سوتین فنردار گن",
+    "slug": "spring-bra",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1378": {
+    "strapiId": 145,
+    "importedAt": "2025-10-25T10:11:57.344Z",
+    "name": "سوتین اسفنجی",
+    "slug": "sponge-bra",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1379": {
+    "strapiId": 146,
+    "importedAt": "2025-10-25T10:11:57.622Z",
+    "name": "سوتین جک دار",
+    "slug": "jacquard-bra",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1380": {
+    "strapiId": 147,
+    "importedAt": "2025-10-25T10:11:57.847Z",
+    "name": "لباس خواب",
+    "slug": "sleepwear",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1381": {
+    "strapiId": 148,
+    "importedAt": "2025-10-25T10:11:58.075Z",
+    "name": "نیم تنه کبریتی",
+    "slug": "match-bust",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1382": {
+    "strapiId": 149,
+    "importedAt": "2025-10-25T10:11:58.320Z",
+    "name": "ست نیم تنه شورت",
+    "slug": "short-torso-set",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1383": {
+    "strapiId": 150,
+    "importedAt": "2025-10-25T10:11:58.557Z",
+    "name": "ست لباس زیر",
+    "slug": "underwear-set",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "1384": {
+    "strapiId": 154,
+    "importedAt": "2025-10-25T10:11:59.557Z",
+    "name": "پیراهن",
+    "slug": "shirt",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1385": {
+    "strapiId": 155,
+    "importedAt": "2025-10-25T10:11:59.822Z",
+    "name": "پیراهن نخی",
+    "slug": "cotton-shirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1386": {
+    "strapiId": 156,
+    "importedAt": "2025-10-25T10:12:00.059Z",
+    "name": "پیراهن خامه دوزی",
+    "slug": "cream-embroidered-shirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1387": {
+    "strapiId": 157,
+    "importedAt": "2025-10-25T10:12:00.298Z",
+    "name": "پیراهن کوتاه",
+    "slug": "short-dress",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1388": {
+    "strapiId": 158,
+    "importedAt": "2025-10-25T10:12:00.565Z",
+    "name": "پیراهن بلند",
+    "slug": "long-shirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1389": {
+    "strapiId": 159,
+    "importedAt": "2025-10-25T10:12:00.892Z",
+    "name": "پیراهن لینن",
+    "slug": "linen-shirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1390": {
+    "strapiId": 160,
+    "importedAt": "2025-10-25T10:12:01.213Z",
+    "name": "پیراهن کرسپو",
+    "slug": "crespo-shirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1391": {
+    "strapiId": 161,
+    "importedAt": "2025-10-25T10:12:01.456Z",
+    "name": "پیراهن کتان",
+    "slug": "linenshirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "1392": {
+    "strapiId": 163,
+    "importedAt": "2025-10-25T10:12:01.928Z",
+    "name": "شال",
+    "slug": "shawls-and-scarves",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1393": {
+    "strapiId": 164,
+    "importedAt": "2025-10-25T10:12:02.175Z",
+    "name": "شال نخی",
+    "slug": "cotton-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1394": {
+    "strapiId": 165,
+    "importedAt": "2025-10-25T10:12:02.437Z",
+    "name": "شال طرحدار",
+    "slug": "patterned-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1395": {
+    "strapiId": 166,
+    "importedAt": "2025-10-25T10:12:02.692Z",
+    "name": "شال ساده",
+    "slug": "simple-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1396": {
+    "strapiId": 167,
+    "importedAt": "2025-10-25T10:12:02.929Z",
+    "name": "شال پلیسه",
+    "slug": "pleated-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1397": {
+    "strapiId": 168,
+    "importedAt": "2025-10-25T10:12:03.152Z",
+    "name": "شال لینن",
+    "slug": "linen-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1398": {
+    "strapiId": 169,
+    "importedAt": "2025-10-25T10:12:03.409Z",
+    "name": "شال موهر",
+    "slug": "mohair-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1399": {
+    "strapiId": 170,
+    "importedAt": "2025-10-25T10:12:03.719Z",
+    "name": "شال حریر",
+    "slug": "silk-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1400": {
+    "strapiId": 171,
+    "importedAt": "2025-10-25T10:12:04.115Z",
+    "name": "شال مجلسی",
+    "slug": "majlisi-shawl",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1401": {
+    "strapiId": 172,
+    "importedAt": "2025-10-25T10:12:05.101Z",
+    "name": "مینی اسکارف",
+    "slug": "mini-scarf",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1402": {
+    "strapiId": 173,
+    "importedAt": "2025-10-25T10:12:05.376Z",
+    "name": "روسری نخی",
+    "slug": "cotton-scarf",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1403": {
+    "strapiId": 174,
+    "importedAt": "2025-10-25T10:12:05.600Z",
+    "name": "روسری ابریشم",
+    "slug": "silk-scarf",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "1404": {
+    "strapiId": 178,
+    "importedAt": "2025-10-25T10:12:06.528Z",
+    "name": "جوراب",
+    "slug": "socks",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1405": {
+    "strapiId": 179,
+    "importedAt": "2025-10-25T10:12:06.761Z",
+    "name": "جوراب کالج",
+    "slug": "college-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1406": {
+    "strapiId": 180,
+    "importedAt": "2025-10-25T10:12:06.983Z",
+    "name": "جوراب مچی",
+    "slug": "ankle-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1407": {
+    "strapiId": 181,
+    "importedAt": "2025-10-25T10:12:07.240Z",
+    "name": "جوراب نیم ساق",
+    "slug": "stocking",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1408": {
+    "strapiId": 182,
+    "importedAt": "2025-10-25T10:12:07.502Z",
+    "name": "جوراب ساق بلند",
+    "slug": "stockings",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1409": {
+    "strapiId": 183,
+    "importedAt": "2025-10-25T10:12:07.756Z",
+    "name": "جوراب حوله ای",
+    "slug": "towel-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1410": {
+    "strapiId": 184,
+    "importedAt": "2025-10-25T10:12:08.065Z",
+    "name": "جوراب فانتزی",
+    "slug": "fancy-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1411": {
+    "strapiId": 185,
+    "importedAt": "2025-10-25T10:12:08.335Z",
+    "name": "جوراب کبریتی",
+    "slug": "match-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1412": {
+    "strapiId": 186,
+    "importedAt": "2025-10-25T10:12:08.576Z",
+    "name": "جوراب مردانه",
+    "slug": "mens-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "1449": {
+    "strapiId": 188,
+    "importedAt": "2025-10-25T10:12:09.061Z",
+    "name": "لباس مردانه",
+    "slug": "%d9%84%d8%a8%d8%a7%d8%b3-%d9%85%d8%b1%d8%af%d8%a7%d9%86%d9%87",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1451": {
+    "strapiId": 189,
+    "importedAt": "2025-10-25T10:12:09.346Z",
+    "name": "پیراهن مردانه",
+    "slug": "%d9%be%db%8c%d8%b1%d8%a7%d9%87%d9%86-%d9%85%d8%b1%d8%af%d8%a7%d9%86%d9%87",
+    "parentId": 1449,
+    "syncedFromExisting": true
+  },
+  "1456": {
+    "strapiId": 190,
+    "importedAt": "2025-10-25T10:12:09.573Z",
+    "name": "دامن",
+    "slug": "skirt",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1457": {
+    "strapiId": 191,
+    "importedAt": "2025-10-25T10:12:09.817Z",
+    "name": "دامن بلند",
+    "slug": "long-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1458": {
+    "strapiId": 192,
+    "importedAt": "2025-10-25T10:12:10.056Z",
+    "name": "دامن کوتاه",
+    "slug": "short-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1459": {
+    "strapiId": 193,
+    "importedAt": "2025-10-25T10:12:10.290Z",
+    "name": "دامن مجلسی",
+    "slug": "majestic-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1460": {
+    "strapiId": 194,
+    "importedAt": "2025-10-25T10:12:10.522Z",
+    "name": "دامن لینن",
+    "slug": "linen-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1461": {
+    "strapiId": 195,
+    "importedAt": "2025-10-25T10:12:10.800Z",
+    "name": "دامن کتان",
+    "slug": "linen-skirt-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1462": {
+    "strapiId": 196,
+    "importedAt": "2025-10-25T10:12:11.064Z",
+    "name": "دامن جین",
+    "slug": "jean-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1463": {
+    "strapiId": 197,
+    "importedAt": "2025-10-25T10:12:11.295Z",
+    "name": "دامن گلدار",
+    "slug": "floral-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1464": {
+    "strapiId": 198,
+    "importedAt": "2025-10-25T10:12:11.536Z",
+    "name": "دامن پلیسه",
+    "slug": "pleated-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "1468": {
+    "strapiId": 200,
+    "importedAt": "2025-10-25T10:12:12.037Z",
+    "name": "سایر",
+    "slug": "%d8%b3%d8%a7%db%8c%d8%b1",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "1526": {
+    "strapiId": 201,
+    "importedAt": "2025-10-25T10:12:12.260Z",
+    "name": "پلیور",
+    "slug": "%d9%be%d9%84%db%8c%d9%88%d8%b1-%d9%88-%d8%a8%d8%a7%d9%81%d8%aa",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2095": {
+    "strapiId": 136,
+    "importedAt": "2025-10-25T10:11:55.205Z",
+    "name": "کت و مانتو بافت",
+    "slug": "textured-coat-and-mantle",
+    "parentId": 1361,
+    "syncedFromExisting": true
+  },
+  "2096": {
+    "strapiId": 199,
+    "importedAt": "2025-10-25T10:12:11.804Z",
+    "name": "دامن بافت",
+    "slug": "woven-skirt",
+    "parentId": 1456,
+    "syncedFromExisting": true
+  },
+  "2097": {
+    "strapiId": 187,
+    "importedAt": "2025-10-25T10:12:08.815Z",
+    "name": "جوراب بافت",
+    "slug": "knitted-socks",
+    "parentId": 1404,
+    "syncedFromExisting": true
+  },
+  "2098": {
+    "strapiId": 124,
+    "importedAt": "2025-10-25T10:11:49.925Z",
+    "name": "لباس آستین بلند",
+    "slug": "woven-casual-clothes",
+    "parentId": 1337,
+    "syncedFromExisting": true
+  },
+  "2099": {
+    "strapiId": 126,
+    "importedAt": "2025-10-25T10:11:52.743Z",
+    "name": "شلوار بافت",
+    "slug": "woven-pants",
+    "parentId": 1346,
+    "syncedFromExisting": true
+  },
+  "2100": {
+    "strapiId": 123,
+    "importedAt": "2025-10-25T10:11:48.332Z",
+    "name": "شومیز بافت",
+    "slug": "textured-paper",
+    "parentId": 1331,
+    "syncedFromExisting": true
+  },
+  "2101": {
+    "strapiId": 162,
+    "importedAt": "2025-10-25T10:12:01.702Z",
+    "name": "پیراهن بافت",
+    "slug": "woven-shirt",
+    "parentId": 1384,
+    "syncedFromExisting": true
+  },
+  "2102": {
+    "strapiId": 151,
+    "importedAt": "2025-10-25T10:11:58.795Z",
+    "name": "لباس زیر بافت",
+    "slug": "woven-underwear",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "2103": {
+    "strapiId": 175,
+    "importedAt": "2025-10-25T10:12:05.836Z",
+    "name": "شال و روسری بافت",
+    "slug": "woven-shawls-and-scarves",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "2111": {
+    "strapiId": 202,
+    "importedAt": "2025-10-25T10:12:12.502Z",
+    "name": "هودی",
+    "slug": "hoodie-and-dores",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2157": {
+    "strapiId": 204,
+    "importedAt": "2025-10-25T10:12:12.979Z",
+    "name": "کاپشن و پافر",
+    "slug": "jacket-and-puffer",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2158": {
+    "strapiId": 205,
+    "importedAt": "2025-10-25T10:12:13.272Z",
+    "name": "پالتو",
+    "slug": "coat",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2159": {
+    "strapiId": 206,
+    "importedAt": "2025-10-25T10:12:13.517Z",
+    "name": "شکت",
+    "slug": "shacket",
+    "parentId": 2158,
+    "syncedFromExisting": true
+  },
+  "2160": {
+    "strapiId": 207,
+    "importedAt": "2025-10-25T10:12:13.741Z",
+    "name": "بارانی",
+    "slug": "baroni",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2161": {
+    "strapiId": 208,
+    "importedAt": "2025-10-25T10:12:13.982Z",
+    "name": "ترنچ کت",
+    "slug": "teranchcoat",
+    "parentId": 2160,
+    "syncedFromExisting": true
+  },
+  "2162": {
+    "strapiId": 203,
+    "importedAt": "2025-10-25T10:12:12.747Z",
+    "name": "سویشرت",
+    "slug": "sweatshirt",
+    "parentId": 2111,
+    "syncedFromExisting": true
+  },
+  "2173": {
+    "strapiId": 209,
+    "importedAt": "2025-10-25T10:12:14.208Z",
+    "name": "لباس‌های زمستانه",
+    "slug": "winter",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2230": {
+    "strapiId": 210,
+    "importedAt": "2025-10-25T10:12:14.591Z",
+    "name": "خرید اقساطی لباس",
+    "slug": "installment-purchase-of-clothes",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2361": {
+    "strapiId": 211,
+    "importedAt": "2025-10-25T10:12:14.823Z",
+    "name": "کمربند زنانه",
+    "slug": "womens-belt",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2396": {
+    "strapiId": 125,
+    "importedAt": "2025-10-25T10:11:50.176Z",
+    "name": "شلوار و شلوارک راحتی",
+    "slug": "casual-pants",
+    "parentId": 1337,
+    "syncedFromExisting": true
+  },
+  "2427": {
+    "strapiId": 212,
+    "importedAt": "2025-10-25T10:12:15.107Z",
+    "name": "کیف",
+    "slug": "%da%a9%db%8c%d9%81",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2620": {
+    "strapiId": 213,
+    "importedAt": "2025-10-25T10:12:15.333Z",
+    "name": "ژیله",
+    "slug": "%da%98%db%8c%d9%84%d9%87",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2666": {
+    "strapiId": 214,
+    "importedAt": "2025-10-25T10:12:15.591Z",
+    "name": "انواع کفش",
+    "slug": "shoes",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2758": {
+    "strapiId": 152,
+    "importedAt": "2025-10-25T10:11:59.043Z",
+    "name": "لگ",
+    "slug": "%d9%84%da%af",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "2771": {
+    "strapiId": 176,
+    "importedAt": "2025-10-25T10:12:06.062Z",
+    "name": "کلاه",
+    "slug": "%da%a9%d9%84%d8%a7%d9%87",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  },
+  "2789": {
+    "strapiId": 215,
+    "importedAt": "2025-10-25T10:12:15.879Z",
+    "name": "عینک",
+    "slug": "glasses",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2799": {
+    "strapiId": 153,
+    "importedAt": "2025-10-25T10:11:59.302Z",
+    "name": "مایو",
+    "slug": "%d9%85%d8%a7%db%8c%d9%88",
+    "parentId": 1370,
+    "syncedFromExisting": true
+  },
+  "2837": {
+    "strapiId": 216,
+    "importedAt": "2025-10-25T10:12:16.167Z",
+    "name": "جشنواره",
+    "slug": "%d8%ac%d8%b4%d9%86%d9%88%d8%a7%d8%b1%d9%87",
+    "parentId": 0,
+    "syncedFromExisting": true
+  },
+  "2849": {
+    "strapiId": 177,
+    "importedAt": "2025-10-25T10:12:06.301Z",
+    "name": "دستکش",
+    "slug": "%d8%af%d8%b3%d8%aa%da%a9%d8%b4",
+    "parentId": 1392,
+    "syncedFromExisting": true
+  }
+}

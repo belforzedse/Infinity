@@ -112,6 +112,33 @@ export const requestSnappPayment = async (
   const totalCartIrr = itemsTotalIrr + taxIrr + shippingIrr;
   const orderAmountIrr = totalCartIrr - discountIrr - externalSourceIrr;
 
+  // DEBUG: Log all amounts for troubleshooting
+  strapi.log.info("SNAPPAY AMOUNT CALCULATION DEBUG", {
+    orderId: order.id,
+    itemCount: items.length,
+    itemsTotalToman: Math.round(itemsTotalIrr / 10),
+    itemsTotalIrr,
+    taxToman: Math.round(taxIrr / 10),
+    taxIrr,
+    shippingToman: Math.round(shippingIrr / 10),
+    shippingIrr,
+    discountToman: Math.round(discountIrr / 10),
+    discountIrr,
+    totalCartToman: Math.round(totalCartIrr / 10),
+    totalCartIrr,
+    orderAmountToman: Math.round(orderAmountIrr / 10),
+    orderAmountIrr,
+    contractAmount: contract.Amount,
+    contractAmountInIrr: Math.round((contract.Amount || 0) * 10),
+    financialSummary: {
+      subtotal: financialSummary.subtotal,
+      discount: financialSummary.discount,
+      tax: financialSummary.tax,
+      shipping: financialSummary.shipping,
+      total: financialSummary.total,
+    },
+  });
+
   const baseId = `O${order.id}`;
   const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
   // SnappPay requires unique transactionId (5-10 chars, include letters)

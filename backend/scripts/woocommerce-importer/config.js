@@ -94,12 +94,12 @@ module.exports = {
     currency: {
       from: process.env.CURRENCY_FROM || 'IRT', // Iranian Toman
       to: process.env.CURRENCY_TO || 'IRR',   // Iranian Rial (internal)
-      multiplier: toNumber(process.env.CURRENCY_MULTIPLIER, 10) // 1 Toman = 10 Rial
+      multiplier: toNumber(process.env.CURRENCY_MULTIPLIER, 1) // Default: 1 (no conversion, use WooCommerce prices as-is)
     },
 
     // Image handling settings
     images: {
-      enableUpload: process.env.IMPORT_IMAGES_ENABLE_UPLOAD !== 'false',
+      enableUpload: process.env.IMPORT_IMAGES_ENABLE_UPLOAD !== 'false', // Enabled by default (set to 'false' to disable)
       maxSize: toNumber(process.env.IMPORT_IMAGES_MAX_SIZE, 10 * 1024 * 1024), // 10MB
       allowedTypes: toArray(process.env.IMPORT_IMAGES_ALLOWED_TYPES, ['jpg', 'jpeg', 'png', 'gif', 'webp']),
       downloadTimeout: toNumber(process.env.IMPORT_IMAGES_DOWNLOAD_TIMEOUT, 30000),
