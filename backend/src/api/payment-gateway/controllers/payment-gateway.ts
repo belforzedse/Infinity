@@ -83,9 +83,17 @@ export default factories.createCoreController(
           (ctx.request.query?.discountCode as string | undefined) ||
           (ctx.request.body?.discountCode as string | undefined);
 
-        // Load user cart
-        const cartService = strapi.service("api::cart.cart");
-        const cart = await cartService.getUserCart(userId);
+        // Load user cart with full product variation details
+        const cart = await strapi.db.query("api::cart.cart").findOne({
+          where: { user: userId },
+          populate: {
+            cart_items: {
+              populate: {
+                product_variation: true,  // Load all fields from product_variation
+              },
+            },
+          },
+        });
 
         if (!cart?.cart_items?.length) {
           return ctx.send({
