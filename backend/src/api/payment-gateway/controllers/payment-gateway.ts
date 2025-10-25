@@ -83,17 +83,9 @@ export default factories.createCoreController(
           (ctx.request.query?.discountCode as string | undefined) ||
           (ctx.request.body?.discountCode as string | undefined);
 
-        // Load user cart with full product variation details
-        const cart = await strapi.db.query("api::cart.cart").findOne({
-          where: { user: userId },
-          populate: {
-            cart_items: {
-              populate: {
-                product_variation: true,  // Load all fields from product_variation
-              },
-            },
-          },
-        });
+        // Load user's current cart with items (same as applyDiscount)
+        const cartService = strapi.service("api::cart.cart");
+        const cart = await cartService.getUserCart(userId);
 
         if (!cart?.cart_items?.length) {
           return ctx.send({
@@ -101,21 +93,14 @@ export default factories.createCoreController(
           });
         }
 
-        // Compute subtotal (toman)
+        // Compute subtotal from cart (same logic as applyDiscount)
         // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
         let subtotal = 0;
         for (const item of cart.cart_items) {
-          const discountPrice = item?.product_variation?.DiscountPrice;
-          const regularPrice = item?.product_variation?.Price;
-          const price = discountPrice ?? regularPrice ?? 0;
-          const count = item?.Count || 0;
-          subtotal += Number(price) * Number(count);
-
-          // DEBUG: Log what price is being used
-          console.log(`[ELIGIBLE DEBUG] Var ID: ${item?.product_variation?.id}, DiscountPrice=${discountPrice}, RegularPrice=${regularPrice}, Using=${price}, Count=${count}`);
+          const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
+          const count = Number(item?.Count || 0);
+          subtotal += Number(price) * count;
         }
-
-        console.log(`[ELIGIBLE DEBUG SUMMARY] shippingId=${shippingId}, shippingCostParam=${shippingCostParam}, hasCode=${!!discountCodeParam}, subtotal=${subtotal}`);
 
         // Discounts: apply coupon first if provided, otherwise fallback to general discount
         let discountAmount = 0;
