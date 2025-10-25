@@ -73,6 +73,11 @@ export default factories.createCoreController(
         }
 
         // Params
+        // IMPORTANT: amount parameter should be the final قابل پرداخت (payable amount in Toman)
+        const amountTomanParam = ctx.request.query?.amount
+          ? Number(ctx.request.query.amount)
+          : undefined;
+
         const shippingId = ctx.request.query?.shippingId
           ? Number(ctx.request.query.shippingId)
           : undefined;
@@ -82,6 +87,34 @@ export default factories.createCoreController(
         const discountCodeParam =
           (ctx.request.query?.discountCode as string | undefined) ||
           (ctx.request.body?.discountCode as string | undefined);
+
+        // If amount is provided directly from frontend (قابل پرداخت), use it directly
+        if (amountTomanParam !== undefined) {
+          const amountIRR = Math.max(0, amountTomanParam) * 10;
+
+          strapi.log.info("SnappPay eligible request (direct amount)", {
+            userId,
+            amountToman: amountTomanParam,
+            amountIRR,
+          });
+
+          const snappay = strapi.service("api::payment-gateway.snappay");
+          const eligibleResp = await snappay.eligible(amountIRR);
+          strapi.log.info("SnappPay eligible result", {
+            successful: eligibleResp?.successful,
+            eligible: eligibleResp?.response?.eligible,
+            error: eligibleResp?.errorData,
+          });
+
+          const payload = {
+            eligible: !!eligibleResp?.response?.eligible,
+            title: eligibleResp?.response?.title_message,
+            description: eligibleResp?.response?.description,
+            amountIRR,
+          };
+
+          return ctx.send({ data: payload });
+        }
 
         // Load user's current cart with items (same as applyDiscount)
         const cartService = strapi.service("api::cart.cart");
