@@ -6,7 +6,7 @@ import GatewayLogs from "@/components/SuperAdmin/Order/GatewayLogs";
 import AdjustItemsPanel from "@/components/SuperAdmin/Order/AdjustItemsPanel";
 import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiClient } from "@/services";
 import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
 import { useParams } from "next/navigation";
@@ -193,6 +193,8 @@ export default function EditOrderPage() {
   const [error, setError] = useState<string | null>(null);
 
   const { id } = useParams();
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isPageVisibleRef = useRef(true);
 
   const load = () => {
     setLoading(true);
@@ -323,6 +325,49 @@ export default function EditOrderPage() {
 
   useEffect(() => {
     load();
+  }, [id]);
+
+  // Set up visibility change listener for page focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = !document.hidden;
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Set up polling for real-time order updates
+  useEffect(() => {
+    // Function to perform polling
+    const startPolling = () => {
+      // Clear any existing interval
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+
+      // Set up new interval - poll every 10 seconds
+      pollingIntervalRef.current = setInterval(() => {
+        // Only fetch if page is visible
+        if (isPageVisibleRef.current && id) {
+          load();
+        }
+      }, 10000); // 10 seconds
+    };
+
+    if (id) {
+      startPolling();
+    }
+
+    // Cleanup
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
   }, [id]);
 
   if (loading) {

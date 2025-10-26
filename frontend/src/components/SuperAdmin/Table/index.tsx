@@ -118,6 +118,8 @@ export function SuperAdminTable<TData, TValue>({
 
   const isFetchingRef = useRef(false);
   const fetchSeqRef = useRef(0);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isPageVisibleRef = useRef(true);
 
   const requestUrl = useMemo(() => {
     if (!url) return null;
@@ -190,6 +192,50 @@ export function SuperAdminTable<TData, TValue>({
       setRefresh(false);
     }
   }, [refresh, requestUrl, runFetch, setRefresh]);
+
+  // Set up visibility change listener for page focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = !document.hidden;
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Set up polling for real-time updates
+  useEffect(() => {
+    if (!requestUrl || !url) return;
+
+    // Function to perform polling
+    const startPolling = () => {
+      // Clear any existing interval
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+
+      // Set up new interval - poll every 10 seconds
+      pollingIntervalRef.current = setInterval(() => {
+        // Only fetch if page is visible
+        if (isPageVisibleRef.current && requestUrl) {
+          runFetch(requestUrl, { force: true });
+        }
+      }, 10000); // 10 seconds
+    };
+
+    // Start polling
+    startPolling();
+
+    // Cleanup
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [requestUrl, url, runFetch]);
 
   const table = useReactTable({
     data: useMemo(() => {

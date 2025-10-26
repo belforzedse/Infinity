@@ -51,6 +51,13 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   const handleVoidBarcode = async () => {
     if (voidLoading) return;
 
+    // Safety check - ensure there's actually a barcode to remove
+    if (!order.shippingBarcode) {
+      toast.error("این سفارش دارای بارکد ارسال نیست.");
+      onSuccess(); // Reload data to sync UI
+      return;
+    }
+
     const confirmed = window.confirm(
       "آیا از حذف بارکد ارسال مطمئن هستید؟ این عملیات قابل بازگشت نیست."
     );
@@ -66,9 +73,10 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
       setForceEdit(false);
       onSuccess();
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "حذف بارکد ارسال با خطا مواجه شد"
-      );
+      const errorMsg = error.response?.data?.error || "حذف بارکد ارسال با خطا مواجه شد";
+      toast.error(errorMsg);
+      // Reload data even on error to sync with server state
+      onSuccess();
     } finally {
       setVoidLoading(false);
     }
@@ -118,6 +126,9 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   const handleApply = async () => {
     if (!preview) return;
 
+    // Check if this is a SnappPay order (has transaction ID and payment token)
+    const isSnappPayOrder = Boolean(order.transactionId && order.paymentToken);
+
     const items: ItemAdjustment[] = order.items
       .filter((it) => quantities[it.id] !== it.quantity)
       .map((it) => ({
@@ -129,12 +140,27 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
     setLoading(true);
     try {
       const result = await adjustItems(order.id, items);
-      const baseMessage =
-        result.status === "cancelled"
-          ? "سفارش لغو و کل مبلغ به کیف پول بازگشت داده شد"
-          : `تغییرات اعمال شد. مبلغ ${result.refundToman.toLocaleString(
-              "fa-IR"
-            )} تومان به کیف پول بازگشت داده شد`;
+
+      // Build message based on payment method
+      let baseMessage: string;
+      if (isSnappPayOrder) {
+        // For SnappPay orders, no wallet refund - only SnappPay refund
+        baseMessage =
+          result.status === "cancelled"
+            ? "سفارش لغو شد. کل مبلغ از طریق SnappPay بازگشت داده می‌شود (تراکنش SnappPay)"
+            : `تغییرات اعمال شد. مبلغ ${result.refundToman.toLocaleString(
+                "fa-IR"
+              )} تومان از طریق SnappPay بازگشت داده می‌شود`;
+      } else {
+        // For other payment methods, refund to wallet
+        baseMessage =
+          result.status === "cancelled"
+            ? "سفارش لغو و کل مبلغ به کیف پول بازگشت داده شد"
+            : `تغییرات اعمال شد. مبلغ ${result.refundToman.toLocaleString(
+                "fa-IR"
+              )} تومان به کیف پول بازگشت داده شد`;
+      }
+
       const tokenMessage = result.paymentToken
         ? ` (توکن پرداخت SnappPay: ${result.paymentToken})`
         : "";
@@ -168,7 +194,7 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
               <li key={index}>{reason}</li>
             ))}
           </ul>
-          {hasShippingBarcode ? (
+          {hasShippingBarcode && order.shippingBarcode ? (
             <div className="mt-3 rounded-md border border-yellow-300 bg-white/60 p-3 text-xs text-yellow-900">
               <div className="mb-2">
                 <span className="font-semibold">بارکد فعلی:</span>{" "}
@@ -290,7 +316,11 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-blue-300 pt-2 text-green-700">
-                  <span className="font-semibold">مبلغ بازگشت به کیف پول:</span>
+                  <span className="font-semibold">
+                    {order.transactionId && order.paymentToken
+                      ? "مبلغ بازگشتی (SnappPay):"
+                      : "مبلغ بازگشت به کیف پول:"}
+                  </span>
                   <span className="font-semibold">
                     {preview.refundToman.toLocaleString("fa-IR")} تومان
                   </span>
