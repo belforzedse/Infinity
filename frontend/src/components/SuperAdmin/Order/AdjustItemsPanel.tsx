@@ -31,6 +31,9 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   const [forceEdit, setForceEdit] = useState(false);
   const [voidLoading, setVoidLoading] = useState(false);
 
+  // Check if this is a SnappPay order (has transaction ID and payment token)
+  const isSnappPayOrder = Boolean(order.transactionId && order.paymentToken);
+
   const hasAllowedStatus = ALLOWED_STATUSES.includes(order.orderStatus);
   const hasShippingBarcode = Boolean(order.shippingBarcode);
   const isBlocked = !hasAllowedStatus || hasShippingBarcode;
@@ -126,9 +129,6 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   const handleApply = async () => {
     if (!preview) return;
 
-    // Check if this is a SnappPay order (has transaction ID and payment token)
-    const isSnappPayOrder = Boolean(order.transactionId && order.paymentToken);
-
     const items: ItemAdjustment[] = order.items
       .filter((it) => quantities[it.id] !== it.quantity)
       .map((it) => ({
@@ -144,13 +144,12 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
       // Build message based on payment method
       let baseMessage: string;
       if (isSnappPayOrder) {
-        // For SnappPay orders, no wallet refund - only SnappPay refund
+        // For SnappPay orders, no wallet refund - just confirm the changes
+        // Don't show any refund message to user for SnappPay
         baseMessage =
           result.status === "cancelled"
-            ? "سفارش لغو شد. کل مبلغ از طریق SnappPay بازگشت داده می‌شود (تراکنش SnappPay)"
-            : `تغییرات اعمال شد. مبلغ ${result.refundToman.toLocaleString(
-                "fa-IR"
-              )} تومان از طریق SnappPay بازگشت داده می‌شود`;
+            ? "سفارش لغو شد"
+            : "تغییرات اعمال شد";
       } else {
         // For other payment methods, refund to wallet
         baseMessage =
@@ -161,8 +160,9 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
               )} تومان به کیف پول بازگشت داده شد`;
       }
 
-      const tokenMessage = result.paymentToken
-        ? ` (توکن پرداخت SnappPay: ${result.paymentToken})`
+      // Only show token message if present (for debugging purposes)
+      const tokenMessage = result.paymentToken && !isSnappPayOrder
+        ? ` (توکن پرداخت: ${result.paymentToken})`
         : "";
       toast.success(baseMessage + tokenMessage);
       setShowConfirm(false);
@@ -315,16 +315,14 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                     {preview.newTotals.total.toLocaleString("fa-IR")} تومان
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-blue-300 pt-2 text-green-700">
-                  <span className="font-semibold">
-                    {order.transactionId && order.paymentToken
-                      ? "مبلغ بازگشتی (SnappPay):"
-                      : "مبلغ بازگشت به کیف پول:"}
-                  </span>
-                  <span className="font-semibold">
-                    {preview.refundToman.toLocaleString("fa-IR")} تومان
-                  </span>
-                </div>
+                {!isSnappPayOrder && (
+                  <div className="flex justify-between border-t border-blue-300 pt-2 text-green-700">
+                    <span className="font-semibold">مبلغ بازگشت به کیف پول:</span>
+                    <span className="font-semibold">
+                      {preview.refundToman.toLocaleString("fa-IR")} تومان
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}

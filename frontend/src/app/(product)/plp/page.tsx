@@ -1,3 +1,6 @@
+// Revalidate every hour to show updated product prices, stock, and search results
+export const revalidate = 3600; // 1 hour in seconds
+
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import { API_BASE_URL } from "@/constants/api";

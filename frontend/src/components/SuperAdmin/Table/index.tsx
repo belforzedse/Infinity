@@ -205,37 +205,17 @@ export function SuperAdminTable<TData, TValue>({
     };
   }, []);
 
-  // Set up polling for real-time updates
+  // Note: Automatic polling has been disabled on super admin pages to prevent
+  // conflicts when admins are editing data. Data will update on manual refresh or
+  // after mutations (e.g., item deletion, status change).
+  // Users can manually refresh the page to see the latest data.
   useEffect(() => {
-    if (!requestUrl || !url) return;
-
-    // Function to perform polling
-    const startPolling = () => {
-      // Clear any existing interval
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-
-      // Set up new interval - poll every 10 seconds
-      pollingIntervalRef.current = setInterval(() => {
-        // Only fetch if page is visible
-        if (isPageVisibleRef.current && requestUrl) {
-          runFetch(requestUrl, { force: true });
-        }
-      }, 10000); // 10 seconds
-    };
-
-    // Start polling
-    startPolling();
-
-    // Cleanup
+    // Polling disabled - admins should manually refresh to get latest data
+    // This prevents the table from updating while an admin is in the middle of editing
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
+      // Cleanup placeholder
     };
-  }, [requestUrl, url, runFetch]);
+  }, []);
 
   const table = useReactTable({
     data: useMemo(() => {

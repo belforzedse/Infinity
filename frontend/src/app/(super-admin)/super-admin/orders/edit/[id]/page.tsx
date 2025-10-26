@@ -198,9 +198,12 @@ export default function EditOrderPage() {
 
   const load = () => {
     setLoading(true);
+    // Add cache-busting timestamp to ensure fresh data
+    const cacheBuster = `_t=${Date.now()}`;
+    const separator = "&";
     return apiClient
       .get(
-        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway`,
+        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway${separator}${cacheBuster}`,
         {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
@@ -339,34 +342,16 @@ export default function EditOrderPage() {
     };
   }, []);
 
-  // Set up polling for real-time order updates
+  // Note: Automatic polling has been disabled on the order edit page to prevent
+  // conflicts when admins are making changes. The order data will update:
+  // - When the admin manually refreshes the page
+  // - After saving changes (onSuccess callback reloads data)
+  // - After barcode operations
   useEffect(() => {
-    // Function to perform polling
-    const startPolling = () => {
-      // Clear any existing interval
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-
-      // Set up new interval - poll every 10 seconds
-      pollingIntervalRef.current = setInterval(() => {
-        // Only fetch if page is visible
-        if (isPageVisibleRef.current && id) {
-          load();
-        }
-      }, 10000); // 10 seconds
-    };
-
-    if (id) {
-      startPolling();
-    }
-
-    // Cleanup
+    // Polling disabled - prevents interrupting admin edits
+    // Manual refresh or save operations will update the data
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
+      // Cleanup placeholder
     };
   }, [id]);
 

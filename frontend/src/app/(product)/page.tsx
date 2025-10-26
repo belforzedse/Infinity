@@ -1,4 +1,7 @@
 // This page is now SSR (Server Component) by removing "use client"
+// Revalidate every hour to show updated product prices, stock, and discounts
+export const revalidate = 3600; // 1 hour in seconds
+
 import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
