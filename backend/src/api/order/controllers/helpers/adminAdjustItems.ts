@@ -605,7 +605,7 @@ async function buildSnappPayUpdatePayload(
     (newTotals.subtotal + newShipping) * 10
   );
 
-  return {
+  const snappayUpdatePayload = {
     transactionId,
     paymentToken,
     amount: Math.round(newTotals.total * 10), // Final total AFTER discount
@@ -622,4 +622,16 @@ async function buildSnappPayUpdatePayload(
       },
     ],
   };
+
+  strapi.log.info("SnappPay UPDATE payload for admin adjustment - COMPLETE PAYLOAD", {
+    orderId: order.id,
+    transactionId,
+    amount: snappayUpdatePayload.amount,
+    discountAmount: snappayUpdatePayload.discountAmount,
+    cartListTotal: snappayUpdatePayload.cartList?.[0]?.totalAmount,
+    completePayload: JSON.stringify(snappayUpdatePayload, null, 2),
+    cartListDetails: JSON.stringify(snappayUpdatePayload.cartList, null, 2),
+  });
+
+  return snappayUpdatePayload;
 }

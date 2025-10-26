@@ -200,7 +200,7 @@ export const requestSnappPayment = async (
     }
   } catch {}
 
-  strapi.log.info("SnappPay token request payload", {
+  strapi.log.info("SnappPay token request payload - FULL ORDER DATA", {
     orderId: order.id,
     transactionId,
     returnURL: snappPayload.returnURL,
@@ -208,6 +208,7 @@ export const requestSnappPayment = async (
     mobilePatternOk: /^\+98\d{10}$/.test(snappPayload.mobile),
     items: items.length,
     cartTotal: totalCartIrr,
+    fullPayload: JSON.stringify(snappPayload, null, 2),
   });
   let tokenResp;
   try {

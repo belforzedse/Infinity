@@ -164,15 +164,19 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
 
       try {
-        strapi.log.info("SnappPay token request", {
+        strapi.log.info("SnappPay token request - COMPLETE PAYLOAD", {
           amount: normalizedPayload.amount,
           hasPlus: normalizedPayload.mobile.startsWith("+"),
           mobilePatternOk: /^\+98\d{10}$/.test(normalizedPayload.mobile),
           returnURL: normalizedPayload.returnURL,
           transactionId: normalizedPayload.transactionId,
           cartTotal: normalizedPayload.cartList?.[0]?.totalAmount,
+          completePayload: JSON.stringify(normalizedPayload, null, 2),
+          cartListDetails: JSON.stringify(normalizedPayload.cartList, null, 2),
         });
-      } catch {}
+      } catch (e) {
+        strapi.log.error("Error logging SnappPay token request", e);
+      }
 
       const { data } = await http.post<SnappPayTokenResponse>(
         "/api/online/payment/v1/token",
@@ -381,20 +385,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
-      strapi.log.info(
-        "SnappPay update request " +
-          JSON.stringify(
-            {
-              transactionId: payload.transactionId,
-              paymentToken: payload.paymentToken,
-              amount: payload.amount,
-              cartTotal: payload.cartList?.[0]?.totalAmount,
-              payload,
-            },
-            null,
-            2
-          )
-      );
+      strapi.log.info("SnappPay update request - COMPLETE PAYLOAD", {
+        transactionId: payload.transactionId,
+        paymentToken: payload.paymentToken,
+        amount: payload.amount,
+        discountAmount: payload.discountAmount,
+        cartTotal: payload.cartList?.[0]?.totalAmount,
+        shippingAmount: payload.cartList?.[0]?.shippingAmount,
+        completePayload: JSON.stringify(payload, null, 2),
+        cartListDetails: JSON.stringify(payload.cartList, null, 2),
+      });
       const { data } = await http.post<SnappPaySimpleResponse>(
         "/api/online/payment/v1/update",
         payload,
@@ -410,6 +410,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         successful: data?.successful,
         errorCode: data?.errorData?.errorCode,
         errorMessage: data?.errorData?.message,
+        completeResponse: JSON.stringify(data, null, 2),
       });
       return data;
     } catch (error: any) {
