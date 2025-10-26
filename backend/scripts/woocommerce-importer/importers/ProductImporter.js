@@ -281,69 +281,42 @@ class ProductImporter {
       if (productId) {
         // Only handle images if enabled in config
         if (this.config.import.images.enableUpload) {
-          // Fetch existing product to check if it already has images
-          let existingProduct = null;
-          if (existingStrapiId && !this.config.import.images.updateProductsWithExistingImages) {
-            try {
-              const response = await this.strapiClient.get('/products', {
-                filters: { id: { $eq: existingStrapiId } },
-                fields: ['id', 'CoverImage', 'Media'],
-                pagination: { limit: 1 }
-              });
-
-              if (response && Array.isArray(response) && response.length > 0) {
-                existingProduct = response[0];
-              }
-            } catch (error) {
-              this.logger.debug(`⚠️ Could not fetch existing product for image check: ${error.message}`);
-            }
-          }
-
-          // Check if we should skip image updates for products that already have images
-          const shouldSkipImages =
-            !this.config.import.images.updateProductsWithExistingImages &&
-            existingProduct &&
-            (existingProduct.CoverImage || (existingProduct.Media && existingProduct.Media.length > 0));
-
-          if (shouldSkipImages) {
-            this.logger.info(`⏭️ Product already has images and updateProductsWithExistingImages is disabled - skipping: ${wcProduct.name}`);
-          } else {
-            const imageResults = await this.handleProductImages(wcProduct, productId);
+          // Always attempt to update images - no skip logic based on existing images
+          const imageResults = await this.handleProductImages(wcProduct, productId);
 
             if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
-              try {
-                const updateData = {};
+            try {
+              const updateData = {};
 
-                if (imageResults.coverImageId) {
-                  updateData.CoverImage = imageResults.coverImageId;
-                }
-
-                if (imageResults.galleryImageIds.length > 0) {
-                  updateData.Media = imageResults.galleryImageIds;
-                }
-
-                // Only update if we have data to update
-                if (Object.keys(updateData).length > 0) {
-                  this.logger.debug(`🔍 DEBUG: Attempting to update product ${productId} with image data:`, JSON.stringify(updateData, null, 2));
-
-                  try {
-                    await this.strapiClient.updateProduct(productId, updateData);
-                    this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
-                  } catch (apiError) {
-                    // Log detailed error info for debugging
-                    this.logger.error(`❌ Image update API error for product ${productId}:`, apiError.message);
-                    if (apiError.response) {
-                      this.logger.error(`   Status: ${apiError.response.status}`);
-                      this.logger.error(`   Response data:`, JSON.stringify(apiError.response.data, null, 2));
-                    }
-                    throw apiError;
-                  }
-                }
-              } catch (imageUpdateError) {
-                // If image update fails, log warning but continue with next product
-                // The product itself was successfully created/updated
-                this.logger.warn(`⚠️ Failed to sync images for product ${wcProduct.name}: ${imageUpdateError.message}`);
+              if (imageResults.coverImageId) {
+                updateData.CoverImage = imageResults.coverImageId;
               }
+
+              if (imageResults.galleryImageIds.length > 0) {
+                updateData.Media = imageResults.galleryImageIds;
+              }
+
+              // Only update if we have data to update
+              if (Object.keys(updateData).length > 0) {
+                this.logger.debug(`🔍 DEBUG: Attempting to update product ${productId} with image data:`, JSON.stringify(updateData, null, 2));
+
+                try {
+                  await this.strapiClient.updateProduct(productId, updateData);
+                  this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
+                } catch (apiError) {
+                  // Log detailed error info for debugging
+                  this.logger.error(`❌ Image update API error for product ${productId}:`, apiError.message);
+                  if (apiError.response) {
+                    this.logger.error(`   Status: ${apiError.response.status}`);
+                    this.logger.error(`   Response data:`, JSON.stringify(apiError.response.data, null, 2));
+                  }
+                  throw apiError;
+                }
+              }
+            } catch (imageUpdateError) {
+              // If image update fails, log warning but continue with next product
+              // The product itself was successfully created/updated
+              this.logger.warn(`⚠️ Failed to sync images for product ${wcProduct.name}: ${imageUpdateError.message}`);
             }
           }
         } else {
