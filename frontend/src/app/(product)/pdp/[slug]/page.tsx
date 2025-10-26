@@ -1,3 +1,6 @@
+// Revalidate every hour to show updated product prices, stock, and reviews
+export const revalidate = 3600; // 1 hour in seconds
+
 import Breadcrumb from "@/components/Kits/Breadcrumb";
 import Hero from "@/components/PDP/Hero";
 import OffersList from "@/components/PDP/OffersList";
