@@ -617,6 +617,8 @@ async function buildSnappPayUpdatePayload(
         cartId: order.id,
         cartItems,
         isShipmentIncluded: true,
+        isTaxIncluded: true,
+        taxAmount: 0,
         shippingAmount: Math.round(newShipping * 10),
         totalAmount: totalAmountBeforeDiscount, // Total BEFORE discount
       },

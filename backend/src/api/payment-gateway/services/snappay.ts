@@ -43,6 +43,8 @@ type SnappPayTokenRequest = {
       commissionType: number; // 1,2,3,...
     }>;
     isShipmentIncluded: boolean;
+    isTaxIncluded: boolean;
+    taxAmount: number; // IRR (always 0, tax disabled)
     shippingAmount: number; // IRR
     totalAmount: number; // IRR
   }>;

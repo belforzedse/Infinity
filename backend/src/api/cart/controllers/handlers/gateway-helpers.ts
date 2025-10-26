@@ -161,6 +161,8 @@ export const requestSnappPayment = async (
         cartId: order.id,
         cartItems: items,
         isShipmentIncluded: true,
+        isTaxIncluded: true,
+        taxAmount: 0,
         shippingAmount: shippingIrr,
         totalAmount: totalCartIrr,
       },
