@@ -200,15 +200,18 @@ export const requestSnappPayment = async (
     }
   } catch {}
 
-  strapi.log.info("SnappPay token request payload - FULL ORDER DATA", {
+  // Log the complete SnappPay payload with all details
+  const payloadForLog = JSON.stringify(snappPayload, null, 2);
+  strapi.log.debug("========== SNAPPAY TOKEN REQUEST PAYLOAD START ==========");
+  strapi.log.debug(payloadForLog);
+  strapi.log.debug("========== SNAPPAY TOKEN REQUEST PAYLOAD END ==========");
+  strapi.log.info("SnappPay token request summary", {
     orderId: order.id,
     transactionId,
-    returnURL: snappPayload.returnURL,
-    mobileHasPlus: snappPayload.mobile.startsWith("+"),
-    mobilePatternOk: /^\+98\d{10}$/.test(snappPayload.mobile),
-    items: items.length,
-    cartTotal: totalCartIrr,
-    fullPayload: JSON.stringify(snappPayload, null, 2),
+    itemCount: items.length,
+    cartTotalIRR: totalCartIrr,
+    cartTotalToman: Math.round(totalCartIrr / 10),
+    mobileValid: /^\+98\d{10}$/.test(snappPayload.mobile),
   });
   let tokenResp;
   try {

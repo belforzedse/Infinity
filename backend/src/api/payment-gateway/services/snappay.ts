@@ -164,15 +164,19 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
 
       try {
-        strapi.log.info("SnappPay token request - COMPLETE PAYLOAD", {
+        const payloadStr = JSON.stringify(normalizedPayload, null, 2);
+        const cartListStr = JSON.stringify(normalizedPayload.cartList, null, 2);
+        strapi.log.debug("========== SNAPPAY SERVICE TOKEN REQUEST PAYLOAD START ==========");
+        strapi.log.debug(payloadStr);
+        strapi.log.debug("========== SNAPPAY SERVICE TOKEN REQUEST PAYLOAD END ==========");
+        strapi.log.info("SnappPay service token request summary", {
           amount: normalizedPayload.amount,
-          hasPlus: normalizedPayload.mobile.startsWith("+"),
-          mobilePatternOk: /^\+98\d{10}$/.test(normalizedPayload.mobile),
-          returnURL: normalizedPayload.returnURL,
-          transactionId: normalizedPayload.transactionId,
+          amountToman: Math.round((normalizedPayload.amount || 0) / 10),
+          discountAmount: normalizedPayload.discountAmount,
           cartTotal: normalizedPayload.cartList?.[0]?.totalAmount,
-          completePayload: JSON.stringify(normalizedPayload, null, 2),
-          cartListDetails: JSON.stringify(normalizedPayload.cartList, null, 2),
+          cartTotalToman: Math.round((normalizedPayload.cartList?.[0]?.totalAmount || 0) / 10),
+          transactionId: normalizedPayload.transactionId,
+          mobileValid: /^\+98\d{10}$/.test(normalizedPayload.mobile),
         });
       } catch (e) {
         strapi.log.error("Error logging SnappPay token request", e);
@@ -385,16 +389,24 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
-      strapi.log.info("SnappPay update request - COMPLETE PAYLOAD", {
-        transactionId: payload.transactionId,
-        paymentToken: payload.paymentToken,
-        amount: payload.amount,
-        discountAmount: payload.discountAmount,
-        cartTotal: payload.cartList?.[0]?.totalAmount,
-        shippingAmount: payload.cartList?.[0]?.shippingAmount,
-        completePayload: JSON.stringify(payload, null, 2),
-        cartListDetails: JSON.stringify(payload.cartList, null, 2),
-      });
+      try {
+        const updatePayloadStr = JSON.stringify(payload, null, 2);
+        strapi.log.debug("========== SNAPPAY SERVICE UPDATE PAYLOAD START ==========");
+        strapi.log.debug(updatePayloadStr);
+        strapi.log.debug("========== SNAPPAY SERVICE UPDATE PAYLOAD END ==========");
+        strapi.log.info("SnappPay service update request summary", {
+          transactionId: payload.transactionId,
+          amount: payload.amount,
+          amountToman: Math.round((payload.amount || 0) / 10),
+          discountAmount: payload.discountAmount,
+          discountAmountToman: Math.round((payload.discountAmount || 0) / 10),
+          cartTotal: payload.cartList?.[0]?.totalAmount,
+          cartTotalToman: Math.round((payload.cartList?.[0]?.totalAmount || 0) / 10),
+          shippingAmount: payload.cartList?.[0]?.shippingAmount,
+        });
+      } catch (e) {
+        strapi.log.error("Error logging SnappPay update request", e);
+      }
       const { data } = await http.post<SnappPaySimpleResponse>(
         "/api/online/payment/v1/update",
         payload,
@@ -406,11 +418,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           timeout: 25_000,
         }
       );
-      strapi.log.info("SnappPay update response", {
+      try {
+        const responseStr = JSON.stringify(data, null, 2);
+        strapi.log.debug("========== SNAPPAY UPDATE RESPONSE START ==========");
+        strapi.log.debug(responseStr);
+        strapi.log.debug("========== SNAPPAY UPDATE RESPONSE END ==========");
+      } catch {}
+      strapi.log.info("SnappPay update response summary", {
         successful: data?.successful,
         errorCode: data?.errorData?.errorCode,
         errorMessage: data?.errorData?.message,
-        completeResponse: JSON.stringify(data, null, 2),
       });
       return data;
     } catch (error: any) {
