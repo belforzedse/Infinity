@@ -384,6 +384,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         commissionType: number;
       }>;
       isShipmentIncluded: boolean;
+      isTaxIncluded: boolean;
+      taxAmount: number; // IRR (always 0, tax disabled)
       shippingAmount: number;
       totalAmount: number; // IRR, total BEFORE discount (items + shipping)
     }>;
