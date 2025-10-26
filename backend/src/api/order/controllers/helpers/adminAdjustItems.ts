@@ -623,14 +623,19 @@ async function buildSnappPayUpdatePayload(
     ],
   };
 
-  strapi.log.info("SnappPay UPDATE payload for admin adjustment - COMPLETE PAYLOAD", {
+  const updatePayloadStr = JSON.stringify(snappayUpdatePayload, null, 2);
+  strapi.log.debug("========== SNAPPAY UPDATE PAYLOAD START ==========");
+  strapi.log.debug(updatePayloadStr);
+  strapi.log.debug("========== SNAPPAY UPDATE PAYLOAD END ==========");
+  strapi.log.info("SnappPay update payload summary", {
     orderId: order.id,
     transactionId,
     amount: snappayUpdatePayload.amount,
+    amountToman: Math.round((snappayUpdatePayload.amount || 0) / 10),
     discountAmount: snappayUpdatePayload.discountAmount,
+    discountAmountToman: Math.round((snappayUpdatePayload.discountAmount || 0) / 10),
     cartListTotal: snappayUpdatePayload.cartList?.[0]?.totalAmount,
-    completePayload: JSON.stringify(snappayUpdatePayload, null, 2),
-    cartListDetails: JSON.stringify(snappayUpdatePayload.cartList, null, 2),
+    cartListTotalToman: Math.round((snappayUpdatePayload.cartList?.[0]?.totalAmount || 0) / 10),
   });
 
   return snappayUpdatePayload;
