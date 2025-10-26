@@ -216,7 +216,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       }
     }
 
-    const taxPercent = Number(order.contract?.TaxPercent || 10);
+    // Tax is completely disabled (always 0)
     const discountRate =
       originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
     const effectiveDiscount = Math.max(
@@ -226,21 +226,16 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     const newTotals = computeTotals(
       newSubtotal,
       effectiveDiscount,
-      taxPercent,
       newShipping
     );
 
     const oldTotal = Number(order.contract?.Amount || 0);
     const paidAmount = computePaidAmountToman(order);
     const requestedRefund = paidAmount - Math.max(newTotals.total, 0);
-    // Do not refund more than originally paid and exclude tax from the refund.
-    const refundableWithoutTax = Math.max(
-      0,
-      requestedRefund - Math.max(newTotals.tax, 0)
-    );
+    // Calculate refund (tax is disabled, so no tax exclusion)
     const refundToman = Math.max(
       0,
-      Math.min(paidAmount, refundableWithoutTax)
+      Math.min(paidAmount, requestedRefund)
     );
 
     if (isDryRun) {
@@ -604,10 +599,10 @@ async function buildSnappPayUpdatePayload(
     })
   );
 
-  // Calculate totalAmount (before discount): subtotal + shipping + tax
-  // According to SnappPay docs: totalAmount = items + shipping + tax (BEFORE discount)
+  // Calculate totalAmount (before discount): subtotal + shipping (tax disabled)
+  // According to SnappPay docs: totalAmount = items + shipping (BEFORE discount)
   const totalAmountBeforeDiscount = Math.round(
-    (newTotals.subtotal + newShipping + newTotals.tax) * 10
+    (newTotals.subtotal + newShipping) * 10
   );
 
   return {
@@ -622,9 +617,7 @@ async function buildSnappPayUpdatePayload(
         cartId: order.id,
         cartItems,
         isShipmentIncluded: true,
-        isTaxIncluded: true,
         shippingAmount: Math.round(newShipping * 10),
-        taxAmount: Math.round(newTotals.tax * 10),
         totalAmount: totalAmountBeforeDiscount, // Total BEFORE discount
       },
     ],

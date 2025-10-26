@@ -69,22 +69,28 @@ class ImageUploader {
 
   /**
    * Download and upload all gallery images for a product
+   * @param {Object} wcProduct - WooCommerce product
+   * @param {number} strapiProductId - Strapi product ID
+   * @param {number} maxImages - Maximum number of gallery images to upload (default: unlimited)
    */
-  async handleGalleryImages(wcProduct, strapiProductId) {
+  async handleGalleryImages(wcProduct, strapiProductId, maxImages = 999) {
     try {
       if (!wcProduct.images || wcProduct.images.length <= 1) {
         this.logger.debug(`📸 No gallery images for product: ${wcProduct.name}`);
         return [];
       }
 
-      this.logger.info(`📸 Processing ${wcProduct.images.length - 1} gallery images for: ${wcProduct.name}`);
-      
+      const totalGalleryImages = wcProduct.images.length - 1;
+      const imagesToProcess = Math.min(totalGalleryImages, maxImages);
+
+      this.logger.info(`📸 Processing ${imagesToProcess}/${totalGalleryImages} gallery images for: ${wcProduct.name}${maxImages < 999 ? ` (max: ${maxImages})` : ''}`);
+
       const uploadedImages = [];
-      
+
       // Skip first image (already used as cover) and process the rest
-      for (let i = 1; i < wcProduct.images.length; i++) {
+      for (let i = 1; i < wcProduct.images.length && uploadedImages.length < maxImages; i++) {
         const imageData = wcProduct.images[i];
-        
+
         if (!imageData.src) continue;
 
         const uploadedImage = await this.downloadAndUploadImage(

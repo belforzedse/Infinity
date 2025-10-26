@@ -43,9 +43,7 @@ type SnappPayTokenRequest = {
       commissionType: number; // 1,2,3,...
     }>;
     isShipmentIncluded: boolean;
-    isTaxIncluded: boolean;
     shippingAmount: number; // IRR
-    taxAmount: number; // IRR
     totalAmount: number; // IRR
   }>;
 };
@@ -376,10 +374,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         commissionType: number;
       }>;
       isShipmentIncluded: boolean;
-      isTaxIncluded: boolean;
       shippingAmount: number;
-      taxAmount: number;
-      totalAmount: number; // IRR, total BEFORE discount (items + shipping + tax)
+      totalAmount: number; // IRR, total BEFORE discount (items + shipping)
     }>;
   }) {
     const http = createHttp();
