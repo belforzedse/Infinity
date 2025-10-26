@@ -163,10 +163,19 @@ async function showImportPreview(type, options) {
 
 // Import options
 let importOptions = {
-  categories: { enabled: false, limit: 100, page: 1, dryRun: true },
+  categories: { enabled: true, limit: 1000, page: 1, dryRun: false },
   users: { enabled: false, limit: 100, page: 1, dryRun: true },
-  products: { enabled: false, limit: 50, page: 1, dryRun: true, categoryIds: [] },
-  variations: { enabled: false, limit: 100, page: 1, dryRun: true },
+  products: {
+    enabled: true,
+    limit: 100000, // All products
+    page: 1,
+    dryRun: false,
+    categoryIds: [],
+    // Image options
+    maxImagesPerProduct: 3, // Default: 3 images per product
+    updateProductsWithExistingImages: false // Default: skip products with existing images
+  },
+  variations: { enabled: true, limit: 1000000000, page: 1, dryRun: false },
   orders: { enabled: false, limit: 50, page: 1, dryRun: true }
 };
 
@@ -192,6 +201,11 @@ async function showMainMenu() {
     console.log(`     Limit: ${opts.limit} | Dry Run: ${opts.dryRun ? 'Yes' : 'No'}`);
     if (opts.categoryIds && opts.categoryIds.length > 0) {
       console.log(`     Categories: [${opts.categoryIds.join(', ')}]`);
+    }
+    // Show image options for products
+    if (type === 'products') {
+      console.log(`     Max Images: ${opts.maxImagesPerProduct === 999 ? 'Unlimited' : opts.maxImagesPerProduct}`);
+      console.log(`     Update Existing Images: ${opts.updateProductsWithExistingImages ? 'Yes' : 'No'}`);
     }
   });
 
@@ -259,6 +273,31 @@ async function configureImporter(type) {
       if (opts.categoryIds.length > 0) {
         console.log(`✅ Filtering by categories: [${opts.categoryIds.join(', ')}]`);
       }
+    }
+
+    // Image configuration options
+    console.log('\n🖼️  Image Configuration:');
+
+    // Max images per product
+    const maxImagesInput = await prompt(
+      `Max gallery images per product? (default: ${opts.maxImagesPerProduct}): `
+    );
+    if (maxImagesInput.trim()) {
+      const maxImages = parseInt(maxImagesInput);
+      if (!isNaN(maxImages) && maxImages > 0) {
+        opts.maxImagesPerProduct = maxImages;
+        console.log(`✅ Max images per product set to: ${maxImages}`);
+      }
+    }
+
+    // Update existing images toggle
+    const updateExistingInput = await prompt(
+      `Update products that already have images? (y/n, default: n): `
+    );
+    if (updateExistingInput.trim()) {
+      opts.updateProductsWithExistingImages = updateExistingInput.toLowerCase() === 'y';
+      const status = opts.updateProductsWithExistingImages ? '✅ ENABLED' : '⭕ DISABLED';
+      console.log(`${status} - Will ${opts.updateProductsWithExistingImages ? '' : 'NOT '}update products with existing images`);
     }
   }
 
@@ -340,6 +379,10 @@ async function runAllImporters() {
           dryRun: opts.dryRun
         });
       } else if (type === 'products') {
+        // Update config with image options before importing
+        config.import.images.maxImagesPerProduct = opts.maxImagesPerProduct;
+        config.import.images.updateProductsWithExistingImages = opts.updateProductsWithExistingImages;
+
         const importer = new ProductImporter(config, logger);
         stats[type] = await importer.import({
           limit: opts.limit,

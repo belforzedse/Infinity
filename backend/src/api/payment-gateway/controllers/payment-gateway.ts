@@ -194,15 +194,10 @@ export default factories.createCoreController(
           if (shipping?.Price) shippingCost = Number(shipping.Price);
         }
 
-        // Tax disabled
-        const taxPercent = 0;
-        const taxAmount = ((subtotal - discountAmount) * taxPercent) / 100;
-
-        // Total (toman) → convert to IRR
+        // Total (toman) → convert to IRR (tax disabled)
         const totalToman =
           Math.round(subtotal) -
           Math.round(discountAmount) +
-          Math.round(taxAmount) +
           Math.round(shippingCost);
         const amountIRR = Math.max(0, totalToman) * 10;
 
@@ -216,7 +211,6 @@ export default factories.createCoreController(
           debugAmounts: {
             subtotalToman: Math.round(subtotal),
             discountToman: Math.round(discountAmount),
-            taxToman: Math.round(taxAmount),
             shippingToman: Math.round(shippingCost),
             totalToman,
             totalIRR: amountIRR,
@@ -348,9 +342,7 @@ export default factories.createCoreController(
                 },
               ],
               isShipmentIncluded: true,
-              isTaxIncluded: true,
               shippingAmount: 0,
-              taxAmount: 0,
               totalAmount: Number(amountIRR),
             },
           ],

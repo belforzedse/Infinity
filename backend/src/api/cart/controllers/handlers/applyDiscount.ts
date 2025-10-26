@@ -118,11 +118,8 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
       discountAmount = Number(coupon.Amount || 0);
     }
 
-    // Compose preview totals (no persistence here)
-    const taxPercent = 0; // Tax disabled
-    const taxable = Math.max(eligibleSubtotal - discountAmount, 0);
-    const tax = (taxable * taxPercent) / 100;
-    const total = Math.max(subtotal - discountAmount + tax + finalShipping, 0);
+    // Compose preview totals (no persistence here, tax disabled)
+    const total = Math.max(subtotal - discountAmount + finalShipping, 0);
 
     // Re-check SnappPay eligibility with discounted total (convert toman → IRR)
     let snappEligible: any = null;
@@ -153,10 +150,8 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
         summary: {
           subtotal: Math.round(subtotal),
           eligibleSubtotal: Math.round(eligibleSubtotal),
-          tax: Math.round(tax),
           shipping: Math.round(finalShipping),
           total: Math.round(total),
-          taxPercent,
         },
         snappEligible: snappEligible
           ? {

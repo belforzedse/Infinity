@@ -1,235 +1,264 @@
 {
   "520425": {
     "strapiId": 3,
-    "importedAt": "2025-10-25T10:15:11.976Z",
+    "importedAt": "2025-10-25T14:05:37.757Z",
     "name": "پیراهن کبریتی B00272",
     "slug": "pirahanb00272",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520426": {
     "strapiId": 4,
-    "importedAt": "2025-10-25T10:15:24.845Z",
+    "importedAt": "2025-10-25T14:05:42.358Z",
     "name": "مانتو نخی آستین بند دار(B00403)",
     "slug": "mantob00403",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520427": {
     "strapiId": 5,
-    "importedAt": "2025-10-25T10:15:50.175Z",
+    "importedAt": "2025-10-25T14:05:49.667Z",
     "name": "دامن کوتاه ساسبندی b00464",
     "slug": "daman-b00464",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520428": {
     "strapiId": 6,
-    "importedAt": "2025-10-25T10:16:11.830Z",
+    "importedAt": "2025-10-25T14:05:56.517Z",
     "name": "شلوار جین رنگی (b00562)",
     "slug": "shalvarb00562",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520429": {
     "strapiId": 7,
-    "importedAt": "2025-10-25T10:16:34.398Z",
+    "importedAt": "2025-10-25T14:06:02.672Z",
     "name": "مانتو آستین دوبل (B00563)",
     "slug": "mantub00563",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520430": {
     "strapiId": 8,
-    "importedAt": "2025-10-25T10:16:50.949Z",
+    "importedAt": "2025-10-25T14:06:07.553Z",
     "name": "سوتین گیپوری جلو باز شو 00205",
     "slug": "%d8%b3%d9%88%d8%aa%db%8c%d9%86-%da%af%db%8c%d9%be%d9%88%d8%b1%db%8c-%d8%ac%d9%84%d9%88-%d8%a8%d8%a7%d8%b2-%d8%b4%d9%88-00205",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520431": {
     "strapiId": 9,
-    "importedAt": "2025-10-25T10:17:28.852Z",
+    "importedAt": "2025-10-25T14:06:19.660Z",
     "name": "پیراهن کوتاه کبریتی (B00596)",
     "slug": "pirahan00596",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520432": {
     "strapiId": 10,
-    "importedAt": "2025-10-25T10:17:47.722Z",
+    "importedAt": "2025-10-25T14:06:27.192Z",
     "name": "مانتو مشکی 00601",
     "slug": "manto-meshki00601",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520434": {
     "strapiId": 11,
-    "importedAt": "2025-07-26T02:14:33.275Z",
+    "importedAt": "2025-10-25T14:06:36.878Z",
     "name": "پیراهن پشت پاپیونی (b00621)",
     "slug": "pirahan-posht-papiony-b00621",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520435": {
     "strapiId": 12,
-    "importedAt": "2025-07-26T02:14:41.508Z",
+    "importedAt": "2025-10-25T14:06:42.860Z",
     "name": "دامن ساسبندی b00627",
     "slug": "daman-sasbandy-b00627",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520438": {
     "strapiId": 13,
-    "importedAt": "2025-07-26T02:14:48.422Z",
+    "importedAt": "2025-10-25T14:06:48.503Z",
     "name": "شلوار کلاسیک منگو m00112",
     "slug": "shalvar-classic-mengo-m00112",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520441": {
     "strapiId": 14,
-    "importedAt": "2025-07-26T02:14:54.617Z",
+    "importedAt": "2025-10-25T14:06:53.404Z",
     "name": "بافت موهر یقه گرد m0043",
     "slug": "baft-moher-yaghe-gerd-m0043",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520442": {
     "strapiId": 15,
-    "importedAt": "2025-07-26T02:15:12.121Z",
+    "importedAt": "2025-10-25T14:07:01.266Z",
     "name": "پلیور بافت مردانه m00157",
     "slug": "poliver-baft-mardane-m00157",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520443": {
     "strapiId": 16,
-    "importedAt": "2025-07-26T02:15:18.914Z",
+    "importedAt": "2025-10-25T14:07:06.000Z",
     "name": "دامن پایین زیپ (M0079)",
     "slug": "daman-paiin-zip-m0079",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520444": {
     "strapiId": 17,
-    "importedAt": "2025-07-26T02:15:25.644Z",
+    "importedAt": "2025-10-25T14:07:11.373Z",
     "name": "تاپ کبریتی بابونه M00195",
     "slug": "chamomile-match-top-m00195",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520447": {
     "strapiId": 18,
-    "importedAt": "2025-07-26T02:15:38.650Z",
+    "importedAt": "2025-10-25T14:07:15.151Z",
     "name": "دامن ساسبندی M00116",
     "slug": "daman-sas-bandy-m00116",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520451": {
     "strapiId": 19,
-    "importedAt": "2025-07-26T02:15:49.650Z",
+    "importedAt": "2025-10-25T14:07:22.217Z",
     "name": "پلیور یقه هفت سوزنی M00190",
     "slug": "poliver-yaghe-haft-sozani-m00190",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520466": {
     "strapiId": 20,
-    "importedAt": "2025-07-26T02:15:54.207Z",
+    "importedAt": "2025-10-25T14:07:25.343Z",
     "name": "هودی جیبدار (m00240)",
     "slug": "hody-jibdar-m00240",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520469": {
     "strapiId": 21,
-    "importedAt": "2025-07-26T02:16:05.696Z",
+    "importedAt": "2025-10-25T14:07:31.360Z",
     "name": "شکت چهارخونه داخل تدی (m00110)",
     "slug": "shekt-chaharkhone-dakhel-tedym00110",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520472": {
     "strapiId": 22,
-    "importedAt": "2025-07-26T02:16:15.916Z",
+    "importedAt": "2025-10-25T14:07:38.190Z",
     "name": "بافت یقه ب ب جلو مروارید (m00215)",
     "slug": "baft-yagh-b-b-jlo-morvarid-m00215",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520477": {
     "strapiId": 23,
-    "importedAt": "2025-07-26T02:16:21.817Z",
+    "importedAt": "2025-10-25T14:07:42.631Z",
     "name": "شلوار راحتی اسپرت m00130",
     "slug": "comfortable-sports-pants-m00130",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520479": {
     "strapiId": 24,
-    "importedAt": "2025-07-26T02:16:34.176Z",
+    "importedAt": "2025-10-25T14:07:50.536Z",
     "name": "دامن ساس بندی m00247",
     "slug": "daman-sas-bandy-m00247",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520481": {
     "strapiId": 25,
-    "importedAt": "2025-07-26T02:16:45.041Z",
+    "importedAt": "2025-10-25T14:07:56.638Z",
     "name": "کراپ کبریتی یقه 5 سانت m00260",
     "slug": "match-crop-collar-5-cm-m00260",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520483": {
     "strapiId": 26,
-    "importedAt": "2025-07-26T02:16:53.458Z",
+    "importedAt": "2025-10-25T14:08:02.434Z",
     "name": "شلوار جاگر m00262",
     "slug": "shalwar-jagar-m00262",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520484": {
     "strapiId": 27,
-    "importedAt": "2025-07-26T02:16:59.546Z",
+    "importedAt": "2025-10-25T14:08:05.879Z",
     "name": "کراپ کبریتی یقه اسکی m00261",
     "slug": "match-crop-m00261-ski-neck",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520964": {
     "strapiId": 28,
-    "importedAt": "2025-07-26T02:17:07.609Z",
+    "importedAt": "2025-10-25T14:08:10.938Z",
     "name": "دامن بافت موهر m00272",
     "slug": "daman-aft-moher-m00272",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "520965": {
     "strapiId": 29,
-    "importedAt": "2025-07-26T02:17:13.157Z",
+    "importedAt": "2025-10-25T14:08:15.616Z",
     "name": "کت چرم m00292",
     "slug": "kot-charm-m00292",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520966": {
     "strapiId": 30,
-    "importedAt": "2025-07-26T02:17:20.744Z",
+    "importedAt": "2025-10-25T14:08:22.479Z",
     "name": "شورت کبریتی پاپیونی 00302",
     "slug": "bow-match-shorts-00302",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520967": {
     "strapiId": 31,
-    "importedAt": "2025-07-26T02:17:26.922Z",
+    "importedAt": "2025-10-25T14:08:27.734Z",
     "name": "شورت بک لس ضربدری FINGCOO 00305",
     "slug": "%d8%b4%d9%88%d8%b1%d8%aa-%d8%a8%da%a9-%d9%84%d8%b3-%d8%b6%d8%b1%d8%a8%d8%af%d8%b1%db%8c-fingcoo-00305",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "520968": {
     "strapiId": 32,
@@ -801,1251 +830,1407 @@
   },
   "522344": {
     "strapiId": 106,
-    "importedAt": "2025-10-25T10:24:23.323Z",
+    "importedAt": "2025-10-25T14:13:23.269Z",
     "name": "کراپ کبریتی آستین چین A00172",
     "slug": "a00172-chinese-sleeve-match-crop",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522348": {
     "strapiId": 107,
-    "importedAt": "2025-10-25T10:24:23.704Z",
+    "importedAt": "2025-10-25T14:13:31.594Z",
     "name": "شورت زبرا خرسی 00465 🐻",
     "slug": "zebra-bear-shorts-00465",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522349": {
     "strapiId": 108,
-    "importedAt": "2025-10-25T10:24:24.375Z",
+    "importedAt": "2025-10-25T14:13:39.666Z",
     "name": "شورت آدم فضایی 00467",
     "slug": "space-man-shorts-00467",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522350": {
     "strapiId": 109,
-    "importedAt": "2025-10-25T10:24:25.048Z",
+    "importedAt": "2025-10-25T14:13:46.314Z",
     "name": "شورت فانتزی برگ سبز 00469",
     "slug": "green-leaf-fantasy-shorts-00469",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522351": {
     "strapiId": 110,
-    "importedAt": "2025-10-25T10:24:25.781Z",
+    "importedAt": "2025-10-25T14:14:04.701Z",
     "name": "پیراهن مجلسی آستین پفی A00168",
     "slug": "dress-shirt-with-puff-sleeves-a00168",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "522353": {
     "strapiId": 111,
-    "importedAt": "2025-10-25T10:24:26.622Z",
+    "importedAt": "2025-10-25T14:14:15.662Z",
     "name": "پیراهن مردانه راه راه A00145",
     "slug": "mens-striped-shirt-a00145",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522354": {
     "strapiId": 112,
-    "importedAt": "2025-10-25T10:24:27.413Z",
+    "importedAt": "2025-10-25T14:14:25.387Z",
     "name": "شلوارک نخی طرحدار و ساده A00138",
     "slug": "patterned-and-simple-cotton-pants-a00138",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522379": {
     "strapiId": 113,
-    "importedAt": "2025-10-25T10:24:28.117Z",
+    "importedAt": "2025-10-25T14:14:30.761Z",
     "name": "پیراهن خامه دوزی A00169",
     "slug": "cream-embroidered-shirt-a00169",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522380": {
     "strapiId": 114,
-    "importedAt": "2025-10-25T10:24:28.431Z",
+    "importedAt": "2025-10-25T14:14:42.053Z",
     "name": "شومیز حریر جلو مروارید A00171",
     "slug": "pearl-front-silk-paper-a00171",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522398": {
     "strapiId": 115,
-    "importedAt": "2025-10-25T10:24:28.783Z",
+    "importedAt": "2025-10-25T14:14:49.816Z",
     "name": "کراپ ساده آستین چین A00173",
     "slug": "a00173-simple-sleeve-pleated-crop",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "522400": {
     "strapiId": 116,
-    "importedAt": "2025-10-25T10:24:30.354Z",
+    "importedAt": "2025-10-25T14:15:00.508Z",
     "name": "پیراهن طرحدار A00176",
     "slug": "patterned-shirt-a00176",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522430": {
     "strapiId": 117,
-    "importedAt": "2025-10-25T10:24:31.092Z",
+    "importedAt": "2025-10-25T14:15:06.954Z",
     "name": "سوتین بالا گیپور 00472",
     "slug": "guipure-top-bra-00472",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522431": {
     "strapiId": 118,
-    "importedAt": "2025-10-25T10:24:34.894Z",
+    "importedAt": "2025-10-25T14:15:14.779Z",
     "name": "تونیک کبریتی و ساده A00136",
     "slug": "match-and-simple-tonic-a00136",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522432": {
     "strapiId": 119,
-    "importedAt": "2025-10-25T10:24:35.844Z",
+    "importedAt": "2025-10-25T14:15:21.681Z",
     "name": "ست کبریتی هارنس دار 00454",
     "slug": "fantasy-match-set-00454",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522433": {
     "strapiId": 120,
-    "importedAt": "2025-10-25T10:24:37.758Z",
+    "importedAt": "2025-10-25T14:15:29.442Z",
     "name": "شومیز جلو چین A00170",
     "slug": "a00170-front-fold-paper",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522465": {
     "strapiId": 121,
-    "importedAt": "2025-10-25T10:24:38.836Z",
+    "importedAt": "2025-10-25T14:15:36.410Z",
     "name": "ست نیم تنه شلوارک کبریتی 00460",
     "slug": "00460-match-shorts-bustier-set",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522466": {
     "strapiId": 122,
-    "importedAt": "2025-10-25T10:24:40.394Z",
+    "importedAt": "2025-10-25T14:16:01.945Z",
     "name": "تیشرت طرحدار A00202",
     "slug": "patterned-t-shirt-a00202",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "522467": {
     "strapiId": 123,
-    "importedAt": "2025-10-25T10:24:40.748Z",
+    "importedAt": "2025-10-25T14:16:07.531Z",
     "name": "کراپ کبریتی یقه سه سانت A00157",
     "slug": "three-centimeter-collar-match-crop-a00157",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522468": {
     "strapiId": 124,
-    "importedAt": "2025-10-25T10:24:41.127Z",
+    "importedAt": "2025-10-25T14:16:26.773Z",
     "name": "تونیک لینن طرحدار A00197",
     "slug": "patterned-linen-tunic-a00197",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "522469": {
     "strapiId": 125,
-    "importedAt": "2025-10-25T10:24:41.440Z",
+    "importedAt": "2025-10-25T14:16:37.904Z",
     "name": "کراپ حلقه ای A00158",
     "slug": "crop-ring-a00158",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "522500": {
     "strapiId": 126,
-    "importedAt": "2025-10-25T10:24:41.743Z",
+    "importedAt": "2025-10-25T14:16:45.506Z",
     "name": "شلوار بگ لینن A00204",
     "slug": "shalwar-big-linen-a00204",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523352": {
     "strapiId": 127,
-    "importedAt": "2025-10-25T10:24:42.475Z",
+    "importedAt": "2025-10-25T14:16:59.391Z",
     "name": "شومیز جلو گیپوری A00189",
     "slug": "guipuri-front-paper-a00189",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523353": {
     "strapiId": 128,
-    "importedAt": "2025-10-25T10:24:43.149Z",
+    "importedAt": "2025-10-25T14:17:15.190Z",
     "name": "ست بابونه 00453",
     "slug": "chamomile-set-00453",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523354": {
     "strapiId": 129,
-    "importedAt": "2025-10-25T10:24:46.659Z",
+    "importedAt": "2025-10-25T14:17:23.985Z",
     "name": "شلوار بگ لینن A00227",
     "slug": "shalwar-linen-a00227",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523355": {
     "strapiId": 130,
-    "importedAt": "2025-10-25T10:24:46.954Z",
+    "importedAt": "2025-10-25T14:17:31.644Z",
     "name": "پیراهن گلدار A00194",
     "slug": "floral-shirt-a00194",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "523357": {
     "strapiId": 131,
-    "importedAt": "2025-10-25T10:24:47.251Z",
+    "importedAt": "2025-10-25T14:17:50.696Z",
     "name": "مایو مردانه A00182",
     "slug": "mens-swimsuit-a00182",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "523358": {
     "strapiId": 132,
-    "importedAt": "2025-10-25T10:24:47.559Z",
+    "importedAt": "2025-10-25T14:17:55.785Z",
     "name": "تاپ ویسکوز A00186",
     "slug": "viscose-top-a00186",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "523359": {
     "strapiId": 133,
-    "importedAt": "2025-10-25T10:24:48.556Z",
+    "importedAt": "2025-10-25T14:18:05.483Z",
     "name": "پیراهن کبریتی راه راه A00210",
     "slug": "a00210-striped-match-shirt",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523360": {
     "strapiId": 134,
-    "importedAt": "2025-10-25T10:24:49.707Z",
+    "importedAt": "2025-10-25T14:18:13.276Z",
     "name": "پیراهن آستین پفی جلو خامه دوزی A00214",
     "slug": "a00214-cream-embroidered-front-puff-sleeve-shirt",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523378": {
     "strapiId": 135,
-    "importedAt": "2025-10-25T10:24:50.476Z",
+    "importedAt": "2025-10-25T14:18:49.752Z",
     "name": "ست پرنسسی 00448",
     "slug": "princess-set-00448",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523379": {
     "strapiId": 136,
-    "importedAt": "2025-10-25T10:24:51.368Z",
+    "importedAt": "2025-10-25T14:18:55.192Z",
     "name": "سوتین ابری لمه 00476",
     "slug": "cloud-bra-00476",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523380": {
     "strapiId": 137,
-    "importedAt": "2025-10-25T10:24:52.394Z",
+    "importedAt": "2025-10-25T14:19:05.028Z",
     "name": "تونیک رنگی A00235",
     "slug": "colored-tonic-a00235",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523381": {
     "strapiId": 138,
-    "importedAt": "2025-10-25T10:24:52.962Z",
+    "importedAt": "2025-10-25T14:19:14.031Z",
     "name": "شلوار جین مام فیت A00236",
     "slug": "mom-fit-jeans-a00236",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523382": {
     "strapiId": 139,
-    "importedAt": "2025-10-25T10:24:53.273Z",
+    "importedAt": "2025-10-25T14:19:20.151Z",
     "name": "شورت لیزری لب دالبری 00481",
     "slug": "dalbery-lip-laser-shorts-00481",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523383": {
     "strapiId": 140,
-    "importedAt": "2025-10-25T10:24:53.612Z",
+    "importedAt": "2025-10-25T14:19:32.434Z",
     "name": "نیم تنه کبریتی 00484 alex",
     "slug": "match-bust-00484-alex",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523384": {
     "strapiId": 141,
-    "importedAt": "2025-10-25T10:24:54.265Z",
+    "importedAt": "2025-10-25T14:19:47.606Z",
     "name": "پیراهن مردانه آستین کوتاه A00230",
     "slug": "short-sleeve-mens-shirt-a00230",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "523385": {
     "strapiId": 142,
-    "importedAt": "2025-10-25T10:24:55.039Z",
+    "importedAt": "2025-10-25T14:20:02.051Z",
     "name": "پیراهن گلدار A00218",
     "slug": "floral-shirt-a00218",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "523386": {
     "strapiId": 143,
-    "importedAt": "2025-10-25T10:24:55.780Z",
+    "importedAt": "2025-10-25T14:20:11.839Z",
     "name": "سوتین چهارخونه 00456",
     "slug": "four-chambered-bra-00456",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523388": {
     "strapiId": 144,
-    "importedAt": "2025-10-25T10:24:56.584Z",
+    "importedAt": "2025-10-25T14:20:24.286Z",
     "name": "ست ابری پاستلی 00482",
     "slug": "pastel-cloud-set-00482",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523389": {
     "strapiId": 145,
-    "importedAt": "2025-10-25T10:24:57.446Z",
+    "importedAt": "2025-10-25T14:20:29.081Z",
     "name": "سوتین ابری گل ریز 00458",
     "slug": "cloud-bra-with-tiny-flowers-00458",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523390": {
     "strapiId": 146,
-    "importedAt": "2025-10-25T10:24:57.994Z",
+    "importedAt": "2025-10-25T14:20:34.849Z",
     "name": "تیشرت لانگ خرسی A00224",
     "slug": "bear-fantasy-t-shirt-a00224",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523391": {
     "strapiId": 147,
-    "importedAt": "2025-10-25T10:24:58.285Z",
+    "importedAt": "2025-10-25T14:20:44.901Z",
     "name": "شومیز خامه دوزی A00217",
     "slug": "cream-embroidery-paper-a00217",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523392": {
     "strapiId": 148,
-    "importedAt": "2025-10-25T10:24:58.598Z",
+    "importedAt": "2025-10-25T14:20:51.408Z",
     "name": "شلوار کتان مام فیت A00231",
     "slug": "mom-fit-linen-pants-a00231",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523393": {
     "strapiId": 149,
-    "importedAt": "2025-10-25T10:24:59.328Z",
+    "importedAt": "2025-10-25T14:21:02.374Z",
     "name": "شومیز لینن گلدوزی A00229",
     "slug": "a00229-embroidered-linen-paper",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523395": {
     "strapiId": 150,
-    "importedAt": "2025-10-25T10:25:00.178Z",
+    "importedAt": "2025-10-25T14:21:15.620Z",
     "name": "پیراهن گلدار مروارید جلوبنددار A00199",
     "slug": "a00199-pearl-floral-shirt-with-strap-front",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523396": {
     "strapiId": 151,
-    "importedAt": "2025-10-25T10:25:01.230Z",
+    "importedAt": "2025-10-25T14:21:45.579Z",
     "name": "شلوارک A00203",
     "slug": "shorts-a00203",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523397": {
     "strapiId": 152,
-    "importedAt": "2025-10-25T10:25:02.115Z",
+    "importedAt": "2025-10-25T14:21:55.446Z",
     "name": "تونیک لینن تک جیب A00239",
     "slug": "one-pocket-lenin-tunic-a00239",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523398": {
     "strapiId": 153,
-    "importedAt": "2025-10-25T10:25:03.213Z",
+    "importedAt": "2025-10-25T14:22:00.205Z",
     "name": "شومیز جلو چین گیپوری A00221",
     "slug": "a00221-guipure-front-fold-paper",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523399": {
     "strapiId": 154,
-    "importedAt": "2025-10-25T10:25:03.714Z",
+    "importedAt": "2025-10-25T14:22:07.189Z",
     "name": "شلوار لینن مام فیت A00244",
     "slug": "mom-fit-linen-pants-a00244",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523400": {
     "strapiId": 155,
-    "importedAt": "2025-10-25T10:25:04.002Z",
+    "importedAt": "2025-10-25T14:22:21.551Z",
     "name": "سوتین لیزری لب دالبری 00455",
     "slug": "dalberry-lip-laser-bra-00455",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523432": {
     "strapiId": 156,
-    "importedAt": "2025-10-25T10:25:04.279Z",
+    "importedAt": "2025-10-25T14:22:29.045Z",
     "name": "شومیز جلو و آستین چین A00222",
     "slug": "a00222-front-paper-and-folded-sleeves",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523433": {
     "strapiId": 157,
-    "importedAt": "2025-10-25T10:25:04.563Z",
+    "importedAt": "2025-10-25T14:22:52.439Z",
     "name": "پیراهن گلدار A00219",
     "slug": "floral-shirt-a00219",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523434": {
     "strapiId": 158,
-    "importedAt": "2025-10-25T10:25:05.376Z",
+    "importedAt": "2025-10-25T14:22:59.638Z",
     "name": "شورت آواکادو 00490",
     "slug": "avocado-shorts-00490",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523435": {
     "strapiId": 159,
-    "importedAt": "2025-10-25T10:25:06.289Z",
+    "importedAt": "2025-10-25T14:23:05.780Z",
     "name": "شورت پاپیون گل 00491",
     "slug": "flower-bow-shorts-00491",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523436": {
     "strapiId": 160,
-    "importedAt": "2025-10-25T10:25:07.078Z",
+    "importedAt": "2025-10-25T14:23:12.818Z",
     "name": "شورت خرسی 00492 🐻",
     "slug": "bear-shorts-00492",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523461": {
     "strapiId": 161,
-    "importedAt": "2025-10-25T10:25:07.898Z",
+    "importedAt": "2025-10-25T14:23:20.265Z",
     "name": "دامن پلیسه ساده A00234",
     "slug": "plain-pleated-skirt-a00234",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523462": {
     "strapiId": 162,
-    "importedAt": "2025-10-25T10:25:08.755Z",
+    "importedAt": "2025-10-25T14:23:26.600Z",
     "name": "شلوار لینن پاکتی A00247",
     "slug": "pocket-linen-pants-a00247",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523463": {
     "strapiId": 163,
-    "importedAt": "2025-10-25T10:25:09.583Z",
+    "importedAt": "2025-10-25T14:23:36.885Z",
     "name": "تونیک رنگی بدون جیب A00253",
     "slug": "colored-tunic-without-pockets-a00253",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523465": {
     "strapiId": 164,
-    "importedAt": "2025-10-25T10:25:09.896Z",
+    "importedAt": "2025-10-25T14:23:43.090Z",
     "name": "پیراهن طرح قلبی A00201",
     "slug": "heart-design-shirt-a00201",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523492": {
     "strapiId": 165,
-    "importedAt": "2025-10-25T10:25:10.267Z",
+    "importedAt": "2025-10-25T14:23:51.072Z",
     "name": "نیم تنه کبریتی 00494",
     "slug": "match-bust-00494",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523493": {
     "strapiId": 166,
-    "importedAt": "2025-10-25T10:25:10.669Z",
+    "importedAt": "2025-10-25T14:24:02.184Z",
     "name": "ست کبریتی 00495",
     "slug": "match-set-00495",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523494": {
     "strapiId": 167,
-    "importedAt": "2025-10-25T10:25:11.565Z",
+    "importedAt": "2025-10-25T14:24:09.389Z",
     "name": "شورت سبز توت فرنگی 00493 🍓",
     "slug": "strawberry-green-shorts-00493",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523495": {
     "strapiId": 168,
-    "importedAt": "2025-10-25T10:25:12.528Z",
+    "importedAt": "2025-10-25T14:24:14.115Z",
     "name": "مانتو آستین دوبل A00248",
     "slug": "coat-sleeves-a00248",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "523519": {
     "strapiId": 169,
-    "importedAt": "2025-10-25T10:25:13.368Z",
+    "importedAt": "2025-10-25T14:24:19.907Z",
     "name": "تونیک رنگی A00255",
     "slug": "colored-tonic-a00255",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "523520": {
     "strapiId": 170,
-    "importedAt": "2025-10-25T10:25:14.225Z",
+    "importedAt": "2025-10-25T14:24:25.534Z",
     "name": "ست مانتو شلوار A00249",
     "slug": "coat-and-pants-set-a00249",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "524198": {
     "strapiId": 171,
-    "importedAt": "2025-10-25T10:25:15.094Z",
+    "importedAt": "2025-10-25T14:24:32.581Z",
     "name": "تیشرت طرح گل A00266",
     "slug": "a00266-flower-design-t-shirt",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524199": {
     "strapiId": 172,
-    "importedAt": "2025-10-25T10:25:15.589Z",
+    "importedAt": "2025-10-25T14:24:37.655Z",
     "name": "دامن لینن A00269",
     "slug": "daman-linen-a00269",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "524200": {
     "strapiId": 173,
-    "importedAt": "2025-10-25T10:25:15.873Z",
+    "importedAt": "2025-10-25T14:24:44.807Z",
     "name": "ست فانتزی گلدار 00497",
     "slug": "floral-fantasy-set-00497",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524201": {
     "strapiId": 174,
-    "importedAt": "2025-10-25T10:25:16.161Z",
+    "importedAt": "2025-10-25T14:24:51.447Z",
     "name": "نیم تنه هارنس دار 00500",
     "slug": "harness-bust-00500",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524203": {
     "strapiId": 175,
-    "importedAt": "2025-10-25T10:25:16.440Z",
+    "importedAt": "2025-10-25T14:25:06.280Z",
     "name": "ست نیم تنه و شلوارک ورزشی 00459",
     "slug": "bust-and-sports-shorts-set-00459",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524206": {
     "strapiId": 176,
-    "importedAt": "2025-10-25T10:25:16.714Z",
+    "importedAt": "2025-10-25T14:25:13.047Z",
     "name": "دامن گلدار A00246",
     "slug": "floral-skirt-a00246",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "524207": {
     "strapiId": 177,
-    "importedAt": "2025-10-25T10:25:17.795Z",
+    "importedAt": "2025-10-25T14:25:20.399Z",
     "name": "تونیک لینن طرحدار A00281",
     "slug": "patterned-linen-tunic-a00281",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "524867": {
     "strapiId": 178,
-    "importedAt": "2025-10-25T10:25:18.723Z",
+    "importedAt": "2025-10-25T14:25:43.913Z",
     "name": "ست لب گیپوری 00601",
     "slug": "satlab-gipuri-00601",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524883": {
     "strapiId": 179,
-    "importedAt": "2025-10-25T10:25:20.567Z",
+    "importedAt": "2025-10-25T14:25:49.774Z",
     "name": "دامن کتان جلو دکمه A00262",
     "slug": "button-front-linen-skirt-a00262",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524895": {
     "strapiId": 180,
-    "importedAt": "2025-10-25T10:25:21.508Z",
+    "importedAt": "2025-10-25T14:25:52.913Z",
     "name": "شلوار اسپانیش جلو چاکدار A0031",
     "slug": "a0031-spanish-trousers-with-slits-in-the-front-2",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524901": {
     "strapiId": 181,
-    "importedAt": "2025-10-25T10:25:22.060Z",
+    "importedAt": "2025-10-25T14:26:03.624Z",
     "name": "پیراهن گلدار A00294",
     "slug": "floral-shirt-a00294",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "524914": {
     "strapiId": 182,
-    "importedAt": "2025-10-25T10:25:22.343Z",
+    "importedAt": "2025-10-25T14:26:12.771Z",
     "name": "بافت طرح لوزی m00325",
     "slug": "textured-lozenge-m00325",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524922": {
     "strapiId": 183,
-    "importedAt": "2025-10-25T10:25:22.624Z",
+    "importedAt": "2025-10-25T14:26:19.531Z",
     "name": "جوراب ساقدار G0065",
     "slug": "g0065-stockings",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "524929": {
     "strapiId": 184,
-    "importedAt": "2025-10-25T10:25:23.527Z",
+    "importedAt": "2025-10-25T14:26:23.288Z",
     "name": "تیشرت خرس خرسی A00233",
     "slug": "bear-bear-t-shirt-a00233-2",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524939": {
     "strapiId": 185,
-    "importedAt": "2025-10-25T10:25:24.645Z",
+    "importedAt": "2025-10-25T14:26:33.247Z",
     "name": "کت لینن هندی A00207",
     "slug": "indian-linen-coat-a00207-2",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "524951": {
     "strapiId": 186,
-    "importedAt": "2025-10-25T10:25:25.611Z",
+    "importedAt": "2025-10-25T14:26:47.939Z",
     "name": "ست تیشرت شلوارک راحتی A00296",
     "slug": "comfortable-t-shirt-shorts-set-a00296",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525026": {
     "strapiId": 187,
-    "importedAt": "2025-10-25T10:25:26.229Z",
+    "importedAt": "2025-10-25T14:26:52.833Z",
     "name": "جوراب ساقدار یاسی G0066",
     "slug": "lilac-stockings-g0066",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525072": {
     "strapiId": 188,
-    "importedAt": "2025-10-25T10:25:26.980Z",
+    "importedAt": "2025-10-25T14:26:58.128Z",
     "name": "نیم ساق ادیداس G0035",
     "slug": "adidas-half-leg-g0035",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525083": {
     "strapiId": 189,
-    "importedAt": "2025-10-25T10:25:27.466Z",
+    "importedAt": "2025-10-25T14:27:01.866Z",
     "name": "گن پادار 00234",
     "slug": "gun-padar-00234",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525088": {
     "strapiId": 190,
-    "importedAt": "2025-10-25T10:25:27.744Z",
+    "importedAt": "2025-10-25T14:27:07.135Z",
     "name": "نیم تنه نخی 00612",
     "slug": "cotton-bodice-00612",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525099": {
     "strapiId": 191,
-    "importedAt": "2025-10-25T10:25:28.057Z",
+    "importedAt": "2025-10-25T14:27:15.864Z",
     "name": "شورت خرسی تدی 00602 🐻",
     "slug": "teddy-bear-shorts-00602",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525113": {
     "strapiId": 192,
-    "importedAt": "2025-10-25T10:25:28.452Z",
+    "importedAt": "2025-10-25T14:27:20.448Z",
     "name": "شورت بغل گره ای طرحدار 00605",
     "slug": "00605-patterned-knotted-armpit-shorts",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525121": {
     "strapiId": 193,
-    "importedAt": "2025-10-25T10:25:28.751Z",
+    "importedAt": "2025-10-25T14:27:30.023Z",
     "name": "تونیک لینن طرحدار A00303",
     "slug": "patterned-linen-tunic-a00303",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525210": {
     "strapiId": 194,
-    "importedAt": "2025-10-25T10:25:29.436Z",
+    "importedAt": "2025-10-25T14:27:34.832Z",
     "name": "شومیز یقه پاپیون A00290",
     "slug": "a00290-bow-tie-paper",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525231": {
     "strapiId": 195,
-    "importedAt": "2025-10-25T10:25:30.085Z",
+    "importedAt": "2025-10-25T14:27:42.810Z",
     "name": "پیراهن خالخالی A00293",
     "slug": "a00293",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525285": {
     "strapiId": 196,
-    "importedAt": "2025-10-25T10:25:30.813Z",
+    "importedAt": "2025-10-25T14:27:48.318Z",
     "name": "شورت توری قلبی 00506",
     "slug": "heart-lace-shorts-00506",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525312": {
     "strapiId": 197,
-    "importedAt": "2025-10-25T10:25:31.621Z",
+    "importedAt": "2025-10-25T14:27:52.849Z",
     "name": "پیراهن آستین پفی A00264",
     "slug": "puff-sleeve-shirt-a00264",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525348": {
     "strapiId": 198,
-    "importedAt": "2025-10-25T10:25:32.458Z",
+    "importedAt": "2025-10-25T14:27:58.239Z",
     "name": "شورت گن تور دار 00607",
     "slug": "gun-shorts-with-net-00607",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525382": {
     "strapiId": 199,
-    "importedAt": "2025-10-25T10:25:33.012Z",
+    "importedAt": "2025-10-25T14:28:05.706Z",
     "name": "پیراهن طرحدار A00276",
     "slug": "patterned-shirt-a00276",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525401": {
     "strapiId": 200,
-    "importedAt": "2025-10-25T10:25:33.481Z",
+    "importedAt": "2025-10-25T14:28:10.315Z",
     "name": "تاپ گلدار پایین چین A00306",
     "slug": "a00306-floral-bottom-china-top",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525413": {
     "strapiId": 201,
-    "importedAt": "2025-10-25T10:25:34.370Z",
+    "importedAt": "2025-10-25T14:28:16.064Z",
     "name": "تیشرت پروانه A00271",
     "slug": "butterfly-t-shirt-a00271",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525427": {
     "strapiId": 202,
-    "importedAt": "2025-10-25T10:25:35.107Z",
+    "importedAt": "2025-10-25T14:28:32.520Z",
     "name": "دامن پلیسه گلدار A00225",
     "slug": "floral-pleated-skirt-a00225",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525439": {
     "strapiId": 203,
-    "importedAt": "2025-10-25T10:25:35.968Z",
+    "importedAt": "2025-10-25T14:28:39.350Z",
     "name": "تیشرت A00291 make time",
     "slug": "t-shirt-a00291-make-time",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525560": {
     "strapiId": 204,
-    "importedAt": "2025-10-25T10:25:36.780Z",
+    "importedAt": "2025-10-25T14:28:44.909Z",
     "name": "تیشرت A00211 bloom",
     "slug": "t-shirt-a00211-bloom",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525571": {
     "strapiId": 205,
-    "importedAt": "2025-10-25T10:25:37.660Z",
+    "importedAt": "2025-10-25T14:28:51.478Z",
     "name": "تیشرت کراپ پروانه A00232",
     "slug": "butterfly-crop-t-shirt-a00232",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525586": {
     "strapiId": 206,
-    "importedAt": "2025-10-25T10:25:54.412Z",
+    "importedAt": "2025-10-25T14:29:19.408Z",
     "name": "تیشرت سرشونه گیپور A00297",
     "slug": "guipure-shoulder-t-shirt-a00297",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525650": {
     "strapiId": 207,
-    "importedAt": "2025-10-25T10:25:55.292Z",
+    "importedAt": "2025-10-25T14:29:35.632Z",
     "name": "پیراهن A00282",
     "slug": "shirt-a00282",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525681": {
     "strapiId": 208,
-    "importedAt": "2025-10-25T10:25:56.038Z",
+    "importedAt": "2025-10-25T14:29:40.352Z",
     "name": "شلوارک راحتی A00270",
     "slug": "comfort-shorts-a00270",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525694": {
     "strapiId": 209,
-    "importedAt": "2025-10-25T10:25:56.773Z",
+    "importedAt": "2025-10-25T14:29:48.362Z",
     "name": "ست راحتی A00198",
     "slug": "comfort-set-a00198",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525755": {
     "strapiId": 210,
-    "importedAt": "2025-10-25T10:25:57.372Z",
+    "importedAt": "2025-10-25T14:29:59.099Z",
     "name": "شال پلیسه وارداتی کد ۱۰۰",
     "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d9%84%db%8c%d8%b3%d9%87-%d9%88%d8%a7%d8%b1%d8%af%d8%a7%d8%aa%db%8c-%da%a9%d8%af-%db%b1%db%b0%db%b0",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525783": {
     "strapiId": 211,
-    "importedAt": "2025-10-25T10:25:57.722Z",
+    "importedAt": "2025-10-25T14:30:13.756Z",
     "name": "شال پلیسه مربعی",
     "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d9%84%db%8c%d8%b3%d9%87-%d9%85%d8%b1%d8%a8%d8%b9%db%8c",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525818": {
     "strapiId": 212,
-    "importedAt": "2025-10-25T10:25:58.139Z",
+    "importedAt": "2025-10-25T14:30:24.436Z",
     "name": "شال پلیسه شاینی",
     "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d9%84%db%8c%d8%b3%d9%87-%d8%b4%d8%a7%db%8c%d9%86%db%8c",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525830": {
     "strapiId": 213,
-    "importedAt": "2025-10-25T10:25:58.630Z",
+    "importedAt": "2025-10-25T14:30:30.794Z",
     "name": "پیراهن نخی طرحدار A0019",
     "slug": "patterned-cotton-shirt-a0019",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "525866": {
     "strapiId": 214,
-    "importedAt": "2025-10-25T10:25:59.109Z",
+    "importedAt": "2025-10-25T14:30:37.713Z",
     "name": "شومیز آستین کوتاه A00187",
     "slug": "a00187-short-sleeve-shirt",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525922": {
     "strapiId": 215,
-    "importedAt": "2025-10-25T10:25:59.630Z",
+    "importedAt": "2025-10-25T14:30:43.263Z",
     "name": "تاپ کبریتی جلو گل A00267",
     "slug": "a00267-floral-match-top",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525929": {
     "strapiId": 216,
-    "importedAt": "2025-10-25T10:26:00.128Z",
+    "importedAt": "2025-10-25T14:30:49.507Z",
     "name": "تیشرت A00265 good words",
     "slug": "t-shirt-a00265-good-words",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525943": {
     "strapiId": 217,
-    "importedAt": "2025-10-25T10:26:00.734Z",
+    "importedAt": "2025-10-25T14:30:54.731Z",
     "name": "بادی کبریتی A00251",
     "slug": "matchbox-a00251",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525952": {
     "strapiId": 218,
-    "importedAt": "2025-10-25T10:26:01.272Z",
+    "importedAt": "2025-10-25T14:31:00.748Z",
     "name": "تیشرت رنگی لاما A00223",
     "slug": "%d8%aa%db%8c%d8%b4%d8%b1%d8%aa-%d8%b1%d9%86%da%af%db%8c-%d9%84%d8%a7%d9%85%d8%a7-a00223",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525959": {
     "strapiId": 219,
-    "importedAt": "2025-10-25T10:26:01.552Z",
+    "importedAt": "2025-10-25T14:31:07.208Z",
     "name": "تاپ کد M00354",
     "slug": "top-code-m00354",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "525966": {
     "strapiId": 220,
-    "importedAt": "2025-10-25T10:26:01.837Z",
+    "importedAt": "2025-10-25T14:31:25.203Z",
     "name": "ست تی شرت شلوار m00150",
     "slug": "t-shirt-pants-set-m00150",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "526033": {
     "strapiId": 221,
-    "importedAt": "2025-10-25T10:26:02.143Z",
+    "importedAt": "2025-10-25T14:31:32.228Z",
     "name": "شلوار مام فیت لینن A00316",
     "slug": "mom-fit-linen-pants-a00316",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526064": {
     "strapiId": 222,
-    "importedAt": "2025-10-25T10:26:02.482Z",
+    "importedAt": "2025-10-25T14:31:38.405Z",
     "name": "شورت فانتزی توت فرنگی 🍓 00503",
     "slug": "strawberry-fantasy-shorts-00503",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526076": {
     "strapiId": 223,
-    "importedAt": "2025-10-25T10:26:02.769Z",
+    "importedAt": "2025-10-25T14:31:44.929Z",
     "name": "شلوار بگ لینن A00277",
     "slug": "shalwar-big-linen-a00277",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526108": {
     "strapiId": 224,
-    "importedAt": "2025-10-25T10:26:03.387Z",
+    "importedAt": "2025-10-25T14:31:50.546Z",
     "name": "پیراهن گلدار A00283",
     "slug": "floral-shirt-a00283",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "526117": {
     "strapiId": 225,
-    "importedAt": "2025-10-25T10:26:03.988Z",
+    "importedAt": "2025-10-25T14:31:57.306Z",
     "name": "پیراهن طرحدار A00274",
     "slug": "patterned-shirt-a00274",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "3.50"
   },
   "526289": {
     "strapiId": 226,
-    "importedAt": "2025-10-25T10:26:04.638Z",
+    "importedAt": "2025-10-25T14:32:03.644Z",
     "name": "پیراهن بلند A003",
     "slug": "a003-long-shirt",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "526290": {
     "strapiId": 227,
-    "importedAt": "2025-10-25T10:26:05.285Z",
+    "importedAt": "2025-10-25T14:32:08.944Z",
     "name": "شلوار دامنی لینن A00313",
     "slug": "shalwar-damini-linen-a00313",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526334": {
     "strapiId": 228,
-    "importedAt": "2025-10-25T10:26:05.959Z",
+    "importedAt": "2025-10-25T14:32:18.953Z",
     "name": "پیراهن گلدار A00263",
     "slug": "floral-shirt-a00263",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526348": {
     "strapiId": 229,
-    "importedAt": "2025-10-25T10:26:06.852Z",
+    "importedAt": "2025-10-25T14:32:23.735Z",
     "name": "پیراهن کوتاه پریا A0018",
     "slug": "priya-short-shirt-a0018",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "526372": {
     "strapiId": 230,
-    "importedAt": "2025-10-25T10:26:07.366Z",
+    "importedAt": "2025-10-25T14:32:41.264Z",
     "name": "پیراهن گلدار A00288",
     "slug": "floral-shirt-a00288",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "526374": {
     "strapiId": 231,
-    "importedAt": "2025-10-25T10:26:07.685Z",
+    "importedAt": "2025-10-25T14:32:45.912Z",
     "name": "کراپ تیشرت A00209 daddy",
     "slug": "crop-t-shirt-a00209-daddy",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526410": {
     "strapiId": 232,
-    "importedAt": "2025-10-25T10:26:08.099Z",
+    "importedAt": "2025-10-25T14:32:51.413Z",
     "name": "شورت لب فرفری توت فرنگی 00412 🍓",
     "slug": "strawberry-curly-lip-shorts-00412",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526426": {
     "strapiId": 233,
-    "importedAt": "2025-10-25T10:26:08.373Z",
+    "importedAt": "2025-10-25T14:32:57.472Z",
     "name": "پیراهن رنگی A00261",
     "slug": "color-shirt-a00261",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526436": {
     "strapiId": 234,
-    "importedAt": "2025-10-25T10:26:08.650Z",
+    "importedAt": "2025-10-25T14:33:06.521Z",
     "name": "دامن بافت پایین تور m0067",
     "slug": "mesh-net-skirt-m0067",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526445": {
     "strapiId": 235,
-    "importedAt": "2025-10-25T10:26:09.255Z",
+    "importedAt": "2025-10-25T14:33:13.246Z",
     "name": "شورت 00507 Love secret",
     "slug": "shorts-00507-love-secret",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526462": {
     "strapiId": 236,
-    "importedAt": "2025-10-25T10:26:09.787Z",
+    "importedAt": "2025-10-25T14:33:17.578Z",
     "name": "شورت خرگوش پاپیونی 00428 🐰",
     "slug": "rabbit-shorts-00428",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526464": {
     "strapiId": 237,
-    "importedAt": "2025-10-25T10:26:10.390Z",
+    "importedAt": "2025-10-25T14:33:22.003Z",
     "name": "شلوار کلاسیک A0097",
     "slug": "classic-pants-a0097",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526474": {
     "strapiId": 238,
-    "importedAt": "2025-10-25T10:26:11.037Z",
+    "importedAt": "2025-10-25T14:33:27.741Z",
     "name": "شورت زبرا پاپیون 00508",
     "slug": "zebra-bow-shorts-00508",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526492": {
     "strapiId": 239,
-    "importedAt": "2025-10-25T10:26:11.650Z",
+    "importedAt": "2025-10-25T14:33:41.312Z",
     "name": "ست ابری ببری 00498",
     "slug": "tiger-cloud-set-00498",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526500": {
     "strapiId": 240,
-    "importedAt": "2025-10-25T10:26:12.375Z",
+    "importedAt": "2025-10-25T14:33:45.967Z",
     "name": "شلوار لینن مام فیت A00205",
     "slug": "mom-fit-linen-pants-a00205",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526510": {
     "strapiId": 241,
-    "importedAt": "2025-10-25T10:26:12.861Z",
+    "importedAt": "2025-10-25T14:34:00.024Z",
     "name": "پیراهن طرحدار جلو دکمه A00250",
     "slug": "a00250-button-front-patterned-shirt",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526578": {
     "strapiId": 242,
-    "importedAt": "2025-10-25T10:26:13.147Z",
+    "importedAt": "2025-10-25T14:34:06.201Z",
     "name": "شلوار جین بوت کات A00259",
     "slug": "boot-cut-jeans-a00259",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526638": {
     "strapiId": 243,
-    "importedAt": "2025-10-25T10:26:13.458Z",
+    "importedAt": "2025-10-25T14:34:13.052Z",
     "name": "نیم تنه 00603 BABE",
     "slug": "bust-00603-babe",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526647": {
     "strapiId": 244,
-    "importedAt": "2025-10-25T10:26:13.782Z",
+    "importedAt": "2025-10-25T14:34:20.834Z",
     "name": "شورت Rabbit 00471",
     "slug": "rabbit-shorts-00471",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526667": {
     "strapiId": 245,
-    "importedAt": "2025-10-25T10:26:14.407Z",
+    "importedAt": "2025-10-25T14:34:27.182Z",
     "name": "شلوارک لینن A00252",
     "slug": "linen-shorts-a00252-2",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526713": {
     "strapiId": 246,
-    "importedAt": "2025-10-25T10:26:14.990Z",
+    "importedAt": "2025-10-25T14:34:35.379Z",
     "name": "ست فانتزی شکوفه 00505",
     "slug": "bloom-fantasy-set-00505",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "526723": {
     "strapiId": 247,
-    "importedAt": "2025-10-25T10:26:15.722Z",
+    "importedAt": "2025-10-25T14:34:39.914Z",
     "name": "شورت سورمه ای توت فرنگی 00414 🍓",
     "slug": "strawberry-navy-shorts-00414",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527279": {
     "strapiId": 248,
-    "importedAt": "2025-10-25T10:26:16.334Z",
+    "importedAt": "2025-10-25T14:34:47.797Z",
     "name": "شومیز ساتن A00308",
     "slug": "satin-paper-a00308",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527322": {
     "strapiId": 249,
-    "importedAt": "2025-10-25T10:26:16.914Z",
+    "importedAt": "2025-10-25T14:34:57.573Z",
     "name": "پیراهن طرحدار A00314",
     "slug": "patterned-shirt-a00314",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "527335": {
     "strapiId": 250,
-    "importedAt": "2025-10-25T10:26:17.561Z",
+    "importedAt": "2025-10-25T14:35:02.768Z",
     "name": "تاپ گلدار پشت کش A00305",
     "slug": "a00305-floral-top-with-elastic-back",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527357": {
     "strapiId": 251,
-    "importedAt": "2025-10-25T10:26:17.861Z",
+    "importedAt": "2025-10-25T14:35:20.924Z",
     "name": "تیشرت A00292 be brave",
     "slug": "t-shirt-a00292-be-brave",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "527487": {
     "strapiId": 252,
-    "importedAt": "2025-10-25T10:26:18.141Z",
+    "importedAt": "2025-10-25T14:35:24.622Z",
     "name": "جوراب G0028",
     "slug": "socks-g0028",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "527508": {
     "strapiId": 253,
-    "importedAt": "2025-10-25T10:26:18.441Z",
+    "importedAt": "2025-10-25T14:35:27.919Z",
     "name": "جوراب صورتی G0016",
     "slug": "pink-socks-g0016",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527553": {
     "strapiId": 254,
-    "importedAt": "2025-10-25T10:26:18.713Z",
+    "importedAt": "2025-10-25T14:35:31.681Z",
     "name": "جوراب G0024",
     "slug": "socks-g0024",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527565": {
     "strapiId": 255,
-    "importedAt": "2025-10-25T10:26:19.497Z",
+    "importedAt": "2025-10-25T14:35:37.948Z",
     "name": "شورتک ساده A00280",
     "slug": "a00280-plain-shorts",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "527570": {
     "strapiId": 256,
-    "importedAt": "2025-10-25T10:26:20.182Z",
+    "importedAt": "2025-10-25T14:35:40.289Z",
     "name": "جوراب G0027",
     "slug": "socks-g0027",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527596": {
     "strapiId": 257,
-    "importedAt": "2025-10-25T10:26:20.862Z",
+    "importedAt": "2025-10-25T14:35:45.177Z",
     "name": "دامن گلدار پایین چین A00310",
     "slug": "a00310-floral-bottom-china-skirt",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "527600": {
     "strapiId": 258,
-    "importedAt": "2025-10-25T10:26:21.522Z",
+    "importedAt": "2025-10-25T14:35:53.165Z",
     "name": "پیراهن جلو جیب A00275",
     "slug": "shirt-front-pocket-a00275",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527657": {
     "strapiId": 259,
-    "importedAt": "2025-10-25T10:26:22.160Z",
+    "importedAt": "2025-10-25T14:35:56.575Z",
     "name": "جوراب G0019",
     "slug": "socks-g0019",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527663": {
     "strapiId": 260,
-    "importedAt": "2025-10-25T10:26:22.782Z",
+    "importedAt": "2025-10-25T14:36:00.683Z",
     "name": "جوراب نیم ساق صورتی🐻 G0060",
     "slug": "pink-socks-%f0%9f%90%bb-g0060",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527671": {
     "strapiId": 261,
-    "importedAt": "2025-10-25T10:26:23.278Z",
+    "importedAt": "2025-10-25T14:36:03.167Z",
     "name": "جوراب G0047",
     "slug": "socks-g0047",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "527675": {
     "strapiId": 262,
@@ -2401,35 +2586,39 @@
   },
   "531533": {
     "strapiId": 306,
-    "importedAt": "2025-10-25T10:26:58.988Z",
+    "importedAt": "2025-10-26T11:20:18.704Z",
     "name": "شورت uokin 00632",
     "slug": "uokin-00632-shorts",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "531692": {
     "strapiId": 307,
-    "importedAt": "2025-10-25T10:26:59.465Z",
+    "importedAt": "2025-10-26T11:20:31.794Z",
     "name": "شلوار لینن مام فیت A00355",
     "slug": "shalwar-linen-mam-fait-a00355",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "531711": {
     "strapiId": 308,
-    "importedAt": "2025-10-25T10:27:01.189Z",
+    "importedAt": "2025-10-26T11:20:46.329Z",
     "name": "شلوار لینن مام فیت A00354",
     "slug": "shalwar-linen-mom-fit-a00354",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "531741": {
     "strapiId": 309,
-    "importedAt": "2025-10-25T10:27:01.931Z",
+    "importedAt": "2025-10-26T11:21:02.236Z",
     "name": "سوتین کبریتی نخی 00625",
     "slug": "cotton-match-bra-00625",
     "type": "variable",
-    "status": "draft"
+    "status": "draft",
+    "rating": "0.00"
   },
   "531924": {
     "strapiId": 310,
@@ -3201,11 +3390,12 @@
   },
   "546003": {
     "strapiId": 406,
-    "importedAt": "2025-10-25T10:27:52.778Z",
+    "importedAt": "2025-10-26T11:25:02.829Z",
     "name": "دامن بافت کوتاه Z0036",
     "slug": "short-woven-skirt-z0036",
     "type": "variable",
-    "status": "publish"
+    "status": "publish",
+    "rating": "0.00"
   },
   "546036": {
     "strapiId": 407,

@@ -105,11 +105,10 @@ export const requestSnappPayment = async (
     (sum: number, x: any) => sum + x.amount * x.count,
     0
   );
-  const taxIrr = Math.round((financialSummary.tax || 0) * 10);
   const shippingIrr = Math.round((financialSummary.shipping || 0) * 10);
   const discountIrr = Math.round((financialSummary.discount || 0) * 10);
   const externalSourceIrr = 0;
-  const totalCartIrr = itemsTotalIrr + taxIrr + shippingIrr;
+  const totalCartIrr = itemsTotalIrr + shippingIrr;
   const orderAmountIrr = totalCartIrr - discountIrr - externalSourceIrr;
 
   // DEBUG: Log all amounts for troubleshooting
@@ -118,8 +117,6 @@ export const requestSnappPayment = async (
     itemCount: items.length,
     itemsTotalToman: Math.round(itemsTotalIrr / 10),
     itemsTotalIrr,
-    taxToman: Math.round(taxIrr / 10),
-    taxIrr,
     shippingToman: Math.round(shippingIrr / 10),
     shippingIrr,
     discountToman: Math.round(discountIrr / 10),
@@ -133,7 +130,6 @@ export const requestSnappPayment = async (
     financialSummary: {
       subtotal: financialSummary.subtotal,
       discount: financialSummary.discount,
-      tax: financialSummary.tax,
       shipping: financialSummary.shipping,
       total: financialSummary.total,
     },
@@ -165,9 +161,7 @@ export const requestSnappPayment = async (
         cartId: order.id,
         cartItems: items,
         isShipmentIncluded: true,
-        isTaxIncluded: true,
         shippingAmount: shippingIrr,
-        taxAmount: taxIrr,
         totalAmount: totalCartIrr,
       },
     ],
