@@ -1,51 +1,66 @@
 import jwt from "jsonwebtoken";
-/**
- * `authentication` middleware
- */
-
 import { Strapi } from "@strapi/strapi";
 
-export default (config, { strapi }: { strapi: Strapi }) => {
+export default (_config, { strapi }: { strapi: Strapi }) => {
   return async (ctx, next) => {
     try {
-      const token = ctx.request.headers["authorization"]?.split(" ")[1];
+      const authHeader = ctx.request.headers["authorization"];
+      const token = authHeader?.split(" ")[1];
+
       if (!token) {
         ctx.unauthorized("Token is required");
         return;
       }
 
-      const pluginJwtService = strapi
+      const pluginJwt = strapi
         .plugin("users-permissions")
         .service("jwt") as any;
 
-      let payload: any;
+      let payload: any | null = null;
 
       try {
-        payload = pluginJwtService.verify(token);
-      } catch {
-        payload = jwt.verify(token, process.env.JWT_SECRET) as any;
+        payload = pluginJwt.verify(token);
+      } catch (err) {
+        if (process.env.JWT_SECRET) {
+          payload = jwt.verify(token, process.env.JWT_SECRET) as any;
+        } else {
+          throw err;
+        }
       }
 
-      const localUserId =
-        typeof payload.localUserId === "number"
-          ? payload.localUserId
-          : Number(payload.userId);
-
-      if (Number.isNaN(localUserId)) {
-        strapi.log.warn("authentication middleware: invalid payload", {
-          payload,
-        });
-      }
+      const localUserId = Number(
+        payload?.localUserId ??
+          payload?.userId ??
+          payload?.id ??
+          payload?.sub
+      );
 
       if (!localUserId || Number.isNaN(localUserId)) {
         ctx.unauthorized("Invalid token payload");
         return;
       }
 
-      const user = await strapi.query("api::local-user.local-user").findOne({
-        where: { id: localUserId },
-        populate: { user_role: true },
-      });
+      let user = await strapi
+        .query("api::local-user.local-user")
+        .findOne({
+          where: { id: localUserId },
+          populate: { user_role: true },
+        });
+
+      if (!user && payload?.id) {
+        const pluginUser = await strapi
+          .query("plugin::users-permissions.user")
+          .findOne({ where: { id: Number(payload.id) } });
+
+        if (pluginUser?.username) {
+          user = await strapi
+            .query("api::local-user.local-user")
+            .findOne({
+              where: { Phone: pluginUser.username },
+              populate: { user_role: true },
+            });
+        }
+      }
 
       if (!user) {
         ctx.notFound("User not found");
@@ -55,9 +70,9 @@ export default (config, { strapi }: { strapi: Strapi }) => {
       delete user.Password;
       ctx.state.user = user;
 
-      return await next();
-    } catch (e) {
-      strapi.log.error(e);
+      await next();
+    } catch (error) {
+      strapi.log.error(error);
       ctx.unauthorized("Invalid token");
     }
   };
