@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useQueryState } from "nuqs";
 
 interface MobileFilterProps {
-  categories: Array<{ id: string; title: string }>;
+  categories?: Array<{ id: string; title: string }>;
   isLoadingCategories?: boolean;
 }
 

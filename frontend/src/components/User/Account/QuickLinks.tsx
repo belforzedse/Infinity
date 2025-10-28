@@ -5,7 +5,7 @@ import { USER_SIDEBAR_ITEMS } from "@/components/User/Constnats";
 import { isValidElement, cloneElement } from "react";
 import type { ReactElement } from "react";
 
-const enhanceIcon = (icon: ReactElement) =>
+const enhanceIcon = (icon: ReactElement<any>) =>
   cloneElement(icon, {
     className: "h-5 w-5 shrink-0 text-pink-500",
   });
