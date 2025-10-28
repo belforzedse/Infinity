@@ -60,13 +60,14 @@ async function ensurePluginUser(localUser: any) {
 }
 
 function issuePluginToken(pluginUserId: number, localUserId: number) {
-  const jwtService = strapi
-    .plugin("users-permissions")
-    .service("jwt") as any;
-  return jwtService.issue({
-    id: pluginUserId,
-    localUserId,
-  });
+  return jwt.sign(
+    {
+      pluginUserId,
+      localUserId,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
 }
 
 export default {

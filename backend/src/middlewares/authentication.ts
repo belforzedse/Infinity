@@ -31,6 +31,12 @@ export default (config, { strapi }: { strapi: Strapi }) => {
           ? payload.localUserId
           : Number(payload.userId);
 
+      if (Number.isNaN(localUserId)) {
+        strapi.log.warn("authentication middleware: invalid payload", {
+          payload,
+        });
+      }
+
       if (!localUserId || Number.isNaN(localUserId)) {
         ctx.unauthorized("Invalid token payload");
         return;
