@@ -12,6 +12,10 @@ const API_AUTHENTICATED_ROLE_ID = Number(
 );
 
 async function ensurePluginUser(localUser: any) {
+  const userService = strapi
+    .plugin("users-permissions")
+    .service("user") as any;
+
   const roleTitle =
     (localUser?.user_role?.Title ||
       localUser?.user_role?.data?.attributes?.Title ||
@@ -29,18 +33,12 @@ async function ensurePluginUser(localUser: any) {
 
   const targetRoleId = isAdmin ? API_ADMIN_ROLE_ID : API_AUTHENTICATED_ROLE_ID;
 
-  const hashService =
-    strapi.service("plugin::users-permissions.user") ||
-    strapi.plugins["users-permissions"].services.user;
-
   const hashPassword = async (password: string | null | undefined) => {
-    const pwd = password && password.length > 0 ? password : Math.random().toString(36);
-    if (hashService.hashPassword) {
-      return hashService.hashPassword(pwd);
-    }
-    return strapi.plugins["users-permissions"].services.user.hashPassword(
-      pwd
-    );
+    const pwd =
+      password && password.length > 0
+        ? password
+        : Math.random().toString(36);
+    return userService.hashPassword(pwd);
   };
 
   if (!pluginUser) {
@@ -74,7 +72,9 @@ async function ensurePluginUser(localUser: any) {
 }
 
 function issuePluginToken(pluginUserId: number, localUserId: number) {
-  const jwtService = strapi.plugins["users-permissions"].services.jwt;
+  const jwtService = strapi
+    .plugin("users-permissions")
+    .service("jwt") as any;
   return jwtService.issue({
     id: pluginUserId,
     localUserId,
