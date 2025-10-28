@@ -88,7 +88,7 @@ export default function OverviewCards({ data, loading, error, onRetry }: Overvie
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="hidden grid-cols-1 gap-3 sm:grid-cols-2 lg:grid xl:grid-cols-4">
       {cards.map((card) => (
         <div
           key={card.id}
@@ -98,7 +98,9 @@ export default function OverviewCards({ data, loading, error, onRetry }: Overvie
           )}
         >
           <span className="text-xs font-medium text-slate-500 lg:text-sm">{card.label}</span>
-          <span className="text-2xl font-semibold text-foreground-primary lg:text-3xl">{card.value}</span>
+          <span className="text-foreground-primary text-2xl font-semibold lg:text-3xl">
+            {card.value}
+          </span>
           <span className="text-xs text-slate-500 lg:text-sm">{card.helper}</span>
         </div>
       ))}

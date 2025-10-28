@@ -11,8 +11,7 @@ import { ORDER_STATUS } from "../Constnats";
 import type { Order } from "@/services/order";
 import OrderService from "@/services/order";
 import { faNum } from "@/utils/faNum";
-import SearchIcon from "@/components/Icons/SearchIcon";
-import RefreshIcon from "@/components/User/Icons/RefreshIcon";
+import { Search, RefreshCcw } from "lucide-react";
 import OrderDetailsDrawer from "./OrderDetailsDrawer";
 
 export default function OrdersTabs() {
@@ -24,11 +23,11 @@ export default function OrdersTabs() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const pageSize = 20; // Fetch more orders for tabs
 
-  const fetchOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (targetPage: number) => {
     try {
       setLoading(true);
 
-      const response = await OrderService.getMyOrders(page, pageSize);
+      const response = await OrderService.getMyOrders(targetPage, pageSize);
       setOrders(response.data);
       setPageCount(response.meta.pagination.pageCount);
     } catch (err: any) {
@@ -36,11 +35,11 @@ export default function OrdersTabs() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize]);
+  }, [pageSize]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    loadOrders(page);
+  }, [loadOrders, page]);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -222,7 +221,7 @@ export default function OrdersTabs() {
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="relative w-full max-w-md">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <SearchIcon className="h-4 w-4" />
+            <Search className="h-4 w-4" />
           </span>
           <input
             value={searchTerm}
@@ -249,11 +248,11 @@ export default function OrdersTabs() {
             type="button"
             onClick={() => {
               setPage(1);
-              fetchOrders();
+              loadOrders(1);
             }}
             className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition hover:border-pink-200 hover:text-pink-600"
           >
-            <RefreshIcon className="h-4 w-4" />
+            <RefreshCcw className="h-4 w-4" />
             بروزرسانی
           </button>
         </div>
