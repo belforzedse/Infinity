@@ -12,10 +12,6 @@ const API_AUTHENTICATED_ROLE_ID = Number(
 );
 
 async function ensurePluginUser(localUser: any) {
-  const userService = strapi
-    .plugin("users-permissions")
-    .service("user") as any;
-
   const roleTitle =
     (localUser?.user_role?.Title ||
       localUser?.user_role?.data?.attributes?.Title ||
@@ -272,6 +268,7 @@ async function loginWithPassword(ctx) {
 
   const user = await strapi.db.query("api::local-user.local-user").findOne({
     where: { Phone: { $endsWith: phone.substring(1) } },
+    populate: ["user_role"],
   });
 
   if (user?.Password !== password) {
