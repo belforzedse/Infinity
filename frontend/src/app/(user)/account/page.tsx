@@ -22,21 +22,21 @@ export default function AccountPage() {
 
   return (
     <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
-      <header className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:px-6 lg:py-6">
-        <span className="text-sm font-semibold text-slate-400">مدیریت حساب کاربری</span>
-        <h1 className="text-2xl font-semibold text-foreground-primary lg:text-3xl">حساب من</h1>
-        <p className="text-sm text-slate-500 lg:text-base">{description}</p>
-        <AccountQuickLinks />
-      </header>
-
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
         <aside className="hidden w-full max-w-[240px] flex-shrink-0 lg:block">
           <UserSidebar />
         </aside>
 
         <main className="flex flex-1 flex-col gap-5">
-          <OverviewCards data={data} loading={loading} error={error} onRetry={refetch} />
           <WelcomNotifBar username={fullName} />
+          <header className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:hidden lg:px-6 lg:py-6">
+            <span className="text-sm font-semibold text-slate-400">مدیریت حساب کاربری</span>
+            <h1 className="text-foreground-primary text-2xl font-semibold lg:text-3xl">حساب من</h1>
+            <p className="text-sm text-slate-500 lg:text-base">{description}</p>
+            <AccountQuickLinks />
+          </header>
+
+          <OverviewCards data={data} loading={loading} error={error} onRetry={refetch} />
           <RecentOrders data={data.orders.recent} loading={loading} />
           <AccountForm />
         </main>

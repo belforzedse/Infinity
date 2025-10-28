@@ -2,9 +2,10 @@ import Image from "next/image";
 import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
-import ShowFactorButton from "./ShowFactorButton";
 import clsx from "clsx";
 import PaymentStatusButton from "./PaymentStatusButton";
+import ShowFactorButton from "./ShowFactorButton";
+import { Eye } from "lucide-react";
 
 interface Props {
   image: string;
@@ -16,6 +17,7 @@ interface Props {
   title: string;
   orderId?: number;
   shippingBarcode?: string;
+  onViewDetails: () => void;
 }
 
 export default function OrderRow({
@@ -28,6 +30,7 @@ export default function OrderRow({
   title,
   orderId,
   shippingBarcode,
+  onViewDetails,
 }: Props) {
   return (
     <tr className="hover:bg-gray-50">
@@ -84,6 +87,14 @@ export default function OrderRow({
               رهگیری مرسوله
             </a>
           ) : null}
+          <button
+            type="button"
+            onClick={onViewDetails}
+            className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-pink-200 hover:text-pink-600"
+          >
+            <Eye className="h-4 w-4" />
+            <span>جزئیات</span>
+          </button>
           <ShowFactorButton />
         </div>
       </td>

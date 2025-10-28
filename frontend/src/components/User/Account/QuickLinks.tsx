@@ -27,7 +27,7 @@ export default function AccountQuickLinks() {
           >
             <div className="flex flex-col">
               <span className="text-xs font-medium text-slate-500">{item.text}</span>
-              <span className="text-[10px] text-slate-400">مدیریت سریع</span>
+
             </div>
             {icon}
           </Link>
