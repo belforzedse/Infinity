@@ -33,20 +33,12 @@ async function ensurePluginUser(localUser: any) {
 
   const targetRoleId = isAdmin ? API_ADMIN_ROLE_ID : API_AUTHENTICATED_ROLE_ID;
 
-  const hashPassword = async (password: string | null | undefined) => {
-    const pwd =
-      password && password.length > 0
-        ? password
-        : Math.random().toString(36);
-    return userService.hashPassword(pwd);
-  };
-
   if (!pluginUser) {
     pluginUser = await pluginUserRepo.create({
       data: {
         username: localUser.Phone,
         email: `${localUser.Phone}@infinity.local`,
-        password: await hashPassword(localUser.Password),
+        password: localUser.Password,
         confirmed: true,
         blocked: false,
         role: targetRoleId,
