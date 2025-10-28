@@ -27,6 +27,16 @@ export default function OrdersPage() {
 
         <main className="flex flex-1 flex-col gap-6">
           <AccountQuickLinks />
+
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold text-foreground-primary lg:text-3xl">
+              تاریخچه سفارش‌ها
+            </h1>
+            <p className="text-sm text-slate-500 lg:text-base">
+              سفارش‌های خود را ردیابی کنید، وضعیت پرداخت را بررسی کنید و جزئیات هر سفارش را ببینید.
+            </p>
+          </div>
+
           <OrdersTabs />
         </main>
       </div>

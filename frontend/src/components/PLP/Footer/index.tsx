@@ -6,8 +6,9 @@ import StoresSection from "./StoresSection";
 import CustomerServiceSection from "./CustomerServiceSection";
 import QuickAccessSection from "./QuickAccessSection";
 import UserAccountSection from "./UserAccountSection";
-import type { FooterData} from "@/services/footer";
+import type { FooterData } from "@/services/footer";
 import { getFooterData } from "@/services/footer";
+import PageContainer from "@/components/layout/PageContainer";
 
 const PLPFooter = () => {
   const [footerData, setFooterData] = useState<FooterData | null>(null);
@@ -19,8 +20,6 @@ const PLPFooter = () => {
         setFooterData(data);
       } catch (error) {
         console.error("Failed to fetch footer data:", error);
-      } finally {
-        // no-op
       }
     };
 
@@ -28,9 +27,12 @@ const PLPFooter = () => {
   }, []);
 
   return (
-    <footer className="rounded-t-3xl bg-stone-100 p-3 md:px-10 md:py-6">
-      <div className="hidden lg:block">
-        <div className="relative mx-auto flex max-w-[1440px] flex-row-reverse items-start justify-between">
+    <footer className="rounded-t-3xl bg-stone-100">
+      <PageContainer
+        variant="wide"
+        className="space-y-6 pb-10 pt-8"
+      >
+        <div className="hidden items-start justify-between gap-6 lg:flex lg:flex-row-reverse">
           <LogoSection />
           <StoresSection contactInfo={footerData?.ContactUs} />
           <CustomerServiceSection
@@ -40,20 +42,20 @@ const PLPFooter = () => {
           <QuickAccessSection data={footerData?.Second} />
           <UserAccountSection data={footerData?.First} />
         </div>
-      </div>
 
-      <div className="lg:hidden">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-6 lg:hidden">
           <LogoSection />
-          <QuickAccessSection data={footerData?.Second} />
-          <UserAccountSection data={footerData?.First} />
-          <CustomerServiceSection
-            data={footerData?.Third}
-            customerSupport={footerData?.CustomerSupport}
-          />
-          <StoresSection contactInfo={footerData?.ContactUs} />
+          <div className="grid gap-6 md:grid-cols-2">
+            <QuickAccessSection data={footerData?.Second} />
+            <UserAccountSection data={footerData?.First} />
+            <CustomerServiceSection
+              data={footerData?.Third}
+              customerSupport={footerData?.CustomerSupport}
+            />
+            <StoresSection contactInfo={footerData?.ContactUs} />
+          </div>
         </div>
-      </div>
+      </PageContainer>
     </footer>
   );
 };
