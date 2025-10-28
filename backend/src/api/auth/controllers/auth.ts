@@ -310,7 +310,11 @@ async function login(ctx) {
     ctx.body = {
       message: "login successful",
       token,
-      isAdmin,
+      user: {
+        id: localUser.id,
+        isAdmin,
+        roles: isAdmin ? ["super-admin", "admin"] : ["authenticated"],
+      },
     };
   } catch (err) {
     strapi.log.error(err);
@@ -456,7 +460,11 @@ async function loginWithPassword(ctx) {
   ctx.body = {
     message: "login successful",
     token,
-    isAdmin,
+    user: {
+      id: user.id,
+      isAdmin,
+      roles: isAdmin ? ["super-admin", "admin"] : ["authenticated"],
+    },
   };
 }
 

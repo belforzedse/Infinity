@@ -143,11 +143,41 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
         Number((pluginUser?.role as any)?.id) === API_ADMIN_ROLE_ID ||
         normalizedPluginRoleTitle.includes("admin");
 
+      let ability = null;
+      try {
+        const permissionService = strapi
+          .plugin("users-permissions")
+          .service("permission");
+
+        if (pluginUser?.role?.id) {
+          const rolePermissions = await Promise.resolve(pluginUser.role.id)
+            .then(permissionService.findRolePermissions)
+            .then((perms: any[]) =>
+              perms.map(permissionService.toContentAPIPermission)
+            );
+
+          ability = await strapi.contentAPI.permissions.engine.generateAbility(
+            rolePermissions
+          );
+        }
+      } catch (abilityError) {
+        strapi.log.warn("Failed to generate users-permissions ability", {
+          pluginUserId: pluginUser?.id,
+          error: abilityError,
+        });
+      }
+
       ctx.state.localUser = localUser;
       ctx.state.pluginUser = pluginUser;
       ctx.state.user = pluginUser;
       ctx.state.isAdmin = isAdmin;
-      ctx.state.auth = { pluginUser, localUser, tokenPayload: payload };
+      ctx.state.ability = ability;
+      ctx.state.auth = {
+        authenticated: true,
+        credentials: pluginUser,
+        ability,
+        tokenPayload: payload,
+      };
 
       await next();
     } catch (error) {
