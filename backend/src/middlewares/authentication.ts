@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Strapi } from "@strapi/strapi";
+import { Ability } from "@casl/ability";
 
 const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
 const LOCAL_ADMIN_ROLE_ID = 2;
@@ -156,15 +157,31 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
               perms.map(permissionService.toContentAPIPermission)
             ) as any[];
 
-          ability = await strapi.contentAPI.permissions.engine.generateAbility(
-            rolePermissions
-          );
+          if (rolePermissions?.length) {
+            ability =
+              await strapi.contentAPI.permissions.engine.generateAbility(
+                rolePermissions
+              );
+          } else {
+            strapi.log.warn("No role permissions found for plugin user", {
+              pluginUserId: pluginUser?.id,
+              roleId: pluginUser.role?.id,
+            });
+          }
         }
       } catch (abilityError) {
         strapi.log.warn("Failed to generate users-permissions ability", {
           pluginUserId: pluginUser?.id,
           error: abilityError,
         });
+      }
+
+      if (!ability && isAdmin) {
+        ability = new Ability([{ action: "manage", subject: "all" }]);
+      }
+
+      if (!ability) {
+        ability = new Ability([]);
       }
 
       ctx.state.localUser = localUser;
