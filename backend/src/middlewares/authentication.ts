@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
 import { Strapi } from "@strapi/strapi";
 
+const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
+const LOCAL_ADMIN_ROLE_ID = 2;
+
 const isNumericString = (value: unknown): value is string =>
   typeof value === "string" && /^\d+$/.test(value);
 
@@ -117,9 +120,34 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
         delete (pluginUser as any).confirmationToken;
       }
 
+      const normalizedLocalRoleTitle = String(
+        (localUser?.user_role as any)?.Title ??
+          (localUser?.user_role as any)?.attributes?.Title ??
+          ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const normalizedPluginRoleTitle = String(
+        (pluginUser?.role as any)?.name ??
+          (pluginUser?.role as any)?.type ??
+          ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const isAdmin =
+        Boolean(payload?.isAdmin) ||
+        Number((localUser?.user_role as any)?.id) === LOCAL_ADMIN_ROLE_ID ||
+        normalizedLocalRoleTitle.includes("admin") ||
+        Number((pluginUser?.role as any)?.id) === API_ADMIN_ROLE_ID ||
+        normalizedPluginRoleTitle.includes("admin");
+
       ctx.state.localUser = localUser;
-      ctx.state.auth = { pluginUser, localUser, tokenPayload: payload };
+      ctx.state.pluginUser = pluginUser;
       ctx.state.user = pluginUser;
+      ctx.state.isAdmin = isAdmin;
+      ctx.state.auth = { pluginUser, localUser, tokenPayload: payload };
 
       await next();
     } catch (error) {

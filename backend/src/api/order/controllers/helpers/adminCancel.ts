@@ -42,8 +42,8 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
 
   try {
     // Admin guard
-    const localUser = ctx.state.localUser;
-    const pluginUser = ctx.state.user;
+    const localUser = ctx.state.localUser ?? ctx.state.user;
+    const pluginUser = ctx.state.pluginUser;
 
     const roleId =
       typeof localUser?.user_role === "object"

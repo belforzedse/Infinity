@@ -6,6 +6,7 @@ import { RedisClient } from "../../../index";
 import { validatePhone } from "../utils/validations";
 
 const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
+const LOCAL_ADMIN_ROLE_ID = 2;
 const API_AUTHENTICATED_ROLE_ID = Number(
   process.env.API_AUTHENTICATED_ROLE_ID || 1
 );
@@ -78,15 +79,89 @@ async function ensurePluginUser(localUser: any) {
   return pluginUser;
 }
 
-function issuePluginToken(pluginUserId: number, localUserId: number) {
+function isAdminUser(localUser: any, pluginUser?: any): boolean {
+  let localRoleId: number | undefined;
+  let localRoleTitle = "";
+
+  const localRole = localUser?.user_role;
+  if (typeof localRole === "number") {
+    localRoleId = localRole;
+  } else if (typeof localRole === "object" && localRole !== null) {
+    if (typeof localRole.id === "number") {
+      localRoleId = localRole.id;
+    }
+    if (typeof localRole.Title === "string") {
+      localRoleTitle = localRole.Title;
+    }
+    const nested = (localRole as any)?.data?.attributes ?? (localRole as any)?.attributes;
+    if (nested) {
+      if (typeof nested.id === "number") {
+        localRoleId = nested.id;
+      }
+      if (typeof nested.Title === "string") {
+        localRoleTitle = nested.Title;
+      }
+    }
+  }
+
+  let pluginRoleId: number | undefined;
+  let pluginRoleTitle = "";
+  const pluginRole = pluginUser?.role;
+  if (typeof pluginRole === "number") {
+    pluginRoleId = pluginRole;
+  } else if (typeof pluginRole === "object" && pluginRole !== null) {
+    if (typeof pluginRole.id === "number") {
+      pluginRoleId = pluginRole.id;
+    }
+    if (typeof pluginRole.name === "string") {
+      pluginRoleTitle = pluginRole.name;
+    } else if (typeof pluginRole.type === "string") {
+      pluginRoleTitle = pluginRole.type;
+    }
+  }
+
+  const normalizedLocalTitle = (localRoleTitle || "").trim().toLowerCase();
+  const normalizedPluginTitle = (pluginRoleTitle || "").trim().toLowerCase();
+
+  return (
+    localRoleId === LOCAL_ADMIN_ROLE_ID ||
+    normalizedLocalTitle.includes("admin") ||
+    pluginRoleId === API_ADMIN_ROLE_ID ||
+    normalizedPluginTitle.includes("admin")
+  );
+}
+
+function issuePluginToken(pluginUser: any, localUser: any) {
   const jwtService = strapi
     .plugin("users-permissions")
     .service("jwt") as any;
 
+  const pluginId =
+    typeof pluginUser?.id === "number"
+      ? pluginUser.id
+      : Number(pluginUser?.id ?? pluginUser);
+
+  const pluginRoleId =
+    typeof pluginUser?.role === "object" && pluginUser.role
+      ? (pluginUser.role as Record<string, unknown>)?.id
+      : undefined;
+
+  const isAdminRole =
+    Number(pluginRoleId) === API_ADMIN_ROLE_ID ||
+    String(
+      (pluginUser?.role as Record<string, unknown>)?.name ??
+        (pluginUser?.role as Record<string, unknown>)?.type ??
+        ""
+    )
+      .trim()
+      .toLowerCase()
+      .includes("admin");
+
   return jwtService.issue(
     {
-      id: pluginUserId,
-      localUserId,
+      id: pluginId,
+      localUserId: localUser?.id ?? Number(localUser),
+      isAdmin: isAdminRole || isAdminUser(localUser, pluginUser),
     },
     { expiresIn: "30d" }
   );
@@ -220,20 +295,22 @@ async function login(ctx) {
       return;
     }
 
-  const pluginUser = await ensurePluginUser(localUser);
-  if (!pluginUser?.id) {
-    strapi.log.error("Failed to sync plugin user during OTP login", {
-      localUserId: localUser.id,
-    });
-    ctx.internalServerError("Login failed");
-    return;
-  }
+    const pluginUser = await ensurePluginUser(localUser);
+    if (!pluginUser?.id) {
+      strapi.log.error("Failed to sync plugin user during OTP login", {
+        localUserId: localUser.id,
+      });
+      ctx.internalServerError("Login failed");
+      return;
+    }
 
-  const token = issuePluginToken(pluginUser.id, localUser.id);
+    const token = issuePluginToken(pluginUser, localUser);
+    const isAdmin = isAdminUser(localUser, pluginUser);
 
     ctx.body = {
       message: "login successful",
       token,
+      isAdmin,
     };
   } catch (err) {
     strapi.log.error(err);
@@ -262,12 +339,22 @@ async function self(ctx) {
       return;
     }
 
-    const isAdmin = user?.user_role?.id === 2;
-    if (user?.user_info?.id) {
-      delete (user.user_info as any).id;
+    const pluginUser = ctx.state.pluginUser;
+    const isAdmin = isAdminUser(user, pluginUser);
+
+    const userInfo = user?.user_info
+      ? { ...(user.user_info as Record<string, unknown>) }
+      : {};
+    if ("id" in (userInfo as Record<string, unknown>)) {
+      delete (userInfo as Record<string, unknown>).id;
     }
 
-    ctx.body = { ...authLocalUser, ...user.user_info, isAdmin };
+    ctx.body = {
+      ...authLocalUser,
+      ...userInfo,
+      isAdmin,
+      roles: isAdmin ? ["super-admin", "admin"] : ["authenticated"],
+    };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
@@ -363,11 +450,13 @@ async function loginWithPassword(ctx) {
     return;
   }
 
-  const token = issuePluginToken(pluginUser.id, user.id);
+  const token = issuePluginToken(pluginUser, user);
+  const isAdmin = isAdminUser(user, pluginUser);
 
   ctx.body = {
     message: "login successful",
     token,
+    isAdmin,
   };
 }
 
