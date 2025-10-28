@@ -75,7 +75,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         پرش به محتوا
       </a>
       <header
-        className={`sticky top-0 z-50 transition-all ${
+        className={`sticky top-0 z-50 transition-all allow-overflow ${
           scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         }`}
       >

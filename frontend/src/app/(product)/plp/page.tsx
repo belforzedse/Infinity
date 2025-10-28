@@ -3,6 +3,7 @@ export const revalidate = 3600; // 1 hour in seconds
 
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
+import PageContainer from "@/components/layout/PageContainer";
 import { API_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
@@ -330,20 +331,16 @@ export default async function PLPPage({
   const isSearchResults = !!search;
 
   return (
-    <>
-      <div className="mt-3 md:mt-0 md:pb-[80px] md:pt-[38px]">
-        {/* Show hero banner only for category browsing, not search results */}
-        {!isSearchResults && <PLPHeroBanner category={category} />}
+    <PageContainer variant="wide" className="space-y-6 pb-20 pt-6">
+      {!isSearchResults && <PLPHeroBanner category={category} />}
 
-        {/* Show search results or product list */}
-        <PLPList
-          products={products}
-          pagination={pagination}
-          category={category}
-          searchQuery={search}
-        />
-      </div>
-    </>
+      <PLPList
+        products={products}
+        pagination={pagination}
+        category={category}
+        searchQuery={search}
+      />
+    </PageContainer>
   );
 }
 
