@@ -5,6 +5,7 @@ import imageLoader from "@/utils/imageLoader";
 import ShoppingCartQuantityControl from "../QuantityControl";
 import type { CartItem } from "@/contexts/CartContext";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { faNum } from "@/utils/faNum";
 
 interface Props {
   cartItem: CartItem;
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
+  const formatPrice = (value: number) => `${faNum(value)} تومان`;
+
   return (
     <div className="flex w-full flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
       <div className="grid grid-cols-4">
@@ -44,7 +47,20 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
-          <span className="text-sm text-foreground-primary">{cartItem.category}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-foreground-primary">{cartItem.category}</span>
+            {[cartItem.color, cartItem.size, cartItem.model].some(Boolean) ? (
+              <span className="text-xs text-slate-500">
+                {[
+                  cartItem.color ? `رنگ: ${cartItem.color}` : null,
+                  cartItem.size ? `سایز: ${cartItem.size}` : null,
+                  cartItem.model ? `مدل: ${cartItem.model}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" • ")}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -54,14 +70,18 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
         </div>
 
         <div className="col-span-3 flex flex-col items-end gap-1 p-3">
-          {cartItem.originalPrice && cartItem.originalPrice > cartItem.price && (
-            <span className="text-xs text-neutral-500 line-through">
-              {cartItem.originalPrice.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
-            </span>
+          {cartItem.originalPrice && cartItem.originalPrice > cartItem.price ? (
+            <>
+              <span className="text-xs text-neutral-500 line-through">
+                {formatPrice(cartItem.originalPrice)}
+              </span>
+              <span className="text-base font-semibold text-pink-600">
+                {formatPrice(cartItem.price)}
+              </span>
+            </>
+          ) : (
+            <span className="text-base text-neutral-800">{formatPrice(cartItem.price)}</span>
           )}
-          <span className="text-base font-semibold text-pink-600">
-            {cartItem.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
-          </span>
         </div>
       </div>
 
@@ -81,16 +101,20 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
         </div>
 
         <div className="col-span-3 flex flex-col items-end gap-1 p-3">
-          {cartItem.originalPrice && cartItem.originalPrice > cartItem.price && (
-            <span className="text-xs text-neutral-500 line-through">
-              {(cartItem.originalPrice * cartItem.quantity).toLocaleString()}{" "}
-              {"\u062A\u0648\u0645\u0627\u0646"}
+          {cartItem.originalPrice && cartItem.originalPrice > cartItem.price ? (
+            <>
+              <span className="text-xs text-neutral-500 line-through">
+                {formatPrice(cartItem.originalPrice * cartItem.quantity)}
+              </span>
+              <span className="text-base font-semibold text-pink-600">
+                {formatPrice(cartItem.price * cartItem.quantity)}
+              </span>
+            </>
+          ) : (
+            <span className="text-base text-neutral-800">
+              {formatPrice(cartItem.price * cartItem.quantity)}
             </span>
           )}
-          <span className="text-base font-semibold text-pink-600">
-            {(cartItem.price * cartItem.quantity).toLocaleString()}{" "}
-            {"\u062A\u0648\u0645\u0627\u0646"}
-          </span>
         </div>
       </div>
     </div>
