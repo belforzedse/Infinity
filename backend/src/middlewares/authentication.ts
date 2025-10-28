@@ -1,6 +1,19 @@
 import jwt from "jsonwebtoken";
 import { Strapi } from "@strapi/strapi";
 
+const isNumericString = (value: unknown): value is string =>
+  typeof value === "string" && /^\d+$/.test(value);
+
+const normalizeId = (rawValue: unknown) => {
+  if (rawValue === null || rawValue === undefined) return null;
+  if (typeof rawValue === "string") {
+    const trimmed = rawValue.trim();
+    if (!trimmed.length) return null;
+    return isNumericString(trimmed) ? Number(trimmed) : trimmed;
+  }
+  return rawValue;
+};
+
 export default (_config, { strapi }: { strapi: Strapi }) => {
   return async (ctx, next) => {
     try {
@@ -31,62 +44,82 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
       const rawLocalUserId =
         payload?.localUserId ??
         payload?.userId ??
-        payload?.id ??
+        payload?.merchant ??
         payload?.sub;
 
-      const normalizedLocalUserId =
-        typeof rawLocalUserId === "string"
-          ? rawLocalUserId.trim()
-          : rawLocalUserId;
+      const rawPluginUserId = payload?.id ?? payload?.pluginUserId;
 
-      if (
-        normalizedLocalUserId === null ||
-        normalizedLocalUserId === undefined ||
-        (typeof normalizedLocalUserId === "string" &&
-          normalizedLocalUserId.length === 0)
-      ) {
-        strapi.log.warn("authentication middleware invalid payload", {
-          payload,
+      const localUserId = normalizeId(rawLocalUserId);
+      const pluginUserId = normalizeId(rawPluginUserId);
+
+      let localUser = null;
+      if (localUserId !== null && localUserId !== undefined) {
+        localUser = await strapi
+          .query("api::local-user.local-user")
+          .findOne({
+            where: { id: localUserId },
+            populate: { user_role: true },
+          });
+      }
+
+      let pluginUser = null;
+      if (pluginUserId !== null && pluginUserId !== undefined) {
+        pluginUser = await strapi
+          .query("plugin::users-permissions.user")
+          .findOne({
+            where: { id: pluginUserId },
+            populate: { role: true },
+          });
+      }
+
+      if (!pluginUser && localUser?.Phone) {
+        pluginUser = await strapi
+          .query("plugin::users-permissions.user")
+          .findOne({
+            where: { username: localUser.Phone },
+            populate: { role: true },
+          });
+      }
+
+      if (!localUser && pluginUser?.username) {
+        localUser = await strapi
+          .query("api::local-user.local-user")
+          .findOne({
+            where: { Phone: pluginUser.username },
+            populate: { user_role: true },
+          });
+      }
+
+      if (!localUser) {
+        ctx.notFound("User not found");
+        return;
+      }
+
+      if (!pluginUser) {
+        strapi.log.warn("authentication middleware missing plugin user", {
+          tokenPayload: payload,
+          localUserId: localUser?.id,
         });
         ctx.unauthorized("Invalid token payload");
         return;
       }
 
-      const localUserId =
-        typeof normalizedLocalUserId === "string" &&
-        /^\d+$/.test(normalizedLocalUserId)
-          ? Number(normalizedLocalUserId)
-          : normalizedLocalUserId;
-
-      let user = await strapi
-        .query("api::local-user.local-user")
-        .findOne({
-          where: { id: localUserId },
-          populate: { user_role: true },
-        });
-
-      if (!user && payload?.id) {
-        const pluginUser = await strapi
-          .query("plugin::users-permissions.user")
-          .findOne({ where: { id: Number(payload.id) } });
-
-        if (pluginUser?.username) {
-          user = await strapi
-            .query("api::local-user.local-user")
-            .findOne({
-              where: { Phone: pluginUser.username },
-              populate: { user_role: true },
-            });
-        }
+      if ("Password" in localUser) {
+        delete (localUser as any).Password;
+      }
+      if ("password" in pluginUser) {
+        delete (pluginUser as any).password;
+      }
+      if ("resetPasswordToken" in pluginUser) {
+        delete (pluginUser as any).resetPasswordToken;
+      }
+      if ("confirmationToken" in pluginUser) {
+        delete (pluginUser as any).confirmationToken;
       }
 
-      if (!user) {
-        ctx.notFound("User not found");
-        return;
-      }
-
-      delete user.Password;
-      ctx.state.user = user;
+      ctx.state.localUser = localUser;
+      ctx.state.auth = { pluginUser, localUser, tokenPayload: payload };
+      ctx.state.user = pluginUser;
 
       await next();
     } catch (error) {

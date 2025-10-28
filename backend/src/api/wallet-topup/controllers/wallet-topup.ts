@@ -13,7 +13,8 @@ export default factories.createCoreController(
   ({ strapi }: { strapi: Strapi }) => ({
     async chargeIntent(ctx) {
       try {
-        const userId = ctx.state.user?.id;
+        const userId =
+          ctx.state.localUser?.id ?? ctx.state.user?.id;
         if (!userId) return ctx.unauthorized("Unauthorized");
 
         const { amount } = ctx.request.body || {};
