@@ -28,20 +28,35 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
         }
       }
 
-      const localUserId = Number(
+      const rawLocalUserId =
         payload?.localUserId ??
-          payload?.userId ??
-          payload?.id ??
-          payload?.sub
-      );
+        payload?.userId ??
+        payload?.id ??
+        payload?.sub;
 
-      if (!localUserId || Number.isNaN(localUserId)) {
+      const normalizedLocalUserId =
+        typeof rawLocalUserId === "string"
+          ? rawLocalUserId.trim()
+          : rawLocalUserId;
+
+      if (
+        normalizedLocalUserId === null ||
+        normalizedLocalUserId === undefined ||
+        (typeof normalizedLocalUserId === "string" &&
+          normalizedLocalUserId.length === 0)
+      ) {
         strapi.log.warn("authentication middleware invalid payload", {
           payload,
         });
         ctx.unauthorized("Invalid token payload");
         return;
       }
+
+      const localUserId =
+        typeof normalizedLocalUserId === "string" &&
+        /^\d+$/.test(normalizedLocalUserId)
+          ? Number(normalizedLocalUserId)
+          : normalizedLocalUserId;
 
       let user = await strapi
         .query("api::local-user.local-user")
