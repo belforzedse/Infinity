@@ -4,6 +4,7 @@
 
 import { RedisClient } from "../../../index";
 import { validatePhone } from "../utils/validations";
+import jwt from "jsonwebtoken";
 
 const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
 const API_AUTHENTICATED_ROLE_ID = Number(
@@ -149,7 +150,22 @@ async function login(ctx) {
       return;
     }
 
-    const otpObj = JSON.parse(await (await RedisClient).get(otpToken));
+    const redis = await RedisClient;
+    const rawOtpPayload = await redis.get(otpToken);
+
+    if (!rawOtpPayload) {
+      ctx.badRequest("otpToken is invalid or expired");
+      return;
+    }
+
+    let otpObj: Record<string, any> | null = null;
+    try {
+      otpObj = JSON.parse(rawOtpPayload);
+    } catch (error) {
+      strapi.log.warn("Failed to parse OTP payload", { otpToken, error });
+      ctx.badRequest("otpToken is invalid");
+      return;
+    }
 
     if (!otpObj?.code) {
       ctx.badRequest("otpToken is invalid");
@@ -202,8 +218,15 @@ async function login(ctx) {
       return;
     }
 
-    const pluginUser = await ensurePluginUser(localUser);
-    const token = issuePluginToken(pluginUser.id, localUser.id);
+  await ensurePluginUser(localUser);
+  const token = jwt.sign(
+    {
+      userId: localUser.id,
+      isAdmin: localUser.user_role?.Title?.toLowerCase().includes("admin"),
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
 
     ctx.body = {
       message: "login successful",
@@ -277,14 +300,6 @@ async function registerInfo(ctx) {
       });
     });
 
-    const refreshedUser = await strapi.db
-      .query("api::local-user.local-user")
-      .findOne({ where: { id: user.id }, populate: ["user_role"] });
-
-    if (refreshedUser) {
-      await ensurePluginUser(refreshedUser);
-    }
-
     ctx.body = {
       message: "info updated",
     };
@@ -311,8 +326,15 @@ async function loginWithPassword(ctx) {
     return;
   }
 
-  const pluginUser = await ensurePluginUser(user);
-  const token = issuePluginToken(pluginUser.id, user.id);
+  await ensurePluginUser(user);
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      isAdmin: user.user_role?.Title?.toLowerCase().includes("admin"),
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
 
   ctx.body = {
     message: "login successful",
@@ -328,7 +350,22 @@ async function resetPassword(ctx) {
     return;
   }
 
-  const otpObj = JSON.parse(await (await RedisClient).get(otpToken));
+  const redis = await RedisClient;
+  const rawOtpPayload = await redis.get(otpToken);
+
+  if (!rawOtpPayload) {
+    ctx.badRequest("otpToken is invalid or expired");
+    return;
+  }
+
+  let otpObj: Record<string, any> | null = null;
+  try {
+    otpObj = JSON.parse(rawOtpPayload);
+  } catch (error) {
+    strapi.log.warn("Failed to parse OTP payload", { otpToken, error });
+    ctx.badRequest("otpToken is invalid");
+    return;
+  }
 
   if (!otpObj?.code) {
     ctx.badRequest("otpToken is invalid");
