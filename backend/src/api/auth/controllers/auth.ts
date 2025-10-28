@@ -6,6 +6,81 @@ import { RedisClient } from "../../../index";
 import jwt from "jsonwebtoken";
 import { validatePhone } from "../utils/validations";
 
+const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
+const API_AUTHENTICATED_ROLE_ID = Number(
+  process.env.API_AUTHENTICATED_ROLE_ID || 1
+);
+
+async function ensurePluginUser(localUser: any) {
+  const roleTitle =
+    (localUser?.user_role?.Title ||
+      localUser?.user_role?.data?.attributes?.Title ||
+      "")?.toString().toLowerCase() || "";
+  const isAdmin = roleTitle.includes("admin");
+
+  const pluginUserRepo = strapi.db.query(
+    "plugin::users-permissions.user"
+  ) as any;
+
+  let pluginUser = await pluginUserRepo.findOne({
+    where: { username: localUser.Phone },
+    populate: ["role"],
+  });
+
+  const targetRoleId = isAdmin ? API_ADMIN_ROLE_ID : API_AUTHENTICATED_ROLE_ID;
+
+  const hashService =
+    strapi.service("plugin::users-permissions.user") ||
+    strapi.plugins["users-permissions"].services.user;
+
+  const hashPassword = async (password: string | null | undefined) => {
+    const pwd = password && password.length > 0 ? password : Math.random().toString(36);
+    if (hashService.hashPassword) {
+      return hashService.hashPassword(pwd);
+    }
+    return strapi.plugins["users-permissions"].services.user.hashPassword(
+      pwd
+    );
+  };
+
+  if (!pluginUser) {
+    pluginUser = await pluginUserRepo.create({
+      data: {
+        username: localUser.Phone,
+        email: `${localUser.Phone}@infinity.local`,
+        password: await hashPassword(localUser.Password),
+        confirmed: true,
+        blocked: false,
+        role: targetRoleId,
+      },
+    });
+  } else {
+    const updates: Record<string, unknown> = {};
+    if (pluginUser.role?.id !== targetRoleId) {
+      updates.role = targetRoleId;
+    }
+    if (!pluginUser.email) {
+      updates.email = `${localUser.Phone}@infinity.local`;
+    }
+    if (Object.keys(updates).length > 0) {
+      pluginUser = await pluginUserRepo.update({
+        where: { id: pluginUser.id },
+        data: updates,
+      });
+    }
+  }
+
+  return pluginUser;
+}
+
+function issuePluginToken(pluginUserId: number, localUserId: number) {
+  const jwtService = strapi.plugins["users-permissions"].services.jwt;
+  return jwtService.issue({
+    id: pluginUserId,
+    localUserId,
+  });
+}
+
 export default {
   otp,
   login,
@@ -212,9 +287,8 @@ async function loginWithPassword(ctx) {
     return;
   }
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
+  const pluginUser = await ensurePluginUser(user);
+  const token = issuePluginToken(pluginUser.id, user.id);
 
   ctx.body = {
     message: "login successful",
