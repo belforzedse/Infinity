@@ -322,7 +322,7 @@ async function registerInfo(ctx) {
 
     const refreshedUser = await strapi.db
       .query("api::local-user.local-user")
-      .findOne({ where: { id: user.id }, populate: ["user_role"] });
+      .findOne({ where: { id: localUser.id }, populate: ["user_role"] });
 
     if (refreshedUser) {
       await ensurePluginUser(refreshedUser);
@@ -426,7 +426,7 @@ async function resetPassword(ctx) {
 
     const refreshedUser = await strapi.db
       .query("api::local-user.local-user")
-      .findOne({ where: { id: localUser.id }, populate: ["user_role"] });
+      .findOne({ where: { id: user.id }, populate: ["user_role"] });
 
     if (refreshedUser) {
       await ensurePluginUser(refreshedUser);
