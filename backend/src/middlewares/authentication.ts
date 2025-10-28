@@ -19,7 +19,7 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
       let payload: any | null = null;
 
       try {
-        payload = pluginJwt.verify(token);
+        payload = await pluginJwt.verify(token);
       } catch (err) {
         if (process.env.JWT_SECRET) {
           payload = jwt.verify(token, process.env.JWT_SECRET) as any;
