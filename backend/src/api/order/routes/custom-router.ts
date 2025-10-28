@@ -37,6 +37,7 @@ export default {
       handler: "order.generateAnipoBarcode",
       config: {
         auth: false,
+        middlewares: ["global::authentication", "global::require-admin"],
       },
     },
     {
@@ -45,7 +46,7 @@ export default {
       handler: "order.adminAdjustItems",
       config: {
         auth: false,
-        middlewares: ["global::authentication"],
+        middlewares: ["global::authentication", "global::require-admin"],
       },
     },
     {
@@ -54,7 +55,7 @@ export default {
       handler: "order.adminCancel",
       config: {
         auth: false,
-        middlewares: ["global::authentication"],
+        middlewares: ["global::authentication", "global::require-admin"],
       },
     },
     {
@@ -63,7 +64,7 @@ export default {
       handler: "order.adminVoidBarcode",
       config: {
         auth: false,
-        middlewares: ["global::authentication"],
+        middlewares: ["global::authentication", "global::require-admin"],
       },
     },
   ],
