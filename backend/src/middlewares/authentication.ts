@@ -143,18 +143,18 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
         Number((pluginUser?.role as any)?.id) === API_ADMIN_ROLE_ID ||
         normalizedPluginRoleTitle.includes("admin");
 
-      let ability = null;
+      let ability: any = null;
       try {
         const permissionService = strapi
           .plugin("users-permissions")
-          .service("permission");
+          .service("permission") as any;
 
         if (pluginUser?.role?.id) {
           const rolePermissions = await Promise.resolve(pluginUser.role.id)
             .then(permissionService.findRolePermissions)
             .then((perms: any[]) =>
               perms.map(permissionService.toContentAPIPermission)
-            );
+            ) as any[];
 
           ability = await strapi.contentAPI.permissions.engine.generateAbility(
             rolePermissions
