@@ -6,6 +6,7 @@ import Hero from "@/components/PDP/Hero";
 import OffersList from "@/components/PDP/OffersList";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
+import PageContainer from "@/components/layout/PageContainer";
 import type { ProductReview } from "@/components/PDP/Comment/List";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -171,7 +172,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     }) || [];
 
   return (
-    <div className="flex flex-col gap-8">
+    <PageContainer variant="wide" className="flex flex-col gap-10 pb-16 pt-6">
       <div className="flex flex-col gap-3">
         <Breadcrumb
           breadcrumbs={[
@@ -224,6 +225,6 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
           "مانتو زنانه شیک و مجلسی با پارچه نخی درجه یک، مناسب برای استفاده روزمره و مهمانی"
         }
       /> */}
-    </div>
+    </PageContainer>
   );
 }
