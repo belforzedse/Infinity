@@ -2,11 +2,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import UserSidebar from "@/components/User/Sidebar";
-import BreadCrumb from "@/components/User/BreadCrumb";
-import SortIcon from "@/components/User/Icons/SortIcon";
 import OrdersTabs from "@/components/User/Orders/Tabs";
 import UserContainer from "@/components/layout/UserContainer";
+import UserSidebar from "@/components/User/Sidebar";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -20,22 +18,16 @@ export default function OrdersPage() {
   }, [router]);
 
   return (
-    <UserContainer className="flex min-h-[60vh] gap-10 bg-white" dir="rtl">
-      <UserSidebar />
+    <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        <aside className="hidden w-full max-w-[240px] flex-shrink-0 lg:block">
+          <UserSidebar />
+        </aside>
 
-      <main className="flex flex-1 flex-col gap-4 overflow-y-auto">
-        <BreadCrumb
-          onClick={() => {}}
-          hasBackButton={false}
-          currentTitle="تاریخچه سفارش ها"
-          icon={<SortIcon className="h-5 w-5" />}
-          nextStepTitle="مرتب سازی"
-        />
-
-        <div className="flex w-full flex-col gap-8 lg:flex-row lg:gap-5">
+        <main className="flex flex-1 flex-col gap-6">
           <OrdersTabs />
-        </div>
-      </main>
+        </main>
+      </div>
     </UserContainer>
   );
 }
