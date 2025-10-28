@@ -67,7 +67,8 @@ export default factories.createCoreController(
     // Compute SnappPay eligibility based on current cart and shipping
     async snappEligible(ctx) {
       try {
-        const userId = ctx.state.user?.id;
+        const userId =
+          ctx.state.localUser?.id ?? ctx.state.user?.id;
         if (!userId) {
           return ctx.unauthorized("Unauthorized");
         }

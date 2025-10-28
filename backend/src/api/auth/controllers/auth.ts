@@ -4,7 +4,6 @@
 
 import { RedisClient } from "../../../index";
 import { validatePhone } from "../utils/validations";
-import jwt from "jsonwebtoken";
 
 const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
 const API_AUTHENTICATED_ROLE_ID = Number(
@@ -84,10 +83,13 @@ function issuePluginToken(pluginUserId: number, localUserId: number) {
     .plugin("users-permissions")
     .service("jwt") as any;
 
-  return jwtService.issue({
-    id: pluginUserId,
-    localUserId,
-  });
+  return jwtService.issue(
+    {
+      id: pluginUserId,
+      localUserId,
+    },
+    { expiresIn: "30d" }
+  );
 }
 
 export default {
@@ -218,15 +220,16 @@ async function login(ctx) {
       return;
     }
 
-  await ensurePluginUser(localUser);
-  const token = jwt.sign(
-    {
-      userId: localUser.id,
-      isAdmin: localUser.user_role?.Title?.toLowerCase().includes("admin"),
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "30d" }
-  );
+  const pluginUser = await ensurePluginUser(localUser);
+  if (!pluginUser?.id) {
+    strapi.log.error("Failed to sync plugin user during OTP login", {
+      localUserId: localUser.id,
+    });
+    ctx.internalServerError("Login failed");
+    return;
+  }
+
+  const token = issuePluginToken(pluginUser.id, localUser.id);
 
     ctx.body = {
       message: "login successful",
@@ -241,22 +244,30 @@ async function login(ctx) {
 
 async function self(ctx) {
   try {
-    // Get user info
+    const authLocalUser = ctx.state.localUser;
+    if (!authLocalUser?.id) {
+      ctx.unauthorized("Unauthorized");
+      return;
+    }
 
-    // Get user with role information
     const user = await strapi.db.query("api::local-user.local-user").findOne({
       where: {
-        id: ctx.state.user?.id,
+        id: authLocalUser.id,
       },
       populate: ["user_role", "user_info"],
     });
 
-    // Check if user is an admin (role id is 2)
+    if (!user) {
+      ctx.notFound("User not found");
+      return;
+    }
+
     const isAdmin = user?.user_role?.id === 2;
+    if (user?.user_info?.id) {
+      delete (user.user_info as any).id;
+    }
 
-    delete user.user_info.id;
-
-    ctx.body = { ...ctx.state.user, ...user.user_info, isAdmin };
+    ctx.body = { ...authLocalUser, ...user.user_info, isAdmin };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
@@ -268,12 +279,17 @@ async function self(ctx) {
 
 async function registerInfo(ctx) {
   const { firstName, lastName, password } = ctx.request.body;
-  const user = ctx.state.user;
+  const localUser = ctx.state.localUser;
+
+  if (!localUser?.id) {
+    ctx.unauthorized("Unauthorized");
+    return;
+  }
 
   try {
     const _user = await strapi.db.query("api::local-user.local-user").findOne({
       where: {
-        id: user.id,
+        id: localUser.id,
       },
       populate: ["user_info"],
     });
@@ -295,10 +311,22 @@ async function registerInfo(ctx) {
         }
       );
 
-      await strapi.entityService.update("api::local-user.local-user", user.id, {
-        data: { Password: password },
-      });
+      await strapi.entityService.update(
+        "api::local-user.local-user",
+        localUser.id,
+        {
+          data: { Password: password },
+        }
+      );
     });
+
+    const refreshedUser = await strapi.db
+      .query("api::local-user.local-user")
+      .findOne({ where: { id: localUser.id }, populate: ["user_role"] });
+
+    if (refreshedUser) {
+      await ensurePluginUser(refreshedUser);
+    }
 
     ctx.body = {
       message: "info updated",
@@ -326,15 +354,16 @@ async function loginWithPassword(ctx) {
     return;
   }
 
-  await ensurePluginUser(user);
-  const token = jwt.sign(
-    {
-      userId: user.id,
-      isAdmin: user.user_role?.Title?.toLowerCase().includes("admin"),
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "30d" }
-  );
+  const pluginUser = await ensurePluginUser(user);
+  if (!pluginUser?.id) {
+    strapi.log.error("Failed to sync plugin user during password login", {
+      localUserId: user.id,
+    });
+    ctx.internalServerError("Login failed");
+    return;
+  }
+
+  const token = issuePluginToken(pluginUser.id, user.id);
 
   ctx.body = {
     message: "login successful",
@@ -397,7 +426,7 @@ async function resetPassword(ctx) {
 
     const refreshedUser = await strapi.db
       .query("api::local-user.local-user")
-      .findOne({ where: { id: user.id }, populate: ["user_role"] });
+      .findOne({ where: { id: localUser.id }, populate: ["user_role"] });
 
     if (refreshedUser) {
       await ensurePluginUser(refreshedUser);
