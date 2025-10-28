@@ -9,7 +9,15 @@ import XIcon from "../Icons/XIcon";
 import { useState } from "react";
 import { useQueryState } from "nuqs";
 
-export default function PLPListMobileFilter() {
+interface MobileFilterProps {
+  categories: Array<{ id: string; title: string }>;
+  isLoadingCategories?: boolean;
+}
+
+export default function PLPListMobileFilter({
+  categories,
+  isLoadingCategories = false,
+}: MobileFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [available, setAvailable] = useQueryState("available");
 
@@ -60,7 +68,11 @@ export default function PLPListMobileFilter() {
             </button>
           </div>
 
-          <PLPListFilter showAvailableOnly={available === "true"} />
+          <PLPListFilter
+            showAvailableOnly={available === "true"}
+            categories={categories}
+            isLoadingCategories={isLoadingCategories}
+          />
 
           <PLPButton
             text="اعمال فیلتر ها"
