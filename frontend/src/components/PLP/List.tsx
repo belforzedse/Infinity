@@ -4,6 +4,8 @@ import { IMAGE_BASE_URL } from "@/constants/api";
 import NoData from "./NoData";
 import dynamic from "next/dynamic";
 import { apiClient } from "@/services";
+import { categories as STATIC_CATEGORIES } from "@/constants/categories";
+import { faNum } from "@/utils/faNum";
 
 // Lazy load heavy components
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
@@ -96,17 +98,17 @@ export default function PLPList({
 }: PLPListProps) {
   // URL state management with nuqs
   const [category, setCategory] = useQueryState("category");
-  const [available] = useQueryState("available");
-  const [minPrice] = useQueryState("minPrice");
-  const [maxPrice] = useQueryState("maxPrice");
-  const [size] = useQueryState("size");
-  const [material] = useQueryState("material");
-  const [season] = useQueryState("season");
-  const [gender] = useQueryState("gender");
-  const [usage] = useQueryState("usage");
+  const [available, setAvailable] = useQueryState("available");
+  const [minPrice, setMinPrice] = useQueryState("minPrice");
+  const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
+  const [size, setSize] = useQueryState("size");
+  const [material, setMaterial] = useQueryState("material");
+  const [season, setSeason] = useQueryState("season");
+  const [gender, setGender] = useQueryState("gender");
+  const [usage, setUsage] = useQueryState("usage");
   const [page, setPage] = useQueryState("page", { defaultValue: "1" });
-  const [sort] = useQueryState("sort");
-  const [discountOnly] = useQueryState("hasDiscount");
+  const [sort, setSort] = useQueryState("sort");
+  const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
   // Local state for products and pagination
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -418,20 +420,205 @@ export default function PLPList({
     }
   }, []);
 
+  const selectedCategoryTitle = useMemo(() => {
+    if (!category) return null;
+    const staticMatch = STATIC_CATEGORIES.find((cat) => cat.slug === category);
+    if (staticMatch) return staticMatch.name;
+
+    const dynamicMatch = validProducts.find(
+      (product) =>
+        product.attributes.product_main_category?.data?.attributes?.Slug === category ||
+        product.attributes.product_main_category?.data?.attributes?.Title === category,
+    );
+
+    return (
+      dynamicMatch?.attributes.product_main_category?.data?.attributes?.Title ||
+      dynamicMatch?.attributes.product_main_category?.data?.attributes?.Slug ||
+      category
+    );
+  }, [category, validProducts]);
+
+  const activeFilters = useMemo(
+    () => {
+      const filters: Array<{ key: string; label: string; onRemove: () => void }> = [];
+
+      if (category) {
+        const categoryLabel = selectedCategoryTitle || category;
+        filters.push({
+          key: "category",
+          label: `دسته: ${categoryLabel}`,
+          onRemove: () => {
+            setCategory(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (available === "true") {
+        filters.push({
+          key: "available",
+          label: "فقط کالاهای موجود",
+          onRemove: () => {
+            setAvailable(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (discountOnly === "true") {
+        filters.push({
+          key: "discount",
+          label: "فقط با تخفیف",
+          onRemove: () => {
+            setDiscountOnly(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (minPrice || maxPrice) {
+        const minLabel = minPrice ? `از ${faNum(Number(minPrice))}` : "";
+        const maxLabel = maxPrice ? `تا ${faNum(Number(maxPrice))}` : "";
+        filters.push({
+          key: "price",
+          label: `قیمت ${[minLabel, maxLabel].filter(Boolean).join(" ") || ""}`.trim(),
+          onRemove: () => {
+            setMinPrice(null);
+            setMaxPrice(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (size) {
+        const numericSize = Number(size);
+        const sizeLabel = Number.isNaN(numericSize) ? size : faNum(numericSize);
+        filters.push({
+          key: "size",
+          label: `سایز ${sizeLabel}`,
+          onRemove: () => {
+            setSize(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (material) {
+        filters.push({
+          key: "material",
+          label: `جنس: ${material}`,
+          onRemove: () => {
+            setMaterial(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (season) {
+        filters.push({
+          key: "season",
+          label: `فصل: ${season}`,
+          onRemove: () => {
+            setSeason(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (gender) {
+        filters.push({
+          key: "gender",
+          label: `جنسیت: ${gender}`,
+          onRemove: () => {
+            setGender(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (usage) {
+        filters.push({
+          key: "usage",
+          label: `کاربری: ${usage}`,
+          onRemove: () => {
+            setUsage(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (sort) {
+        filters.push({
+          key: "sort",
+          label: `مرتب‌سازی: ${sort}`,
+          onRemove: () => {
+            setSort(null);
+            setPage("1");
+          },
+        });
+      }
+
+      return filters;
+    },
+    [
+      available,
+      category,
+      discountOnly,
+      gender,
+      material,
+      maxPrice,
+      minPrice,
+      season,
+      selectedCategoryTitle,
+      setAvailable,
+      setCategory,
+      setDiscountOnly,
+      setGender,
+      setMaterial,
+      setMaxPrice,
+      setMinPrice,
+      setPage,
+      setSeason,
+      setSize,
+      setSort,
+      setUsage,
+      size,
+      sort,
+      usage,
+    ],
+  );
+
+  const clearAllFilters = () => {
+    setCategory(null);
+    setAvailable(null);
+    setMinPrice(null);
+    setMaxPrice(null);
+    setSize(null);
+    setMaterial(null);
+    setSeason(null);
+    setGender(null);
+    setUsage(null);
+    setDiscountOnly(null);
+    setSort(null);
+    setPage("1");
+  };
+
   return (
     <div className="container mx-auto px-4" data-plp-top>
       <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
-        <div className="hidden w-[269px] flex-col gap-7 md:flex">
-          <Filter showAvailableOnly={available === "true"} />
+        <div className="hidden md:flex md:w-[280px]">
+          <div className="sticky top-28 flex w-full flex-col gap-7">
+            <Filter showAvailableOnly={available === "true"} />
 
-          <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
+            <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
 
-          <SidebarSuggestions
-            title="تخفیف های آخرماه"
-            icon={<DiscountIcon />}
-            items={sidebarProducts}
-          />
+            <SidebarSuggestions
+              title="تخفیف های آخرماه"
+              icon={<DiscountIcon />}
+              items={sidebarProducts}
+            />
+          </div>
         </div>
 
         {/* Main content */}
@@ -445,6 +632,31 @@ export default function PLPList({
           {searchQuery && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold">نتایج جستجو برای: &quot;{searchQuery}&quot;</h2>
+            </div>
+          )}
+
+          {activeFilters.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
+              {activeFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  type="button"
+                  onClick={filter.onRemove}
+                  className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-neutral-600 transition-colors hover:border-pink-300 hover:text-pink-600"
+                >
+                  <span>{filter.label}</span>
+                  <span className="text-base leading-none text-slate-400 transition-colors group-hover:text-pink-600">
+                    &times;
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="text-xs font-medium text-pink-600 hover:text-pink-700"
+              >
+                حذف همه
+              </button>
             </div>
           )}
 

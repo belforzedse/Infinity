@@ -65,14 +65,7 @@ export default function CartPage() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
     >
-      <PageContainer variant="wide" className="space-y-8 pb-16 pt-8">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold text-foreground-primary lg:text-3xl">سبد خرید</h1>
-          <p className="text-sm text-slate-500 lg:text-base">
-            اقلام انتخابی شما در یک نگاه. تغییرات خود را اعمال کنید و مرحله پرداخت را ادامه دهید.
-          </p>
-        </header>
-
+      <PageContainer variant="wide" className="space-y-6 pb-16 pt-8">
         <div className="flex flex-col gap-6">
           <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
           <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
