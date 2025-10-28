@@ -64,6 +64,7 @@ function issuePluginToken(pluginUserId: number, localUserId: number) {
     {
       pluginUserId,
       localUserId,
+      userId: localUserId,
     },
     process.env.JWT_SECRET,
     { expiresIn: "30d" }
