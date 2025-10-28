@@ -1,11 +1,29 @@
 "use client";
 
-import { IMAGE_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
 import NoData from "./NoData";
 import dynamic from "next/dynamic";
 import { apiClient } from "@/services";
 import { categories as STATIC_CATEGORIES } from "@/constants/categories";
 import { faNum } from "@/utils/faNum";
+
+const SORT_LABELS: Record<string, string> = {
+  "createdAt:desc": "جدیدترین",
+  "createdAt:asc": "قدیمی‌ترین",
+  "price:asc": "کم به زیاد",
+  "price:desc": "زیاد به کم",
+  "Title:asc": "الف تا ی",
+  "Title:desc": "ی تا الف",
+  "AverageRating:desc": "بالاترین امتیاز",
+  "AverageRating:asc": "کمترین امتیاز",
+};
+
+const humanize = (value: string) =>
+  value
+    .toString()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // Lazy load heavy components
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
@@ -22,7 +40,6 @@ import SidebarSuggestions from "./List/SidebarSuggestions";
 import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useDebouncedCallback } from "use-debounce";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 
@@ -114,6 +131,10 @@ export default function PLPList({
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
+    STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
+  );
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   // Initialize category from prop
   useEffect(() => {
@@ -121,6 +142,30 @@ export default function PLPList({
       setCategory(initialCategory);
     }
   }, [initialCategory, category, setCategory]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`);
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
+        if (Array.isArray(data?.data) && data.data.length > 0) {
+          const mapped = data.data.map((cat: any) => ({
+            id: cat.attributes?.Slug || String(cat.id),
+            title: cat.attributes?.Title || cat.attributes?.Slug || String(cat.id),
+          }));
+          setCategoryOptions(mapped);
+        }
+      } catch (error) {
+        console.error("[PLP] Error fetching categories:", error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Define fetchProducts function with useCallback
   const fetchProducts = useCallback(() => {
@@ -422,8 +467,9 @@ export default function PLPList({
 
   const selectedCategoryTitle = useMemo(() => {
     if (!category) return null;
-    const staticMatch = STATIC_CATEGORIES.find((cat) => cat.slug === category);
-    if (staticMatch) return staticMatch.name;
+
+    const option = categoryOptions.find((item) => item.id === category);
+    if (option) return option.title;
 
     const dynamicMatch = validProducts.find(
       (product) =>
@@ -431,12 +477,12 @@ export default function PLPList({
         product.attributes.product_main_category?.data?.attributes?.Title === category,
     );
 
-    return (
-      dynamicMatch?.attributes.product_main_category?.data?.attributes?.Title ||
-      dynamicMatch?.attributes.product_main_category?.data?.attributes?.Slug ||
-      category
-    );
-  }, [category, validProducts]);
+    if (dynamicMatch?.attributes.product_main_category?.data?.attributes?.Title) {
+      return dynamicMatch.attributes.product_main_category.data.attributes.Title;
+    }
+
+    return category.replace(/[-_]/g, " ");
+  }, [category, categoryOptions, validProducts]);
 
   const activeFilters = useMemo(
     () => {
@@ -444,14 +490,17 @@ export default function PLPList({
 
       if (category) {
         const categoryLabel = selectedCategoryTitle || category;
-        filters.push({
-          key: "category",
-          label: `دسته: ${categoryLabel}`,
-          onRemove: () => {
-            setCategory(null);
-            setPage("1");
-          },
-        });
+        const hasNonLatin = /[\u0600-\u06FF]/.test(categoryLabel); // Persian characters
+        if (hasNonLatin) {
+          filters.push({
+            key: "category",
+            label: `دسته: ${categoryLabel}`,
+            onRemove: () => {
+              setCategory(null);
+              setPage("1");
+            },
+          });
+        }
       }
 
       if (available === "true") {
@@ -460,6 +509,17 @@ export default function PLPList({
           label: "فقط کالاهای موجود",
           onRemove: () => {
             setAvailable(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (category && selectedCategoryTitle) {
+        filters.push({
+          key: "category",
+          label: `دسته: ${selectedCategoryTitle}`,
+          onRemove: () => {
+            setCategory(null);
             setPage("1");
           },
         });
@@ -506,7 +566,7 @@ export default function PLPList({
       if (material) {
         filters.push({
           key: "material",
-          label: `جنس: ${material}`,
+          label: `جنس: ${humanize(material)}`,
           onRemove: () => {
             setMaterial(null);
             setPage("1");
@@ -517,7 +577,7 @@ export default function PLPList({
       if (season) {
         filters.push({
           key: "season",
-          label: `فصل: ${season}`,
+          label: `فصل: ${humanize(season)}`,
           onRemove: () => {
             setSeason(null);
             setPage("1");
@@ -528,7 +588,7 @@ export default function PLPList({
       if (gender) {
         filters.push({
           key: "gender",
-          label: `جنسیت: ${gender}`,
+          label: `جنسیت: ${humanize(gender)}`,
           onRemove: () => {
             setGender(null);
             setPage("1");
@@ -539,7 +599,7 @@ export default function PLPList({
       if (usage) {
         filters.push({
           key: "usage",
-          label: `کاربری: ${usage}`,
+          label: `کاربری: ${humanize(usage)}`,
           onRemove: () => {
             setUsage(null);
             setPage("1");
@@ -550,7 +610,7 @@ export default function PLPList({
       if (sort) {
         filters.push({
           key: "sort",
-          label: `مرتب‌سازی: ${sort}`,
+          label: `مرتب‌سازی: ${SORT_LABELS[sort] || humanize(sort)}`,
           onRemove: () => {
             setSort(null);
             setPage("1");
@@ -609,7 +669,11 @@ export default function PLPList({
         {/* Sidebar with filters - Desktop only */}
         <div className="hidden md:flex md:w-[280px]">
           <div className="sticky top-28 flex w-full flex-col gap-7">
-            <Filter showAvailableOnly={available === "true"} />
+            <Filter
+              showAvailableOnly={available === "true"}
+              categories={categoryOptions}
+              isLoadingCategories={isLoadingCategories}
+            />
 
             <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
 
@@ -625,7 +689,10 @@ export default function PLPList({
         <div className="flex-1">
           {/* Mobile filter buttons */}
           <div className="mb-4 md:hidden">
-            <PLPListMobileFilter />
+            <PLPListMobileFilter
+              categories={categoryOptions}
+              isLoadingCategories={isLoadingCategories}
+            />
           </div>
 
           {/* Show search results title if search query exists */}

@@ -6,13 +6,13 @@ import ShoppingCartMobileTable from "@/components/ShoppingCart/Table/Mobile";
 import CartSkeleton from "@/components/Skeletons/CartSkeleton";
 import EmptyShoppingCart from "@/components/ShoppingCart/Empty";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { getRandomProducts } from "@/services/product/homepage";
 import HeartIcon from "@/components/PDP/Icons/HeartIcon";
 import PageContainer from "@/components/layout/PageContainer";
+import OrderSummaryCard from "@/components/ShoppingCart/OrderSummaryCard";
 
 // Lazy load offers section - not critical for initial render
 const OffersListHomePage = dynamic(() => import("@/components/PDP/OffersListHomePage"), {
@@ -22,7 +22,6 @@ const OffersListHomePage = dynamic(() => import("@/components/PDP/OffersListHome
 
 export default function CartPage() {
   const { cartItems, isLoading } = useCart();
-  const router = useRouter();
   const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
   const [, setLoadingRandom] = useState(false);
 
@@ -66,26 +65,29 @@ export default function CartPage() {
       transition={{ duration: 0.2, ease: "easeOut" }}
     >
       <PageContainer variant="wide" className="space-y-6 pb-16 pt-8">
-        <div className="flex flex-col gap-6">
-          <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
-          <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="flex-1">
+            <div className="flex flex-col gap-6">
+              <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
+              <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
 
-          <button
-            onClick={() => router.push("/checkout")}
-            className="text-sm w-full rounded-lg bg-pink-500 px-6 py-3 text-white transition hover:bg-pink-600 lg:w-fit"
-          >
-            ادامه فرآیند خرید و تسویه حساب
-          </button>
-
-          {randomProducts.length > 0 && (
-            <div className="mt-6">
-              <OffersListHomePage
-                icon={<HeartIcon />}
-                title="پیشنهاد ما برای شما"
-                products={randomProducts}
-              />
+              {randomProducts.length > 0 && (
+                <div className="mt-6">
+                  <OffersListHomePage
+                    icon={<HeartIcon />}
+                    title="پیشنهاد ما برای شما"
+                    products={randomProducts}
+                  />
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          <div className="lg:w-[320px]">
+            <div className="lg:sticky lg:top-28">
+              <OrderSummaryCard />
+            </div>
+          </div>
         </div>
       </PageContainer>
     </motion.section>
