@@ -171,6 +171,7 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
       ctx.state.pluginUser = pluginUser;
       ctx.state.user = pluginUser;
       ctx.state.isAdmin = isAdmin;
+      ctx.state.userAbility = ability;
       ctx.state.ability = ability;
       ctx.state.auth = {
         authenticated: true,
