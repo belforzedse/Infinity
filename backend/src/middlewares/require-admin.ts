@@ -5,11 +5,15 @@ import type { Strapi } from "@strapi/strapi";
  */
 export default (_config, { strapi }: { strapi: Strapi }) => {
   return async (ctx, next) => {
-    const pluginUser = ctx.state.user;
-    const localUser = ctx.state.localUser;
+    const pluginUser = ctx.state.pluginUser ?? ctx.state.user;
+    const localUser = ctx.state.localUser ?? ctx.state.user;
 
     if (!pluginUser && !localUser) {
       return ctx.unauthorized("Authentication required");
+    }
+
+    if (ctx.state?.isAdmin === true) {
+      return next();
     }
 
     let isAdmin = false;

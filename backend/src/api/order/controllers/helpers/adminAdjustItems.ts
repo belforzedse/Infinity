@@ -66,8 +66,8 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
   try {
     // Admin guard
-    const localUser = ctx.state.localUser;
-    const pluginUser = ctx.state.user;
+    const localUser = ctx.state.localUser ?? ctx.state.user;
+    const pluginUser = ctx.state.pluginUser;
     const roleId =
       typeof localUser?.user_role === "object"
         ? (localUser.user_role as any)?.id
