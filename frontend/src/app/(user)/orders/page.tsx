@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import OrdersTabs from "@/components/User/Orders/Tabs";
 import UserContainer from "@/components/layout/UserContainer";
 import UserSidebar from "@/components/User/Sidebar";
+import AccountQuickLinks from "@/components/User/Account/QuickLinks";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function OrdersPage() {
         </aside>
 
         <main className="flex flex-1 flex-col gap-6">
+          <AccountQuickLinks />
           <OrdersTabs />
         </main>
       </div>
