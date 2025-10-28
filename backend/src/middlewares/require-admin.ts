@@ -14,7 +14,7 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
     let roleId: number | undefined;
     let roleTitle: string | undefined;
 
-    const rawRole = user.user_role ?? user.user_role?.data;
+    const rawRole = user?.user_role ?? user?.user_role?.data ?? user?.user_role?.attributes;
 
     if (typeof rawRole === "number") {
       roleId = rawRole;
@@ -37,14 +37,17 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
       }
     }
 
+    const normalizedTitle = roleTitle?.trim().toLowerCase() ?? "";
     const isAdminRoleId = typeof roleId === "number" && roleId === 2;
     const isAdminTitle =
-      typeof roleTitle === "string" &&
-      roleTitle.trim().toLowerCase() === "admin";
+      normalizedTitle === "admin" ||
+      normalizedTitle === "super admin" ||
+      normalizedTitle === "administrator" ||
+      normalizedTitle.includes("admin");
 
     if (!isAdminRoleId && !isAdminTitle) {
       strapi.log.warn("Admin middleware blocked request", {
-        userId: user.id,
+        userId: user?.id,
         roleId,
         roleTitle,
         path: ctx.path,
