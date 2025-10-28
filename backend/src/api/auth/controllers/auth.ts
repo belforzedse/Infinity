@@ -3,7 +3,6 @@
  */
 
 import { RedisClient } from "../../../index";
-import jwt from "jsonwebtoken";
 import { validatePhone } from "../utils/validations";
 
 const API_ADMIN_ROLE_ID = Number(process.env.API_ADMIN_ROLE_ID || 3);
@@ -15,26 +14,46 @@ async function ensurePluginUser(localUser: any) {
   const roleTitle =
     (localUser?.user_role?.Title ||
       localUser?.user_role?.data?.attributes?.Title ||
-      "")?.toString().toLowerCase() || "";
+      "")?.toString()
+      .toLowerCase() || "";
   const isAdmin = roleTitle.includes("admin");
+  const targetRoleId = isAdmin ? API_ADMIN_ROLE_ID : API_AUTHENTICATED_ROLE_ID;
 
-  const pluginUserRepo = strapi.db.query(
+  const userRepo = strapi.db.query(
     "plugin::users-permissions.user"
   ) as any;
 
-  let pluginUser = await pluginUserRepo.findOne({
+  const pluginUserService = strapi.service(
+    "plugin::users-permissions.user"
+  ) as any;
+
+  let pluginUser = await userRepo.findOne({
     where: { username: localUser.Phone },
     populate: ["role"],
   });
 
-  const targetRoleId = isAdmin ? API_ADMIN_ROLE_ID : API_AUTHENTICATED_ROLE_ID;
+  const email = `${localUser.Phone}@infinity.local`;
+  let password = localUser.Password;
+  if (!password || password.length === 0) {
+    const fallback = Math.random().toString(36);
+    if (pluginUserService?.hashPassword) {
+      try {
+        password = await pluginUserService.hashPassword(fallback);
+      } catch (err) {
+        strapi.log.warn("Failed to hash fallback password", err);
+        password = fallback;
+      }
+    } else {
+      password = fallback;
+    }
+  }
 
   if (!pluginUser) {
-    pluginUser = await pluginUserRepo.create({
+    pluginUser = await userRepo.create({
       data: {
         username: localUser.Phone,
-        email: `${localUser.Phone}@infinity.local`,
-        password: localUser.Password,
+        email,
+        password,
         confirmed: true,
         blocked: false,
         role: targetRoleId,
@@ -42,14 +61,14 @@ async function ensurePluginUser(localUser: any) {
     });
   } else {
     const updates: Record<string, unknown> = {};
-    if (pluginUser.role?.id !== targetRoleId) {
-      updates.role = targetRoleId;
+    if (!pluginUser.email) updates.email = email;
+    if (pluginUser.role?.id !== targetRoleId) updates.role = targetRoleId;
+    if (localUser.Password && pluginUser.password !== localUser.Password) {
+      updates.password = localUser.Password;
     }
-    if (!pluginUser.email) {
-      updates.email = `${localUser.Phone}@infinity.local`;
-    }
+
     if (Object.keys(updates).length > 0) {
-      pluginUser = await pluginUserRepo.update({
+      pluginUser = await userRepo.update({
         where: { id: pluginUser.id },
         data: updates,
       });
@@ -60,15 +79,14 @@ async function ensurePluginUser(localUser: any) {
 }
 
 function issuePluginToken(pluginUserId: number, localUserId: number) {
-  return jwt.sign(
-    {
-      pluginUserId,
-      localUserId,
-      userId: localUserId,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "30d" }
-  );
+  const jwtService = strapi
+    .plugin("users-permissions")
+    .service("jwt") as any;
+
+  return jwtService.issue({
+    id: pluginUserId,
+    localUserId,
+  });
 }
 
 export default {
@@ -172,13 +190,20 @@ async function login(ctx) {
       otpObj.merchant = user.id;
     }
 
-    const token = jwt.sign(
-      { userId: otpObj.merchant },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "30d",
-      }
-    );
+    const localUser = await strapi.db
+      .query("api::local-user.local-user")
+      .findOne({
+        where: { id: otpObj.merchant },
+        populate: ["user_role"],
+      });
+
+    if (!localUser) {
+      ctx.notFound("User not found");
+      return;
+    }
+
+    const pluginUser = await ensurePluginUser(localUser);
+    const token = issuePluginToken(pluginUser.id, localUser.id);
 
     ctx.body = {
       message: "login successful",
@@ -252,6 +277,14 @@ async function registerInfo(ctx) {
       });
     });
 
+    const refreshedUser = await strapi.db
+      .query("api::local-user.local-user")
+      .findOne({ where: { id: user.id }, populate: ["user_role"] });
+
+    if (refreshedUser) {
+      await ensurePluginUser(refreshedUser);
+    }
+
     ctx.body = {
       message: "info updated",
     };
@@ -324,6 +357,14 @@ async function resetPassword(ctx) {
         Password: newPassword,
       },
     });
+
+    const refreshedUser = await strapi.db
+      .query("api::local-user.local-user")
+      .findOne({ where: { id: user.id }, populate: ["user_role"] });
+
+    if (refreshedUser) {
+      await ensurePluginUser(refreshedUser);
+    }
 
     ctx.body = {
       message: "password reset successfully",
