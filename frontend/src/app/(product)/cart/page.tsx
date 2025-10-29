@@ -24,6 +24,7 @@ export default function CartPage() {
   const { cartItems, isLoading } = useCart();
   const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
   const [, setLoadingRandom] = useState(false);
+  const hasOffers = randomProducts.length > 0;
 
   useEffect(() => {
     // Delay fetching random products until after cart is rendered
@@ -70,16 +71,6 @@ export default function CartPage() {
             <div className="flex flex-col gap-6">
               <ShoppingCartDesktopTable cartItems={cartItems} className="hidden lg:block" />
               <ShoppingCartMobileTable cartItems={cartItems} className="lg:hidden" />
-
-              {randomProducts.length > 0 && (
-                <div className="mt-6">
-                  <OffersListHomePage
-                    icon={<HeartIcon />}
-                    title="پیشنهاد ما برای شما"
-                    products={randomProducts}
-                  />
-                </div>
-              )}
             </div>
           </div>
 
@@ -89,6 +80,16 @@ export default function CartPage() {
             </div>
           </div>
         </div>
+
+        {hasOffers && (
+          <div className="mt-6 lg:mt-10">
+            <OffersListHomePage
+              icon={<HeartIcon />}
+              title="پیشنهاد ما برای شما"
+              products={randomProducts}
+            />
+          </div>
+        )}
       </PageContainer>
     </motion.section>
   );
