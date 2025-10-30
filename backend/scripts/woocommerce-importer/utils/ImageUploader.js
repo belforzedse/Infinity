@@ -304,6 +304,7 @@ class ImageUploader {
       if (response.data && response.data.length > 0) {
         const uploadedFile = response.data[0];
         this.logger.debug(`✅ Uploaded to Strapi: ${uploadedFile.name} (ID: ${uploadedFile.id})`);
+        this.logger.debug(`🔍 DEBUG - Upload response object:`, JSON.stringify(uploadedFile, null, 2));
         return uploadedFile;
       }
 
