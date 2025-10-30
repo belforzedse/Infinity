@@ -55,3 +55,4 @@ temp
 *.tmp
 build.log
 build-final.log
+.env
