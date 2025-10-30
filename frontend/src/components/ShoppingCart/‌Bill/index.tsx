@@ -7,8 +7,9 @@ import ShoppingCartBillInformationForm from "./InformationForm";
 import ShoppingCartBillDeliveryForm from "./DeliveryForm";
 import ShoppingCartBillDiscountCoupon from "./DiscountCoupon";
 import ShoppingCartBillPaymentGateway from "./PaymentGateway";
+import { CheckoutProgress } from "../CheckoutProgress";
 import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
 import type { ShippingMethod } from "@/services/shipping";
@@ -293,14 +294,16 @@ function ShoppingCartBillForm({}: Props) {
               displayError = "سبد خرید شما خالی است";
               break;
             case "INVALID_ITEM":
-              displayError = "برخی از کالاهای سبد خرید معتبر نیستند. لطفاً سبد خرید خود را بررسی کنید";
+              displayError =
+                "برخی از کالاهای سبد خرید معتبر نیستند. لطفاً سبد خرید خود را بررسی کنید";
               break;
             case "MISSING_PRODUCT_TITLE":
             case "MISSING_PRODUCT_SKU":
               displayError = "اطلاعات برخی از کالاها ناقص است. لطفاً با پشتیبانی تماس بگیرید";
               break;
             case "INVALID_PRICE":
-              displayError = "قیمت برخی از کالاها نامعتبر است. لطفاً سبد خرید خود را بروزرسانی کنید";
+              displayError =
+                "قیمت برخی از کالاها نامعتبر است. لطفاً سبد خرید خود را بروزرسانی کنید";
               break;
             case "ORDER_ITEM_CREATION_FAILED":
               displayError = "خطا در ثبت اقلام سفارش. لطفاً مجدداً تلاش کنید";
@@ -450,12 +453,17 @@ function ShoppingCartBillForm({}: Props) {
     0,
     Math.round(subtotalToman - discountToman + taxToman + shippingToman),
   );
+
   const requiredAmountIrr = totalToman * 10;
+  const submitOrderStep = useAtomValue(submitOrderStepAtom);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <span className="text-lg text-neutral-800 lg:text-3xl">اطلاعات صورت حساب</span>
-
+      <CheckoutProgress
+        currentStep={submitOrderStep}
+        steps={["Information", "Delivery", "Payment"]}
+      />
       {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
