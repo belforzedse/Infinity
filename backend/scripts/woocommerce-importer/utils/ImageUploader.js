@@ -105,7 +105,7 @@ class ImageUploader {
         }
 
         // Add delay between uploads to avoid rate limiting
-        await this.delay(500);
+        await this.delay(100);
       }
 
       this.logger.success(`✅ Uploaded ${uploadedImages.length} gallery images`);
@@ -196,12 +196,11 @@ class ImageUploader {
   }
 
   /**
-   * Process image: optimize without risky conversions
+   * Process image: Convert all images to WebP format (except GIFs)
    * Strategy:
-   * - JPEG: Optimize with Sharp (quality 85, progressive)
-   * - PNG: Optimize with Sharp (compression, preserves transparency)
-   * - WebP: Optimize with Sharp (quality 85)
-   * - GIF: Keep as-is (no conversion - too risky)
+   * - JPEG, PNG, WebP: Convert to WebP with quality 85
+   * - GIFs: Keep as-is (preserves animation)
+   * - Result: Most images stored as .webp with optimal compression, GIFs untouched
    */
   async processImage(imageBuffer, imageUrl, prefix) {
     try {
@@ -209,56 +208,38 @@ class ImageUploader {
       const originalFormat = metadata.format;
       const originalSizeKb = (imageBuffer.length / 1024).toFixed(2);
 
-      let processedBuffer = imageBuffer;
-      let fileName = this.generateFileName(imageUrl, prefix);
-
-      if (originalFormat === 'jpeg' || originalFormat === 'jpg') {
-        // JPEG: Optimize with quality and progressive
-        this.logger.debug(`🔧 Optimizing JPEG: ${fileName}`);
-        processedBuffer = await sharp(imageBuffer)
-          .jpeg({ quality: 85, progressive: true })
-          .toBuffer();
-
-        const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
-        const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
-        this.logger.success(`✅ JPEG optimized: ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
-
-      } else if (originalFormat === 'png') {
-        // PNG: Compress while preserving transparency
-        this.logger.debug(`🔧 Optimizing PNG: ${fileName}`);
-        processedBuffer = await sharp(imageBuffer)
-          .png({ compressionLevel: 9, progressive: true })
-          .toBuffer();
-
-        const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
-        const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
-        this.logger.debug(`✅ PNG optimized: ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
-
-      } else if (originalFormat === 'webp') {
-        // WebP: Optimize
-        this.logger.debug(`🔧 Optimizing WebP: ${fileName}`);
-        processedBuffer = await sharp(imageBuffer)
-          .webp({ quality: 85 })
-          .toBuffer();
-
-        const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
-        const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
-        this.logger.debug(`✅ WebP optimized: ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
-
-      } else if (originalFormat === 'gif') {
-        // GIF: Keep as-is (animated or static - too risky to convert)
-        this.logger.debug(`🎬 Keeping GIF as-is: ${fileName}`);
-
-      } else {
-        this.logger.warn(`⚠️ Unsupported image format: ${originalFormat}, keeping original`);
+      // Keep GIFs as-is (preserve animation)
+      if (originalFormat === 'gif') {
+        this.logger.debug(`🎬 Keeping GIF as-is: ${this.generateFileName(imageUrl, prefix)}`);
+        return {
+          buffer: imageBuffer,
+          fileName: this.generateFileName(imageUrl, prefix)
+        };
       }
+
+      // Convert all other formats to WebP
+      this.logger.debug(`🔧 Converting ${originalFormat?.toUpperCase() || 'UNKNOWN'} to WebP...`);
+
+      const processedBuffer = await sharp(imageBuffer)
+        .webp({ quality: 85 })
+        .toBuffer();
+
+      // Generate filename with .webp extension
+      let fileName = this.generateFileName(imageUrl, prefix);
+      // Replace original extension with .webp
+      fileName = fileName.substring(0, fileName.lastIndexOf('.')) + '.webp';
+
+      const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
+      const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
+
+      this.logger.success(`✅ Converted to WebP: ${originalFormat?.toUpperCase() || 'UNKNOWN'} → ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
 
       return {
         buffer: processedBuffer,
         fileName: fileName
       };
     } catch (error) {
-      this.logger.error(`❌ Failed to process image:`, error.message);
+      this.logger.error(`❌ Failed to convert image to WebP:`, error.message);
       // Fallback to original
       return {
         buffer: imageBuffer,

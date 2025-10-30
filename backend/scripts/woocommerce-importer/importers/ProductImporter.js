@@ -133,61 +133,79 @@ class ProductImporter {
             break;
           }
 
-          // Process products from this page immediately
+          // Process products from this page with parallel execution (5 concurrent)
           this.logger.info(
-            `🔄 Processing ${result.data.length} products from page ${currentPage}...`,
+            `🔄 Processing ${result.data.length} products from page ${currentPage}... (parallel mode)`,
           );
 
-          for (const wcProduct of result.data) {
-            try {
-              // Skip if already processed in another category
-              if (processedProductIds.has(wcProduct.id)) {
-                this.logger.debug(
-                  `⏭️ Skipping product ${wcProduct.id} (${wcProduct.name}) - already imported from another category`,
+          // Process products in batches of 5 concurrent imports
+          const BATCH_SIZE = 5;
+          for (let i = 0; i < result.data.length; i += BATCH_SIZE) {
+            const batch = result.data.slice(i, i + BATCH_SIZE);
+
+            // Process batch in parallel with Promise.allSettled
+            const batchResults = await Promise.allSettled(
+              batch.map(async (wcProduct) => {
+                // Skip if already processed in another category
+                if (processedProductIds.has(wcProduct.id)) {
+                  this.logger.debug(
+                    `⏭️ Skipping product ${wcProduct.id} (${wcProduct.name}) - already imported from another category`,
+                  );
+                  this.stats.skipped++;
+                  return { status: 'skipped', reason: 'duplicate' };
+                }
+
+                // Import products that have the needed demo titles
+                if (!this.shouldImportProduct(wcProduct.name, nameFilter)) {
+                  this.logger.debug(
+                    `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - doesnt match name filter`,
+                  );
+                  this.stats.skipped++;
+                  return { status: 'skipped', reason: 'filter' };
+                }
+
+                await this.importSingleProduct(wcProduct, dryRun);
+                processedProductIds.add(wcProduct.id);
+                return { status: 'success', productId: wcProduct.id };
+              })
+            );
+
+            // Process results and update stats
+            for (let j = 0; j < batchResults.length; j++) {
+              const result = batchResults[j];
+              const wcProduct = batch[j];
+
+              if (result.status === 'fulfilled' && result.value.status === 'success') {
+                totalProcessed++;
+                processedInThisSession++;
+                sessionProcessed++;
+                this.stats.total = totalProcessed;
+
+                // Save progress after each successful batch
+                this.saveProgressState(
+                  {
+                    lastCompletedPage: currentPage,
+                    totalProcessed: totalProcessed,
+                    lastProcessedAt: new Date().toISOString(),
+                  },
+                  progressKey,
                 );
-                this.stats.skipped++;
-                continue;
-              }
-              // Import products that have the needed demo titles
-              if (!this.shouldImportProduct(wcProduct.name, nameFilter)) {
-                this.logger.debug(
-                  "⏩ Skipping product ${wcProduct.id} (${wcProduct.name)} - doesnt match name filter",
+
+                if (totalProcessed % this.config.logging.progressInterval === 0) {
+                  this.logger.info(
+                    `📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`,
+                  );
+                }
+              } else if (result.status === 'rejected') {
+                this.stats.errors++;
+                this.logger.error(
+                  `❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`,
+                  result.reason?.message || result.reason,
                 );
-                this.stats.skipped++;
-                continue;
-              }
 
-              await this.importSingleProduct(wcProduct, dryRun);
-              processedProductIds.add(wcProduct.id);
-              totalProcessed++;
-              processedInThisSession++;
-              sessionProcessed++;
-              this.stats.total = totalProcessed;
-
-              // Save progress after each successful import
-              this.saveProgressState(
-                {
-                  lastCompletedPage: currentPage,
-                  totalProcessed: totalProcessed,
-                  lastProcessedAt: new Date().toISOString(),
-                },
-                progressKey,
-              );
-
-              if (totalProcessed % this.config.logging.progressInterval === 0) {
-                this.logger.info(
-                  `📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`,
-                );
-              }
-            } catch (error) {
-              this.stats.errors++;
-              this.logger.error(
-                `❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`,
-                error.message,
-              );
-
-              if (!this.config.errorHandling.continueOnError) {
-                throw error;
+                if (!this.config.errorHandling.continueOnError) {
+                  throw result.reason;
+                }
               }
             }
           }
@@ -364,7 +382,7 @@ class ProductImporter {
 
                 try {
                   // Wait for Strapi to fully index uploaded images before linking them
-                  await new Promise((resolve) => setTimeout(resolve, 500));
+                  await new Promise((resolve) => setTimeout(resolve, 100));
                   await this.strapiClient.updateProduct(productId, updateData);
                   this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
                 } catch (apiError) {
