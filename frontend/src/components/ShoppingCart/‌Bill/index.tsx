@@ -460,10 +460,10 @@ function ShoppingCartBillForm({}: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <span className="text-lg text-neutral-800 lg:text-3xl">اطلاعات صورت حساب</span>
-      <CheckoutProgress
+      {/* <CheckoutProgress
         currentStep={submitOrderStep}
         steps={["Information", "Delivery", "Payment"]}
-      />
+      /> */}
       {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
