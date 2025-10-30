@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WooCommerce Importer - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            @apply bg-slate-950 text-slate-50;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .card {
+            @apply bg-slate-900 border border-slate-800 rounded-lg p-6;
+        }
+
+        .btn {
+            @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+        }
+
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 text-white;
+        }
+
+        .btn-danger {
+            @apply bg-red-600 hover:bg-red-700 text-white;
+        }
+
+        .btn:disabled {
+            @apply opacity-50 cursor-not-allowed;
+        }
+
+        .stat-box {
+            @apply bg-slate-800 rounded-lg p-5 border border-slate-700;
+        }
+
+        .stat-value {
+            @apply text-3xl font-bold text-blue-400 mt-2;
+        }
+
+        .stat-label {
+            @apply text-slate-400 text-sm uppercase tracking-wider;
+        }
+
+        .status-item {
+            @apply bg-slate-800 rounded-lg p-4 border border-slate-700;
+        }
+
+        .status-healthy {
+            @apply text-green-400;
+        }
+
+        .status-error {
+            @apply text-red-400;
+        }
+
+        .progress-bar {
+            @apply w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700;
+        }
+
+        .progress-fill {
+            @apply bg-blue-600 h-full rounded-full transition-all duration-500;
+        }
+
+        .log-viewer {
+            @apply font-mono text-sm bg-slate-950 rounded-lg p-4 overflow-y-auto border border-slate-800;
+            max-height: 400px;
+        }
+
+        .log-entry {
+            @apply py-1;
+        }
+
+        .log-info { @apply text-blue-300; }
+        .log-success { @apply text-green-300; }
+        .log-warning { @apply text-yellow-300; }
+        .log-error { @apply text-red-300; }
+        .log-debug { @apply text-slate-500; }
+
+        .input-field {
+            @apply w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-50 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        }
+
+        .tab-button {
+            @apply px-4 py-2 text-sm font-medium transition-colors duration-200;
+        }
+
+        .tab-button.active {
+            @apply text-blue-400 border-b-2 border-blue-500;
+        }
+
+        .tab-button.inactive {
+            @apply text-slate-400 hover:text-slate-300 border-b-2 border-transparent;
+        }
+
+        select {
+            @apply input-field;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            @apply bg-slate-900;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            @apply bg-slate-700 rounded;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-slate-600;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        class Dashboard {
+            constructor() {
+                this.state = {
+                    activeTab: 'dashboard',
+                    isConnected: false,
+                    isImporting: false,
+                    logs: [],
+                    stats: {
+                        total: 0,
+                        success: 0,
+                        failed: 0,
+                        skipped: 0
+                    },
+                    currentItem: '',
+                    progress: 0,
+                    health: {
+                        dashboard: { status: 'unknown', latency: 0 },
+                        strapi: { status: 'unknown', latency: 0 },
+                        woocommerce: { status: 'unknown', latency: 0 }
+                    },
+                    dashboardStats: {
+                        totalImports: 0,
+                        totalItems: 0,
+                        successfulItems: 0,
+                        failedItems: 0,
+                        skippedItems: 0
+                    },
+                    filters: {
+                        importType: 'products',
+                        limit: 50,
+                        page: 1,
+                        categoryIds: '',
+                        nameFilter: '',
+                        dryRun: true
+                    },
+                    history: [],
+                    importing: false
+                };
+
+                this.maxLogs = 200;
+                this.init();
+            }
+
+            init() {
+                this.connectSSE();
+                this.checkHealth();
+                this.loadStats();
+                this.loadHistory();
+                this.render();
+
+                setInterval(() => this.checkHealth(), 10000);
+                setInterval(() => this.loadStats(), 5000);
+            }
+
+            connectSSE() {
+                const eventSource = new EventSource('/api/events');
+
+                eventSource.onopen = () => {
+                    this.state.isConnected = true;
+                    this.addLog('Connected to dashboard server', 'success');
+                    this.render();
+                };
+
+                eventSource.onmessage = (e) => {
+                    const event = JSON.parse(e.data);
+
+                    if (event.type === 'log') {
+                        this.addLog(event.message, event.level);
+                    } else if (event.type === 'progress') {
+                        this.state.stats = event.stats;
+                        this.state.currentItem = event.processing;
+                        if (event.total > 0) {
+                            this.state.progress = Math.round((event.current / event.total) * 100);
+                        }
+                        this.render();
+                    } else if (event.type === 'import:start') {
+                        this.state.isImporting = true;
+                        this.state.importing = true;
+                        this.state.logs = [];
+                        this.addLog(`Starting ${event.importType} import...`, 'info');
+                        this.render();
+                    } else if (event.type === 'complete') {
+                        this.state.isImporting = false;
+                        this.state.importing = false;
+                        this.addLog('Import completed!', 'success');
+                        this.loadStats();
+                        this.loadHistory();
+                        this.render();
+                    } else if (event.type === 'error') {
+                        this.state.isImporting = false;
+                        this.state.importing = false;
+                        this.addLog(`Error: ${event.message}`, 'error');
+                        this.render();
+                    }
+                };
+
+                eventSource.onerror = () => {
+                    this.state.isConnected = false;
+                    this.render();
+                };
+            }
+
+            async checkHealth() {
+                try {
+                    const response = await fetch('/api/health/apis');
+                    this.state.health = await response.json();
+                } catch (error) {
+                    console.error('Health check failed:', error);
+                }
+                this.render();
+            }
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/stats');
+                    this.state.dashboardStats = await response.json();
+                } catch (error) {
+                    console.error('Failed to load stats:', error);
+                }
+                this.render();
+            }
+
+            async loadHistory() {
+                try {
+                    const response = await fetch('/api/history');
+                    this.state.history = await response.json();
+                } catch (error) {
+                    console.error('Failed to load history:', error);
+                }
+                this.render();
+            }
+
+            addLog(message, level = 'info') {
+                this.state.logs.push({
+                    timestamp: new Date().toLocaleTimeString(),
+                    message,
+                    level
+                });
+
+                if (this.state.logs.length > this.maxLogs) {
+                    this.state.logs = this.state.logs.slice(-this.maxLogs);
+                }
+
+                this.render();
+            }
+
+            updateFilter(key, value) {
+                this.state.filters[key] = value;
+                this.render();
+            }
+
+            async startImport() {
+                if (this.state.importing) return;
+
+                const { importType, limit, page, categoryIds, nameFilter, dryRun } = this.state.filters;
+
+                const options = {
+                    limit: parseInt(limit) || 50,
+                    page: parseInt(page) || 1,
+                    dryRun
+                };
+
+                if (categoryIds) {
+                    options.categoryIds = categoryIds
+                        .split(',')
+                        .map(id => parseInt(id.trim()))
+                        .filter(id => !isNaN(id));
+                }
+
+                if (nameFilter) {
+                    options.nameFilter = nameFilter.split(',').map(n => n.trim()).filter(n => n);
+                }
+
+                try {
+                    const response = await fetch('/api/import/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: importType,
+                            options
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.state.logs = [];
+                        this.state.stats = { total: 0, success: 0, failed: 0, skipped: 0 };
+                        this.state.progress = 0;
+                    }
+                } catch (error) {
+                    this.addLog(`Failed to start import: ${error.message}`, 'error');
+                }
+            }
+
+            async stopImport() {
+                try {
+                    await fetch('/api/import/stop', { method: 'POST' });
+                } catch (error) {
+                    this.addLog(`Failed to stop import: ${error.message}`, 'error');
+                }
+            }
+
+            render() {
+                const html = this.renderApp();
+                document.getElementById('app').innerHTML = html;
+                this.attachEventListeners();
+
+                const logsContainer = document.getElementById('logs-container');
+                if (logsContainer) {
+                    logsContainer.scrollTop = logsContainer.scrollHeight;
+                }
+            }
+
+            renderApp() {
+                return `
+                    <div class="min-h-screen bg-slate-950">
+                        <!-- Header -->
+                        <div class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+                            <div class="max-w-7xl mx-auto px-6 py-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h1 class="text-3xl font-bold text-blue-400">WooCommerce Importer</h1>
+                                        <p class="text-slate-400 text-sm mt-1">Professional Import Dashboard</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full ${this.state.isConnected ? 'bg-green-400' : 'bg-red-400'}"></div>
+                                        <span class="text-sm font-medium ${this.state.isConnected ? 'text-green-400' : 'text-red-400'}">
+                                            ${this.state.isConnected ? 'Connected' : 'Disconnected'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="max-w-7xl mx-auto px-6 py-8">
+                            <!-- API Health Status -->
+                            <div class="mb-8">
+                                <h2 class="text-lg font-semibold mb-4 text-slate-100">API Status</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    ${this.renderHealthCard('Dashboard', '🖥️', this.state.health.dashboard)}
+                                    ${this.renderHealthCard('Strapi API', '📦', this.state.health.strapi)}
+                                    ${this.renderHealthCard('WooCommerce', '🛒', this.state.health.woocommerce)}
+                                </div>
+                            </div>
+
+                            <!-- Statistics -->
+                            <div class="mb-8">
+                                <h2 class="text-lg font-semibold mb-4 text-slate-100">Statistics</h2>
+                                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                    <div class="stat-box">
+                                        <div class="stat-label">Total Imports</div>
+                                        <div class="stat-value">${this.state.dashboardStats.totalImports}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-label">Total Items</div>
+                                        <div class="stat-value">${this.state.dashboardStats.totalItems.toLocaleString()}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-label">Success</div>
+                                        <div class="stat-value text-green-400">${this.state.dashboardStats.successfulItems.toLocaleString()}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-label">Failed</div>
+                                        <div class="stat-value text-red-400">${this.state.dashboardStats.failedItems}</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-label">Skipped</div>
+                                        <div class="stat-value text-yellow-400">${this.state.dashboardStats.skippedItems}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabs -->
+                            <div class="border-b border-slate-800 mb-8">
+                                <div class="flex gap-8">
+                                    <button class="tab-button ${this.state.activeTab === 'dashboard' ? 'active' : 'inactive'}" data-tab="dashboard">
+                                        Dashboard
+                                    </button>
+                                    <button class="tab-button ${this.state.activeTab === 'import' ? 'active' : 'inactive'}" data-tab="import">
+                                        Start Import
+                                    </button>
+                                    <button class="tab-button ${this.state.activeTab === 'history' ? 'active' : 'inactive'}" data-tab="history">
+                                        History
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content -->
+                            ${this.state.activeTab === 'dashboard' ? this.renderDashboardTab() : ''}
+                            ${this.state.activeTab === 'import' ? this.renderImportTab() : ''}
+                            ${this.state.activeTab === 'history' ? this.renderHistoryTab() : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderHealthCard(label, emoji, health) {
+                const statusClass = health.status === 'healthy' ? 'status-healthy' : 'status-error';
+                const statusText = health.status === 'healthy' ? '✓ Healthy' : '✗ Error';
+                return `
+                    <div class="status-item">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-400">${label}</span>
+                            <span class="text-2xl">${emoji}</span>
+                        </div>
+                        <div class="${statusClass} font-medium text-sm">${statusText}</div>
+                        <div class="text-slate-500 text-xs mt-1">Latency: ${health.latency}ms</div>
+                    </div>
+                `;
+            }
+
+            renderDashboardTab() {
+                return `
+                    <div class="space-y-6">
+                        <!-- Progress Card -->
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-6 text-slate-100">Current Import Status</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-slate-400 text-sm">Progress</span>
+                                        <span class="text-blue-400 font-semibold">${this.state.progress}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${this.state.progress}%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-4 gap-4">
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Total</div>
+                                        <div class="text-2xl font-bold text-slate-100">${this.state.stats.total}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Success</div>
+                                        <div class="text-2xl font-bold text-green-400">${this.state.stats.success}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Failed</div>
+                                        <div class="text-2xl font-bold text-red-400">${this.state.stats.failed}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Skipped</div>
+                                        <div class="text-2xl font-bold text-yellow-400">${this.state.stats.skipped}</div>
+                                    </div>
+                                </div>
+
+                                ${this.state.currentItem ? `
+                                    <div class="pt-4 border-t border-slate-700">
+                                        <div class="text-slate-400 text-xs uppercase mb-2">Current Item</div>
+                                        <div class="text-blue-400 text-sm truncate">${this.state.currentItem}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Logs Card -->
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4 text-slate-100">Live Logs</h3>
+                            <div id="logs-container" class="log-viewer">
+                                ${this.state.logs.length === 0 ? `
+                                    <div class="text-center text-slate-500 py-8">
+                                        No logs yet. Start an import to see live logs here.
+                                    </div>
+                                ` : ''}
+                                ${this.state.logs.map(log => `
+                                    <div class="log-entry log-${log.level}">
+                                        <span class="text-slate-600 text-xs">[${log.timestamp}]</span> ${log.message}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderImportTab() {
+                const { importType, limit, page, categoryIds, nameFilter, dryRun } = this.state.filters;
+                return `
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Configuration -->
+                            <div class="card">
+                                <h3 class="text-lg font-semibold mb-6 text-slate-100">Configuration</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2 text-slate-300">Import Type</label>
+                                        <select id="importType">
+                                            <option value="categories" ${importType === 'categories' ? 'selected' : ''}>Categories</option>
+                                            <option value="products" ${importType === 'products' ? 'selected' : ''}>Products</option>
+                                            <option value="variations" ${importType === 'variations' ? 'selected' : ''}>Variations</option>
+                                            <option value="orders" ${importType === 'orders' ? 'selected' : ''}>Orders</option>
+                                            <option value="users" ${importType === 'users' ? 'selected' : ''}>Users</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium mb-2 text-slate-300">Limit</label>
+                                            <input type="number" class="input-field" id="limit" value="${limit}" min="1" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium mb-2 text-slate-300">Page</label>
+                                            <input type="number" class="input-field" id="page" value="${page}" min="1" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2 text-slate-300">Category IDs</label>
+                                        <input type="text" class="input-field" id="categoryIds" value="${categoryIds}" placeholder="e.g., 5,12,18" />
+                                        <p class="text-xs text-slate-500 mt-1">Leave empty for all categories</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2 text-slate-300">Name Filter</label>
+                                        <input type="text" class="input-field" id="nameFilter" value="${nameFilter}" placeholder="e.g., کیف,کفش" />
+                                        <p class="text-xs text-slate-500 mt-1">Leave empty for all products</p>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 pt-2">
+                                        <input type="checkbox" id="dryRun" ${dryRun ? 'checked' : ''} class="w-4 h-4 rounded bg-slate-800 border-slate-700 cursor-pointer" />
+                                        <label for="dryRun" class="text-sm text-slate-300 cursor-pointer">Dry run mode (no changes)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="card">
+                                <h3 class="text-lg font-semibold mb-6 text-slate-100">Summary</h3>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-400">Type</span>
+                                        <span class="text-slate-100 font-medium capitalize">${importType}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-400">Limit</span>
+                                        <span class="text-slate-100 font-medium">${limit} items</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-400">Page</span>
+                                        <span class="text-slate-100 font-medium">From page ${page}</span>
+                                    </div>
+                                    ${categoryIds ? `
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-slate-400">Categories</span>
+                                            <span class="text-blue-400 font-medium">${categoryIds}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${nameFilter ? `
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-slate-400">Keywords</span>
+                                            <span class="text-blue-400 font-medium">${nameFilter}</span>
+                                        </div>
+                                    ` : ''}
+                                    <div class="flex justify-between items-center pt-3 border-t border-slate-700">
+                                        <span class="text-slate-400">Mode</span>
+                                        <span class="font-medium ${dryRun ? 'text-yellow-400' : 'text-green-400'}">
+                                            ${dryRun ? 'Dry Run' : 'Live'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="flex gap-3">
+                            <button class="btn btn-primary flex-1" id="startBtn" ${this.state.importing ? 'disabled' : ''}>
+                                ${this.state.importing ? '⏳ Importing...' : '▶ Start Import'}
+                            </button>
+                            ${this.state.importing ? `
+                                <button class="btn btn-danger" id="stopBtn">
+                                    ⛔ Stop
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderHistoryTab() {
+                if (this.state.history.length === 0) {
+                    return `
+                        <div class="card text-center py-12">
+                            <p class="text-slate-400">No import history yet</p>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="space-y-4">
+                        ${this.state.history.map((entry, idx) => `
+                            <div class="card">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-blue-400">#${this.state.history.length - idx} - ${entry.type}</h4>
+                                        <p class="text-slate-500 text-sm mt-1">${new Date(entry.timestamp).toLocaleString()}</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-5 gap-4 py-4 border-y border-slate-800 text-center">
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Total</div>
+                                        <div class="text-lg font-bold text-slate-100">${entry.total || 0}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Success</div>
+                                        <div class="text-lg font-bold text-green-400">${entry.success || 0}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Failed</div>
+                                        <div class="text-lg font-bold text-red-400">${entry.failed || 0}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Skipped</div>
+                                        <div class="text-lg font-bold text-yellow-400">${entry.skipped || 0}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-400 text-xs uppercase mb-1">Duration</div>
+                                        <div class="text-lg font-bold text-slate-100">${entry.duration || 'N/A'}</div>
+                                    </div>
+                                </div>
+
+                                ${entry.options ? `
+                                    <div class="pt-4 text-xs text-slate-500 space-y-1">
+                                        ${entry.options.limit ? `<p>Limit: ${entry.options.limit}</p>` : ''}
+                                        ${entry.options.categoryIds && entry.options.categoryIds.length > 0 ? `<p>Categories: ${entry.options.categoryIds.join(', ')}</p>` : ''}
+                                        ${entry.options.nameFilter && entry.options.nameFilter.length > 0 ? `<p>Keywords: ${entry.options.nameFilter.join(', ')}</p>` : ''}
+                                        ${entry.options.dryRun ? `<p>Dry Run: Yes</p>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            attachEventListeners() {
+                // Tab switching
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.state.activeTab = e.target.dataset.tab;
+                        this.render();
+                    });
+                });
+
+                // Filter updates
+                const filterInputs = ['importType', 'limit', 'page', 'categoryIds', 'nameFilter'];
+                filterInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('change', (e) => {
+                            this.updateFilter(id, e.target.value);
+                        });
+                    }
+                });
+
+                // Dry run checkbox
+                const dryRunCheck = document.getElementById('dryRun');
+                if (dryRunCheck) {
+                    dryRunCheck.addEventListener('change', (e) => {
+                        this.updateFilter('dryRun', e.target.checked);
+                    });
+                }
+
+                // Import buttons
+                const startBtn = document.getElementById('startBtn');
+                if (startBtn) {
+                    startBtn.addEventListener('click', () => this.startImport());
+                }
+
+                const stopBtn = document.getElementById('stopBtn');
+                if (stopBtn) {
+                    stopBtn.addEventListener('click', () => this.stopImport());
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new Dashboard();
+        });
+    </script>
+</body>
+</html>
