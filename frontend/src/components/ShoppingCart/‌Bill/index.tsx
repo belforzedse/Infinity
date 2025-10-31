@@ -17,6 +17,7 @@ import { CartService } from "@/services";
 import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";
 import { useCart } from "@/contexts/CartContext";
+import { currentUserAtom } from "@/lib/atoms/auth";
 
 export type FormData = {
   fullName: string;
@@ -35,6 +36,27 @@ function ShoppingCartBillForm({}: Props) {
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const router = useRouter();
+  const currentUser = useAtomValue(currentUserAtom);
+  const [hasRedirected, setHasRedirected] = useState(false);
+
+  // Check authentication on mount - redirect to login if not authenticated
+  useEffect(() => {
+    // Get current pathname to avoid redirecting if already on auth page
+    if (typeof window === "undefined") return;
+
+    const currentPath = window.location.pathname;
+
+    // Only redirect if we're on checkout and not authenticated, and we haven't already redirected
+    if (currentPath.includes("/checkout") && !currentUser && !hasRedirected) {
+      setHasRedirected(true);
+      // User is not logged in, redirect to login with return URL
+      // Use hard browser navigation to preserve query parameters properly
+      const authUrl = "/auth?redirect=/checkout";
+      window.location.href = authUrl;
+    } else if (!currentPath.includes("/checkout")) {
+      setHasRedirected(false);
+    }
+  }, [currentUser, hasRedirected]);
 
   const {
     register,

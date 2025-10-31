@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthService } from "@/services";
 import { atom, useAtom } from "jotai";
 
@@ -19,6 +19,7 @@ export function useCheckPhoneNumber(): UseCheckPhoneNumberReturn {
   const [phoneNumber, setPhoneNumber] = useAtom(phoneNumberAtom);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const checkPhoneNumber = async (phoneNumber: string) => {
     try {
@@ -35,10 +36,14 @@ export function useCheckPhoneNumber(): UseCheckPhoneNumberReturn {
       // Navigate based on the result
       setPhoneNumber(phoneNumber);
 
+      // Preserve redirect parameter from query string
+      const redirectParam = searchParams.get("redirect");
+      const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
+
       if (response.hasUser) {
-        router.push("/auth/login");
+        router.push(`/auth/login${redirectQuery}`);
       } else {
-        router.push("/auth/register");
+        router.push(`/auth/register${redirectQuery}`);
       }
     } catch (err) {
       setError("خطا در بررسی شماره تلفن");
