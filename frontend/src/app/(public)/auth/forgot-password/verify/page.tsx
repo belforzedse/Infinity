@@ -44,7 +44,10 @@ function VerifyContent() {
             });
 
             if (response.message || response.success) {
-              router.push("/auth/login");
+              // Preserve redirect parameter when redirecting to login
+              const redirectParam = queryParams.get("redirect");
+              const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
+              router.push(`/auth/login${redirectQuery}`);
             } else {
               toast.error("کد تایید اشتباه است");
             }

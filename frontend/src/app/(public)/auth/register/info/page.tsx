@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import Text from "@/components/Kits/Text";
 import AuthInput from "@/components/Kits/Auth/Input";
@@ -20,6 +20,7 @@ interface FormData {
 
 export default function RegisterInfoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
 
   const { phoneNumber } = useCheckPhoneNumber();
@@ -50,7 +51,10 @@ export default function RegisterInfoPage() {
       });
 
       if (res.token || res.message) {
-        router.push("/auth/login");
+        // Preserve redirect parameter when redirecting to login
+        const redirectParam = searchParams.get("redirect");
+        const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
+        router.push(`/auth/login${redirectQuery}`);
       }
     } catch (error) {
       console.error(error);

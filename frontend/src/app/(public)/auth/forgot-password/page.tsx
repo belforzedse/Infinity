@@ -1,14 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import ForgotPasswordForm from "@/components/Auth/ForgotPassword/Form";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleForgotPassword = async (data: { phoneNumber: string }) => {
-    router.push(`/auth/forgot-password/verify?phoneNumber=${data.phoneNumber}`);
+    // Preserve redirect parameter when navigating to verify page
+    const redirectParam = searchParams.get("redirect");
+    const redirectQuery = redirectParam ? `&redirect=${encodeURIComponent(redirectParam)}` : "";
+    router.push(`/auth/forgot-password/verify?phoneNumber=${data.phoneNumber}${redirectQuery}`);
   };
 
   return (
