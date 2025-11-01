@@ -11,7 +11,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: ["global::authentication", "global::require-admin"],
+        middlewares: [],
       },
     },
     {
@@ -21,7 +21,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: ["global::authentication", "global::require-admin"],
+        middlewares: [],
       },
     },
     {
@@ -31,7 +31,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: ["global::authentication", "global::require-admin"],
+        middlewares: [],
       },
     },
     {
@@ -41,7 +41,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: ["global::authentication", "global::require-admin"],
+        middlewares: [],
       },
     },
     {

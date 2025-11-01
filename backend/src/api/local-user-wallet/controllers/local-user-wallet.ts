@@ -10,7 +10,7 @@ export default factories.createCoreController(
     async getCurrentUserWallet(ctx) {
       try {
         // Get user from context (set by authentication middleware)
-        const user = ctx.state.localUser ?? ctx.state.user;
+        const user = ctx.state.user;
 
         if (!user) {
           return ctx.unauthorized("Authentication required");
