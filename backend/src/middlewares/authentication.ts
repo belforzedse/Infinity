@@ -1,7 +1,6 @@
+import jwt from "jsonwebtoken";
 /**
  * `authentication` middleware
- * Temporarily uses the numeric user id passed in the Authorization header.
- * This lets us bypass JWT handling while the token service is being repaired.
  */
 
 import { Strapi } from "@strapi/strapi";
@@ -9,26 +8,22 @@ import { Strapi } from "@strapi/strapi";
 export default (_config, { strapi }: { strapi: Strapi }) => {
   return async (ctx, next) => {
     try {
-      const authHeader = ctx.request.headers["authorization"];
-      const token = authHeader?.includes(" ")
-        ? authHeader.split(" ")[1]
-        : authHeader;
-
+      const token = ctx.request.headers["authorization"]?.split(" ")[1];
       if (!token) {
         ctx.unauthorized("Token is required");
         return;
       }
 
-      const userId = Number(token);
-      if (!Number.isInteger(userId) || userId <= 0) {
-        ctx.unauthorized("Invalid token payload");
-        return;
-      }
+      const userPayload = JSON.parse(
+        JSON.stringify(jwt.verify(token, process.env.JWT_SECRET)),
+      ) as {
+        userId: string;
+      };
 
       const user = await strapi
         .query("api::local-user.local-user")
         .findOne({
-          where: { id: userId },
+          where: { id: Number(userPayload.userId) },
           populate: { user_role: true },
         });
 
@@ -38,6 +33,7 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
       }
 
       delete (user as any).Password;
+
       ctx.state.user = user;
 
       await next();
