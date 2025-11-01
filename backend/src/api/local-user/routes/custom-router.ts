@@ -7,7 +7,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: ["global::authentication", "global::require-admin"],
+        middlewares: ["global::authentication"],
       },
     },
     {
@@ -17,7 +17,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: ["global::authentication", "global::require-admin"],
+        middlewares: ["global::authentication"],
       },
     },
   ],
