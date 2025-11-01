@@ -184,6 +184,11 @@ class VariationImporter {
         }
 
         for (const product of variableProducts) {
+          if (!dryRun) {
+            this.logger.info(
+              `🧵 Importing variations for parent product: ${product.name || 'Untitled Product'} (Woo ID: ${product.id})`
+            );
+          }
           const parentStrapiId = this.productMappingCache.get(product.id);
 
           if (!parentStrapiId) {
