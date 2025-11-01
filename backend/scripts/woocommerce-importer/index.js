@@ -101,6 +101,7 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
   .option('--all', 'Import all variations (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--only-imported', 'Only import variations for products that are already imported', false)
@@ -120,13 +121,31 @@ program
         config.import.batchSizes.products = batchSize;
       }
 
+      let nameFilter;
+      if (options.nameFilter && options.nameFilter.length) {
+        const rawInput = Array.isArray(options.nameFilter)
+          ? options.nameFilter.join(',')
+          : options.nameFilter;
+        const parsed = rawInput
+          .split(',')
+          .map((keyword) => keyword.trim())
+          .filter(Boolean);
+
+        if (parsed.length === 1 && parsed[0].toLowerCase() === 'all') {
+          nameFilter = null;
+        } else if (parsed.length > 0) {
+          nameFilter = parsed;
+        }
+      }
+
       const importer = new VariationImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
         onlyImported: options.onlyImported,
-        force: options.force
+        force: options.force,
+        nameFilter
       });
       logger.success('✅ Variation import completed!');
     } catch (error) {
@@ -140,18 +159,37 @@ program
   .description('Import variations only for products that are already imported')
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import for imported products only...');
+      let nameFilter;
+      if (options.nameFilter && options.nameFilter.length) {
+        const rawInput = Array.isArray(options.nameFilter)
+          ? options.nameFilter.join(',')
+          : options.nameFilter;
+        const parsed = rawInput
+          .split(',')
+          .map((keyword) => keyword.trim())
+          .filter(Boolean);
+
+        if (parsed.length === 1 && parsed[0].toLowerCase() === 'all') {
+          nameFilter = null;
+        } else if (parsed.length > 0) {
+          nameFilter = parsed;
+        }
+      }
+
       const importer = new VariationImporter(config, logger);
       await importer.import({
         limit: parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
         onlyImported: true,
-        force: options.force
+        force: options.force,
+        nameFilter
       });
       logger.success('✅ Variation import for imported products completed!');
     } catch (error) {

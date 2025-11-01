@@ -3,6 +3,8 @@ const path = require('path');
 const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
 const DuplicateTracker = require('../utils/DuplicateTracker');
 
+const DEFAULT_NAME_FILTER_KEYWORDS = ['اسلیپر', 'ونس', 'کیف', 'کفش', 'کتونی', 'صندل'];
+
 /**
  * Variation Importer - Handles importing WooCommerce product variations to Strapi
  *
@@ -45,16 +47,48 @@ class VariationImporter {
     this.modelMappingCache = new Map();
   }
 
+  shouldImportParentProduct(productName, nameFilter = DEFAULT_NAME_FILTER_KEYWORDS) {
+    if (!nameFilter || nameFilter.length === 0) {
+      return true;
+    }
+
+    const name = (productName || '').toLowerCase();
+    return nameFilter.some((keyword) => name.includes((keyword || '').toLowerCase()));
+  }
+
   /**
    * Main import method - Optimized for incremental processing
    */
   async import(options = {}) {
-    const { limit = 100, page = 1, dryRun = false, onlyImported = false, force = false } = options;
+    const {
+      limit = 100,
+      page = 1,
+      dryRun = false,
+      onlyImported = false,
+      force = false,
+      nameFilter = DEFAULT_NAME_FILTER_KEYWORDS,
+    } = options;
+
+    const effectiveNameFilter =
+      nameFilter === null
+        ? []
+        : Array.isArray(nameFilter) && nameFilter.length === 0
+        ? []
+        : Array.isArray(nameFilter)
+        ? nameFilter
+        : DEFAULT_NAME_FILTER_KEYWORDS;
 
     this.stats.startTime = Date.now();
     this.logger.info(
       `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported}, force: ${force})`
     );
+    if (effectiveNameFilter.length > 0) {
+      this.logger.info(
+        `🎯 Filtering parent products by keywords: [${effectiveNameFilter.join(', ')}]`
+      );
+    } else {
+      this.logger.info(`🎯 Parent product name filter disabled (importing all variable products)`);
+    }
     this.logger.warn(
       `⚠️  NOTE: Running concurrent import sessions may cause cache staleness. Run imports sequentially for best results.`
     );
@@ -110,8 +144,23 @@ class VariationImporter {
         }
 
         let variableProducts = result.data.filter(
-          (product) => product.type === 'variable' && Array.isArray(product.variations) && product.variations.length > 0
+          (product) =>
+            product.type === 'variable' &&
+            Array.isArray(product.variations) &&
+            product.variations.length > 0
         );
+
+        if (effectiveNameFilter.length > 0) {
+          const beforeFilterCount = variableProducts.length;
+          variableProducts = variableProducts.filter((product) =>
+            this.shouldImportParentProduct(product?.name, effectiveNameFilter)
+          );
+          if (beforeFilterCount !== variableProducts.length) {
+            this.logger.debug(
+              `🎯 Filtered ${beforeFilterCount - variableProducts.length} parent products that did not match the name keywords`
+            );
+          }
+        }
 
         if (onlyImported) {
           const originalCount = variableProducts.length;
