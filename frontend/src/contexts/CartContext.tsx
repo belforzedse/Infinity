@@ -158,7 +158,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Transform API cart format to local format
       const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
         const variation = item.product_variation;
-        const product = variation.product;
+        const product = variation?.product;
+
+        // Skip items without product or variation
+        if (!product || !variation) {
+          return null;
+        }
+
         const productId = String(product.id || "");
         const compositeId = variation.id
           ? `${productId}-${variation.id}`
@@ -238,7 +244,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           size: variation.product_variation_size?.Title,
           model: variation.product_variation_model?.Title,
         };
-      });
+      }).filter((item) => item !== null);
 
       setCartItems(transformedItems);
     } catch (error) {

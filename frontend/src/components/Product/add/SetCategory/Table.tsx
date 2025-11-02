@@ -40,8 +40,8 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
-          {categories.map((category, index) => (
-            <tr key={index} className="">
+          {categories.map((category) => (
+            <tr key={category.id} className="">
               <td className="text-sm py-3 text-right text-neutral-800">
                 {category.attributes.Title}
               </td>
