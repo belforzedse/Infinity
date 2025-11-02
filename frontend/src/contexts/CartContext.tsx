@@ -156,12 +156,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       };
 
       // Transform API cart format to local format
+      const originalItemCount = data?.cart_items?.length || 0;
       const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
         const variation = item.product_variation;
         const product = variation?.product;
 
         // Skip items without product or variation
         if (!product || !variation) {
+          console.warn("Skipping cart item with missing product/variation data:", {
+            itemId: item.id,
+            hasVariation: !!variation,
+            hasProduct: !!product,
+          });
           return null;
         }
 
@@ -245,6 +251,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           model: variation.product_variation_model?.Title,
         };
       }).filter((item) => item !== null);
+
+      // Notify user if items were removed due to missing data
+      if (transformedItems.length < originalItemCount && typeof window !== "undefined") {
+        const removedCount = originalItemCount - transformedItems.length;
+        console.warn(
+          `${removedCount} item(s) were removed from cart due to missing product data. They may have been deleted.`
+        );
+      }
 
       setCartItems(transformedItems);
     } catch (error) {

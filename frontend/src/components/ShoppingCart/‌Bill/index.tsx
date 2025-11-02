@@ -133,7 +133,8 @@ function ShoppingCartBillForm({}: Props) {
           setDiscountPreview({ discount: res.discount, summary: res.summary });
         }
       } catch (e) {
-        console.error("applyDiscount failed:", e);
+        const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
+        console.error("applyDiscount failed:", errorMsg, e);
       }
     };
     run();
@@ -174,7 +175,8 @@ function ShoppingCartBillForm({}: Props) {
           });
         }
       } catch (e) {
-        console.error("getShippingPreview failed:", e);
+        const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
+        console.error("getShippingPreview failed:", errorMsg, e);
       }
     };
     run();
@@ -408,7 +410,8 @@ function ShoppingCartBillForm({}: Props) {
         router.push("/orders/success");
       }
     } catch (err: any) {
-      console.error("Error creating order:", err);
+      const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
+      console.error("Error creating order:", errorMsg, err);
 
       // Extract error information from the error object
       let displayError = "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.";
