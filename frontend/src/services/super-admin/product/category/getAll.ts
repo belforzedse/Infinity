@@ -20,6 +20,9 @@ export const getAllCategories = async (): Promise<PaginatedResponse<categoryResp
   //const accessToken = localStorage.getItem("accessToken");
   try {
     const response = await apiClient.get<PaginatedResponse<categoryResponseType>>(endpoint, {
+      params: {
+        "pagination[limit]": -1, // Fetch all categories without pagination limit
+      },
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
