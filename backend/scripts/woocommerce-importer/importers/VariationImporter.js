@@ -67,6 +67,7 @@ class VariationImporter {
       onlyImported = false,
       force = false,
       nameFilter = DEFAULT_NAME_FILTER_KEYWORDS,
+      logParentNames = true,
     } = options;
 
     const effectiveNameFilter =
@@ -184,7 +185,7 @@ class VariationImporter {
         }
 
         for (const product of variableProducts) {
-          if (!dryRun) {
+          if (logParentNames && !dryRun) {
             this.logger.info(
               `🧵 Importing variations for parent product: ${product.name || 'Untitled Product'} (Woo ID: ${product.id})`
             );
@@ -400,10 +401,24 @@ class VariationImporter {
     const existingStrapiId = existingMapping?.strapiId;
 
     try {
+      // Validate parent product exists
+      if (!parentProductStrapiId || typeof parentProductStrapiId !== 'number') {
+        const errorMsg = `Variation ${wcVariation.id}: Invalid parent product ID: ${parentProductStrapiId}`;
+        this.logger.error(errorMsg);
+        throw new Error(errorMsg);
+      }
+
       const strapiVariation = await this.transformVariation(
         wcVariation,
         parentProductStrapiId
       );
+
+      // Final validation of variation data
+      if (!strapiVariation.SKU || !strapiVariation.Price === undefined) {
+        const errorMsg = `Variation ${wcVariation.id}: Missing required fields - SKU: ${strapiVariation.SKU}, Price: ${strapiVariation.Price}`;
+        this.logger.error(errorMsg);
+        throw new Error(errorMsg);
+      }
 
       if (dryRun) {
         const mode = existingStrapiId ? 'update' : 'create';
@@ -471,8 +486,18 @@ class VariationImporter {
    * Transform WooCommerce variation to Strapi format
    */
   async transformVariation(wcVariation, parentProductStrapiId) {
+    // Validate parent product is set
+    if (!parentProductStrapiId) {
+      throw new Error(`Variation ${wcVariation.id}: Parent product ID is missing or invalid`);
+    }
+
     let sku = wcVariation.sku || this.generateSKU(wcVariation);
     sku = await this.ensureUniqueSKU(sku);
+
+    // Validate SKU is not empty
+    if (!sku || sku.trim() === '') {
+      throw new Error(`Variation ${wcVariation.id}: Could not generate a valid SKU`);
+    }
 
     const strapiVariation = {
       SKU: sku,
@@ -485,19 +510,24 @@ class VariationImporter {
     const regularPrice = parseFloat(wcVariation.regular_price || wcVariation.price || 0);
     const salePrice = parseFloat(wcVariation.sale_price || 0);
 
-    if (salePrice > 0 && salePrice < regularPrice) {
+    // Validate price is set
+    if (!regularPrice || regularPrice <= 0) {
+      this.logger.warn(
+        `⚠️ Variation ${wcVariation.id}: No valid price found (regular: ${wcVariation.regular_price}, price: ${wcVariation.price})`
+      );
+      // Still allow creation with 0 price, but log warning
+      strapiVariation.Price = 0;
+    } else if (salePrice > 0 && salePrice < regularPrice) {
       strapiVariation.Price = this.convertPrice(regularPrice);
       strapiVariation.DiscountPrice = this.convertPrice(salePrice);
       this.logger.debug(
         `💰 Variation ${wcVariation.id}: Regular price ${regularPrice}, Discount price ${salePrice}`
       );
     } else {
-      strapiVariation.Price = this.convertPrice(
-        wcVariation.price || wcVariation.regular_price
-      );
+      strapiVariation.Price = this.convertPrice(regularPrice);
     }
 
-    this.logger.debug(`📂 Transformed variation: ${wcVariation.id} → SKU: ${sku}`);
+    this.logger.debug(`📂 Transformed variation: ${wcVariation.id} → SKU: ${sku}, Price: ${strapiVariation.Price}`);
     return strapiVariation;
   }
 

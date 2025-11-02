@@ -35,5 +35,21 @@ export const getOrCreateUserCart = async (strapi: Strapi, userId: number) => {
     });
   }
 
+  // Clean up cart items with missing product data to prevent checkout errors
+  if (cart.cart_items && cart.cart_items.length > 0) {
+    const validItems = cart.cart_items.filter((item: any) => {
+      const hasValidVariation = item.product_variation && item.product_variation.id;
+      const hasValidProduct = item.product_variation?.product && item.product_variation.product.id;
+
+      if (!hasValidVariation || !hasValidProduct) {
+        strapi.log.warn(`Filtering out invalid cart item ${item.id}: missing product_variation or product`);
+      }
+
+      return hasValidVariation && hasValidProduct;
+    });
+
+    cart.cart_items = validItems;
+  }
+
   return cart;
 };

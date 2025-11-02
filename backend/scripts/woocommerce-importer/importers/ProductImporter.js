@@ -317,6 +317,14 @@ class ProductImporter {
   async importSingleProduct(wcProduct, dryRun = false) {
     this.logger.debug(`🔍 Processing product: ${wcProduct.id} - ${wcProduct.name}`);
 
+    // Pre-validation before processing
+    if (!wcProduct.name || wcProduct.name.trim() === "") {
+      this.stats.failed++;
+      const errorMsg = `Product ${wcProduct.id}: Cannot import product without a name/title`;
+      this.logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
     const existingMapping = this.duplicateTracker.getStrapiId("products", wcProduct.id);
     const existingStrapiId = existingMapping?.strapiId;
 
@@ -507,8 +515,13 @@ class ProductImporter {
    * Transform WooCommerce product to Strapi format
    */
   async transformProduct(wcProduct) {
+    // Validate required product fields
+    if (!wcProduct.name || wcProduct.name.trim() === "") {
+      throw new Error(`Product ${wcProduct.id}: Missing product name/title`);
+    }
+
     const strapiProduct = {
-      Title: wcProduct.name,
+      Title: wcProduct.name.trim(),
       Description: this.cleanHtmlContent(wcProduct.description),
       Status: this.mapProductStatus(wcProduct.status),
       AverageRating: wcProduct.average_rating ? parseFloat(wcProduct.average_rating) : null,

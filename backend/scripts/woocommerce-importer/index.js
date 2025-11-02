@@ -102,6 +102,7 @@ program
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
   .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
+  .option('--no-parent-log', 'Disable logging parent product names during variation import')
   .option('--all', 'Import all variations (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--only-imported', 'Only import variations for products that are already imported', false)
@@ -145,7 +146,8 @@ program
         dryRun: options.dryRun,
         onlyImported: options.onlyImported,
         force: options.force,
-        nameFilter
+        nameFilter,
+        logParentNames: options.parentLog
       });
       logger.success('✅ Variation import completed!');
     } catch (error) {
@@ -160,6 +162,7 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
+  .option('--no-parent-log', 'Disable logging parent product names during variation import')
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
@@ -189,7 +192,8 @@ program
         dryRun: options.dryRun,
         onlyImported: true,
         force: options.force,
-        nameFilter
+        nameFilter,
+        logParentNames: options.parentLog
       });
       logger.success('✅ Variation import for imported products completed!');
     } catch (error) {
