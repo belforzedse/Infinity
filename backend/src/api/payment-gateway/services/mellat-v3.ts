@@ -53,7 +53,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       terminalId: process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID",
       username: process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID",
       password: process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD",
-      timeout: 15000, // 15 seconds timeout
+      timeout: 30000, // 30 seconds timeout (Mellat can be slow with SOAP/WSDL)
       apiUrl,
     };
 
