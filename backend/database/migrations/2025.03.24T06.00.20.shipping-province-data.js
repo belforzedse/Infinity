@@ -7,6 +7,14 @@ module.exports = {
    * Run the migrations: Add all Iranian provinces
    */
   async up(knex) {
+    const tableExists = await knex.schema.hasTable("shipping_provinces");
+    if (!tableExists) {
+      console.warn(
+        "Skipping province seed migration because shipping_provinces table does not exist yet."
+      );
+      return;
+    }
+
     // Iranian provinces data in Persian
     const iranianProvinces = [
       "تهران", // Tehran
