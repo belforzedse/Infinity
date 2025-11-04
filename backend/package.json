@@ -28,11 +28,14 @@
     "start:prod": "NODE_ENV=production strapi start",
     "strapi": "strapi",
     "test:api": "node scripts/test-api-connection.js",
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "type:generate": "strapi ts:generate-types",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .cache build dist .tmp",
     "logs": "pm2 logs infinity-backend --lines 100",
-    "validate": "npm run type-check"
+    "validate": "npm run type-check && npm run test"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "4.25.21",
@@ -56,8 +59,12 @@
   },
   "devDependencies": {
     "@strapi/typescript-utils": "4.25.21",
+    "@types/jest": "^29.5.0",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^18.19.0",
+    "jest": "^29.5.0",
+    "jest-mock-extended": "^3.0.4",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.0.0"
   },
   "engines": {
