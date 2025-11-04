@@ -228,15 +228,17 @@ export const getMyOrders = async (
         ...item,
         product_variation: {
           ...item.product_variation,
-          product: {
-            ...item.product_variation.product,
-            cover_image: item.product_variation.product.cover_image
-              ? {
-                  ...item.product_variation.product.cover_image,
-                  url: getFullImageUrl(item.product_variation.product.cover_image.url),
-                }
-              : undefined,
-          },
+          product: item.product_variation.product
+            ? {
+                ...item.product_variation.product,
+                cover_image: item.product_variation.product.cover_image
+                  ? {
+                      ...item.product_variation.product.cover_image,
+                      url: getFullImageUrl(item.product_variation.product.cover_image.url),
+                    }
+                  : undefined,
+              }
+            : null,
         },
       })),
     }));
