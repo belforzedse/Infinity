@@ -53,7 +53,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       terminalId: process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID",
       username: process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID",
       password: process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD",
-      timeout: 30000, // 30 seconds timeout (Mellat can be slow with SOAP/WSDL)
+      timeout: 60000, // 60 seconds timeout (increased for slower networks/Docker environments)
       apiUrl,
     };
 
@@ -143,97 +143,121 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   /**
-   * Request payment from Mellat gateway
+   * Request payment from Mellat gateway with retry logic
    */
   async requestPayment(params: MellatPaymentParams): Promise<PaymentResponse> {
     const requestId = this.generateRequestId();
+    const maxRetries = 2;
+    let lastError: any = null;
 
-    try {
-      const mellat = this.createMellatClient();
-      const callbackUrl = this.formatCallbackUrl(params.callbackURL);
-
-      strapi.log.info(`[${requestId}] Starting Mellat payment request:`, {
-        orderId: params.orderId,
-        amount: params.amount,
-        userId: params.userId,
-        callbackUrl,
-        contractId: params.contractId,
-      });
-
-      // Initialize the client (with error handling)
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        await mellat.initialize();
-      } catch (initError) {
-        strapi.log.warn(`[${requestId}] WSDL initialization warning:`, {
-          message: initError.message,
-          note: "Proceeding with payment request despite init error"
-        });
-        // Continue anyway - sometimes initialization fails but payment still works
-      }
+        const mellat = this.createMellatClient();
+        const callbackUrl = this.formatCallbackUrl(params.callbackURL);
 
-      // Request payment using mellat-checkout package
-      const paymentRequest = {
-        amount: params.amount,
-        orderId: params.orderId.toString(),
-        callbackUrl: callbackUrl,
-        payerId: params.userId.toString(),
-      };
-
-      strapi.log.debug(
-        `[${requestId}] Payment request payload:`,
-        paymentRequest
-      );
-
-      const response = await mellat.paymentRequest(paymentRequest);
-
-      strapi.log.info(`[${requestId}] Mellat payment response:`, {
-        resCode: response.resCode,
-        refId: response.refId,
-        success: response.resCode === 0,
-      });
-
-      if (response.resCode === 0) {
-        // Success - create redirect URL with RefId parameter
-        const redirectUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat`;
-
-        strapi.log.info(`[${requestId}] Payment request successful:`, {
-          refId: response.refId,
-          redirectUrl,
-          resCode: response.resCode,
+        strapi.log.info(`[${requestId}] Starting Mellat payment request (attempt ${attempt}/${maxRetries}):`, {
+          orderId: params.orderId,
+          amount: params.amount,
+          userId: params.userId,
+          callbackUrl,
+          contractId: params.contractId,
         });
 
-        return {
-          success: true,
+        // Initialize the client (with error handling)
+        try {
+          await mellat.initialize();
+        } catch (initError) {
+          strapi.log.warn(`[${requestId}] WSDL initialization warning (attempt ${attempt}):`, {
+            message: initError.message,
+            note: "Proceeding with payment request despite init error"
+          });
+          // Continue anyway - sometimes initialization fails but payment still works
+        }
+
+        // Request payment using mellat-checkout package
+        const paymentRequest = {
+          amount: params.amount,
+          orderId: params.orderId.toString(),
+          callbackUrl: callbackUrl,
+          payerId: params.userId.toString(),
+        };
+
+        strapi.log.debug(
+          `[${requestId}] Payment request payload:`,
+          paymentRequest
+        );
+
+        const response = await mellat.paymentRequest(paymentRequest);
+
+        strapi.log.info(`[${requestId}] Mellat payment response:`, {
+          resCode: response.resCode,
           refId: response.refId,
-          redirectUrl, // The mellat-checkout package handles the RefId internally
-          requestId,
-          resCode: response.resCode,
-          message: "Payment request successful",
-        };
-      } else {
-        // Error - log the error code
-        this.logMellatErrorCode(requestId, response.resCode);
+          success: response.resCode === 0,
+        });
 
-        return {
-          success: false,
-          error: `Gateway error: ${response.resCode}`,
-          requestId,
-          resCode: response.resCode,
-        };
+        if (response.resCode === 0) {
+          // Success - create redirect URL with RefId parameter
+          const redirectUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat`;
+
+          strapi.log.info(`[${requestId}] Payment request successful:`, {
+            refId: response.refId,
+            redirectUrl,
+            resCode: response.resCode,
+          });
+
+          return {
+            success: true,
+            refId: response.refId,
+            redirectUrl, // The mellat-checkout package handles the RefId internally
+            requestId,
+            resCode: response.resCode,
+            message: "Payment request successful",
+          };
+        } else {
+          // Error - log the error code
+          this.logMellatErrorCode(requestId, response.resCode);
+
+          return {
+            success: false,
+            error: `Gateway error: ${response.resCode}`,
+            requestId,
+            resCode: response.resCode,
+          };
+        }
+      } catch (error) {
+        lastError = error;
+        strapi.log.warn(`[${requestId}] Mellat payment request attempt ${attempt} failed:`, {
+          message: error.message,
+          attempt,
+          willRetry: attempt < maxRetries,
+        });
+
+        // If this was the last attempt, return error
+        if (attempt === maxRetries) {
+          strapi.log.error(`[${requestId}] Mellat payment request failed after ${maxRetries} attempts:`, {
+            message: error.message,
+            stack: error.stack,
+          });
+
+          return {
+            success: false,
+            error: error.message || "Payment request failed after retries",
+            requestId,
+          };
+        }
+
+        // Wait before retrying (exponential backoff: 1s, 2s)
+        const delayMs = Math.pow(2, attempt - 1) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delayMs));
       }
-    } catch (error) {
-      strapi.log.error(`[${requestId}] Error in Mellat payment request:`, {
-        message: error.message,
-        stack: error.stack,
-        error: error,
-      });
-
-      return {
-        success: false,
-        error: error.message || "Payment request failed",
-        requestId,
-      };
     }
+
+    // Fallback (should not reach here)
+    return {
+      success: false,
+      error: lastError?.message || "Payment request failed",
+      requestId,
+    };
   },
 
   /**
