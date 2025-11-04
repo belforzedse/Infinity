@@ -32,6 +32,7 @@ type Props = Record<string, never>;
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submitInProgressRef = React.useRef(false);
   const [_submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
@@ -272,7 +273,14 @@ function ShoppingCartBillForm({}: Props) {
       return;
     }
 
+    // Prevent duplicate submissions while one is in flight
+    if (submitInProgressRef.current) {
+      console.warn("Submit already in progress, ignoring duplicate submission");
+      return;
+    }
+
     try {
+      submitInProgressRef.current = true;
       setIsSubmitting(true);
 
       const stockValid = await CartService.checkCartStock();
@@ -464,6 +472,7 @@ function ShoppingCartBillForm({}: Props) {
 
       setError(displayError);
     } finally {
+      submitInProgressRef.current = false;
       setIsSubmitting(false);
     }
   };
