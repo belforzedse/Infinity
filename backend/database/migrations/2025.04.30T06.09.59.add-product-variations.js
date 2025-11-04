@@ -5,6 +5,23 @@
 module.exports = {
   async up(knex) {
     try {
+      const colorsTableExists = await knex.schema.hasTable(
+        "product_variation_colors"
+      );
+      const modelsTableExists = await knex.schema.hasTable(
+        "product_variation_models"
+      );
+      const sizesTableExists = await knex.schema.hasTable(
+        "product_variation_sizes"
+      );
+
+      if (!colorsTableExists || !modelsTableExists || !sizesTableExists) {
+        console.warn(
+          "Skipping product variation seed because required tables are missing."
+        );
+        return;
+      }
+
       // Colors in Persian
       const colors = [
         { name: "سفید", code: "#FFFFFF" },
