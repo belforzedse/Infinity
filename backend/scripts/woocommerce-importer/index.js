@@ -52,22 +52,41 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '50')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('-c, --categories <ids...>', 'Comma-separated WooCommerce category IDs to filter (e.g., "5,12,18")', '')
   .option('--all', 'Import all products (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
     try {
       logger.info('🛍️ Starting product import...');
-      
+
       // Override batch size if provided
       if (options.batchSize) {
         config.import.batchSizes.products = Math.min(parseInt(options.batchSize), 100);
       }
-      
+
+      // Parse category IDs if provided
+      let categoryIds = [];
+      if (options.categories) {
+        // Handle both comma-separated string and array of arguments
+        const categoryInput = Array.isArray(options.categories)
+          ? options.categories.join(',')
+          : options.categories;
+        categoryIds = categoryInput
+          .split(',')
+          .map(id => parseInt(id.trim()))
+          .filter(id => !isNaN(id));
+
+        if (categoryIds.length > 0) {
+          logger.info(`🏷️ Filtering by categories: [${categoryIds.join(', ')}]`);
+        }
+      }
+
       const importer = new ProductImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
-        dryRun: options.dryRun
+        dryRun: options.dryRun,
+        categoryIds: categoryIds
       });
       logger.success('✅ Product import completed!');
     } catch (error) {
@@ -82,24 +101,53 @@ program
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
+  .option('--no-parent-log', 'Disable logging parent product names during variation import')
   .option('--all', 'Import all variations (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--only-imported', 'Only import variations for products that are already imported', false)
+  .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import...');
-      
+
       // Override batch size if provided
       if (options.batchSize) {
-        config.import.batchSizes.products = Math.min(parseInt(options.batchSize), 100);
+        const parsedBatchSize = Number.parseInt(options.batchSize, 10);
+        const batchSize = Math.min(Number.isNaN(parsedBatchSize) ? 100 : parsedBatchSize, 100);
+
+        config.import.batchSizes.variations = batchSize;
+        // The variation importer still paginates parent products using the product batch size,
+        // so keep both values in sync when the flag is provided.
+        config.import.batchSizes.products = batchSize;
       }
-      
+
+      let nameFilter;
+      if (options.nameFilter && options.nameFilter.length) {
+        const rawInput = Array.isArray(options.nameFilter)
+          ? options.nameFilter.join(',')
+          : options.nameFilter;
+        const parsed = rawInput
+          .split(',')
+          .map((keyword) => keyword.trim())
+          .filter(Boolean);
+
+        if (parsed.length === 1 && parsed[0].toLowerCase() === 'all') {
+          nameFilter = null;
+        } else if (parsed.length > 0) {
+          nameFilter = parsed;
+        }
+      }
+
       const importer = new VariationImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
-        onlyImported: options.onlyImported
+        onlyImported: options.onlyImported,
+        force: options.force,
+        nameFilter,
+        logParentNames: options.parentLog
       });
       logger.success('✅ Variation import completed!');
     } catch (error) {
@@ -113,16 +161,39 @@ program
   .description('Import variations only for products that are already imported')
   .option('-l, --limit <number>', 'Limit number of items to import', '100')
   .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
+  .option('--no-parent-log', 'Disable logging parent product names during variation import')
   .option('--dry-run', 'Run without actually importing data', false)
+  .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import for imported products only...');
+      let nameFilter;
+      if (options.nameFilter && options.nameFilter.length) {
+        const rawInput = Array.isArray(options.nameFilter)
+          ? options.nameFilter.join(',')
+          : options.nameFilter;
+        const parsed = rawInput
+          .split(',')
+          .map((keyword) => keyword.trim())
+          .filter(Boolean);
+
+        if (parsed.length === 1 && parsed[0].toLowerCase() === 'all') {
+          nameFilter = null;
+        } else if (parsed.length > 0) {
+          nameFilter = parsed;
+        }
+      }
+
       const importer = new VariationImporter(config, logger);
       await importer.import({
         limit: parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
-        onlyImported: true
+        onlyImported: true,
+        force: options.force,
+        nameFilter,
+        logParentNames: options.parentLog
       });
       logger.success('✅ Variation import for imported products completed!');
     } catch (error) {

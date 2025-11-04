@@ -4,7 +4,7 @@ const ImageUploader = require('../utils/ImageUploader');
 
 /**
  * Product Importer - Handles importing WooCommerce products to Strapi
- * 
+ *
  * Features:
  * - Product data transformation
  * - Category relationship mapping
@@ -20,16 +20,17 @@ class ProductImporter {
     this.strapiClient = new StrapiClient(config, logger);
     this.duplicateTracker = new DuplicateTracker(config, logger);
     this.imageUploader = new ImageUploader(config, logger);
-    
+
     // Import statistics
     this.stats = {
       total: 0,
       success: 0,
+      updated: 0,
       skipped: 0,
       failed: 0,
       errors: 0,
       startTime: null,
-      endTime: null
+      endTime: null,
     };
 
     // Cache for category mappings to avoid repeated lookups
@@ -37,101 +38,208 @@ class ProductImporter {
   }
 
   /**
-   * Main import method - Optimized for incremental processing
+   * Check if product name contains any of the target keywords
+   * Keywords: کیف (bag), کفش (shoe), کتونی (sneaker), صندل (sandal)
    */
+  shouldImportProduct(productName, nameFilter = null) {
+    // If no filter, import all
+    if (!nameFilter || nameFilter.length === 0) {
+      return true;
+    }
+
+    // Convert to lowercase for case-insensitive matching
+    const name = productName.toLowerCase();
+
+    // Check if any keyword appears in the name
+    return nameFilter.some((keyword) => name.includes(keyword.toLowerCase()));
+  }
+  /**
+   * Main import method - Optimized for incremental processing
+   * Supports optional category filtering
+   */
+
   async import(options = {}) {
-    const { limit = 50, page = 1, dryRun = false } = options;
-    
+    const defaultKeywords = ["اسلیپر", "ونس", "کیف", "کفش", "کتونی", "صندل"];
+    const {
+      limit = 50,
+      page = 1,
+      dryRun = false,
+      categoryIds = [],
+      nameFilter = defaultKeywords,
+    } = options;
+
     this.stats.startTime = Date.now();
-    this.logger.info(`🛍️ Starting product import (limit: ${limit}, page: ${page}, dryRun: ${dryRun})`);
-    
+
+    // Determine categories to import
+    let categoriesToProcess = categoryIds;
+    if (!categoriesToProcess || categoriesToProcess.length === 0) {
+      // If no specific categories provided, import all products
+      categoriesToProcess = [null];
+      this.logger.info(
+        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun})`,
+      );
+    } else {
+      this.logger.info(
+        `🛍️ Starting product import from categories: [${categoriesToProcess.join(
+          ", ",
+        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun})`,
+      );
+    }
+
     try {
       // Pre-load category mappings for faster lookups
       await this.loadCategoryMappings();
-      
-      // Load progress state
-      const progressState = this.loadProgressState();
-      let currentPage = Math.max(page, progressState.lastCompletedPage + 1);
-      let totalProcessed = progressState.totalProcessed;
-      
-      this.logger.info(`📊 Resuming from page ${currentPage} (${totalProcessed} products already processed)`);
-      
-      // Process products incrementally page by page
-      let hasMorePages = true;
-      let processedInThisSession = 0;
-      
-      while (hasMorePages && processedInThisSession < limit) {
-        const remainingLimit = limit - processedInThisSession;
-        const perPage = Math.min(this.config.import.batchSizes.products, remainingLimit);
-        
-        this.logger.info(`📄 Processing page ${currentPage} (requesting ${perPage} items)...`);
-        
-        // Fetch current page
-        const result = await this.wooClient.getProducts(currentPage, perPage);
-        
-        if (!result.data || result.data.length === 0) {
-          this.logger.info(`📄 No more products found on page ${currentPage}`);
-          hasMorePages = false;
-          break;
-        }
-        
-        // Process products from this page immediately
-        this.logger.info(`🔄 Processing ${result.data.length} products from page ${currentPage}...`);
-        
-        for (const wcProduct of result.data) {
-          try {
-            await this.importSingleProduct(wcProduct, dryRun);
-            totalProcessed++;
-            processedInThisSession++;
-            this.stats.total = totalProcessed;
-            
-            // Save progress after each successful import
-            this.saveProgressState({
-              lastCompletedPage: currentPage,
-              totalProcessed: totalProcessed,
-              lastProcessedAt: new Date().toISOString()
-            });
-            
-            if (totalProcessed % this.config.logging.progressInterval === 0) {
-              this.logger.info(`📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`);
-            }
-            
-          } catch (error) {
-            this.stats.errors++;
-            this.logger.error(`❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`, error.message);
-            
-            if (!this.config.errorHandling.continueOnError) {
-              throw error;
+
+      // Track processed product IDs to avoid duplicates across categories
+      const processedProductIds = new Set();
+      let sessionProcessed = 0;
+
+      // Process each category
+      for (const categoryId of categoriesToProcess) {
+        const progressKey = categoryId
+          ? `product-import-progress-cat-${categoryId}.json`
+          : "product-import-progress.json";
+
+        // Load progress state for this category
+        const progressState = this.loadProgressState(progressKey);
+        let currentPage = Math.max(page, progressState.lastCompletedPage + 1);
+        let totalProcessed = progressState.totalProcessed;
+
+        const categoryLabel = categoryId ? `category ${categoryId}` : "all categories";
+        this.logger.info(
+          `📊 Resuming ${categoryLabel} from page ${currentPage} (${totalProcessed} products already processed)`,
+        );
+
+        // Process products incrementally page by page for this category
+        let hasMorePages = true;
+        let processedInThisSession = 0;
+
+        while (hasMorePages && processedInThisSession < limit) {
+          const remainingLimit = limit - processedInThisSession;
+          const perPage = Math.min(this.config.import.batchSizes.products, remainingLimit);
+
+          this.logger.info(
+            `📄 Processing page ${currentPage} from ${categoryLabel} (requesting ${perPage} items)...`,
+          );
+
+          // Fetch current page with optional category filter
+          const result = await this.wooClient.getProducts(currentPage, perPage, categoryId);
+
+          if (!result.data || result.data.length === 0) {
+            this.logger.info(
+              `📄 No more products found on page ${currentPage} for ${categoryLabel}`,
+            );
+            hasMorePages = false;
+            break;
+          }
+
+          // Process products from this page with parallel execution (5 concurrent)
+          this.logger.info(
+            `🔄 Processing ${result.data.length} products from page ${currentPage}... (parallel mode)`,
+          );
+
+          // Process products in batches of 5 concurrent imports
+          const BATCH_SIZE = 5;
+          for (let i = 0; i < result.data.length; i += BATCH_SIZE) {
+            const batch = result.data.slice(i, i + BATCH_SIZE);
+
+            // Process batch in parallel with Promise.allSettled
+            const batchResults = await Promise.allSettled(
+              batch.map(async (wcProduct) => {
+                // Skip if already processed in another category
+                if (processedProductIds.has(wcProduct.id)) {
+                  this.logger.debug(
+                    `⏭️ Skipping product ${wcProduct.id} (${wcProduct.name}) - already imported from another category`,
+                  );
+                  this.stats.skipped++;
+                  return { status: 'skipped', reason: 'duplicate' };
+                }
+
+                // Import products that have the needed demo titles
+                if (!this.shouldImportProduct(wcProduct.name, nameFilter)) {
+                  this.logger.debug(
+                    `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - doesnt match name filter`,
+                  );
+                  this.stats.skipped++;
+                  return { status: 'skipped', reason: 'filter' };
+                }
+
+                await this.importSingleProduct(wcProduct, dryRun);
+                processedProductIds.add(wcProduct.id);
+                return { status: 'success', productId: wcProduct.id };
+              })
+            );
+
+            // Process results and update stats
+            for (let j = 0; j < batchResults.length; j++) {
+              const result = batchResults[j];
+              const wcProduct = batch[j];
+
+              if (result.status === 'fulfilled' && result.value.status === 'success') {
+                totalProcessed++;
+                processedInThisSession++;
+                sessionProcessed++;
+                this.stats.total = totalProcessed;
+
+                // Save progress after each successful batch
+                this.saveProgressState(
+                  {
+                    lastCompletedPage: currentPage,
+                    totalProcessed: totalProcessed,
+                    lastProcessedAt: new Date().toISOString(),
+                  },
+                  progressKey,
+                );
+
+                if (totalProcessed % this.config.logging.progressInterval === 0) {
+                  this.logger.info(
+                    `📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`,
+                  );
+                }
+              } else if (result.status === 'rejected') {
+                this.stats.errors++;
+                this.logger.error(
+                  `❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`,
+                  result.reason?.message || result.reason,
+                );
+
+                if (!this.config.errorHandling.continueOnError) {
+                  throw result.reason;
+                }
+              }
             }
           }
-        }
-        
-        this.logger.success(`✅ Completed page ${currentPage}: ${result.data.length} products processed`);
-        currentPage++;
-        
-        // Check if we've reached the total pages or our limit
-        if (result.totalPages && currentPage > result.totalPages) {
-          hasMorePages = false;
-        }
-        
-        if (processedInThisSession >= limit) {
-          this.logger.info(`📊 Reached session limit of ${limit} products`);
-          break;
+
+          this.logger.success(
+            `✅ Completed page ${currentPage}: ${result.data.length} products processed`,
+          );
+          currentPage++;
+
+          // Check if we've reached the total pages or our limit
+          if (result.totalPages && currentPage > result.totalPages) {
+            hasMorePages = false;
+          }
+
+          if (processedInThisSession >= limit) {
+            this.logger.info(`📊 Reached session limit of ${limit} products`);
+            break;
+          }
         }
       }
-      
-      this.logger.success(`🎉 Import session completed: ${processedInThisSession} products processed in this session`);
-      
+
+      this.logger.success(
+        `🎉 Import session completed: ${sessionProcessed} products processed in this session`,
+      );
     } catch (error) {
       this.stats.errors++;
-      this.logger.error('❌ Product import failed:', error);
+      this.logger.error("❌ Product import failed:", error);
       throw error;
     } finally {
       this.stats.endTime = Date.now();
       this.stats.duration = this.stats.endTime - this.stats.startTime;
       this.logFinalStats();
     }
-    
+
     return this.stats;
   }
 
@@ -139,47 +247,49 @@ class ProductImporter {
    * Load category mappings into cache
    */
   async loadCategoryMappings() {
-    this.logger.debug('📂 Loading category mappings...');
-    const categoryMappings = this.duplicateTracker.getAllMappings('categories');
-    
+    this.logger.debug("📂 Loading category mappings...");
+    const categoryMappings = this.duplicateTracker.getAllMappings("categories");
+
     for (const [wcId, mapping] of Object.entries(categoryMappings)) {
       this.categoryMappingCache.set(parseInt(wcId), mapping.strapiId);
     }
-    
+
     this.logger.info(`📂 Loaded ${this.categoryMappingCache.size} category mappings`);
   }
 
   /**
    * Load progress state from file
    */
-  loadProgressState() {
-    const progressFile = `${this.config.duplicateTracking.storageDir}/product-import-progress.json`;
-    
+  loadProgressState(progressKey = "product-import-progress.json") {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/${progressKey}`;
+
     try {
-      if (require('fs').existsSync(progressFile)) {
-        const data = JSON.parse(require('fs').readFileSync(progressFile, 'utf8'));
-        this.logger.debug(`📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`);
+      if (require("fs").existsSync(progressFile)) {
+        const data = JSON.parse(require("fs").readFileSync(progressFile, "utf8"));
+        this.logger.debug(
+          `📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`,
+        );
         return data;
       }
     } catch (error) {
       this.logger.warn(`⚠️ Failed to load progress state: ${error.message}`);
     }
-    
+
     return {
       lastCompletedPage: 0,
       totalProcessed: 0,
-      lastProcessedAt: null
+      lastProcessedAt: null,
     };
   }
 
   /**
    * Save progress state to file
    */
-  saveProgressState(state) {
-    const progressFile = `${this.config.duplicateTracking.storageDir}/product-import-progress.json`;
-    
+  saveProgressState(state, progressKey = "product-import-progress.json") {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/${progressKey}`;
+
     try {
-      require('fs').writeFileSync(progressFile, JSON.stringify(state, null, 2));
+      require("fs").writeFileSync(progressFile, JSON.stringify(state, null, 2));
     } catch (error) {
       this.logger.error(`❌ Failed to save progress state: ${error.message}`);
     }
@@ -188,12 +298,12 @@ class ProductImporter {
   /**
    * Reset progress state (useful for starting fresh)
    */
-  resetProgressState() {
-    const progressFile = `${this.config.duplicateTracking.storageDir}/product-import-progress.json`;
-    
+  resetProgressState(progressKey = "product-import-progress.json") {
+    const progressFile = `${this.config.duplicateTracking.storageDir}/${progressKey}`;
+
     try {
-      if (require('fs').existsSync(progressFile)) {
-        require('fs').unlinkSync(progressFile);
+      if (require("fs").existsSync(progressFile)) {
+        require("fs").unlinkSync(progressFile);
         this.logger.info(`🧹 Reset product import progress state`);
       }
     } catch (error) {
@@ -205,86 +315,220 @@ class ProductImporter {
    * Import a single product
    */
   async importSingleProduct(wcProduct, dryRun = false) {
-    this.logger.debug(`📦 Processing product: ${wcProduct.id} - ${wcProduct.name}`);
-    
-    // Check for duplicates
-    const duplicateCheck = this.duplicateTracker.checkDuplicate('products', wcProduct);
-    if (duplicateCheck.isDuplicate) {
-      this.stats.skipped++;
-      return duplicateCheck;
+    this.logger.debug(`🔍 Processing product: ${wcProduct.id} - ${wcProduct.name}`);
+
+    // Pre-validation before processing
+    if (!wcProduct.name || wcProduct.name.trim() === "") {
+      this.stats.failed++;
+      const errorMsg = `Product ${wcProduct.id}: Cannot import product without a name/title`;
+      this.logger.error(errorMsg);
+      throw new Error(errorMsg);
     }
-    
+
+    const existingMapping = this.duplicateTracker.getStrapiId("products", wcProduct.id);
+    const existingStrapiId = existingMapping?.strapiId;
+
     try {
-      // Transform WooCommerce product to Strapi format
       const strapiProduct = await this.transformProduct(wcProduct);
-      
+      const payload = this.prepareProductPayload(strapiProduct);
+
       if (dryRun) {
-        this.logger.info(`🔍 [DRY RUN] Would import product: ${wcProduct.name}`);
+        const mode = existingStrapiId ? "update" : "create";
+        this.logger.info(`🔍 [DRY RUN] Would ${mode} product: ${wcProduct.name}`);
         this.stats.success++;
-        return { isDryRun: true, data: strapiProduct };
-      }
-      
-      // Create product in Strapi
-      const result = await this.strapiClient.createProduct(strapiProduct);
-      
-      // Handle images if present
-      const imageResults = await this.handleProductImages(wcProduct, result.data.id);
-      
-      // Update product with images if successfully uploaded
-      if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
-        const updateData = {};
-        
-        if (imageResults.coverImageId) {
-          updateData.CoverImage = imageResults.coverImageId;
+        if (existingStrapiId) {
+          this.stats.updated++;
         }
-        
-        if (imageResults.galleryImageIds.length > 0) {
-          updateData.Media = imageResults.galleryImageIds;
-        }
-        
-        // Update product with image relationships
-        await this.strapiClient.updateProduct(result.data.id, updateData);
-        this.logger.success(`📸 Images linked to product: ${wcProduct.name}`);
+        return { isDryRun: true, mode, data: payload };
       }
-      
-      // Record the mapping
-      this.duplicateTracker.recordMapping(
-        'products',
-        wcProduct.id,
-        result.data.id,
-        {
+
+      let productId = existingStrapiId;
+      let mode = "create";
+
+      if (existingStrapiId) {
+        // Check if product has actually changed before updating
+        if (this.hasProductChanged(wcProduct, existingMapping)) {
+          await this.strapiClient.updateProduct(existingStrapiId, payload);
+          mode = "update";
+          this.logger.success(`✅ Updated product: ${wcProduct.name} → ID: ${existingStrapiId}`);
+        } else {
+          // Product hasn't changed, skip update
+          this.logger.info(`⏭️ No changes detected, skipping: ${wcProduct.name}`);
+          this.stats.skipped++;
+          return { mode: "skipped", strapiId: existingStrapiId };
+        }
+      } else {
+        const result = await this.strapiClient.createProduct(payload);
+        productId = result.data.id;
+        this.logger.success(`✅ Created product: ${wcProduct.name} → ID: ${productId}`);
+      }
+
+      if (productId) {
+        // Only handle images if enabled in config
+        if (this.config.import.images.enableUpload) {
+          // Always attempt to update images - no skip logic based on existing images
+          const imageResults = await this.handleProductImages(wcProduct, productId);
+
+          if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
+            try {
+              const updateData = {};
+
+              if (imageResults.coverImageId) {
+                updateData.CoverImage = imageResults.coverImageId;
+              }
+
+              if (imageResults.galleryImageIds.length > 0) {
+                updateData.Media = imageResults.galleryImageIds;
+              }
+
+              // Only update if we have data to update
+              if (Object.keys(updateData).length > 0) {
+                this.logger.debug(
+                  `🔍 DEBUG: Attempting to update product ${productId} with image data:`,
+                  JSON.stringify(updateData, null, 2),
+                );
+
+                try {
+                  // Wait for Strapi to fully index uploaded images before linking them
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                  await this.strapiClient.updateProduct(productId, updateData);
+                  this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
+                } catch (apiError) {
+                  // Log detailed error info for debugging
+                  this.logger.error(
+                    `❌ Image update API error for product ${productId}:`,
+                    apiError.message,
+                  );
+                  if (apiError.response) {
+                    this.logger.error(`   Status: ${apiError.response.status}`);
+                    this.logger.error(
+                      `   Response data:`,
+                      JSON.stringify(apiError.response.data, null, 2),
+                    );
+                  }
+                  throw apiError;
+                }
+              }
+            } catch (imageUpdateError) {
+              // If image update fails, log warning but continue with next product
+              // The product itself was successfully created/updated
+              this.logger.warn(
+                `⚠️ Failed to sync images for product ${wcProduct.name}: ${imageUpdateError.message}`,
+              );
+            }
+          }
+        } else {
+          this.logger.debug(`⏭️ Image upload disabled - skipping images for: ${wcProduct.name}`);
+        }
+
+        this.duplicateTracker.recordMapping("products", wcProduct.id, productId, {
           name: wcProduct.name,
           slug: wcProduct.slug,
           type: wcProduct.type,
-          status: wcProduct.status
-        }
-      );
-      
+          status: wcProduct.status,
+          rating: wcProduct.average_rating, // Track rating to detect changes
+        });
+      }
+
       this.stats.success++;
-      this.logger.debug(`✅ Created product: ${wcProduct.name} → ID: ${result.data.id}`);
-      
-      return result;
-      
+      if (mode === "update") {
+        this.stats.updated++;
+      }
+
+      return { mode, strapiId: productId };
     } catch (error) {
       this.stats.failed++;
-      this.logger.error(`❌ Failed to create product ${wcProduct.name}:`, error.message);
+      this.logger.error(`❌ Failed to upsert product ${wcProduct.name}:`, error.message);
       throw error;
     }
+  }
+
+  /**
+   * Check if product data has changed since last import
+   * Returns true if any key field has changed, false if unchanged
+   */
+  hasProductChanged(wcProduct, existingMapping) {
+    if (!existingMapping) {
+      return true; // New product, always import
+    }
+
+    // Compare key fields that matter
+    const changed = {
+      name: existingMapping.name !== wcProduct.name,
+      slug: existingMapping.slug !== wcProduct.slug,
+      status: existingMapping.status !== wcProduct.status,
+      description: wcProduct.description && wcProduct.description !== "",
+      price: wcProduct.price && parseFloat(wcProduct.price) > 0,
+      rating:
+        wcProduct.average_rating !== undefined &&
+        wcProduct.average_rating !== existingMapping.rating,
+    };
+
+    // Log what changed
+    const changedFields = Object.entries(changed)
+      .filter(([_, hasChanged]) => hasChanged)
+      .map(([field, _]) => field);
+
+    if (changedFields.length > 0) {
+      this.logger.debug(
+        `📝 Product "${wcProduct.name}" changed fields: ${changedFields.join(", ")}`,
+      );
+      return true;
+    }
+
+    return false; // No changes detected
+  }
+
+  /**
+   * Prepare payload for Strapi create/update operations
+   */
+  prepareProductPayload(strapiProduct) {
+    const {
+      _coverImageUrl,
+      _additionalImages,
+      _variationIds,
+      _attributes,
+      _additionalCategories,
+      ...payload
+    } = strapiProduct;
+
+    // Map additional categories to their IDs
+    if (Array.isArray(_additionalCategories)) {
+      const additionalCategoryIds = _additionalCategories
+        .map((item) => (typeof item === "object" ? item?.id : item))
+        .filter(Boolean);
+      payload.product_other_categories = additionalCategoryIds;
+    }
+
+    if (payload.external_id) {
+      payload.external_id = payload.external_id.toString();
+    }
+
+    if (!payload.external_source) {
+      payload.external_source = "woocommerce";
+    }
+
+    return payload;
   }
 
   /**
    * Transform WooCommerce product to Strapi format
    */
   async transformProduct(wcProduct) {
+    // Validate required product fields
+    if (!wcProduct.name || wcProduct.name.trim() === "") {
+      throw new Error(`Product ${wcProduct.id}: Missing product name/title`);
+    }
+
     const strapiProduct = {
-      Title: wcProduct.name,
+      Title: wcProduct.name.trim(),
       Description: this.cleanHtmlContent(wcProduct.description),
       Status: this.mapProductStatus(wcProduct.status),
       AverageRating: wcProduct.average_rating ? parseFloat(wcProduct.average_rating) : null,
       RatingCount: wcProduct.rating_count || 0,
       // Store WooCommerce ID for reference
       external_id: wcProduct.id.toString(),
-      external_source: 'woocommerce'
+      external_source: "woocommerce",
     };
 
     // Handle short description as cleaning tips or return conditions
@@ -302,21 +546,30 @@ class ProductImporter {
     if (wcProduct.categories && wcProduct.categories.length > 0) {
       const mainCategory = wcProduct.categories[0];
       const mainCategoryStrapiId = this.categoryMappingCache.get(mainCategory.id);
-      
+
       if (mainCategoryStrapiId) {
         strapiProduct.product_main_category = mainCategoryStrapiId;
-        this.logger.debug(`🔗 Linked product ${wcProduct.name} to main category ID: ${mainCategoryStrapiId}`);
+        this.logger.debug(
+          `🔗 Linked product ${wcProduct.name} to main category ID: ${mainCategoryStrapiId}`,
+        );
       } else {
-        this.logger.warn(`⚠️ Main category ${mainCategory.id} not found for product ${wcProduct.name}`);
+        this.logger.warn(
+          `⚠️ Main category ${mainCategory.id} not found for product ${wcProduct.name}`,
+        );
       }
     }
 
     // Store additional category relationships for later processing
     if (wcProduct.categories && wcProduct.categories.length > 1) {
-      strapiProduct._additionalCategories = wcProduct.categories.slice(1).map(cat => {
-        const strapiId = this.categoryMappingCache.get(cat.id);
-        return strapiId ? { id: strapiId } : null;
-      }).filter(Boolean);
+      strapiProduct._additionalCategories = wcProduct.categories
+        .slice(1)
+        .map((cat) => {
+          const strapiId = this.categoryMappingCache.get(cat.id);
+          return strapiId ? { id: strapiId } : null;
+        })
+        .filter(Boolean);
+    } else {
+      strapiProduct._additionalCategories = [];
     }
 
     // Handle cover image
@@ -354,13 +607,18 @@ class ProductImporter {
 
       // Handle cover image (first image)
       const coverImageId = await this.imageUploader.handleCoverImage(wcProduct, strapiProductId);
-      
-      // Handle gallery images (remaining images)
-      const galleryImageIds = await this.imageUploader.handleGalleryImages(wcProduct, strapiProductId);
+
+      // Handle gallery images (remaining images) with max limit
+      const maxGalleryImages = this.config.import.images.maxImagesPerProduct;
+      const galleryImageIds = await this.imageUploader.handleGalleryImages(
+        wcProduct,
+        strapiProductId,
+        maxGalleryImages,
+      );
 
       return {
         coverImageId,
-        galleryImageIds
+        galleryImageIds,
       };
     } catch (error) {
       this.logger.error(`❌ Failed to handle images for product ${wcProduct.id}:`, error.message);
@@ -380,18 +638,18 @@ class ProductImporter {
    * Clean HTML content for plain text fields
    */
   cleanHtmlContent(htmlContent) {
-    if (!htmlContent || typeof htmlContent !== 'string') {
-      return '';
+    if (!htmlContent || typeof htmlContent !== "string") {
+      return "";
     }
-    
+
     // Basic HTML tag removal - in production, use a proper HTML parser
     return htmlContent
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&nbsp;/g, ' ')  // Replace &nbsp; with space
-      .replace(/&amp;/g, '&')   // Replace &amp; with &
-      .replace(/&lt;/g, '<')    // Replace &lt; with <
-      .replace(/&gt;/g, '>')    // Replace &gt; with >
-      .replace(/&quot;/g, '"')  // Replace &quot; with "
+      .replace(/<[^>]*>/g, "") // Remove HTML tags
+      .replace(/&nbsp;/g, " ") // Replace &nbsp; with space
+      .replace(/&amp;/g, "&") // Replace &amp; with &
+      .replace(/&lt;/g, "<") // Replace &lt; with <
+      .replace(/&gt;/g, ">") // Replace &gt; with >
+      .replace(/&quot;/g, '"') // Replace &quot; with "
       .trim();
   }
 
@@ -399,9 +657,9 @@ class ProductImporter {
    * Determine if content is cleaning instructions
    */
   isCleaningInstructions(content) {
-    const cleaningKeywords = ['شستشو', 'پاک', 'تمیز', 'washing', 'clean', 'care', 'جنس'];
-    return cleaningKeywords.some(keyword => 
-      content.toLowerCase().includes(keyword.toLowerCase())
+    const cleaningKeywords = ["شستشو", "پاک", "تمیز", "washing", "clean", "care", "جنس"];
+    return cleaningKeywords.some((keyword) =>
+      content.toLowerCase().includes(keyword.toLowerCase()),
     );
   }
 
@@ -411,10 +669,12 @@ class ProductImporter {
   logFinalStats() {
     this.logger.success(`🎉 Product import completed!`);
     this.logger.logStats(this.stats);
-    
+
     // Log duplicate tracking stats
     const trackingStats = this.duplicateTracker.getStats();
-    this.logger.info(`📊 Duplicate tracking: ${trackingStats.products?.total || 0} products tracked`);
+    this.logger.info(
+      `📊 Duplicate tracking: ${trackingStats.products?.total || 0} products tracked`,
+    );
   }
 
   /**
@@ -425,4 +685,5 @@ class ProductImporter {
   }
 }
 
-module.exports = ProductImporter; 
+module.exports = ProductImporter;
+

@@ -65,12 +65,15 @@ export const createOrderAndItems = async (
       throw new Error(`INVALID_ITEM: Cart item ${item.id} missing product variation`);
     }
     if (!variation.product?.Title) {
-      console.error("=== VALIDATION ERROR: Missing product title ===", {
+      const errorInfo = {
         variationId: variation.id,
         hasProduct: !!variation.product,
-        productKeys: variation.product ? Object.keys(variation.product) : []
-      });
-      throw new Error(`MISSING_PRODUCT_TITLE: Product variation ${variation.id} missing title`);
+        productId: variation.product?.id || "NONE",
+        productKeys: variation.product ? Object.keys(variation.product) : [],
+        cartItemId: item.id
+      };
+      strapi.log.error("=== VALIDATION ERROR: Missing product title ===", errorInfo);
+      throw new Error(`MISSING_PRODUCT_TITLE: Product variation ${variation.id} (cart item ${item.id}) missing title. Product may have been deleted.`);
     }
     if (!variation.product?.SKU) {
       console.warn("=== WARNING: Missing product SKU ===", {
@@ -121,7 +124,8 @@ export const createOrderAndItems = async (
 
   for (const item of cart.cart_items) {
     const variation = item.product_variation;
-    const itemPrice = Number(variation?.Price || 0);
+    // Use DiscountPrice if available, otherwise fall back to Price
+    const itemPrice = Number(variation?.DiscountPrice ?? variation?.Price ?? 0);
     const itemCount = Number(item?.Count || 0);
     subtotal += itemPrice * itemCount;
 

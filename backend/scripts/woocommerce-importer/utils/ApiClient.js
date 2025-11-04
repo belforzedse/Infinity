@@ -58,11 +58,14 @@ class WooCommerceClient extends BaseApiClient {
   constructor(config, logger) {
     super(config.woocommerce, logger);
     
+    this.consumerKey = config.woocommerce.auth.consumerKey;
+    this.consumerSecret = config.woocommerce.auth.consumerSecret;
+
     this.client = axios.create({
       baseURL: config.woocommerce.baseUrl,
       auth: {
-        username: config.woocommerce.auth.consumerKey,
-        password: config.woocommerce.auth.consumerSecret
+        username: this.consumerKey,
+        password: this.consumerSecret
       },
       timeout: 60000, // Increased to 60 seconds for slow responses
       headers: {
@@ -71,10 +74,25 @@ class WooCommerceClient extends BaseApiClient {
     });
 
     // Request interceptor for rate limiting
-    this.client.interceptors.request.use(async (config) => {
-      this.logger.info(`🔄 Making WC API request: ${config.method?.toUpperCase()} ${config.url}`);
+    this.client.interceptors.request.use(async (requestConfig) => {
+      this.logger.info(`🔄 Making WC API request: ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`);
       await this.rateLimitDelay();
-      return config;
+
+      // Some WooCommerce installations (including Infinity Store) block HTTP Basic auth
+      // headers at the web server layer. To maintain compatibility we always append
+      // the consumer key/secret as query parameters in addition to the Authorization
+      // header so the request succeeds regardless of the server configuration.
+      requestConfig.params = requestConfig.params || {};
+
+      if (!requestConfig.params.consumer_key) {
+        requestConfig.params.consumer_key = this.consumerKey;
+      }
+
+      if (!requestConfig.params.consumer_secret) {
+        requestConfig.params.consumer_secret = this.consumerSecret;
+      }
+
+      return requestConfig;
     });
 
     // Response interceptor for logging
@@ -115,15 +133,20 @@ class WooCommerceClient extends BaseApiClient {
   }
 
   /**
-   * Get products with pagination
+   * Get products with pagination and optional category filtering
    */
-  async getProducts(page = 1, perPage = 20) {
-    const response = await this.retryRequest(() => 
-      this.client.get('/products', {
-        params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
-      })
+  async getProducts(page = 1, perPage = 20, categoryId = null) {
+    const params = { page, per_page: perPage, orderby: 'id', order: 'asc' };
+
+    // Add category filter if specified
+    if (categoryId) {
+      params.category = categoryId;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/products', { params })
     );
-    
+
     return {
       data: response.data,
       totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
@@ -209,7 +232,12 @@ class StrapiClient extends BaseApiClient {
       (error) => {
         if (error.response) {
           this.logger.error(`❌ Strapi API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`);
-          this.logger.debug('Response data:', error.response.data);
+          // Log error details at ERROR level, not DEBUG, so users can see what validation failed
+          if (error.response.data?.error) {
+            this.logger.error(`Error details: ${JSON.stringify(error.response.data.error, null, 2)}`);
+          } else if (error.response.data) {
+            this.logger.error(`Response: ${JSON.stringify(error.response.data, null, 2)}`);
+          }
         } else {
           this.logger.error(`❌ Strapi API Error: ${error.message}`);
         }
@@ -259,6 +287,16 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Update an existing product variation
+   */
+  async updateProductVariation(variationId, updateData) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/product-variations/${variationId}`, { data: updateData })
+    );
+    return response.data;
+  }
+
+  /**
    * Create a new product variation
    */
   async createProductVariation(variationData) {
@@ -281,11 +319,12 @@ class StrapiClient extends BaseApiClient {
           }
         })
       );
-      
-      if (existingByTitle.data && existingByTitle.data.data && existingByTitle.data.data.length > 0) {
+
+      if (existingByTitle.data?.data && existingByTitle.data.data.length > 0) {
+        // Return in consistent format { data: {...} }
         return { data: existingByTitle.data.data[0] };
       }
-      
+
       // Also check by ColorCode to avoid duplicates
       const existingByColor = await this.retryRequest(() =>
         this.client.get('/product-variation-colors', {
@@ -294,13 +333,14 @@ class StrapiClient extends BaseApiClient {
           }
         })
       );
-      
-      if (existingByColor.data && existingByColor.data.data && existingByColor.data.data.length > 0) {
+
+      if (existingByColor.data?.data && existingByColor.data.data.length > 0) {
+        // Return in consistent format { data: {...} }
         return { data: existingByColor.data.data[0] };
       }
-      
+
       // If not found, create new one
-      const response = await this.retryRequest(() => 
+      const response = await this.retryRequest(() =>
         this.client.post('/product-variation-colors', { data: colorData })
       );
       return response.data;
@@ -316,11 +356,11 @@ class StrapiClient extends BaseApiClient {
             }
           })
         );
-        
-        if (existingByTitle.data && existingByTitle.data.data && existingByTitle.data.data.length > 0) {
+
+        if (existingByTitle.data?.data && existingByTitle.data.data.length > 0) {
           return { data: existingByTitle.data.data[0] };
         }
-        
+
         // Then check by ColorCode
         const existingByColor = await this.retryRequest(() =>
           this.client.get('/product-variation-colors', {
@@ -330,7 +370,7 @@ class StrapiClient extends BaseApiClient {
           })
         );
         
-        if (existingByColor.data && existingByColor.data.data && existingByColor.data.data.length > 0) {
+        if (existingByColor.data?.data && existingByColor.data.data.length > 0) {
           return { data: existingByColor.data.data[0] };
         }
       } catch (findError) {
@@ -439,6 +479,16 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Update an existing product stock
+   */
+  async updateProductStock(stockId, stockData) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/product-stocks/${stockId}`, { data: stockData })
+    );
+    return response.data;
+  }
+
+  /**
    * Create an order
    */
   async createOrder(orderData) {
@@ -472,9 +522,9 @@ class StrapiClient extends BaseApiClient {
    * Get all local users (for phone uniqueness check)
    */
   async getAllLocalUsers() {
-    const response = await this.retryRequest(() => 
+    const response = await this.retryRequest(() =>
       this.client.get('/local-users', {
-        params: { 
+        params: {
           'pagination[pageSize]': 1000, // Get a large batch for phone checking
           'fields[0]': 'Phone' // Only get phone field for efficiency
         }
@@ -484,10 +534,66 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Find a local user by external ID
+   */
+  async findLocalUserByExternalId(externalId) {
+    if (!externalId) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/local-users', {
+        params: {
+          'filters[external_id][$eq]': externalId,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  /**
+   * Find a local user by phone number
+   */
+  async findLocalUserByPhone(phone) {
+    if (!phone) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/local-users', {
+        params: {
+          'filters[Phone][$eq]': phone,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  /**
+   * Extract the first entity from a Strapi collection response
+   */
+  extractFirstEntry(responseData) {
+    if (!responseData) {
+      return null;
+    }
+
+    const items = Array.isArray(responseData?.data) ? responseData.data : [];
+    if (items.length === 0) {
+      return null;
+    }
+
+    return items[0];
+  }
+
+  /**
    * Create local user
    */
   async createLocalUser(userData) {
-    const response = await this.retryRequest(() => 
+    const response = await this.retryRequest(() =>
       this.client.post('/local-users', { data: userData })
     );
     return response.data;

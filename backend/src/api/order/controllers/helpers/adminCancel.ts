@@ -156,68 +156,70 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
         }
       }
 
-      // Refund to wallet
-      const userId = order.user?.id || order.user;
-      let wallet = await strapi.db
-        .query("api::local-user-wallet.local-user-wallet")
-        .findOne({ where: { user: userId } });
-
-      if (!wallet) {
-        wallet = await strapi.db
+      // Refund to wallet (only for non-SnappPay orders)
+      if (gatewaySource !== "SnappPay") {
+        const userId = order.user?.id || order.user;
+        let wallet = await strapi.db
           .query("api::local-user-wallet.local-user-wallet")
-          .create({
-            data: {
-              user: userId,
-              Balance: 0,
-              LastTransactionDate: new Date(),
-            },
-          });
-      }
+          .findOne({ where: { user: userId } });
 
-      const refundIrr = paidAmount * 10;
-      await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
-        where: { id: wallet.id },
-        data: {
-          Balance: Number(wallet.Balance || 0) + refundIrr,
-          LastTransactionDate: new Date(),
-        },
-      });
+        if (!wallet) {
+          wallet = await strapi.db
+            .query("api::local-user-wallet.local-user-wallet")
+            .create({
+              data: {
+                user: userId,
+                Balance: 0,
+                LastTransactionDate: new Date(),
+              },
+            });
+        }
 
-      await strapi.db
-        .query(
-          "api::local-user-wallet-transaction.local-user-wallet-transaction"
-        )
-        .create({
+        const refundIrr = paidAmount * 10;
+        await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
+          where: { id: wallet.id },
           data: {
-            Amount: refundIrr,
-            Type: "Add",
-            Date: new Date(),
-            Cause: "Order Cancelled (Admin)",
-            ReferenceId: `order-${orderIdNum}-cancel-${Date.now()}`,
-            user_wallet: wallet.id,
+            Balance: Number(wallet.Balance || 0) + refundIrr,
+            LastTransactionDate: new Date(),
           },
         });
 
-      // Create contract-transaction Return record
-      const maxStep =
-        txList.length > 0
-          ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
-          : 0;
-
-      if (Number.isFinite(contractIdNum)) {
         await strapi.db
-          .query("api::contract-transaction.contract-transaction")
+          .query(
+            "api::local-user-wallet-transaction.local-user-wallet-transaction"
+          )
           .create({
             data: {
-              Type: "Return",
               Amount: refundIrr,
-              Step: maxStep + 1,
-              Status: "Success",
-              external_source: "System",
-              contract: contractIdNum,
+              Type: "Add",
               Date: new Date(),
+              Cause: "Order Cancelled (Admin)",
+              ReferenceId: `order-${orderIdNum}-cancel-${Date.now()}`,
+              user_wallet: wallet.id,
             },
           });
+
+        // Create contract-transaction Return record
+        const maxStep =
+          txList.length > 0
+            ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
+            : 0;
+
+        if (Number.isFinite(contractIdNum)) {
+          await strapi.db
+            .query("api::contract-transaction.contract-transaction")
+            .create({
+              data: {
+                Type: "Return",
+                Amount: refundIrr,
+                Step: maxStep + 1,
+                Status: "Success",
+                external_source: "System",
+                contract: contractIdNum,
+                Date: new Date(),
+              },
+            });
+        }
       }
 
       // Log

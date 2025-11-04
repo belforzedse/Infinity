@@ -73,6 +73,11 @@ export default factories.createCoreController(
         }
 
         // Params
+        // IMPORTANT: amount parameter should be the final قابل پرداخت (payable amount in Toman)
+        const amountTomanParam = ctx.request.query?.amount
+          ? Number(ctx.request.query.amount)
+          : undefined;
+
         const shippingId = ctx.request.query?.shippingId
           ? Number(ctx.request.query.shippingId)
           : undefined;
@@ -83,7 +88,35 @@ export default factories.createCoreController(
           (ctx.request.query?.discountCode as string | undefined) ||
           (ctx.request.body?.discountCode as string | undefined);
 
-        // Load user cart
+        // If amount is provided directly from frontend (قابل پرداخت), use it directly
+        if (amountTomanParam !== undefined) {
+          const amountIRR = Math.max(0, amountTomanParam) * 10;
+
+          strapi.log.info("SnappPay eligible request (direct amount)", {
+            userId,
+            amountToman: amountTomanParam,
+            amountIRR,
+          });
+
+          const snappay = strapi.service("api::payment-gateway.snappay");
+          const eligibleResp = await snappay.eligible(amountIRR);
+          strapi.log.info("SnappPay eligible result", {
+            successful: eligibleResp?.successful,
+            eligible: eligibleResp?.response?.eligible,
+            error: eligibleResp?.errorData,
+          });
+
+          const payload = {
+            eligible: !!eligibleResp?.response?.eligible,
+            title: eligibleResp?.response?.title_message,
+            description: eligibleResp?.response?.description,
+            amountIRR,
+          };
+
+          return ctx.send({ data: payload });
+        }
+
+        // Load user's current cart with items (same as applyDiscount)
         const cartService = strapi.service("api::cart.cart");
         const cart = await cartService.getUserCart(userId);
 
@@ -93,13 +126,17 @@ export default factories.createCoreController(
           });
         }
 
-        // Compute subtotal (toman)
+        // Compute subtotal from cart (same logic as applyDiscount)
+        // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
         let subtotal = 0;
         for (const item of cart.cart_items) {
-          const price = item?.product_variation?.Price || 0;
-          const count = item?.Count || 0;
-          subtotal += Number(price) * Number(count);
+          const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
+          const count = Number(item?.Count || 0);
+          subtotal += Number(price) * count;
+
+          console.log(`[ELIGIBLE CALC] VarID=${item?.product_variation?.id}, DiscountPrice=${item?.product_variation?.DiscountPrice}, Price=${item?.product_variation?.Price}, Count=${count}, ItemTotal=${Number(price) * count}`);
         }
+        console.log(`[ELIGIBLE CALC] Final subtotal=${subtotal}`);
 
         // Discounts: apply coupon first if provided, otherwise fallback to general discount
         let discountAmount = 0;
@@ -157,15 +194,10 @@ export default factories.createCoreController(
           if (shipping?.Price) shippingCost = Number(shipping.Price);
         }
 
-        // Tax 10% on (subtotal - discount)
-        const taxPercent = 10;
-        const taxAmount = ((subtotal - discountAmount) * taxPercent) / 100;
-
-        // Total (toman) → convert to IRR
+        // Total (toman) → convert to IRR (tax disabled)
         const totalToman =
           Math.round(subtotal) -
           Math.round(discountAmount) +
-          Math.round(taxAmount) +
           Math.round(shippingCost);
         const amountIRR = Math.max(0, totalToman) * 10;
 
@@ -176,6 +208,13 @@ export default factories.createCoreController(
           amountIRR,
           hasDiscountCode: !!discountCodeParam,
           discountToman: Math.round(discountAmount),
+          debugAmounts: {
+            subtotalToman: Math.round(subtotal),
+            discountToman: Math.round(discountAmount),
+            shippingToman: Math.round(shippingCost),
+            totalToman,
+            totalIRR: amountIRR,
+          },
         });
         const eligibleResp = await snappay.eligible(amountIRR);
         strapi.log.info("SnappPay eligible result", {
@@ -304,8 +343,8 @@ export default factories.createCoreController(
               ],
               isShipmentIncluded: true,
               isTaxIncluded: true,
-              shippingAmount: 0,
               taxAmount: 0,
+              shippingAmount: 0,
               totalAmount: Number(amountIRR),
             },
           ],

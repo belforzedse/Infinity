@@ -69,22 +69,28 @@ class ImageUploader {
 
   /**
    * Download and upload all gallery images for a product
+   * @param {Object} wcProduct - WooCommerce product
+   * @param {number} strapiProductId - Strapi product ID
+   * @param {number} maxImages - Maximum number of gallery images to upload (default: unlimited)
    */
-  async handleGalleryImages(wcProduct, strapiProductId) {
+  async handleGalleryImages(wcProduct, strapiProductId, maxImages = 999) {
     try {
       if (!wcProduct.images || wcProduct.images.length <= 1) {
         this.logger.debug(`📸 No gallery images for product: ${wcProduct.name}`);
         return [];
       }
 
-      this.logger.info(`📸 Processing ${wcProduct.images.length - 1} gallery images for: ${wcProduct.name}`);
-      
+      const totalGalleryImages = wcProduct.images.length - 1;
+      const imagesToProcess = Math.min(totalGalleryImages, maxImages);
+
+      this.logger.info(`📸 Processing ${imagesToProcess}/${totalGalleryImages} gallery images for: ${wcProduct.name}${maxImages < 999 ? ` (max: ${maxImages})` : ''}`);
+
       const uploadedImages = [];
-      
+
       // Skip first image (already used as cover) and process the rest
-      for (let i = 1; i < wcProduct.images.length; i++) {
+      for (let i = 1; i < wcProduct.images.length && uploadedImages.length < maxImages; i++) {
         const imageData = wcProduct.images[i];
-        
+
         if (!imageData.src) continue;
 
         const uploadedImage = await this.downloadAndUploadImage(
@@ -99,7 +105,7 @@ class ImageUploader {
         }
 
         // Add delay between uploads to avoid rate limiting
-        await this.delay(500);
+        await this.delay(100);
       }
 
       this.logger.success(`✅ Uploaded ${uploadedImages.length} gallery images`);
@@ -190,59 +196,50 @@ class ImageUploader {
   }
 
   /**
-   * Process image: convert WebP to JPG if needed, optimize, and generate filename
+   * Process image: Convert all images to WebP format (except GIFs)
+   * Strategy:
+   * - JPEG, PNG, WebP: Convert to WebP with quality 85
+   * - GIFs: Keep as-is (preserves animation)
+   * - Result: Most images stored as .webp with optimal compression, GIFs untouched
    */
   async processImage(imageBuffer, imageUrl, prefix) {
     try {
       const metadata = await sharp(imageBuffer).metadata();
       const originalFormat = metadata.format;
-      
-      let processedBuffer = imageBuffer;
-      let fileName = this.generateFileName(imageUrl, prefix);
-      
-      // Check if conversion is needed
-      if (originalFormat === 'webp') {
-        this.logger.debug(`🔄 Converting WebP to JPG: ${imageUrl}`);
-        
-        // Convert WebP to high-quality JPEG
-        processedBuffer = await sharp(imageBuffer)
-          .jpeg({ 
-            quality: 90,
-            progressive: true,
-            mozjpeg: true
-          })
-          .toBuffer();
-        
-        // Update filename extension
-        fileName = fileName.replace(/\.webp$/i, '.jpg');
-        if (!fileName.toLowerCase().endsWith('.jpg') && !fileName.toLowerCase().endsWith('.jpeg')) {
-          fileName = fileName.replace(/\.[^.]+$/, '.jpg');
-        }
-        
-        this.logger.success(`✅ Converted WebP to JPG: ${fileName} (${(processedBuffer.length / 1024).toFixed(2)}KB)`);
-      } else if (['jpeg', 'jpg', 'png', 'gif'].includes(originalFormat)) {
-        // Optimize existing formats without conversion
-        if (originalFormat === 'jpeg' || originalFormat === 'jpg') {
-          processedBuffer = await sharp(imageBuffer)
-            .jpeg({ quality: 90, progressive: true })
-            .toBuffer();
-        } else if (originalFormat === 'png') {
-          processedBuffer = await sharp(imageBuffer)
-            .png({ compressionLevel: 8, progressive: true })
-            .toBuffer();
-        }
-        
-        this.logger.debug(`🎨 Optimized ${originalFormat.toUpperCase()}: ${fileName}`);
-      } else {
-        this.logger.warn(`⚠️ Unsupported image format: ${originalFormat}, keeping original`);
+      const originalSizeKb = (imageBuffer.length / 1024).toFixed(2);
+
+      // Keep GIFs as-is (preserve animation)
+      if (originalFormat === 'gif') {
+        this.logger.debug(`🎬 Keeping GIF as-is: ${this.generateFileName(imageUrl, prefix)}`);
+        return {
+          buffer: imageBuffer,
+          fileName: this.generateFileName(imageUrl, prefix)
+        };
       }
-      
+
+      // Convert all other formats to WebP
+      this.logger.debug(`🔧 Converting ${originalFormat?.toUpperCase() || 'UNKNOWN'} to WebP...`);
+
+      const processedBuffer = await sharp(imageBuffer)
+        .webp({ quality: 85 })
+        .toBuffer();
+
+      // Generate filename with .webp extension
+      let fileName = this.generateFileName(imageUrl, prefix);
+      // Replace original extension with .webp
+      fileName = fileName.substring(0, fileName.lastIndexOf('.')) + '.webp';
+
+      const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
+      const savings = (((imageBuffer.length - processedBuffer.length) / imageBuffer.length) * 100).toFixed(1);
+
+      this.logger.success(`✅ Converted to WebP: ${originalFormat?.toUpperCase() || 'UNKNOWN'} → ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`);
+
       return {
         buffer: processedBuffer,
         fileName: fileName
       };
     } catch (error) {
-      this.logger.error(`❌ Failed to process image:`, error.message);
+      this.logger.error(`❌ Failed to convert image to WebP:`, error.message);
       // Fallback to original
       return {
         buffer: imageBuffer,
@@ -288,6 +285,7 @@ class ImageUploader {
       if (response.data && response.data.length > 0) {
         const uploadedFile = response.data[0];
         this.logger.debug(`✅ Uploaded to Strapi: ${uploadedFile.name} (ID: ${uploadedFile.id})`);
+        this.logger.debug(`🔍 DEBUG - Upload response object:`, JSON.stringify(uploadedFile, null, 2));
         return uploadedFile;
       }
 
@@ -304,7 +302,7 @@ class ImageUploader {
   }
 
   /**
-   * Generate a clean filename for the image
+   * Generate a clean filename for the image (preserves original extension)
    */
   generateFileName(imageUrl, prefix) {
     try {
@@ -312,13 +310,13 @@ class ImageUploader {
       const originalName = path.basename(url.pathname);
       const ext = path.extname(originalName) || '.jpg';
       const baseName = path.basename(originalName, ext);
-      
+
       // Clean the filename
       const cleanBaseName = baseName
         .replace(/[^a-zA-Z0-9\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF-_]/g, '-')
         .replace(/--+/g, '-')
         .replace(/^-|-$/g, '');
-      
+
       const timestamp = Date.now();
       return `${prefix}-${cleanBaseName}-${timestamp}${ext}`;
     } catch (error) {

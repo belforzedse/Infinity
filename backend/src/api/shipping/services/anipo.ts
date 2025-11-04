@@ -9,7 +9,6 @@ type BarcodePriceRequest = {
     sum: number; // IRR
     isnonstandard: 0 | 1;
     smsservice: 0 | 1;
-    PayTypeID?: number; // optional byte flag required by upstream (workaround)
   };
 };
 
@@ -95,7 +94,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         sum: Math.max(0, Math.floor(params.sum || 0)),
         isnonstandard: params.isnonstandard ?? 0,
         smsservice: params.smsservice ?? 0,
-        PayTypeID: 0,
       },
     };
     try {
