@@ -4,6 +4,14 @@
 
 module.exports = {
   async up(knex) {
+    const hasProductsTable = await knex.schema.hasTable("products");
+    if (!hasProductsTable) {
+      console.warn(
+        "Skipping weight normalization because products table does not exist."
+      );
+      return;
+    }
+
     // products table is `products` with column `weight`
     try {
       await knex("products").whereNull("weight").update({ weight: 100 });
@@ -15,5 +23,4 @@ module.exports = {
     }
   },
 };
-
 

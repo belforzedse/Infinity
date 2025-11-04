@@ -7,6 +7,14 @@
 
 module.exports = {
   async up(knex) {
+    const tableExists = await knex.schema.hasTable("product_variations");
+    if (!tableExists) {
+      console.warn(
+        "Skipping discount_price column migration because product_variations table does not exist."
+      );
+      return;
+    }
+
     const hasColumn = await knex.schema.hasColumn(
       "product_variations",
       "discount_price",
@@ -20,6 +28,11 @@ module.exports = {
   },
 
   async down(knex) {
+    const tableExists = await knex.schema.hasTable("product_variations");
+    if (!tableExists) {
+      return;
+    }
+
     const hasColumn = await knex.schema.hasColumn(
       "product_variations",
       "discount_price",
