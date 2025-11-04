@@ -28,6 +28,8 @@ interface PaymentResponse {
   requestId?: string;
   resCode?: number;
   message?: string;
+  errorCode?: string;
+  errorErrno?: number;
 }
 
 export default ({ strapi }: { strapi: Strapi }) => ({
