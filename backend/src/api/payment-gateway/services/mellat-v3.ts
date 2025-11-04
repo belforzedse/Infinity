@@ -39,11 +39,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   createMellatClient() {
     const rawApiUrl =
       process.env.MELLAT_GATEWAY_URL ||
-      "https://bpm.shaparak.ir/pgwchannel/services/pgw";
+      "https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl";
 
-    // Don't append ?wsdl - the soap library and mellat-checkout handle this automatically
-    // Appending it can cause connection issues
-    const apiUrl = rawApiUrl.trim();
+    const sanitized = rawApiUrl.trim();
+    const apiUrl = sanitized.includes("?wsdl")
+      ? sanitized
+      : `${sanitized.replace(/\/$/, "")}?wsdl`;
 
     strapi.log.info("[Mellat] Creating client with URL:", { apiUrl });
 
