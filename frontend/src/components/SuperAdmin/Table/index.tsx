@@ -193,17 +193,21 @@ export function SuperAdminTable<TData, TValue>({
     }
   }, [refresh, requestUrl, runFetch, setRefresh]);
 
-  // Set up visibility change listener for page focus
+  // Set up visibility change listener for page focus - refresh when page becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       isPageVisibleRef.current = !document.hidden;
+      // Refresh data when page becomes visible (switched back from another tab)
+      if (!document.hidden && requestUrl) {
+        runFetch(requestUrl, { force: true });
+      }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [requestUrl, runFetch]);
 
   // Note: Automatic polling has been disabled on super admin pages to prevent
   // conflicts when admins are editing data. Data will update on manual refresh or

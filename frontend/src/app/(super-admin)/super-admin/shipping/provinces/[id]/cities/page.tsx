@@ -10,8 +10,10 @@ import { useEffect, useState } from "react";
 import type { Province } from "../../table";
 import { apiClient } from "@/services";
 import { STRAPI_TOKEN } from "@/constants/api";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function ShippingCitiesPage() {
+  useFreshDataOnPageLoad();
   const { id } = useParams();
 
   const [provinces, setProvinces] = useState<Province[]>([]);

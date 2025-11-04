@@ -15,8 +15,10 @@ import { appendTitleFilter } from "@/constants/productFilters";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { refreshTable } from "@/components/SuperAdmin/Table";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function ProductsPage() {
+  useFreshDataOnPageLoad();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [sort, setSort] = useState<
     "newest" | "oldest" | "stock-asc" | "stock-desc" | "sales-asc" | "sales-desc"

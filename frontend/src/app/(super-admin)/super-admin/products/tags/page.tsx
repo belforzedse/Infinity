@@ -5,8 +5,10 @@ import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { MobileTable, columns } from "./table";
 import { ENDPOINTS } from "@/constants/api";
 import { useState } from "react";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function TagsPage() {
+  useFreshDataOnPageLoad();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
 
   return (

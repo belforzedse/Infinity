@@ -32,6 +32,8 @@ function ShoppingCartBillPaymentGateway({
         {snappTitle && <div className="text-md font-bold text-neutral-800">{snappTitle}</div>}
         {snappDescription && <div className="text-sm text-neutral-600">{snappDescription}</div>}
       </div>
+    ) : !snappEligible ? (
+      <div className="text-md font-bold text-neutral-800">اسنپ پی</div>
     ) : undefined;
 
   // Payment gateway configurations
@@ -61,38 +63,38 @@ function ShoppingCartBillPaymentGateway({
     name: "پرداخت اقساطی اسنپ‌پی",
     img: "/images/cart/snappay.svg",
     helper: snappHelper,
+    disabled: !snappEligible,
   };
 
   return (
     <div className="flex flex-col gap-4">
       <span className="text-2xl text-neutral-800 lg:text-xl">درگاه پرداخت خود را انتخاب کنید</span>
-      {/* Top row: SnappPay spanning full width (only if eligible) */}
-      {snappEligible && (
-        <button
-          onClick={() => onChange(snappay.id)}
-          className={classNames(
-            "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 lg:gap-6 lg:p-2",
-            selected === snappay.id && "!border-pink-600",
-          )}
-          type="button"
-        >
-          {/* Logo on the right (in RTL, first item appears on right) */}
-          <div className="relative h-24 w-24 flex-shrink-0 lg:h-36 lg:w-36">
-            <Image
-              src={snappay.img}
-              alt={snappay.name}
-              fill
-              className="bg-stone-50 object-contain p-3"
-              sizes="(min-width: 1024px) 144px, 96px"
-            />
-          </div>
+      {/* Top row: SnappPay spanning full width (always shown, disabled if not eligible) */}
+      <button
+        onClick={() => !snappay.disabled && onChange(snappay.id)}
+        className={classNames(
+          "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 lg:gap-6 lg:p-2 transition-opacity duration-300",
+          selected === snappay.id && "!border-pink-600",
+          snappay.disabled && "cursor-not-allowed opacity-50",
+        )}
+        type="button"
+      >
+        {/* Logo on the right (in RTL, first item appears on right) */}
+        <div className="relative h-24 w-24 flex-shrink-0 lg:h-36 lg:w-36">
+          <Image
+            src={snappay.img}
+            alt={snappay.name}
+            fill
+            className="bg-stone-50 object-contain p-3"
+            sizes="(min-width: 1024px) 144px, 96px"
+          />
+        </div>
 
-          {/* Text content on the left (in RTL, second item appears on left) */}
-          <div className="flex flex-1 flex-col items-start gap-2">
-            <span className="text-md lg:text-lg">{snappay.helper}</span>
-          </div>
-        </button>
-      )}
+        {/* Text content on the left (in RTL, second item appears on left) */}
+        <div className="flex flex-1 flex-col items-start gap-2">
+          <span className="text-md lg:text-lg">{snappay.helper}</span>
+        </div>
+      </button>
       <div className="flex w-full flex-col gap-2">
         {/* Bottom row: Mellat and Wallet side by side */}
         <div className="grid grid-cols-2 gap-2">

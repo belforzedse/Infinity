@@ -6,8 +6,10 @@ import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { ENDPOINTS } from "@/constants/api";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function UsersPage() {
+  useFreshDataOnPageLoad();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
