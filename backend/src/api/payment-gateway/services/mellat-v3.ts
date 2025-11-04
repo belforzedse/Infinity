@@ -41,21 +41,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       process.env.MELLAT_GATEWAY_URL ||
       "https://bpm.shaparak.ir/pgwchannel/services/pgw";
 
-    let apiUrl = rawApiUrl.trim();
-    if (apiUrl && !apiUrl.toLowerCase().includes("wsdl")) {
-      // Mellat SOAP integration requires hitting the ?wsdl endpoint; append when the caller omits it.
-      apiUrl = `${apiUrl}${apiUrl.includes("?") ? "&" : "?"}wsdl`;
-      strapi.log.warn("[Mellat] Gateway URL missing ?wsdl suffix, appending automatically", {
-        providedUrl: rawApiUrl,
-        normalizedUrl: apiUrl,
-      });
-    }
+    // Don't append ?wsdl - the soap library and mellat-checkout handle this automatically
+    // Appending it can cause connection issues
+    const apiUrl = rawApiUrl.trim();
+
+    strapi.log.info("[Mellat] Creating client with URL:", { apiUrl });
 
     const config = {
       terminalId: process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID",
       username: process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID",
       password: process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD",
-      timeout: 120000, // 120 seconds timeout (WSDL initialization takes 60+ seconds on production)
+      timeout: 120000, // 120 seconds timeout
       apiUrl,
     };
 
