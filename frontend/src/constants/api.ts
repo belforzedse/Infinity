@@ -14,7 +14,9 @@ export const API_VERSION = "v1";
 
 
 // Request Timeout (in milliseconds)
-export const REQUEST_TIMEOUT = 30000; // 30 seconds
+// Increased to 150s to accommodate Mellat WSDL initialization (60+ seconds)
+// and add buffer for slow networks
+export const REQUEST_TIMEOUT = 150000; // 150 seconds
 
 // API Endpoints
 export const ENDPOINTS = {
