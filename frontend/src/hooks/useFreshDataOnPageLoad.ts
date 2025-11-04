@@ -21,7 +21,7 @@ import { refreshTable } from "@/components/SuperAdmin/Table";
  * This hook:
  * - Triggers a refresh when the component mounts (page entered)
  * - Triggers a refresh when the page tab becomes visible (switched back from another tab)
- * - Debounces visibility changes to prevent excessive API calls (2s delay)
+ * - Debounces visibility changes to prevent excessive API calls (10s delay)
  * - Works with SuperAdminTable which listens to the refreshTable atom
  */
 export function useFreshDataOnPageLoad() {
@@ -43,12 +43,12 @@ export function useFreshDataOnPageLoad() {
           clearTimeout(visibilityDebounceRef.current);
         }
 
-        // Debounce: wait 2 seconds before refreshing to avoid excessive calls
+        // Debounce: wait 10 seconds before refreshing to avoid excessive calls
         // This prevents issues when rapidly switching between tabs
         visibilityDebounceRef.current = setTimeout(() => {
           setRefresh(true);
           visibilityDebounceRef.current = null;
-        }, 2000);
+        }, 10000);
       }
     };
 
