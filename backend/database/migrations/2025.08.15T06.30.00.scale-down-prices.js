@@ -22,8 +22,22 @@ module.exports = {
         { table: "contract_transactions", column: "discount_amount", cast: "bigint" },
       ];
 
+      const tableExists = {};
+      for (const op of operations) {
+        if (!(op.table in tableExists)) {
+          tableExists[op.table] = await knex.schema.hasTable(op.table);
+        }
+      }
+
       await knex.transaction(async (trx) => {
         for (const op of operations) {
+          if (!tableExists[op.table]) {
+            console.warn(
+              `Skipping price scaling for ${op.table}.${op.column} because table does not exist.`
+            );
+            continue;
+          }
+
           const castType = op.cast === "integer" ? "integer" : "bigint";
 
           const affected = await trx(op.table)
@@ -45,5 +59,3 @@ module.exports = {
     }
   },
 };
-
-
