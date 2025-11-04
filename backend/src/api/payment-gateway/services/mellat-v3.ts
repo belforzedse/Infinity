@@ -172,10 +172,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         });
 
         // Initialize the client (with error handling and timing)
-        strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] Starting WSDL initialization...`);
+        strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] Starting WSDL initialization...`, {
+          apiUrl: mellat.config?.apiUrl || 'unknown',
+          timeout: mellat.config?.timeout || 'unknown',
+        });
         const initStartTime = Date.now();
 
         try {
+          strapi.log.debug(`[${requestId}] Calling mellat.initialize()...`);
           await mellat.initialize();
           const initDuration = Date.now() - initStartTime;
           strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] WSDL initialization successful (${initDuration}ms)`);
