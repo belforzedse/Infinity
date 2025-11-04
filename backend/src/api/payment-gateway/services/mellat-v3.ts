@@ -176,7 +176,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
         try {
           strapi.log.debug(`[${requestId}] Calling mellat.initialize()...`);
-          await mellat.initialize();
+
+          // Wrap initialize with explicit promise timeout to ensure it never exceeds our limit
+          const initPromise = mellat.initialize();
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`WSDL initialization timeout exceeded 120s`)), 120000)
+          );
+
+          await Promise.race([initPromise, timeoutPromise]);
           const initDuration = Date.now() - initStartTime;
           strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] WSDL initialization successful (${initDuration}ms)`);
         } catch (initError) {

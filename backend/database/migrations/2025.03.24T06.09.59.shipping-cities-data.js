@@ -11,6 +11,25 @@ const path = require("path");
 module.exports = {
   async up(knex) {
     try {
+      const provinceTableExists = await knex.schema.hasTable("shipping_provinces");
+      const cityTableExists = await knex.schema.hasTable("shipping_cities");
+      if (!provinceTableExists || !cityTableExists) {
+        console.warn(
+          "Skipping cities migration because required tables are missing."
+        );
+        return;
+      }
+
+      const joinTableExists = await knex.schema.hasTable(
+        "shipping_cities_shipping_province_links"
+      );
+      if (!joinTableExists) {
+        console.warn(
+          "Skipping cities migration because join table shipping_cities_shipping_province_links is missing."
+        );
+        return;
+      }
+
       // Read the JSON file with cities data
       const citiesDataPath = path.resolve(__dirname, "..", "iran-cities.json");
       const citiesData = JSON.parse(fs.readFileSync(citiesDataPath, "utf8"));
