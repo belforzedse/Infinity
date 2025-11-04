@@ -8,6 +8,22 @@ type ItemAdjustment = {
   remove?: boolean;
 };
 
+// Rate limiting cache for SnappPay update calls
+// Key: orderId-transactionId, Value: timestamp of last call
+const snappayUpdateCache = new Map<string, number>();
+const SNAPPAY_UPDATE_COOLDOWN_MS = 30000; // 30 seconds cooldown between updates
+const CACHE_CLEANUP_THRESHOLD_MS = 300000; // 5 minutes
+
+// Clean up old cache entries to prevent memory leaks
+function cleanupCache() {
+  const now = Date.now();
+  for (const [key, timestamp] of snappayUpdateCache.entries()) {
+    if (now - timestamp > CACHE_CLEANUP_THRESHOLD_MS) {
+      snappayUpdateCache.delete(key);
+    }
+  }
+}
+
 const computePaidAmountToman = (order: any): number => {
   const txList = order?.contract?.contract_transactions || [];
   let paidIrr = 0;
@@ -200,7 +216,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       }
     }
 
-    const taxPercent = Number(order.contract?.TaxPercent || 10);
+    // Tax is completely disabled (always 0)
     const discountRate =
       originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
     const effectiveDiscount = Math.max(
@@ -210,21 +226,16 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     const newTotals = computeTotals(
       newSubtotal,
       effectiveDiscount,
-      taxPercent,
       newShipping
     );
 
     const oldTotal = Number(order.contract?.Amount || 0);
     const paidAmount = computePaidAmountToman(order);
     const requestedRefund = paidAmount - Math.max(newTotals.total, 0);
-    // Do not refund more than originally paid and exclude tax from the refund.
-    const refundableWithoutTax = Math.max(
-      0,
-      requestedRefund - Math.max(newTotals.tax, 0)
-    );
+    // Calculate refund (tax is disabled, so no tax exclusion)
     const refundToman = Math.max(
       0,
-      Math.min(paidAmount, refundableWithoutTax)
+      Math.min(paidAmount, requestedRefund)
     );
 
     if (isDryRun) {
@@ -328,6 +339,24 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
         if (allRemoved) {
           // Full cancel
+          const cacheKey = `${orderIdNum}-${transactionId}-cancel`;
+          const lastCall = snappayUpdateCache.get(cacheKey);
+          const now = Date.now();
+
+          // Rate limiting: prevent duplicate cancel calls within cooldown period
+          if (lastCall && now - lastCall < SNAPPAY_UPDATE_COOLDOWN_MS) {
+            const waitTime = Math.ceil((SNAPPAY_UPDATE_COOLDOWN_MS - (now - lastCall)) / 1000);
+            strapi.log.warn("SnappPay cancel call blocked by rate limiter", {
+              orderId: orderIdNum,
+              transactionId,
+              lastCallAgo: now - lastCall,
+              waitSeconds: waitTime,
+            });
+            throw new Error(
+              `SNAPPAY_RATE_LIMIT: Please wait ${waitTime} seconds before cancelling again`
+            );
+          }
+
           const cancelRes = await snappay.cancelOrder(
             transactionId,
             paymentToken
@@ -337,9 +366,33 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
               `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
             );
           }
+
+          // Update cache on successful call
+          snappayUpdateCache.set(cacheKey, now);
+          // Clean old entries from cache (older than 5 minutes)
+          cleanupCache();
+
           snappayAction = "cancel";
         } else {
           // Update
+          const cacheKey = `${orderIdNum}-${transactionId}-update`;
+          const lastCall = snappayUpdateCache.get(cacheKey);
+          const now = Date.now();
+
+          // Rate limiting: prevent duplicate update calls within cooldown period
+          if (lastCall && now - lastCall < SNAPPAY_UPDATE_COOLDOWN_MS) {
+            const waitTime = Math.ceil((SNAPPAY_UPDATE_COOLDOWN_MS - (now - lastCall)) / 1000);
+            strapi.log.warn("SnappPay update call blocked by rate limiter", {
+              orderId: orderIdNum,
+              transactionId,
+              lastCallAgo: now - lastCall,
+              waitSeconds: waitTime,
+            });
+            throw new Error(
+              `SNAPPAY_RATE_LIMIT: Please wait ${waitTime} seconds before updating again`
+            );
+          }
+
           const payload = await buildSnappPayUpdatePayload(
             strapi,
             transactionId,
@@ -349,81 +402,103 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             newTotals,
             newShipping
           );
+          strapi.log.info("SnappPay update payload being sent", {
+            orderId: orderIdNum,
+            transactionId,
+            amount: payload.amount,
+            totalAmount: payload.cartList[0].totalAmount,
+            discountAmount: payload.discountAmount,
+            hasPaymentMethodTypeDto: !!payload.paymentMethodTypeDto,
+          });
           const updateRes = await snappay.update(payload);
+          strapi.log.info("SnappPay update response", {
+            orderId: orderIdNum,
+            successful: updateRes.successful,
+            errorCode: updateRes.errorData?.errorCode,
+            errorMessage: updateRes.errorData?.message,
+          });
           if (!updateRes.successful) {
             throw new Error(
               `SNAPPAY_UPDATE_FAILED:${updateRes.errorData?.message || ""}`
             );
           }
+
+          // Update cache on successful call
+          snappayUpdateCache.set(cacheKey, now);
+          // Clean old entries from cache (older than 5 minutes)
+          cleanupCache();
+
           snappayPayload = payload;
           snappayAction = "update";
         }
       }
 
-      // Refund to wallet
-      const userId = order.user?.id || order.user;
-      let wallet = await strapi.db
-        .query("api::local-user-wallet.local-user-wallet")
-        .findOne({ where: { user: userId } });
-
-      if (!wallet) {
-        wallet = await strapi.db
+      // Refund to wallet (only for non-SnappPay orders)
+      if (gatewaySource !== "SnappPay") {
+        const userId = order.user?.id || order.user;
+        let wallet = await strapi.db
           .query("api::local-user-wallet.local-user-wallet")
-          .create({
-            data: {
-              user: userId,
-              Balance: 0,
-              LastTransactionDate: new Date(),
-            },
-          });
-      }
+          .findOne({ where: { user: userId } });
 
-      const refundIrr = refundToman * 10;
-      await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
-        where: { id: wallet.id },
-        data: {
-          Balance: Number(wallet.Balance || 0) + refundIrr,
-          LastTransactionDate: new Date(),
-        },
-      });
+        if (!wallet) {
+          wallet = await strapi.db
+            .query("api::local-user-wallet.local-user-wallet")
+            .create({
+              data: {
+                user: userId,
+                Balance: 0,
+                LastTransactionDate: new Date(),
+              },
+            });
+        }
 
-      await strapi.db
-        .query(
-          "api::local-user-wallet-transaction.local-user-wallet-transaction"
-        )
-        .create({
+        const refundIrr = refundToman * 10;
+        await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
+          where: { id: wallet.id },
           data: {
-            Amount: refundIrr,
-            Type: "Add",
-            Date: new Date(),
-            Cause: allRemoved
-              ? "Order Cancelled (Admin)"
-              : "Order Adjustment (Admin)",
-            ReferenceId: `order-${orderIdNum}-adj-${Date.now()}`,
-            user_wallet: wallet.id,
+            Balance: Number(wallet.Balance || 0) + refundIrr,
+            LastTransactionDate: new Date(),
           },
         });
 
-      // Create contract-transaction Return record
-      const maxStep =
-        txList.length > 0
-          ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
-          : 0;
-
-      if (Number.isFinite(contractIdNum)) {
         await strapi.db
-          .query("api::contract-transaction.contract-transaction")
+          .query(
+            "api::local-user-wallet-transaction.local-user-wallet-transaction"
+          )
           .create({
             data: {
-              Type: "Return",
               Amount: refundIrr,
-              Step: maxStep + 1,
-              Status: "Success",
-              external_source: "System",
-              contract: contractIdNum,
+              Type: "Add",
               Date: new Date(),
+              Cause: allRemoved
+                ? "Order Cancelled (Admin)"
+                : "Order Adjustment (Admin)",
+              ReferenceId: `order-${orderIdNum}-adj-${Date.now()}`,
+              user_wallet: wallet.id,
             },
           });
+
+        // Create contract-transaction Return record
+        const maxStep =
+          txList.length > 0
+            ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
+            : 0;
+
+        if (Number.isFinite(contractIdNum)) {
+          await strapi.db
+            .query("api::contract-transaction.contract-transaction")
+            .create({
+              data: {
+                Type: "Return",
+                Amount: refundIrr,
+                Step: maxStep + 1,
+                Status: "Success",
+                external_source: "System",
+                contract: contractIdNum,
+                Date: new Date(),
+              },
+            });
+        }
       }
 
       // Log
@@ -463,11 +538,21 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
   } catch (error: any) {
     strapi.log.error("adminAdjustItems error", error);
     const message = String(error?.message || "");
+
+    // Rate limit errors should return 429 Too Many Requests
+    if (message.startsWith("SNAPPAY_RATE_LIMIT")) {
+      return ctx.tooManyRequests(message.replace("SNAPPAY_RATE_LIMIT: ", ""), {
+        data: { error: message, code: "RATE_LIMITED" },
+      });
+    }
+
+    // Other SnappPay errors
     if (message.startsWith("SNAPPAY_")) {
       return ctx.badGateway("SnappPay synchronization failed", {
         data: { error: message },
       });
     }
+
     return ctx.internalServerError("Failed to adjust items", {
       data: { error: error.message },
     });
@@ -501,7 +586,7 @@ async function buildSnappPayUpdatePayload(
         categoryEntity?.Title ||
         categoryEntity?.Name ||
         "";
-      // Map the category to SnapPay's expected format
+      // Map the category to SnapPay's expected format (returns "بدون دسته بندی" if empty)
       const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       return {
         id: idx + 1,
@@ -514,22 +599,46 @@ async function buildSnappPayUpdatePayload(
     })
   );
 
-  return {
+  // Calculate totalAmount (before discount): subtotal + shipping (tax disabled)
+  // According to SnappPay docs: totalAmount = items + shipping (BEFORE discount)
+  const totalAmountBeforeDiscount = Math.round(
+    (newTotals.subtotal + newShipping) * 10
+  );
+
+  const snappayUpdatePayload = {
     transactionId,
     paymentToken,
-    amount: Math.round(newTotals.total * 10),
+    amount: Math.round(newTotals.total * 10), // Final total AFTER discount
     discountAmount: Math.round(newTotals.discount * 10),
     externalSourceAmount: 0,
+    paymentMethodTypeDto: "INSTALLMENT" as const, // Required by SnappPay API
     cartList: [
       {
         cartId: order.id,
         cartItems,
         isShipmentIncluded: true,
         isTaxIncluded: true,
+        taxAmount: 0,
         shippingAmount: Math.round(newShipping * 10),
-        taxAmount: Math.round(newTotals.tax * 10),
-        totalAmount: Math.round(newTotals.total * 10),
+        totalAmount: totalAmountBeforeDiscount, // Total BEFORE discount
       },
     ],
   };
+
+  const updatePayloadStr = JSON.stringify(snappayUpdatePayload, null, 2);
+  strapi.log.debug("========== SNAPPAY UPDATE PAYLOAD START ==========");
+  strapi.log.debug(updatePayloadStr);
+  strapi.log.debug("========== SNAPPAY UPDATE PAYLOAD END ==========");
+  strapi.log.info("SnappPay update payload summary", {
+    orderId: order.id,
+    transactionId,
+    amount: snappayUpdatePayload.amount,
+    amountToman: Math.round((snappayUpdatePayload.amount || 0) / 10),
+    discountAmount: snappayUpdatePayload.discountAmount,
+    discountAmountToman: Math.round((snappayUpdatePayload.discountAmount || 0) / 10),
+    cartListTotal: snappayUpdatePayload.cartList?.[0]?.totalAmount,
+    cartListTotalToman: Math.round((snappayUpdatePayload.cartList?.[0]?.totalAmount || 0) / 10),
+  });
+
+  return snappayUpdatePayload;
 }

@@ -26,6 +26,10 @@
       "required": true,
       "min": "0"
     },
+    "DiscountPrice": {
+      "type": "biginteger",
+      "min": "0"
+    },
     "product": {
       "type": "relation",
       "relation": "manyToOne",
@@ -57,7 +61,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::general-discount.general-discount",
-      "inversedBy": "product_variations"
+      "mappedBy": "product_variations"
     },
     "external_id": {
       "type": "string",

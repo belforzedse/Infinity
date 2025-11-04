@@ -52,7 +52,7 @@ export default {
       "api::product-variation.product-variation",
       id,
       {
-        fields: ["IsPublished", "SKU", "Price"],
+        fields: ["IsPublished", "SKU", "Price", "DiscountPrice"],
         populate: {
           product: true,
           product_variation_color: true,
@@ -77,7 +77,7 @@ export default {
       "api::product-variation.product-variation",
       result.id,
       {
-        fields: ["IsPublished", "SKU", "Price"],
+        fields: ["IsPublished", "SKU", "Price", "DiscountPrice"],
         populate: {
           product: true,
           product_variation_color: true,

@@ -79,12 +79,15 @@ export const requestSnappPayment = async (
     (orderItems || []).map(async (it: any) => {
       const pname =
         it.ProductTitle || it.product_variation?.product?.Title || "Item";
-      const mainCatNameFa =
-        it.product_variation?.product?.product_main_category?.Name ||
-        it.product_variation?.product?.Title ||
-        "سایر";
-      // Map the category to SnapPay's expected format
-      const snappayCategory = await mapToSnappayCategory(strapi, mainCatNameFa);
+      const categoryEntity =
+        it.product_variation?.product?.product_main_category;
+      const rawCategory =
+        categoryEntity?.snappay_category ||
+        categoryEntity?.Title ||
+        categoryEntity?.Name ||
+        "";
+      // Map the category to SnapPay's expected format (returns "بدون دسته بندی" if empty)
+      const snappayCategory = await mapToSnappayCategory(strapi, rawCategory);
       const perAmountToman = Math.round(it.PerAmount || 0);
       const perAmountIrr = perAmountToman * 10;
       return {
@@ -102,12 +105,35 @@ export const requestSnappPayment = async (
     (sum: number, x: any) => sum + x.amount * x.count,
     0
   );
-  const taxIrr = Math.round((financialSummary.tax || 0) * 10);
   const shippingIrr = Math.round((financialSummary.shipping || 0) * 10);
   const discountIrr = Math.round((financialSummary.discount || 0) * 10);
   const externalSourceIrr = 0;
-  const totalCartIrr = itemsTotalIrr + taxIrr + shippingIrr;
+  const totalCartIrr = itemsTotalIrr + shippingIrr;
   const orderAmountIrr = totalCartIrr - discountIrr - externalSourceIrr;
+
+  // DEBUG: Log all amounts for troubleshooting
+  strapi.log.info("SNAPPAY AMOUNT CALCULATION DEBUG", {
+    orderId: order.id,
+    itemCount: items.length,
+    itemsTotalToman: Math.round(itemsTotalIrr / 10),
+    itemsTotalIrr,
+    shippingToman: Math.round(shippingIrr / 10),
+    shippingIrr,
+    discountToman: Math.round(discountIrr / 10),
+    discountIrr,
+    totalCartToman: Math.round(totalCartIrr / 10),
+    totalCartIrr,
+    orderAmountToman: Math.round(orderAmountIrr / 10),
+    orderAmountIrr,
+    contractAmount: contract.Amount,
+    contractAmountInIrr: Math.round((contract.Amount || 0) * 10),
+    financialSummary: {
+      subtotal: financialSummary.subtotal,
+      discount: financialSummary.discount,
+      shipping: financialSummary.shipping,
+      total: financialSummary.total,
+    },
+  });
 
   const baseId = `O${order.id}`;
   const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -136,8 +162,8 @@ export const requestSnappPayment = async (
         cartItems: items,
         isShipmentIncluded: true,
         isTaxIncluded: true,
+        taxAmount: 0,
         shippingAmount: shippingIrr,
-        taxAmount: taxIrr,
         totalAmount: totalCartIrr,
       },
     ],
@@ -176,14 +202,18 @@ export const requestSnappPayment = async (
     }
   } catch {}
 
-  strapi.log.info("SnappPay token request payload", {
+  // Log the complete SnappPay payload with all details
+  const payloadForLog = JSON.stringify(snappPayload, null, 2);
+  strapi.log.debug("========== SNAPPAY TOKEN REQUEST PAYLOAD START ==========");
+  strapi.log.debug(payloadForLog);
+  strapi.log.debug("========== SNAPPAY TOKEN REQUEST PAYLOAD END ==========");
+  strapi.log.info("SnappPay token request summary", {
     orderId: order.id,
     transactionId,
-    returnURL: snappPayload.returnURL,
-    mobileHasPlus: snappPayload.mobile.startsWith("+"),
-    mobilePatternOk: /^\+98\d{10}$/.test(snappPayload.mobile),
-    items: items.length,
-    cartTotal: totalCartIrr,
+    itemCount: items.length,
+    cartTotalIRR: totalCartIrr,
+    cartTotalToman: Math.round(totalCartIrr / 10),
+    mobileValid: /^\+98\d{10}$/.test(snappPayload.mobile),
   });
   let tokenResp;
   try {

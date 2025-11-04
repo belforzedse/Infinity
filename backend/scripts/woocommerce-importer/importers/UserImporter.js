@@ -141,23 +141,29 @@ class UserImporter {
    * Load existing phones into cache for uniqueness checks
    */
   async loadEmailCache() {
-    this.logger.debug('📂 Loading existing user phones...');
+    this.logger.debug('📂 Loading existing user contact identifiers...');
     
     try {
-      // Get existing local users to check for phone duplicates
       const existingUsers = await this.strapiClient.getAllLocalUsers();
+      const items = Array.isArray(existingUsers?.data?.data)
+        ? existingUsers.data.data
+        : Array.isArray(existingUsers?.data)
+          ? existingUsers.data
+          : Array.isArray(existingUsers)
+            ? existingUsers
+            : [];
       
-      if (existingUsers && existingUsers.data) {
-        for (const user of existingUsers.data) {
-          if (user.Phone) {
-            this.emailCache.add(user.Phone.toLowerCase());
-          }
+      for (const entry of items) {
+        const rawPhone = entry?.attributes?.Phone ?? entry?.Phone;
+        const normalized = this.normalizePhone(rawPhone);
+        if (normalized) {
+          this.emailCache.add(normalized);
         }
       }
       
-      this.logger.info(`📂 Loaded ${this.emailCache.size} existing user phones`);
+      this.logger.info(`📂 Loaded ${this.emailCache.size} existing user identifiers`);
     } catch (error) {
-      this.logger.warn(`⚠️ Failed to load existing phones: ${error.message}`);
+      this.logger.warn(`⚠️ Failed to load existing emails: ${error.message}`);
     }
   }
 
@@ -232,7 +238,7 @@ class UserImporter {
    */
   resetProgressState() {
     const progressFile = `${this.config.duplicateTracking.storageDir}/user-import-progress.json`;
-    
+
     try {
       if (require('fs').existsSync(progressFile)) {
         require('fs').unlinkSync(progressFile);
@@ -241,6 +247,31 @@ class UserImporter {
     } catch (error) {
       this.logger.error(`❌ Failed to reset progress state: ${error.message}`);
     }
+  }
+
+  /**
+   * Check Strapi for an existing user by external ID or phone
+   */
+  async findExistingStrapiUser(externalId, phone) {
+    try {
+      const existingByExternalId = await this.strapiClient.findLocalUserByExternalId(externalId);
+      if (existingByExternalId) {
+        return existingByExternalId;
+      }
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to look up user by external ID ${externalId}: ${error.message}`);
+    }
+
+    try {
+      const existingByPhone = await this.strapiClient.findLocalUserByPhone(phone);
+      if (existingByPhone) {
+        return existingByPhone;
+      }
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to look up user by phone ${phone}: ${error.message}`);
+    }
+
+    return null;
   }
 
   /**
@@ -280,17 +311,50 @@ class UserImporter {
       userPhone = `wc_${wcCustomer.id}_${timestamp}`;
       this.logger.info(`📱 Generated phone for user ${wcCustomer.id}: ${userPhone}`);
     }
-    
-    if (this.emailCache.has(userPhone.toLowerCase())) {
+
+    const normalizedPhone = this.normalizePhone(userPhone);
+    if (normalizedPhone && this.emailCache.has(normalizedPhone)) {
       this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${userPhone}`);
       this.stats.skipped++;
       return { isSkipped: true, reason: 'Phone already exists' };
     }
-    
+
     try {
       // Transform WooCommerce customer to Strapi format
       const strapiUser = await this.transformUser(wcCustomer);
-      
+
+      // Check if this user already exists in Strapi to avoid duplicates
+      const existingUser = await this.findExistingStrapiUser(
+        strapiUser.user.external_id,
+        strapiUser.user.Phone
+      );
+
+      if (existingUser) {
+        const existingId = existingUser?.id ?? existingUser?.data?.id ?? null;
+        this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - already exists in Strapi (ID: ${existingId ?? 'unknown'})`);
+        this.stats.skipped++;
+
+        if (normalizedPhone) {
+          this.emailCache.add(normalizedPhone);
+        }
+
+        if (existingId) {
+          this.duplicateTracker.recordMapping(
+            'users',
+            wcCustomer.id,
+            existingId,
+            {
+              email: wcCustomer.email || '',
+              firstName: wcCustomer.first_name || '',
+              lastName: wcCustomer.last_name || '',
+              phone: strapiUser.user.Phone
+            }
+          );
+        }
+
+        return { isSkipped: true, reason: 'Already exists', existingId };
+      }
+
       if (dryRun) {
         this.logger.info(`🔍 [DRY RUN] Would import user: ${wcCustomer.email}`);
         this.stats.success++;
@@ -332,22 +396,12 @@ class UserImporter {
         // Don't throw here - user was created successfully, just info failed
         this.logger.warn(`⚠️ User created but user info failed for ${wcCustomer.email || `ID:${wcCustomer.id}`}`);
       }
-      
-      // Add phone to cache to prevent duplicates in this session
-      const phone = this.extractPhone(wcCustomer);
-      let userPhone;
-      
-      if (phone && phone.trim() !== '') {
-        userPhone = phone;
-      } else if (wcCustomer.email && wcCustomer.email.trim() !== '') {
-        userPhone = wcCustomer.email;
-      } else {
-        const timestamp = Date.now();
-        userPhone = `wc_${wcCustomer.id}_${timestamp}`;
+
+      // Add normalized phone/email to cache to prevent duplicates in this session
+      if (normalizedPhone) {
+        this.emailCache.add(normalizedPhone);
       }
-      
-      this.emailCache.add(userPhone.toLowerCase());
-      
+
       // Record the mapping
       this.duplicateTracker.recordMapping(
         'users',
@@ -357,7 +411,7 @@ class UserImporter {
           email: wcCustomer.email || '',
           firstName: wcCustomer.first_name || '',
           lastName: wcCustomer.last_name || '',
-          phone: userPhone
+          phone: strapiUser.user.Phone
         }
       );
       
@@ -446,6 +500,22 @@ class UserImporter {
   }
 
   /**
+   * Normalize phone identifiers for duplicate detection.
+   */
+  normalizePhone(value) {
+    if (value === undefined || value === null) {
+      return '';
+    }
+
+    const normalized = value.toString().trim();
+    if (normalized === '') {
+      return '';
+    }
+
+    return normalized.replace(/\s+/g, '').toLowerCase();
+  }
+
+  /**
    * Extract phone number from customer data
    */
   extractPhone(wcCustomer) {
@@ -522,3 +592,6 @@ class UserImporter {
 }
 
 module.exports = UserImporter;
+
+
+

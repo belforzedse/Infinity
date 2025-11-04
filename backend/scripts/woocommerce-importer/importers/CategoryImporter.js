@@ -127,38 +127,70 @@ class CategoryImporter {
 
   /**
    * Sort categories by hierarchy - parents first, then children
+   * FIX: Now includes orphaned categories (those with missing parents)
    */
   sortCategoriesByHierarchy(categories) {
     const categoryMap = new Map();
     const rootCategories = [];
     const sortedCategories = [];
-    
+
     // Build category map
     categories.forEach(cat => {
       categoryMap.set(cat.id, cat);
-      if (cat.parent === 0) {
+    });
+
+    // Identify root categories: those with no parent OR parent doesn't exist in our list
+    categories.forEach(cat => {
+      if (!cat.parent || cat.parent === 0 || !categoryMap.has(cat.parent)) {
         rootCategories.push(cat);
       }
     });
-    
+
+    // Track visited categories to detect cycles and prevent infinite recursion
+    const visitedCategories = new Set();
+
     // Recursive function to add categories in hierarchical order
-    const addCategoryAndChildren = (category) => {
+    const addCategoryAndChildren = (category, ancestorChain = []) => {
+      // Detect cycles: if this category is already in the ancestor chain, we have a cycle
+      if (ancestorChain.includes(category.id)) {
+        this.logger.warn(
+          `⚠️ Cycle detected in category hierarchy: ${ancestorChain.join(' → ')} → ${category.id} (${category.name})`
+        );
+        return;
+      }
+
+      // Skip if already processed (can happen with cycles)
+      if (visitedCategories.has(category.id)) {
+        return;
+      }
+
+      visitedCategories.add(category.id);
       sortedCategories.push(category);
-      
-      // Find and add children
+
+      // Find and add children, passing the updated ancestor chain
+      const newAncestorChain = [...ancestorChain, category.id];
       categories
         .filter(cat => cat.parent === category.id)
         .forEach(childCategory => {
-          addCategoryAndChildren(childCategory);
+          addCategoryAndChildren(childCategory, newAncestorChain);
         });
     };
-    
+
     // Start with root categories
     rootCategories.forEach(rootCategory => {
       addCategoryAndChildren(rootCategory);
     });
-    
-    this.logger.info(`🌳 Sorted categories hierarchically: ${rootCategories.length} root categories`);
+
+    if (rootCategories.length > 0) {
+      this.logger.info(`🌳 Sorted categories hierarchically: ${rootCategories.length} root categories, ${sortedCategories.length} total`);
+    }
+
+    // Log any categories that might have been orphaned
+    if (sortedCategories.length < categories.length) {
+      const orphanedCount = categories.length - sortedCategories.length;
+      this.logger.warn(`⚠️ ${orphanedCount} categories were not processed (possible cycles or missing references)`);
+    }
+
     return sortedCategories;
   }
 
@@ -167,27 +199,51 @@ class CategoryImporter {
    */
   async importSingleCategory(wcCategory, dryRun = false) {
     this.logger.debug(`📂 Processing category: ${wcCategory.id} - ${wcCategory.name}`);
-    
-    // Check for duplicates
+
+    // Check for duplicates in mapping tracker
     const duplicateCheck = this.duplicateTracker.checkDuplicate('categories', wcCategory);
     if (duplicateCheck.isDuplicate) {
       this.stats.skipped++;
+      this.logger.debug(`⏭️ Category ${wcCategory.id} already in mappings, skipping`);
       return duplicateCheck;
     }
-    
+
     try {
       // Transform WooCommerce category to Strapi format
       const strapiCategory = await this.transformCategory(wcCategory);
-      
+
+      // Check if category already exists in Strapi database by slug
+      const existingCategory = await this.findExistingCategoryBySlug(strapiCategory.Slug);
+
+      if (existingCategory) {
+        this.stats.skipped++;
+        this.logger.warn(`📦 Category already exists in database: ${wcCategory.name} (ID: ${existingCategory.id}) - syncing mapping`);
+
+        // Record the mapping so we don't try to create it again
+        this.duplicateTracker.recordMapping(
+          'categories',
+          wcCategory.id,
+          existingCategory.id,
+          {
+            name: wcCategory.name,
+            slug: wcCategory.slug,
+            parentId: wcCategory.parent,
+            syncedFromExisting: true
+          }
+        );
+
+        return { isSynced: true, data: existingCategory };
+      }
+
       if (dryRun) {
         this.logger.info(`🔍 [DRY RUN] Would import category: ${wcCategory.name}`);
         this.stats.success++;
         return { isDryRun: true, data: strapiCategory };
       }
-      
+
       // Create category in Strapi
       const result = await this.strapiClient.createCategory(strapiCategory);
-      
+
       // Record the mapping
       this.duplicateTracker.recordMapping(
         'categories',
@@ -199,12 +255,12 @@ class CategoryImporter {
           parentId: wcCategory.parent
         }
       );
-      
+
       this.stats.success++;
       this.logger.debug(`✅ Created category: ${wcCategory.name} → ID: ${result.data.id}`);
-      
+
       return result;
-      
+
     } catch (error) {
       this.stats.failed++;
       this.logger.error(`❌ Failed to create category ${wcCategory.name}:`, error.message);
@@ -213,35 +269,74 @@ class CategoryImporter {
   }
 
   /**
+   * Find an existing category by slug in the Strapi database
+   */
+  async findExistingCategoryBySlug(slug) {
+    try {
+      const response = await this.strapiClient.getCategories({
+        'filters[Slug][$eq]': slug,
+        'pagination[pageSize]': 1
+      });
+
+      const categories = response.data || [];
+      if (categories.length > 0) {
+        return categories[0];
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to query existing categories by slug: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
    * Transform WooCommerce category to Strapi format
    */
   async transformCategory(wcCategory) {
+    // Ensure slug is unique by appending ID if needed
+    let slug = wcCategory.slug;
+    if (!slug) {
+      slug = wcCategory.name
+        .toLowerCase()
+        .replace(/[^\u0600-\u06FF\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
+    }
+
+    // Add WooCommerce ID to slug to ensure uniqueness
+    if (!slug.endsWith(`-${wcCategory.id}`)) {
+      slug = `${slug}-${wcCategory.id}`.toLowerCase();
+    }
+
     const strapiCategory = {
       Title: wcCategory.name,
-      Slug: wcCategory.slug,
+      Slug: slug,
       // Store WooCommerce ID for reference
       external_id: wcCategory.id.toString(),
       external_source: 'woocommerce'
     };
-    
-    // Handle parent relationship
+
+    // Handle parent relationship - only set if parent exists in mappings
     if (wcCategory.parent && wcCategory.parent !== 0) {
       const parentMapping = this.duplicateTracker.getStrapiId('categories', wcCategory.parent);
       if (parentMapping && parentMapping.strapiId) {
         strapiCategory.parent = parentMapping.strapiId;
         this.logger.debug(`🔗 Linking category ${wcCategory.name} to parent ID: ${parentMapping.strapiId}`);
       } else {
-        this.logger.warn(`⚠️ Parent category ${wcCategory.parent} not found for ${wcCategory.name}`);
+        // Don't set parent if it doesn't exist - let it be a root category for now
+        this.logger.warn(`⚠️ Parent category ${wcCategory.parent} not found for ${wcCategory.name} - will import as root category`);
       }
     }
-    
+
     // Create category content if description exists
     if (wcCategory.description && wcCategory.description.trim()) {
       // Note: We'll handle category content creation separately
       // For now, we'll store the description for later processing
       strapiCategory.description_html = wcCategory.description;
     }
-    
+
     this.logger.debug(`🔄 Transformed category: ${wcCategory.name} → ${JSON.stringify(strapiCategory, null, 2)}`);
     return strapiCategory;
   }
@@ -282,6 +377,26 @@ class CategoryImporter {
     // Log duplicate tracking stats
     const trackingStats = this.duplicateTracker.getStats();
     this.logger.info(`📊 Duplicate tracking: ${trackingStats.categories.total} categories tracked`);
+  }
+
+  /**
+   * Provide a lightweight progress snapshot for the interactive importer.
+   */
+  loadProgressState() {
+    return {
+      lastCompletedPage: 0,
+      totalProcessed: this.stats.total || 0,
+      lastProcessedAt: this.stats.endTime
+        ? new Date(this.stats.endTime).toISOString()
+        : null
+    };
+  }
+
+  /**
+   * Categories are reprocessed every run; nothing to reset.
+   */
+  resetProgressState() {
+    this.logger.info('📂 Category importer has no persisted progress to reset');
   }
 
   /**

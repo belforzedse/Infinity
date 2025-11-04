@@ -282,24 +282,38 @@ class OrderImporter {
     // Create guest user based on billing information
     if (wcOrder.billing && wcOrder.billing.phone) {
       const phone = wcOrder.billing.phone;
-      
+
       // Check cache first
       if (this.userCache.has(phone)) {
         return this.userCache.get(phone);
       }
-      
+
       if (dryRun) {
         return null; // Don't create in dry run
       }
-      
+
       try {
-        // Create guest user
+        // First check if user with this phone already exists in Strapi
+        const existingUser = await this.strapiClient.get('/local-users', {
+          'filters[Phone][$eq]': phone,
+          'pagination[pageSize]': 1
+        });
+
+        if (existingUser.data && existingUser.data.length > 0) {
+          // User already exists, use that one
+          const userId = existingUser.data[0].id;
+          this.userCache.set(phone, userId);
+          this.logger.debug(`👤 Found existing user with phone ${phone} → ID: ${userId}`);
+          return userId;
+        }
+
+        // User doesn't exist, create new guest user
         const guestUser = await this.createGuestUser(wcOrder.billing);
         this.userCache.set(phone, guestUser.data.id);
         this.stats.guestUsersCreated++;
         return guestUser.data.id;
       } catch (error) {
-        this.logger.warn(`⚠️ Failed to create guest user for order ${wcOrder.id}:`, error.message);
+        this.logger.warn(`⚠️ Failed to handle guest user for order ${wcOrder.id}:`, error.message);
         return null; // Continue without user link
       }
     }

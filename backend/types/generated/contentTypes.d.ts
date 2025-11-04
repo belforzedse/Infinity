@@ -2127,6 +2127,13 @@ export interface ApiProductVariationProductVariation
         },
         string
       >;
+    DiscountPrice: Attribute.BigInteger &
+      Attribute.SetMinMax<
+        {
+          min: '0';
+        },
+        string
+      >;
     product: Attribute.Relation<
       'api::product-variation.product-variation',
       'manyToOne',

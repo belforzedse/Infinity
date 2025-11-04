@@ -1,5 +1,3 @@
-import { settleSnappayOrder } from "../../controllers/helpers/settleSnappay";
-
 type AuditAction = "Create" | "Update" | "Delete";
 
 function diffChanges(
@@ -68,15 +66,6 @@ export default {
         },
       }
     );
-
-    const nextStatus = event?.params?.data?.Status;
-    if (
-      nextStatus === "Done" &&
-      previous?.Status !== "Done" &&
-      previous?.contract
-    ) {
-      await settleSnappayOrder(strapi, Number(id));
-    }
 
     event.state = { ...(event.state || {}), previousOrder: previous };
   },

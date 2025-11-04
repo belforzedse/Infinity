@@ -13,21 +13,19 @@ export default (config, { strapi }: { strapi: Strapi }) => {
       const token = ctx.request.headers["authorization"]?.split(" ")[1];
       if (token) {
         const userPayload = JSON.parse(
-          JSON.stringify(jwt.verify(token, process.env.JWT_SECRET))
+          JSON.stringify(jwt.verify(token, process.env.JWT_SECRET)),
         ) as {
           userId: string;
         };
 
-        const user = await strapi
-          .query("api::local-user.local-user")
-          .findOne({
-            where: {
-              id: Number(userPayload.userId),
-            },
-            populate: {
-              user_role: true,
-            },
-          });
+        const user = await strapi.query("api::local-user.local-user").findOne({
+          where: {
+            id: Number(userPayload.userId),
+          },
+          populate: {
+            user_role: true,
+          },
+        });
 
         if (!user) {
           ctx.notFound("User not found");

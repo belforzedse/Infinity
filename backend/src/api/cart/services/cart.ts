@@ -229,11 +229,9 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           }
         }
 
-        const taxPercent = 10;
         const totals = computeTotals(
           subtotal,
           discountAmount,
-          taxPercent,
           finalShippingCost
         );
 
@@ -242,7 +240,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           userId,
           Number(order.id),
           totals.total,
-          taxPercent,
+          0,
           trx
         );
 
