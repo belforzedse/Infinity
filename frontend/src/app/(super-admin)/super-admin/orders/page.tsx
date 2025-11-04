@@ -5,8 +5,10 @@ import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function OrdersPage() {
+  useFreshDataOnPageLoad();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
