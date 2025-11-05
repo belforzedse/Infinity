@@ -12,6 +12,7 @@
     "build": "strapi build",
     "build:prod": "NODE_ENV=production strapi build",
     "debug:mellat": "node scripts/debug-mellat.js",
+    "test:mellat-v2": "node scripts/test-mellat-v2.js",
     "test:mellat-v3": "node scripts/test-mellat-v3.js",
     "test:callback-url": "node scripts/test-callback-url.js",
     "deploy": "strapi deploy",
