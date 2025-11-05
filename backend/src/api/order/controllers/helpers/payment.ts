@@ -19,6 +19,23 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
     q.transactionId ??
     b.transaction_id ??
     q.transaction_id) as any;
+  const samanStateInput: any =
+    b.State ?? q.State ?? b.STATE ?? q.STATE ?? b.state ?? q.state;
+  const samanStatusInput: any =
+    b.Status ?? q.Status ?? b.STATUS ?? q.STATUS ?? b.status ?? q.status;
+  const samanRefNumInput: any =
+    b.RefNum ?? q.RefNum ?? b.refNum ?? q.refnum ?? q.RefNum ?? b.RefNum;
+  const samanResNumInput: any =
+    b.ResNum ?? q.ResNum ?? b.resNum ?? q.resnum ?? q.ResNum ?? b.ResNum;
+  const samanTerminalInput: any =
+    b.TerminalId ??
+    q.TerminalId ??
+    b.terminalId ??
+    q.terminalId ??
+    b.MID ??
+    q.MID ??
+    b.mid ??
+    q.mid;
 
   try {
     // Log raw request payload and query for diagnostics
@@ -54,8 +71,392 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       state,
       paymentToken: paymentTokenInput,
       transactionId: transactionIdInput,
+      samanState: samanStateInput,
+      samanStatus: samanStatusInput,
+      samanRefNum: samanRefNumInput,
+      samanResNum: samanResNumInput,
       timestamp: new Date().toISOString(),
     });
+
+    const isSamanFlow =
+      !paymentTokenInput &&
+      !transactionIdInput &&
+      !ResCode &&
+      (samanStateInput !== undefined ||
+        samanStatusInput !== undefined ||
+        samanRefNumInput !== undefined ||
+        samanResNumInput !== undefined);
+
+    if (isSamanFlow) {
+      const samanService = strapi.service("api::payment-gateway.saman-kish") as any;
+      const refNum =
+        samanRefNumInput !== undefined && samanRefNumInput !== null
+          ? String(samanRefNumInput).trim()
+          : "";
+      const resNumRaw =
+        samanResNumInput !== undefined && samanResNumInput !== null
+          ? String(samanResNumInput).trim()
+          : "";
+      const normalizedState =
+        samanStateInput !== undefined && samanStateInput !== null
+          ? String(samanStateInput).trim().toUpperCase()
+          : "";
+      const statusNumeric =
+        samanStatusInput !== undefined &&
+        samanStatusInput !== null &&
+        String(samanStatusInput).trim() !== ""
+          ? Number(String(samanStatusInput).replace(/\s+/g, ""))
+          : NaN;
+      const terminalNumber =
+        samanTerminalInput !== undefined && samanTerminalInput !== null
+          ? Number(String(samanTerminalInput).replace(/\s+/g, ""))
+          : undefined;
+
+      let orderId: number | undefined;
+      if (resNumRaw) {
+        const candidate = Number(resNumRaw.split("-")[0]);
+        if (!Number.isNaN(candidate)) {
+          orderId = candidate;
+        }
+      }
+
+      let contractTransaction: any = undefined;
+      if (resNumRaw) {
+        try {
+          const txMatches = (await strapi.entityService.findMany(
+            "api::contract-transaction.contract-transaction",
+            {
+              filters: {
+                external_source: "SamanKish",
+                external_id: resNumRaw,
+              },
+              populate: { contract: { populate: { order: true } } },
+              sort: { createdAt: "desc" },
+              limit: 1,
+            }
+          )) as any[];
+          if (txMatches?.length) {
+            contractTransaction = txMatches[0];
+          }
+        } catch (err) {
+          strapi.log.error(
+            "Failed to locate Saman contract transaction by resNum",
+            err
+          );
+        }
+      }
+
+      if (!contractTransaction && refNum) {
+        try {
+          const txMatches = (await strapi.entityService.findMany(
+            "api::contract-transaction.contract-transaction",
+            {
+              filters: {
+                external_source: "SamanKish",
+                TrackId: refNum,
+              },
+              populate: { contract: { populate: { order: true } } },
+              sort: { createdAt: "desc" },
+              limit: 1,
+            }
+          )) as any[];
+          if (txMatches?.length) {
+            contractTransaction = txMatches[0];
+          }
+        } catch (err) {
+          strapi.log.error(
+            "Failed to locate Saman contract transaction by refNum",
+            err
+          );
+        }
+      }
+
+      if (
+        (!orderId || Number.isNaN(orderId)) &&
+        contractTransaction?.contract?.order
+      ) {
+        const co = contractTransaction.contract.order;
+        const derivedOrderId =
+          typeof co === "object" && co ? Number(co.id) : Number(co);
+        if (!Number.isNaN(derivedOrderId)) {
+          orderId = derivedOrderId;
+        }
+      }
+
+      if (!orderId || Number.isNaN(orderId)) {
+        strapi.log.error("Saman callback missing orderId", {
+          refNum,
+          resNumRaw,
+          normalizedState,
+        });
+        return ctx.badRequest("Invalid order reference", {
+          data: {
+            success: false,
+            error: "Invalid order reference (Saman)",
+          },
+        });
+      }
+
+      const orderEntity = (await strapi.entityService.findOne(
+        "api::order.order",
+        orderId,
+        {
+          populate: {
+            contract: true,
+            order_items: {
+              populate: {
+                product_variation: { populate: { product_stock: true } },
+              },
+            },
+          },
+        }
+      )) as any;
+
+      if (!orderEntity) {
+        strapi.log.error("Saman order not found", { orderId });
+        return ctx.badRequest("Order not found", {
+          data: { success: false, error: "Order not found (Saman)" },
+        });
+      }
+
+      const contractId =
+        contractTransaction?.contract?.id ||
+        (typeof orderEntity.contract === "object" && orderEntity.contract
+          ? orderEntity.contract.id
+          : orderEntity.contract);
+
+      const contractAmountToman = Math.round(
+        (orderEntity.contract?.Amount ?? 0) as number
+      );
+      const contractAmountIrr = contractAmountToman * 10;
+
+      const markOrderCancelled = async (reason: string) => {
+        try {
+          await strapi.entityService.update("api::order.order", orderId!, {
+            data: { Status: "Cancelled" },
+          });
+        } catch (err) {
+          strapi.log.error("Failed to mark order cancelled (Saman)", err);
+        }
+        if (contractId) {
+          try {
+            await strapi.entityService.update(
+              "api::contract.contract",
+              contractId,
+              {
+                data: { Status: "Cancelled", external_source: "SamanKish" },
+              }
+            );
+          } catch (err) {
+            strapi.log.error("Failed to cancel contract (Saman)", err);
+          }
+        }
+        if (contractTransaction?.id) {
+          try {
+            await strapi.entityService.update(
+              "api::contract-transaction.contract-transaction",
+              contractTransaction.id,
+              { data: { Status: "Failed" } }
+            );
+          } catch (err) {
+            strapi.log.error(
+              "Failed to update contract transaction status (Saman)",
+              err
+            );
+          }
+        }
+        try {
+          await strapi.entityService.create("api::order-log.order-log", {
+            data: {
+              order: orderId,
+              Action: "Update",
+              Description: `Saman gateway failure: ${reason}`,
+              Changes: {
+                refNum,
+                resNum: resNumRaw,
+                state: normalizedState,
+                status: samanStatusInput,
+              },
+            },
+          });
+        } catch (err) {
+          strapi.log.error("Failed to log Saman cancellation", err);
+        }
+      };
+
+      const stateSuccessful =
+        normalizedState === "OK" ||
+        normalizedState === "SUCCESS" ||
+        (!Number.isNaN(statusNumeric) && statusNumeric === 2);
+
+      if (!stateSuccessful) {
+        await markOrderCancelled(
+          normalizedState || `Status ${samanStatusInput || "Unknown"}`
+        );
+        return ctx.redirect(
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
+            normalizedState || String(samanStatusInput || "FAILED")
+          )}`
+        );
+      }
+
+      const verifyResult = await samanService.verifyTransaction({
+        refNum,
+        terminalNumber,
+      });
+
+      if (!verifyResult?.success || verifyResult?.resultCode !== 0) {
+        await markOrderCancelled(
+          verifyResult?.resultDescription || "Verification failed"
+        );
+        try {
+          await samanService.reverseTransaction({
+            refNum,
+            terminalNumber,
+          });
+        } catch (reverseErr) {
+          strapi.log.error("Saman reverse attempt failed", reverseErr);
+        }
+        return ctx.redirect(
+          `https://infinity.rgbgroup.ir/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
+            verifyResult?.resultDescription || "Verification failed"
+          )}`
+        );
+      }
+
+      const detail =
+        verifyResult.transactionDetail || verifyResult.TransactionDetail || {};
+      const affectiveAmountIrr = Number(
+        detail?.AffectiveAmount ?? detail?.OrginalAmount ?? 0
+      );
+
+      try {
+        for (const it of orderEntity?.order_items || []) {
+          const variation = it?.product_variation;
+          if (variation?.product_stock?.id && typeof it?.Count === "number") {
+            const stockId = variation.product_stock.id as number;
+            const current = Number(variation.product_stock.Count || 0);
+            const dec = Number(it.Count || 0);
+            await strapi.entityService.update(
+              "api::product-stock.product-stock",
+              stockId,
+              { data: { Count: current - dec } }
+            );
+          }
+        }
+      } catch (stockErr) {
+        strapi.log.error("Failed to decrement stock after Saman payment", stockErr);
+      }
+
+      try {
+        await strapi.entityService.update("api::order.order", orderId, {
+          data: {
+            Status: "Started",
+            external_source: "SamanKish",
+            external_id: refNum,
+          },
+        });
+      } catch (err) {
+        strapi.log.error("Failed to update order status for Saman", err);
+      }
+
+      if (contractId) {
+        try {
+          await strapi.entityService.update(
+            "api::contract.contract",
+            contractId,
+            {
+              data: {
+                Status: "Confirmed",
+                external_source: "SamanKish",
+                external_id: refNum,
+              },
+            }
+          );
+        } catch (err) {
+          strapi.log.error("Failed to update contract for Saman", err);
+        }
+      }
+
+      if (!contractTransaction && contractId) {
+        try {
+          contractTransaction = await strapi.entityService.create(
+            "api::contract-transaction.contract-transaction",
+            {
+              data: {
+                Type: "Gateway",
+                Amount: contractAmountIrr,
+                DiscountAmount: 0,
+                Step: 1,
+                Status: "Pending",
+                TrackId: refNum,
+                external_id: resNumRaw || refNum,
+                external_source: "SamanKish",
+                contract: contractId,
+                Date: new Date(),
+              },
+            }
+          );
+        } catch (err) {
+          strapi.log.error(
+            "Failed to create Saman contract transaction at verify",
+            err
+          );
+        }
+      }
+
+      if (contractTransaction?.id) {
+        try {
+          await strapi.entityService.update(
+            "api::contract-transaction.contract-transaction",
+            contractTransaction.id,
+            {
+              data: {
+                Status: "Success",
+                TrackId: refNum,
+                external_id: resNumRaw || contractTransaction.external_id,
+                Amount: affectiveAmountIrr || contractAmountIrr,
+              },
+            }
+          );
+        } catch (err) {
+          strapi.log.error(
+            "Failed to mark Saman contract transaction success",
+            err
+          );
+        }
+      }
+
+      try {
+        await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
+      } catch (barcodeErr) {
+        strapi.log.error("Failed to auto generate barcode (Saman)", barcodeErr);
+      }
+
+      try {
+        await strapi.entityService.create("api::order-log.order-log", {
+          data: {
+            order: orderId,
+            Action: "Update",
+            Description: "Saman gateway verify succeeded",
+            Changes: {
+              refNum,
+              resNum: resNumRaw,
+              resultCode: verifyResult.resultCode,
+              detail,
+            },
+          },
+        });
+      } catch (err) {
+        strapi.log.error("Failed to log Saman success", err);
+      }
+
+      return ctx.redirect(
+        `https://infinity.rgbgroup.ir/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
+          refNum || ""
+        )}`
+      );
+    }
 
     // If this is a SnappPay flow (state provided or paymentToken present), follow SnappPay verify+settle
     if (state || paymentTokenInput || transactionIdInput) {
