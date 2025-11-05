@@ -1,5 +1,9 @@
 import { Strapi } from "@strapi/strapi";
-import { requestMellatPayment, requestSnappPayment } from "./gateway-helpers";
+import {
+  requestMellatPayment,
+  requestSamanPayment,
+  requestSnappPayment,
+} from "./gateway-helpers";
 
 export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
   const { user } = ctx.state;
@@ -265,6 +269,16 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         }
       );
       if (response) return response;
+      paymentResult = pr;
+    } else if (selectedGateway === "samankish" || selectedGateway === "saman") {
+      const { paymentResult: pr } = await requestSamanPayment(strapi, {
+        order,
+        contract,
+        financialSummary,
+        callbackURL: callbackURL,
+        userId: user.id,
+        cellNumber: mobile || user?.Phone,
+      });
       paymentResult = pr;
     } else {
       paymentResult = await requestMellatPayment(strapi, {
