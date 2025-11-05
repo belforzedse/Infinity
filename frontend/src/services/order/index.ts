@@ -82,7 +82,7 @@ export interface OrderItem {
       cover_image?: {
         url: string;
       };
-    };
+    } | null;
     product_color?: {
       id: number;
       Title: string;

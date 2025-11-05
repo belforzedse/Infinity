@@ -77,7 +77,7 @@ function ShoppingCartBillForm({}: Props) {
   const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">("mellat");
+  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet">("samankish");
   const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
   const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
   const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
@@ -386,28 +386,8 @@ function ShoppingCartBillForm({}: Props) {
         localStorage.setItem("pendingRefId", cartResponse.refId || "");
 
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
-        if (gateway === "snappay") {
+        if (gateway === "snappay" || gateway === "samankish") {
           window.location.href = cartResponse.redirectUrl!;
-        } else if (gateway === "mellat") {
-          const createPaymentForm = () => {
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = cartResponse.redirectUrl!;
-            form.style.display = "none";
-            if (cartResponse.refId) {
-              const refIdInput = document.createElement("input");
-              refIdInput.type = "hidden";
-              refIdInput.name = "RefId";
-              refIdInput.value = cartResponse.refId;
-              form.appendChild(refIdInput);
-            }
-            document.body.appendChild(form);
-            return form;
-          };
-          setTimeout(() => {
-            const form = createPaymentForm();
-            form.submit();
-          }, 500);
         } else if (gateway === "wallet") {
           // Wallet flow returns no redirect; just move to success
           setSubmitOrderStep(SubmitOrderStep.Success);

@@ -3,8 +3,8 @@ import Image from "next/image";
 import classNames from "classnames";
 
 interface Props {
-  selected: "mellat" | "snappay" | "wallet";
-  onChange: (gw: "mellat" | "snappay" | "wallet") => void;
+  selected: "samankish" | "snappay" | "wallet";
+  onChange: (gw: "samankish" | "snappay" | "wallet") => void;
   snappEligible?: boolean;
   snappTitle?: string;
   snappDescription?: string;
@@ -36,11 +36,10 @@ function ShoppingCartBillPaymentGateway({
       <div className="text-md font-bold text-neutral-800">اسنپ پی</div>
     ) : undefined;
 
-  // Payment gateway configurations
-  const mellat = {
-    id: "mellat" as const,
-    name: "ملت",
-    img: "/images/cart/melat.png",
+  const saman = {
+    id: "samankish" as const,
+    name: "سپ",
+    img: "/images/cart/samankish.png",
   };
 
   const wallet = {
@@ -73,7 +72,7 @@ function ShoppingCartBillPaymentGateway({
       <button
         onClick={() => !snappay.disabled && onChange(snappay.id)}
         className={classNames(
-          "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 lg:gap-6 lg:p-2 transition-opacity duration-300",
+          "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 transition-opacity duration-300 lg:gap-6 lg:p-2",
           selected === snappay.id && "!border-pink-600",
           snappay.disabled && "cursor-not-allowed opacity-50",
         )}
@@ -96,27 +95,27 @@ function ShoppingCartBillPaymentGateway({
         </div>
       </button>
       <div className="flex w-full flex-col gap-2">
-        {/* Bottom row: Mellat and Wallet side by side */}
-        <div className="grid grid-cols-2 gap-2">
-          {/* Mellat Payment Gateway */}
+        {/* Bottom row: Saman and Wallet */}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {/* Saman Kish Payment Gateway */}
           <button
-            onClick={() => onChange(mellat.id)}
+            onClick={() => onChange(saman.id)}
             className={classNames(
               "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
-              selected === mellat.id && "!border-pink-600",
+              selected === saman.id && "!border-pink-600",
             )}
             type="button"
           >
             <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
               <Image
-                src={mellat.img}
-                alt={mellat.name}
+                src={saman.img}
+                alt={saman.name}
                 fill
                 className="bg-stone-50 object-contain p-3"
                 sizes="(min-width: 1024px) 128px, 96px"
               />
             </div>
-            <span className="text-sm lg:text-base">درگاه پرداخت {mellat.name}</span>
+            <span className="text-sm lg:text-base">درگاه پرداخت {saman.name}</span>
           </button>
 
           {/* Wallet Payment Gateway */}
