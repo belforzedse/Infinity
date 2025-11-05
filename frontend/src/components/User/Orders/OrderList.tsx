@@ -65,48 +65,53 @@ export default function OrderList({ className = "" }: OrderListProps) {
   };
 
   const renderOrderItems = (items: OrderItem[]) => {
-    return items.map((item) => (
-      <div key={item.id} className="flex items-center border-b border-gray-100 py-2 last:border-0">
-        <div className="relative h-16 w-16 overflow-hidden rounded-md">
-          {item.product_variation.product.cover_image ? (
-            <Image
-              src={item.product_variation.product.cover_image.url}
-              alt={item.ProductTitle}
-              fill
-              className="object-cover"
-              sizes="64px"
-              loader={imageLoader}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gray-200">
-              <span className="text-xs text-gray-500">بدون تصویر</span>
-            </div>
-          )}
-        </div>
-        <div className="mr-3 flex-grow">
-          <h4 className="text-sm font-medium">{item.ProductTitle}</h4>
-          <div className="text-xs mt-1 flex flex-wrap gap-x-3 text-gray-600">
-            {item.product_variation.product_color && (
-              <span>رنگ: {item.product_variation.product_color.Title}</span>
-            )}
-            {item.product_variation.product_size && (
-              <span>سایز: {item.product_variation.product_size.Title}</span>
-            )}
-            {item.product_variation.product_variation_model && (
-              <span>مدل: {item.product_variation.product_variation_model.Title}</span>
+    return items.map((item) => {
+      const product = item.product_variation.product;
+      const coverUrl = product?.cover_image?.url;
+
+      return (
+        <div key={item.id} className="flex items-center border-b border-gray-100 py-2 last:border-0">
+          <div className="relative h-16 w-16 overflow-hidden rounded-md">
+            {coverUrl ? (
+              <Image
+                src={coverUrl}
+                alt={item.ProductTitle}
+                fill
+                className="object-cover"
+                sizes="64px"
+                loader={imageLoader}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gray-200">
+                <span className="text-xs text-gray-500">بدون تصویر</span>
+              </div>
             )}
           </div>
+          <div className="mr-3 flex-grow">
+            <h4 className="text-sm font-medium">{item.ProductTitle}</h4>
+            <div className="text-xs mt-1 flex flex-wrap gap-x-3 text-gray-600">
+              {item.product_variation.product_color && (
+                <span>رنگ: {item.product_variation.product_color.Title}</span>
+              )}
+              {item.product_variation.product_size && (
+                <span>سایز: {item.product_variation.product_size.Title}</span>
+              )}
+              {item.product_variation.product_variation_model && (
+                <span>مدل: {item.product_variation.product_variation_model.Title}</span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col items-end text-left">
+            <span className="text-sm">
+              {item.Count} × {faNum(item.PerAmount)} تومان
+            </span>
+            <span className="text-sm mt-1 font-semibold">
+              {faNum(item.Count * item.PerAmount)} تومان
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col items-end text-left">
-          <span className="text-sm">
-            {item.Count} × {faNum(item.PerAmount)} تومان
-          </span>
-          <span className="text-sm mt-1 font-semibold">
-            {faNum(item.Count * item.PerAmount)} تومان
-          </span>
-        </div>
-      </div>
-    ));
+      );
+    });
   };
 
   const renderOrders = () => {
