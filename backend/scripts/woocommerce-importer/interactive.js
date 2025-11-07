@@ -176,7 +176,7 @@ let importOptions = {
     categoryIds: [],
     // Image options
     maxImagesPerProduct: 3, // Default: 3 images per product
-    updateProductsWithExistingImages: false // Default: skip products with existing images
+    updateProductsWithExistingImages: true // Always update images, even for existing products to avoid dangling references
   },
   variations: { enabled: true, limit: 1000000000, page: 1, dryRun: false, onlyImported: true },
   orders: { enabled: false, limit: 50, page: 1, dryRun: true }

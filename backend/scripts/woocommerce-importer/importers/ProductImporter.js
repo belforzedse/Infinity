@@ -373,12 +373,23 @@ class ProductImporter {
             try {
               const updateData = {};
 
+              // When updating product with new images, explicitly clear old references
+              // This ensures dangling image references don't persist when images are replaced
               if (imageResults.coverImageId) {
+                // Clear old cover image by setting new one
+                // Strapi will disconnect the old one automatically
                 updateData.CoverImage = imageResults.coverImageId;
+              } else if (mode === "update") {
+                // If no new cover image but this is an update, clear the old one
+                updateData.CoverImage = null;
               }
 
               if (imageResults.galleryImageIds.length > 0) {
+                // Replace all gallery images with new ones
                 updateData.Media = imageResults.galleryImageIds;
+              } else if (mode === "update") {
+                // If no new gallery images but this is an update, clear old ones
+                updateData.Media = null;
               }
 
               // Only update if we have data to update
