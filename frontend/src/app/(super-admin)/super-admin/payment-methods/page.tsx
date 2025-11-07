@@ -4,6 +4,7 @@ import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import type { PaymentMethods} from "./table";
 import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 // This is sample data. Replace with your actual data fetching logic
 const data: PaymentMethods[] = [
@@ -28,6 +29,7 @@ const data: PaymentMethods[] = [
 ];
 
 export default function PaymentMethodsPage() {
+  useFreshDataOnPageLoad();
   return (
     <ContentWrapper
       title="درگاه های پرداخت"

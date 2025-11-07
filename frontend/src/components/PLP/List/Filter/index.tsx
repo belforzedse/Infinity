@@ -10,16 +10,22 @@ import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { categories as staticCategories } from "@/constants/categories";
 
-interface FilterProps {
-  showAvailableOnly?: boolean;
-}
-
 interface Category {
   id: string;
   title: string;
 }
 
-export default function Filter({ showAvailableOnly = false }: FilterProps) {
+interface FilterProps {
+  showAvailableOnly?: boolean;
+  categories?: Category[];
+  isLoadingCategories?: boolean;
+}
+
+export default function Filter({
+  showAvailableOnly = false,
+  categories: categoriesProp,
+  isLoadingCategories: isLoadingCategoriesProp,
+}: FilterProps) {
   // URL state management with nuqs
   const [category, setCategory] = useQueryState("category");
   const [available, setAvailable] = useQueryState("available");
@@ -28,14 +34,20 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
   const [, setSize] = useQueryState("size");
 
   // State for categories
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [localCategories, setLocalCategories] = useState<Category[]>([]);
+  const [isFetchingCategories, setIsFetchingCategories] = useState(!categoriesProp);
 
   // Fetch categories on component mount
   useEffect(() => {
+    if (categoriesProp) {
+      return;
+    }
+
+    let isMounted = true;
+
     const fetchCategories = async () => {
       try {
-        setIsLoadingCategories(true);
+        setIsFetchingCategories(true);
         const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`);
 
         if (!response.ok) {
@@ -44,14 +56,16 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
 
         const data = await response.json();
         if (Array.isArray(data.data) && data.data.length > 0) {
-          setCategories(
+          if (!isMounted) return;
+          setLocalCategories(
             data.data.map((cat: any) => ({
               id: cat.attributes.Slug || cat.id.toString(),
               title: cat.attributes.Title,
             })),
           );
         } else {
-          setCategories(
+          if (!isMounted) return;
+          setLocalCategories(
             staticCategories.map((cat) => ({
               id: cat.slug,
               title: cat.name,
@@ -60,19 +74,24 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
-        setCategories(
+        if (!isMounted) return;
+        setLocalCategories(
           staticCategories.map((cat) => ({
             id: cat.slug,
             title: cat.name,
           })),
         );
       } finally {
-        setIsLoadingCategories(false);
+        if (!isMounted) return;
+        setIsFetchingCategories(false);
       }
     };
 
     fetchCategories();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [categoriesProp]);
 
   // Initialize available state from prop - run only once on mount
   useEffect(() => {
@@ -114,17 +133,20 @@ export default function Filter({ showAvailableOnly = false }: FilterProps) {
     [setSize],
   );
 
+  const resolvedCategories = categoriesProp ?? localCategories;
+  const resolvedIsLoading = categoriesProp ? isLoadingCategoriesProp ?? false : isFetchingCategories;
+
   return (
     <div className="flex flex-col gap-3">
       <PLPListFilterCategory
         value={category || ""}
         title="دسته بندی محصولات"
-        filterOptions={categories.map((cat) => ({
+        filterOptions={resolvedCategories.map((cat) => ({
           id: cat.id,
           title: cat.title,
         }))}
         onOptionSelect={(optionId: string | number) => handleCategorySelect(optionId.toString())}
-        isLoading={isLoadingCategories}
+        isLoading={resolvedIsLoading}
       />
 
       <AvailabilityFilter

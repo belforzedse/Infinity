@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import notify from "@/utils/notify";
+import { cartRequestQueue } from "@/utils/requestQueue";
 
 export interface CartItem {
   id: string;
@@ -155,9 +156,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       };
 
       // Transform API cart format to local format
+      const originalItemCount = data?.cart_items?.length || 0;
       const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
         const variation = item.product_variation;
-        const product = variation.product;
+        const product = variation?.product;
+
+        // Skip items without product or variation
+        if (!product || !variation) {
+          console.warn("Skipping cart item with missing product/variation data:", {
+            itemId: item.id,
+            hasVariation: !!variation,
+            hasProduct: !!product,
+          });
+          return null;
+        }
+
         const productId = String(product.id || "");
         const compositeId = variation.id
           ? `${productId}-${variation.id}`
@@ -237,7 +250,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           size: variation.product_variation_size?.Title,
           model: variation.product_variation_model?.Title,
         };
-      });
+      }).filter((item) => item !== null);
+
+      // Notify user if items were removed due to missing data
+      if (transformedItems.length < originalItemCount && typeof window !== "undefined") {
+        const removedCount = originalItemCount - transformedItems.length;
+        console.warn(
+          `${removedCount} item(s) were removed from cart due to missing product data. They may have been deleted.`
+        );
+      }
 
       setCartItems(transformedItems);
     } catch (error) {
@@ -289,16 +310,49 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = async (newItem: CartItem) => {
     if (isLoggedIn) {
-      // Add to cart via API
+      // Optimistic update: add item to cart immediately
+      const previousCartItems = cartItems;
+      let itemWasAdded = false;
+
+      setCartItems((prev) => {
+        const existingItemIndex = prev.findIndex((item) => item.slug === newItem.slug);
+
+        if (existingItemIndex !== -1) {
+          // Update quantity if item exists
+          const updatedItems = [...prev];
+          const existingItem = updatedItems[existingItemIndex];
+          updatedItems[existingItemIndex] = {
+            ...existingItem,
+            quantity: existingItem.quantity + newItem.quantity,
+            price: newItem.price,
+            originalPrice: newItem.originalPrice ?? existingItem.originalPrice,
+            discountPercentage: newItem.discountPercentage ?? existingItem.discountPercentage,
+          };
+          itemWasAdded = true;
+          return updatedItems;
+        } else {
+          // Add new item
+          itemWasAdded = true;
+          return [...prev, newItem];
+        }
+      });
+
+      // Queue API call in the background
       try {
         setIsLoading(true);
-
-        await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
-
-        // Refresh cart after adding item
-        await fetchUserCart();
+        await cartRequestQueue.enqueue(
+          async () => {
+            await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
+            // Refresh cart to ensure consistency with backend
+            await fetchUserCart();
+          },
+          `add-${newItem.slug}`
+        );
       } catch (error: any) {
         console.error("Failed to add item to cart:", error);
+
+        // Revert optimistic update on failure
+        setCartItems(previousCartItems);
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
@@ -310,7 +364,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     } else {
-      // Local storage implementation
+      // Local storage implementation (no queue needed for guest users)
       setCartItems((prev) => {
         // Check if item already exists in cart
         const existingItemIndex = prev.findIndex((item) => item.slug === newItem.slug);
@@ -337,28 +391,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = async (id: string) => {
     if (isLoggedIn) {
+      // Optimistic update: remove item from cart immediately
+      const previousCartItems = cartItems;
+
+      // Find cart item ID from our local state that matches the item ID
+      const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
+      if (!item) return;
+
+      // Remove item optimistically
+      setCartItems((prev) => prev.filter((item) => item.id !== id && item.cartItemId !== id));
+
+      // Queue API call in the background
       try {
         setIsLoading(true);
 
-        // Find cart item ID from our local state that matches the item ID
-        const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
-        if (!item) return;
-
         // Extract the cart item ID from the API (assuming it's in the variationId field)
         const cartItemId = item.cartItemId || item.id;
-        if (!cartItemId) return;
+        if (!cartItemId) {
+          throw new Error("Cart item ID not found");
+        }
 
-        await CartService.removeCartItem(Number(cartItemId));
-
-        // Refresh cart after removing item
-        await fetchUserCart();
+        await cartRequestQueue.enqueue(
+          async () => {
+            await CartService.removeCartItem(Number(cartItemId));
+            // Refresh cart to ensure consistency with backend
+            await fetchUserCart();
+          },
+          `remove-${cartItemId}`
+        );
       } catch (error) {
         console.error("Failed to remove item from cart:", error);
+
+        // Revert optimistic update on failure
+        setCartItems(previousCartItems);
+        notify.error("حذف کالا از سبد خرید با خطا مواجه شد");
       } finally {
         setIsLoading(false);
       }
     } else {
-      // Local storage implementation
+      // Local storage implementation (no queue needed for guest users)
       setCartItems((prev) => prev.filter((item) => item.id !== id));
     }
   };
@@ -370,23 +441,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (isLoggedIn) {
+      // Optimistic update: update quantity immediately
+      const previousCartItems = cartItems;
+
+      // Find cart item ID from our local state that matches the item ID
+      const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
+      if (!item) return;
+
+      // Update quantity optimistically
+      setCartItems((prev) =>
+        prev.map((cartItem) =>
+          cartItem.id === id || cartItem.cartItemId === id
+            ? { ...cartItem, quantity }
+            : cartItem
+        )
+      );
+
+      // Queue API call in the background
       try {
         setIsLoading(true);
 
-        // Find cart item ID from our local state that matches the item ID
-        const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
-        if (!item) return;
-
         // Extract the cart item ID from the API
         const cartItemId = item.cartItemId || item.id;
-        if (!cartItemId) return;
+        if (!cartItemId) {
+          throw new Error("Cart item ID not found");
+        }
 
-        await CartService.updateCartItem(Number(cartItemId), quantity);
-
-        // Refresh cart after updating item
-        await fetchUserCart();
+        await cartRequestQueue.enqueue(
+          async () => {
+            await CartService.updateCartItem(Number(cartItemId), quantity);
+            // Refresh cart to ensure consistency with backend
+            await fetchUserCart();
+          },
+          `update-${cartItemId}`
+        );
       } catch (error: any) {
         console.error("Failed to update cart item:", error);
+
+        // Revert optimistic update on failure
+        setCartItems(previousCartItems);
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
@@ -398,7 +491,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     } else {
-      // Local storage implementation
+      // Local storage implementation (no queue needed for guest users)
       setCartItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
     }
   };

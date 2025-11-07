@@ -55,6 +55,13 @@ export type MobileLayout = {
   secondaryBottom: BannerImageSpec;
 };
 
+export type TabletLayout = {
+  heroBanner: BannerImageSpec;      // Wide banner on top
+  rightBanner: BannerImageSpec;     // Big square on the right
+  leftTopBanner: BannerImageSpec;   // Smaller banner top-left
+  leftBottomBanner: BannerImageSpec; // Smaller banner bottom-left
+};
+
 export type HeroSlideConfig = {
   id: string;
   desktop: DesktopLayout;

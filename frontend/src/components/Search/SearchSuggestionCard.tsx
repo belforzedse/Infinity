@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { faNum } from "@/utils/faNum";
-import type { FC} from "react";
-import { useState } from "react";
+import type { FC, ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 export interface SearchSuggestionCardProps {
@@ -16,6 +16,7 @@ export interface SearchSuggestionCardProps {
   onClick: () => void;
   index: number;
   isActive?: boolean;
+  query?: string;
 }
 
 const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
@@ -30,6 +31,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
   onClick,
   index,
   isActive = false,
+  query = "",
 }) => {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -44,6 +46,24 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
     ? Math.round(((Number(price) - Number(discountPrice)) / Number(price)) * 100)
     : undefined;
   const showDiscount = (discount ?? computedDiscount ?? 0) > 0;
+
+  const highlightedTitle = useMemo<ReactNode>(() => {
+    if (!query) return title;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const matcher = new RegExp(`(${escaped})`, "gi");
+    const parts = title.split(matcher);
+    const lowerQuery = query.toLowerCase();
+    return parts.map((part, idx) =>
+      part.toLowerCase() === lowerQuery
+        ? (
+            <mark key={`${id}-${idx}`} className="bg-transparent px-0 text-pink-600">
+              {part}
+            </mark>
+          )
+        : part,
+    );
+  }, [id, query, title]);
+
   return (
     <motion.button
       type="button"
@@ -102,7 +122,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
             {category && <span className="text-xs mb-0.5 truncate text-gray-500">{category}</span>}
 
             {/* Title */}
-            <h4 className="text-sm mb-1 line-clamp-1 font-medium text-gray-900">{title}</h4>
+            <h4 className="text-sm mb-1 line-clamp-1 font-medium text-gray-900">{highlightedTitle}</h4>
 
             {/* Price */}
             <div className="flex items-center gap-2">

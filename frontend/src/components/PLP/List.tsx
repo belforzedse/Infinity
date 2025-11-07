@@ -1,8 +1,29 @@
 "use client";
 
-import { IMAGE_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
 import NoData from "./NoData";
 import dynamic from "next/dynamic";
+import { apiClient } from "@/services";
+import { categories as STATIC_CATEGORIES } from "@/constants/categories";
+import { faNum } from "@/utils/faNum";
+
+const SORT_LABELS: Record<string, string> = {
+  "createdAt:desc": "جدیدترین",
+  "createdAt:asc": "قدیمی‌ترین",
+  "price:asc": "کم به زیاد",
+  "price:desc": "زیاد به کم",
+  "Title:asc": "الف تا ی",
+  "Title:desc": "ی تا الف",
+  "AverageRating:desc": "بالاترین امتیاز",
+  "AverageRating:asc": "کمترین امتیاز",
+};
+
+const humanize = (value: string) =>
+  value
+    .toString()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // Lazy load heavy components
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
@@ -19,10 +40,8 @@ import SidebarSuggestions from "./List/SidebarSuggestions";
 import PLPPagination from "./Pagination";
 import { useQueryState } from "nuqs";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useDebouncedCallback } from "use-debounce";
-import { API_BASE_URL } from "@/constants/api";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-// use native fetch so user isn't timed out artificially
+import notify from "@/utils/notify";
 
 interface Product {
   id: number;
@@ -96,22 +115,26 @@ export default function PLPList({
 }: PLPListProps) {
   // URL state management with nuqs
   const [category, setCategory] = useQueryState("category");
-  const [available] = useQueryState("available");
-  const [minPrice] = useQueryState("minPrice");
-  const [maxPrice] = useQueryState("maxPrice");
-  const [size] = useQueryState("size");
-  const [material] = useQueryState("material");
-  const [season] = useQueryState("season");
-  const [gender] = useQueryState("gender");
-  const [usage] = useQueryState("usage");
+  const [available, setAvailable] = useQueryState("available");
+  const [minPrice, setMinPrice] = useQueryState("minPrice");
+  const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
+  const [size, setSize] = useQueryState("size");
+  const [material, setMaterial] = useQueryState("material");
+  const [season, setSeason] = useQueryState("season");
+  const [gender, setGender] = useQueryState("gender");
+  const [usage, setUsage] = useQueryState("usage");
   const [page, setPage] = useQueryState("page", { defaultValue: "1" });
-  const [sort] = useQueryState("sort");
-  const [discountOnly] = useQueryState("hasDiscount");
+  const [sort, setSort] = useQueryState("sort");
+  const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
   // Local state for products and pagination
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
+    STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
+  );
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   // Initialize category from prop
   useEffect(() => {
@@ -119,6 +142,30 @@ export default function PLPList({
       setCategory(initialCategory);
     }
   }, [initialCategory, category, setCategory]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`);
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
+        if (Array.isArray(data?.data) && data.data.length > 0) {
+          const mapped = data.data.map((cat: any) => ({
+            id: cat.attributes?.Slug || String(cat.id),
+            title: cat.attributes?.Title || cat.attributes?.Slug || String(cat.id),
+          }));
+          setCategoryOptions(mapped);
+        }
+      } catch (error) {
+        console.error("[PLP] Error fetching categories:", error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Define fetchProducts function with useCallback
   const fetchProducts = useCallback(() => {
@@ -129,9 +176,6 @@ export default function PLPList({
 
     setIsLoading(true);
 
-    // Base URL with required fields and pagination
-    const baseUrl = `${API_BASE_URL}/products`;
-
     // Build query parameters
     const queryParams = new URLSearchParams();
 
@@ -140,6 +184,7 @@ export default function PLPList({
     queryParams.append("populate[1]", "product_main_category");
     queryParams.append("populate[2]", "product_variations");
     queryParams.append("populate[3]", "product_variations.product_stock");
+    queryParams.append("populate[4]", "product_variations.general_discounts");
 
     // Add pagination
     queryParams.append("pagination[page]", page);
@@ -149,7 +194,6 @@ export default function PLPList({
     queryParams.append("filters[Status][$eq]", "Active");
 
     // Only show products whose Title contains کیف, کفش, صندل, or کتونی
-    // We append the $or filters as separate params to keep URLSearchParams usage
     queryParams.append("filters[$or][0][Title][$containsi]", "کیف");
     queryParams.append("filters[$or][1][Title][$containsi]", "کفش");
     queryParams.append("filters[$or][2][Title][$containsi]", "صندل");
@@ -160,9 +204,9 @@ export default function PLPList({
       queryParams.append("filters[product_main_category][Slug][$eq]", category);
     }
 
-    // Availability filter
+    // Availability filter - check for actual stock (Count > 0) not just IsPublished
     if (available === "true") {
-      queryParams.append("filters[product_variations][IsPublished][$eq]", "true");
+      queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
     }
 
     // Price range filters
@@ -203,11 +247,12 @@ export default function PLPList({
       queryParams.append("sort[0]", sort);
     }
 
-    // Construct final URL
-    const url = `${baseUrl}?${queryParams.toString()}`;
+    // Construct endpoint with query params
+    const endpoint = `/products?${queryParams.toString()}`;
 
-    fetch(url)
-      .then((response) => response.json())
+    // Use apiClient instead of native fetch for better error handling, retry logic, and consistency
+    apiClient
+      .getPublic<any>(endpoint, { suppressAuthRedirect: true })
       .then((data) => {
         setProducts(Array.isArray(data?.data) ? data.data : []);
         setPagination(
@@ -220,7 +265,8 @@ export default function PLPList({
         );
       })
       .catch((error) => {
-        console.error("Error fetching products:", error);
+        console.error("[PLP] Error fetching products:", error);
+        notify.error("خطا در بارگیری محصولات");
         setProducts([]);
         setPagination({
           page: parseInt(page) || 1,
@@ -245,6 +291,7 @@ export default function PLPList({
     usage,
     sort,
     searchQuery,
+    discountOnly,
   ]);
 
   // Fetch products when dependencies change
@@ -418,33 +465,265 @@ export default function PLPList({
     }
   }, []);
 
+  const selectedCategoryTitle = useMemo(() => {
+    if (!category) return null;
+
+    const option = categoryOptions.find((item) => item.id === category);
+    if (option) return option.title;
+
+    const dynamicMatch = validProducts.find(
+      (product) =>
+        product.attributes.product_main_category?.data?.attributes?.Slug === category ||
+        product.attributes.product_main_category?.data?.attributes?.Title === category,
+    );
+
+    if (dynamicMatch?.attributes.product_main_category?.data?.attributes?.Title) {
+      return dynamicMatch.attributes.product_main_category.data.attributes.Title;
+    }
+
+    return category.replace(/[-_]/g, " ");
+  }, [category, categoryOptions, validProducts]);
+
+  const activeFilters = useMemo(
+    () => {
+      const filters: Array<{ key: string; label: string; onRemove: () => void }> = [];
+
+      if (category) {
+        const categoryLabel = selectedCategoryTitle || category;
+        const hasNonLatin = /[\u0600-\u06FF]/.test(categoryLabel); // Persian characters
+        if (hasNonLatin) {
+          filters.push({
+            key: "category",
+            label: `دسته: ${categoryLabel}`,
+            onRemove: () => {
+              setCategory(null);
+              setPage("1");
+            },
+          });
+        }
+      }
+
+      if (available === "true") {
+        filters.push({
+          key: "available",
+          label: "فقط کالاهای موجود",
+          onRemove: () => {
+            setAvailable(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (category && selectedCategoryTitle) {
+        filters.push({
+          key: "category",
+          label: `دسته: ${selectedCategoryTitle}`,
+          onRemove: () => {
+            setCategory(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (discountOnly === "true") {
+        filters.push({
+          key: "discount",
+          label: "فقط با تخفیف",
+          onRemove: () => {
+            setDiscountOnly(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (minPrice || maxPrice) {
+        const minLabel = minPrice ? `از ${faNum(Number(minPrice))}` : "";
+        const maxLabel = maxPrice ? `تا ${faNum(Number(maxPrice))}` : "";
+        filters.push({
+          key: "price",
+          label: `قیمت ${[minLabel, maxLabel].filter(Boolean).join(" ") || ""}`.trim(),
+          onRemove: () => {
+            setMinPrice(null);
+            setMaxPrice(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (size) {
+        const numericSize = Number(size);
+        const sizeLabel = Number.isNaN(numericSize) ? size : faNum(numericSize);
+        filters.push({
+          key: "size",
+          label: `سایز ${sizeLabel}`,
+          onRemove: () => {
+            setSize(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (material) {
+        filters.push({
+          key: "material",
+          label: `جنس: ${humanize(material)}`,
+          onRemove: () => {
+            setMaterial(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (season) {
+        filters.push({
+          key: "season",
+          label: `فصل: ${humanize(season)}`,
+          onRemove: () => {
+            setSeason(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (gender) {
+        filters.push({
+          key: "gender",
+          label: `جنسیت: ${humanize(gender)}`,
+          onRemove: () => {
+            setGender(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (usage) {
+        filters.push({
+          key: "usage",
+          label: `کاربری: ${humanize(usage)}`,
+          onRemove: () => {
+            setUsage(null);
+            setPage("1");
+          },
+        });
+      }
+
+      if (sort) {
+        filters.push({
+          key: "sort",
+          label: `مرتب‌سازی: ${SORT_LABELS[sort] || humanize(sort)}`,
+          onRemove: () => {
+            setSort(null);
+            setPage("1");
+          },
+        });
+      }
+
+      return filters;
+    },
+    [
+      available,
+      category,
+      discountOnly,
+      gender,
+      material,
+      maxPrice,
+      minPrice,
+      season,
+      selectedCategoryTitle,
+      setAvailable,
+      setCategory,
+      setDiscountOnly,
+      setGender,
+      setMaterial,
+      setMaxPrice,
+      setMinPrice,
+      setPage,
+      setSeason,
+      setSize,
+      setSort,
+      setUsage,
+      size,
+      sort,
+      usage,
+    ],
+  );
+
+  const clearAllFilters = () => {
+    setCategory(null);
+    setAvailable(null);
+    setMinPrice(null);
+    setMaxPrice(null);
+    setSize(null);
+    setMaterial(null);
+    setSeason(null);
+    setGender(null);
+    setUsage(null);
+    setDiscountOnly(null);
+    setSort(null);
+    setPage("1");
+  };
+
   return (
     <div className="container mx-auto px-4" data-plp-top>
       <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
-        <div className="hidden w-[269px] flex-col gap-7 md:flex">
-          <Filter showAvailableOnly={available === "true"} />
+        <div className="hidden md:flex md:w-[280px]">
+          <div className="sticky top-28 flex w-full flex-col gap-7">
+            <Filter
+              showAvailableOnly={available === "true"}
+              categories={categoryOptions}
+              isLoadingCategories={isLoadingCategories}
+            />
 
-          <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
+            <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
 
-          <SidebarSuggestions
-            title="تخفیف های آخرماه"
-            icon={<DiscountIcon />}
-            items={sidebarProducts}
-          />
+            <SidebarSuggestions
+              title="تخفیف های آخرماه"
+              icon={<DiscountIcon />}
+              items={sidebarProducts}
+            />
+          </div>
         </div>
 
         {/* Main content */}
         <div className="flex-1">
           {/* Mobile filter buttons */}
           <div className="mb-4 md:hidden">
-            <PLPListMobileFilter />
+            <PLPListMobileFilter
+              categories={categoryOptions}
+              isLoadingCategories={isLoadingCategories}
+            />
           </div>
 
           {/* Show search results title if search query exists */}
           {searchQuery && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold">نتایج جستجو برای: &quot;{searchQuery}&quot;</h2>
+            </div>
+          )}
+
+          {activeFilters.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
+              {activeFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  type="button"
+                  onClick={filter.onRemove}
+                  className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-neutral-600 transition-colors hover:border-pink-300 hover:text-pink-600"
+                >
+                  <span>{filter.label}</span>
+                  <span className="text-base leading-none text-slate-400 transition-colors group-hover:text-pink-600">
+                    &times;
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="text-xs font-medium text-pink-600 hover:text-pink-700"
+              >
+                حذف همه
+              </button>
             </div>
           )}
 

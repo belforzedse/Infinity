@@ -1,4 +1,4 @@
-import type { DesktopLayout, MobileLayout, BannerImageSpec, TextBannerSpec, ColorScheme, Typography } from "../types";
+import type { DesktopLayout, MobileLayout, TabletLayout, BannerImageSpec, TextBannerSpec, ColorScheme, Typography } from "../types";
 
 /**
  * Deep clone helper to avoid shared references
@@ -19,6 +19,15 @@ export function cloneMobileLayout(layout: MobileLayout): MobileLayout {
     secondaryPrimary: { ...layout.secondaryPrimary },
     secondaryTop: { ...layout.secondaryTop },
     secondaryBottom: { ...layout.secondaryBottom },
+  };
+}
+
+export function cloneTabletLayout(layout: TabletLayout): TabletLayout {
+  return {
+    heroBanner: { ...layout.heroBanner },
+    rightBanner: { ...layout.rightBanner },
+    leftTopBanner: { ...layout.leftTopBanner },
+    leftBottomBanner: { ...layout.leftBottomBanner },
   };
 }
 
@@ -246,6 +255,85 @@ export class MobileSlideBuilder {
   }
 
   build(): MobileLayout {
+    return this.layout;
+  }
+}
+
+/**
+ * Builder for creating tablet slides with fluent API
+ * Tablet layout: wide hero on top, big square on right, 2 smaller banners stacked on left
+ */
+export class TabletSlideBuilder {
+  private layout: TabletLayout;
+
+  constructor(base?: TabletLayout) {
+    this.layout = base ? cloneTabletLayout(base) : this.createDefault();
+  }
+
+  private createDefault(): TabletLayout {
+    return {
+      heroBanner: {
+        src: "",
+        alt: "Hero Banner",
+        width: 1920,
+        height: 560,
+        className: "w-full rounded-lg object-cover",
+        sizes: "100%",
+      },
+      rightBanner: {
+        src: "",
+        alt: "Right Banner",
+        width: 600,
+        height: 600,
+        className: "h-full w-full rounded-lg object-cover",
+        loading: "lazy",
+      },
+      leftTopBanner: {
+        src: "",
+        alt: "Left Top Banner",
+        width: 400,
+        height: 280,
+        className: "h-full w-full rounded-lg object-cover",
+        loading: "lazy",
+      },
+      leftBottomBanner: {
+        src: "",
+        alt: "Left Bottom Banner",
+        width: 400,
+        height: 280,
+        className: "h-full w-full rounded-lg object-cover",
+        loading: "lazy",
+      },
+    };
+  }
+
+  heroBanner(config: Partial<BannerImageSpec>): this {
+    this.layout.heroBanner = { ...this.layout.heroBanner, ...config };
+    return this;
+  }
+
+  rightBanner(config: Partial<BannerImageSpec>): this {
+    this.layout.rightBanner = { ...this.layout.rightBanner, ...config };
+    return this;
+  }
+
+  leftTopBanner(config: Partial<BannerImageSpec>): this {
+    this.layout.leftTopBanner = { ...this.layout.leftTopBanner, ...config };
+    return this;
+  }
+
+  leftBottomBanner(config: Partial<BannerImageSpec>): this {
+    this.layout.leftBottomBanner = { ...this.layout.leftBottomBanner, ...config };
+    return this;
+  }
+
+  withPriority(): this {
+    this.layout.heroBanner.priority = true;
+    this.layout.heroBanner.loading = "eager";
+    return this;
+  }
+
+  build(): TabletLayout {
     return this.layout;
   }
 }

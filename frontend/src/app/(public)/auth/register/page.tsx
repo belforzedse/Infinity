@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import logger from "@/utils/logger";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import VerificationInput from "@/components/Auth/VerificationInput";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -15,6 +15,7 @@ import { useCart } from "@/contexts/CartContext";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { phoneNumber } = useCheckPhoneNumber();
   const { migrateLocalCartToApi } = useCart();
 
@@ -40,7 +41,10 @@ export default function RegisterPage() {
         // Migrate local cart to API after registration
         await migrateLocalCartToApi();
 
-        router.push("/auth/register/info");
+        // Preserve redirect parameter when redirecting to info page
+        const redirectParam = searchParams.get("redirect");
+        const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
+        router.push(`/auth/register/info${redirectQuery}`);
       } else {
         toast.error("کد تایید اشتباه است");
       }

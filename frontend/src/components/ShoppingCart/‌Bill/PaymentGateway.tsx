@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import classNames from "classnames";
 
 interface Props {
-  selected: "mellat" | "snappay" | "wallet";
-  onChange: (gw: "mellat" | "snappay" | "wallet") => void;
+  selected: "samankish" | "snappay" | "wallet";
+  onChange: (gw: "samankish" | "snappay" | "wallet") => void;
   snappEligible?: boolean;
-  snappMessage?: string;
+  snappTitle?: string;
+  snappDescription?: string;
   walletBalanceIrr?: number;
   requiredAmountIrr?: number;
 }
@@ -15,77 +16,163 @@ function ShoppingCartBillPaymentGateway({
   selected,
   onChange,
   snappEligible = true,
-  snappMessage,
+  snappTitle,
+  snappDescription,
   walletBalanceIrr = 0,
   requiredAmountIrr = 0,
 }: Props) {
+  const [walletHovered, setWalletHovered] = useState(false);
   const walletDisabled = walletBalanceIrr < requiredAmountIrr || requiredAmountIrr <= 0;
-  const paymentGateways: Array<{
-    id: "mellat" | "snappay" | "wallet";
-    name: string;
-    img: string;
-    disabled?: boolean;
-    helper?: string | React.JSX.Element;
-  }> = [
-    {
-      id: "mellat",
-      name: "ملت",
-      img: "/images/cart/melat.png",
-    },
-    {
-      id: "snappay",
-      name: "اسنپ پی (اقساطی)",
-      img: "/images/cart/snappay.png",
-      disabled: !snappEligible,
-      helper: snappMessage,
-    },
-    {
-      id: "wallet",
-      name: "کیف پول",
-      img: "/images/cart/wallet.svg",
-      disabled: walletDisabled,
-      helper: walletDisabled ? (
-        <span>
-          موجودی کافی نیست.{" "}
-          <a href="/wallet" className="underline">
-            شارژ کیف پول
-          </a>
-        </span>
-      ) : undefined,
-    },
-  ];
+  const showWalletDetails = walletHovered || selected === "wallet";
+
+  // Build SnappPay helper content with title and description on two lines
+  const snappHelper =
+    snappTitle || snappDescription ? (
+      <div className="flex flex-col gap-2 text-right">
+        {snappTitle && <div className="text-md font-bold text-neutral-800">{snappTitle}</div>}
+        {snappDescription && <div className="text-sm text-neutral-600">{snappDescription}</div>}
+      </div>
+    ) : !snappEligible ? (
+      <div className="text-md font-bold text-neutral-800">اسنپ پی</div>
+    ) : undefined;
+
+  const saman = {
+    id: "samankish" as const,
+    name: "سپ",
+    img: "/images/cart/samankish.png",
+  };
+
+  const wallet = {
+    id: "wallet" as const,
+    name: "کیف پول",
+    img: "/images/cart/wallet.svg",
+    disabled: walletDisabled,
+    helper: (
+      <a
+        href="/wallet"
+        className="text-sm inline-block cursor-pointer rounded-md bg-pink-500 px-4 py-2 font-medium text-white transition-colors hover:bg-pink-600"
+      >
+        شارژ کیف پول
+      </a>
+    ),
+  };
+
+  const snappay = {
+    id: "snappay" as const,
+    name: "پرداخت اقساطی اسنپ‌پی",
+    img: "/images/cart/snappay.svg",
+    helper: snappHelper,
+    disabled: !snappEligible,
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <span className="text-2xl text-neutral-800 lg:text-xl">درگاه پرداخت خود را انتخاب کنید</span>
+      {/* Top row: SnappPay spanning full width (always shown, disabled if not eligible) */}
+      <button
+        onClick={() => !snappay.disabled && onChange(snappay.id)}
+        className={classNames(
+          "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 transition-opacity duration-300 lg:gap-6 lg:p-2",
+          selected === snappay.id && "!border-pink-600",
+          snappay.disabled && "cursor-not-allowed opacity-50",
+        )}
+        type="button"
+      >
+        {/* Logo on the right (in RTL, first item appears on right) */}
+        <div className="relative h-24 w-24 flex-shrink-0 lg:h-36 lg:w-36">
+          <Image
+            src={snappay.img}
+            alt={snappay.name}
+            fill
+            className="bg-stone-50 object-contain p-3"
+            sizes="(min-width: 1024px) 144px, 96px"
+          />
+        </div>
 
-      <div className="grid w-full grid-cols-2 gap-2">
-        {paymentGateways.map((pg) => (
+        {/* Text content on the left (in RTL, second item appears on left) */}
+        <div className="flex flex-1 flex-col items-start gap-2">
+          <span className="text-md lg:text-lg">{snappay.helper}</span>
+        </div>
+      </button>
+      <div className="flex w-full flex-col gap-2">
+        {/* Bottom row: Saman and Wallet */}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {/* Saman Kish Payment Gateway */}
           <button
-            key={pg.id}
-            onClick={() => !pg.disabled && onChange(pg.id)}
+            onClick={() => onChange(saman.id)}
             className={classNames(
               "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
-              selected === pg.id && "!border-pink-600",
-              pg.disabled && "cursor-not-allowed opacity-50",
+              selected === saman.id && "!border-pink-600",
             )}
             type="button"
           >
-            <div className="relative h-16 w-16">
-              <Image src={pg.img} alt={pg.name} fill className="object-cover" sizes="64px" />
+            <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
+              <Image
+                src={saman.img}
+                alt={saman.name}
+                fill
+                className="bg-stone-50 object-contain p-3"
+                sizes="(min-width: 1024px) 128px, 96px"
+              />
+            </div>
+            <span className="text-sm lg:text-base">درگاه پرداخت {saman.name}</span>
+          </button>
+
+          {/* Wallet Payment Gateway */}
+          <button
+            onClick={() => !wallet.disabled && onChange(wallet.id)}
+            onMouseEnter={() => setWalletHovered(true)}
+            onMouseLeave={() => setWalletHovered(false)}
+            className={classNames(
+              "relative flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4 transition-opacity duration-300",
+              selected === wallet.id && "!border-pink-600",
+              wallet.disabled && !walletHovered && "cursor-not-allowed opacity-50",
+              wallet.disabled && walletHovered && "cursor-pointer opacity-100",
+            )}
+            type="button"
+          >
+            {/* Default view: Logo and name */}
+            <div
+              className={classNames(
+                "absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-300 ease-in-out",
+                !showWalletDetails
+                  ? "pointer-events-auto opacity-100"
+                  : "pointer-events-none opacity-0",
+              )}
+            >
+              <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
+                <Image
+                  src={wallet.img}
+                  alt={wallet.name}
+                  fill
+                  className="bg-stone-50 object-contain p-3"
+                  sizes="(min-width: 1024px) 128px, 96px"
+                />
+              </div>
+              <span className="text-sm lg:text-base">{wallet.name} درگاه پرداخت</span>
             </div>
 
-            <span className="text-sm text-neutral-600 lg:text-xs">{pg.name} درگاه پرداخت</span>
-            {pg.id === "wallet" && (
-              <span className="text-[10px] text-neutral-600">
-                موجودی: {(walletBalanceIrr / 10).toLocaleString()} تومان
-              </span>
-            )}
-            {pg.helper && (
-              <span className="text-center text-[10px] leading-4 text-amber-700">{pg.helper}</span>
-            )}
+            {/* Revealed view: Balance and charge button */}
+            <div
+              className={classNames(
+                "absolute inset-0 flex w-full flex-col items-center justify-center gap-5 overflow-hidden px-3 py-4 transition-opacity duration-300 ease-in-out",
+                showWalletDetails
+                  ? "pointer-events-auto opacity-100"
+                  : "pointer-events-none opacity-0",
+              )}
+            >
+              <div className="flex w-full max-w-full flex-col items-center gap-5">
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-xs text-neutral-600">موجودی:</span>
+                  <span className="text-xl font-bold text-pink-500">
+                    {(walletBalanceIrr / 10).toLocaleString()} تومان
+                  </span>
+                </div>
+                {wallet.helper && <div className="flex w-full justify-center">{wallet.helper}</div>}
+              </div>
+            </div>
           </button>
-        ))}
+        </div>
       </div>
     </div>
   );

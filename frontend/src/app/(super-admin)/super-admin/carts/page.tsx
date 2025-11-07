@@ -3,8 +3,10 @@
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { columns, MobileTable } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function CartsPage() {
+  useFreshDataOnPageLoad();
   return (
     <ContentWrapper
       title="سبد خرید"

@@ -2,22 +2,38 @@
 
 import Image from "next/image";
 import AuthIllustration from "@/components/Auth/Illustration";
-import { Suspense, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserService } from "@/services";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Mark component as hydrated after first render
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
+    // Only run auth redirect logic after hydration is complete
+    if (!isHydrated) return;
+
     const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) return;
 
-    // Redirect authenticated users based on role
+    // Get the redirect parameter if it exists
+    const redirectParam = searchParams.get("redirect");
+
+    // Redirect authenticated users based on role (or to the redirect URL if provided)
     UserService.me()
       .then((me) => {
-        if (me?.isAdmin) {
+        // If there's a redirect parameter, prioritize it
+        if (redirectParam) {
+          router.replace(redirectParam);
+        } else if (me?.isAdmin) {
           router.replace("/super-admin");
         } else {
           router.replace("/account");
@@ -26,7 +42,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       .catch(() => {
         // If fetch fails, stay on auth and let user log in again
       });
-  }, [router]);
+  }, [isHydrated, router, searchParams]);
 
   return (
     <main className="flex min-h-screen items-start justify-center bg-pink-50 p-4 md:items-center">

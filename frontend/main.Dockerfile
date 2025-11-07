@@ -9,22 +9,18 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy source code, env loader, and main.env
+# Copy source code
 COPY . .
 
-# Set NODE_ENV to production (this will make load-env.js load main.env)
-ENV NODE_ENV=production
+# Source main.env and build
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN set -a && . ./main.env && set +a && npm run build
 
-# Build the application (prebuild script will load main.env)
-RUN npm run build
-
-# Production stage
+# Runtime stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy only necessary files from builder

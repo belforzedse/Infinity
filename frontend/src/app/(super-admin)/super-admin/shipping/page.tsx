@@ -5,8 +5,10 @@ import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import ShippingTabs from "@/components/SuperAdmin/ShippingTabs";
 import { useState } from "react";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function ShippingPage() {
+  useFreshDataOnPageLoad();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
 
   return (

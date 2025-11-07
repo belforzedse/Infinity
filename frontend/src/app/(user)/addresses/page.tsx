@@ -1,30 +1,39 @@
 "use client";
+
 import UserSidebar from "@/components/User/Sidebar";
 import AddressContainer from "@/components/User/Address";
-import AddAddress from "@/components/User/Address/AddAddress";
+import UserContainer from "@/components/layout/UserContainer";
+import AccountQuickLinks from "@/components/User/Account/QuickLinks";
+
 export default function AddressesPage() {
   return (
-    <div className="container mx-auto flex min-h-[60vh] gap-10 bg-white px-4 lg:p-0" dir="rtl">
-      <UserSidebar />
+    <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        <aside className="hidden w-full max-w-[240px] flex-shrink-0 lg:block">
+          <UserSidebar />
+        </aside>
 
-      <main className="flex flex-1 flex-col gap-7 overflow-y-auto">
-        <div className="flex w-full flex-grow flex-col gap-0 lg:gap-6">
-          <span className="text-sm order-2 text-foreground-primary lg:text-lg lg:order-1">
-            آدرس‌های زیر به طور پیش‌فرض در صفحه پرداخت مورد استفاده قرار مي‌گیرد.
-          </span>
+        <main className="flex flex-1 flex-col gap-6">
+          <AccountQuickLinks />
 
-          <div className="order-1 flex w-full items-center justify-between lg:order-2">
-            <span className="text-2xl hidden text-foreground-primary lg:flex">آدرس صورت حساب</span>
-            <span className="text-2xl flex text-foreground-primary lg:hidden">حساب من</span>
-
-            <AddAddress />
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold text-foreground-primary lg:text-3xl">
+              آدرس‌های من
+            </h1>
+            <p className="text-sm text-slate-500 lg:text-base">
+              آدرس‌های ذخیره‌شده برای پرداخت سریع و ارسال سفارش را مدیریت کنید.
+            </p>
           </div>
 
-          <div className="order-3 mt-5 lg:mt-0">
+          <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:px-6 lg:py-6">
+            <span className="text-sm text-slate-600 lg:text-base">
+              آدرس‌های پیش‌فرض در صفحه پرداخت نمایش داده می‌شوند.
+            </span>
+
             <AddressContainer />
-          </div>
-        </div>
-      </main>
-    </div>
+          </section>
+        </main>
+      </div>
+    </UserContainer>
   );
 }

@@ -9,13 +9,15 @@ const ShoppingCartCounter = () => {
   return (
     <button
       onClick={openDrawer}
-      className="relative hidden h-14 w-14 items-center justify-center rounded-full bg-foreground-pink lg:flex"
+      className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pink-500 hover:bg-pink-600 transition-colors"
     >
-      <BasketIcon />
+      <BasketIcon className="text-white" />
 
-      <div className="text-xs absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white leading-6 text-foreground-pink">
-        {totalItems}
-      </div>
+      {totalItems > 0 && (
+        <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-white text-xs font-medium text-pink-600">
+          {totalItems}
+        </div>
+      )}
     </button>
   );
 };

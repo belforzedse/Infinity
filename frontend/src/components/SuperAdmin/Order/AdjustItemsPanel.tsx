@@ -31,6 +31,9 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   const [forceEdit, setForceEdit] = useState(false);
   const [voidLoading, setVoidLoading] = useState(false);
 
+  // Check if this is a SnappPay order (has transaction ID and payment token)
+  const isSnappPayOrder = Boolean(order.transactionId && order.paymentToken);
+
   const hasAllowedStatus = ALLOWED_STATUSES.includes(order.orderStatus);
   const hasShippingBarcode = Boolean(order.shippingBarcode);
   const isBlocked = !hasAllowedStatus || hasShippingBarcode;
@@ -51,6 +54,13 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   const handleVoidBarcode = async () => {
     if (voidLoading) return;
 
+    // Safety check - ensure there's actually a barcode to remove
+    if (!order.shippingBarcode) {
+      toast.error("این سفارش دارای بارکد ارسال نیست.");
+      onSuccess(); // Reload data to sync UI
+      return;
+    }
+
     const confirmed = window.confirm(
       "آیا از حذف بارکد ارسال مطمئن هستید؟ این عملیات قابل بازگشت نیست."
     );
@@ -66,9 +76,10 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
       setForceEdit(false);
       onSuccess();
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "حذف بارکد ارسال با خطا مواجه شد"
-      );
+      const errorMsg = error.response?.data?.error || "حذف بارکد ارسال با خطا مواجه شد";
+      toast.error(errorMsg);
+      // Reload data even on error to sync with server state
+      onSuccess();
     } finally {
       setVoidLoading(false);
     }
@@ -129,14 +140,29 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
     setLoading(true);
     try {
       const result = await adjustItems(order.id, items);
-      const baseMessage =
-        result.status === "cancelled"
-          ? "سفارش لغو و کل مبلغ به کیف پول بازگشت داده شد"
-          : `تغییرات اعمال شد. مبلغ ${result.refundToman.toLocaleString(
-              "fa-IR"
-            )} تومان به کیف پول بازگشت داده شد`;
-      const tokenMessage = result.paymentToken
-        ? ` (توکن پرداخت SnappPay: ${result.paymentToken})`
+
+      // Build message based on payment method
+      let baseMessage: string;
+      if (isSnappPayOrder) {
+        // For SnappPay orders, no wallet refund - just confirm the changes
+        // Don't show any refund message to user for SnappPay
+        baseMessage =
+          result.status === "cancelled"
+            ? "سفارش لغو شد"
+            : "تغییرات اعمال شد";
+      } else {
+        // For other payment methods, refund to wallet
+        baseMessage =
+          result.status === "cancelled"
+            ? "سفارش لغو و کل مبلغ به کیف پول بازگشت داده شد"
+            : `تغییرات اعمال شد. مبلغ ${result.refundToman.toLocaleString(
+                "fa-IR"
+              )} تومان به کیف پول بازگشت داده شد`;
+      }
+
+      // Only show token message if present (for debugging purposes)
+      const tokenMessage = result.paymentToken && !isSnappPayOrder
+        ? ` (توکن پرداخت: ${result.paymentToken})`
         : "";
       toast.success(baseMessage + tokenMessage);
       setShowConfirm(false);
@@ -168,7 +194,7 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
               <li key={index}>{reason}</li>
             ))}
           </ul>
-          {hasShippingBarcode ? (
+          {hasShippingBarcode && order.shippingBarcode ? (
             <div className="mt-3 rounded-md border border-yellow-300 bg-white/60 p-3 text-xs text-yellow-900">
               <div className="mb-2">
                 <span className="font-semibold">بارکد فعلی:</span>{" "}
@@ -278,12 +304,6 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>مالیات:</span>
-                  <span className="font-medium">
-                    {preview.newTotals.tax.toLocaleString("fa-IR")} تومان
-                  </span>
-                </div>
-                <div className="flex justify-between">
                   <span>هزینه ارسال:</span>
                   <span className="font-medium">
                     {preview.newShipping.toLocaleString("fa-IR")} تومان
@@ -295,12 +315,14 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                     {preview.newTotals.total.toLocaleString("fa-IR")} تومان
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-blue-300 pt-2 text-green-700">
-                  <span className="font-semibold">مبلغ بازگشت به کیف پول:</span>
-                  <span className="font-semibold">
-                    {preview.refundToman.toLocaleString("fa-IR")} تومان
-                  </span>
-                </div>
+                {!isSnappPayOrder && (
+                  <div className="flex justify-between border-t border-blue-300 pt-2 text-green-700">
+                    <span className="font-semibold">مبلغ بازگشت به کیف پول:</span>
+                    <span className="font-semibold">
+                      {preview.refundToman.toLocaleString("fa-IR")} تومان
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
