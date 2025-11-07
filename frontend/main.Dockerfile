@@ -14,7 +14,7 @@ COPY . .
 
 # Source main.env and build
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN set -a && . ./main.env && set +a && npm run build
+RUN set -a && . ./main.env && set +a && rm -f ./dev.env && npm run build
 
 # Runtime stage
 FROM node:20-alpine AS runner
