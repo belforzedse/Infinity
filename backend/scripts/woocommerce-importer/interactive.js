@@ -19,7 +19,7 @@ const config = require('./config');
 
 // Initialize
 const logger = new Logger();
-const duplicateTracker = new DuplicateTracker(config, logger);
+let duplicateTracker = new DuplicateTracker(config, logger);
 
 // Create readline interface for prompts
 const rl = readline.createInterface({
@@ -161,6 +161,9 @@ async function showImportPreview(type, options) {
   }
 }
 
+// Track selected credentials environment
+let selectedCredentialEnv = 'production';
+
 // Import options
 let importOptions = {
   categories: { enabled: true, limit: 1000, page: 1, dryRun: false },
@@ -175,8 +178,53 @@ let importOptions = {
     maxImagesPerProduct: 3, // Default: 3 images per product
     updateProductsWithExistingImages: false // Default: skip products with existing images
   },
-  variations: { enabled: true, limit: 1000000000, page: 1, dryRun: false },
+  variations: { enabled: true, limit: 1000000000, page: 1, dryRun: false, onlyImported: true },
   orders: { enabled: false, limit: 50, page: 1, dryRun: true }
+};
+
+/**
+ * Select Strapi credentials (production or staging)
+ */
+async function selectCredentials() {
+  console.clear();
+  console.log(`
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                    🔐 Select Strapi Credentials                           ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+  `);
+
+  console.log('\n📋 Available Environments:\n');
+  console.log('  1️⃣  Production');
+  console.log('     URL: https://api.infinitycolor.co/api\n');
+  console.log('  2️⃣  Staging');
+  console.log('     URL: https://api.infinity.rgbgroup.ir/api\n');
+
+  const choice = await prompt('Select environment (1-2, default: 1): ');
+
+  let selected = 'production';
+  if (choice === '2') {
+    selected = 'staging';
+  }
+
+  selectedCredentialEnv = selected;
+
+  // Apply selected credentials to config
+  const creds = config.strapi.credentials[selected];
+  config.strapi.baseUrl = creds.baseUrl;
+  config.strapi.auth.token = creds.token;
+
+  // Set environment-specific storage directory for import tracking
+  config.duplicateTracking.storageDir = config.duplicateTracking.environments[selected];
+
+  // Recreate the duplicate tracker with the new storage directory
+  duplicateTracker = new DuplicateTracker(config, logger);
+
+  console.log(`\n✅ Using ${selected.toUpperCase()} credentials`);
+  console.log(`   Base URL: ${config.strapi.baseUrl}`);
+  console.log(`   Tracking Directory: ${config.duplicateTracking.storageDir}\n`);
+  await prompt('Press Enter to continue...');
 };
 
 /**
@@ -191,6 +239,10 @@ async function showMainMenu() {
 ║                                                                            ║
 ╚════════════════════════════════════════════════════════════════════════════╝
   `);
+
+  // Display current credentials
+  console.log(`🔐 Current Credentials: ${selectedCredentialEnv.toUpperCase()}`);
+  console.log(`   Base URL: ${config.strapi.baseUrl}\n`);
 
   console.log('📋 Current Import Configuration:\n');
 
@@ -207,21 +259,26 @@ async function showMainMenu() {
       console.log(`     Max Images: ${opts.maxImagesPerProduct === 999 ? 'Unlimited' : opts.maxImagesPerProduct}`);
       console.log(`     Update Existing Images: ${opts.updateProductsWithExistingImages ? 'Yes' : 'No'}`);
     }
+    // Show variations filter
+    if (type === 'variations') {
+      console.log(`     Only Imported Parents: ${opts.onlyImported ? 'Yes' : 'No'}`);
+    }
   });
 
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
   console.log('\n📝 Main Menu:\n');
-  console.log('  1️⃣  Configure Categories Import');
-  console.log('  2️⃣  Configure Users Import');
-  console.log('  3️⃣  Configure Products Import');
-  console.log('  4️⃣  Configure Variations Import');
-  console.log('  5️⃣  Configure Orders Import');
-  console.log('  6️⃣  Run All Enabled Importers');
-  console.log('  7️⃣  View Import Status & Mappings');
-  console.log('  8️⃣  Clear All Mappings (Reset Progress)');
-  console.log('  9️⃣  Exit\n');
+  console.log('  1️⃣  Change Credentials (Production/Staging)');
+  console.log('  2️⃣  Configure Categories Import');
+  console.log('  3️⃣  Configure Users Import');
+  console.log('  4️⃣  Configure Products Import');
+  console.log('  5️⃣  Configure Variations Import');
+  console.log('  6️⃣  Configure Orders Import');
+  console.log('  7️⃣  Run All Enabled Importers');
+  console.log('  8️⃣  View Import Status & Mappings');
+  console.log('  9️⃣  Clear All Mappings (Reset Progress)');
+  console.log('  🔟  Exit\n');
 
-  const choice = await prompt('Enter your choice (1-9): ');
+  const choice = await prompt('Enter your choice (1-10): ');
   return choice;
 }
 
@@ -258,6 +315,18 @@ async function configureImporter(type) {
   const dryRunInput = await prompt(`Dry run mode (y/n)? (default: y): `);
   if (dryRunInput.trim()) {
     opts.dryRun = dryRunInput.toLowerCase() !== 'n';
+  }
+
+  // Only import variations for already-imported products (only for variations)
+  if (type === 'variations') {
+    const onlyImportedInput = await prompt(
+      `Only import variations for products already in mappings? (y/n, default: y): `
+    );
+    if (onlyImportedInput.trim()) {
+      opts.onlyImported = onlyImportedInput.toLowerCase() !== 'n';
+      const status = opts.onlyImported ? '✅ ENABLED' : '⭕ DISABLED';
+      console.log(`${status} - Will ${opts.onlyImported ? '' : 'NOT '}filter by imported parent products`);
+    }
   }
 
   // Category filter (only for products)
@@ -395,7 +464,8 @@ async function runAllImporters() {
         stats[type] = await importer.import({
           limit: opts.limit,
           page: opts.page,
-          dryRun: opts.dryRun
+          dryRun: opts.dryRun,
+          onlyImported: opts.onlyImported // Only import variations for products already in mappings
         });
       } else if (type === 'orders') {
         const importer = new OrderImporter(config, logger);
@@ -494,6 +564,9 @@ async function clearMappings() {
  */
 async function main() {
   try {
+    // Select credentials on startup
+    await selectCredentials();
+
     let running = true;
 
     while (running) {
@@ -501,30 +574,33 @@ async function main() {
 
       switch (choice) {
         case '1':
-          await configureImporter('categories');
+          await selectCredentials();
           break;
         case '2':
-          await configureImporter('users');
+          await configureImporter('categories');
           break;
         case '3':
-          await configureImporter('products');
+          await configureImporter('users');
           break;
         case '4':
-          await configureImporter('variations');
+          await configureImporter('products');
           break;
         case '5':
-          await configureImporter('orders');
+          await configureImporter('variations');
           break;
         case '6':
-          await runAllImporters();
+          await configureImporter('orders');
           break;
         case '7':
-          await showStatus();
+          await runAllImporters();
           break;
         case '8':
-          await clearMappings();
+          await showStatus();
           break;
         case '9':
+          await clearMappings();
+          break;
+        case '10':
           console.log('\n👋 Goodbye!\n');
           running = false;
           break;

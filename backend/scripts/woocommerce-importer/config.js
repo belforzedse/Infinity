@@ -54,10 +54,22 @@ module.exports = {
 
   // Strapi API Configuration
   strapi: {
-    baseUrl: "https://api.infinity.rgbgroup.ir/api",
+    // Default to production - will be overridden by user selection in interactive mode
+    baseUrl: "https://api.infinitycolor.co/api",
     auth: {
       token:
-        "STRAPI_API_TOKEN",
+        "c53f2effbd2f9e3184e2a5932899b1fd9a614afbce4ede82d9e83b34b76188be3dc10e9923e0023450671a24d95c639d60ef6f289e66efc3670be6e2b207f455d19a28f886e7ad9eb1c92ca06354f3ac8e13355f296900e8dbcdd0ab6137c5a704b863775a9615464c3a3097595054d8dbfc45e0ad1140f2ae9a0af638f9e728",
+    },
+    // Credential options for interactive selection
+    credentials: {
+      production: {
+        baseUrl: "https://api.infinitycolor.co/api",
+        token: "c53f2effbd2f9e3184e2a5932899b1fd9a614afbce4ede82d9e83b34b76188be3dc10e9923e0023450671a24d95c639d60ef6f289e66efc3670be6e2b207f455d19a28f886e7ad9eb1c92ca06354f3ac8e13355f296900e8dbcdd0ab6137c5a704b863775a9615464c3a3097595054d8dbfc45e0ad1140f2ae9a0af638f9e728",
+      },
+      staging: {
+        baseUrl: "https://api.infinity.rgbgroup.ir/api",
+        token: "STRAPI_API_TOKEN",
+      },
     },
     endpoints: {
       categories: "/product-categories",
@@ -180,7 +192,8 @@ module.exports = {
 
   // Duplicate Prevention
   duplicateTracking: {
-    // Store external ID mappings in JSON files
+    // Base directory - will be environment-specific in interactive mode
+    // e.g., "./import-tracking/production" or "./import-tracking/staging"
     storageDir: process.env.IMPORT_TRACKING_DIR || "./import-tracking",
     mappingFiles: {
       categories: process.env.IMPORT_TRACKING_CATEGORIES_FILE || "category-mappings.json",
@@ -188,6 +201,11 @@ module.exports = {
       variations: process.env.IMPORT_TRACKING_VARIATIONS_FILE || "variation-mappings.json",
       orders: process.env.IMPORT_TRACKING_ORDERS_FILE || "order-mappings.json",
       users: process.env.IMPORT_TRACKING_USERS_FILE || "user-mappings.json",
+    },
+    // Environment-specific directories
+    environments: {
+      production: "./import-tracking/production",
+      staging: "./import-tracking/staging",
     },
   },
 
