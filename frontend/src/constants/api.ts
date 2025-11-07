@@ -8,7 +8,7 @@ export const API_BASE_URL =
 export const STRAPI_TOKEN =
   process.env.NEXT_PUBLIC_STRAPI_TOKEN ||
   "STRAPI_API_TOKEN";
-export const IMAGE_BASE_URL = "https://api.infinity.rgbgroup.ir";
+export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinity.rgbgroup.ir";
 // API Versions
 export const API_VERSION = "v1";
 
