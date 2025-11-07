@@ -10,7 +10,7 @@ interface NavigationFormData extends Omit<Navigation, "product_categories"> {
 }
 
 export const config: UpsertPageConfigType<NavigationFormData> = {
-  headTitle: "ویرایش ناوبری",
+  headTitle: "ویرایش منو ناوبری",
   showTimestamp: true,
   actionButtons: (props) => (
     <>

@@ -4,7 +4,7 @@ import UserFavoritesIcon from "@/components/User/Icons/UserFavoritesIcon";
 // removed unused import: UserScoresIcon from "@/components/User/Icons/UserScoresIcon"
 import UserWalletIcon from "@/components/User/Icons/UserWalletIcon";
 import UserAddressesIcon from "@/components/User/Icons/UserAddressesIcon";
-// removed unused import: UserPasswordIcon from "@/components/User/Icons/UserPasswordIcon"
+import UserPasswordIcon from "@/components/User/Icons/UserPasswordIcon";
 import LogoutIcon from "@/components/Icons/LogoutIcon";
 import { OrderStatus, PersianOrderStatus } from "@/constants/enums";
 
@@ -33,6 +33,11 @@ export const USER_SIDEBAR_ITEMS = [
     href: "/addresses",
     icon: <UserAddressesIcon />,
     text: "آدرس ها",
+  },
+  {
+    href: "/password",
+    icon: <UserPasswordIcon />,
+    text: "رمز عبور",
   },
 ];
 

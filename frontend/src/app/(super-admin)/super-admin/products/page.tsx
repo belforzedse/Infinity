@@ -15,8 +15,10 @@ import { appendTitleFilter } from "@/constants/productFilters";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { refreshTable } from "@/components/SuperAdmin/Table";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function ProductsPage() {
+  useFreshDataOnPageLoad();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [sort, setSort] = useState<
     "newest" | "oldest" | "stock-asc" | "stock-desc" | "sales-asc" | "sales-desc"
@@ -38,7 +40,7 @@ export default function ProductsPage() {
   const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [, setRefresh] = useAtom(refreshTable);
+  const [refresh, setRefresh] = useAtom(refreshTable);
 
   // Debounce search input to avoid excessive API calls
   const debouncedSearch = useDebouncedCallback((query: string) => {
@@ -201,6 +203,11 @@ export default function ProductsPage() {
     } else if (sort === "sales-asc" || sort === "sales-desc") {
       buildSalesIndex();
     }
+
+    // Reset refresh flag after rebuilding
+    if (refresh) {
+      setRefresh(false);
+    }
   }, [
     buildSalesIndex,
     buildStockIndex,
@@ -209,6 +216,8 @@ export default function ProductsPage() {
     debouncedSearchQuery,
     isRecycleBinOpen,
     buildingIndex,
+    refresh,
+    setRefresh,
   ]);
 
   // Fetch current page data when using custom index
@@ -317,15 +326,23 @@ export default function ProductsPage() {
             toast.success(`موجودی ${removedStockCount} تنوع محصول با موفقیت حذف شد`);
             break;
 
-          case "soft_delete":
-            // Soft delete selected products
+          case "soft_delete": {
+            // Soft delete selected products with better error handling
             let deletedCount = 0;
+            const failedIds: string[] = [];
+            const deletionTime = new Date().toISOString();
+
+            // Show progress toast
+            const progressToast = toast.loading(
+              `در حال حذف ${selectedProducts.length} محصول...`
+            );
+
             for (const product of selectedProducts) {
               try {
                 await apiClient.put(
                   `/products/${product.id}`,
                   {
-                    data: { removedAt: new Date().toISOString() },
+                    data: { removedAt: deletionTime },
                   },
                   {
                     headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
@@ -334,14 +351,45 @@ export default function ProductsPage() {
                 deletedCount++;
               } catch (error) {
                 console.error(`Failed to delete product ${product.id}:`, error);
+                failedIds.push(product.id);
               }
             }
-            toast.success(`${deletedCount} محصول با موفقیت حذف شد`);
-            break;
 
-          case "restore":
-            // Restore selected products
+            // Dismiss progress toast
+            toast.dismiss(progressToast);
+
+            // Show result toast
+            if (deletedCount > 0) {
+              const message =
+                failedIds.length === 0
+                  ? `${deletedCount} محصول با موفقیت حذف شد`
+                  : `${deletedCount} محصول حذف شد (${failedIds.length} ناموفق)`;
+              toast.success(message);
+            }
+
+            if (failedIds.length > 0) {
+              toast.error(
+                `خطا در حذف ${failedIds.length} محصول. لطفا دوباره سعی کنید.`
+              );
+            }
+
+            // Refresh table after deletions
+            if (deletedCount > 0) {
+              setRefresh(true);
+            }
+            break;
+          }
+
+          case "restore": {
+            // Restore selected products with better error handling
             let restoredCount = 0;
+            const failedIds: string[] = [];
+
+            // Show progress toast
+            const progressToast = toast.loading(
+              `در حال بازیابی ${selectedProducts.length} محصول...`
+            );
+
             for (const product of selectedProducts) {
               try {
                 await apiClient.put(
@@ -356,10 +404,34 @@ export default function ProductsPage() {
                 restoredCount++;
               } catch (error) {
                 console.error(`Failed to restore product ${product.id}:`, error);
+                failedIds.push(product.id);
               }
             }
-            toast.success(`${restoredCount} محصول با موفقیت بازیابی شد`);
+
+            // Dismiss progress toast
+            toast.dismiss(progressToast);
+
+            // Show result toast
+            if (restoredCount > 0) {
+              const message =
+                failedIds.length === 0
+                  ? `${restoredCount} محصول با موفقیت بازیابی شد`
+                  : `${restoredCount} محصول بازیابی شد (${failedIds.length} ناموفق)`;
+              toast.success(message);
+            }
+
+            if (failedIds.length > 0) {
+              toast.error(
+                `خطا در بازیابی ${failedIds.length} محصول. لطفا دوباره سعی کنید.`
+              );
+            }
+
+            // Refresh table after restores
+            if (restoredCount > 0) {
+              setRefresh(true);
+            }
             break;
+          }
 
           case "set_stock":
             // Set stock to a specific value

@@ -1,5 +1,9 @@
+// Revalidate every hour to show updated product prices, stock, and search results
+export const revalidate = 3600; // 1 hour in seconds
+
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
+import PageContainer from "@/components/layout/PageContainer";
 import { API_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
@@ -36,6 +40,13 @@ interface Product {
           Price: string;
           IsPublished: boolean;
           DiscountPrice?: string;
+          product_stock?: {
+            data?: {
+              attributes: {
+                Count: number;
+              };
+            };
+          };
           general_discounts?: {
             data: Array<{
               attributes: {
@@ -209,7 +220,10 @@ async function getProducts(
   const url = `${baseUrl}?${queryParams.toString()}`;
 
   try {
-    const response = await fetchWithTimeout(url, { timeoutMs: 15000 });
+    const response = await fetchWithTimeout(url, {
+      timeoutMs: 15000,
+      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+    });
     const data = await response.json();
 
     // Filter out products with zero price and check availability if needed
@@ -220,11 +234,12 @@ async function getProducts(
         return price && parseInt(price) > 0;
       });
 
-      // If showAvailableOnly is true, also check if any variation is published
+      // If showAvailableOnly is true, also check if any variation has stock
       if (showAvailableOnly) {
-        const hasAvailableVariation = product.attributes.product_variations?.data?.some(
-          (variation) => variation.attributes.IsPublished,
-        );
+        const hasAvailableVariation = product.attributes.product_variations?.data?.some((variation) => {
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          return typeof stockCount === "number" && stockCount > 0;
+        });
         return hasValidPrice && hasAvailableVariation;
       }
 
@@ -236,6 +251,14 @@ async function getProducts(
       filteredProducts = filteredProducts.filter((product: Product) =>
         product.attributes.product_variations?.data?.some((variation) => {
           const price = parseFloat(variation.attributes.Price);
+
+          // Check for general_discounts first
+          const generalDiscounts = variation.attributes.general_discounts?.data;
+          if (generalDiscounts && generalDiscounts.length > 0) {
+            return true;
+          }
+
+          // Fallback to DiscountPrice field
           const discountPrice = variation.attributes.DiscountPrice
             ? parseFloat(variation.attributes.DiscountPrice)
             : null;
@@ -308,20 +331,16 @@ export default async function PLPPage({
   const isSearchResults = !!search;
 
   return (
-    <>
-      <div className="mt-3 md:mt-0 md:pb-[80px] md:pt-[38px]">
-        {/* Show hero banner only for category browsing, not search results */}
-        {!isSearchResults && <PLPHeroBanner category={category} />}
+    <PageContainer variant="wide" className="space-y-6 pb-20 pt-6">
+      {!isSearchResults && <PLPHeroBanner category={category} />}
 
-        {/* Show search results or product list */}
-        <PLPList
-          products={products}
-          pagination={pagination}
-          category={category}
-          searchQuery={search}
-        />
-      </div>
-    </>
+      <PLPList
+        products={products}
+        pagination={pagination}
+        category={category}
+        searchQuery={search}
+      />
+    </PageContainer>
   );
 }
 

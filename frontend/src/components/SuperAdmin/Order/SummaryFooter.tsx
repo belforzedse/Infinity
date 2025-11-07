@@ -128,15 +128,6 @@ export default function SuperAdminOrderSummaryFooter({
             </p>
           </div>
         ) : null}
-        {typeof order.tax === "number" ? (
-          <div className="flex items-center gap-3">
-            <p className="text-sm text-slate-500">مالیات</p>
-            <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>
-            <p className="text-base text-foreground-primary">
-              {priceFormatter(order.tax, " تومان")}
-            </p>
-          </div>
-        ) : null}
         <div className="flex items-center gap-3">
           <p className="text-sm text-slate-500">هزینه حمل و نقل (تیپاکس)</p>
           <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>

@@ -101,7 +101,7 @@ export default function Page() {
   const calculateTotals = (items: OrderItem[], shipping: number = 0) => {
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const discount = orderData.discount || 0;
-    const taxPercent = 10; // Default 10% tax
+    const taxPercent = 0; // Tax disabled
     const preTaxAmount = subtotal - discount;
     const tax = Math.max(0, Math.round(preTaxAmount * (taxPercent / 100)));
     const total = subtotal - discount + tax + shipping;

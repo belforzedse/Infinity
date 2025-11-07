@@ -21,6 +21,7 @@ import { atom, useAtom } from "jotai";
 import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
 import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
+import { optimisticallyDeletedItems } from "@/lib/atoms/optimisticDelete";
 
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData, TValue> {
@@ -113,9 +114,12 @@ export function SuperAdminTable<TData, TValue>({
   const [dragOverRow, setDragOverRow] = useState<Row<TData> | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
   const [refresh, setRefresh] = useAtom(refreshTable);
+  const [deletedItems] = useAtom(optimisticallyDeletedItems);
 
   const isFetchingRef = useRef(false);
   const fetchSeqRef = useRef(0);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isPageVisibleRef = useRef(true);
 
   const requestUrl = useMemo(() => {
     if (!url) return null;
@@ -188,6 +192,34 @@ export function SuperAdminTable<TData, TValue>({
       setRefresh(false);
     }
   }, [refresh, requestUrl, runFetch, setRefresh]);
+
+  // Set up visibility change listener for page focus - refresh when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = !document.hidden;
+      // Refresh data when page becomes visible (switched back from another tab)
+      if (!document.hidden && requestUrl) {
+        runFetch(requestUrl, { force: true });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [requestUrl, runFetch]);
+
+  // Note: Automatic polling has been disabled on super admin pages to prevent
+  // conflicts when admins are editing data. Data will update on manual refresh or
+  // after mutations (e.g., item deletion, status change).
+  // Users can manually refresh the page to see the latest data.
+  useEffect(() => {
+    // Polling disabled - admins should manually refresh to get latest data
+    // This prevents the table from updating while an admin is in the middle of editing
+    return () => {
+      // Cleanup placeholder
+    };
+  }, []);
 
   const table = useReactTable({
     data: useMemo(() => {
@@ -369,60 +401,68 @@ export function SuperAdminTable<TData, TValue>({
             {isLoading ? (
               <ReportTableSkeleton columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  draggable={draggable}
-                  onDragStart={() => handleDragStart(row)}
-                  onDragOver={(e) => handleDragOver(e, row)}
-                  onDrop={(e) => handleDrop(e, row)}
-                  className={twMerge(
-                    "border-b border-gray-200 transition-colors hover:bg-gray-50/50",
-                    dragOverRow?.id === row.id && "border-t-2 border-blue-500",
-                  )}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <td
-                      key={cell.id}
-                      className={twMerge(
-                        "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
-                        cell.column.columnDef.meta?.cellClassName,
-                      )}
-                    >
-                      {index === 0 && enableSelection ? (
-                        <div className="flex items-center gap-2">
-                          {draggable && (
-                            <div className="cursor-move">
-                              <DragIcon />
-                            </div>
-                          )}
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.has(
-                              (getRowId?.(row.original as TData) ||
-                                String((row.original as any)?.id)) ??
-                                "",
+              table.getRowModel().rows.map((row) => {
+                const isOptimisticallyDeleted = deletedItems.has(
+                  (getRowId?.(row.original as TData) ||
+                    String((row.original as any)?.id)) ?? ""
+                );
+
+                return (
+                  <tr
+                    key={row.id}
+                    draggable={draggable}
+                    onDragStart={() => handleDragStart(row)}
+                    onDragOver={(e) => handleDragOver(e, row)}
+                    onDrop={(e) => handleDrop(e, row)}
+                    className={twMerge(
+                      "border-b border-gray-200 transition-all duration-300 ease-out hover:bg-gray-50/50",
+                      dragOverRow?.id === row.id && "border-t-2 border-blue-500",
+                      isOptimisticallyDeleted && "opacity-30 grayscale",
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell, index) => (
+                      <td
+                        key={cell.id}
+                        className={twMerge(
+                          "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
+                          cell.column.columnDef.meta?.cellClassName,
+                        )}
+                      >
+                        {index === 0 && enableSelection ? (
+                          <div className="flex items-center gap-2">
+                            {draggable && (
+                              <div className="cursor-move">
+                                <DragIcon />
+                              </div>
                             )}
-                            onChange={(e) => {
-                              const id =
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(
                                 (getRowId?.(row.original as TData) ||
                                   String((row.original as any)?.id)) ??
-                                "";
-                              const next = new Set(selectedIds);
-                              if (e.target.checked) next.add(id);
-                              else next.delete(id);
-                              setSelectedIds(next);
-                            }}
-                          />
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      ) : (
-                        flexRender(cell.column.columnDef.cell, cell.getContext())
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
+                                  "",
+                              )}
+                              onChange={(e) => {
+                                const id =
+                                  (getRowId?.(row.original as TData) ||
+                                    String((row.original as any)?.id)) ??
+                                  "";
+                                const next = new Set(selectedIds);
+                                if (e.target.checked) next.add(id);
+                                else next.delete(id);
+                                setSelectedIds(next);
+                              }}
+                            />
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
+                        ) : (
+                          flexRender(cell.column.columnDef.cell, cell.getContext())
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={columns.length} className="h-24 text-center">

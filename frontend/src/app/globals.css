@@ -242,6 +242,10 @@ textarea:focus-visible {
   border-top-color: transparent;
 }
 
+.allow-overflow {
+  overflow: visible !important;
+}
+
 /* Enhanced glass header edge with thicker, warped bottom highlight */
 .glass-header {
   position: relative;

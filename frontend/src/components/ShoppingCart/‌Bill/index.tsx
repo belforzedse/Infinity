@@ -7,8 +7,9 @@ import ShoppingCartBillInformationForm from "./InformationForm";
 import ShoppingCartBillDeliveryForm from "./DeliveryForm";
 import ShoppingCartBillDiscountCoupon from "./DiscountCoupon";
 import ShoppingCartBillPaymentGateway from "./PaymentGateway";
+import { CheckoutProgress } from "../CheckoutProgress";
 import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
 import type { ShippingMethod } from "@/services/shipping";
@@ -16,6 +17,7 @@ import { CartService } from "@/services";
 import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";
 import { useCart } from "@/contexts/CartContext";
+import { currentUserAtom } from "@/lib/atoms/auth";
 
 export type FormData = {
   fullName: string;
@@ -30,10 +32,32 @@ type Props = Record<string, never>;
 function ShoppingCartBillForm({}: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submitInProgressRef = React.useRef(false);
   const [_submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [_, setOrderId] = useAtom(orderIdAtom);
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const router = useRouter();
+  const currentUser = useAtomValue(currentUserAtom);
+  const [hasRedirected, setHasRedirected] = useState(false);
+
+  // Check authentication on mount - redirect to login if not authenticated
+  useEffect(() => {
+    // Get current pathname to avoid redirecting if already on auth page
+    if (typeof window === "undefined") return;
+
+    const currentPath = window.location.pathname;
+
+    // Only redirect if we're on checkout and not authenticated, and we haven't already redirected
+    if (currentPath.includes("/checkout") && !currentUser && !hasRedirected) {
+      setHasRedirected(true);
+      // User is not logged in, redirect to login with return URL
+      // Use hard browser navigation to preserve query parameters properly
+      const authUrl = "/auth?redirect=/checkout";
+      window.location.href = authUrl;
+    } else if (!currentPath.includes("/checkout")) {
+      setHasRedirected(false);
+    }
+  }, [currentUser, hasRedirected]);
 
   const {
     register,
@@ -53,9 +77,10 @@ function ShoppingCartBillForm({}: Props) {
   const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"mellat" | "snappay" | "wallet">("mellat");
-  const [snappEligible, setSnappEligible] = useState<boolean>(true);
-  const [snappMessage, setSnappMessage] = useState<string | undefined>(undefined);
+  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet">("samankish");
+  const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
+  const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
+  const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
   const [discountCode, setDiscountCode] = useState<string | undefined>(undefined);
   const [discountPreview, setDiscountPreview] = useState<
     | {
@@ -109,7 +134,8 @@ function ShoppingCartBillForm({}: Props) {
           setDiscountPreview({ discount: res.discount, summary: res.summary });
         }
       } catch (e) {
-        console.error("applyDiscount failed:", e);
+        const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
+        console.error("applyDiscount failed:", errorMsg, e);
       }
     };
     run();
@@ -150,7 +176,8 @@ function ShoppingCartBillForm({}: Props) {
           });
         }
       } catch (e) {
-        console.error("getShippingPreview failed:", e);
+        const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
+        console.error("getShippingPreview failed:", errorMsg, e);
       }
     };
     run();
@@ -161,25 +188,39 @@ function ShoppingCartBillForm({}: Props) {
     const run = async () => {
       try {
         if (!shippingId) {
-          setSnappEligible(true);
-          setSnappMessage(undefined);
+          // Don't show SnappPay if no shipping selected
+          setSnappEligible(false);
+          setSnappTitle(undefined);
+          setSnappDescription(undefined);
           return;
         }
+
+        // Calculate the final amount (قابل پرداخت) to send to Snappay eligible
+        const shippingToman = shippingCost ?? 0;
+        const discountToman = discountPreview?.discount ?? 0;
+        const subtotalToman = totalPrice;
+        const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
+        const finalAmount = Math.max(
+          0,
+          Math.round(subtotalToman - discountToman + taxToman + shippingToman),
+        );
+
         const res = await CartService.getSnappEligible({
-          shippingId,
-          shippingCost,
-          discountCode,
+          amount: finalAmount,
         });
+        // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
-        const msg = res.title || res.description;
-        setSnappMessage(msg);
-      } catch {
-        setSnappEligible(true);
-        setSnappMessage(undefined);
+        setSnappTitle(res.title);
+        setSnappDescription(res.description);
+      } catch (error) {
+        // On error, hide SnappPay (don't show it by default)
+        setSnappEligible(false);
+        setSnappTitle(undefined);
+        setSnappDescription(undefined);
       }
     };
     run();
-  }, [shippingId, shippingCost, discountCode]);
+  }, [shippingId, shippingCost, discountCode, discountPreview, totalPrice]);
 
   // Load wallet balance once
   useEffect(() => {
@@ -232,7 +273,14 @@ function ShoppingCartBillForm({}: Props) {
       return;
     }
 
+    // Prevent duplicate submissions while one is in flight
+    if (submitInProgressRef.current) {
+      console.warn("Submit already in progress, ignoring duplicate submission");
+      return;
+    }
+
     try {
+      submitInProgressRef.current = true;
       setIsSubmitting(true);
 
       const stockValid = await CartService.checkCartStock();
@@ -278,14 +326,16 @@ function ShoppingCartBillForm({}: Props) {
               displayError = "سبد خرید شما خالی است";
               break;
             case "INVALID_ITEM":
-              displayError = "برخی از کالاهای سبد خرید معتبر نیستند. لطفاً سبد خرید خود را بررسی کنید";
+              displayError =
+                "برخی از کالاهای سبد خرید معتبر نیستند. لطفاً سبد خرید خود را بررسی کنید";
               break;
             case "MISSING_PRODUCT_TITLE":
             case "MISSING_PRODUCT_SKU":
               displayError = "اطلاعات برخی از کالاها ناقص است. لطفاً با پشتیبانی تماس بگیرید";
               break;
             case "INVALID_PRICE":
-              displayError = "قیمت برخی از کالاها نامعتبر است. لطفاً سبد خرید خود را بروزرسانی کنید";
+              displayError =
+                "قیمت برخی از کالاها نامعتبر است. لطفاً سبد خرید خود را بروزرسانی کنید";
               break;
             case "ORDER_ITEM_CREATION_FAILED":
               displayError = "خطا در ثبت اقلام سفارش. لطفاً مجدداً تلاش کنید";
@@ -336,28 +386,8 @@ function ShoppingCartBillForm({}: Props) {
         localStorage.setItem("pendingRefId", cartResponse.refId || "");
 
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
-        if (gateway === "snappay") {
+        if (gateway === "snappay" || gateway === "samankish") {
           window.location.href = cartResponse.redirectUrl!;
-        } else if (gateway === "mellat") {
-          const createPaymentForm = () => {
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = cartResponse.redirectUrl!;
-            form.style.display = "none";
-            if (cartResponse.refId) {
-              const refIdInput = document.createElement("input");
-              refIdInput.type = "hidden";
-              refIdInput.name = "RefId";
-              refIdInput.value = cartResponse.refId;
-              form.appendChild(refIdInput);
-            }
-            document.body.appendChild(form);
-            return form;
-          };
-          setTimeout(() => {
-            const form = createPaymentForm();
-            form.submit();
-          }, 500);
         } else if (gateway === "wallet") {
           // Wallet flow returns no redirect; just move to success
           setSubmitOrderStep(SubmitOrderStep.Success);
@@ -368,7 +398,8 @@ function ShoppingCartBillForm({}: Props) {
         router.push("/orders/success");
       }
     } catch (err: any) {
-      console.error("Error creating order:", err);
+      const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
+      console.error("Error creating order:", errorMsg, err);
 
       // Extract error information from the error object
       let displayError = "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.";
@@ -421,6 +452,7 @@ function ShoppingCartBillForm({}: Props) {
 
       setError(displayError);
     } finally {
+      submitInProgressRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -435,12 +467,17 @@ function ShoppingCartBillForm({}: Props) {
     0,
     Math.round(subtotalToman - discountToman + taxToman + shippingToman),
   );
+
   const requiredAmountIrr = totalToman * 10;
+  const submitOrderStep = useAtomValue(submitOrderStepAtom);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <span className="text-lg text-neutral-800 lg:text-3xl">اطلاعات صورت حساب</span>
-
+      {/* <CheckoutProgress
+        currentStep={submitOrderStep}
+        steps={["Information", "Delivery", "Payment"]}
+      /> */}
       {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -481,7 +518,8 @@ function ShoppingCartBillForm({}: Props) {
             selected={gateway}
             onChange={setGateway}
             snappEligible={snappEligible}
-            snappMessage={snappMessage}
+            snappTitle={snappTitle}
+            snappDescription={snappDescription}
             walletBalanceIrr={walletBalanceIrr}
             requiredAmountIrr={requiredAmountIrr}
           />

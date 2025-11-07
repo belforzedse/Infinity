@@ -1,17 +1,29 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAtom } from "jotai";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import LoginForm from "@/components/Auth/Login/Form";
 import LoginActions from "@/components/Auth/Login/Actions";
 import { AuthService, UserService } from "@/services";
 import { toast } from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
-// removed unused import: useEffect from "react"
+import { redirectUrlAtom } from "@/lib/atoms/auth";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { migrateLocalCartToApi } = useCart();
+  const [storedRedirectUrl, setRedirectUrl] = useAtom(redirectUrlAtom);
+
+  // Store redirect URL from query params into atom on page load
+  useEffect(() => {
+    const redirect = searchParams.get("redirect");
+    if (redirect) {
+      setRedirectUrl(redirect);
+    }
+  }, [searchParams, setRedirectUrl]);
 
   const handleLogin = async (data: {
     phoneNumber: string;
@@ -26,10 +38,16 @@ export default function LoginPage() {
 
         // Migrate local cart to API after login
         await migrateLocalCartToApi();
-        // Fetch current user and redirect based on role
+        // Fetch current user and redirect based on role or redirect URL
         try {
           const me = await UserService.me();
-          if (me?.isAdmin) {
+
+          // Use stored redirect URL if available, otherwise use role-based redirect
+          if (storedRedirectUrl) {
+            router.push(storedRedirectUrl);
+            // Clear the stored redirect URL after using it
+            setRedirectUrl(null);
+          } else if (me?.isAdmin) {
             router.push("/super-admin");
           } else {
             router.push("/account");

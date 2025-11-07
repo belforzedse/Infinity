@@ -5,6 +5,7 @@ import type { Area} from "./table";
 import { columns, MobileTable } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import ShippingTabs from "@/components/SuperAdmin/ShippingTabs";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 // This is sample data. Replace with your actual data fetching logic
 const data: Area[] = [
@@ -25,6 +26,7 @@ const data: Area[] = [
 ];
 
 export default function ShippingAreasPage() {
+  useFreshDataOnPageLoad();
   return (
     <div className="flex flex-col gap-6">
       <ShippingTabs selectedTab="area" />

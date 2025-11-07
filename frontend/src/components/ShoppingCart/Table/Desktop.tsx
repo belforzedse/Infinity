@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import imageLoader from "@/utils/imageLoader";
 import React from "react";
 import ShoppingCartQuantityControl from "../QuantityControl";
 import classNames from "classnames";
 import type { CartItem } from "@/contexts/CartContext";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { faNum } from "@/utils/faNum";
 
 interface Props {
   cartItems: CartItem[];
@@ -14,77 +16,96 @@ interface Props {
 }
 
 const ShoppingCartDesktopTable: React.FC<Props> = ({ cartItems, className }) => {
+  const buildAttributes = (item: CartItem) => {
+    const attributes = [
+      item.color ? `رنگ: ${item.color}` : null,
+      item.size ? `سایز: ${item.size}` : null,
+      item.model ? `مدل: ${item.model}` : null,
+    ].filter(Boolean);
+
+    return attributes.length ? attributes.join(" • ") : null;
+  };
+
+  const formatPrice = (value: number) => `${faNum(value)} تومان`;
+
   return (
     <div className={classNames("w-full overflow-x-auto", className)}>
-      <table className="w-full min-w-[800px]">
-        <thead className="bg-stone-50">
-          <tr className="text-black">
-            <th className="rounded-r-xl p-4 text-center font-normal">نام محصول</th>
-            <th className="p-4 text-center font-normal">دسته بندی</th>
-            <th className="p-4 text-right font-normal">قیمت</th>
-            <th className="p-4 text-right font-normal">تعداد</th>
-            <th className="rounded-l-xl p-4 text-left font-normal">جمع نهایی</th>
+      <table className="w-full min-w-[960px] divide-y divide-slate-100 text-sm text-neutral-700">
+        <thead className="bg-stone-50 text-xs font-medium text-slate-500">
+          <tr>
+            <th className="rounded-r-xl p-4 text-right">محصول</th>
+            <th className="p-4 text-right">قیمت واحد</th>
+            <th className="p-4 text-center">تعداد</th>
+            <th className="rounded-l-xl p-4 text-left">جمع نهایی</th>
           </tr>
         </thead>
-        <tbody>
-          {cartItems.map((item) => (
-            <tr key={item.id} className="border-b border-slate-100">
-              <td className="w-52 p-4">
-                <div className="flex items-center gap-1">
-                  <Image
-                    src={
-                      item.image.startsWith("http") ? item.image : `${IMAGE_BASE_URL}${item.image}`
-                    }
-                    alt={item.name}
-                    width={48}
-                    height={48}
-                    className="rounded-xl"
-                    loader={imageLoader}
-                  />
-                  <span className="text-xs text-neutral-800">{item.name}</span>
-                </div>
-              </td>
-              <td className="text-xs w-36 p-4 text-center text-neutral-800">{item.category}</td>
-              <td className="w-40 p-4 text-neutral-800">
-                {item.originalPrice && item.originalPrice > item.price ? (
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-[11px] text-neutral-400 line-through">
-                      {item.originalPrice.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
-                    </span>
-                    <span className="text-sm font-semibold text-pink-600">
-                      {item.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
+        <tbody className="bg-white">
+          {cartItems.map((item) => {
+            const attributes = buildAttributes(item);
+            const hasDiscount = !!(item.originalPrice && item.originalPrice > item.price);
+
+            return (
+              <tr key={item.id} className="transition hover:bg-stone-50/80">
+                <td className="p-4 align-top">
+                  <div className="flex items-start gap-3">
+                    <Link href={`/pdp/${item.slug}`} className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-100">
+                      <Image
+                        src={item.image.startsWith("http") ? item.image : `${IMAGE_BASE_URL}${item.image}`}
+                        alt={item.name}
+                        fill
+                        loader={imageLoader}
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    </Link>
+
+                    <div className="flex flex-col gap-1 text-sm">
+                      <Link
+                        href={`/pdp/${item.slug}`}
+                        className="font-semibold text-foreground-primary hover:text-pink-600"
+                      >
+                        {item.name}
+                      </Link>
+                      <span className="text-xs text-slate-500">{item.category}</span>
+                      {attributes ? (
+                        <span className="text-xs text-slate-400">{attributes}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </td>
+
+                <td className="p-4 align-top">
+                  <div className="flex flex-col items-end gap-1 text-sm">
+                    {hasDiscount && (
+                      <span className="text-xs text-slate-400 line-through">
+                        {formatPrice(item.originalPrice!)}
+                      </span>
+                    )}
+                    <span className={hasDiscount ? "font-semibold text-pink-600" : "text-neutral-800"}>
+                      {formatPrice(item.price)}
                     </span>
                   </div>
-                ) : (
-                  <span className="text-sm text-neutral-800">
-                    {item.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
-                  </span>
-                )}
-              </td>
-              <td className="p-4">
-                <ShoppingCartQuantityControl itemId={item.id} quantity={item.quantity} />
-              </td>
-              <td className="text-base p-4 text-left text-neutral-800">
-                {item.originalPrice && item.originalPrice > item.price ? (
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="text-sm text-neutral-400 line-through">
-                      {(item.originalPrice * item.quantity).toLocaleString()}{" "}
-                      {"\u062A\u0648\u0645\u0627\u0646"}
-                    </span>
-                    <span className="text-base font-semibold text-pink-600">
-                      {(item.price * item.quantity).toLocaleString()}{" "}
-                      {"\u062A\u0648\u0645\u0627\u0646"}
+                </td>
+
+                <td className="p-4 align-top">
+                  <ShoppingCartQuantityControl itemId={item.id} quantity={item.quantity} />
+                </td>
+
+                <td className="p-4 align-top">
+                  <div className="flex flex-col items-start gap-1 text-sm">
+                    {hasDiscount && (
+                      <span className="text-xs text-slate-400 line-through">
+                        {formatPrice(item.originalPrice! * item.quantity)}
+                      </span>
+                    )}
+                    <span className={hasDiscount ? "text-base font-semibold text-pink-600" : "text-base text-neutral-800"}>
+                      {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
-                ) : (
-                  <span>
-                    {(item.price * item.quantity).toLocaleString()}{" "}
-                    {"\u062A\u0648\u0645\u0627\u0646"}
-                  </span>
-                )}
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -57,7 +57,7 @@ export default function MobileSlider({
         .mobile-slider-container {
           width: 100%;
         }
-        @media (min-width: 1190px) {
+        @media (min-width: 768px) {
           .mobile-slider-container {
             display: none;
           }

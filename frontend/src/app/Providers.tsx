@@ -9,9 +9,14 @@ import NavigationProgress from "@/components/ui/NavigationProgress";
 import GlobalFetchInterceptor from "@/components/ui/GlobalFetchInterceptor";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import ImageEffects from "@/components/ui/ImageEffects";
+import ServiceWorkerRegistration from "@/components/ui/ServiceWorkerRegistration";
+import AuthInitializer from "@/components/ui/AuthInitializer";
 import { Suspense } from "react";
+import { useFreshDataOnVisibility } from "@/hooks/useFreshDataOnVisibility";
 
 export default function Providers({ children }: { children: ReactNode }) {
+  // Enable automatic data refresh on all pages when tab becomes visible (10 min debounce)
+  useFreshDataOnVisibility();
   return (
     <Provider store={jotaiStore}>
       {/*
@@ -20,6 +25,8 @@ export default function Providers({ children }: { children: ReactNode }) {
        * individually. The order of these components generally reflects the
        * desired rendering priority for visual elements.
        */}
+      <AuthInitializer />
+      <ServiceWorkerRegistration />
       <PreloadBlur />
       <TopProgressBar />
       {/* Navigation progress relies on Suspense to avoid blocking the initial render */}

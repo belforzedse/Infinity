@@ -6,6 +6,7 @@ import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import PageContainer from "@/components/layout/PageContainer";
 
 interface PLPHeroBannerProps {
   category?: string;
@@ -151,28 +152,34 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
   }, [category]);
 
   return (
-    <div className="w-full bg-background-secondary p-4 md:px-10 md:py-6">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-3 md:flex-row">
-        <div className="flex flex-1 flex-wrap gap-3 pt-4 md:pt-0">
-          {featuredProducts.map((product) => (
-            <ProductSmallCard key={product.id} {...product} />
-          ))}
-        </div>
-
-        <Link href="/">
-          <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 517px"
-              priority
-              loader={imageLoader}
-            />
+    <div className="w-full bg-background-secondary py-6">
+      <PageContainer
+        variant="wide"
+        disablePadding
+        className="space-y-3 bg-transparent px-4 pb-0 md:px-10"
+      >
+        <div className="flex flex-col gap-3 md:flex-row">
+          <div className="flex flex-1 flex-wrap gap-3 pt-4 md:pt-0">
+            {featuredProducts.map((product) => (
+              <ProductSmallCard key={product.id} {...product} />
+            ))}
           </div>
-        </Link>
-      </div>
+
+          <Link href="/" className="flex-shrink-0">
+            <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 517px"
+                priority
+                loader={imageLoader}
+              />
+            </div>
+          </Link>
+        </div>
+      </PageContainer>
     </div>
   );
 }

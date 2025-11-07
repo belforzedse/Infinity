@@ -18,7 +18,7 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   const isActive = pathname === href;
 
   const renderIcon = (iconElement: ReactNode) => {
-    const iconClassName = clsx("h-5 w-5", isActive ? "fill-white text-white" : "text-pink-500");
+    const iconClassName = clsx("h-5 w-5", isActive ? "fill-white text-black" : "text-pink-500");
 
     if (isValidElement<{ className?: string }>(iconElement)) {
       return cloneElement(iconElement, { className: iconClassName });
@@ -28,9 +28,12 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
 
   if (onClick) {
     return (
-      <button onClick={onClick} className="flex items-center gap-2 px-5 py-4 text-gray-700">
+      <button
+        onClick={onClick}
+        className="flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-red-50 hover:text-red-600"
+      >
         {renderIcon(icon)}
-        <span className="text-base">{text}</span>
+        <span className="text-sm">{text}</span>
       </button>
     );
   }
@@ -38,22 +41,23 @@ const SidebarItem = ({ href, icon, text, onClick }: SidebarItemProps) => {
   return (
     <Link
       href={href}
-      className={`relative flex items-center gap-2 px-5 py-4 ${
+      className={`relative flex items-center gap-2 rounded-lg px-5 py-3 transition-all ${
         isActive
-          ? "justify-between gap-2 rounded-lg bg-background-pink text-white"
-          : "text-gray-700 hover:text-pink-500"
+          ? "justify-between border-l-4 border-pink-600 bg-pink-100"
+          : "text-gray-700 hover:bg-pink-50"
       }`}
     >
       <div className="flex items-center gap-2">
         {renderIcon(icon)}
-        <span className="text-sm">{text}</span>
+        <span
+          className={`text-sm font-medium transition-colors ${
+            isActive ? "text-gray-900" : "text-gray-700"
+          }`}
+        >
+          {text}
+        </span>
       </div>
-      {isActive && (
-        <>
-          <ArrowLeftIcon />
-          <div className="absolute right-[-32px] top-0 h-14 w-1 rounded-full bg-background-pink" />
-        </>
-      )}
+      {isActive && <ArrowLeftIcon className="h-4 w-4 text-gray-900" />}
     </Link>
   );
 };

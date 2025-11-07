@@ -4,8 +4,10 @@ import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import ShippingTabs from "@/components/SuperAdmin/ShippingTabs";
+import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function ShippingProvincesPage() {
+  useFreshDataOnPageLoad();
   return (
     <div className="flex flex-col gap-6">
       <ShippingTabs selectedTab="province" />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
 import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
@@ -31,12 +31,42 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
   const containerRef = useRef<HTMLFormElement | null>(null);
   const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  const POPULAR_QUERIES = useMemo(
+    () => ["کیف", "کفش", "کتونی", "لباس زنانه", "پرفروش"],
+    [],
+  );
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("recentSearches");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) setRecentSearches(parsed.slice(0, 6));
+      }
+    } catch {
+      setRecentSearches([]);
+    }
+  }, []);
+
+  const persistRecent = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    setRecentSearches((prev) => {
+      const next = [trimmed, ...prev.filter((item) => item !== trimmed)].slice(0, 6);
+      localStorage.setItem("recentSearches", JSON.stringify(next));
+      return next;
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Don't search if query is empty
     if (!searchQuery.trim()) return;
+
+    persistRecent(searchQuery);
 
     // Redirect to search results page with the query
     router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -51,7 +81,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     const q = searchQuery.trim();
     if (q.length < 2) {
       setSuggestions([]);
-      setOpen(false);
+      if (isFocused) setOpen(true);
       return;
     }
 
@@ -126,7 +156,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
       clearTimeout(t);
       controller.abort();
     };
-  }, [searchQuery]);
+  }, [isFocused, searchQuery]);
 
   // Close on outside click
   useEffect(() => {
@@ -176,7 +206,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
           }}
           onFocus={() => {
             setIsFocused(true);
-            if (searchQuery.trim().length >= 2) setOpen(true);
+            setOpen(true);
           }}
           onBlur={() => {
             // Give time for clicks inside dropdown
@@ -213,38 +243,96 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
             role="listbox"
             aria-label="پیشنهادهای جستجو"
           >
-            {loading && <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>}
-            {!loading && suggestions.length === 0 && (
-              <div className="text-xs px-3 py-2 text-neutral-500">موردی یافت نشد</div>
-            )}
-            {!loading &&
-              suggestions.map((s, idx) => (
-                <SearchSuggestionCard
-                  key={s.id}
-                  id={s.id}
-                  title={s.Title}
-                  price={s.Price}
-                  discountPrice={s.DiscountPrice}
-                  discount={s.Discount}
-                  category={s.category}
-                  image={s.image}
-                  isAvailable={s.isAvailable}
-                  onClick={() => router.push(`/pdp/${s.id}`)}
-                  index={idx}
-                  isActive={activeIndex === idx}
-                />
-              ))}
-            {!loading && suggestions.length > 0 && (
-              <motion.button
-                type="button"
-                onClick={() => router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`)}
-                className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                مشاهده همه نتایج
-              </motion.button>
+            {searchQuery.trim().length < 2 && !loading ? (
+              <div className="flex flex-col gap-2 p-3 text-right text-sm text-neutral-600">
+                {recentSearches.length > 0 && (
+                  <div>
+                    <span className="text-xs font-medium text-neutral-500">جستجوهای اخیر</span>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {recentSearches.map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(term);
+                            setOpen(false);
+                            router.push(`/plp?search=${encodeURIComponent(term)}`);
+                          }}
+                          className="text-xs rounded-full border border-slate-200 px-3 py-1 text-pink-600 hover:border-pink-300 hover:bg-pink-50"
+                        >
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <span className="text-xs font-medium text-neutral-500">جستجوهای محبوب</span>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {POPULAR_QUERIES.map((term) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(term);
+                          setOpen(false);
+                          router.push(`/plp?search=${encodeURIComponent(term)}`);
+                        }}
+                        className="text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-pink-300 hover:bg-pink-50"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs text-neutral-500">
+                  <span>برای جستجوی سریع‌تر از کلید‌های جهت‌دار استفاده کنید</span>
+                  <span className="font-medium text-slate-400">↕ / ↵</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                {loading && <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>}
+                {!loading && suggestions.length === 0 && (
+                  <div className="text-xs px-3 py-2 text-neutral-500">موردی یافت نشد</div>
+                )}
+                {!loading &&
+                  suggestions.map((s, idx) => (
+                    <SearchSuggestionCard
+                      key={s.id}
+                      id={s.id}
+                      title={s.Title}
+                      price={s.Price}
+                      discountPrice={s.DiscountPrice}
+                      discount={s.Discount}
+                      category={s.category}
+                      image={s.image}
+                      isAvailable={s.isAvailable}
+                      onClick={() => {
+                        persistRecent(s.Title);
+                        router.push(`/pdp/${s.id}`);
+                      }}
+                      index={idx}
+                      isActive={activeIndex === idx}
+                      query={searchQuery.trim()}
+                    />
+                  ))}
+                {!loading && suggestions.length > 0 && (
+                  <motion.button
+                    type="button"
+                    onClick={() => {
+                      persistRecent(searchQuery);
+                      router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                    }}
+                    className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    مشاهده همه نتایج
+                  </motion.button>
+                )}
+              </>
             )}
           </motion.div>
         )}

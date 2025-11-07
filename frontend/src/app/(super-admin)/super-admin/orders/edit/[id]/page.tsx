@@ -6,7 +6,7 @@ import GatewayLogs from "@/components/SuperAdmin/Order/GatewayLogs";
 import AdjustItemsPanel from "@/components/SuperAdmin/Order/AdjustItemsPanel";
 import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiClient } from "@/services";
 import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
 import { useParams } from "next/navigation";
@@ -193,12 +193,17 @@ export default function EditOrderPage() {
   const [error, setError] = useState<string | null>(null);
 
   const { id } = useParams();
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isPageVisibleRef = useRef(true);
 
   const load = () => {
     setLoading(true);
+    // Add cache-busting timestamp to ensure fresh data
+    const cacheBuster = `_t=${Date.now()}`;
+    const separator = "&";
     return apiClient
       .get(
-        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway`,
+        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway${separator}${cacheBuster}`,
         {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
@@ -235,7 +240,7 @@ export default function EditOrderPage() {
           data.attributes?.contract?.data?.attributes?.Amount || 0
         );
         const taxPercent = Number(
-          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 10
+          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 0
         );
         // Use items subtotal for "موارد جمع جزء" and contract amount (already includes shipping/tax) for total.
         const subtotal = itemsSubtotal;
@@ -323,6 +328,31 @@ export default function EditOrderPage() {
 
   useEffect(() => {
     load();
+  }, [id]);
+
+  // Set up visibility change listener for page focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = !document.hidden;
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Note: Automatic polling has been disabled on the order edit page to prevent
+  // conflicts when admins are making changes. The order data will update:
+  // - When the admin manually refreshes the page
+  // - After saving changes (onSuccess callback reloads data)
+  // - After barcode operations
+  useEffect(() => {
+    // Polling disabled - prevents interrupting admin edits
+    // Manual refresh or save operations will update the data
+    return () => {
+      // Cleanup placeholder
+    };
   }, [id]);
 
   if (loading) {

@@ -1,4 +1,7 @@
 // This page is now SSR (Server Component) by removing "use client"
+// Revalidate every hour to show updated product prices, stock, and discounts
+export const revalidate = 3600; // 1 hour in seconds
+
 import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
@@ -6,37 +9,36 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { categories } from "@/constants/categories";
-import {
-  getDiscountedProducts,
-  getNewProducts,
-  getFavoriteProducts,
-} from "@/services/product/homepage";
+import { getHomepageSections } from "@/services/product/homepage";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
+import TabletSlider from "@/components/Hero/tabletSlider";
 import Reveal from "@/components/Reveal";
+import PageContainer from "@/components/layout/PageContainer";
 
 export default async function Home() {
-  const [discountedProducts, newProducts, favoriteProducts] = await Promise.all([
-    getDiscountedProducts(),
-    getNewProducts(),
-    getFavoriteProducts(),
-  ]);
+  const {
+    discounted: discountedProducts,
+    new: newProducts,
+    favorites: favoriteProducts,
+  } = await getHomepageSections();
 
   return (
-    <div className="mx-auto mt-5 px-2 pb-8 md:mt-8 md:px-1 md:pb-16 lg:px-10 xl:max-w-[1440px]">
-      {/* Hero section with responsive images */}
-      <Reveal variant="zoom-in" duration={650}>
-        <MobileSlider />
-      </Reveal>
+    <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
+      <section className="space-y-6">
+        <Reveal variant="zoom-in" duration={650}>
+          <MobileSlider />
+        </Reveal>
+        <Reveal delay={50} variant="zoom-in" duration={650}>
+          <TabletSlider />
+        </Reveal>
+        <Reveal delay={100} variant="zoom-in" duration={650}>
+          <DesktopSlider />
+        </Reveal>
+      </section>
 
-      {/* Desktop hero banner */}
-      <Reveal delay={100} variant="zoom-in" duration={650}>
-        <DesktopSlider />
-      </Reveal>
-
-      {/* Discounted products section */}
-      <div className="mt-8 md:mt-12">
-        {discountedProducts.length > 0 && (
+      {discountedProducts.length > 0 && (
+        <section>
           <Reveal variant="fade-up" duration={700}>
             <OffersListHomePage
               icon={<OffIcon />}
@@ -44,52 +46,50 @@ export default async function Home() {
               products={discountedProducts}
             />
           </Reveal>
-        )}
-      </div>
+        </section>
+      )}
 
-      {/* Categories section */}
-      <div className="mt-8 md:mt-12">
-        <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-6 lg:gap-0">
+      <section className="space-y-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {categories.map((category, index) => (
             <Link
               key={category.id}
               href={category.href}
-              className={`flex flex-col items-center ${
-                index === categories.length - 1 && categories.length % 3 === 1
-                  ? "col-span-3 mx-auto md:col-span-1 md:mx-0"
-                  : index >= categories.length - (categories.length % 3) &&
-                      categories.length % 3 !== 0 &&
-                      categories.length % 3 !== 1
-                    ? "mx-auto md:mx-0"
-                    : ""
-              }`}
+              className="flex w-full flex-col items-center text-center"
             >
-              {/* desktop categories section */}
-              <Reveal delay={index * 80} className="w-full" variant="fade-up" duration={600}>
-                <span className="block w-full">
-                  <div className="relative hidden h-[340px] w-full overflow-hidden transition-transform duration-300 will-change-transform hover:-translate-y-0.5 lg:block">
-                    <div
-                      className="flex h-full w-full items-center justify-center"
-                      style={{ backgroundColor: category.backgroundColor }}
-                    >
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        width={category.width}
-                        height={category.height}
-                        className="max-h-[240px] w-auto object-contain drop-shadow-md"
-                        loading="lazy"
-                        sizes="227px 317px"
-                      />
-                    </div>
-                    <span className="absolute bottom-2 left-1/2 mt-1 -translate-x-1/2 rounded-lg bg-white px-2.5 py-1.5 text-[18px] font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
-                      {category.name}
-                    </span>
+              <Reveal
+                delay={index * 80}
+                className="hidden w-full lg:block"
+                variant="fade-up"
+                duration={600}
+              >
+                <div className="relative h-[340px] w-full overflow-hidden border border-slate-100 transition-transform duration-300 hover:-translate-y-0.5">
+                  <div
+                    className="flex h-full w-full items-center justify-center"
+                    style={{ backgroundColor: category.backgroundColor }}
+                  >
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      width={category.width}
+                      height={category.height}
+                      className="max-h-[240px] w-auto object-contain drop-shadow-md"
+                      loading="lazy"
+                      sizes="227px 317px"
+                    />
                   </div>
-                </span>
+                  <span className="text-base absolute bottom-3 left-1/2 -translate-x-1/2 rounded-xl bg-white px-3 py-1.5 font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
+                    {category.name}
+                  </span>
+                </div>
               </Reveal>
-              {/* mobile categories section */}
-              <Reveal delay={index * 80} className="lg:hidden" variant="fade-up" duration={600}>
+
+              <Reveal
+                delay={index * 80}
+                className="w-full lg:hidden"
+                variant="fade-up"
+                duration={600}
+              >
                 <div
                   className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
                   style={{ backgroundColor: category.backgroundColor }}
@@ -104,24 +104,19 @@ export default async function Home() {
                     sizes="80px"
                   />
                 </div>
-                <span className="text-sm mx-auto mt-2 block text-center md:text-base">
-                  {category.name}
-                </span>
+                <span className="text-sm mx-auto mt-2 block md:text-base">{category.name}</span>
               </Reveal>
             </Link>
           ))}
         </div>
-      </div>
-      <div className="hidden md:block">
-        {/* New products section */}
-        <div className="mt-8 md:mt-12">
+      </section>
+
+      <section className="space-y-10">
+        <div className="hidden space-y-10 md:block">
           <Reveal variant="fade-up" duration={700}>
             <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
           </Reveal>
-        </div>
 
-        {/* Favorite products section */}
-        <div className="mb-8 mt-8 md:mb-12 md:mt-12">
           {favoriteProducts.length > 0 && (
             <Reveal variant="fade-up" duration={700}>
               <OffersListHomePage
@@ -132,17 +127,12 @@ export default async function Home() {
             </Reveal>
           )}
         </div>
-      </div>
-      <div className="md:hidden">
-        {/* New products section */}
-        <div className="mt-8 md:mt-12">
+
+        <div className="space-y-10 md:hidden">
           <Reveal variant="blur-up" duration={1500}>
             <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
           </Reveal>
-        </div>
 
-        {/* Favorite products section */}
-        <div className="mb-8 mt-8 md:mb-12 md:mt-12">
           {favoriteProducts.length > 0 && (
             <Reveal variant="blur-up" duration={1500}>
               <OffersListHomePage
@@ -153,8 +143,8 @@ export default async function Home() {
             </Reveal>
           )}
         </div>
-      </div>
-    </div>
+      </section>
+    </PageContainer>
   );
 }
 

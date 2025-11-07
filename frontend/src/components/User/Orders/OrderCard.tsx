@@ -3,8 +3,9 @@ import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
 import clsx from "clsx";
-import ShowFactorButton from "./ShowFactorButton";
 import PaymentStatusButton from "./PaymentStatusButton";
+import ShowFactorButton from "./ShowFactorButton";
+import { Eye } from "lucide-react";
 
 interface Props {
   image: string;
@@ -16,6 +17,7 @@ interface Props {
   title: string;
   orderId?: number;
   shippingBarcode?: string;
+  onViewDetails: () => void;
 }
 
 export default function OrderCard({
@@ -28,6 +30,7 @@ export default function OrderCard({
   title,
   orderId,
   shippingBarcode,
+  onViewDetails,
 }: Props) {
   return (
     <div className="mb-3 flex flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
@@ -108,6 +111,14 @@ export default function OrderCard({
                 رهگیری مرسوله
               </a>
             ) : null}
+            <button
+              type="button"
+              onClick={onViewDetails}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-pink-200 hover:text-pink-600"
+            >
+              <Eye className="h-4 w-4" />
+              <span>جزئیات</span>
+            </button>
             <ShowFactorButton />
           </div>
         </div>
