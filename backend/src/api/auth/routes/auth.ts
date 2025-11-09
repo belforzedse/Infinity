@@ -25,9 +25,7 @@ export default {
       path: "/auth/self",
       handler: "auth.self",
       config: {
-        auth: false,
-        policies: [],
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -45,9 +43,7 @@ export default {
       path: "/auth/register-info",
       handler: "auth.registerInfo",
       config: {
-        auth: false,
-        policies: [],
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {

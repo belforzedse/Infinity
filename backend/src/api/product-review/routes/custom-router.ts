@@ -5,8 +5,7 @@ export default {
       path: "/product-reviews/submit",
       handler: "product-review.submitReview",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -14,8 +13,7 @@ export default {
       path: "/product-reviews/user/me",
       handler: "product-review.getUserReviews",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
   ],

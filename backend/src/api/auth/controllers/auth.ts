@@ -3,7 +3,6 @@
  */
 
 import { RedisClient } from "../../../index";
-import jwt from "jsonwebtoken";
 import { validatePhone } from "../utils/validations";
 
 export default {
@@ -25,9 +24,7 @@ async function welcome(ctx) {
     return validation;
   }
 
-  const hasUser = await strapi
-    .service("api::auth.auth")
-    .hasUser(ctx, { phone });
+  const hasUser = await strapi.service("api::auth.auth").hasUser(ctx, { phone });
 
   ctx.body = {
     message: "welcome",
@@ -66,7 +63,7 @@ async function login(ctx) {
       return;
     }
 
-    const otpObj = JSON.parse(await (await RedisClient).get(otpToken));
+    const otpObj = JSON.parse(await(await RedisClient).get(otpToken));
 
     if (!otpObj?.code) {
       ctx.badRequest("otpToken is invalid");
@@ -78,47 +75,44 @@ async function login(ctx) {
       return;
     }
 
-    if (otpObj.merchant) {
-      if (!otpObj.IsVerified) {
-        await strapi.entityService.update(
-          "api::local-user.local-user",
-          otpObj.merchant,
-          {
-            data: {
-              IsVerified: true,
-            },
-          }
-        );
+    // Ensure a plugin user exists for this phone and issue plugin JWT
+    let upUser = await strapi
+      .query("plugin::users-permissions.user")
+      .findOne({ where: { phone: { $endsWith: otpObj.phone.substring(1) } } });
+    const normalizedPhone = (otpObj.phone || "").trim();
+    if (upUser) {
+      // if not confirmed, mark as confirmed
+      if (!upUser.confirmed) {
+        await strapi.entityService.update("plugin::users-permissions.user", upUser.id, {
+          data: { confirmed: true },
+        });
       }
     } else {
-      const user = await strapi
-        .service("api::local-user.local-user")
-        .createUser(ctx, {
-          userData: {
-            Phone: `+98${otpObj.phone?.substring(1)}`,
-            IsVerified: true,
-          },
+      const email = `${normalizedPhone.replace(/\D/g, "") || "user"}@placeholder.local`;
+      upUser = await strapi.entityService.create("plugin::users-permissions.user", {
+        data: {
+          username: normalizedPhone,
+          email,
+          phone: normalizedPhone,
+          confirmed: true,
+          blocked: false,
+          IsActive: true,
+        },
+      });
+
+      // create user_info record (was local-user-info) and link to plugin user
+      try {
+        await strapi.entityService.create("api::local-user-info.local-user-info", {
+          data: { user: upUser.id },
         });
-
-      if (!user) {
-        return;
+      } catch (e) {
+        strapi.log.warn("Failed to create user_info for new plugin user", e);
       }
-
-      otpObj.merchant = user.id;
     }
 
-    const token = jwt.sign(
-      { userId: otpObj.merchant },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "30d",
-      }
-    );
+    const token = await strapi.plugin("users-permissions").service("jwt").issue({ id: upUser.id });
 
-    ctx.body = {
-      message: "login successful",
-      token,
-    };
+    ctx.body = { message: "login successful", token };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
@@ -130,20 +124,24 @@ async function self(ctx) {
   try {
     // Get user info
 
-    // Get user with role information
-    const user = await strapi.db.query("api::local-user.local-user").findOne({
-      where: {
-        id: ctx.state.user?.id,
-      },
-      populate: ["user_role", "user_info"],
-    });
+    // ctx.state.user is a plugin user. Load full plugin user (with role) and optionally legacy profile
+    const pluginUserId = ctx.state.user?.id;
+    const fullUser = await strapi.db
+      .query("plugin::users-permissions.user")
+      .findOne({ where: { id: pluginUserId }, populate: ["role"] });
 
-    // Check if user is an admin (role id is 2)
-    const isAdmin = user?.user_role?.id === 2;
+    // Determine administrative flag based on plugin role name
+    const roleName = fullUser?.role?.name;
+    const isAdmin = roleName === "Superadmin" || roleName === "Store manager";
 
-    delete user.user_info.id;
+    // Load profile from local-user-info which now points to plugin user
+    const localUserInfo = await strapi.db
+      .query("api::local-user-info.local-user-info")
+      .findOne({ where: { user: pluginUserId } });
+    const profile = localUserInfo ? { ...localUserInfo } : {};
+    if (profile && (profile as any).id) delete (profile as any).id;
 
-    ctx.body = { ...ctx.state.user, ...user.user_info, isAdmin };
+    ctx.body = { ...ctx.state.user, ...profile, isAdmin };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
@@ -158,33 +156,41 @@ async function registerInfo(ctx) {
   const user = ctx.state.user;
 
   try {
-    const _user = await strapi.db.query("api::local-user.local-user").findOne({
-      where: {
-        id: user.id,
-      },
-      populate: ["user_info"],
-    });
+    const pluginUserId = user.id;
+    // Find profile record that points to plugin user
+    const profileRecord = await strapi.db
+      .query("api::local-user-info.local-user-info")
+      .findOne({ where: { user: pluginUserId } });
 
-    if (!_user) {
+    if (!profileRecord) {
       ctx.notFound("User info not found");
       return;
     }
 
-    await strapi.db.transaction(async (tx) => {
-      await strapi.entityService.update(
-        "api::local-user-info.local-user-info",
-        _user.user_info.id,
-        {
-          data: {
-            FirstName: firstName,
-            LastName: lastName,
-          },
-        }
-      );
-
-      await strapi.entityService.update("api::local-user.local-user", user.id, {
-        data: { Password: password },
+    await strapi.db.transaction(async () => {
+      await strapi.entityService.update("api::local-user-info.local-user-info", profileRecord.id, {
+        data: {
+          FirstName: firstName,
+          LastName: lastName,
+        },
       });
+
+      // update plugin user's password
+      if (password) {
+        await strapi.entityService.update("plugin::users-permissions.user", pluginUserId, {
+          data: { password },
+        });
+      }
+
+      // If there is an existing legacy local-user linked, update its Password as well for compatibility
+      const legacyLocal = await strapi.db
+        .query("api::local-user.local-user")
+        .findOne({ where: { strapi_user: pluginUserId } });
+      if (legacyLocal) {
+        await strapi.entityService.update("api::local-user.local-user", legacyLocal.id, {
+          data: { Password: password },
+        });
+      }
     });
 
     ctx.body = {
@@ -212,14 +218,32 @@ async function loginWithPassword(ctx) {
     return;
   }
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
+  // Ensure plugin user exists and issue JWT
+  const normalizedPhone = (user?.Phone || "").trim();
+  let upUser = await strapi
+    .query("plugin::users-permissions.user")
+    .findOne({ where: { phone: normalizedPhone } });
+  if (!upUser) {
+    const email = `${normalizedPhone.replace(/\D/g, "") || "user"}@placeholder.local`;
+    const created = await strapi.entityService.create("plugin::users-permissions.user", {
+      data: {
+        username: normalizedPhone,
+        email,
+        phone: normalizedPhone,
+        confirmed: true,
+        blocked: false,
+        IsActive: true,
+      },
+    });
+    upUser = created as any;
+    await strapi.entityService.update("api::local-user.local-user", user.id, {
+      data: { strapi_user: upUser.id } as any,
+    } as any);
+  }
 
-  ctx.body = {
-    message: "login successful",
-    token,
-  };
+  const token = await strapi.plugin("users-permissions").service("jwt").issue({ id: upUser.id });
+
+  ctx.body = { message: "login successful", token };
 }
 
 async function resetPassword(ctx) {
@@ -230,7 +254,7 @@ async function resetPassword(ctx) {
     return;
   }
 
-  const otpObj = JSON.parse(await (await RedisClient).get(otpToken));
+  const otpObj = JSON.parse(await(await RedisClient).get(otpToken));
 
   if (!otpObj?.code) {
     ctx.badRequest("otpToken is invalid");
@@ -242,32 +266,27 @@ async function resetPassword(ctx) {
     return;
   }
 
-  const user = await strapi.entityService.findOne(
-    "api::local-user.local-user",
-    otpObj.merchant
+  // otpObj.merchant should be plugin user id now
+  const pluginUser = await strapi.entityService.findOne(
+    "plugin::users-permissions.user",
+    otpObj.merchant,
   );
-
-  if (!user) {
+  if (!pluginUser) {
     ctx.unauthorized("Unauthorized");
     return;
   }
 
   try {
-    // update local user info password
-    await strapi.entityService.update("api::local-user.local-user", user.id, {
+    await strapi.entityService.update("plugin::users-permissions.user", pluginUser.id, {
       data: {
-        Password: newPassword,
+        password: newPassword,
       },
     });
 
-    ctx.body = {
-      message: "password reset successfully",
-    };
+    ctx.body = { message: "password reset successfully" };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
-    ctx.body = {
-      message: err.message,
-    };
+    ctx.body = { message: err.message };
   }
 }
