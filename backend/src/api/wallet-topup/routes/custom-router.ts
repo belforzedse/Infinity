@@ -5,8 +5,7 @@ export default {
       path: "/wallet/charge-intent",
       handler: "wallet-topup.chargeIntent",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {

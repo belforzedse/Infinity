@@ -1,0 +1,130 @@
+{
+  "collectionName": "users",
+  "info": {
+    "displayName": "user",
+    "singularName": "user",
+    "pluralName": "users"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "users-permissions": {
+      "contentType": "user"
+    }
+  },
+  "attributes": {
+    "username": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "unique": true
+    },
+    "provider": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string",
+      "private": true
+    },
+    "resetPasswordToken": {
+      "type": "string",
+      "private": true
+    },
+    "confirmationToken": {
+      "type": "string",
+      "private": true
+    },
+    "confirmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "blocked": {
+      "type": "boolean",
+      "default": false
+    },
+    "role": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.role"
+    },
+    "phone": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "IsVerified": {
+      "type": "boolean",
+      "default": false
+    },
+    "user_info": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user-info.local-user-info",
+      "mappedBy": "user"
+    },
+    "product_reviews": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-review.product-review",
+      "mappedBy": "user"
+    },
+    "user_wallet": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::local-user-wallet.local-user-wallet",
+      "mappedBy": "user"
+    },
+    "contracts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contract.contract",
+      "mappedBy": "local_user"
+    },
+    "user_addresses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::local-user-address.local-user-address",
+      "mappedBy": "user"
+    },
+    "IsActive": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "user_role": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::local-user-role.local-user-role",
+      "inversedBy": "users"
+    },
+    "cart": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cart.cart",
+      "mappedBy": "user"
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "user"
+    },
+    "external_source": {
+      "type": "string"
+    },
+    "discounts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::discount.discount",
+      "mappedBy": "local_users"
+    },
+    "external_id": {
+      "type": "string"
+    },
+    "removedAt": {
+      "type": "datetime"
+    }
+  }
+}

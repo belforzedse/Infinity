@@ -6,29 +6,25 @@ import { RedisClient } from "../../..";
 
 export default () => ({
   async hasUser(ctx, { phone }) {
-    const merchant = await strapi.db
-      .query("api::local-user.local-user")
-      .findOne({
+    const user = await strapi.query("plugin::users-permissions.user").findOne({
+      where: {
+        phone: {
+          $endsWith: phone.substring(1),
+        },
+      },
+    });
+
+    return !!user?.id;
+  },
+  async otp(ctx, { phone }) {
+    try {
+      const merchant = await strapi.query("plugin::users-permissions.user").findOne({
         where: {
-          Phone: {
+          phone: {
             $endsWith: phone.substring(1),
           },
         },
       });
-
-    return !!merchant?.id;
-  },
-  async otp(ctx, { phone }) {
-    try {
-      const merchant = await strapi.db
-        .query("api::local-user.local-user")
-        .findOne({
-          where: {
-            Phone: {
-              $endsWith: phone.substring(1),
-            },
-          },
-        });
 
       const code = Math.random().toString().substring(2, 8);
       const otpToken =

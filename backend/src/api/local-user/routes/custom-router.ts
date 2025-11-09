@@ -5,9 +5,7 @@ export default {
       path: "/sp/local-users",
       handler: "local-user.createUser",
       config: {
-        auth: false,
-        policies: [],
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -15,9 +13,7 @@ export default {
       path: "/sp/local-users/:id",
       handler: "local-user.updateUser",
       config: {
-        auth: false,
-        policies: [],
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
   ],

@@ -67,10 +67,13 @@ export default factories.createCoreController(
     // Compute SnappPay eligibility based on current cart and shipping
     async snappEligible(ctx) {
       try {
-        const userId = ctx.state.user?.id;
-        if (!userId) {
+        // Resolve legacy local-user id from plugin user
+        const pluginUserId = ctx.state.user?.id;
+        if (!pluginUserId) {
           return ctx.unauthorized("Unauthorized");
         }
+        // When using plugin users, use the plugin user id as the principal
+        const userId = pluginUserId;
 
         // Params
         // IMPORTANT: amount parameter should be the final قابل پرداخت (payable amount in Toman)
@@ -93,7 +96,7 @@ export default factories.createCoreController(
           const amountIRR = Math.max(0, amountTomanParam) * 10;
 
           strapi.log.info("SnappPay eligible request (direct amount)", {
-            userId,
+            userId: pluginUserId,
             amountToman: amountTomanParam,
             amountIRR,
           });
@@ -130,11 +133,18 @@ export default factories.createCoreController(
         // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
         let subtotal = 0;
         for (const item of cart.cart_items) {
-          const price = item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
+          const price =
+            item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0;
           const count = Number(item?.Count || 0);
           subtotal += Number(price) * count;
 
-          console.log(`[ELIGIBLE CALC] VarID=${item?.product_variation?.id}, DiscountPrice=${item?.product_variation?.DiscountPrice}, Price=${item?.product_variation?.Price}, Count=${count}, ItemTotal=${Number(price) * count}`);
+          console.log(
+            `[ELIGIBLE CALC] VarID=${item?.product_variation?.id}, DiscountPrice=${
+              item?.product_variation?.DiscountPrice
+            }, Price=${item?.product_variation?.Price}, Count=${count}, ItemTotal=${
+              Number(price) * count
+            }`,
+          );
         }
         console.log(`[ELIGIBLE CALC] Final subtotal=${subtotal}`);
 
@@ -147,13 +157,10 @@ export default factories.createCoreController(
               userId,
               String(discountCodeParam),
               subtotal,
-              cart.cart_items
+              cart.cart_items,
             );
           } catch (e) {
-            strapi.log.error(
-              "Failed to compute coupon discount for eligibility",
-              e
-            );
+            strapi.log.error("Failed to compute coupon discount for eligibility", e);
           }
         }
         if (!discountAmount) {
@@ -166,7 +173,7 @@ export default factories.createCoreController(
                 EndDate: { $gte: new Date() },
               },
               sort: { createdAt: "desc" },
-            }
+            },
           );
           for (const discount of generalDiscounts || []) {
             const d = discount as any;
@@ -187,24 +194,19 @@ export default factories.createCoreController(
         // Shipping (toman)
         let shippingCost = shippingCostParam || 0;
         if (!shippingCost && shippingId) {
-          const shipping = await strapi.entityService.findOne(
-            "api::shipping.shipping",
-            shippingId
-          );
+          const shipping = await strapi.entityService.findOne("api::shipping.shipping", shippingId);
           if (shipping?.Price) shippingCost = Number(shipping.Price);
         }
 
         // Total (toman) → convert to IRR (tax disabled)
         const totalToman =
-          Math.round(subtotal) -
-          Math.round(discountAmount) +
-          Math.round(shippingCost);
+          Math.round(subtotal) - Math.round(discountAmount) + Math.round(shippingCost);
         const amountIRR = Math.max(0, totalToman) * 10;
 
         // Call Snapp eligibility
         const snappay = strapi.service("api::payment-gateway.snappay");
         strapi.log.info("SnappPay eligible request", {
-          userId,
+        userId: pluginUserId,
           amountIRR,
           hasDiscountCode: !!discountCodeParam,
           discountToman: Math.round(discountAmount),

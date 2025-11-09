@@ -21,7 +21,7 @@
     "user": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::local-user.local-user",
+      "target": "plugin::users-permissions.user",
       "inversedBy": "user_info"
     },
     "NationalCode": {
