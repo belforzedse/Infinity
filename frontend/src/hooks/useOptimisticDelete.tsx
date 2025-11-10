@@ -19,6 +19,7 @@ interface OptimisticDeleteOptions {
   itemName?: string;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
+  payloadFormatter?: (removedAt: string | null) => Record<string, unknown>;
 }
 
 /**
@@ -30,19 +31,80 @@ interface OptimisticDeleteOptions {
  */
 export function useOptimisticDelete() {
   const [deletedItems, setDeletedItems] = useAtom(optimisticallyDeletedItems);
-  const [pendingConfirmations, setPendingConfirmations] = useAtom(
-    pendingDeleteConfirmations
-  );
+  const [pendingConfirmations, setPendingConfirmations] = useAtom(pendingDeleteConfirmations);
   const [toastIds, setToastIds] = useAtom(undoToastIds);
   const [, setRefresh] = useAtom(refreshTable);
 
+  const buildPayload = useCallback(
+    (
+      formatter: OptimisticDeleteOptions["payloadFormatter"],
+      removedAt: string | null,
+    ): Record<string, unknown> => {
+      if (typeof formatter === "function") {
+        return formatter(removedAt);
+      }
+      return {
+        data: {
+          removedAt,
+        },
+      };
+    },
+    [],
+  );
+
+  const confirmDeleteServer = useCallback(
+    async (
+      apiUrl: string,
+      itemId: string,
+      removedAt: string,
+      payloadFormatter?: OptimisticDeleteOptions["payloadFormatter"],
+    ) => {
+      try {
+        await apiClient.put(`${apiUrl}/${itemId}`, buildPayload(payloadFormatter, removedAt));
+
+        const newPendingConfirmations = new Set(pendingConfirmations);
+        newPendingConfirmations.add(itemId);
+        setPendingConfirmations(newPendingConfirmations);
+
+        setRefresh(true);
+      } catch (error) {
+        console.error("Failed to confirm deletion:", error);
+        const newDeletedItems = new Map(deletedItems);
+        newDeletedItems.delete(itemId);
+        setDeletedItems(newDeletedItems);
+        toast.error("خطا در تأیید حذف");
+      }
+    },
+    [buildPayload, deletedItems, setDeletedItems, pendingConfirmations, setPendingConfirmations, setRefresh],
+  );
+
+  const undoDelete = useCallback(
+    (itemId: string) => {
+      const deletedItem = deletedItems.get(itemId);
+      if (!deletedItem) return;
+
+      if (deletedItem.undoTimeout) {
+        clearTimeout(deletedItem.undoTimeout);
+      }
+
+      const newDeletedItems = new Map(deletedItems);
+      newDeletedItems.delete(itemId);
+      setDeletedItems(newDeletedItems);
+
+      const newPendingConfirmations = new Set(pendingConfirmations);
+      newPendingConfirmations.delete(itemId);
+      setPendingConfirmations(newPendingConfirmations);
+
+      toast.success("حذف لغو شد");
+    },
+    [deletedItems, setDeletedItems, pendingConfirmations, setPendingConfirmations],
+  );
+
   const deleteItem = useCallback(
     async (options: OptimisticDeleteOptions) => {
-      const { apiUrl, itemId, itemName = "Item", onSuccess, onError } =
-        options;
+      const { apiUrl, itemId, itemName = "Item", onSuccess, onError, payloadFormatter } = options;
 
       try {
-        // Step 1: Optimistically mark as deleted in UI
         const now = new Date().toISOString();
         const newDeletedItems = new Map(deletedItems);
         newDeletedItems.set(itemId, {
@@ -51,13 +113,10 @@ export function useOptimisticDelete() {
         });
         setDeletedItems(newDeletedItems);
 
-        // Step 2: Set up undo timeout
         const undoTimeout = setTimeout(() => {
-          // Timeout expired - confirm the deletion server-side
-          confirmDeleteServer(apiUrl, itemId, now);
+          confirmDeleteServer(apiUrl, itemId, now, payloadFormatter);
         }, UNDO_TIMEOUT_MS);
 
-        // Update deleted items with timeout reference
         newDeletedItems.set(itemId, {
           id: itemId,
           removedAt: now,
@@ -65,17 +124,15 @@ export function useOptimisticDelete() {
         });
         setDeletedItems(newDeletedItems);
 
-        // Step 3: Show toast with undo button
         const toastId = toast.custom(
           (t) => {
-            const baseClasses = "flex items-center justify-between gap-3 rounded-lg bg-green-100 px-4 py-3 text-green-800 shadow-lg transition-all duration-300";
+            const baseClasses =
+              "flex items-center justify-between gap-3 rounded-lg bg-green-100 px-4 py-3 text-green-800 shadow-lg transition-all duration-300";
             const visibilityClass = t.visible ? "opacity-100" : "opacity-0";
-            const divClasses = baseClasses + " " + visibilityClass;
+            const divClasses = `${baseClasses} ${visibilityClass}`;
             return (
               <div className={divClasses}>
-                <span className="text-sm font-medium">
-                  {itemName} با موفقیت حذف شد
-                </span>
+                <span className="text-sm font-medium">{itemName} با موفقیت حذف شد</span>
                 <button
                   onClick={() => {
                     undoDelete(itemId);
@@ -88,17 +145,15 @@ export function useOptimisticDelete() {
               </div>
             );
           },
-          { duration: UNDO_TIMEOUT_MS }
+          { duration: UNDO_TIMEOUT_MS },
         );
 
-        // Store toast ID for reference
         const newToastIds = new Map(toastIds);
         newToastIds.set(itemId, toastId);
         setToastIds(newToastIds);
 
         onSuccess?.();
       } catch (error) {
-        // Rollback on error
         const newDeletedItems = new Map(deletedItems);
         newDeletedItems.delete(itemId);
         setDeletedItems(newDeletedItems);
@@ -108,63 +163,7 @@ export function useOptimisticDelete() {
         onError?.(err);
       }
     },
-    [deletedItems, setDeletedItems, toastIds, setToastIds, setRefresh]
-  );
-
-  const undoDelete = useCallback(
-    (itemId: string) => {
-      const deletedItem = deletedItems.get(itemId);
-      if (!deletedItem) return;
-
-      // Clear the timeout
-      if (deletedItem.undoTimeout) {
-        clearTimeout(deletedItem.undoTimeout);
-      }
-
-      // Remove from deleted items
-      const newDeletedItems = new Map(deletedItems);
-      newDeletedItems.delete(itemId);
-      setDeletedItems(newDeletedItems);
-
-      // Remove from pending confirmations if exists
-      const newPendingConfirmations = new Set(pendingConfirmations);
-      newPendingConfirmations.delete(itemId);
-      setPendingConfirmations(newPendingConfirmations);
-
-      toast.success("حذف لغو شد");
-    },
-    [deletedItems, setDeletedItems, pendingConfirmations, setPendingConfirmations]
-  );
-
-  const confirmDeleteServer = useCallback(
-    async (apiUrl: string, itemId: string, removedAt: string) => {
-      try {
-        // Make the actual API call to confirm deletion
-        await apiClient.put(`${apiUrl}/${itemId}`, {
-          data: {
-            removedAt: removedAt,
-          },
-        });
-
-        // Mark as confirmed
-        const newPendingConfirmations = new Set(pendingConfirmations);
-        newPendingConfirmations.add(itemId);
-        setPendingConfirmations(newPendingConfirmations);
-
-        // Trigger table refresh for consistency
-        setRefresh(true);
-      } catch (error) {
-        console.error("Failed to confirm deletion:", error);
-
-        // Rollback - restore the item in UI
-        const newDeletedItems = new Map(deletedItems);
-        newDeletedItems.delete(itemId);
-        setDeletedItems(newDeletedItems);
-
-        toast.error("خطا در تأیید حذف");
-      }
-    },
-    [deletedItems, setDeletedItems, pendingConfirmations, setPendingConfirmations, setRefresh]
+    [deletedItems, setDeletedItems, toastIds, setToastIds, confirmDeleteServer, undoDelete],
   );
 
   return {

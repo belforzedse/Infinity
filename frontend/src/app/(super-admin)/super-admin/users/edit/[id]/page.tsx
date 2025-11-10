@@ -22,6 +22,7 @@ export type User = {
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
+  legacyRoleId?: string | null;
 };
 
 export default function Page() {
@@ -38,28 +39,23 @@ export default function Page() {
         // Fetch user data from API
         const _user = await UserService.getDetails(id);
 
-        // Handle potentially null user_info and user_role
-        const { user_info, user_role, ...user } = _user.attributes;
+        const userInfo = _user.user_info || {};
 
-        // Default values in case data is null
-        const userInfo = user_info?.data?.attributes || {};
-        const roleId = user_role?.data?.id || null;
-
-        // Convert string dates to Date objects
         const formattedData: User = {
           id: _user.id.toString(),
           bio: userInfo.Bio || "",
           birthDate: userInfo.BirthDate ? new Date(userInfo.BirthDate) : new Date(),
-          createdAt: new Date(user.createdAt),
+          createdAt: _user.createdAt ? new Date(_user.createdAt) : new Date(),
           gender: userInfo.Sex ? "male" : "female",
-          firstname: userInfo.FirstName,
-          lastname: userInfo.LastName,
-          password: "1234",
-          phone: user.Phone,
-          role: roleId?.toString() || "",
-          updatedAt: new Date(user.updatedAt),
+          firstname: userInfo.FirstName || "",
+          lastname: userInfo.LastName || "",
+          password: "",
+          phone: _user.phone || "",
+          role: _user.role?.id ? _user.role.id.toString() : "",
+          updatedAt: _user.updatedAt ? new Date(_user.updatedAt) : new Date(),
           nationalCode: userInfo.NationalCode || "",
-          isActive: user.IsActive,
+          isActive: _user.IsActive ?? false,
+          legacyRoleId: _user.user_role?.id ? _user.user_role.id.toString() : null,
         };
 
         setUserData(formattedData);
@@ -89,21 +85,33 @@ export default function Page() {
       config={config}
       data={userData}
       onSubmit={async (data) => {
-        const body = {
+        const localPayload = {
           firstName: data.firstname,
           lastName: data.lastname,
           birthDate: data.birthDate,
-          gender: data.gender === "male" ? true : false,
+          gender: data.gender === "male",
           bio: data.bio,
           isActive: data.isActive,
           nationalCode: data.nationalCode,
-          role: data.role,
+          role: userData?.legacyRoleId ?? undefined,
         };
 
-        setIsLoading(true);
-        await apiClient.put(`/sp/local-users/${id}`, body);
-        setIsLoading(false);
-        setRevalidate(revalidate + 1);
+        try {
+          setIsLoading(true);
+          await Promise.all([
+            apiClient.put(`/users/${id}`, {
+              ...(data.role ? { role: Number(data.role) } : {}),
+              IsActive: data.isActive,
+            }),
+            apiClient.put(`/sp/local-users/${id}`, localPayload),
+          ]);
+          setRevalidate((prev) => prev + 1);
+        } catch (err) {
+          console.error("Failed to update user:", err);
+          setError("خطا در بروزرسانی اطلاعات کاربر");
+        } finally {
+          setIsLoading(false);
+        }
       }}
     />
   );

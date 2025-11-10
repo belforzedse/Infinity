@@ -160,8 +160,13 @@ export function SuperAdminTable<TData, TValue>({
       try {
         const res = await apiClient.get<TData[]>(apiUrl);
         if (seq === fetchSeqRef.current) {
-          setTableData(res.data);
-          setTotalSize(res.meta?.pagination?.total ?? 0);
+          const payload = Array.isArray(res) ? res : res?.data;
+          setTableData((payload as TData[]) ?? []);
+          const total =
+            (res as any)?.meta?.pagination?.total ??
+            (Array.isArray(payload) ? payload.length : 0) ??
+            0;
+          setTotalSize(total);
         }
       } catch (error) {
         if ((error as any)?.name !== "AbortError") {

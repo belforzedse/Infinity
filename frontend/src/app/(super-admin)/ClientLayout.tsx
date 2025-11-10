@@ -2,6 +2,7 @@
 
 import Header from "@/components/SuperAdmin/Layout/Header";
 import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/services";
@@ -38,6 +39,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <Mobile>{children}</Mobile>
         </div>
       </Suspense>
+      <div className="[&_button]:!left-4 [&_button]:!right-auto">
+        <ScrollToTop />
+      </div>
     </>
   );
 }
@@ -58,7 +62,7 @@ function Mobile({ children }: { children: React.ReactNode }) {
 function Desktop({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen gap-5 bg-neutral-50 pl-10">
-      <div className="w-[250px]">
+      <div className="sticky top-0 h-screen w-[250px] overflow-y-auto">
         <Sidebar isOpen={true} onClose={() => {}} />
       </div>
       <div className="flex w-full flex-1 flex-col gap-4 p-4 lg:gap-7">
