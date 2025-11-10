@@ -19,6 +19,11 @@ export default function ReportsIndexPage() {
             گزارش مجموع نقدینگی هر درگاه
           </Link>
         </li>
+        <li>
+          <Link className="text-pink-600" href="/super-admin/reports/admin-activity">
+            گزارش ادمین ها
+          </Link>
+        </li>
       </ul>
     </div>
   );
