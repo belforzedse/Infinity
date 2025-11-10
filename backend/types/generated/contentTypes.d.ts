@@ -540,7 +540,7 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
     local_users: Attribute.Relation<
       "api::discount.discount",
       "manyToMany",
-      "api::local-user.local-user"
+      "plugin::users-permissions.user"
     >;
     product_variations: Attribute.Relation<
       "api::discount.discount",
@@ -827,7 +827,7 @@ export interface ApiLocalUserRoleLocalUserRole extends Schema.CollectionType {
     users: Attribute.Relation<
       "api::local-user-role.local-user-role",
       "oneToMany",
-      "api::local-user.local-user"
+      "plugin::users-permissions.user"
     >;
   };
 }

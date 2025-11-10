@@ -1,3 +1,14 @@
+import { MANAGEMENT_ROLES } from "../../../utils/roles";
+
+const adminPolicy = [
+  {
+    name: "global::role-based",
+    config: {
+      roles: MANAGEMENT_ROLES,
+    },
+  },
+];
+
 export default {
   routes: [
     {
@@ -6,6 +17,7 @@ export default {
       handler: "local-user.createUser",
       config: {
         auth: { scope: [] },
+        policies: adminPolicy,
       },
     },
     {
@@ -14,6 +26,7 @@ export default {
       handler: "local-user.updateUser",
       config: {
         auth: { scope: [] },
+        policies: adminPolicy,
       },
     },
   ],

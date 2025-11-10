@@ -150,16 +150,21 @@ export default {
         strapi.log.error("Failed to migrate local users to plugin users", e);
       }
     })();
-    // Ensure plugin roles exist: Superadmin, Store manager, Customer
+    // Ensure plugin roles exist: Superadmin, Owner, Store manager, Customer
     (async function ensurePluginRoles() {
       try {
         const roles = [
-          { name: "Superadmin", description: "Full access to the system (internal use)" },
+          {
+            name: "Superadmin",
+            description: "Full access to the system (internal use)",
+            type: "superadmin",
+          },
           {
             name: "Store manager",
             description: "Manage store and orders, cannot manage user wallets",
+            type: "store-manager",
           },
-          { name: "Customer", description: "End customer role" },
+          { name: "Customer", description: "End customer role", type: "customer" },
         ];
 
         for (const r of roles) {
@@ -171,7 +176,7 @@ export default {
               data: {
                 name: r.name,
                 description: r.description,
-                type: "custom",
+                type: r.type,
               },
             });
             strapi.log.info(`Created users-permissions role: ${r.name}`);

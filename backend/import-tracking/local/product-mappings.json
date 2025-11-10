@@ -1,0 +1,659 @@
+{
+  "561562": {
+    "strapiId": 1,
+    "importedAt": "2025-11-10T00:45:16.903Z",
+    "name": "اسلیپر استیکری 00801",
+    "slug": "sleeper-model-2-00801",
+    "type": "variable",
+    "status": "publish",
+    "rating": "4.00"
+  },
+  "566251": {
+    "strapiId": 2,
+    "importedAt": "2025-11-10T00:45:43.137Z",
+    "name": "اسلیپر ساقدار قلبی 00832",
+    "slug": "00832-heart-leg-sleeper",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "570232": {
+    "strapiId": 3,
+    "importedAt": "2025-11-10T00:45:50.153Z",
+    "name": "اسلیپر تدی ساده 00834",
+    "slug": "simple-sleeper-00834",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "664649": {
+    "strapiId": 4,
+    "importedAt": "2025-11-10T00:49:24.656Z",
+    "name": "صندل استیکری 00363",
+    "slug": "sticker-sandals-00363-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "667044": {
+    "strapiId": 5,
+    "importedAt": "2025-11-10T00:49:34.477Z",
+    "name": "صندل ENJOY کد 00364",
+    "slug": "enjoy-sandal-code-00364",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "667729": {
+    "strapiId": 6,
+    "importedAt": "2025-11-10T00:49:34.514Z",
+    "name": "صندل پاستلی 00365",
+    "slug": "pastel-sandal-00365",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "692888": {
+    "strapiId": 7,
+    "importedAt": "2025-11-10T00:50:41.004Z",
+    "name": "صندل استیکری oppsi00363",
+    "slug": "oppsi00363-sticker-sandal",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "718859": {
+    "strapiId": 8,
+    "importedAt": "2025-11-10T00:51:35.179Z",
+    "name": "کیف ماهلین B000113",
+    "slug": "mahlin-bag-b000113",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "718864": {
+    "strapiId": 9,
+    "importedAt": "2025-11-10T00:51:36.878Z",
+    "name": "کیف بولر B009",
+    "slug": "bowler-bag-b009",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "718887": {
+    "strapiId": 10,
+    "importedAt": "2025-11-10T00:51:37.157Z",
+    "name": "کیف دوشی هانا B002",
+    "slug": "hana-b002-shoulder-bag",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "719594": {
+    "strapiId": 11,
+    "importedAt": "2025-11-10T00:51:42.638Z",
+    "name": "کیف دستی دوشی B001",
+    "slug": "doshi-handbag-b001",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "722348": {
+    "strapiId": 12,
+    "importedAt": "2025-11-10T00:51:58.706Z",
+    "name": "کیف بولر B0011",
+    "slug": "bowler-bag-b0011",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "722350": {
+    "strapiId": 14,
+    "importedAt": "2025-11-10T00:51:48.531Z",
+    "name": "کیف دوشی آلما B005",
+    "slug": "alma-b005-shower-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "722434": {
+    "strapiId": 13,
+    "importedAt": "2025-11-10T00:51:48.435Z",
+    "name": "کیف گلوریا B0021",
+    "slug": "gloria-bag-b0021",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "723087": {
+    "strapiId": 15,
+    "importedAt": "2025-11-10T00:51:58.745Z",
+    "name": "کیف برندا B0020",
+    "slug": "",
+    "type": "simple",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "723088": {
+    "strapiId": 16,
+    "importedAt": "2025-11-10T00:52:05.594Z",
+    "name": "کیف برندا B0020",
+    "slug": "brenda-bag-b0020",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "724377": {
+    "strapiId": 17,
+    "importedAt": "2025-11-10T00:52:06.067Z",
+    "name": "کیف دوشی آلما OppsiB005",
+    "slug": "alma-oppsib005-shower-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "724623": {
+    "strapiId": 18,
+    "importedAt": "2025-11-10T00:52:13.754Z",
+    "name": "کیف تلما B0022",
+    "slug": "thelma-bag-b0022",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "727447": {
+    "strapiId": 19,
+    "importedAt": "2025-11-10T00:52:18.188Z",
+    "name": "کیف مینی زارا",
+    "slug": "%da%a9%db%8c%d9%81-%d9%85%db%8c%d9%86%db%8c-%d8%b2%d8%a7%d8%b1%d8%a7",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "728116": {
+    "strapiId": 20,
+    "importedAt": "2025-11-10T00:52:35.617Z",
+    "name": "کیف کنفی زارا B0023",
+    "slug": "zara-hemp-bag-b0023",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "729022": {
+    "strapiId": 21,
+    "importedAt": "2025-11-10T00:52:42.485Z",
+    "name": "کیف پول ملودی B0024",
+    "slug": "melody-wallet-b0024",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "729084": {
+    "strapiId": 22,
+    "importedAt": "2025-11-10T00:52:54.712Z",
+    "name": "کیف بولر طرحدار B0030",
+    "slug": "patterned-bowler-bag-b0030",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "729211": {
+    "strapiId": 24,
+    "importedAt": "2025-11-10T00:52:54.790Z",
+    "name": "کیف دوشی زارا B0031",
+    "slug": "zara-b0031-shower-bag",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "729224": {
+    "strapiId": 23,
+    "importedAt": "2025-11-10T00:52:58.495Z",
+    "name": "کیف لورا B0032",
+    "slug": "laura-bag-b0032",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "729337": {
+    "strapiId": 25,
+    "importedAt": "2025-11-10T00:53:02.078Z",
+    "name": "کیف پاسپورتی لارا B0033",
+    "slug": "lara-passport-bag-b0033",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "729681": {
+    "strapiId": 26,
+    "importedAt": "2025-11-10T00:53:08.085Z",
+    "name": "کیف باربارا طرح زارا B0036",
+    "slug": "barbara-bag-zara-design-b0036",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "732062": {
+    "strapiId": 27,
+    "importedAt": "2025-11-10T00:53:14.769Z",
+    "name": "کیف لنا B0034",
+    "slug": "lena-bag-b0034",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "732690": {
+    "strapiId": 28,
+    "importedAt": "2025-11-10T00:53:14.806Z",
+    "name": "کیف پاسپورتی گلدار B0035",
+    "slug": "floral-passport-bag-b0035",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "733029": {
+    "strapiId": 29,
+    "importedAt": "2025-11-10T00:53:21.902Z",
+    "name": "کیف چکاوک B0041",
+    "slug": "checkout-bag-b0041",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "735105": {
+    "strapiId": 30,
+    "importedAt": "2025-11-10T00:53:26.899Z",
+    "name": "کیف دوشی هانا B002",
+    "slug": "%da%a9%db%8c%d9%81-%d8%af%d9%88%d8%b4%db%8c-%d9%87%d8%a7%d9%86%d8%a7-b002",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "739292": {
+    "strapiId": 31,
+    "importedAt": "2025-11-10T00:53:45.567Z",
+    "name": "کیف دستی دوشی رزا B0043",
+    "slug": "doshi-roza-handbag-b0043",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "740533": {
+    "strapiId": 32,
+    "importedAt": "2025-11-10T00:53:51.176Z",
+    "name": "کیف پول Teddy B0040",
+    "slug": "teddy-wallet-b0040",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "743700": {
+    "strapiId": 33,
+    "importedAt": "2025-11-10T00:53:57.167Z",
+    "name": "کیف پول B0047 fruits",
+    "slug": "fruits-bag-b0047",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "743707": {
+    "strapiId": 34,
+    "importedAt": "2025-11-10T00:53:56.941Z",
+    "name": "کیف پول اریکا S0060",
+    "slug": "erika-wallet-s0060",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "745539": {
+    "strapiId": 35,
+    "importedAt": "2025-11-10T00:54:14.322Z",
+    "name": "کیف گلدار B0035",
+    "slug": "b0035-floral-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "746578": {
+    "strapiId": 36,
+    "importedAt": "2025-11-10T00:54:20.414Z",
+    "name": "کیف آنیسا B0051",
+    "slug": "anisa-bag-b0051",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "747569": {
+    "strapiId": 37,
+    "importedAt": "2025-11-10T00:54:24.072Z",
+    "name": "کیف آنیل B0074",
+    "slug": "anil-bag-b0074",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "757310": {
+    "strapiId": 38,
+    "importedAt": "2025-11-10T00:54:41.518Z",
+    "name": "کیف دونا b0067",
+    "slug": "%da%a9%db%8c%d9%81-%d8%af%d9%88%d9%86%d8%a7-b0067",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "765021": {
+    "strapiId": 39,
+    "importedAt": "2025-11-10T00:54:58.153Z",
+    "name": "کیف لی لی B0069",
+    "slug": "li-li-bag-b0069",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "766288": {
+    "strapiId": 40,
+    "importedAt": "2025-11-10T00:55:04.127Z",
+    "name": "کیف پول تیارا B0080",
+    "slug": "tiara-bag-b0080",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "767696": {
+    "strapiId": 41,
+    "importedAt": "2025-11-10T00:55:09.020Z",
+    "name": "کیف کالین B0050",
+    "slug": "colin-bag-b0050",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "770016": {
+    "strapiId": 42,
+    "importedAt": "2025-11-10T00:55:24.604Z",
+    "name": "کیف دوکاره b0097",
+    "slug": "%da%a9%db%8c%d9%81-%d8%af%d9%88%da%a9%d8%a7%d8%b1%d9%87-b0097",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "773114": {
+    "strapiId": 43,
+    "importedAt": "2025-11-10T00:55:48.322Z",
+    "name": "کیف إمی B0090",
+    "slug": "amy-bag-b0090",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "774452": {
+    "strapiId": 44,
+    "importedAt": "2025-11-10T00:55:54.464Z",
+    "name": "کیف پول مایا B0081",
+    "slug": "maya-bag-b0081",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "774614": {
+    "strapiId": 45,
+    "importedAt": "2025-11-10T00:55:56.685Z",
+    "name": "کیف ژاکلین B0095",
+    "slug": "jacqueline-bag-b0095-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "777194": {
+    "strapiId": 46,
+    "importedAt": "2025-11-10T00:56:09.264Z",
+    "name": "کیف ونوس B0099",
+    "slug": "venus-bag-b0099-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "779899": {
+    "strapiId": 47,
+    "importedAt": "2025-11-10T00:56:22.196Z",
+    "name": "کیف ژینو B00101",
+    "slug": "gino-bag-b00101",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "780597": {
+    "strapiId": 48,
+    "importedAt": "2025-11-10T00:56:25.363Z",
+    "name": "کیف باربارا طرح زارا B0036",
+    "slug": "barbara-bag-zara-design-b0036-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "780670": {
+    "strapiId": 49,
+    "importedAt": "2025-11-10T00:56:36.275Z",
+    "name": "کیف B00102Emma",
+    "slug": "b00102emma-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "783363": {
+    "strapiId": 50,
+    "importedAt": "2025-11-10T00:57:00.278Z",
+    "name": "کیف مارگارت B00106",
+    "slug": "margaret-bag-b00106",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "785484": {
+    "strapiId": 51,
+    "importedAt": "2025-11-10T00:57:04.895Z",
+    "name": "کیف بنیتا B00112",
+    "slug": "%da%a9%db%8c%d9%81-%d8%a8%d9%86%db%8c%d8%aa%d8%a7-b00112",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "786745": {
+    "strapiId": 52,
+    "importedAt": "2025-11-10T00:57:19.505Z",
+    "name": "کیف کلارا B0096",
+    "slug": "clara-bag-b0096",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "787472": {
+    "strapiId": 53,
+    "importedAt": "2025-11-10T00:57:37.089Z",
+    "name": "کیف الیزه B00108",
+    "slug": "elysee-bag-b00108",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "788828": {
+    "strapiId": 54,
+    "importedAt": "2025-11-10T00:58:04.230Z",
+    "name": "کیف ریما  B00110",
+    "slug": "rima-bag-b00110",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "788841": {
+    "strapiId": 55,
+    "importedAt": "2025-11-10T00:58:04.152Z",
+    "name": "کیف لیراک  B00111",
+    "slug": "lirak-bag-b00111",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "788850": {
+    "strapiId": 57,
+    "importedAt": "2025-11-10T00:57:48.635Z",
+    "name": "کیف ماهلین  B00113",
+    "slug": "mahlin-bag-b00113",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "788875": {
+    "strapiId": 56,
+    "importedAt": "2025-11-10T00:57:48.880Z",
+    "name": "کیف پرنسا  B00114",
+    "slug": "princesa-bag-b00114",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "788878": {
+    "strapiId": 58,
+    "importedAt": "2025-11-10T00:58:16.010Z",
+    "name": "کیف یووه  B00115",
+    "slug": "juve-bag-b00115",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "789887": {
+    "strapiId": 59,
+    "importedAt": "2025-11-10T00:58:40.446Z",
+    "name": "کیف دلسا B00105",
+    "slug": "delsa-bag-b00105",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "790103": {
+    "strapiId": 60,
+    "importedAt": "2025-11-10T00:58:44.856Z",
+    "name": "کیف ونوسb00107",
+    "slug": "%da%a9%db%8c%d9%81-%d9%88%d9%86%d9%88%d8%b3b00107",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "792270": {
+    "strapiId": 61,
+    "importedAt": "2025-11-10T00:58:59.217Z",
+    "name": "کیف کارتی صدفی B00120",
+    "slug": "shell-button-wallet-b00120",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "792297": {
+    "strapiId": 62,
+    "importedAt": "2025-11-10T00:58:52.484Z",
+    "name": "کیف پول تد B00121",
+    "slug": "ted-wallet-b00121",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "795251": {
+    "strapiId": 63,
+    "importedAt": "2025-11-10T00:59:12.372Z",
+    "name": "کیف پول یونا B00122",
+    "slug": "yuna-bag-b00122",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "795271": {
+    "strapiId": 64,
+    "importedAt": "2025-11-10T00:59:10.832Z",
+    "name": "کیف پول COCO B00123",
+    "slug": "cocob00123-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "797569": {
+    "strapiId": 65,
+    "importedAt": "2025-11-10T00:59:23.900Z",
+    "name": "کیف مانیا B00126",
+    "slug": "mania-bag-b00126",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "797756": {
+    "strapiId": 66,
+    "importedAt": "2025-11-10T00:59:29.561Z",
+    "name": "کیف الیزه OppsiB00108",
+    "slug": "%da%a9%db%8c%d9%81-%d8%a7%d9%84%db%8c%d8%b2%d9%87-oppsib00108",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "797804": {
+    "strapiId": 67,
+    "importedAt": "2025-11-10T00:59:35.820Z",
+    "name": "کیف کارتی سوزی B00132",
+    "slug": "suzy-card-case-b00132",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "797829": {
+    "strapiId": 68,
+    "importedAt": "2025-11-10T00:59:54.710Z",
+    "name": "کیف پول  cute bearB00130",
+    "slug": "cute-bear-bag-b00130",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "803654": {
+    "strapiId": 69,
+    "importedAt": "2025-11-10T01:00:36.853Z",
+    "name": "کیف بولر ساده B00128",
+    "slug": "simple-bowler-bag-b00128",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "803711": {
+    "strapiId": 70,
+    "importedAt": "2025-11-10T01:00:13.138Z",
+    "name": "کیف بولر طرحدار B00127",
+    "slug": "patterned-bowler-bag-b00127",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "804214": {
+    "strapiId": 71,
+    "importedAt": "2025-11-10T01:00:43.657Z",
+    "name": "کیف MOMMY BAG B00172",
+    "slug": "mommy-bag-b00172",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "814617": {
+    "strapiId": 72,
+    "importedAt": "2025-11-10T01:01:05.532Z",
+    "name": "کیف زوئی B00180",
+    "slug": "zoe-bag-b00180",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "815655": {
+    "strapiId": 73,
+    "importedAt": "2025-11-10T01:01:16.877Z",
+    "name": "کیف هانا B00200",
+    "slug": "hanna-bag-b00200",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  }
+}

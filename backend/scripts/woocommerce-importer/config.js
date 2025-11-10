@@ -70,6 +70,12 @@ module.exports = {
         baseUrl: "https://api.infinity.rgbgroup.ir/api",
         token: "STRAPI_API_TOKEN",
       },
+      local: {
+        baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
+        token:
+          process.env.STRAPI_IMPORT_LOCAL_TOKEN ||
+          "01a64981d0a2ad0dac5d0a08fc047c0036d4deaac2ad6d342141aad1ace16680cab4fab969be2343c93268975394bdfe490feffc7913542a187715e8bb5d4c724f63076d68d9d2f2ad381bb690960c7e6ff89e75b6b82ca81e282bcf71c85a624a31cb3ad1591416c0676f584f81797109a4eb1642a7ccbaffa4c013e60be873",
+      },
     },
     endpoints: {
       categories: "/product-categories",
@@ -206,6 +212,7 @@ module.exports = {
     environments: {
       production: "./import-tracking/production",
       staging: "./import-tracking/staging",
+      local: "./import-tracking/local",
     },
   },
 

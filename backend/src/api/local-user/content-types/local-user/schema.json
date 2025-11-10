@@ -83,7 +83,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::discount.discount",
-      "mappedBy": "local_users"
+      "inversedBy": "local_users"
     },
     "removedAt": {
       "type": "datetime"

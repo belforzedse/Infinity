@@ -47,7 +47,7 @@
     "local_users": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "api::local-user.local-user",
+      "target": "plugin::users-permissions.user",
       "inversedBy": "discounts"
     },
     "product_variations": {
