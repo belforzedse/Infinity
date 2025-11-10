@@ -4,7 +4,7 @@
  */
 import { DesktopSlideBuilder } from "../../slideFactory";
 
-export const slide1 = new DesktopSlideBuilder()
+export const slide4 = new DesktopSlideBuilder()
   // Top left text banner with blue theme and custom typography
   .topLeftTextBanner({
     title: "لباســـی که خودت را توش پیدا می‌کنی",
@@ -26,11 +26,11 @@ export const slide1 = new DesktopSlideBuilder()
     },
   })
   // Bottom right action banner
-  .bottomActionBannerLeft({
+  .bottomActionBannerRight({
     title: "دامن ها",
     subtitle: "",
-    className: "h-[200px]",
     colors: {
+      background: "bg-[#A6C2DB]",
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
     },
@@ -51,15 +51,15 @@ export const slide1 = new DesktopSlideBuilder()
       height: 600,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
       className: "h-full w-full rounded-lg pl-8 object-contain",
-      objectPosition: "left",
+      objectPosition: " left",
     },
     background: {
       type: "color",
       value: "#A6C2DB",
       alt: "Background",
-      width: "100%",
-      height: "80%",
-      position: "bottom center",
+      width: "",
+      height: "165px",
+      position: "bottom center", // center, bottom center, top left, etc.
       backgroundSize: "cover",
       className: "rounded-3xl",
     },
@@ -71,11 +71,11 @@ export const slide1 = new DesktopSlideBuilder()
     },
   })
   // Bottom left action banner (image only, with brightness effect)
-  .bottomActionBannerRight({
+  .bottomActionBannerLeft({
     title: "دامن ها",
     subtitle: "",
-    className: "h-[200px]",
     colors: {
+      background: "bg-[#A6C2DB]",
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
     },
@@ -96,15 +96,15 @@ export const slide1 = new DesktopSlideBuilder()
       height: 600,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
       className: "h-full w-full rounded-lg pl-8 object-contain",
-      objectPosition: "left",
+      objectPosition: " left",
     },
     background: {
       type: "color",
       value: "#A6C2DB",
       alt: "Background",
-      width: "100%",
-      height: "80%",
-      position: "bottom center",
+      width: "",
+      height: "165px",
+      position: "bottom center", // center, bottom center, top left, etc.
       backgroundSize: "cover",
       className: "rounded-3xl",
     },
