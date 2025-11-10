@@ -31,8 +31,8 @@ export const ENDPOINTS = {
   },
   USER: {
     ME: "/auth/self",
-    GET_ALL: "/local-users",
-    GET_DETAILS: "/local-users",
+    GET_ALL: "/users",
+    GET_DETAILS: "/users",
     GET_INFO: "/user/info/by/user",
   },
   PRODUCT: {
