@@ -88,9 +88,9 @@ module.exports = {
       orders: "/orders",
       orderItems: "/order-items",
       contracts: "/contracts",
-      localUsers: "/local-users",
-      localUserInfos: "/local-user-infos",
-      localUserRoles: "/local-user-roles",
+      users: "/users",
+      userInfos: "/local-user-infos",
+      userRoles: "/users-permissions/roles",
     },
   },
 
