@@ -1,4 +1,3 @@
-import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";
 import { Switch } from "@headlessui/react";
 import { useEffect, useState } from "react";
@@ -29,20 +28,11 @@ export default function SuperAdminTableCellSwitch({
           apiUrl
             ? (checked) => {
                 apiClient
-                  .put(
-                    apiUrl,
-                    {
-                      data: {
-                        IsActive: checked,
-                      },
+                  .put(apiUrl, {
+                    data: {
+                      IsActive: checked,
                     },
-                    {
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${STRAPI_TOKEN}`,
-                      },
-                    },
-                  )
+                  })
                   .then(() => {
                     setStatus(checked ? "active" : "inactive");
                     toast.success("وضعیت تغییر کرد");

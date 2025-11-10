@@ -18,7 +18,6 @@ import SuperAdminTableSelect from "./Select";
 import DragIcon from "../Layout/Icons/DragIcon";
 import { apiClient } from "@/services";
 import { atom, useAtom } from "jotai";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
 import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
 import { optimisticallyDeletedItems } from "@/lib/atoms/optimisticDelete";
@@ -159,9 +158,7 @@ export function SuperAdminTable<TData, TValue>({
       isFetchingRef.current = true;
       setInternalLoading(true);
       try {
-        const res = await apiClient.get<TData[]>(apiUrl, {
-          headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-        });
+        const res = await apiClient.get<TData[]>(apiUrl);
         if (seq === fetchSeqRef.current) {
           setTableData(res.data);
           setTotalSize(res.meta?.pagination?.total ?? 0);

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
 
@@ -145,24 +144,21 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
           baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
         }
 
-        console.log('User search URL:', baseUrl); // Debug log
+        console.log("User search URL:", baseUrl); // Debug log
 
         const response = await apiClient.get(baseUrl, {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
           signal: controller.signal,
         });
 
         if (!mounted) return;
 
-        console.log('User search response:', response); // Debug log
+        console.log("User search response:", response); // Debug log
         const users = (response as any).data as User[];
         setSuggestions(users);
         setOpen(users.length > 0);
       } catch (error) {
         if (!mounted) return;
-        console.error('User search error:', error); // Debug log
+        console.error("User search error:", error); // Debug log
         setSuggestions([]);
         setOpen(false);
       } finally {

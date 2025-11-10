@@ -2,7 +2,6 @@ import { apiClient } from "@/services";
 import RecycleIcon from "../../Layout/Icons/RecycleIcon";
 import UndoIcon from "../../Layout/Icons/UndoIcon";
 import SuperAdminTableCellActionButton from "./ActionButton";
-import { STRAPI_TOKEN } from "@/constants/api";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { refreshTable } from "..";
@@ -28,19 +27,11 @@ export default function RemoveActionButton(props: Props) {
       // Restore (undo) action
       try {
         setIsDeleting(true);
-        await apiClient.put(
-          `${apiUrl}/${id}`,
-          {
-            data: {
-              removedAt: null,
-            },
+        await apiClient.put(`${apiUrl}/${id}`, {
+          data: {
+            removedAt: null,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          }
-        );
+        });
         setRefresh(true);
         toast.success("با موفقیت بازیابی شد");
       } catch (error) {

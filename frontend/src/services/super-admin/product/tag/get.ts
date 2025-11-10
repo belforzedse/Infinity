@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import type { PaginatedResponse } from "@/types/api";
 
 export interface TagAttributes {
@@ -17,11 +17,7 @@ export const getTags = async (): Promise<PaginatedResponse<TagResponseType>> => 
   const endpoint = `${ENDPOINTS.PRODUCT.TAG}`;
 
   try {
-    const response = await apiClient.get<PaginatedResponse<TagResponseType>>(endpoint, {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-    });
+    const response = await apiClient.get<PaginatedResponse<TagResponseType>>(endpoint);
 
     return response.data;
   } catch (error) {

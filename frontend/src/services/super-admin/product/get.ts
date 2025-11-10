@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import { paramCreator } from "@/utils/paramCreator";
 import type { TagAttributes } from "./tag/get";
@@ -81,11 +81,7 @@ export const getProduct = async (
   params: PopulateObject,
 ): Promise<ApiResponse<Item>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?${paramCreator(params)}`;
-  const response = await apiClient.get<ApiResponse<Item>>(endpoint, {
-    headers: {
-      Authorization: `Bearer ${STRAPI_TOKEN}`,
-    },
-  });
+  const response = await apiClient.get<ApiResponse<Item>>(endpoint);
 
   return response as any;
 };

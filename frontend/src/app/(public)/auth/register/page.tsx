@@ -33,20 +33,34 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (verificationCode.length === 6) {
-      const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
+      try {
+        const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
-      if (response.token) {
-        localStorage.setItem("accessToken", response.token);
+        if (response.token) {
+          localStorage.setItem("accessToken", response.token);
 
-        // Migrate local cart to API after registration
-        await migrateLocalCartToApi();
+          // Migrate local cart to API after registration
+          await migrateLocalCartToApi();
 
-        // Preserve redirect parameter when redirecting to info page
-        const redirectParam = searchParams.get("redirect");
-        const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
-        router.push(`/auth/register/info${redirectQuery}`);
-      } else {
-        toast.error("کد تایید اشتباه است");
+          const params = new URLSearchParams();
+          const redirectParam = searchParams.get("redirect");
+          if (redirectParam) {
+            params.set("redirect", redirectParam);
+          }
+          if (phoneNumber) {
+            params.set("phone", phoneNumber);
+          }
+          const query = params.toString();
+          router.push(`/auth/register/info${query ? `?${query}` : ""}`);
+        } else {
+          toast.error("کد تایید اشتباه است");
+        }
+      } catch (error: any) {
+        const message =
+          error?.response?.data?.error?.message ||
+          error?.message ||
+          "خطا در ارسال کد تایید. لطفا دوباره تلاش کنید";
+        toast.error(message);
       }
     }
   };

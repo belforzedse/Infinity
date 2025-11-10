@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { useQueryState } from "nuqs";
 import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
 import { appendTitleFilter } from "@/constants/productFilters";
@@ -89,9 +88,7 @@ export default function ProductsPage() {
         endpoint += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
       }
 
-      const res = await apiClient.get(endpoint, {
-        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-      });
+      const res = await apiClient.get(endpoint);
       const data = (res as any).data as any[];
       total = (res as any).meta?.pagination?.total || total;
       items.push(...data);
@@ -160,7 +157,6 @@ export default function ProductsPage() {
               ? `&filters[removedAt][$null]=false`
               : `&filters[removedAt][$null]=true`) +
             `&fields[0]=id&populate[0]=product_variations`,
-          { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
         );
         const prods = (res as any).data as any[];
         prods.forEach((p: any) => {
@@ -254,7 +250,6 @@ export default function ProductsPage() {
           }
           return ep;
         })(),
-        { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
       );
       const rows = ((res as any).data as Product[]).slice();
       // Preserve the order of ids
@@ -307,15 +302,9 @@ export default function ProductsPage() {
               for (const variation of product.attributes.product_variations.data) {
                 if (variation.attributes.product_stock?.data?.id) {
                   try {
-                    await apiClient.put(
-                      `/product-stocks/${variation.attributes.product_stock.data.id}`,
-                      {
-                        data: { Count: 0 },
-                      },
-                      {
-                        headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-                      },
-                    );
+                    await apiClient.put(`/product-stocks/${variation.attributes.product_stock.data.id}`, {
+                      data: { Count: 0 },
+                    });
                     removedStockCount++;
                   } catch (error) {
                     console.error(`Failed to remove stock for variation ${variation.id}:`, error);
@@ -339,15 +328,9 @@ export default function ProductsPage() {
 
             for (const product of selectedProducts) {
               try {
-                await apiClient.put(
-                  `/products/${product.id}`,
-                  {
-                    data: { removedAt: deletionTime },
-                  },
-                  {
-                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-                  },
-                );
+                await apiClient.put(`/products/${product.id}`, {
+                  data: { removedAt: deletionTime },
+                });
                 deletedCount++;
               } catch (error) {
                 console.error(`Failed to delete product ${product.id}:`, error);
@@ -392,15 +375,9 @@ export default function ProductsPage() {
 
             for (const product of selectedProducts) {
               try {
-                await apiClient.put(
-                  `/products/${product.id}`,
-                  {
-                    data: { removedAt: null },
-                  },
-                  {
-                    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-                  },
-                );
+                await apiClient.put(`/products/${product.id}`, {
+                  data: { removedAt: null },
+                });
                 restoredCount++;
               } catch (error) {
                 console.error(`Failed to restore product ${product.id}:`, error);
@@ -443,15 +420,9 @@ export default function ProductsPage() {
                 for (const variation of product.attributes.product_variations.data) {
                   if (variation.attributes.product_stock?.data?.id) {
                     try {
-                      await apiClient.put(
-                        `/product-stocks/${variation.attributes.product_stock.data.id}`,
-                        {
-                          data: { Count: newStock },
-                        },
-                        {
-                          headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-                        },
-                      );
+                      await apiClient.put(`/product-stocks/${variation.attributes.product_stock.data.id}`, {
+                        data: { Count: newStock },
+                      });
                       updatedStockCount++;
                     } catch (error) {
                       console.error(`Failed to update stock for variation ${variation.id}:`, error);
@@ -474,15 +445,9 @@ export default function ProductsPage() {
             for (const product of selectedProducts) {
               for (const variation of product.attributes.product_variations.data) {
                 try {
-                  await apiClient.put(
-                    `/product-variations/${variation.id}`,
-                    {
-                      data: { IsPublished: true },
-                    },
-                    {
-                      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-                    },
-                  );
+                  await apiClient.put(`/product-variations/${variation.id}`, {
+                    data: { IsPublished: true },
+                  });
                   publishedCount++;
                 } catch (error) {
                   console.error(`Failed to publish variation ${variation.id}:`, error);
@@ -498,15 +463,9 @@ export default function ProductsPage() {
             for (const product of selectedProducts) {
               for (const variation of product.attributes.product_variations.data) {
                 try {
-                  await apiClient.put(
-                    `/product-variations/${variation.id}`,
-                    {
-                      data: { IsPublished: false },
-                    },
-                    {
-                      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-                    },
-                  );
+                  await apiClient.put(`/product-variations/${variation.id}`, {
+                    data: { IsPublished: false },
+                  });
                   unpublishedCount++;
                 } catch (error) {
                   console.error(`Failed to unpublish variation ${variation.id}:`, error);

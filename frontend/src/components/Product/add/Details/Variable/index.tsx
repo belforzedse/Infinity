@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import type { ProductVariable, ProductVariableDisplay } from "./types";
 import { ProductVariableTable } from "./Table";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 interface ProductVariablesProps {
   productId: number;
@@ -26,11 +25,6 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
       try {
         const response = await apiClient.get(
           `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model,product_stock,general_discounts&pagination[pageSize]=100`,
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          },
         );
 
         // Type assertion to work with the data
@@ -148,11 +142,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
     if (!deleteId) return;
 
     try {
-      await apiClient.delete(`/product-variations/${deleteId}`, {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      });
+      await apiClient.delete(`/product-variations/${deleteId}`);
 
       // Update local state
       setVariables((prev) => prev.filter((v) => v.id !== deleteId));
@@ -166,54 +156,30 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
   const handleSaveVariation = async (updatedVariation: ProductVariableDisplay) => {
     try {
       // Update variation data
-      await apiClient.put(
-        `/product-variations/${updatedVariation.id}`,
-        {
-          data: {
-            SKU: updatedVariation.sku,
-            Price: updatedVariation.price,
-            DiscountPrice: updatedVariation.discountPrice || null,
-            IsPublished: updatedVariation.isPublished,
-          },
+      await apiClient.put(`/product-variations/${updatedVariation.id}`, {
+        data: {
+          SKU: updatedVariation.sku,
+          Price: updatedVariation.price,
+          DiscountPrice: updatedVariation.discountPrice || null,
+          IsPublished: updatedVariation.isPublished,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        },
-      );
+      });
 
       // Update stock if it exists, or create new stock
       if (updatedVariation.stockId) {
-        await apiClient.put(
-          `/product-stocks/${updatedVariation.stockId}`,
-          {
-            data: {
-              Count: updatedVariation.stock,
-            },
+        await apiClient.put(`/product-stocks/${updatedVariation.stockId}`, {
+          data: {
+            Count: updatedVariation.stock,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          },
-        );
+        });
       } else {
         // Create new stock and link to variation
-        const stockResponse = await apiClient.post(
-          "/product-stocks",
-          {
-            data: {
-              Count: updatedVariation.stock,
-              product_variation: updatedVariation.id,
-            },
+        const stockResponse = await apiClient.post("/product-stocks", {
+          data: {
+            Count: updatedVariation.stock,
+            product_variation: updatedVariation.id,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          },
-        );
+        });
 
         // Update stockId in local state
         const stockData = stockResponse.data as { id: number };

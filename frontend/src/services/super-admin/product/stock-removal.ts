@@ -1,5 +1,4 @@
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 export interface StockRemovalResult {
   success: boolean;
@@ -21,11 +20,7 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
     while (true) {
       const endpoint = `/products?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate[0]=product_variations&populate[1]=product_variations.product_stock&filters[Status][$eq]=Active`;
 
-      const response = await apiClient.get<any>(endpoint, {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      });
+      const response = await apiClient.get<any>(endpoint);
 
       const products = response?.data || [];
 
@@ -70,15 +65,9 @@ export const removeStockForPersianTermProducts = async (): Promise<StockRemovalR
 
         if (stockData && stockData.id) {
           try {
-            await apiClient.put(
-              `/product-stocks/${stockData.id}`,
-              {
-                data: { Count: 0 },
-              },
-              {
-                headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-              },
-            );
+            await apiClient.put(`/product-stocks/${stockData.id}`, {
+              data: { Count: 0 },
+            });
 
             totalVariationsUpdated++;
           } catch (error) {

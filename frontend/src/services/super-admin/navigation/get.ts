@@ -1,13 +1,8 @@
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import type { Navigation } from "@/types/super-admin/navigation";
 
 export async function getNavigation(): Promise<Navigation> {
-  const response = await apiClient.get("/navigation?populate=*", {
-    headers: {
-      Authorization: `Bearer ${STRAPI_TOKEN}`,
-    },
-  });
+  const response = await apiClient.get("/navigation?populate=*");
 
   const navigationData = (response as any).data.attributes;
 

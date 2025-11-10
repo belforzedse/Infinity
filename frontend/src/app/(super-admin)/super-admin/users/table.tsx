@@ -7,7 +7,6 @@ import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveAction
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import SuperAdminTableCellSwitch from "@/components/SuperAdmin/Table/Cells/Switch";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { useAtom } from "jotai";
@@ -63,9 +62,6 @@ const StatusCell = ({ row }: { row: Row<User> }) => {
           },
         },
         {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
         },
       );
 
@@ -113,9 +109,6 @@ const WalletCell = ({ row }: { row: Row<User> }) => {
           },
         },
         {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
         },
       );
       setShowWalletModal(false);
@@ -200,9 +193,6 @@ const ActionsCell = ({ row }: { row: Row<User> }) => {
           },
         },
         {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
         },
       );
       setShowPasswordModal(false);
