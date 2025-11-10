@@ -87,12 +87,6 @@
     },
     "removedAt": {
       "type": "datetime"
-    },
-    "strapi_user": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::users-permissions.user",
-      "private": true
     }
   }
 }

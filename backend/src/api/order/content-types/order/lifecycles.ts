@@ -31,9 +31,12 @@ export default {
     const { result } = event;
     if (!result?.id) return;
 
+    const userId = (event as any)?.state?.user?.id;
+
     await strapi.entityService.create("api::order-log.order-log" as any, {
       data: {
         order: result.id,
+        performed_by: userId || null,
         Action: "Create" as AuditAction,
         Description: "Order created",
       },
@@ -94,9 +97,12 @@ export default {
     const changes = diffChanges(previous, current);
     if (Object.keys(changes).length === 0) return;
 
+    const userId = (event as any)?.state?.user?.id;
+
     await strapi.entityService.create("api::order-log.order-log" as any, {
       data: {
         order: result.id,
+        performed_by: userId || null,
         Action: "Update" as AuditAction,
         Changes: changes,
         Description: "Order updated",
@@ -115,9 +121,12 @@ export default {
     const id = (event as any)?.state?.deletingOrderId;
     if (!id) return;
 
+    const userId = (event as any)?.state?.user?.id;
+
     await strapi.entityService.create("api::order-log.order-log" as any, {
       data: {
         order: id,
+        performed_by: userId || null,
         Action: "Delete" as AuditAction,
         Description: "Order deleted",
       },
