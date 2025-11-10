@@ -1,7 +1,6 @@
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
 import React, { useState, useEffect } from "react";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 interface Feature {
   id: string;
@@ -109,21 +108,11 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const authHeader = {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        };
-
         // Fetch all available variation options
         const [colorsRes, sizesRes, modelsRes] = await Promise.all([
-          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors", {
-            headers: authHeader,
-          }),
-          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes", {
-            headers: authHeader,
-          }),
-          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models", {
-            headers: authHeader,
-          }),
+          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors"),
+          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes"),
+          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models"),
         ]);
 
         setAvailableOptions({
@@ -136,7 +125,6 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         if (productId) {
           const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
             `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
-            { headers: authHeader },
           );
 
           const existingVariations = (existingVariationsRes as any).data || [];
@@ -276,10 +264,6 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
     try {
       setIsGeneratingVariations(true);
-      const authHeader = {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      };
-
       // Create all possible combinations
       const combinations = [];
       for (const color of features.colors) {
@@ -304,7 +288,6 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       // Fetch existing variations to avoid duplicates
       const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
         `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
-        { headers: authHeader },
       );
 
       const existingVariations = (existingVariationsRes as any).data || [];

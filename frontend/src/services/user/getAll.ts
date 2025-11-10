@@ -1,5 +1,5 @@
 import { apiClient } from "../index";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 
 export interface GetAllUserResponse {
   data: {
@@ -18,13 +18,8 @@ export interface GetAllUserResponse {
 
 export const getAll = async (): Promise<GetAllUserResponse> => {
   const endpoint = `${ENDPOINTS.USER.GET_ALL}`;
-  const accessToken = STRAPI_TOKEN;
 
-  const response = await apiClient.get<GetAllUserResponse>(endpoint, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await apiClient.get<GetAllUserResponse>(endpoint);
 
   return response.data;
 };

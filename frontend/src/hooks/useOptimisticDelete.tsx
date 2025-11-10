@@ -4,7 +4,6 @@ import { useAtom } from "jotai";
 import { useCallback } from "react";
 import toast from "react-hot-toast";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import {
   optimisticallyDeletedItems,
   pendingDeleteConfirmations,
@@ -141,19 +140,11 @@ export function useOptimisticDelete() {
     async (apiUrl: string, itemId: string, removedAt: string) => {
       try {
         // Make the actual API call to confirm deletion
-        await apiClient.put(
-          `${apiUrl}/${itemId}`,
-          {
-            data: {
-              removedAt: removedAt,
-            },
+        await apiClient.put(`${apiUrl}/${itemId}`, {
+          data: {
+            removedAt: removedAt,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          }
-        );
+        });
 
         // Mark as confirmed
         const newPendingConfirmations = new Set(pendingConfirmations);

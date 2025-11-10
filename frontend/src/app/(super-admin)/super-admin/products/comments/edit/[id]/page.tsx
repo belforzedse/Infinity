@@ -7,7 +7,6 @@ import { config } from "./config";
 import { useParams } from "next/navigation";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 type CommentResponse = {
   id: string;
@@ -69,11 +68,6 @@ export default function Page() {
     apiClient
       .get(
         `/product-review-likes?populate[0]=user&filters[product_review][id][$eq]=${id}&pagination[page]=${reactionPages}&pagination[pageSize]=10`,
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        },
       )
       .then((res) => {
         setReactions((data) => [...(data || []), ...((res as any)?.data || [])]);
@@ -86,11 +80,7 @@ export default function Page() {
   useEffect(() => {
     setIsLoading(true);
     apiClient
-      .get(`/product-reviews/${id}?populate[0]=user&populate[1]=user.user_info`, {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      })
+      .get(`/product-reviews/${id}?populate[0]=user&populate[1]=user.user_info`)
       .then((res) => {
         const data = (res as any)?.data as CommentResponse;
 
@@ -204,21 +194,12 @@ export default function Page() {
       onSubmit={async (data) => {
         setIsLoading(true);
         try {
-          await apiClient.put(
-            `/product-reviews/${id}`,
-            {
-              data: {
-                Status: data?.status,
-                Content: data?.message,
-              },
+          await apiClient.put(`/product-reviews/${id}`, {
+            data: {
+              Status: data?.status,
+              Content: data?.message,
             },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${STRAPI_TOKEN}`,
-              },
-            },
-          );
+          });
           setRevalidate(revalidate + 1);
           toast.success("ویرایش با موفقیت انجام شد");
         } catch (error) {

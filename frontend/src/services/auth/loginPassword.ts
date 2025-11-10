@@ -11,7 +11,7 @@ export const loginPassword = async (phone: string, password: string): Promise<Re
   const response = await apiClient.post<Response>(
     endpoint,
     {
-      phone,
+      phone: normalizePhone(phone),
       password,
     },
     { suppressAuthRedirect: true },
@@ -19,3 +19,12 @@ export const loginPassword = async (phone: string, password: string): Promise<Re
 
   return response as any;
 };
+
+function normalizePhone(value: string) {
+  if (!value) return value;
+  let trimmed = value.trim();
+  if (trimmed.startsWith("+")) return trimmed;
+  if (trimmed.startsWith("0")) trimmed = trimmed.substring(1);
+  if (!trimmed.startsWith("98")) trimmed = `98${trimmed}`;
+  return `+${trimmed}`;
+}

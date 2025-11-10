@@ -101,12 +101,7 @@ export default function Page() {
         };
 
         setIsLoading(true);
-        await apiClient.put(`/sp/local-users/${id}`, body, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        await apiClient.put(`/sp/local-users/${id}`, body);
         setIsLoading(false);
         setRevalidate(revalidate + 1);
       }}

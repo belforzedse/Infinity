@@ -16,9 +16,7 @@ export interface Response {
 export const register = async (payload: RegisterRequest): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.REGISTER;
 
-  const response = await apiClient.post<Response>(endpoint, payload, {
-    skipAuth: true,
-  });
+  const response = await apiClient.post<Response>(endpoint, payload);
 
   return response as Response;
 };

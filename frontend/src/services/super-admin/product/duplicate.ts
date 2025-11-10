@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import { toast } from "react-hot-toast";
 import { getProduct } from "./get";
 
@@ -69,7 +69,6 @@ export const duplicateProduct = async (productId: string) => {
     const response = await apiClient.post<{ data: StrapiItem<ProductAttributes> }>(
       ENDPOINTS.PRODUCT.PRODUCT,
       { data: duplicateData },
-      { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
     );
 
     const newProductId = response.data.data.id;
@@ -80,7 +79,6 @@ export const duplicateProduct = async (productId: string) => {
         try {
           const variationResponse = await apiClient.get<{ data: StrapiItem<any> }>(
             `/product-variations/${variation.id}?populate=*`,
-            { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
           );
 
           const variationData = variationResponse.data.data.attributes;
@@ -102,7 +100,6 @@ export const duplicateProduct = async (productId: string) => {
           const newVariationResponse = await apiClient.post<{ data: StrapiItem<any> }>(
             `/product-variations`,
             { data: newVariationData },
-            { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
           );
 
           // Duplicate stock with 0 count
@@ -115,7 +112,6 @@ export const duplicateProduct = async (productId: string) => {
                   product_variation: newVariationResponse.data.data.id,
                 },
               },
-              { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
             );
           }
         } catch (variationError) {

@@ -4,7 +4,6 @@ import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/Co
 import type { User } from "./page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 // Function to fetch roles from the API
 const fetchRoles = async (
@@ -12,11 +11,7 @@ const fetchRoles = async (
   _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
-    const response = await apiClient.get("/local-user-roles", {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-    });
+    const response = await apiClient.get("/local-user-roles");
 
     const data = response as {
       data: Array<{

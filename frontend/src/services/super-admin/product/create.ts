@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import type { ProductData } from "@/types/super-admin/products";
 import { toast } from "react-hot-toast";
 
@@ -24,17 +24,9 @@ export const createProduct = async (body: ProductData) => {
     const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}`;
     const transformedBody = transformProductDataForApi(body);
 
-    const response = await apiClient.post(
-      endpoint,
-      {
-        data: transformedBody,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      },
-    );
+    const response = await apiClient.post(endpoint, {
+      data: transformedBody,
+    });
 
     return { success: true, data: response.data };
   } catch (error: any) {

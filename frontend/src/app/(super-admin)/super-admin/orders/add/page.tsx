@@ -2,7 +2,6 @@
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { createConfig } from "./config";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
 import { useRouter } from "next/navigation";
@@ -226,11 +225,6 @@ export default function Page() {
             CustomerName: data.userName || null,
           },
         },
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        },
       );
 
       logger.info("Order created", { id: (orderResponse as any)?.data?.id });
@@ -239,24 +233,16 @@ export default function Page() {
       // Create order items
       logger.info("Creating order items", { count: selectedItems.length });
       const itemPromises = selectedItems.map(item =>
-        apiClient.post(
-          "/order-items",
-          {
-            data: {
-              Count: item.quantity,
-              PerAmount: item.price,
-              ProductTitle: item.productName,
-              ProductSKU: item.productCode,
-              order: orderId,
-              product_variation: item.productVariationId || item.productId,
-            },
+        apiClient.post("/order-items", {
+          data: {
+            Count: item.quantity,
+            PerAmount: item.price,
+            ProductTitle: item.productName,
+            ProductSKU: item.productCode,
+            order: orderId,
+            product_variation: item.productVariationId || item.productId,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          }
-        )
+        })
       );
 
       await Promise.all(itemPromises);
@@ -264,21 +250,13 @@ export default function Page() {
       // Create contract if needed
       if (data.total > 0) {
         logger.info("Creating contract", { amount: data.total });
-        await apiClient.post(
-          "/contracts",
-          {
-            data: {
-              Amount: data.total,
-              Status: "Not Ready",
-              order: orderId,
-            },
+        await apiClient.post("/contracts", {
+          data: {
+            Amount: data.total,
+            Status: "Not Ready",
+            order: orderId,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          }
-        );
+        });
       }
 
       toast.success("سفارش با موفقیت ثبت شد");

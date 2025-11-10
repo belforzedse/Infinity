@@ -8,7 +8,6 @@ import { apiClient } from "@/services";
 import toast from "react-hot-toast";
 import type { ReactElement } from "react";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 type User = {
   id: string | number;
@@ -38,11 +37,7 @@ const fetchRoles = async (
   _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
-    const response = await apiClient.get("/local-user-roles", {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-    });
+    const response = await apiClient.get("/local-user-roles");
 
     const data = response as {
       data: Array<{
@@ -243,11 +238,6 @@ export default function Page() {
                 gender: data.gender === "male",
                 bio: data.bio,
                 nationalCode: data.nationalCode,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                },
               },
             );
 

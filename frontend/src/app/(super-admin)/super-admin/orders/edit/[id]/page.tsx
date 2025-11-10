@@ -8,7 +8,7 @@ import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
 import { useState, useEffect, useRef } from "react";
 import { apiClient } from "@/services";
-import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
+import { API_BASE_URL } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCoverImage } from "@/types/Product";
@@ -204,11 +204,6 @@ export default function EditOrderPage() {
     return apiClient
       .get(
         `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway${separator}${cacheBuster}`,
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        }
       )
       .then((res) => {
         const data = (res as any).data as OrderResponse;
@@ -371,20 +366,12 @@ export default function EditOrderPage() {
         data={data}
         onSubmit={async (data) => {
           apiClient
-            .put(
-              `/orders/${id}`,
-              {
-                data: {
-                  Status: data.orderStatus,
-                  Description: data.description,
-                },
+            .put(`/orders/${id}`, {
+              data: {
+                Status: data.orderStatus,
+                Description: data.description,
               },
-              {
-                headers: {
-                  Authorization: `Bearer ${STRAPI_TOKEN}`,
-                },
-              }
-            )
+            })
             .then((res) => {
               toast.success("سفارش با موفقیت ویرایش شد");
             })

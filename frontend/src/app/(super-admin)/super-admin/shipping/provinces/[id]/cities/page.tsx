@@ -9,7 +9,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Province } from "../../table";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 
 export default function ShippingCitiesPage() {
@@ -22,12 +21,7 @@ export default function ShippingCitiesPage() {
 
   useEffect(() => {
     apiClient
-      .get(`/shipping-provinces?pagination[page]=1&pagination[pageSize]=100`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      })
+      .get(`/shipping-provinces?pagination[page]=1&pagination[pageSize]=100`)
       .then((res) => {
         setProvinces((res as any).data as Province[]);
       });

@@ -6,7 +6,6 @@ import RecycleBinButton from "./Button/RecycleBin";
 import AddButton from "./Button/Add";
 import FilterButton from "./Button/Filter";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { refreshTable } from "../../Table";
 import { useAtom } from "jotai";
 
@@ -61,11 +60,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
         .get<{
           data: { id: number }[];
           meta: { pagination: { total: number } };
-        }>(`${apiUrl}?filters[removedAt][$null]=false`, {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        })
+        }>(`${apiUrl}?filters[removedAt][$null]=false`)
         .then((res) => {
           setCount((res as any)?.meta?.pagination?.total);
           setHasCountError(false);

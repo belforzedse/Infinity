@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 type OrderLog = {
   id: number;
@@ -23,11 +22,6 @@ export default function GatewayLogs({ orderId }: { orderId: number }) {
         setLoading(true);
         const res = await apiClient.get(
           `/order-logs?filters[order][id][$eq]=${orderId}&sort[0]=createdAt:asc` as any,
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-          },
         );
         setLogs(((res as any).data || []) as OrderLog[]);
       } finally {
