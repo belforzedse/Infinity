@@ -391,9 +391,17 @@ export interface ApiContractLogContractLog extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::contract-log.contract-log", "oneToOne", "admin::user"> &
       Attribute.Private;
     Description: Attribute.Text;
+    IP: Attribute.String;
+    performed_by: Attribute.Relation<
+      "api::contract-log.contract-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    PerformedBy: Attribute.String;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::contract-log.contract-log", "oneToOne", "admin::user"> &
       Attribute.Private;
+    UserAgent: Attribute.String;
   };
 }
 
@@ -747,6 +755,11 @@ export interface ApiLocalUserLogLocalUserLog extends Schema.CollectionType {
       "manyToOne",
       "api::local-user.local-user"
     >;
+    performed_by: Attribute.Relation<
+      "api::local-user-log.local-user-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
     PerformedBy: Attribute.String;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::local-user-log.local-user-log", "oneToOne", "admin::user"> &
@@ -968,12 +981,6 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
       "api::product-review.product-review"
     >;
     removedAt: Attribute.DateTime;
-    strapi_user: Attribute.Relation<
-      "api::local-user.local-user",
-      "oneToOne",
-      "plugin::users-permissions.user"
-    > &
-      Attribute.Private;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::local-user.local-user", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -1102,6 +1109,11 @@ export interface ApiOrderLogOrderLog extends Schema.CollectionType {
     Description: Attribute.Text;
     IP: Attribute.String;
     order: Attribute.Relation<"api::order-log.order-log", "manyToOne", "api::order.order">;
+    performed_by: Attribute.Relation<
+      "api::order-log.order-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
     PerformedBy: Attribute.String;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::order-log.order-log", "oneToOne", "admin::user"> &
@@ -1413,6 +1425,13 @@ export interface ApiProductLogProductLog extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::product-log.product-log", "oneToOne", "admin::user"> &
       Attribute.Private;
     Description: Attribute.Text;
+    IP: Attribute.String;
+    performed_by: Attribute.Relation<
+      "api::product-log.product-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    PerformedBy: Attribute.String;
     product: Attribute.Relation<
       "api::product-log.product-log",
       "manyToOne",
@@ -1421,6 +1440,7 @@ export interface ApiProductLogProductLog extends Schema.CollectionType {
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::product-log.product-log", "oneToOne", "admin::user"> &
       Attribute.Private;
+    UserAgent: Attribute.String;
   };
 }
 

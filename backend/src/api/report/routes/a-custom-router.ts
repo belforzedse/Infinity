@@ -28,5 +28,13 @@ export default {
         auth: { scope: [] },
       },
     },
+    {
+      method: "GET",
+      path: "/reports/admin-activity",
+      handler: "report.adminActivity",
+      config: {
+        auth: { scope: [] },
+      },
+    },
   ],
 };

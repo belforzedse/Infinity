@@ -655,5 +655,2399 @@
     "type": "variable",
     "status": "publish",
     "rating": "0.00"
+  },
+  "821100": {
+    "strapiId": 76,
+    "importedAt": "2025-11-10T01:18:01.021Z",
+    "name": "کیف چکاوک B00201",
+    "slug": "chakavak-bag-b00201",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "821472": {
+    "strapiId": 77,
+    "importedAt": "2025-11-10T01:18:24.833Z",
+    "name": "کیف فلور B00203",
+    "slug": "flora-bag-b00203",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "821973": {
+    "strapiId": 78,
+    "importedAt": "2025-11-10T01:18:47.415Z",
+    "name": "کیف آنا B00181",
+    "slug": "anna-bag-b00181",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "822291": {
+    "strapiId": 79,
+    "importedAt": "2025-11-10T01:18:52.952Z",
+    "name": "کیف رژا B00202",
+    "slug": "raja-bag-b00202",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "824665": {
+    "strapiId": 80,
+    "importedAt": "2025-11-10T01:19:03.528Z",
+    "name": "کیف دو تیکه B00204",
+    "slug": "two-piece-bag-b00204",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "825507": {
+    "strapiId": 81,
+    "importedAt": "2025-11-10T01:19:10.489Z",
+    "name": "کیف دونا B00210",
+    "slug": "donna-bag-b00210",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "825513": {
+    "strapiId": 82,
+    "importedAt": "2025-11-10T01:19:21.209Z",
+    "name": "کیف آلما B00209",
+    "slug": "alma-bag-b00209",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "825519": {
+    "strapiId": 83,
+    "importedAt": "2025-11-10T01:19:34.102Z",
+    "name": "کیف اریکا B00208",
+    "slug": "erica-bag-b00208",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "825527": {
+    "strapiId": 84,
+    "importedAt": "2025-11-10T01:19:27.002Z",
+    "name": "کیف ویونا B00206",
+    "slug": "viona-bag-b00206",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "825537": {
+    "strapiId": 85,
+    "importedAt": "2025-11-10T01:19:34.285Z",
+    "name": "کیف آیلی B00205",
+    "slug": "ailey-bag-b00205",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "828311": {
+    "strapiId": 88,
+    "importedAt": "2025-11-10T01:19:52.462Z",
+    "name": "کیف پول یونا B00213",
+    "slug": "yuna-wallet-b00213",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "828391": {
+    "strapiId": 87,
+    "importedAt": "2025-11-10T01:19:51.536Z",
+    "name": "کیف پول آلباB00217",
+    "slug": "alba-wallet-b00217",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "828660": {
+    "strapiId": 86,
+    "importedAt": "2025-11-10T01:19:45.669Z",
+    "name": "کیف پول الا B00214",
+    "slug": "",
+    "type": "simple",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "830238": {
+    "strapiId": 89,
+    "importedAt": "2025-11-10T01:19:59.537Z",
+    "name": "کیف جاکارتی سویل B00218",
+    "slug": "seville-jakarta-bag-b00218",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "830256": {
+    "strapiId": 90,
+    "importedAt": "2025-11-10T01:20:01.084Z",
+    "name": "کیف پول ربکا B00220",
+    "slug": "rebecca-wallet-b00220",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "830639": {
+    "strapiId": 91,
+    "importedAt": "2025-11-10T01:19:52.521Z",
+    "name": "کیف گیلدا B00211",
+    "slug": "gilda-bag-b00211",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "830930": {
+    "strapiId": 92,
+    "importedAt": "2025-11-10T01:20:01.578Z",
+    "name": "کیف آنا OppsiB00181",
+    "slug": "%da%a9%db%8c%d9%81-%d8%a2%d9%86%d8%a7-oppsib00181",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "831330": {
+    "strapiId": 93,
+    "importedAt": "2025-11-10T01:20:07.361Z",
+    "name": "کیف پول آیگل B00212",
+    "slug": "aigle-wallet-b00212",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "832792": {
+    "strapiId": 94,
+    "importedAt": "2025-11-10T01:20:14.011Z",
+    "name": "کیف ورزشی نایکی B00236",
+    "slug": "nike-sports-bag-b00236",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "833872": {
+    "strapiId": 95,
+    "importedAt": "2025-11-10T01:20:21.279Z",
+    "name": "کیف پاسپورتی OppsiB00186",
+    "slug": "%da%a9%db%8c%d9%81-%d9%be%d8%a7%d8%b3%d9%be%d9%88%d8%b1%d8%aa%db%8c-oppsib00186",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "834033": {
+    "strapiId": 96,
+    "importedAt": "2025-11-10T01:20:28.200Z",
+    "name": "کیف طرحدار B00238",
+    "slug": "patterned-bag-b00238",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "834038": {
+    "strapiId": 97,
+    "importedAt": "2025-11-10T01:20:30.668Z",
+    "name": "کیف پول لورا B00221",
+    "slug": "laura-wallet-b00221",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "836203": {
+    "strapiId": 98,
+    "importedAt": "2025-11-10T01:20:47.868Z",
+    "name": "کیف مارگارت OppsiB00106",
+    "slug": "%da%a9%db%8c%d9%81-%d9%85%d8%a7%d8%b1%da%af%d8%a7%d8%b1%d8%aa-oppsib00106",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "837077": {
+    "strapiId": 99,
+    "importedAt": "2025-11-10T01:20:53.847Z",
+    "name": "کیف کارت عروسکی B00223",
+    "slug": "doll-card-bag-b00223",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "837587": {
+    "strapiId": 100,
+    "importedAt": "2025-11-10T01:21:10.692Z",
+    "name": "کیف دنیز B00239",
+    "slug": "denise-bag-b00239",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "837616": {
+    "strapiId": 101,
+    "importedAt": "2025-11-10T01:21:14.272Z",
+    "name": "کیف دو جیب B00247",
+    "slug": "two-pocket-bag-b00247",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "837793": {
+    "strapiId": 102,
+    "importedAt": "2025-11-10T01:21:24.526Z",
+    "name": "کیف پول گوچی B00224",
+    "slug": "gucci-wallet-b00224",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "837829": {
+    "strapiId": 103,
+    "importedAt": "2025-11-10T01:21:23.678Z",
+    "name": "کیف کارت Mellow B00222",
+    "slug": "mellow-b00222-card-case",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "840947": {
+    "strapiId": 105,
+    "importedAt": "2025-11-10T01:21:44.286Z",
+    "name": "کیف سه کاره B00249",
+    "slug": "b00249-triple-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "840961": {
+    "strapiId": 104,
+    "importedAt": "2025-11-10T01:21:42.667Z",
+    "name": "کیف دیور B00243",
+    "slug": "dior-bag-b00243",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "841788": {
+    "strapiId": 107,
+    "importedAt": "2025-11-10T01:21:51.293Z",
+    "name": "کیف تیارا B00244",
+    "slug": "tiara-bag-b00244",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "841815": {
+    "strapiId": 106,
+    "importedAt": "2025-11-10T01:21:48.763Z",
+    "name": "کیف برشکا B00241",
+    "slug": "breshka-bag-b00241",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "841853": {
+    "strapiId": 108,
+    "importedAt": "2025-11-10T01:21:50.172Z",
+    "name": "کیف هلالی آروشا B00246",
+    "slug": "arusha-crescent-bag-b00246",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "843679": {
+    "strapiId": 109,
+    "importedAt": "2025-11-10T01:22:00.352Z",
+    "name": "کیف هانا OppsiB00200",
+    "slug": "%da%a9%db%8c%d9%81-%d9%87%d8%a7%d9%86%d8%a7-oppsib00200",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "845031": {
+    "strapiId": 110,
+    "importedAt": "2025-11-10T01:22:06.959Z",
+    "name": "کیف دوشی لبه هلالی OppsiB00188",
+    "slug": "%da%a9%db%8c%d9%81-%d8%af%d9%88%d8%b4%db%8c-%d9%84%d8%a8%d9%87-%d9%87%d9%84%d8%a7%d9%84%db%8c-oppsib00188",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "846028": {
+    "strapiId": 111,
+    "importedAt": "2025-11-10T01:22:27.469Z",
+    "name": "کیف ورزشی نایکی OppsiB00236",
+    "slug": "%da%a9%db%8c%d9%81-%d9%88%d8%b1%d8%b2%d8%b4%db%8c-%d9%86%d8%a7%db%8c%da%a9%db%8c-oppsib00236",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "847865": {
+    "strapiId": 112,
+    "importedAt": "2025-11-10T01:22:31.245Z",
+    "name": "کیف هلالی تارا B00248",
+    "slug": "tara-crescent-bag-b00248",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "848106": {
+    "strapiId": 113,
+    "importedAt": "2025-11-10T01:22:36.090Z",
+    "name": "کیف لاوین B00242",
+    "slug": "lavin-b00242-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850184": {
+    "strapiId": 114,
+    "importedAt": "2025-11-10T01:22:40.631Z",
+    "name": "کیف پول دایاموند B00134",
+    "slug": "diamond-wallet-b00134",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850214": {
+    "strapiId": 115,
+    "importedAt": "2025-11-10T01:22:45.503Z",
+    "name": "کیف سوفی B0091",
+    "slug": "sophie-bag-b0091",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850237": {
+    "strapiId": 116,
+    "importedAt": "2025-11-10T01:22:47.851Z",
+    "name": "کیف کارت آنیل B00226",
+    "slug": "anil-card-bag-b00226",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850260": {
+    "strapiId": 118,
+    "importedAt": "2025-11-10T01:22:46.498Z",
+    "name": "کیف پول ریما B00227",
+    "slug": "rima-wallet-b00227",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850293": {
+    "strapiId": 117,
+    "importedAt": "2025-11-10T01:22:49.157Z",
+    "name": "کیف بزرگ تک دسته B00250",
+    "slug": "large-single-handle-bag-b00250",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850350": {
+    "strapiId": 120,
+    "importedAt": "2025-11-10T01:22:55.579Z",
+    "name": "کیف برشکا اداری B00251",
+    "slug": "kyiv-breshka-adari-b00251",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850398": {
+    "strapiId": 119,
+    "importedAt": "2025-11-10T01:22:57.204Z",
+    "name": "کیف دلانا B00245",
+    "slug": "delana-bag-b00245",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850419": {
+    "strapiId": 121,
+    "importedAt": "2025-11-10T01:22:56.434Z",
+    "name": "کیف پول سوفی B00228",
+    "slug": "sophies-wallet-b00228",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850455": {
+    "strapiId": 122,
+    "importedAt": "2025-11-10T01:23:06.050Z",
+    "name": "کیف کارتی سالویا B00229",
+    "slug": "salvia-card-bag-b00229",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850477": {
+    "strapiId": 123,
+    "importedAt": "2025-11-10T01:23:04.248Z",
+    "name": "کیف پول دینا B00233",
+    "slug": "dina-wallet-b00233",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850586": {
+    "strapiId": 124,
+    "importedAt": "2025-11-10T01:23:05.337Z",
+    "name": "کیف پول یافا B00230",
+    "slug": "jaffa-wallet-b00230",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850612": {
+    "strapiId": 126,
+    "importedAt": "2025-11-10T01:23:18.187Z",
+    "name": "کیف پول مگی B00235",
+    "slug": "maggie-wallet-b00235",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "850633": {
+    "strapiId": 125,
+    "importedAt": "2025-11-10T01:23:14.671Z",
+    "name": "کیف پول فی فی B00234",
+    "slug": "phi-phi-wallet-b00234",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "850661": {
+    "strapiId": 127,
+    "importedAt": "2025-11-10T01:23:19.832Z",
+    "name": "کیف پول بتی B00231",
+    "slug": "betty-wallet-b00231",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "850683": {
+    "strapiId": 128,
+    "importedAt": "2025-11-10T01:23:19.935Z",
+    "name": "کیف پول برندا B00232",
+    "slug": "brenda-wallet-b00232",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "852370": {
+    "strapiId": 129,
+    "importedAt": "2025-11-10T01:23:32.522Z",
+    "name": "کیف سه کاره OppsiB00249",
+    "slug": "%da%a9%db%8c%d9%81-%d8%b3%d9%87-%da%a9%d8%a7%d8%b1%d9%87-oppsib00249",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "853680": {
+    "strapiId": 130,
+    "importedAt": "2025-11-10T01:23:35.897Z",
+    "name": "کیف OppsiMOMMY BAG B00172",
+    "slug": "%da%a9%db%8c%d9%81-oppsimommy-bag-b00172",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "861069": {
+    "strapiId": 131,
+    "importedAt": "2025-11-10T01:24:04.395Z",
+    "name": "کیف دانشجویی OppsiB00187",
+    "slug": "%da%a9%db%8c%d9%81-%d8%af%d8%a7%d9%86%d8%b4%d8%ac%d9%88%db%8c%db%8c-oppsib00187",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "869163": {
+    "strapiId": 132,
+    "importedAt": "2025-11-10T01:24:39.713Z",
+    "name": "کیف کلارا OppsiB0096",
+    "slug": "%da%a9%db%8c%d9%81-%da%a9%d9%84%d8%a7%d8%b1%d8%a7-oppsib0096",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "873814": {
+    "strapiId": 133,
+    "importedAt": "2025-11-10T01:24:41.725Z",
+    "name": "کیف مینی زارا Oppsi",
+    "slug": "%da%a9%db%8c%d9%81-%d9%85%db%8c%d9%86%db%8c-%d8%b2%d8%a7%d8%b1%d8%a7-oppsi",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "874578": {
+    "strapiId": 134,
+    "importedAt": "2025-11-10T01:24:42.234Z",
+    "name": "کیف برشکا OppsiB00241",
+    "slug": "%da%a9%db%8c%d9%81-%d8%a8%d8%b1%d8%b4%da%a9%d8%a7-oppsib00241",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "876208": {
+    "strapiId": 135,
+    "importedAt": "2025-11-10T01:25:07.258Z",
+    "name": "کیف دو زیپ  B00257",
+    "slug": "b00257-tassel-double-zipper-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "877995": {
+    "strapiId": 136,
+    "importedAt": "2025-11-10T01:25:58.870Z",
+    "name": "کیف میلانو B00258",
+    "slug": "milano-bag-b00258",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "878613": {
+    "strapiId": 137,
+    "importedAt": "2025-11-10T01:26:33.690Z",
+    "name": "کیف جلو قفلی B00260",
+    "slug": "front-lock-bag-b00260",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "878621": {
+    "strapiId": 138,
+    "importedAt": "2025-11-10T01:26:27.378Z",
+    "name": "کیف آنائل B00261",
+    "slug": "anneal-bag-b00261",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "878653": {
+    "strapiId": 139,
+    "importedAt": "2025-11-10T01:25:59.455Z",
+    "name": "کیف برشکا اداری OppsiB00251",
+    "slug": "%da%a9%db%8c%d9%81-%d8%a8%d8%b1%d8%b4%da%a9%d8%a7-%d8%a7%d8%af%d8%a7%d8%b1%db%8c-oppsib00251",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "880485": {
+    "strapiId": 140,
+    "importedAt": "2025-11-10T01:26:59.237Z",
+    "name": "کیف مجلسی تمام نگین B00259",
+    "slug": "b00259-all-jewellery-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "882824": {
+    "strapiId": 141,
+    "importedAt": "2025-11-10T01:27:08.827Z",
+    "name": "کیف دستی موجی B00269",
+    "slug": "wave-handbag-b00269",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "882828": {
+    "strapiId": 142,
+    "importedAt": "2025-11-10T01:27:08.503Z",
+    "name": "کیف سگک ترکیبی B00275",
+    "slug": "combination-buckle-bag-b00275",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "883139": {
+    "strapiId": 143,
+    "importedAt": "2025-11-10T01:27:14.056Z",
+    "name": "کتونی D0074",
+    "slug": "shoes-d0074",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "884206": {
+    "strapiId": 144,
+    "importedAt": "2025-11-10T01:27:17.588Z",
+    "name": "کتونی بارسا D0072",
+    "slug": "rosara-cotton-dress-d0072",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "884933": {
+    "strapiId": 145,
+    "importedAt": "2025-11-10T01:27:36.626Z",
+    "name": "کیف نیلاب B00267",
+    "slug": "nilab-bag-b00267",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "884940": {
+    "strapiId": 146,
+    "importedAt": "2025-11-10T01:27:35.603Z",
+    "name": "کیف حلقه دار B00276",
+    "slug": "ring-bag-b00276",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "885260": {
+    "strapiId": 148,
+    "importedAt": "2025-11-10T01:27:42.870Z",
+    "name": "کیف تک بند B00273",
+    "slug": "single-strap-bag-b00273",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "885363": {
+    "strapiId": 147,
+    "importedAt": "2025-11-10T01:27:44.952Z",
+    "name": "کتونی سامبا D0088",
+    "slug": "d0088",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886196": {
+    "strapiId": 149,
+    "importedAt": "2025-11-10T01:27:51.233Z",
+    "name": "کتونی آدیداس D0081",
+    "slug": "cotton-d0081",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886219": {
+    "strapiId": 150,
+    "importedAt": "2025-11-10T01:27:57.745Z",
+    "name": "کتونی ایده D0075",
+    "slug": "cotton-idea-d0075",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886314": {
+    "strapiId": 151,
+    "importedAt": "2025-11-10T01:28:08.496Z",
+    "name": "کیف گلایور B00264",
+    "slug": "gulliver-bag-b00264",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886320": {
+    "strapiId": 153,
+    "importedAt": "2025-11-10T01:28:08.387Z",
+    "name": "کیف مجلسی شاینی B00271",
+    "slug": "shaini-bag-b00271",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886327": {
+    "strapiId": 152,
+    "importedAt": "2025-11-10T01:28:08.249Z",
+    "name": "کیف زارا B00279",
+    "slug": "zara-bag-b00279",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "888360": {
+    "strapiId": 155,
+    "importedAt": "2025-11-10T01:28:18.662Z",
+    "name": "کتونی آنلی D0085",
+    "slug": "ketoni-anli-d0085",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "888390": {
+    "strapiId": 154,
+    "importedAt": "2025-11-10T01:28:17.132Z",
+    "name": "کتونی نیوبالانس D0086",
+    "slug": "d0086",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "890978": {
+    "strapiId": 157,
+    "importedAt": "2025-11-10T01:28:19.134Z",
+    "name": "کتونی سامبا OppsiD0088",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%b3%d8%a7%d9%85%d8%a8%d8%a7-oppsid0088",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "891132": {
+    "strapiId": 156,
+    "importedAt": "2025-11-10T01:28:23.728Z",
+    "name": "کیف برند B00278",
+    "slug": "bag-brand-b00278",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "891174": {
+    "strapiId": 158,
+    "importedAt": "2025-11-10T01:28:25.703Z",
+    "name": "کتونی ربکا D0083",
+    "slug": "ketoni-rebecca-d0083",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "892059": {
+    "strapiId": 159,
+    "importedAt": "2025-11-10T01:28:32.170Z",
+    "name": "کیف قفل چرخی B00265",
+    "slug": "wheel-lock-bag-b00265",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "892074": {
+    "strapiId": 160,
+    "importedAt": "2025-11-10T01:28:37.691Z",
+    "name": "کتونی برندا D0082",
+    "slug": "cotton-brenda-d0082",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "892517": {
+    "strapiId": 161,
+    "importedAt": "2025-11-10T01:28:57.132Z",
+    "name": "کیف تیکه ای برشکا B00277",
+    "slug": "bershka-b00277-piece-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "893775": {
+    "strapiId": 162,
+    "importedAt": "2025-11-10T01:29:06.545Z",
+    "name": "کتونی فشن D0084",
+    "slug": "fashion-cotton-d0084",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "893795": {
+    "strapiId": 163,
+    "importedAt": "2025-11-10T01:29:06.436Z",
+    "name": "کتونی آل ستار D0087",
+    "slug": "all-star-cotton-d0087",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "894942": {
+    "strapiId": 164,
+    "importedAt": "2025-11-10T01:29:15.910Z",
+    "name": "کیف مجلسی شاینی B00268",
+    "slug": "cheyenne-bag-b00268",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "894950": {
+    "strapiId": 165,
+    "importedAt": "2025-11-10T01:29:14.628Z",
+    "name": "کیف لبه شاین B00272",
+    "slug": "handbag-b00272",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "894953": {
+    "strapiId": 166,
+    "importedAt": "2025-11-10T01:29:23.372Z",
+    "name": "کیف جلو حلقه B00270",
+    "slug": "ring-front-bag-b00270",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "895706": {
+    "strapiId": 167,
+    "importedAt": "2025-11-10T01:29:23.870Z",
+    "name": "کیف کارت عروسکی OppsiB00223",
+    "slug": "%da%a9%db%8c%d9%81-%da%a9%d8%a7%d8%b1%d8%aa-%d8%b9%d8%b1%d9%88%d8%b3%da%a9%db%8c-oppsib00223",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "897845": {
+    "strapiId": 168,
+    "importedAt": "2025-11-10T01:29:32.143Z",
+    "name": "کیف مجلسی نواردار B00266",
+    "slug": "belted-bag-b00266",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "898633": {
+    "strapiId": 169,
+    "importedAt": "2025-11-10T01:29:36.768Z",
+    "name": "کیف راشل B00263",
+    "slug": "rachel-bag-b00263",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "898652": {
+    "strapiId": 170,
+    "importedAt": "2025-11-10T01:29:39.396Z",
+    "name": "کیف مجلسی پیله B00262",
+    "slug": "cocoon-bag-b00262",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "900343": {
+    "strapiId": 171,
+    "importedAt": "2025-11-10T01:29:58.289Z",
+    "name": "کتونی آرکبرد D0089",
+    "slug": "cotton-samba-archbird-d0089",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "902350": {
+    "strapiId": 172,
+    "importedAt": "2025-11-10T01:30:02.986Z",
+    "name": "کتونی نیو بالانس D0073",
+    "slug": "d0073",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "903939": {
+    "strapiId": 173,
+    "importedAt": "2025-11-10T01:30:11.456Z",
+    "name": "کیف کمربندی B00280",
+    "slug": "belt-bag-b00280",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "903943": {
+    "strapiId": 174,
+    "importedAt": "2025-11-10T01:30:10.065Z",
+    "name": "کتونی آراد D00134",
+    "slug": "arad-ketoni-d00134",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "903990": {
+    "strapiId": 175,
+    "importedAt": "2025-11-10T01:30:16.279Z",
+    "name": "کتونی سیدنی D00132",
+    "slug": "sydney-cotton-d00132",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "904041": {
+    "strapiId": 176,
+    "importedAt": "2025-11-10T01:30:29.977Z",
+    "name": "کتونی امگا D00131",
+    "slug": "omega-ketone-d00131",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "907449": {
+    "strapiId": 177,
+    "importedAt": "2025-11-10T01:30:38.653Z",
+    "name": "کیف سطلی B00281",
+    "slug": "bucket-bag-b00281",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "907476": {
+    "strapiId": 178,
+    "importedAt": "2025-11-10T01:30:36.819Z",
+    "name": "کیف بامی B00288",
+    "slug": "bami-bag-b00288",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "907512": {
+    "strapiId": 179,
+    "importedAt": "2025-11-10T01:30:50.726Z",
+    "name": "کتونی وین استار D00142",
+    "slug": "winstar-d00142-ketton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "907561": {
+    "strapiId": 181,
+    "importedAt": "2025-11-10T01:30:46.944Z",
+    "name": "کتونی رسپینا D00148",
+    "slug": "respina-d00148-ketton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "907620": {
+    "strapiId": 180,
+    "importedAt": "2025-11-10T01:30:49.619Z",
+    "name": "کیف بینو B00290",
+    "slug": "bino-bag-b00290",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "909132": {
+    "strapiId": 182,
+    "importedAt": "2025-11-10T01:31:06.362Z",
+    "name": "کتونی نیوبالانس D00150",
+    "slug": "d00150",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "909732": {
+    "strapiId": 183,
+    "importedAt": "2025-11-10T01:31:14.346Z",
+    "name": "کیف بلا B00293",
+    "slug": "bella-bag-b00293",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "909753": {
+    "strapiId": 184,
+    "importedAt": "2025-11-10T01:31:13.664Z",
+    "name": "کیف زنانه شرانگ B00282",
+    "slug": "womens-bag-shrang-b00282",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "909924": {
+    "strapiId": 185,
+    "importedAt": "2025-11-10T01:31:22.742Z",
+    "name": "کیف هلالی قفل دار B00283",
+    "slug": "crescent-lock-bag-b00283",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "910144": {
+    "strapiId": 186,
+    "importedAt": "2025-11-10T01:31:29.705Z",
+    "name": "کیف آوین B00284",
+    "slug": "avin-b00284-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "911162": {
+    "strapiId": 187,
+    "importedAt": "2025-11-10T01:31:34.977Z",
+    "name": "کیف B00289",
+    "slug": "bag-b00289",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "911186": {
+    "strapiId": 189,
+    "importedAt": "2025-11-10T01:31:36.038Z",
+    "name": "کیف میو میو B00292",
+    "slug": "miu-miu-bag-b00292",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "911209": {
+    "strapiId": 188,
+    "importedAt": "2025-11-10T01:31:36.279Z",
+    "name": "کتونی سامبا D00149",
+    "slug": "samba-cotton-d00149",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "911284": {
+    "strapiId": 190,
+    "importedAt": "2025-11-10T01:31:44.059Z",
+    "name": "کتونی پوما D00155",
+    "slug": "puma-d00155-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "912548": {
+    "strapiId": 191,
+    "importedAt": "2025-11-10T01:31:50.039Z",
+    "name": "کیف افرا B00287",
+    "slug": "maple-bag-b00278",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "912552": {
+    "strapiId": 192,
+    "importedAt": "2025-11-10T01:31:56.658Z",
+    "name": "کیف پارلا B00291",
+    "slug": "parella-bag-b00291",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913422": {
+    "strapiId": 193,
+    "importedAt": "2025-11-10T01:31:57.181Z",
+    "name": "کتونی بارلی D00154",
+    "slug": "barley-cotton-d00154",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913467": {
+    "strapiId": 194,
+    "importedAt": "2025-11-10T01:32:09.843Z",
+    "name": "کتونی نیکو D00164",
+    "slug": "nico-ketone-d00164",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913508": {
+    "strapiId": 195,
+    "importedAt": "2025-11-10T01:32:08.840Z",
+    "name": "کتونی لینا D00165",
+    "slug": "linas-cotton-d00165",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913548": {
+    "strapiId": 197,
+    "importedAt": "2025-11-10T01:32:10.787Z",
+    "name": "کتونی اسیکس D00166",
+    "slug": "dinas-ketone-d00166",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913603": {
+    "strapiId": 196,
+    "importedAt": "2025-11-10T01:32:09.166Z",
+    "name": "کیف مارک B00297",
+    "slug": "branded-bag-b00297",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913607": {
+    "strapiId": 198,
+    "importedAt": "2025-11-10T01:32:05.550Z",
+    "name": "کیف FENDI B00295",
+    "slug": "b00295-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913815": {
+    "strapiId": 199,
+    "importedAt": "2025-11-10T01:32:16.356Z",
+    "name": "ونس رامش D00160",
+    "slug": "ramesh-cotton-d00160",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913871": {
+    "strapiId": 200,
+    "importedAt": "2025-11-10T01:32:24.469Z",
+    "name": "ونس بندی ویدا D00161",
+    "slug": "vida-ketone-d00161",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "913898": {
+    "strapiId": 201,
+    "importedAt": "2025-11-10T01:32:24.005Z",
+    "name": "ونس وینا D00162",
+    "slug": "vienna-cotton-d00162",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "914957": {
+    "strapiId": 202,
+    "importedAt": "2025-11-10T01:32:31.953Z",
+    "name": "کیف ZARA B00298",
+    "slug": "zara-b00298-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "914967": {
+    "strapiId": 203,
+    "importedAt": "2025-11-10T01:32:31.965Z",
+    "name": "کیف رسا B00299",
+    "slug": "resaa-bag-b00299",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "914974": {
+    "strapiId": 204,
+    "importedAt": "2025-11-10T01:32:33.292Z",
+    "name": "کیف بنو B00300",
+    "slug": "beno-bag-b00300",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "915369": {
+    "strapiId": 205,
+    "importedAt": "2025-11-10T01:32:52.091Z",
+    "name": "کیف مایسا B00301",
+    "slug": "maysa-bag-b00301",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "917461": {
+    "strapiId": 206,
+    "importedAt": "2025-11-10T01:33:01.528Z",
+    "name": "کیف GUESS B00303",
+    "slug": "guess-b00303-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "917472": {
+    "strapiId": 207,
+    "importedAt": "2025-11-10T01:33:00.793Z",
+    "name": "کیف نها B00302",
+    "slug": "neha-bag-b00302",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "919037": {
+    "strapiId": 208,
+    "importedAt": "2025-11-10T01:33:13.445Z",
+    "name": "کفش مجلسی مرواریدی D00145",
+    "slug": "pearl-talqi-evening-shoes-d00145",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "919065": {
+    "strapiId": 209,
+    "importedAt": "2025-11-10T01:33:19.194Z",
+    "name": "کفش مجلسی گیپوری D00146",
+    "slug": "guipure-evening-shoes-d00146",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "923949": {
+    "strapiId": 210,
+    "importedAt": "2025-11-10T01:33:25.993Z",
+    "name": "کتونی مک کویین D00193",
+    "slug": "mcqueens-d00193-jacket",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "923967": {
+    "strapiId": 211,
+    "importedAt": "2025-11-10T01:33:36.394Z",
+    "name": "کتونی دو خط D00194",
+    "slug": "two-line-coat-d00194",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "926012": {
+    "strapiId": 212,
+    "importedAt": "2025-11-10T01:33:49.783Z",
+    "name": "کتونی ربکا OppsiD0083",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%b1%d8%a8%da%a9%d8%a7-oppsid0083",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "929151": {
+    "strapiId": 213,
+    "importedAt": "2025-11-10T01:33:50.279Z",
+    "name": "کتونی پوما OppsiD00155",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d9%be%d9%88%d9%85%d8%a7-oppsid00155",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "933100": {
+    "strapiId": 214,
+    "importedAt": "2025-11-10T01:34:04.988Z",
+    "name": "کفش مجلسی مرواریدی OppsiD00145",
+    "slug": "%da%a9%d9%81%d8%b4-%d9%85%d8%ac%d9%84%d8%b3%db%8c-%d9%85%d8%b1%d9%88%d8%a7%d8%b1%db%8c%d8%af%db%8c-oppsid00145",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "936096": {
+    "strapiId": 215,
+    "importedAt": "2025-11-10T01:34:12.132Z",
+    "name": "صندل پشت بندی D00195",
+    "slug": "back-strap-sandals-d00195",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "936099": {
+    "strapiId": 216,
+    "importedAt": "2025-11-10T01:34:11.157Z",
+    "name": "صندل سگک دار D00196",
+    "slug": "buckle-sandals-d00196",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "937364": {
+    "strapiId": 217,
+    "importedAt": "2025-11-10T01:34:18.535Z",
+    "name": "کتونی v2k نایکی d00197",
+    "slug": "d00197",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "938462": {
+    "strapiId": 218,
+    "importedAt": "2025-11-10T01:34:23.060Z",
+    "name": "کفش مجلسی پشت باز ورنی D00147",
+    "slug": "patent-leather-open-back-shoes-d00147",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "938473": {
+    "strapiId": 219,
+    "importedAt": "2025-11-10T01:34:28.715Z",
+    "name": "ونس سفید D00198",
+    "slug": "white-vans-d00198",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "940828": {
+    "strapiId": 220,
+    "importedAt": "2025-11-10T01:34:47.647Z",
+    "name": "کتونی نیوبالانس D00199",
+    "slug": "d00199",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "942809": {
+    "strapiId": 221,
+    "importedAt": "2025-11-10T01:34:57.347Z",
+    "name": "صندل هرمس D00200",
+    "slug": "slippers-d00200",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "942873": {
+    "strapiId": 222,
+    "importedAt": "2025-11-10T01:34:56.979Z",
+    "name": "صندل دو سگک D00202",
+    "slug": "double-buckle-sandals-d00202",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "943279": {
+    "strapiId": 224,
+    "importedAt": "2025-11-10T01:35:08.979Z",
+    "name": "کتونی ورزشی نایک v2k D00221",
+    "slug": "v2k-sports-shoes-d00221",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "943321": {
+    "strapiId": 223,
+    "importedAt": "2025-11-10T01:35:05.454Z",
+    "name": "صندل طرحدار D00203",
+    "slug": "patterned-sandals-d00203",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "943352": {
+    "strapiId": 225,
+    "importedAt": "2025-11-10T01:35:07.168Z",
+    "name": "کفش مجلسی جلو پاپیون D00204",
+    "slug": "bow-tie-front-dress-shoes-000204",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "945494": {
+    "strapiId": 227,
+    "importedAt": "2025-11-10T01:35:16.144Z",
+    "name": "کیف مینی B00304",
+    "slug": "mini-bag-b00304",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "945499": {
+    "strapiId": 226,
+    "importedAt": "2025-11-10T01:35:15.287Z",
+    "name": "کیف دوشی شالدار B00305",
+    "slug": "scarf-shower-bag-b00305",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "945503": {
+    "strapiId": 228,
+    "importedAt": "2025-11-10T01:35:38.186Z",
+    "name": "کیف رامک B00306",
+    "slug": "ramek-b00306-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "946393": {
+    "strapiId": 229,
+    "importedAt": "2025-11-10T01:35:42.778Z",
+    "name": "کیف مایا B00307",
+    "slug": "maya-bag-b00307",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "947172": {
+    "strapiId": 230,
+    "importedAt": "2025-11-10T01:35:45.497Z",
+    "name": "کیف دلسا B00308",
+    "slug": "delsa-bag-b00308",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "947452": {
+    "strapiId": 231,
+    "importedAt": "2025-11-10T01:35:48.150Z",
+    "name": "صندل سگک کمربندی F001",
+    "slug": "sandals-f001",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "948201": {
+    "strapiId": 232,
+    "importedAt": "2025-11-10T01:35:50.996Z",
+    "name": "صندل سگک دار D00196",
+    "slug": "buckle-sandals-d00196-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "950093": {
+    "strapiId": 233,
+    "importedAt": "2025-11-10T01:35:53.008Z",
+    "name": "صندل جین نیلای F004",
+    "slug": "nilai-jean-sandals-f004",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "950354": {
+    "strapiId": 234,
+    "importedAt": "2025-11-10T01:35:59.460Z",
+    "name": "کتونی جردن D00205",
+    "slug": "jordan-d00205-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "951547": {
+    "strapiId": 235,
+    "importedAt": "2025-11-10T01:36:01.329Z",
+    "name": "کتونی جردن OppsiD00205",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%ac%d8%b1%d8%af%d9%86-oppsid00205",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "951889": {
+    "strapiId": 237,
+    "importedAt": "2025-11-10T01:36:22.749Z",
+    "name": "صندل جین F007",
+    "slug": "denim-sandals-f007",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "952590": {
+    "strapiId": 236,
+    "importedAt": "2025-11-10T01:36:24.261Z",
+    "name": "کفش دلارز F003",
+    "slug": "dollars-shoes-f003",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "953162": {
+    "strapiId": 238,
+    "importedAt": "2025-11-10T01:36:30.307Z",
+    "name": "صندل دو سگک D00202sh",
+    "slug": "double-buckle-sandals-d00202-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "953542": {
+    "strapiId": 239,
+    "importedAt": "2025-11-10T01:36:37.733Z",
+    "name": "کیف هلالی ترلان B00309",
+    "slug": "terlan-crescent-bag-b00309",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "953873": {
+    "strapiId": 240,
+    "importedAt": "2025-11-10T01:36:49.280Z",
+    "name": "صندل آناهید F005",
+    "slug": "anahid-sandals-f005",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "953905": {
+    "strapiId": 241,
+    "importedAt": "2025-11-10T01:36:45.836Z",
+    "name": "صندل کیانا F006",
+    "slug": "kiana-sandals-f006",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "955812": {
+    "strapiId": 242,
+    "importedAt": "2025-11-10T01:37:01.845Z",
+    "name": "کفش کالج پاپیونی D00144",
+    "slug": "bowtie-college-shoes-d00144",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "956138": {
+    "strapiId": 243,
+    "importedAt": "2025-11-10T01:36:55.179Z",
+    "name": "کتونی نیو بالانس F009",
+    "slug": "f009-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "956159": {
+    "strapiId": 244,
+    "importedAt": "2025-11-10T01:36:58.219Z",
+    "name": "کتونی درنا F0012",
+    "slug": "dorna-f0012-cotton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "956172": {
+    "strapiId": 245,
+    "importedAt": "2025-11-10T01:37:07.723Z",
+    "name": "کتونی آوان F008",
+    "slug": "avan-f008-ketton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "957796": {
+    "strapiId": 246,
+    "importedAt": "2025-11-10T01:37:08.222Z",
+    "name": "کیف برند OppsiB00278",
+    "slug": "%da%a9%db%8c%d9%81-%d8%a8%d8%b1%d9%86%d8%af-oppsib00278",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "958457": {
+    "strapiId": 247,
+    "importedAt": "2025-11-10T01:37:13.788Z",
+    "name": "صندل حصیری زارا F0014",
+    "slug": "straw-sandals-f0014",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "958495": {
+    "strapiId": 248,
+    "importedAt": "2025-11-10T01:37:14.202Z",
+    "name": "کتونی میلا F0010",
+    "slug": "mila-f0010-cotton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "960083": {
+    "strapiId": 249,
+    "importedAt": "2025-11-10T01:37:31.747Z",
+    "name": "صندل آنشرلی F0016",
+    "slug": "ansherli-sandals-f0016",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "960865": {
+    "strapiId": 250,
+    "importedAt": "2025-11-10T01:37:33.505Z",
+    "name": "صندل سگک دار OppsiD00196",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%b3%da%af%da%a9-%d8%af%d8%a7%d8%b1-oppsid00196",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "960955": {
+    "strapiId": 251,
+    "importedAt": "2025-11-10T01:37:38.635Z",
+    "name": "صندل لی زارا F0025",
+    "slug": "zara-lee-sandals-f0025",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "961242": {
+    "strapiId": 252,
+    "importedAt": "2025-11-10T01:37:39.129Z",
+    "name": "کفش کالج پاپیونی OppsiD00144",
+    "slug": "%da%a9%d9%81%d8%b4-%da%a9%d8%a7%d9%84%d8%ac-%d9%be%d8%a7%d9%be%db%8c%d9%88%d9%86%db%8c-oppsid00144",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "961485": {
+    "strapiId": 253,
+    "importedAt": "2025-11-10T01:37:39.608Z",
+    "name": "کتونی آوان OppsiF008",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%a2%d9%88%d8%a7%d9%86-oppsif008",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "962037": {
+    "strapiId": 254,
+    "importedAt": "2025-11-10T01:37:45.296Z",
+    "name": "کتونی روما F0011",
+    "slug": "roma-f0011-ketone",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "963151": {
+    "strapiId": 255,
+    "importedAt": "2025-11-10T01:37:45.769Z",
+    "name": "کتونی نیو بالانس OppsiF009",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d9%86%db%8c%d9%88-%d8%a8%d8%a7%d9%84%d8%a7%d9%86%d8%b3-oppsif009",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "963187": {
+    "strapiId": 256,
+    "importedAt": "2025-11-10T01:37:55.619Z",
+    "name": "صندل برشکا F0018",
+    "slug": "bershka-sandals-f0018",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "964172": {
+    "strapiId": 257,
+    "importedAt": "2025-11-10T01:38:06.139Z",
+    "name": "صندل F0027",
+    "slug": "sandals-f0027",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "965513": {
+    "strapiId": 258,
+    "importedAt": "2025-11-10T01:38:25.749Z",
+    "name": "صندل سگک کمربندی OppsiF001",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%b3%da%af%da%a9-%da%a9%d9%85%d8%b1%d8%a8%d9%86%d8%af%db%8c-oppsif001",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "967502": {
+    "strapiId": 259,
+    "importedAt": "2025-11-10T01:38:36.499Z",
+    "name": "کتونی آل استار F0013",
+    "slug": "all-star-kettle-f0013",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "967511": {
+    "strapiId": 260,
+    "importedAt": "2025-11-10T01:38:38.508Z",
+    "name": "صندل فرنو F0020",
+    "slug": "frenno-sandals-f0020",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "967728": {
+    "strapiId": 261,
+    "importedAt": "2025-11-10T01:38:39.004Z",
+    "name": "کفش مجلسی پشت باز ورنی OppsiD00147",
+    "slug": "%da%a9%d9%81%d8%b4-%d9%85%d8%ac%d9%84%d8%b3%db%8c-%d9%be%d8%b4%d8%aa-%d8%a8%d8%a7%d8%b2-%d9%88%d8%b1%d9%86%db%8c-oppsid00147",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "968412": {
+    "strapiId": 262,
+    "importedAt": "2025-11-10T01:38:50.943Z",
+    "name": "صندل ساحل F0024",
+    "slug": "beach-sandals-f0024",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "968444": {
+    "strapiId": 263,
+    "importedAt": "2025-11-10T01:39:03.784Z",
+    "name": "صندل رونیکا F0017",
+    "slug": "ronica-sandals-f0017",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "968464": {
+    "strapiId": 264,
+    "importedAt": "2025-11-10T01:38:56.015Z",
+    "name": "کتونی مستر V2K F0031",
+    "slug": "master-v2k-f0031",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "968499": {
+    "strapiId": 265,
+    "importedAt": "2025-11-10T01:38:57.506Z",
+    "name": "کیف فریان B00314",
+    "slug": "farian-b00314-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "968514": {
+    "strapiId": 266,
+    "importedAt": "2025-11-10T01:39:02.286Z",
+    "name": "کتونی SAIL F0029",
+    "slug": "sail-f0029-cotton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "968541": {
+    "strapiId": 267,
+    "importedAt": "2025-11-10T01:38:59.389Z",
+    "name": "صندل بافت سولی F0021",
+    "slug": "soli-woven-sandals-f0021",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "969515": {
+    "strapiId": 268,
+    "importedAt": "2025-11-10T01:39:10.917Z",
+    "name": "کیف هانده B00310",
+    "slug": "hande-bag-b00310",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "969527": {
+    "strapiId": 269,
+    "importedAt": "2025-11-10T01:39:21.753Z",
+    "name": "صندل آوینا F0023",
+    "slug": "avina-sandals-f0023",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "969543": {
+    "strapiId": 270,
+    "importedAt": "2025-11-10T01:39:21.757Z",
+    "name": "کتونی مستر سامبا F0030",
+    "slug": "mr-samba-f0030-cotton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "969596": {
+    "strapiId": 271,
+    "importedAt": "2025-11-10T01:39:21.509Z",
+    "name": "صندل ورنی F0015",
+    "slug": "varney-sandals-f0015",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "970595": {
+    "strapiId": 272,
+    "importedAt": "2025-11-10T01:39:22.251Z",
+    "name": "کیف پارلا OppsiB00291",
+    "slug": "%da%a9%db%8c%d9%81-%d9%be%d8%a7%d8%b1%d9%84%d8%a7-oppsib00291",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "970861": {
+    "strapiId": 273,
+    "importedAt": "2025-11-10T01:39:31.010Z",
+    "name": "کتونی مستر نیو بالانس F0032",
+    "slug": "l-f0032-mens-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "971763": {
+    "strapiId": 274,
+    "importedAt": "2025-11-10T01:39:37.475Z",
+    "name": "کتونی آل استار ساق کوتاه F0033",
+    "slug": "all-short-leg-leggings-f0033",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "971791": {
+    "strapiId": 275,
+    "importedAt": "2025-11-10T01:39:46.974Z",
+    "name": "کتونی اسپرت NKTE F0034",
+    "slug": "nkte-f0034-sports-jacket",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "971816": {
+    "strapiId": 276,
+    "importedAt": "2025-11-10T01:39:47.946Z",
+    "name": "کیف کنفی B00323",
+    "slug": "hemp-bag-b00323",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "971821": {
+    "strapiId": 277,
+    "importedAt": "2025-11-10T01:39:46.336Z",
+    "name": "صندل ضربدری F0026",
+    "slug": "cross-sandals-f0026",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "974072": {
+    "strapiId": 278,
+    "importedAt": "2025-11-10T01:40:11.223Z",
+    "name": "کیف قفل طلایی B00316",
+    "slug": "golden-lock-bag-b00316",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "974082": {
+    "strapiId": 279,
+    "importedAt": "2025-11-10T01:40:15.958Z",
+    "name": "کیف بولر B00326",
+    "slug": "bowler-bag-b00326",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "974095": {
+    "strapiId": 281,
+    "importedAt": "2025-11-10T01:40:16.955Z",
+    "name": "صندل دلارا F0022",
+    "slug": "delara-sandals-f0022",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "974116": {
+    "strapiId": 280,
+    "importedAt": "2025-11-10T01:40:17.789Z",
+    "name": "کتونی V2K F0035",
+    "slug": "ketone-v2k-f0035",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "974889": {
+    "strapiId": 282,
+    "importedAt": "2025-11-10T01:40:18.286Z",
+    "name": "کتونی مستر OppsiV2K F0031",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d9%85%d8%b3%d8%aa%d8%b1-oppsiv2k-f0031",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "975869": {
+    "strapiId": 283,
+    "importedAt": "2025-11-10T01:40:19.908Z",
+    "name": "کتونی مستر سامبا OppsiF0030",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d9%85%d8%b3%d8%aa%d8%b1-%d8%b3%d8%a7%d9%85%d8%a8%d8%a7-oppsif0030",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "975889": {
+    "strapiId": 285,
+    "importedAt": "2025-11-10T01:40:18.775Z",
+    "name": "صندل ضربدری OppsiF0026",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%b6%d8%b1%d8%a8%d8%af%d8%b1%db%8c-oppsif0026",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "975969": {
+    "strapiId": 284,
+    "importedAt": "2025-11-10T01:40:25.294Z",
+    "name": "کتونی v2k لیان F0037",
+    "slug": "v2k-lian-ketone-f0037",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "976866": {
+    "strapiId": 286,
+    "importedAt": "2025-11-10T01:40:30.709Z",
+    "name": "کتونی نیوبالانس دلسا F0040",
+    "slug": "balance-delsa-f0040-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "977004": {
+    "strapiId": 287,
+    "importedAt": "2025-11-10T01:40:44.272Z",
+    "name": "کیف مینی اسکارف دار B00327",
+    "slug": "mini-scarf-bag-b00327",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "977530": {
+    "strapiId": 288,
+    "importedAt": "2025-11-10T01:40:44.767Z",
+    "name": "صندل کیانا OppsiF006",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%da%a9%db%8c%d8%a7%d9%86%d8%a7-oppsif006",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "978252": {
+    "strapiId": 289,
+    "importedAt": "2025-11-10T01:40:52.623Z",
+    "name": "کتونی MAKLINIT F0036",
+    "slug": "maklinit-f0036-ketone",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "978273": {
+    "strapiId": 290,
+    "importedAt": "2025-11-10T01:40:49.485Z",
+    "name": "کیف ترنم B00320",
+    "slug": "tranem-bag-b00320",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "978282": {
+    "strapiId": 291,
+    "importedAt": "2025-11-10T01:40:57.883Z",
+    "name": "صندل پشت بندی F0028",
+    "slug": "back-strap-sandals-f0028",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "978307": {
+    "strapiId": 292,
+    "importedAt": "2025-11-10T01:40:58.752Z",
+    "name": "کیف کنفی منگو MANGO B00324",
+    "slug": "mango-hemp-bag-mango-b00324",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "978315": {
+    "strapiId": 293,
+    "importedAt": "2025-11-10T01:40:57.263Z",
+    "name": "کتونی NIKP F0039",
+    "slug": "nikp-f0039-ketone",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979745": {
+    "strapiId": 294,
+    "importedAt": "2025-11-10T01:41:22.931Z",
+    "name": "کتونی نیو بالانس پانیا F0038",
+    "slug": "new-balance-pania-f0038-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979904": {
+    "strapiId": 295,
+    "importedAt": "2025-11-10T01:41:22.414Z",
+    "name": "کیف شانا B00312",
+    "slug": "shana-bag-b00312",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979928": {
+    "strapiId": 296,
+    "importedAt": "2025-11-10T01:41:30.388Z",
+    "name": "کیف CHANEL B00321",
+    "slug": "b00321-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979932": {
+    "strapiId": 297,
+    "importedAt": "2025-11-10T01:41:27.922Z",
+    "name": "کیف دسته اسکارف B00319",
+    "slug": "scarf-handle-bag-b00319",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979939": {
+    "strapiId": 298,
+    "importedAt": "2025-11-10T01:41:28.427Z",
+    "name": "کیف سها B00325",
+    "slug": "saha-bag-b00325",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979946": {
+    "strapiId": 299,
+    "importedAt": "2025-11-10T01:41:25.211Z",
+    "name": "کیف CHLOE B00315",
+    "slug": "b00315-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979970": {
+    "strapiId": 301,
+    "importedAt": "2025-11-10T01:41:34.769Z",
+    "name": "کیف شیلر B00313",
+    "slug": "schiller-b00313-bag",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "979978": {
+    "strapiId": 300,
+    "importedAt": "2025-11-10T01:41:37.080Z",
+    "name": "کیف سگک H B00311",
+    "slug": "h-buckle-bag-b00311",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "980180": {
+    "strapiId": 303,
+    "importedAt": "2025-11-10T01:41:43.065Z",
+    "name": "کتونی نایک جردن F0043",
+    "slug": "jordan-f0043-ketone",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "980297": {
+    "strapiId": 302,
+    "importedAt": "2025-11-10T01:41:45.634Z",
+    "name": "کتونی اسپرت REEBCK F0042",
+    "slug": "reebck-f0042-sports-jacket",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "980475": {
+    "strapiId": 304,
+    "importedAt": "2025-11-10T01:41:46.132Z",
+    "name": "صندل پشت بندی OppsiF0028",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d9%be%d8%b4%d8%aa-%d8%a8%d9%86%d8%af%db%8c-oppsif0028",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "980532": {
+    "strapiId": 305,
+    "importedAt": "2025-11-10T01:41:46.633Z",
+    "name": "صندل جین OppsiF007",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%ac%db%8c%d9%86-oppsif007",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "980547": {
+    "strapiId": 306,
+    "importedAt": "2025-11-10T01:41:46.637Z",
+    "name": "کتونی آل استار ساق کوتاه OppsiF0033",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%a2%d9%84-%d8%a7%d8%b3%d8%aa%d8%a7%d8%b1-%d8%b3%d8%a7%d9%82-%da%a9%d9%88%d8%aa%d8%a7%d9%87-oppsif0033",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "983304": {
+    "strapiId": 307,
+    "importedAt": "2025-11-10T01:41:52.870Z",
+    "name": "صندل پاشنه دار دلانا F0049",
+    "slug": "delana-heeled-sandals-f0049",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "984913": {
+    "strapiId": 308,
+    "importedAt": "2025-11-10T01:41:58.792Z",
+    "name": "کفش عروسکی کنفی F0052",
+    "slug": "hemp-doll-shoes-f0052",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "985992": {
+    "strapiId": 309,
+    "importedAt": "2025-11-10T01:42:04.963Z",
+    "name": "کیف طرح کنفی B00322",
+    "slug": "hemp-design-bag-b00322",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "986980": {
+    "strapiId": 310,
+    "importedAt": "2025-11-10T01:42:10.884Z",
+    "name": "صندل سگک طلایی F0060",
+    "slug": "gold-buckle-sandals-f0060",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987010": {
+    "strapiId": 311,
+    "importedAt": "2025-11-10T01:42:11.894Z",
+    "name": "صندل حصیری F0062",
+    "slug": "straw-sandals-f0062",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987046": {
+    "strapiId": 312,
+    "importedAt": "2025-11-10T01:42:18.938Z",
+    "name": "صندل ربکا F0056",
+    "slug": "rebecca-sandals-f0056",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987105": {
+    "strapiId": 313,
+    "importedAt": "2025-11-10T01:42:20.488Z",
+    "name": "صندل برندا F0057",
+    "slug": "brenda-sandals-f0057",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987194": {
+    "strapiId": 314,
+    "importedAt": "2025-11-10T01:42:31.197Z",
+    "name": "صندل آیسن F0058",
+    "slug": "aisen-sandals-f0058",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987217": {
+    "strapiId": 315,
+    "importedAt": "2025-11-10T01:42:31.572Z",
+    "name": "کیف مارسی B00328",
+    "slug": "marseille-bag-b00328",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987234": {
+    "strapiId": 316,
+    "importedAt": "2025-11-10T01:42:33.073Z",
+    "name": "صندل حصیری مهسان F0053",
+    "slug": "mahsan-straw-sandals-f0053",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987266": {
+    "strapiId": 318,
+    "importedAt": "2025-11-10T01:42:33.658Z",
+    "name": "کتونی آل استار ساق بلند نورا F0047",
+    "slug": "nora-all-star-leggings-f0047",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "987286": {
+    "strapiId": 317,
+    "importedAt": "2025-11-10T01:42:32.658Z",
+    "name": "کتونی آل استار ساق کوتاه پناه F0048",
+    "slug": "all-star-short-leg-pant-f0048",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "988229": {
+    "strapiId": 319,
+    "importedAt": "2025-11-10T01:42:54.306Z",
+    "name": "کتونی V2K تیارا F0044",
+    "slug": "v2k-tiara-f0044-ketone",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "988301": {
+    "strapiId": 320,
+    "importedAt": "2025-11-10T01:42:54.882Z",
+    "name": "کتونی جردن مارتا F0045",
+    "slug": "jordan-martha-f0045",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "988382": {
+    "strapiId": 322,
+    "importedAt": "2025-11-10T01:42:52.516Z",
+    "name": "صندل تلما F0059",
+    "slug": "thelma-sandals-f0059",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "988412": {
+    "strapiId": 321,
+    "importedAt": "2025-11-10T01:42:55.546Z",
+    "name": "صندل بتی F0061",
+    "slug": "betty-sandals-f0061",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "988456": {
+    "strapiId": 323,
+    "importedAt": "2025-11-10T01:43:01.808Z",
+    "name": "کتونی نیوبالانس دیبا f0041",
+    "slug": "diba-f0041-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "991561": {
+    "strapiId": 324,
+    "importedAt": "2025-11-10T01:43:02.306Z",
+    "name": "صندل ربکا OppsiF0056",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%b1%d8%a8%da%a9%d8%a7-oppsif0056",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "993809": {
+    "strapiId": 325,
+    "importedAt": "2025-11-10T01:43:07.329Z",
+    "name": "صندل آنیل F0055",
+    "slug": "anil-sandals-f0055",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "993898": {
+    "strapiId": 326,
+    "importedAt": "2025-11-10T01:43:14.752Z",
+    "name": "سوتین کفشدوزکی 000581",
+    "slug": "ladybug-bra-000581",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "995650": {
+    "strapiId": 327,
+    "importedAt": "2025-11-10T01:43:21.586Z",
+    "name": "کتونی آنیا F0046",
+    "slug": "anyas-ketton-f0046",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "996935": {
+    "strapiId": 328,
+    "importedAt": "2025-11-10T01:43:41.420Z",
+    "name": "کتونی نیوبالانس F0065",
+    "slug": "new-balance-f0065-sneakers",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "997431": {
+    "strapiId": 329,
+    "importedAt": "2025-11-10T01:43:42.965Z",
+    "name": "صندل مهلا F0063",
+    "slug": "mahla-sandals-f0063",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "998185": {
+    "strapiId": 331,
+    "importedAt": "2025-11-10T01:43:48.761Z",
+    "name": "صندل پارمین F0064",
+    "slug": "parmin-sandals-f0064",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "998206": {
+    "strapiId": 330,
+    "importedAt": "2025-11-10T01:43:43.463Z",
+    "name": "صندل آنشرلی OppsiF0016",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%a2%d9%86%d8%b4%d8%b1%d9%84%db%8c-oppsif0016",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "998369": {
+    "strapiId": 332,
+    "importedAt": "2025-11-10T01:43:49.257Z",
+    "name": "کتونی آل استار ساق بلند نورا OppsiF0047",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%a2%d9%84-%d8%a7%d8%b3%d8%aa%d8%a7%d8%b1-%d8%b3%d8%a7%d9%82-%d8%a8%d9%84%d9%86%d8%af-%d9%86%d9%88%d8%b1%d8%a7-oppsif0047",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1001049": {
+    "strapiId": 333,
+    "importedAt": "2025-11-10T01:43:49.755Z",
+    "name": "صندل تلما OppsiF0059",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%aa%d9%84%d9%85%d8%a7-oppsif0059",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1004276": {
+    "strapiId": 334,
+    "importedAt": "2025-11-10T01:43:50.249Z",
+    "name": "صندل مهلا OppsiF0063",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d9%85%d9%87%d9%84%d8%a7-oppsif0063",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1004524": {
+    "strapiId": 335,
+    "importedAt": "2025-11-10T01:43:50.749Z",
+    "name": "کتونی OppsiNIKP F0039",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-oppsinikp-f0039",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1007262": {
+    "strapiId": 336,
+    "importedAt": "2025-11-10T01:44:05.177Z",
+    "name": "کیف کنفی زبرا b00324",
+    "slug": "",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1007642": {
+    "strapiId": 337,
+    "importedAt": "2025-11-10T01:44:05.681Z",
+    "name": "صندل آنیل OppsiF0055",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%a2%d9%86%db%8c%d9%84-oppsif0055",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1007686": {
+    "strapiId": 338,
+    "importedAt": "2025-11-10T01:44:05.685Z",
+    "name": "صندل پارمین OppsiF0064",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d9%be%d8%a7%d8%b1%d9%85%db%8c%d9%86-oppsif0064",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1008913": {
+    "strapiId": 339,
+    "importedAt": "2025-11-10T01:44:06.174Z",
+    "name": "صندل دلارا OppsiF0022",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%af%d9%84%d8%a7%d8%b1%d8%a7-oppsif0022",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1012263": {
+    "strapiId": 340,
+    "importedAt": "2025-11-10T01:44:10.509Z",
+    "name": "کتونی مانلی F0066",
+    "slug": "manly-f0066-cotton",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1017969": {
+    "strapiId": 341,
+    "importedAt": "2025-11-10T01:44:24.725Z",
+    "name": "کتونی آراد OppsiD00134",
+    "slug": "%da%a9%d8%aa%d9%88%d9%86%db%8c-%d8%a2%d8%b1%d8%a7%d8%af-oppsid00134",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
   }
 }
