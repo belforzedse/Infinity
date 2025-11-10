@@ -25,7 +25,7 @@ export default {
       path: "/auth/self",
       handler: "auth.self",
       config: {
-        auth: { scope: [] },
+        auth: false,
       },
     },
     {
@@ -43,7 +43,7 @@ export default {
       path: "/auth/register-info",
       handler: "auth.registerInfo",
       config: {
-        auth: { scope: [] },
+        auth: false,
       },
     },
     {
