@@ -6,10 +6,19 @@ import { RedisClient } from "../../..";
 
 export default () => ({
   async hasUser(ctx, { phone }) {
+    // Normalize phone to +98XXXXXXXXX format for consistent lookup
+    let normalizedPhone = String(phone).trim();
+    if (normalizedPhone.startsWith("0")) {
+      normalizedPhone = `+98${normalizedPhone.substring(1)}`;
+    }
+    if (!normalizedPhone.startsWith("+")) {
+      normalizedPhone = `+${normalizedPhone}`;
+    }
+
     const user = await strapi.query("plugin::users-permissions.user").findOne({
       where: {
         phone: {
-          $endsWith: phone.substring(1),
+          $endsWith: normalizedPhone.substring(1),
         },
       },
     });
@@ -18,10 +27,19 @@ export default () => ({
   },
   async otp(ctx, { phone }) {
     try {
+      // Normalize phone to +98XXXXXXXXX format for consistent lookup
+      let normalizedPhone = String(phone).trim();
+      if (normalizedPhone.startsWith("0")) {
+        normalizedPhone = `+98${normalizedPhone.substring(1)}`;
+      }
+      if (!normalizedPhone.startsWith("+")) {
+        normalizedPhone = `+${normalizedPhone}`;
+      }
+
       const merchant = await strapi.query("plugin::users-permissions.user").findOne({
         where: {
           phone: {
-            $endsWith: phone.substring(1),
+            $endsWith: normalizedPhone.substring(1),
           },
         },
       });
@@ -37,7 +55,7 @@ export default () => ({
         JSON.stringify({
           code,
           merchant: merchant?.id,
-          phone,
+          phone: normalizedPhone,
           IsVerified: merchant?.IsVerified,
         }),
         {
