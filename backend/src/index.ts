@@ -5,6 +5,66 @@ import localUserOverride from "./api/local-user/documentation/1.0.0/overrides/lo
 import productLifeCycles from "./api/product/lifecycles";
 import productVariationLifeCycles from "./api/product-variation/lifecycles";
 
+// Helper function to get permissions for a role type
+async function getPermissionsForRole(roleType: string): Promise<Record<string, any>> {
+  try {
+    // Get all available routes/endpoints
+    const routes = strapi.plugin("users-permissions").config("routes");
+    const permissions: Record<string, any> = {};
+
+    if (roleType === "superadmin") {
+      // Superadmin: Grant all permissions
+      for (const [key, value] of Object.entries(routes)) {
+        const actions = Array.isArray(value) ? value : [];
+        if (actions.length > 0) {
+          permissions[key] = {
+            controllers: {
+              [key.split("::").pop()]: actions,
+            },
+          };
+        }
+      }
+    } else if (roleType === "store-manager") {
+      // Store manager: Can manage products, orders, users, but not financial/wallet
+      const allowedActions = [
+        "api::product.product",
+        "api::product-variation.product-variation",
+        "api::product-review.product-review",
+        "api::order.order",
+        "api::local-user.local-user",
+        "api::discount.discount",
+      ];
+      for (const action of allowedActions) {
+        if (routes[action]) {
+          const actionName = action.split("::").pop() || action;
+          permissions[action] = {
+            controllers: {
+              [actionName]: ["find", "findOne", "create", "update", "delete"],
+            },
+          };
+        }
+      }
+    } else if (roleType === "customer") {
+      // Customer: Read-only access to products, own data
+      permissions["api::product.product"] = {
+        controllers: {
+          product: ["find", "findOne"],
+        },
+      };
+      permissions["api::product-review.product-review"] = {
+        controllers: {
+          "product-review": ["find", "findOne"],
+        },
+      };
+    }
+
+    return permissions;
+  } catch (err) {
+    strapi.log.warn("Could not auto-generate permissions", { error: err?.message });
+    return {};
+  }
+}
+
 export const RedisClient = createClient({
   url: process.env.REDIS_URL,
   password: process.env.REDIS_PASSWORD,
@@ -182,12 +242,13 @@ export default {
                 });
               strapi.log.info(`✓ Created users-permissions role: ${r.name}`, { roleId: created.id });
 
-              // Rebuild permissions for the newly created role
+              // Assign permissions based on role type
               try {
-                await strapi.plugin("users-permissions").service("role").updatePermissions(created.id, {});
-                strapi.log.info(`✓ Initialized permissions for role: ${r.name}`);
+                const permissions = await getPermissionsForRole(r.type);
+                await strapi.plugin("users-permissions").service("role").updatePermissions(created.id, permissions);
+                strapi.log.info(`✓ Created and assigned permissions for role: ${r.name}`);
               } catch (permError) {
-                strapi.log.warn(`Could not initialize permissions for role: ${r.name}`, { error: permError?.message });
+                strapi.log.warn(`Could not assign permissions for role: ${r.name}`, { error: permError?.message });
               }
             } else {
               strapi.log.info(`✓ Role already exists: ${r.name}`, { roleId: existing.id });
