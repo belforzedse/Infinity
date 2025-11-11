@@ -43,3 +43,19 @@ export function getAccessToken(): string | null {
     return null;
   }
 }
+
+/**
+ * Normalizes Iranian phone numbers to the +98XXXXXXXXXX format
+ * Converts from formats like:
+ * - 09XXXXXXXXX → +989XXXXXXXXX
+ * - 989XXXXXXXXX → +989XXXXXXXXX
+ * - +989XXXXXXXXX → +989XXXXXXXXX (unchanged)
+ */
+export function normalizePhoneNumber(value: string): string {
+  if (!value) return value;
+  let trimmed = value.trim();
+  if (trimmed.startsWith("+")) return trimmed;
+  if (trimmed.startsWith("0")) trimmed = trimmed.substring(1);
+  if (!trimmed.startsWith("98")) trimmed = `98${trimmed}`;
+  return `+${trimmed}`;
+}

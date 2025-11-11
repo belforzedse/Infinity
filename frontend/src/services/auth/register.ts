@@ -1,5 +1,6 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
+import { normalizePhoneNumber } from "@/utils/auth";
 
 export interface RegisterRequest {
   firstName: string;
@@ -16,7 +17,12 @@ export interface Response {
 export const register = async (payload: RegisterRequest): Promise<Response> => {
   const endpoint = ENDPOINTS.AUTH.REGISTER;
 
-  const response = await apiClient.post<Response>(endpoint, payload);
+  const normalizedPayload = {
+    ...payload,
+    phone: payload.phone ? normalizePhoneNumber(payload.phone) : undefined,
+  };
+
+  const response = await apiClient.post<Response>(endpoint, normalizedPayload);
 
   return response as Response;
 };
