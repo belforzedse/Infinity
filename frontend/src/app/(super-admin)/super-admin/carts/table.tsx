@@ -126,7 +126,7 @@ export const columns: ColumnDef<Cart>[] = [
             const thumbnailUrl = imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
 
             // Fix URL construction for cart items
-            const baseImageUrl = API_BASE_URL.split("/api")[0];
+            const baseImageUrl = API_BASE_URL ? API_BASE_URL.split("/api")[0] : "";
             const imageUrl = thumbnailUrl
               ? (thumbnailUrl.startsWith('http') ? thumbnailUrl : `${baseImageUrl}${thumbnailUrl}`)
               : null;

@@ -36,7 +36,8 @@ export type UserWallet = {
 };
 
 export type User = {
-  id: number;
+  id: string;
+  attributes: any;
   username?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -249,11 +250,16 @@ type Props = {
 export const MobileTable = ({ data }: Props) => {
   return (
     <div className="mt-2 flex flex-col gap-2">
-      {data?.map((row) => (
+      {data?.map((row) => {
+        const rowWithStringId: User = {
+          ...row,
+          id: String(row.id),
+        };
+        return (
         <MobileTableRowBox
           key={row.id}
           columns={columns}
-          row={row}
+          row={rowWithStringId}
           header={
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex items-center gap-1">
@@ -281,7 +287,8 @@ export const MobileTable = ({ data }: Props) => {
           }
           headTitle={row.phone || "-"}
         />
-      ))}
+        );
+      })}
     </div>
   );
 };
