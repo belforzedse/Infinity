@@ -87,6 +87,10 @@
     },
     "removedAt": {
       "type": "datetime"
+    },
+    "strapi_user": {
+      "type": "integer",
+      "unique": true
     }
   }
 }

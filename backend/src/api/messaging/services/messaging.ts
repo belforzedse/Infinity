@@ -43,9 +43,25 @@ export default () => ({
         });
 
         const responseData = (await response.json()) as any;
+        strapi.log.debug(
+          `IP Panel response payload :: ${JSON.stringify(
+            {
+              status: response.status,
+              response: responseData,
+            },
+            null,
+            2,
+          )}`,
+        );
+
+        const gatewaySuccess =
+          response.ok &&
+          (responseData?.success === true ||
+            responseData?.status === "OK" ||
+            responseData?.code === 200);
 
         // IP Panel returns 200 OK but may have errors in the response body
-        if (!response.ok || !responseData?.success) {
+        if (!gatewaySuccess) {
           strapi.log.error(`SMS gateway failed for ${normalizedPhone}`, {
             status: response.status,
             response: responseData,
@@ -58,8 +74,9 @@ export default () => ({
           return false;
         }
 
+        const messageId = responseData?.messageId ?? responseData?.data?.message_id;
         strapi.log.info(`SMS sent successfully to ${normalizedPhone}`, {
-          messageId: responseData?.messageId,
+          messageId,
           recipient: normalizedPhone,
         });
       }

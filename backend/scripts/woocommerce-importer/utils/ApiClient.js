@@ -287,6 +287,61 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Find existing product size helper for a product
+   */
+  async findProductSizeHelper(productId) {
+    const response = await this.retryRequest(() =>
+      this.client.get('/product-size-helpers', {
+        params: {
+          'filters[product][id][$eq]': productId,
+        },
+      }),
+    );
+    if (response.data?.data && response.data.data.length > 0) {
+      return response.data.data[0];
+    }
+    return null;
+  }
+
+  /**
+   * Create or update the size helper associated with a product
+   */
+  async syncProductSizeHelper(productId, helperMatrix) {
+    const existingHelper = await this.findProductSizeHelper(productId);
+
+    // If no helper data provided, delete existing helper if present
+    if (!helperMatrix) {
+      if (existingHelper) {
+        await this.retryRequest(() =>
+          this.client.delete(`/product-size-helpers/${existingHelper.id}`),
+        );
+      }
+      return null;
+    }
+
+    if (existingHelper) {
+      const response = await this.retryRequest(() =>
+        this.client.put(`/product-size-helpers/${existingHelper.id}`, {
+          data: {
+            Helper: helperMatrix,
+          },
+        }),
+      );
+      return response.data;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.post('/product-size-helpers', {
+        data: {
+          Helper: helperMatrix,
+          product: productId,
+        },
+      }),
+    );
+    return response.data;
+  }
+
+  /**
    * Update an existing product variation
    */
   async updateProductVariation(variationId, updateData) {
