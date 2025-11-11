@@ -41,13 +41,14 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
   const { reason } = ctx.request.body as { reason?: string };
 
   try {
-    // Admin guard
-    const user = ctx.state.user;
-    const roleId =
-      typeof user?.user_role === "object"
-        ? user.user_role?.id
-        : user?.user_role;
-    if (!user || Number(roleId) !== 2) {
+    // Admin guard: ensure plugin user has an admin/store-manager role
+    const pluginUser = ctx.state.user;
+    if (!pluginUser) return ctx.forbidden("Admin access required");
+    const fullUser = await strapi.db
+      .query("plugin::users-permissions.user")
+      .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
+    const roleName = fullUser?.role?.name;
+    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
       return ctx.forbidden("Admin access required");
     }
 
@@ -134,8 +135,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
         const source = tx?.external_source || contract?.external_source;
         return source === "SnappPay" && tx?.TrackId;
       });
-      const gatewaySource =
-        snappayTx?.external_source || contract?.external_source;
+      const gatewaySource = snappayTx?.external_source || contract?.external_source;
       const paymentToken = snappayTx?.TrackId;
       const transactionId = contract?.external_id;
 
@@ -150,9 +150,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
         const snappay = strapi.service("api::payment-gateway.snappay");
         const cancelRes = await snappay.cancelOrder(transactionId, paymentToken);
         if (!cancelRes.successful) {
-          throw new Error(
-            `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
-          );
+          throw new Error(`SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`);
         }
       }
 
@@ -164,15 +162,13 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           .findOne({ where: { user: userId } });
 
         if (!wallet) {
-          wallet = await strapi.db
-            .query("api::local-user-wallet.local-user-wallet")
-            .create({
-              data: {
-                user: userId,
-                Balance: 0,
-                LastTransactionDate: new Date(),
-              },
-            });
+          wallet = await strapi.db.query("api::local-user-wallet.local-user-wallet").create({
+            data: {
+              user: userId,
+              Balance: 0,
+              LastTransactionDate: new Date(),
+            },
+          });
         }
 
         const refundIrr = paidAmount * 10;
@@ -185,9 +181,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
         });
 
         await strapi.db
-          .query(
-            "api::local-user-wallet-transaction.local-user-wallet-transaction"
-          )
+          .query("api::local-user-wallet-transaction.local-user-wallet-transaction")
           .create({
             data: {
               Amount: refundIrr,
@@ -201,24 +195,20 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
 
         // Create contract-transaction Return record
         const maxStep =
-          txList.length > 0
-            ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
-            : 0;
+          txList.length > 0 ? Math.max(...txList.map((t: any) => Number(t.Step || 0))) : 0;
 
         if (Number.isFinite(contractIdNum)) {
-          await strapi.db
-            .query("api::contract-transaction.contract-transaction")
-            .create({
-              data: {
-                Type: "Return",
-                Amount: refundIrr,
-                Step: maxStep + 1,
-                Status: "Success",
-                external_source: "System",
-                contract: contractIdNum,
-                Date: new Date(),
-              },
-            });
+          await strapi.db.query("api::contract-transaction.contract-transaction").create({
+            data: {
+              Type: "Return",
+              Amount: refundIrr,
+              Step: maxStep + 1,
+              Status: "Success",
+              external_source: "System",
+              contract: contractIdNum,
+              Date: new Date(),
+            },
+          });
         }
       }
 
@@ -231,11 +221,9 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           Changes: {
             reason: reason || "",
             refundToman: paidAmount,
-            snappay: snappayToken
-              ? { action: "cancel", token: snappayToken }
-              : undefined,
+            snappay: snappayToken ? { action: "cancel", token: snappayToken } : undefined,
           },
-          PerformedBy: `Admin User ${user.id}`,
+          PerformedBy: `Admin User ${fullUser.id}`,
         },
       });
 

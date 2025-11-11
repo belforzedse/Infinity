@@ -39,6 +39,7 @@ class OrderImporter {
     // Caches for faster lookups
     this.variationMappingCache = new Map();
     this.userCache = new Map(); // Cache for guest users created
+    this.customerRoleId = null;
   }
 
   /**
@@ -281,11 +282,15 @@ class OrderImporter {
     
     // Create guest user based on billing information
     if (wcOrder.billing && wcOrder.billing.phone) {
-      const phone = wcOrder.billing.phone;
+      const formattedPhone = this.formatPhone(wcOrder.billing.phone);
+      if (!formattedPhone) {
+        return null;
+      }
+      const cacheKey = formattedPhone;
 
       // Check cache first
-      if (this.userCache.has(phone)) {
-        return this.userCache.get(phone);
+      if (this.userCache.has(cacheKey)) {
+        return this.userCache.get(cacheKey);
       }
 
       if (dryRun) {
@@ -294,24 +299,25 @@ class OrderImporter {
 
       try {
         // First check if user with this phone already exists in Strapi
-        const existingUser = await this.strapiClient.get('/local-users', {
-          'filters[Phone][$eq]': phone,
-          'pagination[pageSize]': 1
-        });
+        const existingUser = await this.strapiClient.findPluginUserByPhone(formattedPhone);
 
-        if (existingUser.data && existingUser.data.length > 0) {
-          // User already exists, use that one
-          const userId = existingUser.data[0].id;
-          this.userCache.set(phone, userId);
-          this.logger.debug(`👤 Found existing user with phone ${phone} → ID: ${userId}`);
-          return userId;
+        if (existingUser) {
+          const userId = existingUser.id ?? existingUser?.data?.id;
+          if (userId) {
+            this.userCache.set(cacheKey, userId);
+            this.logger.debug(`👤 Found existing user with phone ${formattedPhone} → ID: ${userId}`);
+            return userId;
+          }
         }
 
         // User doesn't exist, create new guest user
         const guestUser = await this.createGuestUser(wcOrder.billing);
-        this.userCache.set(phone, guestUser.data.id);
+        const guestUserId = guestUser?.id ?? guestUser?.data?.id;
+        if (guestUserId) {
+          this.userCache.set(cacheKey, guestUserId);
+        }
         this.stats.guestUsersCreated++;
-        return guestUser.data.id;
+        return guestUserId;
       } catch (error) {
         this.logger.warn(`⚠️ Failed to handle guest user for order ${wcOrder.id}:`, error.message);
         return null; // Continue without user link
@@ -325,33 +331,112 @@ class OrderImporter {
    * Create guest user from billing information
    */
   async createGuestUser(billing) {
-    const userData = {
-      Phone: billing.phone,
-      IsActive: false, // Guest users are inactive by default
+    const rawPhone = (billing.phone || '').trim();
+    const formattedPhone = rawPhone ? this.formatPhone(rawPhone) : `guest_${Date.now()}`;
+    const sanitizedPhone = formattedPhone.substring(0, 255);
+    const email = this.ensureGuestEmail(billing, sanitizedPhone);
+    const payload = {
+      username: sanitizedPhone,
+      phone: sanitizedPhone,
+      email,
+      password: this.generateRandomPassword(),
+      IsActive: false,
       IsVerified: false,
-      external_id: `guest_${billing.phone}`,
-      external_source: 'woocommerce_guest'
+      confirmed: true,
+      blocked: false,
+      external_id: `guest_${sanitizedPhone}`,
+      external_source: 'woocommerce_guest',
     };
-    
-    const userResult = await this.strapiClient.create('/local-users', userData);
-    
-    // Create user info if we have name data
-    if (userResult.data && (billing.first_name || billing.last_name)) {
+
+    const customerRoleId = await this.getOrLoadCustomerRoleId();
+    if (customerRoleId) {
+      payload.role = customerRoleId;
+    }
+
+    const userResult = await this.strapiClient.createPluginUser(payload);
+    const userId = userResult?.id ?? userResult?.data?.id;
+
+    if (userId && (billing.first_name || billing.last_name)) {
       const userInfoData = {
         FirstName: billing.first_name || '',
         LastName: billing.last_name || '',
-        user: userResult.data.id
+        user: userId,
       };
-      
+
       try {
         await this.strapiClient.create('/local-user-infos', userInfoData);
       } catch (error) {
         this.logger.warn(`⚠️ Failed to create user info for guest:`, error.message);
       }
     }
-    
-    this.logger.debug(`👤 Created guest user: ${billing.phone} → ID: ${userResult.data.id}`);
+
+    this.logger.debug(`👤 Created guest user: ${sanitizedPhone} → ID: ${userId}`);
     return userResult;
+  }
+
+  async getOrLoadCustomerRoleId() {
+    if (this.customerRoleId) {
+      return this.customerRoleId;
+    }
+
+    try {
+      const roles = await this.strapiClient.getPluginRoles();
+      const customerRole = roles.find(
+        (role) =>
+          role?.name?.toLowerCase() === 'customer' ||
+          role?.type === 'customer',
+      );
+      if (customerRole?.id) {
+        this.customerRoleId = customerRole.id;
+        return this.customerRoleId;
+      }
+      this.logger.warn('⚠️ Customer plugin role not found for guest users.');
+    } catch (error) {
+      this.logger.error(`❌ Failed to load plugin roles for guest users: ${error.message}`);
+    }
+
+    return null;
+  }
+
+  ensureGuestEmail(billing, fallbackPhone) {
+    if (billing.email && billing.email.trim() !== '') {
+      return billing.email.trim();
+    }
+    const numeric = (fallbackPhone || '').replace(/\D/g, '') || `guest-${Date.now()}`;
+    return `${numeric}@placeholder.local`;
+  }
+
+  generateRandomPassword() {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
+
+  formatPhone(value) {
+    if (value === undefined || value === null) {
+      return '';
+    }
+    let trimmed = value.toString().trim();
+    if (!trimmed) return '';
+
+    trimmed = trimmed.replace(/\s+/g, '');
+
+    if (trimmed.startsWith('+')) {
+      return trimmed;
+    }
+
+    if (trimmed.startsWith('0')) {
+      return `+98${trimmed.slice(1)}`;
+    }
+
+    if (trimmed.startsWith('98')) {
+      return `+${trimmed}`;
+    }
+
+    return `+${trimmed}`;
   }
 
   /**

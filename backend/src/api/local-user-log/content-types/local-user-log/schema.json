@@ -17,6 +17,11 @@
       "relation": "manyToOne",
       "target": "api::local-user.local-user"
     },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
     "Action": {
       "type": "enumeration",
       "enum": ["Create", "Update", "Delete"],

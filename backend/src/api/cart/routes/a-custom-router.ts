@@ -9,8 +9,7 @@ export default {
       path: "/carts/me",
       handler: "cart.getMyCart",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -18,8 +17,7 @@ export default {
       path: "/carts/add-item",
       handler: "cart.addItem",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -27,8 +25,7 @@ export default {
       path: "/carts/update-item",
       handler: "cart.updateItem",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -36,8 +33,7 @@ export default {
       path: "/carts/remove-item/:id",
       handler: "cart.removeItem",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -45,8 +41,7 @@ export default {
       path: "/carts/check-stock",
       handler: "cart.checkStock",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -54,8 +49,7 @@ export default {
       path: "/carts/apply-discount",
       handler: "cart.applyDiscount",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -63,8 +57,7 @@ export default {
       path: "/carts/finalize",
       handler: "cart.finalizeToOrder",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -72,8 +65,7 @@ export default {
       path: "/carts/shipping-preview",
       handler: "cart.shippingPreview",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
   ],

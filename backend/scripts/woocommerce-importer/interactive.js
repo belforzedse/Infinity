@@ -200,12 +200,16 @@ async function selectCredentials() {
   console.log('     URL: https://api.infinitycolor.co/api\n');
   console.log('  2️⃣  Staging');
   console.log('     URL: https://api.infinity.rgbgroup.ir/api\n');
+  console.log('  3️⃣  Local');
+  console.log('     URL: http://localhost:1337/api\n');
 
-  const choice = await prompt('Select environment (1-2, default: 1): ');
+  const choice = await prompt('Select environment (1-3, default: 1): ');
 
   let selected = 'production';
   if (choice === '2') {
     selected = 'staging';
+  } else if (choice === '3') {
+    selected = 'local';
   }
 
   selectedCredentialEnv = selected;

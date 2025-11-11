@@ -18,8 +18,7 @@ export default {
       path: "/orders/:id/payment-status",
       handler: "order.checkPaymentStatus",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -27,8 +26,7 @@ export default {
       path: "/orders/my-orders",
       handler: "order.getMyOrders",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -44,8 +42,7 @@ export default {
       path: "/orders/:id/admin/adjust-items",
       handler: "order.adminAdjustItems",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -53,8 +50,7 @@ export default {
       path: "/orders/:id/admin/cancel",
       handler: "order.adminCancel",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -62,8 +58,7 @@ export default {
       path: "/orders/:id/admin/void-barcode",
       handler: "order.adminVoidBarcode",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
   ],

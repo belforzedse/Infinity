@@ -9,8 +9,7 @@ export default {
       path: "/reports/liquidity",
       handler: "report.liquidity",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -18,8 +17,7 @@ export default {
       path: "/reports/product-sales",
       handler: "report.productSales",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -27,8 +25,15 @@ export default {
       path: "/reports/gateway-liquidity",
       handler: "report.gatewayLiquidity",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
+      },
+    },
+    {
+      method: "GET",
+      path: "/reports/admin-activity",
+      handler: "report.adminActivity",
+      config: {
+        auth: { scope: [] },
       },
     },
   ],
