@@ -309,7 +309,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
       // Create new variations
       for (const combination of newCombinations) {
-        await apiClient.post("/product-variations", { data: combination }, { headers: authHeader });
+        await apiClient.post("/product-variations", { data: combination });
       }
 
       alert(`${newCombinations.length} تنوع محصول با موفقیت ایجاد شد`);

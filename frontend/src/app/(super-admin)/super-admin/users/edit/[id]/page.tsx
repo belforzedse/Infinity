@@ -39,7 +39,7 @@ export default function Page() {
         // Fetch user data from API
         const _user = await UserService.getDetails(id);
 
-        const userInfo = _user.user_info || {};
+        const userInfo = (_user.user_info || {}) as Record<string, any>;
 
         const formattedData: User = {
           id: _user.id.toString(),
