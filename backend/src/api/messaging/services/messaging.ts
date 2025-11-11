@@ -15,25 +15,53 @@ export default () => ({
       }
 
       if (isOTP) {
-        await fetch(
-          process.env.IP_PANEL_API_URL ||
-            "https://api2.ippanel.com/api/v1/sms/pattern/normal/send",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              apiKey: process.env.IP_PANEL_API_KEY,
+        // Validate required environment variables
+        if (!process.env.IP_PANEL_API_URL || !process.env.IP_PANEL_API_KEY || !process.env.IP_PANEL_PATTERN_CODE || !process.env.IP_PANEL_SENDER) {
+          strapi.log.error("Missing IP Panel environment variables", {
+            hasApiUrl: !!process.env.IP_PANEL_API_URL,
+            hasApiKey: !!process.env.IP_PANEL_API_KEY,
+            hasPatternCode: !!process.env.IP_PANEL_PATTERN_CODE,
+            hasSender: !!process.env.IP_PANEL_SENDER,
+          });
+          return false;
+        }
+
+        const response = await fetch(process.env.IP_PANEL_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apiKey: process.env.IP_PANEL_API_KEY,
+          },
+          body: JSON.stringify({
+            recipient: normalizedPhone,
+            code: process.env.IP_PANEL_PATTERN_CODE,
+            sender: process.env.IP_PANEL_SENDER,
+            variable: {
+              "verification-code": message,
             },
-            body: JSON.stringify({
+          }),
+        });
+
+        const responseData = await response.json();
+
+        // IP Panel returns 200 OK but may have errors in the response body
+        if (!response.ok || !responseData.success) {
+          strapi.log.error(`SMS gateway failed for ${normalizedPhone}`, {
+            status: response.status,
+            response: responseData,
+            request: {
               recipient: normalizedPhone,
               code: process.env.IP_PANEL_PATTERN_CODE || "42d3urtbfhm6p8g",
               sender: process.env.IP_PANEL_SENDER || "+983000505",
-              variable: {
-                "verification-code": message,
-              },
-            }),
-          }
-        );
+            },
+          });
+          return false;
+        }
+
+        strapi.log.info(`SMS sent successfully to ${normalizedPhone}`, {
+          messageId: responseData.messageId,
+          recipient: normalizedPhone,
+        });
       }
 
       return 200;

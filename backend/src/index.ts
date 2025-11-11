@@ -168,22 +168,57 @@ export default {
         ];
 
         for (const r of roles) {
-          const existing = await strapi
-            .query("plugin::users-permissions.role")
-            .findOne({ where: { name: r.name } });
-          if (!existing) {
-            await strapi
+          try {
+            const existing = await strapi
               .query("plugin::users-permissions.role")
-              .create({
-                name: r.name,
-                description: r.description,
-                type: r.type,
-              });
-            strapi.log.info(`Created users-permissions role: ${r.name}`);
+              .findOne({ where: { name: r.name } });
+            if (!existing) {
+              const created = await strapi
+                .query("plugin::users-permissions.role")
+                .create({
+                  name: r.name,
+                  description: r.description,
+                  type: r.type,
+                });
+              strapi.log.info(`✓ Created users-permissions role: ${r.name}`, { roleId: created.id });
+
+              // Rebuild permissions for the newly created role
+              try {
+                await strapi.plugin("users-permissions").service("role").updatePermissions(created.id, {});
+                strapi.log.info(`✓ Initialized permissions for role: ${r.name}`);
+              } catch (permError) {
+                strapi.log.warn(`Could not initialize permissions for role: ${r.name}`, { error: permError?.message });
+              }
+            } else {
+              strapi.log.info(`✓ Role already exists: ${r.name}`, { roleId: existing.id });
+            }
+          } catch (roleError) {
+            strapi.log.error(`✗ Failed to create role: ${r.name}`, {
+              error: roleError?.message,
+              details: roleError,
+            });
           }
         }
+
+        // Rebuild permissions for all existing roles (fixes broken roles)
+        try {
+          const allRoles = await strapi.query("plugin::users-permissions.role").findMany();
+          for (const role of allRoles) {
+            try {
+              await strapi.plugin("users-permissions").service("role").updatePermissions(role.id, {});
+              strapi.log.info(`✓ Rebuilt permissions for role: ${role.name} (id: ${role.id})`);
+            } catch (rebuildError) {
+              strapi.log.warn(`Could not rebuild permissions for role: ${role.name}`, { error: rebuildError?.message });
+            }
+          }
+        } catch (rebuildError) {
+          strapi.log.warn("Could not rebuild all role permissions", { error: rebuildError?.message });
+        }
       } catch (e) {
-        strapi.log.error("Failed to ensure plugin roles", e);
+        strapi.log.error("✗ Failed to ensure plugin roles", {
+          error: e?.message,
+          details: e,
+        });
       }
     })();
   },
