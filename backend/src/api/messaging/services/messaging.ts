@@ -42,24 +42,24 @@ export default () => ({
           }),
         });
 
-        const responseData = await response.json();
+        const responseData = (await response.json()) as any;
 
         // IP Panel returns 200 OK but may have errors in the response body
-        if (!response.ok || !responseData.success) {
+        if (!response.ok || !responseData?.success) {
           strapi.log.error(`SMS gateway failed for ${normalizedPhone}`, {
             status: response.status,
             response: responseData,
             request: {
               recipient: normalizedPhone,
-              code: process.env.IP_PANEL_PATTERN_CODE || "42d3urtbfhm6p8g",
-              sender: process.env.IP_PANEL_SENDER || "+983000505",
+              code: process.env.IP_PANEL_PATTERN_CODE,
+              sender: process.env.IP_PANEL_SENDER,
             },
           });
           return false;
         }
 
         strapi.log.info(`SMS sent successfully to ${normalizedPhone}`, {
-          messageId: responseData.messageId,
+          messageId: responseData?.messageId,
           recipient: normalizedPhone,
         });
       }

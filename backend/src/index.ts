@@ -199,21 +199,6 @@ export default {
             });
           }
         }
-
-        // Rebuild permissions for all existing roles (fixes broken roles)
-        try {
-          const allRoles = await strapi.query("plugin::users-permissions.role").findMany();
-          for (const role of allRoles) {
-            try {
-              await strapi.plugin("users-permissions").service("role").updatePermissions(role.id, {});
-              strapi.log.info(`✓ Rebuilt permissions for role: ${role.name} (id: ${role.id})`);
-            } catch (rebuildError) {
-              strapi.log.warn(`Could not rebuild permissions for role: ${role.name}`, { error: rebuildError?.message });
-            }
-          }
-        } catch (rebuildError) {
-          strapi.log.warn("Could not rebuild all role permissions", { error: rebuildError?.message });
-        }
       } catch (e) {
         strapi.log.error("✗ Failed to ensure plugin roles", {
           error: e?.message,
