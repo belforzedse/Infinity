@@ -1,67 +1,259 @@
 import { createClient } from "redis";
+import type { Strapi } from "@strapi/strapi";
 import override from "./api/auth/documentation/1.0.0/overrides/auth.json";
 import localUserOverride from "./api/local-user/documentation/1.0.0/overrides/local-user.json";
 
 import productLifeCycles from "./api/product/lifecycles";
 import productVariationLifeCycles from "./api/product-variation/lifecycles";
 
-// Helper function to get permissions for a role type
-async function getPermissionsForRole(roleType: string): Promise<Record<string, any>> {
-  try {
-    // Get all available routes/endpoints
-    const routes = strapi.plugin("users-permissions").config("routes");
-    const permissions: Record<string, any> = {};
+type ControllerActions = Record<string, ReadonlyArray<string> | "*">;
+type FullAccessSpec = { mode: "all" };
+type GranularSpec = {
+  mode?: undefined;
+  inherits?: string[];
+  grants: Record<string, ControllerActions>;
+};
+type RolePermissionSpec = FullAccessSpec | GranularSpec;
 
-    if (roleType === "superadmin") {
-      // Superadmin: Grant all permissions
-      for (const [key, value] of Object.entries(routes)) {
-        const actions = Array.isArray(value) ? value : [];
-        if (actions.length > 0) {
-          permissions[key] = {
-            controllers: {
-              [key.split("::").pop()]: actions,
-            },
-          };
-        }
-      }
-    } else if (roleType === "store-manager") {
-      // Store manager: Can manage products, orders, users, but not financial/wallet
-      const allowedActions = [
-        "api::product.product",
-        "api::product-variation.product-variation",
-        "api::product-review.product-review",
-        "api::order.order",
-        "api::local-user.local-user",
-        "api::discount.discount",
-      ];
-      for (const action of allowedActions) {
-        if (routes[action]) {
-          const actionName = action.split("::").pop() || action;
-          permissions[action] = {
-            controllers: {
-              [actionName]: ["find", "findOne", "create", "update", "delete"],
-            },
-          };
-        }
-      }
-    } else if (roleType === "customer") {
-      // Customer: Read-only access to products, own data
-      permissions["api::product.product"] = {
-        controllers: {
-          product: ["find", "findOne"],
-        },
-      };
-      permissions["api::product-review.product-review"] = {
-        controllers: {
-          "product-review": ["find", "findOne"],
-        },
-      };
+const READ_ACTIONS = ["find", "findOne"] as const;
+
+const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
+  public: {
+    grants: {
+      "api::auth": {
+        auth: ["welcome", "otp", "login", "loginWithPassword", "resetPassword"],
+      },
+      "api::product": {
+        product: [...READ_ACTIONS, "search"],
+      },
+      "api::product-category": {
+        "product-category": READ_ACTIONS,
+      },
+      "api::product-category-content": {
+        "product-category-content": READ_ACTIONS,
+      },
+      "api::product-faq": {
+        "product-faq": READ_ACTIONS,
+      },
+      "api::product-size-helper": {
+        "product-size-helper": READ_ACTIONS,
+      },
+      "api::product-tag": {
+        "product-tag": READ_ACTIONS,
+      },
+      "api::product-variation": {
+        "product-variation": READ_ACTIONS,
+      },
+      "api::product-variation-color": {
+        "product-variation-color": READ_ACTIONS,
+      },
+      "api::product-variation-model": {
+        "product-variation-model": READ_ACTIONS,
+      },
+      "api::product-variation-size": {
+        "product-variation-size": READ_ACTIONS,
+      },
+      "api::product-review": {
+        "product-review": READ_ACTIONS,
+      },
+      "api::product-review-reply": {
+        "product-review-reply": READ_ACTIONS,
+      },
+      "api::product-review-like": {
+        "product-review-like": READ_ACTIONS,
+      },
+      "api::navigation": {
+        navigation: ["find"],
+      },
+      "api::footer": {
+        footer: ["find"],
+      },
+      "api::shipping": {
+        shipping: READ_ACTIONS,
+      },
+      "api::shipping-city": {
+        "shipping-city": READ_ACTIONS,
+      },
+      "api::shipping-province": {
+        "shipping-province": READ_ACTIONS,
+      },
+      "api::order": {
+        order: ["verifyPayment"],
+      },
+      "api::wallet-topup": {
+        "wallet-topup": ["paymentCallback"],
+      },
+    },
+  },
+  customer: {
+    inherits: ["public"],
+    grants: {
+      "api::auth": {
+        auth: ["self", "registerInfo"],
+      },
+      "api::cart": {
+        cart: [
+          "getMyCart",
+          "addItem",
+          "updateItem",
+          "removeItem",
+          "checkStock",
+          "applyDiscount",
+          "finalizeToOrder",
+          "shippingPreview",
+        ],
+      },
+      "api::product-like": {
+        "product-like": ["toggleFavorite", "getUserLikes"],
+      },
+      "api::product-review": {
+        "product-review": ["submitReview", "getUserReviews"],
+      },
+      "api::order": {
+        order: ["getMyOrders", "checkPaymentStatus"],
+      },
+      "api::local-user-address": {
+        "local-user-address": [
+          "find",
+          "findOne",
+          "create",
+          "update",
+          "delete",
+          "getMyAddresses",
+          "createAddress",
+        ],
+      },
+      "api::local-user-wallet": {
+        "local-user-wallet": ["getCurrentUserWallet"],
+      },
+      "api::wallet-topup": {
+        "wallet-topup": ["chargeIntent"],
+      },
+      "api::payment-gateway": {
+        "payment-gateway": ["snappEligible"],
+      },
+    },
+  },
+  "store-manager": { mode: "all" },
+  superadmin: { mode: "all" },
+};
+
+function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
+  return spec.mode === "all";
+}
+
+function enableAllActions(tree: Record<string, any>) {
+  Object.values(tree).forEach((entry: any) => {
+    Object.values(entry.controllers || {}).forEach((controller: any) => {
+      Object.values(controller).forEach((action: any) => {
+        action.enabled = true;
+      });
+    });
+  });
+}
+
+function applyControllerActions(
+  tree: Record<string, any>,
+  strapi: Strapi,
+  typeKey: string,
+  controllerName: string,
+  actions: ReadonlyArray<string> | "*" = [],
+) {
+  const typeEntry = tree[typeKey];
+  if (!typeEntry?.controllers?.[controllerName]) {
+    strapi.log.warn(
+      `Permission template skipped unknown controller: ${typeKey}.${controllerName}`,
+    );
+    return;
+  }
+
+  const controllerEntry = typeEntry.controllers[controllerName];
+
+  if (actions === "*") {
+    Object.keys(controllerEntry).forEach((action) => {
+      controllerEntry[action].enabled = true;
+    });
+    return;
+  }
+
+  actions.forEach((actionName) => {
+    if (!controllerEntry[actionName]) {
+      strapi.log.warn(
+        `Permission template skipped unknown action: ${typeKey}.${controllerName}.${actionName}`,
+      );
+      return;
     }
+    controllerEntry[actionName].enabled = true;
+  });
+}
 
-    return permissions;
-  } catch (err) {
-    strapi.log.warn("Could not auto-generate permissions", { error: err?.message });
-    return {};
+function applySpecRecursive(
+  tree: Record<string, any>,
+  strapi: Strapi,
+  roleType: string,
+  visited = new Set<string>(),
+) {
+  if (visited.has(roleType)) {
+    return;
+  }
+  visited.add(roleType);
+
+  const spec = ROLE_PERMISSION_SPECS[roleType];
+  if (!spec) {
+    return;
+  }
+
+  if (isFullAccessSpec(spec)) {
+    enableAllActions(tree);
+    return;
+  }
+
+  spec.inherits?.forEach((parent) => {
+    applySpecRecursive(tree, strapi, parent, visited);
+  });
+
+  Object.entries(spec.grants).forEach(([typeKey, controllers]) => {
+    Object.entries(controllers).forEach(([controller, actions]) => {
+      applyControllerActions(tree, strapi, typeKey, controller, actions);
+    });
+  });
+}
+
+function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string, any> {
+  const usersPermissionsService = strapi.plugin("users-permissions").service("users-permissions");
+  const spec = ROLE_PERMISSION_SPECS[roleType];
+
+  if (!spec) {
+    return usersPermissionsService.getActions({ defaultEnable: false });
+  }
+
+  if (isFullAccessSpec(spec)) {
+    return usersPermissionsService.getActions({ defaultEnable: true });
+  }
+
+  const tree = usersPermissionsService.getActions({ defaultEnable: false });
+  applySpecRecursive(tree, strapi, roleType);
+  return tree;
+}
+
+async function assignRolePermissions(strapi: Strapi, role: { id: number; name: string; type?: string | null }) {
+  const roleType = role?.type;
+  if (!roleType || !ROLE_PERMISSION_SPECS[roleType]) {
+    strapi.log.debug(`No permission template configured for role: ${role?.name ?? roleType}`);
+    return;
+  }
+
+  try {
+    const permissions = getDefaultPermissions(strapi, roleType);
+    await strapi
+      .plugin("users-permissions")
+      .service("role")
+      .updateRole(role.id, { permissions });
+    strapi.log.info(`✓ Assigned permissions for role: ${role.name}`);
+  } catch (error) {
+    strapi.log.warn(`Could not assign permissions for role: ${role.name}`, {
+      error: (error as any)?.message,
+    });
   }
 }
 
@@ -236,22 +428,18 @@ export default {
               const created = await strapi
                 .query("plugin::users-permissions.role")
                 .create({
-                  name: r.name,
-                  description: r.description,
-                  type: r.type,
+                  data: {
+                    name: r.name,
+                    description: r.description,
+                    type: r.type,
+                  },
                 });
               strapi.log.info(`✓ Created users-permissions role: ${r.name}`, { roleId: created.id });
 
-              // Assign permissions based on role type
-              try {
-                const permissions = await getPermissionsForRole(r.type);
-                await strapi.plugin("users-permissions").service("role").updatePermissions(created.id, permissions);
-                strapi.log.info(`✓ Created and assigned permissions for role: ${r.name}`);
-              } catch (permError) {
-                strapi.log.warn(`Could not assign permissions for role: ${r.name}`, { error: permError?.message });
-              }
+              await assignRolePermissions(strapi, created as any);
             } else {
               strapi.log.info(`✓ Role already exists: ${r.name}`, { roleId: existing.id });
+              await assignRolePermissions(strapi, existing as any);
             }
           } catch (roleError) {
             strapi.log.error(`✗ Failed to create role: ${r.name}`, {
@@ -264,6 +452,21 @@ export default {
         strapi.log.error("✗ Failed to ensure plugin roles", {
           error: e?.message,
           details: e,
+        });
+      }
+
+      try {
+        const publicRole = await strapi
+          .query("plugin::users-permissions.role")
+          .findOne({ where: { type: "public" } });
+        if (publicRole) {
+          await assignRolePermissions(strapi, publicRole as any);
+        } else {
+          strapi.log.warn("Public role not found; permissions were not updated");
+        }
+      } catch (error) {
+        strapi.log.error("Failed to assign permissions for public role", {
+          error: (error as any)?.message,
         });
       }
     })();
