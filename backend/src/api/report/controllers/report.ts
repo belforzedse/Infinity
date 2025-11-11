@@ -2,6 +2,8 @@
  * Report controller
  */
 
+import { ROLE_NAMES, roleIsAllowed, fetchUserWithRole } from "../../../utils/roles";
+
 type Interval = "day" | "week" | "month";
 
 function parseDate(value?: string, fallbackDays = 30): Date {
@@ -17,14 +19,11 @@ function parseDate(value?: string, fallbackDays = 30): Date {
 export default {
   async liquidity(ctx) {
     try {
-      // Admin guard
+      // Admin guard - only superadmins can view reports
       const userId = ctx.state?.user?.id;
-      const user = await strapi.db.query("api::local-user.local-user").findOne({
-        where: { id: userId },
-        populate: ["user_role"],
-      });
-      if (!user || user.user_role?.id !== 2) {
-        return ctx.forbidden("Access denied");
+      const user = await fetchUserWithRole(strapi, userId);
+      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
+        return ctx.forbidden("Access denied - Superadmin role required");
       }
 
       const start = parseDate(ctx.query.start as string);
@@ -78,14 +77,11 @@ export default {
 
   async productSales(ctx) {
     try {
-      // Admin guard
+      // Admin guard - only superadmins can view reports
       const userId = ctx.state?.user?.id;
-      const user = await strapi.db.query("api::local-user.local-user").findOne({
-        where: { id: userId },
-        populate: ["user_role"],
-      });
-      if (!user || user.user_role?.id !== 2) {
-        return ctx.forbidden("Access denied");
+      const user = await fetchUserWithRole(strapi, userId);
+      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
+        return ctx.forbidden("Access denied - Superadmin role required");
       }
 
       const start = parseDate(ctx.query.start as string);
@@ -307,14 +303,11 @@ export default {
 
   async gatewayLiquidity(ctx) {
     try {
-      // Admin guard
+      // Admin guard - only superadmins can view reports
       const userId = ctx.state?.user?.id;
-      const user = await strapi.db.query("api::local-user.local-user").findOne({
-        where: { id: userId },
-        populate: ["user_role"],
-      });
-      if (!user || user.user_role?.id !== 2) {
-        return ctx.forbidden("Access denied");
+      const user = await fetchUserWithRole(strapi, userId);
+      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
+        return ctx.forbidden("Access denied - Superadmin role required");
       }
 
       const start = parseDate(ctx.query.start as string);
@@ -325,7 +318,7 @@ export default {
       // Join contract_transactions to payment_gateways via link table if present
       let txGatewayJoin = `LEFT JOIN payment_gateways pg ON ct.payment_gateway_id = pg.id`;
       const txGwLinkRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
+        `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name LIKE '%contract%transaction%payment%gateway%links%'`
       );
       const txGwLinks = txGwLinkRes.rows || txGwLinkRes[0] || [];
@@ -380,6 +373,171 @@ export default {
           gatewayTitle: r.title,
           total: Number(r.total || 0),
         })),
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async adminActivity(ctx) {
+    try {
+      // Admin guard - only superadmins can view admin activity
+      const userId = ctx.state?.user?.id;
+      const user = await fetchUserWithRole(strapi, userId);
+      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
+        return ctx.forbidden("Access denied - Superadmin role required");
+      }
+
+      const start = parseDate(ctx.query.start as string);
+      const end = parseDate(ctx.query.end as string, 0);
+      const userId_filter = ctx.query.user_id as string;
+      const actionType = ctx.query.action_type as string;
+      const logType = ctx.query.log_type as string;
+      const limit = Math.min(Number(ctx.query.limit || 100), 1000);
+      const offset = Number(ctx.query.offset || 0);
+
+      // Helper to query a log table using Strapi query API
+      async function queryLogTable(entity: string, resourceType: string) {
+        const filters: any = {
+          createdAt: {
+            $gte: start.toISOString(),
+            $lte: end.toISOString(),
+          },
+        };
+
+        if (actionType) {
+          filters.Action = actionType;
+        }
+
+        const logs = await (strapi.db.query(entity as any) as any).findMany({
+          where: filters,
+          populate: { performed_by: { populate: { role: true } } },
+          orderBy: { createdAt: "desc" },
+          limit,
+          offset,
+        } as any);
+
+        return (Array.isArray(logs) ? logs : []).map((log: any) => ({
+          id: log.id,
+          log_type: resourceType,
+          action_type: log.Action,
+          admin_username:
+            log.performed_by?.username ||
+            log.PerformedBy ||
+            "System",
+          admin_role: log.performed_by?.role?.name || "Unknown",
+          description: log.Description,
+          changes: log.Changes,
+          ip_address: log.IP,
+          user_agent: log.UserAgent,
+          timestamp: log.createdAt,
+        }));
+      }
+
+      // Query all log tables
+      let allLogs: any[] = [];
+
+      if (!logType || logType === "All" || logType === "Orders") {
+        const orderLogs = await queryLogTable(
+          "api::order-log.order-log",
+          "Order"
+        );
+        allLogs = allLogs.concat(orderLogs);
+      }
+
+      if (!logType || logType === "All" || logType === "Products") {
+        const productLogs = await queryLogTable(
+          "api::product-log.product-log",
+          "Product"
+        );
+        allLogs = allLogs.concat(productLogs);
+      }
+
+      if (!logType || logType === "All" || logType === "Users") {
+        const userLogs = await queryLogTable(
+          "api::local-user-log.local-user-log",
+          "User"
+        );
+        allLogs = allLogs.concat(userLogs);
+      }
+
+      if (!logType || logType === "All" || logType === "Contracts") {
+        const contractLogs = await queryLogTable(
+          "api::contract-log.contract-log",
+          "Contract"
+        );
+        allLogs = allLogs.concat(contractLogs);
+      }
+
+      // Filter by user_id if provided
+      if (userId_filter) {
+        allLogs = allLogs.filter((log) => log.admin_username === userId_filter);
+      }
+
+      // Sort by timestamp DESC
+      allLogs = allLogs.sort(
+        (a: any, b: any) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+
+      // Get total count across all logs
+      async function countLogTable(entity: string) {
+        try {
+          const count = await (strapi.db.query(entity as any) as any).count({
+            where: {
+              createdAt: {
+                $gte: start.toISOString(),
+                $lte: end.toISOString(),
+              },
+            },
+          });
+          return count || 0;
+        } catch {
+          return 0;
+        }
+      }
+
+      const countPromises = [
+        logType && logType !== "All" && logType !== "Orders"
+          ? Promise.resolve(0)
+          : countLogTable("api::order-log.order-log"),
+        logType && logType !== "All" && logType !== "Products"
+          ? Promise.resolve(0)
+          : countLogTable("api::product-log.product-log"),
+        logType && logType !== "All" && logType !== "Users"
+          ? Promise.resolve(0)
+          : countLogTable("api::local-user-log.local-user-log"),
+        logType && logType !== "All" && logType !== "Contracts"
+          ? Promise.resolve(0)
+          : countLogTable("api::contract-log.contract-log"),
+      ];
+
+      const counts = await Promise.all(countPromises);
+      const totalCount = counts.reduce((sum, count) => sum + (count as number), 0);
+
+      ctx.body = {
+        data: {
+          activities: allLogs
+            .slice(offset, offset + limit)
+            .map((log: any) => ({
+              id: log.id,
+              logType: log.log_type,
+              actionType: log.action_type,
+              adminUsername: log.admin_username,
+              adminRole: log.admin_role,
+              description: log.description,
+              changes: log.changes,
+              ipAddress: log.ip_address,
+              userAgent: log.user_agent,
+              timestamp: log.timestamp,
+            })),
+          pagination: {
+            total: totalCount,
+            limit,
+            offset,
+            hasMore: offset + allLogs.length < totalCount,
+          },
+        },
       };
     } catch (error) {
       ctx.badRequest(error.message, { data: { success: false } });

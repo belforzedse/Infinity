@@ -29,7 +29,7 @@
     "user": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "api::local-user.local-user",
+      "target": "plugin::users-permissions.user",
       "inversedBy": "user_addresses"
     }
   }

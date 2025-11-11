@@ -65,13 +65,14 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
   const isDryRun = ctx.query.dryRun === "true";
 
   try {
-    // Admin guard
-    const user = ctx.state.user;
-    const roleId =
-      typeof user?.user_role === "object"
-        ? user.user_role?.id
-        : user?.user_role;
-    if (!user || Number(roleId) !== 2) {
+    // Admin guard: ensure plugin user has an admin/store-manager role
+    const pluginUser = ctx.state.user;
+    if (!pluginUser) return ctx.forbidden("Admin access required");
+    const fullUser = await strapi.db
+      .query("plugin::users-permissions.user")
+      .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
+    const roleName = fullUser?.role?.name;
+    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
       return ctx.forbidden("Admin access required");
     }
 
@@ -148,9 +149,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       if (!item) continue;
 
       const oldCount = Number(item.Count || 0);
-      let newCount = adj.remove
-        ? 0
-        : Math.min(oldCount, Number(adj.newCount ?? oldCount));
+      let newCount = adj.remove ? 0 : Math.min(oldCount, Number(adj.newCount ?? oldCount));
 
       if (newCount > oldCount) {
         return ctx.badRequest("Cannot increase quantity", {
@@ -175,7 +174,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
     const originalSubtotal = orderItemsArr.reduce(
       (sum, it: any) => sum + Number(it.PerAmount || 0) * Number(it.Count || 0),
-      0
+      0,
     );
 
     // Recompute financials
@@ -217,26 +216,18 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     }
 
     // Tax is completely disabled (always 0)
-    const discountRate =
-      originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
+    const discountRate = originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
     const effectiveDiscount = Math.max(
       0,
-      Math.min(newSubtotal, Math.round(newSubtotal * discountRate))
+      Math.min(newSubtotal, Math.round(newSubtotal * discountRate)),
     );
-    const newTotals = computeTotals(
-      newSubtotal,
-      effectiveDiscount,
-      newShipping
-    );
+    const newTotals = computeTotals(newSubtotal, effectiveDiscount, newShipping);
 
     const oldTotal = Number(order.contract?.Amount || 0);
     const paidAmount = computePaidAmountToman(order);
     const requestedRefund = paidAmount - Math.max(newTotals.total, 0);
     // Calculate refund (tax is disabled, so no tax exclusion)
-    const refundToman = Math.max(
-      0,
-      Math.min(paidAmount, requestedRefund)
-    );
+    const refundToman = Math.max(0, Math.min(paidAmount, requestedRefund));
 
     if (isDryRun) {
       return {
@@ -254,7 +245,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
     // Check if all items removed
     const allRemoved = order.order_items.every((it: any) =>
-      changes.some((c) => c.orderItemId === it.id && c.newCount === 0)
+      changes.some((c) => c.orderItemId === it.id && c.newCount === 0),
     );
 
     // Apply changes in transaction
@@ -322,8 +313,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
         const source = tx?.external_source || contract?.external_source;
         return source === "SnappPay" && tx?.TrackId;
       });
-      const gatewaySource =
-        snappayTx?.external_source || contract?.external_source;
+      const gatewaySource = snappayTx?.external_source || contract?.external_source;
       const paymentToken = snappayTx?.TrackId;
       const transactionId = contract?.external_id;
 
@@ -353,18 +343,13 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
               waitSeconds: waitTime,
             });
             throw new Error(
-              `SNAPPAY_RATE_LIMIT: Please wait ${waitTime} seconds before cancelling again`
+              `SNAPPAY_RATE_LIMIT: Please wait ${waitTime} seconds before cancelling again`,
             );
           }
 
-          const cancelRes = await snappay.cancelOrder(
-            transactionId,
-            paymentToken
-          );
+          const cancelRes = await snappay.cancelOrder(transactionId, paymentToken);
           if (!cancelRes.successful) {
-            throw new Error(
-              `SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`
-            );
+            throw new Error(`SNAPPAY_CANCEL_FAILED:${cancelRes.errorData?.message || ""}`);
           }
 
           // Update cache on successful call
@@ -389,7 +374,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
               waitSeconds: waitTime,
             });
             throw new Error(
-              `SNAPPAY_RATE_LIMIT: Please wait ${waitTime} seconds before updating again`
+              `SNAPPAY_RATE_LIMIT: Please wait ${waitTime} seconds before updating again`,
             );
           }
 
@@ -400,7 +385,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             order,
             changes,
             newTotals,
-            newShipping
+            newShipping,
           );
           strapi.log.info("SnappPay update payload being sent", {
             orderId: orderIdNum,
@@ -418,9 +403,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
             errorMessage: updateRes.errorData?.message,
           });
           if (!updateRes.successful) {
-            throw new Error(
-              `SNAPPAY_UPDATE_FAILED:${updateRes.errorData?.message || ""}`
-            );
+            throw new Error(`SNAPPAY_UPDATE_FAILED:${updateRes.errorData?.message || ""}`);
           }
 
           // Update cache on successful call
@@ -441,15 +424,13 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           .findOne({ where: { user: userId } });
 
         if (!wallet) {
-          wallet = await strapi.db
-            .query("api::local-user-wallet.local-user-wallet")
-            .create({
-              data: {
-                user: userId,
-                Balance: 0,
-                LastTransactionDate: new Date(),
-              },
-            });
+          wallet = await strapi.db.query("api::local-user-wallet.local-user-wallet").create({
+            data: {
+              user: userId,
+              Balance: 0,
+              LastTransactionDate: new Date(),
+            },
+          });
         }
 
         const refundIrr = refundToman * 10;
@@ -462,17 +443,13 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
         });
 
         await strapi.db
-          .query(
-            "api::local-user-wallet-transaction.local-user-wallet-transaction"
-          )
+          .query("api::local-user-wallet-transaction.local-user-wallet-transaction")
           .create({
             data: {
               Amount: refundIrr,
               Type: "Add",
               Date: new Date(),
-              Cause: allRemoved
-                ? "Order Cancelled (Admin)"
-                : "Order Adjustment (Admin)",
+              Cause: allRemoved ? "Order Cancelled (Admin)" : "Order Adjustment (Admin)",
               ReferenceId: `order-${orderIdNum}-adj-${Date.now()}`,
               user_wallet: wallet.id,
             },
@@ -480,24 +457,20 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
 
         // Create contract-transaction Return record
         const maxStep =
-          txList.length > 0
-            ? Math.max(...txList.map((t: any) => Number(t.Step || 0)))
-            : 0;
+          txList.length > 0 ? Math.max(...txList.map((t: any) => Number(t.Step || 0))) : 0;
 
         if (Number.isFinite(contractIdNum)) {
-          await strapi.db
-            .query("api::contract-transaction.contract-transaction")
-            .create({
-              data: {
-                Type: "Return",
-                Amount: refundIrr,
-                Step: maxStep + 1,
-                Status: "Success",
-                external_source: "System",
-                contract: contractIdNum,
-                Date: new Date(),
-              },
-            });
+          await strapi.db.query("api::contract-transaction.contract-transaction").create({
+            data: {
+              Type: "Return",
+              Amount: refundIrr,
+              Step: maxStep + 1,
+              Status: "Success",
+              external_source: "System",
+              contract: contractIdNum,
+              Date: new Date(),
+            },
+          });
         }
       }
 
@@ -522,7 +495,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
                 }
               : undefined,
           },
-          PerformedBy: `Admin User ${user.id}`,
+          PerformedBy: `Admin User ${fullUser.id}`,
         },
       });
 

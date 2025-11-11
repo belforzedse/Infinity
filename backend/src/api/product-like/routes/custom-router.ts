@@ -5,8 +5,7 @@ export default {
       path: "/product-likes/toggle",
       handler: "product-like.toggleFavorite",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
     {
@@ -14,8 +13,7 @@ export default {
       path: "/product-likes/user/me",
       handler: "product-like.getUserLikes",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
   ],

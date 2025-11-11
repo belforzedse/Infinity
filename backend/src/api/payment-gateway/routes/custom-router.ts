@@ -49,8 +49,7 @@ export default {
       path: "/payment-gateway/snapp-eligible",
       handler: "payment-gateway.snappEligible",
       config: {
-        auth: false,
-        middlewares: ["global::authentication"],
+        auth: { scope: [] },
       },
     },
   ],

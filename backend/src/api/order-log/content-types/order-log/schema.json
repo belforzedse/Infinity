@@ -17,6 +17,11 @@
       "relation": "manyToOne",
       "target": "api::order.order"
     },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
     "Action": {
       "type": "enumeration",
       "enum": ["Create", "Update", "Delete"],
