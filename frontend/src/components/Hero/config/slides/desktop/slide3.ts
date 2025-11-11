@@ -7,20 +7,22 @@ import { DesktopSlideBuilder } from "../../slideFactory";
 export const slide3 = new DesktopSlideBuilder()
   // Top left text banner with blue theme and custom typography
   .topLeftTextBanner({
-    title: "لباســـی که خودت را توش پیدا می‌کنی",
-    subtitle: "جزئیات کوچک، تأثیر بزرگ.",
-    className: "w-full gap-[8px] pb-[70px] mb-[10px] rounded-3xl px-[36px] pt-[30px]",
+    title: "لباس‌های پریمیوم، با قیمت‌های باورنکردنی!",
+    subtitle: "انــــــفجار تخفیــــف‌ پوشــــــاک",
+    className: "w-full gap-[8px] pb-8 mb-[10px] rounded-3xl px-[36px] pt-[30px]",
+    titleClassName: "font-rokh font-bold ",
+    subtitleClassName: "font-kaghaz font-semibold",
     colors: {
       background: "bg-slate-50",
-      titleColor: "text-[#94B5D2]",
-      subtitleColor: "text-gray-600",
+      titleColor: "text-gray-400",
+      subtitleColor: "text-[#C79769]",
     },
     typography: {
-      titleSize: "lg:text-[48px] 2xl:text-[50px]",
-      subtitleSize: "lg:text-[26px] 2xl:text-[30px]",
+      titleSize: "lg:text-[26px] 2xl:text-[30pxpx]",
+      subtitleSize: "lg:text-[60px] 2xl:text-[70px]",
       titleWeight: "font-bold",
       subtitleWeight: "font-semibold",
-      titleLeading: "leading-tight",
+      titleLeading: "leading-relaxed",
       subtitleLeading: "leading-relaxed",
       titleTracking: "tracking-tight",
     },
@@ -29,8 +31,10 @@ export const slide3 = new DesktopSlideBuilder()
   .bottomActionBannerRight({
     title: "دامن ها",
     subtitle: "",
+    className: "h-[80%] bottom",
+
     colors: {
-      background: "bg-[#A6C2DB]",
+      background: "bg-[#E3BDC9]",
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
     },
@@ -45,17 +49,17 @@ export const slide3 = new DesktopSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     image: {
-      src: "/images/HeroSlider/ActionBannerLeft/Slider3.webp",
+      src: "/images/HeroSlider/ActionBannerRight/Slide3.webp",
       alt: "Category Banner",
-      width: 600,
-      height: 600,
+      width: 700,
+      height: 700,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-      className: "h-full w-full rounded-lg pl-8 object-contain",
+      className: "h-full w-full rounded-lg pl-4 -translate-y-2 scale-110 object-contain",
       objectPosition: " left",
     },
     background: {
       type: "color",
-      value: "#A6C2DB",
+      value: "#E3BDC9",
       alt: "Background",
       width: "",
       height: "165px",
@@ -74,8 +78,10 @@ export const slide3 = new DesktopSlideBuilder()
   .bottomActionBannerLeft({
     title: "دامن ها",
     subtitle: "",
+    className: "h-[80%] bottom",
+
     colors: {
-      background: "bg-[#A6C2DB]",
+      background: "bg-[#E3BDC9]",
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
     },
@@ -90,17 +96,17 @@ export const slide3 = new DesktopSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     image: {
-      src: "/images/HeroSlider/ActionBannerLeft/Slider3.webp",
+      src: "/images/HeroSlider/ActionBannerLeft/Slide3.webp",
       alt: "Category Banner",
       width: 600,
       height: 600,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-      className: "h-full w-full rounded-lg pl-8 object-contain",
+      className: "h-full w-full rounded-lg pl-4 scale-110 object-contain",
       objectPosition: " left",
     },
     background: {
       type: "color",
-      value: "#A6C2DB",
+      value: "#E3BDC9",
       alt: "Background",
       width: "",
       height: "165px",
@@ -130,9 +136,11 @@ export const slide3 = new DesktopSlideBuilder()
     foregroundImage: {
       src: "/images/HeroSlider/Square/Slide3Foreground.png",
       alt: "Hero Side Image",
-      width: 650,
-      height: 650,
+      width: 1000,
+      height: 1000,
       priority: false,
+      objectPosition: "bottom right",
+      className: "object-contain  translate-x-4 xl:-translate-x-6",
     },
   })
   .build();

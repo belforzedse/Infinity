@@ -9,7 +9,7 @@ export const slide1 = new DesktopSlideBuilder()
   .topLeftTextBanner({
     title: "لباســـی که خودت را توش پیدا می‌کنی",
     subtitle: "جزئیات کوچک، تأثیر بزرگ.",
-    className: "w-full gap-[8px] pb-[70px] mb-[10px] rounded-3xl px-[36px] pt-[30px]",
+    className: "w-full gap-[8px] pb-[68px] mb-[10px] rounded-3xl px-[36px] pt-[30px]",
     colors: {
       background: "bg-slate-50",
       titleColor: "text-[#94B5D2]",
@@ -26,10 +26,10 @@ export const slide1 = new DesktopSlideBuilder()
     },
   })
   // Bottom right action banner
-  .bottomActionBannerLeft({
+  .bottomActionBannerRight({
     title: "دامن ها",
     subtitle: "",
-    className: "h-[200px]",
+    className: "h-[80%]",
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -45,12 +45,12 @@ export const slide1 = new DesktopSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     image: {
-      src: "/images/HeroSlider/ActionBannerLeft/Slider3.webp",
+      src: "/images/HeroSlider/ActionBannerRight/Slide1.webp",
       alt: "Category Banner",
-      width: 600,
-      height: 600,
+      width: 800,
+      height: 900,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-      className: "h-full w-full rounded-lg pl-8 object-contain",
+      className: "h-full w-full rounded-lg pl-2 object-contain",
       objectPosition: "left",
     },
     background: {
@@ -71,10 +71,10 @@ export const slide1 = new DesktopSlideBuilder()
     },
   })
   // Bottom left action banner (image only, with brightness effect)
-  .bottomActionBannerRight({
+  .bottomActionBannerLeft({
     title: "دامن ها",
     subtitle: "",
-    className: "h-[200px]",
+    className: "h-[80%]",
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -90,17 +90,17 @@ export const slide1 = new DesktopSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     image: {
-      src: "/images/HeroSlider/ActionBannerLeft/Slider3.webp",
+      src: "/images/HeroSlider/ActionBannerLeft/Slide1.webp",
       alt: "Category Banner",
       width: 600,
       height: 600,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-      className: "h-full w-full rounded-lg pl-8 object-contain",
-      objectPosition: "left",
+      className: "h-full w-full rounded-lg mb-2 -translate-y-4 object-contain",
+      objectPosition: "top left ",
     },
     background: {
       type: "color",
-      value: "#A6C2DB",
+      value: "#CFB99C",
       alt: "Background",
       width: "100%",
       height: "80%",

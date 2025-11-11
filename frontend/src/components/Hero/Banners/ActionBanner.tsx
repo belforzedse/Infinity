@@ -79,7 +79,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
   // If background is configured, use layered layout (like LeftBanner)
   if (background) {
     return (
-      <div dir="ltr" className={`relative w-full h-full ${className}`}>
+      <div dir="ltr" className={`relative w-full ${className}`}>
         {/* Background element */}
         <div
           className={`absolute ${background.className || ''}`}
@@ -103,8 +103,8 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           style={{
             objectPosition: image.objectPosition || "center",
             zIndex: 10,
-            width: '100%',
-            height: '100%',
+            width: (image as any).customWidth || '100%',
+            height: (image as any).customHeight || '100%',
             left: 0,
             top: 0,
           }}
