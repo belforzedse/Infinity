@@ -291,31 +291,37 @@ class UserImporter {
       return duplicateCheck;
     }
     
-    // Get phone or generate a unique identifier
-    const phone = this.extractPhone(wcCustomer);
-    let userPhone;
-    
-    if (phone && phone.trim() !== '') {
-      userPhone = phone;
-    } else if (wcCustomer.email && wcCustomer.email.trim() !== '') {
-      userPhone = wcCustomer.email;
-    } else {
-      // Generate a unique phone from user ID and timestamp if no phone or email
-      const timestamp = Date.now();
-      userPhone = `wc_${wcCustomer.id}_${timestamp}`;
-      this.logger.info(`📱 Generated phone for user ${wcCustomer.id}: ${userPhone}`);
+    // Require a valid phone number for import
+    const extractedPhone = this.extractPhone(wcCustomer);
+    if (!extractedPhone || extractedPhone.trim() === '') {
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - missing phone number`);
+      this.stats.skipped++;
+      return { isSkipped: true, reason: 'Missing phone number' };
     }
 
-    const normalizedPhone = this.normalizePhone(userPhone);
+    const formattedPhone = this.formatPhone(extractedPhone);
+    if (!formattedPhone) {
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - invalid phone number: ${extractedPhone}`);
+      this.stats.skipped++;
+      return { isSkipped: true, reason: 'Invalid phone number' };
+    }
+
+    const normalizedPhone = this.normalizePhone(formattedPhone);
+    if (!normalizedPhone) {
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - unable to normalize phone number: ${formattedPhone}`);
+      this.stats.skipped++;
+      return { isSkipped: true, reason: 'Invalid phone number' };
+    }
+
     if (normalizedPhone && this.emailCache.has(normalizedPhone)) {
-      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${userPhone}`);
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${formattedPhone}`);
       this.stats.skipped++;
       return { isSkipped: true, reason: 'Phone already exists' };
     }
 
     try {
       // Transform WooCommerce customer to Strapi format
-      const strapiUser = await this.transformUser(wcCustomer);
+      const strapiUser = await this.transformUser(wcCustomer, formattedPhone);
 
       // Check if this user already exists in Strapi to avoid duplicates
       const existingUser = await this.findExistingStrapiUser(
@@ -429,20 +435,17 @@ class UserImporter {
   /**
    * Transform WooCommerce customer to Strapi payloads
    */
-  async transformUser(wcCustomer) {
-    const phone = this.extractPhone(wcCustomer);
-    let userPhone;
-
-    if (phone && phone.trim() !== '') {
-      userPhone = phone;
-    } else if (wcCustomer.email && wcCustomer.email.trim() !== '') {
-      userPhone = wcCustomer.email;
-    } else {
-      const timestamp = Date.now();
-      userPhone = `wc_${wcCustomer.id}_${timestamp}`;
+  async transformUser(wcCustomer, enforcedPhone = null) {
+    const phone = enforcedPhone ?? this.extractPhone(wcCustomer);
+    if (!phone || phone.trim() === '') {
+      throw new Error(`Cannot transform user ${wcCustomer.id} - missing phone number`);
     }
 
-    const formattedPhone = this.formatPhone(userPhone);
+    const formattedPhone = this.formatPhone(phone);
+    if (!formattedPhone) {
+      throw new Error(`Cannot transform user ${wcCustomer.id} - invalid phone number: ${phone}`);
+    }
+
     const sanitizedPhone = formattedPhone.substring(0, 255);
     const firstName = (wcCustomer.first_name || '').trim().substring(0, 255);
     const lastName = (wcCustomer.last_name || '').trim().substring(0, 255);

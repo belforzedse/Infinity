@@ -432,6 +432,15 @@ class ProductImporter {
           this.logger.debug(`⏭️ Image upload disabled - skipping images for: ${wcProduct.name}`);
         }
 
+        // Sync size guide helper per product
+        try {
+          await this.strapiClient.syncProductSizeHelper(productId, strapiProduct._sizeGuideMatrix);
+        } catch (sizeGuideError) {
+          this.logger.warn(
+            `⚠️ Failed to sync size guide for product ${wcProduct.name}: ${sizeGuideError.message}`,
+          );
+        }
+
         this.duplicateTracker.recordMapping("products", wcProduct.id, productId, {
           name: wcProduct.name,
           slug: wcProduct.slug,
@@ -500,6 +509,7 @@ class ProductImporter {
       _variationIds,
       _attributes,
       _additionalCategories,
+      _sizeGuideMatrix,
       ...payload
     } = strapiProduct;
 
@@ -600,6 +610,14 @@ class ProductImporter {
       strapiProduct._attributes = wcProduct.attributes;
     }
 
+    // Extract size guide matrix from WooCommerce meta fields
+    const sizeGuideMatrix = this.extractSizeGuideMatrix(wcProduct);
+    if (sizeGuideMatrix) {
+      strapiProduct._sizeGuideMatrix = sizeGuideMatrix;
+    } else {
+      strapiProduct._sizeGuideMatrix = null;
+    }
+
     this.logger.debug(`🔄 Transformed product: ${wcProduct.name}`);
     return strapiProduct;
   }
@@ -635,6 +653,59 @@ class ProductImporter {
       this.logger.error(`❌ Failed to handle images for product ${wcProduct.id}:`, error.message);
       return { coverImageId: null, galleryImageIds: [] };
     }
+  }
+
+  /**
+   * Extract and sanitize size guide matrix stored in WooCommerce meta data
+   */
+  extractSizeGuideMatrix(wcProduct) {
+    if (!wcProduct || !Array.isArray(wcProduct.meta_data)) {
+      return null;
+    }
+
+    const sizeGuideKeys = ["product_size_guide", "product-custom-meta-inp"];
+    const metaEntry = wcProduct.meta_data.find(
+      (meta) => meta && sizeGuideKeys.includes(meta.key),
+    );
+
+    if (!metaEntry || metaEntry.value === undefined || metaEntry.value === null) {
+      return null;
+    }
+
+    let rawValue = metaEntry.value;
+    if (typeof rawValue === "string") {
+      rawValue = rawValue.trim();
+      if (rawValue === "") {
+        return null;
+      }
+      try {
+        rawValue = JSON.parse(rawValue);
+      } catch (_) {
+        // If parsing fails, treat as non-JSON payload
+        return null;
+      }
+    }
+
+    if (!Array.isArray(rawValue)) {
+      return null;
+    }
+
+    const sanitized = rawValue
+      .filter((row) => Array.isArray(row))
+      .map((row) =>
+        row.map((cell) => {
+          if (cell === null || cell === undefined) {
+            return "";
+          }
+          return typeof cell === "string" ? cell : String(cell);
+        }),
+      );
+
+    const hasContent = sanitized.some((row) =>
+      row.some((cell) => typeof cell === "string" && cell.trim() !== ""),
+    );
+
+    return hasContent ? sanitized : null;
   }
 
   /**
@@ -697,4 +768,3 @@ class ProductImporter {
 }
 
 module.exports = ProductImporter;
-

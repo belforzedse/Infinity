@@ -19,6 +19,39 @@ const config = require('./config');
 // Initialize logger
 const logger = new Logger();
 
+/**
+ * Parse --name-filter CLI args into array/null/undefined
+ */
+function resolveNameFilterOption(optionValue, disableFlag = false) {
+  if (disableFlag) {
+    return null;
+  }
+
+  if (optionValue === undefined || optionValue === null) {
+    return undefined;
+  }
+
+  const rawInput = Array.isArray(optionValue) ? optionValue.join(",") : optionValue;
+  if (!rawInput || rawInput.trim() === "") {
+    return undefined;
+  }
+
+  const parsed = rawInput
+    .split(",")
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+
+  if (parsed.length === 0) {
+    return undefined;
+  }
+
+  if (parsed.length === 1 && parsed[0].toLowerCase() === "all") {
+    return null;
+  }
+
+  return parsed;
+}
+
 program
   .name('woocommerce-importer')
   .description('Import data from WooCommerce to Strapi')
@@ -53,6 +86,8 @@ program
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
   .option('-c, --categories <ids...>', 'Comma-separated WooCommerce category IDs to filter (e.g., "5,12,18")', '')
+  .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match product names (use "all" to disable)', '')
+  .option('--disable-name-filter', 'Import every product regardless of کیف/کفش keywords', false)
   .option('--all', 'Import all products (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
@@ -81,12 +116,18 @@ program
         }
       }
 
+      const resolvedNameFilter = resolveNameFilterOption(
+        options.nameFilter,
+        options.disableNameFilter
+      );
+
       const importer = new ProductImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
-        categoryIds: categoryIds
+        categoryIds: categoryIds,
+        nameFilter: resolvedNameFilter ?? undefined
       });
       logger.success('✅ Product import completed!');
     } catch (error) {
@@ -103,6 +144,7 @@ program
   .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
   .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
   .option('--no-parent-log', 'Disable logging parent product names during variation import')
+  .option('--disable-name-filter', 'Import variations for all parent products regardless of keywords', false)
   .option('--all', 'Import all variations (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--only-imported', 'Only import variations for products that are already imported', false)
@@ -122,22 +164,10 @@ program
         config.import.batchSizes.products = batchSize;
       }
 
-      let nameFilter;
-      if (options.nameFilter && options.nameFilter.length) {
-        const rawInput = Array.isArray(options.nameFilter)
-          ? options.nameFilter.join(',')
-          : options.nameFilter;
-        const parsed = rawInput
-          .split(',')
-          .map((keyword) => keyword.trim())
-          .filter(Boolean);
-
-        if (parsed.length === 1 && parsed[0].toLowerCase() === 'all') {
-          nameFilter = null;
-        } else if (parsed.length > 0) {
-          nameFilter = parsed;
-        }
-      }
+      const nameFilter = resolveNameFilterOption(
+        options.nameFilter,
+        options.disableNameFilter
+      );
 
       const importer = new VariationImporter(config, logger);
       await importer.import({
@@ -163,27 +193,16 @@ program
   .option('-p, --page <number>', 'Start from specific page', '1')
   .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
   .option('--no-parent-log', 'Disable logging parent product names during variation import')
+  .option('--disable-name-filter', 'Import variations for all parent products regardless of keywords', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
   .action(async (options) => {
     try {
       logger.info('🎨 Starting variation import for imported products only...');
-      let nameFilter;
-      if (options.nameFilter && options.nameFilter.length) {
-        const rawInput = Array.isArray(options.nameFilter)
-          ? options.nameFilter.join(',')
-          : options.nameFilter;
-        const parsed = rawInput
-          .split(',')
-          .map((keyword) => keyword.trim())
-          .filter(Boolean);
-
-        if (parsed.length === 1 && parsed[0].toLowerCase() === 'all') {
-          nameFilter = null;
-        } else if (parsed.length > 0) {
-          nameFilter = parsed;
-        }
-      }
+      const nameFilter = resolveNameFilterOption(
+        options.nameFilter,
+        options.disableNameFilter
+      );
 
       const importer = new VariationImporter(config, logger);
       await importer.import({

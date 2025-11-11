@@ -981,6 +981,7 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
       "api::product-review.product-review"
     >;
     removedAt: Attribute.DateTime;
+    strapi_user: Attribute.Integer & Attribute.Unique;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::local-user.local-user", "oneToOne", "admin::user"> &
       Attribute.Private;

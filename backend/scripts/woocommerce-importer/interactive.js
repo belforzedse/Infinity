@@ -174,11 +174,19 @@ let importOptions = {
     page: 1,
     dryRun: false,
     categoryIds: [],
+    useNameFilter: true,
     // Image options
     maxImagesPerProduct: 3, // Default: 3 images per product
     updateProductsWithExistingImages: true // Always update images, even for existing products to avoid dangling references
   },
-  variations: { enabled: true, limit: 1000000000, page: 1, dryRun: false, onlyImported: true },
+  variations: {
+    enabled: true,
+    limit: 1000000000,
+    page: 1,
+    dryRun: false,
+    onlyImported: true,
+    useNameFilter: true
+  },
   orders: { enabled: false, limit: 50, page: 1, dryRun: true }
 };
 
@@ -262,10 +270,12 @@ async function showMainMenu() {
     if (type === 'products') {
       console.log(`     Max Images: ${opts.maxImagesPerProduct === 999 ? 'Unlimited' : opts.maxImagesPerProduct}`);
       console.log(`     Update Existing Images: ${opts.updateProductsWithExistingImages ? 'Yes' : 'No'}`);
+      console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? 'On' : 'Off'}`);
     }
     // Show variations filter
     if (type === 'variations') {
       console.log(`     Only Imported Parents: ${opts.onlyImported ? 'Yes' : 'No'}`);
+      console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? 'On' : 'Off'}`);
     }
   });
 
@@ -331,6 +341,13 @@ async function configureImporter(type) {
       const status = opts.onlyImported ? '✅ ENABLED' : '⭕ DISABLED';
       console.log(`${status} - Will ${opts.onlyImported ? '' : 'NOT '}filter by imported parent products`);
     }
+
+    const variationNameFilterInput = await prompt(
+      `Use default کیف/کفش keyword filter for parent products? (y/n, default: y): `
+    );
+    if (variationNameFilterInput.trim()) {
+      opts.useNameFilter = variationNameFilterInput.toLowerCase() !== 'n';
+    }
   }
 
   // Category filter (only for products)
@@ -371,6 +388,13 @@ async function configureImporter(type) {
       opts.updateProductsWithExistingImages = updateExistingInput.toLowerCase() === 'y';
       const status = opts.updateProductsWithExistingImages ? '✅ ENABLED' : '⭕ DISABLED';
       console.log(`${status} - Will ${opts.updateProductsWithExistingImages ? '' : 'NOT '}update products with existing images`);
+    }
+
+    const productNameFilterInput = await prompt(
+      `Use default کیف/کفش keyword filter for products? (y/n, default: y): `
+    );
+    if (productNameFilterInput.trim()) {
+      opts.useNameFilter = productNameFilterInput.toLowerCase() !== 'n';
     }
   }
 
@@ -461,7 +485,8 @@ async function runAllImporters() {
           limit: opts.limit,
           page: opts.page,
           dryRun: opts.dryRun,
-          categoryIds: opts.categoryIds
+          categoryIds: opts.categoryIds,
+          nameFilter: opts.useNameFilter ? undefined : null
         });
       } else if (type === 'variations') {
         const importer = new VariationImporter(config, logger);
@@ -469,7 +494,8 @@ async function runAllImporters() {
           limit: opts.limit,
           page: opts.page,
           dryRun: opts.dryRun,
-          onlyImported: opts.onlyImported // Only import variations for products already in mappings
+          onlyImported: opts.onlyImported,
+          nameFilter: opts.useNameFilter ? undefined : null
         });
       } else if (type === 'orders') {
         const importer = new OrderImporter(config, logger);
