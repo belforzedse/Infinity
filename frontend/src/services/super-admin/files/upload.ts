@@ -1,5 +1,6 @@
-import { API_BASE_URL, ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import toast from "react-hot-toast";
+import { getAccessToken } from "@/utils/auth";
 
 export type ImageFormat = {
   ext: string;
@@ -48,11 +49,14 @@ export const uploadFile = async (file: File): Promise<Response | undefined> => {
     const formData = new FormData();
     formData.append("files", file);
 
+    const token = getAccessToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : undefined,
       body: formData,
     });
 

@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import type { PaginatedResponse } from "@/types/api";
 
 export interface CategoryAttributes {
@@ -20,11 +20,7 @@ export const deleteCategory = async (id: string): Promise<PaginatedResponse<Item
     const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}`;
     //const accessToken = localStorage.getItem("accessToken");
 
-    const response = await apiClient.delete<PaginatedResponse<Item>>(endpoint, {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-    });
+    const response = await apiClient.delete<PaginatedResponse<Item>>(endpoint);
     return response.data;
   } catch (error) {
     console.error("Error deleting category:", error);

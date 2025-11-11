@@ -1,26 +1,51 @@
+/**
+ * Mobile Slide 5
+ * Different hero + primary images + responsive object-fit
+ */
 import { MobileSlideBuilder } from "../../slideFactory";
 
 export const slide5 = new MobileSlideBuilder()
-  .heroDesktop({
+  .heroBanner({
     src: "/images/side3.png",
+    alt: "Hero Banner",
+    width: 1920,
+    height: 560,
+    className: "w-full rounded-lg object-cover",
+    sizes: "(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw",
   })
-  .heroMobile({
-    src: "/images/hero1.png",
-  })
-  .secondaryPrimary({
+  .primaryBanner({
     src: "/images/side3.png",
+    alt: "Primary Banner",
+    width: 1200,
+    height: 600,
+    className: "w-full rounded-lg object-cover",
     href: "https://infinitycolor.co/shop/skirt/",
+    sizes: "(max-width: 768px) 100vw, 50vw",
   })
-  .secondaryTop({
-    src: "/images/bottomleft3.png",
-    href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-    className: "h-full w-full rounded-lg object-contain md:object-cover",
-    objectPosition: "center center",
+  .topActionBanner({
+    title: "",
+    subtitle: "",
+    image: {
+      src: "/images/bottomleft3.png",
+      alt: "Category Banner",
+      width: 600,
+      height: 600,
+      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      className: "h-full w-full rounded-lg object-contain md:object-cover",
+      objectPosition: "center center",
+    },
   })
-  .secondaryBottom({
-    src: "/images/bottomright3.png",
-    className: "h-full w-full rounded-lg object-contain md:object-cover",
-    objectPosition: "center center",
-    href: "https://infinitycolor.co/shop/skirt/",
+  .bottomActionBanner({
+    title: "",
+    subtitle: "",
+    image: {
+      src: "/images/bottomright3.png",
+      alt: "Category Banner",
+      width: 600,
+      height: 600,
+      href: "https://infinitycolor.co/shop/skirt/",
+      className: "h-full w-full rounded-lg object-contain md:object-cover",
+      objectPosition: "center center",
+    },
   })
   .build();

@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import type { PaginatedResponse } from "@/types/api";
 
 export interface CategoryAttributes {
@@ -22,9 +22,6 @@ export const getAllCategories = async (): Promise<PaginatedResponse<categoryResp
     const response = await apiClient.get<PaginatedResponse<categoryResponseType>>(endpoint, {
       params: {
         "pagination[limit]": -1, // Fetch all categories without pagination limit
-      },
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
     });
     return response as any;

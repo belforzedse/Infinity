@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import Invoice from "@/components/invoice";
 
 type StrapiOrderResponse = {
@@ -44,7 +43,6 @@ export default function PrintOrderPage() {
          &populate[5]=delivery_address.shipping_city.shipping_province
          &populate[6]=shipping
          &populate[7]=contract.contract_transactions.payment_gateway`,
-          { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
         );
 
         const raw: StrapiOrderResponse = (res as any).data;

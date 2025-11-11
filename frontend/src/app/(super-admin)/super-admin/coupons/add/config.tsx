@@ -3,7 +3,6 @@
 import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type Coupon } from "./page";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 
 export const config: UpsertPageConfigType<Coupon> = {
   headTitle: "کد تخفیف جدید",
@@ -116,12 +115,6 @@ export const config: UpsertPageConfigType<Coupon> = {
                 if (category === "product") {
                   const res = await apiClient.get(
                     `/product-variations?filters[SKU][$containsi]=${searchTerm}`,
-                    {
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${STRAPI_TOKEN}`,
-                      },
-                    },
                   );
 
                   return (res as any).data.map((product: any) => ({
@@ -131,12 +124,6 @@ export const config: UpsertPageConfigType<Coupon> = {
                 } else {
                   const res = await apiClient.get(
                     `/local-users?filters[Phone][$containsi]=${searchTerm}`,
-                    {
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${STRAPI_TOKEN}`,
-                      },
-                    },
                   );
 
                   return (res as any).data.map((user: any) => ({

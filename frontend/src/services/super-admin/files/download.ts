@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 // removed unused import: ApiResponse from "@/types/api"
 import { toast } from "react-hot-toast";
 
@@ -44,11 +44,7 @@ export const Download = async (id: string): Promise<FileResponse> => {
   try {
     const endpoint = `${ENDPOINTS.FILE.DOWNLOAD}/${id}`;
 
-    const response = await apiClient.get<FileResponse>(endpoint, {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-    });
+    const response = await apiClient.get<FileResponse>(endpoint);
     return response.data;
   } catch (error: any) {
     console.error("Error downloading file:", error);

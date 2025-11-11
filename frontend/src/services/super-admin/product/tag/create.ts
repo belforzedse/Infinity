@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import logger from "@/utils/logger";
 
@@ -23,17 +23,9 @@ export const createTag = async (title: string): Promise<ApiResponse<TagResponse>
   const endpoint = ENDPOINTS.PRODUCT.TAG;
 
   try {
-    const response = await apiClient.post<ApiResponse<TagResponse>>(
-      endpoint,
-      {
-        data: { Title: title },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      },
-    );
+    const response = await apiClient.post<ApiResponse<TagResponse>>(endpoint, {
+      data: { Title: title },
+    });
 
     // Log the response for debugging
     if (process.env.NODE_ENV !== "production") {

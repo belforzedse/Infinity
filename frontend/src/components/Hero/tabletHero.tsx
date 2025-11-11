@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import BannerImage from "./Banners/BannerImage";
+import { LeftBanner } from "./Banners/LeftBanner";
+import { ActionBanner } from "./Banners/ActionBanner";
 import type { TabletLayout } from "./types";
 import { AnimatePresence, motion } from "framer-motion";
 import { luxurySlideFade } from "./animations";
@@ -10,8 +12,15 @@ type Props = {
   playKey?: number;
 };
 
+/**
+ * Tablet Hero Layout
+ * Structure:
+ * - Top: Full-width hero banner
+ * - Bottom: 2-column grid
+ *   - Left: Two stacked action banners (h-40 each)
+ *   - Right: LeftBanner with background + foreground (h-368)
+ */
 export default function TabletHero({ layout, playKey = 0 }: Props) {
-  // Tablet animations - moderate between mobile and desktop
   const heroBannerVar = luxurySlideFade("right", {
     distance: 80,
     duration: 0.7,
@@ -60,11 +69,12 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
         </div>
       </div>
 
-      {/* Secondary section: left banners stacked (smaller), right banner (bigger) */}
+      {/* Secondary section: left action banners (stacked), right LeftBanner */}
       <div className="mt-4 grid grid-cols-2 gap-4">
-        {/* Left column - 2 stacked smaller banners */}
+        {/* Left column - 2 stacked action banners */}
         <div className="flex flex-col gap-4">
-          <div className="relative h-40 w-full rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+          {/* Top action banner */}
+          <div className="h-40 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`left-top-${playKey}`}
@@ -72,18 +82,16 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="absolute inset-0 h-full w-full"
+                className="h-full w-full"
                 style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
-                <BannerImage {...layout.leftTopBanner} />
+                <ActionBanner spec={layout.leftBannerTop} />
               </motion.div>
             </AnimatePresence>
-            <div className="invisible h-40">
-              <BannerImage {...layout.leftTopBanner} />
-            </div>
           </div>
 
-          <div className="relative h-40 w-full rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+          {/* Bottom action banner */}
+          <div className="h-40 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`left-bottom-${playKey}`}
@@ -91,19 +99,16 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="absolute inset-0 h-full w-full"
+                className="h-full w-full"
                 style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
-                <BannerImage {...layout.leftBottomBanner} />
+                <ActionBanner spec={layout.leftBannerBottom} />
               </motion.div>
             </AnimatePresence>
-            <div className="invisible h-40">
-              <BannerImage {...layout.leftBottomBanner} />
-            </div>
           </div>
         </div>
 
-        {/* Right column - large banner (bigger) */}
+        {/* Right column - LeftBanner with background + foreground */}
         <div
           className="relative overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]"
           style={{ height: "368px" }}
@@ -115,15 +120,12 @@ export default function TabletHero({ layout, playKey = 0 }: Props) {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="absolute inset-0 h-full w-full"
+              className="h-full w-full"
               style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
             >
-              <BannerImage {...layout.rightBanner} />
+              <LeftBanner spec={layout.rightBanner} className="h-full w-full" />
             </motion.div>
           </AnimatePresence>
-          <div className="invisible" style={{ height: "368px" }}>
-            <BannerImage {...layout.rightBanner} />
-          </div>
         </div>
       </div>
     </>
