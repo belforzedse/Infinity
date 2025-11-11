@@ -9,7 +9,7 @@ export const slide2 = new DesktopSlideBuilder()
   .topLeftTextBanner({
     title: "بزار استـــــــــایـــــــلت حرف بزنه",
     subtitle: "پوشاک کاربردی، طراحی هوشمند.",
-    className: "w-full gap-[8px] pb-[60px] mb-[10px] rounded-3xl pr-[36px] pt-[30px]",
+    className: "w-full gap-[8px] pb-[56px] mb-[10px] rounded-3xl pr-[36px] pt-[30px]",
     colors: {
       background: "bg-slate-50",
       titleColor: "text-[#A28471]",
@@ -29,6 +29,8 @@ export const slide2 = new DesktopSlideBuilder()
   .bottomActionBannerRight({
     title: " کت ها",
     subtitle: "",
+    className: "h-[80%]",
+
     colors: {
       background: "bg-[#374C5F]",
       titleColor: "text-white",
@@ -74,6 +76,7 @@ export const slide2 = new DesktopSlideBuilder()
   .bottomActionBannerLeft({
     title: "پلیورها ",
     subtitle: "",
+    className: "h-[80%]",
     colors: {
       background: "bg-[#A28D71]",
       titleColor: "text-white",
@@ -95,8 +98,10 @@ export const slide2 = new DesktopSlideBuilder()
       width: 600,
       height: 600,
       href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-      className: "h-full w-full rounded-lg pl-4 pb-8 object-contain",
-      objectPosition: "top left",
+      className: " rounded-lg pl-8 object-contain",
+      objectPosition: "left",
+      customWidth: "200px", // NEW: Set image display width
+      customHeight: "180px", // NEW: Set image display height
     },
     background: {
       type: "color",
@@ -133,7 +138,7 @@ export const slide2 = new DesktopSlideBuilder()
       width: 650,
       height: 650,
       priority: false,
- // "center", "bottom center", "top left", etc.
+      // "center", "bottom center", "top left", etc.
     },
   })
   .build();

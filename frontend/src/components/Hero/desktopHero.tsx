@@ -69,12 +69,12 @@ export default function DesktopHero({ layout, slideKey }: Props) {
   });
 
   return (
-    <div className="h-[480px] w-[1358px] max-w-full">
+    <div className="h-[480px] w-full max-w-[1358px] overflow-hidden mx-auto">
       <div className="relative h-full w-full">
         <div className="flex h-full items-stretch gap-2 lg:gap-0">
           {/* Left section (7/12): Text banner + action banners */}
-          <div className="w-7/12 flex-none">
-            <div className="mt-[50px] flex flex-col">
+          <div className="w-7/12 mt-[50px] flex-none overflow-hidden h-full">
+            <div className="flex flex-col h-full">
               {/* Top: Text banner */}
               <div>
                 <AnimatePresence mode="wait" initial={false}>
@@ -99,9 +99,9 @@ export default function DesktopHero({ layout, slideKey }: Props) {
               </div>
 
               {/* Bottom: Two action banners in grid */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex-1 grid grid-cols-2 gap-3 items-end">
                 {/* Left action banner */}
-                <div className="h-[400px] overflow-hidden rounded-lg">
+                <div className="h-full overflow-hidden rounded-lg">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`actionLeft-${slideKey}`}
@@ -117,7 +117,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                 </div>
 
                 {/* Right action banner */}
-                <div className="h-[400px] overflow-hidden rounded-lg">
+                <div className="h-full overflow-hidden rounded-lg">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`actionRight-${slideKey}`}
@@ -135,7 +135,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
             </div>
           </div>
 
-          {/* Right section (5/12): Right banner with background + foreground */}
+          {/* Left section (5/12): Left banner with background + foreground */}
           <div className="w-5/12 flex-none">
             <div className="h-full w-full overflow-visible rounded-lg">
               <AnimatePresence mode="wait" initial={false}>
