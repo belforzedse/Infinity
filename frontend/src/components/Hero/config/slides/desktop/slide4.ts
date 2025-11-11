@@ -130,7 +130,7 @@ export const slide4 = new DesktopSlideBuilder()
       className: "rounded-3xl",
     },
     foregroundImage: {
-      src: "/images/HeroSlider/Square/Slide4Foreground.png",
+      src: "/images/HeroSlider/Square/Slide4Foreground.PNG",
       alt: "Hero Side Image",
       width: 650,
       height: 650,
