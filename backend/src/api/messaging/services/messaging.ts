@@ -5,6 +5,15 @@
 export default () => ({
   async sendSMS(ctx, { phone, message, isOTP = true }) {
     try {
+      // Normalize phone number: convert 0 prefix to +98
+      let normalizedPhone = String(phone).trim();
+      if (normalizedPhone.startsWith("0")) {
+        normalizedPhone = `+98${normalizedPhone.substring(1)}`;
+      }
+      if (!normalizedPhone.startsWith("+")) {
+        normalizedPhone = `+${normalizedPhone}`;
+      }
+
       if (isOTP) {
         await fetch(
           process.env.IP_PANEL_API_URL ||
@@ -16,7 +25,7 @@ export default () => ({
               apiKey: process.env.IP_PANEL_API_KEY,
             },
             body: JSON.stringify({
-              recipient: phone,
+              recipient: normalizedPhone,
               code: process.env.IP_PANEL_PATTERN_CODE || "42d3urtbfhm6p8g",
               sender: process.env.IP_PANEL_SENDER || "+983000505",
               variable: {
