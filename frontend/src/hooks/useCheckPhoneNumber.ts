@@ -26,7 +26,13 @@ export function useCheckPhoneNumber(): UseCheckPhoneNumberReturn {
       setIsLoading(true);
       setError(null);
 
-      if (!phoneNumber.match(/^09\d{9}$/)) {
+      // Accept both formats:
+      // - 09XXXXXXXXX (11 digits starting with 0)
+      // - +989XXXXXXXXX (international format with +98)
+      const isValidPhone =
+        /^09\d{9}$/.test(phoneNumber) || /^\+989\d{9}$/.test(phoneNumber);
+
+      if (!isValidPhone) {
         setError("شماره تلفن نامعتبر است");
         return;
       }
