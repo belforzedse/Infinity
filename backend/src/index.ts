@@ -172,13 +172,13 @@ export default {
             .query("plugin::users-permissions.role")
             .findOne({ where: { name: r.name } });
           if (!existing) {
-            await strapi.entityService.create("plugin::users-permissions.role", {
-              data: {
+            await strapi
+              .query("plugin::users-permissions.role")
+              .create({
                 name: r.name,
                 description: r.description,
                 type: r.type,
-              },
-            });
+              });
             strapi.log.info(`Created users-permissions role: ${r.name}`);
           }
         }
