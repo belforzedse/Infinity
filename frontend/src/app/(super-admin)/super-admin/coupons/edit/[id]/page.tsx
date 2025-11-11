@@ -3,7 +3,6 @@
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { config } from "./config";
 import { toast } from "react-hot-toast";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import { useEffect, useState } from "react";
@@ -74,11 +73,7 @@ export default function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await apiClient.get<DiscountResponse>(`/discounts/${id}?populate=*`, {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        });
+        const response = await apiClient.get<DiscountResponse>(`/discounts/${id}?populate=*`);
 
         const discount = (response as any).data.attributes;
 
@@ -155,29 +150,21 @@ export default function Page() {
       data={data}
       onSubmit={async (formData) => {
         try {
-          await apiClient.put(
-            `/discounts/${id}`,
-            {
-              data: {
-                Code: formData.code || null,
-                Type: formData.type || null,
-                Amount: formData.amount || null,
-                LimitAmount: formData.maxAmount || null,
-                LimitUsage: formData.limit || null,
-                StartDate: (formData.startDate as any)?.value as Date,
-                EndDate: (formData.endDate as any)?.value as Date,
-                IsActive: formData.isActive,
-                local_users: formData.terms.find((term) => term.category === "user")?.tags || [],
-                product_variations:
-                  formData.terms.find((term) => term.category === "product")?.tags || [],
-              },
+          await apiClient.put(`/discounts/${id}`, {
+            data: {
+              Code: formData.code || null,
+              Type: formData.type || null,
+              Amount: formData.amount || null,
+              LimitAmount: formData.maxAmount || null,
+              LimitUsage: formData.limit || null,
+              StartDate: (formData.startDate as any)?.value as Date,
+              EndDate: (formData.endDate as any)?.value as Date,
+              IsActive: formData.isActive,
+              local_users: formData.terms.find((term) => term.category === "user")?.tags || [],
+              product_variations:
+                formData.terms.find((term) => term.category === "product")?.tags || [],
             },
-            {
-              headers: {
-                Authorization: `Bearer ${STRAPI_TOKEN}`,
-              },
-            },
-          );
+          });
 
           toast.success("کد تخفیف با موفقیت بروزرسانی شد");
           router.push("/super-admin/coupons");

@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import AnipoBarcodeLabel from "@/components/SuperAdmin/Order/AnipoBarcodeLabel";
 
 type Order = {
@@ -70,7 +69,6 @@ export default function AnipoBarcodePrintPage() {
       try {
         const res = await apiClient.get(
           `/orders/${id}?populate[0]=user&populate[1]=user.user_info&populate[2]=delivery_address.shipping_city.shipping_province&populate[3]=contract`,
-          { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` } },
         );
 
         setOrder((res as any).data);
