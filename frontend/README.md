@@ -83,23 +83,28 @@ NEXT_PUBLIC_IMAGE_BASE_URL=http://localhost:1337/
 - `format`: Run Prettier formatting
 - `test`: Run Jest tests
 
-## Docker
+## Docker & Compose
 
-The `main.Dockerfile` automatically loads environment variables from `main.env`:
-
-Build:
+Both Dockerfiles now rely on build arguments rather than reading `main.env`/`dev.env` during the image build. Pass the public Strapi values explicitly (or export them in your shell) before building:
 
 ```bash
-docker build -f main.Dockerfile -t infinity-frontend:prod .
-```
+docker build \
+  --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.example.com/api \
+  --build-arg NEXT_PUBLIC_IMAGE_BASE_URL=https://api.example.com \
+  --build-arg NEXT_PUBLIC_STRAPI_TOKEN=token \
+  -f main.Dockerfile \
+  -t infinity-frontend:prod .
 
-Run:
-
-```bash
 docker run --rm -p 3000:3000 infinity-frontend:prod
 ```
 
-No build args needed - environment variables are loaded automatically from `main.env`!
+For repeatable local runs the repo ships with `docker-compose.yml`. Create a `.env` file (ignored by git) with the three `NEXT_PUBLIC_*` values plus any overrides such as `HOST_PORT`, then:
+
+```bash
+docker compose up --build
+```
+
+Compose will forward the env values as both build args and runtime vars so the container behaves the same way you’ll deploy it in CI/CD.
 
 - fix(pdp): add `type="button"` to variation selector buttons (color/size/model)
 - chore(a11y): add TODO to improve selected color state semantics for keyboard access

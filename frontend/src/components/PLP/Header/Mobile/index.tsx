@@ -23,13 +23,14 @@ export default function PLPMobileHeader({}: Props) {
   return (
     <header className="lg:hidden">
       <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
-        <Link
-          href="/orders"
-          className="pressable glass-chip flex max-h-[43px] items-center gap-1 px-4 py-3 text-neutral-800 transition-colors hover:text-neutral-900"
+        <button
+          onClick={() => window.location.href = "/orders"}
+          className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2"
+          aria-label="پیگیری سفارش"
         >
-          <span className="text-sm">پیگیری سفارش</span>
-          <OrderTrackingIcon className="scale-150 text-neutral-800" />
-        </Link>
+          <span className="text-xs font-medium text-neutral-800">پیگیری سفارش</span>
+          <OrderTrackingIcon className="text-neutral-800" />
+        </button>
 
         <Logo />
 
@@ -37,21 +38,23 @@ export default function PLPMobileHeader({}: Props) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="pressable glass-chip flex h-[43px] w-[43px] items-center justify-center transition-colors"
+            className="hidden 440:flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white"
             aria-label="جستجو"
           >
-            <SearchIcon className="scale-150 text-neutral-800" />
+            <SearchIcon className="text-neutral-800" />
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="pressable glass-chip flex h-[43px] w-[43px] items-center justify-center transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white"
+            aria-label="فهرست"
           >
             <MenuIcon className="text-neutral-800" />
           </button>
 
           <button
             onClick={openDrawer}
-            className="pressable relative flex h-[43px] w-[43px] items-center justify-center rounded-[28px] bg-pink-500 text-white transition-transform"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-pink-500"
+            aria-label="سبد خریدتان"
           >
             <CartIcon className="text-white" />
             <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white">
@@ -64,7 +67,11 @@ export default function PLPMobileHeader({}: Props) {
       {/* Search Bar managed via MobileSearch modal */}
 
       {/* Mobile Menu Modal */}
-      <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <MobileMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onSearchClick={() => setIsSearchOpen(true)}
+      />
 
       {/* Mobile Search Modal */}
       <MobileSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
