@@ -127,7 +127,7 @@ function AreaMobileRow({ row }: { row: Area }) {
                 })
               ) : (
                 <span className="text-xs text-foreground-primary md:text-base">
-                  {resolveValue(column.accessorKey as string) ?? "-"}
+                  {("accessorKey" in column) ? (resolveValue(column.accessorKey as string) ?? "-") : "-"}
                 </span>
               )}
             </div>
