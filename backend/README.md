@@ -6,6 +6,23 @@ Strapi comes with a full featured [Command Line Interface](https://docs.strapi.i
 
 This project includes Docker setup for development and deployment.
 up and down and up and down and
+
+### Deployment & Ops Cheat Sheet
+
+- **Services**: `docker-compose.yml` now pulls the prebuilt image from `ghcr.io/belforzedse/infinity-backend:<tag>` and starts Strapi + Postgres 14 + Redis 7. Uploads live under `./public`, Postgres/Redis use named volumes so data survives container restarts.
+- **Branch map**:
+  | Branch | Target VM (SSH) | Image tag | Env file |
+  | --- | --- | --- | --- |
+  | `main` | `deploy@193.141.65.207:3031` | `infinity-backend:main` | `main.env` |
+  | `dev` | `deploy@193.141.65.208:3031` | `...:dev` | `dev.env` |
+  | `experimental` | `deploy@193.141.65.212:3031` | `...:experimental` | `main.env` |
+- **CI/CD**: `.github/workflows/backend-cicd.yml` builds + pushes Docker images on every push, SCPs the compose file to `/opt/infinity/backend/`, writes the branch env file from the GitHub secret, logs into GHCR, pulls the tag, migrates (`docker compose run --rm strapi npm run strapi migrate`), then brings the stack up with `docker compose up -d --remove-orphans`.
+- **Secrets**:
+  - Repository secrets per environment: `*_BACKEND_HOST`, `*_BACKEND_PORT`, `*_BACKEND_USER`, `*_BACKEND_SSH_KEY`, `*_BACKEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).
+  - Shared registry credentials: `GHCR_DEPLOY_USER=belforzedse`, `GHCR_DEPLOY_TOKEN=<PAT with read:packages>`.
+- **Compose variables**: `ENV_FILE` (defaults to `main.env`), `IMAGE_TAG` (`main` by default), `STRAPI_PORT`, `POSTGRES_PORT`, `REDIS_PORT`. Override locally, e.g. `ENV_FILE=dev.env STRAPI_PORT=1338 docker compose up`.
+- **Ports**: Strapi exposes `${STRAPI_PORT:-1337}`; Postgres/Redis still publish `5432/6379` for local development. Remove those `ports` lines on production if you do not want them reachable from the host network.
+
 ### Development
 
 To run using Docker for development:
