@@ -1,45 +1,45 @@
 "use client";
-import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
-import RecycleIcon from "@/components/SuperAdmin/Layout/Icons/RecycleIcon";
 import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 
-// This is a sample data type. Modify according to your needs
 export type Area = {
   id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  description: string;
+  attributes: {
+    Title: string;
+    Description?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
 };
 
 export const columns: ColumnDef<Area>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "attributes.Title",
     header: "منطقه",
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "attributes.createdAt",
     header: "تاریخ ایجاد",
     cell: ({ row }) => {
-      const date = row.getValue("createdAt") as Date;
+      const date = new Date(row.original?.attributes?.createdAt);
       return <SuperAdminTableCellFullDate date={date} />;
     },
   },
   {
-    accessorKey: "updatedAt",
+    accessorKey: "attributes.updatedAt",
     header: "تاریخ به روز رسانی",
     cell: ({ row }) => {
-      const date = row.getValue("updatedAt") as Date;
+      const date = new Date(row.original?.attributes?.updatedAt);
       return <SuperAdminTableCellFullDate date={date} />;
     },
   },
   {
-    accessorKey: "description",
+    accessorKey: "attributes.Description",
     header: "توضیحات",
+    cell: ({ row }) => row.original?.attributes?.Description || "-",
   },
   {
     accessorKey: "id",
@@ -51,9 +51,7 @@ export const columns: ColumnDef<Area>[] = [
     cell: () => {
       return (
         <div className="flex flex-row-reverse items-center gap-3 p-1">
-          <SuperAdminTableCellActionButton variant="primary" icon={<RecycleIcon />} />
-
-          <SuperAdminTableCellActionButton variant="secondary" icon={<EditIcon />} />
+          <SuperAdminTableCellActionButton variant="secondary" icon={<ShowMoreIcon />} />
         </div>
       );
     },
@@ -61,10 +59,11 @@ export const columns: ColumnDef<Area>[] = [
 ];
 
 type Props = {
-  data: Area[];
+  data: Area[] | undefined;
 };
 
 export const MobileTable = ({ data }: Props) => {
+  if (!data) return null;
   return (
     <div className="mt-2 flex flex-col gap-2">
       {data.map((row) => (
@@ -76,13 +75,20 @@ export const MobileTable = ({ data }: Props) => {
 
 function AreaMobileRow({ row }: { row: Area }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { Title, Description, createdAt, updatedAt } = row.attributes || {};
+
+  const resolveValue = (accessorKey?: string) => {
+    if (!accessorKey) return undefined;
+    return accessorKey.split(".").reduce<any>((acc, key) => acc?.[key], row);
+  };
+
   return (
     <div className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3">
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex w-full items-center justify-between">
           <div className="flex gap-2">
             <input type="checkbox" className="h-5 w-5" />
-            <span className="text-sm text-neutral-800">{row.title}</span>
+            <span className="text-sm text-neutral-800">{Title || "-"}</span>
           </div>
           <button
             className={`flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 ${isOpen ? "rotate-180" : ""}`}
@@ -94,14 +100,14 @@ function AreaMobileRow({ row }: { row: Area }) {
         {!isOpen ? (
           <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
             <div className="flex items-center gap-1">
-              <span className="text-xs text-neutral-400">{row.description}</span>
+              <span className="text-xs text-neutral-400">{Description || "-"}</span>
               <span className="text-xs text-neutral-400">|</span>
               <span className="text-sm text-neutral-400">
-                ایجاد: {row.createdAt.toLocaleDateString("fa-IR")}
+                ایجاد: {new Date(createdAt || "").toLocaleDateString("fa-IR")}
               </span>
               <span className="text-xs text-neutral-400">|</span>
               <span className="text-sm text-neutral-400">
-                ویرایش: {row.updatedAt.toLocaleDateString("fa-IR")}
+                ویرایش: {new Date(updatedAt || "").toLocaleDateString("fa-IR")}
               </span>
             </div>
           </div>
@@ -115,12 +121,13 @@ function AreaMobileRow({ row }: { row: Area }) {
               {column?.cell ? (
                 (column?.cell as any)?.({
                   row: {
-                    getValue: (key: string) => row[key as keyof Area],
+                    original: row,
+                    getValue: (key: string) => resolveValue(key),
                   },
                 })
               ) : (
                 <span className="text-xs text-foreground-primary md:text-base">
-                  {row[(column as any).accessorKey as keyof Area] as string}
+                  {resolveValue(column.accessorKey as string) ?? "-"}
                 </span>
               )}
             </div>
