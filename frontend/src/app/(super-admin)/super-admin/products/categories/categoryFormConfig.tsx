@@ -116,6 +116,7 @@ export const getCategoryFormConfig = (
 };
 
 export const createEmptyCategoryFormData = (): ProductCategoryForm => ({
+  id: "",
   Title: "",
   Slug: "",
   Parent: "",
