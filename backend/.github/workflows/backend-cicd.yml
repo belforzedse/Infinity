@@ -77,11 +77,30 @@ jobs:
             cat <<'EOF' > main.env
             ${{ secrets.PROD_BACKEND_ENV_FILE }}
             EOF
-            export IMAGE_TAG=main
+            export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
+            extract_var() {
+              local key="$1"
+              local value
+              value=$(grep -E "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
+              if [[ -z "$value" ]]; then
+                echo "Missing ${key} in ${ENV_FILE}" >&2
+                exit 1
+              fi
+              printf '%s\n' "$value"
+            }
+            DB_USER=$(extract_var "DATABASE_USERNAME")
+            DB_PASS=$(extract_var "DATABASE_PASSWORD")
+            DB_NAME=$(extract_var "DATABASE_NAME")
+            cat <<EOF > "$DB_ENV_FILE"
+POSTGRES_USER=${DB_USER}
+POSTGRES_PASSWORD=${DB_PASS}
+POSTGRES_DB=${DB_NAME}
+EOF
+            export IMAGE_TAG=main
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi migrate
+            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi -- migrate
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
 
@@ -111,11 +130,30 @@ jobs:
             cat <<'EOF' > dev.env
             ${{ secrets.STAGING_BACKEND_ENV_FILE }}
             EOF
-            export IMAGE_TAG=dev
+            export DB_ENV_FILE=db.env
             export ENV_FILE=dev.env
+            extract_var() {
+              local key="$1"
+              local value
+              value=$(grep -E "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
+              if [[ -z "$value" ]]; then
+                echo "Missing ${key} in ${ENV_FILE}" >&2
+                exit 1
+              fi
+              printf '%s\n' "$value"
+            }
+            DB_USER=$(extract_var "DATABASE_USERNAME")
+            DB_PASS=$(extract_var "DATABASE_PASSWORD")
+            DB_NAME=$(extract_var "DATABASE_NAME")
+            cat <<EOF > "$DB_ENV_FILE"
+POSTGRES_USER=${DB_USER}
+POSTGRES_PASSWORD=${DB_PASS}
+POSTGRES_DB=${DB_NAME}
+EOF
+            export IMAGE_TAG=dev
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi migrate
+            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi -- migrate
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
 
@@ -145,10 +183,29 @@ jobs:
             cat <<'EOF' > main.env
             ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
             EOF
-            export IMAGE_TAG=experimental
+            export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
+            extract_var() {
+              local key="$1"
+              local value
+              value=$(grep -E "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
+              if [[ -z "$value" ]]; then
+                echo "Missing ${key} in ${ENV_FILE}" >&2
+                exit 1
+              fi
+              printf '%s\n' "$value"
+            }
+            DB_USER=$(extract_var "DATABASE_USERNAME")
+            DB_PASS=$(extract_var "DATABASE_PASSWORD")
+            DB_NAME=$(extract_var "DATABASE_NAME")
+            cat <<EOF > "$DB_ENV_FILE"
+POSTGRES_USER=${DB_USER}
+POSTGRES_PASSWORD=${DB_PASS}
+POSTGRES_DB=${DB_NAME}
+EOF
+            export IMAGE_TAG=experimental
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi migrate
+            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi -- migrate
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
