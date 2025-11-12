@@ -13,7 +13,7 @@ services:
       - "${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
     volumes:
-      - ./public:/app/public
+      - uploads-data:/app/public
     networks:
       - infinity-network
 
@@ -57,6 +57,7 @@ services:
 volumes:
   infinity-postgres-data:
   infinity-redis-data:
+  uploads-data:
 
 networks:
   infinity-network:
