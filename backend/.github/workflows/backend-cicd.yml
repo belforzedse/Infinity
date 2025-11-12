@@ -74,25 +74,15 @@ jobs:
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            cat <<'EOF' > main.env
+            cat <<-'EOF' > main.env
             ${{ secrets.PROD_BACKEND_ENV_FILE }}
             EOF
             export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
-            extract_var() {
-              local key="$1"
-              local value
-              value=$(grep -E "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
-              if [[ -z "$value" ]]; then
-                echo "Missing ${key} in ${ENV_FILE}" >&2
-                exit 1
-              fi
-              printf '%s\n' "$value"
-            }
-            DB_USER=$(extract_var "DATABASE_USERNAME")
-            DB_PASS=$(extract_var "DATABASE_PASSWORD")
-            DB_NAME=$(extract_var "DATABASE_NAME")
-            cat <<EOF > "$DB_ENV_FILE"
+            DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            cat > "$DB_ENV_FILE" <<-EOF
             POSTGRES_USER=${DB_USER}
             POSTGRES_PASSWORD=${DB_PASS}
             POSTGRES_DB=${DB_NAME}
@@ -127,25 +117,15 @@ jobs:
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            cat <<'EOF' > dev.env
+            cat <<-'EOF' > dev.env
             ${{ secrets.STAGING_BACKEND_ENV_FILE }}
             EOF
             export DB_ENV_FILE=db.env
             export ENV_FILE=dev.env
-            extract_var() {
-              local key="$1"
-              local value
-              value=$(grep -E "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
-              if [[ -z "$value" ]]; then
-                echo "Missing ${key} in ${ENV_FILE}" >&2
-                exit 1
-              fi
-              printf '%s\n' "$value"
-            }
-            DB_USER=$(extract_var "DATABASE_USERNAME")
-            DB_PASS=$(extract_var "DATABASE_PASSWORD")
-            DB_NAME=$(extract_var "DATABASE_NAME")
-            cat <<EOF > "$DB_ENV_FILE"
+            DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            cat > "$DB_ENV_FILE" <<-EOF
             POSTGRES_USER=${DB_USER}
             POSTGRES_PASSWORD=${DB_PASS}
             POSTGRES_DB=${DB_NAME}
@@ -180,25 +160,15 @@ jobs:
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            cat <<'EOF' > main.env
+            cat <<-'EOF' > main.env
             ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
             EOF
             export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
-            extract_var() {
-              local key="$1"
-              local value
-              value=$(grep -E "^${key}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
-              if [[ -z "$value" ]]; then
-                echo "Missing ${key} in ${ENV_FILE}" >&2
-                exit 1
-              fi
-              printf '%s\n' "$value"
-            }
-            DB_USER=$(extract_var "DATABASE_USERNAME")
-            DB_PASS=$(extract_var "DATABASE_PASSWORD")
-            DB_NAME=$(extract_var "DATABASE_NAME")
-            cat <<EOF > "$DB_ENV_FILE"
+            DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            cat > "$DB_ENV_FILE" <<-EOF
             POSTGRES_USER=${DB_USER}
             POSTGRES_PASSWORD=${DB_PASS}
             POSTGRES_DB=${DB_NAME}
