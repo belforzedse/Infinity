@@ -118,6 +118,7 @@ export function SuperAdminTable<TData, TValue>({
   const isFetchingRef = useRef(false);
   const fetchSeqRef = useRef(0);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const isPageVisibleRef = useRef(true);
 
   const requestUrl = useMemo(() => {
@@ -184,7 +185,23 @@ export function SuperAdminTable<TData, TValue>({
 
   // Fetch on first mount and when the computed request URL changes
   useEffect(() => {
-    if (requestUrl) runFetch(requestUrl);
+    if (!requestUrl) return;
+
+    if (fetchDebounceRef.current) {
+      clearTimeout(fetchDebounceRef.current);
+    }
+
+    fetchDebounceRef.current = setTimeout(() => {
+      runFetch(requestUrl);
+      fetchDebounceRef.current = null;
+    }, 300);
+
+    return () => {
+      if (fetchDebounceRef.current) {
+        clearTimeout(fetchDebounceRef.current);
+        fetchDebounceRef.current = null;
+      }
+    };
   }, [requestUrl, runFetch]);
 
   // External refresh trigger (e.g. after mutations)

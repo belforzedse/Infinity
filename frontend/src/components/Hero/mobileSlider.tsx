@@ -37,7 +37,7 @@ export default function MobileSlider({
 
   return (
     <div ref={hostRef} className="mobile-slider-container block space-y-6 pb-12 [touch-action:manipulation]">
-      <MobileHero layout={slides[index]} playKey={playKey} />
+      <MobileHero layout={slides[index]} slideKey={index} />
 
       {/* Pagination below content, not overlaying images */}
       <div className="flex w-full items-center justify-center">

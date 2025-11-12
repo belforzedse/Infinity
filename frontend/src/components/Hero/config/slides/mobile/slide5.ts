@@ -1,51 +1,91 @@
 /**
  * Mobile Slide 5
- * Different hero + primary images + responsive object-fit
+ * Vibrant warm colors with premium presentation
  */
 import { MobileSlideBuilder } from "../../slideFactory";
 
 export const slide5 = new MobileSlideBuilder()
   .heroBanner({
-    src: "/images/side3.png",
-    alt: "Hero Banner",
-    width: 1920,
-    height: 560,
-    className: "w-full rounded-lg object-cover",
-    sizes: "(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw",
-  })
-  .primaryBanner({
-    src: "/images/side3.png",
-    alt: "Primary Banner",
-    width: 1200,
-    height: 600,
-    className: "w-full rounded-lg object-cover",
-    href: "https://infinitycolor.co/shop/skirt/",
-    sizes: "(max-width: 768px) 100vw, 50vw",
-  })
-  .topActionBanner({
-    title: "",
-    subtitle: "",
-    image: {
-      src: "/images/bottomleft3.png",
-      alt: "Category Banner",
+    background: { type: "color", value: "bg-orange-100" },
+    foregroundImage: {
+      src: "/images/side3.png",
+      alt: "Hero",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
-      className: "h-full w-full rounded-lg object-contain md:object-cover",
-      objectPosition: "center center",
+      className: "object-contain",
     },
   })
-  .bottomActionBanner({
-    title: "",
-    subtitle: "",
+  .primaryBanner({
+    title: "تابستان داغ",
+    subtitle: "کالکشن سال",
+    className: "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]",
+    colors: {
+      background: "bg-orange-50",
+      titleColor: "text-orange-900",
+      subtitleColor: "text-orange-700",
+    },
+    typography: {
+      titleFont: "font-kaghaz",
+      titleSize: "text-xl sm:text-2xl md:text-3xl",
+      titleWeight: "font-bold",
+      subtitleSize: "text-sm sm:text-base md:text-lg",
+      subtitleWeight: "font-medium",
+      titleLeading: "leading-tight",
+      subtitleLeading: "leading-relaxed",
+    },
+  })
+  .bottomActionBannerLeft({
+    title: "تابستان",
     image: {
-      src: "/images/bottomright3.png",
-      alt: "Category Banner",
+      src: "/images/bottomleft3.png",
+      alt: "Banner",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/skirt/",
       className: "h-full w-full rounded-lg object-contain md:object-cover",
-      objectPosition: "center center",
+    },
+    className: "rounded-lg",
+    colors: {
+      background: "bg-gradient-to-b from-orange-700/70 to-red-600/50",
+      titleColor: "text-orange-50",
+      subtitleColor: "text-yellow-100",
+    },
+    typography: {
+      titleFont: "font-kaghaz",
+      titleSize: "text-lg sm:text-2xl",
+      titleWeight: "font-bold",
+    },
+    button: {
+      label: "نگاه کنید",
+      href: "#",
+      className: "text-orange-50 text-xs font-semibold",
+      showArrow: true,
+    },
+  })
+  .bottomActionBannerRight({
+    title: "رنگ نئون",
+    image: {
+      src: "/images/bottomright3.png",
+      alt: "Banner",
+      width: 600,
+      height: 600,
+      className: "h-full w-full rounded-lg object-contain md:object-cover",
+    },
+    className: "rounded-lg",
+    colors: {
+      background: "bg-gradient-to-t from-indigo-900/70 to-purple-600/50",
+      titleColor: "text-indigo-100",
+      subtitleColor: "text-purple-200",
+    },
+    typography: {
+      titleFont: "font-kaghaz",
+      titleSize: "text-lg sm:text-2xl",
+      titleWeight: "font-bold",
+    },
+    button: {
+      label: "کاوش",
+      href: "#",
+      className: "text-indigo-100 text-xs font-semibold",
+      showArrow: true,
     },
   })
   .build();
