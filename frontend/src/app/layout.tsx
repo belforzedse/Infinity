@@ -33,6 +33,14 @@ export default function RootLayout({
       className={`${peyda.variable} ${peydaFanum.variable} ${rokh.variable} ${kaghaz.variable}`}
     >
       <body className={`${peydaFanum.className} antialiased`}>
+        {/* Skip to main content link for keyboard users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only fixed top-0 right-0 z-[2147483646] bg-pink-600 text-white px-4 py-2 rounded-b-lg"
+        >
+          رفتن به محتوای اصلی
+        </a>
+
         <CartProvider>
           <NuqsAdapter>
             <Providers>{children}</Providers>

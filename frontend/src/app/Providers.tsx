@@ -36,7 +36,9 @@ export default function Providers({ children }: { children: ReactNode }) {
       {/* Intercepts fetch calls to show global error/loading states */}
       <GlobalFetchInterceptor />
       <ImageEffects />
-      {children}
+      <main id="main-content">
+        {children}
+      </main>
       <GlobalLoadingOverlay />
     </Provider>
   );
