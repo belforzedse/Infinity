@@ -101,7 +101,7 @@ jobs:
           username: ${{ secrets.PROD_FRONTEND_USER }}
           key: ${{ secrets.PROD_FRONTEND_SSH_KEY }}
           port: ${{ secrets.PROD_FRONTEND_PORT || '22' }}
-          source: frontend/docker-compose.yml
+          source: docker-compose.yml
           target: /opt/infinity/frontend/
 
       - name: Deploy to production
@@ -134,7 +134,7 @@ jobs:
           username: ${{ secrets.STAGING_FRONTEND_USER }}
           key: ${{ secrets.STAGING_FRONTEND_SSH_KEY }}
           port: ${{ secrets.STAGING_FRONTEND_PORT || '22' }}
-          source: frontend/docker-compose.yml
+          source: docker-compose.yml
           target: /opt/infinity/frontend/
 
       - name: Deploy to staging
@@ -167,7 +167,7 @@ jobs:
           username: ${{ secrets.EXPERIMENTAL_FRONTEND_USER }}
           key: ${{ secrets.EXPERIMENTAL_FRONTEND_SSH_KEY }}
           port: ${{ secrets.EXPERIMENTAL_FRONTEND_PORT || '22' }}
-          source: frontend/docker-compose.yml
+          source: docker-compose.yml
           target: /opt/infinity/frontend/
 
       - name: Deploy to experimental
