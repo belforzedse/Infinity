@@ -77,15 +77,12 @@ jobs:
             cat <<'EOF' > main.env
             ${{ secrets.PROD_BACKEND_ENV_FILE }}
             EOF
-            set -a
-            . ./main.env
-            set +a
             export IMAGE_TAG=main
             export ENV_FILE=main.env
-            docker compose pull
-            docker compose up -d infinity-postgres infinity-redis
-            docker compose run --rm strapi npm run strapi migrate
-            docker compose up -d --remove-orphans
+            docker compose --env-file "$ENV_FILE" pull
+            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi migrate
+            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
 
       - name: Upload docker-compose (staging)
@@ -114,15 +111,12 @@ jobs:
             cat <<'EOF' > dev.env
             ${{ secrets.STAGING_BACKEND_ENV_FILE }}
             EOF
-            set -a
-            . ./dev.env
-            set +a
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
-            docker compose pull
-            docker compose up -d infinity-postgres infinity-redis
-            docker compose run --rm strapi npm run strapi migrate
-            docker compose up -d --remove-orphans
+            docker compose --env-file "$ENV_FILE" pull
+            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi migrate
+            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
 
       - name: Upload docker-compose (experimental)
@@ -151,13 +145,10 @@ jobs:
             cat <<'EOF' > main.env
             ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
             EOF
-            set -a
-            . ./main.env
-            set +a
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env
-            docker compose pull
-            docker compose up -d infinity-postgres infinity-redis
-            docker compose run --rm strapi npm run strapi migrate
-            docker compose up -d --remove-orphans
+            docker compose --env-file "$ENV_FILE" pull
+            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi migrate
+            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
