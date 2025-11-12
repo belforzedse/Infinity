@@ -5,12 +5,14 @@ export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
   const { reason } = ctx.request.body || {};
 
   try {
-    const user = ctx.state.user;
-    const roleId =
-      typeof user?.user_role === "object"
-        ? user.user_role?.id
-        : user?.user_role;
-    if (!user || Number(roleId) !== 2) {
+    // Admin guard: ensure plugin user has an admin/store-manager role
+    const pluginUser = ctx.state.user;
+    if (!pluginUser) return ctx.forbidden("Admin access required");
+    const fullUser = await strapi.db
+      .query("plugin::users-permissions.user")
+      .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
+    const roleName = fullUser?.role?.name;
+    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
       return ctx.forbidden("Admin access required");
     }
 
@@ -47,7 +49,7 @@ export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
           reason: reason || "",
           previousBarcode: order.ShippingBarcode,
         },
-        PerformedBy: `Admin User ${user.id}`,
+              PerformedBy: `Admin User ${fullUser.id}`,
       },
     });
 

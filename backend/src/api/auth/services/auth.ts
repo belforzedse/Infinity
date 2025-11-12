@@ -6,29 +6,43 @@ import { RedisClient } from "../../..";
 
 export default () => ({
   async hasUser(ctx, { phone }) {
-    const merchant = await strapi.db
-      .query("api::local-user.local-user")
-      .findOne({
-        where: {
-          Phone: {
-            $endsWith: phone.substring(1),
-          },
-        },
-      });
+    // Normalize phone to +98XXXXXXXXX format for consistent lookup
+    let normalizedPhone = String(phone).trim();
+    if (normalizedPhone.startsWith("0")) {
+      normalizedPhone = `+98${normalizedPhone.substring(1)}`;
+    }
+    if (!normalizedPhone.startsWith("+")) {
+      normalizedPhone = `+${normalizedPhone}`;
+    }
 
-    return !!merchant?.id;
+    const user = await strapi.query("plugin::users-permissions.user").findOne({
+      where: {
+        phone: {
+          $endsWith: normalizedPhone.substring(1),
+        },
+      },
+    });
+
+    return !!user?.id;
   },
   async otp(ctx, { phone }) {
     try {
-      const merchant = await strapi.db
-        .query("api::local-user.local-user")
-        .findOne({
-          where: {
-            Phone: {
-              $endsWith: phone.substring(1),
-            },
+      // Normalize phone to +98XXXXXXXXX format for consistent lookup
+      let normalizedPhone = String(phone).trim();
+      if (normalizedPhone.startsWith("0")) {
+        normalizedPhone = `+98${normalizedPhone.substring(1)}`;
+      }
+      if (!normalizedPhone.startsWith("+")) {
+        normalizedPhone = `+${normalizedPhone}`;
+      }
+
+      const merchant = await strapi.query("plugin::users-permissions.user").findOne({
+        where: {
+          phone: {
+            $endsWith: normalizedPhone.substring(1),
           },
-        });
+        },
+      });
 
       const code = Math.random().toString().substring(2, 8);
       const otpToken =
@@ -41,7 +55,7 @@ export default () => ({
         JSON.stringify({
           code,
           merchant: merchant?.id,
-          phone,
+          phone: normalizedPhone,
           IsVerified: merchant?.IsVerified,
         }),
         {

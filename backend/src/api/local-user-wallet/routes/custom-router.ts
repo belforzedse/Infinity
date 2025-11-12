@@ -6,7 +6,6 @@ export default {
       handler: "local-user-wallet.getCurrentUserWallet",
       config: {
         auth: false,
-        middlewares: ["global::authentication"],
       },
     },
   ],

@@ -1,49 +1,64 @@
-version: "3"
-
 services:
-  # strapi:
-  #   container_name: infinity-strapi
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   restart: unless-stopped
-  #   env_file: .env
-  #   environment:
-  #     DATABASE_CLIENT: ${DATABASE_CLIENT}
-  #     DATABASE_HOST: postgres
-  #     DATABASE_PORT: ${DATABASE_PORT}
-  #     DATABASE_NAME: ${DATABASE_NAME}
-  #     DATABASE_USERNAME: ${DATABASE_USERNAME}
-  #     DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-  #     NODE_ENV: development
-  #   volumes:
-  #     - ./:/app
-  #     - /app/node_modules
-  #   ports:
-  #     - "1337:1337"
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - infinity-network
-
-  postgres:
-    container_name: infinity-postgres
-    image: postgres:14
+  strapi:
+    container_name: infinity-strapi
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    env_file:
+      - ${ENV_FILE:-main.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
-    env_file: .env
+    volumes:
+      - ./public:/app/public
+    networks:
+      - infinity-network
+
+  infinity-postgres:
+    container_name: infinity-postgres
+    image: postgres:14-alpine
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE:-main.env}
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     volumes:
-      - infinity-data:/var/lib/postgresql/data
+      - infinity-postgres-data:/var/lib/postgresql/data
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - infinity-network
+
+  infinity-redis:
+    container_name: infinity-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - infinity-redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - infinity-network
 
 volumes:
-  infinity-data:
+  infinity-postgres-data:
+  infinity-redis-data:
 
 networks:
   infinity-network:

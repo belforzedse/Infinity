@@ -287,6 +287,61 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Find existing product size helper for a product
+   */
+  async findProductSizeHelper(productId) {
+    const response = await this.retryRequest(() =>
+      this.client.get('/product-size-helpers', {
+        params: {
+          'filters[product][id][$eq]': productId,
+        },
+      }),
+    );
+    if (response.data?.data && response.data.data.length > 0) {
+      return response.data.data[0];
+    }
+    return null;
+  }
+
+  /**
+   * Create or update the size helper associated with a product
+   */
+  async syncProductSizeHelper(productId, helperMatrix) {
+    const existingHelper = await this.findProductSizeHelper(productId);
+
+    // If no helper data provided, delete existing helper if present
+    if (!helperMatrix) {
+      if (existingHelper) {
+        await this.retryRequest(() =>
+          this.client.delete(`/product-size-helpers/${existingHelper.id}`),
+        );
+      }
+      return null;
+    }
+
+    if (existingHelper) {
+      const response = await this.retryRequest(() =>
+        this.client.put(`/product-size-helpers/${existingHelper.id}`, {
+          data: {
+            Helper: helperMatrix,
+          },
+        }),
+      );
+      return response.data;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.post('/product-size-helpers', {
+        data: {
+          Helper: helperMatrix,
+          product: productId,
+        },
+      }),
+    );
+    return response.data;
+  }
+
+  /**
    * Update an existing product variation
    */
   async updateProductVariation(variationId, updateData) {
@@ -519,30 +574,30 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
-   * Get all local users (for phone uniqueness check)
+   * Get all plugin users (for phone uniqueness check)
    */
-  async getAllLocalUsers() {
+  async getAllPluginUsers(params = {}) {
     const response = await this.retryRequest(() =>
-      this.client.get('/local-users', {
+      this.client.get('/users', {
         params: {
-          'pagination[pageSize]': 1000, // Get a large batch for phone checking
-          'fields[0]': 'Phone' // Only get phone field for efficiency
-        }
+          ...params,
+          'pagination[pageSize]': params['pagination[pageSize]'] || 1000,
+        },
       })
     );
-    return response.data;
+    return response.data ?? response;
   }
 
   /**
    * Find a local user by external ID
    */
-  async findLocalUserByExternalId(externalId) {
+  async findPluginUserByExternalId(externalId) {
     if (!externalId) {
       return null;
     }
 
     const response = await this.retryRequest(() =>
-      this.client.get('/local-users', {
+      this.client.get('/users', {
         params: {
           'filters[external_id][$eq]': externalId,
           'pagination[pageSize]': 1
@@ -550,27 +605,27 @@ class StrapiClient extends BaseApiClient {
       })
     );
 
-    return this.extractFirstEntry(response.data);
+    return this.extractFirstEntry(response.data ?? response);
   }
 
   /**
    * Find a local user by phone number
    */
-  async findLocalUserByPhone(phone) {
+  async findPluginUserByPhone(phone) {
     if (!phone) {
       return null;
     }
 
     const response = await this.retryRequest(() =>
-      this.client.get('/local-users', {
+      this.client.get('/users', {
         params: {
-          'filters[Phone][$eq]': phone,
+          'filters[phone][$eq]': phone,
           'pagination[pageSize]': 1
         }
       })
     );
 
-    return this.extractFirstEntry(response.data);
+    return this.extractFirstEntry(response.data ?? response);
   }
 
   /**
@@ -581,7 +636,11 @@ class StrapiClient extends BaseApiClient {
       return null;
     }
 
-    const items = Array.isArray(responseData?.data) ? responseData.data : [];
+    const items = Array.isArray(responseData?.data)
+      ? responseData.data
+      : Array.isArray(responseData)
+        ? responseData
+        : [];
     if (items.length === 0) {
       return null;
     }
@@ -592,15 +651,15 @@ class StrapiClient extends BaseApiClient {
   /**
    * Create local user
    */
-  async createLocalUser(userData) {
+  async createPluginUser(userData) {
     const response = await this.retryRequest(() =>
-      this.client.post('/local-users', { data: userData })
+      this.client.post('/users', userData)
     );
-    return response.data;
+    return response.data ?? response;
   }
 
   /**
-   * Create local user info
+   * Create local user info (profile record linked to plugin user)
    */
   async createLocalUserInfo(userInfoData) {
     const response = await this.retryRequest(() => 
@@ -610,13 +669,13 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
-   * Create local user role
+   * Fetch plugin roles
    */
-  async createLocalUserRole(roleData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/local-user-roles', { data: roleData })
+  async getPluginRoles() {
+    const response = await this.retryRequest(() =>
+      this.client.get('/users-permissions/roles')
     );
-    return response.data;
+    return response.data?.roles ?? response.data ?? response;
   }
 
   /**

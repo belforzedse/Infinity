@@ -373,12 +373,23 @@ class ProductImporter {
             try {
               const updateData = {};
 
+              // When updating product with new images, explicitly clear old references
+              // This ensures dangling image references don't persist when images are replaced
               if (imageResults.coverImageId) {
+                // Clear old cover image by setting new one
+                // Strapi will disconnect the old one automatically
                 updateData.CoverImage = imageResults.coverImageId;
+              } else if (mode === "update") {
+                // If no new cover image but this is an update, clear the old one
+                updateData.CoverImage = null;
               }
 
               if (imageResults.galleryImageIds.length > 0) {
+                // Replace all gallery images with new ones
                 updateData.Media = imageResults.galleryImageIds;
+              } else if (mode === "update") {
+                // If no new gallery images but this is an update, clear old ones
+                updateData.Media = null;
               }
 
               // Only update if we have data to update
@@ -419,6 +430,15 @@ class ProductImporter {
           }
         } else {
           this.logger.debug(`⏭️ Image upload disabled - skipping images for: ${wcProduct.name}`);
+        }
+
+        // Sync size guide helper per product
+        try {
+          await this.strapiClient.syncProductSizeHelper(productId, strapiProduct._sizeGuideMatrix);
+        } catch (sizeGuideError) {
+          this.logger.warn(
+            `⚠️ Failed to sync size guide for product ${wcProduct.name}: ${sizeGuideError.message}`,
+          );
         }
 
         this.duplicateTracker.recordMapping("products", wcProduct.id, productId, {
@@ -489,6 +509,7 @@ class ProductImporter {
       _variationIds,
       _attributes,
       _additionalCategories,
+      _sizeGuideMatrix,
       ...payload
     } = strapiProduct;
 
@@ -589,6 +610,14 @@ class ProductImporter {
       strapiProduct._attributes = wcProduct.attributes;
     }
 
+    // Extract size guide matrix from WooCommerce meta fields
+    const sizeGuideMatrix = this.extractSizeGuideMatrix(wcProduct);
+    if (sizeGuideMatrix) {
+      strapiProduct._sizeGuideMatrix = sizeGuideMatrix;
+    } else {
+      strapiProduct._sizeGuideMatrix = null;
+    }
+
     this.logger.debug(`🔄 Transformed product: ${wcProduct.name}`);
     return strapiProduct;
   }
@@ -624,6 +653,59 @@ class ProductImporter {
       this.logger.error(`❌ Failed to handle images for product ${wcProduct.id}:`, error.message);
       return { coverImageId: null, galleryImageIds: [] };
     }
+  }
+
+  /**
+   * Extract and sanitize size guide matrix stored in WooCommerce meta data
+   */
+  extractSizeGuideMatrix(wcProduct) {
+    if (!wcProduct || !Array.isArray(wcProduct.meta_data)) {
+      return null;
+    }
+
+    const sizeGuideKeys = ["product_size_guide", "product-custom-meta-inp"];
+    const metaEntry = wcProduct.meta_data.find(
+      (meta) => meta && sizeGuideKeys.includes(meta.key),
+    );
+
+    if (!metaEntry || metaEntry.value === undefined || metaEntry.value === null) {
+      return null;
+    }
+
+    let rawValue = metaEntry.value;
+    if (typeof rawValue === "string") {
+      rawValue = rawValue.trim();
+      if (rawValue === "") {
+        return null;
+      }
+      try {
+        rawValue = JSON.parse(rawValue);
+      } catch (_) {
+        // If parsing fails, treat as non-JSON payload
+        return null;
+      }
+    }
+
+    if (!Array.isArray(rawValue)) {
+      return null;
+    }
+
+    const sanitized = rawValue
+      .filter((row) => Array.isArray(row))
+      .map((row) =>
+        row.map((cell) => {
+          if (cell === null || cell === undefined) {
+            return "";
+          }
+          return typeof cell === "string" ? cell : String(cell);
+        }),
+      );
+
+    const hasContent = sanitized.some((row) =>
+      row.some((cell) => typeof cell === "string" && cell.trim() !== ""),
+    );
+
+    return hasContent ? sanitized : null;
   }
 
   /**
@@ -686,4 +768,3 @@ class ProductImporter {
 }
 
 module.exports = ProductImporter;
-

@@ -13,40 +13,34 @@ export default factories.createCoreController(
   ({ strapi }: { strapi: Strapi }) => ({
     async chargeIntent(ctx) {
       try {
-        const userId = ctx.state.user?.id;
-        if (!userId) return ctx.unauthorized("Unauthorized");
+        // Resolve legacy local-user id from plugin user
+        const pluginUserId = ctx.state.user?.id;
+        if (!pluginUserId) return ctx.unauthorized("Authentication required");
 
         const { amount } = ctx.request.body || {};
         const amountIrr = Number(amount);
-        if (!amountIrr || amountIrr <= 0)
-          return ctx.badRequest("amount is required (IRR)");
+        if (!amountIrr || amountIrr <= 0) return ctx.badRequest("amount is required (IRR)");
 
         // Create a more robust unique numeric SaleOrderId for Mellat
         const randomSuffix = Math.floor(Math.random() * 900) + 100; // 3 digits
         const saleOrderId = `${Date.now()}${randomSuffix}`;
 
         // Persist pending topup
-        const topup = await strapi.entityService.create(
-          "api::wallet-topup.wallet-topup",
-          {
-            data: {
-              Amount: Math.round(amountIrr),
-              Status: "Pending",
-              SaleOrderId: saleOrderId,
-              user: userId,
-              Date: new Date(),
-            },
-          }
-        );
+        const topup = await strapi.entityService.create("api::wallet-topup.wallet-topup", {
+          data: {
+            Amount: Math.round(amountIrr),
+            Status: "Pending",
+            SaleOrderId: saleOrderId,
+            user: pluginUserId,
+            Date: new Date(),
+          },
+        });
 
         const paymentService = strapi.service("api::payment-gateway.mellat-v3");
 
         // Build absolute callback URL and avoid duplicate "/api" prefixes
         const configuredBase = String(
-          strapi.config.get(
-            "server.url",
-            process.env.URL || "https://api.infinity.rgbgroup.ir/"
-          )
+          strapi.config.get("server.url", process.env.URL || "https://api.infinity.rgbgroup.ir/"),
         );
         let baseUrl = configuredBase.trim();
         if (!/^https?:\/\//i.test(baseUrl)) {
@@ -58,16 +52,14 @@ export default factories.createCoreController(
         const response = await paymentService.requestPayment({
           orderId: Number(saleOrderId),
           amount: Math.round(amountIrr),
-          userId,
+          userId: pluginUserId,
           callbackURL,
         } as any);
 
         if (!response?.success) {
-          await strapi.entityService.update(
-            "api::wallet-topup.wallet-topup",
-            topup.id,
-            { data: { Status: "Failed" } }
-          );
+          await strapi.entityService.update("api::wallet-topup.wallet-topup", topup.id, {
+            data: { Status: "Failed" },
+          });
           return ctx.badRequest("Gateway error", {
             data: { success: false, error: response?.error },
           });
@@ -75,11 +67,9 @@ export default factories.createCoreController(
 
         // Save RefId for tracking
         try {
-          await strapi.entityService.update(
-            "api::wallet-topup.wallet-topup",
-            topup.id,
-            { data: { RefId: response.refId } }
-          );
+          await strapi.entityService.update("api::wallet-topup.wallet-topup", topup.id, {
+            data: { RefId: response.refId },
+          });
         } catch (e) {
           strapi.log.error("Failed to persist wallet topup RefId", {
             topupId: topup.id,

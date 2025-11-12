@@ -1,0 +1,38 @@
+{
+  "561562": {
+    "strapiId": 1,
+    "importedAt": "2025-11-11T12:00:17.770Z",
+    "name": "اسلیپر استیکری 00801",
+    "slug": "sleeper-model-2-00801",
+    "type": "variable",
+    "status": "publish",
+    "rating": "4.00"
+  },
+  "564173": {
+    "strapiId": 2,
+    "importedAt": "2025-11-11T12:00:43.188Z",
+    "name": "اسلیپر پلنگی بدون ساق  00825",
+    "slug": "slipper-without-leopard-legs-00825",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "566251": {
+    "strapiId": 3,
+    "importedAt": "2025-11-11T12:00:52.441Z",
+    "name": "اسلیپر ساقدار قلبی 00832",
+    "slug": "00832-heart-leg-sleeper",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "570232": {
+    "strapiId": 4,
+    "importedAt": "2025-11-11T12:01:01.497Z",
+    "name": "اسلیپر تدی ساده 00834",
+    "slug": "simple-sleeper-00834",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  }
+}

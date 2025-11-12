@@ -144,17 +144,18 @@ class UserImporter {
     this.logger.debug('📂 Loading existing user contact identifiers...');
     
     try {
-      const existingUsers = await this.strapiClient.getAllLocalUsers();
-      const items = Array.isArray(existingUsers?.data?.data)
-        ? existingUsers.data.data
-        : Array.isArray(existingUsers?.data)
-          ? existingUsers.data
-          : Array.isArray(existingUsers)
-            ? existingUsers
-            : [];
+      const existingUsers = await this.strapiClient.getAllPluginUsers({
+        'pagination[pageSize]': 1000,
+        'fields[0]': 'phone',
+      });
+      const items = Array.isArray(existingUsers?.data)
+        ? existingUsers.data
+        : Array.isArray(existingUsers)
+          ? existingUsers
+          : [];
       
       for (const entry of items) {
-        const rawPhone = entry?.attributes?.Phone ?? entry?.Phone;
+        const rawPhone = entry?.phone ?? entry?.Phone ?? entry?.attributes?.phone;
         const normalized = this.normalizePhone(rawPhone);
         if (normalized) {
           this.emailCache.add(normalized);
@@ -172,27 +173,20 @@ class UserImporter {
    */
   async findOrCreateCustomerRole() {
     try {
-      // Try to find existing customer role
-      const existingRoles = await this.strapiClient.get('/local-user-roles', {
-        'filters[Title][$eq]': 'Customer'
-      });
-      
-      if (existingRoles.data && existingRoles.data.length > 0) {
-        this.logger.debug(`📋 Found existing customer role: ${existingRoles.data[0].id}`);
-        return existingRoles.data[0];
+      const roles = await this.strapiClient.getPluginRoles();
+      const customerRole = roles.find(
+        (role) => role?.name?.toLowerCase() === 'customer' || role?.type === 'customer',
+      );
+
+      if (!customerRole) {
+        this.logger.error("❌ Customer plugin role not found. Please create it before importing users.");
+        return { id: null };
       }
-      
-      // Create customer role if it doesn't exist
-      const newRole = await this.strapiClient.create('/local-user-roles', {
-        Title: 'Customer'
-      });
-      
-      this.logger.info(`📋 Created customer role: ${newRole.data.id}`);
-      return newRole.data;
-      
+
+      this.logger.debug(`📋 Using plugin role: ${customerRole.name} (ID: ${customerRole.id})`);
+      return customerRole;
     } catch (error) {
-      this.logger.error(`❌ Failed to find/create customer role: ${error.message}`);
-      // Return a default structure if role creation fails
+      this.logger.error(`❌ Failed to load plugin roles: ${error.message}`);
       return { id: null };
     }
   }
@@ -254,7 +248,7 @@ class UserImporter {
    */
   async findExistingStrapiUser(externalId, phone) {
     try {
-      const existingByExternalId = await this.strapiClient.findLocalUserByExternalId(externalId);
+      const existingByExternalId = await this.strapiClient.findPluginUserByExternalId(externalId);
       if (existingByExternalId) {
         return existingByExternalId;
       }
@@ -263,7 +257,7 @@ class UserImporter {
     }
 
     try {
-      const existingByPhone = await this.strapiClient.findLocalUserByPhone(phone);
+      const existingByPhone = await this.strapiClient.findPluginUserByPhone(phone);
       if (existingByPhone) {
         return existingByPhone;
       }
@@ -297,36 +291,42 @@ class UserImporter {
       return duplicateCheck;
     }
     
-    // Get phone or generate a unique identifier
-    const phone = this.extractPhone(wcCustomer);
-    let userPhone;
-    
-    if (phone && phone.trim() !== '') {
-      userPhone = phone;
-    } else if (wcCustomer.email && wcCustomer.email.trim() !== '') {
-      userPhone = wcCustomer.email;
-    } else {
-      // Generate a unique phone from user ID and timestamp if no phone or email
-      const timestamp = Date.now();
-      userPhone = `wc_${wcCustomer.id}_${timestamp}`;
-      this.logger.info(`📱 Generated phone for user ${wcCustomer.id}: ${userPhone}`);
+    // Require a valid phone number for import
+    const extractedPhone = this.extractPhone(wcCustomer);
+    if (!extractedPhone || extractedPhone.trim() === '') {
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - missing phone number`);
+      this.stats.skipped++;
+      return { isSkipped: true, reason: 'Missing phone number' };
     }
 
-    const normalizedPhone = this.normalizePhone(userPhone);
+    const formattedPhone = this.formatPhone(extractedPhone);
+    if (!formattedPhone) {
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - invalid phone number: ${extractedPhone}`);
+      this.stats.skipped++;
+      return { isSkipped: true, reason: 'Invalid phone number' };
+    }
+
+    const normalizedPhone = this.normalizePhone(formattedPhone);
+    if (!normalizedPhone) {
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - unable to normalize phone number: ${formattedPhone}`);
+      this.stats.skipped++;
+      return { isSkipped: true, reason: 'Invalid phone number' };
+    }
+
     if (normalizedPhone && this.emailCache.has(normalizedPhone)) {
-      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${userPhone}`);
+      this.logger.warn(`⏭️ Skipping user ${wcCustomer.id} - phone already exists: ${formattedPhone}`);
       this.stats.skipped++;
       return { isSkipped: true, reason: 'Phone already exists' };
     }
 
     try {
       // Transform WooCommerce customer to Strapi format
-      const strapiUser = await this.transformUser(wcCustomer);
+      const strapiUser = await this.transformUser(wcCustomer, formattedPhone);
 
       // Check if this user already exists in Strapi to avoid duplicates
       const existingUser = await this.findExistingStrapiUser(
-        strapiUser.user.external_id,
-        strapiUser.user.Phone
+        strapiUser.pluginUser.external_id,
+        strapiUser.pluginUser.phone
       );
 
       if (existingUser) {
@@ -347,7 +347,7 @@ class UserImporter {
               email: wcCustomer.email || '',
               firstName: wcCustomer.first_name || '',
               lastName: wcCustomer.last_name || '',
-              phone: strapiUser.user.Phone
+              phone: strapiUser.pluginUser.phone
             }
           );
         }
@@ -361,40 +361,46 @@ class UserImporter {
         return { isDryRun: true, data: strapiUser };
       }
       
-      // Find or create customer role
       const customerRole = await this.findOrCreateCustomerRole();
-      
-      // Create local user in Strapi
-      let userResult;
+
+      let pluginUserResult;
       try {
-        userResult = await this.strapiClient.createLocalUser({
-          ...strapiUser.user,
-          user_role: customerRole.id // Link to customer role
+        pluginUserResult = await this.strapiClient.createPluginUser({
+          ...strapiUser.pluginUser,
+          ...(customerRole?.id ? { role: customerRole.id } : {}),
         });
         this.stats.usersCreated++;
       } catch (error) {
-        this.logger.error(`❌ Failed to create local user for ${wcCustomer.email || `ID:${wcCustomer.id}`}:`, error.message);
+        this.logger.error(
+          `❌ Failed to create plugin user for ${wcCustomer.email || `ID:${wcCustomer.id}`}:`,
+          error.message,
+        );
         if (error.response && error.response.data) {
           this.logger.error(`API Error Details:`, JSON.stringify(error.response.data, null, 2));
         }
         throw error;
       }
-      
-      // Create user info
+
+      const pluginUserId = pluginUserResult?.id ?? pluginUserResult?.data?.id;
+
       try {
-        const userInfoResult = await this.strapiClient.createLocalUserInfo({
+        await this.strapiClient.createLocalUserInfo({
           ...strapiUser.userInfo,
-          user: userResult.data.id // Link to user
+          user: pluginUserId,
         });
         this.stats.userInfosCreated++;
         this.stats.rolesAssigned++;
       } catch (error) {
-        this.logger.error(`❌ Failed to create user info for ${wcCustomer.email || `ID:${wcCustomer.id}`}:`, error.message);
+        this.logger.error(
+          `❌ Failed to create user info for ${wcCustomer.email || `ID:${wcCustomer.id}`}:`,
+          error.message,
+        );
         if (error.response && error.response.data) {
           this.logger.error(`API Error Details:`, JSON.stringify(error.response.data, null, 2));
         }
-        // Don't throw here - user was created successfully, just info failed
-        this.logger.warn(`⚠️ User created but user info failed for ${wcCustomer.email || `ID:${wcCustomer.id}`}`);
+        this.logger.warn(
+          `⚠️ Plugin user created but user info failed for ${wcCustomer.email || `ID:${wcCustomer.id}`}`,
+        );
       }
 
       // Add normalized phone/email to cache to prevent duplicates in this session
@@ -403,22 +409,21 @@ class UserImporter {
       }
 
       // Record the mapping
-      this.duplicateTracker.recordMapping(
-        'users',
-        wcCustomer.id,
-        userResult.data.id,
-        {
+      if (pluginUserId) {
+        this.duplicateTracker.recordMapping('users', wcCustomer.id, pluginUserId, {
           email: wcCustomer.email || '',
           firstName: wcCustomer.first_name || '',
           lastName: wcCustomer.last_name || '',
-          phone: strapiUser.user.Phone
-        }
+          phone: strapiUser.pluginUser.phone,
+        });
+      }
+
+      this.stats.success++;
+      this.logger.debug(
+        `✅ Created user: ${wcCustomer.email || `ID:${wcCustomer.id}`} → ID: ${pluginUserId}`,
       );
       
-      this.stats.success++;
-      this.logger.debug(`✅ Created user: ${wcCustomer.email || `ID:${wcCustomer.id}`} → ID: ${userResult.data.id}`);
-      
-      return userResult;
+      return pluginUserResult;
       
     } catch (error) {
       this.stats.failed++;
@@ -428,75 +433,57 @@ class UserImporter {
   }
 
   /**
-   * Transform WooCommerce customer to Strapi format
+   * Transform WooCommerce customer to Strapi payloads
    */
-  async transformUser(wcCustomer) {
-    // Get phone or generate unique identifier
-    const phone = this.extractPhone(wcCustomer);
-    let userPhone;
-    
-    if (phone && phone.trim() !== '') {
-      userPhone = phone;
-    } else if (wcCustomer.email && wcCustomer.email.trim() !== '') {
-      userPhone = wcCustomer.email;
-    } else {
-      // Generate a unique phone from user ID and timestamp if no phone or email
-      const timestamp = Date.now();
-      userPhone = `wc_${wcCustomer.id}_${timestamp}`;
+  async transformUser(wcCustomer, enforcedPhone = null) {
+    const phone = enforcedPhone ?? this.extractPhone(wcCustomer);
+    if (!phone || phone.trim() === '') {
+      throw new Error(`Cannot transform user ${wcCustomer.id} - missing phone number`);
     }
-    
-    // Ensure phone is not too long (database constraints)
-    const sanitizedPhone = userPhone.substring(0, 255);
-    
-    // Sanitize names
+
+    const formattedPhone = this.formatPhone(phone);
+    if (!formattedPhone) {
+      throw new Error(`Cannot transform user ${wcCustomer.id} - invalid phone number: ${phone}`);
+    }
+
+    const sanitizedPhone = formattedPhone.substring(0, 255);
     const firstName = (wcCustomer.first_name || '').trim().substring(0, 255);
     const lastName = (wcCustomer.last_name || '').trim().substring(0, 255);
-    
-    // Create bio with available information
     const address = this.formatAddress(wcCustomer);
+
     let bio = '';
-    
-    // Add email to bio if available
     if (wcCustomer.email && wcCustomer.email.trim() !== '') {
       bio = `Email: ${wcCustomer.email}`;
     }
-    
-    // Add address to bio if available
     if (address && address.trim()) {
-      if (bio) {
-        bio += `\nAddress: ${address}`;
-      } else {
-        bio = `Address: ${address}`;
-      }
+      bio = bio ? `${bio}\nAddress: ${address}` : `Address: ${address}`;
     }
-    
-    // Add WooCommerce ID if no other info available
     if (!bio) {
       bio = `WooCommerce Customer ID: ${wcCustomer.id}`;
     }
-    
-    // Ensure bio is not too long
     bio = bio.substring(0, 1000);
-    
-    const strapiUser = {
-      user: {
-        Phone: sanitizedPhone, // Phone is required and unique in local-user schema
-        Password: this.generateRandomPassword(), // Generate random password
-        IsActive: true,
-        IsVerified: false, // Default to unverified
-        external_id: wcCustomer.id.toString(),
-        external_source: 'woocommerce'
-      },
-      userInfo: {
-        FirstName: firstName,
-        LastName: lastName,
-        Bio: bio
-      },
-      roleId: null // We'll find or create the customer role
+
+    const pluginUser = {
+      username: sanitizedPhone,
+      email: this.ensureEmail(wcCustomer, sanitizedPhone),
+      phone: sanitizedPhone,
+      password: this.generateRandomPassword(),
+      confirmed: true,
+      blocked: false,
+      IsActive: true,
+      IsVerified: false,
+      external_id: wcCustomer.id.toString(),
+      external_source: 'woocommerce',
+    };
+
+    const userInfo = {
+      FirstName: firstName,
+      LastName: lastName,
+      Bio: bio,
     };
 
     this.logger.debug(`🔄 Transformed user: ${wcCustomer.email || 'No Email'} → Phone: ${sanitizedPhone}`);
-    return strapiUser;
+    return { pluginUser, userInfo };
   }
 
   /**
@@ -507,12 +494,47 @@ class UserImporter {
       return '';
     }
 
-    const normalized = value.toString().trim();
-    if (normalized === '') {
+    const formatted = this.formatPhone(value);
+    if (!formatted) {
       return '';
     }
 
-    return normalized.replace(/\s+/g, '').toLowerCase();
+    return formatted.replace(/\s+/g, '').toLowerCase();
+  }
+
+  formatPhone(value) {
+    if (value === undefined || value === null) {
+      return '';
+    }
+    let trimmed = value.toString().trim();
+    if (!trimmed) return '';
+
+    trimmed = trimmed.replace(/\s+/g, '');
+
+    if (trimmed.startsWith('+')) {
+      return trimmed;
+    }
+
+    if (trimmed.startsWith('0')) {
+      return `+98${trimmed.slice(1)}`;
+    }
+
+    if (trimmed.startsWith('98')) {
+      return `+${trimmed}`;
+    }
+
+    return `+${trimmed}`;
+  }
+
+  ensureEmail(wcCustomer, fallbackPhone) {
+    if (wcCustomer.email && wcCustomer.email.trim() !== '') {
+      return wcCustomer.email.trim();
+    }
+    const numeric =
+      (fallbackPhone || '').replace(/\D/g, '') ||
+      wcCustomer.id?.toString() ||
+      Math.random().toString(36).slice(2, 10);
+    return `${numeric}@placeholder.local`;
   }
 
   /**
@@ -592,6 +614,3 @@ class UserImporter {
 }
 
 module.exports = UserImporter;
-
-
-
