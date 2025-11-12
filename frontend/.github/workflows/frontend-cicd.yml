@@ -108,6 +108,7 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/infinity/frontend
+            echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<EOF > main.env
             NODE_ENV=production
             PORT=3000
@@ -143,6 +144,7 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/infinity/frontend
+            echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<EOF > dev.env
             NODE_ENV=production
             PORT=3000
@@ -178,6 +180,7 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/infinity/frontend
+            echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<EOF > main.env
             NODE_ENV=production
             PORT=3000
