@@ -80,7 +80,6 @@ jobs:
             export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
             mkdir -p public/uploads
-            chown -R ${{ secrets.PROD_BACKEND_USER }}:${{ secrets.PROD_BACKEND_USER }} public
             DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
             DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
             DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
@@ -125,7 +124,6 @@ jobs:
             export DB_ENV_FILE=db.env
             export ENV_FILE=dev.env
             mkdir -p public/uploads
-            chown -R ${{ secrets.STAGING_BACKEND_USER }}:${{ secrets.STAGING_BACKEND_USER }} public
             DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
             DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
             DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
@@ -170,7 +168,6 @@ jobs:
             export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
             mkdir -p public/uploads
-            chown -R ${{ secrets.EXPERIMENTAL_BACKEND_USER }}:${{ secrets.EXPERIMENTAL_BACKEND_USER }} public
             DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
             DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
             DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
