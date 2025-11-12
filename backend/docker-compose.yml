@@ -19,7 +19,7 @@ services:
 
   infinity-postgres:
     container_name: infinity-postgres
-    image: postgres:14-alpine
+    image: postgres:16-alpine
     restart: unless-stopped
     env_file:
       - ${DB_ENV_FILE:-db.env}
