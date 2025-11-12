@@ -23,5 +23,6 @@ export const getProductSizeHelper = async (
 
   const response = await apiClient.get<ApiResponse<SizeHelperData[]>>(endpoint);
 
-  return response.data;
+  // Return the full ApiResponse so callers can access both data and meta
+  return response;
 };

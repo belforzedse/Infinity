@@ -1,131 +1,145 @@
 "use client";
 import React from "react";
-import BannerImage from "./Banners/BannerImage";
+import { LeftBanner } from "./Banners/LeftBanner";
+import TextBanner from "./Banners/TextBanner";
 import { ActionBanner } from "./Banners/ActionBanner";
 import type { MobileLayout } from "./types";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { luxurySlideFade } from "./animations";
 
 type Props = {
   layout: MobileLayout;
-  playKey?: number; // bump to retrigger entrance animation on active slide
+  slideKey?: string | number; // bump to retrigger entrance animation on active slide
 };
 
 /**
- * Mobile Hero Layout
+ * Mobile Hero Layout (Advanced)
  * Structure:
- * - Top: Hero banner (responsive via sizes prop)
- * - Middle: Primary large banner
- * - Bottom: Two stacked action banners (responsive: horizontal on mobile, vertical on md+)
+ * - Top: Hero banner (square with background + foreground)
+ * - Middle: Primary text banner
+ * - Bottom: Two action banners (responsive: side-by-side on mobile, stacked below text)
  */
-export default function MobileHero({ layout, playKey = 0 }: Props) {
-  const heroVar = luxurySlideFade("right", {
-    distance: 50,
-    duration: 0.6,
-    delayIn: 0.2,
+export default function MobileHero({ layout, slideKey = 0 }: Props) {
+  const prefersReduced = useReducedMotion();
+
+  const animConfig = prefersReduced
+    ? {
+        distance: 40,
+        duration: 0.7,
+        ease: [0.35, 0.46, 0.45, 0.94] as any,
+      }
+    : {
+        distance: 80,
+        duration: 1.0,
+        ease: [0.16, 1, 0.3, 1] as any,
+      };
+
+  const heroVar = luxurySlideFade("left", {
+    ...animConfig,
+    delayIn: 0.0,
     delayOut: 0.1,
   });
   const primaryVar = luxurySlideFade("right", {
-    distance: 200,
-    duration: 0.6,
-    delayIn: 0.5,
-    delayOut: 0.3,
+    ...animConfig,
+    delayIn: 0.15,
+    delayOut: 0.2,
   });
-  const topActionVar = luxurySlideFade("left", {
-    distance: 70,
-    duration: 0.6,
+  const leftActionVar = luxurySlideFade("left", {
+    ...animConfig,
+    distance: animConfig.distance * 0.6,
     delayIn: 0.1,
     delayOut: 0.3,
   });
-  const bottomActionVar = luxurySlideFade("left", {
-    distance: 70,
-    duration: 0.6,
-    delayIn: 0.3,
+  const rightActionVar = luxurySlideFade("right", {
+    ...animConfig,
+    distance: animConfig.distance * 0.6,
+    delayIn: 0.2,
     delayOut: 0.2,
   });
 
   return (
-    <>
-      {/* Hero banner at top */}
-      <div className="relative w-full overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={`hero-${playKey}`}
-            variants={heroVar}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="absolute inset-0 h-full w-full"
-            style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
-          >
-            <BannerImage {...layout.heroBanner} />
-          </motion.div>
-        </AnimatePresence>
-        {/* Spacer to maintain height */}
-        <div className="invisible">
-          <BannerImage {...layout.heroBanner} />
-        </div>
-      </div>
-
-      {/* Primary + Action Banners section */}
-      <div className="mt-4 flex flex-col gap-2 md:flex-row md:gap-4">
-        {/* Primary banner - large on md+ */}
-        <div className="relative w-full overflow-hidden rounded-lg md:w-3/4 [backface-visibility:hidden] [transform:translateZ(0)]">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={`primary-${playKey}`}
-              variants={primaryVar}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="absolute inset-0 h-full w-full"
-              style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
-            >
-              <BannerImage {...layout.primaryBanner} />
-            </motion.div>
-          </AnimatePresence>
-          <div className="invisible">
-            <BannerImage {...layout.primaryBanner} />
-          </div>
-        </div>
-
-        {/* Action banners - horizontal on mobile, vertical on md+ */}
-        <div className="flex gap-2 md:w-1/4 md:flex-col md:gap-4">
-          {/* Top action banner */}
-          <div className="relative w-1/2 overflow-hidden rounded-lg md:w-full aspect-square md:aspect-auto [backface-visibility:hidden] [transform:translateZ(0)]">
+    <div className="h-auto w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-3 md:flex-row md:gap-6">
+        {/* Left section: Primary text banner + Hero square */}
+        <div className="flex w-full flex-col gap-3 md:w-1/3">
+          {/* Primary text banner (above hero square) */}
+          <div className="overflow-hidden rounded-3xl">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={`topAction-${playKey}`}
-                variants={topActionVar}
+                key={`primary-${slideKey}`}
+                variants={primaryVar}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="absolute inset-0 h-full w-full"
-                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
-                <ActionBanner spec={layout.topActionBanner} />
+                <TextBanner
+                  title={layout.primaryBanner.title}
+                  subtitle={layout.primaryBanner.subtitle}
+                  className={layout.primaryBanner.className}
+                  titleClassName={layout.primaryBanner.titleClassName}
+                  subtitleClassName={layout.primaryBanner.subtitleClassName}
+                  colors={layout.primaryBanner.colors}
+                  typography={layout.primaryBanner.typography}
+                />
               </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Bottom action banner */}
-          <div className="relative w-1/2 overflow-hidden rounded-lg md:w-full aspect-square md:aspect-auto [backface-visibility:hidden] [transform:translateZ(0)]">
+          {/* Hero banner (square with background + foreground) - full width on mobile */}
+          <div className="relative h-64 w-full md:aspect-square overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={`bottomAction-${playKey}`}
-                variants={bottomActionVar}
+                key={`hero-${slideKey}`}
+                variants={heroVar}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="absolute inset-0 h-full w-full"
+                className="h-full w-full overflow-hidden"
                 style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
-                <ActionBanner spec={layout.bottomActionBanner} />
+                <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Right section: Action banners (2-column on tablet, stacked on mobile) */}
+        <div className="flex w-full gap-4 md:w-2/3 md:flex-col">
+          {/* Left action banner */}
+          <div className="relative flex-1 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={`leftAction-${slideKey}`}
+                variants={rightActionVar}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="h-full w-full"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+              >
+                <ActionBanner spec={layout.bottomActionBannerLeft} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Right action banner */}
+          <div className="relative flex-1 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={`rightAction-${slideKey}`}
+                variants={leftActionVar}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="h-full w-full"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+              >
+                <ActionBanner spec={layout.bottomActionBannerRight} />
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

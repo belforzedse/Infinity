@@ -59,31 +59,33 @@ export type DesktopLayout = {
 };
 
 /**
- * Tablet Layout - Uses flexible banner system
+ * Tablet Layout - Advanced layout with hero square + text banner + action banners
  * Structure:
- * - heroBanner: Full-width hero image at top
- * - leftBanners: Stacked banners on left side
- * - rightBanner: Large banner on right
+ * - heroBanner: Square with background + foreground (right side, LeftBannerSpec)
+ * - primaryBanner: Text banner (top left, TextBannerSpec)
+ * - bottomActionBannerLeft: Action banner (left column)
+ * - bottomActionBannerRight: Action banner (left column)
  */
 export type TabletLayout = {
-  heroBanner: BannerImageSpec;
-  leftBannerTop: ActionBannerSpec;
-  leftBannerBottom: ActionBannerSpec;
-  rightBanner: LeftBannerSpec;
+  heroBanner: LeftBannerSpec;
+  primaryBanner: TextBannerSpec;
+  bottomActionBannerLeft: ActionBannerSpec;
+  bottomActionBannerRight: ActionBannerSpec;
 };
 
 /**
- * Mobile Layout - Uses flexible banner system
+ * Mobile Layout - Advanced layout with hero square + text banner + action banners
  * Structure:
- * - heroBanner: Responsive hero image
- * - primaryBanner: Large banner below hero
- * - actionBanners: Two stacked action banners
+ * - heroBanner: Square with background + foreground (LeftBannerSpec)
+ * - primaryBanner: Text banner (TextBannerSpec)
+ * - bottomActionBannerLeft: Action banner (responsive positioning)
+ * - bottomActionBannerRight: Action banner (responsive positioning)
  */
 export type MobileLayout = {
-  heroBanner: BannerImageSpec;
-  primaryBanner: BannerImageSpec;
-  topActionBanner: ActionBannerSpec;
-  bottomActionBanner: ActionBannerSpec;
+  heroBanner: LeftBannerSpec;
+  primaryBanner: TextBannerSpec;
+  bottomActionBannerLeft: ActionBannerSpec;
+  bottomActionBannerRight: ActionBannerSpec;
 };
 
 // New Flexible Banner Types

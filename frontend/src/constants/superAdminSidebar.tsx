@@ -200,7 +200,7 @@ const superAdminSidebar: SidebarItem[] = [
       {
         id: "admin-activity",
         label: "گزارش فعالیت پشتیبانان",
-        href: "/super-admin/shipping/admin-activity",
+        href: "/super-admin/reports/admin-activity",
       },
     ],
   },

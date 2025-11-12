@@ -45,15 +45,16 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
 
   // Render foreground image
   const ForegroundContent = (
-    <div className={`relative w-full h-full ${className}`}>
+    <div className={`relative h-full w-full ${className}`}>
       {/* Background element */}
       <div
-        className={`absolute ${background.className || ''}`}
+        className={`absolute  ${background.className || ""}`}
         style={{
           ...backgroundStyle,
           width: backgroundWidth,
           height: backgroundHeight,
           ...getBackgroundPosition(background.position),
+          zIndex: 0,
         }}
       />
       {/* Foreground image - can overlap background */}
@@ -65,9 +66,9 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
         sizes={foregroundImage.sizes}
         priority={foregroundImage.priority}
         loading={foregroundImage.loading}
-        className={`absolute w-full h-full ${foregroundImage.className || 'object-contain'}`}
+        className={`absolute inset-0 lg:h-full lg:w-full ${foregroundImage.className || "object-contain"}`}
         style={{
-          objectPosition: foregroundImage.objectPosition || 'center',
+          objectPosition: foregroundImage.objectPosition || "center",
           zIndex: 10,
         }}
       />

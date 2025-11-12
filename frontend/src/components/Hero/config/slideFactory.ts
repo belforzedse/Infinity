@@ -14,19 +14,39 @@ export function cloneDesktopLayout(layout: DesktopLayout): DesktopLayout {
 
 export function cloneMobileLayout(layout: MobileLayout): MobileLayout {
   return {
-    heroBanner: { ...layout.heroBanner },
+    heroBanner: {
+      ...layout.heroBanner,
+      background: { ...layout.heroBanner.background },
+      foregroundImage: { ...layout.heroBanner.foregroundImage },
+    },
     primaryBanner: { ...layout.primaryBanner },
-    topActionBanner: { ...layout.topActionBanner, image: { ...layout.topActionBanner.image } },
-    bottomActionBanner: { ...layout.bottomActionBanner, image: { ...layout.bottomActionBanner.image } },
+    bottomActionBannerLeft: {
+      ...layout.bottomActionBannerLeft,
+      image: { ...layout.bottomActionBannerLeft.image },
+    },
+    bottomActionBannerRight: {
+      ...layout.bottomActionBannerRight,
+      image: { ...layout.bottomActionBannerRight.image },
+    },
   };
 }
 
 export function cloneTabletLayout(layout: TabletLayout): TabletLayout {
   return {
-    heroBanner: { ...layout.heroBanner },
-    leftBannerTop: { ...layout.leftBannerTop, image: { ...layout.leftBannerTop.image } },
-    leftBannerBottom: { ...layout.leftBannerBottom, image: { ...layout.leftBannerBottom.image } },
-    rightBanner: { ...layout.rightBanner, foregroundImage: { ...layout.rightBanner.foregroundImage } },
+    heroBanner: {
+      ...layout.heroBanner,
+      background: { ...layout.heroBanner.background },
+      foregroundImage: { ...layout.heroBanner.foregroundImage },
+    },
+    primaryBanner: { ...layout.primaryBanner },
+    bottomActionBannerLeft: {
+      ...layout.bottomActionBannerLeft,
+      image: { ...layout.bottomActionBannerLeft.image },
+    },
+    bottomActionBannerRight: {
+      ...layout.bottomActionBannerRight,
+      image: { ...layout.bottomActionBannerRight.image },
+    },
   };
 }
 
@@ -197,7 +217,7 @@ export class DesktopSlideBuilder {
 
 /**
  * Builder for creating mobile slides with fluent API
- * Mobile layout uses: heroBanner + primaryBanner + actionBanners
+ * Mobile layout uses: heroBanner (square) + primaryBanner (text) + bottomActionBanners
  */
 export class MobileSlideBuilder {
   private layout: MobileLayout;
@@ -209,23 +229,41 @@ export class MobileSlideBuilder {
   private createDefault(): MobileLayout {
     return {
       heroBanner: {
-        src: "",
-        alt: "Hero Banner",
-        width: 1920,
-        height: 560,
-        className: "w-full rounded-lg object-cover",
-        sizes: "100vw",
+        background: {
+          type: "color",
+          value: "bg-slate-50",
+          width: "100%",
+          height: "100%",
+          position: "center",
+        },
+        foregroundImage: {
+          src: "",
+          alt: "Hero Banner",
+          width: 600,
+          height: 600,
+          className: "object-contain",
+        },
       },
       primaryBanner: {
-        src: "",
-        alt: "Primary Banner",
-        width: 1200,
-        height: 600,
-        className: "w-full rounded-lg object-cover",
-        loading: "lazy",
-        sizes: "(max-width: 768px) 100vw, 50vw",
+        title: "",
+        subtitle: "",
+        className: "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]",
+        colors: {
+          background: "bg-stone-50",
+          titleColor: "text-gray-900",
+          subtitleColor: "text-gray-600",
+        },
+        typography: {
+          titleFont: "font-kaghaz",
+          titleSize: "text-xl sm:text-2xl md:text-3xl",
+          subtitleSize: "text-sm sm:text-base md:text-lg",
+          titleWeight: "font-bold",
+          subtitleWeight: "font-medium",
+          titleLeading: "leading-tight",
+          subtitleLeading: "leading-relaxed",
+        },
       },
-      topActionBanner: {
+      bottomActionBannerLeft: {
         title: "",
         subtitle: "",
         image: {
@@ -237,7 +275,7 @@ export class MobileSlideBuilder {
         },
         className: "rounded-lg",
       },
-      bottomActionBanner: {
+      bottomActionBannerRight: {
         title: "",
         subtitle: "",
         image: {
@@ -253,67 +291,85 @@ export class MobileSlideBuilder {
   }
 
   /**
-   * Configure hero banner image
+   * Configure hero banner (square with background + foreground)
    */
-  heroBanner(config: Partial<BannerImageSpec>): this {
-    this.layout.heroBanner = { ...this.layout.heroBanner, ...config };
-    return this;
-  }
-
-  /**
-   * Configure primary banner image
-   */
-  primaryBanner(config: Partial<BannerImageSpec>): this {
-    this.layout.primaryBanner = { ...this.layout.primaryBanner, ...config };
-    return this;
-  }
-
-  /**
-   * Configure top action banner
-   */
-  topActionBanner(config: Partial<ActionBannerSpec>): this {
-    this.layout.topActionBanner = {
-      ...this.layout.topActionBanner,
+  heroBanner(config: Partial<LeftBannerSpec>): this {
+    this.layout.heroBanner = {
+      ...this.layout.heroBanner,
       ...config,
-      image: config.image
-        ? { ...this.layout.topActionBanner.image, ...config.image }
-        : this.layout.topActionBanner.image,
-      colors: config.colors
-        ? { ...this.layout.topActionBanner.colors, ...config.colors }
-        : this.layout.topActionBanner.colors,
-      typography: config.typography
-        ? { ...this.layout.topActionBanner.typography, ...config.typography }
-        : this.layout.topActionBanner.typography,
+      background: config.background
+        ? { ...this.layout.heroBanner.background, ...config.background }
+        : this.layout.heroBanner.background,
+      foregroundImage: config.foregroundImage
+        ? { ...this.layout.heroBanner.foregroundImage, ...config.foregroundImage }
+        : this.layout.heroBanner.foregroundImage,
     };
     return this;
   }
 
   /**
-   * Configure bottom action banner
+   * Configure primary text banner
    */
-  bottomActionBanner(config: Partial<ActionBannerSpec>): this {
-    this.layout.bottomActionBanner = {
-      ...this.layout.bottomActionBanner,
+  primaryBanner(config: Partial<TextBannerSpec>): this {
+    this.layout.primaryBanner = {
+      ...this.layout.primaryBanner,
       ...config,
-      image: config.image
-        ? { ...this.layout.bottomActionBanner.image, ...config.image }
-        : this.layout.bottomActionBanner.image,
       colors: config.colors
-        ? { ...this.layout.bottomActionBanner.colors, ...config.colors }
-        : this.layout.bottomActionBanner.colors,
+        ? { ...this.layout.primaryBanner.colors, ...config.colors }
+        : this.layout.primaryBanner.colors,
       typography: config.typography
-        ? { ...this.layout.bottomActionBanner.typography, ...config.typography }
-        : this.layout.bottomActionBanner.typography,
+        ? { ...this.layout.primaryBanner.typography, ...config.typography }
+        : this.layout.primaryBanner.typography,
     };
     return this;
   }
 
   /**
-   * Convenience method: Set hero images as priority for LCP
+   * Configure bottom-left action banner
+   */
+  bottomActionBannerLeft(config: Partial<ActionBannerSpec>): this {
+    this.layout.bottomActionBannerLeft = {
+      ...this.layout.bottomActionBannerLeft,
+      ...config,
+      image: config.image
+        ? { ...this.layout.bottomActionBannerLeft.image, ...config.image }
+        : this.layout.bottomActionBannerLeft.image,
+      colors: config.colors
+        ? { ...this.layout.bottomActionBannerLeft.colors, ...config.colors }
+        : this.layout.bottomActionBannerLeft.colors,
+      typography: config.typography
+        ? { ...this.layout.bottomActionBannerLeft.typography, ...config.typography }
+        : this.layout.bottomActionBannerLeft.typography,
+    };
+    return this;
+  }
+
+  /**
+   * Configure bottom-right action banner
+   */
+  bottomActionBannerRight(config: Partial<ActionBannerSpec>): this {
+    this.layout.bottomActionBannerRight = {
+      ...this.layout.bottomActionBannerRight,
+      ...config,
+      image: config.image
+        ? { ...this.layout.bottomActionBannerRight.image, ...config.image }
+        : this.layout.bottomActionBannerRight.image,
+      colors: config.colors
+        ? { ...this.layout.bottomActionBannerRight.colors, ...config.colors }
+        : this.layout.bottomActionBannerRight.colors,
+      typography: config.typography
+        ? { ...this.layout.bottomActionBannerRight.typography, ...config.typography }
+        : this.layout.bottomActionBannerRight.typography,
+    };
+    return this;
+  }
+
+  /**
+   * Convenience method: Set foreground image as priority for LCP
    */
   withPriority(): this {
-    this.layout.heroBanner.priority = true;
-    this.layout.heroBanner.loading = "eager";
+    this.layout.heroBanner.foregroundImage.priority = true;
+    this.layout.heroBanner.foregroundImage.loading = "eager";
     return this;
   }
 
@@ -324,7 +380,7 @@ export class MobileSlideBuilder {
 
 /**
  * Builder for creating tablet slides with fluent API
- * Tablet layout uses: heroBanner + leftBanners (stacked) + rightBanner (LeftBanner with bg + fg)
+ * Tablet layout uses: heroBanner (square) + primaryBanner (text) + bottomActionBanners
  */
 export class TabletSlideBuilder {
   private layout: TabletLayout;
@@ -336,127 +392,147 @@ export class TabletSlideBuilder {
   private createDefault(): TabletLayout {
     return {
       heroBanner: {
-        src: "",
-        alt: "Hero Banner",
-        width: 1920,
-        height: 560,
-        className: "w-full rounded-lg object-cover",
-        sizes: "100%",
-      },
-      leftBannerTop: {
-        title: "",
-        subtitle: "",
-        image: {
-          src: "",
-          alt: "Action Banner",
-          width: 400,
-          height: 280,
-          className: "object-cover",
-        },
-        className: "h-[280px] rounded-lg",
-      },
-      leftBannerBottom: {
-        title: "",
-        subtitle: "",
-        image: {
-          src: "",
-          alt: "Action Banner",
-          width: 400,
-          height: 280,
-          className: "object-cover",
-        },
-        className: "h-[280px] rounded-lg",
-      },
-      rightBanner: {
         background: {
           type: "color",
-          value: "bg-stone-50",
+          value: "bg-slate-50",
           width: "100%",
           height: "100%",
           position: "center",
         },
         foregroundImage: {
           src: "",
-          alt: "Right Banner",
+          alt: "Hero Banner",
+          width: 600,
+          height: 600,
+          className: "object-contain",
+        },
+      },
+      primaryBanner: {
+        title: "",
+        subtitle: "",
+        className: "w-full gap-[8px] rounded-3xl px-[32px] pb-[32px] pt-[28px]",
+        colors: {
+          background: "bg-stone-50",
+          titleColor: "text-gray-900",
+          subtitleColor: "text-gray-600",
+        },
+        typography: {
+          titleFont: "font-kaghaz",
+          titleSize: "lg:text-[40px] 2xl:text-[48px]",
+          subtitleSize: "lg:text-[24px] 2xl:text-[28px]",
+          titleWeight: "font-bold",
+          subtitleWeight: "font-medium",
+          titleLeading: "leading-tight",
+          subtitleLeading: "leading-relaxed",
+        },
+      },
+      bottomActionBannerLeft: {
+        title: "",
+        subtitle: "",
+        image: {
+          src: "",
+          alt: "Action Banner",
           width: 600,
           height: 600,
           className: "object-cover",
         },
+        className: "rounded-lg",
+      },
+      bottomActionBannerRight: {
+        title: "",
+        subtitle: "",
+        image: {
+          src: "",
+          alt: "Action Banner",
+          width: 600,
+          height: 600,
+          className: "object-cover",
+        },
+        className: "rounded-lg",
       },
     };
   }
 
   /**
-   * Configure hero banner image
+   * Configure hero banner (square with background + foreground)
    */
-  heroBanner(config: Partial<BannerImageSpec>): this {
-    this.layout.heroBanner = { ...this.layout.heroBanner, ...config };
-    return this;
-  }
-
-  /**
-   * Configure left top action banner
-   */
-  leftBannerTop(config: Partial<ActionBannerSpec>): this {
-    this.layout.leftBannerTop = {
-      ...this.layout.leftBannerTop,
-      ...config,
-      image: config.image
-        ? { ...this.layout.leftBannerTop.image, ...config.image }
-        : this.layout.leftBannerTop.image,
-      colors: config.colors
-        ? { ...this.layout.leftBannerTop.colors, ...config.colors }
-        : this.layout.leftBannerTop.colors,
-      typography: config.typography
-        ? { ...this.layout.leftBannerTop.typography, ...config.typography }
-        : this.layout.leftBannerTop.typography,
-    };
-    return this;
-  }
-
-  /**
-   * Configure left bottom action banner
-   */
-  leftBannerBottom(config: Partial<ActionBannerSpec>): this {
-    this.layout.leftBannerBottom = {
-      ...this.layout.leftBannerBottom,
-      ...config,
-      image: config.image
-        ? { ...this.layout.leftBannerBottom.image, ...config.image }
-        : this.layout.leftBannerBottom.image,
-      colors: config.colors
-        ? { ...this.layout.leftBannerBottom.colors, ...config.colors }
-        : this.layout.leftBannerBottom.colors,
-      typography: config.typography
-        ? { ...this.layout.leftBannerBottom.typography, ...config.typography }
-        : this.layout.leftBannerBottom.typography,
-    };
-    return this;
-  }
-
-  /**
-   * Configure right banner with background and foreground image
-   */
-  rightBanner(config: Partial<LeftBannerSpec>): this {
-    this.layout.rightBanner = {
-      ...this.layout.rightBanner,
+  heroBanner(config: Partial<LeftBannerSpec>): this {
+    this.layout.heroBanner = {
+      ...this.layout.heroBanner,
       ...config,
       background: config.background
-        ? { ...this.layout.rightBanner.background, ...config.background }
-        : this.layout.rightBanner.background,
+        ? { ...this.layout.heroBanner.background, ...config.background }
+        : this.layout.heroBanner.background,
       foregroundImage: config.foregroundImage
-        ? { ...this.layout.rightBanner.foregroundImage, ...config.foregroundImage }
-        : this.layout.rightBanner.foregroundImage,
+        ? { ...this.layout.heroBanner.foregroundImage, ...config.foregroundImage }
+        : this.layout.heroBanner.foregroundImage,
     };
     return this;
   }
 
   /**
-   * Convenience method: Set hero banner as priority for LCP
+   * Configure primary text banner
+   */
+  primaryBanner(config: Partial<TextBannerSpec>): this {
+    this.layout.primaryBanner = {
+      ...this.layout.primaryBanner,
+      ...config,
+      colors: config.colors
+        ? { ...this.layout.primaryBanner.colors, ...config.colors }
+        : this.layout.primaryBanner.colors,
+      typography: config.typography
+        ? { ...this.layout.primaryBanner.typography, ...config.typography }
+        : this.layout.primaryBanner.typography,
+    };
+    return this;
+  }
+
+  /**
+   * Configure bottom-left action banner
+   */
+  bottomActionBannerLeft(config: Partial<ActionBannerSpec>): this {
+    this.layout.bottomActionBannerLeft = {
+      ...this.layout.bottomActionBannerLeft,
+      ...config,
+      image: config.image
+        ? { ...this.layout.bottomActionBannerLeft.image, ...config.image }
+        : this.layout.bottomActionBannerLeft.image,
+      colors: config.colors
+        ? { ...this.layout.bottomActionBannerLeft.colors, ...config.colors }
+        : this.layout.bottomActionBannerLeft.colors,
+      typography: config.typography
+        ? { ...this.layout.bottomActionBannerLeft.typography, ...config.typography }
+        : this.layout.bottomActionBannerLeft.typography,
+    };
+    return this;
+  }
+
+  /**
+   * Configure bottom-right action banner
+   */
+  bottomActionBannerRight(config: Partial<ActionBannerSpec>): this {
+    this.layout.bottomActionBannerRight = {
+      ...this.layout.bottomActionBannerRight,
+      ...config,
+      image: config.image
+        ? { ...this.layout.bottomActionBannerRight.image, ...config.image }
+        : this.layout.bottomActionBannerRight.image,
+      colors: config.colors
+        ? { ...this.layout.bottomActionBannerRight.colors, ...config.colors }
+        : this.layout.bottomActionBannerRight.colors,
+      typography: config.typography
+        ? { ...this.layout.bottomActionBannerRight.typography, ...config.typography }
+        : this.layout.bottomActionBannerRight.typography,
+    };
+    return this;
+  }
+
+  /**
+   * Convenience method: Set foreground image as priority for LCP
    */
   withPriority(): this {
-    this.layout.heroBanner.priority = true;
-    this.layout.heroBanner.loading = "eager";
+    this.layout.heroBanner.foregroundImage.priority = true;
+    this.layout.heroBanner.foregroundImage.loading = "eager";
     return this;
   }
 

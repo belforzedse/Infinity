@@ -10,5 +10,4 @@ export const mobileSlides: MobileLayout[] = [
   slides.slide2,
   slides.slide3,
   slides.slide4,
-  slides.slide5,
 ];

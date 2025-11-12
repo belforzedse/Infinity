@@ -1,24 +1,20 @@
 import React from "react";
+import { normalizeSizeGuideData, type SizeGuideRow } from "@/utils/sizeGuide";
 
 interface SpecTableProps {
-  specs?: {
-    size: string;
-    [key: string]: string;
-  }[];
+  specs?: SizeGuideRow[];
 }
 
 const SpecTable: React.FC<SpecTableProps> = ({ specs = [] }) => {
-  // If no specs data is provided, return null
-  if (!specs.length) {
+  const { rows, headers } = normalizeSizeGuideData(specs);
+
+  if (!rows.length || headers.length === 0) {
     return (
       <div className="w-full p-5 text-center">
         <p className="text-foreground-primary">راهنمای سایز برای این محصول موجود نیست.</p>
       </div>
     );
   }
-
-  // Get all column keys from the first item
-  const columnKeys = Object.keys(specs[0]).filter((key) => key !== "size");
 
   return (
     <div className="w-full overflow-x-auto">
@@ -28,23 +24,23 @@ const SpecTable: React.FC<SpecTableProps> = ({ specs = [] }) => {
             <th className="text-sm whitespace-nowrap border p-3 text-center text-foreground-primary">
               سایز
             </th>
-            {columnKeys.map((key) => (
+            {headers.map((header) => (
               <th
-                key={key}
+                key={header}
                 className="text-sm whitespace-nowrap border p-3 text-center text-foreground-primary"
               >
-                {key}
+                {header}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {specs.map((spec, index) => (
+          {rows.map((spec, index) => (
             <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
               <td className="text-sm border p-3 text-right text-gray-700">{spec.size}</td>
-              {columnKeys.map((key) => (
-                <td key={key} className="text-sm border p-3 text-right text-gray-700">
-                  {spec[key]}
+              {headers.map((header) => (
+                <td key={header} className="text-sm border p-3 text-right text-gray-700">
+                  {spec[header] || "-"}
                 </td>
               ))}
             </tr>
