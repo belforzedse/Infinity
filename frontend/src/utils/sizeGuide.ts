@@ -63,7 +63,7 @@ export const normalizeSizeGuideData = (
   });
 
   const rows = helperData.slice(1).map((row) => {
-    const normalizedRow: Record<string, string> = { size: row.size };
+    const normalizedRow: Record<string, string> = { size: row.size ?? "" };
     headers.forEach((headerTitle, index) => {
       const sourceKey = measurementKeys[index];
       normalizedRow[headerTitle] = row[sourceKey] ?? "";
