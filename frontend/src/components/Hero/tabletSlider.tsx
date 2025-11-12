@@ -37,7 +37,7 @@ export default function TabletSlider({
 
   return (
     <div ref={hostRef} className="tablet-slider-container block space-y-6 pb-12 px-4 [touch-action:manipulation]">
-      <TabletHero layout={slides[index]} playKey={playKey} />
+      <TabletHero layout={slides[index]} slideKey={index} />
 
       {/* Pagination below content */}
       <div className="flex w-full items-center justify-center">

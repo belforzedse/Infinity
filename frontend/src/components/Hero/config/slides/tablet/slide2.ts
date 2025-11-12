@@ -1,19 +1,111 @@
+/**
+ * Tablet Slide 2
+ * Luxurious dark theme with sophisticated styling
+ */
 import { TabletSlideBuilder } from "../../slideFactory";
 
 export const slide2 = new TabletSlideBuilder()
+  // Hero banner
   .heroBanner({
-    src: "/images/hero1.png",
+    background: {
+      type: "color",
+      value: "bg-gradient-to-br from-slate-700 to-slate-800",
+      width: "100%",
+      height: "100%",
+      position: "center",
+    },
+    foregroundImage: {
+      src: "/images/side2.png",
+      alt: "Hero",
+      width: 600,
+      height: 600,
+      className: "object-contain",
+    },
   })
-  .rightBanner({
-    src: "/images/side3.png",
-    href: "https://infinitycolor.co/shop/skirt/",
+  // Primary text banner
+  .primaryBanner({
+    title: "فصل تازه",
+    subtitle: "مجموعه جدید و منحصر به فرد",
+    className: "w-full gap-[8px] rounded-3xl px-[32px] pb-[32px] pt-[28px]",
+    colors: {
+      background: "bg-slate-900",
+      titleColor: "text-slate-100",
+      subtitleColor: "text-slate-300",
+    },
+    typography: {
+      titleFont: "font-kaghaz",
+      titleSize: "lg:text-[40px] 2xl:text-[48px]",
+      titleWeight: "font-bold",
+      subtitleSize: "lg:text-[24px] 2xl:text-[28px]",
+      subtitleWeight: "font-medium",
+      titleLeading: "leading-tight",
+      subtitleLeading: "leading-relaxed",
+    },
   })
-  .leftTopBanner({
-    src: "/images/bottomleft3.png",
-    href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+  // Bottom left action banner
+  .bottomActionBannerLeft({
+    title: "تخفیف ها",
+    subtitle: "تا ۷۰ درصد",
+    image: {
+      src: "/images/bottomright3.png",
+      alt: "Category",
+      width: 600,
+      height: 600,
+      className: "h-full w-full rounded-lg object-cover",
+    },
+    className: "rounded-lg",
+    colors: {
+      background: "bg-gradient-to-br from-slate-800/80 to-slate-900/80",
+      titleColor: "text-slate-100",
+      subtitleColor: "text-slate-300",
+    },
+    typography: {
+      titleFont: "font-kaghaz",
+      titleSize: "text-2xl sm:text-3xl",
+      titleWeight: "font-bold",
+      subtitleSize: "text-sm sm:text-base",
+      subtitleWeight: "font-medium",
+      titleLeading: "leading-tight",
+      subtitleLeading: "leading-relaxed",
+    },
+    button: {
+      label: "کاوش",
+      href: "#",
+      className: "text-slate-200 text-base font-semibold",
+      showArrow: true,
+    },
   })
-  .leftBottomBanner({
-    src: "/images/bottomright3.png",
-    href: "https://infinitycolor.co/shop/skirt/",
+  // Bottom right action banner
+  .bottomActionBannerRight({
+    title: "تخفیف فوری",
+    subtitle: "جدید و تازه",
+    image: {
+      src: "/images/bottomleft3.png",
+      alt: "Category",
+      width: 600,
+      height: 600,
+      className: "h-full w-full rounded-lg object-cover",
+    },
+    className: "rounded-lg",
+    colors: {
+      background: "bg-gradient-to-tl from-amber-700/70 to-orange-600/70",
+      titleColor: "text-amber-50",
+      subtitleColor: "text-orange-100",
+    },
+    typography: {
+      titleFont: "font-kaghaz",
+      titleSize: "text-2xl sm:text-3xl",
+      titleWeight: "font-bold",
+      subtitleSize: "text-sm sm:text-base",
+      subtitleWeight: "font-medium",
+      titleLeading: "leading-tight",
+      subtitleLeading: "leading-relaxed",
+    },
+    button: {
+      label: "خریدی",
+      href: "#",
+      className: "text-amber-50 text-base font-semibold",
+      showArrow: true,
+    },
   })
   .build();

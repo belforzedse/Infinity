@@ -34,12 +34,9 @@ export default function UsersPage() {
   return (
     <ContentWrapper
       title="کاربران"
-      hasAddButton
-      addButtonText="افزودن کاربر جدید"
       hasFilterButton
       hasRecycleBin
       hasPagination
-      addButtonPath="/super-admin/users/add"
       apiUrl={ENDPOINTS.USER.GET_ALL}
       isRecycleBinOpen={isRecycleBinOpen}
       setIsRecycleBinOpen={setIsRecycleBinOpen}
@@ -53,7 +50,7 @@ export default function UsersPage() {
           title: "نام خانوادگی",
         },
         {
-          id: "[Phone]",
+          id: "[phone]",
           title: "شماره تلفن",
         },
       ]}
@@ -111,7 +108,7 @@ export default function UsersPage() {
               const encodedTerm = encodeURIComponent(searchTerm);
               baseUrl += `&filters[$or][0][user_info][FirstName][$containsi]=${encodedTerm}`;
               baseUrl += `&filters[$or][1][user_info][LastName][$containsi]=${encodedTerm}`;
-              baseUrl += `&filters[$or][2][Phone][$containsi]=${encodedTerm}`;
+              baseUrl += `&filters[$or][2][phone][$containsi]=${encodedTerm}`;
             } else if (searchWords.length === 2) {
               // Two words: prioritize FirstName + LastName in exact order
               let orIndex = 0;
@@ -127,7 +124,7 @@ export default function UsersPage() {
               baseUrl += `&filters[$or][${orIndex++}][user_info][FirstName][$containsi]=${encodedPhrase}`;
 
               // Priority 3: Phone number search
-              baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
+              baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
             } else if (searchWords.length === 3) {
               // Three words: handle patterns like "داریوش فیضی پور"
               let orIndex = 0;
@@ -149,7 +146,7 @@ export default function UsersPage() {
               baseUrl += `&filters[$or][${orIndex++}][user_info][FirstName][$containsi]=${encodedPhrase}`;
 
               // Priority 4: Phone number search
-              baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
+              baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
             } else {
               // More than 3 words: try different combinations
               let orIndex = 0;
@@ -172,7 +169,7 @@ export default function UsersPage() {
               baseUrl += `&filters[$or][${orIndex-1}][$and][1][user_info][LastName][$containsi]=${secondHalf}`;
 
               // Priority 4: Phone number search
-              baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
+              baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
             }
           }
 

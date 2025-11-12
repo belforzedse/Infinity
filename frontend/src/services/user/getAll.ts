@@ -1,30 +1,17 @@
 import { apiClient } from "../index";
-import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
+import type { PluginUserDetails } from "./getDetails";
+import { normalizePluginUser } from "./getDetails";
 
-export interface GetAllUserResponse {
-  data: {
-    id: number;
-    attributes: {
-      FirstName: string;
-      LastName: string;
-      Phone: string;
-      IsActive: boolean;
-      IsVerified: boolean;
-      createdAt: string;
-      updatedAt: string;
-    };
-  }[];
-}
-
-export const getAll = async (): Promise<GetAllUserResponse> => {
+export const getAll = async (): Promise<PluginUserDetails[]> => {
   const endpoint = `${ENDPOINTS.USER.GET_ALL}`;
-  const accessToken = STRAPI_TOKEN;
 
-  const response = await apiClient.get<GetAllUserResponse>(endpoint, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await apiClient.get<PluginUserDetails[]>(endpoint);
+  const payload = (response as any)?.data ?? response;
 
-  return response.data;
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+
+  return payload.map((item) => normalizePluginUser(item));
 };

@@ -5,10 +5,14 @@ import Link from "next/link";
 import XIcon from "@/components/User/Icons/XIcon";
 import { usePathname } from "next/navigation";
 import { useNavigation } from "@/hooks/api/useNavigation";
+import HomeIcon from "@/components/PLP/Icons/HomeIcon";
+import SidebarItem from "@/components/User/Sidebar/SidebarItem";
+import SearchIcon from "@/components/PLP/Icons/SearchIcon";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onSearchClick?: () => void;
 }
 
 interface MenuItem {
@@ -16,7 +20,7 @@ interface MenuItem {
   href: string;
 }
 
-export default function MobileMenu({ isOpen, onClose }: Props) {
+export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
   const pathname = usePathname();
   // Only trigger the API fetch when the menu is open
   const { navigation, loading } = useNavigation(isOpen);
@@ -56,60 +60,53 @@ export default function MobileMenu({ isOpen, onClose }: Props) {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="h-full w-[280px] transform overflow-hidden bg-white shadow-xl transition-all">
-                <div className="flex h-full flex-col">
-                  <div className="flex items-center justify-between border-b border-slate-100 p-4">
-                    <Dialog.Title as="h3" className="text-lg font-medium text-neutral-800">
-                      منو
-                    </Dialog.Title>
-                    <button
-                      onClick={onClose}
-                      className="rounded-full p-2 transition-colors hover:bg-slate-50"
-                    >
-                      <XIcon />
-                    </button>
-                  </div>
-
-                  <nav className="flex-1 overflow-y-auto p-4">
+              <Dialog.Panel className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all">
+                <nav className="p-5">
+                  <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+                    <XIcon />
+                  </button>
+                  <div className="flex flex-col gap-3">
                     {loading ? (
-                      <div className="flex flex-col gap-3">
+                      <>
                         <div className="h-12 animate-pulse rounded-xl bg-gray-200"></div>
                         <div className="h-12 animate-pulse rounded-xl bg-gray-200"></div>
                         <div className="h-12 animate-pulse rounded-xl bg-gray-200"></div>
-                      </div>
+                      </>
                     ) : (
-                      <div className="flex flex-col gap-2">
-                        {menuItems.map((item) => {
-                          const isActive = pathname === item.href;
+                      <>
+                        <SidebarItem
+                          href="/"
+                          icon={<HomeIcon />}
+                          text="خانه"
+                        />
+                        <button
+                          onClick={() => {
+                            onSearchClick?.();
+                            onClose();
+                          }}
+                          className="relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-pink-50 w-full text-right"
+                        >
+                          <SearchIcon className="text-pink-500" />
+                          <span className="text-sm font-medium">جستجو</span>
+                        </button>
+                        {menuItems.slice(1).map((item) => {
+                          // Create a simple icon component for categories
+                          // Using a placeholder icon since we don't have specific category icons
                           return (
                             <Link
                               key={item.href}
                               href={item.href}
-                              className={`rounded-xl px-4 py-3 transition-colors ${
-                                isActive
-                                  ? "bg-pink-50 text-pink-600"
-                                  : "text-neutral-800 hover:bg-slate-50"
-                              }`}
+                              className="relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-pink-50"
                               onClick={onClose}
                             >
-                              {item.label}
+                              <span className="text-sm font-medium">{item.label}</span>
                             </Link>
                           );
                         })}
-                      </div>
+                      </>
                     )}
-                  </nav>
-
-                  <div className="border-t border-slate-100 p-4">
-                    <Link
-                      href="/order-tracking"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-neutral-800 transition-colors hover:bg-slate-100"
-                      onClick={onClose}
-                    >
-                      <span>پیگیری سفارش</span>
-                    </Link>
                   </div>
-                </div>
+                </nav>
               </Dialog.Panel>
             </Transition.Child>
           </div>

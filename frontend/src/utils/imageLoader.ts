@@ -10,17 +10,18 @@ export default function imageLoader({ src, width, quality = 75 }: ImageLoaderPro
     const base = envBaseUrl || "http://localhost"; // safe SSR fallback
     const url = new URL(src, base);
 
-    // Always include width so Next doesn't warn in dev
-    url.searchParams.set("w", String(width));
-    url.searchParams.set("q", String(quality));
-
-    // Add format parameter for modern image formats
-    url.searchParams.set("f", "webp");
+    // For Strapi uploads, don't add query parameters - Strapi handles optimization internally
+    // and returns pre-optimized formats
+    if (!url.pathname.includes("/uploads/")) {
+      // For non-Strapi URLs, add Next.js optimization parameters
+      url.searchParams.set("w", String(width));
+      url.searchParams.set("q", String(quality));
+      url.searchParams.set("f", "webp");
+    }
 
     return url.toString();
   } catch {
-    // Fallback: append params directly
-    const joiner = src.includes("?") ? "&" : "?";
-    return `${src}${joiner}w=${width}&q=${quality}&f=webp`;
+    // Fallback: return src as-is
+    return src;
   }
 }

@@ -7,8 +7,8 @@ import Text from "@/components/Kits/Text";
 import AuthInput from "@/components/Kits/Auth/Input";
 import AuthButton from "@/components/Kits/Auth/Button";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
-import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import { AuthService } from "@/services";
+import toast from "react-hot-toast";
 
 interface FormData {
   firstName: string;
@@ -22,32 +22,50 @@ export default function RegisterInfoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-
-  const { phoneNumber } = useCheckPhoneNumber();
-
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
-    phoneNumber: phoneNumber || "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
   });
 
   useEffect(() => {
-    if (!phoneNumber) {
-      router.push("/auth");
+    const paramsPhone = searchParams.get("phone");
+    const storedPhone =
+      typeof window !== "undefined" ? localStorage.getItem("pendingPhone") : null;
+    const phoneToUse = paramsPhone || storedPhone;
+
+    if (phoneToUse) {
+      setFormData((prev) => ({ ...prev, phoneNumber: phoneToUse }));
+    } else {
+      toast.error("لطفا ابتدا شماره خود را تایید کنید.");
+      router.replace("/auth");
     }
-  }, [phoneNumber, router]);
+    if (storedPhone) {
+      localStorage.removeItem("pendingPhone");
+    }
+  }, [router, searchParams]);
+
+  const normalizePhone = (value: string) => {
+    if (!value) return value;
+    let trimmed = value.trim();
+    if (trimmed.startsWith("+")) return trimmed;
+    if (trimmed.startsWith("0")) trimmed = trimmed.substring(1);
+    if (!trimmed.startsWith("98")) trimmed = `98${trimmed}`;
+    return `+${trimmed}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const normalizedPhone = normalizePhone(formData.phoneNumber);
       const res = await AuthService.register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         password: formData.password,
-        phone: formData.phoneNumber,
+        phone: normalizedPhone,
       });
 
       if (res.token || res.message) {
@@ -56,8 +74,13 @@ export default function RegisterInfoPage() {
         const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
         router.push(`/auth/login${redirectQuery}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      const message =
+        error?.response?.data?.error?.message ||
+        error?.message ||
+        "خطا در ثبت اطلاعات. لطفا دوباره تلاش کنید";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,6 @@
 
 import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { type CouponRule } from "./page";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";
 
 // Define API response types
@@ -132,11 +131,6 @@ export const config: UpsertPageConfigType<CouponRule> = {
                   if (category === "product") {
                     const response = await apiClient.get<ProductVariationResponse>(
                       `/product-variations?filters[SKU][$containsi]=${searchTerm}`,
-                      {
-                        headers: {
-                          Authorization: `Bearer ${STRAPI_TOKEN}`,
-                        },
-                      },
                     );
 
                     return (response as any).data.map((item: any) => ({
@@ -146,11 +140,6 @@ export const config: UpsertPageConfigType<CouponRule> = {
                   } else if (category === "category") {
                     const response = await apiClient.get<ProductCategoryResponse>(
                       `/product-categories?filters[Title][$containsi]=${searchTerm}`,
-                      {
-                        headers: {
-                          Authorization: `Bearer ${STRAPI_TOKEN}`,
-                        },
-                      },
                     );
 
                     return (response as any).data.map((item: any) => ({
