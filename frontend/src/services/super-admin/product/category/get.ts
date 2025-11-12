@@ -26,5 +26,5 @@ export const getCategoryById = async (
 ): Promise<ApiResponse<CategoryDetail>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}?populate=parent`;
   const response = await apiClient.get<ApiResponse<CategoryDetail>>(endpoint);
-  return response;
+  return response.data;
 };
