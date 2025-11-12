@@ -91,7 +91,6 @@ jobs:
             export IMAGE_TAG=main
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi -- migrate
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
 
@@ -135,7 +134,6 @@ jobs:
             export IMAGE_TAG=dev
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi -- migrate
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
 
@@ -179,6 +177,5 @@ jobs:
             export IMAGE_TAG=experimental
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" run --rm strapi npm run strapi -- migrate
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
             docker image prune -f
