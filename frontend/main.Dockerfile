@@ -1,33 +1,34 @@
-# Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production
 
-# Copy package files first for better layer caching
 COPY package*.json ./
+RUN npm ci --legacy-peer-deps
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Copy source code
 COPY . .
 
-# Source main.env and build
-ENV NEXT_TELEMETRY_DISABLED=1
-RUN set -a && . ./main.env && set +a && rm -f ./dev.env && npm run build
+ARG NEXT_PUBLIC_API_BASE_URL=""
+ARG NEXT_PUBLIC_IMAGE_BASE_URL=""
+ARG NEXT_PUBLIC_STRAPI_TOKEN=""
 
-# Runtime stage
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_IMAGE_BASE_URL=${NEXT_PUBLIC_IMAGE_BASE_URL}
+ENV NEXT_PUBLIC_STRAPI_TOKEN=${NEXT_PUBLIC_STRAPI_TOKEN}
+
+RUN npm run build
+
 FROM node:20-alpine AS runner
-
 WORKDIR /app
 
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production
 
-# Copy only necessary files from builder
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-CMD ["node", "server.js"] 
+CMD ["node", "server.js"]

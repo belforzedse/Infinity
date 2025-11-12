@@ -50,13 +50,14 @@ export default async function Home() {
       )}
 
       <section className="space-y-6">
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {categories.map((category, index) => (
-            <Link
-              key={category.id}
-              href={category.href}
-              className="flex w-full flex-col items-center text-center"
-            >
+        <div className="flex justify-center">
+          <div className="grid grid-cols-3 gap-4 md:grid-cols-4 md:gap-6 lg:grid-cols-6 lg:gap-8">
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={category.href}
+                className="flex flex-col items-center text-center"
+              >
               <Reveal
                 delay={index * 80}
                 className="hidden w-full lg:block"
@@ -86,7 +87,7 @@ export default async function Home() {
 
               <Reveal
                 delay={index * 80}
-                className="w-full lg:hidden"
+                className="flex w-full flex-col items-center lg:hidden"
                 variant="fade-up"
                 duration={600}
               >
@@ -104,10 +105,11 @@ export default async function Home() {
                     sizes="80px"
                   />
                 </div>
-                <span className="text-sm mx-auto mt-2 block md:text-base">{category.name}</span>
+                <span className="mt-2 text-center text-sm font-medium md:text-base">{category.name}</span>
               </Reveal>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
