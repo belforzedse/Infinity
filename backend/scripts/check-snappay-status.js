@@ -13,27 +13,40 @@
  */
 
 const axios = require("axios");
+const qs = require("qs");
 
 const {
-  SNAPPAY_BASE_URL = "https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io",
-  SNAPPAY_CLIENT_ID = "infinity",
-  SNAPPAY_CLIENT_SECRET = "m7Z*e6RJp#DaWZQc",
-  SNAPPAY_USERNAME = "infinity-purchase",
-  SNAPPAY_PASSWORD = "J#FFlaz3*#eSpy5N",
+  SNAPPAY_BASE_URL,
+  SNAPPAY_CLIENT_ID,
+  SNAPPAY_CLIENT_SECRET,
+  SNAPPAY_USERNAME,
+  SNAPPAY_PASSWORD,
 } = process.env;
 
+if (
+  !SNAPPAY_BASE_URL ||
+  !SNAPPAY_CLIENT_ID ||
+  !SNAPPAY_CLIENT_SECRET ||
+  !SNAPPAY_USERNAME ||
+  !SNAPPAY_PASSWORD
+) {
+  console.error("Missing SNAPPAY_* environment variables. Please load main.env/dev.env first.");
+  process.exit(1);
+}
+
 async function fetchAccessToken(http) {
-  const body = new URLSearchParams();
-  body.append("grant_type", "password");
-  body.append("scope", "online-merchant");
-  body.append("username", SNAPPAY_USERNAME);
-  body.append("password", SNAPPAY_PASSWORD);
+  const body = qs.stringify({
+    grant_type: "password",
+    scope: "online-merchant",
+    username: SNAPPAY_USERNAME,
+    password: SNAPPAY_PASSWORD,
+  });
 
   const basic = Buffer.from(`${SNAPPAY_CLIENT_ID}:${SNAPPAY_CLIENT_SECRET}`).toString(
     "base64"
   );
 
-  const { data } = await http.post("/api/online/v1/oauth/token", body.toString(), {
+  const { data } = await http.post("/api/online/v1/oauth/token", body, {
     headers: {
       Authorization: `Basic ${basic}`,
       "Content-Type": "application/x-www-form-urlencoded",
