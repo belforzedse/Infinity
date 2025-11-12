@@ -106,6 +106,26 @@ docker compose up --build
 
 Compose will forward the env values as both build args and runtime vars so the container behaves the same way you’ll deploy it in CI/CD.
 
+## CI/CD & Deployment
+
+- GitHub Actions workflow: `.github/workflows/frontend-cicd.yml`
+  - Triggers on pushes to `main`, `dev`, `experimental`, plus manual dispatch.
+  - Steps: `npm ci` → resolve branch-specific `NEXT_PUBLIC_*` envs → `npm run build` → Docker build with `--build-arg NEXT_PUBLIC_*` → push to `ghcr.io/belforzedse/infinity-frontend:<sha>` and `<branch>` tags.
+- Deployment targets and Compose env files:
+
+| Branch | VM (SSH) | Image tag | Env file on server |
+| --- | --- | --- | --- |
+| `main` | `deploy@193.141.65.207:3031` | `ghcr.io/belforzedse/infinity-frontend:main` | `/opt/infinity/frontend/main.env` |
+| `dev` | `deploy@193.141.65.208:3031` | `…:dev` | `/opt/infinity/frontend/dev.env` |
+| `experimental` | `deploy@193.141.65.212:3031` | `…:experimental` | `/opt/infinity/frontend/main.env` |
+
+- Deployment flow per branch:
+  1. SCP `frontend/docker-compose.yml` to `/opt/infinity/frontend/`.
+  2. SSH in with the `deploy` user (key stored as `*_FRONTEND_SSH_KEY` secret).
+  3. Rewrite the env file with the GitHub secrets and run `docker compose pull && docker compose up -d --remove-orphans`, then prune dangling images.
+- Required repository secrets (per environment prefix `PROD_`, `STAGING_`, `EXPERIMENTAL_`): `*_FRONTEND_HOST`, `*_FRONTEND_PORT`, `*_FRONTEND_USER`, `*_FRONTEND_SSH_KEY`, `*_FRONTEND_API_BASE_URL`, `*_FRONTEND_IMAGE_BASE_URL`, `*_FRONTEND_STRAPI_TOKEN`.
+- Each VM must have Docker Engine + Compose v2 installed, `deploy` added to the `docker` group, and `/opt/infinity/frontend` owned by `deploy`.***
+
 - fix(pdp): add `type="button"` to variation selector buttons (color/size/model)
 - chore(a11y): add TODO to improve selected color state semantics for keyboard access
 

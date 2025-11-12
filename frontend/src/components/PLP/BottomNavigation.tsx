@@ -9,10 +9,12 @@ import BasketIcon from "./Icons/BasketIcon";
 import ProfileIcon from "./Icons/ProfileIcon";
 import { categories } from "@/constants/categories";
 import Image from "next/image";
+import { useCart } from "@/contexts/CartContext";
 
 const PLPBottomNavigation = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { totalItems } = useCart();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);
@@ -74,7 +76,16 @@ const PLPBottomNavigation = () => {
     {
       label: "سبد خرید",
       href: "/cart",
-      icon: (isActive: boolean) => <BasketIcon isActive={isActive} />,
+      icon: (isActive: boolean) => (
+        <div className="relative">
+          <BasketIcon isActive={isActive} />
+          {totalItems > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-pink-600 text-xs font-medium text-white">
+              {totalItems > 9 ? '9+' : totalItems}
+            </span>
+          )}
+        </div>
+      ),
     },
     {
       label: "حساب کاربری",
