@@ -1,73 +1,77 @@
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
 import KeyIcon from "@/components/SuperAdmin/Layout/Icons/KeyIcon";
-import PlusIcon from "@/components/SuperAdmin/Layout/Icons/PlusIcon";
 import { refreshTable } from "@/components/SuperAdmin/Table";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import SuperAdminTableCellSwitch from "@/components/SuperAdmin/Table/Cells/Switch";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
-import { STRAPI_TOKEN } from "@/constants/api";
 import { apiClient } from "@/services";
+import { translatePluginRoleLabel } from "@/constants/roleLabels";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
+export type UserInfo = {
+  id: number;
+  FirstName?: string | null;
+  LastName?: string | null;
+  NationalCode?: string | null;
+  BirthDate?: string | null;
+  Sex?: boolean | null;
+  Bio?: string | null;
+};
+
+export type LocalUserRole = {
+  id: number;
+  Title?: string | null;
+};
+
+import type { PluginRoleInfo } from "@/services/user/getDetails";
+
+export type UserWallet = {
+  id: number;
+  Balance?: string | number | null;
+};
+
 export type User = {
   id: string;
-  attributes: {
-    Phone: string;
-    removedAt: string;
-    user_info: {
-      data: {
-        attributes: {
-          FirstName: string;
-          LastName: string;
-        };
-      };
-    };
-    user_role: {
-      data: {
-        attributes: {
-          Title: string;
-        };
-      };
-    };
-    IsActive: boolean;
-    user_wallet: {
-      data: {
-        id: number;
-        attributes: {
-          Balance: string;
-        };
-      };
-    };
-    createdAt: string;
-  };
+  attributes: any;
+  username?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  confirmed?: boolean;
+  blocked?: boolean;
+  IsActive?: boolean;
+  IsVerified?: boolean;
+  removedAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  user_info?: UserInfo | null;
+  user_role?: LocalUserRole | null;
+  role?: PluginRoleInfo | null;
+  user_wallet?: UserWallet | null;
+};
+
+const deriveFullName = (user: User) => {
+  const firstName = user.user_info?.FirstName ?? "";
+  const lastName = user.user_info?.LastName ?? "";
+  if (!firstName && !lastName) return "";
+  return `${firstName} ${lastName}`.trim();
 };
 
 const StatusCell = ({ row }: { row: Row<User> }) => {
-  const [status, setStatus] = useState(row.original.attributes.IsActive ? "active" : "inactive");
+  const [status, setStatus] = useState(row.original.IsActive ? "active" : "inactive");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStatusChange = async (newStatus: "active" | "inactive") => {
     setIsLoading(true);
 
     try {
-      await apiClient.put(
-        `/local-users/${row.original.id}`,
-        {
-          data: {
-            IsActive: newStatus === "active",
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        },
-      );
+      await apiClient.put(`/users/${row.original.id}`, {
+        IsActive: newStatus === "active",
+      });
 
       toast.success("وضعیت کاربر با موفقیت تغییر کرد");
       setStatus(newStatus);
@@ -89,90 +93,13 @@ const StatusCell = ({ row }: { row: Row<User> }) => {
 };
 
 const WalletCell = ({ row }: { row: Row<User> }) => {
-  const wallet = row.original.attributes.user_wallet.data?.attributes.Balance as string;
-  const walletId = row.original.attributes.user_wallet.data?.id as number;
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [newBalance, setNewBalance] = useState(wallet ? wallet : "0");
-  const [, setRefresh] = useAtom(refreshTable);
-
-  const onClick = () => {
-    setShowWalletModal(true);
-  };
-
-  const handleWalletUpdate = async () => {
-    setIsLoading(true);
-
-    try {
-      await apiClient.put(
-        `/local-user-wallets/${walletId}`,
-        {
-          data: {
-            Balance: newBalance,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        },
-      );
-      setShowWalletModal(false);
-      toast.success("موجودی کیف پول با موفقیت بروزرسانی شد");
-      setRefresh(true);
-    } catch (error) {
-      toast.error("خطا در بروزرسانی کیف پول");
-      console.error("Failed to update wallet:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const walletData = row.original.user_wallet ?? null;
+  const walletBalance = Number(walletData?.Balance ?? 0);
 
   return (
-    <>
-      <button
-        className="text-sm flex items-center gap-1 rounded-lg border border-slate-400 bg-white px-3 py-1 text-slate-700 disabled:opacity-50"
-        onClick={onClick}
-        disabled={isLoading}
-      >
-        <SuperAdminTableCellSimplePrice price={wallet ? +wallet : 0} />
-        <PlusIcon />
-      </button>
-
-      {showWalletModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <h2 className="text-xl mb-4 font-bold">تغییر موجودی کیف پول</h2>
-            <div className="mb-4">
-              <label className="text-sm mb-1 block font-medium">موجودی جدید</label>
-              <input
-                type="number"
-                value={newBalance}
-                onChange={(e) => setNewBalance(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowWalletModal(false)}
-                className="rounded-md bg-gray-200 px-4 py-2"
-                disabled={isLoading}
-              >
-                انصراف
-              </button>
-              <button
-                onClick={handleWalletUpdate}
-                className="rounded-md bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
-                disabled={isLoading}
-              >
-                {isLoading ? "در حال بروزرسانی..." : "ذخیره"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-1">
+      <SuperAdminTableCellSimplePrice price={walletBalance} />
+    </div>
   );
 };
 
@@ -192,19 +119,9 @@ const ActionsCell = ({ row }: { row: Row<User> }) => {
     setIsLoading(true);
 
     try {
-      await apiClient.put(
-        `/local-users/${row.original.id}`,
-        {
-          data: {
-            Password: newPassword,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${STRAPI_TOKEN}`,
-          },
-        },
-      );
+      await apiClient.put(`/users/${row.original.id}`, {
+        password: newPassword,
+      });
       setShowPasswordModal(false);
       setNewPassword("");
       setRetryPassword("");
@@ -218,12 +135,17 @@ const ActionsCell = ({ row }: { row: Row<User> }) => {
     }
   };
 
-  const isRemoved = row.original.attributes.removedAt;
+  const isRemoved = row.original.removedAt;
 
   return (
     <>
       <div className="flex flex-row-reverse items-center gap-3 p-1">
-        <RemoveActionButton isRemoved={!!isRemoved} id={row.original.id} apiUrl={"/local-users"} />
+        <RemoveActionButton
+          isRemoved={!!isRemoved}
+          id={row.original.id.toString()}
+          apiUrl={"/users"}
+          payloadFormatter={(removedAt) => ({ removedAt })}
+        />
 
         <SuperAdminTableCellActionButton
           variant="secondary"
@@ -283,47 +205,30 @@ const ActionsCell = ({ row }: { row: Row<User> }) => {
 
 export const columns: ColumnDef<User>[] = [
   {
-    accessorKey: "attributes.Phone",
+    accessorKey: "phone",
     header: "شماره تلفن",
+    cell: ({ row }) => row.original.phone ?? "-",
   },
   {
-    accessorKey: "attributes.user_info.data",
+    accessorKey: "user_info",
     header: "نام",
     cell: ({ row }) => {
-      const userInfo = row.original.attributes as {
-        user_info: {
-          data: {
-            attributes: {
-              FirstName: string;
-              LastName: string;
-            };
-          };
-        };
-      };
-
-      return userInfo &&
-        userInfo.user_info.data?.attributes?.FirstName &&
-        userInfo.user_info.data?.attributes?.LastName ? (
-        <span className="text-sm text-neutral-800">
-          {userInfo.user_info.data?.attributes?.FirstName}{" "}
-          {userInfo.user_info.data?.attributes?.LastName}
-        </span>
-      ) : (
-        "-"
-      );
+      const fullName = deriveFullName(row.original);
+      return fullName ? <span className="text-sm text-neutral-800">{fullName}</span> : "-";
     },
   },
   {
-    accessorKey: "attributes.user_role.data.attributes.Title",
+    accessorKey: "user_role",
     header: "نقش",
+    cell: ({ row }) => getRoleLabel(row.original),
   },
   {
-    accessorKey: "attributes",
+    accessorKey: "IsActive",
     header: "وضعیت",
     cell: ({ row }) => <StatusCell row={row} />,
   },
   {
-    accessorKey: "attributes.user_wallet.data.attributes.Balance",
+    accessorKey: "user_wallet",
     header: "موجودی کیف پول",
     cell: ({ row }) => <WalletCell row={row} />,
   },
@@ -345,49 +250,49 @@ type Props = {
 export const MobileTable = ({ data }: Props) => {
   return (
     <div className="mt-2 flex flex-col gap-2">
-      {data?.map((row) => (
+      {data?.map((row) => {
+        const rowWithStringId: User = {
+          ...row,
+          id: String(row.id),
+        };
+        return (
         <MobileTableRowBox
           key={row.id}
           columns={columns}
-          row={row}
+          row={rowWithStringId}
           header={
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex items-center gap-1">
                 <span className="text-xs text-neutral-400">
-                  {row.attributes?.user_info?.data?.attributes?.FirstName}{" "}
-                  {row.attributes?.user_info?.data?.attributes?.LastName}
+                  {deriveFullName(row) || row.username || "-"}
                 </span>
                 <span className="text-xs text-neutral-400">|</span>
-                <span className="text-xs text-yellow-600">
-                  {row.attributes?.user_role?.data?.attributes?.Title}
-                </span>
+                <span className="text-xs text-yellow-600">{getRoleLabel(row)}</span>
                 <span className="text-xs text-neutral-400">|</span>
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-neutral-400">
-                    {row.attributes?.IsActive ? "غیرفعال کردن حساب" : "فعال کردن حساب"}
+                    {row.IsActive ? "غیرفعال کردن حساب" : "فعال کردن حساب"}
                   </span>
-                  <SuperAdminTableCellSwitch
-                    status={row.attributes?.IsActive ? "active" : "inactive"}
-                  />
+                  <SuperAdminTableCellSwitch status={row.IsActive ? "active" : "inactive"} />
                 </div>
               </div>
 
-              <button className="text-xs flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1 text-slate-700 md:border-slate-400">
+              <div className="text-xs flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1 text-slate-700">
                 <SuperAdminTableCellSimplePrice
-                  price={
-                    row.attributes?.user_wallet?.data?.attributes?.Balance
-                      ? +row.attributes?.user_wallet?.data?.attributes?.Balance
-                      : 0
-                  }
+                  price={Number(row.user_wallet?.Balance ?? 0)}
                   inverse
                 />
-                +
-              </button>
+              </div>
             </div>
           }
-          headTitle={row.attributes?.Phone}
+          headTitle={row.phone || "-"}
         />
-      ))}
+        );
+      })}
     </div>
   );
+};
+const getRoleLabel = (user: User) => {
+  if (user.user_role?.Title) return user.user_role.Title;
+  return translatePluginRoleLabel(user.role?.name) || "-";
 };

@@ -4,11 +4,10 @@
  */
 // Base URLs
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinity.rgbgroup.ir/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 export const STRAPI_TOKEN =
-  process.env.NEXT_PUBLIC_STRAPI_TOKEN ||
-  "STRAPI_API_TOKEN";
-export const IMAGE_BASE_URL = "https://api.infinity.rgbgroup.ir";
+  process.env.NEXT_PUBLIC_STRAPI_TOKEN;
+export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
 // API Versions
 export const API_VERSION = "v1";
 
@@ -32,8 +31,8 @@ export const ENDPOINTS = {
   },
   USER: {
     ME: "/auth/self",
-    GET_ALL: "/local-users",
-    GET_DETAILS: "/local-users",
+    GET_ALL: "/users",
+    GET_DETAILS: "/users",
     GET_INFO: "/user/info/by/user",
   },
   PRODUCT: {

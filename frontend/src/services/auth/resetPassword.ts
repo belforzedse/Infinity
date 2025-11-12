@@ -1,5 +1,6 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
+import { normalizePhoneNumber } from "@/utils/auth";
 
 export interface ResetPasswordRequest {
   otp: string;
@@ -34,11 +35,13 @@ export const resetPassword = async (payload: ResetPasswordRequest): Promise<Resp
     throw new Error("Missing OTP token");
   }
 
+  const normalizedPhone = payload.phone ? normalizePhoneNumber(payload.phone) : undefined;
+
   const response = await apiClient.post<Response>(endpoint, {
     otpToken,
     otp: payload.otp,
     newPassword: payload.newPassword,
-    phone: payload.phone,
+    phone: normalizedPhone,
   });
 
   return response as Response;

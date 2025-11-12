@@ -34,6 +34,7 @@ type SidebarChild = {
   id: string;
   label: string;
   href: string;
+  icon?: ReactNode;
 };
 
 type SidebarItem = {
@@ -53,38 +54,43 @@ const superAdminSidebar: SidebarItem[] = [
     children: [],
   },
   {
-    id: "products",
+    id: "manage-products",
     label: "مدیریت محصولات",
-    href: "/super-admin/products",
+    href: "",
     icon: <ProductIcon />,
-    children: [],
-    // children: [
-    //   {
-    //     id: "product-attributes",
-    //     label: "ویژگی ها",
-    //     href: "/super-admin/products/attributes",
-    //   },
-    //   {
-    //     id: "product-categories",
-    //     label: "دسته بندی ها",
-    //     href: "/super-admin/products/categories",
-    //   },
-    //   {
-    //     id: "product-tags",
-    //     label: "برچسب ها",
-    //     href: "/super-admin/products/tags",
-    //   },
-    //   {
-    //     id: "product-comments",
-    //     label: "مدیریت نظرات",
-    //     href: "/super-admin/products/comments",
-    //   },
-    //   {
-    //     id: "product-size-guide",
-    //     label: "راهنمای اندازه",
-    //     href: "/super-admin/products/size-guide",
-    //   },
-    // ],
+
+    children: [
+      // {
+      //   id: "product-attributes",
+      //   label: "ویژگی ها",
+      //   href: "/super-admin/products/attributes",
+      // },
+      {
+        id: "productس",
+        label: " محصولات",
+        href: "/super-admin/products",
+      },
+      {
+        id: "product-categories",
+        label: "دسته بندی ها",
+        href: "/super-admin/products/categories",
+      },
+      // {
+      //   id: "product-tags",
+      //   label: "برچسب ها",
+      //   href: "/super-admin/products/tags",
+      // },
+      {
+        id: "product-comments",
+        label: "مدیریت نظرات",
+        href: "/super-admin/products/comments",
+      },
+      {
+        id: "product-size-guide",
+        label: "راهنمای اندازه",
+        href: "/super-admin/products/size-guide",
+      },
+    ],
   },
   // {
   //   id: "customer-club",
@@ -118,17 +124,17 @@ const superAdminSidebar: SidebarItem[] = [
     icon: <CartIcon />,
     children: [],
   },
-  {
-    id: "payment-methods",
-    label: "روش های پرداخت",
-    href: "/super-admin/payment-methods",
-    icon: <PaymentIcon />,
-    children: [],
-  },
+  // {
+  //   id: "payment-methods",
+  //   label: "روش های پرداخت",
+  //   href: "/super-admin/payment-methods",
+  //   icon: <PaymentIcon />,
+  //   children: [],
+  // },
   {
     id: "discounts",
     label: "مدیریت تخفیف ها",
-    href: "/super-admin/discounts",
+    href: "",
     icon: <PercentIcon />,
     children: [
       {
@@ -183,17 +189,28 @@ const superAdminSidebar: SidebarItem[] = [
   {
     id: "reports",
     label: "گزارشات و تحلیل ها",
-    href: "/super-admin/reports",
+    href: "",
     icon: <ChartIcon />,
-    children: [],
+    children: [
+      {
+        id: "product-sales",
+        label:" فروش هر محصول",
+        href: "/super-admin/reports/products-sales",
+      },
+      {
+        id: "admin-activity",
+        label: "گزارش فعالیت پشتیبانان",
+        href: "/super-admin/reports/admin-activity",
+      },
+    ],
   },
-  {
-    id: "notifications",
-    label: "نوتیفیکیشن ها",
-    href: "/super-admin/notifications",
-    icon: <BellIcon />,
-    children: [],
-  },
+  // {
+  //   id: "notifications",
+  //   label: "نوتیفیکیشن ها",
+  //   href: "/super-admin/notifications",
+  //   icon: <BellIcon />,
+  //   children: [],
+  // },
 
   // {
   //   id: "cache",
@@ -202,13 +219,13 @@ const superAdminSidebar: SidebarItem[] = [
   //   icon: <CacheIcon />,
   //   children: [],
   // },
-  {
-    id: "navbaredit",
-    label: "مدیریت منوی ناوبری",
-    href: "/super-admin/navigation/edit",
-    icon: <RarMenu />,
-    children: [],
-  },
+  // {
+  //   id: "navbaredit",
+  //   label: "مدیریت منوی ناوبری",
+  //   href: "/super-admin/navigation/edit",
+  //   icon: <RarMenu />,
+  //   children: [],
+  // },
   // {
   //   id: "seo",
   //   label: "سئو",

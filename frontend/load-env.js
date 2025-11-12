@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-function loadEnvFile(filename) {
+function loadEnvFile(filename, allowOverride = false) {
   const envPath = path.resolve(__dirname, filename);
 
   if (!fs.existsSync(envPath)) {
@@ -36,8 +36,8 @@ function loadEnvFile(filename) {
         value = value.slice(1, -1);
       }
 
-      // Only set if not already defined (allows .env.local to override)
-      if (!process.env[key]) {
+      // Set if allowOverride is true, or if not already defined
+      if (allowOverride || !process.env[key]) {
         process.env[key] = value;
       }
     }
@@ -48,11 +48,11 @@ function loadEnvFile(filename) {
 const devEnvExists = fs.existsSync(path.resolve(__dirname, 'dev.env'));
 const envFile = devEnvExists ? 'dev.env' : 'main.env';
 
-// Load the appropriate env file
-loadEnvFile(envFile);
+// Load .env.local first (prioritized for local overrides)
+loadEnvFile('.env.local', true);
 
-// Also load .env.local if it exists (for local overrides)
-loadEnvFile('.env.local');
+// Load the appropriate env file (as defaults, won't override .env.local)
+loadEnvFile(envFile);
 
 console.log('Environment variables loaded successfully');
 console.log(`API URL: ${process.env.NEXT_PUBLIC_API_BASE_URL || 'not set'}`);

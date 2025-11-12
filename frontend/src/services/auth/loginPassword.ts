@@ -1,5 +1,6 @@
 import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api";
+import { normalizePhoneNumber } from "@/utils/auth";
 
 export interface Response {
   token: string;
@@ -11,7 +12,7 @@ export const loginPassword = async (phone: string, password: string): Promise<Re
   const response = await apiClient.post<Response>(
     endpoint,
     {
-      phone,
+      phone: normalizePhoneNumber(phone),
       password,
     },
     { suppressAuthRedirect: true },

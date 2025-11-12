@@ -8,6 +8,7 @@ import {
   updateProductSizeHelper,
 } from "@/services/super-admin/product/size-helper/create";
 import { toast } from "react-hot-toast";
+import { normalizeSizeGuideData } from "@/utils/sizeGuide";
 
 interface SizeProps {
   productId: number;
@@ -28,15 +29,14 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
         setHelperId(response.data[0].id);
 
         if (helperData && helperData.length > 0) {
-          const firstRow = helperData[0];
-          const columnKeys = Object.keys(firstRow).filter((key) => key !== "size");
+          const { rows, headers } = normalizeSizeGuideData(helperData);
           setColumns(
-            columnKeys.map((key) => ({
-              key,
-              title: key, // Use the key as the title initially
+            headers.map((header) => ({
+              key: header,
+              title: header,
             })),
           );
-          setSizeData(helperData);
+          setSizeData(rows);
         } else {
           setDefaultData();
         }

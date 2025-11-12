@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api"; // removed unused: STRAPI_TOKEN
+import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
 import { appendTitleFilter } from "@/constants/productFilters";
 import type { ApiResponse } from "@/types/api";
 import type { ProductCardProps } from "@/components/Product/Card";

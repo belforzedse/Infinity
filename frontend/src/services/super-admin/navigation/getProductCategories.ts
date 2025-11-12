@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN, ENDPOINTS } from "@/constants/api";
+import { ENDPOINTS } from "@/constants/api";
 
 export interface ProductCategory {
   id: number;
@@ -11,9 +11,6 @@ export async function getProductCategories(): Promise<ProductCategory[]> {
   const response = await apiClient.get(ENDPOINTS.PRODUCT.CATEGORY, {
     params: {
       "pagination[limit]": -1, // Fetch all categories without pagination limit
-    },
-    headers: {
-      Authorization: `Bearer ${STRAPI_TOKEN}`,
     },
   });
 

@@ -4,7 +4,7 @@ import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/Co
 import type { User } from "./page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
+import { translatePluginRoleLabel } from "@/constants/roleLabels";
 
 // Function to fetch roles from the API
 const fetchRoles = async (
@@ -12,27 +12,27 @@ const fetchRoles = async (
   _formData?: any,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {
-    const response = await apiClient.get("/local-user-roles", {
-      headers: {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-    });
+    const response = await apiClient.get("/users-permissions/roles");
+    const payload = (response as any)?.data ?? response;
+    const roles = Array.isArray(payload?.roles)
+      ? payload.roles
+      : Array.isArray(payload)
+        ? payload
+        : [];
 
-    const data = response as {
-      data: Array<{
-        id: number;
-        attributes: {
-          Title: string;
-          createdAt: string;
-          updatedAt: string;
+    return roles
+      .filter((role: any) => {
+        const roleName = (role?.name ?? role?.attributes?.name ?? "").toLowerCase();
+        return roleName !== "authenticated" && roleName !== "public";
+      })
+      .map((role: any) => {
+        const id = role?.id ?? role?.attributes?.id;
+        const name = role?.name ?? role?.attributes?.name ?? `نقش ${id ?? ""}`;
+        return {
+          label: translatePluginRoleLabel(name) || name,
+          value: id ? id.toString() : name,
         };
-      }>;
-    };
-
-    return data.data.map((role) => ({
-      label: role.attributes.Title,
-      value: role.id.toString(),
-    }));
+      });
   } catch (error) {
     console.error("Error fetching roles:", error);
     return [];
@@ -42,10 +42,6 @@ const fetchRoles = async (
 export const config: UpsertPageConfigType<User> = {
   headTitle: "ویرایش کاربر",
   showTimestamp: false,
-  addButton: {
-    text: "افزودن کاربر جدید",
-    path: "/super-admin/users/add",
-  },
   isActiveBox: {
     key: "isActive",
     header: "وضیعت حساب کاربری",

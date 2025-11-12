@@ -1,5 +1,4 @@
 import { apiClient } from "@/services";
-import { STRAPI_TOKEN } from "@/constants/api";
 import type { Footer } from "@/types/super-admin/footer";
 
 const defaultFooter = (): Footer => ({
@@ -17,11 +16,6 @@ export async function getFooter(): Promise<Footer> {
   try {
     const response = await apiClient.get(
       "/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs",
-      {
-        headers: {
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-      },
     );
 
     const footerData = (response as any)?.data?.attributes;
