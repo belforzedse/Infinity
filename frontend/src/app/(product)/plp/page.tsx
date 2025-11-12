@@ -1,5 +1,4 @@
-// Revalidate every hour to show updated product prices, stock, and search results
-export const revalidate = 3600; // 1 hour in seconds
+export const revalidate = 60; // refresh product listing every minute
 
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
@@ -222,7 +221,7 @@ async function getProducts(
   try {
     const response = await fetchWithTimeout(url, {
       timeoutMs: 15000,
-      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      next: { revalidate: 60 },
     });
     const data = await response.json();
 

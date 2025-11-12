@@ -1,29 +1,10 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import type { Area} from "./table";
 import { columns, MobileTable } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import ShippingTabs from "@/components/SuperAdmin/ShippingTabs";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
-
-// This is sample data. Replace with your actual data fetching logic
-const data: Area[] = [
-  {
-    id: "1",
-    title: "منطقه ۱",
-    createdAt: new Date("2024-03-15"),
-    updatedAt: new Date("2024-03-15"),
-    description: "شمال تهران",
-  },
-  {
-    id: "2",
-    title: "منطقه ۲",
-    createdAt: new Date("2024-03-14"),
-    updatedAt: new Date("2024-03-14"),
-    description: "غرب تهران",
-  },
-];
 
 export default function ShippingAreasPage() {
   useFreshDataOnPageLoad();
@@ -38,11 +19,11 @@ export default function ShippingAreasPage() {
         hasFilterButton
         hasRecycleBin
       >
-        <SuperAdminTable columns={columns} data={data} />
-
-        <div className="block md:hidden">
-          <MobileTable data={data} />
-        </div>
+        <SuperAdminTable
+          columns={columns}
+          url="/shipping-areas"
+          mobileTable={(data) => <MobileTable data={data} />}
+        />
       </ContentWrapper>
     </div>
   );

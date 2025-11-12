@@ -124,6 +124,7 @@ Compose will forward the env values as both build args and runtime vars so the c
   2. SSH in with the `deploy` user (key stored as `*_FRONTEND_SSH_KEY` secret).
   3. Rewrite the env file with the GitHub secrets and run `docker compose pull && docker compose up -d --remove-orphans`, then prune dangling images.
 - Required repository secrets (per environment prefix `PROD_`, `STAGING_`, `EXPERIMENTAL_`): `*_FRONTEND_HOST`, `*_FRONTEND_PORT`, `*_FRONTEND_USER`, `*_FRONTEND_SSH_KEY`, `*_FRONTEND_API_BASE_URL`, `*_FRONTEND_IMAGE_BASE_URL`, `*_FRONTEND_STRAPI_TOKEN`.
+- Shared registry secrets: `GHCR_DEPLOY_USER` (GitHub username used for pulls) and `GHCR_DEPLOY_TOKEN` (PAT with `read:packages`) so the VMs can `docker login ghcr.io` before pulling.
 - Each VM must have Docker Engine + Compose v2 installed, `deploy` added to the `docker` group, and `/opt/infinity/frontend` owned by `deploy`.***
 
 - fix(pdp): add `type="button"` to variation selector buttons (color/size/model)

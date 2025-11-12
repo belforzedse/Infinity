@@ -1,5 +1,4 @@
-// Revalidate every hour to show updated product prices, stock, and reviews
-export const revalidate = 3600; // 1 hour in seconds
+export const revalidate = 60; // refresh PDP data every minute
 
 import Breadcrumb from "@/components/Kits/Breadcrumb";
 import Hero from "@/components/PDP/Hero";
