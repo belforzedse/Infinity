@@ -242,7 +242,14 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
             className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full min-w-[320px] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
             role="listbox"
             aria-label="پیشنهادهای جستجو"
+            id="plp-desktop-suggestions"
           >
+            {/* Screen reader announcement for result count */}
+            {!loading && suggestions.length > 0 && (
+              <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                {suggestions.length} نتیجه یافت شد برای "{searchQuery.trim()}"
+              </div>
+            )}
             {searchQuery.trim().length < 2 && !loading ? (
               <div className="flex flex-col gap-2 p-3 text-right text-sm text-neutral-600">
                 {recentSearches.length > 0 && (
@@ -298,24 +305,30 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                 )}
                 {!loading &&
                   suggestions.map((s, idx) => (
-                    <SearchSuggestionCard
+                    <div
                       key={s.id}
-                      id={s.id}
-                      title={s.Title}
-                      price={s.Price}
-                      discountPrice={s.DiscountPrice}
-                      discount={s.Discount}
-                      category={s.category}
-                      image={s.image}
-                      isAvailable={s.isAvailable}
-                      onClick={() => {
-                        persistRecent(s.Title);
-                        router.push(`/pdp/${s.id}`);
-                      }}
-                      index={idx}
-                      isActive={activeIndex === idx}
-                      query={searchQuery.trim()}
-                    />
+                      role="option"
+                      aria-selected={activeIndex === idx}
+                      aria-label={`${s.Title} - ${s.Price ? `${s.Price} تومان` : ''}`}
+                    >
+                      <SearchSuggestionCard
+                        id={s.id}
+                        title={s.Title}
+                        price={s.Price}
+                        discountPrice={s.DiscountPrice}
+                        discount={s.Discount}
+                        category={s.category}
+                        image={s.image}
+                        isAvailable={s.isAvailable}
+                        onClick={() => {
+                          persistRecent(s.Title);
+                          router.push(`/pdp/${s.id}`);
+                        }}
+                        index={idx}
+                        isActive={activeIndex === idx}
+                        query={searchQuery.trim()}
+                      />
+                    </div>
                   ))}
                 {!loading && suggestions.length > 0 && (
                   <motion.button

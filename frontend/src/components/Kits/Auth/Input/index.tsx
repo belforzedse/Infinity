@@ -45,7 +45,13 @@ export default function AuthInput({
           <div className="absolute left-4 top-1/2 -translate-y-1/2">{leftElement}</div>
         )}
       </div>
-      {error && <Text className="mt-1 text-red-500">{error}</Text>}
+      {error && (
+        <div id={`${props.id}-error`} className="mt-1 text-red-500" role="alert">
+          <Text className="mt-1 text-red-500">
+            {error}
+          </Text>
+        </div>
+      )}
     </div>
   );
 }

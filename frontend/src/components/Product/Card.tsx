@@ -54,42 +54,28 @@ const ProductCard: FC<ProductCardProps> = ({
   // const testDiscount = id === 1 ? 20 : discount;
 
   return (
-    <Link
-      href={`/pdp/${id.toString()}`}
-      className="group block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-    >
-      <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">
-        <div className="relative">
-          <ImageSlider images={images} title={title} priority={priority} />
+    <div className="group relative">
+      <Link
+        href={`/pdp/${id.toString()}`}
+        className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">
+          <div className="relative">
+            <ImageSlider images={images} title={title} priority={priority} />
 
-          <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
-            {discount ? (
-              <div className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1">
-                <span className="text-xs text-white">٪{discount} تخفیف</span>
-              </div>
-            ) : (
-              <span />
-            )}
-            <button
-              className={`glass-chip mt-[0.5px] flex h-9 w-9 items-center justify-center rounded-full ${
-                isLoading ? "cursor-wait opacity-50" : "hover:brightness-[1.05]"
-              } z-10 transition-all ring-1 ring-white/60`}
-              onClick={toggleLike}
-              disabled={isLoading}
-              aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
-            >
-              <HeartIcon
-                className={`h-4 w-4 ${
-                  isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500 text-neutral-500"
-                }`}
-                filled={isLiked}
-              />
-            </button>
-          </div>
+            <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
+              {discount ? (
+                <div className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1">
+                  <span className="text-xs text-white">٪{discount} تخفیف</span>
+                </div>
+              ) : (
+                <span />
+              )}
+            </div>
 
-          {colorsCount && colorsCount > 0 && (
+            {colorsCount && colorsCount > 0 && (
             <div className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-md">
-              <span className="text-xxs text-neutral-800">3+</span>
+              <span className="text-xs text-neutral-800">{colorsCount > 3 ? `${colorsCount}+` : colorsCount}‌</span>
               <div className="relative w-4">
                 <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
                 <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
@@ -112,12 +98,12 @@ const ProductCard: FC<ProductCardProps> = ({
             <div className="mt-1 flex items-center gap-0.5">
               <Image
                 src="/images/eyes-emoji.png"
-                alt="views"
+                alt="نمایش‌ها"
                 width={8}
                 height={8}
                 className="h-2 w-2"
               />
-              <span className="text-[9px] text-pink-800 md:text-xs">
+              <span className="text-xs text-pink-800 md:text-sm">
                 {seenCount} نفر در ۲۴ ساعت گذشته آن را دیده‌اند!
               </span>
             </div>
@@ -153,6 +139,27 @@ const ProductCard: FC<ProductCardProps> = ({
         </div>
       </div>
     </Link>
+
+    {/* Like button outside Link for independent interaction */}
+    <button
+      onClick={(e) => {
+        toggleLike(e);
+      }}
+      className={`absolute top-5 right-5 glass-chip flex h-11 w-11 items-center justify-center rounded-full ${
+        isLoading ? "cursor-wait opacity-50" : "hover:brightness-[1.05]"
+      } z-20 transition-all ring-1 ring-white/60`}
+      disabled={isLoading}
+      aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+      aria-pressed={isLiked}
+    >
+      <HeartIcon
+        className={`h-5 w-5 ${
+          isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500 text-neutral-500"
+        }`}
+        filled={isLiked}
+      />
+    </button>
+    </div>
   );
 };
 

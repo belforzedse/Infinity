@@ -5,7 +5,7 @@ import type { categoryResponseType } from "@/services/super-admin/product/catego
 import { getAllCategories } from "@/services/super-admin/product/category/getAll";
 
 export type ProductCategoryForm = {
-  id?: string;
+  id: string;
   Title: string;
   Slug: string;
   Parent: string;

@@ -51,7 +51,7 @@ export default async function Home() {
 
       <section className="space-y-6">
         <div className="flex justify-center">
-          <div className="grid grid-cols-3 gap-4 md:grid-cols-4 md:gap-6 lg:grid-cols-6 lg:gap-8">
+          <div className="grid grid-cols-3 gap-4 md:grid-cols-4 md:gap-6 lg:grid-cols-6 lg:gap-0">
             {categories.map((category, index) => (
               <Link
                 key={category.id}
