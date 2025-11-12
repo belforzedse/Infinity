@@ -4,4 +4,5 @@ services:
     env_file:
       - ${ENV_FILE:-main.env}
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "127.0.0.1:${HOST_PORT:-3000}:3000"
