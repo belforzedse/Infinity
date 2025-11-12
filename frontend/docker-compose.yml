@@ -4,9 +4,4 @@ services:
     env_file:
       - ${ENV_FILE:-main.env}
     restart: unless-stopped
-    networks:
-      - infinity-frontend-net
-
-networks:
-  infinity-frontend-net:
-    driver: bridge
+    network_mode: host
