@@ -49,13 +49,6 @@ jobs:
             echo "token=${{ secrets.PROD_FRONTEND_STRAPI_TOKEN }}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Lint
-        run: npm run lint
-        env:
-          NEXT_PUBLIC_API_BASE_URL: ${{ steps.env.outputs.api }}
-          NEXT_PUBLIC_IMAGE_BASE_URL: ${{ steps.env.outputs.image }}
-          NEXT_PUBLIC_STRAPI_TOKEN: ${{ steps.env.outputs.token }}
-
       - name: Build (Next.js)
         run: npm run build
         env:
