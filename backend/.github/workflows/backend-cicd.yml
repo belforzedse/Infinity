@@ -70,13 +70,13 @@ jobs:
           username: ${{ secrets.PROD_BACKEND_USER }}
           key: ${{ secrets.PROD_BACKEND_SSH_KEY }}
           port: ${{ secrets.PROD_BACKEND_PORT || '22' }}
-          envs: |
-            BACKEND_ENV=${{ secrets.PROD_BACKEND_ENV_FILE }}
           script: |
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            printf '%s\n' "$BACKEND_ENV" > main.env
+            cat <<'EOF' > main.env
+            ${{ secrets.PROD_BACKEND_ENV_FILE }}
+            EOF
             export IMAGE_TAG=main
             export ENV_FILE=main.env
             docker compose pull
@@ -104,13 +104,13 @@ jobs:
           username: ${{ secrets.STAGING_BACKEND_USER }}
           key: ${{ secrets.STAGING_BACKEND_SSH_KEY }}
           port: ${{ secrets.STAGING_BACKEND_PORT || '22' }}
-          envs: |
-            BACKEND_ENV=${{ secrets.STAGING_BACKEND_ENV_FILE }}
           script: |
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            printf '%s\n' "$BACKEND_ENV" > dev.env
+            cat <<'EOF' > dev.env
+            ${{ secrets.STAGING_BACKEND_ENV_FILE }}
+            EOF
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
             docker compose pull
@@ -138,13 +138,13 @@ jobs:
           username: ${{ secrets.EXPERIMENTAL_BACKEND_USER }}
           key: ${{ secrets.EXPERIMENTAL_BACKEND_SSH_KEY }}
           port: ${{ secrets.EXPERIMENTAL_BACKEND_PORT || '22' }}
-          envs: |
-            BACKEND_ENV=${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
           script: |
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            printf '%s\n' "$BACKEND_ENV" > main.env
+            cat <<'EOF' > main.env
+            ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
+            EOF
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env
             docker compose pull
