@@ -93,10 +93,10 @@ jobs:
             DB_PASS=$(extract_var "DATABASE_PASSWORD")
             DB_NAME=$(extract_var "DATABASE_NAME")
             cat <<EOF > "$DB_ENV_FILE"
-POSTGRES_USER=${DB_USER}
-POSTGRES_PASSWORD=${DB_PASS}
-POSTGRES_DB=${DB_NAME}
-EOF
+            POSTGRES_USER=${DB_USER}
+            POSTGRES_PASSWORD=${DB_PASS}
+            POSTGRES_DB=${DB_NAME}
+            EOF
             export IMAGE_TAG=main
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
@@ -146,10 +146,10 @@ EOF
             DB_PASS=$(extract_var "DATABASE_PASSWORD")
             DB_NAME=$(extract_var "DATABASE_NAME")
             cat <<EOF > "$DB_ENV_FILE"
-POSTGRES_USER=${DB_USER}
-POSTGRES_PASSWORD=${DB_PASS}
-POSTGRES_DB=${DB_NAME}
-EOF
+            POSTGRES_USER=${DB_USER}
+            POSTGRES_PASSWORD=${DB_PASS}
+            POSTGRES_DB=${DB_NAME}
+            EOF
             export IMAGE_TAG=dev
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
@@ -199,10 +199,10 @@ EOF
             DB_PASS=$(extract_var "DATABASE_PASSWORD")
             DB_NAME=$(extract_var "DATABASE_NAME")
             cat <<EOF > "$DB_ENV_FILE"
-POSTGRES_USER=${DB_USER}
-POSTGRES_PASSWORD=${DB_PASS}
-POSTGRES_DB=${DB_NAME}
-EOF
+            POSTGRES_USER=${DB_USER}
+            POSTGRES_PASSWORD=${DB_PASS}
+            POSTGRES_DB=${DB_NAME}
+            EOF
             export IMAGE_TAG=experimental
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
