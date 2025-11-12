@@ -25,12 +25,6 @@
       "type": "boolean",
       "default": false
     },
-    "user_info": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::local-user-info.local-user-info",
-      "mappedBy": "user"
-    },
     "product_reviews": {
       "type": "relation",
       "relation": "oneToMany",
@@ -89,10 +83,14 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::discount.discount",
-      "mappedBy": "local_users"
+      "inversedBy": "local_users"
     },
     "removedAt": {
       "type": "datetime"
+    },
+    "strapi_user": {
+      "type": "integer",
+      "unique": true
     }
   }
 }

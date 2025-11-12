@@ -5,10 +5,10 @@
  * See README / deployment docs for the list of required variables.
  */
 
-const requiredEnvVar = (key, { optional = false, defaultValue = '' } = {}) => {
+const requiredEnvVar = (key, { optional = false, defaultValue = "" } = {}) => {
   const value = process.env[key];
 
-  if (value !== undefined && value !== null && value.toString().trim() !== '') {
+  if (value !== undefined && value !== null && value.toString().trim() !== "") {
     return value.toString().trim();
   }
 
@@ -18,22 +18,22 @@ const requiredEnvVar = (key, { optional = false, defaultValue = '' } = {}) => {
 
   throw new Error(
     `Missing environment variable "${key}" required for importer configuration. ` +
-    `Set it before running the interactive importer.`
+      `Set it before running the interactive importer.`,
   );
 };
 
 const toNumber = (value, fallback) => {
-  const asNumber = Number.parseInt(value ?? '', 10);
+  const asNumber = Number.parseInt(value ?? "", 10);
   return Number.isNaN(asNumber) ? fallback : asNumber;
 };
 
 const toArray = (value, fallback = []) => {
-  if (typeof value !== 'string' || value.trim() === '') {
+  if (typeof value !== "string" || value.trim() === "") {
     return fallback;
   }
   return value
-    .split(',')
-    .map(item => item.trim())
+    .split(",")
+    .map((item) => item.trim())
     .filter(Boolean);
 };
 
@@ -54,10 +54,30 @@ module.exports = {
 
   // Strapi API Configuration
   strapi: {
-    baseUrl: "https://api.infinity.rgbgroup.ir/api",
+    // Default to production - will be overridden by user selection in interactive mode
+    baseUrl: "https://api.infinitycolor.co/api",
     auth: {
       token:
-        "STRAPI_API_TOKEN",
+        "c53f2effbd2f9e3184e2a5932899b1fd9a614afbce4ede82d9e83b34b76188be3dc10e9923e0023450671a24d95c639d60ef6f289e66efc3670be6e2b207f455d19a28f886e7ad9eb1c92ca06354f3ac8e13355f296900e8dbcdd0ab6137c5a704b863775a9615464c3a3097595054d8dbfc45e0ad1140f2ae9a0af638f9e728",
+    },
+    // Credential options for interactive selection
+    credentials: {
+      production: {
+        baseUrl: "https://api.infinitycolor.co/api",
+        token:
+          "c53f2effbd2f9e3184e2a5932899b1fd9a614afbce4ede82d9e83b34b76188be3dc10e9923e0023450671a24d95c639d60ef6f289e66efc3670be6e2b207f455d19a28f886e7ad9eb1c92ca06354f3ac8e13355f296900e8dbcdd0ab6137c5a704b863775a9615464c3a3097595054d8dbfc45e0ad1140f2ae9a0af638f9e728",
+      },
+      staging: {
+        baseUrl: "https://api.infinity.rgbgroup.ir/api",
+        token:
+          "89ea0441795124e522c7e14ce3a6e75f942663b5a8398ff194e0c90b6563163fe742632ad076310f330d06bee08c7f99225e4c91be39bd35fbd5ee7f668924404cb8f3647e576d8a2ba0b70734d53b75f2797348173b09615ccb06c2fd11c592eb4f535e1a57ca93844b234d27c739ca1fa9af20ca4eee0717328d2ae7fc135c",
+      },
+      local: {
+        baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
+        token:
+          process.env.STRAPI_IMPORT_LOCAL_TOKEN ||
+          "a38278a5e039887d0e2ae6fc562e5af2ba06bfc342ff788571fcc89189b02f86d517c840d5cd32e4ed6f03171d5b60ab4d415a3e18e4adbb93ab5dcb8c5477be880850eef6c0e6db23d558f199c030582f2d0a68546ac58c989d689f47c086a40e4720ecc820fff887888f54f63672c6719f9f2060febaeef10229360c169dfb",
+      },
     },
     endpoints: {
       categories: "/product-categories",
@@ -70,9 +90,9 @@ module.exports = {
       orders: "/orders",
       orderItems: "/order-items",
       contracts: "/contracts",
-      localUsers: "/local-users",
-      localUserInfos: "/local-user-infos",
-      localUserRoles: "/local-user-roles",
+      users: "/users",
+      userInfos: "/local-user-infos",
+      userRoles: "/users-permissions/roles",
     },
   },
 
@@ -180,7 +200,8 @@ module.exports = {
 
   // Duplicate Prevention
   duplicateTracking: {
-    // Store external ID mappings in JSON files
+    // Base directory - will be environment-specific in interactive mode
+    // e.g., "./import-tracking/production" or "./import-tracking/staging"
     storageDir: process.env.IMPORT_TRACKING_DIR || "./import-tracking",
     mappingFiles: {
       categories: process.env.IMPORT_TRACKING_CATEGORIES_FILE || "category-mappings.json",
@@ -188,6 +209,12 @@ module.exports = {
       variations: process.env.IMPORT_TRACKING_VARIATIONS_FILE || "variation-mappings.json",
       orders: process.env.IMPORT_TRACKING_ORDERS_FILE || "order-mappings.json",
       users: process.env.IMPORT_TRACKING_USERS_FILE || "user-mappings.json",
+    },
+    // Environment-specific directories
+    environments: {
+      production: "./import-tracking/production",
+      staging: "./import-tracking/staging",
+      local: "./import-tracking/local",
     },
   },
 

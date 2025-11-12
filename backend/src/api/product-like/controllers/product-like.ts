@@ -16,39 +16,28 @@ export default factories.createCoreController(
           return ctx.badRequest("Product ID is required");
         }
 
-        // Get user from context (set by authentication middleware)
-        const user = ctx.state.user;
-
-        if (!user) {
-          return ctx.unauthorized("Authentication required");
-        }
+        // Resolve legacy local-user id from plugin user
+        const pluginUserId = ctx.state.user?.id;
+        if (!pluginUserId) return ctx.unauthorized("Authentication required");
 
         // Check if product exists
-        const product = await strapi.entityService.findOne(
-          "api::product.product",
-          productId
-        );
+        const product = await strapi.entityService.findOne("api::product.product", productId);
 
         if (!product) {
           return ctx.notFound("Product not found");
         }
 
         // Check if favorite already exists
-        const existingLike = await strapi.db
-          .query("api::product-like.product-like")
-          .findOne({
-            where: {
-              user: user.id,
-              product: productId,
-            },
-          });
+        const existingLike = await strapi.db.query("api::product-like.product-like").findOne({
+          where: {
+            user: pluginUserId,
+            product: productId,
+          },
+        });
 
         // If favorite exists, remove it (toggle off)
         if (existingLike) {
-          await strapi.entityService.delete(
-            "api::product-like.product-like",
-            existingLike.id
-          );
+          await strapi.entityService.delete("api::product-like.product-like", existingLike.id);
           return ctx.send({
             success: true,
             message: "Product removed from favorites",
@@ -59,7 +48,7 @@ export default factories.createCoreController(
         // Otherwise, add it as a favorite (toggle on)
         await strapi.entityService.create("api::product-like.product-like", {
           data: {
-            user: user.id,
+            user: pluginUserId,
             product: productId,
           },
         });
@@ -77,12 +66,9 @@ export default factories.createCoreController(
 
     async getUserLikes(ctx) {
       try {
-        // Get user from context (set by authentication middleware)
-        const user = ctx.state.user;
-
-        if (!user) {
-          return ctx.unauthorized("Authentication required");
-        }
+        // Resolve legacy local-user id from plugin user
+        const pluginUserId = ctx.state.user?.id;
+        if (!pluginUserId) return ctx.unauthorized("Authentication required");
 
         // Query parameters for pagination
         const { page = 1, pageSize = 25 } = ctx.query;
@@ -93,7 +79,7 @@ export default factories.createCoreController(
         const [productLikes, count] = await Promise.all([
           strapi.db.query("api::product-like.product-like").findMany({
             where: {
-              user: user.id,
+              user: pluginUserId,
             },
             populate: {
               product: {
@@ -117,7 +103,7 @@ export default factories.createCoreController(
           }),
           strapi.db.query("api::product-like.product-like").count({
             where: {
-              user: user.id,
+              user: pluginUserId,
             },
           }),
         ]);

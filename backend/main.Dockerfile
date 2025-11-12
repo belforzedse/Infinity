@@ -2,14 +2,20 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-#RUN apk add git
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
 
-COPY package.json package-lock.json ./
-
-RUN yarn install --ignore-engines
-#:3
 COPY . .
+RUN npm run build
 
-RUN yarn build
+FROM node:20-alpine AS runner
 
-ENTRYPOINT ["yarn", "start:prod"]
+WORKDIR /app
+ENV NODE_ENV=production \
+    STRAPI_TELEMETRY_DISABLED=true
+
+COPY --from=builder /app /app
+RUN npm prune --omit=dev
+
+EXPOSE 1337
+CMD ["npm", "run", "start:prod"]

@@ -26,8 +26,6 @@ export default {
       handler: "auth.self",
       config: {
         auth: false,
-        policies: [],
-        middlewares: ["global::authentication"],
       },
     },
     {
@@ -46,8 +44,6 @@ export default {
       handler: "auth.registerInfo",
       config: {
         auth: false,
-        policies: [],
-        middlewares: ["global::authentication"],
       },
     },
     {

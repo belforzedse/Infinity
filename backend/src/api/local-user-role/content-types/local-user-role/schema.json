@@ -19,7 +19,7 @@
     "users": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::local-user.local-user",
+      "target": "plugin::users-permissions.user",
       "mappedBy": "user_role"
     },
     "user_permissions": {

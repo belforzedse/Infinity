@@ -18,7 +18,7 @@ export default () => ({
           "api::discount.discount",
           "api::footer.footer",
           "api::general-discount.general-discount",
-          "api::local-user.local-user",
+
           "api::local-user-address.local-user-address",
           "api::local-user-info.local-user-info",
           "api::local-user-permission.local-user-permission",
