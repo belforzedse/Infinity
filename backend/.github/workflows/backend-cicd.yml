@@ -77,6 +77,9 @@ jobs:
             cat <<'EOF' > main.env
             ${{ secrets.PROD_BACKEND_ENV_FILE }}
             EOF
+            set -a
+            . ./main.env
+            set +a
             export IMAGE_TAG=main
             export ENV_FILE=main.env
             docker compose pull
@@ -111,6 +114,9 @@ jobs:
             cat <<'EOF' > dev.env
             ${{ secrets.STAGING_BACKEND_ENV_FILE }}
             EOF
+            set -a
+            . ./dev.env
+            set +a
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
             docker compose pull
@@ -145,6 +151,9 @@ jobs:
             cat <<'EOF' > main.env
             ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
             EOF
+            set -a
+            . ./main.env
+            set +a
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env
             docker compose pull
