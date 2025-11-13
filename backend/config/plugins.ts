@@ -6,7 +6,7 @@ export default () => ({
         getTimeout: 100,
         options: {
           max: 100000,
-          maxAge: 30 * 1000, // 30 seconds
+          maxAge: 30 * 10 * 1000, // 30 seconds
         },
       },
       strategy: {
@@ -49,6 +49,15 @@ export default () => ({
           "api::shipping-city.shipping-city",
           "api::shipping-province.shipping-province",
         ],
+      },
+    },
+  },
+  upload: {
+    config: {
+      providerOptions: {
+        local: {
+          sizeLimit: 0,
+        },
       },
     },
   },
