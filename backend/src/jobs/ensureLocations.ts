@@ -6,18 +6,38 @@ type CityPayload = { province: string; cities: string[] };
 
 export async function ensureIranLocations(strapi: Strapi) {
   try {
+    const forceReseed = process.env.FORCE_RESEED === "true";
     const provinceCount = await strapi.db.query("api::shipping-province.shipping-province").count();
     const cityCount = await strapi.db.query("api::shipping-city.shipping-city").count();
-    if (provinceCount > 0 && cityCount > 0) {
-      strapi.log.info("Iran locations already seeded (provinces=%s cities=%s)", provinceCount, cityCount);
+
+    if (!forceReseed && provinceCount > 0 && cityCount > 0) {
+      strapi.log.info(
+        "✓ Iran locations already seeded (provinces=%d cities=%d). Set FORCE_RESEED=true to re-seed.",
+        provinceCount,
+        cityCount,
+      );
       return;
     }
 
-    const jsonPath = path.resolve(strapi.dirs.app.root, "database/iran-cities.json");
-    const sqlPath = path.resolve(
-      strapi.dirs.app.root,
-      "database/iran_cities (for api document) (2).sql",
-    );
+    if (forceReseed && (provinceCount > 0 || cityCount > 0)) {
+      strapi.log.info(
+        "⟳ FORCE_RESEED enabled. Clearing existing data (provinces=%d cities=%d)...",
+        provinceCount,
+        cityCount,
+      );
+      // Clear existing data for re-seeding
+      await strapi.db.query("api::shipping-city.shipping-city").deleteMany();
+      await strapi.db.query("api::shipping-province.shipping-province").deleteMany();
+      strapi.log.info("✓ Cleared existing provinces and cities");
+    }
+
+    const appRoot = strapi.dirs.app.root;
+    const jsonPath = path.resolve(appRoot, "database/iran-cities.json");
+    const sqlPath = path.resolve(appRoot, "database/iran_cities (for api document) (2).sql");
+
+    strapi.log.info("🔍 Checking for seed files...");
+    strapi.log.debug("  JSON path: %s", jsonPath);
+    strapi.log.debug("  SQL path: %s", sqlPath);
 
     const [jsonExists, sqlExists] = await Promise.all([
       fs
@@ -29,14 +49,18 @@ export async function ensureIranLocations(strapi: Strapi) {
         .then(() => true)
         .catch(() => false),
     ]);
+
     if (!jsonExists || !sqlExists) {
-      strapi.log.warn(
-        "Iran locations bootstrap skipped (json: %s, sql: %s)",
-        jsonExists ? "found" : "missing",
-        sqlExists ? "found" : "missing",
+      strapi.log.error(
+        "✗ Iran locations bootstrap FAILED - missing files (json: %s, sql: %s). App root: %s",
+        jsonExists ? "✓ found" : "✗ MISSING",
+        sqlExists ? "✓ found" : "✗ MISSING",
+        appRoot,
       );
       return;
     }
+
+    strapi.log.info("✓ Found seed files, starting import...");
 
     const raw = await fs.readFile(jsonPath, "utf8");
     const payload: CityPayload[] = JSON.parse(raw);
@@ -97,8 +121,13 @@ export async function ensureIranLocations(strapi: Strapi) {
       }
     }
 
-    strapi.log.info("Seeded Iranian provinces (%s) and cities (%s)", provinceIdMap.size, await strapi.db.query("api::shipping-city.shipping-city").count());
+    const finalCityCount = await strapi.db.query("api::shipping-city.shipping-city").count();
+    strapi.log.info(
+      "✓ SEEDING COMPLETE: Added provinces (%d) and cities (%d)",
+      provinceIdMap.size,
+      finalCityCount,
+    );
   } catch (error) {
-    strapi.log.error("Failed seeding Iran locations", error);
+    strapi.log.error("✗ SEEDING FAILED: Iran locations bootstrap error:", error);
   }
 }
