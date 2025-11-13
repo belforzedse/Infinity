@@ -9,6 +9,7 @@ import { GENDER_OPTIONS } from "./constants";
 import useUser from "@/hooks/useUser";
 import { updateProfile } from "@/services/user/updateProfile";
 import { toast } from "react-hot-toast";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 interface AccountFormData {
   firstName: string;
@@ -64,9 +65,11 @@ export default function AccountForm() {
       await refetch();
 
       toast.success("اطلاعات حساب کاربری با موفقیت بروزرسانی شد");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast.error("خطا در بروزرسانی اطلاعات");
+      const rawErrorMessage = extractErrorMessage(error);
+      const message = translateErrorMessage(rawErrorMessage, "خطا در بروزرسانی اطلاعات");
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -151,9 +154,6 @@ export default function AccountForm() {
             name="phone"
             type="tel"
             value={formData.phone}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleInputChange("phone", e.target.value)
-            }
             placeholder="09122034113"
             dir="ltr"
             disabled={true}

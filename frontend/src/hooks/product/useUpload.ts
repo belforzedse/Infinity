@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { uploadFile } from "@/services/super-admin/files/upload";
 import { useEffect } from "react"; // removed unused: useState
 import logger from "@/utils/logger";
@@ -100,6 +101,23 @@ export function useUpload({
     return "/file-icon.png";
   };
 
+  const optimizeImage = async (file: File): Promise<File> => {
+    try {
+      const optimized = await imageCompression(file, {
+        maxSizeMB: 256,
+        maxWidthOrHeight: 10920,
+        useWebWorker: true,
+        fileType: file.type,
+      });
+      return optimized;
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Image optimization failed, uploading original file", error);
+      }
+      return file;
+    }
+  };
+
   // TODO: Revoke object URLs on unmount to avoid memory leaks
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: FileType) => {
@@ -115,9 +133,19 @@ export function useUpload({
     try {
       for (const file of newFiles) {
         try {
-          const fileType = getFileType(file); // FIXME: Shadows outer fileType parameter
+          const currentFileType = getFileType(file);
           const previewUrl = createPreview(file);
-          const response = await uploadFile(file);
+          let uploadSource: File = file;
+
+          if (currentFileType === "image") {
+            const optimizedBlob = await optimizeImage(file);
+            // Preserve original filename when uploading optimized images
+            uploadSource = new File([optimizedBlob], file.name, {
+              type: optimizedBlob.type,
+            });
+          }
+
+          const response = await uploadFile(uploadSource);
 
           if (response) {
             // Update Media or Files array in productData based on file type
@@ -125,7 +153,7 @@ export function useUpload({
               logger.info("response", { response });
             }
 
-            if (fileType === "image" || fileType === "video") {
+            if (currentFileType === "image" || currentFileType === "video") {
               setProductData((prev: any) => ({
                 // TODO: Replace `any` usage with ProductData type
                 ...prev,
@@ -155,7 +183,7 @@ export function useUpload({
             };
 
             // Sort files by type into appropriate arrays
-            switch (fileType) {
+            switch (currentFileType) {
               case "image":
                 successfulImages.push(fileWithPreview);
                 break;

@@ -5,6 +5,7 @@ import { config } from "./config";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/services";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 export type CouponRule = {
   id: number;
@@ -57,8 +58,10 @@ export default function Page() {
 
           toast.success("قانون تخفیف با موفقیت ثبت شد");
           router.push("/super-admin/coupons/rules");
-        } catch {
-          toast.error("خطایی رخ داده است");
+        } catch (error: any) {
+          const rawErrorMessage = extractErrorMessage(error);
+          const message = translateErrorMessage(rawErrorMessage, "خطا در ثبت قانون تخفیف");
+          toast.error(message);
         }
       }}
     />
