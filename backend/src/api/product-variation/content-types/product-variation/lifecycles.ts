@@ -1,3 +1,5 @@
+import { resolveAuditActor } from "../../../../utils/audit";
+
 type AuditAction = "Create" | "Update" | "Delete";
 
 function diffChanges(
@@ -30,12 +32,17 @@ export default {
   async afterCreate(event) {
     const { result } = event;
     if (!result?.id) return;
+    const actor = resolveAuditActor(event as any);
 
     await strapi.entityService.create(
       "api::product-variation-log.product-variation-log" as any,
       {
         data: {
           product_variation: result.id,
+          performed_by: actor.userId,
+          PerformedBy: actor.label || undefined,
+          IP: actor.ip || undefined,
+          UserAgent: actor.userAgent || undefined,
           Action: "Create" as AuditAction,
           Description: "Product variation created",
         },
@@ -71,6 +78,7 @@ export default {
   async afterUpdate(event) {
     const { result, state } = event as any;
     if (!result?.id) return;
+    const actor = resolveAuditActor(event as any);
 
     const previous = state?.previousProductVariation || {};
     const current = await strapi.entityService.findOne(
@@ -95,6 +103,10 @@ export default {
       {
         data: {
           product_variation: result.id,
+          performed_by: actor.userId,
+          PerformedBy: actor.label || undefined,
+          IP: actor.ip || undefined,
+          UserAgent: actor.userAgent || undefined,
           Action: "Update" as AuditAction,
           Changes: changes,
           Description: "Product variation updated",
@@ -113,12 +125,17 @@ export default {
   async afterDelete(event) {
     const id = (event as any)?.state?.deletingProductVariationId;
     if (!id) return;
+    const actor = resolveAuditActor(event as any);
 
     await strapi.entityService.create(
       "api::product-variation-log.product-variation-log" as any,
       {
         data: {
           product_variation: id,
+          performed_by: actor.userId,
+          PerformedBy: actor.label || undefined,
+          IP: actor.ip || undefined,
+          UserAgent: actor.userAgent || undefined,
           Action: "Delete" as AuditAction,
           Description: "Product variation deleted",
         },
