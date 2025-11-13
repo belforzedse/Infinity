@@ -52,6 +52,32 @@ function resolveNameFilterOption(optionValue, disableFlag = false) {
   return parsed;
 }
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+function normalizeDateOption(optionValue, label, boundary) {
+  if (optionValue === undefined || optionValue === null || optionValue === '') {
+    return undefined;
+  }
+
+  const raw = String(optionValue).trim();
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid ${label} value: ${optionValue}`);
+  }
+
+  const isDateOnly = DATE_ONLY_REGEX.test(raw);
+  let timestamp = parsed.getTime();
+
+  if (isDateOnly && boundary === 'after') {
+    timestamp += ONE_DAY_MS;
+  } else if (isDateOnly && boundary === 'before') {
+    timestamp += ONE_DAY_MS - 1;
+  }
+
+  return new Date(timestamp).toISOString();
+}
+
 program
   .name('woocommerce-importer')
   .description('Import data from WooCommerce to Strapi')
@@ -88,6 +114,8 @@ program
   .option('-c, --categories <ids...>', 'Comma-separated WooCommerce category IDs to filter (e.g., "5,12,18")', '')
   .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match product names (use "all" to disable)', '')
   .option('--disable-name-filter', 'Import every product regardless of کیف/کفش keywords', false)
+  .option('--created-after <timestamp>', 'Only import products created after this date/time (ISO 8601)')
+  .option('--created-before <timestamp>', 'Only import products created before this date/time (ISO 8601)')
   .option('--all', 'Import all products (ignores limit)', false)
   .option('--dry-run', 'Run without actually importing data', false)
   .action(async (options) => {
@@ -121,13 +149,33 @@ program
         options.disableNameFilter
       );
 
+      let createdAfterIso;
+      let createdBeforeIso;
+      try {
+        createdAfterIso = normalizeDateOption(options.createdAfter, '--created-after', 'after');
+        createdBeforeIso = normalizeDateOption(options.createdBefore, '--created-before', 'before');
+
+        if (
+          createdAfterIso &&
+          createdBeforeIso &&
+          new Date(createdAfterIso) > new Date(createdBeforeIso)
+        ) {
+          throw new Error('--created-after date must be before --created-before date');
+        }
+      } catch (error) {
+        logger.error(error.message);
+        process.exit(1);
+      }
+
       const importer = new ProductImporter(config, logger);
       await importer.import({
         limit: options.all ? 999999 : parseInt(options.limit),
         page: parseInt(options.page),
         dryRun: options.dryRun,
         categoryIds: categoryIds,
-        nameFilter: resolvedNameFilter ?? undefined
+        nameFilter: resolvedNameFilter ?? undefined,
+        createdAfter: createdAfterIso,
+        createdBefore: createdBeforeIso
       });
       logger.success('✅ Product import completed!');
     } catch (error) {

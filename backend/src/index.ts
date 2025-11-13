@@ -148,6 +148,10 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
   superadmin: { mode: "all" },
 };
 
+const STORE_MANAGER_DENIED_CONTROLLERS = [
+  { typeKey: "api::report", controller: "report" },
+];
+
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
   return spec.mode === "all";
 }
@@ -238,12 +242,36 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
   }
 
   if (isFullAccessSpec(spec)) {
-    return usersPermissionsService.getActions({ defaultEnable: true });
+    const tree = usersPermissionsService.getActions({ defaultEnable: true });
+    if (roleType === "store-manager") {
+      disableControllers(tree, STORE_MANAGER_DENIED_CONTROLLERS, strapi);
+    }
+    return tree;
   }
 
   const tree = usersPermissionsService.getActions({ defaultEnable: false });
   applySpecRecursive(tree, strapi, roleType);
   return tree;
+}
+
+function disableControllers(
+  tree: Record<string, any>,
+  entries: Array<{ typeKey: string; controller: string }>,
+  strapi: Strapi,
+) {
+  entries.forEach(({ typeKey, controller }) => {
+    const controllerEntry = tree[typeKey]?.controllers?.[controller];
+    if (!controllerEntry) {
+      strapi.log.warn(
+        `Permission restriction skipped unknown controller: ${typeKey}.${controller}`,
+      );
+      return;
+    }
+
+    Object.values(controllerEntry).forEach((action: any) => {
+      action.enabled = false;
+    });
+  });
 }
 
 async function assignRolePermissions(strapi: Strapi, role: { id: number; name: string; type?: string | null }) {

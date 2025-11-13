@@ -135,12 +135,28 @@ class WooCommerceClient extends BaseApiClient {
   /**
    * Get products with pagination and optional category filtering
    */
-  async getProducts(page = 1, perPage = 20, categoryId = null) {
+  async getProducts(page = 1, perPage = 20, categoryId = null, filters = {}) {
     const params = { page, per_page: perPage, orderby: 'id', order: 'asc' };
 
     // Add category filter if specified
     if (categoryId) {
       params.category = categoryId;
+    }
+
+    if (filters.createdAfter) {
+      params.after = filters.createdAfter;
+    }
+
+    if (filters.createdBefore) {
+      params.before = filters.createdBefore;
+    }
+
+    if (filters.modifiedAfter) {
+      params.modified_after = filters.modifiedAfter;
+    }
+
+    if (filters.modifiedBefore) {
+      params.modified_before = filters.modifiedBefore;
     }
 
     const response = await this.retryRequest(() =>
