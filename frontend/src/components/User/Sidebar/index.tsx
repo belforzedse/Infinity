@@ -1,22 +1,15 @@
 "use client";
 import SidebarItem from "./SidebarItem";
 import { USER_SIDEBAR_ITEMS, LOGOUT_ITEM } from "@/components/User/Constnats";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import { performLogout } from "@/utils/logout";
 
 const UserSidebar = () => {
-  const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleLogout = () => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-      }
-    } finally {
-      router.replace("/auth");
-    }
+    performLogout();
   };
 
   // const confirmAndLogout = () => {

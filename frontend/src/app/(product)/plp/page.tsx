@@ -1,4 +1,4 @@
-export const revalidate = 60; // refresh product listing every minute
+export const revalidate = 30; // refresh product listing every 30 seconds
 
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";

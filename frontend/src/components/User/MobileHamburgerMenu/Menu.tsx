@@ -5,7 +5,7 @@ import { USER_SIDEBAR_ITEMS, LOGOUT_ITEM } from "@/components/User/Constnats";
 import SidebarItem from "@/components/User/Sidebar/SidebarItem";
 import XIcon from "../Icons/XIcon";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
-import { useRouter } from "next/navigation";
+import { performLogout } from "@/utils/logout";
 
 interface Props {
   isOpen: boolean;
@@ -13,19 +13,12 @@ interface Props {
 }
 
 const Menu = ({ isOpen, onClose }: Props) => {
-  const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleLogout = () => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-      }
-    } finally {
-      setShowConfirm(false);
-      onClose();
-      router.replace("/auth");
-    }
+    setShowConfirm(false);
+    onClose();
+    performLogout();
   };
 
   const openConfirm = () => setShowConfirm(true);

@@ -86,9 +86,9 @@ const superAdminSidebar: SidebarItem[] = [
         href: "/super-admin/products/comments",
       },
       {
-        id: "product-size-guide",
-        label: "راهنمای اندازه",
-        href: "/super-admin/products/size-guide",
+        id: "product-colors",
+        label: "مدیریت رنگ‌ها",
+        href: "/super-admin/products/colors",
       },
     ],
   },

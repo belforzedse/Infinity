@@ -3,6 +3,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
+import { HexColorPicker, HexColorInput } from "react-colorful";
 
 interface Feature {
   id: string;
@@ -74,20 +75,51 @@ interface FeaturesTableProps {
 
 const COLOR_PALETTE = [
   "#000000",
-  "#2f3640",
+  "#1f2937",
+  "#374151",
+  "#4b5563",
+  "#6b7280",
+  "#94a3b8",
+  "#cbd5f5",
   "#ffffff",
   "#f5f5f5",
-  "#f39c12",
-  "#e74c3c",
-  "#8e44ad",
-  "#2980b9",
-  "#16a085",
-  "#27ae60",
-  "#c0392b",
-  "#d35400",
-  "#7f8c8d",
-  "#bdc3c7",
-  "#34495e",
+  "#e5e7eb",
+  "#991b1b",
+  "#dc2626",
+  "#f87171",
+  "#fee2e2",
+  "#f97316",
+  "#fb923c",
+  "#fed7aa",
+  "#fef3c7",
+  "#facc15",
+  "#a16207",
+  "#ca8a04",
+  "#84cc16",
+  "#22c55e",
+  "#16a34a",
+  "#0d9488",
+  "#14b8a6",
+  "#2dd4bf",
+  "#06b6d4",
+  "#0ea5e9",
+  "#2563eb",
+  "#1d4ed8",
+  "#3b82f6",
+  "#60a5fa",
+  "#818cf8",
+  "#a855f7",
+  "#d946ef",
+  "#ec4899",
+  "#f472b6",
+  "#f9a8d4",
+  "#fda4af",
+  "#fb7185",
+  "#f43f5e",
+  "#be185d",
+  "#831843",
+  "#475569",
+  "#334155",
 ];
 
 const ATTRIBUTE_ENDPOINTS = {
@@ -191,6 +223,17 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       ...prev,
       isOpen: false,
     }));
+
+  const handleColorChange = (value: string) => {
+    if (!value) {
+      return;
+    }
+    const normalized = value.startsWith("#") ? value : `#${value}`;
+    setColorModal((prev) => ({
+      ...prev,
+      colorCode: normalized.toLowerCase(),
+    }));
+  };
 
   const handleSaveColor = async () => {
     if (!colorModal.name.trim()) {
@@ -739,51 +782,56 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-neutral-600">کد رنگ</label>
-                      <div className="mt-2 flex items-center gap-3">
-                        <input
-                          type="color"
-                          value={colorModal.colorCode}
-                          onChange={(e) =>
-                            setColorModal((prev) => ({
-                              ...prev,
-                              colorCode: e.target.value,
-                            }))
-                          }
-                          className="h-10 w-16 cursor-pointer rounded border border-slate-200 bg-white"
-                        />
-                        <input
-                          type="text"
-                          value={colorModal.colorCode.toUpperCase()}
-                          onChange={(e) =>
-                            setColorModal((prev) => ({
-                              ...prev,
-                              colorCode: e.target.value,
-                            }))
-                          }
-                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
-                        />
+                      <label className="text-sm text-neutral-600">انتخاب رنگ</label>
+                      <div className="mt-3 flex flex-col gap-4 md:flex-row">
+                        <div className="flex-1">
+                          <HexColorPicker color={colorModal.colorCode} onChange={handleColorChange} />
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <span className="text-xs text-neutral-500">کد HEX</span>
+                            <HexColorInput
+                              prefixed
+                              color={colorModal.colorCode}
+                              onChange={handleColorChange}
+                              aria-label="کد رنگ"
+                              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <span
+                              className="h-10 w-10 rounded-lg border border-slate-200"
+                              style={{ backgroundColor: colorModal.colorCode }}
+                              aria-hidden="true"
+                            />
+                            <div className="text-xs text-neutral-500">
+                              <p className="font-medium text-neutral-700">نمونه رنگ انتخابی</p>
+                              <p>{colorModal.colorCode.toUpperCase()}</p>
+                            </div>
+                          </div>
+                          <p className="text-xs text-neutral-500">
+                            می‌توانید کد رنگ را بچسبانید یا از انتخاب‌گر برای پیدا کردن دقیق‌ترین طیف استفاده کنید.
+                          </p>
+                        </div>
                       </div>
-                      <div className="mt-3 grid grid-cols-5 gap-2">
-                        {COLOR_PALETTE.map((color) => (
-                          <button
-                            type="button"
-                            key={color}
-                            onClick={() =>
-                              setColorModal((prev) => ({
-                                ...prev,
-                                colorCode: color,
-                              }))
-                            }
-                            className={`h-10 w-full rounded-lg border ${
-                              colorModal.colorCode.toLowerCase() === color.toLowerCase()
-                                ? "border-blue-500 ring-2 ring-blue-200"
-                                : "border-slate-200"
-                            }`}
-                            style={{ backgroundColor: color }}
-                            aria-label={`انتخاب رنگ ${color}`}
-                          />
-                        ))}
+                      <div className="mt-4">
+                        <p className="text-xs font-medium text-neutral-600">رنگ‌های پر استفاده</p>
+                        <div className="mt-2 grid grid-cols-5 gap-2">
+                          {COLOR_PALETTE.map((color) => (
+                            <button
+                              type="button"
+                              key={color}
+                              onClick={() => handleColorChange(color)}
+                              className={`h-10 w-full rounded-lg border ${
+                                colorModal.colorCode.toLowerCase() === color.toLowerCase()
+                                  ? "border-blue-500 ring-2 ring-blue-200"
+                                  : "border-slate-200"
+                              }`}
+                              style={{ backgroundColor: color }}
+                              aria-label={`انتخاب رنگ ${color}`}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>

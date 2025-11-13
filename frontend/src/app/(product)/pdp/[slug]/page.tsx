@@ -1,4 +1,4 @@
-export const revalidate = 60; // refresh PDP data every minute
+export const revalidate = 30; // refresh PDP data every 30 seconds
 
 import Breadcrumb from "@/components/Kits/Breadcrumb";
 import Hero from "@/components/PDP/Hero";
