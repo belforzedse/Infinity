@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
-const DuplicateTracker = require('../utils/DuplicateTracker');
+const fs = require("fs");
+const path = require("path");
+const { WooCommerceClient, StrapiClient } = require("../utils/ApiClient");
+const DuplicateTracker = require("../utils/DuplicateTracker");
 
-const DEFAULT_NAME_FILTER_KEYWORDS = ['اسلیپر', 'ونس', 'کیف', 'کفش', 'کتونی', 'صندل'];
+const DEFAULT_NAME_FILTER_KEYWORDS = ["اسلیپر", "ونس", "کیف", "کفش", "کتونی", "صندل"];
 
 /**
  * Variation Importer - Handles importing WooCommerce product variations to Strapi
@@ -37,7 +37,7 @@ class VariationImporter {
       variationsUpdated: 0,
       stocksCreated: 0,
       stocksUpdated: 0,
-      attributesCreated: 0
+      attributesCreated: 0,
     };
 
     // Caches for faster lookups
@@ -52,8 +52,8 @@ class VariationImporter {
       return true;
     }
 
-    const name = (productName || '').toLowerCase();
-    return nameFilter.some((keyword) => name.includes((keyword || '').toLowerCase()));
+    const name = (productName || "").toLowerCase();
+    return nameFilter.some((keyword) => name.includes((keyword || "").toLowerCase()));
   }
 
   /**
@@ -81,17 +81,17 @@ class VariationImporter {
 
     this.stats.startTime = Date.now();
     this.logger.info(
-      `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported}, force: ${force})`
+      `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported}, force: ${force})`,
     );
     if (effectiveNameFilter.length > 0) {
       this.logger.info(
-        `🎯 Filtering parent products by keywords: [${effectiveNameFilter.join(', ')}]`
+        `🎯 Filtering parent products by keywords: [${effectiveNameFilter.join(", ")}]`,
       );
     } else {
       this.logger.info(`🎯 Parent product name filter disabled (importing all variable products)`);
     }
     this.logger.warn(
-      `⚠️  NOTE: Running concurrent import sessions may cause cache staleness. Run imports sequentially for best results.`
+      `⚠️  NOTE: Running concurrent import sessions may cause cache staleness. Run imports sequentially for best results.`,
     );
 
     try {
@@ -99,17 +99,21 @@ class VariationImporter {
       this.lastCacheRefreshTime = Date.now();
 
       // If force flag is set, ignore progress state and start from page 1
-      const progressState = force ? { lastCompletedPage: 0, totalProcessed: 0 } : this.loadProgressState();
+      const progressState = force
+        ? { lastCompletedPage: 0, totalProcessed: 0 }
+        : this.loadProgressState();
 
       if (force && (progressState.lastCompletedPage > 0 || progressState.totalProcessed > 0)) {
-        this.logger.warn(`⚠️ FORCE MODE: Ignoring previous progress state (was at page ${progressState.lastCompletedPage}, ${progressState.totalProcessed} processed)`);
+        this.logger.warn(
+          `⚠️ FORCE MODE: Ignoring previous progress state (was at page ${progressState.lastCompletedPage}, ${progressState.totalProcessed} processed)`,
+        );
       }
 
       let currentPage = Math.max(page, (progressState.lastCompletedPage || 0) + 1);
       let totalProcessed = progressState.totalProcessed || 0;
 
       this.logger.info(
-        `📊 Resuming from page ${currentPage} (${totalProcessed} variations already processed)`
+        `📊 Resuming from page ${currentPage} (${totalProcessed} variations already processed)`,
       );
 
       const productBatchSize = this.config.import.batchSizes.products || 50;
@@ -124,7 +128,9 @@ class VariationImporter {
         const cacheAge = Date.now() - this.lastCacheRefreshTime;
         const CACHE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
         if (cacheAge > CACHE_REFRESH_INTERVAL) {
-          this.logger.info(`🔄 Refreshing mapping caches (last refresh: ${Math.round(cacheAge / 1000)}s ago)`);
+          this.logger.info(
+            `🔄 Refreshing mapping caches (last refresh: ${Math.round(cacheAge / 1000)}s ago)`,
+          );
           await this.loadMappingCaches();
           this.lastCacheRefreshTime = Date.now();
         }
@@ -132,9 +138,7 @@ class VariationImporter {
         const remainingLimit = limit - processedInThisSession;
         const perPage = Math.min(productBatchSize, remainingLimit);
 
-        this.logger.info(
-          `📂 Processing product page ${currentPage} (requesting ${perPage} items)`
-        );
+        this.logger.info(`📂 Processing product page ${currentPage} (requesting ${perPage} items)`);
 
         const result = await this.wooClient.getProducts(currentPage, perPage);
 
@@ -146,19 +150,21 @@ class VariationImporter {
 
         let variableProducts = result.data.filter(
           (product) =>
-            product.type === 'variable' &&
+            product.type === "variable" &&
             Array.isArray(product.variations) &&
-            product.variations.length > 0
+            product.variations.length > 0,
         );
 
         if (effectiveNameFilter.length > 0) {
           const beforeFilterCount = variableProducts.length;
           variableProducts = variableProducts.filter((product) =>
-            this.shouldImportParentProduct(product?.name, effectiveNameFilter)
+            this.shouldImportParentProduct(product?.name, effectiveNameFilter),
           );
           if (beforeFilterCount !== variableProducts.length) {
             this.logger.debug(
-              `🎯 Filtered ${beforeFilterCount - variableProducts.length} parent products that did not match the name keywords`
+              `🎯 Filtered ${
+                beforeFilterCount - variableProducts.length
+              } parent products that did not match the name keywords`,
             );
           }
         }
@@ -166,19 +172,21 @@ class VariationImporter {
         if (onlyImported) {
           const originalCount = variableProducts.length;
           variableProducts = variableProducts.filter((product) =>
-            this.productMappingCache.has(product.id)
+            this.productMappingCache.has(product.id),
           );
 
           if (originalCount !== variableProducts.length) {
             this.logger.debug(
-              `🔍 Filtered ${originalCount - variableProducts.length} products without imported parents`
+              `🔍 Filtered ${
+                originalCount - variableProducts.length
+              } products without imported parents`,
             );
           }
         }
 
         if (variableProducts.length === 0) {
           this.logger.debug(
-            `📂 No variable products with variations found on page ${currentPage}, skipping`
+            `📂 No variable products with variations found on page ${currentPage}, skipping`,
           );
           currentPage += 1;
           continue;
@@ -187,14 +195,16 @@ class VariationImporter {
         for (const product of variableProducts) {
           if (logParentNames && !dryRun) {
             this.logger.info(
-              `🧵 Importing variations for parent product: ${product.name || 'Untitled Product'} (Woo ID: ${product.id})`
+              `🧵 Importing variations for parent product: ${
+                product.name || "Untitled Product"
+              } (Woo ID: ${product.id})`,
             );
           }
           const parentStrapiId = this.productMappingCache.get(product.id);
 
           if (!parentStrapiId) {
             this.logger.warn(
-              `⚠️ Skipping variations for product ${product.id} (${product.name}) - parent not imported yet`
+              `⚠️ Skipping variations for product ${product.id} (${product.name}) - parent not imported yet`,
             );
             this.stats.skipped += product.variations.length;
             continue;
@@ -210,7 +220,7 @@ class VariationImporter {
             const variationResult = await this.wooClient.getProductVariations(
               product.id,
               variationPage,
-              perVariationPage
+              perVariationPage,
             );
 
             if (!Array.isArray(variationResult.data) || variationResult.data.length === 0) {
@@ -231,19 +241,19 @@ class VariationImporter {
                 this.saveProgressState({
                   lastCompletedPage: currentPage - 1, // Mark previous page as complete, not current
                   totalProcessed,
-                  lastProcessedAt: new Date().toISOString()
+                  lastProcessedAt: new Date().toISOString(),
                 });
 
                 if (totalProcessed % this.config.logging.progressInterval === 0) {
                   this.logger.info(
-                    `📈 Progress: ${totalProcessed} variations processed, current page: ${currentPage}`
+                    `📈 Progress: ${totalProcessed} variations processed, current page: ${currentPage}`,
                   );
                 }
               } catch (error) {
                 this.stats.errors += 1;
                 this.logger.error(
                   `❌ Failed to import variation ${variation.id}:`,
-                  error.message || error
+                  error.message || error,
                 );
 
                 if (!this.config.errorHandling.continueOnError) {
@@ -261,7 +271,7 @@ class VariationImporter {
             }
 
             variationPage += 1;
-            const totalVariationPages = Number.parseInt(variationResult.totalPages || '1', 10);
+            const totalVariationPages = Number.parseInt(variationResult.totalPages || "1", 10);
             if (variationPage > totalVariationPages) {
               hasMoreVariations = false;
             }
@@ -273,18 +283,18 @@ class VariationImporter {
         }
 
         this.logger.success(
-          `✅ Completed product page ${currentPage}: processed variations from ${variableProducts.length} products`
+          `✅ Completed product page ${currentPage}: processed variations from ${variableProducts.length} products`,
         );
 
         // NOW mark this page as fully complete (all products and variations processed)
         this.saveProgressState({
           lastCompletedPage: currentPage,
           totalProcessed,
-          lastProcessedAt: new Date().toISOString()
+          lastProcessedAt: new Date().toISOString(),
         });
 
         currentPage += 1;
-        const totalProductPages = Number.parseInt(result.totalPages || '1', 10);
+        const totalProductPages = Number.parseInt(result.totalPages || "1", 10);
         if (currentPage > totalProductPages) {
           hasMorePages = false;
         }
@@ -296,11 +306,11 @@ class VariationImporter {
       }
 
       this.logger.success(
-        `🎉 Import session completed: ${processedInThisSession} variations processed in this session`
+        `🎉 Import session completed: ${processedInThisSession} variations processed in this session`,
       );
     } catch (error) {
       this.stats.errors += 1;
-      this.logger.error('❌ Variation import failed:', error);
+      this.logger.error("❌ Variation import failed:", error);
       throw error;
     } finally {
       this.stats.endTime = Date.now();
@@ -315,9 +325,9 @@ class VariationImporter {
    * Load all mapping caches
    */
   async loadMappingCaches() {
-    this.logger.debug('📂 Loading mapping caches...');
+    this.logger.debug("📂 Loading mapping caches...");
 
-    const productMappings = this.duplicateTracker.getAllMappings('products');
+    const productMappings = this.duplicateTracker.getAllMappings("products");
     for (const [wcId, mapping] of Object.entries(productMappings)) {
       this.productMappingCache.set(parseInt(wcId, 10), mapping.strapiId);
     }
@@ -331,14 +341,14 @@ class VariationImporter {
   loadProgressState() {
     const progressFile = path.join(
       this.config.duplicateTracking.storageDir,
-      'variation-import-progress.json'
+      "variation-import-progress.json",
     );
 
     try {
       if (fs.existsSync(progressFile)) {
-        const data = JSON.parse(fs.readFileSync(progressFile, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(progressFile, "utf8"));
         this.logger.debug(
-          `📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`
+          `📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`,
         );
         return data;
       }
@@ -349,7 +359,7 @@ class VariationImporter {
     return {
       lastCompletedPage: 0,
       totalProcessed: 0,
-      lastProcessedAt: null
+      lastProcessedAt: null,
     };
   }
 
@@ -359,7 +369,7 @@ class VariationImporter {
   saveProgressState(state) {
     const progressFile = path.join(
       this.config.duplicateTracking.storageDir,
-      'variation-import-progress.json'
+      "variation-import-progress.json",
     );
 
     try {
@@ -375,7 +385,7 @@ class VariationImporter {
   resetProgressState() {
     const progressFile = path.join(
       this.config.duplicateTracking.storageDir,
-      'variation-import-progress.json'
+      "variation-import-progress.json",
     );
 
     try {
@@ -394,24 +404,21 @@ class VariationImporter {
    */
   async importSingleVariation(wcVariation, parentProductStrapiId, dryRun = false) {
     this.logger.debug(
-      `🔄 Processing variation: ${wcVariation.id} - ${wcVariation._parentProduct.name}`
+      `🔄 Processing variation: ${wcVariation.id} - ${wcVariation._parentProduct.name}`,
     );
 
-    const existingMapping = this.duplicateTracker.getStrapiId('variations', wcVariation.id);
+    const existingMapping = this.duplicateTracker.getStrapiId("variations", wcVariation.id);
     const existingStrapiId = existingMapping?.strapiId;
 
     try {
       // Validate parent product exists
-      if (!parentProductStrapiId || typeof parentProductStrapiId !== 'number') {
+      if (!parentProductStrapiId || typeof parentProductStrapiId !== "number") {
         const errorMsg = `Variation ${wcVariation.id}: Invalid parent product ID: ${parentProductStrapiId}`;
         this.logger.error(errorMsg);
         throw new Error(errorMsg);
       }
 
-      const strapiVariation = await this.transformVariation(
-        wcVariation,
-        parentProductStrapiId
-      );
+      const strapiVariation = await this.transformVariation(wcVariation, parentProductStrapiId);
 
       // Final validation of variation data
       if (!strapiVariation.SKU || !strapiVariation.Price === undefined) {
@@ -421,7 +428,7 @@ class VariationImporter {
       }
 
       if (dryRun) {
-        const mode = existingStrapiId ? 'update' : 'create';
+        const mode = existingStrapiId ? "update" : "create";
         this.logger.info(`🔍 [DRY RUN] Would ${mode} variation: ${wcVariation.id}`);
         this.stats.success += 1;
         if (existingStrapiId) {
@@ -433,12 +440,12 @@ class VariationImporter {
       await this.createVariationAttributes(wcVariation, strapiVariation);
 
       let variationId = existingStrapiId;
-      let mode = 'create';
+      let mode = "create";
 
       if (existingStrapiId) {
         await this.strapiClient.updateProductVariation(existingStrapiId, strapiVariation);
         variationId = existingStrapiId;
-        mode = 'update';
+        mode = "update";
         this.stats.variationsUpdated += 1;
         this.logger.success(`🔄 Updated variation: ${wcVariation.id} → ID: ${existingStrapiId}`);
       } else {
@@ -457,20 +464,15 @@ class VariationImporter {
         }
       }
 
-      this.duplicateTracker.recordMapping(
-        'variations',
-        wcVariation.id,
-        variationId,
-        {
-          productId: wcVariation._parentProduct.id,
-          sku: wcVariation.sku,
-          price: wcVariation.price,
-          stockQuantity: wcVariation.stock_quantity
-        }
-      );
+      this.duplicateTracker.recordMapping("variations", wcVariation.id, variationId, {
+        productId: wcVariation._parentProduct.id,
+        sku: wcVariation.sku,
+        price: wcVariation.price,
+        stockQuantity: wcVariation.stock_quantity,
+      });
 
       this.stats.success += 1;
-      if (mode === 'update') {
+      if (mode === "update") {
         this.stats.updated += 1;
       }
 
@@ -495,16 +497,19 @@ class VariationImporter {
     sku = await this.ensureUniqueSKU(sku);
 
     // Validate SKU is not empty
-    if (!sku || sku.trim() === '') {
+    if (!sku || sku.trim() === "") {
       throw new Error(`Variation ${wcVariation.id}: Could not generate a valid SKU`);
     }
 
+    const variationStatus = (wcVariation.status || "").toLowerCase();
+    const isPublished = variationStatus === "publish";
+
     const strapiVariation = {
       SKU: sku,
-      IsPublished: wcVariation.status === 'publish',
+      IsPublished: isPublished,
       external_id: wcVariation.id.toString(),
-      external_source: 'woocommerce',
-      product: parentProductStrapiId
+      external_source: "woocommerce",
+      product: parentProductStrapiId,
     };
 
     const regularPrice = parseFloat(wcVariation.regular_price || wcVariation.price || 0);
@@ -513,7 +518,7 @@ class VariationImporter {
     // Validate price is set
     if (!regularPrice || regularPrice <= 0) {
       this.logger.warn(
-        `⚠️ Variation ${wcVariation.id}: No valid price found (regular: ${wcVariation.regular_price}, price: ${wcVariation.price})`
+        `⚠️ Variation ${wcVariation.id}: No valid price found (regular: ${wcVariation.regular_price}, price: ${wcVariation.price})`,
       );
       // Still allow creation with 0 price, but log warning
       strapiVariation.Price = 0;
@@ -521,13 +526,15 @@ class VariationImporter {
       strapiVariation.Price = this.convertPrice(regularPrice);
       strapiVariation.DiscountPrice = this.convertPrice(salePrice);
       this.logger.debug(
-        `💰 Variation ${wcVariation.id}: Regular price ${regularPrice}, Discount price ${salePrice}`
+        `💰 Variation ${wcVariation.id}: Regular price ${regularPrice}, Discount price ${salePrice}`,
       );
     } else {
       strapiVariation.Price = this.convertPrice(regularPrice);
     }
 
-    this.logger.debug(`📂 Transformed variation: ${wcVariation.id} → SKU: ${sku}, Price: ${strapiVariation.Price}`);
+    this.logger.debug(
+      `📂 Transformed variation: ${wcVariation.id} → SKU: ${sku}, Price: ${strapiVariation.Price}`,
+    );
     return strapiVariation;
   }
 
@@ -540,35 +547,30 @@ class VariationImporter {
     if (Array.isArray(wcVariation.attributes)) {
       for (const attribute of wcVariation.attributes) {
         try {
-          const attributeType = this.identifyAttributeType(attribute.name || '');
+          const attributeType = this.identifyAttributeType(attribute.name || "");
           presentAttributes.add(attributeType);
 
           const strapiId = await this.createOrGetAttribute(attributeType, attribute.option);
 
           if (strapiId) {
             switch (attributeType) {
-              case 'color':
+              case "color":
                 strapiVariation.product_variation_color = strapiId;
                 break;
-              case 'size':
+              case "size":
                 strapiVariation.product_variation_size = strapiId;
                 break;
-              case 'model':
+              case "model":
                 strapiVariation.product_variation_model = strapiId;
                 break;
               default:
                 break;
             }
 
-            this.logger.debug(
-              `🔄 Linked ${attributeType}: ${attribute.option} → ID: ${strapiId}`
-            );
+            this.logger.debug(`🔄 Linked ${attributeType}: ${attribute.option} → ID: ${strapiId}`);
           }
         } catch (error) {
-          this.logger.error(
-            `❌ Failed to create attribute ${attribute.name}:`,
-            error.message
-          );
+          this.logger.error(`❌ Failed to create attribute ${attribute.name}:`, error.message);
         }
       }
     }
@@ -582,55 +584,49 @@ class VariationImporter {
   async addDefaultAttributes(strapiVariation, presentAttributes, variationId) {
     const defaultAttrs = this.config.import.defaults.variationAttributes;
 
-    if (!presentAttributes.has('color') && !strapiVariation.product_variation_color) {
+    if (!presentAttributes.has("color") && !strapiVariation.product_variation_color) {
       try {
         const defaultColorId = await this.createOrGetAttribute(
-          'color',
+          "color",
           defaultAttrs.color.title,
-          defaultAttrs.color.colorCode
+          defaultAttrs.color.colorCode,
         );
         if (defaultColorId) {
           strapiVariation.product_variation_color = defaultColorId;
           this.logger.info(
-            `🔄 Variation ${variationId}: Added default color "${defaultAttrs.color.title}" → ID: ${defaultColorId}`
+            `🔄 Variation ${variationId}: Added default color "${defaultAttrs.color.title}" → ID: ${defaultColorId}`,
           );
         }
       } catch (error) {
-        this.logger.error('❌ Failed to create default color attribute:', error.message);
+        this.logger.error("❌ Failed to create default color attribute:", error.message);
       }
     }
 
-    if (!presentAttributes.has('size') && !strapiVariation.product_variation_size) {
+    if (!presentAttributes.has("size") && !strapiVariation.product_variation_size) {
       try {
-        const defaultSizeId = await this.createOrGetAttribute(
-          'size',
-          defaultAttrs.size.title
-        );
+        const defaultSizeId = await this.createOrGetAttribute("size", defaultAttrs.size.title);
         if (defaultSizeId) {
           strapiVariation.product_variation_size = defaultSizeId;
           this.logger.info(
-            `🔍 Variation ${variationId}: Added default size "${defaultAttrs.size.title}" → ID: ${defaultSizeId}`
+            `🔍 Variation ${variationId}: Added default size "${defaultAttrs.size.title}" → ID: ${defaultSizeId}`,
           );
         }
       } catch (error) {
-        this.logger.error('❌ Failed to create default size attribute:', error.message);
+        this.logger.error("❌ Failed to create default size attribute:", error.message);
       }
     }
 
-    if (!presentAttributes.has('model') && !strapiVariation.product_variation_model) {
+    if (!presentAttributes.has("model") && !strapiVariation.product_variation_model) {
       try {
-        const defaultModelId = await this.createOrGetAttribute(
-          'model',
-          defaultAttrs.model.title
-        );
+        const defaultModelId = await this.createOrGetAttribute("model", defaultAttrs.model.title);
         if (defaultModelId) {
           strapiVariation.product_variation_model = defaultModelId;
           this.logger.info(
-            `ℹ️ Variation ${variationId}: Added default model "${defaultAttrs.model.title}" → ID: ${defaultModelId}`
+            `ℹ️ Variation ${variationId}: Added default model "${defaultAttrs.model.title}" → ID: ${defaultModelId}`,
           );
         }
       } catch (error) {
-        this.logger.error('❌ Failed to create default model attribute:', error.message);
+        this.logger.error("❌ Failed to create default model attribute:", error.message);
       }
     }
   }
@@ -639,24 +635,24 @@ class VariationImporter {
    * Identify attribute type based on name
    */
   identifyAttributeType(attributeName) {
-    const name = (attributeName || '').toLowerCase();
+    const name = (attributeName || "").toLowerCase();
 
-    if (name.includes('رنگ') || name.includes('color') || name.includes('colour')) {
-      return 'color';
+    if (name.includes("رنگ") || name.includes("color") || name.includes("colour")) {
+      return "color";
     }
 
-    if (name.includes('سایز') || name.includes('اندازه') || name.includes('size')) {
-      return 'size';
+    if (name.includes("سایز") || name.includes("اندازه") || name.includes("size")) {
+      return "size";
     }
 
-    return 'model';
+    return "model";
   }
 
   /**
    * Create or get existing attribute
    */
   async createOrGetAttribute(type, value, customColorCode = null) {
-    if (!value || value.toString().trim() === '') {
+    if (!value || value.toString().trim() === "") {
       return null;
     }
 
@@ -672,19 +668,19 @@ class VariationImporter {
       const normalizedValue = value.toString().trim();
       const attributeData = {
         Title: normalizedValue,
-        external_id: `${type}_${normalizedValue.toLowerCase().replace(/\s+/g, '_')}`,
-        external_source: 'woocommerce'
+        external_id: `${type}_${normalizedValue.toLowerCase().replace(/\s+/g, "_")}`,
+        external_source: "woocommerce",
       };
 
-      if (type === 'color') {
+      if (type === "color") {
         attributeData.ColorCode = customColorCode || this.generateColorCode(normalizedValue);
       }
 
       switch (type) {
-        case 'color':
+        case "color":
           result = await this.strapiClient.createVariationColor(attributeData);
           break;
-        case 'size':
+        case "size":
           result = await this.strapiClient.createVariationSize(attributeData);
           break;
         default:
@@ -696,15 +692,12 @@ class VariationImporter {
         cache.set(cacheKey, result.data.id);
         this.stats.attributesCreated += 1;
         this.logger.debug(
-          `✅ Created ${type} attribute: ${normalizedValue} → ID: ${result.data.id}`
+          `✅ Created ${type} attribute: ${normalizedValue} → ID: ${result.data.id}`,
         );
         return result.data.id;
       }
     } catch (error) {
-      this.logger.error(
-        `❌ Failed to create ${type} attribute "${value}":`,
-        error.message
-      );
+      this.logger.error(`❌ Failed to create ${type} attribute "${value}":`, error.message);
     }
 
     return null;
@@ -715,11 +708,11 @@ class VariationImporter {
    */
   getCacheForType(type) {
     switch (type) {
-      case 'color':
+      case "color":
         return this.colorMappingCache;
-      case 'size':
+      case "size":
         return this.sizeMappingCache;
-      case 'model':
+      case "model":
       default:
         return this.modelMappingCache;
     }
@@ -762,13 +755,13 @@ class VariationImporter {
       Count: Math.max(0, wcVariation.stock_quantity || 0),
       product_variation: variationId,
       external_id: `stock_${wcVariation.id}`,
-      external_source: 'woocommerce'
+      external_source: "woocommerce",
     };
 
     try {
       const existing = await this.strapiClient.findByExternalId(
-        '/product-stocks',
-        stockData.external_id
+        "/product-stocks",
+        stockData.external_id,
       );
       const existingItems = Array.isArray(existing?.data) ? existing.data : [];
 
@@ -776,21 +769,18 @@ class VariationImporter {
         const stockId = existingItems[0].id;
         await this.strapiClient.updateProductStock(stockId, stockData);
         this.logger.debug(
-          `🔍 Updated stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`
+          `🔍 Updated stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`,
         );
         return { updated: true, id: stockId };
       }
 
       const result = await this.strapiClient.createProductStock(stockData);
       this.logger.debug(
-        `🔍 Created stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`
+        `🔍 Created stock record: ${wcVariation.stock_quantity} units for variation ${variationId}`,
       );
       return { created: true, id: result.data.id };
     } catch (error) {
-      this.logger.error(
-        `??O Failed to sync stock for variation ${variationId}:`,
-        error.message
-      );
+      this.logger.error(`??O Failed to sync stock for variation ${variationId}:`, error.message);
       throw error;
     }
   }
@@ -815,9 +805,9 @@ class VariationImporter {
     while (!isUnique) {
       try {
         // Check if this SKU already exists in Strapi
-        const existing = await this.strapiClient.get('/product-variations', {
-          'filters[SKU][$eq]': uniqueSKU,
-          'pagination[pageSize]': 1
+        const existing = await this.strapiClient.get("/product-variations", {
+          "filters[SKU][$eq]": uniqueSKU,
+          "pagination[pageSize]": 1,
         });
 
         // If no results found, SKU is unique
@@ -847,7 +837,7 @@ class VariationImporter {
    * Convert price from IRT to internal format
    */
   convertPrice(price) {
-    if (!price || price === '0' || price === '') {
+    if (!price || price === "0" || price === "") {
       return 0;
     }
 
@@ -872,7 +862,7 @@ class VariationImporter {
 
     const trackingStats = this.duplicateTracker.getStats();
     this.logger.info(
-      `📊 Duplicate tracking: ${trackingStats.variations?.total || 0} variations tracked`
+      `📊 Duplicate tracking: ${trackingStats.variations?.total || 0} variations tracked`,
     );
   }
 
