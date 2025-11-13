@@ -4,6 +4,7 @@ import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/Content
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { createCategory, type CategoryData } from "@/services/super-admin/product/category/create";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import {
   createEmptyCategoryFormData,
   getCategoryFormConfig,
@@ -35,9 +36,11 @@ export default function AddCategoryPage() {
       await createCategory(payload);
       toast.success("دسته‌بندی با موفقیت ایجاد شد");
       router.push("/super-admin/products/categories");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create category:", error);
-      toast.error("ایجاد دسته‌بندی با خطا مواجه شد");
+      const rawErrorMessage = extractErrorMessage(error);
+      const message = translateErrorMessage(rawErrorMessage, "ایجاد دسته‌بندی با خطا مواجه شد");
+      toast.error(message);
     }
   };
 

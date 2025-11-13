@@ -4,6 +4,7 @@ import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/Content
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import {
   createEmptyCategoryFormData,
   getCategoryFormConfig,
@@ -49,9 +50,11 @@ export default function EditCategoryPage() {
             ? new Date(payload.attributes.updatedAt)
             : new Date(),
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to load category:", error);
-        toast.error("دریافت اطلاعات با خطا مواجه شد");
+        const rawErrorMessage = extractErrorMessage(error);
+        const message = translateErrorMessage(rawErrorMessage, "دریافت اطلاعات با خطا مواجه شد");
+        toast.error(message);
         router.push("/super-admin/products/categories");
       } finally {
         setIsLoading(false);
@@ -84,9 +87,11 @@ export default function EditCategoryPage() {
       await updateCategory(categoryId, payload);
       toast.success("تغییرات با موفقیت ذخیره شد");
       router.push("/super-admin/products/categories");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update category:", error);
-      toast.error("به‌روزرسانی دسته‌بندی با خطا مواجه شد");
+      const rawErrorMessage = extractErrorMessage(error);
+      const message = translateErrorMessage(rawErrorMessage, "به‌روزرسانی دسته‌بندی با خطا مواجه شد");
+      toast.error(message);
     }
   };
 

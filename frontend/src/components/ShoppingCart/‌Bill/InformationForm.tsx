@@ -16,6 +16,8 @@ import CirculeInformationIcon from "../Icons/CirculeInformationIcon";
 import UserService from "@/services/user";
 import type { UserAddress } from "@/services/user/addresses";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 interface Props {
   register: UseFormRegister<FormData>;
@@ -28,6 +30,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,9 +40,11 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
         setError(null);
         const addresses = await UserService.addresses.getAll();
         setAddresses(addresses);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch addresses:", err);
-        setError("خطا در دریافت آدرس‌ها");
+        const rawErrorMessage = extractErrorMessage(err);
+        const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت آدرس‌ها");
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -54,8 +59,11 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           setValue("fullName", `${user.FirstName} ${user.LastName}`);
           setValue("phoneNumber", user.Phone);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch user info:", err);
+        const rawErrorMessage = extractErrorMessage(err);
+        const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت اطلاعات کاربری");
+        toast.error(message);
       }
     };
 
@@ -82,20 +90,29 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           placeholder="نام و نام خانوادگی تحویل گیرنده"
           error={errors.fullName?.message?.toString()}
           label="نام و نام خانوادگی"
-          readOnly
-          className="bg-gray-50"
         />
 
-        <Input
-          {...register("phoneNumber")}
-          name="phoneNumber"
-          placeholder="شماره همراه فعال"
-          error={errors.phoneNumber?.message?.toString()}
-          pattern="^[0-9]{11}$"
-          label="شماره همراه"
-          readOnly
-          className="bg-gray-50"
-        />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-sm font-medium text-gray-700">شماره همراه</label>
+            <button
+              type="button"
+              onClick={() => setIsEditingPhone(!isEditingPhone)}
+              className="text-xs text-blue-600 hover:text-blue-700 underline"
+            >
+              {isEditingPhone ? "انصراف" : "ویرایش"}
+            </button>
+          </div>
+          <Input
+            {...register("phoneNumber")}
+            name="phoneNumber"
+            placeholder="شماره همراه فعال"
+            error={errors.phoneNumber?.message?.toString()}
+            pattern="^[0-9]{11}$"
+            disabled={!isEditingPhone}
+            maxLength={11}
+          />
+        </div>
       </div>
       <div className="relative">
         <Controller
