@@ -1,0 +1,3146 @@
+{
+  "1034922": {
+    "strapiId": 49,
+    "importedAt": "2025-11-13T17:12:45.996Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034923": {
+    "strapiId": 48,
+    "importedAt": "2025-11-13T17:12:45.762Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034924": {
+    "strapiId": 47,
+    "importedAt": "2025-11-13T17:12:45.521Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034925": {
+    "strapiId": 46,
+    "importedAt": "2025-11-13T17:12:45.285Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034926": {
+    "strapiId": 45,
+    "importedAt": "2025-11-13T17:12:45.056Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034927": {
+    "strapiId": 44,
+    "importedAt": "2025-11-13T17:12:44.812Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034928": {
+    "strapiId": 43,
+    "importedAt": "2025-11-13T17:12:44.580Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034929": {
+    "strapiId": 42,
+    "importedAt": "2025-11-13T17:12:44.231Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034930": {
+    "strapiId": 41,
+    "importedAt": "2025-11-13T17:12:43.986Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034931": {
+    "strapiId": 40,
+    "importedAt": "2025-11-13T17:12:43.712Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 3
+  },
+  "1034932": {
+    "strapiId": 39,
+    "importedAt": "2025-11-13T17:12:43.462Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034933": {
+    "strapiId": 38,
+    "importedAt": "2025-11-13T17:12:43.217Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034934": {
+    "strapiId": 37,
+    "importedAt": "2025-11-13T17:12:42.985Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034935": {
+    "strapiId": 36,
+    "importedAt": "2025-11-13T17:12:42.745Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034936": {
+    "strapiId": 35,
+    "importedAt": "2025-11-13T17:12:42.420Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034937": {
+    "strapiId": 34,
+    "importedAt": "2025-11-13T17:12:42.193Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034938": {
+    "strapiId": 33,
+    "importedAt": "2025-11-13T17:12:41.921Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034939": {
+    "strapiId": 32,
+    "importedAt": "2025-11-13T17:12:41.680Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034940": {
+    "strapiId": 31,
+    "importedAt": "2025-11-13T17:12:41.431Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034941": {
+    "strapiId": 30,
+    "importedAt": "2025-11-13T17:12:41.171Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034942": {
+    "strapiId": 29,
+    "importedAt": "2025-11-13T17:12:40.932Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034943": {
+    "strapiId": 28,
+    "importedAt": "2025-11-13T17:12:40.581Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034944": {
+    "strapiId": 27,
+    "importedAt": "2025-11-13T17:12:40.276Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034945": {
+    "strapiId": 26,
+    "importedAt": "2025-11-13T17:12:40.018Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034946": {
+    "strapiId": 25,
+    "importedAt": "2025-11-13T17:12:39.754Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034947": {
+    "strapiId": 24,
+    "importedAt": "2025-11-13T17:12:39.450Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034948": {
+    "strapiId": 23,
+    "importedAt": "2025-11-13T17:12:39.025Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034949": {
+    "strapiId": 22,
+    "importedAt": "2025-11-13T17:12:38.719Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034950": {
+    "strapiId": 21,
+    "importedAt": "2025-11-13T17:12:38.343Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034951": {
+    "strapiId": 20,
+    "importedAt": "2025-11-13T17:12:38.026Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034952": {
+    "strapiId": 19,
+    "importedAt": "2025-11-13T17:12:37.603Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034953": {
+    "strapiId": 18,
+    "importedAt": "2025-11-13T17:12:37.145Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034954": {
+    "strapiId": 17,
+    "importedAt": "2025-11-13T17:12:36.762Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 1
+  },
+  "1034955": {
+    "strapiId": 16,
+    "importedAt": "2025-11-13T17:12:36.309Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1034956": {
+    "strapiId": 15,
+    "importedAt": "2025-11-13T17:12:35.935Z",
+    "productId": 1034921,
+    "sku": "",
+    "price": "677000",
+    "stockQuantity": 0
+  },
+  "1064951": {
+    "strapiId": 51,
+    "importedAt": "2025-11-13T17:13:22.520Z",
+    "productId": 1064948,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 8
+  },
+  "1064952": {
+    "strapiId": 50,
+    "importedAt": "2025-11-13T17:13:21.985Z",
+    "productId": 1064948,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1084304": {
+    "strapiId": 55,
+    "importedAt": "2025-11-13T17:13:45.925Z",
+    "productId": 1084303,
+    "sku": "",
+    "price": "749000",
+    "stockQuantity": 0
+  },
+  "1084305": {
+    "strapiId": 54,
+    "importedAt": "2025-11-13T17:13:45.681Z",
+    "productId": 1084303,
+    "sku": "",
+    "price": "749000",
+    "stockQuantity": 0
+  },
+  "1084306": {
+    "strapiId": 53,
+    "importedAt": "2025-11-13T17:13:45.323Z",
+    "productId": 1084303,
+    "sku": "",
+    "price": "749000",
+    "stockQuantity": 1
+  },
+  "1084307": {
+    "strapiId": 52,
+    "importedAt": "2025-11-13T17:13:45.035Z",
+    "productId": 1084303,
+    "sku": "",
+    "price": "749000",
+    "stockQuantity": 1
+  },
+  "1090632": {
+    "strapiId": 63,
+    "importedAt": "2025-11-13T17:13:57.044Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 6
+  },
+  "1090633": {
+    "strapiId": 62,
+    "importedAt": "2025-11-13T17:13:56.808Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 6
+  },
+  "1090634": {
+    "strapiId": 61,
+    "importedAt": "2025-11-13T17:13:56.488Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 7
+  },
+  "1090635": {
+    "strapiId": 60,
+    "importedAt": "2025-11-13T17:13:56.238Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 5
+  },
+  "1090636": {
+    "strapiId": 59,
+    "importedAt": "2025-11-13T17:13:55.998Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 4
+  },
+  "1090637": {
+    "strapiId": 58,
+    "importedAt": "2025-11-13T17:13:55.753Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 6
+  },
+  "1090638": {
+    "strapiId": 57,
+    "importedAt": "2025-11-13T17:13:55.515Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 9
+  },
+  "1090639": {
+    "strapiId": 56,
+    "importedAt": "2025-11-13T17:13:55.152Z",
+    "productId": 1090630,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 7
+  },
+  "1092771": {
+    "strapiId": 65,
+    "importedAt": "2025-11-13T17:13:58.816Z",
+    "productId": 1092770,
+    "sku": "",
+    "price": "889000",
+    "stockQuantity": 19
+  },
+  "1092772": {
+    "strapiId": 64,
+    "importedAt": "2025-11-13T17:13:58.579Z",
+    "productId": 1092770,
+    "sku": "",
+    "price": "889000",
+    "stockQuantity": 19
+  },
+  "1095586": {
+    "strapiId": 75,
+    "importedAt": "2025-11-13T17:14:06.460Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 1
+  },
+  "1095587": {
+    "strapiId": 74,
+    "importedAt": "2025-11-13T17:14:06.166Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095588": {
+    "strapiId": 73,
+    "importedAt": "2025-11-13T17:14:05.773Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095589": {
+    "strapiId": 72,
+    "importedAt": "2025-11-13T17:14:05.025Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095590": {
+    "strapiId": 71,
+    "importedAt": "2025-11-13T17:14:04.530Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095591": {
+    "strapiId": 70,
+    "importedAt": "2025-11-13T17:14:03.836Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095592": {
+    "strapiId": 69,
+    "importedAt": "2025-11-13T17:14:03.047Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 1
+  },
+  "1095593": {
+    "strapiId": 68,
+    "importedAt": "2025-11-13T17:14:02.549Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095594": {
+    "strapiId": 67,
+    "importedAt": "2025-11-13T17:14:01.901Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1095595": {
+    "strapiId": 66,
+    "importedAt": "2025-11-13T17:14:01.642Z",
+    "productId": 1095585,
+    "sku": "",
+    "price": "623000",
+    "stockQuantity": 0
+  },
+  "1097578": {
+    "strapiId": 79,
+    "importedAt": "2025-11-13T17:14:19.919Z",
+    "productId": 1097577,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 1
+  },
+  "1097579": {
+    "strapiId": 78,
+    "importedAt": "2025-11-13T17:14:19.473Z",
+    "productId": 1097577,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 1
+  },
+  "1097580": {
+    "strapiId": 77,
+    "importedAt": "2025-11-13T17:14:18.987Z",
+    "productId": 1097577,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1097581": {
+    "strapiId": 76,
+    "importedAt": "2025-11-13T17:14:18.481Z",
+    "productId": 1097577,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1097755": {
+    "strapiId": 94,
+    "importedAt": "2025-11-13T17:14:29.524Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 0
+  },
+  "1097756": {
+    "strapiId": 93,
+    "importedAt": "2025-11-13T17:14:29.123Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 0
+  },
+  "1097757": {
+    "strapiId": 92,
+    "importedAt": "2025-11-13T17:14:28.769Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 0
+  },
+  "1097758": {
+    "strapiId": 91,
+    "importedAt": "2025-11-13T17:14:28.428Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 0
+  },
+  "1097759": {
+    "strapiId": 90,
+    "importedAt": "2025-11-13T17:14:28.084Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 0
+  },
+  "1097760": {
+    "strapiId": 89,
+    "importedAt": "2025-11-13T17:14:27.775Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 5
+  },
+  "1097761": {
+    "strapiId": 88,
+    "importedAt": "2025-11-13T17:14:27.239Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 4
+  },
+  "1097762": {
+    "strapiId": 87,
+    "importedAt": "2025-11-13T17:14:26.821Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 4
+  },
+  "1097763": {
+    "strapiId": 86,
+    "importedAt": "2025-11-13T17:14:26.111Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 4
+  },
+  "1097764": {
+    "strapiId": 85,
+    "importedAt": "2025-11-13T17:14:25.649Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 2
+  },
+  "1097765": {
+    "strapiId": 84,
+    "importedAt": "2025-11-13T17:14:24.675Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 3
+  },
+  "1097766": {
+    "strapiId": 83,
+    "importedAt": "2025-11-13T17:14:23.990Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 3
+  },
+  "1097767": {
+    "strapiId": 82,
+    "importedAt": "2025-11-13T17:14:23.485Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 4
+  },
+  "1097768": {
+    "strapiId": 81,
+    "importedAt": "2025-11-13T17:14:23.020Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 1
+  },
+  "1097769": {
+    "strapiId": 80,
+    "importedAt": "2025-11-13T17:14:22.548Z",
+    "productId": 1097747,
+    "sku": "",
+    "price": "1599000",
+    "stockQuantity": 2
+  },
+  "1097825": {
+    "strapiId": 102,
+    "importedAt": "2025-11-13T17:14:34.880Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 8
+  },
+  "1097826": {
+    "strapiId": 101,
+    "importedAt": "2025-11-13T17:14:34.616Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 6
+  },
+  "1097827": {
+    "strapiId": 100,
+    "importedAt": "2025-11-13T17:14:34.175Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 4
+  },
+  "1097828": {
+    "strapiId": 99,
+    "importedAt": "2025-11-13T17:14:33.397Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 8
+  },
+  "1097829": {
+    "strapiId": 98,
+    "importedAt": "2025-11-13T17:14:32.977Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 3
+  },
+  "1097830": {
+    "strapiId": 97,
+    "importedAt": "2025-11-13T17:14:32.489Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 2
+  },
+  "1097831": {
+    "strapiId": 96,
+    "importedAt": "2025-11-13T17:14:32.153Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 3
+  },
+  "1097832": {
+    "strapiId": 95,
+    "importedAt": "2025-11-13T17:14:31.753Z",
+    "productId": 1097823,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 3
+  },
+  "1098708": {
+    "strapiId": 106,
+    "importedAt": "2025-11-13T17:14:37.243Z",
+    "productId": 1098705,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 19
+  },
+  "1098709": {
+    "strapiId": 105,
+    "importedAt": "2025-11-13T17:14:36.969Z",
+    "productId": 1098705,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 19
+  },
+  "1098710": {
+    "strapiId": 104,
+    "importedAt": "2025-11-13T17:14:36.697Z",
+    "productId": 1098705,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 18
+  },
+  "1098711": {
+    "strapiId": 103,
+    "importedAt": "2025-11-13T17:14:36.435Z",
+    "productId": 1098705,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 18
+  },
+  "1098827": {
+    "strapiId": 110,
+    "importedAt": "2025-11-13T17:14:40.267Z",
+    "productId": 1098778,
+    "sku": "",
+    "price": "2599000",
+    "stockQuantity": 3
+  },
+  "1098828": {
+    "strapiId": 109,
+    "importedAt": "2025-11-13T17:14:39.890Z",
+    "productId": 1098778,
+    "sku": "",
+    "price": "2599000",
+    "stockQuantity": 3
+  },
+  "1098829": {
+    "strapiId": 108,
+    "importedAt": "2025-11-13T17:14:39.627Z",
+    "productId": 1098778,
+    "sku": "",
+    "price": "2599000",
+    "stockQuantity": 3
+  },
+  "1098830": {
+    "strapiId": 107,
+    "importedAt": "2025-11-13T17:14:39.356Z",
+    "productId": 1098778,
+    "sku": "",
+    "price": "2599000",
+    "stockQuantity": 3
+  },
+  "1098907": {
+    "strapiId": 115,
+    "importedAt": "2025-11-13T17:14:44.589Z",
+    "productId": 1098895,
+    "sku": "",
+    "price": "",
+    "stockQuantity": 12
+  },
+  "1098908": {
+    "strapiId": 114,
+    "importedAt": "2025-11-13T17:14:44.146Z",
+    "productId": 1098895,
+    "sku": "",
+    "price": "",
+    "stockQuantity": 18
+  },
+  "1098909": {
+    "strapiId": 113,
+    "importedAt": "2025-11-13T17:14:43.857Z",
+    "productId": 1098895,
+    "sku": "",
+    "price": "",
+    "stockQuantity": 12
+  },
+  "1098910": {
+    "strapiId": 112,
+    "importedAt": "2025-11-13T17:14:43.601Z",
+    "productId": 1098895,
+    "sku": "",
+    "price": "",
+    "stockQuantity": 18
+  },
+  "1098911": {
+    "strapiId": 111,
+    "importedAt": "2025-11-13T17:14:43.336Z",
+    "productId": 1098895,
+    "sku": "",
+    "price": "",
+    "stockQuantity": 12
+  },
+  "1099058": {
+    "strapiId": 120,
+    "importedAt": "2025-11-13T17:14:47.694Z",
+    "productId": 1099052,
+    "sku": "",
+    "price": "1699000",
+    "stockQuantity": 6
+  },
+  "1099059": {
+    "strapiId": 119,
+    "importedAt": "2025-11-13T17:14:47.454Z",
+    "productId": 1099052,
+    "sku": "",
+    "price": "1699000",
+    "stockQuantity": 6
+  },
+  "1099060": {
+    "strapiId": 118,
+    "importedAt": "2025-11-13T17:14:46.694Z",
+    "productId": 1099052,
+    "sku": "",
+    "price": "1699000",
+    "stockQuantity": 6
+  },
+  "1099061": {
+    "strapiId": 117,
+    "importedAt": "2025-11-13T17:14:46.432Z",
+    "productId": 1099052,
+    "sku": "",
+    "price": "1699000",
+    "stockQuantity": 6
+  },
+  "1099062": {
+    "strapiId": 116,
+    "importedAt": "2025-11-13T17:14:46.183Z",
+    "productId": 1099052,
+    "sku": "",
+    "price": "1699000",
+    "stockQuantity": 6
+  },
+  "1099939": {
+    "strapiId": 122,
+    "importedAt": "2025-11-13T17:14:50.649Z",
+    "productId": 1099937,
+    "sku": "",
+    "price": "1139000",
+    "stockQuantity": 5
+  },
+  "1099940": {
+    "strapiId": 121,
+    "importedAt": "2025-11-13T17:14:50.312Z",
+    "productId": 1099937,
+    "sku": "",
+    "price": "1139000",
+    "stockQuantity": 9
+  },
+  "1100059": {
+    "strapiId": 123,
+    "importedAt": "2025-11-13T17:14:52.453Z",
+    "productId": 1100058,
+    "sku": "",
+    "price": "1139000",
+    "stockQuantity": 52
+  },
+  "1100077": {
+    "strapiId": 131,
+    "importedAt": "2025-11-13T17:14:57.548Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 3
+  },
+  "1100078": {
+    "strapiId": 130,
+    "importedAt": "2025-11-13T17:14:57.276Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 11
+  },
+  "1100079": {
+    "strapiId": 129,
+    "importedAt": "2025-11-13T17:14:57.042Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 16
+  },
+  "1100081": {
+    "strapiId": 128,
+    "importedAt": "2025-11-13T17:14:56.814Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 8
+  },
+  "1100082": {
+    "strapiId": 127,
+    "importedAt": "2025-11-13T17:14:56.566Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 15
+  },
+  "1100084": {
+    "strapiId": 126,
+    "importedAt": "2025-11-13T17:14:56.339Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 6
+  },
+  "1100085": {
+    "strapiId": 125,
+    "importedAt": "2025-11-13T17:14:56.092Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 14
+  },
+  "1100087": {
+    "strapiId": 124,
+    "importedAt": "2025-11-13T17:14:55.863Z",
+    "productId": 1100075,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100172": {
+    "strapiId": 156,
+    "importedAt": "2025-11-13T17:15:07.364Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100173": {
+    "strapiId": 155,
+    "importedAt": "2025-11-13T17:15:07.136Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100174": {
+    "strapiId": 154,
+    "importedAt": "2025-11-13T17:15:06.907Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100175": {
+    "strapiId": 153,
+    "importedAt": "2025-11-13T17:15:06.682Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100176": {
+    "strapiId": 152,
+    "importedAt": "2025-11-13T17:15:06.452Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100177": {
+    "strapiId": 151,
+    "importedAt": "2025-11-13T17:15:06.209Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100178": {
+    "strapiId": 150,
+    "importedAt": "2025-11-13T17:15:05.988Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100179": {
+    "strapiId": 149,
+    "importedAt": "2025-11-13T17:15:05.760Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100180": {
+    "strapiId": 148,
+    "importedAt": "2025-11-13T17:15:05.510Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100181": {
+    "strapiId": 147,
+    "importedAt": "2025-11-13T17:15:05.260Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100182": {
+    "strapiId": 146,
+    "importedAt": "2025-11-13T17:15:04.945Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 3
+  },
+  "1100183": {
+    "strapiId": 145,
+    "importedAt": "2025-11-13T17:15:04.686Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100184": {
+    "strapiId": 144,
+    "importedAt": "2025-11-13T17:15:04.433Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100185": {
+    "strapiId": 143,
+    "importedAt": "2025-11-13T17:15:04.181Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1100186": {
+    "strapiId": 142,
+    "importedAt": "2025-11-13T17:15:03.935Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 5
+  },
+  "1100187": {
+    "strapiId": 141,
+    "importedAt": "2025-11-13T17:15:03.695Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 1
+  },
+  "1100188": {
+    "strapiId": 140,
+    "importedAt": "2025-11-13T17:15:03.424Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 1
+  },
+  "1100189": {
+    "strapiId": 139,
+    "importedAt": "2025-11-13T17:15:03.180Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 1
+  },
+  "1100190": {
+    "strapiId": 138,
+    "importedAt": "2025-11-13T17:15:02.943Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 1
+  },
+  "1100191": {
+    "strapiId": 137,
+    "importedAt": "2025-11-13T17:15:02.697Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 1
+  },
+  "1100192": {
+    "strapiId": 136,
+    "importedAt": "2025-11-13T17:15:02.044Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100193": {
+    "strapiId": 135,
+    "importedAt": "2025-11-13T17:15:01.802Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100194": {
+    "strapiId": 134,
+    "importedAt": "2025-11-13T17:15:01.541Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100195": {
+    "strapiId": 133,
+    "importedAt": "2025-11-13T17:15:01.317Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100196": {
+    "strapiId": 132,
+    "importedAt": "2025-11-13T17:15:01.094Z",
+    "productId": 1100169,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 2
+  },
+  "1100197": {
+    "strapiId": 159,
+    "importedAt": "2025-11-13T17:15:09.317Z",
+    "productId": 1100170,
+    "sku": "",
+    "price": "819000",
+    "stockQuantity": 14
+  },
+  "1100198": {
+    "strapiId": 158,
+    "importedAt": "2025-11-13T17:15:09.095Z",
+    "productId": 1100170,
+    "sku": "",
+    "price": "819000",
+    "stockQuantity": 14
+  },
+  "1100199": {
+    "strapiId": 157,
+    "importedAt": "2025-11-13T17:15:08.866Z",
+    "productId": 1100170,
+    "sku": "",
+    "price": "819000",
+    "stockQuantity": 14
+  },
+  "1100249": {
+    "strapiId": 160,
+    "importedAt": "2025-11-13T17:15:12.547Z",
+    "productId": 1100244,
+    "sku": "",
+    "price": "1099000",
+    "stockQuantity": 12
+  },
+  "1100284": {
+    "strapiId": 172,
+    "importedAt": "2025-11-13T17:15:17.017Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100285": {
+    "strapiId": 171,
+    "importedAt": "2025-11-13T17:15:16.783Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 4
+  },
+  "1100286": {
+    "strapiId": 170,
+    "importedAt": "2025-11-13T17:15:16.543Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100287": {
+    "strapiId": 169,
+    "importedAt": "2025-11-13T17:15:16.296Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100288": {
+    "strapiId": 168,
+    "importedAt": "2025-11-13T17:15:16.056Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 5
+  },
+  "1100289": {
+    "strapiId": 167,
+    "importedAt": "2025-11-13T17:15:15.800Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 5
+  },
+  "1100290": {
+    "strapiId": 166,
+    "importedAt": "2025-11-13T17:15:15.557Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100291": {
+    "strapiId": 165,
+    "importedAt": "2025-11-13T17:15:15.257Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100292": {
+    "strapiId": 164,
+    "importedAt": "2025-11-13T17:15:15.024Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100293": {
+    "strapiId": 163,
+    "importedAt": "2025-11-13T17:15:14.771Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 6
+  },
+  "1100294": {
+    "strapiId": 162,
+    "importedAt": "2025-11-13T17:15:14.541Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 7
+  },
+  "1100295": {
+    "strapiId": 161,
+    "importedAt": "2025-11-13T17:15:14.310Z",
+    "productId": 1100279,
+    "sku": "",
+    "price": "3399000",
+    "stockQuantity": 8
+  },
+  "1100930": {
+    "strapiId": 175,
+    "importedAt": "2025-11-13T17:15:21.141Z",
+    "productId": 1100773,
+    "sku": "",
+    "price": "889000",
+    "stockQuantity": 12
+  },
+  "1100931": {
+    "strapiId": 174,
+    "importedAt": "2025-11-13T17:15:20.818Z",
+    "productId": 1100773,
+    "sku": "",
+    "price": "889000",
+    "stockQuantity": 11
+  },
+  "1100932": {
+    "strapiId": 173,
+    "importedAt": "2025-11-13T17:15:20.530Z",
+    "productId": 1100773,
+    "sku": "",
+    "price": "889000",
+    "stockQuantity": 7
+  },
+  "1100987": {
+    "strapiId": 197,
+    "importedAt": "2025-11-13T17:15:31.099Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 2
+  },
+  "1100988": {
+    "strapiId": 196,
+    "importedAt": "2025-11-13T17:15:30.848Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1100989": {
+    "strapiId": 195,
+    "importedAt": "2025-11-13T17:15:30.580Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1100990": {
+    "strapiId": 194,
+    "importedAt": "2025-11-13T17:15:30.037Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 0
+  },
+  "1100991": {
+    "strapiId": 193,
+    "importedAt": "2025-11-13T17:15:29.783Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 2
+  },
+  "1100992": {
+    "strapiId": 192,
+    "importedAt": "2025-11-13T17:15:29.529Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 2
+  },
+  "1100993": {
+    "strapiId": 191,
+    "importedAt": "2025-11-13T17:15:29.250Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 0
+  },
+  "1100994": {
+    "strapiId": 190,
+    "importedAt": "2025-11-13T17:15:28.998Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1100995": {
+    "strapiId": 189,
+    "importedAt": "2025-11-13T17:15:28.745Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 3
+  },
+  "1100996": {
+    "strapiId": 188,
+    "importedAt": "2025-11-13T17:15:28.469Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 4
+  },
+  "1100997": {
+    "strapiId": 187,
+    "importedAt": "2025-11-13T17:15:28.171Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1100998": {
+    "strapiId": 186,
+    "importedAt": "2025-11-13T17:15:27.882Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1100999": {
+    "strapiId": 185,
+    "importedAt": "2025-11-13T17:15:27.627Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 3
+  },
+  "1101000": {
+    "strapiId": 184,
+    "importedAt": "2025-11-13T17:15:27.375Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 3
+  },
+  "1101001": {
+    "strapiId": 183,
+    "importedAt": "2025-11-13T17:15:27.137Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1101002": {
+    "strapiId": 182,
+    "importedAt": "2025-11-13T17:15:26.891Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 0
+  },
+  "1101003": {
+    "strapiId": 181,
+    "importedAt": "2025-11-13T17:15:26.648Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 4
+  },
+  "1101004": {
+    "strapiId": 180,
+    "importedAt": "2025-11-13T17:15:26.404Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 2
+  },
+  "1101005": {
+    "strapiId": 179,
+    "importedAt": "2025-11-13T17:15:26.146Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 0
+  },
+  "1101006": {
+    "strapiId": 178,
+    "importedAt": "2025-11-13T17:15:25.794Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1101007": {
+    "strapiId": 177,
+    "importedAt": "2025-11-13T17:15:25.453Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 1
+  },
+  "1101008": {
+    "strapiId": 176,
+    "importedAt": "2025-11-13T17:15:25.106Z",
+    "productId": 1100983,
+    "sku": "",
+    "price": "289000",
+    "stockQuantity": 2
+  },
+  "1101022": {
+    "strapiId": 203,
+    "importedAt": "2025-11-13T17:15:34.819Z",
+    "productId": 1101018,
+    "sku": "",
+    "price": "129000",
+    "stockQuantity": 12
+  },
+  "1101023": {
+    "strapiId": 202,
+    "importedAt": "2025-11-13T17:15:34.550Z",
+    "productId": 1101018,
+    "sku": "",
+    "price": "129000",
+    "stockQuantity": 9
+  },
+  "1101024": {
+    "strapiId": 201,
+    "importedAt": "2025-11-13T17:15:34.237Z",
+    "productId": 1101018,
+    "sku": "",
+    "price": "129000",
+    "stockQuantity": 9
+  },
+  "1101025": {
+    "strapiId": 200,
+    "importedAt": "2025-11-13T17:15:33.989Z",
+    "productId": 1101018,
+    "sku": "",
+    "price": "129000",
+    "stockQuantity": 12
+  },
+  "1101026": {
+    "strapiId": 199,
+    "importedAt": "2025-11-13T17:15:33.741Z",
+    "productId": 1101018,
+    "sku": "",
+    "price": "129000",
+    "stockQuantity": 9
+  },
+  "1101027": {
+    "strapiId": 198,
+    "importedAt": "2025-11-13T17:15:33.486Z",
+    "productId": 1101018,
+    "sku": "",
+    "price": "129000",
+    "stockQuantity": 11
+  },
+  "1101037": {
+    "strapiId": 210,
+    "importedAt": "2025-11-13T17:15:37.971Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 8
+  },
+  "1101038": {
+    "strapiId": 209,
+    "importedAt": "2025-11-13T17:15:37.704Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 8
+  },
+  "1101039": {
+    "strapiId": 208,
+    "importedAt": "2025-11-13T17:15:37.432Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 8
+  },
+  "1101040": {
+    "strapiId": 207,
+    "importedAt": "2025-11-13T17:15:37.175Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 3
+  },
+  "1101041": {
+    "strapiId": 206,
+    "importedAt": "2025-11-13T17:15:36.907Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 7
+  },
+  "1101042": {
+    "strapiId": 205,
+    "importedAt": "2025-11-13T17:15:36.584Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 8
+  },
+  "1101043": {
+    "strapiId": 204,
+    "importedAt": "2025-11-13T17:15:36.321Z",
+    "productId": 1101033,
+    "sku": "",
+    "price": "329000",
+    "stockQuantity": 3
+  },
+  "1101105": {
+    "strapiId": 214,
+    "importedAt": "2025-11-13T17:15:40.807Z",
+    "productId": 1101101,
+    "sku": "",
+    "price": "899000",
+    "stockQuantity": 12
+  },
+  "1101106": {
+    "strapiId": 213,
+    "importedAt": "2025-11-13T17:15:40.539Z",
+    "productId": 1101101,
+    "sku": "",
+    "price": "899000",
+    "stockQuantity": 16
+  },
+  "1101107": {
+    "strapiId": 212,
+    "importedAt": "2025-11-13T17:15:40.268Z",
+    "productId": 1101101,
+    "sku": "",
+    "price": "899000",
+    "stockQuantity": 12
+  },
+  "1101108": {
+    "strapiId": 211,
+    "importedAt": "2025-11-13T17:15:39.842Z",
+    "productId": 1101101,
+    "sku": "",
+    "price": "899000",
+    "stockQuantity": 8
+  },
+  "1101121": {
+    "strapiId": 223,
+    "importedAt": "2025-11-13T17:15:48.409Z",
+    "productId": 1101120,
+    "sku": "",
+    "price": "650000",
+    "stockQuantity": 0
+  },
+  "1101122": {
+    "strapiId": 222,
+    "importedAt": "2025-11-13T17:15:48.136Z",
+    "productId": 1101120,
+    "sku": "",
+    "price": "650000",
+    "stockQuantity": 0
+  },
+  "1101123": {
+    "strapiId": 221,
+    "importedAt": "2025-11-13T17:15:47.834Z",
+    "productId": 1101120,
+    "sku": "",
+    "price": "650000",
+    "stockQuantity": 1
+  },
+  "1101124": {
+    "strapiId": 220,
+    "importedAt": "2025-11-13T17:15:47.569Z",
+    "productId": 1101120,
+    "sku": "",
+    "price": "650000",
+    "stockQuantity": 0
+  },
+  "1101126": {
+    "strapiId": 219,
+    "importedAt": "2025-11-13T17:15:44.686Z",
+    "productId": 1101116,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 5
+  },
+  "1101127": {
+    "strapiId": 218,
+    "importedAt": "2025-11-13T17:15:44.262Z",
+    "productId": 1101116,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 7
+  },
+  "1101128": {
+    "strapiId": 217,
+    "importedAt": "2025-11-13T17:15:43.989Z",
+    "productId": 1101116,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 5
+  },
+  "1101129": {
+    "strapiId": 216,
+    "importedAt": "2025-11-13T17:15:43.684Z",
+    "productId": 1101116,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 6
+  },
+  "1101130": {
+    "strapiId": 215,
+    "importedAt": "2025-11-13T17:15:43.415Z",
+    "productId": 1101116,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1101136": {
+    "strapiId": 227,
+    "importedAt": "2025-11-13T17:15:51.338Z",
+    "productId": 1101133,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 26
+  },
+  "1101137": {
+    "strapiId": 226,
+    "importedAt": "2025-11-13T17:15:51.005Z",
+    "productId": 1101133,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 25
+  },
+  "1101138": {
+    "strapiId": 225,
+    "importedAt": "2025-11-13T17:15:50.683Z",
+    "productId": 1101133,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 25
+  },
+  "1101139": {
+    "strapiId": 224,
+    "importedAt": "2025-11-13T17:15:50.353Z",
+    "productId": 1101133,
+    "sku": "",
+    "price": "979000",
+    "stockQuantity": 26
+  },
+  "1101155": {
+    "strapiId": 233,
+    "importedAt": "2025-11-13T17:15:55.412Z",
+    "productId": 1101146,
+    "sku": "",
+    "price": "1629000",
+    "stockQuantity": 13
+  },
+  "1101156": {
+    "strapiId": 232,
+    "importedAt": "2025-11-13T17:15:55.135Z",
+    "productId": 1101146,
+    "sku": "",
+    "price": "1629000",
+    "stockQuantity": 13
+  },
+  "1101157": {
+    "strapiId": 231,
+    "importedAt": "2025-11-13T17:15:54.854Z",
+    "productId": 1101146,
+    "sku": "",
+    "price": "1629000",
+    "stockQuantity": 13
+  },
+  "1101158": {
+    "strapiId": 230,
+    "importedAt": "2025-11-13T17:15:54.536Z",
+    "productId": 1101146,
+    "sku": "",
+    "price": "1629000",
+    "stockQuantity": 13
+  },
+  "1101159": {
+    "strapiId": 229,
+    "importedAt": "2025-11-13T17:15:54.231Z",
+    "productId": 1101146,
+    "sku": "",
+    "price": "1629000",
+    "stockQuantity": 13
+  },
+  "1101160": {
+    "strapiId": 228,
+    "importedAt": "2025-11-13T17:15:53.928Z",
+    "productId": 1101146,
+    "sku": "",
+    "price": "1629000",
+    "stockQuantity": 13
+  },
+  "1101163": {
+    "strapiId": 239,
+    "importedAt": "2025-11-13T17:15:58.425Z",
+    "productId": 1101162,
+    "sku": "",
+    "price": "1339000",
+    "stockQuantity": 11
+  },
+  "1101164": {
+    "strapiId": 238,
+    "importedAt": "2025-11-13T17:15:58.178Z",
+    "productId": 1101162,
+    "sku": "",
+    "price": "1339000",
+    "stockQuantity": 11
+  },
+  "1101165": {
+    "strapiId": 237,
+    "importedAt": "2025-11-13T17:15:57.935Z",
+    "productId": 1101162,
+    "sku": "",
+    "price": "1339000",
+    "stockQuantity": 11
+  },
+  "1101166": {
+    "strapiId": 236,
+    "importedAt": "2025-11-13T17:15:57.706Z",
+    "productId": 1101162,
+    "sku": "",
+    "price": "1339000",
+    "stockQuantity": 11
+  },
+  "1101167": {
+    "strapiId": 235,
+    "importedAt": "2025-11-13T17:15:57.421Z",
+    "productId": 1101162,
+    "sku": "",
+    "price": "1339000",
+    "stockQuantity": 11
+  },
+  "1101168": {
+    "strapiId": 234,
+    "importedAt": "2025-11-13T17:15:57.151Z",
+    "productId": 1101162,
+    "sku": "",
+    "price": "1339000",
+    "stockQuantity": 11
+  },
+  "1101185": {
+    "strapiId": 249,
+    "importedAt": "2025-11-13T17:16:03.954Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 9
+  },
+  "1101186": {
+    "strapiId": 248,
+    "importedAt": "2025-11-13T17:16:03.721Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 3
+  },
+  "1101187": {
+    "strapiId": 247,
+    "importedAt": "2025-11-13T17:16:03.487Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 11
+  },
+  "1101188": {
+    "strapiId": 246,
+    "importedAt": "2025-11-13T17:16:03.210Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 5
+  },
+  "1101189": {
+    "strapiId": 245,
+    "importedAt": "2025-11-13T17:16:02.978Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 4
+  },
+  "1101190": {
+    "strapiId": 244,
+    "importedAt": "2025-11-13T17:16:02.748Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 9
+  },
+  "1101191": {
+    "strapiId": 243,
+    "importedAt": "2025-11-13T17:16:02.516Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 3
+  },
+  "1101192": {
+    "strapiId": 242,
+    "importedAt": "2025-11-13T17:16:02.291Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 6
+  },
+  "1101193": {
+    "strapiId": 241,
+    "importedAt": "2025-11-13T17:16:02.004Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 11
+  },
+  "1101194": {
+    "strapiId": 240,
+    "importedAt": "2025-11-13T17:16:01.752Z",
+    "productId": 1101182,
+    "sku": "",
+    "price": "1239000",
+    "stockQuantity": 5
+  },
+  "1101237": {
+    "strapiId": 254,
+    "importedAt": "2025-11-13T17:16:07.598Z",
+    "productId": 1101236,
+    "sku": "",
+    "price": "71000",
+    "stockQuantity": 0
+  },
+  "1101238": {
+    "strapiId": 253,
+    "importedAt": "2025-11-13T17:16:07.369Z",
+    "productId": 1101236,
+    "sku": "",
+    "price": "71000",
+    "stockQuantity": 0
+  },
+  "1101239": {
+    "strapiId": 252,
+    "importedAt": "2025-11-13T17:16:07.143Z",
+    "productId": 1101236,
+    "sku": "",
+    "price": "71000",
+    "stockQuantity": 1
+  },
+  "1101240": {
+    "strapiId": 251,
+    "importedAt": "2025-11-13T17:16:06.907Z",
+    "productId": 1101236,
+    "sku": "",
+    "price": "71000",
+    "stockQuantity": 0
+  },
+  "1101241": {
+    "strapiId": 250,
+    "importedAt": "2025-11-13T17:16:06.676Z",
+    "productId": 1101236,
+    "sku": "",
+    "price": "71000",
+    "stockQuantity": 0
+  },
+  "1101258": {
+    "strapiId": 266,
+    "importedAt": "2025-11-13T17:16:12.171Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101259": {
+    "strapiId": 265,
+    "importedAt": "2025-11-13T17:16:11.930Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101260": {
+    "strapiId": 264,
+    "importedAt": "2025-11-13T17:16:11.659Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101261": {
+    "strapiId": 263,
+    "importedAt": "2025-11-13T17:16:11.407Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101262": {
+    "strapiId": 262,
+    "importedAt": "2025-11-13T17:16:11.174Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 1
+  },
+  "1101263": {
+    "strapiId": 261,
+    "importedAt": "2025-11-13T17:16:10.921Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101264": {
+    "strapiId": 260,
+    "importedAt": "2025-11-13T17:16:10.630Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101265": {
+    "strapiId": 259,
+    "importedAt": "2025-11-13T17:16:10.392Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101266": {
+    "strapiId": 258,
+    "importedAt": "2025-11-13T17:16:10.159Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101267": {
+    "strapiId": 257,
+    "importedAt": "2025-11-13T17:16:09.890Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101268": {
+    "strapiId": 256,
+    "importedAt": "2025-11-13T17:16:09.652Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101269": {
+    "strapiId": 255,
+    "importedAt": "2025-11-13T17:16:09.411Z",
+    "productId": 1101257,
+    "sku": "",
+    "price": "479000",
+    "stockQuantity": 0
+  },
+  "1101336": {
+    "strapiId": 292,
+    "importedAt": "2025-11-13T17:16:21.800Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 7
+  },
+  "1101337": {
+    "strapiId": 291,
+    "importedAt": "2025-11-13T17:16:21.568Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 11
+  },
+  "1101338": {
+    "strapiId": 290,
+    "importedAt": "2025-11-13T17:16:21.335Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 3
+  },
+  "1101339": {
+    "strapiId": 289,
+    "importedAt": "2025-11-13T17:16:21.104Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 1
+  },
+  "1101340": {
+    "strapiId": 288,
+    "importedAt": "2025-11-13T17:16:20.858Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 3
+  },
+  "1101341": {
+    "strapiId": 287,
+    "importedAt": "2025-11-13T17:16:20.615Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 3
+  },
+  "1101342": {
+    "strapiId": 286,
+    "importedAt": "2025-11-13T17:16:20.382Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 7
+  },
+  "1101343": {
+    "strapiId": 285,
+    "importedAt": "2025-11-13T17:16:20.135Z",
+    "productId": 1101330,
+    "sku": "",
+    "price": "2899000",
+    "stockQuantity": 6
+  },
+  "1101347": {
+    "strapiId": 298,
+    "importedAt": "2025-11-13T17:16:24.660Z",
+    "productId": 1101344,
+    "sku": "",
+    "price": "1419000",
+    "stockQuantity": 11
+  },
+  "1101348": {
+    "strapiId": 297,
+    "importedAt": "2025-11-13T17:16:24.436Z",
+    "productId": 1101344,
+    "sku": "",
+    "price": "1419000",
+    "stockQuantity": 11
+  },
+  "1101349": {
+    "strapiId": 296,
+    "importedAt": "2025-11-13T17:16:24.193Z",
+    "productId": 1101344,
+    "sku": "",
+    "price": "1419000",
+    "stockQuantity": 11
+  },
+  "1101350": {
+    "strapiId": 295,
+    "importedAt": "2025-11-13T17:16:23.907Z",
+    "productId": 1101344,
+    "sku": "",
+    "price": "1419000",
+    "stockQuantity": 11
+  },
+  "1101351": {
+    "strapiId": 294,
+    "importedAt": "2025-11-13T17:16:23.610Z",
+    "productId": 1101344,
+    "sku": "",
+    "price": "1419000",
+    "stockQuantity": 11
+  },
+  "1101352": {
+    "strapiId": 293,
+    "importedAt": "2025-11-13T17:16:23.372Z",
+    "productId": 1101344,
+    "sku": "",
+    "price": "1419000",
+    "stockQuantity": 11
+  },
+  "1101409": {
+    "strapiId": 308,
+    "importedAt": "2025-11-13T17:16:28.611Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 4
+  },
+  "1101410": {
+    "strapiId": 307,
+    "importedAt": "2025-11-13T17:16:28.374Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 5
+  },
+  "1101411": {
+    "strapiId": 306,
+    "importedAt": "2025-11-13T17:16:28.142Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 4
+  },
+  "1101412": {
+    "strapiId": 305,
+    "importedAt": "2025-11-13T17:16:27.900Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 4
+  },
+  "1101413": {
+    "strapiId": 304,
+    "importedAt": "2025-11-13T17:16:27.669Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 3
+  },
+  "1101414": {
+    "strapiId": 303,
+    "importedAt": "2025-11-13T17:16:27.433Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 4
+  },
+  "1101415": {
+    "strapiId": 302,
+    "importedAt": "2025-11-13T17:16:27.186Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 5
+  },
+  "1101416": {
+    "strapiId": 301,
+    "importedAt": "2025-11-13T17:16:26.944Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 5
+  },
+  "1101417": {
+    "strapiId": 300,
+    "importedAt": "2025-11-13T17:16:26.691Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 5
+  },
+  "1101418": {
+    "strapiId": 299,
+    "importedAt": "2025-11-13T17:16:26.353Z",
+    "productId": 1101407,
+    "sku": "",
+    "price": "4299000",
+    "stockQuantity": 6
+  },
+  "1101460": {
+    "strapiId": 314,
+    "importedAt": "2025-11-13T17:16:31.676Z",
+    "productId": 1101455,
+    "sku": "",
+    "price": "2399000",
+    "stockQuantity": 5
+  },
+  "1101461": {
+    "strapiId": 313,
+    "importedAt": "2025-11-13T17:16:31.420Z",
+    "productId": 1101455,
+    "sku": "",
+    "price": "2399000",
+    "stockQuantity": 5
+  },
+  "1101462": {
+    "strapiId": 312,
+    "importedAt": "2025-11-13T17:16:31.175Z",
+    "productId": 1101455,
+    "sku": "",
+    "price": "2399000",
+    "stockQuantity": 9
+  },
+  "1101463": {
+    "strapiId": 311,
+    "importedAt": "2025-11-13T17:16:30.915Z",
+    "productId": 1101455,
+    "sku": "",
+    "price": "2399000",
+    "stockQuantity": 9
+  },
+  "1101464": {
+    "strapiId": 310,
+    "importedAt": "2025-11-13T17:16:30.661Z",
+    "productId": 1101455,
+    "sku": "",
+    "price": "2399000",
+    "stockQuantity": 7
+  },
+  "1101465": {
+    "strapiId": 309,
+    "importedAt": "2025-11-13T17:16:30.412Z",
+    "productId": 1101455,
+    "sku": "",
+    "price": "2399000",
+    "stockQuantity": 7
+  },
+  "1101469": {
+    "strapiId": 322,
+    "importedAt": "2025-11-13T17:16:35.056Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 5
+  },
+  "1101470": {
+    "strapiId": 321,
+    "importedAt": "2025-11-13T17:16:34.803Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 5
+  },
+  "1101471": {
+    "strapiId": 320,
+    "importedAt": "2025-11-13T17:16:34.548Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 9
+  },
+  "1101472": {
+    "strapiId": 319,
+    "importedAt": "2025-11-13T17:16:34.295Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 9
+  },
+  "1101473": {
+    "strapiId": 318,
+    "importedAt": "2025-11-13T17:16:34.032Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 4
+  },
+  "1101474": {
+    "strapiId": 317,
+    "importedAt": "2025-11-13T17:16:33.779Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 6
+  },
+  "1101475": {
+    "strapiId": 316,
+    "importedAt": "2025-11-13T17:16:33.528Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 3
+  },
+  "1101476": {
+    "strapiId": 315,
+    "importedAt": "2025-11-13T17:16:33.269Z",
+    "productId": 1101458,
+    "sku": "",
+    "price": "2799000",
+    "stockQuantity": 7
+  },
+  "1101479": {
+    "strapiId": 284,
+    "importedAt": "2025-11-13T17:16:18.337Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 5
+  },
+  "1101480": {
+    "strapiId": 283,
+    "importedAt": "2025-11-13T17:16:18.100Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 5
+  },
+  "1101481": {
+    "strapiId": 282,
+    "importedAt": "2025-11-13T17:16:17.860Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 5
+  },
+  "1101482": {
+    "strapiId": 281,
+    "importedAt": "2025-11-13T17:16:17.620Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101483": {
+    "strapiId": 280,
+    "importedAt": "2025-11-13T17:16:17.382Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101484": {
+    "strapiId": 279,
+    "importedAt": "2025-11-13T17:16:17.114Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101485": {
+    "strapiId": 278,
+    "importedAt": "2025-11-13T17:16:16.827Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 2
+  },
+  "1101486": {
+    "strapiId": 277,
+    "importedAt": "2025-11-13T17:16:16.544Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 2
+  },
+  "1101487": {
+    "strapiId": 276,
+    "importedAt": "2025-11-13T17:16:16.261Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 2
+  },
+  "1101488": {
+    "strapiId": 275,
+    "importedAt": "2025-11-13T17:16:16.000Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 1
+  },
+  "1101489": {
+    "strapiId": 274,
+    "importedAt": "2025-11-13T17:16:15.757Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 1
+  },
+  "1101490": {
+    "strapiId": 273,
+    "importedAt": "2025-11-13T17:16:15.519Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 1
+  },
+  "1101491": {
+    "strapiId": 272,
+    "importedAt": "2025-11-13T17:16:15.283Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101492": {
+    "strapiId": 271,
+    "importedAt": "2025-11-13T17:16:15.046Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101493": {
+    "strapiId": 270,
+    "importedAt": "2025-11-13T17:16:14.804Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101494": {
+    "strapiId": 269,
+    "importedAt": "2025-11-13T17:16:14.573Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101495": {
+    "strapiId": 268,
+    "importedAt": "2025-11-13T17:16:14.323Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101496": {
+    "strapiId": 267,
+    "importedAt": "2025-11-13T17:16:14.066Z",
+    "productId": 1101271,
+    "sku": "",
+    "price": "519000",
+    "stockQuantity": 4
+  },
+  "1101528": {
+    "strapiId": 348,
+    "importedAt": "2025-11-13T17:16:45.649Z",
+    "productId": 1101524,
+    "sku": "",
+    "price": "189000",
+    "stockQuantity": 8
+  },
+  "1101529": {
+    "strapiId": 347,
+    "importedAt": "2025-11-13T17:16:45.406Z",
+    "productId": 1101524,
+    "sku": "",
+    "price": "189000",
+    "stockQuantity": 8
+  },
+  "1101530": {
+    "strapiId": 346,
+    "importedAt": "2025-11-13T17:16:45.163Z",
+    "productId": 1101524,
+    "sku": "",
+    "price": "189000",
+    "stockQuantity": 6
+  },
+  "1101531": {
+    "strapiId": 345,
+    "importedAt": "2025-11-13T17:16:44.907Z",
+    "productId": 1101524,
+    "sku": "",
+    "price": "189000",
+    "stockQuantity": 8
+  },
+  "1101532": {
+    "strapiId": 344,
+    "importedAt": "2025-11-13T17:16:44.649Z",
+    "productId": 1101524,
+    "sku": "",
+    "price": "189000",
+    "stockQuantity": 8
+  },
+  "1101533": {
+    "strapiId": 343,
+    "importedAt": "2025-11-13T17:16:44.372Z",
+    "productId": 1101524,
+    "sku": "",
+    "price": "189000",
+    "stockQuantity": 4
+  },
+  "1101546": {
+    "strapiId": 330,
+    "importedAt": "2025-11-13T17:16:38.355Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 9
+  },
+  "1101547": {
+    "strapiId": 329,
+    "importedAt": "2025-11-13T17:16:38.109Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 9
+  },
+  "1101548": {
+    "strapiId": 328,
+    "importedAt": "2025-11-13T17:16:37.861Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 4
+  },
+  "1101549": {
+    "strapiId": 327,
+    "importedAt": "2025-11-13T17:16:37.614Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 6
+  },
+  "1101550": {
+    "strapiId": 326,
+    "importedAt": "2025-11-13T17:16:37.364Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 7
+  },
+  "1101551": {
+    "strapiId": 325,
+    "importedAt": "2025-11-13T17:16:37.101Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 7
+  },
+  "1101552": {
+    "strapiId": 324,
+    "importedAt": "2025-11-13T17:16:36.854Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 7
+  },
+  "1101553": {
+    "strapiId": 323,
+    "importedAt": "2025-11-13T17:16:36.594Z",
+    "productId": 1101498,
+    "sku": "",
+    "price": "2299000",
+    "stockQuantity": 7
+  },
+  "1101555": {
+    "strapiId": 357,
+    "importedAt": "2025-11-13T17:16:49.461Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 8
+  },
+  "1101556": {
+    "strapiId": 356,
+    "importedAt": "2025-11-13T17:16:49.219Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1101557": {
+    "strapiId": 355,
+    "importedAt": "2025-11-13T17:16:48.973Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1101558": {
+    "strapiId": 354,
+    "importedAt": "2025-11-13T17:16:48.717Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 8
+  },
+  "1101559": {
+    "strapiId": 353,
+    "importedAt": "2025-11-13T17:16:48.438Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1101560": {
+    "strapiId": 352,
+    "importedAt": "2025-11-13T17:16:48.189Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1101561": {
+    "strapiId": 351,
+    "importedAt": "2025-11-13T17:16:47.929Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 8
+  },
+  "1101562": {
+    "strapiId": 350,
+    "importedAt": "2025-11-13T17:16:47.532Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1101563": {
+    "strapiId": 349,
+    "importedAt": "2025-11-13T17:16:47.245Z",
+    "productId": 1101535,
+    "sku": "",
+    "price": "799000",
+    "stockQuantity": 4
+  },
+  "1101565": {
+    "strapiId": 342,
+    "importedAt": "2025-11-13T17:16:42.902Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101566": {
+    "strapiId": 341,
+    "importedAt": "2025-11-13T17:16:42.641Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101567": {
+    "strapiId": 340,
+    "importedAt": "2025-11-13T17:16:42.383Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101568": {
+    "strapiId": 339,
+    "importedAt": "2025-11-13T17:16:42.130Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101569": {
+    "strapiId": 338,
+    "importedAt": "2025-11-13T17:16:41.870Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 1
+  },
+  "1101570": {
+    "strapiId": 337,
+    "importedAt": "2025-11-13T17:16:41.548Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 2
+  },
+  "1101571": {
+    "strapiId": 336,
+    "importedAt": "2025-11-13T17:16:41.280Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 1
+  },
+  "1101572": {
+    "strapiId": 335,
+    "importedAt": "2025-11-13T17:16:41.024Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 2
+  },
+  "1101573": {
+    "strapiId": 334,
+    "importedAt": "2025-11-13T17:16:40.774Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 5
+  },
+  "1101574": {
+    "strapiId": 333,
+    "importedAt": "2025-11-13T17:16:40.467Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101575": {
+    "strapiId": 332,
+    "importedAt": "2025-11-13T17:16:40.208Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101576": {
+    "strapiId": 331,
+    "importedAt": "2025-11-13T17:16:39.954Z",
+    "productId": 1101519,
+    "sku": "",
+    "price": "3299000",
+    "stockQuantity": 4
+  },
+  "1101587": {
+    "strapiId": 360,
+    "importedAt": "2025-11-13T17:16:51.840Z",
+    "productId": 1101577,
+    "sku": "",
+    "price": "819000",
+    "stockQuantity": 12
+  },
+  "1101588": {
+    "strapiId": 359,
+    "importedAt": "2025-11-13T17:16:51.430Z",
+    "productId": 1101577,
+    "sku": "",
+    "price": "819000",
+    "stockQuantity": 15
+  },
+  "1101589": {
+    "strapiId": 358,
+    "importedAt": "2025-11-13T17:16:51.033Z",
+    "productId": 1101577,
+    "sku": "",
+    "price": "819000",
+    "stockQuantity": 15
+  },
+  "1101634": {
+    "strapiId": 366,
+    "importedAt": "2025-11-13T17:16:54.631Z",
+    "productId": 1101605,
+    "sku": "",
+    "price": "1499000",
+    "stockQuantity": 13
+  },
+  "1101635": {
+    "strapiId": 365,
+    "importedAt": "2025-11-13T17:16:54.370Z",
+    "productId": 1101605,
+    "sku": "",
+    "price": "1499000",
+    "stockQuantity": 13
+  },
+  "1101636": {
+    "strapiId": 364,
+    "importedAt": "2025-11-13T17:16:54.110Z",
+    "productId": 1101605,
+    "sku": "",
+    "price": "1499000",
+    "stockQuantity": 13
+  },
+  "1101637": {
+    "strapiId": 363,
+    "importedAt": "2025-11-13T17:16:53.853Z",
+    "productId": 1101605,
+    "sku": "",
+    "price": "1499000",
+    "stockQuantity": 13
+  },
+  "1101638": {
+    "strapiId": 362,
+    "importedAt": "2025-11-13T17:16:53.608Z",
+    "productId": 1101605,
+    "sku": "",
+    "price": "1499000",
+    "stockQuantity": 13
+  },
+  "1101639": {
+    "strapiId": 361,
+    "importedAt": "2025-11-13T17:16:53.364Z",
+    "productId": 1101605,
+    "sku": "",
+    "price": "1499000",
+    "stockQuantity": 13
+  },
+  "1101641": {
+    "strapiId": 374,
+    "importedAt": "2025-11-13T17:16:59.588Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 0
+  },
+  "1101642": {
+    "strapiId": 373,
+    "importedAt": "2025-11-13T17:16:59.345Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 0
+  },
+  "1101643": {
+    "strapiId": 372,
+    "importedAt": "2025-11-13T17:16:58.984Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 0
+  },
+  "1101644": {
+    "strapiId": 371,
+    "importedAt": "2025-11-13T17:16:58.619Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 0
+  },
+  "1101645": {
+    "strapiId": 370,
+    "importedAt": "2025-11-13T17:16:58.333Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 1
+  },
+  "1101646": {
+    "strapiId": 369,
+    "importedAt": "2025-11-13T17:16:58.045Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 0
+  },
+  "1101647": {
+    "strapiId": 368,
+    "importedAt": "2025-11-13T17:16:57.792Z",
+    "productId": 1101640,
+    "sku": "",
+    "price": "719000",
+    "stockQuantity": 0
+  },
+  "1101648": {
+    "strapiId": 367,
+    "importedAt": "2025-11-13T17:16:56.230Z",
+    "productId": 1101631,
+    "sku": "",
+    "price": "789000",
+    "stockQuantity": 29
+  },
+  "1101664": {
+    "strapiId": 390,
+    "importedAt": "2025-11-13T17:17:07.666Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1101665": {
+    "strapiId": 389,
+    "importedAt": "2025-11-13T17:17:07.428Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1101666": {
+    "strapiId": 388,
+    "importedAt": "2025-11-13T17:17:07.185Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1101667": {
+    "strapiId": 387,
+    "importedAt": "2025-11-13T17:17:06.938Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1101668": {
+    "strapiId": 386,
+    "importedAt": "2025-11-13T17:17:06.668Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1101669": {
+    "strapiId": 385,
+    "importedAt": "2025-11-13T17:17:06.246Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 1
+  },
+  "1101670": {
+    "strapiId": 384,
+    "importedAt": "2025-11-13T17:17:05.973Z",
+    "productId": 1101663,
+    "sku": "",
+    "price": "769000",
+    "stockQuantity": 0
+  },
+  "1101674": {
+    "strapiId": 401,
+    "importedAt": "2025-11-13T17:17:11.774Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101675": {
+    "strapiId": 383,
+    "importedAt": "2025-11-13T17:17:04.422Z",
+    "productId": 1101661,
+    "sku": "",
+    "price": "839000",
+    "stockQuantity": 9
+  },
+  "1101676": {
+    "strapiId": 400,
+    "importedAt": "2025-11-13T17:17:11.508Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101677": {
+    "strapiId": 382,
+    "importedAt": "2025-11-13T17:17:04.150Z",
+    "productId": 1101661,
+    "sku": "",
+    "price": "839000",
+    "stockQuantity": 4
+  },
+  "1101678": {
+    "strapiId": 381,
+    "importedAt": "2025-11-13T17:17:03.839Z",
+    "productId": 1101661,
+    "sku": "",
+    "price": "839000",
+    "stockQuantity": 4
+  },
+  "1101679": {
+    "strapiId": 399,
+    "importedAt": "2025-11-13T17:17:11.257Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101680": {
+    "strapiId": 398,
+    "importedAt": "2025-11-13T17:17:11.010Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101681": {
+    "strapiId": 397,
+    "importedAt": "2025-11-13T17:17:10.761Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101682": {
+    "strapiId": 396,
+    "importedAt": "2025-11-13T17:17:10.503Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 1
+  },
+  "1101683": {
+    "strapiId": 395,
+    "importedAt": "2025-11-13T17:17:10.255Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101684": {
+    "strapiId": 394,
+    "importedAt": "2025-11-13T17:17:10.000Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101685": {
+    "strapiId": 393,
+    "importedAt": "2025-11-13T17:17:09.768Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101686": {
+    "strapiId": 392,
+    "importedAt": "2025-11-13T17:17:09.494Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101687": {
+    "strapiId": 391,
+    "importedAt": "2025-11-13T17:17:09.243Z",
+    "productId": 1101673,
+    "sku": "",
+    "price": "999000",
+    "stockQuantity": 0
+  },
+  "1101698": {
+    "strapiId": 404,
+    "importedAt": "2025-11-13T17:17:13.755Z",
+    "productId": 1101688,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 6
+  },
+  "1101699": {
+    "strapiId": 403,
+    "importedAt": "2025-11-13T17:17:13.515Z",
+    "productId": 1101688,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 7
+  },
+  "1101700": {
+    "strapiId": 402,
+    "importedAt": "2025-11-13T17:17:13.271Z",
+    "productId": 1101688,
+    "sku": "",
+    "price": "2699000",
+    "stockQuantity": 4
+  },
+  "1101710": {
+    "strapiId": 407,
+    "importedAt": "2025-11-13T17:17:16.256Z",
+    "productId": 1101707,
+    "sku": "",
+    "price": "789000",
+    "stockQuantity": 15
+  },
+  "1101711": {
+    "strapiId": 406,
+    "importedAt": "2025-11-13T17:17:16.016Z",
+    "productId": 1101707,
+    "sku": "",
+    "price": "789000",
+    "stockQuantity": 14
+  },
+  "1101712": {
+    "strapiId": 405,
+    "importedAt": "2025-11-13T17:17:15.630Z",
+    "productId": 1101707,
+    "sku": "",
+    "price": "789000",
+    "stockQuantity": 6
+  },
+  "1101735": {
+    "strapiId": 380,
+    "importedAt": "2025-11-13T17:17:02.368Z",
+    "productId": 1101658,
+    "sku": "",
+    "price": "4999000",
+    "stockQuantity": 2
+  },
+  "1101736": {
+    "strapiId": 379,
+    "importedAt": "2025-11-13T17:17:02.120Z",
+    "productId": 1101658,
+    "sku": "",
+    "price": "4999000",
+    "stockQuantity": 3
+  },
+  "1101737": {
+    "strapiId": 378,
+    "importedAt": "2025-11-13T17:17:01.875Z",
+    "productId": 1101658,
+    "sku": "",
+    "price": "4999000",
+    "stockQuantity": 2
+  },
+  "1101738": {
+    "strapiId": 377,
+    "importedAt": "2025-11-13T17:17:01.611Z",
+    "productId": 1101658,
+    "sku": "",
+    "price": "4999000",
+    "stockQuantity": 1
+  },
+  "1101739": {
+    "strapiId": 376,
+    "importedAt": "2025-11-13T17:17:01.363Z",
+    "productId": 1101658,
+    "sku": "",
+    "price": "4999000",
+    "stockQuantity": 2
+  },
+  "1101740": {
+    "strapiId": 375,
+    "importedAt": "2025-11-13T17:17:01.115Z",
+    "productId": 1101658,
+    "sku": "",
+    "price": "4999000",
+    "stockQuantity": 1
+  }
+}

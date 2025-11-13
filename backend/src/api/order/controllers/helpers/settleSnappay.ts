@@ -1,5 +1,4 @@
 import type { Strapi } from "@strapi/strapi";
-import { autoGenerateBarcodeIfEligible } from "./autoBarcode";
 
 async function loadOrder(strapi: Strapi, orderId: number) {
   return strapi.entityService.findOne("api::order.order", orderId, {
@@ -89,11 +88,6 @@ export async function settleSnappayOrder(strapi: Strapi, orderId: number) {
 
   if (newlySettled) {
     await decrementStock(strapi, order);
-    try {
-      await autoGenerateBarcodeIfEligible(strapi, orderId);
-    } catch (err) {
-      strapi.log.error("Failed to generate barcode after settlement", err);
-    }
     try {
       await strapi.entityService.create("api::order-log.order-log", {
         data: {
