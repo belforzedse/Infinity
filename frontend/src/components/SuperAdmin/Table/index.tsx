@@ -484,8 +484,8 @@ export function SuperAdminTable<TData, TValue>({
               })
             ) : (
               <tr>
-                <td colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                <td colSpan={columns.length} className="h-24 text-center text-sm text-neutral-500">
+                  داده‌ای برای نمایش وجود ندارد
                 </td>
               </tr>
             )}

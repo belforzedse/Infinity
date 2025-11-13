@@ -8,7 +8,7 @@ import {
   updateProductSizeHelper,
 } from "@/services/super-admin/product/size-helper/create";
 import { toast } from "react-hot-toast";
-import { normalizeSizeGuideData } from "@/utils/sizeGuide";
+import { normalizeSizeGuideData, serializeSizeGuideMatrix } from "@/utils/sizeGuide";
 
 interface SizeProps {
   productId: number;
@@ -24,12 +24,17 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
   const fetchSizeHelper = useCallback(async () => {
     try {
       const response = await getProductSizeHelper(productId);
+      console.log("🔍 Size helper response:", response);
+
       if (response.data && response.data.length > 0) {
         const helperData = response.data[0].attributes.Helper || [];
+        console.log("🔍 Helper data:", helperData);
         setHelperId(response.data[0].id);
 
         if (helperData && helperData.length > 0) {
           const { rows, headers } = normalizeSizeGuideData(helperData);
+          console.log("🔍 Normalized rows:", rows);
+          console.log("🔍 Normalized headers:", headers);
           setColumns(
             headers.map((header) => ({
               key: header,
@@ -38,9 +43,11 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
           );
           setSizeData(rows);
         } else {
+          console.log("🔍 No helper data, setting defaults");
           setDefaultData();
         }
       } else {
+        console.log("🔍 No response data or empty array, setting defaults");
         setDefaultData();
       }
     } catch (error) {
@@ -71,9 +78,15 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
 
   const handleSave = async (data: any[]) => {
     try {
+      const helperMatrix = serializeSizeGuideMatrix(data, columns);
+      if (!helperMatrix.length) {
+        toast.error("لطفاً جدول راهنمای سایز را تکمیل کنید");
+        return;
+      }
+
       const helperData = {
         product: productId,
-        Helper: data,
+        Helper: helperMatrix,
       };
 
       if (helperId) {

@@ -145,7 +145,7 @@ const ProductCard: FC<ProductCardProps> = ({
       onClick={(e) => {
         toggleLike(e);
       }}
-      className={`absolute top-5 right-5 glass-chip flex h-11 w-11 items-center justify-center rounded-full ${
+      className={`absolute top-5 left-5 glass-chip flex h-11 w-11 items-center justify-center rounded-full ${
         isLoading ? "cursor-wait opacity-50" : "hover:brightness-[1.05]"
       } z-20 transition-all ring-1 ring-white/60`}
       disabled={isLoading}
