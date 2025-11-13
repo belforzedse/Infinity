@@ -104,8 +104,8 @@ export function useUpload({
   const optimizeImage = async (file: File): Promise<File> => {
     try {
       const optimized = await imageCompression(file, {
-        maxSizeMB: 10,
-        maxWidthOrHeight: 1920,
+        maxSizeMB: 256,
+        maxWidthOrHeight: 10920,
         useWebWorker: true,
         fileType: file.type,
       });
