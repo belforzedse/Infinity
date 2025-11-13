@@ -120,7 +120,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       password: process.env.SAMAN_PASSWORD,
       callbackUrl:
         process.env.SAMAN_CALLBACK_URL ||
-        `${(process.env.URL || "https://api.infinity.rgbgroup.ir/").replace(/\/$/, "")}/api/orders/payment-callback`,
+        `${(process.env.URL || "https://api.infinitycolor.org/").replace(/\/$/, "")}/api/orders/payment-callback`,
       tokenExpiryInMin:
         process.env.SAMAN_TOKEN_EXPIRY_MIN !== undefined
           ? Number(process.env.SAMAN_TOKEN_EXPIRY_MIN)
@@ -372,4 +372,3 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return RESULT_CODE_MESSAGES[code];
   },
 });
-
