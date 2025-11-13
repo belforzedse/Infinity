@@ -135,9 +135,12 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           });
         } catch (_) {}
 
-        // Replace shipping cost using Anipo for non-4 (buy-in-person)
+        /**
+         * Automatic Anipo shipping overrides disabled.
+         * Leaving previous implementation commented for future reference.
+         */
+        /*
         if (Number(shippingData.shippingId) !== 4) {
-          // Load address for codes
           if (shippingData.addressId) {
             const address: any = await strapi.entityService.findOne(
               "api::local-user-address.local-user-address",
@@ -160,7 +163,6 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
               });
               if (preview?.ok && typeof preview.price === "number") {
                 finalShippingCost = Math.max(0, Math.floor(preview.price));
-                // Persist new shipping cost on order
                 await strapi.entityService.update(
                   "api::order.order",
                   order.id,
@@ -169,7 +171,6 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
                   }
                 );
               } else {
-                // Log why Anipo-based shipping override was skipped for observability
                 try {
                   await strapi.entityService.create(
                     "api::order-log.order-log",
@@ -184,13 +185,12 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
                       },
                     }
                   );
-                } catch (_) {
-                  // Swallow logging errors to avoid affecting checkout flow
-                }
+                } catch (_) {}
               }
             }
           }
         }
+        */
 
         let discountAmount = 0;
         let discountCode: string | undefined;

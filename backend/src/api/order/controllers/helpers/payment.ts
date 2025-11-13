@@ -1,5 +1,4 @@
 import type { Strapi } from "@strapi/strapi";
-import { autoGenerateBarcodeIfEligible } from "./autoBarcode";
 
 export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Mellat returns: ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId
@@ -427,11 +426,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         }
       }
 
-      try {
-        await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-      } catch (barcodeErr) {
-        strapi.log.error("Failed to auto generate barcode (Saman)", barcodeErr);
-      }
+      // Barcode generation is now a manual super-admin action.
 
       try {
         await strapi.entityService.create("api::order-log.order-log", {
@@ -771,9 +766,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           strapi.log.error("Failed to decrement stock after settlement", e);
         }
 
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
+        // Barcode generation now only occurs when triggered manually from the admin panel.
       }
 
       await strapi.entityService.update("api::order.order", orderId, {
@@ -923,9 +916,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             Status: "Started",
           },
         });
-        try {
-          await autoGenerateBarcodeIfEligible(strapi, Number(orderId));
-        } catch {}
+        // Barcode generation is now a manual super-admin action.
 
         strapi.log.info(`Payment successful for Order ${orderId}:`, {
           orderId,

@@ -1,9 +1,4 @@
 import { verifyPaymentHandler } from "../../order/controllers/helpers/payment";
-import { autoGenerateBarcodeIfEligible } from "../../order/controllers/helpers/autoBarcode";
-
-jest.mock("../../order/controllers/helpers/autoBarcode", () => ({
-  autoGenerateBarcodeIfEligible: jest.fn(),
-}));
 
 type StrapiMockHelpers = ReturnType<typeof createStrapiMock>;
 
@@ -155,10 +150,6 @@ describe("verifyPaymentHandler", () => {
       200,
       expect.objectContaining({ data: { Status: "Started" } }),
     );
-    expect(autoGenerateBarcodeIfEligible).toHaveBeenCalledWith(
-      strapi,
-      200,
-    );
     expect(strapi.entityService.create).toHaveBeenCalledWith(
       "api::order-log.order-log",
       expect.objectContaining({
@@ -280,7 +271,6 @@ describe("verifyPaymentHandler", () => {
       700,
       { data: { Status: "Started" } },
     );
-    expect(autoGenerateBarcodeIfEligible).toHaveBeenCalledWith(strapi, 700);
     expect(strapi.entityService.create).toHaveBeenCalledWith(
       "api::order-log.order-log",
       expect.objectContaining({

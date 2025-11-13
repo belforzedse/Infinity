@@ -377,6 +377,62 @@ class StrapiClient extends BaseApiClient {
     return response.data;
   }
 
+  /**
+   * Shipping helpers (provinces/cities)
+   */
+  async findShippingProvinceByTitle(title) {
+    const response = await this.retryRequest(() =>
+      this.client.get('/shipping-provinces', {
+        params: {
+          'filters[Title][$eq]': title,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+    return response.data?.data?.[0] || null;
+  }
+
+  async createShippingProvince(data) {
+    const response = await this.retryRequest(() =>
+      this.client.post('/shipping-provinces', { data })
+    );
+    return response.data?.data;
+  }
+
+  async updateShippingProvince(id, data) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/shipping-provinces/${id}`, { data })
+    );
+    return response.data?.data;
+  }
+
+  async findShippingCity(title, provinceId) {
+    const response = await this.retryRequest(() =>
+      this.client.get('/shipping-cities', {
+        params: {
+          'filters[Title][$eq]': title,
+          'filters[shipping_province][id][$eq]': provinceId,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+    return response.data?.data?.[0] || null;
+  }
+
+  async createShippingCity(data) {
+    const response = await this.retryRequest(() =>
+      this.client.post('/shipping-cities', { data })
+    );
+    return response.data?.data;
+  }
+
+  async updateShippingCity(id, data) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/shipping-cities/${id}`, { data })
+    );
+    return response.data?.data;
+  }
+
     /**
    * Find or create variation color
    */

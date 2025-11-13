@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { WooCommerceClient, StrapiClient } = require("../utils/ApiClient");
 const DuplicateTracker = require("../utils/DuplicateTracker");
+const { resolveColorMapping } = require("../utils/colorMappings");
 
 const DEFAULT_NAME_FILTER_KEYWORDS = ["اسلیپر", "ونس", "کیف", "کفش", "کتونی", "صندل"];
 
@@ -656,7 +657,20 @@ class VariationImporter {
       return null;
     }
 
-    const cacheKey = `${type}:${value}`;
+    let normalizedValue = value.toString().trim();
+    let resolvedColor = null;
+
+    if (type === "color") {
+      resolvedColor = resolveColorMapping(normalizedValue);
+      if (!resolvedColor.matched) {
+        this.logger.info(
+          `🎨 Color "${normalizedValue}" not found in mapping. Using fallback ${resolvedColor.colorCode}.`,
+        );
+      }
+      normalizedValue = resolvedColor.title;
+    }
+
+    const cacheKey = `${type}:${normalizedValue.toLowerCase()}`;
     const cache = this.getCacheForType(type);
 
     if (cache.has(cacheKey)) {
@@ -665,7 +679,6 @@ class VariationImporter {
 
     try {
       let result;
-      const normalizedValue = value.toString().trim();
       const attributeData = {
         Title: normalizedValue,
         external_id: `${type}_${normalizedValue.toLowerCase().replace(/\s+/g, "_")}`,
@@ -673,7 +686,8 @@ class VariationImporter {
       };
 
       if (type === "color") {
-        attributeData.ColorCode = customColorCode || this.generateColorCode(normalizedValue);
+        attributeData.ColorCode =
+          customColorCode || resolvedColor?.colorCode || resolveColorMapping("").colorCode;
       }
 
       switch (type) {

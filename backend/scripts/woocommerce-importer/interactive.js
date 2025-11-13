@@ -14,6 +14,7 @@ const VariationImporter = require('./importers/VariationImporter');
 const OrderImporter = require('./importers/OrderImporter');
 const UserImporter = require('./importers/UserImporter');
 const DuplicateTracker = require('./utils/DuplicateTracker');
+const { syncShippingLocations } = require('./utils/ShippingSeeder');
 const Logger = require('./utils/Logger');
 const config = require('./config');
 
@@ -340,9 +341,10 @@ async function showMainMenu() {
   console.log('  7️⃣  Run All Enabled Importers');
   console.log('  8️⃣  View Import Status & Mappings');
   console.log('  9️⃣  Clear All Mappings (Reset Progress)');
-  console.log('  🔟  Exit\n');
+  console.log('  🔟  Sync Shipping Provinces & Cities');
+  console.log('  1️⃣1️⃣  Exit\n');
 
-  const choice = await prompt('Enter your choice (1-10): ');
+  const choice = await prompt('Enter your choice (1-11): ');
   return choice;
 }
 
@@ -735,6 +737,14 @@ async function main() {
           await clearMappings();
           break;
         case '10':
+          try {
+            await syncShippingLocations(config, logger);
+          } catch (error) {
+            console.log(`\n❌ Shipping sync failed: ${error.message}\n`);
+          }
+          await prompt('Press Enter to continue...');
+          break;
+        case '11':
           console.log('\n👋 Goodbye!\n');
           running = false;
           break;
