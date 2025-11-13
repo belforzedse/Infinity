@@ -57,6 +57,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::product-stock": {
         "product-stock": READ_ACTIONS,
       },
+      "api::cart-item": {
+        "cart-item": READ_ACTIONS,
+      },
       "api::product-review": {
         "product-review": READ_ACTIONS,
       },
