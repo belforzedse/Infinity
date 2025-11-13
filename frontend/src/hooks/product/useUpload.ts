@@ -133,10 +133,18 @@ export function useUpload({
     try {
       for (const file of newFiles) {
         try {
-          const fileType = getFileType(file); // FIXME: Shadows outer fileType parameter
+          const currentFileType = getFileType(file);
           const previewUrl = createPreview(file);
-          const uploadSource =
-            fileType === "image" ? await optimizeImage(file) : file;
+          let uploadSource: File = file;
+
+          if (currentFileType === "image") {
+            const optimizedBlob = await optimizeImage(file);
+            // Preserve original filename when uploading optimized images
+            uploadSource = new File([optimizedBlob], file.name, {
+              type: optimizedBlob.type,
+            });
+          }
+
           const response = await uploadFile(uploadSource);
 
           if (response) {
@@ -145,7 +153,7 @@ export function useUpload({
               logger.info("response", { response });
             }
 
-            if (fileType === "image" || fileType === "video") {
+            if (currentFileType === "image" || currentFileType === "video") {
               setProductData((prev: any) => ({
                 // TODO: Replace `any` usage with ProductData type
                 ...prev,
@@ -175,7 +183,7 @@ export function useUpload({
             };
 
             // Sort files by type into appropriate arrays
-            switch (fileType) {
+            switch (currentFileType) {
               case "image":
                 successfulImages.push(fileWithPreview);
                 break;
