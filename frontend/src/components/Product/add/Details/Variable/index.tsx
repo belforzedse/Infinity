@@ -7,6 +7,11 @@ interface ProductVariablesProps {
   productId: number;
 }
 
+const DEFAULT_TITLES = {
+  sizes: "تک سایز",
+  models: "استاندارد",
+};
+
 const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [variables, setVariables] = useState<ProductVariableDisplay[]>([]);
@@ -49,8 +54,12 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
         const formattedVariations = variations.map((variation: ProductVariable) => {
           // Extract color, size, model details
           const color = variation.attributes.product_variation_color?.data?.attributes.Title || "";
-          const size = variation.attributes.product_variation_size?.data?.attributes.Title || "";
-          const model = variation.attributes.product_variation_model?.data?.attributes.Title || "";
+          const size =
+            variation.attributes.product_variation_size?.data?.attributes.Title ||
+            DEFAULT_TITLES.sizes;
+          const model =
+            variation.attributes.product_variation_model?.data?.attributes.Title ||
+            DEFAULT_TITLES.models;
 
           // Create variable name from combinations
           const variableParts = [size, color, model].filter((part) => part !== "");

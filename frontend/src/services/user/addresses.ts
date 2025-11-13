@@ -1,6 +1,6 @@
-import { apiClient } from "@/services";
 // removed unused import: HTTP_STATUS from "@/constants/api"
 import { handleAuthErrors } from "@/utils/auth";
+import { apiClient } from "@/lib/api-client";
 
 // Use the central auth error handler instead of local implementation
 const handleAuthError = (error: any) => {

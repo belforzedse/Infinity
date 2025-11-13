@@ -4,6 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
 import { HexColorPicker, HexColorInput } from "react-colorful";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 interface Feature {
   id: string;
@@ -133,12 +134,6 @@ const DEFAULT_TITLES: Record<"sizes" | "models", string> = {
   models: "استاندارد",
 };
 
-const featureToFeatureValue = (option: ApiFeature): Feature => ({
-  id: String(option.id),
-  value: option.attributes.Title,
-  colorCode: option.attributes.ColorCode,
-});
-
 export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   const [features, setFeatures] = useState<FeatureGroup>({
     colors: [],
@@ -185,39 +180,6 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     models: false,
   });
 
-  type DefaultAttributeType = "sizes" | "models";
-
-  const ensureDefaultAttribute = async (type: DefaultAttributeType, title: string): Promise<Feature | null> => {
-    const existingFeature = features[type].find((feature) => feature.value === title);
-    if (existingFeature) {
-      return existingFeature;
-    }
-
-    let option = availableOptions[type].find((item) => item.attributes.Title === title);
-    try {
-      if (!option) {
-        const response = await apiClient.post<ApiFeature>(ATTRIBUTE_ENDPOINTS[type], {
-          data: { Title: title },
-        });
-        option = response.data;
-        setAvailableOptions((prev) => ({
-          ...prev,
-          [type]: [...prev[type], option],
-        }));
-      }
-
-      const newFeature = featureToFeatureValue(option);
-      setFeatures((prev) => ({
-        ...prev,
-        [type]: [...prev[type], newFeature],
-      }));
-      return newFeature;
-    } catch (error) {
-      console.error(`Error ensuring default ${type} attribute:`, error);
-      return null;
-    }
-  };
-
   const createAttributeOption = async (
     type: "colors" | "sizes" | "models",
     payload: { Title: string; ColorCode?: string },
@@ -245,8 +207,8 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       return created;
     } catch (error: any) {
       console.error("Error creating variation option:", error);
-      const message =
-        error?.response?.data?.error?.message || "خطا در ایجاد ویژگی جدید. لطفاً دوباره تلاش کنید.";
+      const rawErrorMessage = extractErrorMessage(error);
+      const message = translateErrorMessage(rawErrorMessage, "خطا در ایجاد ویژگی جدید. لطفاً دوباره تلاش کنید.");
       toast.error(message);
       return null;
     } finally {
@@ -383,8 +345,10 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
   // Generate combinations and calculate potential variations count
   useEffect(() => {
-    const potentialVariationsCount =
-      features.colors.length * features.sizes.length * features.models.length || 0;
+    // Account for default values when sizes or models are empty
+    const sizeCount = features.sizes.length > 0 ? features.sizes.length : 1;
+    const modelCount = features.models.length > 0 ? features.models.length : 1;
+    const potentialVariationsCount = features.colors.length * sizeCount * modelCount;
 
     setVariationsCount(potentialVariationsCount);
   }, [features]);
@@ -462,57 +426,34 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       return;
     }
 
-    let defaultSizeFeature: Feature | null = null;
-    let defaultModelFeature: Feature | null = null;
-
-    if (features.sizes.length === 0) {
-      defaultSizeFeature = await ensureDefaultAttribute("sizes", DEFAULT_TITLES.sizes);
-      if (!defaultSizeFeature) {
-        alert("خطا در افزودن اندازه پیش‌فرض");
-        return;
-      }
-    }
-
-    if (features.models.length === 0) {
-      defaultModelFeature = await ensureDefaultAttribute("models", DEFAULT_TITLES.models);
-      if (!defaultModelFeature) {
-        alert("خطا در افزودن مدل پیش‌فرض");
-        return;
-      }
-    }
-
     try {
       setIsGeneratingVariations(true);
       // Create all possible combinations
       const combinations = [];
       const colorList = features.colors;
-      const sizeList = features.sizes.length
-        ? features.sizes
-        : defaultSizeFeature
-        ? [defaultSizeFeature]
-        : [];
-      const modelList = features.models.length
-        ? features.models
-        : defaultModelFeature
-        ? [defaultModelFeature]
-        : [];
-
-      if (sizeList.length === 0 || modelList.length === 0) {
-        alert("خطا در آماده‌سازی ویژگی پیش‌فرض");
-        return;
-      }
-
+      const sizeOptions =
+        features.sizes.length > 0 ? features.sizes : [{ id: "default-size", value: DEFAULT_TITLES.sizes }];
+      const modelOptions =
+        features.models.length > 0 ? features.models : [{ id: "default-model", value: DEFAULT_TITLES.models }];
       for (const color of colorList) {
-        for (const size of sizeList) {
-          for (const model of modelList) {
+        for (const size of sizeOptions) {
+          for (const model of modelOptions) {
             // Generate a unique SKU for this variation
-            const sku = generateSKU(color.id, size.id, model.id);
+            const sku = generateSKU(
+              color.id,
+              size.id || "default-size",
+              model.id || "default-model",
+            );
 
             combinations.push({
               product: productId,
               product_variation_color: parseInt(color.id),
-              product_variation_size: parseInt(size.id),
-              product_variation_model: parseInt(model.id),
+              ...(features.sizes.length > 0
+                ? { product_variation_size: parseInt(size.id) }
+                : {}),
+              ...(features.models.length > 0
+                ? { product_variation_model: parseInt(model.id) }
+                : {}),
               SKU: sku,
               Price: 0, // Default price is 0
               DiscountPrice: null, // Default discount price is null

@@ -5,6 +5,7 @@ import { config } from "./config";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/services";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 export type Coupon = {
   id: number;
@@ -61,8 +62,10 @@ export default function Page() {
 
           toast.success("کد تخفیف با موفقیت ثبت شد");
           router.push("/super-admin/coupons");
-        } catch {
-          toast.error("خطایی رخ داده است");
+        } catch (error: any) {
+          const rawErrorMessage = extractErrorMessage(error);
+          const message = translateErrorMessage(rawErrorMessage, "خطا در ثبت کد تخفیف");
+          toast.error(message);
         }
       }}
     />

@@ -1,7 +1,7 @@
-import { apiClient } from "../index";
 import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
 import type { ApiError } from "@/types/api";
+import { apiClient } from "@/lib/api-client";
 
 export interface MeResponse {
   Bio: string | null;
@@ -25,6 +25,7 @@ function hasData<T>(p: unknown): p is { data: T } {
 }
 
 export const me = async (requireAdmin: boolean = false): Promise<MeResponse> => {
+
   const endpoint = `${ENDPOINTS.USER.ME}`;
   const accessToken = localStorage.getItem("accessToken");
 

@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import { useEffect, useState } from "react";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 export type CouponRule = {
   id: number;
@@ -112,8 +113,10 @@ export default function Page() {
         }
 
         setData(transformedData);
-      } catch {
-        toast.error("خطا در دریافت اطلاعات");
+      } catch (error: any) {
+        const rawErrorMessage = extractErrorMessage(error);
+        const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت اطلاعات قانون تخفیف");
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -149,8 +152,10 @@ export default function Page() {
 
           toast.success("قانون تخفیف با موفقیت بروزرسانی شد");
           router.push("/super-admin/coupons/rules");
-        } catch {
-          toast.error("خطایی رخ داده است");
+        } catch (error: any) {
+          const rawErrorMessage = extractErrorMessage(error);
+          const message = translateErrorMessage(rawErrorMessage, "خطا در بروزرسانی قانون تخفیف");
+          toast.error(message);
         }
       }}
     />
