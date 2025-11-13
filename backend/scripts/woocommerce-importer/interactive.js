@@ -212,9 +212,10 @@ let importOptions = {
     page: 1,
     dryRun: false,
     categoryIds: [],
-    useNameFilter: true,
+    useNameFilter: false,
     createdAfter: null,
     createdBefore: null,
+    publishedAfter: null, // Only import products uploaded/published after this timestamp
     // Image options
     maxImagesPerProduct: 3, // Default: 3 images per product
     updateProductsWithExistingImages: true // Always update images, even for existing products to avoid dangling references
@@ -225,7 +226,7 @@ let importOptions = {
     page: 1,
     dryRun: false,
     onlyImported: true,
-    useNameFilter: true
+    useNameFilter: false
   },
   orders: { enabled: false, limit: 50, page: 1, dryRun: true }
 };
@@ -316,6 +317,9 @@ async function showMainMenu() {
       }
       if (opts.createdBefore) {
         console.log(`     Created Before: ${formatDateDisplay(opts.createdBefore)}`);
+      }
+      if (opts.publishedAfter) {
+        console.log(`     Published After: ${formatDateDisplay(opts.publishedAfter)}`);
       }
     }
     // Show variations filter
@@ -476,6 +480,23 @@ async function configureImporter(type) {
         }
       }
     }
+
+    const publishedAfterInput = await prompt(
+      `Published-after filter - only import products uploaded after this date (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${opts.publishedAfter ? `, current ${formatDateDisplay(opts.publishedAfter)}` : ''}): `
+    );
+    if (publishedAfterInput) {
+      if (publishedAfterInput.toLowerCase() === 'clear') {
+        opts.publishedAfter = null;
+        console.log('⭕ Published-after filter removed');
+      } else {
+        try {
+          opts.publishedAfter = normalizeDateInput(publishedAfterInput, 'after');
+          console.log(`✅ Published-after filter set to: ${formatDateDisplay(opts.publishedAfter)}`);
+        } catch (error) {
+          console.log(`❌ ${error.message}. Keeping previous value.`);
+        }
+      }
+    }
   }
 
   console.log(`\n✅ ${type.toUpperCase()} configuration saved!`);
@@ -568,7 +589,8 @@ async function runAllImporters() {
           categoryIds: opts.categoryIds,
           nameFilter: opts.useNameFilter ? undefined : null,
           createdAfter: opts.createdAfter,
-          createdBefore: opts.createdBefore
+          createdBefore: opts.createdBefore,
+          publishedAfter: opts.publishedAfter
         });
       } else if (type === 'variations') {
         const importer = new VariationImporter(config, logger);

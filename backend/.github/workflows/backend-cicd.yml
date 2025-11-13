@@ -92,7 +92,9 @@ jobs:
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
-            docker image prune -f
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
 
       - name: Upload docker-compose (staging)
         if: github.ref == 'refs/heads/dev'
@@ -135,7 +137,9 @@ jobs:
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
-            docker image prune -f
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
 
       - name: Upload docker-compose (experimental)
         if: github.ref == 'refs/heads/experimental'
@@ -178,4 +182,6 @@ jobs:
             docker compose --env-file "$ENV_FILE" pull
             docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
             docker compose --env-file "$ENV_FILE" up -d --remove-orphans
-            docker image prune -f
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
