@@ -4,7 +4,6 @@ import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
-import { appendTitleFilter } from "@/constants/productFilters";
 import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
 
 interface Props {
@@ -56,8 +55,6 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
       try {
         // Start with basic search
         let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=6&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
-        // Add کیف کفش صندل کتونی filter to live preview suggestions
-        url = appendTitleFilter(url);
         const res = await fetch(url, {
           cache: "no-store",
           headers: { Accept: "application/json" },

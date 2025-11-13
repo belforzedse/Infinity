@@ -21,8 +21,6 @@ export const getProductSizeHelper = async (
 ): Promise<ApiResponse<SizeHelperData[]>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.SIZE_HELPER}?filters[product][id][$eq]=${productId}`;
 
-  const response = await apiClient.get<ApiResponse<SizeHelperData[]>>(endpoint);
-
-  // Return the full ApiResponse so callers can access both data and meta
-  return response.data;
+  // apiClient.get already returns ApiResponse<T>, so pass the unwrapped type
+  return apiClient.get<SizeHelperData[]>(endpoint);
 };

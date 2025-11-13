@@ -1,16 +1,20 @@
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
-import React, { useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 import { apiClient } from "@/services";
+import toast from "react-hot-toast";
 
 interface Feature {
   id: string;
   value: string;
+  colorCode?: string;
 }
 
 interface ApiFeature {
   id: number;
   attributes: {
     Title: string;
+    ColorCode?: string;
     [key: string]: any;
   };
 }
@@ -68,6 +72,30 @@ interface FeaturesTableProps {
   productId: number;
 }
 
+const COLOR_PALETTE = [
+  "#000000",
+  "#2f3640",
+  "#ffffff",
+  "#f5f5f5",
+  "#f39c12",
+  "#e74c3c",
+  "#8e44ad",
+  "#2980b9",
+  "#16a085",
+  "#27ae60",
+  "#c0392b",
+  "#d35400",
+  "#7f8c8d",
+  "#bdc3c7",
+  "#34495e",
+];
+
+const ATTRIBUTE_ENDPOINTS = {
+  colors: "/product-variation-colors",
+  sizes: "/product-variation-sizes",
+  models: "/product-variation-models",
+} as const;
+
 export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   const [features, setFeatures] = useState<FeatureGroup>({
     colors: [],
@@ -103,6 +131,93 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
 
   const [isGeneratingVariations, setIsGeneratingVariations] = useState(false);
   const [variationsCount, setVariationsCount] = useState(0);
+  const [colorModal, setColorModal] = useState({
+    isOpen: false,
+    name: "",
+    colorCode: "#000000",
+  });
+  const [creationLoading, setCreationLoading] = useState({
+    colors: false,
+    sizes: false,
+    models: false,
+  });
+
+  const createAttributeOption = async (
+    type: "colors" | "sizes" | "models",
+    payload: { Title: string; ColorCode?: string },
+  ) => {
+    const title = payload.Title?.trim();
+    if (!title) {
+      toast.error("نام ویژگی نمی‌تواند خالی باشد");
+      return null;
+    }
+
+    setCreationLoading((prev) => ({ ...prev, [type]: true }));
+    try {
+      const response = await apiClient.post<ApiFeature>(ATTRIBUTE_ENDPOINTS[type], {
+        data: payload,
+      });
+      const created = response.data;
+
+      setAvailableOptions((prev) => ({
+        ...prev,
+        [type]: [...prev[type], created],
+      }));
+
+      addFeature(type, created);
+      toast.success(`${title} با موفقیت اضافه شد`);
+      return created;
+    } catch (error: any) {
+      console.error("Error creating variation option:", error);
+      const message =
+        error?.response?.data?.error?.message || "خطا در ایجاد ویژگی جدید. لطفاً دوباره تلاش کنید.";
+      toast.error(message);
+      return null;
+    } finally {
+      setCreationLoading((prev) => ({ ...prev, [type]: false }));
+    }
+  };
+
+  const openColorModal = (prefill?: string) => {
+    setColorModal({
+      isOpen: true,
+      name: prefill?.trim() || "",
+      colorCode: "#000000",
+    });
+  };
+
+  const closeColorModal = () =>
+    setColorModal((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+
+  const handleSaveColor = async () => {
+    if (!colorModal.name.trim()) {
+      toast.error("نام رنگ را وارد کنید");
+      return;
+    }
+    const saved = await createAttributeOption("colors", {
+      Title: colorModal.name.trim(),
+      ColorCode: colorModal.colorCode,
+    });
+    if (saved) {
+      setInputValues((prev) => ({ ...prev, colors: "" }));
+      closeColorModal();
+    }
+  };
+
+  const handleCreateTextOption = async (
+    type: "sizes" | "models",
+    label: string,
+  ) => {
+    const created = await createAttributeOption(type, {
+      Title: label.trim(),
+    });
+    if (created) {
+      setInputValues((prev) => ({ ...prev, [type]: "" }));
+    }
+  };
 
   // Fetch all available options and existing variations
   useEffect(() => {
@@ -140,6 +255,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               existingColors.set(String(colorData.id), {
                 id: String(colorData.id),
                 value: colorData.attributes.Title,
+                colorCode: colorData.attributes.ColorCode,
               });
             }
 
@@ -222,6 +338,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     const newFeature: Feature = {
       id: String(item.id),
       value: item.attributes.Title,
+      colorCode: item.attributes.ColorCode,
     };
 
     setFeatures((prev) => ({
@@ -322,8 +439,9 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="w-full rounded-xl border border-slate-100">
+    <>
+      <div className="space-y-4">
+        <div className="w-full rounded-xl border border-slate-100">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-slate-100">
@@ -343,8 +461,13 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                   {features.colors.map((color) => (
                     <div
                       key={color.id}
-                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-2 py-1"
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1"
                     >
+                      <span
+                        className="h-4 w-4 rounded-full border border-slate-200"
+                        style={{ backgroundColor: color.colorCode || "#f5f5f5" }}
+                        aria-label={`کد رنگ ${color.colorCode || "نامشخص"}`}
+                      />
                       <span className="text-sm text-slate-500">{color.value}</span>
                       <button
                         onClick={() => removeFeature("colors", color.id)}
@@ -362,20 +485,58 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       value={inputValues.colors}
                       onChange={(e) => handleInputChange("colors", e.target.value)}
                     />
-                    {inputValues.colors && filteredOptions.colors.length > 0 && (
+                    {inputValues.colors && (
                       <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                        {filteredOptions.colors.map((option) => (
-                          <div
-                            key={option.id}
-                            onClick={() => addFeature("colors", option)}
-                            className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                          >
-                            {option.attributes.Title}
-                          </div>
-                        ))}
+                        {filteredOptions.colors.length > 0 ? (
+                          filteredOptions.colors.map((option) => (
+                            <div
+                              key={option.id}
+                              onClick={() => addFeature("colors", option)}
+                              className="text-sm flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-slate-100"
+                            >
+                              <span
+                                className="h-5 w-5 rounded-full border border-slate-200"
+                                style={{ backgroundColor: option.attributes.ColorCode || "#f5f5f5" }}
+                              />
+                              <span>{option.attributes.Title}</span>
+                              {option.attributes.ColorCode && (
+                                <span className="text-xs text-slate-400">
+                                  {option.attributes.ColorCode.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
+                        )}
+                        <button
+                          type="button"
+                          disabled={creationLoading.colors}
+                          onClick={() => openColorModal(inputValues.colors)}
+                          className={`text-xs flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 ${
+                            creationLoading.colors
+                              ? "cursor-not-allowed text-slate-400"
+                              : "text-blue-600 hover:bg-blue-50"
+                          }`}
+                        >
+                          <span>افزودن رنگ «{inputValues.colors}»</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
                       </div>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    disabled={creationLoading.colors}
+                    onClick={() => openColorModal()}
+                    className={`text-xs rounded-full border border-dashed border-slate-200 px-3 py-1 transition ${
+                      creationLoading.colors
+                        ? "cursor-not-allowed text-slate-400"
+                        : "text-blue-600 hover:border-blue-400 hover:text-blue-700"
+                    }`}
+                  >
+                    افزودن رنگ دلخواه
+                  </button>
                 </div>
               </td>
             </tr>
@@ -407,17 +568,34 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       value={inputValues.sizes}
                       onChange={(e) => handleInputChange("sizes", e.target.value)}
                     />
-                    {inputValues.sizes && filteredOptions.sizes.length > 0 && (
+                    {inputValues.sizes && (
                       <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                        {filteredOptions.sizes.map((option) => (
-                          <div
-                            key={option.id}
-                            onClick={() => addFeature("sizes", option)}
-                            className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                          >
-                            {option.attributes.Title}
-                          </div>
-                        ))}
+                        {filteredOptions.sizes.length > 0 ? (
+                          filteredOptions.sizes.map((option) => (
+                            <div
+                              key={option.id}
+                              onClick={() => addFeature("sizes", option)}
+                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
+                            >
+                              {option.attributes.Title}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
+                        )}
+                        <button
+                          type="button"
+                          disabled={creationLoading.sizes}
+                          onClick={() => handleCreateTextOption("sizes", inputValues.sizes)}
+                          className={`text-xs flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 ${
+                            creationLoading.sizes
+                              ? "cursor-not-allowed text-slate-400"
+                              : "text-blue-600 hover:bg-blue-50"
+                          }`}
+                        >
+                          <span>افزودن سایز «{inputValues.sizes}»</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -452,17 +630,34 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       value={inputValues.models}
                       onChange={(e) => handleInputChange("models", e.target.value)}
                     />
-                    {inputValues.models && filteredOptions.models.length > 0 && (
+                    {inputValues.models && (
                       <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                        {filteredOptions.models.map((option) => (
-                          <div
-                            key={option.id}
-                            onClick={() => addFeature("models", option)}
-                            className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                          >
-                            {option.attributes.Title}
-                          </div>
-                        ))}
+                        {filteredOptions.models.length > 0 ? (
+                          filteredOptions.models.map((option) => (
+                            <div
+                              key={option.id}
+                              onClick={() => addFeature("models", option)}
+                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
+                            >
+                              {option.attributes.Title}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
+                        )}
+                        <button
+                          type="button"
+                          disabled={creationLoading.models}
+                          onClick={() => handleCreateTextOption("models", inputValues.models)}
+                          className={`text-xs flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 ${
+                            creationLoading.models
+                              ? "cursor-not-allowed text-slate-400"
+                              : "text-blue-600 hover:bg-blue-50"
+                          }`}
+                        >
+                          <span>افزودن مدل «{inputValues.models}»</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -471,32 +666,153 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
             </tr>
           </tbody>
         </table>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border border-slate-100 p-4">
+          <div className="text-sm text-slate-600">
+            <p>
+              تعداد تنوع‌های محصول: <span className="font-semibold">{variationsCount}</span>
+            </p>
+            {variationsCount > 0 && (
+              <p className="text-xs mt-1">
+                با ترکیب ویژگی‌های انتخاب شده {variationsCount} تنوع محصول ایجاد خواهد شد
+              </p>
+            )}
+          </div>
+          <button
+            onClick={generateVariations}
+            disabled={isGeneratingVariations || variationsCount === 0}
+            className={`text-sm rounded-lg px-4 py-2 text-white ${
+              isGeneratingVariations || variationsCount === 0
+                ? "bg-blue-300"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {isGeneratingVariations ? "در حال ایجاد تنوع‌ها..." : "ایجاد تنوع‌های محصول"}
+          </button>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-xl border border-slate-100 p-4">
-        <div className="text-sm text-slate-600">
-          <p>
-            تعداد تنوع‌های محصول: <span className="font-semibold">{variationsCount}</span>
-          </p>
-          {variationsCount > 0 && (
-            <p className="text-xs mt-1">
-              با ترکیب ویژگی‌های انتخاب شده {variationsCount} تنوع محصول ایجاد خواهد شد
-            </p>
-          )}
-        </div>
-        <button
-          onClick={generateVariations}
-          disabled={isGeneratingVariations || variationsCount === 0}
-          className={`text-sm rounded-lg px-4 py-2 text-white ${
-            isGeneratingVariations || variationsCount === 0
-              ? "bg-blue-300"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {isGeneratingVariations ? "در حال ایجاد تنوع‌ها..." : "ایجاد تنوع‌های محصول"}
-        </button>
-      </div>
-    </div>
+      <Transition appear show={colorModal.isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-[1300]" onClose={closeColorModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                  <Dialog.Title className="text-lg font-medium text-neutral-900">
+                    افزودن رنگ جدید
+                  </Dialog.Title>
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label className="text-sm text-neutral-600">نام رنگ</label>
+                      <input
+                        type="text"
+                        value={colorModal.name}
+                        onChange={(e) =>
+                          setColorModal((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+                        placeholder="مثلاً آبی آسمانی"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-neutral-600">کد رنگ</label>
+                      <div className="mt-2 flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={colorModal.colorCode}
+                          onChange={(e) =>
+                            setColorModal((prev) => ({
+                              ...prev,
+                              colorCode: e.target.value,
+                            }))
+                          }
+                          className="h-10 w-16 cursor-pointer rounded border border-slate-200 bg-white"
+                        />
+                        <input
+                          type="text"
+                          value={colorModal.colorCode.toUpperCase()}
+                          onChange={(e) =>
+                            setColorModal((prev) => ({
+                              ...prev,
+                              colorCode: e.target.value,
+                            }))
+                          }
+                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+                        />
+                      </div>
+                      <div className="mt-3 grid grid-cols-5 gap-2">
+                        {COLOR_PALETTE.map((color) => (
+                          <button
+                            type="button"
+                            key={color}
+                            onClick={() =>
+                              setColorModal((prev) => ({
+                                ...prev,
+                                colorCode: color,
+                              }))
+                            }
+                            className={`h-10 w-full rounded-lg border ${
+                              colorModal.colorCode.toLowerCase() === color.toLowerCase()
+                                ? "border-blue-500 ring-2 ring-blue-200"
+                                : "border-slate-200"
+                            }`}
+                            style={{ backgroundColor: color }}
+                            aria-label={`انتخاب رنگ ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={closeColorModal}
+                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-neutral-600"
+                    >
+                      انصراف
+                    </button>
+                    <button
+                      type="button"
+                      disabled={creationLoading.colors}
+                      onClick={handleSaveColor}
+                      className={`rounded-lg px-4 py-2 text-sm text-white ${
+                        creationLoading.colors ? "bg-blue-300" : "bg-blue-600 hover:bg-blue-700"
+                      }`}
+                    >
+                      ذخیره رنگ
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+    </>
   );
 };
 

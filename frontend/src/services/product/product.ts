@@ -1,10 +1,10 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
-import { appendTitleFilter } from "@/constants/productFilters";
+import { ENDPOINTS } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
 import { computeDiscountForVariation, parseNumber } from "@/utils/discounts";
+import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 
 export interface ProductMedia {
   id: number;
@@ -266,7 +266,7 @@ export const formatGalleryAssets = (product: ProductDetail) => {
       // Get thumbnail URL or use a placeholder
       let thumbnailUrl = "";
       if (coverImage.attributes.formats?.thumbnail?.url) {
-        thumbnailUrl = `${IMAGE_BASE_URL}${coverImage.attributes.formats.thumbnail.url}`;
+        thumbnailUrl = resolveAssetUrl(coverImage.attributes.formats.thumbnail.url);
       } else {
         // Create a placeholder image based on type
         const placeholder = getPlaceholderImage(coverImage.attributes.mime);
@@ -276,7 +276,7 @@ export const formatGalleryAssets = (product: ProductDetail) => {
       assets.push({
         id: coverImage.id.toString(),
         type: isVideo ? ("video" as const) : ("image" as const),
-        src: `${IMAGE_BASE_URL}${coverImage.attributes.url}`,
+        src: resolveAssetUrl(coverImage.attributes.url),
         thumbnail: thumbnailUrl,
         alt: coverImage.attributes.alternativeText || product.attributes.Title,
       });
@@ -294,7 +294,7 @@ export const formatGalleryAssets = (product: ProductDetail) => {
         // Get thumbnail URL or use a placeholder
         let thumbnailUrl = "";
         if (media.attributes.formats?.thumbnail?.url) {
-          thumbnailUrl = `${IMAGE_BASE_URL}${media.attributes.formats.thumbnail.url}`;
+          thumbnailUrl = resolveAssetUrl(media.attributes.formats.thumbnail.url);
         } else {
           // Create a placeholder image based on type
           const placeholder = getPlaceholderImage(media.attributes.mime);
@@ -304,7 +304,7 @@ export const formatGalleryAssets = (product: ProductDetail) => {
         assets.push({
           id: media.id.toString(),
           type: isVideo ? ("video" as const) : ("image" as const),
-          src: `${IMAGE_BASE_URL}${media.attributes.url}`,
+        src: resolveAssetUrl(media.attributes.url),
           thumbnail: thumbnailUrl,
           alt: media.attributes.alternativeText || product.attributes.Title,
         });
@@ -581,9 +581,7 @@ export const getRelatedProductsByMainCategory = async (
     return [];
   }
 
-  const endpoint = appendTitleFilter(
-    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`,
-  );
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -620,9 +618,7 @@ export const getRelatedProductsByOtherCategories = async (
       .map((id, index) => `filters[product_other_categories][id][$in][${index}]=${id}`)
       .join("&");
 
-    const endpoint = appendTitleFilter(
-      `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`,
-    );
+    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`;
 
     const response = await apiClient.get<any>(endpoint);
     return formatProductsToCardProps((response as any).data);
@@ -685,7 +681,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 
       const result: ProductCardProps = {
         id: parseInt(product.id),
-        images: [`${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`],
+        images: [resolveAssetUrl(product.attributes.CoverImage?.data?.attributes?.url)],
         category: product.attributes.product_main_category?.data?.attributes?.Title || "",
         title: product.attributes.Title,
         price,
