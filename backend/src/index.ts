@@ -5,6 +5,7 @@ import localUserOverride from "./api/local-user/documentation/1.0.0/overrides/lo
 
 import productLifeCycles from "./api/product/lifecycles";
 import productVariationLifeCycles from "./api/product-variation/lifecycles";
+import { ensureIranLocations } from "./jobs/ensureLocations";
 
 type ControllerActions = Record<string, ReadonlyArray<string> | "*">;
 type FullAccessSpec = { mode: "all" };
@@ -299,6 +300,9 @@ export default {
   bootstrap({ strapi }) {
     strapi.db.lifecycles.subscribe(productLifeCycles);
     strapi.db.lifecycles.subscribe(productVariationLifeCycles);
+    ensureIranLocations(strapi).catch((err) => {
+      strapi.log.error("Failed to ensure province/city seed", err);
+    });
     // Migrate any existing local-users to plugin users by creating a bridge (idempotent)
     (async function migrateLocalUsers() {
       try {
