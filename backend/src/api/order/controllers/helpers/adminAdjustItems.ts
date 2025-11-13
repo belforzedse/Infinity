@@ -188,8 +188,9 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
     // Reuse original discount
     const discountAmount = Number(order.AppliedDiscountAmount || 0);
 
-    // Recalculate shipping if Anipo
+    // Recalculate shipping if Anipo (disabled – leave original logic commented for reference)
     let newShipping = Number(order.ShippingCost || 0);
+    /*
     const shipping = order.shipping;
     if (shipping && shipping.Title?.toLowerCase().includes("anipo")) {
       const cityCode = order.delivery_address?.shipping_city?.Code;
@@ -214,6 +215,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
         }
       }
     }
+    */
 
     // Tax is completely disabled (always 0)
     const discountRate = originalSubtotal > 0 ? discountAmount / originalSubtotal : 0;
