@@ -1,36 +1,135 @@
 {
-  "561562": {
-    "strapiId": 1,
-    "importedAt": "2025-11-11T12:00:17.770Z",
-    "name": "اسلیپر استیکری 00801",
-    "slug": "sleeper-model-2-00801",
-    "type": "variable",
-    "status": "publish",
-    "rating": "4.00"
-  },
-  "564173": {
-    "strapiId": 2,
-    "importedAt": "2025-11-11T12:00:43.188Z",
-    "name": "اسلیپر پلنگی بدون ساق  00825",
-    "slug": "slipper-without-leopard-legs-00825",
-    "type": "variable",
-    "status": "publish",
-    "rating": "0.00"
-  },
-  "566251": {
+  "826444": {
     "strapiId": 3,
-    "importedAt": "2025-11-11T12:00:52.441Z",
-    "name": "اسلیپر ساقدار قلبی 00832",
-    "slug": "00832-heart-leg-sleeper",
+    "importedAt": "2025-11-13T11:31:55.451Z",
+    "name": "پیراهن راه راه نیم زیپ OppsiH00309",
+    "slug": "%d9%be%db%8c%d8%b1%d8%a7%d9%87%d9%86-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-%d9%86%db%8c%d9%85-%d8%b2%db%8c%d9%be-oppsih00309",
     "type": "variable",
     "status": "publish",
     "rating": "0.00"
   },
-  "570232": {
+  "848167": {
+    "strapiId": 5,
+    "importedAt": "2025-11-13T11:31:35.771Z",
+    "name": "بافت آستین تور OppsiH00134",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d8%b3%d8%aa%db%8c%d9%86-%d8%aa%d9%88%d8%b1-oppsih00134",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "856512": {
+    "strapiId": 6,
+    "importedAt": "2025-11-13T11:31:51.425Z",
+    "name": "دامن پایین تور OppsiH00197",
+    "slug": "%d8%af%d8%a7%d9%85%d9%86-%d9%be%d8%a7%db%8c%db%8c%d9%86-%d8%aa%d9%88%d8%b1-oppsih00197",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "861476": {
+    "strapiId": 7,
+    "importedAt": "2025-11-13T11:31:32.099Z",
+    "name": "ترنچ کت آسو OppsiE0065",
+    "slug": "%d8%aa%d8%b1%d9%86%da%86-%da%a9%d8%aa-%d8%a2%d8%b3%d9%88-oppsie0065",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "870975": {
     "strapiId": 4,
-    "importedAt": "2025-11-11T12:01:01.497Z",
-    "name": "اسلیپر تدی ساده 00834",
-    "slug": "simple-sleeper-00834",
+    "importedAt": "2025-11-13T11:31:45.920Z",
+    "name": "ترنچ کت کایرو OppsiE0063",
+    "slug": "%d8%aa%d8%b1%d9%86%da%86-%da%a9%d8%aa-%da%a9%d8%a7%db%8c%d8%b1%d9%88-oppsie0063",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1017451": {
+    "strapiId": 9,
+    "importedAt": "2025-11-13T11:32:31.201Z",
+    "name": "پیراهن کبریتی OppsiC00599",
+    "slug": "%d9%be%db%8c%d8%b1%d8%a7%d9%87%d9%86-%da%a9%d8%a8%d8%b1%db%8c%d8%aa%db%8c-oppsic00599",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1034921": {
+    "strapiId": 8,
+    "importedAt": "2025-11-13T11:32:28.188Z",
+    "name": "تونیک شارو OppsiD00253",
+    "slug": "%d8%aa%d9%88%d9%86%db%8c%da%a9-%d8%b4%d8%a7%d8%b1%d9%88-oppsid00253",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1039359": {
+    "strapiId": 11,
+    "importedAt": "2025-11-13T11:32:49.159Z",
+    "name": "سوییشرت یقه ایستاده OppsiE00211",
+    "slug": "%d8%b3%d9%88%db%8c%db%8c%d8%b4%d8%b1%d8%aa-%db%8c%d9%82%d9%87-%d8%a7%db%8c%d8%b3%d8%aa%d8%a7%d8%af%d9%87-oppsie00211",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1040152": {
+    "strapiId": 10,
+    "importedAt": "2025-11-13T11:32:22.632Z",
+    "name": "ست فانتزی ماهلین Oppsi000474",
+    "slug": "%d8%b3%d8%aa-%d9%81%d8%a7%d9%86%d8%aa%d8%b2%db%8c-%d9%85%d8%a7%d9%87%d9%84%db%8c%d9%86-oppsi000474",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1043344": {
+    "strapiId": 12,
+    "importedAt": "2025-11-13T11:32:53.819Z",
+    "name": "دستکش Oppsi(FASHION)S00708",
+    "slug": "%d8%af%d8%b3%d8%aa%da%a9%d8%b4-oppsifashions00708",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1052647": {
+    "strapiId": 13,
+    "importedAt": "2025-11-13T11:33:17.418Z",
+    "name": "شلوار بگ کبریتی تو کرک OppsiL0095",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%da%a9%d8%a8%d8%b1%db%8c%d8%aa%db%8c-%d8%aa%d9%88-%da%a9%d8%b1%da%a9-oppsil0095",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1064948": {
+    "strapiId": 14,
+    "importedAt": "2025-11-13T11:33:19.129Z",
+    "name": "ژیله یقه هفت L00110",
+    "slug": "%da%98%db%8c%d9%84%d9%87-%db%8c%d9%82%d9%87-%d9%87%d9%81%d8%aa-l00110",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1074962": {
+    "strapiId": 16,
+    "importedAt": "2025-11-13T11:33:14.322Z",
+    "name": "شلوار اویشو بغل خط OppsiL00152",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a7%d9%88%db%8c%d8%b4%d9%88-%d8%a8%d8%ba%d9%84-%d8%ae%d8%b7-oppsil00152",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1075000": {
+    "strapiId": 15,
+    "importedAt": "2025-11-13T11:33:07.913Z",
+    "name": "بلوز یقه اسکی کش بافت OppsiL00198",
+    "slug": "%d8%a8%d9%84%d9%88%d8%b2-%db%8c%d9%82%d9%87-%d8%a7%d8%b3%da%a9%db%8c-%da%a9%d8%b4-%d8%a8%d8%a7%d9%81%d8%aa-oppsil00198",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1077346": {
+    "strapiId": 17,
+    "importedAt": "2025-11-13T11:33:21.449Z",
+    "name": "پلیور راه راه OppsiL00166",
+    "slug": "%d9%be%d9%84%db%8c%d9%88%d8%b1-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsil00166",
     "type": "variable",
     "status": "publish",
     "rating": "0.00"

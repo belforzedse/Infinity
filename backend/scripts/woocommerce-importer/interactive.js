@@ -36,6 +36,44 @@ function prompt(question) {
   });
 }
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+function normalizeDateInput(value, boundary) {
+  if (!value) {
+    return null;
+  }
+
+  const raw = String(value).trim();
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid date value: ${value}`);
+  }
+
+  const isDateOnly = DATE_ONLY_REGEX.test(raw);
+  let timestamp = parsed.getTime();
+
+  if (isDateOnly && boundary === 'after') {
+    timestamp += ONE_DAY_MS;
+  } else if (isDateOnly && boundary === 'before') {
+    timestamp += ONE_DAY_MS - 1;
+  }
+
+  return new Date(timestamp).toISOString();
+}
+
+function formatDateDisplay(value) {
+  if (!value) {
+    return '';
+  }
+
+  try {
+    return new Date(value).toISOString();
+  } catch (error) {
+    return value;
+  }
+}
+
 /**
  * Check API health before import
  */
@@ -175,6 +213,8 @@ let importOptions = {
     dryRun: false,
     categoryIds: [],
     useNameFilter: true,
+    createdAfter: null,
+    createdBefore: null,
     // Image options
     maxImagesPerProduct: 3, // Default: 3 images per product
     updateProductsWithExistingImages: true // Always update images, even for existing products to avoid dangling references
@@ -271,6 +311,12 @@ async function showMainMenu() {
       console.log(`     Max Images: ${opts.maxImagesPerProduct === 999 ? 'Unlimited' : opts.maxImagesPerProduct}`);
       console.log(`     Update Existing Images: ${opts.updateProductsWithExistingImages ? 'Yes' : 'No'}`);
       console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? 'On' : 'Off'}`);
+      if (opts.createdAfter) {
+        console.log(`     Created After: ${formatDateDisplay(opts.createdAfter)}`);
+      }
+      if (opts.createdBefore) {
+        console.log(`     Created Before: ${formatDateDisplay(opts.createdBefore)}`);
+      }
     }
     // Show variations filter
     if (type === 'variations') {
@@ -396,6 +442,40 @@ async function configureImporter(type) {
     if (productNameFilterInput.trim()) {
       opts.useNameFilter = productNameFilterInput.toLowerCase() !== 'n';
     }
+
+    const createdAfterInput = await prompt(
+      `Created-after filter (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${opts.createdAfter ? `, current ${formatDateDisplay(opts.createdAfter)}` : ''}): `
+    );
+    if (createdAfterInput) {
+      if (createdAfterInput.toLowerCase() === 'clear') {
+        opts.createdAfter = null;
+        console.log('⭕ Created-after filter removed');
+      } else {
+        try {
+        opts.createdAfter = normalizeDateInput(createdAfterInput, 'after');
+          console.log(`✅ Created-after filter set to: ${formatDateDisplay(opts.createdAfter)}`);
+        } catch (error) {
+          console.log(`❌ ${error.message}. Keeping previous value.`);
+        }
+      }
+    }
+
+    const createdBeforeInput = await prompt(
+      `Created-before filter (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${opts.createdBefore ? `, current ${formatDateDisplay(opts.createdBefore)}` : ''}): `
+    );
+    if (createdBeforeInput) {
+      if (createdBeforeInput.toLowerCase() === 'clear') {
+        opts.createdBefore = null;
+        console.log('⭕ Created-before filter removed');
+      } else {
+        try {
+        opts.createdBefore = normalizeDateInput(createdBeforeInput, 'before');
+          console.log(`✅ Created-before filter set to: ${formatDateDisplay(opts.createdBefore)}`);
+        } catch (error) {
+          console.log(`❌ ${error.message}. Keeping previous value.`);
+        }
+      }
+    }
   }
 
   console.log(`\n✅ ${type.toUpperCase()} configuration saved!`);
@@ -486,7 +566,9 @@ async function runAllImporters() {
           page: opts.page,
           dryRun: opts.dryRun,
           categoryIds: opts.categoryIds,
-          nameFilter: opts.useNameFilter ? undefined : null
+          nameFilter: opts.useNameFilter ? undefined : null,
+          createdAfter: opts.createdAfter,
+          createdBefore: opts.createdBefore
         });
       } else if (type === 'variations') {
         const importer = new VariationImporter(config, logger);

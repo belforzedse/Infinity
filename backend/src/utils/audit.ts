@@ -1,3 +1,5 @@
+import { getAuditContext } from "./audit-context";
+
 type EventContext = {
   state?: { user?: any };
 };
@@ -37,7 +39,27 @@ const extractLabel = (user: any): string | null => {
   );
 };
 
+/**
+ * Resolve the audit actor from multiple sources with priority order:
+ * 1. AsyncLocalStorage audit context (from middleware, most reliable for async operations)
+ * 2. HTTP request context (fallback for direct HTTP handlers)
+ * 3. Event state (for programmatic updates)
+ * 4. Event data payload (explicit performed_by)
+ * 5. Null (anonymous)
+ */
 export const resolveAuditActor = (event?: LifecycleEvent): AuditActorInfo => {
+  // First check: AsyncLocalStorage audit context (highest priority for async)
+  const auditContext = getAuditContext();
+  if (auditContext?.userId) {
+    return {
+      userId: auditContext.userId,
+      label: auditContext.userLabel,
+      ip: auditContext.ip,
+      userAgent: auditContext.userAgent,
+    };
+  }
+
+  // Second check: HTTP request context (fallback for sync handlers)
   const requestCtx = (global as any)?.strapi?.requestContext?.get?.() as
     | (EventContext & { request?: any })
     | undefined;

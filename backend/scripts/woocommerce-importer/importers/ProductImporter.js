@@ -66,9 +66,24 @@ class ProductImporter {
       dryRun = false,
       categoryIds = [],
       nameFilter = defaultKeywords,
+      createdAfter,
+      createdBefore,
     } = options;
 
     this.stats.startTime = Date.now();
+
+    const normalizedActivityAfter = this.normalizeDateFilter(createdAfter, 'activityAfter');
+    const normalizedActivityBefore = this.normalizeDateFilter(createdBefore, 'activityBefore');
+
+    if (
+      normalizedActivityAfter &&
+      normalizedActivityBefore &&
+      new Date(normalizedActivityAfter) > new Date(normalizedActivityBefore)
+    ) {
+      throw new Error('createdAfter date must be before createdBefore date');
+    }
+
+    const dateFilterLabel = this.describeActivityFilter(normalizedActivityAfter, normalizedActivityBefore);
 
     // Determine categories to import
     let categoriesToProcess = categoryIds;
@@ -76,13 +91,13 @@ class ProductImporter {
       // If no specific categories provided, import all products
       categoriesToProcess = [null];
       this.logger.info(
-        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun})`,
+        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel})`,
       );
     } else {
       this.logger.info(
         `🛍️ Starting product import from categories: [${categoriesToProcess.join(
           ", ",
-        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun})`,
+        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel})`,
       );
     }
 
@@ -123,7 +138,10 @@ class ProductImporter {
           );
 
           // Fetch current page with optional category filter
-          const result = await this.wooClient.getProducts(currentPage, perPage, categoryId);
+          const result = await this.wooClient.getProducts(currentPage, perPage, categoryId, {
+            modifiedAfter: normalizedActivityAfter,
+            modifiedBefore: normalizedActivityBefore,
+          });
 
           if (!result.data || result.data.length === 0) {
             this.logger.info(
@@ -309,6 +327,60 @@ class ProductImporter {
     } catch (error) {
       this.logger.error(`❌ Failed to reset progress state: ${error.message}`);
     }
+  }
+
+  describeActivityFilter(activityAfter, activityBefore) {
+    if (!activityAfter && !activityBefore) {
+      return "";
+    }
+
+    const parts = [];
+    if (activityAfter) {
+      parts.push(`activityAfter=${this.formatDateForLog(activityAfter)}`);
+    }
+
+    if (activityBefore) {
+      parts.push(`activityBefore=${this.formatDateForLog(activityBefore)}`);
+    }
+
+    return `, ${parts.join(" | ")}`;
+  }
+
+  formatDateForLog(value) {
+    try {
+      return new Date(value).toISOString();
+    } catch (error) {
+      this.logger.warn(`⚠️  Unable to format date filter value: ${value}`);
+      return value;
+    }
+  }
+
+  normalizeDateFilter(value, label = 'dateFilter') {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+
+    if (value instanceof Date) {
+      if (Number.isNaN(value.getTime())) {
+        throw new Error(`Invalid ${label} value`);
+      }
+      return value.toISOString();
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return undefined;
+      }
+
+      const parsed = new Date(trimmed);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new Error(`Invalid ${label} value: ${value}`);
+      }
+      return parsed.toISOString();
+    }
+
+    throw new Error(`Unsupported ${label} value type: ${typeof value}`);
   }
 
   /**
