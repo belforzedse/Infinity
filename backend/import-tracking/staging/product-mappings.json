@@ -133,5 +133,50 @@
     "type": "variable",
     "status": "publish",
     "rating": "0.00"
+  },
+  "1091868": {
+    "strapiId": 23,
+    "importedAt": "2025-11-13T12:37:16.842Z",
+    "name": "بافت پرنسسی دکمه نما L00291",
+    "slug": "button-up-blouse-l00291",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1091923": {
+    "strapiId": 27,
+    "importedAt": "2025-11-13T12:37:48.913Z",
+    "name": "بافت مینیمال L00283",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-l00283",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1091949": {
+    "strapiId": 24,
+    "importedAt": "2025-11-13T12:37:45.644Z",
+    "name": "دامن بافت L00184",
+    "slug": "%d8%af%d8%a7%d9%85%d9%86-%d8%a8%d8%a7%d9%81%d8%aa-l00184",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1091972": {
+    "strapiId": 25,
+    "importedAt": "2025-11-13T12:37:49.509Z",
+    "name": "کت فوتر پشمی L00311",
+    "slug": "woolen-footer-coat-l00311",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092186": {
+    "strapiId": 26,
+    "importedAt": "2025-11-13T12:37:30.480Z",
+    "name": "بافت مرواریدی L00288",
+    "slug": "pearl-texture-l00288",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
   }
 }
