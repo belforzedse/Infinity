@@ -8,9 +8,12 @@ export interface NormalizedSizeGuideData {
   headers: string[];
 }
 
-const HEADER_SIZE_VALUES = ["size", "سایز"];
+export type SizeGuideMatrix = Array<Array<string | number | null | undefined>>;
 
-const isNumericKey = (key: string) => /^\d+$/.test(key);
+const HEADER_SIZE_VALUES = ["size", "سایز"];
+const DEFAULT_SIZE_HEADER = "سایز";
+const sanitizeCell = (value: unknown) =>
+  typeof value === "number" ? String(value) : typeof value === "string" ? value.trim() : "";
 
 const getUniqueHeaderTitle = (title: string, used: Set<string>) => {
   const baseTitle = title.trim().length > 0 ? title.trim() : "ستون";
@@ -25,51 +28,133 @@ const getUniqueHeaderTitle = (title: string, used: Set<string>) => {
   return uniqueTitle;
 };
 
-export const normalizeSizeGuideData = (
-  helperData?: SizeGuideRow[] | null,
-): NormalizedSizeGuideData => {
-  if (!Array.isArray(helperData) || helperData.length === 0) {
+const normalizeMatrixData = (matrix: SizeGuideMatrix): NormalizedSizeGuideData => {
+  if (matrix.length === 0 || !Array.isArray(matrix[0])) {
     return { rows: [], headers: [] };
   }
 
-  const firstRow = helperData[0] ?? {};
-  const measurementKeys = Object.keys(firstRow).filter((key) => key !== "size");
-
-  if (measurementKeys.length === 0) {
-    return { rows: helperData, headers: [] };
-  }
-
-  const numericKeys = measurementKeys.every(isNumericKey);
-  const rawSizeValue = typeof firstRow.size === "string" ? firstRow.size.trim() : "";
-  const normalizedSizeValue = rawSizeValue.toLowerCase();
-  const hasEmbeddedHeaders =
-    numericKeys || HEADER_SIZE_VALUES.includes(normalizedSizeValue) || HEADER_SIZE_VALUES.includes(rawSizeValue);
-
-  if (!hasEmbeddedHeaders) {
-    return {
-      rows: helperData,
-      headers: measurementKeys,
-    };
-  }
-
+  const headerRow = matrix[0];
   const usedHeaders = new Set<string>();
-  const headers = measurementKeys.map((key, index) => {
-    const rawHeader = firstRow[key];
-    const fallback = `ستون ${index + 1}`;
-    const headerTitle =
-      typeof rawHeader === "string" && rawHeader.trim().length > 0 ? rawHeader.trim() : fallback;
 
-    return getUniqueHeaderTitle(headerTitle, usedHeaders);
+  const headerEntries = headerRow.map((cell, index) => {
+    const fallback = `ستون ${index + 1}`;
+    const headerTitle = sanitizeCell(cell) || fallback;
+    const uniqueTitle = getUniqueHeaderTitle(headerTitle, usedHeaders) || fallback;
+    return {
+      index,
+      title: uniqueTitle,
+      rawTitle: sanitizeCell(cell).toLowerCase(),
+    };
   });
 
-  const rows = helperData.slice(1).map((row) => {
-    const normalizedRow: Record<string, string> = { size: row.size ?? "" };
-    headers.forEach((headerTitle, index) => {
-      const sourceKey = measurementKeys[index];
-      normalizedRow[headerTitle] = row[sourceKey] ?? "";
+  const sizeEntry =
+    headerEntries.find((entry) => HEADER_SIZE_VALUES.includes(entry.rawTitle)) ||
+    headerEntries[0];
+
+  const measurementEntries = headerEntries.filter((entry) => entry.index !== sizeEntry.index);
+  const headers = measurementEntries.map((entry) => entry.title);
+
+  const rows = matrix.slice(1).map((row) => {
+    const normalizedRow: SizeGuideRow = {
+      size: sanitizeCell(row[sizeEntry.index]),
+    };
+
+    measurementEntries.forEach((entry) => {
+      normalizedRow[entry.title] = sanitizeCell(row[entry.index]);
+    });
+
+    return normalizedRow;
+  });
+
+  return { rows, headers };
+};
+
+const normalizeObjectRows = (helperData: SizeGuideRow[]): NormalizedSizeGuideData => {
+  const measurementKeys = new Set<string>();
+  helperData.forEach((row) => {
+    Object.keys(row || {}).forEach((key) => {
+      if (key !== "size") {
+        measurementKeys.add(key);
+      }
+    });
+  });
+
+  const headers = Array.from(measurementKeys);
+  const rows = helperData.map((row) => {
+    const normalizedRow: SizeGuideRow = {
+      size: row.size ?? row[DEFAULT_SIZE_HEADER] ?? "",
+    };
+    headers.forEach((header) => {
+      normalizedRow[header] = row[header] ?? "";
     });
     return normalizedRow;
   });
 
   return { rows, headers };
+};
+
+const coerceHelperPayload = (
+  helperData?: SizeGuideRow[] | SizeGuideMatrix | string | null,
+): SizeGuideRow[] | SizeGuideMatrix | null => {
+  if (typeof helperData === "string") {
+    try {
+      const parsed = JSON.parse(helperData);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  return Array.isArray(helperData) ? helperData : null;
+};
+
+export const normalizeSizeGuideData = (
+  rawHelperData?: SizeGuideRow[] | SizeGuideMatrix | string | null,
+): NormalizedSizeGuideData => {
+  const helperData = coerceHelperPayload(rawHelperData);
+  if (!helperData || helperData.length === 0) {
+    return { rows: [], headers: [] };
+  }
+
+  if (Array.isArray(helperData[0])) {
+    return normalizeMatrixData(helperData as SizeGuideMatrix);
+  }
+
+  return normalizeObjectRows(helperData as SizeGuideRow[]);
+};
+
+export const serializeSizeGuideMatrix = (
+  rows: SizeGuideRow[],
+  columns?: { key: string; title: string }[],
+): SizeGuideMatrix => {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return [];
+  }
+
+  const measurementColumns =
+    columns && columns.length > 0
+      ? columns
+      : Array.from(
+          rows.reduce((set, row) => {
+            Object.keys(row || {}).forEach((key) => {
+              if (key !== "size") {
+                set.add(key);
+              }
+            });
+            return set;
+          }, new Set<string>()),
+        ).map((key) => ({ key, title: key }));
+
+  const headerRow = [DEFAULT_SIZE_HEADER, ...measurementColumns.map((col) => col.title || col.key)];
+  const matrix: SizeGuideMatrix = [headerRow];
+
+  rows.forEach((row) => {
+    const sizeValue = row.size ?? row[DEFAULT_SIZE_HEADER] ?? "";
+    const record = [
+      sanitizeCell(sizeValue),
+      ...measurementColumns.map((col) => sanitizeCell(row[col.key])),
+    ];
+    matrix.push(record);
+  });
+
+  return matrix;
 };

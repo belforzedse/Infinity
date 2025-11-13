@@ -1,9 +1,24 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, API_BASE_URL } from "@/constants/api";
-import { appendTitleFilter } from "@/constants/productFilters";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
 import logger from "@/utils/logger";
+
+const productHasStock = (product: any): boolean => {
+  const variations = product?.attributes?.product_variations?.data;
+  if (!Array.isArray(variations)) return false;
+
+  return variations.some((variation: any) => {
+    const stockCount = variation?.attributes?.product_stock?.data?.attributes?.Count;
+    const numericStock =
+      typeof stockCount === "number"
+        ? stockCount
+        : stockCount !== undefined && stockCount !== null
+          ? Number(stockCount)
+          : 0;
+    return Number.isFinite(numericStock) && numericStock > 0;
+  });
+};
 
 /**
  * Fetch all homepage product sections in one API call
@@ -16,23 +31,20 @@ export const getHomepageSections = async (): Promise<{
   favorites: ProductCardProps[];
 }> => {
   // Fetch a larger pool of products (60) to ensure we have enough for all sections after filtering
-  const endpoint = appendTitleFilter(
+  const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
-      `populate[0]=CoverImage&` +
-      `populate[1]=product_main_category&` +
-      `populate[2]=product_variations&` +
-      `populate[3]=product_variations.product_stock&` +
-      `populate[4]=product_variations.general_discounts&` +
-      // Hide zero-price and zero-stock variations
-      `filters[product_variations][Price][$gte]=1&` +
-      // Hide zero-stock items
-      `filters[product_variations][product_stock][Count][$gt]=0&` +
-      `pagination[limit]=60`, // Fetch more to have enough after filtering
-  );
+    `populate[0]=CoverImage&` +
+    `populate[1]=product_main_category&` +
+    `populate[2]=product_variations&` +
+    `populate[3]=product_variations.product_stock&` +
+    `populate[4]=product_variations.general_discounts&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
+    `pagination[limit]=60`; // Fetch more to have enough after filtering
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 600 }, // Revalidate every 10 minutes
+      next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -40,10 +52,11 @@ export const getHomepageSections = async (): Promise<{
     }).then(res => res.json());
 
     const allProducts = (response as any)?.data || [];
+    const availableProducts = allProducts.filter(productHasStock);
     logger.info(`[BatchHomepage] Fetched ${allProducts.length} total products for all sections`);
 
     // Filter for discounted products
-    const discountedProducts = allProducts.filter((product: any) => {
+    const discountedProducts = availableProducts.filter((product: any) => {
       const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
         const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
         const hasStock = typeof stockCount === "number" && stockCount > 0;
@@ -60,7 +73,7 @@ export const getHomepageSections = async (): Promise<{
     }).slice(0, 20); // Limit to 20
 
     // Filter for new products (by createdAt)
-    const newProducts = [...allProducts]
+    const newProducts = [...availableProducts]
       .sort((a: any, b: any) => {
         const dateA = new Date(a.attributes.createdAt).getTime();
         const dateB = new Date(b.attributes.createdAt).getTime();
@@ -69,7 +82,7 @@ export const getHomepageSections = async (): Promise<{
       .slice(0, 20);
 
     // Filter for favorite products (by rating)
-    const favoriteProducts = [...allProducts]
+    const favoriteProducts = [...availableProducts]
       .sort((a: any, b: any) => {
         const ratingA = parseFloat(a.attributes.AverageRating) || 0;
         const ratingB = parseFloat(b.attributes.AverageRating) || 0;
@@ -94,23 +107,20 @@ export const getHomepageSections = async (): Promise<{
  * Fetch products that have active discounts.
  */
 export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
-  const endpoint = appendTitleFilter(
+  const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
-      `populate[0]=CoverImage&` +
-      `populate[1]=product_main_category&` +
-      `populate[2]=product_variations&` +
-      `populate[3]=product_variations.product_stock&` +
-      `populate[4]=product_variations.general_discounts&` +
-      // Hide zero-price and zero-stock variations
-      `filters[product_variations][Price][$gte]=1&` +
-      // Hide zero-stock items
-      `filters[product_variations][product_stock][Count][$gt]=0&` +
-      `pagination[limit]=20`,
-  );
+    `populate[0]=CoverImage&` +
+    `populate[1]=product_main_category&` +
+    `populate[2]=product_variations&` +
+    `populate[3]=product_variations.product_stock&` +
+    `populate[4]=product_variations.general_discounts&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
+    `pagination[limit]=20`;
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -118,9 +128,10 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     }).then(res => res.json());
 
     const allProducts = (response as any)?.data || [];
+    const availableProducts = allProducts.filter(productHasStock);
     logger.info(`Fetched ${allProducts.length} total products for discount check`);
 
-    const discounted = allProducts.filter((product: any) => {
+    const discounted = availableProducts.filter((product: any) => {
       // Check if product has any variation with stock AND discount
       const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
         // Check if variation has stock
@@ -166,29 +177,28 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
  * Fetch newest products.
  */
 export const getNewProducts = async (): Promise<ProductCardProps[]> => {
-  const endpoint = appendTitleFilter(
+  const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
-      `populate[0]=CoverImage&` +
-      `populate[1]=product_main_category&` +
-      `populate[2]=product_variations&` +
-      `populate[3]=product_variations.product_stock&` +
-      `populate[4]=product_variations.general_discounts&` +
-      // Hide zero-price and zero-stock variations
-      `filters[product_variations][Price][$gte]=1&` +
-      // Hide zero-stock items
-      `filters[product_variations][product_stock][Count][$gt]=0&` +
-      `sort[0]=createdAt:desc&pagination[limit]=20`,
-  );
+    `populate[0]=CoverImage&` +
+    `populate[1]=product_main_category&` +
+    `populate[2]=product_variations&` +
+    `populate[3]=product_variations.product_stock&` +
+    `populate[4]=product_variations.general_discounts&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
+    `sort[0]=createdAt:desc&pagination[limit]=20`;
+
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     }).then(res => res.json());
-    return formatProductsToCardProps((response as any).data);
+    const availableProducts = ((response as any).data || []).filter(productHasStock);
+    return formatProductsToCardProps(availableProducts);
   } catch (error) {
     logger.error("Error fetching new products:", error as any);
     return [];
@@ -199,29 +209,27 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
  * Fetch highest rated products.
  */
 export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
-  const endpoint = appendTitleFilter(
+  const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
-      `populate[0]=CoverImage&` +
-      `populate[1]=product_main_category&` +
-      `populate[2]=product_variations&` +
-      `populate[3]=product_variations.product_stock&` +
-      `populate[4]=product_variations.general_discounts&` +
-      // Hide zero-price and zero-stock variations
-      `filters[product_variations][Price][$gte]=1&` +
-      // Hide zero-stock items
-      `filters[product_variations][product_stock][Count][$gt]=0&` +
-      `sort[0]=AverageRating:desc&pagination[limit]=20`,
-  );
+    `populate[0]=CoverImage&` +
+    `populate[1]=product_main_category&` +
+    `populate[2]=product_variations&` +
+    `populate[3]=product_variations.product_stock&` +
+    `populate[4]=product_variations.general_discounts&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
+    `sort[0]=AverageRating:desc&pagination[limit]=20`;
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 600 }, // Revalidate every 10 minutes (600 seconds)
+      next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     }).then(res => res.json());
-    return formatProductsToCardProps((response as any).data);
+    const availableProducts = ((response as any).data || []).filter(productHasStock);
+    return formatProductsToCardProps(availableProducts);
   } catch (error) {
     logger.error("Error fetching favorite products:", error as any);
     return [];
@@ -236,19 +244,18 @@ export const getRandomProducts = async (
   poolSize: number = 60,
   take: number = 20,
 ): Promise<ProductCardProps[]> => {
-  const endpoint = appendTitleFilter(
+  const endpoint = 
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
       `populate[0]=CoverImage&` +
       `populate[1]=product_main_category&` +
       `populate[2]=product_variations&` +
       `populate[3]=product_variations.product_stock&` +
       `populate[4]=product_variations.general_discounts&` +
-      // Hide zero-price and zero-stock variations
+      // Hide zero-price variations
       `filters[product_variations][Price][$gte]=1&` +
-      // Hide zero-stock items
       `filters[product_variations][product_stock][Count][$gt]=0&` +
-      `pagination[limit]=${poolSize}`,
-  );
+      `pagination[limit]=${poolSize}`;
+
 
   try {
     // Public products endpoint: avoid sending user token to prevent accidental 401/logout

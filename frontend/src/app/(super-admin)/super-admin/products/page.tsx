@@ -9,8 +9,6 @@ import { useDebouncedCallback } from "use-debounce";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { apiClient } from "@/services";
 import { useQueryState } from "nuqs";
-import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
-import { appendTitleFilter } from "@/constants/productFilters";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { refreshTable } from "@/components/SuperAdmin/Table";
@@ -35,8 +33,6 @@ export default function ProductsPage() {
   const [customPageData, setCustomPageData] = useState<Product[] | null>(null);
   const [buildingIndex, setBuildingIndex] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
-  const [settings, setSettings] = useState<{ filterPublicProductsByTitle: boolean } | null>(null);
-  const [localTitleFilter, setLocalTitleFilter] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [refresh, setRefresh] = useAtom(refreshTable);
@@ -77,13 +73,6 @@ export default function ProductsPage() {
         `&populate[1]=product_variations.product_stock` +
         `&populate[2]=product_main_category`;
 
-      const shouldApplyTitleFilter =
-        localTitleFilter !== null ? localTitleFilter : settings?.filterPublicProductsByTitle;
-
-      if (shouldApplyTitleFilter && !isRecycleBinOpen) {
-        endpoint = appendTitleFilter(endpoint);
-      }
-
       if (debouncedSearchQuery.trim()) {
         endpoint += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
       }
@@ -99,8 +88,6 @@ export default function ProductsPage() {
     return items;
   }, [
     isRecycleBinOpen,
-    localTitleFilter,
-    settings?.filterPublicProductsByTitle,
     debouncedSearchQuery,
   ]);
 
@@ -132,8 +119,6 @@ export default function ProductsPage() {
     getAllProductsLite,
     sort,
     isRecycleBinOpen,
-    localTitleFilter,
-    settings?.filterPublicProductsByTitle,
     debouncedSearchQuery,
     setTotalSize,
     buildingIndex,
@@ -204,17 +189,7 @@ export default function ProductsPage() {
     if (refresh) {
       setRefresh(false);
     }
-  }, [
-    buildSalesIndex,
-    buildStockIndex,
-    sort,
-    localTitleFilter,
-    debouncedSearchQuery,
-    isRecycleBinOpen,
-    buildingIndex,
-    refresh,
-    setRefresh,
-  ]);
+  }, [buildSalesIndex, buildStockIndex, sort, debouncedSearchQuery, isRecycleBinOpen, buildingIndex, refresh, setRefresh]);
 
   // Fetch current page data when using custom index
   useEffect(() => {
@@ -238,12 +213,6 @@ export default function ProductsPage() {
               ? `&filters[removedAt][$null]=false`
               : `&filters[removedAt][$null]=true`) +
             `&populate[0]=CoverImage&populate[1]=product_variations&populate[2]=product_variations.product_stock&populate[3]=product_main_category`;
-          const shouldApplyTitleFilter =
-            localTitleFilter !== null ? localTitleFilter : settings?.filterPublicProductsByTitle;
-
-          if (shouldApplyTitleFilter && !isRecycleBinOpen) {
-            ep = appendTitleFilter(ep);
-          }
 
           if (debouncedSearchQuery.trim()) {
             ep += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
@@ -258,32 +227,7 @@ export default function ProductsPage() {
       setPageLoading(false);
     };
     run();
-  }, [
-    sortedProductIds,
-    page,
-    pageSize,
-    isRecycleBinOpen,
-    localTitleFilter,
-    settings?.filterPublicProductsByTitle,
-    debouncedSearchQuery,
-  ]);
-
-  // Fetch settings once on mount
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const s = await getSuperAdminSettings();
-        if (!mounted) return;
-        setSettings({ filterPublicProductsByTitle: s.filterPublicProductsByTitle });
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  }, [sortedProductIds, page, pageSize, isRecycleBinOpen, debouncedSearchQuery]);
 
   // Bulk actions handler
   const handleBulkAction = useCallback(
@@ -538,27 +482,6 @@ export default function ProductsPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-neutral-600">فیلتر کیف، کفش، صندل، کتونی:</label>
-            <select
-              className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
-              value={localTitleFilter === null ? "global" : localTitleFilter ? "on" : "off"}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === "global") {
-                  setLocalTitleFilter(null);
-                } else {
-                  setLocalTitleFilter(value === "on");
-                }
-              }}
-            >
-              <option value="global">
-                پیش‌فرض سایت ({settings?.filterPublicProductsByTitle ? "فعال" : "غیرفعال"})
-              </option>
-              <option value="on">فعال</option>
-              <option value="off">غیرفعال</option>
-            </select>
-          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -599,19 +522,11 @@ export default function ProductsPage() {
         <SuperAdminTable
           columns={columns}
           url={(() => {
-            const base =
+            let sortedBase =
               "/products?populate[0]=CoverImage&populate[1]=product_variations&populate[2]=product_variations.product_stock&populate[3]=product_main_category" +
               (isRecycleBinOpen
                 ? "&filters[removedAt][$null]=false"
                 : "&filters[removedAt][$null]=true");
-            const shouldApplyTitleFilter =
-              localTitleFilter !== null ? localTitleFilter : settings?.filterPublicProductsByTitle;
-
-            let sortedBase = base;
-            if (shouldApplyTitleFilter && !isRecycleBinOpen) {
-              sortedBase = appendTitleFilter(sortedBase);
-            }
-
             if (debouncedSearchQuery.trim()) {
               sortedBase += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
             }

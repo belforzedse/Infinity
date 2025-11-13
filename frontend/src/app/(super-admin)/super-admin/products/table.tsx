@@ -4,13 +4,11 @@ import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
-import { API_BASE_URL } from "@/constants/api";
 import type { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import type { ColumnDef } from "@tanstack/react-table";
-import Image from "next/image";
-import imageLoader from "@/utils/imageLoader";
 import { duplicateProduct } from "@/services/super-admin/product/duplicate";
+import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 
 export type Product = {
   id: string;
@@ -75,45 +73,45 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const coverImage = row.original?.attributes?.CoverImage;
       const imageData = coverImage?.data?.attributes;
-      const thumbnailUrl = imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
-
-      console.log('Product debug:', {
-        id: row.original?.id,
-        coverImage,
-        imageData,
-        thumbnailUrl,
-        API_BASE_URL: API_BASE_URL.split("/api")[0]
-      });
-
-      // Fix URL construction - ensure proper base URL
-      const baseImageUrl = API_BASE_URL.split("/api")[0]; // Should be "https://api.infinitycolor.co"
-      const imageUrl = thumbnailUrl
-        ? (thumbnailUrl.startsWith('http') ? thumbnailUrl : `${baseImageUrl}${thumbnailUrl}`)
-        : null;
-
-      console.log('Final product image URL:', imageUrl);
+      const thumbnailUrl =
+        imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
+      const imageUrl = resolveAssetUrl(thumbnailUrl || imageData?.url);
 
       return (
         <div className="flex items-center gap-2">
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={imageData?.name || row.original?.attributes?.Title || 'Product image'}
-              className="h-12 w-12 overflow-hidden rounded-xl object-cover"
-              onError={(e) => {
-                console.log('Products table image failed:', imageUrl);
-                console.log('Trying to load:', imageUrl);
-                e.currentTarget.style.display = 'none';
-                const placeholder = e.currentTarget.nextElementSibling;
-                if (placeholder) placeholder.classList.remove('hidden');
-              }}
-            />
-          ) : null}
-          <div className={`h-12 w-12 bg-gray-200 rounded-xl flex items-center justify-center ${imageUrl ? 'hidden' : ''}`}>
-            <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-            </svg>
-          </div>
+            <>
+              <img
+                src={imageUrl}
+                alt={imageData?.name || row.original?.attributes?.Title || "Product image"}
+                className="h-12 w-12 overflow-hidden rounded-xl object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const placeholder = e.currentTarget.nextElementSibling;
+                  if (placeholder) placeholder.classList.remove("hidden");
+                }}
+              />
+              <div className="hidden h-12 w-12 items-center justify-center rounded-xl bg-gray-200">
+                <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </>
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200">
+              <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <span className="text-xs !leading-none text-foreground-primary">
@@ -242,30 +240,40 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
           {(() => {
             const coverImage = row?.attributes?.CoverImage;
             const imageData = coverImage?.data?.attributes;
-            const thumbnailUrl = imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
-            // Fix URL construction for mobile table
-            const baseImageUrl = API_BASE_URL.split("/api")[0];
-            const imageUrl = thumbnailUrl
-              ? (thumbnailUrl.startsWith('http') ? thumbnailUrl : `${baseImageUrl}${thumbnailUrl}`)
-              : null;
+            const thumbnailUrl =
+              imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
+            const imageUrl = resolveAssetUrl(thumbnailUrl);
 
             return imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={imageData?.name || row?.attributes?.Title || 'Product image'}
-                className="h-12 w-12 rounded-lg object-cover"
-                onError={(e) => {
-                  console.log('Mobile products table image failed:', imageUrl);
-                  console.log('Mobile trying to load:', imageUrl);
-                  e.currentTarget.style.display = 'none';
-                  const placeholder = e.currentTarget.nextElementSibling;
-                  if (placeholder) placeholder.classList.remove('hidden');
-                }}
-              />
+              <>
+                <img
+                  src={imageUrl}
+                  alt={imageData?.name || row?.attributes?.Title || "Product image"}
+                  className="h-12 w-12 rounded-lg object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    const placeholder = e.currentTarget.nextElementSibling;
+                    if (placeholder) placeholder.classList.remove("hidden");
+                  }}
+                />
+                <div className="h-12 w-12 bg-gray-200 rounded-lg hidden items-center justify-center">
+                  <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </>
             ) : (
-              <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-200">
+                <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             );
