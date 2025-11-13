@@ -24,6 +24,7 @@ services:
     env_file:
       - ${DB_ENV_FILE:-db.env}
     volumes:
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - infinity-postgres-data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
