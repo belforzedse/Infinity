@@ -6,6 +6,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/services";
+import { HTTP_STATUS } from "@/constants/api";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -17,14 +18,26 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       return;
     }
 
+    const redirectToPrevious = () => {
+      if (typeof window !== "undefined" && window.history.length > 1) {
+        router.back();
+      } else {
+        router.replace("/");
+      }
+    };
+
     UserService.me(true)
       .then((me) => {
         if (!me?.isAdmin) {
-          router.replace("/auth");
+          redirectToPrevious();
         }
       })
-      .catch(() => {
-        router.replace("/auth");
+      .catch((error) => {
+        if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
+          router.replace("/auth");
+          return;
+        }
+        redirectToPrevious();
       });
   }, [router]);
 
