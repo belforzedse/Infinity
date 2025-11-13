@@ -133,11 +133,22 @@ export function useUpload({
     try {
       for (const file of newFiles) {
         try {
-          const currentFileType = getFileType(file);
+          const detectedFileType = getFileType(file);
+
+          if (fileType === "image" && detectedFileType !== "image") {
+            uploadErrors.push(`${file.name}: فقط بارگذاری تصاویر در این بخش مجاز است`);
+            continue;
+          }
+
+          if (fileType === "video" && detectedFileType !== "video") {
+            uploadErrors.push(`${file.name}: فقط فایل ویدیویی معتبر است`);
+            continue;
+          }
+
           const previewUrl = createPreview(file);
           let uploadSource: File = file;
 
-          if (currentFileType === "image") {
+          if (detectedFileType === "image") {
             const optimizedBlob = await optimizeImage(file);
             // Preserve original filename when uploading optimized images
             uploadSource = new File([optimizedBlob], file.name, {
@@ -153,7 +164,7 @@ export function useUpload({
               logger.info("response", { response });
             }
 
-            if (currentFileType === "image" || currentFileType === "video") {
+            if (detectedFileType === "image" || detectedFileType === "video") {
               setProductData((prev: any) => ({
                 // TODO: Replace `any` usage with ProductData type
                 ...prev,
@@ -183,7 +194,7 @@ export function useUpload({
             };
 
             // Sort files by type into appropriate arrays
-            switch (currentFileType) {
+            switch (detectedFileType) {
               case "image":
                 successfulImages.push(fileWithPreview);
                 break;
