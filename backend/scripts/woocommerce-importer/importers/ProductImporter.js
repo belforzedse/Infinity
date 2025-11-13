@@ -68,12 +68,14 @@ class ProductImporter {
       nameFilter = defaultKeywords,
       createdAfter,
       createdBefore,
+      publishedAfter,
     } = options;
 
     this.stats.startTime = Date.now();
 
     const normalizedActivityAfter = this.normalizeDateFilter(createdAfter, 'activityAfter');
     const normalizedActivityBefore = this.normalizeDateFilter(createdBefore, 'activityBefore');
+    const normalizedPublishedAfter = this.normalizeDateFilter(publishedAfter, 'publishedAfter');
 
     if (
       normalizedActivityAfter &&
@@ -83,7 +85,7 @@ class ProductImporter {
       throw new Error('createdAfter date must be before createdBefore date');
     }
 
-    const dateFilterLabel = this.describeActivityFilter(normalizedActivityAfter, normalizedActivityBefore);
+    const dateFilterLabel = this.describeActivityFilter(normalizedActivityAfter, normalizedActivityBefore, normalizedPublishedAfter);
 
     // Determine categories to import
     let categoriesToProcess = categoryIds;
@@ -91,13 +93,13 @@ class ProductImporter {
       // If no specific categories provided, import all products
       categoriesToProcess = [null];
       this.logger.info(
-        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel})`,
+        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${normalizedPublishedAfter ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}` : ''})`,
       );
     } else {
       this.logger.info(
         `🛍️ Starting product import from categories: [${categoriesToProcess.join(
           ", ",
-        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel})`,
+        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${normalizedPublishedAfter ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}` : ''})`,
       );
     }
 
@@ -180,6 +182,18 @@ class ProductImporter {
                   );
                   this.stats.skipped++;
                   return { status: 'skipped', reason: 'filter' };
+                }
+
+                // Check publishedAfter filter - only import products that were uploaded/published after timestamp
+                if (normalizedPublishedAfter) {
+                  const publishedAt = wcProduct.date_created || wcProduct.date_modified;
+                  if (!publishedAt || new Date(publishedAt) < new Date(normalizedPublishedAfter)) {
+                    this.logger.debug(
+                      `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - published before ${this.formatDateForLog(normalizedPublishedAfter)} (published: ${publishedAt ? this.formatDateForLog(publishedAt) : 'unknown'})`,
+                    );
+                    this.stats.skipped++;
+                    return { status: 'skipped', reason: 'publishedAfter' };
+                  }
                 }
 
                 await this.importSingleProduct(wcProduct, dryRun);
@@ -329,8 +343,8 @@ class ProductImporter {
     }
   }
 
-  describeActivityFilter(activityAfter, activityBefore) {
-    if (!activityAfter && !activityBefore) {
+  describeActivityFilter(activityAfter, activityBefore, publishedAfter) {
+    if (!activityAfter && !activityBefore && !publishedAfter) {
       return "";
     }
 
@@ -341,6 +355,10 @@ class ProductImporter {
 
     if (activityBefore) {
       parts.push(`activityBefore=${this.formatDateForLog(activityBefore)}`);
+    }
+
+    if (publishedAfter) {
+      parts.push(`publishedAfter=${this.formatDateForLog(publishedAfter)}`);
     }
 
     return `, ${parts.join(" | ")}`;
