@@ -1,3 +1,5 @@
+import { resolveAuditActor } from "../../../../utils/audit";
+
 type AuditAction = "Create" | "Update" | "Delete";
 
 function diffChanges(
@@ -30,10 +32,15 @@ export default {
   async afterCreate(event) {
     const { result } = event;
     if (!result?.id) return;
+    const actor = resolveAuditActor(event as any);
 
     await strapi.entityService.create("api::contract-log.contract-log" as any, {
       data: {
         contract: result.id,
+        performed_by: actor.userId,
+        PerformedBy: actor.label || undefined,
+        IP: actor.ip || undefined,
+        UserAgent: actor.userAgent || undefined,
         Action: "Create" as AuditAction,
         Description: "Contract created",
       },
@@ -60,6 +67,7 @@ export default {
   async afterUpdate(event) {
     const { result, state } = event as any;
     if (!result?.id) return;
+    const actor = resolveAuditActor(event as any);
 
     const previous = state?.previousContract || {};
     const current = await strapi.entityService.findOne(
@@ -77,6 +85,10 @@ export default {
     await strapi.entityService.create("api::contract-log.contract-log" as any, {
       data: {
         contract: result.id,
+        performed_by: actor.userId,
+        PerformedBy: actor.label || undefined,
+        IP: actor.ip || undefined,
+        UserAgent: actor.userAgent || undefined,
         Action: "Update" as AuditAction,
         Changes: changes,
         Description: "Contract updated",
@@ -94,10 +106,15 @@ export default {
   async afterDelete(event) {
     const id = (event as any)?.state?.deletingContractId;
     if (!id) return;
+    const actor = resolveAuditActor(event as any);
 
     await strapi.entityService.create("api::contract-log.contract-log" as any, {
       data: {
         contract: id,
+        performed_by: actor.userId,
+        PerformedBy: actor.label || undefined,
+        IP: actor.ip || undefined,
+        UserAgent: actor.userAgent || undefined,
         Action: "Delete" as AuditAction,
         Description: "Contract deleted",
       },

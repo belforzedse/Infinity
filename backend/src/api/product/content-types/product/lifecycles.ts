@@ -1,3 +1,5 @@
+import { resolveAuditActor } from "../../../../utils/audit";
+
 type AuditAction = "Create" | "Update" | "Delete";
 
 function diffChanges(
@@ -30,10 +32,15 @@ export default {
   async afterCreate(event) {
     const { result } = event;
     if (!result?.id) return;
+    const actor = resolveAuditActor(event as any);
 
     await strapi.entityService.create("api::product-log.product-log" as any, {
       data: {
         product: result.id,
+        performed_by: actor.userId,
+        PerformedBy: actor.label || undefined,
+        IP: actor.ip || undefined,
+        UserAgent: actor.userAgent || undefined,
         Action: "Create" as AuditAction,
         Description: "Product created",
       },
@@ -68,6 +75,7 @@ export default {
   async afterUpdate(event) {
     const { result, state } = event as any;
     if (!result?.id) return;
+    const actor = resolveAuditActor(event as any);
 
     const previous = state?.previousProduct || {};
     const current = await strapi.entityService.findOne(
@@ -93,6 +101,10 @@ export default {
     await strapi.entityService.create("api::product-log.product-log" as any, {
       data: {
         product: result.id,
+        performed_by: actor.userId,
+        PerformedBy: actor.label || undefined,
+        IP: actor.ip || undefined,
+        UserAgent: actor.userAgent || undefined,
         Action: "Update" as AuditAction,
         Changes: changes,
         Description: "Product updated",
@@ -110,10 +122,15 @@ export default {
   async afterDelete(event) {
     const id = (event as any)?.state?.deletingProductId;
     if (!id) return;
+    const actor = resolveAuditActor(event as any);
 
     await strapi.entityService.create("api::product-log.product-log" as any, {
       data: {
         product: id,
+        performed_by: actor.userId,
+        PerformedBy: actor.label || undefined,
+        IP: actor.ip || undefined,
+        UserAgent: actor.userAgent || undefined,
         Action: "Delete" as AuditAction,
         Description: "Product deleted",
       },
