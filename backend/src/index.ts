@@ -54,6 +54,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::product-variation-size": {
         "product-variation-size": READ_ACTIONS,
       },
+      "api::product-stock": {
+        "product-stock": READ_ACTIONS,
+      },
       "api::product-review": {
         "product-review": READ_ACTIONS,
       },
@@ -106,6 +109,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       },
       "api::product-like": {
         "product-like": ["toggleFavorite", "getUserLikes"],
+      },
+      "api::product-stock": {
+        "product-stock": READ_ACTIONS,
       },
       "api::product-review": {
         "product-review": ["submitReview", "getUserReviews"],
