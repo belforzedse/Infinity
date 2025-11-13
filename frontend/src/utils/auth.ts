@@ -1,8 +1,15 @@
 import { HTTP_STATUS } from "@/constants/api";
+import { jotaiStore } from "@/lib/jotaiStore";
+import { errorNotificationsAtom, addErrorNotification } from "@/lib/atoms/errors";
+import { currentUserAtom } from "@/lib/atoms/auth";
 
 /**
- * Handles authentication errors (401, 403) or non-admin access
- * and redirects to auth page when necessary
+ * Handles authentication errors (401, 403) gracefully
+ * Shows user-friendly notifications instead of hard redirects
+ *
+ * 401 (Unauthorized): Shows notification with login link
+ * 403 (Forbidden): Shows notification explaining permission denied
+ * isAdminCheck: Shows notification instead of redirecting
  */
 export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   // TODO: Replace `any` with a specific error type for stricter checking
@@ -20,16 +27,42 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
     return;
   }
 
+  // 401: User not authenticated
   if (isUnauthorized) {
+    // Clear auth state immediately
     localStorage.removeItem("accessToken");
+    jotaiStore.set(currentUserAtom, null);
+
+    // Show friendly notification (no hard redirect)
+    if (!isJest) {
+      const notification = addErrorNotification(
+        401,
+        error?.message || "برای ادامه وارد حساب کاربری خود شوید"
+      );
+      jotaiStore.set(errorNotificationsAtom, (prev) => [...prev, notification]);
+    }
+    return;
   }
 
-  if (!isJest && (isUnauthorized || isNotAdmin)) {
-    try {
-      window.location.href = "/auth";
-    } catch {
-      // Some environments (like older jsdom) throw on navigation.
+  // 403: User forbidden/permission denied
+  if (isForbidden) {
+    if (!isJest) {
+      const notification = addErrorNotification(
+        403,
+        error?.message || "شما اجازه دسترسی به این منطقه را ندارید"
+      );
+      jotaiStore.set(errorNotificationsAtom, (prev) => [...prev, notification]);
     }
+    return;
+  }
+
+  // isNotAdmin: Not an admin user
+  if (isNotAdmin && !isJest) {
+    const notification = addErrorNotification(
+      403,
+      "این صفحه فقط برای مدیران دسترسی دارد"
+    );
+    jotaiStore.set(errorNotificationsAtom, (prev) => [...prev, notification]);
   }
 };
 

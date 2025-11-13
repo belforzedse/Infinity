@@ -326,18 +326,20 @@ export default function MellatCallback() {
 ## Environment Variables
 
 Variables are auto-loaded from:
-- **`dev.env`** - Development environment (used in dev mode)
+- **`dev.env`** - Development/Staging environment (used in dev mode)
 - **`main.env`** - Production environment (used when `NODE_ENV=production`)
 - **`.env.local`** - Personal overrides (gitignored, not committed)
 
 Key variables:
 
 ```bash
-# API Configuration
-NEXT_PUBLIC_API_BASE_URL=http://localhost:1337/api
-NEXT_PUBLIC_IMAGE_BASE_URL=http://localhost:1337/
+# API Configuration (points to backend API)
+NEXT_PUBLIC_API_BASE_URL=https://api.infinity.rgbgroup.ir/api    # Staging
+NEXT_PUBLIC_API_BASE_URL=https://api.infinitycolor.org/api      # Production
+NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinity.rgbgroup.ir/    # Staging
+NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinitycolor.org/       # Production
 
-# Authentication
+# Authentication (rarely needed for frontend)
 NEXT_PUBLIC_STRAPI_TOKEN=your-token-here
 
 # Feature Flags
@@ -346,6 +348,14 @@ NEXT_PUBLIC_ENABLE_MELLAT=true
 ```
 
 The loader (`load-env.js`) automatically merges files based on `NODE_ENV`.
+
+### Deployment Environment Setup
+
+**Frontend runs on separate servers/containers:**
+- **Staging**: Points to `https://api.infinity.rgbgroup.ir` (backend staging)
+- **Production**: Points to `https://api.infinitycolor.org` (backend production)
+
+The API URLs in the environment files determine which backend the frontend communicates with. Ensure they match your backend deployment.
 
 ## Common Tasks
 
