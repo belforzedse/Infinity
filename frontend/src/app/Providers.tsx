@@ -8,6 +8,7 @@ import PreloadBlur from "@/components/ui/PreloadBlur";
 import NavigationProgress from "@/components/ui/NavigationProgress";
 import GlobalFetchInterceptor from "@/components/ui/GlobalFetchInterceptor";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
+import GlobalErrorDisplay from "@/components/ui/GlobalErrorDisplay";
 import ImageEffects from "@/components/ui/ImageEffects";
 import ServiceWorkerRegistration from "@/components/ui/ServiceWorkerRegistration";
 import AuthInitializer from "@/components/ui/AuthInitializer";
@@ -35,6 +36,8 @@ export default function Providers({ children }: { children: ReactNode }) {
       </Suspense>
       {/* Intercepts fetch calls to show global error/loading states */}
       <GlobalFetchInterceptor />
+      {/* Displays friendly error notifications for 401/403/etc */}
+      <GlobalErrorDisplay />
       <ImageEffects />
       <main id="main-content">
         {children}

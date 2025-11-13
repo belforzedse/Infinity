@@ -163,12 +163,6 @@ export default function PDPHeroInfoSize(props: Props) {
         </div>
       </div>
 
-      {sizeHelper?.attributes?.Helper && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-3">
-          <div className="mb-2 text-xs text-neutral-500">راهنمای سایز این محصول</div>
-          <SpecTable specs={sizeHelper.attributes.Helper} />
-        </div>
-      )}
     </div>
   );
 }

@@ -8,8 +8,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
 import SettingsIcon from "../Icons/SettingsIcon";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import { performLogout } from "@/utils/logout";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -18,19 +19,12 @@ interface SuperAdminLayoutSidebarProps {
 
 export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminLayoutSidebarProps) {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleLogout = () => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-      }
-    } finally {
-      router.replace("/auth");
-    }
+    performLogout();
   };
 
   const openConfirm = () => setShowConfirm(true);

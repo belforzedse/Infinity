@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import { performLogout } from "@/utils/logout";
 
 export default function SuperAdminLogoutPage() {
   const router = useRouter();
@@ -13,15 +14,8 @@ export default function SuperAdminLogoutPage() {
   }, []);
 
   const handleLogout = useCallback(() => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-      }
-    } finally {
-      router.replace("/auth");
-    }
-  }, [router]);
+    performLogout();
+  }, []);
 
   const handleCancel = useCallback(() => {
     setShowConfirm(false);
