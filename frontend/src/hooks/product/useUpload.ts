@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { uploadFile } from "@/services/super-admin/files/upload";
 import { useEffect } from "react"; // removed unused: useState
 import logger from "@/utils/logger";
@@ -100,6 +101,23 @@ export function useUpload({
     return "/file-icon.png";
   };
 
+  const optimizeImage = async (file: File): Promise<File> => {
+    try {
+      const optimized = await imageCompression(file, {
+        maxSizeMB: 10,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: file.type,
+      });
+      return optimized;
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Image optimization failed, uploading original file", error);
+      }
+      return file;
+    }
+  };
+
   // TODO: Revoke object URLs on unmount to avoid memory leaks
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: FileType) => {
@@ -117,7 +135,9 @@ export function useUpload({
         try {
           const fileType = getFileType(file); // FIXME: Shadows outer fileType parameter
           const previewUrl = createPreview(file);
-          const response = await uploadFile(file);
+          const uploadSource =
+            fileType === "image" ? await optimizeImage(file) : file;
+          const response = await uploadFile(uploadSource);
 
           if (response) {
             // Update Media or Files array in productData based on file type
