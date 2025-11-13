@@ -195,7 +195,7 @@ const superAdminSidebar: SidebarItem[] = [
       {
         id: "product-sales",
         label:" فروش هر محصول",
-        href: "/super-admin/reports/products-sales",
+        href: "/super-admin/reports/product-sales",
       },
       {
         id: "admin-activity",
