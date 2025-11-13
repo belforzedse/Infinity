@@ -176,7 +176,20 @@ async function self(ctx) {
     const profile = localUserInfo ? { ...localUserInfo } : {};
     if (profile && (profile as any).id) delete (profile as any).id;
 
-    ctx.body = { ...ctx.state.user, ...profile, isAdmin };
+    const phone =
+      typeof fullUser?.phone === "string" && fullUser.phone.trim().length > 0
+        ? fullUser.phone.trim()
+        : undefined;
+
+    ctx.body = {
+      ...ctx.state.user,
+      ...profile,
+      Phone: phone || profile?.Phone || null,
+      phone: phone || profile?.phone || null,
+      UserName: fullUser?.username ?? profile?.UserName,
+      Email: fullUser?.email ?? profile?.Email,
+      isAdmin,
+    };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;

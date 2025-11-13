@@ -1,5 +1,4 @@
 import type { Strapi } from "@strapi/strapi";
-import type { Strapi } from "@strapi/strapi";
 
 export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Mellat returns: ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId
