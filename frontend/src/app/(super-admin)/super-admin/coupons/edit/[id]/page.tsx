@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import { useEffect, useState } from "react";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 export type Coupon = {
   id: number;
@@ -125,8 +126,10 @@ export default function Page() {
         };
 
         setData(couponData);
-      } catch (error) {
-        toast.error("خطا در دریافت اطلاعات کد تخفیف");
+      } catch (error: any) {
+        const rawErrorMessage = extractErrorMessage(error);
+        const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت اطلاعات کد تخفیف");
+        toast.error(message);
         console.error(error);
       } finally {
         setLoading(false);
@@ -168,8 +171,10 @@ export default function Page() {
 
           toast.success("کد تخفیف با موفقیت بروزرسانی شد");
           router.push("/super-admin/coupons");
-        } catch (error) {
-          toast.error("خطایی رخ داده است");
+        } catch (error: any) {
+          const rawErrorMessage = extractErrorMessage(error);
+          const message = translateErrorMessage(rawErrorMessage, "خطا در بروزرسانی کد تخفیف");
+          toast.error(message);
           console.error(error);
         }
       }}
