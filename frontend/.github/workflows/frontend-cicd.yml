@@ -120,7 +120,9 @@ jobs:
             export ENV_FILE=main.env
             docker compose pull
             docker compose up -d --remove-orphans
-            docker image prune -f
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
 
       - name: Upload docker-compose (staging)
         if: github.ref == 'refs/heads/dev'
@@ -156,7 +158,9 @@ jobs:
             export ENV_FILE=dev.env
             docker compose pull
             docker compose up -d --remove-orphans
-            docker image prune -f
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
 
       - name: Upload docker-compose (experimental)
         if: github.ref == 'refs/heads/experimental'
@@ -192,4 +196,6 @@ jobs:
             export ENV_FILE=main.env
             docker compose pull
             docker compose up -d --remove-orphans
-            docker image prune -f
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
