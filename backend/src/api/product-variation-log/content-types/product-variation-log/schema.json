@@ -17,6 +17,11 @@
       "relation": "manyToOne",
       "target": "api::product-variation.product-variation"
     },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
     "Action": {
       "type": "enumeration",
       "enum": ["Create", "Update", "Delete"],
@@ -27,6 +32,15 @@
     },
     "Description": {
       "type": "text"
+    },
+    "PerformedBy": {
+      "type": "string"
+    },
+    "IP": {
+      "type": "string"
+    },
+    "UserAgent": {
+      "type": "string"
     }
   }
 }

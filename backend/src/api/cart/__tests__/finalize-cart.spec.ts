@@ -1,364 +1,626 @@
-/**
- * Cart finalization tests (most critical)
- * Tests: Creating orders, contracts, handling payments, stock management
- */
+import { finalizeToOrderHandler } from "../controllers/handlers/finalizeToOrder";
+import {
+  requestMellatPayment,
+  requestSamanPayment,
+  requestSnappPayment,
+} from "../controllers/handlers/gateway-helpers";
 
-import { mockCart, mockCartItem, mockUser, mockContext, mockOrder, mockContract } from '../../../__tests__/mocks/factories';
+jest.mock("../controllers/handlers/gateway-helpers", () => ({
+  requestMellatPayment: jest.fn(),
+  requestSamanPayment: jest.fn(),
+  requestSnappPayment: jest.fn(),
+}));
 
-describe('Finalize Cart to Order', () => {
-  const mockStrapi = global.strapi;
+type StrapiMockHelpers = ReturnType<typeof createStrapiMock>;
 
+// Creates a lightweight Koa-like ctx with error helpers that throw, allowing tests to assert on badRequest/unauthorized behaviours.
+const createCtx = (overrides: Partial<any> = {}) => {
+  const ctx: any = {
+    request: {
+      body: {},
+      header: {},
+      ...overrides.request,
+    },
+    state: {
+      user: { id: 1 },
+      ...overrides.state,
+    },
+    badRequest: jest.fn((message: string, payload?: unknown) => {
+      const error: any = new Error(message);
+      error.status = 400;
+      error.payload = payload;
+      throw error;
+    }),
+    unauthorized: jest.fn((message: string) => {
+      const error: any = new Error(message);
+      error.status = 401;
+      throw error;
+    }),
+    ...overrides,
+  };
+
+  return ctx;
+};
+
+// Minimal Strapi mock with registries so tests can attach per-UID services/queries.
+const createStrapiMock = () => {
+  const serviceMap: Record<string, any> = {};
+  const queryMap: Record<string, any> = {};
+  const strapi: any = {
+    log: {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    },
+    entityService: {
+      findOne: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn().mockResolvedValue(null),
+      update: jest.fn().mockResolvedValue(null),
+    },
+    service: jest.fn((uid: string) => serviceMap[uid]),
+    db: {
+      query: jest.fn((uid: string) => queryMap[uid]),
+    },
+  };
+
+  const registerService = (uid: string, impl: any) => {
+    serviceMap[uid] = impl;
+  };
+
+  const registerQuery = (uid: string, impl: any) => {
+    queryMap[uid] = impl;
+  };
+
+  return { strapi, registerService, registerQuery };
+};
+
+// Convenience helper for supplying multiple entityService.findOne implementations in one go.
+const mockEntityFindOne = (
+  strapi: StrapiMockHelpers["strapi"],
+  implementations: Record<string, (...args: any[]) => any>,
+) => {
+  (strapi.entityService.findOne as jest.Mock).mockImplementation(
+    async (uid: string, ...args: any[]) => {
+      const handler = implementations[uid];
+      return handler ? handler(...args) : null;
+    },
+  );
+};
+
+const mockedRequestMellatPayment = requestMellatPayment as jest.MockedFunction<
+  typeof requestMellatPayment
+>;
+const mockedRequestSnappPayment = requestSnappPayment as jest.MockedFunction<
+  typeof requestSnappPayment
+>;
+const mockedRequestSamanPayment = requestSamanPayment as jest.MockedFunction<
+  typeof requestSamanPayment
+>;
+
+describe("finalizeToOrderHandler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Validation', () => {
-    it('should require cart to have items', () => {
-      const emptyCart = mockCart({ cart_items: [] });
-      const hasItems = emptyCart.cart_items.length > 0;
-      expect(hasItems).toBe(false);
+  it("rejects the request when required shipping data is missing", async () => {
+    const { strapi } = createStrapiMock();
+    const handler = finalizeToOrderHandler(strapi);
+    const ctx = createCtx({
+      request: { body: { addressId: 10 } },
     });
 
-    it('should require valid shipping method', () => {
-      const ctx = mockContext({
-        request: { body: { shipping: null } },
-      });
-      expect(ctx.request.body.shipping).toBeNull();
+    await expect(handler(ctx)).rejects.toMatchObject({
+      message: "روش ارسال الزامی است",
+      status: 400,
     });
 
-    it('should require valid address', () => {
-      const ctx = mockContext({
-        request: { body: { addressId: null } },
-      });
-      expect(ctx.request.body.addressId).toBeNull();
-    });
-
-    it('should require valid payment gateway', () => {
-      const validGateways = ['mellat', 'snappay', 'wallet'];
-      const gateway = 'invalid-gateway';
-      const isValid = validGateways.includes(gateway);
-      expect(isValid).toBe(false);
-    });
-
-    it('should require authenticated user', () => {
-      const ctx = mockContext({
-        state: { user: null },
-      });
-      expect(ctx.state.user).toBeNull();
-    });
-
-    it('should validate phone number format', () => {
-      const validPhone = '09123456789';
-      const invalidPhone = '123'; // Too short
-      const phoneRegex = /^98\d{10}$|^09\d{9}$/;
-
-      expect(validPhone).toMatch(phoneRegex);
-      expect(invalidPhone).not.toMatch(phoneRegex);
-    });
-
-    it('should require positive total amount', () => {
-      const totalAmount = 0;
-      const isValid = totalAmount > 0;
-      expect(isValid).toBe(false);
-    });
+    expect(ctx.badRequest).toHaveBeenCalledWith(
+      "روش ارسال الزامی است",
+      expect.objectContaining({
+        data: expect.objectContaining({ errorCode: "SHIPPING_REQUIRED" }),
+      }),
+    );
+    expect(strapi.entityService.findOne).not.toHaveBeenCalled();
   });
 
-  describe('Order Creation', () => {
-    it('should create order with correct data', () => {
-      const userId = 1;
-      const user = mockUser({ id: userId });
-      const cart = mockCart({ user, cart_items: [mockCartItem()] });
-
-      const orderData = {
-        Status: 'Pending',
-        Date: new Date().toISOString(),
-        user: { id: userId },
-        order_items: cart.cart_items,
-      };
-
-      expect(orderData.Status).toBe('Pending');
-      expect(orderData.user.id).toBe(userId);
-      expect(orderData.order_items.length).toBeGreaterThan(0);
+  it("rejects the request when the shipping method cannot be found", async () => {
+    const { strapi } = createStrapiMock();
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => null,
+    });
+    const handler = finalizeToOrderHandler(strapi);
+    const ctx = createCtx({
+      request: { body: { shipping: 99, addressId: 1 } },
     });
 
-    it('should assign unique order number', () => {
-      const orderId1 = 100;
-      const orderId2 = 101;
-
-      expect(orderId1).not.toBe(orderId2);
+    await expect(handler(ctx)).rejects.toMatchObject({
+      message: "خطا در بررسی روش ارسال",
     });
 
-    it('should copy cart items to order items', () => {
-      const cartItems = [
-        mockCartItem({ Count: 2 }),
-        mockCartItem({ Count: 3 }),
-      ];
-
-      const orderItems = cartItems.map((item) => ({
-        ...item,
-        order: { id: 1 }, // Will be set after order creation
-      }));
-
-      expect(orderItems).toHaveLength(cartItems.length);
-      orderItems.forEach((item, idx) => {
-        expect(item.Count).toBe(cartItems[idx].Count);
-        expect(item.ProductTitle).toBe(cartItems[idx].ProductTitle);
-      });
-    });
-
-    it('should preserve product details in order items', () => {
-      const cartItem = mockCartItem({
-        ProductTitle: 'Test Product',
-        ProductSKU: 'TEST-001',
-        Count: 5,
-        PerAmount: 100000,
-      });
-
-      expect(cartItem.ProductTitle).toBe('Test Product');
-      expect(cartItem.ProductSKU).toBe('TEST-001');
-      expect(cartItem.Count).toBe(5);
-      expect(cartItem.PerAmount).toBe(100000);
-    });
-
-    it('should create order log entry', () => {
-      const orderId = 100;
-      const userId = 1;
-
-      const orderLog = {
-        order: { id: orderId },
-        user: { id: userId },
-        Action: 'Created',
-        Description: 'Order created from cart finalization',
-        createdAt: new Date().toISOString(),
-      };
-
-      expect(orderLog.order.id).toBe(orderId);
-      expect(orderLog.Action).toBe('Created');
-    });
+    expect(ctx.badRequest).toHaveBeenCalledWith(
+      "روش ارسال انتخاب شده معتبر نیست",
+      expect.objectContaining({
+        data: expect.objectContaining({ errorCode: "INVALID_SHIPPING" }),
+      }),
+    );
   });
 
-  describe('Contract Creation', () => {
-    it('should create contract with correct calculations', () => {
-      const subtotal = 100000;
-      const discount = 10000;
-      const tax = 9000; // 10% of (subtotal - discount)
-      const shipping = 50000;
+  it("settles the order immediately when wallet funding succeeds", async () => {
+    const { strapi, registerService, registerQuery } = createStrapiMock();
+    const cartService = {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 42 },
+        contract: { id: 7, Amount: 250_000 },
+        financialSummary: { payable: 250_000 },
+      }),
+    };
+    registerService("api::cart.cart", cartService);
 
-      const contract = mockContract({
-        Amount: subtotal - discount + tax + shipping,
-        Discount: discount,
-        TaxAmount: tax,
-        ShippingCost: shipping,
-      });
-
-      expect(contract.Amount).toBe(subtotal - discount + tax + shipping);
-      expect(contract.Discount).toBe(discount);
-      expect(contract.TaxAmount).toBe(tax);
+    const walletRecord = { id: 99, Balance: 3_000_000 };
+    registerQuery("api::local-user-wallet.local-user-wallet", {
+      findOne: jest.fn().mockResolvedValue(walletRecord),
     });
 
-    it('should calculate tax on subtotal minus discount', () => {
-      const subtotal = 100000;
-      const discount = 10000;
-      const taxPercent = 10;
+    const orderWithItems = {
+      id: 42,
+      order_items: [
+        {
+          Count: 2,
+          product_variation: {
+            product_stock: { id: 55, Count: 10 },
+          },
+        },
+      ],
+    };
 
-      const taxableAmount = subtotal - discount;
-      const tax = Math.round((taxableAmount * taxPercent) / 100);
-
-      expect(tax).toBe(9000);
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 4, Title: "Pickup" }),
+      "api::local-user-address.local-user-address": () => ({
+        id: 18,
+        shipping_city: {},
+      }),
+      "api::order.order": () => orderWithItems,
     });
 
-    it('should include shipping cost in total', () => {
-      const subtotal = 100000;
-      const shipping = 50000;
-      const tax = 10000;
-      const discount = 0;
-
-      const total = subtotal - discount + tax + shipping;
-      expect(total).toBe(160000);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 4,
+          addressId: 18,
+          gateway: "wallet",
+          shippingCost: 0,
+          mobile: "09120000000",
+        },
+      },
     });
 
-    it('should handle zero discount', () => {
-      const subtotal = 100000;
-      const discount = 0;
-      const tax = 10000;
+    const handler = finalizeToOrderHandler(strapi);
+    const response = await handler(ctx);
 
-      const total = subtotal - discount + tax;
-      expect(total).toBe(110000);
+    expect(response.data).toMatchObject({
+      success: true,
+      message: "Order paid via wallet.",
+      orderId: 42,
+      contractId: 7,
+      requestId: "wallet",
     });
 
-    it('should never allow negative total', () => {
-      const subtotal = 100000;
-      const discount = 150000; // More than subtotal
-      const tax = 0;
+    expect(cartService.finalizeCartToOrder).toHaveBeenCalledWith(
+      ctx.state.user.id,
+      expect.objectContaining({
+        shippingId: 4,
+        addressId: 18,
+      }),
+    );
 
-      const total = Math.max(0, subtotal - discount + tax);
-      expect(total).toBeGreaterThanOrEqual(0);
-    });
+    expect(strapi.db.query).toHaveBeenCalledWith(
+      "api::local-user-wallet.local-user-wallet",
+    );
+
+    expect(strapi.entityService.update).toHaveBeenCalledWith(
+      "api::local-user-wallet.local-user-wallet",
+      walletRecord.id,
+      expect.objectContaining({
+        data: expect.objectContaining({
+          Balance: walletRecord.Balance - 2_500_000,
+        }),
+      }),
+    );
+
+    expect(strapi.entityService.create).toHaveBeenCalledWith(
+      "api::local-user-wallet-transaction.local-user-wallet-transaction",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          Amount: 2_500_000,
+          Type: "Minus",
+          user_wallet: walletRecord.id,
+        }),
+      }),
+    );
+
+    expect(strapi.entityService.update).toHaveBeenCalledWith(
+      "api::product-stock.product-stock",
+      55,
+      { data: { Count: 8 } },
+    );
+
+    expect(strapi.entityService.update).toHaveBeenCalledWith(
+      "api::order.order",
+      42,
+      { data: { Status: "Started" } },
+    );
+
+    expect(strapi.entityService.create).toHaveBeenCalledWith(
+      "api::order-log.order-log",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          Description: expect.stringContaining("Wallet payment success"),
+        }),
+      }),
+    );
   });
 
-  describe('Payment Processing', () => {
-    it('should route to correct payment gateway', () => {
-      const gateways = {
-        mellat: { name: 'Mellat Bank', endpoint: '/mellat/request' },
-        snappay: { name: 'SnappPay', endpoint: '/snappay/request' },
-        wallet: { name: 'Wallet', endpoint: '/wallet/deduct' },
-      };
-
-      const selectedGateway = 'mellat';
-      expect(gateways[selectedGateway]).toBeDefined();
+  it("fails fast when wallet balance is insufficient", async () => {
+    const { strapi, registerService, registerQuery } = createStrapiMock();
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 10 },
+        contract: { id: 20, Amount: 100_000 },
+        financialSummary: { payable: 100_000 },
+      }),
+    });
+    registerQuery("api::local-user-wallet.local-user-wallet", {
+      findOne: jest.fn().mockResolvedValue({ id: 5, Balance: 100_000 }),
+    });
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 1 }),
+      "api::local-user-address.local-user-address": () => ({ id: 2, shipping_city: {} }),
     });
 
-    it('should pass correct amount to payment gateway', () => {
-      const orderTotal = 160000;
-      const paymentAmount = orderTotal;
-
-      expect(paymentAmount).toBe(orderTotal);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          addressId: 2,
+          gateway: "wallet",
+        },
+      },
     });
 
-    it('should include callback URL in payment request', () => {
-      const callbackUrl = '/orders/payment-callback';
-      expect(callbackUrl).toBeDefined();
-      expect(callbackUrl).toMatch(/callback/i);
+    const handler = finalizeToOrderHandler(strapi);
+    await expect(handler(ctx)).rejects.toMatchObject({
+      message: "Wallet balance is insufficient",
     });
 
-    it('should handle payment gateway timeout', () => {
-      const timeout = 60000; // 60 seconds
-      expect(timeout).toBeGreaterThan(0);
-    });
-
-    it('should handle payment gateway errors', () => {
-      const error = new Error('Payment gateway unavailable');
-      expect(error).toBeInstanceOf(Error);
-    });
-
-    it('should retry payment on failure', () => {
-      const maxRetries = 2;
-      expect(maxRetries).toBeGreaterThanOrEqual(1);
-    });
+    expect(ctx.badRequest).toHaveBeenCalledWith(
+      "Wallet balance is insufficient",
+      expect.objectContaining({
+        data: expect.objectContaining({ error: "insufficient_wallet" }),
+      }),
+    );
   });
 
-  describe('Stock Management', () => {
-    it('should NOT decrement stock on order creation', () => {
-      // Stock should only decrement after SUCCESSFUL payment
-      const variation = {
-        id: 1,
-        currentStock: 100,
-        orderedQuantity: 5,
-      };
-
-      expect(variation.currentStock).toBe(100); // Unchanged until payment success
+  it("propagates stock issues reported by finalizeCartToOrder", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: false,
+        message: "Stock issues prevent order creation",
+        itemsRemoved: [{ id: 1 }],
+      }),
+    });
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 2 }),
+      "api::local-user-address.local-user-address": () => ({ id: 3, shipping_city: {} }),
     });
 
-    it('should decrement stock after successful payment', () => {
-      const initialStock = 100;
-      const orderedQuantity = 5;
-      const afterPayment = initialStock - orderedQuantity;
-
-      expect(afterPayment).toBe(95);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 2,
+          addressId: 3,
+          gateway: "mellat",
+        },
+      },
     });
 
-    it('should not over-decrement stock', () => {
-      const stock = 10;
-      const quantity = 10;
-      const remaining = Math.max(0, stock - quantity);
-
-      expect(remaining).toBeGreaterThanOrEqual(0);
+    const handler = finalizeToOrderHandler(strapi);
+    await expect(handler(ctx)).rejects.toMatchObject({
+      message: "Stock issues prevent order creation",
     });
 
-    it('should create stock log entry on decrement', () => {
-      const stockLog = {
-        product_stock: { id: 1 },
-        order: { id: 100 },
-        Action: 'Decremented',
-        PreviousQuantity: 100,
-        NewQuantity: 95,
-        Quantity: 5,
-      };
-
-      expect(stockLog.PreviousQuantity - stockLog.Quantity).toBe(stockLog.NewQuantity);
-    });
-
-    it('should only decrement on first successful payment', () => {
-      // Prevent double-decrement if callback fires twice
-      const order = { id: 100, paid: true, stockDecremented: true };
-
-      const shouldDecrement = !order.stockDecremented;
-      expect(shouldDecrement).toBe(false);
-    });
+    expect(ctx.badRequest).toHaveBeenCalledWith(
+      "Stock issues prevent order creation",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          success: false,
+          itemsRemoved: [{ id: 1 }],
+        }),
+      }),
+    );
   });
 
-  describe('Cart Cleanup', () => {
-    it('should empty cart after successful order creation', () => {
-      const cartBefore = mockCart({
-        cart_items: [mockCartItem(), mockCartItem()],
-      });
+  it("cancels the order when the external gateway rejects the payment", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    const cartService = {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 501 },
+        contract: { id: 77, Amount: 180_000 },
+        financialSummary: { payable: 180_000 },
+      }),
+    };
+    registerService("api::cart.cart", cartService);
 
-      expect(cartBefore.cart_items.length).toBe(2);
-
-      const cartAfter = mockCart({ cart_items: [] });
-      expect(cartAfter.cart_items.length).toBe(0);
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 4 }),
+      "api::local-user-address.local-user-address": () => ({
+        id: 22,
+        shipping_city: {},
+      }),
     });
 
-    it('should not delete cart, just clear items', () => {
-      const cartId = 1;
-      const cart = mockCart({ id: cartId, cart_items: [] });
-
-      expect(cart.id).toBe(cartId); // Cart still exists
-      expect(cart.cart_items.length).toBe(0); // But items cleared
+    mockedRequestMellatPayment.mockResolvedValue({
+      success: false,
+      error: "Gateway down",
+      requestId: "REQ-123",
+      detailedError: { code: "XX" },
     });
+
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 4,
+          addressId: 22,
+          gateway: "mellat",
+          shippingCost: 0,
+        },
+      },
+      state: { user: { id: 9 } },
+    });
+
+    const handler = finalizeToOrderHandler(strapi);
+
+    await expect(handler(ctx)).rejects.toMatchObject({
+      message: "Gateway down",
+      status: 400,
+    });
+
+    expect(mockedRequestMellatPayment).toHaveBeenCalledWith(
+      strapi,
+      expect.objectContaining({
+        orderId: 501,
+        amount: 1_800_000,
+        userId: 9,
+        contractId: 77,
+        callbackURL: undefined,
+      }),
+    );
+
+    expect(strapi.entityService.create).toHaveBeenCalledWith(
+      "api::order-log.order-log",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          Description: expect.stringContaining("Gateway payment request failed"),
+          Changes: expect.objectContaining({ requestId: "REQ-123" }),
+        }),
+      }),
+    );
+
+    expect(strapi.entityService.update).toHaveBeenCalledWith(
+      "api::order.order",
+      501,
+      { data: { Status: "Cancelled" } },
+    );
+    expect(strapi.entityService.update).toHaveBeenCalledWith(
+      "api::contract.contract",
+      77,
+      { data: { Status: "Cancelled" } },
+    );
+
+    expect(ctx.badRequest).toHaveBeenCalledWith(
+      "Gateway down",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          error: "Gateway down",
+          requestId: "REQ-123",
+        }),
+      }),
+    );
   });
 
-  describe('Error Scenarios', () => {
-    it('should rollback on order creation failure', () => {
-      // If order creation fails, don't proceed with payment
-      (mockStrapi.db.query as any).mockImplementation(() => ({
-        create: jest.fn().mockRejectedValue(new Error('DB error')),
-      }));
+  it("returns redirect information when Mellat payment request succeeds", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    const cartService = {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 88 },
+        contract: { id: 44, Amount: 320_000 },
+        financialSummary: { payable: 320_000 },
+      }),
+    };
+    registerService("api::cart.cart", cartService);
 
-      expect(mockStrapi.db.query).toBeDefined();
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 4 }),
+      "api::local-user-address.local-user-address": () => ({
+        id: 12,
+        shipping_city: {},
+      }),
     });
 
-    it('should rollback on contract creation failure', () => {
-      // Similar - if contract fails, abort
-      (mockStrapi.db.query as any).mockImplementation(() => ({
-        create: jest.fn().mockRejectedValue(new Error('Contract creation failed')),
-      }));
-
-      expect(mockStrapi.db.query).toBeDefined();
+    mockedRequestMellatPayment.mockResolvedValue({
+      success: true,
+      redirectUrl: "https://bank.example/start/ABC",
+      refId: "REF-1",
+      requestId: "REQ-success",
     });
 
-    it('should handle payment failure gracefully', () => {
-      const paymentError = 'Payment gateway timeout';
-      expect(paymentError).toBeDefined();
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 4,
+          addressId: 12,
+          gateway: "mellat",
+          shippingCost: 0,
+          callbackURL: "/custom/callback",
+        },
+      },
     });
 
-    it('should not decrement stock if payment fails', () => {
-      const paymentSuccessful = false;
-      const shouldDecrement = paymentSuccessful;
+    const handler = finalizeToOrderHandler(strapi);
+    const response = await handler(ctx);
 
-      expect(shouldDecrement).toBe(false);
+    expect(response.data).toMatchObject({
+      success: true,
+      message:
+        "Order created successfully. Redirecting to payment gateway.",
+      orderId: 88,
+      contractId: 44,
+      redirectUrl: "https://bank.example/start/ABC",
+      refId: "REF-1",
+      requestId: "REQ-success",
     });
+
+    expect(mockedRequestMellatPayment).toHaveBeenCalledWith(
+      strapi,
+      expect.objectContaining({
+        callbackURL: "/custom/callback",
+      }),
+    );
+
+    expect(strapi.entityService.create).toHaveBeenCalledWith(
+      "api::order-log.order-log",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          Description: expect.stringContaining("Gateway payment request initiated"),
+          Changes: expect.objectContaining({
+            redirectUrl: "https://bank.example/start/ABC",
+            refId: "REF-1",
+            requestId: "REQ-success",
+          }),
+        }),
+      }),
+    );
+
+    expect(ctx.badRequest).not.toHaveBeenCalled();
   });
 
-  describe('Concurrent Requests', () => {
-    it('should handle multiple users finalizing carts simultaneously', () => {
-      const user1 = mockUser({ id: 1 });
-      const user2 = mockUser({ id: 2 });
-
-      const cart1 = mockCart({ user: user1, id: 1 });
-      const cart2 = mockCart({ user: user2, id: 2 });
-
-      expect(cart1.user.id).not.toBe(cart2.user.id);
+  it("returns redirect information when Saman payment request succeeds", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 91 },
+        contract: { id: 55, Amount: 220_000 },
+        financialSummary: { payable: 220_000 },
+      }),
     });
 
-    it('should prevent double-spending from single cart', () => {
-      // If cart finalize is called twice simultaneously
-      const cartId = 1;
-      const finalizeAttempt1 = { cartId, timestamp: 1000 };
-      const finalizeAttempt2 = { cartId, timestamp: 1001 };
-
-      // Second should be rejected
-      expect(finalizeAttempt2.timestamp).toBeGreaterThan(finalizeAttempt1.timestamp);
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 3 }),
+      "api::local-user-address.local-user-address": () => ({
+        id: 9,
+        shipping_city: {},
+      }),
     });
+
+    mockedRequestSamanPayment.mockResolvedValue({
+      paymentResult: {
+        success: true,
+        redirectUrl: "https://saman.example/start",
+        refId: "SAM-REF",
+        requestId: "SAM-REQUEST",
+        resNum: "SAM-RES",
+      },
+    });
+
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 3,
+          addressId: 9,
+          gateway: "samankish",
+          mobile: "09121234567",
+        },
+      },
+    });
+
+    const handler = finalizeToOrderHandler(strapi);
+    const response = await handler(ctx);
+
+    expect(response.data).toMatchObject({
+      success: true,
+      orderId: 91,
+      contractId: 55,
+      redirectUrl: "https://saman.example/start",
+      refId: "SAM-REF",
+      requestId: "SAM-REQUEST",
+    });
+
+    expect(mockedRequestSamanPayment).toHaveBeenCalledWith(
+      strapi,
+      expect.objectContaining({
+        order: { id: 91 },
+        contract: { id: 55, Amount: 220_000 },
+        financialSummary: { payable: 220_000 },
+        callbackURL: undefined,
+        userId: ctx.state.user.id,
+        cellNumber: "09121234567",
+      }),
+    );
+    expect(mockedRequestMellatPayment).not.toHaveBeenCalled();
+  });
+
+  it("returns gateway-provided response for SnappPay", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 60 },
+        contract: { id: 70, Amount: 200_000 },
+        financialSummary: { payable: 200_000 },
+      }),
+    });
+
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 5 }),
+      "api::local-user-address.local-user-address": () => ({
+        id: 6,
+        shipping_city: {},
+      }),
+    });
+
+    mockedRequestSnappPayment.mockResolvedValue({
+      response: { data: { redirectUrl: "https://snapp.test" } },
+      paymentResult: undefined,
+    } as any);
+
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 5,
+          addressId: 6,
+          gateway: "snappay",
+        },
+      },
+    });
+
+    const handler = finalizeToOrderHandler(strapi);
+    const response = await handler(ctx);
+
+    expect(response).toEqual({ data: { redirectUrl: "https://snapp.test" } });
+    expect(mockedRequestSnappPayment).toHaveBeenCalledWith(
+      strapi,
+      ctx,
+      expect.objectContaining({
+        order: { id: 60 },
+        contract: { id: 70, Amount: 200_000 },
+      }),
+    );
   });
 });

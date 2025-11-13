@@ -55,22 +55,22 @@ module.exports = {
   // Strapi API Configuration
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
-    baseUrl: "https://api.infinitycolor.co/api",
+    baseUrl: "https://api.infinitycolor.org/api",
     auth: {
       token:
-        "c53f2effbd2f9e3184e2a5932899b1fd9a614afbce4ede82d9e83b34b76188be3dc10e9923e0023450671a24d95c639d60ef6f289e66efc3670be6e2b207f455d19a28f886e7ad9eb1c92ca06354f3ac8e13355f296900e8dbcdd0ab6137c5a704b863775a9615464c3a3097595054d8dbfc45e0ad1140f2ae9a0af638f9e728",
+        "STRAPI_API_TOKEN_PRODUCTION",
     },
     // Credential options for interactive selection
     credentials: {
       production: {
-        baseUrl: "https://api.infinitycolor.co/api",
+        baseUrl: "https://api.infinitycolor.org/api",
         token:
-          "c53f2effbd2f9e3184e2a5932899b1fd9a614afbce4ede82d9e83b34b76188be3dc10e9923e0023450671a24d95c639d60ef6f289e66efc3670be6e2b207f455d19a28f886e7ad9eb1c92ca06354f3ac8e13355f296900e8dbcdd0ab6137c5a704b863775a9615464c3a3097595054d8dbfc45e0ad1140f2ae9a0af638f9e728",
+          "STRAPI_API_TOKEN_PRODUCTION",
       },
       staging: {
-        baseUrl: "https://api.infinity.rgbgroup.ir/api",
+        baseUrl: "https://api.staging.infinitycolor.org/api",
         token:
-          "89ea0441795124e522c7e14ce3a6e75f942663b5a8398ff194e0c90b6563163fe742632ad076310f330d06bee08c7f99225e4c91be39bd35fbd5ee7f668924404cb8f3647e576d8a2ba0b70734d53b75f2797348173b09615ccb06c2fd11c592eb4f535e1a57ca93844b234d27c739ca1fa9af20ca4eee0717328d2ae7fc135c",
+          "STRAPI_API_TOKEN_STAGING",
       },
       local: {
         baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",

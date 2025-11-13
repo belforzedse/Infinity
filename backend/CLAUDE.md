@@ -2,11 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overviewe
+## Project Overview
 
 This is **Infinity Backend**, an e-commerce backend built on **Strapi 4.25.21** (a headless CMS framework). The system handles products, shopping carts, orders, payments, user management, and more. It uses PostgreSQL for persistence and Redis for caching/sessions.
 
-## Development Commandsshaq
+## Development Commands
 
 ### Starting the Server
 ```bash
@@ -243,9 +243,73 @@ This updates type definitions in `types/generated/` based on Strapi schemas.
 3. Use `npm run test:mellat-v3` to test Mellat integration
 4. Check `src/api/payment-gateway/services/mellat-v3.ts` for implementation details
 
+## Database Initialization & Deployment
+
+### Critical Environment Setup
+
+**Docker/Deployment:**
+- `docker-compose.yml`: Shared across all environments (prod, staging, experimental)
+- `init-db.sh`: Auto-creates database on container startup (idempotent)
+- Both production and staging use **identical service names**: `infinity-postgres`, `infinity-redis`, `infinity-strapi`
+- Service discovery works because they run on **separate servers**, not naming conflicts
+
+**Environment Files:**
+- `main.env`: Production configuration (`DATABASE_HOST=infinity-postgres`, `DATABASE_NAME=prod`)
+- `dev.env`: Staging configuration (`DATABASE_HOST=infinity-postgres`, `DATABASE_NAME=dev`)
+- GitHub Actions extracts `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME` and creates `db.env`
+
+**Important:** Both environments use the SAME hostname (`infinity-postgres`) because:
+- They run on separate Docker hosts (different servers)
+- Same container name on different hosts causes no conflict
+- Allows single docker-compose.yml for all deployments
+
+### Database Auto-Initialization
+
+1. **init-db.sh runs on PostgreSQL startup:**
+   ```bash
+   CREATE DATABASE IF NOT EXISTS "$POSTGRES_DB";
+   ```
+   - Idempotent (safe to run multiple times)
+   - Creates database before Strapi connects
+   - Prevents "database does not exist" errors
+
+2. **Strapi auto-migration on first connection:**
+   - Creates all tables from schemas
+   - Runs pending migrations from `/database/migrations/`
+   - Calls `bootstrap()` function in `src/index.ts`
+
+3. **Bootstrap seeding (runs every startup, idempotent):**
+   - `ensureIranLocations()`: Seeds provinces and cities if missing
+   - `migrateLocalUsers()`: One-time migration of legacy users to plugin system
+   - `ensurePluginRoles()`: Creates roles if missing, updates permissions
+
+### Shipping City Data
+
+- **Auto-seeded on startup** via `ensureIranLocations()` in `src/index.ts`
+- Reads from:
+  - `database/iran-cities.json` - Province and city names
+  - `database/iran_cities (for api document) (2).sql` - City/province codes
+- Creates: `shipping_province` and `shipping_city` records
+- Idempotent: checks if data exists, skips if already seeded
+- Critical: SQL file must be in `database/` directory, not in root
+
+### GitHub Actions Deployment Flow
+
+Production deployment (push to `main`):
+1. Extract environment from `PROD_BACKEND_ENV_FILE` secret
+2. Create `main.env` file with credentials
+3. Generate `db.env` from `DATABASE_*` variables
+4. Start containers: `docker compose --env-file main.env up -d`
+5. `init-db.sh` creates `prod` database
+6. Strapi auto-creates schema
+7. Bootstrap seeds Iran locations
+
 ## Working with Modified Files
 
 Recent changes:
+- `init-db.sh`: Database initialization script (auto-creates database)
+- `docker-compose.yml`: Now mounts init script for database creation
+- `database/iran_cities (for api document) (2).sql`: Moved to database/ directory for seeding
 - `src/api/cart/controllers/handlers/gateway-helpers.ts`: Payment gateway logic
 - `src/api/order/controllers/helpers/adminAdjustItems.ts`: Admin order adjustments
 - `src/api/product-category/content-types/product-category/schema.json`: Category schema updates
@@ -254,5 +318,6 @@ Recent changes:
 ## Git Workflow
 
 - Main development branch: `dev`
+- Deployments: `main` (prod), `dev` (staging), `experimental`
 - Recent commits show focus on error handling, SKU fallback logic, and payment gateway integration
 - Use descriptive commit messages with prefixes like `fix(orders):`, `feat(payment):`, etc.
