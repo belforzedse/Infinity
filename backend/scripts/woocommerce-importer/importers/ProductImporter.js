@@ -73,19 +73,23 @@ class ProductImporter {
 
     this.stats.startTime = Date.now();
 
-    const normalizedActivityAfter = this.normalizeDateFilter(createdAfter, 'activityAfter');
-    const normalizedActivityBefore = this.normalizeDateFilter(createdBefore, 'activityBefore');
+    const normalizedCreatedAfter = this.normalizeDateFilter(createdAfter, 'createdAfter');
+    const normalizedCreatedBefore = this.normalizeDateFilter(createdBefore, 'createdBefore');
     const normalizedPublishedAfter = this.normalizeDateFilter(publishedAfter, 'publishedAfter');
 
     if (
-      normalizedActivityAfter &&
-      normalizedActivityBefore &&
-      new Date(normalizedActivityAfter) > new Date(normalizedActivityBefore)
+      normalizedCreatedAfter &&
+      normalizedCreatedBefore &&
+      new Date(normalizedCreatedAfter) > new Date(normalizedCreatedBefore)
     ) {
       throw new Error('createdAfter date must be before createdBefore date');
     }
 
-    const dateFilterLabel = this.describeActivityFilter(normalizedActivityAfter, normalizedActivityBefore, normalizedPublishedAfter);
+    const dateFilterLabel = this.describeDateFilters(
+      normalizedCreatedAfter,
+      normalizedCreatedBefore,
+      normalizedPublishedAfter
+    );
 
     // Determine categories to import
     let categoriesToProcess = categoryIds;
@@ -141,8 +145,10 @@ class ProductImporter {
 
           // Fetch current page with optional category filter
           const result = await this.wooClient.getProducts(currentPage, perPage, categoryId, {
-            modifiedAfter: normalizedActivityAfter,
-            modifiedBefore: normalizedActivityBefore,
+            modifiedAfter: normalizedCreatedAfter,
+            modifiedBefore: normalizedCreatedBefore,
+            createdAfter: normalizedCreatedAfter,
+            createdBefore: normalizedCreatedBefore,
           });
 
           if (!result.data || result.data.length === 0) {
@@ -343,18 +349,18 @@ class ProductImporter {
     }
   }
 
-  describeActivityFilter(activityAfter, activityBefore, publishedAfter) {
-    if (!activityAfter && !activityBefore && !publishedAfter) {
+  describeDateFilters(createdAfter, createdBefore, publishedAfter) {
+    if (!createdAfter && !createdBefore && !publishedAfter) {
       return "";
     }
 
     const parts = [];
-    if (activityAfter) {
-      parts.push(`activityAfter=${this.formatDateForLog(activityAfter)}`);
+    if (createdAfter) {
+      parts.push(`createdAfter=${this.formatDateForLog(createdAfter)}`);
     }
 
-    if (activityBefore) {
-      parts.push(`activityBefore=${this.formatDateForLog(activityBefore)}`);
+    if (createdBefore) {
+      parts.push(`createdBefore=${this.formatDateForLog(createdBefore)}`);
     }
 
     if (publishedAfter) {
