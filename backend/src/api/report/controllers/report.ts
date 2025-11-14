@@ -2,6 +2,7 @@
  * Report controller
  */
 
+import type { RoleName } from "../../../utils/roles";
 import { ROLE_NAMES, roleIsAllowed, fetchUserWithRole } from "../../../utils/roles";
 
 type Interval = "day" | "week" | "month";
@@ -16,15 +17,30 @@ function parseDate(value?: string, fallbackDays = 30): Date {
   return isNaN(d.getTime()) ? new Date() : d;
 }
 
+async function ensureRoleAccess(
+  ctx: any,
+  allowedRoles: RoleName[],
+  errorMessage: string,
+) {
+  const userId = ctx.state?.user?.id;
+  const user = await fetchUserWithRole(strapi, userId);
+  if (!user || !roleIsAllowed(user.role?.name, allowedRoles)) {
+    ctx.forbidden(errorMessage);
+    return null;
+  }
+
+  return user;
+}
+
 export default {
   async liquidity(ctx) {
     try {
-      // Admin guard - only superadmins can view reports
-      const userId = ctx.state?.user?.id;
-      const user = await fetchUserWithRole(strapi, userId);
-      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
-        return ctx.forbidden("Access denied - Superadmin role required");
-      }
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
@@ -77,12 +93,12 @@ export default {
 
   async productSales(ctx) {
     try {
-      // Admin guard - only superadmins can view reports
-      const userId = ctx.state?.user?.id;
-      const user = await fetchUserWithRole(strapi, userId);
-      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
-        return ctx.forbidden("Access denied - Superadmin role required");
-      }
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
@@ -303,12 +319,12 @@ export default {
 
   async gatewayLiquidity(ctx) {
     try {
-      // Admin guard - only superadmins can view reports
-      const userId = ctx.state?.user?.id;
-      const user = await fetchUserWithRole(strapi, userId);
-      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
-        return ctx.forbidden("Access denied - Superadmin role required");
-      }
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
@@ -381,12 +397,12 @@ export default {
 
   async adminActivity(ctx) {
     try {
-      // Admin guard - only superadmins can view admin activity
-      const userId = ctx.state?.user?.id;
-      const user = await fetchUserWithRole(strapi, userId);
-      if (!user || !roleIsAllowed(user.role?.name, [ROLE_NAMES.SUPERADMIN])) {
-        return ctx.forbidden("Access denied - Superadmin role required");
-      }
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN],
+        "Access denied - Superadmin role required",
+      );
+      if (!user) return;
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
