@@ -67,12 +67,14 @@ let cachedToken: { token: string; expiresAt: number } | null = null;
 function getSnappConfig() {
   return {
     baseUrl:
-      process.env.SNAPPAY_BASE_URL ||
-      "https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io",
+      process.env.SNAPPAY_BASE_URL || "https://api.snapppay.ir",
     clientId: process.env.SNAPPAY_CLIENT_ID || "infinity",
-    clientSecret: process.env.SNAPPAY_CLIENT_SECRET || "m7Z*e6RJp#DaWZQc",
-    username: process.env.SNAPPAY_USERNAME || "infinity-purchase",
-    password: process.env.SNAPPAY_PASSWORD || "J#FFlaz3*#eSpy5N",
+    clientSecret:
+      process.env.SNAPPAY_CLIENT_SECRET || "SNAPPAY_CLIENT_SECRET",
+    username:
+      process.env.SNAPPAY_USERNAME || "infinity-purchase",
+    password:
+      process.env.SNAPPAY_PASSWORD || "SNAPPAY_PASSWORD",
   };
 }
 
