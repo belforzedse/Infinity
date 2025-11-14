@@ -13,6 +13,94 @@ import { adminVoidBarcodeHandler } from "./helpers/adminVoidBarcode";
 export default factories.createCoreController(
   "api::order.order",
   ({ strapi }: { strapi: Strapi }) => ({
+    async findOne(ctx) {
+      const { id } = ctx.params;
+
+      try {
+        // Query with all necessary relations populated
+        const order = await strapi.db.query("api::order.order").findOne({
+          where: { id },
+          populate: {
+            user: {
+              fields: ["id", "email", "phone", "username"],
+            },
+            user_info: true,
+            contract: {
+              populate: {
+                contract_transactions: {
+                  populate: {
+                    payment_gateway: true,
+                  },
+                },
+              },
+            },
+            order_items: {
+              populate: {
+                product_variation: {
+                  populate: {
+                    product: {
+                      populate: ["CoverImage"],
+                    },
+                    product_color: true,
+                    product_size: true,
+                  },
+                },
+              },
+            },
+            shipping: true,
+            delivery_address: {
+              populate: {
+                shipping_city: {
+                  populate: {
+                    shipping_province: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (!order) {
+          return ctx.notFound("Order not found");
+        }
+
+        // Transform the response to match the frontend's expected structure
+        const transformedOrder = {
+          ...order,
+          user: order.user
+            ? {
+                data: {
+                  id: order.user.id,
+                  attributes: {
+                    Phone: order.user.phone || null,
+                    phone: order.user.phone || null,
+                    email: order.user.email,
+                    username: order.user.username,
+                    user_info: order.user_info
+                      ? {
+                          data: {
+                            id: order.user_info.id,
+                            attributes: order.user_info,
+                          },
+                        }
+                      : null,
+                  },
+                },
+              }
+            : null,
+        };
+
+        ctx.body = { data: transformedOrder };
+      } catch (error) {
+        ctx.badRequest("Error fetching order", {
+          data: {
+            success: false,
+            error: (error as any).message,
+          },
+        });
+      }
+    },
+
     async generateAnipoBarcode(ctx) {
       return generateAnipoBarcodeHandler(strapi as any, ctx);
     },
