@@ -14,7 +14,8 @@
   "attributes": {
     "Code": {
       "type": "string",
-      "required": true
+      "required": true,
+      "unique": true
     },
     "Type": {
       "type": "enumeration",
