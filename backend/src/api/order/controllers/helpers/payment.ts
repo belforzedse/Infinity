@@ -1,5 +1,81 @@
 import type { Strapi } from "@strapi/strapi";
 
+async function incrementDiscountUsageCounter(
+  strapi: Strapi,
+  discountCode: string,
+  orderId: number
+) {
+  if (!discountCode) return; // No discount code to track
+
+  try {
+    // Find the discount by code
+    const discount = await strapi.entityService.findMany(
+      "api::discount.discount",
+      {
+        filters: { Code: discountCode },
+        limit: 1,
+      }
+    );
+
+    if (!discount || !discount[0]) {
+      strapi.log.warn(
+        `Discount code "${discountCode}" not found when incrementing usage for order ${orderId}`
+      );
+      return;
+    }
+
+    const discountId = discount[0].id;
+    const currentUsedTimes = Number(discount[0].UsedTimes || 0);
+    const discountAmount = Number(discount[0].Amount || 0);
+    const discountType = discount[0].Type || "Unknown";
+
+    // Increment UsedTimes
+    await strapi.entityService.update("api::discount.discount", discountId, {
+      data: { UsedTimes: currentUsedTimes + 1 },
+    });
+
+    // Log to order-log for audit trail
+    try {
+      await strapi.entityService.create("api::order-log.order-log", {
+        data: {
+          order: orderId,
+          Action: "Update",
+          Description: `Discount code "${discountCode}" successfully applied`,
+          Changes: {
+            discountCode,
+            discountId,
+            discountType,
+            discountAmount,
+            usageTrackingBefore: currentUsedTimes,
+            usageTrackingAfter: currentUsedTimes + 1,
+          },
+        },
+      });
+    } catch (logErr) {
+      strapi.log.error("Failed to create discount usage audit log", logErr);
+    }
+
+    strapi.log.info(
+      `Discount usage incremented for code "${discountCode}" (order ${orderId}): ${currentUsedTimes} → ${
+        currentUsedTimes + 1
+      }`,
+      {
+        orderId,
+        discountId,
+        discountCode,
+        discountType,
+        discountAmount,
+      }
+    );
+  } catch (error) {
+    strapi.log.error(
+      `Failed to increment discount usage counter for code "${discountCode}" on order ${orderId}:`,
+      error
+    );
+    // Don't throw - this shouldn't block payment completion
+  }
+}
+
 export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Mellat returns: ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId
   const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } =
@@ -357,6 +433,15 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         });
       } catch (err) {
         strapi.log.error("Failed to update order status for Saman", err);
+      }
+
+      // Increment discount usage counter if discount was applied
+      if (orderEntity?.DiscountCode) {
+        await incrementDiscountUsageCounter(
+          strapi,
+          orderEntity.DiscountCode,
+          orderId
+        );
       }
 
       if (contractId) {
@@ -772,6 +857,24 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       await strapi.entityService.update("api::order.order", orderId, {
         data: { Status: "Started" },
       });
+
+      // Increment discount usage counter if discount was applied
+      try {
+        const orderWithDiscount = await strapi.entityService.findOne(
+          "api::order.order",
+          orderId
+        );
+        if (orderWithDiscount?.DiscountCode) {
+          await incrementDiscountUsageCounter(
+            strapi,
+            orderWithDiscount.DiscountCode,
+            orderId
+          );
+        }
+      } catch (err) {
+        strapi.log.error("Failed to increment discount for SnappPay order", err);
+      }
+
       try {
         await strapi.entityService.create("api::order-log.order-log", {
           data: {
@@ -916,6 +1019,24 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             Status: "Started",
           },
         });
+
+        // Increment discount usage counter if discount was applied
+        try {
+          const orderWithDiscount = await strapi.entityService.findOne(
+            "api::order.order",
+            orderId
+          );
+          if (orderWithDiscount?.DiscountCode) {
+            await incrementDiscountUsageCounter(
+              strapi,
+              orderWithDiscount.DiscountCode,
+              orderId
+            );
+          }
+        } catch (err) {
+          strapi.log.error("Failed to increment discount for Mellat order", err);
+        }
+
         // Barcode generation is now a manual super-admin action.
 
         strapi.log.info(`Payment successful for Order ${orderId}:`, {

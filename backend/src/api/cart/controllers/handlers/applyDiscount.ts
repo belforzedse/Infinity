@@ -59,13 +59,20 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
 
     const coupon: any = matching[0];
 
-    // Enforce usage limits
+    // Enforce usage limits (LimitUsage = 0 means unlimited)
     if (
       typeof coupon.LimitUsage === "number" &&
       typeof coupon.UsedTimes === "number" &&
-      coupon.LimitUsage >= 0 &&
+      coupon.LimitUsage > 0 &&
       coupon.UsedTimes >= coupon.LimitUsage
     ) {
+      strapi.log.warn("Discount code usage limit reached", {
+        discountCode: code,
+        discountId: coupon.id,
+        limitUsage: coupon.LimitUsage,
+        usedTimes: coupon.UsedTimes,
+        userId: ctx.state?.user?.id,
+      });
       return ctx.badRequest("Discount code usage limit reached", {
         data: { success: false, error: "usage_limit_reached" },
       });
@@ -171,6 +178,18 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
     } catch (e) {
       strapi.log.error("Failed SnappPay eligibility check after discount", e);
     }
+
+    // Log successful discount code validation
+    strapi.log.info("Discount code successfully validated and previewed", {
+      discountCode: code,
+      discountId: coupon.id,
+      discountType: coupon.Type,
+      discountAmount: Number(coupon.Amount || 0),
+      calculatedDiscount: Math.round(discountAmount),
+      cartSubtotal: Math.round(subtotal),
+      userId: ctx.state?.user?.id,
+      cartItemsCount: cart?.cart_items?.length || 0,
+    });
 
     return {
       data: {

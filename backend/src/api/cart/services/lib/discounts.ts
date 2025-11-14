@@ -26,7 +26,9 @@ export const computeCouponDiscount = async (
       limit: 1,
     }
   );
-  if (!matches?.length) return 0;
+  if (!matches?.length) {
+    throw new Error(`INVALID_OR_EXPIRED_COUPON: کد تخفیف "${code}" معتبر نیست یا منقضی شده است`);
+  }
   const coupon: any = matches[0];
   let eligibleSubtotal = subtotal;
   if (Array.isArray(coupon.products) && coupon.products.length > 0) {
@@ -47,7 +49,7 @@ export const computeCouponDiscount = async (
       }
     }
     if (eligibleSubtotal <= 0) {
-      return 0;
+      throw new Error(`NO_ELIGIBLE_ITEMS: هیچ کالای واجد شرط در سبد خرید یافت نشد`);
     }
   }
 
@@ -56,14 +58,14 @@ export const computeCouponDiscount = async (
     coupon.MinCartTotal > 0 &&
     subtotal < coupon.MinCartTotal
   ) {
-    return 0;
+    throw new Error(`BELOW_MINIMUM_CART: حداقل مبلغ سفارش ${coupon.MinCartTotal} تومان است`);
   }
   if (
     typeof coupon.MaxCartTotal === "number" &&
     coupon.MaxCartTotal > 0 &&
     subtotal > coupon.MaxCartTotal
   ) {
-    return 0;
+    throw new Error(`ABOVE_MAXIMUM_CART: حداکثر مبلغ سفارش ${coupon.MaxCartTotal} تومان است`);
   }
   if (coupon.delivery_methods?.length) {
     const normalizedShippingId =
@@ -71,13 +73,13 @@ export const computeCouponDiscount = async (
         ? Number(shippingId)
         : NaN;
     if (!normalizedShippingId || Number.isNaN(normalizedShippingId)) {
-      return 0;
+      throw new Error(`SHIPPING_REQUIRED_FOR_COUPON: این کد تخفیف نیاز به انتخاب روش ارسال خاصی دارد`);
     }
     const allowedDelivery = coupon.delivery_methods.some(
       (method: any) => Number(method.id) === normalizedShippingId
     );
     if (!allowedDelivery) {
-      return 0;
+      throw new Error(`INVALID_DELIVERY_METHOD: این کد تخفیف برای روش ارسال انتخاب شده معتبر نیست`);
     }
   }
 
