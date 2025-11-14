@@ -144,7 +144,7 @@ export default function Page() {
 
   if (isStoreManager) {
     return (
-      <StoreManagerNotice description="برای ویرایش قوانین تخفیف باید با نقش سوپر ادمین وارد شوید." />
+      <StoreManagerNotice description="برای ویرایش تخفیفای عمومی باید با نقش سوپر ادمین وارد شوید." />
     );
   }
 
@@ -174,7 +174,7 @@ export default function Page() {
           });
 
           toast.success("قانون تخفیف با موفقیت بروزرسانی شد");
-          router.push("/super-admin/coupons/rules");
+          router.push("/super-admin/general-discounts");
         } catch (error: any) {
           const rawErrorMessage = extractErrorMessage(error);
           const message = translateErrorMessage(rawErrorMessage, "خطا در بروزرسانی قانون تخفیف");

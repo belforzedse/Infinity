@@ -25,13 +25,22 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
   const [showConfirm, setShowConfirm] = useState(false);
   const { roleName } = useCurrentUser();
   const isSuperAdmin = (roleName ?? "").toLowerCase() === "superadmin";
-  const sidebarItems = useMemo(
-    () =>
-      isSuperAdmin
-        ? superAdminSidebar
-        : superAdminSidebar.filter((item) => item.id !== "reports"),
-    [isSuperAdmin],
-  );
+  const sidebarItems = useMemo(() => {
+    if (isSuperAdmin) {
+      return superAdminSidebar;
+    }
+
+    return superAdminSidebar.map((item) => {
+      if (item.id !== "reports") {
+        return item;
+      }
+
+      return {
+        ...item,
+        children: item.children.filter((child) => child.id !== "admin-activity"),
+      };
+    });
+  }, [isSuperAdmin]);
 
   const handleLogout = () => {
     performLogout();
@@ -118,14 +127,12 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                     role="button"
                     tabIndex={0}
                     className={clsx(
-                      "flex cursor-pointer items-center justify-between rounded-lg px-2 py-1.5",
-                      "transition-colors duration-150 hover:bg-neutral-50",
-                      hasChildren && "mb-2",
+                      "flex items-center justify-between rounded-lg px-2 py-1.5",
+                      "transition-colors duration-150 ",
+                      !hasChildren && "cursor-pointer hover:bg-neutral-50",
+                      hasChildren && "mb-2 cursor-default",
                     )}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openAndNavigate(item);
-                    }}
+
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
@@ -140,7 +147,7 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                       </div>
                     ) : (
                       <Link
-                        href={item.href}
+                        href={item.href ? item.href : ""}
                         className="flex items-center gap-2"
                         onClick={(e) => e.stopPropagation()}
                       >

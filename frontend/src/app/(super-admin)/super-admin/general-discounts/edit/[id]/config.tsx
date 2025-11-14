@@ -24,10 +24,10 @@ type ProductCategoryResponse = {
 };
 
 export const config: UpsertPageConfigType<CouponRule> = {
-  headTitle: "قوانین تخفیف",
+  headTitle: "تخفیفای عمومی",
   addButton: {
-    text: "قانون جدید",
-    path: "/super-admin/coupons/rules/add",
+    text: "تخفیف جدید",
+    path: "/super-admin/general-discounts/add",
   },
   isActiveBox: {
     key: "isActive",

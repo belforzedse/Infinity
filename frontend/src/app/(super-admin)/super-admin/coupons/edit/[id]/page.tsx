@@ -9,6 +9,12 @@ import { useEffect, useState } from "react";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import StoreManagerNotice from "@/components/SuperAdmin/StoreManagerNotice";
+import CouponProductSelector, {
+  type SelectedProduct,
+} from "@/components/SuperAdmin/Coupons/ProductSelector";
+import CouponDeliverySelector, {
+  type SelectedDelivery,
+} from "@/components/SuperAdmin/Coupons/DeliverySelector";
 
 export type Coupon = {
   id: number;
@@ -19,19 +25,13 @@ export type Coupon = {
   limit: number;
   startDate: Date;
   endDate: Date;
-  terms: Term[];
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
+  minCartTotal?: number | null;
+  maxCartTotal?: number | null;
 };
 
-type Term = {
-  category: string;
-  tags: string[];
-  tagLabels?: Record<string, string>;
-};
-
-// Define the API response type
 type DiscountResponse = {
   data: {
     id: number;
@@ -44,21 +44,24 @@ type DiscountResponse = {
       StartDate: string;
       EndDate: string;
       IsActive: boolean;
+      MinCartTotal?: number | null;
+      MaxCartTotal?: number | null;
       createdAt: string;
       updatedAt: string;
-      local_users: {
+      products: {
         data: Array<{
           id: number;
           attributes: {
-            Phone: string;
+            Title: string;
+            SKU: string;
           };
         }>;
       };
-      product_variations: {
+      delivery_methods: {
         data: Array<{
           id: number;
           attributes: {
-            SKU: string;
+            Title: string;
           };
         }>;
       };
@@ -71,6 +74,8 @@ export default function Page() {
   const router = useRouter();
   const [data, setData] = useState<Coupon | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+  const [selectedDeliveries, setSelectedDeliveries] = useState<SelectedDelivery[]>([]);
 
   const { id } = useParams();
 
@@ -87,25 +92,26 @@ export default function Page() {
 
     const fetchData = async () => {
       try {
-        const response = await apiClient.get<DiscountResponse>(`/discounts/${id}?populate=*`);
+        const populate = "?populate[products]=*&populate[delivery_methods]=*";
+        const response = await apiClient.get<DiscountResponse>(`/discounts/${id}${populate}`);
 
         const discount = (response as any).data.attributes;
 
-        // Create tagLabels objects for users and products
-        const userTagLabels: Record<string, string> = {};
+        // Create tagLabels objects
         const productTagLabels: Record<string, string> = {};
+        const deliveryTagLabels: Record<string, string> = {};
 
-        // Populate user tag labels
-        if (discount.local_users?.data) {
-          discount.local_users.data.forEach((user: any) => {
-            userTagLabels[user.id.toString()] = user.attributes.Phone;
+        if (discount.products?.data) {
+          discount.products.data.forEach((product: any) => {
+            productTagLabels[product.id.toString()] =
+              product.attributes?.Title || product.attributes?.SKU || `محصول ${product.id}`;
           });
         }
 
-        // Populate product tag labels
-        if (discount.product_variations?.data) {
-          discount.product_variations.data.forEach((product: any) => {
-            productTagLabels[product.id.toString()] = product.attributes.SKU;
+        if (discount.delivery_methods?.data) {
+          discount.delivery_methods.data.forEach((method: any) => {
+            deliveryTagLabels[method.id.toString()] =
+              method.attributes?.Title || `روش ارسال ${method.id}`;
           });
         }
 
@@ -119,26 +125,27 @@ export default function Page() {
           limit: discount.LimitUsage || 0,
           startDate: new Date(discount.StartDate),
           endDate: new Date(discount.EndDate),
-          terms: [
-            {
-              category: "user",
-              tags: discount.local_users?.data?.map((user: any) => user.id.toString()) || [],
-              tagLabels: userTagLabels,
-            },
-            {
-              category: "product",
-              tags:
-                discount.product_variations?.data?.map((product: any) => product.id.toString()) ||
-                [],
-              tagLabels: productTagLabels,
-            },
-          ],
           createdAt: new Date(discount.createdAt),
           updatedAt: new Date(discount.updatedAt),
           isActive: discount.IsActive || false,
+          minCartTotal: discount.MinCartTotal ?? null,
+          maxCartTotal: discount.MaxCartTotal ?? null,
         };
 
         setData(couponData);
+        setSelectedProducts(
+          (discount.products?.data || []).map((product: any) => ({
+            id: product.id,
+            title: productTagLabels[product.id.toString()],
+            sku: product.attributes?.SKU,
+          })),
+        );
+        setSelectedDeliveries(
+          (discount.delivery_methods?.data || []).map((method: any) => ({
+            id: method.id,
+            title: deliveryTagLabels[method.id.toString()],
+          })),
+        );
       } catch (error: any) {
         const rawErrorMessage = extractErrorMessage(error);
         const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت اطلاعات کد تخفیف");
@@ -167,36 +174,69 @@ export default function Page() {
   }
 
   return (
-    <UpsertPageContentWrapper<Coupon>
-      config={config}
-      data={data}
-      onSubmit={async (formData) => {
-        try {
-          await apiClient.put(`/discounts/${id}`, {
-            data: {
-              Code: formData.code || null,
-              Type: formData.type || null,
-              Amount: formData.amount || null,
-              LimitAmount: formData.maxAmount || null,
-              LimitUsage: formData.limit || null,
-              StartDate: (formData.startDate as any)?.value as Date,
-              EndDate: (formData.endDate as any)?.value as Date,
-              IsActive: formData.isActive,
-              local_users: formData.terms.find((term) => term.category === "user")?.tags || [],
-              product_variations:
-                formData.terms.find((term) => term.category === "product")?.tags || [],
-            },
-          });
+    <>
+      <UpsertPageContentWrapper<Coupon>
+        config={config}
+        data={data}
+        onSubmit={async (formData) => {
+          try {
+            await apiClient.put(`/discounts/${id}`, {
+              data: {
+                Code: formData.code || null,
+                Type: formData.type || null,
+                Amount: formData.amount || null,
+                LimitAmount: formData.maxAmount || null,
+                LimitUsage: formData.limit || null,
+                StartDate: (formData.startDate as any)?.value as Date,
+                EndDate: (formData.endDate as any)?.value as Date,
+                IsActive: formData.isActive,
+                products: selectedProducts.map((product) => product.id),
+                delivery_methods: selectedDeliveries.map((delivery) => delivery.id),
+                MinCartTotal:
+                  formData.minCartTotal !== undefined && formData.minCartTotal !== null
+                    ? Number(formData.minCartTotal)
+                    : null,
+                MaxCartTotal:
+                  formData.maxCartTotal !== undefined && formData.maxCartTotal !== null
+                    ? Number(formData.maxCartTotal)
+                    : null,
+              },
+            });
 
-          toast.success("کد تخفیف با موفقیت بروزرسانی شد");
-          router.push("/super-admin/coupons");
-        } catch (error: any) {
-          const rawErrorMessage = extractErrorMessage(error);
-          const message = translateErrorMessage(rawErrorMessage, "خطا در بروزرسانی کد تخفیف");
-          toast.error(message);
-          console.error(error);
-        }
-      }}
-    />
+            toast.success("کد تخفیف با موفقیت بروزرسانی شد");
+            router.push("/super-admin/coupons");
+          } catch (error: any) {
+            const rawErrorMessage = extractErrorMessage(error);
+            const message = translateErrorMessage(rawErrorMessage, "خطا در بروزرسانی کد تخفیف");
+            toast.error(message);
+            console.error(error);
+          }
+        }}
+        />
+      <div className="mt-6 space-y-6">
+        <CouponProductSelector
+          products={selectedProducts}
+          onAddProduct={(product) =>
+            setSelectedProducts((prev) =>
+              prev.some((p) => p.id === product.id) ? prev : [...prev, product],
+            )
+          }
+          onRemoveProduct={(productId) =>
+            setSelectedProducts((prev) => prev.filter((p) => p.id !== productId))
+          }
+        />
+
+        <CouponDeliverySelector
+          selected={selectedDeliveries}
+          onToggle={(delivery) =>
+            setSelectedDeliveries((prev) =>
+              prev.some((d) => d.id === delivery.id)
+                ? prev.filter((d) => d.id !== delivery.id)
+                : [...prev, delivery],
+            )
+          }
+        />
+      </div>
+    </>
   );
 }

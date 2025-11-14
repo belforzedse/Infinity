@@ -125,7 +125,7 @@ export const createColumns = (canManageDiscounts: boolean): ColumnDef<CouponRule
 
           <SuperAdminTableCellActionButton
             variant="secondary"
-            path={`/super-admin/coupons/rules/edit/${row.original.id}`}
+            path={`/super-admin/general-discounts/edit/${row.original.id}`}
             icon={<EditIcon />}
           />
         </div>

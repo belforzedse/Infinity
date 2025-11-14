@@ -32,8 +32,8 @@ export default function CouponsPage() {
         columns={columns}
         url={
           isRecycleBinOpen
-            ? "/discounts?filters[removedAt][$null]=false"
-            : "/discounts?filters[removedAt][$null]=true"
+            ? "/discounts?populate[products]=*&populate[delivery_methods]=*&filters[removedAt][$null]=false"
+            : "/discounts?populate[products]=*&populate[delivery_methods]=*&filters[removedAt][$null]=true"
         }
         mobileTable={(data) => (
           <MobileTable
