@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Skip ESLint during builds; run lint separately in CI
-  eslint: { ignoreDuringBuilds: true },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
@@ -23,7 +21,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["@heroicons/react", "lucide-react", "react-icons", "framer-motion"],
     scrollRestoration: true,
-    optimizeCss: true,
+    optimizeCss: false,
   },
   compress: true,
 };
