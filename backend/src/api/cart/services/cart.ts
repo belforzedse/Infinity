@@ -203,7 +203,8 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
             userId,
             discountCode,
             subtotal,
-            cart.cart_items
+            cart.cart_items,
+            shippingData?.shippingId
           );
         }
 

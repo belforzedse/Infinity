@@ -118,7 +118,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::discount.discount",
-      "mappedBy": "local_users"
+      "mappedBy": "users"
     },
     "external_id": {
       "type": "string"

@@ -109,6 +109,12 @@
       "target": "api::product-category.product-category",
       "inversedBy": "product_others"
     },
+    "discounts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::discount.discount",
+      "mappedBy": "products"
+    },
     "removedAt": {
       "type": "datetime"
     },

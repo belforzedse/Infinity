@@ -31,6 +31,12 @@
       "relation": "oneToMany",
       "target": "api::order.order",
       "mappedBy": "shipping"
+    },
+    "discounts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::discount.discount",
+      "mappedBy": "delivery_methods"
     }
   }
 }
