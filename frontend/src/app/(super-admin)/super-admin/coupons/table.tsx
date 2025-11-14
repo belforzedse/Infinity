@@ -28,7 +28,7 @@ export type Coupon = {
   };
 };
 
-export const columns: ColumnDef<Coupon>[] = [
+export const createColumns = (canManageDiscounts: boolean): ColumnDef<Coupon>[] => [
   {
     accessorKey: "attributes.Code",
     header: "کد",
@@ -106,6 +106,13 @@ export const columns: ColumnDef<Coupon>[] = [
     header: "وضعیت کد",
     cell: ({ row }) => {
       const status = row.original?.attributes?.IsActive as boolean;
+      if (!canManageDiscounts) {
+        return (
+          <span className="text-xs text-neutral-500 md:text-sm">
+            {status ? "فعال" : "غیرفعال"}
+          </span>
+        );
+      }
       return (
         <SuperAdminTableCellSwitch
           status={status ? "active" : "inactive"}
@@ -122,6 +129,13 @@ export const columns: ColumnDef<Coupon>[] = [
       cellClassName: "text-left",
     },
     cell: ({ row }) => {
+      if (!canManageDiscounts) {
+        return (
+          <span className="text-xs text-neutral-400 md:text-sm">
+            فقط قابل مشاهده برای مدیر فروشگاه
+          </span>
+        );
+      }
       return (
         <div className="flex flex-row-reverse items-center gap-3 p-1">
           <RemoveActionButton
@@ -143,9 +157,11 @@ export const columns: ColumnDef<Coupon>[] = [
 
 type Props = {
   data: Coupon[] | undefined;
+  canManageDiscounts: boolean;
+  columns: ColumnDef<Coupon>[];
 };
 
-export const MobileTable = ({ data }: Props) => {
+export const MobileTable = ({ data, canManageDiscounts, columns }: Props) => {
   if (!data) return null;
 
   return (
@@ -176,10 +192,16 @@ export const MobileTable = ({ data }: Props) => {
                     </span>
                   </div>
 
-                  <SuperAdminTableCellSwitch
-                    status={row?.attributes?.IsActive ? "active" : "inactive"}
-                    apiUrl={`/discounts/${row.id}`}
-                  />
+                  {canManageDiscounts ? (
+                    <SuperAdminTableCellSwitch
+                      status={row?.attributes?.IsActive ? "active" : "inactive"}
+                      apiUrl={`/discounts/${row.id}`}
+                    />
+                  ) : (
+                    <span className="text-xs text-neutral-500">
+                      {row?.attributes?.IsActive ? "فعال" : "غیرفعال"}
+                    </span>
+                  )}
                 </div>
               </>
             }

@@ -3,7 +3,7 @@ import Logo from "@/components/Kits/Logo";
 import superAdminSidebar from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
-import React, { useState, Fragment, useEffect } from "react";
+import React, { useState, Fragment, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
@@ -11,6 +11,7 @@ import SettingsIcon from "../Icons/SettingsIcon";
 import { usePathname, useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { performLogout } from "@/utils/logout";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
@@ -22,6 +23,15 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
   const pathname = usePathname();
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
+  const { roleName } = useCurrentUser();
+  const isSuperAdmin = (roleName ?? "").toLowerCase() === "superadmin";
+  const sidebarItems = useMemo(
+    () =>
+      isSuperAdmin
+        ? superAdminSidebar
+        : superAdminSidebar.filter((item) => item.id !== "reports"),
+    [isSuperAdmin],
+  );
 
   const handleLogout = () => {
     performLogout();
@@ -34,14 +44,14 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
   useEffect(() => {
     const next: Record<string, boolean> = {};
     const curr = pathname.replace(/\/$/, "");
-    superAdminSidebar.forEach((it) => {
+    sidebarItems.forEach((it) => {
       const base = (it.href ?? "").replace(/\/$/, "");
       if (it.children.length > 0 && base && (curr === base || curr.startsWith(base + "/"))) {
         next[it.id] = true;
       }
     });
     setOpenMenus((p) => ({ ...p, ...next }));
-  }, [pathname]);
+  }, [pathname, sidebarItems]);
 
   const openAndNavigate = (item: (typeof superAdminSidebar)[number]) => {
     if (item.href) router.push(item.href);
@@ -97,7 +107,7 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-6">
-            {superAdminSidebar.map((item) => {
+            {sidebarItems.map((item) => {
               const hasChildren = item.children.length > 0;
               const isOpenMenu = !!openMenus[item.id];
 

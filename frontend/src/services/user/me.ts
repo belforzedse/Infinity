@@ -19,6 +19,7 @@ export interface MeResponse {
   updatedAt: string;
   isAdmin?: boolean;
   UserName?: string;
+  roleName?: string | null;
 }
 
 type MaybeApiResponse<T> = T | { data: T };
