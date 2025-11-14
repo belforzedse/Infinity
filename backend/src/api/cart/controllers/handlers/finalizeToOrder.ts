@@ -136,14 +136,34 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     });
 
     const selectedGateway = String(gateway || "mellat").toLowerCase();
+    const paymentGatewayLabel =
+      selectedGateway === "snappay"
+        ? "SnappPay"
+        : selectedGateway === "samankish" || selectedGateway === "saman"
+        ? "SamanKish"
+        : selectedGateway === "wallet"
+        ? "Wallet"
+        : "Mellat";
     const baseUrl = process.env.URL || "https://api.infinitycolor.org/";
     const serverBaseUrl = `${baseUrl.replace(/\/$/, "")}/api`;
     const absoluteCallback = `${serverBaseUrl}${
       (callbackURL || "/orders/payment-callback").startsWith("/") ? "" : "/"
     }${callbackURL || "/orders/payment-callback"}`;
 
+    try {
+      await strapi.entityService.update("api::order.order", order.id, {
+        data: { PaymentGateway: paymentGatewayLabel },
+      });
+    } catch (e) {
+      strapi.log.error("Failed to update order payment gateway", {
+        orderId: order.id,
+        gateway: paymentGatewayLabel,
+        error: (e as Error)?.message || e,
+      });
+    }
+
     // Wallet payment path (full wallet only)
-    if (String(gateway || "").toLowerCase() === "wallet") {
+    if (selectedGateway === "wallet") {
       // Compute total amount from contract (toman -> IRR inside wallet storage uses IRR)
       const totalToman = Math.round(contract.Amount || 0);
       const totalIrr = totalToman * 10;

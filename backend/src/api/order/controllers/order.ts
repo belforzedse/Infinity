@@ -60,6 +60,7 @@ export default factories.createCoreController(
             orderId: order.id,
             status: order.Status,
             isPaid: ["Started", "Shipment", "Done"].includes(order.Status),
+            paymentGateway: order.PaymentGateway || "Unknown",
           },
         };
       } catch (error) {
