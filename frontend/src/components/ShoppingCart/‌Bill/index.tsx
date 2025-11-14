@@ -96,9 +96,6 @@ function ShoppingCartBillForm({}: Props) {
       }
     | undefined
   >(undefined);
-  const [shippingPreview, setShippingPreview] = useState<
-    { shipping: number; weight?: number } | undefined
-  >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
   const { totalPrice } = useCart();
 
@@ -140,48 +137,6 @@ function ShoppingCartBillForm({}: Props) {
     };
     run();
   }, [discountCode, shippingId, shippingCost]);
-
-  // Fetch shipping preview on address or shipping change
-  useEffect(() => {
-    const run = async () => {
-      try {
-        if (!addressId || !shippingId) return;
-        const preview = await CartService.getShippingPreview({
-          addressId,
-          shippingId,
-        });
-        if (preview?.success) {
-          setShippingPreview({
-            shipping: preview.shipping,
-            weight: preview.weight,
-          });
-          // Merge with discount preview totals if exists
-          setDiscountPreview((prev) => {
-            if (!prev) return prev;
-            const { subtotal, eligibleSubtotal, taxPercent } = prev.summary;
-            const tax = prev.summary.tax;
-            const shipping = preview.shipping || 0;
-            const total = subtotal - prev.discount + tax + shipping;
-            return {
-              discount: prev.discount,
-              summary: {
-                subtotal,
-                eligibleSubtotal,
-                tax,
-                shipping,
-                total,
-                taxPercent,
-              },
-            };
-          });
-        }
-      } catch (e) {
-        const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
-        console.error("getShippingPreview failed:", errorMsg, e);
-      }
-    };
-    run();
-  }, [addressId, shippingId]);
 
   // Re-check SnappPay eligibility when shipping or discount changes (stable deps)
   useEffect(() => {
@@ -459,7 +414,7 @@ function ShoppingCartBillForm({}: Props) {
 
   // Compute required amount (toman -> IRR) for wallet enablement, independent of discountPreview presence
   // Fallbacks: subtotal + tax + shipping when no discount is applied
-  const shippingToman = shippingPreview?.shipping ?? shippingCost ?? 0;
+  const shippingToman = shippingCost ?? 0;
   const discountToman = discountPreview?.discount ?? 0;
   const subtotalToman = totalPrice;
   const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
@@ -494,7 +449,6 @@ function ShoppingCartBillForm({}: Props) {
             setValue={setValue}
             selectedShipping={watchShippingMethod}
             discountPreview={discountPreview}
-            shippingPreviewShipping={shippingPreview?.shipping}
           />
           <ShoppingCartBillDiscountCoupon
             shippingId={watchShippingMethod ? Number(watchShippingMethod.id) : undefined}
