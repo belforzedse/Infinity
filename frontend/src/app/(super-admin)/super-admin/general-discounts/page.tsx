@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-export default function CouponsRulesPage() {
+export default function GeneralDiscountsPage() {
   useFreshDataOnPageLoad();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const { isStoreManager } = useCurrentUser();
@@ -16,10 +16,10 @@ export default function CouponsRulesPage() {
 
   return (
     <ContentWrapper
-      title="قوانین تخفیف"
+      title="تخفیفای عمومی"
       hasAddButton={canManageDiscounts}
-      addButtonText={canManageDiscounts ? "قانون جدید" : undefined}
-      addButtonPath={canManageDiscounts ? "/super-admin/coupons/rules/add" : undefined}
+      addButtonText={canManageDiscounts ? "تخفیف جدید" : undefined}
+      addButtonPath={canManageDiscounts ? "/super-admin/general-discounts/add" : undefined}
       hasFilterButton
       hasRecycleBin
       isRecycleBinOpen={isRecycleBinOpen}

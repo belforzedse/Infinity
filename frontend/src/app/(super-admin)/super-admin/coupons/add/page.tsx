@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
 import { config } from "./config";
 import { toast } from "react-hot-toast";
@@ -8,6 +9,12 @@ import { apiClient } from "@/services";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import StoreManagerNotice from "@/components/SuperAdmin/StoreManagerNotice";
+import CouponProductSelector, {
+  type SelectedProduct,
+} from "@/components/SuperAdmin/Coupons/ProductSelector";
+import CouponDeliverySelector, {
+  type SelectedDelivery,
+} from "@/components/SuperAdmin/Coupons/DeliverySelector";
 
 export type Coupon = {
   id: number;
@@ -18,27 +25,25 @@ export type Coupon = {
   limit: number;
   startDate: Date;
   endDate: Date;
-  terms: Term[];
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
-};
-
-type Term = {
-  category: string;
-  tags: string[];
-  tagLabels?: Record<string, string>;
+  minCartTotal?: number | null;
+  maxCartTotal?: number | null;
 };
 
 export default function Page() {
   const { isStoreManager, isLoading } = useCurrentUser();
   const router = useRouter();
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+  const [selectedDeliveries, setSelectedDeliveries] = useState<SelectedDelivery[]>([]);
 
   const initialData: Partial<Coupon> = {
-    terms: [],
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    minCartTotal: null,
+    maxCartTotal: null,
   };
 
   if (isLoading) {
@@ -52,35 +57,70 @@ export default function Page() {
   }
 
   return (
-    <UpsertPageContentWrapper<Coupon>
-      config={config}
-      data={initialData as Coupon}
-      onSubmit={async (data) => {
-        try {
-          await apiClient.post("/discounts", {
-            data: {
-              Code: data.code || null,
-              Type: data.type || null,
-              Amount: data.amount || null,
-              LimitAmount: data.maxAmount || null,
-              LimitUsage: data.limit || null,
-              StartDate: (data.startDate as any)?.value as Date,
-              EndDate: (data.endDate as any)?.value as Date,
-              IsActive: data.isActive,
-              local_users: data.terms.find((term) => term.category === "user")?.tags || [],
-              product_variations:
-                data.terms.find((term) => term.category === "product")?.tags || [],
-            },
-          });
+    <>
+      <UpsertPageContentWrapper<Coupon>
+        config={config}
+        data={initialData as Coupon}
+        onSubmit={async (data) => {
+          try {
+            const parseNullableNumber = (value: any) => {
+              if (value === undefined || value === null || value === "") {
+                return null;
+              }
+              const parsed = Number(value);
+              return Number.isNaN(parsed) ? null : parsed;
+            };
 
-          toast.success("کد تخفیف با موفقیت ثبت شد");
-          router.push("/super-admin/coupons");
-        } catch (error: any) {
-          const rawErrorMessage = extractErrorMessage(error);
-          const message = translateErrorMessage(rawErrorMessage, "خطا در ثبت کد تخفیف");
-          toast.error(message);
-        }
-      }}
-    />
+            await apiClient.post("/discounts", {
+              data: {
+                Code: data.code || null,
+                Type: data.type || null,
+                Amount: data.amount || null,
+                LimitAmount: data.maxAmount || null,
+                LimitUsage: data.limit || null,
+                StartDate: (data.startDate as any)?.value as Date,
+                EndDate: (data.endDate as any)?.value as Date,
+                IsActive: data.isActive,
+                products: selectedProducts.map((p) => p.id),
+                delivery_methods: selectedDeliveries.map((d) => d.id),
+                MinCartTotal: parseNullableNumber(data.minCartTotal),
+                MaxCartTotal: parseNullableNumber(data.maxCartTotal),
+              },
+            });
+
+            toast.success("کد تخفیف با موفقیت ثبت شد");
+            router.push("/super-admin/coupons");
+          } catch (error: any) {
+            const rawErrorMessage = extractErrorMessage(error);
+            const message = translateErrorMessage(rawErrorMessage, "خطا در ثبت کد تخفیف");
+            toast.error(message);
+          }
+        }}
+        />
+      <div className="mt-6 space-y-6">
+        <CouponProductSelector
+          products={selectedProducts}
+          onAddProduct={(product) =>
+            setSelectedProducts((prev) =>
+              prev.some((p) => p.id === product.id) ? prev : [...prev, product],
+            )
+          }
+          onRemoveProduct={(productId) =>
+            setSelectedProducts((prev) => prev.filter((p) => p.id !== productId))
+          }
+        />
+
+        <CouponDeliverySelector
+          selected={selectedDeliveries}
+          onToggle={(delivery) =>
+            setSelectedDeliveries((prev) =>
+              prev.some((d) => d.id === delivery.id)
+                ? prev.filter((d) => d.id !== delivery.id)
+                : [...prev, delivery],
+            )
+          }
+        />
+      </div>
+    </>
   );
 }

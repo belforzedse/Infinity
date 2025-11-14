@@ -97,51 +97,24 @@ export const config: UpsertPageConfigType<Coupon> = {
         },
         {
           header: {
-            title: "شرایط استفاده",
+            title: "شرایط پیشرفته",
           },
           fields: [
             {
-              name: "terms",
-              helper: () => (
-                <span className="text-sm text-actions-primary">
-                  شما می توانید از دسته بندی” محصولات” موارد مد نظر خود را برای اعمال تخفیف از فیلد
-                  مقابل انتخاب نمایید.
-                </span>
-              ),
-              type: "terms",
-              colSpan: 12,
+              name: "minCartTotal",
+              type: "text",
+              label: "حداقل مبلغ سبد (تومان)",
+              placeholder: "مثلاً 500000",
+              colSpan: 6,
               mobileColSpan: 12,
-              fetchTerms: async (searchTerm, category) => {
-                if (category === "product") {
-                  const res = await apiClient.get(
-                    `/product-variations?filters[SKU][$containsi]=${searchTerm}`,
-                  );
-
-                  return (res as any).data.map((product: any) => ({
-                    label: product.attributes.SKU,
-                    value: product.id,
-                  }));
-                } else {
-                  const res = await apiClient.get(
-                    `/local-users?filters[Phone][$containsi]=${searchTerm}`,
-                  );
-
-                  return (res as any).data.map((user: any) => ({
-                    label: user.attributes.Phone,
-                    value: user.id,
-                  }));
-                }
-              },
-              options: [
-                {
-                  label: "کاربر",
-                  value: "user",
-                },
-                {
-                  label: "محصول",
-                  value: "product",
-                },
-              ],
+            },
+            {
+              name: "maxCartTotal",
+              type: "text",
+              label: "حداکثر مبلغ سبد (تومان)",
+              placeholder: "خالی بماند یعنی بدون محدودیت",
+              colSpan: 6,
+              mobileColSpan: 12,
             },
           ],
         },

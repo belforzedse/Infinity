@@ -25,7 +25,59 @@ export type Coupon = {
     createdAt: string;
     updatedAt: string;
     removedAt: string | null;
+    MinCartTotal?: number | null;
+    MaxCartTotal?: number | null;
+    products?: {
+      data?: Array<{
+        id: number;
+        attributes?: { Title?: string; SKU?: string };
+      }>;
+    };
+    delivery_methods?: {
+      data?: Array<{
+        id: number;
+        attributes?: { Title?: string };
+      }>;
+    };
   };
+};
+
+const RuleBadges = ({ attrs }: { attrs: Coupon["attributes"] }) => {
+  const chips: string[] = [];
+  if (attrs.MinCartTotal && Number(attrs.MinCartTotal) > 0) {
+    chips.push(`حداقل ${priceFormatter(attrs.MinCartTotal, " تومان")}`);
+  }
+  if (attrs.MaxCartTotal && Number(attrs.MaxCartTotal) > 0) {
+    chips.push(`حداکثر ${priceFormatter(attrs.MaxCartTotal, " تومان")}`);
+  }
+  const productCount = attrs.products?.data?.length ?? 0;
+  if (productCount > 0) {
+    chips.push(`${productCount} محصول`);
+  }
+  const deliveryNames =
+    attrs.delivery_methods?.data
+      ?.map((method) => method.attributes?.Title)
+      .filter(Boolean) ?? [];
+  if (deliveryNames.length > 0) {
+    chips.push(`ارسال: ${deliveryNames.join("، ")}`);
+  }
+
+  if (chips.length === 0) {
+    return <span className="text-xs text-neutral-400">بدون محدودیت</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {chips.map((chip, idx) => (
+        <span
+          key={`${chip}-${idx}`}
+          className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600"
+        >
+          {chip}
+        </span>
+      ))}
+    </div>
+  );
 };
 
 export const createColumns = (canManageDiscounts: boolean): ColumnDef<Coupon>[] => [
@@ -99,6 +151,13 @@ export const createColumns = (canManageDiscounts: boolean): ColumnDef<Coupon>[] 
     cell: ({ row }) => {
       const date = new Date(row.original?.attributes?.EndDate as string);
       return <SuperAdminTableCellFullDate date={date} />;
+    },
+  },
+  {
+    accessorKey: "attributes.rules",
+    header: "شرایط",
+    cell: ({ row }) => {
+      return <RuleBadges attrs={row.original?.attributes} />;
     },
   },
   {
@@ -202,6 +261,9 @@ export const MobileTable = ({ data, canManageDiscounts, columns }: Props) => {
                       {row?.attributes?.IsActive ? "فعال" : "غیرفعال"}
                     </span>
                   )}
+                </div>
+                <div className="mt-2">
+                  <RuleBadges attrs={row.attributes} />
                 </div>
               </>
             }
