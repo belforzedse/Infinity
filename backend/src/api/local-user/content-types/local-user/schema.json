@@ -79,12 +79,6 @@
     "external_source": {
       "type": "string"
     },
-    "discounts": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::discount.discount",
-      "inversedBy": "local_users"
-    },
     "removedAt": {
       "type": "datetime"
     },
