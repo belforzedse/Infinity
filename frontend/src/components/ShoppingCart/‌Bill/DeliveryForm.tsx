@@ -27,7 +27,6 @@ type Props = {
       taxPercent: number;
     };
   };
-  shippingPreviewShipping?: number;
 };
 
 function ShoppingCartBillDeliveryForm({
@@ -35,9 +34,8 @@ function ShoppingCartBillDeliveryForm({
   setValue,
   selectedShipping,
   discountPreview,
-  shippingPreviewShipping,
 }: Props) {
-  const { totalPrice, subtotalBeforeDiscount, cartDiscountTotal } = useCart();
+  const { totalPrice, subtotalBeforeDiscount, cartDiscountTotal, openDrawer } = useCart();
   const [, _setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,7 +84,7 @@ function ShoppingCartBillDeliveryForm({
           <span className="text-base text-nowrap text-black lg:text-sm">
             {totalPrice.toLocaleString()} تومان
           </span>
-          <button className="flex items-center" type="button">
+          <button className="flex items-center" type="button" onClick={openDrawer}>
             <span className="text-sm text-nowrap text-pink-600 lg:text-xs">مشاهده سبد خرید</span>
             <ChevronLeftIcon className="h-4 w-4 text-pink-600" />
           </button>

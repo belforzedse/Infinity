@@ -2,6 +2,7 @@ import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
 import type { ApiError } from "@/types/api";
 import { apiClient } from "@/lib/api-client";
+import { User } from '../../app/(super-admin)/super-admin/users/edit/[id]/page';
 
 export interface MeResponse {
   Bio: string | null;
@@ -17,6 +18,7 @@ export interface MeResponse {
   id: number;
   updatedAt: string;
   isAdmin?: boolean;
+  UserName?: string;
 }
 
 type MaybeApiResponse<T> = T | { data: T };

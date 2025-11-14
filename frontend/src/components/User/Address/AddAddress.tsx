@@ -162,13 +162,14 @@ export default function AddAddress({ onAddressAdded }: Props) {
         onClick={() => setIsOpen(true)}
         className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
       >
-        <span className="text-sm text-foreground-pink lg:text-base">افزودن آدرس</span>
+        <span className="text-foreground-pink text-sm lg:text-base">افزودن آدرس</span>
         <CirculePlusIcon className="h-5 w-5" />
       </button>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <span className="text-lg mb-1 text-foreground-primary lg:text-2xl lg:col-span-2">
+        <form onSubmit={handleSubmit} className="flex max-h-[80vh] flex-col gap-4">
+          <div className="grid flex-1 grid-cols-1 gap-3 overflow-y-auto pr-1 lg:grid-cols-2">
+          <span className="text-foreground-primary text-lg mb-1 lg:text-2xl lg:col-span-2">
             افزودن آدرس
           </span>
 
@@ -181,7 +182,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
               </div>
               <div className="flex-1">
                 <span className="text-sm text-gray-500">شماره تماس:</span>
-                <p className="text-sm font-medium">{userInfo.Phone}</p>
+                <p className="text-sm text-black font-medium">{userInfo.UserName}</p>
               </div>
             </div>
           )}
@@ -222,7 +223,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
           />
 
           <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
-            <label className="text-base text-foreground-primary lg:text-lg">
+            <label className="text-foreground-primary text-base lg:text-lg">
               جزئیات آدرس (اختیاری)
             </label>
             <input
@@ -235,7 +236,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
           </div>
 
           <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
-            <label className="text-base text-foreground-primary lg:text-lg">کد پستی</label>
+            <label className="text-foreground-primary text-base lg:text-lg">کد پستی</label>
             <input
               type="text"
               value={postalCode}
@@ -250,7 +251,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
           </div>
 
           <div className="col-span-2 flex flex-col gap-1">
-            <label className="text-base text-foreground-primary lg:text-lg">
+            <label className="text-foreground-primary text-base lg:text-lg">
               آدرس دقیق محل سکونت
             </label>
             <textarea
@@ -263,11 +264,12 @@ export default function AddAddress({ onAddressAdded }: Props) {
             />
           </div>
 
-          <div className="col-span-2 mt-3 flex justify-end">
+          </div>
+          <div className="flex justify-end border-t border-slate-100 bg-white px-4 py-4">
             <button
               type="submit"
               disabled={loading || !selectedCity}
-              className={`hover:bg-primary-700 text-sm flex w-full items-center justify-center gap-2 rounded-lg bg-foreground-pink px-8 py-2 font-medium text-white transition-colors lg:w-fit ${
+              className={`hover:bg-[#db3172] text-sm flex w-full items-center justify-center gap-2 rounded-lg bg-[#f45a93] px-8 py-2 font-medium text-white transition-colors lg:w-fit ${
                 loading || !selectedCity ? "cursor-not-allowed opacity-70" : ""
               }`}
             >
