@@ -180,7 +180,7 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
         if (!mounted) return;
 
         console.log("User search response:", response); // Debug log
-        const users = response as User[];
+        const users = response as unknown as User[];
         setSuggestions(users);
         setOpen(users.length > 0);
       } catch (error) {
