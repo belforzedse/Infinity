@@ -537,7 +537,7 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
         },
         number
       >;
-    Code: Attribute.String & Attribute.Required;
+    Code: Attribute.String & Attribute.Required & Attribute.Unique;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::discount.discount", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -579,11 +579,6 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
         number
       > &
       Attribute.DefaultTo<0>;
-    users: Attribute.Relation<
-      "api::discount.discount",
-      "manyToMany",
-      "plugin::users-permissions.user"
-    >;
   };
 }
 
@@ -978,11 +973,6 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::local-user.local-user", "oneToOne", "admin::user"> &
       Attribute.Private;
-    discounts: Attribute.Relation<
-      "api::local-user.local-user",
-      "manyToMany",
-      "api::discount.discount"
-    >;
     external_id: Attribute.String;
     external_source: Attribute.String;
     IsActive: Attribute.Boolean & Attribute.Required & Attribute.DefaultTo<true>;
@@ -2496,11 +2486,6 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"plugin::users-permissions.user", "oneToOne", "admin::user"> &
       Attribute.Private;
-    discounts: Attribute.Relation<
-      "plugin::users-permissions.user",
-      "manyToMany",
-      "api::discount.discount"
-    >;
     email: Attribute.String & Attribute.Unique;
     external_id: Attribute.String;
     external_source: Attribute.String;
