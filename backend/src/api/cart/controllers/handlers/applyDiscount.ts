@@ -44,7 +44,6 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
           removedAt: { $null: true },
         },
         populate: {
-          users: true,
           products: true,
           delivery_methods: true,
         },
@@ -70,16 +69,6 @@ export const applyDiscountHandler = (strapi: Strapi) => async (ctx: any) => {
       return ctx.badRequest("Discount code usage limit reached", {
         data: { success: false, error: "usage_limit_reached" },
       });
-    }
-
-    // If coupon is scoped to specific users, ensure current user is allowed
-    if (coupon.users?.length) {
-      const allowed = coupon.users.some((u: any) => u.id === user.id);
-      if (!allowed) {
-        return ctx.badRequest("You are not eligible for this code", {
-          data: { success: false, error: "not_eligible_user" },
-        });
-      }
     }
 
     // If coupon is scoped to specific products, restrict subtotal
