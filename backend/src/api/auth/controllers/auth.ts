@@ -189,6 +189,7 @@ async function self(ctx) {
       UserName: fullUser?.username ?? profile?.UserName,
       Email: fullUser?.email ?? profile?.Email,
       isAdmin,
+      roleName: roleName ?? null,
     };
   } catch (err) {
     strapi.log.error(err);
