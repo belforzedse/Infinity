@@ -11,6 +11,11 @@ on:
 env:
   REGISTRY: ghcr.io/${{ github.repository_owner }}
   IMAGE_NAME: infinity-backend
+  SNAPPAY_BASE_URL: ${{ secrets.SNAPPAY_BASE_URL || 'https://api.snapppay.ir' }}
+  SNAPPAY_CLIENT_ID: ${{ secrets.SNAPPAY_CLIENT_ID || 'infinity' }}
+  SNAPPAY_CLIENT_SECRET: ${{ secrets.SNAPPAY_CLIENT_SECRET || 'SNAPPAY_CLIENT_SECRET' }}
+  SNAPPAY_USERNAME: ${{ secrets.SNAPPAY_USERNAME || 'infinity-purchase' }}
+  SNAPPAY_PASSWORD: ${{ secrets.SNAPPAY_PASSWORD || 'SNAPPAY_PASSWORD' }}
 
 jobs:
   build-and-deploy:
