@@ -20,7 +20,6 @@ export const computeCouponDiscount = async (
         removedAt: { $null: true },
       },
       populate: {
-        users: true,
         products: true,
         delivery_methods: true,
       },
@@ -29,13 +28,6 @@ export const computeCouponDiscount = async (
   );
   if (!matches?.length) return 0;
   const coupon: any = matches[0];
-  if (
-    coupon.users?.length &&
-    !coupon.users.some((u: any) => u.id === userId)
-  ) {
-    return 0;
-  }
-
   let eligibleSubtotal = subtotal;
   if (Array.isArray(coupon.products) && coupon.products.length > 0) {
     const productIds = new Set(
