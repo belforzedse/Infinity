@@ -148,8 +148,19 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
   superadmin: { mode: "all" },
 };
 
-const STORE_MANAGER_DENIED_CONTROLLERS = [
+type RestrictedController = {
+  typeKey: string;
+  controller: string;
+  allowActions?: ReadonlyArray<string>;
+};
+
+const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::report", controller: "report" },
+  {
+    typeKey: "api::discount",
+    controller: "discount",
+    allowActions: READ_ACTIONS,
+  },
 ];
 
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
@@ -244,7 +255,7 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
   if (isFullAccessSpec(spec)) {
     const tree = usersPermissionsService.getActions({ defaultEnable: true });
     if (roleType === "store-manager") {
-      disableControllers(tree, STORE_MANAGER_DENIED_CONTROLLERS, strapi);
+      applyRestrictedControllers(tree, STORE_MANAGER_RESTRICTED_CONTROLLERS, strapi);
     }
     return tree;
   }
@@ -254,12 +265,12 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
   return tree;
 }
 
-function disableControllers(
+function applyRestrictedControllers(
   tree: Record<string, any>,
-  entries: Array<{ typeKey: string; controller: string }>,
+  entries: RestrictedController[],
   strapi: Strapi,
 ) {
-  entries.forEach(({ typeKey, controller }) => {
+  entries.forEach(({ typeKey, controller, allowActions }) => {
     const controllerEntry = tree[typeKey]?.controllers?.[controller];
     if (!controllerEntry) {
       strapi.log.warn(
@@ -268,7 +279,11 @@ function disableControllers(
       return;
     }
 
-    Object.values(controllerEntry).forEach((action: any) => {
+    const allowed = new Set(allowActions ?? []);
+    Object.entries(controllerEntry).forEach(([actionName, action]: [string, any]) => {
+      if (allowed.size > 0 && allowed.has(actionName)) {
+        return;
+      }
       action.enabled = false;
     });
   });
