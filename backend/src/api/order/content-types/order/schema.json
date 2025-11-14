@@ -117,6 +117,17 @@
       "type": "integer",
       "min": 0,
       "default": 0
+    },
+    "PaymentGateway": {
+      "type": "enumeration",
+      "enum": [
+        "Unknown",
+        "Wallet",
+        "Mellat",
+        "SnappPay",
+        "SamanKish"
+      ],
+      "default": "Unknown"
     }
   }
 }

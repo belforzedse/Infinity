@@ -1160,6 +1160,10 @@ export interface ApiOrderOrder extends Schema.CollectionType {
     external_source: Attribute.String;
     Note: Attribute.Text;
     order_items: Attribute.Relation<"api::order.order", "oneToMany", "api::order-item.order-item">;
+    PaymentGateway: Attribute.Enumeration<
+      ["Unknown", "Wallet", "Mellat", "SnappPay", "SamanKish"]
+    > &
+      Attribute.DefaultTo<"Unknown">;
     shipping: Attribute.Relation<"api::order.order", "manyToOne", "api::shipping.shipping">;
     ShippingBarcode: Attribute.String;
     ShippingBoxSizeId: Attribute.Integer &
@@ -1772,6 +1776,13 @@ export interface ApiProductVariationLogProductVariationLog extends Schema.Collec
     > &
       Attribute.Private;
     Description: Attribute.Text;
+    IP: Attribute.String;
+    performed_by: Attribute.Relation<
+      "api::product-variation-log.product-variation-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    PerformedBy: Attribute.String;
     product_variation: Attribute.Relation<
       "api::product-variation-log.product-variation-log",
       "manyToOne",
@@ -1784,6 +1795,7 @@ export interface ApiProductVariationLogProductVariationLog extends Schema.Collec
       "admin::user"
     > &
       Attribute.Private;
+    UserAgent: Attribute.String;
   };
 }
 
