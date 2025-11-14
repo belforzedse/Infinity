@@ -7,6 +7,8 @@ import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import { useEffect, useState } from "react";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import StoreManagerNotice from "@/components/SuperAdmin/StoreManagerNotice";
 
 export type CouponRule = {
   id: number;
@@ -51,6 +53,7 @@ type ApiResponse = {
 };
 
 export default function Page() {
+  const { isStoreManager, isLoading } = useCurrentUser();
   const router = useRouter();
   const [data, setData] = useState<CouponRule | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,6 +61,16 @@ export default function Page() {
   const { id } = useParams();
 
   useEffect(() => {
+    if (isStoreManager) {
+      setLoading(false);
+    }
+  }, [isStoreManager]);
+
+  useEffect(() => {
+    if (isStoreManager || isLoading) {
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const response = await apiClient.get<ApiResponse>(`/general-discounts/${id}?populate=*`);
@@ -123,10 +136,20 @@ export default function Page() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, isStoreManager, isLoading]);
 
-  if (loading || !data) {
+  if (isLoading || loading) {
     return <div>در حال بارگذاری...</div>;
+  }
+
+  if (isStoreManager) {
+    return (
+      <StoreManagerNotice description="برای ویرایش قوانین تخفیف باید با نقش سوپر ادمین وارد شوید." />
+    );
+  }
+
+  if (!data) {
+    return <div>قانون تخفیف یافت نشد</div>;
   }
 
   return (

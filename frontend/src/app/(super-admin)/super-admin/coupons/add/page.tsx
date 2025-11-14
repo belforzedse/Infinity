@@ -6,6 +6,8 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import StoreManagerNotice from "@/components/SuperAdmin/StoreManagerNotice";
 
 export type Coupon = {
   id: number;
@@ -29,6 +31,7 @@ type Term = {
 };
 
 export default function Page() {
+  const { isStoreManager, isLoading } = useCurrentUser();
   const router = useRouter();
 
   const initialData: Partial<Coupon> = {
@@ -37,6 +40,16 @@ export default function Page() {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+
+  if (isLoading) {
+    return <div>در حال بارگذاری...</div>;
+  }
+
+  if (isStoreManager) {
+    return (
+      <StoreManagerNotice description="برای مدیریت یا ایجاد کد تخفیف باید با نقش سوپر ادمین وارد شوید." />
+    );
+  }
 
   return (
     <UpsertPageContentWrapper<Coupon>

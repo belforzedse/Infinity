@@ -7,6 +7,8 @@ import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import { useEffect, useState } from "react";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import StoreManagerNotice from "@/components/SuperAdmin/StoreManagerNotice";
 
 export type Coupon = {
   id: number;
@@ -65,6 +67,7 @@ type DiscountResponse = {
 };
 
 export default function Page() {
+  const { isStoreManager, isLoading } = useCurrentUser();
   const router = useRouter();
   const [data, setData] = useState<Coupon | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,6 +75,16 @@ export default function Page() {
   const { id } = useParams();
 
   useEffect(() => {
+    if (isStoreManager) {
+      setLoading(false);
+    }
+  }, [isStoreManager]);
+
+  useEffect(() => {
+    if (isStoreManager || isLoading) {
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const response = await apiClient.get<DiscountResponse>(`/discounts/${id}?populate=*`);
@@ -137,10 +150,16 @@ export default function Page() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, isStoreManager, isLoading]);
 
-  if (loading) {
+  if (isLoading || loading) {
     return <div>در حال بارگذاری...</div>;
+  }
+
+  if (isStoreManager) {
+    return (
+      <StoreManagerNotice description="برای ویرایش کد تخفیف باید با نقش سوپر ادمین وارد شوید." />
+    );
   }
 
   if (!data) {
