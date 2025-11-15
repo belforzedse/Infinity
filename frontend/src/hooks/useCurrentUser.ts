@@ -21,5 +21,7 @@ export const useCurrentUser = () => {
     error,
     isAuthenticated: !!user,
     isAdmin: user?.isAdmin ?? false,
+    roleName: user?.roleName ?? null,
+    isStoreManager: (user?.roleName ?? "").toLowerCase() === "store manager",
   };
 };

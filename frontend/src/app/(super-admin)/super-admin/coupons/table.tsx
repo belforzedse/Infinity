@@ -25,10 +25,62 @@ export type Coupon = {
     createdAt: string;
     updatedAt: string;
     removedAt: string | null;
+    MinCartTotal?: number | null;
+    MaxCartTotal?: number | null;
+    products?: {
+      data?: Array<{
+        id: number;
+        attributes?: { Title?: string; SKU?: string };
+      }>;
+    };
+    delivery_methods?: {
+      data?: Array<{
+        id: number;
+        attributes?: { Title?: string };
+      }>;
+    };
   };
 };
 
-export const columns: ColumnDef<Coupon>[] = [
+const RuleBadges = ({ attrs }: { attrs: Coupon["attributes"] }) => {
+  const chips: string[] = [];
+  if (attrs.MinCartTotal && Number(attrs.MinCartTotal) > 0) {
+    chips.push(`حداقل ${priceFormatter(attrs.MinCartTotal, " تومان")}`);
+  }
+  if (attrs.MaxCartTotal && Number(attrs.MaxCartTotal) > 0) {
+    chips.push(`حداکثر ${priceFormatter(attrs.MaxCartTotal, " تومان")}`);
+  }
+  const productCount = attrs.products?.data?.length ?? 0;
+  if (productCount > 0) {
+    chips.push(`${productCount} محصول`);
+  }
+  const deliveryNames =
+    attrs.delivery_methods?.data
+      ?.map((method) => method.attributes?.Title)
+      .filter(Boolean) ?? [];
+  if (deliveryNames.length > 0) {
+    chips.push(`ارسال: ${deliveryNames.join("، ")}`);
+  }
+
+  if (chips.length === 0) {
+    return <span className="text-xs text-neutral-400">بدون محدودیت</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {chips.map((chip, idx) => (
+        <span
+          key={`${chip}-${idx}`}
+          className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600"
+        >
+          {chip}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+export const createColumns = (canManageDiscounts: boolean): ColumnDef<Coupon>[] => [
   {
     accessorKey: "attributes.Code",
     header: "کد",
@@ -102,10 +154,24 @@ export const columns: ColumnDef<Coupon>[] = [
     },
   },
   {
+    accessorKey: "attributes.rules",
+    header: "شرایط",
+    cell: ({ row }) => {
+      return <RuleBadges attrs={row.original?.attributes} />;
+    },
+  },
+  {
     accessorKey: "status",
     header: "وضعیت کد",
     cell: ({ row }) => {
       const status = row.original?.attributes?.IsActive as boolean;
+      if (!canManageDiscounts) {
+        return (
+          <span className="text-xs text-neutral-500 md:text-sm">
+            {status ? "فعال" : "غیرفعال"}
+          </span>
+        );
+      }
       return (
         <SuperAdminTableCellSwitch
           status={status ? "active" : "inactive"}
@@ -122,6 +188,13 @@ export const columns: ColumnDef<Coupon>[] = [
       cellClassName: "text-left",
     },
     cell: ({ row }) => {
+      if (!canManageDiscounts) {
+        return (
+          <span className="text-xs text-neutral-400 md:text-sm">
+            فقط قابل مشاهده برای مدیر فروشگاه
+          </span>
+        );
+      }
       return (
         <div className="flex flex-row-reverse items-center gap-3 p-1">
           <RemoveActionButton
@@ -143,9 +216,11 @@ export const columns: ColumnDef<Coupon>[] = [
 
 type Props = {
   data: Coupon[] | undefined;
+  canManageDiscounts: boolean;
+  columns: ColumnDef<Coupon>[];
 };
 
-export const MobileTable = ({ data }: Props) => {
+export const MobileTable = ({ data, canManageDiscounts, columns }: Props) => {
   if (!data) return null;
 
   return (
@@ -176,10 +251,19 @@ export const MobileTable = ({ data }: Props) => {
                     </span>
                   </div>
 
-                  <SuperAdminTableCellSwitch
-                    status={row?.attributes?.IsActive ? "active" : "inactive"}
-                    apiUrl={`/discounts/${row.id}`}
-                  />
+                  {canManageDiscounts ? (
+                    <SuperAdminTableCellSwitch
+                      status={row?.attributes?.IsActive ? "active" : "inactive"}
+                      apiUrl={`/discounts/${row.id}`}
+                    />
+                  ) : (
+                    <span className="text-xs text-neutral-500">
+                      {row?.attributes?.IsActive ? "فعال" : "غیرفعال"}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <RuleBadges attrs={row.attributes} />
                 </div>
               </>
             }

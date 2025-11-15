@@ -4,45 +4,72 @@ import React, { useEffect, useRef, useState } from "react";
 import { apiClient } from "@/services";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
+import { translatePluginRoleLabel } from "@/constants/roleLabels";
 
 type User = {
-  id: string;
-  attributes: {
-    Phone: string;
-    IsActive: boolean;
-    user_info: {
-      data: {
-        attributes: {
-          FirstName: string;
-          LastName: string;
-        };
-      };
-    };
-    user_role: {
-      data: {
-        attributes: {
-          Title: string;
-        };
-      };
-    };
-    user_wallet: {
-      data: {
-        attributes: {
-          Balance: string;
-        };
-      };
-    };
+  id: number;
+  username: string;
+  email: string;
+  phone: string;
+  IsVerified: boolean;
+  IsActive: boolean;
+  role?: {
+    id: number;
+    name: string;
+    description: string;
+    type: string;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+  user_info?: {
+    id: number;
+    FirstName: string;
+    LastName: string;
+    NationalCode?: string | null;
+    BirthDate?: string | null;
+    Sex?: boolean | null;
+    Bio?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+  user_wallet?: {
+    id: number;
+    Balance: string;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+  provider?: string | null;
+  confirmed?: boolean;
+  blocked?: boolean;
+  external_source?: string | null;
+  external_id?: string | null;
+  removedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  product_reviews?: any[];
+  contracts?: any[];
+  user_addresses?: any[];
+  user_role?: null;
+  cart?: {
+    id: number;
+    Status: string;
+    createdAt: string;
+    updatedAt: string;
   };
+  orders?: any[];
+  discounts?: any[];
 };
 
 interface UserSearchSectionProps {
   selectedUser: User | null;
   onUserSelect: (user: User) => void;
+  showSelectedCard?: boolean;
 }
 
 const UserSearchSection: React.FC<UserSearchSectionProps> = ({
   selectedUser,
   onUserSelect,
+  showSelectedCard = true,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<User[]>([]);
@@ -68,10 +95,10 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
     setLoading(true);
     const timeout = setTimeout(async () => {
       try {
-        // Use EXACT same logic as working users page
-        let baseUrl = `/local-users?populate=*&filters[removedAt][$null]=true&pagination[pageSize]=6`;
+        // Search plugin users endpoint with populate for user_info
+        let baseUrl = `/users?populate=user_info,role,user_wallet&filters[removedAt][$null]=true&pagination[pageSize]=6`;
 
-        // Add search filter - EXACT copy from users page
+        // Add search filter
         const searchTerm = q.trim();
         const searchWords = searchTerm.split(/\s+/); // Split by any whitespace
 
@@ -80,7 +107,7 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
           const encodedTerm = encodeURIComponent(searchTerm);
           baseUrl += `&filters[$or][0][user_info][FirstName][$containsi]=${encodedTerm}`;
           baseUrl += `&filters[$or][1][user_info][LastName][$containsi]=${encodedTerm}`;
-          baseUrl += `&filters[$or][2][Phone][$containsi]=${encodedTerm}`;
+          baseUrl += `&filters[$or][2][phone][$containsi]=${encodedTerm}`;
         } else if (searchWords.length === 2) {
           // Two words: prioritize FirstName + LastName in exact order
           let orIndex = 0;
@@ -89,14 +116,14 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
 
           // Priority 1: First word in FirstName AND second word in LastName (exact order)
           baseUrl += `&filters[$or][${orIndex++}][$and][0][user_info][FirstName][$containsi]=${firstName}`;
-          baseUrl += `&filters[$or][${orIndex-1}][$and][1][user_info][LastName][$containsi]=${lastName}`;
+          baseUrl += `&filters[$or][${orIndex - 1}][$and][1][user_info][LastName][$containsi]=${lastName}`;
 
           // Priority 2: Exact phrase in FirstName (in case someone has compound first name)
           const encodedPhrase = encodeURIComponent(searchTerm);
           baseUrl += `&filters[$or][${orIndex++}][user_info][FirstName][$containsi]=${encodedPhrase}`;
 
           // Priority 3: Phone number search
-          baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
+          baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
         } else if (searchWords.length === 3) {
           // Three words: handle patterns like "داریوش فیضی پور"
           let orIndex = 0;
@@ -104,21 +131,21 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
           const word3 = encodeURIComponent(searchWords[2]);
 
           // Priority 1: First word in FirstName AND (second + third) words in LastName
-          const lastNameCombined = encodeURIComponent(searchWords.slice(1).join(' '));
+          const lastNameCombined = encodeURIComponent(searchWords.slice(1).join(" "));
           baseUrl += `&filters[$or][${orIndex++}][$and][0][user_info][FirstName][$containsi]=${word1}`;
-          baseUrl += `&filters[$or][${orIndex-1}][$and][1][user_info][LastName][$containsi]=${lastNameCombined}`;
+          baseUrl += `&filters[$or][${orIndex - 1}][$and][1][user_info][LastName][$containsi]=${lastNameCombined}`;
 
           // Priority 2: (First + second) words in FirstName AND third word in LastName
-          const firstNameCombined = encodeURIComponent(searchWords.slice(0, 2).join(' '));
+          const firstNameCombined = encodeURIComponent(searchWords.slice(0, 2).join(" "));
           baseUrl += `&filters[$or][${orIndex++}][$and][0][user_info][FirstName][$containsi]=${firstNameCombined}`;
-          baseUrl += `&filters[$or][${orIndex-1}][$and][1][user_info][LastName][$containsi]=${word3}`;
+          baseUrl += `&filters[$or][${orIndex - 1}][$and][1][user_info][LastName][$containsi]=${word3}`;
 
           // Priority 3: Exact phrase in FirstName
           const encodedPhrase = encodeURIComponent(searchTerm);
           baseUrl += `&filters[$or][${orIndex++}][user_info][FirstName][$containsi]=${encodedPhrase}`;
 
           // Priority 4: Phone number search
-          baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
+          baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
         } else {
           // More than 3 words: try different combinations
           let orIndex = 0;
@@ -129,19 +156,19 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
 
           // Priority 2: First word in FirstName, rest in LastName
           const firstName = encodeURIComponent(searchWords[0]);
-          const lastName = encodeURIComponent(searchWords.slice(1).join(' '));
+          const lastName = encodeURIComponent(searchWords.slice(1).join(" "));
           baseUrl += `&filters[$or][${orIndex++}][$and][0][user_info][FirstName][$containsi]=${firstName}`;
-          baseUrl += `&filters[$or][${orIndex-1}][$and][1][user_info][LastName][$containsi]=${lastName}`;
+          baseUrl += `&filters[$or][${orIndex - 1}][$and][1][user_info][LastName][$containsi]=${lastName}`;
 
           // Priority 3: First half in FirstName, second half in LastName
           const midPoint = Math.ceil(searchWords.length / 2);
-          const firstHalf = encodeURIComponent(searchWords.slice(0, midPoint).join(' '));
-          const secondHalf = encodeURIComponent(searchWords.slice(midPoint).join(' '));
+          const firstHalf = encodeURIComponent(searchWords.slice(0, midPoint).join(" "));
+          const secondHalf = encodeURIComponent(searchWords.slice(midPoint).join(" "));
           baseUrl += `&filters[$or][${orIndex++}][$and][0][user_info][FirstName][$containsi]=${firstHalf}`;
-          baseUrl += `&filters[$or][${orIndex-1}][$and][1][user_info][LastName][$containsi]=${secondHalf}`;
+          baseUrl += `&filters[$or][${orIndex - 1}][$and][1][user_info][LastName][$containsi]=${secondHalf}`;
 
           // Priority 4: Phone number search
-          baseUrl += `&filters[$or][${orIndex++}][Phone][$containsi]=${encodedPhrase}`;
+          baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
         }
 
         console.log("User search URL:", baseUrl); // Debug log
@@ -153,7 +180,7 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
         if (!mounted) return;
 
         console.log("User search response:", response); // Debug log
-        const users = (response as any).data as User[];
+        const users = response as unknown as User[];
         setSuggestions(users);
         setOpen(users.length > 0);
       } catch (error) {
@@ -213,60 +240,59 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
   };
 
   const getUserDisplayName = (user: User) => {
-    const firstName = user.attributes.user_info?.data?.attributes?.FirstName;
-    const lastName = user.attributes.user_info?.data?.attributes?.LastName;
-    return firstName && lastName ? `${firstName} ${lastName}` : user.attributes.Phone;
+    const firstName = user.user_info?.FirstName;
+    const lastName = user.user_info?.LastName;
+    return firstName && lastName ? `${firstName} ${lastName}` : user.phone;
   };
 
   const formatPrice = (price: string | number) => {
-    return new Intl.NumberFormat('fa-IR').format(Number(price));
+    return new Intl.NumberFormat("fa-IR").format(Number(price));
   };
 
   return (
     <div className="space-y-4">
-      {/* Selected User Display */}
-      {selectedUser ? (
-        <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-              <span className="text-sm font-semibold text-green-800">
-                {getUserDisplayName(selectedUser).charAt(0)}
-              </span>
+      {showSelectedCard && (
+        <>
+          {selectedUser ? (
+            <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                  <span className="text-sm font-semibold text-green-800">
+                    {getUserDisplayName(selectedUser).charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium text-green-900">
+                    {getUserDisplayName(selectedUser)}
+                  </p>
+                  <p className="text-sm text-green-700">{selectedUser.phone}</p>
+                </div>
+              </div>
+              <div className="text-left">
+                <p className="text-sm text-green-700">
+                  موجودی:{" "}
+                  {formatPrice(selectedUser.user_wallet?.Balance || "0")} تومان
+                </p>
+                <button
+                  onClick={() => onUserSelect(null as any)}
+                  className="mt-1 text-sm text-red-600 hover:text-red-800"
+                >
+                  حذف
+                </button>
+              </div>
             </div>
-            <div>
-              <p className="font-medium text-green-900">
-                {getUserDisplayName(selectedUser)}
-              </p>
-              <p className="text-sm text-green-700">
-                {selectedUser.attributes.Phone}
+          ) : (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p className="text-sm text-gray-600">
+                هیچ مشتری انتخاب نشده (اختیاری) - اطلاعات مشتری به صورت دستی وارد خواهد شد
               </p>
             </div>
-          </div>
-          <div className="text-left">
-            <p className="text-sm text-green-700">
-              موجودی: {formatPrice(selectedUser.attributes.user_wallet?.data?.attributes?.Balance || "0")} تومان
-            </p>
-            <button
-              onClick={() => onUserSelect(null as any)}
-              className="mt-1 text-sm text-red-600 hover:text-red-800"
-            >
-              حذف
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <p className="text-sm text-gray-600">
-            هیچ مشتری انتخاب نشده (اختیاری) - اطلاعات مشتری به صورت دستی وارد خواهد شد
-          </p>
-        </div>
+          )}
+        </>
       )}
 
       {/* Search Input */}
-      <div
-        ref={containerRef}
-        className="relative"
-      >
+      <div ref={containerRef} className="relative">
         <motion.div
           className={`relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200`}
           animate={{ scale: isFocused ? 1.02 : 1 }}
@@ -317,10 +343,14 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
               className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
             >
               {loading && (
-                <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>
+                <div className="text-xs px-3 py-2 text-neutral-500">
+                  در حال جستجو…
+                </div>
               )}
               {!loading && suggestions.length === 0 && (
-                <div className="text-xs px-3 py-2 text-neutral-500">مشتری یافت نشد</div>
+                <div className="text-xs px-3 py-2 text-neutral-500">
+                  مشتری یافت نشد
+                </div>
               )}
               {!loading &&
                 suggestions.map((user, idx) => (
@@ -342,15 +372,14 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
                           {getUserDisplayName(user)}
                         </p>
                         <span className="text-xs text-slate-500">
-                          {user.attributes.user_role?.data?.attributes?.Title}
+                          {translatePluginRoleLabel(user.role?.name)}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-600">
-                        {user.attributes.Phone}
-                      </p>
-                      {user.attributes.user_wallet?.data?.attributes?.Balance && (
+                      <p className="text-sm text-slate-600">{user.phone}</p>
+                      {user.user_wallet?.Balance && (
                         <p className="text-xs text-slate-500">
-                          موجودی: {formatPrice(user.attributes.user_wallet.data.attributes.Balance)} تومان
+                          موجودی:{" "}
+                          {formatPrice(user.user_wallet.Balance)} تومان
                         </p>
                       )}
                     </div>

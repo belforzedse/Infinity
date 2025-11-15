@@ -13,6 +13,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [paymentGateway, setPaymentGateway] = useState<string | null>(null);
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
@@ -24,7 +25,9 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
 
         setIsPaid(response.isPaid);
         setOrderStatus(response.status);
-        if (response.transactionId) {
+        const gateway = response.paymentGateway ?? null;
+        setPaymentGateway(gateway);
+        if (gateway === "SnappPay" && response.transactionId) {
           setTransactionId(String(response.transactionId));
         } else {
           setTransactionId(null);
@@ -110,9 +113,9 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
           <span className="text-gray-800">{getStatusTranslation(orderStatus)}</span>
         </div>
       )}
-      {transactionId && (
+      {transactionId && paymentGateway === "SnappPay" && (
         <div className="text-sm mt-1 text-gray-600">
-          <span className="ml-1 font-medium">ID تراکنش:</span>
+          <span className="ml-1 font-medium">ID تراکنش اسنپ‌پی:</span>
           <span className="text-gray-800">{transactionId}</span>
         </div>
       )}
