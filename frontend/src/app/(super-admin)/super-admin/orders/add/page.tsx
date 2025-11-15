@@ -165,26 +165,33 @@ export default function Page() {
       return;
     }
 
-    const firstName = user.attributes.user_info?.data?.attributes?.FirstName || '';
-    const lastName = user.attributes.user_info?.data?.attributes?.LastName || '';
-    const fullName = `${firstName} ${lastName}`.trim() || user.attributes.Phone;
+    const legacyAttributes = user?.attributes || {};
+    const legacyUserInfo = legacyAttributes?.user_info?.data?.attributes;
+    const normalizedUserInfo = user.user_info || legacyUserInfo || null;
+
+    const firstName = normalizedUserInfo?.FirstName || "";
+    const lastName = normalizedUserInfo?.LastName || "";
+    const phone = user.phone || user.Phone || legacyAttributes?.Phone || "";
+    const email = user.email || user.Email || legacyAttributes?.Email || "";
+    const nameFallback = phone || user.username || legacyAttributes?.username || "";
+    const fullName = `${firstName} ${lastName}`.trim() || nameFallback;
 
     // Auto-fill user data
-    logger.info('Setting order data for user', { userId: user.id });
-    setOrderData(prev => ({
+    logger.info("Setting order data for user", { userId: user.id });
+    setOrderData((prev) => ({
       ...prev,
       userId: user.id,
       userName: fullName,
-      phoneNumber: user.attributes.Phone,
-      email: user.attributes.Email || '',
+      phoneNumber: phone,
+      email: email,
     }));
 
     // Mark fields as auto-filled
-    setFieldStates(prev => ({
+    setFieldStates((prev) => ({
       ...prev,
       userName: { isAutoFilled: !!(firstName && lastName), isEditable: false },
-      phoneNumber: { isAutoFilled: !!user.attributes.Phone, isEditable: false },
-      email: { isAutoFilled: !!user.attributes.Email, isEditable: false },
+      phoneNumber: { isAutoFilled: !!phone, isEditable: false },
+      email: { isAutoFilled: !!email, isEditable: false },
       address: { isAutoFilled: false, isEditable: true }, // Always editable for new orders
       postalCode: { isAutoFilled: false, isEditable: true },
     }));
