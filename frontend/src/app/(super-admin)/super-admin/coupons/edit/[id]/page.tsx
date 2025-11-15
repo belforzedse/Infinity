@@ -69,6 +69,25 @@ type DiscountResponse = {
   };
 };
 
+const parseNumericInput = (value: unknown): number | null => {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? Math.round(value) : null;
+  }
+  if (typeof value === "string") {
+    const normalized = value
+      .trim()
+      .replace(/[,٬\s]/g, "")
+      .replace(/[%٪]/g, "");
+    if (!normalized) return null;
+    const parsed = Number(normalized);
+    return Number.isNaN(parsed) ? null : Math.round(parsed);
+  }
+  return null;
+};
+
 export default function Page() {
   const { isStoreManager, isLoading } = useCurrentUser();
   const router = useRouter();
@@ -184,22 +203,16 @@ export default function Page() {
               data: {
                 Code: formData.code || null,
                 Type: formData.type || null,
-                Amount: formData.amount || null,
-                LimitAmount: formData.maxAmount || null,
-                LimitUsage: formData.limit || null,
+                Amount: parseNumericInput(formData.amount),
+                LimitAmount: parseNumericInput(formData.maxAmount),
+                LimitUsage: parseNumericInput(formData.limit),
                 StartDate: (formData.startDate as any)?.value as Date,
                 EndDate: (formData.endDate as any)?.value as Date,
                 IsActive: formData.isActive,
                 products: selectedProducts.map((product) => product.id),
                 delivery_methods: selectedDeliveries.map((delivery) => delivery.id),
-                MinCartTotal:
-                  formData.minCartTotal !== undefined && formData.minCartTotal !== null
-                    ? Number(formData.minCartTotal)
-                    : null,
-                MaxCartTotal:
-                  formData.maxCartTotal !== undefined && formData.maxCartTotal !== null
-                    ? Number(formData.maxCartTotal)
-                    : null,
+                MinCartTotal: parseNumericInput(formData.minCartTotal),
+                MaxCartTotal: parseNumericInput(formData.maxCartTotal),
               },
             });
 

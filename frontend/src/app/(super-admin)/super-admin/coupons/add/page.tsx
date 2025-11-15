@@ -63,28 +63,39 @@ export default function Page() {
         data={initialData as Coupon}
         onSubmit={async (data) => {
           try {
-            const parseNullableNumber = (value: any) => {
+            const parseNumericInput = (value: unknown): number | null => {
               if (value === undefined || value === null || value === "") {
                 return null;
               }
-              const parsed = Number(value);
-              return Number.isNaN(parsed) ? null : parsed;
+              if (typeof value === "number") {
+                return Number.isFinite(value) ? Math.round(value) : null;
+              }
+              if (typeof value === "string") {
+                const normalized = value
+                  .trim()
+                  .replace(/[,٬\s]/g, "")
+                  .replace(/[%٪]/g, "");
+                if (!normalized) return null;
+                const parsed = Number(normalized);
+                return Number.isNaN(parsed) ? null : Math.round(parsed);
+              }
+              return null;
             };
 
             await apiClient.post("/discounts", {
               data: {
                 Code: data.code || null,
                 Type: data.type || null,
-                Amount: data.amount || null,
-                LimitAmount: data.maxAmount || null,
-                LimitUsage: data.limit || null,
+                Amount: parseNumericInput(data.amount),
+                LimitAmount: parseNumericInput(data.maxAmount),
+                LimitUsage: parseNumericInput(data.limit),
                 StartDate: (data.startDate as any)?.value as Date,
                 EndDate: (data.endDate as any)?.value as Date,
                 IsActive: data.isActive,
                 products: selectedProducts.map((p) => p.id),
                 delivery_methods: selectedDeliveries.map((d) => d.id),
-                MinCartTotal: parseNullableNumber(data.minCartTotal),
-                MaxCartTotal: parseNullableNumber(data.maxCartTotal),
+                MinCartTotal: parseNumericInput(data.minCartTotal),
+                MaxCartTotal: parseNumericInput(data.maxCartTotal),
               },
             });
 
