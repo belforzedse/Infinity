@@ -57,10 +57,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
 
-  // Check if user is logged in
-  const isLoggedIn = typeof window !== "undefined" ? !!localStorage.getItem("accessToken") : false;
+  // Read login state on client after hydration to avoid SSR mismatch
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateLoginState = () => {
+      setIsLoggedIn(!!localStorage.getItem("accessToken"));
+    };
+
+    updateLoginState();
+    window.addEventListener("storage", updateLoginState);
+
+    return () => {
+      window.removeEventListener("storage", updateLoginState);
+    };
+  }, []);
 
   // Close drawer when path changes
   useEffect(() => {

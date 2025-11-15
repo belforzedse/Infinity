@@ -17,6 +17,10 @@ export default function ImageEffects() {
     const idleId = schedule(() => {
       const applyEffects = (img: HTMLImageElement) => {
         if (!img) return;
+        // Skip Next.js <Image> managed elements to avoid hydration mismatches
+        if (img.dataset?.nimg !== undefined) {
+          return;
+        }
         // Ensure lazy loading on plain <img>
         if (!img.getAttribute("loading")) {
           img.setAttribute("loading", "lazy");
