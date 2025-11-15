@@ -15,7 +15,7 @@ export const defaultSliderConfig: SliderConfig = {
   desktop: desktopSlides,
   tablet: tabletSlides,
   mobile: mobileSlides,
-  autoplayInterval: 3600000, // 1 hour in milliseconds
+  autoplayInterval: 600000, // 1 hour in milliseconds
 };
 
 // Export individual configs for flexibility
