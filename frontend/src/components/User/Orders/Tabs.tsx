@@ -119,8 +119,11 @@ export default function OrdersTabs() {
     const firstItem = order.order_items[0];
     // Use actual product image, fallback to simple gray placeholder
     const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
-    const image =
-      firstItem?.product_variation?.product?.cover_image?.url || placeholderImage;
+    const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinitycolor.org/";
+    const coverImage = firstItem?.product_variation?.product?.CoverImage;
+    const image = coverImage?.url
+      ? `${imageBaseUrl}${coverImage.url}`
+      : placeholderImage;
     const category =
       firstItem?.product_variation?.product?.Title ||
       firstItem?.product_variation?.product?.Title ||
