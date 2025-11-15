@@ -12,6 +12,8 @@ interface RecentOrdersProps {
 
 const statusLabelMap: Record<string, { label: string; tone: "info" | "success" | "warning" | "danger" }> =
   {
+    paying: { label: "در انتظار پرداخت", tone: "info" },
+    pending: { label: "در انتظار پرداخت", tone: "info" },
     started: { label: "ثبت شده", tone: "info" },
     processing: { label: "در حال آماده‌سازی", tone: "info" },
     shipment: { label: "در حال ارسال", tone: "warning" },
