@@ -158,6 +158,7 @@ export default factories.createCoreController(
               String(discountCodeParam),
               subtotal,
               cart.cart_items,
+              shippingId
             );
           } catch (e) {
             strapi.log.error("Failed to compute coupon discount for eligibility", e);

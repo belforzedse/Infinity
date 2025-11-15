@@ -537,24 +537,34 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
         },
         number
       >;
-    Code: Attribute.String & Attribute.Required;
+    Code: Attribute.String & Attribute.Required & Attribute.Unique;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::discount.discount", "oneToOne", "admin::user"> &
       Attribute.Private;
+    delivery_methods: Attribute.Relation<
+      "api::discount.discount",
+      "manyToMany",
+      "api::shipping.shipping"
+    >;
     EndDate: Attribute.DateTime & Attribute.Required;
     IsActive: Attribute.Boolean & Attribute.DefaultTo<false>;
     LimitAmount: Attribute.Integer;
     LimitUsage: Attribute.Integer;
-    local_users: Attribute.Relation<
-      "api::discount.discount",
-      "manyToMany",
-      "plugin::users-permissions.user"
-    >;
-    product_variations: Attribute.Relation<
-      "api::discount.discount",
-      "oneToMany",
-      "api::product-variation.product-variation"
-    >;
+    MaxCartTotal: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    MinCartTotal: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    products: Attribute.Relation<"api::discount.discount", "manyToMany", "api::product.product">;
     removedAt: Attribute.DateTime;
     StartDate: Attribute.DateTime & Attribute.Required;
     Type: Attribute.Enumeration<["Discount", "Cash"]> & Attribute.DefaultTo<"Discount">;
@@ -963,11 +973,6 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::local-user.local-user", "oneToOne", "admin::user"> &
       Attribute.Private;
-    discounts: Attribute.Relation<
-      "api::local-user.local-user",
-      "manyToMany",
-      "api::discount.discount"
-    >;
     external_id: Attribute.String;
     external_source: Attribute.String;
     IsActive: Attribute.Boolean & Attribute.Required & Attribute.DefaultTo<true>;
@@ -1958,6 +1963,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::product.product", "oneToOne", "admin::user"> &
       Attribute.Private;
     Description: Attribute.Text;
+    discounts: Attribute.Relation<"api::product.product", "manyToMany", "api::discount.discount">;
     external_id: Attribute.String;
     external_source: Attribute.String;
     Files: Attribute.Media<"files", true>;
@@ -2087,6 +2093,7 @@ export interface ApiShippingShipping extends Schema.CollectionType {
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::shipping.shipping", "oneToOne", "admin::user"> &
       Attribute.Private;
+    discounts: Attribute.Relation<"api::shipping.shipping", "manyToMany", "api::discount.discount">;
     IsActive: Attribute.Boolean;
     orders: Attribute.Relation<"api::shipping.shipping", "oneToMany", "api::order.order">;
     Price: Attribute.Integer &
@@ -2479,11 +2486,6 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"plugin::users-permissions.user", "oneToOne", "admin::user"> &
       Attribute.Private;
-    discounts: Attribute.Relation<
-      "plugin::users-permissions.user",
-      "manyToMany",
-      "api::discount.discount"
-    >;
     email: Attribute.String & Attribute.Unique;
     external_id: Attribute.String;
     external_source: Attribute.String;

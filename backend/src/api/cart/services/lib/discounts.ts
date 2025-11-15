@@ -5,7 +5,8 @@ export const computeCouponDiscount = async (
   userId: number,
   code: string,
   subtotal: number,
-  cartItems: any[]
+  cartItems: any[],
+  shippingId?: number | null
 ) => {
   if (!code) return 0;
   const matches = await strapi.entityService.findMany(
@@ -18,32 +19,67 @@ export const computeCouponDiscount = async (
         EndDate: { $gte: new Date() },
         removedAt: { $null: true },
       },
-      populate: { local_users: true, product_variations: true },
+      populate: {
+        products: true,
+        delivery_methods: true,
+      },
       limit: 1,
     }
   );
-  if (!matches?.length) return 0;
-  const coupon: any = matches[0];
-  if (
-    coupon.local_users?.length &&
-    !coupon.local_users.some((u: any) => u.id === userId)
-  ) {
-    return 0;
+  if (!matches?.length) {
+    throw new Error(`INVALID_OR_EXPIRED_COUPON: کد تخفیف "${code}" معتبر نیست یا منقضی شده است`);
   }
-
+  const coupon: any = matches[0];
   let eligibleSubtotal = subtotal;
-  if (coupon.product_variations?.length) {
-    const eligibleIds = new Set(
-      coupon.product_variations.map((p: any) => p.id)
+  if (Array.isArray(coupon.products) && coupon.products.length > 0) {
+    const productIds = new Set(
+      (coupon.products || []).map((p: any) => Number(p.id))
     );
     eligibleSubtotal = 0;
     for (const item of cartItems) {
-      if (eligibleIds.has(item?.product_variation?.id)) {
-        // Use DiscountPrice if available, otherwise fall back to Price (same logic as order item creation)
-        const price = Number(item?.product_variation?.DiscountPrice ?? item?.product_variation?.Price ?? 0);
+      const productId = Number(item?.product_variation?.product?.id);
+      if (productIds.has(productId)) {
+        const price = Number(
+          item?.product_variation?.DiscountPrice ??
+            item?.product_variation?.Price ??
+            0
+        );
         const count = Number(item?.Count || 0);
         eligibleSubtotal += price * count;
       }
+    }
+    if (eligibleSubtotal <= 0) {
+      throw new Error(`NO_ELIGIBLE_ITEMS: هیچ کالای واجد شرط در سبد خرید یافت نشد`);
+    }
+  }
+
+  if (
+    typeof coupon.MinCartTotal === "number" &&
+    coupon.MinCartTotal > 0 &&
+    subtotal < coupon.MinCartTotal
+  ) {
+    throw new Error(`BELOW_MINIMUM_CART: حداقل مبلغ سفارش ${coupon.MinCartTotal} تومان است`);
+  }
+  if (
+    typeof coupon.MaxCartTotal === "number" &&
+    coupon.MaxCartTotal > 0 &&
+    subtotal > coupon.MaxCartTotal
+  ) {
+    throw new Error(`ABOVE_MAXIMUM_CART: حداکثر مبلغ سفارش ${coupon.MaxCartTotal} تومان است`);
+  }
+  if (coupon.delivery_methods?.length) {
+    const normalizedShippingId =
+      shippingId !== undefined && shippingId !== null
+        ? Number(shippingId)
+        : NaN;
+    if (!normalizedShippingId || Number.isNaN(normalizedShippingId)) {
+      throw new Error(`SHIPPING_REQUIRED_FOR_COUPON: این کد تخفیف نیاز به انتخاب روش ارسال خاصی دارد`);
+    }
+    const allowedDelivery = coupon.delivery_methods.some(
+      (method: any) => Number(method.id) === normalizedShippingId
+    );
+    if (!allowedDelivery) {
+      throw new Error(`INVALID_DELIVERY_METHOD: این کد تخفیف برای روش ارسال انتخاب شده معتبر نیست`);
     }
   }
 
@@ -63,7 +99,7 @@ export const computeCouponDiscount = async (
       couponLimitAmount: coupon.LimitAmount,
       subtotalPassed: subtotal,
       eligibleSubtotal,
-      isProductSpecific: coupon.product_variations?.length > 0,
+      isProductSpecific: coupon.products?.length > 0,
       calculatedDiscount: discountAmount,
     });
     return discountAmount;
