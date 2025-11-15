@@ -186,7 +186,7 @@ export default factories.createCoreController(
                     product_color: true,
                     product_size: true,
                     product_variation_model: true,
-                    product: { populate: ["cover_image"] },
+                    product: { populate: ["CoverImage"] },
                   },
                 },
               },
