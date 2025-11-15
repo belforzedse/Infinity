@@ -76,6 +76,32 @@ async function incrementDiscountUsageCounter(
   }
 }
 
+async function clearCartAfterPayment(strapi: Strapi, orderId?: number) {
+  if (!orderId) return;
+  try {
+    const order = await strapi.entityService.findOne("api::order.order", orderId, {
+      populate: { user: true },
+    });
+    const userRelation: any = order?.user;
+    const userId =
+      typeof userRelation === "object" && userRelation
+        ? userRelation.id
+        : typeof userRelation === "number"
+        ? userRelation
+        : undefined;
+    if (!userId) return;
+    const cartService: any = strapi.service("api::cart.cart");
+    if (cartService?.clearCart) {
+      await cartService.clearCart(userId);
+    }
+  } catch (error: any) {
+    strapi.log.error("Failed to clear cart after payment", {
+      orderId,
+      error: error?.message || error,
+    });
+  }
+}
+
 export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Mellat returns: ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId
   const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } =
@@ -531,6 +557,8 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         strapi.log.error("Failed to log Saman success", err);
       }
 
+      await clearCartAfterPayment(strapi, orderId);
+
       return ctx.redirect(
         `https://infinitycolor.org/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
           refNum || ""
@@ -890,6 +918,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           },
         });
       } catch {}
+
+      await clearCartAfterPayment(strapi, orderId);
+
       return ctx.redirect(
         `https://infinitycolor.org/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
           transactionIdInput || ""
@@ -1059,6 +1090,8 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         } catch (e) {
           strapi.log.error("Failed to persist gateway success log", e);
         }
+
+        await clearCartAfterPayment(strapi, orderId);
 
         // Redirect to frontend success page
         ctx.redirect(
