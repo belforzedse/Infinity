@@ -10,7 +10,26 @@ interface ActionBannerProps {
 }
 
 export function ActionBanner({ spec }: ActionBannerProps) {
-  const { title, subtitle, image, button, className, titleClassName, subtitleClassName, colors, typography, background } = spec;
+  const {
+    title,
+    subtitle,
+    image,
+    button,
+    className,
+    titleClassName,
+    subtitleClassName,
+    colors,
+    typography,
+    background,
+    contentAlignment,
+  } = spec;
+  const alignmentClass =
+    contentAlignment === "top"
+      ? "justify-start"
+      : contentAlignment === "bottom"
+        ? "justify-end"
+        : "justify-center";
+  const spacingClass = spec.paddingClassName ?? "px-4 py-4 pr-8";
 
   // Determine background styling
   const bgStyle = background
@@ -110,7 +129,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           }}
         />
         {/* Content overlay */}
-        <div className="relative z-20 flex h-full flex-col justify-center px-4 py-4 pr-8 text-right">
+        <div className={`relative z-20 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right`}>
           <h2 className={titleClasses}>{title}</h2>
 
           {subtitle && <p className={`${subtitleClasses} mt-2`}>{subtitle}</p>}
@@ -150,7 +169,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
         />
       </div>
       {/* Content on the right */}
-      <div className="relative z-10 flex h-full flex-col justify-center px-4 py-4 pr-8 text-right">
+      <div className={`relative z-10 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right`}>
         <h2 className={titleClasses}>{title}</h2>
 
         {subtitle && <p className={`${subtitleClasses} mt-2`}>{subtitle}</p>}

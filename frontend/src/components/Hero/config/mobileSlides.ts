@@ -8,6 +8,5 @@ import * as slides from "./slides/mobile";
 export const mobileSlides: MobileLayout[] = [
   slides.slide1,
   slides.slide2,
-  slides.slide3,
-  slides.slide4,
+
 ];

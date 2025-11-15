@@ -106,7 +106,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
         {/* Right section: Action banners (2-column on tablet, stacked on mobile) */}
         <div className="flex w-full gap-4 md:w-2/3 md:flex-col">
           {/* Left action banner */}
-          <div className="relative flex-1 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative flex-1 overflow-visible rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`leftAction-${slideKey}`}
@@ -123,7 +123,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
           </div>
 
           {/* Right action banner */}
-          <div className="relative flex-1 overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative flex-1 overflow-visible rounded-lg [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`rightAction-${slideKey}`}

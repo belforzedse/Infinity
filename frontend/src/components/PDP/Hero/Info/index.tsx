@@ -400,7 +400,7 @@ export default function PDPHeroInfo(props: Props) {
   const currentVariation = getCurrentVariation();
 
   return (
-    <div className="flex flex-1 flex-col gap-5 md:max-w-[688px]">
+    <div className="flex flex-1 flex-col gap-5 md:max-w-[400px] tablet:max-w-[500px] lg:max-w-[688px]">
       {process.env.NODE_ENV !== "production" && (
         <div>
           <div className="mb-2">

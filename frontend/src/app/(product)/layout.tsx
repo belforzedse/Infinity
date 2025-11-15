@@ -32,7 +32,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
   }, []);
   const HeaderContent = () => (
     <>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <div className="px-10 py-3">
           <div className="mx-auto max-w-[1440px]">
             <div className="grid grid-cols-[1fr_auto_1fr] items-center">
@@ -59,14 +59,14 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         </div>
       </div>
 
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <MobileHeader />
       </div>
     </>
   );
 
   return (
-    <div dir="rtl" className="bg-white pb-[81px] antialiased md:pb-0">
+    <div dir="rtl" className="bg-white pb-[81px] antialiased lg:pb-0">
       {/* Skip to content for accessibility */}
       <a
         href="#content"
@@ -106,7 +106,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
       </header>
 
       {/* Desktop categories/navigation (not sticky) */}
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <HeaderDesktopNav />
       </div>
 

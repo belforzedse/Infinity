@@ -56,7 +56,7 @@ export default function PDPHeroGallery(props: Props) {
   }, [selectedImage, assets]);
 
   return (
-    <div className="top-2 flex h-[500px] flex-1 flex-col-reverse gap-2 md:sticky md:min-w-[640px] md:flex-row">
+    <div className="top-2 flex h-[350px] flex-1 flex-col-reverse gap-2 md:sticky md:h-[450px] md:min-w-[300px] md:flex-row tablet:min-w-[400px] lg:min-w-[640px] lg:h-[500px]">
       <ThumbnailList
         assets={assets}
         selectedImage={selectedImage}

@@ -99,7 +99,7 @@ const PLPBottomNavigation = () => {
     <>
       <nav
         data-bottom-nav
-        className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white lg:hidden"
       >
         <div className="flex items-center justify-between px-4 py-2.5">
           {navItems.map((item) => {
@@ -123,7 +123,7 @@ const PLPBottomNavigation = () => {
       </nav>
       {isCategoriesMounted && (
         <div
-          className={`fixed inset-0 z-40 flex items-end justify-center transition-opacity duration-200 md:hidden ${
+          className={`fixed inset-0 z-40 flex items-end justify-center transition-opacity duration-200 lg:hidden ${
             isCategoriesVisible ? "bg-black/40 opacity-100" : "bg-black/0 opacity-0"
           }`}
           onClick={closeCategories}
