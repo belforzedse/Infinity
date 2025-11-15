@@ -125,6 +125,8 @@ export type ActionBannerSpec = {
   colors?: ColorScheme;
   typography?: Typography;
   background?: BackgroundSpec; // Optional background config (color or image)
+  contentAlignment?: "top" | "center" | "bottom";
+  paddingClassName?: string;
 };
 
 export type HeroSlideConfig = {

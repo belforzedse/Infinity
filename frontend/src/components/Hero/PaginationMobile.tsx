@@ -31,8 +31,8 @@ export default function PaginationMobile({
       {showArrows && (
         <button
           type="button"
-          aria-label="Next"
-          onClick={onNext}
+          aria-label="Previous"
+          onClick={onPrev}
           className={clsx(
             "text-lg mx-1 rounded-full p-1 text-pink-500 transition hover:bg-pink-50",
             arrowClassName,
@@ -62,8 +62,8 @@ export default function PaginationMobile({
       {showArrows && (
         <button
           type="button"
-          aria-label="Previous"
-          onClick={onPrev}
+          aria-label="Next"
+          onClick={onNext}
           className={clsx(
             "text-lg mx-1 rounded-full p-1 text-pink-500 transition hover:bg-pink-50",
             arrowClassName,

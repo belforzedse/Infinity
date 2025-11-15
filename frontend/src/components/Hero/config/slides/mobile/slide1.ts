@@ -62,6 +62,7 @@ export const slide1 = new MobileSlideBuilder()
       objectPosition: "bottom left",
     },
     className: "rounded-lg",
+    paddingClassName: "px-3 py-4 pr-3",
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -95,7 +96,8 @@ export const slide1 = new MobileSlideBuilder()
       className: "h-full w-full rounded-lg scale-125 pl-2 object-contain",
       objectPosition: "left",
     },
-    className: "rounded-lg",
+    className: "rounded-lg ",
+    paddingClassName: "px-3 py-4 pr-3",
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
