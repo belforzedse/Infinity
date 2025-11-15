@@ -4,10 +4,166 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { apiClient } from "@/services";
 import Invoice from "@/components/invoice";
+import { unwrapCollection, unwrapEntity } from "@/utils/strapi";
 
 type StrapiOrderResponse = {
-  id: string;
-  attributes: any; // raw from Strapi, will be transformed
+  id?: string;
+  attributes?: any; // raw from Strapi, will be transformed
+  data?: {
+    id?: string;
+    attributes?: any;
+  };
+};
+
+const normalizeUserRelation = (user: any) => {
+  const entity = unwrapEntity(user);
+  if (!entity) return undefined;
+  const userInfo = unwrapEntity(entity.user_info);
+  return {
+    data: {
+      id: String(entity.id ?? ""),
+      attributes: {
+        Phone: entity.Phone ?? entity.phone ?? "",
+        user_info: userInfo
+          ? {
+              data: {
+                id: String(userInfo.id ?? ""),
+                attributes: {
+                  FirstName: userInfo.FirstName ?? "",
+                  LastName: userInfo.LastName ?? "",
+                },
+              },
+            }
+          : { data: undefined },
+      },
+    },
+  };
+};
+
+const normalizeOrderItems = (items: any) => {
+  const collection = unwrapCollection(items);
+  return {
+    data: collection
+      .map((item: any) => {
+        const entity = unwrapEntity(item);
+        if (!entity) return null;
+        const pv = unwrapEntity(entity.product_variation);
+        const product = unwrapEntity(pv?.product);
+        const color = unwrapEntity(entity.product_color);
+        const size = unwrapEntity(entity.product_size);
+        return {
+          id: String(entity.id ?? ""),
+          attributes: {
+            Count: Number(entity.Count ?? entity.Quantity ?? 1),
+            PerAmount: Number(entity.PerAmount ?? entity.UnitPrice ?? 0),
+            ProductSKU: entity.ProductSKU ?? pv?.SKU ?? "—",
+            ProductTitle: entity.ProductTitle ?? product?.Title ?? "—",
+            product_color: color
+              ? {
+                  data: {
+                    id: String(color.id ?? ""),
+                    attributes: color,
+                  },
+                }
+              : undefined,
+            product_size: size
+              ? {
+                  data: {
+                    id: String(size.id ?? ""),
+                    attributes: size,
+                  },
+                }
+              : undefined,
+          },
+        };
+      })
+      .filter(Boolean),
+  };
+};
+
+const normalizeDeliveryAddress = (address: any) => {
+  const entity = unwrapEntity(address);
+  if (!entity) return undefined;
+  const city = unwrapEntity(entity.shipping_city);
+  const province = unwrapEntity(city?.shipping_province);
+  const fullAddress = [entity.FullAddress, city?.Title, province?.Title]
+    .filter(Boolean)
+    .join(" - ");
+  return {
+    data: {
+      id: String(entity.id ?? ""),
+      attributes: {
+        ...entity,
+        FullAddress: fullAddress || entity.FullAddress,
+        shipping_city: city
+          ? {
+              data: {
+                id: String(city.id ?? ""),
+                attributes: {
+                  ...city,
+                  shipping_province: province
+                    ? {
+                        data: {
+                          id: String(province.id ?? ""),
+                          attributes: province,
+                        },
+                      }
+                    : undefined,
+                },
+              },
+            }
+          : undefined,
+      },
+    },
+  };
+};
+
+const normalizeShipping = (shipping: any) => {
+  const entity = unwrapEntity(shipping);
+  if (!entity) return undefined;
+  return {
+    data: {
+      id: String(entity.id ?? ""),
+      attributes: {
+        ...entity,
+        Name: entity.Name ?? entity.Title ?? entity.name ?? "",
+      },
+    },
+  };
+};
+
+const normalizeContract = (contract: any) => {
+  const entity = unwrapEntity(contract);
+  if (!entity) return undefined;
+  const transactions = unwrapCollection(entity.contract_transactions).map((tx: any) => {
+    const txEntity = unwrapEntity(tx);
+    const gateway = unwrapEntity(txEntity?.payment_gateway);
+    return {
+      id: String(txEntity?.id ?? ""),
+      attributes: {
+        ...txEntity,
+        payment_gateway: gateway
+          ? {
+              data: {
+                id: String(gateway.id ?? ""),
+                attributes: gateway,
+              },
+            }
+          : undefined,
+      },
+    };
+  });
+  return {
+    data: {
+      id: String(entity.id ?? ""),
+      attributes: {
+        ...entity,
+        contract_transactions: {
+          data: transactions,
+        },
+      },
+    },
+  };
 };
 
 export default function PrintOrderPage() {
@@ -46,57 +202,59 @@ export default function PrintOrderPage() {
         );
 
         const raw: StrapiOrderResponse = (res as any).data;
+        const normalizedOrder = unwrapEntity(raw?.data ?? raw);
 
-        // --- normalize items (your existing logic) ---
-        const transformedItems = raw.attributes.order_items.data.map((item: any) => {
-          const attr = item.attributes || {};
-          const pv = attr.product_variation?.data?.attributes || {};
-          const product = pv.product?.data?.attributes || {};
-          return {
-            id: item.id,
-            attributes: {
-              Count: attr.Quantity ?? attr.Count ?? 1,
-              PerAmount: attr.UnitPrice ?? attr.PerAmount ?? 0,
-              ProductSKU: pv.SKU ?? "—",
-              ProductTitle: product.Name ?? attr.ProductTitle ?? "—",
-            },
-          };
-        });
+        if (!normalizedOrder) {
+          throw new Error("سفارش پیدا نشد");
+        }
 
-        // --- derive payment gateway like in edit page ---
-        const txList =
-          raw.attributes?.contract?.data?.attributes?.contract_transactions?.data || [];
-        const lastTx = txList[txList.length - 1]?.attributes;
-        const paymentGateway = lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
+        const attributesSource = normalizedOrder.attributes
+          ? { ...normalizedOrder.attributes }
+          : { ...normalizedOrder };
 
-        // --- optional: derive a readable full address (city/province) if you want to show it ---
-        const addr = raw.attributes?.delivery_address?.data?.attributes;
-        const city = addr?.shipping_city?.data?.attributes?.Title;
-        const province =
-          addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes?.Title;
-        const fullAddress = [addr?.FullAddress, city, province].filter(Boolean).join(" - ");
+        const contractEntity = unwrapEntity(
+          attributesSource.contract ?? normalizedOrder.contract,
+        );
+        const contractTransactions = unwrapCollection(
+          contractEntity?.contract_transactions,
+        );
+        const lastTx = contractTransactions[contractTransactions.length - 1];
+        const paymentGateway =
+          unwrapEntity(lastTx?.payment_gateway)?.Title ||
+          contractEntity?.payment_gateway ||
+          attributesSource.PaymentGateway ||
+          normalizedOrder.PaymentGateway;
 
-        // --- keep shipping relation as-is; just ensure it's present in attrs ---
-        const transformedOrder = {
-          ...raw,
-          attributes: {
-            ...raw.attributes,
-            order_items: { data: transformedItems },
-            paymentGateway, // <- new normalized field
-            delivery_address: raw.attributes.delivery_address
-              ? {
-                  data: {
-                    attributes: {
-                      ...addr,
-                      FullAddress: fullAddress || addr?.FullAddress,
-                    },
-                  },
-                }
-              : raw.attributes.delivery_address,
-          },
+        const normalizedOrderItems = normalizeOrderItems(
+          attributesSource.order_items ?? normalizedOrder.order_items,
+        );
+        const normalizedUser = normalizeUserRelation(
+          attributesSource.user ?? normalizedOrder.user,
+        );
+        const normalizedDeliveryAddress = normalizeDeliveryAddress(
+          attributesSource.delivery_address ?? normalizedOrder.delivery_address,
+        );
+        const normalizedShipping = normalizeShipping(
+          attributesSource.shipping ?? normalizedOrder.shipping,
+        );
+        const normalizedContract = normalizeContract(
+          attributesSource.contract ?? normalizedOrder.contract,
+        );
+
+        const finalAttributes = {
+          ...attributesSource,
+          paymentGateway,
+          user: normalizedUser ?? attributesSource.user,
+          contract: normalizedContract ?? attributesSource.contract,
+          order_items: normalizedOrderItems,
+          delivery_address: normalizedDeliveryAddress ?? attributesSource.delivery_address,
+          shipping: normalizedShipping ?? attributesSource.shipping,
         };
 
-        setOrder(transformedOrder);
+        setOrder({
+          id: String(normalizedOrder.id ?? attributesSource.id ?? id),
+          attributes: finalAttributes,
+        });
       } finally {
         setLoading(false);
       }

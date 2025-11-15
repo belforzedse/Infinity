@@ -15,10 +15,8 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html dir="rtl">
-      <body>
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
-          <div className="max-w-md rounded-3xl bg-white p-8 shadow-xl">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+      <div className="max-w-md rounded-3xl bg-white p-8 shadow-xl">
             <div className="mb-6 text-center">
               <div className="mb-4 text-6xl">⚠️</div>
               <h1 className="text-3xl font-bold text-red-600">خطای سرور</h1>
@@ -53,12 +51,10 @@ export default function GlobalError({
               </Link>
             </div>
 
-            <p className="mt-6 text-center text-xs text-gray-500">
-              ما در حال رفع این مشکل هستیم. لطفاً بعداً دوباره تلاش کنید.
-            </p>
-          </div>
-        </div>
-      </body>
-    </html>
+        <p className="mt-6 text-center text-xs text-gray-500">
+          ما در حال رفع این مشکل هستیم. لطفاً بعداً دوباره تلاش کنید.
+        </p>
+      </div>
+    </div>
   );
 }

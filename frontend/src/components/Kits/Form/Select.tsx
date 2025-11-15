@@ -10,7 +10,7 @@ export interface Option {
 
 interface SelectProps {
   label?: string;
-  value: Option | null;
+  value?: Option | null;
   onChange: (value: Option) => void;
   options: Option[];
   placeholder?: string;
@@ -23,7 +23,7 @@ interface SelectProps {
 
 export default function Select({
   label,
-  value,
+  value = null,
   onChange,
   options,
   placeholder = "انتخاب کنید",
@@ -36,7 +36,7 @@ export default function Select({
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {label && <label className="text-base text-foreground-primary lg:text-lg">{label}</label>}
-      <Listbox value={value ?? undefined} onChange={onChange} disabled={isLoading}>
+      <Listbox value={value ?? null} onChange={onChange} disabled={isLoading}>
         <div className="relative">
           <Listbox.Button
             className={classNames(
