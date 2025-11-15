@@ -131,7 +131,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
 
     try {
       setLoading(true);
-      await UserService.addresses.add(addressData);
+      const newAddress = await UserService.addresses.add(addressData);
       toast.success("آدرس با موفقیت اضافه شد");
 
       // Reset form fields
@@ -144,9 +144,10 @@ export default function AddAddress({ onAddressAdded }: Props) {
       // Close modal
       setIsOpen(false);
 
-      // Callback to refresh addresses list
+      // Callback to refresh addresses list from backend
+      // This ensures the UI updates with the new address correctly
       if (onAddressAdded) {
-        onAddressAdded();
+        await onAddressAdded();
       }
     } catch (error: any) {
       console.error("Failed to add address:", error);
@@ -167,8 +168,8 @@ export default function AddAddress({ onAddressAdded }: Props) {
       </button>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <form onSubmit={handleSubmit} className="flex max-h-[80vh] flex-col gap-4">
-          <div className="grid flex-1 grid-cols-1 gap-3 overflow-y-auto pr-1 lg:grid-cols-2">
+        <form onSubmit={handleSubmit} className="flex max-h-[80vh] flex-col gap-4 overflow-y-auto">
+          <div className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-2">
           <span className="text-foreground-primary text-lg mb-1 lg:text-2xl lg:col-span-2">
             افزودن آدرس
           </span>

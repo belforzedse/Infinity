@@ -72,12 +72,26 @@ export default function OrdersTabs() {
       "همه سفارش‌ها": filtered, // All orders
       [PersianOrderStatus.INPROGRESS]: filtered.filter(
         (order) =>
+          order.Status === "Paying" || // Waiting for payment
           order.Status === "Started" ||
           order.Status === "Processing" ||
-          order.Status === "Shipment",
+          order.Status === "Shipment" ||
+          order.Status === "PROCESSING" ||
+          order.Status === "SHIPPED" ||
+          order.Status === "جاری", // Persian status
       ),
-      [PersianOrderStatus.DELIVERED]: filtered.filter((order) => order.Status === "Done"),
-      [PersianOrderStatus.CANCELLED]: filtered.filter((order) => order.Status === "Cancelled"),
+      [PersianOrderStatus.DELIVERED]: filtered.filter(
+        (order) =>
+          order.Status === "Done" ||
+          order.Status === "DELIVERED" ||
+          order.Status === "تحویل داده شده", // Persian status
+      ),
+      [PersianOrderStatus.CANCELLED]: filtered.filter(
+        (order) =>
+          order.Status === "Cancelled" ||
+          order.Status === "CANCELLED" ||
+          order.Status === "لغو شده", // Persian status
+      ),
     };
   }, [orders, matchesSearch]);
 
@@ -103,9 +117,10 @@ export default function OrdersTabs() {
   // Map API order to the component props format
   const mapOrderToProps = (order: Order) => {
     const firstItem = order.order_items[0];
+    // Use actual product image, fallback to simple gray placeholder
+    const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
     const image =
-      firstItem?.product_variation?.product?.cover_image?.url ||
-      "/images/placeholders/product-placeholder.png";
+      firstItem?.product_variation?.product?.cover_image?.url || placeholderImage;
     const category =
       firstItem?.product_variation?.product?.Title ||
       firstItem?.product_variation?.product?.Title ||
@@ -117,9 +132,17 @@ export default function OrdersTabs() {
       order.ShippingCost;
 
     let status = PersianOrderStatus.INPROGRESS;
-    if (order.Status === "Done") {
+    if (
+      order.Status === "Done" ||
+      order.Status === "DELIVERED" ||
+      order.Status === "تحویل داده شده"
+    ) {
       status = PersianOrderStatus.DELIVERED;
-    } else if (order.Status === "Cancelled") {
+    } else if (
+      order.Status === "Cancelled" ||
+      order.Status === "CANCELLED" ||
+      order.Status === "لغو شده"
+    ) {
       status = PersianOrderStatus.CANCELLED;
     }
 
