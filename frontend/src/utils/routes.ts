@@ -82,9 +82,9 @@ export const routes: RouteInfo[] = [
     description: "Manage coupons",
   },
   {
-    name: "Super Admin - Coupons Rules",
-    path: "/super-admin/coupons/rules",
-    description: "Manage coupons rules",
+    name: "Super Admin - General Discounts",
+    path: "/super-admin/general-discounts",
+    description: "Manage general discounts",
   },
   {
     name: "Super Admin - Discounts",

@@ -10,8 +10,8 @@ export default function DiscountsPage() {
         <Link href="/super-admin/coupons" className="text-pink-600">
           کدهای تخفیف
         </Link>
-        <Link href="/super-admin/coupons/rules" className="text-pink-600">
-          قوانین تخفیف
+        <Link href="/super-admin/general-discounts" className="text-pink-600">
+          تخفیفای عمومی
         </Link>
       </div>
     </ContentWrapper>

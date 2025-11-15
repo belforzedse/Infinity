@@ -6,7 +6,7 @@ import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { motion } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
 
-type Product = {
+export type Product = {
   id: number;
   Title: string;
   Description: string;
@@ -37,7 +37,7 @@ type Product = {
   image?: string;
 };
 
-type OrderItem = {
+export type OrderItem = {
   id: number;
   productId: number;
   productVariationId?: number;
@@ -53,11 +53,13 @@ type OrderItem = {
 interface ProductSearchProps {
   onProductSelect: (product: Product, variation?: any) => void;
   selectedItems: OrderItem[];
+  enableVariationSelection?: boolean;
 }
 
 const ProductSearch: React.FC<ProductSearchProps> = ({
   onProductSelect,
   selectedItems,
+  enableVariationSelection = true,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
@@ -155,11 +157,11 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
   };
 
   const handleProductClick = (product: Product) => {
-    if (product.product_variations && product.product_variations.length > 0) {
+    if (enableVariationSelection && product.product_variations?.length) {
       setSelectedProduct(product);
-    } else {
-      onProductSelect(product);
+      return;
     }
+    onProductSelect(product);
   };
 
   const handleVariationSelect = (product: Product, variation: any) => {
@@ -272,8 +274,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
         ))}
       </div>
 
-      {/* Variation Selection Modal */}
-      {selectedProduct && (
+      {enableVariationSelection && selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-lg bg-white p-6">
             <div className="mb-4 flex items-center justify-between">

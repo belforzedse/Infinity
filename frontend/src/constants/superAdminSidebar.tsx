@@ -40,7 +40,7 @@ type SidebarChild = {
 type SidebarItem = {
   id: string;
   label: string;
-  href: string;
+  href?: string;
   icon: ReactNode;
   children: SidebarChild[];
 };
@@ -143,9 +143,9 @@ const superAdminSidebar: SidebarItem[] = [
         href: "/super-admin/coupons",
       },
       {
-        id: "coupon-rules",
-        label: "قوانین تخفیف",
-        href: "/super-admin/coupons/rules",
+        id: "general-discounts",
+        label: "تخفیفای عمومی",
+        href: "/super-admin/general-discounts",
       },
     ],
   },
@@ -189,7 +189,6 @@ const superAdminSidebar: SidebarItem[] = [
   {
     id: "reports",
     label: "گزارشات و تحلیل ها",
-    href: "",
     icon: <ChartIcon />,
     children: [
       {

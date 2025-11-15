@@ -63,6 +63,7 @@ export interface OrderPaymentStatusResponse {
   status: string;
   isPaid: boolean;
   transactionId?: string | number | null;
+  paymentGateway?: string | null;
 }
 
 /**
