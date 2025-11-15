@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
 import { useAccountFreshData } from "@/hooks/useAccountFreshData";
 import useUser from "@/hooks/useUser";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
@@ -21,15 +21,28 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   const { userData, isLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Mark component as hydrated after first render to prevent hydration mismatches
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
+    // Only run auth redirect logic after hydration is complete
+    if (!isHydrated) return;
+
     if (!isLoading && !userData) {
       const target = `/auth?redirect=${encodeURIComponent(pathname)}`;
       router.replace(target);
     }
-  }, [isLoading, userData, router, pathname]);
+  }, [isHydrated, isLoading, userData, router, pathname]);
 
-  if (!isLoading && !userData) {
+  // During initial render (server + hydration), render the layout structure
+  // to prevent hydration mismatch. The useEffect above will handle redirects
+  // if the user is not authenticated after hydration.
+  // Only return null after we've confirmed no user (after hydration + effects run)
+  if (isHydrated && !isLoading && !userData) {
     return null;
   }
   return (
