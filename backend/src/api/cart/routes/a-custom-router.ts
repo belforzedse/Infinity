@@ -50,6 +50,7 @@ export default {
       handler: "cart.applyDiscount",
       config: {
         auth: { scope: [] },
+        middlewares: ["api::cart.discount-throttle"],
       },
     },
     {

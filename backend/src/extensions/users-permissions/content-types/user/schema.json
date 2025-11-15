@@ -114,12 +114,6 @@
     "external_source": {
       "type": "string"
     },
-    "discounts": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::discount.discount",
-      "mappedBy": "local_users"
-    },
     "external_id": {
       "type": "string"
     },

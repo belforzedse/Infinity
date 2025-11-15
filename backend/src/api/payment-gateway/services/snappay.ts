@@ -75,6 +75,39 @@ function getSnappConfig() {
       process.env.SNAPPAY_USERNAME || "infinity-purchase",
     password:
       process.env.SNAPPAY_PASSWORD || "SNAPPAY_PASSWORD",
+    returnUrl:
+      process.env.SNAPPAY_RETURN_URL || process.env.URL + "api/orders/payment-callback",
+  };
+}
+
+/**
+ * Format error details with IP whitelisting hints
+ */
+function formatSnappPayError(error: any, context: string): object {
+  const status = error.response?.status;
+  const errorCode = error.response?.data?.errorData?.errorCode;
+  const message = error.message;
+
+  let hint = "";
+  if (status === 403 || errorCode === 403) {
+    hint = "IP_NOT_WHITELISTED - Your server IP must be whitelisted by SnappPay. Contact SnappPay support with your server's public IP address.";
+  } else if (status === 401 || errorCode === 1003) {
+    hint = "INVALID_CREDENTIALS - Check client_id, client_secret, username, password, or returnURL configuration";
+  }
+
+  return {
+    context,
+    message,
+    status,
+    errorCode,
+    statusText: error.response?.statusText,
+    hint,
+    config: {
+      method: error.config?.method,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+    },
+    timestamp: new Date().toISOString(),
   };
 }
 
@@ -93,21 +126,27 @@ async function fetchAccessToken(http: AxiosInstance): Promise<string> {
   body.append("username", username);
   body.append("password", password);
 
-  const { data } = await http.post<SnappPayAccessTokenResponse>(
-    "/api/online/v1/oauth/token",
-    body.toString(),
-    {
-      headers: {
-        Authorization: `Basic ${basic}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      timeout: 20_000,
-    }
-  );
+  try {
+    const { data } = await http.post<SnappPayAccessTokenResponse>(
+      "/api/online/v1/oauth/token",
+      body.toString(),
+      {
+        headers: {
+          Authorization: `Basic ${basic}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: 20_000,
+      }
+    );
 
-  const expiresAt = Date.now() + (data.expires_in - 30) * 1000; // small safety margin
-  cachedToken = { token: data.access_token, expiresAt };
-  return data.access_token;
+    const expiresAt = Date.now() + (data.expires_in - 30) * 1000; // small safety margin
+    cachedToken = { token: data.access_token, expiresAt };
+    return data.access_token;
+  } catch (error: any) {
+    const errorDetails = formatSnappPayError(error, "fetchAccessToken");
+    strapi.log.error("❌ SnappPay authentication failed", errorDetails);
+    throw error;
+  }
 }
 
 function createHttp(): AxiosInstance {
@@ -121,6 +160,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
+      strapi.log.info("SnappPay eligible check request", { amountIRR, amountToman: Math.round(amountIRR / 10) });
       const { data } = await http.get<SnappPayEligibleResponse>(
         `/api/online/offer/v1/eligible`,
         {
@@ -129,13 +169,26 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           timeout: 20_000,
         }
       );
+      try {
+        strapi.log.debug("========== SNAPPAY ELIGIBLE RESPONSE FULL START ==========");
+        strapi.log.debug(JSON.stringify(data, null, 2));
+        strapi.log.debug("========== SNAPPAY ELIGIBLE RESPONSE FULL END ==========");
+        strapi.log.info("SnappPay eligible check response", {
+          successful: data?.successful,
+          eligible: data?.response?.eligible,
+          errorCode: data?.errorData?.errorCode,
+          errorMessage: data?.errorData?.message,
+        });
+      } catch (e) {
+        strapi.log.error("Error logging SnappPay eligible response", e);
+      }
       return data;
     } catch (error: any) {
-      strapi.log.error("SnappPay eligible error", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      const errorDetails = formatSnappPayError(error, "eligible");
+      strapi.log.debug("========== SNAPPAY ELIGIBLE ERROR DETAILS START ==========");
+      strapi.log.debug(JSON.stringify(errorDetails, null, 2));
+      strapi.log.debug("========== SNAPPAY ELIGIBLE ERROR DETAILS END ==========");
+      strapi.log.error("❌ SnappPay eligible check failed", errorDetails);
       return {
         successful: false,
         errorData: {
@@ -198,21 +251,27 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         }
       );
       try {
+        strapi.log.debug("========== SNAPPAY TOKEN RESPONSE FULL START ==========");
+        strapi.log.debug(JSON.stringify(data, null, 2));
+        strapi.log.debug("========== SNAPPAY TOKEN RESPONSE FULL END ==========");
         strapi.log.info("SnappPay token response", {
           successful: data?.successful,
           hasPaymentToken: !!data?.response?.paymentToken,
           hasPaymentPageUrl: !!data?.response?.paymentPageUrl,
+          paymentToken: data?.response?.paymentToken?.substring(0, 20) + "...", // First 20 chars for debugging
           errorCode: data?.errorData?.errorCode,
           errorMessage: data?.errorData?.message,
         });
-      } catch {}
+      } catch (e) {
+        strapi.log.error("Error logging SnappPay token response", e);
+      }
       return data;
     } catch (error: any) {
-      strapi.log.error("SnappPay token error", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      const errorDetails = formatSnappPayError(error, "requestPaymentToken");
+      strapi.log.debug("========== SNAPPAY TOKEN ERROR DETAILS START ==========");
+      strapi.log.debug(JSON.stringify(errorDetails, null, 2));
+      strapi.log.debug("========== SNAPPAY TOKEN ERROR DETAILS END ==========");
+      strapi.log.error("❌ SnappPay token request failed", errorDetails);
       return {
         successful: false,
         errorData: {
@@ -236,11 +295,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       );
       return data;
     } catch (error: any) {
-      strapi.log.error("SnappPay verify error", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      const errorDetails = formatSnappPayError(error, "verify");
+      strapi.log.error("❌ SnappPay verify error", errorDetails);
       return {
         successful: false,
         errorData: {
@@ -264,11 +320,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       );
       return data;
     } catch (error: any) {
-      strapi.log.error("SnappPay settle error", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      const errorDetails = formatSnappPayError(error, "settle");
+      strapi.log.error("❌ SnappPay settle error", errorDetails);
       return {
         successful: false,
         errorData: {
@@ -437,11 +490,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
       return data;
     } catch (error: any) {
-      strapi.log.error("SnappPay update error", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      const errorDetails = formatSnappPayError(error, "update");
+      strapi.log.error("❌ SnappPay update error", errorDetails);
       return {
         successful: false,
         errorData: {

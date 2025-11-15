@@ -14,7 +14,8 @@
   "attributes": {
     "Code": {
       "type": "string",
-      "required": true
+      "required": true,
+      "unique": true
     },
     "Type": {
       "type": "enumeration",
@@ -44,16 +45,17 @@
       "type": "boolean",
       "default": false
     },
-    "local_users": {
+    "products": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "plugin::users-permissions.user",
+      "target": "api::product.product",
       "inversedBy": "discounts"
     },
-    "product_variations": {
+    "delivery_methods": {
       "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::product-variation.product-variation"
+      "relation": "manyToMany",
+      "target": "api::shipping.shipping",
+      "inversedBy": "discounts"
     },
     "removedAt": {
       "type": "datetime"
@@ -65,6 +67,14 @@
     },
     "LimitUsage": {
       "type": "integer"
+    },
+    "MinCartTotal": {
+      "type": "integer",
+      "min": 0
+    },
+    "MaxCartTotal": {
+      "type": "integer",
+      "min": 0
     }
   }
 }

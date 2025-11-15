@@ -198,13 +198,20 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
 
         if (shippingData?.discountCode) {
           discountCode = String(shippingData.discountCode);
-          discountAmount = await computeCouponDiscount(
-            strapi as any,
-            userId,
-            discountCode,
-            subtotal,
-            cart.cart_items
-          );
+          try {
+            discountAmount = await computeCouponDiscount(
+              strapi as any,
+              userId,
+              discountCode,
+              subtotal,
+              cart.cart_items,
+              shippingData?.shippingId
+            );
+          } catch (discountError: any) {
+            // Discount validation failed - throw error to prevent order creation
+            const errorMsg = discountError.message || "Discount validation failed";
+            throw new Error(errorMsg);
+          }
         }
 
         // If no coupon applied, find active general discounts
