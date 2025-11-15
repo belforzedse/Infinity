@@ -11,6 +11,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import logger from "@/utils/logger";
+import { ProductSchema } from "@/components/SEO/ProductSchema";
+import { BreadcrumbSchema } from "@/components/SEO/BreadcrumbSchema";
 import type {
   ProductDetail} from "@/services/product/product";
 import {
@@ -36,19 +38,38 @@ export async function generateMetadata({
       : undefined;
 
     const title = `خرید ${titleRaw} | اینفینیتی استور`;
+    const productId = product?.id || slug;
 
     return {
       title,
       description,
+      keywords: [titleRaw, "خرید", "فروشگاه آنلاین", "اینفینیتی"],
       openGraph: {
         title,
         description,
         type: "website",
-        url: `/pdp/${slug}`,
-        images: imageUrl ? [{ url: imageUrl }] : undefined,
+        url: `https://infinitycolor.org/pdp/${slug}`,
+        siteName: "اینفینیتی استور",
+        locale: "fa_IR",
+        images: imageUrl
+          ? [
+              {
+                url: imageUrl,
+                width: 1200,
+                height: 630,
+                alt: titleRaw,
+              },
+            ]
+          : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: imageUrl ? [imageUrl] : undefined,
       },
       alternates: {
-        canonical: `/pdp/${slug}`,
+        canonical: `https://infinitycolor.org/pdp/${slug}`,
       },
     };
   } catch {
@@ -170,24 +191,28 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       };
     }) || [];
 
+  const breadcrumbItems = [
+    {
+      label: "صفحه اصلی",
+      href: "/",
+    },
+    {
+      label: categoryName,
+      href: `/plp?category=${categorySlug}`,
+    },
+    {
+      label: productTitle,
+    },
+  ];
+
   return (
     <PageContainer variant="wide" className="flex flex-col gap-10 pb-16 pt-6">
+      {/* JSON-LD Schemas for SEO */}
+      {productData && <ProductSchema product={productData} slug={slug} />}
+      <BreadcrumbSchema breadcrumbs={breadcrumbItems} />
+
       <div className="flex flex-col gap-3">
-        <Breadcrumb
-          breadcrumbs={[
-            {
-              label: "صفحه اصلی",
-              href: "/",
-            },
-            {
-              label: categoryName,
-              href: `/plp?category=${categorySlug}`,
-            },
-            {
-              label: productTitle,
-            },
-          ]}
-        />
+        <Breadcrumb breadcrumbs={breadcrumbItems} />
 
         <Hero productData={productData} productId={productId} />
       </div>
