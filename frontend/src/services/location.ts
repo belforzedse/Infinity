@@ -70,9 +70,10 @@ export const getProvinces = async (params?: LocationParams): Promise<Province[]>
     queryParams["pagination[page]"] = params.page.toString();
   }
 
-  if (params?.pageSize) {
-    queryParams["pagination[pageSize]"] = params.pageSize.toString();
-  }
+  // Set default pageSize to 1000 to fetch all provinces if not specified
+  // This ensures all provinces from the backend are retrieved (Iran has 31 provinces)
+  const pageSize = params?.pageSize || 1000;
+  queryParams["pagination[pageSize]"] = pageSize.toString();
 
   if (params?.sort) {
     queryParams["sort"] = params.sort;
@@ -109,9 +110,10 @@ export const getCities = async (provinceId?: number, params?: LocationParams): P
     queryParams["pagination[page]"] = params.page.toString();
   }
 
-  if (params?.pageSize) {
-    queryParams["pagination[pageSize]"] = params.pageSize.toString();
-  }
+  // Set default pageSize to 5000 to fetch all cities if not specified
+  // This ensures all cities from the backend are retrieved (Iran has 1000+ cities)
+  const pageSize = params?.pageSize || 5000;
+  queryParams["pagination[pageSize]"] = pageSize.toString();
 
   if (params?.sort) {
     queryParams["sort"] = params.sort || "Title:asc";
