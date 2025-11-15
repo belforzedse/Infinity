@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
 import AddressCard from "./AddressCard";
 import UserService from "@/services/user";
-import type { UserAddress } from "@/services/user/addresses";
 import AddAddress from "./AddAddress";
+import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
 
 const AddressContainer = () => {
-  const [addresses, setAddresses] = useState<UserAddress[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [addresses, setAddresses] = useAtom(addressesAtom);
+  const [loading, setLoading] = useAtom(addressesLoadingAtom);
+  const [error, setError] = useAtom(addressesErrorAtom);
 
   const fetchAddresses = async () => {
     try {
@@ -25,15 +26,20 @@ const AddressContainer = () => {
 
   useEffect(() => {
     fetchAddresses();
-  }, []);
+  }, [setAddresses, setLoading, setError]);
 
   const handleDelete = async (id: number) => {
+    // Optimistic update: remove immediately from UI
+    const previousAddresses = addresses;
+    setAddresses(addresses.filter(addr => addr.id !== id));
+
     try {
       await UserService.addresses.delete(id);
-      // Refresh address list after deletion
-      fetchAddresses();
+      // Success - address is already removed from UI
     } catch (err) {
       console.error("Failed to delete address:", err);
+      // Revert on error
+      setAddresses(previousAddresses);
       alert("خطا در حذف آدرس");
     }
   };
@@ -81,10 +87,15 @@ const AddressContainer = () => {
     );
   };
 
+  // Callback for when new address is added - refetch to sync with backend
+  const handleAddressAdded = async () => {
+    await fetchAddresses();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <AddAddress onAddressAdded={fetchAddresses} />
+        <AddAddress onAddressAdded={handleAddressAdded} />
       </div>
       {renderAddresses()}
     </div>
