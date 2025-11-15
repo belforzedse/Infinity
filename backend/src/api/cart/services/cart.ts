@@ -37,6 +37,35 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
     return removeCartItemOp(strapi as any, cartItemId);
   },
 
+  async clearCart(userId: number) {
+    const cart = await getOrCreateUserCart(strapi as any, userId);
+    if (!cart?.id) {
+      return { success: true };
+    }
+
+    const cartItems = cart.cart_items || [];
+    for (const item of cartItems) {
+      try {
+        await strapi.entityService.delete("api::cart-item.cart-item", item.id);
+      } catch (err) {
+        strapi.log.error("Failed to remove cart item during clearCart", {
+          cartItemId: item.id,
+          error: err,
+        });
+      }
+    }
+
+    try {
+      await strapi.entityService.update("api::cart.cart", cart.id, {
+        data: { Status: "Empty" },
+      });
+    } catch (err) {
+      strapi.log.error("Failed to update cart status during clearCart", err);
+    }
+
+    return { success: true };
+  },
+
   async checkCartStock(userId: number) {
     return checkCartStockOp(strapi as any, userId);
   },

@@ -259,6 +259,12 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         });
       } catch {}
 
+      try {
+        await cartService.clearCart(user.id);
+      } catch (err) {
+        strapi.log.error("Failed to clear cart after wallet payment", err);
+      }
+
       return {
         data: {
           success: true,
