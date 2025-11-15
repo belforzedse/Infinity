@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import { currentUserAtom, userLoadingAtom, userErrorAtom } from "@/lib/atoms/auth";
 import UserService from "@/services/user";
+import { __clearOrderCache } from "@/services/order";
 
 /**
  * AuthInitializer Component
@@ -34,6 +35,7 @@ export default function AuthInitializer() {
       if (lastTokenRef.current && !token) {
         setUser(null); // Clear cached user immediately
         setError(null);
+        __clearOrderCache();
         lastTokenRef.current = null;
         return;
       }
