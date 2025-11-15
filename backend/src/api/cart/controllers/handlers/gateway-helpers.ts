@@ -247,12 +247,9 @@ export const requestSnappPayment = async (
     }
   } catch {}
 
-  // Log the complete SnappPay payload with all details
-  const payloadForLog = JSON.stringify(snappPayload, null, 2);
-  strapi.log.debug("========== SNAPPAY TOKEN REQUEST PAYLOAD START ==========");
-  strapi.log.debug(payloadForLog);
-  strapi.log.debug("========== SNAPPAY TOKEN REQUEST PAYLOAD END ==========");
-  strapi.log.info("SnappPay token request summary", {
+  // SnappPay token request is logged inside the service (snappay.ts)
+  // to avoid duplicate logging. We only log a summary here.
+  strapi.log.info("SnappPay token request initiated", {
     orderId: order.id,
     transactionId,
     itemCount: items.length,

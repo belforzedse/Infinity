@@ -121,6 +121,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const http = createHttp();
     try {
       const token = await fetchAccessToken(http);
+      strapi.log.info("SnappPay eligible check request", { amountIRR, amountToman: Math.round(amountIRR / 10) });
       const { data } = await http.get<SnappPayEligibleResponse>(
         `/api/online/offer/v1/eligible`,
         {
@@ -129,12 +130,36 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           timeout: 20_000,
         }
       );
+      try {
+        strapi.log.debug("========== SNAPPAY ELIGIBLE RESPONSE FULL START ==========");
+        strapi.log.debug(JSON.stringify(data, null, 2));
+        strapi.log.debug("========== SNAPPAY ELIGIBLE RESPONSE FULL END ==========");
+        strapi.log.info("SnappPay eligible check response", {
+          successful: data?.successful,
+          eligible: data?.response?.eligible,
+          errorCode: data?.errorData?.errorCode,
+          errorMessage: data?.errorData?.message,
+        });
+      } catch (e) {
+        strapi.log.error("Error logging SnappPay eligible response", e);
+      }
       return data;
     } catch (error: any) {
+      strapi.log.debug("========== SNAPPAY ELIGIBLE ERROR DETAILS START ==========");
+      strapi.log.debug(JSON.stringify({
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+      }, null, 2));
+      strapi.log.debug("========== SNAPPAY ELIGIBLE ERROR DETAILS END ==========");
       strapi.log.error("SnappPay eligible error", {
         message: error.message,
         status: error.response?.status,
-        data: error.response?.data,
+        statusText: error.response?.statusText,
+        errorCode: error.response?.data?.errorData?.errorCode,
+        errorMessage: error.response?.data?.errorData?.message,
       });
       return {
         successful: false,
@@ -198,20 +223,42 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         }
       );
       try {
+        strapi.log.debug("========== SNAPPAY TOKEN RESPONSE FULL START ==========");
+        strapi.log.debug(JSON.stringify(data, null, 2));
+        strapi.log.debug("========== SNAPPAY TOKEN RESPONSE FULL END ==========");
         strapi.log.info("SnappPay token response", {
           successful: data?.successful,
           hasPaymentToken: !!data?.response?.paymentToken,
           hasPaymentPageUrl: !!data?.response?.paymentPageUrl,
+          paymentToken: data?.response?.paymentToken?.substring(0, 20) + "...", // First 20 chars for debugging
           errorCode: data?.errorData?.errorCode,
           errorMessage: data?.errorData?.message,
         });
-      } catch {}
+      } catch (e) {
+        strapi.log.error("Error logging SnappPay token response", e);
+      }
       return data;
     } catch (error: any) {
+      strapi.log.debug("========== SNAPPAY TOKEN ERROR DETAILS START ==========");
+      strapi.log.debug(JSON.stringify({
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        config: {
+          method: error.config?.method,
+          url: error.config?.url,
+          timeout: error.config?.timeout,
+        },
+      }, null, 2));
+      strapi.log.debug("========== SNAPPAY TOKEN ERROR DETAILS END ==========");
       strapi.log.error("SnappPay token error", {
         message: error.message,
         status: error.response?.status,
-        data: error.response?.data,
+        statusText: error.response?.statusText,
+        errorCode: error.response?.data?.errorData?.errorCode,
+        errorMessage: error.response?.data?.errorData?.message,
       });
       return {
         successful: false,
