@@ -37,7 +37,7 @@ function VerifyContent() {
 
           try {
             const response = await AuthService.resetPassword({
-              otp: data.otp,
+              otp: data.otp.split("").reverse().join(""),
               newPassword: data.password,
               otpToken: typeof window !== "undefined" ? sessionStorage.getItem("otpToken") : null,
               phone: phoneNumber || undefined,
