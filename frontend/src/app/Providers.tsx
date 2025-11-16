@@ -39,9 +39,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       {/* Displays friendly error notifications for 401/403/etc */}
       <GlobalErrorDisplay />
       <ImageEffects />
-      <main id="main-content">
-        {children}
-      </main>
+      {children}
       <GlobalLoadingOverlay />
     </Provider>
   );

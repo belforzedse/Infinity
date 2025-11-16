@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import AuthIllustration from "@/components/Auth/Illustration";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { UserService } from "@/services";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
@@ -11,17 +11,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // Mark component as hydrated after first render
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   useEffect(() => {
-    // Only run auth redirect logic after hydration is complete
-    if (!isHydrated) return;
-
     // Allow registration-related pages to stay accessible even when a token exists
     if (pathname?.startsWith("/auth/register")) {
       const mobileParam = searchParams.get("phone");
@@ -52,7 +43,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       .catch(() => {
         // If fetch fails, stay on auth and let user log in again
       });
-  }, [isHydrated, router, searchParams, pathname]);
+  }, [router, searchParams, pathname]);
 
   return (
     <main className="flex min-h-screen items-start justify-center bg-pink-50 p-4 md:items-center">

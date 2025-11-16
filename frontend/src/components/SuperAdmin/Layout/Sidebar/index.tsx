@@ -119,6 +119,19 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
             {sidebarItems.map((item) => {
               const hasChildren = item.children.length > 0;
               const isOpenMenu = !!openMenus[item.id];
+              const curr = pathname.replace(/\/$/, "");
+            const itemBase = (item.href ?? "").replace(/\/$/, "");
+            const hasActiveChild = item.children.some((child) => {
+              const childHref = (child.href ?? "").replace(/\/$/, "");
+              return childHref && (curr === childHref || curr.startsWith(childHref + "/"));
+            });
+            const isDashboardItem = item.id === "dashboard";
+            const isActiveBase =
+              itemBase &&
+              (curr === itemBase ||
+                curr === `${itemBase}/` ||
+                (!isDashboardItem && curr.startsWith(itemBase + "/")));
+            const isActive = Boolean(isActiveBase) || hasActiveChild;
 
               return (
                 <div key={item.id} className="flex flex-col">
@@ -127,12 +140,12 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                     role="button"
                     tabIndex={0}
                     className={clsx(
-                      "flex items-center justify-between rounded-lg px-2 py-1.5",
+                      "relative flex items-center justify-between rounded-lg px-2 py-1.5",
                       "transition-colors duration-150 ",
                       !hasChildren && "cursor-pointer hover:bg-neutral-50",
                       hasChildren && "mb-2 cursor-default",
+                      isActive && !hasChildren ? "bg-pink-50 text-pink-600" : "",
                     )}
-
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
@@ -140,10 +153,20 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                       }
                     }}
                   >
+                    {isActive && !hasChildren && (
+                      <span className="pointer-events-none absolute -right-1.5 top-1/2 h-10 w-2 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-pink-600 to-pink-400" />
+                    )}
                     {hasChildren ? (
                       <div className="flex items-center gap-2">
                         {item.icon}
-                        <span className="text-sm font-medium text-neutral-600">{item.label}</span>
+                        <span
+                          className={clsx(
+                            "text-sm font-medium",
+                            isActive ? "text-pink-600" : "text-neutral-600",
+                          )}
+                        >
+                          {item.label}
+                        </span>
                       </div>
                     ) : (
                       <Link
@@ -153,7 +176,14 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                       >
                         <div className="flex items-center gap-2">
                           {item.icon}
-                          <span className="text-sm font-medium text-neutral-600">{item.label}</span>
+                          <span
+                            className={clsx(
+                              "text-sm font-medium",
+                              isActive ? "text-pink-600" : "text-neutral-600",
+                            )}
+                          >
+                            {item.label}
+                          </span>
                         </div>
                       </Link>
                     )}
@@ -216,19 +246,23 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                                 exit={{ opacity: 0, y: -4 }}
                                 transition={{ duration: 0.15, delay: index * 0.03 }}
                               >
-                                <Link
-                                  href={child.href}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className={clsx(
-                                    "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
-                                    "transition-colors duration-150",
-                                    active
-                                      ? "bg-neutral-100 font-medium text-neutral-900"
-                                      : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
-                                  )}
-                                >
-                                  {child.label}
-                                </Link>
+                        <Link
+                          href={child.href}
+                          onClick={(e) => e.stopPropagation()}
+                          className={clsx(
+                            "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                            "transition-colors duration-150",
+                            "relative pl-6 pr-2",
+                            active
+                              ? "bg-neutral-100 font-medium text-neutral-900"
+                              : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
+                          )}
+                        >
+                          {child.label}
+                          {active && (
+                            <span className="absolute -right-1.5 top-1/2 h-8 w-2 -translate-y-1/2 rounded-r-full bg-pink-500" />
+                          )}
+                        </Link>
                               </motion.div>
                               {index !== item.children.length - 1 && (
                                 <div className="mx-4 h-px bg-neutral-100" />

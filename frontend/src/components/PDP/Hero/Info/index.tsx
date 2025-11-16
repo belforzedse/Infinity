@@ -512,7 +512,7 @@ export default function PDPHeroInfo(props: Props) {
         )}
 
         {productData?.attributes?.CleaningTips && (
-          <FAQItem title="نکات شست و شو" content={productData.attributes.CleaningTips} />
+          <FAQItem title="توضیحات" content={productData.attributes.CleaningTips} />
         )}
 
         {productData?.attributes?.ReturnConditions && (

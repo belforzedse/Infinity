@@ -3,23 +3,47 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import VerifyForgotPasswordForm from "@/components/Auth/ForgotPassword/VerifyForm";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { AuthService } from "@/services";
 import toast from "react-hot-toast";
+import { extractErrorStatus } from "@/utils/errorMessages";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 function VerifyContent() {
   const queryParams = useSearchParams();
   const phoneNumber = queryParams.get("phoneNumber");
 
   const router = useRouter();
+  const [pendingPassword, setPendingPassword] = useState<string | null>(null);
 
   useEffect(() => {
-    if (phoneNumber) {
-      AuthService.sendOTP(phoneNumber);
-    } else {
+    if (!phoneNumber) {
       router.push("/auth/forgot-password");
+      return;
     }
+
+    const sendInitialOTP = async () => {
+      try {
+        await AuthService.sendOTP(phoneNumber);
+      } catch (error: unknown) {
+        const friendlyMessage = getUserFacingErrorMessage(
+          error,
+          "کد تایید ارسال نشده است",
+        );
+        toast.error(friendlyMessage);
+      }
+    };
+
+    sendInitialOTP();
   }, [phoneNumber, router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem("pendingNewPassword");
+    if (stored) {
+      setPendingPassword(stored);
+    }
+  }, []);
 
   return (
     <div className="mx-auto w-full">
@@ -28,7 +52,23 @@ function VerifyContent() {
       </AuthTitle>
 
       <VerifyForgotPasswordForm
-        resendCode={() => AuthService.sendOTP(phoneNumber || "")}
+        resendCode={async () => {
+          try {
+            await AuthService.sendOTP(phoneNumber || "");
+            toast.success("کد تایید دوباره ارسال شد");
+          } catch (error: unknown) {
+            const friendlyMessage = getUserFacingErrorMessage(error, "خطا در ارسال کد تایید");
+            const errorStatus = extractErrorStatus(error);
+
+            if (errorStatus === 429) {
+              toast.error(friendlyMessage);
+              return;
+            }
+
+            toast.error(friendlyMessage);
+          }
+        }}
+        initialPassword={pendingPassword ?? undefined}
         onSubmit={async (data) => {
           if (!phoneNumber) {
             router.push("/auth/forgot-password");
@@ -37,7 +77,7 @@ function VerifyContent() {
 
           try {
             const response = await AuthService.resetPassword({
-              otp: data.otp,
+              otp: data.otp.split("").reverse().join(""),
               newPassword: data.password,
               otpToken: typeof window !== "undefined" ? sessionStorage.getItem("otpToken") : null,
               phone: phoneNumber || undefined,
@@ -51,10 +91,26 @@ function VerifyContent() {
             } else {
               toast.error("کد تایید اشتباه است");
             }
-          } catch {
-            toast.error("کد تایید یا توکن معتبر نیست");
+          } catch (error: unknown) {
+            const friendlyMessage = getUserFacingErrorMessage(
+              error,
+              "کد تایید یا توکن معتبر نیست",
+            );
+            const errorStatus = extractErrorStatus(error);
+
+            if (errorStatus === 429) {
+            toast.error(friendlyMessage);
+            return;
           }
-        }}
+
+          toast.error(friendlyMessage);
+        }
+      }}
+      onSuccess={() => {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("pendingNewPassword");
+        }
+      }}
       />
     </div>
   );

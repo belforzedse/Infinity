@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
@@ -23,6 +23,7 @@ export interface CartItem {
   color?: string;
   size?: string;
   model?: string;
+  sku?: string;
 }
 
 interface CartContextType {
@@ -57,10 +58,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
 
-  // Check if user is logged in
-  const isLoggedIn = typeof window !== "undefined" ? !!localStorage.getItem("accessToken") : false;
+  // Read login state on client after hydration to avoid SSR mismatch
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateLoginState = () => {
+      setIsLoggedIn(!!localStorage.getItem("accessToken"));
+    };
+
+    updateLoginState();
+    window.addEventListener("storage", updateLoginState);
+
+    return () => {
+      window.removeEventListener("storage", updateLoginState);
+    };
+  }, []);
 
   // Close drawer when path changes
   useEffect(() => {
@@ -269,32 +284,54 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Function to migrate local cart to API when user logs in
+  const pendingRemovals = useRef<Set<string>>(new Set());
+
   const migrateLocalCartToApi = async () => {
-    // Get cart from localStorage
+    if (typeof window === "undefined") return;
+
     const storedCart = localStorage.getItem("cart");
     if (!storedCart) return;
 
+    let localCartItems: CartItem[] = [];
+    try {
+      localCartItems = JSON.parse(storedCart);
+    } catch (error) {
+      console.warn("Unable to parse local cart during migration:", error);
+    }
+
+    localStorage.removeItem("cart");
+
+    if (!localCartItems.length) return;
+
     try {
       setIsLoading(true);
-      const localCartItems: CartItem[] = JSON.parse(storedCart);
 
-      // If there are items in the local cart
-      if (localCartItems.length > 0) {
-        // Add each item to the API cart
-        for (const item of localCartItems) {
-          if (item.variationId) {
-            await CartService.addItemToCart(Number(item.variationId), item.quantity);
-          }
+      const deduped = new Map<string, CartItem>();
+      for (const item of localCartItems) {
+        const key = `${item.variationId}-${item.sku}-${item.id}`;
+        const existing = deduped.get(key);
+        if (existing) {
+          existing.quantity += item.quantity;
+        } else {
+          deduped.set(key, { ...item });
         }
-
-        // Clear the local cart after migration
-        localStorage.removeItem("cart");
-
-        // Fetch updated cart from API
-        await fetchUserCart();
       }
-    } catch (error) {
-      console.error("Failed to migrate cart:", error);
+
+      for (const item of Array.from(deduped.values())) {
+        if (!item.variationId) continue;
+
+        try {
+          await CartService.addItemToCart(Number(item.variationId), item.quantity);
+        } catch (error) {
+          const variationLabel = item.sku || item.name || item.variationId;
+          console.warn(
+            `Failed to migrate cart item (${variationLabel}):`,
+            error,
+          );
+        }
+      }
+
+      await fetchUserCart();
     } finally {
       setIsLoading(false);
     }
@@ -366,11 +403,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Local storage implementation (no queue needed for guest users)
       setCartItems((prev) => {
-        // Check if item already exists in cart
         const existingItemIndex = prev.findIndex((item) => item.slug === newItem.slug);
 
         if (existingItemIndex !== -1) {
-          // Update quantity if item exists
           const updatedItems = [...prev];
           const existingItem = updatedItems[existingItemIndex];
           updatedItems[existingItemIndex] = {
@@ -381,10 +416,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             discountPercentage: newItem.discountPercentage ?? existingItem.discountPercentage,
           };
           return updatedItems;
-        } else {
-          // Add new item
-          return [...prev, newItem];
         }
+
+        return [...prev, newItem];
       });
     }
   };
@@ -397,6 +431,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Find cart item ID from our local state that matches the item ID
       const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
       if (!item) return;
+
+      const removalKey = item.cartItemId || item.id;
+      if (!removalKey || pendingRemovals.current.has(removalKey)) return;
+      pendingRemovals.current.add(removalKey);
 
       // Remove item optimistically
       setCartItems((prev) => prev.filter((item) => item.id !== id && item.cartItemId !== id));
@@ -414,7 +452,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         await cartRequestQueue.enqueue(
           async () => {
             await CartService.removeCartItem(Number(cartItemId));
-            // Refresh cart to ensure consistency with backend
             await fetchUserCart();
           },
           `remove-${cartItemId}`
@@ -422,10 +459,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Failed to remove item from cart:", error);
 
-        // Revert optimistic update on failure
-        setCartItems(previousCartItems);
+        await fetchUserCart();
         notify.error("حذف کالا از سبد خرید با خطا مواجه شد");
       } finally {
+        pendingRemovals.current.delete(removalKey ?? "");
         setIsLoading(false);
       }
     } else {

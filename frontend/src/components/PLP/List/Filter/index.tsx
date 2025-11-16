@@ -4,11 +4,11 @@ import PLPListFilterCategory from "./Category";
 import AvailabilityFilter from "./Availability";
 import PriceFilter from "./Price";
 import PLPFilterBox from "@/components/Kits/PLP/FilterBox";
-import PLPFilterBoxWithItems from "@/components/Kits/PLP/FilterBoxWithItems";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { categories as staticCategories } from "@/constants/categories";
+import { SORT_OPTIONS } from "@/components/PLP/sortOptions";
 
 interface Category {
   id: string;
@@ -31,8 +31,8 @@ export default function Filter({
   const [available, setAvailable] = useQueryState("available");
   const [minPrice, setMinPrice] = useQueryState("minPrice");
   const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [, setSize] = useQueryState("size");
-
+  const [sort, setSort] = useQueryState("sort");
+  const [, setPage] = useQueryState("page");
   // State for categories
   const [localCategories, setLocalCategories] = useState<Category[]>([]);
   const [isFetchingCategories, setIsFetchingCategories] = useState(!categoriesProp);
@@ -125,13 +125,18 @@ export default function Filter({
     [setMinPrice, setMaxPrice],
   );
 
-  // Size filter handler
-  const handleSizeSelect = useCallback(
-    (id: string) => {
-      setSize(id);
+  const handleSortToggle = useCallback(
+    (value: string) => {
+      setPage("1");
+      setSort((prev) => (prev === value ? null : value));
     },
-    [setSize],
+    [setSort, setPage],
   );
+
+  const handleSortClear = useCallback(() => {
+    setPage("1");
+    setSort(null);
+  }, [setSort, setPage]);
 
   const resolvedCategories = categoriesProp ?? localCategories;
   const resolvedIsLoading = categoriesProp ? isLoadingCategoriesProp ?? false : isFetchingCategories;
@@ -159,26 +164,41 @@ export default function Filter({
           minPriceValue={minPrice ? parseInt(minPrice) : undefined}
           maxPriceValue={maxPrice ? parseInt(maxPrice) : undefined}
           minPrice={20000}
-          maxPrice={5000000}
+          maxPrice={50000000}
           onPriceChange={handlePriceChange}
         />
       </PLPFilterBox>
 
-      <PLPFilterBoxWithItems
-        title="سایز"
-        options={[
-          { id: "1", label: "سایز 1" },
-          { id: "2", label: "سایز 2" },
-          { id: "3", label: "سایز 3" },
-          { id: "4", label: "سایز 4" },
-          { id: "5", label: "سایز 5" },
-          { id: "6", label: "سایز 6" },
-          { id: "7", label: "سایز 7" },
-          { id: "8", label: "سایز 8" },
-          { id: "9", label: "سایز 9" },
-        ]}
-        onOptionSelect={handleSizeSelect}
-      />
+      <PLPFilterBox title="مرتب سازی" defaultOpen>
+        <div className="flex flex-col gap-2">
+          {SORT_OPTIONS.map((option) => {
+            const isActive = sort === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => handleSortToggle(option.value)}
+                className={`flex w-full items-center justify-between rounded-xl border px-4 py-2 text-sm font-semibold transition ${isActive ? "border-pink-500 bg-pink-50 text-pink-700" : "border-slate-200 bg-white text-neutral-700 hover:border-pink-200"}`}
+              >
+                <span>{option.label}</span>
+                <span
+                  className={`h-4 w-4 rounded-full border transition ${isActive ? "border-pink-500 bg-pink-500" : "border-slate-300 bg-transparent"}`}
+                />
+              </button>
+            );
+          })}
+          {sort && (
+            <button
+              type="button"
+              onClick={handleSortClear}
+              className="text-xs text-right text-pink-600 underline-offset-2 hover:text-pink-700"
+            >
+              حذف مرتب‌سازی
+            </button>
+          )}
+        </div>
+      </PLPFilterBox>
 
       {/* <PLPFilterBoxWithItems
         title="جنس"

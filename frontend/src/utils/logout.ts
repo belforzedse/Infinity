@@ -12,6 +12,7 @@
 
 import { jotaiStore } from "@/lib/jotaiStore";
 import { currentUserAtom, userErrorAtom } from "@/lib/atoms/auth";
+import { __clearOrderCache } from "@/services/order";
 
 export async function performLogout(): Promise<void> {
   try {
@@ -25,6 +26,7 @@ export async function performLogout(): Promise<void> {
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
     }
+    __clearOrderCache();
 
     // 3. Redirect to auth page
     if (typeof window !== "undefined") {
@@ -34,6 +36,7 @@ export async function performLogout(): Promise<void> {
     console.error("[Logout] Error during logout:", error);
     // Even if something fails, redirect to auth page
     if (typeof window !== "undefined") {
+      __clearOrderCache();
       window.location.href = "/auth";
     }
   }

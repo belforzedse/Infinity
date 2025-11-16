@@ -23,6 +23,7 @@ export const ERROR_MESSAGE_MAP: Record<string, string> = {
 
   // Server errors
   "server error": "خطای سرور. لطفاً بعداً دوباره تلاش کنید.",
+  "too many requests": "تعداد درخواست‌ها بیش از حد است. لطفاً چند لحظه بعد دوباره تلاش کنید.",
 };
 
 /**

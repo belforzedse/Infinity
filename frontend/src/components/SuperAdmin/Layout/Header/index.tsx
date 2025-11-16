@@ -4,6 +4,7 @@ import Image from "next/image";
 import Logo from "@/components/Kits/Logo";
 import MenuIcon from "@/components/PLP/Icons/MenuIcon";
 import { useMe } from "@/hooks/api/useMe";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 interface SuperAdminLayoutHeaderProps {
   onMenuClick: () => void;
@@ -11,6 +12,7 @@ interface SuperAdminLayoutHeaderProps {
 
 export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayoutHeaderProps) {
   const { data: me, error } = useMe();
+  const userFacingError = error ? getUserFacingErrorMessage(error, "خطا در دریافت اطلاعات کاربر") : null;
 
   return (
     <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 lg:h-[76px] lg:bg-white lg:px-6">
@@ -69,9 +71,9 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
             </div> */}
           </div>
         </div>
-        {error && (
+        {userFacingError && (
           <span className="text-xs text-red-500" dir="rtl">
-            {error.message}
+            {userFacingError}
           </span>
         )}
 

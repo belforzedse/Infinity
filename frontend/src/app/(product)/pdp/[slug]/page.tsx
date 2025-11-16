@@ -2,7 +2,7 @@ export const revalidate = 30; // refresh PDP data every 30 seconds
 
 import Breadcrumb from "@/components/Kits/Breadcrumb";
 import Hero from "@/components/PDP/Hero";
-import OffersList from "@/components/PDP/OffersList";
+import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
 import PageContainer from "@/components/layout/PageContainer";
@@ -219,7 +219,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
 
       {/* Other Products in the same main category */}
       {sameMainCategoryProducts.length > 0 && (
-        <OffersList
+        <OffersListHomePage
           icon={<FavoriteIcon />}
           title="شاید بپسندید"
           products={sameMainCategoryProducts}
@@ -228,7 +228,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
 
       {/* Other Products in other categories */}
       {otherCategoriesProducts.length > 0 && (
-        <OffersList
+        <OffersListHomePage
           icon={<FavoriteIcon />}
           title="محصولات مشابه"
           products={otherCategoriesProducts}

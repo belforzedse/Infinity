@@ -13,6 +13,7 @@ import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCoverImage } from "@/types/Product";
 import { apiClient as _ } from "@/services";
+import { unwrapCollection, unwrapEntity } from "@/utils/strapi";
 
 export type Order = {
   id: number;
@@ -206,110 +207,139 @@ export default function EditOrderPage() {
         `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway${separator}${cacheBuster}`,
       )
       .then((res) => {
-        const data = (res as any).data as OrderResponse;
+        const rawResponse = (res as any).data;
+        const normalizedOrder = unwrapEntity(
+          rawResponse?.data ?? rawResponse,
+        ) as
+          | (OrderResponse["attributes"] & {
+              id?: string | number;
+            } & Record<string, any>)
+          | undefined;
 
-        const items = data.attributes?.order_items?.data?.map((item) => ({
-          id: +item.id,
-          productId: +item.attributes?.product_variation?.data?.id,
-          productName: item.attributes?.ProductTitle,
-          productCode: item.attributes?.ProductSKU,
-          price: item.attributes?.PerAmount,
-          quantity: item.attributes?.Count,
-          color: item.attributes?.product_color?.data?.attributes?.Title,
-          size: item.attributes?.product_size?.data?.attributes?.Title,
-          image:
-            API_BASE_URL.split("/api")[0] +
-            item.attributes?.product_variation?.data?.attributes?.product?.data
-              ?.attributes?.CoverImage?.data?.attributes?.formats?.thumbnail
-              ?.url,
-        }));
+        if (!normalizedOrder) {
+          throw new Error("سفارش پیدا نشد");
+        }
 
-        // Compute financials
-        const shippingCost = Number(data.attributes?.ShippingCost || 0);
+        const orderItemsRaw = unwrapCollection(
+          (normalizedOrder as any).order_items,
+        );
+        const items = orderItemsRaw.map((rawItem: any) => {
+          const item = unwrapEntity(rawItem);
+          const productVariation = unwrapEntity(item?.product_variation);
+          const product = unwrapEntity(productVariation?.product);
+          const coverImage = unwrapEntity(product?.CoverImage);
+          const color = unwrapEntity(item?.product_color);
+          const size = unwrapEntity(item?.product_size);
+          const thumbnailUrl =
+            coverImage?.formats?.thumbnail?.url ??
+            coverImage?.url ??
+            coverImage?.data?.attributes?.url;
+
+          return {
+            id: Number(item?.id ?? item?.orderItemId ?? 0),
+            productId: Number(productVariation?.id ?? product?.id ?? 0),
+            productName: item?.ProductTitle ?? product?.Title ?? "",
+            productCode: item?.ProductSKU ?? productVariation?.SKU ?? "",
+            price: Number(item?.PerAmount ?? productVariation?.Price ?? 0),
+            quantity: Number(item?.Count ?? 0),
+            color: color?.Title,
+            size: size?.Title,
+            image: thumbnailUrl
+              ? API_BASE_URL.split("/api")[0] + thumbnailUrl
+              : "",
+          };
+        });
+
+        const contract = unwrapEntity((normalizedOrder as any).contract);
+        const contractTransactions = unwrapCollection(
+          contract?.contract_transactions,
+        ).map((tx: any) => unwrapEntity(tx));
+
+        const shippingCost = Number(normalizedOrder?.ShippingCost || 0);
         const itemsSubtotal = (items || []).reduce(
           (sum: number, it: any) =>
             sum + Number(it.price || 0) * Number(it.quantity || 0),
-          0
+          0,
         );
-        const contractAmount = Number(
-          data.attributes?.contract?.data?.attributes?.Amount || 0
-        );
-        const taxPercent = Number(
-          (data.attributes?.contract?.data?.attributes as any)?.TaxPercent || 0
-        );
-        // Use items subtotal for "موارد جمع جزء" and contract amount (already includes shipping/tax) for total.
+        const contractAmount = Number(contract?.Amount || 0);
+        const taxPercent = Number(contract?.TaxPercent || 0);
         const subtotal = itemsSubtotal;
         const total = contractAmount || itemsSubtotal + shippingCost;
-        // Derive discount and tax from identities:
-        // total = subtotal - discount + tax + shipping
-        // tax = (subtotal - discount) * (taxPercent/100)
         const r = taxPercent / 100;
-        const preTaxBase = (total - shippingCost) / (1 + r); // equals (subtotal - discount)
+        const preTaxBase = (total - shippingCost) / (1 + r);
         const discount = Math.max(0, Math.round(subtotal - preTaxBase));
         const tax = Math.max(0, Math.round(preTaxBase * r));
 
-        const userName =
-          (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes
-            ?.FirstName || "") +
-          " " +
-          (data.attributes?.user?.data?.attributes?.user_info?.data?.attributes
-            ?.LastName || "");
+        const user = unwrapEntity((normalizedOrder as any).user);
+        const userInfo = unwrapEntity(user?.user_info);
 
-        const addr = data.attributes?.delivery_address?.data?.attributes;
-        const city = addr?.shipping_city?.data?.attributes?.Title;
-        const province =
-          addr?.shipping_city?.data?.attributes?.shipping_province?.data
-            ?.attributes?.Title;
-        const fullAddress = [addr?.FullAddress, city, province]
+        const addr = unwrapEntity((normalizedOrder as any).delivery_address);
+        const city = unwrapEntity(addr?.shipping_city);
+        const province = unwrapEntity(city?.shipping_province);
+        const fullAddress = [addr?.FullAddress, city?.Title, province?.Title]
           .filter(Boolean)
           .join(" - ");
 
-        // Extract last gateway used from latest successful or pending contract transaction
-        const txList =
-          data.attributes?.contract?.data?.attributes?.contract_transactions
-            ?.data || [];
-        const lastTx = txList[txList.length - 1]?.attributes;
+        const txList = contractTransactions || [];
+        const lastTx = txList[txList.length - 1];
         const lastSnappayTx = [...txList]
           .reverse()
           .find(
             (tx) =>
-              (tx?.attributes?.external_source ||
-                data.attributes?.contract?.data?.attributes?.external_source) ===
-                "SnappPay" && tx?.attributes?.TrackId
+              (tx?.external_source || contract?.external_source) ===
+                "SnappPay" && tx?.TrackId,
           );
         const paymentGateway =
-          lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
+          unwrapEntity(lastTx?.payment_gateway)?.Title ||
+          contract?.payment_gateway ||
+          (normalizedOrder as any)?.PaymentGateway ||
+          undefined;
         const transactionId =
-          data.attributes?.contract?.data?.attributes?.external_id;
-        const paymentToken = lastSnappayTx?.attributes?.TrackId;
+          contract?.external_id || (normalizedOrder as any)?.external_id;
+        const paymentToken = lastSnappayTx?.TrackId;
+
+        const userName =
+          (userInfo?.FirstName || "") + " " + (userInfo?.LastName || "");
 
         setData({
-          id: +data.id,
-          createdAt: new Date(data.attributes?.createdAt),
-          updatedAt: new Date(data.attributes?.updatedAt),
-          description: data.attributes?.Description,
-          orderDate: new Date(data.attributes?.Date),
-          orderStatus: data.attributes?.Status,
-          phoneNumber: data.attributes?.user?.data?.attributes?.Phone,
-          address: fullAddress || undefined,
+          id: Number((normalizedOrder as any).id),
+          createdAt: new Date(
+            normalizedOrder?.createdAt ??
+              normalizedOrder?.created_at ??
+              Date.now(),
+          ),
+          updatedAt: new Date(
+            normalizedOrder?.updatedAt ??
+              normalizedOrder?.updated_at ??
+              Date.now(),
+          ),
+          description: normalizedOrder?.Description,
+          orderDate: new Date(normalizedOrder?.Date ?? Date.now()),
+          orderStatus: normalizedOrder?.Status,
+          phoneNumber:
+            user?.Phone ??
+            (user as any)?.phone ??
+            (normalizedOrder as any)?.phone ??
+            (normalizedOrder as any)?.Phone,
+          address: fullAddress || addr?.Description || undefined,
           postalCode: addr?.PostalCode,
           paymentGateway,
           transactionId,
           paymentToken,
           shipping: shippingCost,
-          userId: data.attributes?.user?.data?.id,
-          userName: userName.trim() || data.attributes?.user?.data?.id,
+          userId: String(user?.id ?? (normalizedOrder as any)?.userId ?? ""),
+          userName: userName.trim() || String(user?.id ?? ""),
           items: items,
           subtotal,
           discount,
           tax,
           total,
-          contractStatus: data.attributes?.contract?.data?.attributes?.Status,
-          shippingBarcode: data.attributes?.ShippingBarcode,
-          shippingPostPrice: data.attributes?.ShippingPostPrice,
-          shippingTax: data.attributes?.ShippingTax,
-          shippingWeight: data.attributes?.ShippingWeight,
-          shippingBoxSizeId: data.attributes?.ShippingBoxSizeId,
+          contractStatus: contract?.Status,
+          shippingBarcode: normalizedOrder?.ShippingBarcode,
+          shippingPostPrice: normalizedOrder?.ShippingPostPrice,
+          shippingTax: normalizedOrder?.ShippingTax,
+          shippingWeight: normalizedOrder?.ShippingWeight,
+          shippingBoxSizeId: normalizedOrder?.ShippingBoxSizeId,
         });
       })
       .catch((err) => {

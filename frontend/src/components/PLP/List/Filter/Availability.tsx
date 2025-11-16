@@ -27,7 +27,7 @@ export default function AvailabilityFilter({
   return (
     <div className="rounded-2xl bg-stone-50 p-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-neutral-800">نمایش محصولات موجود</span>
+        <span className="text-xs h-auto w-auto text-neutral-800">نمایش محصولات موجود</span>
 
         <div
           className={`relative flex h-4 w-7 items-center ${

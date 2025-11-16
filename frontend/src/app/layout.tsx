@@ -43,7 +43,9 @@ export default function RootLayout({
 
         <CartProvider>
           <NuqsAdapter>
-            <Providers>{children}</Providers>
+            <Providers>
+              <div id="main-content">{children}</div>
+            </Providers>
           </NuqsAdapter>
         </CartProvider>
         <Toaster

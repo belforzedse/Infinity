@@ -74,9 +74,18 @@ const getOrderTotal = (order: any) => {
 const normaliseOrderStatus = (status: string | undefined) => {
   if (!status) return "other";
   const value = status.toLowerCase();
-  if (value === "done") return "delivered";
-  if (value === "cancelled" || value === "canceled") return "cancelled";
-  if (value === "started" || value === "processing" || value === "shipment") return "active";
+  if (value === "done" || value === "delivered" || value === " تحویل داده شده") return "delivered";
+  if (value === "cancelled" || value === "canceled" || value === "لغو شده") return "cancelled";
+  if (
+    value === "paying" ||
+    value === "pending" ||
+    value === "started" ||
+    value === "processing" ||
+    value === "shipment" ||
+    value === "shipped" ||
+    value === "جاری"
+  )
+    return "active";
   return "other";
 };
 

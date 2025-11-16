@@ -11,7 +11,7 @@ import type { MeResponse } from "@/services/user/me";
 export const currentUserAtom = atom<MeResponse | null>(null);
 
 // Atom to track if we've attempted to load the user (prevents infinite loops)
-export const userLoadingAtom = atom<boolean>(false);
+export const userLoadingAtom = atom<boolean>(true);
 
 // Atom to track auth loading errors
 export const userErrorAtom = atom<Error | null>(null);

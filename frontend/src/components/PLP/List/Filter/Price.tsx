@@ -51,11 +51,11 @@ const PriceFilter = ({
   };
 
   function formatPrice(price: number) {
-    return `${(price / 1000).toLocaleString("fa-IR")}`;
+    return price.toLocaleString("fa-IR");
   }
 
   function parsePrice(value: string): number {
-    return parseInt(value.replace(/[^0-9]/g, "")) * 1000;
+    return parseInt(value.replace(/[^0-9]/g, ""), 10);
   }
 
   const handleInputChange = (value: string, isMin: boolean) => {
@@ -82,7 +82,7 @@ const PriceFilter = ({
             <input
               type="text"
               value={inputValues.max}
-              placeholder={`${formatPrice(maxPrice)} هزار تومان`}
+              placeholder={`${formatPrice(maxPrice)} تومان`}
               onChange={(e) => handleInputChange(e.target.value, false)}
               className="text-xs w-full text-center text-neutral-400 focus:outline-none"
             />
@@ -92,7 +92,7 @@ const PriceFilter = ({
             <input
               type="text"
               value={inputValues.min}
-              placeholder={`${formatPrice(minPrice)} هزار تومان`}
+              placeholder={`${formatPrice(minPrice)} تومان`}
               onChange={(e) => handleInputChange(e.target.value, true)}
               className="text-xs w-full text-center text-neutral-400 focus:outline-none"
             />

@@ -2,6 +2,7 @@ import { HTTP_STATUS } from "@/constants/api";
 import { jotaiStore } from "@/lib/jotaiStore";
 import { errorNotificationsAtom, addErrorNotification } from "@/lib/atoms/errors";
 import { currentUserAtom } from "@/lib/atoms/auth";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 /**
  * Handles authentication errors (401, 403) gracefully
@@ -37,7 +38,7 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
     if (!isJest) {
       const notification = addErrorNotification(
         401,
-        error?.message || "برای ادامه وارد حساب کاربری خود شوید"
+        getUserFacingErrorMessage(error, "برای ادامه وارد حساب کاربری خود شوید"),
       );
       jotaiStore.set(errorNotificationsAtom, (prev) => [...prev, notification]);
     }
@@ -49,7 +50,7 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
     if (!isJest) {
       const notification = addErrorNotification(
         403,
-        error?.message || "شما اجازه دسترسی به این منطقه را ندارید"
+        getUserFacingErrorMessage(error, "شما اجازه دسترسی به این منطقه را ندارید"),
       );
       jotaiStore.set(errorNotificationsAtom, (prev) => [...prev, notification]);
     }
@@ -60,7 +61,7 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   if (isNotAdmin && !isJest) {
     const notification = addErrorNotification(
       403,
-      "این صفحه فقط برای مدیران دسترسی دارد"
+      "این صفحه فقط برای مدیران دسترسی دارد",
     );
     jotaiStore.set(errorNotificationsAtom, (prev) => [...prev, notification]);
   }
