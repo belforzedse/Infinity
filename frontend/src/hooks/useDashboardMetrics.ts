@@ -55,10 +55,10 @@ export function useDashboardMetrics() {
     };
 
     const fetchLatestOrders = async () => {
-      const response = await apiClient.get<OrdersResponse>(
+      const response = await apiClient.get<Order[]>(
         `${ORDERS_ENDPOINT}?sort[0]=createdAt:desc&pagination[page]=1&pagination[pageSize]=3&populate[0]=user&populate[1]=contract&populate[2]=user.user_info`,
       );
-      return (response?.data ?? []) as DashboardOrder[];
+      return (response?.data as DashboardOrder[]) ?? [];
     };
 
     const load = async () => {
