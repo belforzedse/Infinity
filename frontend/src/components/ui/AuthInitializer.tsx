@@ -66,7 +66,15 @@ export default function AuthInitializer() {
       } catch (error) {
         const err = error instanceof Error ? error : new Error("Failed to fetch user");
         setError(err);
-        console.error("[AuthInitializer] Failed to load user:", error);
+        const hasDetails =
+          (error instanceof Error && error.message) ||
+          (typeof error === "object" &&
+            error !== null &&
+            ((("status" in error && typeof (error as any).status === "number") ||
+              ("message" in error && typeof (error as any).message === "string"))));
+        if (hasDetails) {
+          console.error("[AuthInitializer] Failed to load user:", error);
+        }
       } finally {
         setIsLoading(false);
       }

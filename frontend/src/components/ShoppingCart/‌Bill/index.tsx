@@ -97,7 +97,7 @@ function ShoppingCartBillForm({}: Props) {
     | undefined
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
-  const { totalPrice } = useCart();
+  const { totalPrice, totalItems } = useCart();
 
   // Persist/restore discount code
   useEffect(() => {
@@ -189,11 +189,21 @@ function ShoppingCartBillForm({}: Props) {
   }, []);
 
   // Validate cart has items and total price on mount
+  const EMPTY_CART_ERROR = "سبد خرید شما خالی است یا مبلغ نامعتبر است";
   useEffect(() => {
-    if (totalPrice <= 0) {
-      setError("سبد خرید شما خالی است یا مبلغ نامعتبر است");
+    if (!currentUser) {
+      return;
     }
-  }, [totalPrice]);
+
+    if (totalPrice > 0 || totalItems > 0) {
+      setError((prev) => (prev === EMPTY_CART_ERROR ? null : prev));
+      return;
+    }
+
+    if (totalPrice <= 0 && totalItems === 0) {
+      setError(EMPTY_CART_ERROR);
+    }
+  }, [totalPrice, totalItems, currentUser]);
 
   const onSubmit = async (data: FormData) => {
     // Clear previous errors
