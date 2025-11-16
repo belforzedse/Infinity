@@ -284,31 +284,51 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Function to migrate local cart to API when user logs in
   const migrateLocalCartToApi = async () => {
-    // Get cart from localStorage
+    if (typeof window === "undefined") return;
+
     const storedCart = localStorage.getItem("cart");
     if (!storedCart) return;
 
+    let localCartItems: CartItem[] = [];
+    try {
+      localCartItems = JSON.parse(storedCart);
+    } catch (error) {
+      console.warn("Unable to parse local cart during migration:", error);
+    }
+
+    localStorage.removeItem("cart");
+
+    if (!localCartItems.length) return;
+
     try {
       setIsLoading(true);
-      const localCartItems: CartItem[] = JSON.parse(storedCart);
 
-      // If there are items in the local cart
-      if (localCartItems.length > 0) {
-        // Add each item to the API cart
-        for (const item of localCartItems) {
-          if (item.variationId) {
-            await CartService.addItemToCart(Number(item.variationId), item.quantity);
-          }
+      const deduped = new Map<string, CartItem>();
+      for (const item of localCartItems) {
+        const key = `${item.variationId}-${item.sku}-${item.id}`;
+        const existing = deduped.get(key);
+        if (existing) {
+          existing.quantity += item.quantity;
+        } else {
+          deduped.set(key, { ...item });
         }
-
-        // Clear the local cart after migration
-        localStorage.removeItem("cart");
-
-        // Fetch updated cart from API
-        await fetchUserCart();
       }
-    } catch (error) {
-      console.error("Failed to migrate cart:", error);
+
+      for (const item of deduped.values()) {
+        if (!item.variationId) continue;
+
+        try {
+          await CartService.addItemToCart(Number(item.variationId), item.quantity);
+        } catch (error) {
+          const variationLabel = item.sku || item.name || item.variationId;
+          console.warn(
+            `Failed to migrate cart item (${variationLabel}):`,
+            error,
+          );
+        }
+      }
+
+      await fetchUserCart();
     } finally {
       setIsLoading(false);
     }
