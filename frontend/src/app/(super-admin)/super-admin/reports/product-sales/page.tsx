@@ -6,6 +6,7 @@ import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 const RechartsTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
@@ -162,9 +163,8 @@ export default function ProductSalesReportPage() {
       if (error instanceof Error && error.message.includes("xlsx package not found")) {
         alert("پکیج xlsx یافت نشد. لطفاً دستور زیر را اجرا کنید:\nnpm install xlsx");
       } else {
-        alert(
-          `خطا در ایجاد فایل Excel: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
+        const friendlyError = getUserFacingErrorMessage(error, "خطا در ایجاد فایل Excel");
+        alert(`خطا در ایجاد فایل Excel: ${friendlyError}`);
       }
     }
   }, []);

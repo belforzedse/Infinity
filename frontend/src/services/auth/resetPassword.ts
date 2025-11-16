@@ -44,5 +44,5 @@ export const resetPassword = async (payload: ResetPasswordRequest): Promise<Resp
     phone: normalizedPhone,
   });
 
-  return response as Response;
+  return response as any;
 };

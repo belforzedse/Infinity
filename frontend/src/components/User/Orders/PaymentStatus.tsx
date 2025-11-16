@@ -62,7 +62,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   }
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 ">
       <div className="flex items-center">
         <span className="text-sm ml-2">وضعیت پرداخت:</span>
         {isPaid ? (

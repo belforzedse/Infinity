@@ -43,6 +43,7 @@ export default function AuthInitializer() {
       // No token, no user to load
       if (!token) {
         lastTokenRef.current = null;
+        setIsLoading(false);
         return;
       }
 
