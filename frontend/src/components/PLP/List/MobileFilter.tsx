@@ -34,9 +34,9 @@ export default function PLPListMobileFilter({
 
   return (
     <div className="flex gap-1">
-      <PLPButton text="نمایش فیلتر ها" rightIcon={<FilterIcon />} onClick={handleOpen} />
+      <PLPButton className="h-auto w-auto" text="نمایش فیلتر ها" rightIcon={<FilterIcon />} onClick={handleOpen} />
 
-      <PLPButton text="مرتب سازی" rightIcon={<SortDescIcon className="h-6 w-6" />} />
+      {/* <PLPButton text="مرتب سازی" rightIcon={<SortDescIcon className="h-6 w-6" />} /> */}
 
       <AvailabilityFilter
         onChange={handleAvailabilityChange}

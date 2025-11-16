@@ -95,10 +95,10 @@ export default function PLPPagination({
           onClick={handlePrevious}
           disabled={currentPage === 1}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-md border transition-colors",
+            "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
             currentPage === 1
-              ? "cursor-not-allowed border-gray-200 text-gray-400"
-              : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
+              ? "cursor-not-allowed  text-gray-400"
+              : " text-gray-700 hover:border-gray-400 hover:bg-gray-50",
           )}
           aria-label="صفحه قبلی"
         >
@@ -130,10 +130,10 @@ export default function PLPPagination({
                   scrollToTop();
                 }}
                 className={cn(
-                  "text-sm flex h-8 w-8 items-center justify-center rounded-md font-medium transition-colors",
+                  "text-sm flex h-8 w-8 items-center justify-center rounded-full font-medium transition-colors",
                   isActive
-                    ? "bg-primary border-primary border text-white"
-                    : "border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
+                    ? "bg-pink-500  text-white"
+                    : " text-gray-700 hover:border-gray-400 hover:bg-gray-50",
                 )}
                 aria-label={`صفحه ${pageNum}`}
                 aria-current={isActive ? "page" : undefined}
@@ -149,10 +149,10 @@ export default function PLPPagination({
           onClick={handleNext}
           disabled={currentPage === totalPages}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-md border transition-colors",
+            "flex h-8 w-8 items-center justify-center rounded-md  transition-colors",
             currentPage === totalPages
-              ? "cursor-not-allowed border-gray-200 text-gray-400"
-              : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
+              ? "cursor-not-allowed  text-gray-400"
+              : " text-gray-700  hover:bg-gray-50",
           )}
           aria-label="صفحه بعدی"
         >
@@ -160,10 +160,7 @@ export default function PLPPagination({
         </button>
       </div>
 
-      {/* Page Info - Mobile Only */}
-      <div className="text-sm mt-2 text-center text-gray-600 md:hidden">
-        صفحه {currentPage} از {totalPages}
-      </div>
+
     </div>
   );
 }
