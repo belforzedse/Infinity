@@ -6,6 +6,8 @@ import VerifyForgotPasswordForm from "@/components/Auth/ForgotPassword/VerifyFor
 import { Suspense, useEffect } from "react";
 import { AuthService } from "@/services";
 import toast from "react-hot-toast";
+import { extractErrorStatus } from "@/utils/errorMessages";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 function VerifyContent() {
   const queryParams = useSearchParams();
@@ -14,11 +16,24 @@ function VerifyContent() {
   const router = useRouter();
 
   useEffect(() => {
-    if (phoneNumber) {
-      AuthService.sendOTP(phoneNumber);
-    } else {
+    if (!phoneNumber) {
       router.push("/auth/forgot-password");
+      return;
     }
+
+    const sendInitialOTP = async () => {
+      try {
+        await AuthService.sendOTP(phoneNumber);
+      } catch (error: unknown) {
+        const friendlyMessage = getUserFacingErrorMessage(
+          error,
+          "کد تایید ارسال نشده است",
+        );
+        toast.error(friendlyMessage);
+      }
+    };
+
+    sendInitialOTP();
   }, [phoneNumber, router]);
 
   return (
@@ -28,7 +43,22 @@ function VerifyContent() {
       </AuthTitle>
 
       <VerifyForgotPasswordForm
-        resendCode={() => AuthService.sendOTP(phoneNumber || "")}
+        resendCode={async () => {
+          try {
+            await AuthService.sendOTP(phoneNumber || "");
+            toast.success("کد تایید دوباره ارسال شد");
+          } catch (error: unknown) {
+            const friendlyMessage = getUserFacingErrorMessage(error, "خطا در ارسال کد تایید");
+            const errorStatus = extractErrorStatus(error);
+
+            if (errorStatus === 429) {
+              toast.error(friendlyMessage);
+              return;
+            }
+
+            toast.error(friendlyMessage);
+          }
+        }}
         onSubmit={async (data) => {
           if (!phoneNumber) {
             router.push("/auth/forgot-password");
@@ -51,8 +81,19 @@ function VerifyContent() {
             } else {
               toast.error("کد تایید اشتباه است");
             }
-          } catch {
-            toast.error("کد تایید یا توکن معتبر نیست");
+          } catch (error: unknown) {
+            const friendlyMessage = getUserFacingErrorMessage(
+              error,
+              "کد تایید یا توکن معتبر نیست",
+            );
+            const errorStatus = extractErrorStatus(error);
+
+            if (errorStatus === 429) {
+              toast.error(friendlyMessage);
+              return;
+            }
+
+            toast.error(friendlyMessage);
           }
         }}
       />

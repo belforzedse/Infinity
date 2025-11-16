@@ -4,6 +4,7 @@ import GiftIcon from "@/components/ShoppingCart/Icons/GiftIcon";
 import React, { useState } from "react";
 import { CartService } from "@/services";
 import toast from "react-hot-toast";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 type DiscountSummary = {
   subtotal: number;
@@ -54,7 +55,7 @@ function ShoppingCartBillDiscountCoupon({
         toast.error("کد تخفیف نامعتبر است");
       }
     } catch (e: any) {
-      toast.error(e?.message || "کد تخفیف نامعتبر است");
+      toast.error(getUserFacingErrorMessage(e, "کد تخفیف نامعتبر است"));
     } finally {
       setLoading(false);
     }

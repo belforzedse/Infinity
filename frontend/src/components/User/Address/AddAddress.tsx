@@ -10,6 +10,8 @@ import type { AddAddressRequest } from "@/services/user/addresses";
 import type { Province, City } from "@/services/location";
 import { getProvinces, getCities } from "@/services/location";
 import { toast } from "react-hot-toast";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+
 
 interface Props {
   onAddressAdded?: () => void;
@@ -151,7 +153,7 @@ export default function AddAddress({ onAddressAdded }: Props) {
       }
     } catch (error: any) {
       console.error("Failed to add address:", error);
-      toast.error(error.message || "خطا در اضافه کردن آدرس");
+      toast.error(getUserFacingErrorMessage(error, "خطا در اضافه کردن آدرس"));
     } finally {
       setLoading(false);
     }

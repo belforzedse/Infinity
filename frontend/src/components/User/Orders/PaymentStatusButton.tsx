@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { OrderService } from "@/services";
+import toast from "react-hot-toast";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 interface PaymentStatusButtonProps {
   orderId: number;
@@ -30,7 +32,9 @@ export default function PaymentStatusButton({ orderId, className = "" }: Payment
       });
     } catch (err: any) {
       console.error("Error checking payment status:", err);
-      setError(err.message || "خطا در بررسی وضعیت پرداخت");
+      const friendlyMessage = getUserFacingErrorMessage(err, "خطا در بررسی وضعیت پرداخت");
+      setError(friendlyMessage);
+      toast.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -49,7 +53,7 @@ export default function PaymentStatusButton({ orderId, className = "" }: Payment
   };
 
   return (
-    <div className="relative">
+    <div className="hidden md:block relative">
       <button
         onClick={checkStatus}
         disabled={loading}
