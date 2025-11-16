@@ -18,7 +18,12 @@ export interface ProductLike {
   id: number;
   product: {
     id: number;
-    title: string;
+    title?: string;
+    Title?: string;
+    attributes?: {
+      title?: string;
+      Title?: string;
+    };
     description: string;
     price: number;
     images: ImageResponse[];
