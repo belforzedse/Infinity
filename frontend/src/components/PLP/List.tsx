@@ -6,17 +6,17 @@ import dynamic from "next/dynamic";
 import { apiClient } from "@/services";
 import { categories as STATIC_CATEGORIES } from "@/constants/categories";
 import { faNum } from "@/utils/faNum";
-
-const SORT_LABELS: Record<string, string> = {
-  "createdAt:desc": "جدیدترین",
-  "createdAt:asc": "قدیمی‌ترین",
-  "price:asc": "کم به زیاد",
-  "price:desc": "زیاد به کم",
-  "Title:asc": "الف تا ی",
-  "Title:desc": "ی تا الف",
-  "AverageRating:desc": "بالاترین امتیاز",
-  "AverageRating:asc": "کمترین امتیاز",
-};
+import Filter from "./List/Filter";
+import PLPListMobileFilter from "./List/MobileFilter";
+import HeartIcon from "./Icons/HeartIcon";
+import DiscountIcon from "./Icons/DiscountIcon";
+import SidebarSuggestions from "./List/SidebarSuggestions";
+import PLPPagination from "./Pagination";
+import { useQueryState } from "nuqs";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
+import notify from "@/utils/notify";
+import { SORT_LABELS } from "./sortOptions";
 
 const humanize = (value: string) =>
   value
@@ -25,6 +25,7 @@ const humanize = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
+
 // Lazy load heavy components
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
   loading: () => <div className="h-48 animate-pulse rounded-lg bg-gray-200" />,
@@ -32,16 +33,6 @@ const ProductCard = dynamic(() => import("@/components/Product/Card"), {
 const ProductSmallCard = dynamic(() => import("@/components/Product/SmallCard"), {
   loading: () => <div className="h-24 animate-pulse rounded-lg bg-gray-200" />,
 });
-import Filter from "./List/Filter";
-import PLPListMobileFilter from "./List/MobileFilter";
-import HeartIcon from "./Icons/HeartIcon";
-import DiscountIcon from "./Icons/DiscountIcon";
-import SidebarSuggestions from "./List/SidebarSuggestions";
-import PLPPagination from "./Pagination";
-import { useQueryState } from "nuqs";
-import { useEffect, useState, useMemo, useCallback } from "react";
-import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-import notify from "@/utils/notify";
 
 interface Product {
   id: number;
@@ -127,6 +118,7 @@ export default function PLPList({
   const [sort, setSort] = useQueryState("sort");
   const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
+
   // Local state for products and pagination
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
@@ -137,11 +129,14 @@ export default function PLPList({
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   // Initialize category from prop
+  const initializedCategoryRef = useRef(false);
+
   useEffect(() => {
-    if (initialCategory && !category) {
+    if (!initializedCategoryRef.current && initialCategory) {
+      initializedCategoryRef.current = true;
       setCategory(initialCategory);
     }
-  }, [initialCategory, category, setCategory]);
+  }, [initialCategory, setCategory]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -293,6 +288,8 @@ export default function PLPList({
     fetchProducts();
   }, [fetchProducts]);
 
+
+
   // Memoize expensive filtering operations
   const validProducts = useMemo(
     () =>
@@ -312,11 +309,8 @@ export default function PLPList({
 
           // If showAvailableOnly is true, check if any variation is published AND has stock
           if (available === "true") {
-            const hasAvailableVariation = product.attributes.product_variations.data.some(
-              (variation) => variation?.attributes?.IsPublished === true,
-            );
-            const hasStock = checkStockAvailability(product);
-            if (!(hasValidPrice && hasAvailableVariation && hasStock)) return false;
+            const hasInStockVariation = checkStockAvailability(product);
+            if (!(hasValidPrice && hasInStockVariation)) return false;
           } else if (!hasValidPrice) {
             return false;
           }
@@ -441,17 +435,17 @@ export default function PLPList({
       }
 
       return product.attributes.product_variations.data.some((variation) => {
-        if (!variation?.attributes) {
+        const attrs = variation?.attributes;
+        if (!attrs) {
           return false;
         }
 
-        const stockData = variation.attributes.product_stock?.data;
-        if (!stockData?.attributes) {
+        const stockCount = attrs.product_stock?.data?.attributes?.Count;
+        if (typeof stockCount !== "number" || stockCount <= 0) {
           return false;
         }
 
-        const stockCount = stockData.attributes.Count;
-        return typeof stockCount === "number" && stockCount > 0;
+        return attrs.IsPublished === true;
       });
     } catch (error) {
       console.warn("Error checking stock availability:", error);
@@ -482,21 +476,6 @@ export default function PLPList({
     () => {
       const filters: Array<{ key: string; label: string; onRemove: () => void }> = [];
 
-      if (category) {
-        const categoryLabel = selectedCategoryTitle || category;
-        const hasNonLatin = /[\u0600-\u06FF]/.test(categoryLabel); // Persian characters
-        if (hasNonLatin) {
-          filters.push({
-            key: "category",
-            label: `دسته: ${categoryLabel}`,
-            onRemove: () => {
-              setCategory(null);
-              setPage("1");
-            },
-          });
-        }
-      }
-
       if (available === "true") {
         filters.push({
           key: "available",
@@ -508,10 +487,10 @@ export default function PLPList({
         });
       }
 
-      if (category && selectedCategoryTitle) {
+      if (category) {
         filters.push({
           key: "category",
-          label: `دسته: ${selectedCategoryTitle}`,
+          label: `دسته: ${selectedCategoryTitle || category}`,
           onRemove: () => {
             setCategory(null);
             setPage("1");
@@ -683,10 +662,10 @@ export default function PLPList({
         <div className="flex-1">
           {/* Mobile filter buttons */}
           <div className="mb-4 md:hidden">
-            <PLPListMobileFilter
-              categories={categoryOptions}
-              isLoadingCategories={isLoadingCategories}
-            />
+                <PLPListMobileFilter
+                  categories={categoryOptions}
+                  isLoadingCategories={isLoadingCategories}
+                />
           </div>
 
           {/* Show search results title if search query exists */}
@@ -698,14 +677,14 @@ export default function PLPList({
 
           {activeFilters.length > 0 && (
             <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
-              {activeFilters.map((filter) => (
+              {activeFilters.map((filterEntry) => (
                 <button
-                  key={filter.key}
+                  key={`${filterEntry.key}-${filterEntry.label}`}
                   type="button"
-                  onClick={filter.onRemove}
+                  onClick={filterEntry.onRemove}
                   className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-neutral-600 transition-colors hover:border-pink-300 hover:text-pink-600"
                 >
-                  <span>{filter.label}</span>
+                  <span>{filterEntry.label}</span>
                   <span className="text-base leading-none text-slate-400 transition-colors group-hover:text-pink-600">
                     &times;
                   </span>
@@ -729,7 +708,7 @@ export default function PLPList({
           ) : (
             <>
               {/* Desktop view - ProductCard */}
-              <div className="hidden grid-cols-2 gap-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+              <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {validProducts.map((product, index) => {
                   // Find the first variation with a valid price
                   const firstValidVariation = product.attributes.product_variations?.data?.find(
