@@ -14,10 +14,14 @@ interface OrderDetailsDrawerProps {
   onClose: () => void;
 }
 
-const statusLabelMap: Record<string, { label: string; tone: "info" | "success" | "warning" | "danger" }> =
+type StatusTone = "info" | "success" | "warning" | "danger";
+
+const statusLabelMap: Record<string, { label: string; tone: StatusTone }> =
   {
     started: { label: "ثبت شده", tone: "info" },
     processing: { label: "در حال آماده‌سازی", tone: "info" },
+    paying: { label: "در حال پرداخت", tone: "info" },
+
     shipment: { label: "در حال ارسال", tone: "warning" },
     done: { label: "تحویل شده", tone: "success" },
     delivered: { label: "تحویل شده", tone: "success" },
@@ -81,9 +85,16 @@ const getVariationDescription = (item: OrderItem) => {
   return parts.join(" | ");
 };
 
-const getStatusInfo = (status: string) => {
-  const key = status?.toLowerCase?.() || "info";
-  return statusLabelMap[key] ?? { label: "نامشخص", tone: "info" };
+const getStatusInfo = (status?: string): { label: string; tone: StatusTone } => {
+  const key = status?.toLowerCase?.() || "";
+  if (!status) {
+    return { label: "نامشخص", tone: "info" };
+  }
+
+  const mapped = statusLabelMap[key];
+  if (mapped) return mapped;
+
+  return { label: status, tone: "info" };
 };
 
 const calculateTotals = (order: Order) => {

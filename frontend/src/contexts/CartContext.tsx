@@ -23,6 +23,7 @@ export interface CartItem {
   color?: string;
   size?: string;
   model?: string;
+  sku?: string;
 }
 
 interface CartContextType {
@@ -314,7 +315,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      for (const item of deduped.values()) {
+      for (const item of Array.from(deduped.values())) {
         if (!item.variationId) continue;
 
         try {
