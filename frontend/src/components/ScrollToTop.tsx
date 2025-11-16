@@ -2,10 +2,16 @@
 
 import React from "react";
 
+const SHOW_THRESHOLD = 400;
+const HIDE_THRESHOLD = 360;
+
 export default function ScrollToTop() {
   const [visible, setVisible] = React.useState(false);
   const [progress, setProgress] = React.useState(0); // 0..1
   const [btnBottom, setBtnBottom] = React.useState<number>(80);
+  const lastProgress = React.useRef(0);
+  const lastVisible = React.useRef(false);
+  const ticking = React.useRef(false);
 
   React.useEffect(() => {
     const recalcBottom = () => {
@@ -19,14 +25,37 @@ export default function ScrollToTop() {
       }
     };
 
-    const onScroll = () => {
+    const updateScrollState = () => {
       const doc = document.documentElement;
       const scrollTop = window.scrollY || doc.scrollTop;
       const scrollable = Math.max(1, doc.scrollHeight - window.innerHeight);
-      setProgress(Math.min(1, Math.max(0, scrollTop / scrollable)));
-      setVisible(scrollTop > 400);
+      const nextProgress = Math.min(1, Math.max(0, scrollTop / scrollable));
+      let nextVisible = lastVisible.current;
+      if (scrollTop > SHOW_THRESHOLD) {
+        nextVisible = true;
+      } else if (scrollTop < HIDE_THRESHOLD) {
+        nextVisible = false;
+      }
+
+      if (Math.abs(nextProgress - lastProgress.current) >= 0.0001) {
+        setProgress(nextProgress);
+      }
+      lastProgress.current = nextProgress;
+      if (nextVisible !== lastVisible.current) {
+        setVisible(nextVisible);
+      }
+      lastVisible.current = nextVisible;
     };
-    onScroll();
+
+    const onScroll = () => {
+      if (ticking.current) return;
+      ticking.current = true;
+      window.requestAnimationFrame(() => {
+        updateScrollState();
+        ticking.current = false;
+      });
+    };
+    updateScrollState();
     recalcBottom();
     window.addEventListener("scroll", onScroll, { passive: true });
     const onResize = () => {
@@ -73,7 +102,7 @@ export default function ScrollToTop() {
       onClick={onClick}
       className={[
         "fixed right-4 z-[60] rounded-full text-pink-600",
-        "shadow-elevated transition-all motion-reduce:transition-none",
+        "shadow-elevated transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
         // liquid glass gradient
         "bg-gradient-to-br from-pink-50/70 to-white/70 ring-1 ring-white/60 saturate-150 backdrop-blur-xl",
         "hover:from-pink-50/80 hover:to-white/80 active:scale-95",
