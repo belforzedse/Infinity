@@ -22,35 +22,13 @@ const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
 export default function ProductLayout({ children }: { children: React.ReactNode }) {
   const { isDrawerOpen } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
-  const [mobileHeaderVisible, setMobileHeaderVisible] = React.useState(true);
   const pathname = usePathname();
-  const lastScrollY = React.useRef(0);
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    lastScrollY.current = window.scrollY;
-    const threshold = 6;
-
-    const handleMobileScroll = () => {
-      const currentY = window.scrollY;
-      const delta = currentY - lastScrollY.current;
-      if (delta > threshold && currentY > 40) {
-        setMobileHeaderVisible(false);
-      } else if (delta < -threshold) {
-        setMobileHeaderVisible(true);
-      }
-      lastScrollY.current = currentY;
-    };
-
-    window.addEventListener("scroll", handleMobileScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleMobileScroll);
   }, []);
   const HeaderContent = () => (
     <>
@@ -82,15 +60,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
       </div>
 
       <div className="lg:hidden">
-        <div
-          className={`transition-[max-height,transform] duration-[360ms] ease-out overflow-hidden ${
-            mobileHeaderVisible
-              ? "max-h-[120px] translate-y-0 pointer-events-auto"
-              : "max-h-0 -translate-y-full pointer-events-none"
-          }`}
-        >
-          <MobileHeader />
-        </div>
+        <MobileHeader />
       </div>
     </>
   );
