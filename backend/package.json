@@ -2,10 +2,10 @@
   "name": "infinity",
   "version": "0.1.0",
   "private": true,
-  "description": "A Strapi application",
+  "description": "Infinity color backend powered by Strapi",
   "license": "MIT",
   "author": {
-    "name": "A Strapi developer"
+    "name": "bel4"
   },
   "scripts": {
     "add:variations": "node scripts/add-product-variations.js",
