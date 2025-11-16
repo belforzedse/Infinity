@@ -116,6 +116,9 @@ export interface Order {
     Title: string;
     Price: number;
   };
+  contract?: {
+    Amount?: number;
+  };
 }
 
 export interface OrdersResponse {
