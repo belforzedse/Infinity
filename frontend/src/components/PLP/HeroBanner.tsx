@@ -119,7 +119,7 @@ const fetchProductsFromUrl = async (url: string): Promise<ProcessedProduct[]> =>
     return [];
   }
 
-  return data.data.map((product: ProductData) => mapProduct(product)).filter((product) => product.price > 0);
+  return data.data.map((product: ProductData) => mapProduct(product)).filter((product: ProcessedProduct) => product.price > 0);
 };
 
 function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
