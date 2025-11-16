@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import VerifyForgotPasswordForm from "@/components/Auth/ForgotPassword/VerifyForm";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { AuthService } from "@/services";
 import toast from "react-hot-toast";
 import { extractErrorStatus } from "@/utils/errorMessages";
@@ -14,6 +14,7 @@ function VerifyContent() {
   const phoneNumber = queryParams.get("phoneNumber");
 
   const router = useRouter();
+  const [pendingPassword, setPendingPassword] = useState<string | null>(null);
 
   useEffect(() => {
     if (!phoneNumber) {
@@ -35,6 +36,14 @@ function VerifyContent() {
 
     sendInitialOTP();
   }, [phoneNumber, router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem("pendingNewPassword");
+    if (stored) {
+      setPendingPassword(stored);
+    }
+  }, []);
 
   return (
     <div className="mx-auto w-full">
@@ -59,6 +68,7 @@ function VerifyContent() {
             toast.error(friendlyMessage);
           }
         }}
+        initialPassword={pendingPassword ?? undefined}
         onSubmit={async (data) => {
           if (!phoneNumber) {
             router.push("/auth/forgot-password");
@@ -89,13 +99,18 @@ function VerifyContent() {
             const errorStatus = extractErrorStatus(error);
 
             if (errorStatus === 429) {
-              toast.error(friendlyMessage);
-              return;
-            }
-
             toast.error(friendlyMessage);
+            return;
           }
-        }}
+
+          toast.error(friendlyMessage);
+        }
+      }}
+      onSuccess={() => {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("pendingNewPassword");
+        }
+      }}
       />
     </div>
   );
