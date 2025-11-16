@@ -122,7 +122,10 @@ export default function PDPHeroInfoAction({
       return false;
     }
 
-    return hasStockForVariation(currentVariation, requestedQuantity);
+    const alreadyInCart = isInCart ? quantity : 0;
+    const requestedTotal = alreadyInCart + requestedQuantity;
+
+    return hasStockForVariation(currentVariation, requestedTotal);
   };
 
   // Enhanced add to cart handler with stock validation

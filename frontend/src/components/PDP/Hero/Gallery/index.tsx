@@ -56,13 +56,14 @@ export default function PDPHeroGallery(props: Props) {
   }, [selectedImage, assets]);
 
   return (
-    <div className="top-2 flex h-[350px] flex-1 flex-col-reverse gap-2 md:sticky md:h-[450px] md:min-w-[300px] md:flex-row tablet:min-w-[400px] lg:min-w-[640px] lg:h-[500px]">
-      <ThumbnailList
-        assets={assets}
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-      />
-
+    <div className="top-2 flex flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row">
+      <div className="hidden xl:block">
+        <ThumbnailList
+          assets={assets}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+        />
+      </div>
       <SingleImage
         type={byId.get(selectedImage)?.type || "image"}
         src={byId.get(selectedImage)?.src || ""}
@@ -71,6 +72,13 @@ export default function PDPHeroGallery(props: Props) {
         goToNextImage={goToNextImage}
         goToPreviousImage={goToPreviousImage}
       />
+      <div className="md:mt-10  xl:hidden">
+        <ThumbnailList
+          assets={assets}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+        />
+      </div>
     </div>
   );
 }

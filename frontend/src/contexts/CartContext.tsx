@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
@@ -284,6 +284,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Function to migrate local cart to API when user logs in
+  const pendingRemovals = useRef<Set<string>>(new Set());
+
   const migrateLocalCartToApi = async () => {
     if (typeof window === "undefined") return;
 
@@ -401,11 +403,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Local storage implementation (no queue needed for guest users)
       setCartItems((prev) => {
-        // Check if item already exists in cart
         const existingItemIndex = prev.findIndex((item) => item.slug === newItem.slug);
 
         if (existingItemIndex !== -1) {
-          // Update quantity if item exists
           const updatedItems = [...prev];
           const existingItem = updatedItems[existingItemIndex];
           updatedItems[existingItemIndex] = {
@@ -416,10 +416,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             discountPercentage: newItem.discountPercentage ?? existingItem.discountPercentage,
           };
           return updatedItems;
-        } else {
-          // Add new item
-          return [...prev, newItem];
         }
+
+        return [...prev, newItem];
       });
     }
   };
@@ -432,6 +431,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Find cart item ID from our local state that matches the item ID
       const item = cartItems.find((item) => item.id === id || item.cartItemId === id);
       if (!item) return;
+
+      const removalKey = item.cartItemId || item.id;
+      if (!removalKey || pendingRemovals.current.has(removalKey)) return;
+      pendingRemovals.current.add(removalKey);
 
       // Remove item optimistically
       setCartItems((prev) => prev.filter((item) => item.id !== id && item.cartItemId !== id));
@@ -449,7 +452,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         await cartRequestQueue.enqueue(
           async () => {
             await CartService.removeCartItem(Number(cartItemId));
-            // Refresh cart to ensure consistency with backend
             await fetchUserCart();
           },
           `remove-${cartItemId}`
@@ -457,10 +459,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Failed to remove item from cart:", error);
 
-        // Revert optimistic update on failure
-        setCartItems(previousCartItems);
+        await fetchUserCart();
         notify.error("حذف کالا از سبد خرید با خطا مواجه شد");
       } finally {
+        pendingRemovals.current.delete(removalKey ?? "");
         setIsLoading(false);
       }
     } else {

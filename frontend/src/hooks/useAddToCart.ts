@@ -2,6 +2,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
 // removed unused import: useRouter from "next/navigation"
 import notify from "@/utils/notify";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 interface UseAddToCartProps {
   productId: string;
@@ -123,11 +124,14 @@ export default function useAddToCart({
     } catch (error: any) {
       console.error("Error adding to cart:", error);
 
-      // Check for the specific "Not enough stock" error
+      const friendlyMessage = getUserFacingErrorMessage(
+        error,
+        "افزودن کالا به سبد خرید با خطا مواجه شد",
+      );
       if (error.message && error.message.includes("Not enough stock")) {
         notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
       } else {
-        notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
+        notify.error(friendlyMessage);
       }
     } finally {
       setIsAdding(false);
