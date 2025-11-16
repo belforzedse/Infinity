@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Shield, Home, AlertTriangle, Settings, ChevronRight } from "lucide-react";
+import { Shield, Home, AlertTriangle, Settings, ChevronRight, ChevronLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -70,16 +70,11 @@ export default function NotFound() {
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-700 to-rose-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                 <Home className="relative z-10 h-5 w-5" />
                 <span className="relative z-10">بازگشت به پیشخوان</span>
-                <ChevronRight className="relative z-10 h-4 w-4" />
+                <ChevronLeft className="relative z-10 h-4 w-4" />
               </button>
             </Link>
 
-            <Link href="/super-admin/dashboard">
-              <button className="flex items-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-8 py-4 font-semibold text-gray-700 shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700 hover:shadow-xl">
-                <Shield className="h-5 w-5" />
-                داشبورد مدیریت
-              </button>
-            </Link>
+
           </div>
 
           {/* Status indicator */}
