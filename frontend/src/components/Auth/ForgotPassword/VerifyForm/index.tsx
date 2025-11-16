@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthButton from "@/components/Kits/Auth/Button";
 import Text from "@/components/Kits/Text";
@@ -12,19 +12,33 @@ import EditIcon from "@/components/Kits/Auth/Icons/EditIcon";
 interface VerifyForgotPasswordFormProps {
   onSubmit: (data: { otp: string; password: string }) => Promise<void>;
   resendCode: () => void;
+  initialPassword?: string;
+  onSuccess?: () => void;
 }
 
 export default function VerifyForgotPasswordForm({
   onSubmit,
   resendCode,
+  initialPassword,
+  onSuccess,
 }: VerifyForgotPasswordFormProps) {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    password: "",
+    password: initialPassword || "",
     otp: "",
-    confirmPassword: "",
+    confirmPassword: initialPassword || "",
   });
+
+  useEffect(() => {
+    if (initialPassword) {
+      setFormData((prev) => ({
+        ...prev,
+        password: initialPassword,
+        confirmPassword: initialPassword,
+      }));
+    }
+  }, [initialPassword]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent | null) => {
@@ -33,6 +47,7 @@ export default function VerifyForgotPasswordForm({
 
     try {
       await onSubmit(formData);
+      onSuccess?.();
     } catch (error) {
       console.error(error);
     } finally {

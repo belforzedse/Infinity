@@ -9,10 +9,16 @@ import OverviewCards from "@/components/User/Account/OverviewCards";
 import RecentOrders from "@/components/User/Account/RecentOrders";
 import AccountQuickLinks from "@/components/User/Account/QuickLinks";
 import UserSidebar from "@/components/User/Sidebar";
+import { useEffect, useState } from "react";
 
 export default function AccountPage() {
   const { userData } = useUser();
   const { data, loading, error, refetch } = useUserAccountOverview();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const fullName = userData
     ? `${userData.FirstName || ""} ${userData.LastName || ""}`.trim() || "کاربر"
@@ -36,8 +42,8 @@ export default function AccountPage() {
             <AccountQuickLinks />
           </header>
 
-          <OverviewCards data={data} loading={loading} error={error} onRetry={refetch} />
-          <RecentOrders data={data.orders.recent} loading={loading} />
+          <OverviewCards data={data} loading={isHydrated && loading} error={error} onRetry={refetch} />
+          <RecentOrders data={data.orders.recent} loading={isHydrated && loading} />
           <AccountForm />
         </main>
       </div>

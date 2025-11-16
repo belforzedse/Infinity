@@ -62,9 +62,16 @@ export default function FavoritesPage() {
       productImage = `${IMAGE_BASE_URL}${productImage}`;
     }
 
+    const title =
+      product.title ||
+      product.Title ||
+      product.attributes?.Title ||
+      product.attributes?.title ||
+      "محصول";
+
     return {
       id: product.id,
-      title: product.title || "محصول",
+      title,
       category: categoryTitle,
       likedCount: 0,
       price: price,

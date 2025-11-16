@@ -7,6 +7,7 @@ import { useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import { atom } from "jotai";
 import type { FileType } from "@/components/Product/add/FileUploader/types";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 interface UploadingState {
   image: boolean;
@@ -208,7 +209,8 @@ export function useUpload({
           }
         } catch (error: any) {
           // TODO: Narrow error type instead of using `any`
-          uploadErrors.push(`${file.name}: ${error.message}`);
+          const friendlyMessage = getUserFacingErrorMessage(error, "خطا در آپلود فایل‌ها");
+          uploadErrors.push(`${file.name}: ${friendlyMessage}`);
         }
       }
 

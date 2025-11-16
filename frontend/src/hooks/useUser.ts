@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
+import { currentUserAtom, userLoadingAtom, userErrorAtom } from "@/lib/atoms/auth";
+import UserService from "@/services/user";
 import type { MeResponse } from "@/services/user/me";
-import { me } from "@/services/user/me";
 
 interface UseUserReturnType {
   userData: MeResponse | null;
@@ -10,35 +11,24 @@ interface UseUserReturnType {
 }
 
 export default function useUser(): UseUserReturnType {
-  const [userData, setUserData] = useState<MeResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [userData, setUserData] = useAtom(currentUserAtom);
+  const [isLoading, setIsLoading] = useAtom(userLoadingAtom);
+  const [error, setError] = useAtom(userErrorAtom);
 
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
       setError(null);
-
-      const data = await me();
+      const data = await UserService.me();
       setUserData(data);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch user data"));
+      const parsedError = err instanceof Error ? err : new Error("Failed to fetch user data");
+      setError(parsedError);
       console.error("Error fetching user data:", err);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Check if user is authenticated
-    const accessToken = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-
-    if (accessToken) {
-      fetchUserData();
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
 
   return {
     userData,

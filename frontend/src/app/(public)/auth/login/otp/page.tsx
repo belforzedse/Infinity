@@ -9,7 +9,12 @@ import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
-import { redirectUrlAtom } from "@/lib/atoms/auth";
+import {
+  currentUserAtom,
+  redirectUrlAtom,
+  userErrorAtom,
+  userLoadingAtom,
+} from "@/lib/atoms/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +22,9 @@ export default function LoginPage() {
   const { phoneNumber } = useCheckPhoneNumber();
   const { migrateLocalCartToApi } = useCart();
   const [storedRedirectUrl, setRedirectUrl] = useAtom(redirectUrlAtom);
+  const [, setUserData] = useAtom(currentUserAtom);
+  const [, setLoadingUser] = useAtom(userLoadingAtom);
+  const [, setUserError] = useAtom(userErrorAtom);
 
   // Store redirect URL from query params into atom on page load
   useEffect(() => {
@@ -42,6 +50,9 @@ export default function LoginPage() {
           // Fetch current user and redirect based on role or redirect URL
           try {
             const me = await UserService.me();
+            setUserData(me);
+            setLoadingUser(false);
+            setUserError(null);
 
             // Use stored redirect URL if available, otherwise use role-based redirect
             if (storedRedirectUrl) {

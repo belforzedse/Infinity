@@ -10,7 +10,6 @@ import useUser from "@/hooks/useUser";
 import { updateProfile } from "@/services/user/updateProfile";
 import { toast } from "react-hot-toast";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
-
 interface AccountFormData {
   firstName: string;
   lastName: string;
@@ -31,6 +30,12 @@ export default function AccountForm() {
     gender: "",
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Mark component as hydrated to prevent hydration mismatches with loading state
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Update form when user data is loaded
   useEffect(() => {
@@ -86,7 +91,8 @@ export default function AccountForm() {
     handleInputChange("gender", e.target.value as "male" | "female");
   };
 
-  if (isLoading) {
+  // Only show loading/error states after hydration to prevent mismatches
+  if (isHydrated && isLoading) {
     return (
       <div className="flex flex-col gap-4 rounded-lg bg-white p-6 shadow-sm">
         <div className="flex items-center justify-center py-12">
@@ -96,7 +102,7 @@ export default function AccountForm() {
     );
   }
 
-  if (error) {
+  if (isHydrated && error) {
     return (
       <div className="flex flex-col gap-4 rounded-lg bg-white p-6 shadow-sm">
         <span className="text-lg font-medium text-red-600">خطا در بارگذاری اطلاعات کاربر</span>

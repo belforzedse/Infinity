@@ -1,6 +1,6 @@
 "use client";
 import type { ReactNode} from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CalendarIcon from "../Icons/CalendarIcon";
 import AddButton from "../../Layout/ContentWrapper/Button/Add";
 import ActiveBox from "./ActiveBox";
@@ -89,6 +89,12 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
 
   const [formData, setFormData] = useState<T>(data ?? ({} as T));
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (data) {
+      setFormData(data);
+    }
+  }, [data]);
 
   const onSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
     e?.preventDefault();

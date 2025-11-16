@@ -39,7 +39,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
       const containerHeight = scrollContainerRef.current.clientHeight;
 
       // Check if we're in mobile view (scrolling horizontally)
-      const isMobile = window.innerWidth < 768;
+      const isMobile = window.innerWidth < 900;
 
       if (isMobile) {
         const scrollPosition = index * (thumbnailWidth + gap);
@@ -113,9 +113,9 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   return (
     <div
       ref={scrollContainerRef}
-      className="relative h-auto w-full overflow-x-auto md:h-[473px] md:w-[139px] md:overflow-y-auto md:overflow-x-hidden"
+      className="relative h-auto w-full overflow-x-auto xl:h-[473px] xl:w-[139px] xl:overflow-y-auto xl:overflow-x-hidden"
     >
-      <div className="flex w-fit flex-row-reverse gap-2 md:w-full md:flex-col">
+      <div className="flex w-full flex-row-reverse gap-2 xl:w-full xl:flex-col">
         {assets.map((asset) => (
           <div
             key={asset.id}
@@ -148,7 +148,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
       {/* Blur */}
       {showBlur && (
         <div
-          className="bottom-0 left-0 hidden h-[71px] w-[40px] md:sticky md:left-0 md:block md:w-full"
+          className="bottom-0 left-0 hidden h-[71px] w-[40px] xl:sticky xl:left-0 xl:block xl:w-full"
           style={{
             background: "linear-gradient(181.25deg, rgba(255, 255, 255, 0) 44.29%, #FFFFFF 85.78%)",
             backdropFilter: "blur(4px)",

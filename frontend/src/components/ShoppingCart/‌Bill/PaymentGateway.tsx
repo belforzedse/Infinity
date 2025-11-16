@@ -124,44 +124,25 @@ function ShoppingCartBillPaymentGateway({
             onMouseEnter={() => setWalletHovered(true)}
             onMouseLeave={() => setWalletHovered(false)}
             className={classNames(
-              "relative flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4 transition-opacity duration-300",
+              "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4 transition-opacity duration-300",
               selected === wallet.id && "!border-pink-600",
               wallet.disabled && !walletHovered && "cursor-not-allowed opacity-50",
               wallet.disabled && walletHovered && "cursor-pointer opacity-100",
             )}
             type="button"
           >
-            {/* Default view: Logo and name */}
-            <div
-              className={classNames(
-                "absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-300 ease-in-out",
-                !showWalletDetails
-                  ? "pointer-events-auto opacity-100"
-                  : "pointer-events-none opacity-0",
-              )}
-            >
-              <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
-                <Image
-                  src={wallet.img}
-                  alt={wallet.name}
-                  fill
-                  className="bg-stone-50 object-contain p-3"
-                  sizes="(min-width: 1024px) 128px, 96px"
-                />
-              </div>
-              <span className="text-sm lg:text-base">{wallet.name} درگاه پرداخت</span>
+            <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
+              <Image
+                src={wallet.img}
+                alt={wallet.name}
+                fill
+                className="bg-stone-50 object-contain p-3"
+                sizes="(min-width: 1024px) 128px, 96px"
+              />
             </div>
-
-            {/* Revealed view: Balance and charge button */}
-            <div
-              className={classNames(
-                "absolute inset-0 flex w-full flex-col items-center justify-center gap-5 overflow-hidden px-3 py-4 transition-opacity duration-300 ease-in-out",
-                showWalletDetails
-                  ? "pointer-events-auto opacity-100"
-                  : "pointer-events-none opacity-0",
-              )}
-            >
-              <div className="flex w-full max-w-full flex-col items-center gap-5">
+            <span className="text-sm lg:text-base">{wallet.name} درگاه پرداخت</span>
+            {showWalletDetails && (
+              <div className="flex w-full flex-col items-center gap-3 pt-3 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <span className="text-xs text-neutral-600">موجودی:</span>
                   <span className="text-xl font-bold text-pink-500">
@@ -170,7 +151,7 @@ function ShoppingCartBillPaymentGateway({
                 </div>
                 {wallet.helper && <div className="flex w-full justify-center">{wallet.helper}</div>}
               </div>
-            </div>
+            )}
           </button>
         </div>
       </div>

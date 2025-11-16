@@ -65,76 +65,101 @@ interface ProcessedProduct {
   image: string;
 }
 
-function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
-  let url = `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&pagination[pageSize]=6`;
+const MAX_HERO_PRODUCTS = 6;
 
-  // Only show products whose Title contains کیف، کفش، صندل، or کتونی
+const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations`;
+
+const mapProduct = (product: ProductData): ProcessedProduct => {
+  const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
+    const price = variation.attributes.Price;
+    return price && parseInt(price) > 0;
+  });
+
+  if (!firstValidVariation) {
+    return {
+      id: product.id,
+      title: product.attributes.Title,
+      category: product.attributes.product_main_category?.data?.attributes?.Title,
+      likedCount: product.attributes.RatingCount || 0,
+      price: 0,
+      discountedPrice: 0,
+      discount: 0,
+      image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
+    };
+  }
+
+  const hasDiscount =
+    firstValidVariation.attributes.general_discounts?.data &&
+    firstValidVariation.attributes.general_discounts.data.length > 0;
+  const discount =
+    hasDiscount && firstValidVariation.attributes.general_discounts?.data
+      ? firstValidVariation.attributes.general_discounts.data[0].attributes.Amount
+      : 0;
+  const price = parseInt(firstValidVariation.attributes.Price || "0");
+  const discountedPrice = hasDiscount && discount ? price * (1 - discount / 100) : price;
+
+  return {
+    id: product.id,
+    title: product.attributes.Title,
+    category: product.attributes.product_main_category?.data?.attributes?.Title,
+    likedCount: product.attributes.RatingCount || 0,
+    price,
+    discountedPrice,
+    discount,
+    image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
+  };
+};
+
+const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+
+const fetchProductsFromUrl = async (url: string): Promise<ProcessedProduct[]> => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!Array.isArray(data?.data)) {
+    return [];
+  }
+
+  return data.data.map((product: ProductData) => mapProduct(product)).filter((product: ProcessedProduct) => product.price > 0);
+};
+
+function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
+  let url = `${BASE_PRODUCT_FETCH_URL}&pagination[pageSize]=6`;
   url += `&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل&filters[$or][3][Title][$containsi]=کتونی`;
 
   if (category) {
     url += `&filters[product_main_category][Slug][$eq]=${category}`;
   }
 
-  return fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      // Filter out products with zero price
-      const filteredProducts = data.data.filter((product: ProductData) => {
-        // Check if any variation has a valid price
-        return product.attributes.product_variations?.data?.some((variation) => {
-          const price = variation.attributes.Price;
-          return price && parseInt(price) > 0;
-        });
-      });
+  return fetchProductsFromUrl(url);
+}
 
-      return filteredProducts.map((product: ProductData) => {
-        // Find the first variation with a valid price
-        const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
-          const price = variation.attributes.Price;
-          return price && parseInt(price) > 0;
-        });
-
-        const hasDiscount =
-          firstValidVariation?.attributes?.general_discounts?.data &&
-          firstValidVariation.attributes.general_discounts.data.length > 0;
-        const discount =
-          hasDiscount && firstValidVariation.attributes.general_discounts?.data
-            ? firstValidVariation.attributes.general_discounts.data[0].attributes.Amount
-            : 0;
-        const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-        const discountedPrice = hasDiscount && discount ? price * (1 - discount / 100) : price;
-
-        return {
-          id: product.id,
-          title: product.attributes.Title,
-          category: product.attributes.product_main_category?.data?.attributes?.Title,
-          likedCount: product.attributes.RatingCount || 0,
-          price,
-          discountedPrice,
-          discount,
-          image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
-        };
-      });
-    });
+function getRandomProducts(): Promise<ProcessedProduct[]> {
+  const url = `${BASE_PRODUCT_FETCH_URL}&pagination[pageSize]=20`;
+  return fetchProductsFromUrl(url).then((products) => shuffle(products).slice(0, MAX_HERO_PRODUCTS));
 }
 
 export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
   const [title, setTitle] = useState("همه محصولات");
-  const [imageUrl, setImageUrl] = useState("/images/off-section.png");
+  const [imageUrl, setImageUrl] = useState("/images/PLP.webp");
   const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>([]);
+  const [columnCount, setColumnCount] = useState(3);
 
   useEffect(() => {
-    // Fetch both category data and featured products in parallel
-    Promise.all([
-      category
-        ? fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`).then((res) =>
-            res.json(),
-          )
-        : Promise.resolve({ data: [] }),
-      getFeaturedProducts(category),
-    ])
-      .then(([categoryData, products]) => {
-        setFeaturedProducts(products);
+    const fetchData = async () => {
+      try {
+        const [categoryData, products] = await Promise.all([
+          category
+            ? fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`).then((res) =>
+                res.json(),
+              )
+            : Promise.resolve({ data: [] }),
+          getFeaturedProducts(category),
+        ]);
+
+        const normalizedProducts = products.length
+          ? shuffle(products).slice(0, MAX_HERO_PRODUCTS)
+          : await getRandomProducts();
+        setFeaturedProducts(normalizedProducts);
 
         if (category && categoryData.data.length > 0) {
           const categoryAttributes = categoryData.data[0].attributes;
@@ -144,24 +169,41 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
             setImageUrl(`${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`);
           }
         }
-      })
-      .catch(() => {
-        // Keep UI usable on failures
-        setFeaturedProducts([]);
-      });
+      } catch {
+        const fallback = await getRandomProducts();
+        setFeaturedProducts(fallback);
+      }
+    };
+
+    fetchData();
   }, [category]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const updateColumns = () => setColumnCount(mediaQuery.matches ? 4 : 3);
+
+    updateColumns();
+    mediaQuery.addEventListener("change", updateColumns);
+    return () => mediaQuery.removeEventListener("change", updateColumns);
+  }, []);
+
+  const visibleProducts = featuredProducts.slice(0, columnCount * 2);
+
   return (
-    <div className="w-full bg-background-secondary py-6">
+    <div className="w-full bg-slate-50 rounded-2xl py-4">
       <PageContainer
         variant="wide"
         disablePadding
-        className="space-y-3 bg-transparent px-4 pb-0 md:px-10"
+        className="space-y-3 bg-transparent px-4 pb-0 md:px-4"
       >
         <div className="flex flex-col gap-3 md:flex-row">
-          <div className="flex flex-1 flex-wrap gap-3 pt-4 md:pt-0">
-            {featuredProducts.map((product) => (
-              <ProductSmallCard key={product.id} {...product} />
+          <div className="xl:grid xl:flex-1 xl:grid-cols-3 xl:justify-items-center xl:gap-3 hidden">
+            {visibleProducts.map((product) => (
+              <ProductSmallCard key={product.id} {...product}  />
             ))}
           </div>
 
@@ -174,7 +216,7 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 517px"
                 priority
-                loader={imageLoader}
+                loader={imageUrl.startsWith("http") ? imageLoader : undefined}
               />
             </div>
           </Link>

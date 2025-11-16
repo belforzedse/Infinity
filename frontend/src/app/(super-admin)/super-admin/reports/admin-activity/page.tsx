@@ -5,6 +5,7 @@ import { getAdminActivity, AdminActivityLog } from "@/services/super-admin/repor
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 // Translation helpers for Persian
 const actionTypeMap: Record<string, string> = {
@@ -132,9 +133,8 @@ export default function AdminActivityReportPage() {
       if (error instanceof Error && error.message.includes("xlsx package not found")) {
         alert("پکیج xlsx یافت نشد. لطفاً دستور زیر را اجرا کنید:\nnpm install xlsx");
       } else {
-        alert(
-          `خطا در ایجاد فایل Excel: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
+        const friendlyError = getUserFacingErrorMessage(error, "خطا در ایجاد فایل Excel");
+        alert(`خطا در ایجاد فایل Excel: ${friendlyError}`);
       }
     }
   }, []);
@@ -178,7 +178,8 @@ export default function AdminActivityReportPage() {
       })
       .catch((error) => {
         console.error("Error fetching admin activity:", error);
-        alert("خطا در بارگذاری گزارش: " + error.message);
+        const friendlyError = getUserFacingErrorMessage(error, "خطا در بارگذاری گزارش");
+        alert(`خطا در بارگذاری گزارش: ${friendlyError}`);
       })
       .finally(() => setLoading(false));
   }, [startISO, endISO, selectedUser, selectedActionType, selectedLogType]);
