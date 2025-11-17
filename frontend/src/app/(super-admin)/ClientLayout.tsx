@@ -10,12 +10,17 @@ import { HTTP_STATUS } from "@/constants/api";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
     const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) {
       router.replace("/auth");
-      return;
+      return undefined;
     }
 
     const redirectToPrevious = () => {
@@ -28,18 +33,42 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     UserService.me(true)
       .then((me) => {
+        if (!isMounted) return;
         if (!me?.isAdmin) {
           redirectToPrevious();
+          return;
         }
+        setIsAuthorized(true);
+        setIsLoading(false);
       })
       .catch((error) => {
+        if (!isMounted) return;
         if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
           router.replace("/auth");
           return;
         }
         redirectToPrevious();
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50">
+        <div
+          className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700"
+          aria-label="Loading admin view"
+        />
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <>
