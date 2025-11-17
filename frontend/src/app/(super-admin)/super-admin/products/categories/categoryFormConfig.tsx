@@ -28,8 +28,10 @@ const createParentOptionsFetcher =
   > => {
     try {
       const response = await getAllCategories();
-      // response is PaginatedResponse<categoryResponseType> which has data: categoryResponseType[]
+      // Handle Strapi paginated response structure
+      // response.data contains the array of categories
       const categories = (response as any)?.data as categoryResponseType[];
+
       if (!Array.isArray(categories)) {
         console.warn("Categories is not an array:", categories);
         return [];
@@ -42,7 +44,9 @@ const createParentOptionsFetcher =
           value: category.id.toString(),
         }));
     } catch (error) {
-      console.error("Failed to fetch parent categories:", error);
+      // Silently fail - don't show error toast for dropdown options
+      // This prevents multiple error messages when the form loads
+      console.error("Failed to fetch parent categories (silent):", error);
       // Return empty array instead of throwing, so form still loads
       return [];
     }
