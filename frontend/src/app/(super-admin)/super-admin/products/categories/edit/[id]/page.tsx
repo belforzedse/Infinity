@@ -29,7 +29,7 @@ export default function EditCategoryPage() {
       setIsLoading(true);
       try {
         const response = await getCategoryById(categoryId);
-        const payload = (response as any)?.data;
+        const payload = (response as any)?.data?.data ?? (response as any)?.data;
         if (!payload) {
           toast.error("دسته‌بندی مورد نظر یافت نشد");
           router.push("/super-admin/products/categories");
