@@ -34,6 +34,10 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   isAvailable = true,
   priority = false,
 }) => {
+  const hasDiscount = Boolean(
+    discountedPrice && discountedPrice > 0 && discountedPrice < price,
+  );
+
   return (
     <Link href={`/pdp/${id}`} className={clsx("w-full md:w-[269px]", className)}>
       <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">

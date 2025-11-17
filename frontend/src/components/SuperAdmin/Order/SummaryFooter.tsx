@@ -33,8 +33,8 @@ type OrderItem = {
   productCode: string;
   price: number;
   quantity: number;
-  color: string;
-  image: string;
+  color?: string;
+  image?: string;
 };
 
 export default function SuperAdminOrderSummaryFooter({
@@ -59,7 +59,7 @@ export default function SuperAdminOrderSummaryFooter({
           >
             <div className="flex items-center gap-2">
               <Image
-                src={item.image}
+                src={item.image || "/images/placeholder.png"}
                 alt={item.productName}
                 width={48}
                 height={48}
@@ -74,7 +74,7 @@ export default function SuperAdminOrderSummaryFooter({
                 <p className="text-xs text-neutral-500">
                   شناسه متغیر: {item.productCode}
                 </p>
-                <p className="text-xs text-neutral-500">رنگ: {item.color}</p>
+                <p className="text-xs text-neutral-500">رنگ: {item.color ?? "-"}</p>
               </div>
             </div>
 
