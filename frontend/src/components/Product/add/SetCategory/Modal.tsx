@@ -23,9 +23,10 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
   const categoriesDataPagination = useAtomValue(productCategoryDataAtomPagination);
 
   const filteredCategories = useMemo(() => {
-    if (!searchText.trim()) return categoriesData;
+    const safeCategoriesData = categoriesData || [];
+    if (!searchText.trim()) return safeCategoriesData;
 
-    return categoriesData.filter(
+    return safeCategoriesData.filter(
       (category) =>
         category.attributes.Title.toLowerCase().includes(searchText.toLowerCase()) ||
         (category.attributes.Slug?.toLowerCase() || "").includes(searchText.toLowerCase()),
@@ -59,8 +60,8 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
         <SetCategoryTable categories={filteredCategories} />
 
         <SetCategoryTablePagination
-          totalItems={categoriesDataPagination.totalItems}
-          itemsPerPage={categoriesDataPagination.itemsPerPage}
+          totalItems={categoriesDataPagination?.totalItems || 0}
+          itemsPerPage={categoriesDataPagination?.itemsPerPage || 10}
         />
       </div>
     </Modal>

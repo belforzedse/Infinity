@@ -25,19 +25,20 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   const pathname = usePathname();
 
   const [categorySearchQuery, setCategorySearchQuery] = useState("");
-  const [categoryOptions, setCategoryOptions] = useState<categoryResponseType[]>(CategoriesData);
+  const [categoryOptions, setCategoryOptions] = useState<categoryResponseType[]>(CategoriesData || []);
 
   const [isGetCategoriesLoading, setIsGetCategoriesLoading] = useState(false);
   const [isCreateCategoryLoading, setIsCreateCategoryLoading] = useState(false);
 
   useEffect(() => {
-    setCategoryOptions(CategoriesData);
+    setCategoryOptions(CategoriesData || []);
   }, [CategoriesData]);
 
   useEffect(() => {
     if (!pathname.endsWith("/add") && productData.product_other_categories?.length > 0) {
+      const safeCategoriesData = CategoriesData || [];
       setCategoryOptions(
-        CategoriesData.filter(
+        safeCategoriesData.filter(
           (category) =>
             !productData.product_other_categories.some(
               (selectedCat) => selectedCat.id === category.id,

@@ -58,7 +58,7 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
         className="w-full"
         value={selectedMainCategory}
         onChange={(value) => onChangeMainCategory(value)}
-        options={CategoriesData.map((category: any) => ({
+        options={(CategoriesData || []).map((category: any) => ({
           id: category.id.toString(),
           name: category.attributes.Title,
         }))}
