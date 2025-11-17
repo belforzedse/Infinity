@@ -28,8 +28,12 @@ const createParentOptionsFetcher =
   > => {
     try {
       const response = await getAllCategories();
+      // response is PaginatedResponse<categoryResponseType> which has data: categoryResponseType[]
       const categories = (response as any)?.data as categoryResponseType[];
-      if (!Array.isArray(categories)) return [];
+      if (!Array.isArray(categories)) {
+        console.warn("Categories is not an array:", categories);
+        return [];
+      }
 
       return categories
         .filter((category) => category.id !== excludeId)
@@ -39,6 +43,7 @@ const createParentOptionsFetcher =
         }));
     } catch (error) {
       console.error("Failed to fetch parent categories:", error);
+      // Return empty array instead of throwing, so form still loads
       return [];
     }
   };

@@ -108,8 +108,10 @@ function Desktop({ children }: { children: React.ReactNode }) {
         <Sidebar isOpen={true} onClose={() => {}} />
       </div>
       <div className="flex w-full flex-1 flex-col gap-4 p-4 lg:gap-7">
-        <Header onMenuClick={() => {}} />
-        {children}
+        <div className="w-full max-w-screen-3xl space-y-4 lg:space-y-7 mx-auto">
+          <Header onMenuClick={() => {}} />
+          {children}
+        </div>
       </div>
     </div>
   );

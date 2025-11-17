@@ -13,12 +13,14 @@ Modern, RTL‑first e‑commerce frontend built with Next.js (App Router), TypeS
 
 ## Tech Stack
 
-- Framework: Next.js 15 (App Router)
-- Language: TypeScript
-- Styling: Tailwind CSS
-- State: Jotai
+- Framework: Next.js 16.0.3 (App Router)
+- React: 19.2.0
+- Language: TypeScript 5 (strict mode)
+- Styling: Tailwind CSS 3.4.1
+- State: Jotai 2.11.1
+- Forms: React Hook Form 7.54.2
 - Notifications: react-hot-toast
-- Backend: Strapi v4 (via REST APIs)
+- Backend: Strapi v4.25.21 (via REST APIs)
 
 the design: Figma — https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infinity-Store-(%D8%B5%D9%81%D8%AD%D9%87-%D8%B3%D8%A7%D8%B2)?node-id=6095-753
 

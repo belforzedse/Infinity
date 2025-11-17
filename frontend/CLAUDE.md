@@ -5,12 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 **Infinity Store Frontend** is a modern, RTL-first e-commerce user interface built with:
-- **Next.js 15** (App Router, server/client components)
-- **TypeScript** (strict mode)
-- **Tailwind CSS** (with Persian text optimization)
-- **Jotai** (atomic state management)
-- **React Hook Form** (form state)
-- **React Query patterns** (API caching)
+- **Next.js 16.0.3** (App Router, server/client components)
+- **React 19.2.0** (latest React with concurrent features)
+- **TypeScript 5** (strict mode)
+- **Tailwind CSS 3.4.1** (with Persian text optimization)
+- **Jotai 2.11.1** (atomic state management)
+- **React Hook Form 7.54.2** (form state)
+- **shadcn/ui** (component library)
 
 The frontend integrates with a Strapi v4 backend API for all data and handles authentication, product discovery, cart management, checkout, and user accounts.
 
@@ -49,6 +50,24 @@ npm run test:coverage                # Generate coverage report
 ```bash
 npm run clean                        # Remove .next, node_modules cache
 ```
+
+## Technology Stack
+
+### Core Dependencies
+- **Next.js**: 16.0.3 (App Router with React Server Components)
+- **React**: 19.2.0 (latest with concurrent rendering)
+- **TypeScript**: 5.x (strict mode)
+- **Tailwind CSS**: 3.4.1
+- **Jotai**: 2.11.1 (atomic state management)
+- **React Hook Form**: 7.54.2
+- **shadcn/ui**: Component library
+
+### Key Features
+- React Server Components (RSC) for optimal performance
+- App Router with route groups and layouts
+- Image optimization with Next.js Image component
+- Standalone output mode for Docker deployment
+- Package import optimization for better bundle size
 
 ## Architecture
 
@@ -330,24 +349,40 @@ Variables are auto-loaded from:
 - **`main.env`** - Production environment (used when `NODE_ENV=production`)
 - **`.env.local`** - Personal overrides (gitignored, not committed)
 
-Key variables:
+The loader (`load-env.js`) automatically merges files based on `NODE_ENV`.
+
+### Required Variables
 
 ```bash
 # API Configuration (points to backend API)
 NEXT_PUBLIC_API_BASE_URL=https://api.infinity.rgbgroup.ir/api    # Staging
 NEXT_PUBLIC_API_BASE_URL=https://api.infinitycolor.org/api      # Production
+
+# Image/CDN Base URL
 NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinity.rgbgroup.ir/    # Staging
 NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinitycolor.org/       # Production
 
-# Authentication (rarely needed for frontend)
+# Strapi Public Token (for public API endpoints)
 NEXT_PUBLIC_STRAPI_TOKEN=your-token-here
+```
 
-# Feature Flags
+### Optional Variables
+
+```bash
+# Feature Flags (if needed)
 NEXT_PUBLIC_ENABLE_SNAPPAY=true
 NEXT_PUBLIC_ENABLE_MELLAT=true
 ```
 
-The loader (`load-env.js`) automatically merges files based on `NODE_ENV`.
+### Environment-Specific URLs
+
+**Staging (dev branch):**
+- API: `https://api.infinity.rgbgroup.ir/api`
+- Images: `https://api.infinity.rgbgroup.ir/`
+
+**Production (main branch):**
+- API: `https://api.infinitycolor.org/api`
+- Images: `https://api.infinitycolor.org/`
 
 ### Deployment Environment Setup
 
@@ -470,6 +505,8 @@ Test critical flows like:
 - **CSRF protection**: Backend validates request origin
 - **Auth guard**: Protected routes redirect unauthenticated users
 - **Password handling**: Never logged or exposed in client code
+- **Environment variables**: Only `NEXT_PUBLIC_*` vars are exposed to client
+- **API keys**: Public Strapi token only, no sensitive credentials in frontend
 
 ## RTL & Internationalization
 

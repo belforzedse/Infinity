@@ -77,3 +77,35 @@ export const voidShippingBarcode = async (
   );
   return (response as any).data;
 };
+
+export type OrderLifecycleStatus = "Paying" | "Started" | "Shipment" | "Done" | "Returned" | "Cancelled";
+
+export const ORDER_STATUSES: OrderLifecycleStatus[] = [
+  "Paying",
+  "Started",
+  "Shipment",
+  "Done",
+  "Returned",
+  "Cancelled",
+];
+
+export const ORDER_STATUS_LABELS: Record<OrderLifecycleStatus, string> = {
+  Paying: "در حال پرداخت",
+  Started: "درحال پردازش",
+  Shipment: "در حال ارسال",
+  Done: "تکمیل شده",
+  Returned: "مرجوع شده",
+  Cancelled: "لغو شده",
+};
+
+export const changeOrderStatus = async (
+  orderId: string,
+  status: OrderLifecycleStatus,
+) => {
+  const response = await apiClient.put(`/orders/${orderId}`, {
+    data: {
+      Status: status,
+    },
+  });
+  return (response as any).data;
+};
