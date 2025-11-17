@@ -222,11 +222,56 @@ src/api/product-review/routes/custom-router.ts
 ## Environment Variables
 
 Key variables (see `.env.example`):
-- `DATABASE_URL`, `DATABASE_CLIENT`, `DATABASE_*`: DB connection
-- `REDIS_URL`, `REDIS_PASSWORD`: Redis connection
+
+### Database
+- `DATABASE_CLIENT`: Database client (postgres)
+- `DATABASE_HOST`: Database host (localhost or infinity-postgres)
+- `DATABASE_PORT`: Database port (5432)
+- `DATABASE_NAME`: Database name (infinity_db, prod, dev)
+- `DATABASE_USERNAME`: Database username
+- `DATABASE_PASSWORD`: Database password
+- `DATABASE_SSL`: SSL mode (false for local, true for production)
+
+### Redis
+- `REDIS_URL`: Redis connection URL (redis://:password@host:6379)
+- `REDIS_PASSWORD`: Redis password
+
+### Security
 - `JWT_SECRET`: JWT signing key
-- `HOST`, `PORT`: Server binding
-- Payment gateway credentials (Mellat terminal ID, SnappPay API keys)
+- `APP_KEYS`: Comma-separated app keys
+- `API_TOKEN_SALT`: API token salt
+- `ADMIN_JWT_SECRET`: Admin JWT secret
+- `TRANSFER_TOKEN_SALT`: Transfer token salt
+
+### Server
+- `HOST`: Server host (0.0.0.0)
+- `PORT`: Server port (1337)
+- `URL`: Public URL (https://api.infinitycolor.org)
+
+### Payment Gateways
+
+**Mellat Bank:**
+- `MELLAT_TERMINAL_ID`: Terminal ID (required, no fallback)
+- `MELLAT_USERNAME`: Username (required, no fallback)
+- `MELLAT_PASSWORD`: Password (required, no fallback)
+- `MELLAT_GATEWAY_URL`: Gateway URL (optional)
+- `MELLAT_PAYMENT_URL`: Payment page URL (optional)
+
+**SnappPay:**
+- `SNAPPAY_BASE_URL`: API base URL (default: https://api.snappay.ir)
+- `SNAPPAY_CLIENT_ID`: Client ID (required, no fallback)
+- `SNAPPAY_CLIENT_SECRET`: Client secret (required, no fallback)
+- `SNAPPAY_USERNAME`: Username (required, no fallback)
+- `SNAPPAY_PASSWORD`: Password (required, no fallback)
+- `SNAPPAY_RETURN_URL`: Return URL (optional)
+
+### SMS Gateway (IP Panel)
+- `IP_PANEL_API_URL`: API endpoint
+- `IP_PANEL_API_KEY`: API key
+- `IP_PANEL_PATTERN_CODE`: Pattern code
+- `IP_PANEL_SENDER`: Sender number
+
+**⚠️ SECURITY NOTE**: All payment gateway credentials MUST be in environment variables. Hardcoded fallbacks in code are a security risk and should be removed.
 
 ## Type Safety
 
@@ -303,6 +348,26 @@ Production deployment (push to `main`):
 5. `init-db.sh` creates `prod` database
 6. Strapi auto-creates schema
 7. Bootstrap seeds Iran locations
+
+## Known Issues & Technical Debt
+
+### Critical Issues
+1. **Hardcoded Secrets**: Payment gateway services have fallback credentials in code
+   - Files: `snappay.ts`, `mellat.ts`, `mellat-v2.ts`, `mellat-v3.ts`
+   - Action: Remove all fallback values, require env vars
+2. **Low Test Coverage**: Only 7 test files for 191 TypeScript files
+   - Action: Expand test coverage, especially for payment flows
+3. **Stock Decrement Timing**: Wallet payments decrement stock before settlement
+   - File: `src/api/cart/controllers/handlers/finalizeToOrder.ts`
+   - Action: Move stock decrement to callback flow
+
+### High Priority Issues
+1. **Type Safety**: 50+ `as any` casts need proper type definitions
+2. **Logging**: 15+ `console.log` calls should use structured logging
+3. **Monolithic Services**: `cart.service.ts` (376 lines) needs refactoring
+4. **Missing Request Validation**: No zod/schema validation middleware
+
+See `DX_ANALYSIS.md` for complete analysis and roadmap.
 
 ## Working with Modified Files
 
