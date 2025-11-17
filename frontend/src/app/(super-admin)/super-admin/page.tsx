@@ -47,7 +47,8 @@ export default function SuperAdminPage() {
     const lastName = userInfoAttributes?.LastName || "";
     const fullName = `${firstName} ${lastName}`.trim();
 
-    const key = order?.id ?? Math.random();
+    const key =
+      order?.id ?? attributes?.OrderNumber ?? attributes?.createdAt ?? attributes?.updatedAt;
     const time = new Date(attributes?.updatedAt ?? attributes?.createdAt ?? Date.now()).toLocaleTimeString(
       "fa-IR",
       {
