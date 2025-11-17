@@ -9,6 +9,7 @@ import { priceFormatter } from "@/utils/price";
 import type { ColumnDef } from "@tanstack/react-table";
 import { duplicateProduct } from "@/services/super-admin/product/duplicate";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import { useRouter } from "next/navigation";
 
 export type Product = {
   id: string;
@@ -211,6 +212,39 @@ export const columns: ColumnDef<Product>[] = [
   },
 ];
 
+const getPriceInfo = (variations: Product["attributes"]["product_variations"]["data"]) => {
+  const normalized = variations
+    .map((variation) => {
+      const price = Number(variation?.attributes?.Price || 0);
+      const discount = variation?.attributes?.DiscountPrice
+        ? Number(variation.attributes.DiscountPrice)
+        : null;
+      return { price, discount };
+    })
+    .filter((variation) => variation.price > 0);
+
+  if (!normalized.length) {
+    return null;
+  }
+
+  const minPrice = Math.min(...normalized.map((variation) => variation.price));
+  const maxPrice = Math.max(...normalized.map((variation) => variation.price));
+  const discounts = normalized
+    .map((variation) => variation.discount)
+    .filter((value): value is number => typeof value === "number" && value > 0);
+  const minDiscount = discounts.length ? Math.min(...discounts) : null;
+
+  return { minPrice, maxPrice, minDiscount };
+};
+
+const getThumbnailUrl = (row: Product) => {
+  const coverImage = row?.attributes?.CoverImage;
+  const imageData = coverImage?.data?.attributes;
+  const thumbnailUrl =
+    imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
+  return resolveAssetUrl(thumbnailUrl || imageData?.url);
+};
+
 type Props = {
   data: Product[] | undefined;
   enableSelection?: boolean;
@@ -219,40 +253,67 @@ type Props = {
 };
 
 export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionChange }: Props) => {
+  const router = useRouter();
+  const handleRowClick = (id: string) => {
+    router.push(`/super-admin/products/${id}`);
+  };
+
   return (
     <div className="mt-2 flex flex-col gap-2">
-      {data?.map((row) => (
-        <div
-          key={row?.id}
-          className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
-        >
-          {enableSelection ? (
-            <input
-              type="checkbox"
-              className="h-5 w-5"
-              checked={selectedIds?.has(row.id) || false}
-              onChange={(e) => onSelectionChange?.(row.id, e.target.checked)}
-            />
-          ) : (
-            <input type="checkbox" className="h-5 w-5" />
-          )}
+      {data?.map((row) => {
+        const variations = row?.attributes?.product_variations?.data || [];
+        const priceInfo = getPriceInfo(variations);
+        const rowPriceText = priceInfo
+          ? priceInfo.maxPrice > priceInfo.minPrice
+            ? `${priceFormatter(priceInfo.minPrice, " تومان")} تا ${priceFormatter(
+                priceInfo.maxPrice,
+                " تومان",
+              )}`
+            : priceFormatter(priceInfo.minPrice, " تومان")
+          : "-";
+        const stockCount = variations.reduce(
+          (acc, variation) =>
+            acc + (variation?.attributes?.product_stock?.data?.attributes?.Count || 0),
+          0,
+        );
+        const sku = variations[0]?.attributes?.SKU || "";
+        const imageUrl = getThumbnailUrl(row);
 
-          {(() => {
-            const coverImage = row?.attributes?.CoverImage;
-            const imageData = coverImage?.data?.attributes;
-            const thumbnailUrl =
-              imageData?.formats?.thumbnail?.url || imageData?.formats?.small?.url || imageData?.url;
-            const imageUrl = resolveAssetUrl(thumbnailUrl);
+        return (
+          <div
+            key={row?.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleRowClick(row.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleRowClick(row.id);
+              }
+            }}
+            className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
+          >
+            {enableSelection ? (
+              <input
+                type="checkbox"
+                className="h-5 w-5"
+                checked={selectedIds?.has(row.id) || false}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => onSelectionChange?.(row.id, event.target.checked)}
+              />
+            ) : (
+              <input type="checkbox" className="h-5 w-5" onClick={(event) => event.stopPropagation()} />
+            )}
 
-            return imageUrl ? (
+            {imageUrl ? (
               <>
                 <img
                   src={imageUrl}
-                  alt={imageData?.name || row?.attributes?.Title || "Product image"}
+                  alt={row?.attributes?.Title || "Product image"}
                   className="h-12 w-12 rounded-lg object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const placeholder = e.currentTarget.nextElementSibling;
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                    const placeholder = event.currentTarget.nextElementSibling;
                     if (placeholder) placeholder.classList.remove("hidden");
                   }}
                 />
@@ -276,62 +337,58 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                   />
                 </svg>
               </div>
-            );
-          })()}
+            )}
 
-          <div className="flex flex-1 flex-col gap-2">
-            <div className="flex w-full items-center justify-between">
-              <span className="text-sm text-neutral-800">
-                {row?.attributes?.Title}
-                {row?.attributes?.product_variations?.data?.[0]?.attributes?.SKU}
-              </span>
-
-              <button className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600">
-                <ShowMoreIcon />
-              </button>
-            </div>
-
-            <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
-              <div className="flex gap-1">
-                <span className="text-xs text-neutral-400">
-                  {row?.attributes?.product_main_category?.data?.attributes?.Title}
+            <div className="flex flex-1 flex-col gap-2">
+              <div className="flex w-full items-center justify-between">
+                <span className="text-sm text-neutral-800">
+                  {row?.attributes?.Title}
+                  {sku}
                 </span>
-                <span className="text-xs text-neutral-400">|</span>
-                <span className="text-xs text-green-700">
-                  {row?.attributes?.product_variations?.data?.reduce(
-                    (acc, curr) => acc + curr?.attributes?.product_stock?.data?.attributes?.Count,
-                    0,
-                  )}
-                  عدد در انبار
-                </span>
+
+                <button
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleRowClick(row.id);
+                  }}
+                  aria-label="نمایش جزئیات محصول"
+                >
+                  <ShowMoreIcon />
+                </button>
               </div>
 
-              <div className="flex flex-col">
-                {row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice && (
-                  <span className="text-xs font-medium text-pink-600">
-                    {priceFormatter(
-                      +row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice,
-                      " تومان",
-                    )}
+              <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
+                <div className="flex gap-1">
+                  <span className="text-xs text-neutral-400">
+                    {row?.attributes?.product_main_category?.data?.attributes?.Title}
                   </span>
-                )}
-                <span
-                  className={`text-xs ${
-                    row?.attributes?.product_variations?.data?.[0]?.attributes?.DiscountPrice
-                      ? "text-gray-500 line-through"
-                      : "text-neutral-800"
-                  }`}
-                >
-                  {priceFormatter(
-                    +row?.attributes?.product_variations?.data?.[0]?.attributes?.Price,
-                    " تومان",
+                  <span className="text-xs text-neutral-400">|</span>
+                  <span className="text-xs text-green-700">
+                    {stockCount}
+                    عدد در انبار
+                  </span>
+                </div>
+
+                <div className="flex flex-col">
+                  {priceInfo?.minDiscount && (
+                    <span className="text-xs font-medium text-pink-600">
+                      {priceFormatter(priceInfo.minDiscount, " تومان")}
+                    </span>
                   )}
-                </span>
+                  <span
+                    className={`text-xs ${
+                      priceInfo?.minDiscount ? "text-gray-500 line-through" : "text-neutral-800"
+                    }`}
+                  >
+                    {rowPriceText}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

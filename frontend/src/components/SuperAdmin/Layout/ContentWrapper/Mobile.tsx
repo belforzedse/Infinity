@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SuperAdminPagination from "../../Pagination";
+import SuperAdminPageSizeSelect from "../../Pagination/PageSizeSelect";
 import RecycleBinButton from "./Button/RecycleBin";
 import AddButton from "./Button/Add";
 import FilterButton from "./Button/Filter";
@@ -68,8 +69,13 @@ export default function SuperAdminLayoutContentWrapperMobile(props: Props) {
         </div>
       </div>
 
-      <div className="mt-5">{children}</div>
+      {hasPagination && (
+        <div className="mt-3 flex justify-end">
+          <SuperAdminPageSizeSelect />
+        </div>
+      )}
 
+      <div className="mt-5">{children}</div>
       {hasPagination && (
         <SuperAdminPagination
           className="mt-4"
@@ -78,6 +84,7 @@ export default function SuperAdminLayoutContentWrapperMobile(props: Props) {
           onPageChange={handlePageChange}
         />
       )}
+
     </>
   );
 }
