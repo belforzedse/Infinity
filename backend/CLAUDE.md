@@ -46,7 +46,7 @@ npm run test:callback-url       # Test payment callback URL
 - **Cache/Session**: Redis
 - **Language**: TypeScript
 - **Payment Gateways**: Mellat Bank (v2, v3), SnappPay
-- **Authentication**: JWT-based custom auth (not using Strapi's default users-permissions)
+- **Authentication**: Strapi users-permissions plugin (migrated from custom auth system)
 
 ### Directory Structure
 
@@ -93,11 +93,13 @@ src/api/cart/controllers/
     └── gateway-helpers.ts     # Payment gateway abstraction
 ```
 
-#### 2. Custom Authentication
-The system uses a **custom JWT auth** system (`api::local-user.local-user`) instead of Strapi's built-in `users-permissions` plugin:
-- JWT tokens are validated in `src/middlewares/authentication.ts`
-- User object is attached to `ctx.state.user`
-- Auth routes are in `src/api/auth/`
+#### 2. Strapi Users-Permissions Authentication
+The system uses **Strapi's users-permissions plugin** for authentication:
+- JWT tokens are issued/verified using `strapi.plugin("users-permissions").service("jwt")`
+- Users are stored in `plugin::users-permissions.user` content type
+- Auth routes are in `src/api/auth/` and use the plugin's JWT service
+- User profile data is stored in `api::local-user-info.local-user-info` linked to plugin users
+- Routes use `auth: { scope: [] }` or `auth: false` for authentication
 
 #### 3. Lifecycle Hooks
 Strapi lifecycles are used for automatic side effects:
