@@ -268,24 +268,77 @@ export default {
       const { join: paidOrdersContractJoin, source: contractJoinSource } =
         await detectJoin();
 
-      const contractTxFkRes = await knex.raw(
-        `SELECT column_name FROM information_schema.columns WHERE table_name = 'contract_transactions'`,
-      );
-      const contractTxColumns =
-        (contractTxFkRes.rows || contractTxFkRes[0] || []).map((r: any) =>
-          String(r.column_name),
+      const detectContractTxJoin = async () => {
+        const contractTxFkRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'contract_transactions'`,
         );
-      const contractTxFk =
-        contractTxColumns.find((c) => c === "contract_id") ||
-        contractTxColumns.find((c) => c === "contract") ||
-        contractTxColumns.find(
-          (c) => c.startsWith("contract") && c.endsWith("_id"),
+        const contractTxColumns =
+          (contractTxFkRes.rows || contractTxFkRes[0] || []).map((r: any) =>
+            String(r.column_name),
+          );
+
+        const directFk =
+          contractTxColumns.find((c) => c === "contract_id") ||
+          contractTxColumns.find((c) => c === "contract") ||
+          contractTxColumns.find(
+            (c) => c.startsWith("contract") && c.endsWith("_id"),
+          );
+        if (directFk) {
+          return {
+            join: `JOIN contract_transactions ct ON ct.${directFk} = c.id`,
+            source: "direct",
+          };
+        }
+
+        const linkRes = await knex.raw(
+          `SELECT table_name FROM information_schema.tables
+           WHERE table_schema = 'public'
+             AND table_name LIKE '%contract%transaction%links%'`,
         );
-      if (!contractTxFk) {
+        const linkTables = linkRes.rows || linkRes[0] || [];
+        for (const row of linkTables) {
+          const tableName = String(row.table_name);
+          const colsRes = await knex.raw(
+            `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+            [tableName],
+          );
+          const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+            String(r.column_name),
+          );
+          const contractFk =
+            cols.find((c: string) => c === "contract_id") ||
+            cols.find((c: string) => c.endsWith("contract_id")) ||
+            cols.find(
+              (c: string) => c.startsWith("contract") && c.endsWith("_id"),
+            );
+          const txFk =
+            cols.find((c: string) => c === "contract_transaction_id") ||
+            cols.find((c: string) => c.endsWith("contract_transaction_id")) ||
+            cols.find((c: string) => c === "transaction_id") ||
+            cols.find(
+              (c: string) =>
+                c.startsWith("contract_transaction") && c.endsWith("_id"),
+            );
+          if (contractFk && txFk) {
+            return {
+              join: `
+                JOIN ${tableName} lct ON lct.${contractFk} = c.id
+                JOIN contract_transactions ct ON ct.id = lct.${txFk}
+              `,
+              source: "link",
+            };
+          }
+        }
+
         throw new Error(
-          "CONTRACT_TRANSACTION_RELATION_NOT_FOUND: contract_transactions missing contract FK",
+          "CONTRACT_TRANSACTION_RELATION_NOT_FOUND: Unable to link contracts to contract_transactions",
         );
-      }
+      };
+
+      const {
+        join: contractTransactionsJoin,
+        source: contractTransactionsJoinSource,
+      } = await detectContractTxJoin();
 
       const paidOrdersCte = `
         WITH paid_orders AS (
@@ -296,7 +349,7 @@ export default {
             )::numeric AS settled_amount_irr
           FROM orders o
           ${paidOrdersContractJoin}
-          JOIN contract_transactions ct ON ct.${contractTxFk} = c.id
+          ${contractTransactionsJoin}
           WHERE ct.status = 'Success'
             AND o.date BETWEEN ? AND ?
           GROUP BY o.id
@@ -405,7 +458,7 @@ export default {
                ordersCount > 0 ? settledOrders / ordersCount : 0,
              settledAmountToman: totalSettledIrr / 10,
             joinSource: contractJoinSource,
-            contractTxFk,
+            contractTransactionsJoinSource,
           },
         };
         return;
