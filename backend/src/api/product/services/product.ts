@@ -19,10 +19,16 @@ export default factories.createCoreService(
       const limit = parseInt(pageSize.toString());
 
       // Create a search filter for product name, description, etc.
+      // Exclude trashed products (removedAt should be null)
       const filters: any = {
-        $or: [
-          { Title: { $containsi: query } },
-          { Description: { $containsi: query } },
+        $and: [
+          {
+            $or: [
+              { Title: { $containsi: query } },
+              { Description: { $containsi: query } },
+            ],
+          },
+          { removedAt: { $null: true } },
         ],
       };
 

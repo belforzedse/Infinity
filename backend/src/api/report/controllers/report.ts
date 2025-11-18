@@ -109,7 +109,7 @@ export default {
       let ordersItemsJoinSql: string | null = null;
       let ordersItemsLink: string | undefined;
       const ordersItemsLinksRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
+        `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name LIKE '%order%item%links%'`
       );
       const ordersItemsLinks =
@@ -157,7 +157,7 @@ export default {
       let productVariationJoinSql = "";
       let selectProductVariationId = "NULL AS product_variation_id";
       const oiPvLinksRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
+        `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name LIKE '%order%item%product%variation%links%'`
       );
       const oiPvLinks = oiPvLinksRes.rows || oiPvLinksRes[0] || [];
@@ -196,76 +196,210 @@ export default {
         }
       }
 
-      // Optionally join contracts to orders (if a reliable relation is present)
-      let contractJoinSql: string = "";
-      let contractOrderLink: string | undefined;
+      const detectJoin = async () => {
+        const tryLinkTable = async () => {
+          const linkRes = await knex.raw(
+            `SELECT table_name FROM information_schema.tables
+             WHERE table_schema = 'public' AND table_name LIKE '%order%contract%links%'`,
+          );
+          const linkTables = linkRes.rows || linkRes[0] || [];
+          for (const row of linkTables) {
+            const tableName = String(row.table_name);
+            const colsRes = await knex.raw(
+              `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+              [tableName],
+            );
+            const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+              String(r.column_name),
+            );
+            const orderFk =
+              cols.find((c: string) => c === "order_id") ||
+              cols.find((c: string) => c.endsWith("order_id")) ||
+              cols.find(
+                (c: string) => c.startsWith("order") && c.endsWith("_id"),
+              );
+            const contractFk =
+              cols.find((c: string) => c === "contract_id") ||
+              cols.find((c: string) => c.endsWith("contract_id")) ||
+              cols.find(
+                (c: string) => c.startsWith("contract") && c.endsWith("_id"),
+              );
 
-      const contractLinkTablesRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND table_name LIKE '%contract%order%links%'`
-      );
-      const contractLinkTables =
-        contractLinkTablesRes.rows || contractLinkTablesRes[0] || [];
-      if (Array.isArray(contractLinkTables) && contractLinkTables.length > 0) {
-        contractOrderLink = String(contractLinkTables[0].table_name);
-      }
+            if (orderFk && contractFk) {
+              return `
+                JOIN ${tableName} col ON col.${orderFk} = o.id
+                JOIN contracts c ON c.id = col.${contractFk}
+              `;
+            }
+          }
+          return null;
+        };
 
-      if (contractOrderLink) {
-        const colsRes = await knex.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [contractOrderLink]
-        );
-        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
-          String(r.column_name)
-        );
-        const orderFk =
-          cols.find((c: string) => c === "order_id") ||
-          cols.find((c: string) => c.endsWith("order_id")) ||
-          cols.find(
-            (c: string) => c.startsWith("order") && c.endsWith("_id")
-          ) ||
-          "order_id";
-        const contractFk =
-          cols.find((c: string) => c === "contract_id") ||
-          cols.find((c: string) => c.endsWith("contract_id")) ||
-          cols.find(
-            (c: string) => c.startsWith("contract") && c.endsWith("_id")
-          ) ||
-          "contract_id";
+        const tryDirectFk = async () => {
+          const contractOrderFkRes = await knex.raw(
+            `SELECT column_name FROM information_schema.columns WHERE table_name = 'contracts'`,
+          );
+          const cols = (contractOrderFkRes.rows || contractOrderFkRes[0] || []).map(
+            (r: any) => String(r.column_name),
+          );
+          const orderFkColumn =
+            cols.find((c) => c === "order_id") ||
+            cols.find((c) => c === "order") ||
+            cols.find((c) => c.endsWith("order_id"));
+          if (orderFkColumn) {
+            return `JOIN contracts c ON c.${orderFkColumn} = o.id`;
+          }
+          return null;
+        };
 
-        contractJoinSql = `
-          LEFT JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
-          LEFT JOIN contracts c ON c.id = col.${contractFk}
-        `;
-      } else {
-        // Fallback to contracts.order_id FK if it exists
-        const hasOrderIdColRes = await knex.raw(
-          `SELECT 1 FROM information_schema.columns WHERE table_name = 'contracts' AND column_name = 'order_id'`
+        const viaLink = await tryLinkTable();
+        if (viaLink) {
+          return { join: viaLink, source: "link" };
+        }
+        const viaDirect = await tryDirectFk();
+        if (viaDirect) {
+          return { join: viaDirect, source: "direct" };
+        }
+        throw new Error(
+          "CONTRACT_RELATION_NOT_FOUND: Unable to resolve order-contract relation for reports",
         );
-        const hasOrderId =
-          (hasOrderIdColRes.rows || hasOrderIdColRes[0] || []).length > 0;
-        contractJoinSql = hasOrderId
-          ? `LEFT JOIN contracts c ON c.order_id = o.id`
-          : "";
-      }
+      };
+
+      const { join: paidOrdersContractJoin, source: contractJoinSource } =
+        await detectJoin();
+
+      const detectContractTxJoin = async () => {
+        const contractTxFkRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'contract_transactions'`,
+        );
+        const contractTxColumns =
+          (contractTxFkRes.rows || contractTxFkRes[0] || []).map((r: any) =>
+            String(r.column_name),
+          );
+
+        const directFk =
+          contractTxColumns.find((c) => c === "contract_id") ||
+          contractTxColumns.find((c) => c === "contract") ||
+          contractTxColumns.find(
+            (c) => c.startsWith("contract") && c.endsWith("_id"),
+          );
+        if (directFk) {
+          return {
+            join: `JOIN contract_transactions ct ON ct.${directFk} = c.id`,
+            source: "direct",
+          };
+        }
+
+        const linkRes = await knex.raw(
+          `SELECT table_name FROM information_schema.tables
+           WHERE table_schema = 'public'
+             AND table_name LIKE '%contract%transaction%links%'`,
+        );
+        const linkTables = linkRes.rows || linkRes[0] || [];
+        for (const row of linkTables) {
+          const tableName = String(row.table_name);
+          const colsRes = await knex.raw(
+            `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+            [tableName],
+          );
+          const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+            String(r.column_name),
+          );
+          const contractFk =
+            cols.find((c: string) => c === "contract_id") ||
+            cols.find((c: string) => c.endsWith("contract_id")) ||
+            cols.find(
+              (c: string) => c.startsWith("contract") && c.endsWith("_id"),
+            );
+          const txFk =
+            cols.find((c: string) => c === "contract_transaction_id") ||
+            cols.find((c: string) => c.endsWith("contract_transaction_id")) ||
+            cols.find((c: string) => c === "transaction_id") ||
+            cols.find(
+              (c: string) =>
+                c.startsWith("contract_transaction") && c.endsWith("_id"),
+            );
+          if (contractFk && txFk) {
+            return {
+              join: `
+                JOIN ${tableName} lct ON lct.${contractFk} = c.id
+                JOIN contract_transactions ct ON ct.id = lct.${txFk}
+              `,
+              source: "link",
+            };
+          }
+        }
+
+        throw new Error(
+          "CONTRACT_TRANSACTION_RELATION_NOT_FOUND: Unable to link contracts to contract_transactions",
+        );
+      };
+
+      const {
+        join: contractTransactionsJoin,
+        source: contractTransactionsJoinSource,
+      } = await detectContractTxJoin();
+
+      const paidOrdersCte = `
+        WITH paid_orders AS (
+          SELECT
+            o.id AS order_id,
+            SUM(
+              CASE WHEN ct.type = 'Return' THEN -ct.amount ELSE ct.amount END
+            )::numeric AS settled_amount_irr
+          FROM orders o
+          ${paidOrdersContractJoin}
+          ${contractTransactionsJoin}
+          WHERE ct.status = 'Success'
+            AND o.date BETWEEN ? AND ?
+          GROUP BY o.id
+          HAVING SUM(
+            CASE WHEN ct.type = 'Return' THEN -ct.amount ELSE ct.amount END
+          ) > 0
+        )
+      `;
 
       const query = `
-        SELECT ${selectProductVariationId},
-               oi.product_title,
-               oi.product_sku,
-               SUM(oi.count)::bigint AS total_count,
-               SUM((oi.per_amount * oi.count))::bigint AS total_revenue
-        ${ordersItemsJoinSql}
-        ${productVariationJoinSql}
-        ${contractJoinSql}
-        WHERE o.date BETWEEN ? AND ?
-        GROUP BY ${
-          selectProductVariationId.includes("pv.id") ? "pv.id," : ""
-        } oi.product_title, oi.product_sku
+        ${paidOrdersCte},
+        itemized AS (
+          SELECT
+            ${selectProductVariationId},
+            oi.product_title,
+            oi.product_sku,
+            oi.count AS item_count,
+            oi.per_amount AS item_unit_amount,
+            (oi.per_amount * oi.count)::numeric AS item_total_toman,
+            o.id AS order_id,
+            po.settled_amount_irr,
+            SUM((oi.per_amount * oi.count)::numeric) OVER (PARTITION BY o.id) AS order_items_subtotal
+          ${ordersItemsJoinSql}
+          ${productVariationJoinSql}
+          JOIN paid_orders po ON po.order_id = o.id
+          WHERE o.date BETWEEN ? AND ?
+        )
+        SELECT
+          product_variation_id,
+          product_title,
+          product_sku,
+          SUM(item_count)::bigint AS total_count,
+          ROUND(
+            SUM(
+              CASE
+                WHEN settled_amount_irr IS NULL
+                  OR settled_amount_irr <= 0
+                  OR order_items_subtotal IS NULL
+                  OR order_items_subtotal <= 0
+                THEN item_total_toman
+                ELSE (settled_amount_irr / 10.0) * (item_total_toman / order_items_subtotal)
+              END
+            )
+          )::bigint AS total_revenue
+        FROM itemized
+        GROUP BY product_variation_id, product_title, product_sku
         ORDER BY total_revenue DESC
       `;
 
-      const res = await knex.raw(query, [start, end]);
+      const res = await knex.raw(query, [start, end, start, end]);
       const rows = res.rows || res[0];
 
       const payload = rows.map((r: any) => ({
@@ -282,22 +416,35 @@ export default {
         String(ctx.query.debug || "") === "1";
       if (wantsDebug) {
         // Orders in range
-        const ordersCountRes = await knex.raw(
-          `SELECT COUNT(*)::bigint AS c FROM orders o WHERE o.date BETWEEN ? AND ?`,
-          [start, end]
-        );
-        const ordersCount = Number(
-          (ordersCountRes.rows || ordersCountRes[0])[0]?.c || 0
+        const [ordersCountRes, joinCountRes, settledMetaRes] = await Promise.all(
+          [
+            knex.raw(
+              `SELECT COUNT(*)::bigint AS c FROM orders o WHERE o.date BETWEEN ? AND ?`,
+              [start, end],
+            ),
+            knex.raw(
+              `SELECT COUNT(*)::bigint AS c ${ordersItemsJoinSql} WHERE o.date BETWEEN ? AND ?`,
+              [start, end],
+            ),
+            knex.raw(
+              `${paidOrdersCte}
+               SELECT COUNT(*)::bigint AS orders, COALESCE(SUM(settled_amount_irr)::bigint, 0) AS total_amount_irr
+               FROM paid_orders`,
+              [start, end],
+            ),
+          ],
         );
 
-        // Order items matched by join
-        const joinCountRes = await knex.raw(
-          `SELECT COUNT(*)::bigint AS c ${ordersItemsJoinSql} WHERE o.date BETWEEN ? AND ?`,
-          [start, end]
+        const ordersCount = Number(
+          (ordersCountRes.rows || ordersCountRes[0])[0]?.c || 0,
         );
         const joinCount = Number(
-          (joinCountRes.rows || joinCountRes[0])[0]?.c || 0
+          (joinCountRes.rows || joinCountRes[0])[0]?.c || 0,
         );
+        const settledMetaRow =
+          (settledMetaRes.rows || settledMetaRes[0])[0] || {};
+        const settledOrders = Number(settledMetaRow.orders || 0);
+        const totalSettledIrr = Number(settledMetaRow.total_amount_irr || 0);
 
         ctx.body = {
           data: payload,
@@ -306,6 +453,12 @@ export default {
             end,
             ordersInRange: ordersCount,
             orderItemsJoinedCount: joinCount,
+             settledOrders,
+             settlementCoverage:
+               ordersCount > 0 ? settledOrders / ordersCount : 0,
+             settledAmountToman: totalSettledIrr / 10,
+            joinSource: contractJoinSource,
+            contractTransactionsJoinSource,
           },
         };
         return;
@@ -406,11 +559,54 @@ export default {
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
-      const userId_filter = ctx.query.user_id as string;
-      const actionType = ctx.query.action_type as string;
-      const logType = ctx.query.log_type as string;
+      const allowedAdminRoles = new Set<string>([
+        ROLE_NAMES.SUPERADMIN,
+        ROLE_NAMES.STORE_MANAGER,
+      ]);
+
+      const userIdFilterRaw = (ctx.query.user_id as string) || "";
+      const userIdFilter =
+        typeof userIdFilterRaw === "string"
+          ? userIdFilterRaw.trim().toLowerCase()
+          : "";
+      const actionType = (ctx.query.action_type as string) || "";
+      const logType = (ctx.query.log_type as string) || "All";
       const limit = Math.min(Number(ctx.query.limit || 100), 1000);
-      const offset = Number(ctx.query.offset || 0);
+      const offset = Math.max(Number(ctx.query.offset || 0), 0);
+      const perTableLimit = limit + offset;
+
+      const adminActivities = (await strapi.entityService.findMany(
+        "api::admin-activity.admin-activity" as any,
+        {
+          filters: {
+            createdAt: {
+              $gte: start.toISOString(),
+              $lte: end.toISOString(),
+            },
+            ...(logType && logType !== "All"
+              ? { ResourceType: logType }
+              : {}),
+            ...(actionType ? { Action: actionType } : {}),
+          },
+          orderBy: { createdAt: "desc" },
+          limit: perTableLimit,
+        },
+      )) as any[];
+
+      let allLogs: any[] = (adminActivities || []).map((log: any) => ({
+        id: `AdminActivity-${log.id}`,
+        log_type: log.ResourceType || "Admin",
+        action_type: log.Action,
+        admin_username: log.PerformedByName || "System",
+        admin_role:
+          log.PerformedByRole ||
+          (log.PerformedByName ? "Unknown" : "System"),
+        description: log.Description,
+        changes: log.Metadata,
+        ip_address: log.IP,
+        user_agent: log.UserAgent,
+        timestamp: log.createdAt,
+      }));
 
       // Helper to query a log table using Strapi query API
       async function queryLogTable(entity: string, resourceType: string) {
@@ -429,31 +625,57 @@ export default {
           where: filters,
           populate: { performed_by: { populate: { role: true } } },
           orderBy: { createdAt: "desc" },
-          limit,
-          offset,
+          limit: perTableLimit,
         } as any);
 
-        return (Array.isArray(logs) ? logs : []).map((log: any) => ({
-          id: log.id,
-          log_type: resourceType,
-          action_type: log.Action,
-          admin_username:
-            log.performed_by?.username ||
+        return (Array.isArray(logs) ? logs : []).map((log: any) => {
+          const actor = log.performed_by;
+          const actorRole = actor?.role?.name || null;
+          const actorUsername =
+            actor?.username ||
+            actor?.email ||
+            actor?.phone ||
             log.PerformedBy ||
-            "System",
-          admin_role: log.performed_by?.role?.name || "Unknown",
-          description: log.Description,
-          changes: log.Changes,
-          ip_address: log.IP,
-          user_agent: log.UserAgent,
-          timestamp: log.createdAt,
-        }));
+            null;
+          const actorLabel = actorUsername || (actor?.id ? `User ${actor.id}` : null);
+          const isSystemLabel =
+            !actorLabel ||
+            actorLabel.toLowerCase() === "system" ||
+            actorLabel === "[object Object]";
+          const actorUserId =
+            typeof actor?.id === "number" ? actor.id : Number(actor?.id) || null;
+          const includeFromRole =
+            !!actorRole && allowedAdminRoles.has(actorRole);
+          const adminRoleLabel = includeFromRole
+            ? actorRole
+            : isSystemLabel
+            ? "System"
+            : "Unknown";
+
+          return {
+            id: `${resourceType}-${log.id}`,
+            log_type: resourceType,
+            action_type: log.Action,
+            admin_username: actorLabel || "System",
+            admin_role: adminRoleLabel,
+            admin_user_id: actorUserId,
+            admin_email: actor?.email || null,
+            description: log.Description,
+            changes: log.Changes,
+            ip_address: log.IP,
+            user_agent: log.UserAgent,
+            timestamp: log.createdAt,
+          };
+        });
       }
 
       // Query all log tables
-      let allLogs: any[] = [];
+      const wantsLogType = (type: string) => {
+        if (!logType || logType === "All") return true;
+        return logType.toLowerCase() === type.toLowerCase();
+      };
 
-      if (!logType || logType === "All" || logType === "Orders") {
+      if (wantsLogType("Order")) {
         const orderLogs = await queryLogTable(
           "api::order-log.order-log",
           "Order"
@@ -461,7 +683,7 @@ export default {
         allLogs = allLogs.concat(orderLogs);
       }
 
-      if (!logType || logType === "All" || logType === "Products") {
+      if (wantsLogType("Product")) {
         const productLogs = await queryLogTable(
           "api::product-log.product-log",
           "Product"
@@ -469,7 +691,7 @@ export default {
         allLogs = allLogs.concat(productLogs);
       }
 
-      if (!logType || logType === "All" || logType === "Users") {
+      if (wantsLogType("User")) {
         const userLogs = await queryLogTable(
           "api::local-user-log.local-user-log",
           "User"
@@ -477,7 +699,7 @@ export default {
         allLogs = allLogs.concat(userLogs);
       }
 
-      if (!logType || logType === "All" || logType === "Contracts") {
+      if (wantsLogType("Contract")) {
         const contractLogs = await queryLogTable(
           "api::contract-log.contract-log",
           "Contract"
@@ -485,10 +707,30 @@ export default {
         allLogs = allLogs.concat(contractLogs);
       }
 
+      allLogs = allLogs.filter((log) => !!log);
+
       // Filter by user_id if provided
-      if (userId_filter) {
-        allLogs = allLogs.filter((log) => log.admin_username === userId_filter);
-      }
+      const matchesUserFilter = (log: any) => {
+        if (!userIdFilter) return true;
+        if (log.admin_user_id && String(log.admin_user_id) === userIdFilter) {
+          return true;
+        }
+        if (
+          typeof log.admin_username === "string" &&
+          log.admin_username.toLowerCase() === userIdFilter
+        ) {
+          return true;
+        }
+        if (
+          typeof log.admin_email === "string" &&
+          log.admin_email.toLowerCase() === userIdFilter
+        ) {
+          return true;
+        }
+        return false;
+      };
+
+      allLogs = allLogs.filter(matchesUserFilter);
 
       // Sort by timestamp DESC
       allLogs = allLogs.sort(
@@ -496,62 +738,28 @@ export default {
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
-      // Get total count across all logs
-      async function countLogTable(entity: string) {
-        try {
-          const count = await (strapi.db.query(entity as any) as any).count({
-            where: {
-              createdAt: {
-                $gte: start.toISOString(),
-                $lte: end.toISOString(),
-              },
-            },
-          });
-          return count || 0;
-        } catch {
-          return 0;
-        }
-      }
-
-      const countPromises = [
-        logType && logType !== "All" && logType !== "Orders"
-          ? Promise.resolve(0)
-          : countLogTable("api::order-log.order-log"),
-        logType && logType !== "All" && logType !== "Products"
-          ? Promise.resolve(0)
-          : countLogTable("api::product-log.product-log"),
-        logType && logType !== "All" && logType !== "Users"
-          ? Promise.resolve(0)
-          : countLogTable("api::local-user-log.local-user-log"),
-        logType && logType !== "All" && logType !== "Contracts"
-          ? Promise.resolve(0)
-          : countLogTable("api::contract-log.contract-log"),
-      ];
-
-      const counts = await Promise.all(countPromises);
-      const totalCount = counts.reduce((sum, count) => sum + (count as number), 0);
+      const totalCount = allLogs.length;
+      const pagedLogs = allLogs.slice(offset, offset + limit);
 
       ctx.body = {
         data: {
-          activities: allLogs
-            .slice(offset, offset + limit)
-            .map((log: any) => ({
-              id: log.id,
-              logType: log.log_type,
-              actionType: log.action_type,
-              adminUsername: log.admin_username,
-              adminRole: log.admin_role,
-              description: log.description,
-              changes: log.changes,
-              ipAddress: log.ip_address,
-              userAgent: log.user_agent,
-              timestamp: log.timestamp,
-            })),
+          activities: pagedLogs.map((log: any) => ({
+            id: log.id,
+            logType: log.log_type,
+            actionType: log.action_type,
+            adminUsername: log.admin_username,
+            adminRole: log.admin_role,
+            description: log.description,
+            changes: log.changes,
+            ipAddress: log.ip_address,
+            userAgent: log.user_agent,
+            timestamp: log.timestamp,
+          })),
           pagination: {
             total: totalCount,
             limit,
             offset,
-            hasMore: offset + allLogs.length < totalCount,
+            hasMore: offset + limit < totalCount,
           },
         },
       };

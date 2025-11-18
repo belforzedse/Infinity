@@ -30,6 +30,14 @@ export default {
       },
     },
     {
+      method: "GET",
+      path: "/orders/my-orders/:id",
+      handler: "order.getMyOrderDetail",
+      config: {
+        auth: { scope: [] },
+      },
+    },
+    {
       method: "POST",
       path: "/orders/:id/anipo-barcode",
       handler: "order.generateAnipoBarcode",
