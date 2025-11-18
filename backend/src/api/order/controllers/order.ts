@@ -215,5 +215,82 @@ export default factories.createCoreController(
         });
       }
     },
+
+    async getMyOrderDetail(ctx) {
+      const { user } = ctx.state;
+      const { id } = ctx.params;
+
+      try {
+        const orderId = Number(id);
+        if (Number.isNaN(orderId)) {
+          return ctx.badRequest("Order id must be a number", {
+            data: { success: false, error: "INVALID_ID" },
+          });
+        }
+
+        const order = await strapi.db.query("api::order.order").findOne({
+          where: { id: orderId, user: { id: user.id } },
+          populate: {
+            order_items: {
+              populate: {
+                product_variation: {
+                  populate: {
+                    product_color: true,
+                    product_size: true,
+                    product_variation_model: true,
+                    product: { populate: ["CoverImage"] },
+                  },
+                },
+              },
+            },
+            shipping: true,
+            delivery_address: {
+              populate: {
+                shipping_city: {
+                  populate: {
+                    shipping_province: true,
+                  },
+                },
+              },
+            },
+            contract: {
+              populate: {
+                contract_transactions: {
+                  populate: {
+                    payment_gateway: true,
+                  },
+                  orderBy: { Date: "asc" },
+                },
+              },
+            },
+          },
+        });
+
+        if (!order) {
+          return ctx.notFound("Order not found", {
+            data: { success: false, error: "NOT_FOUND" },
+          });
+        }
+
+        const orderLogs = await strapi.db.query("api::order-log.order-log").findMany({
+          where: { order: { id: orderId } },
+          orderBy: { createdAt: "asc" },
+        });
+
+        const contractTransactions = order.contract?.contract_transactions ?? [];
+
+        return {
+          data: {
+            ...order,
+            contract_transactions: contractTransactions,
+            orderLogs,
+          },
+        };
+      } catch (error) {
+        return ctx.badRequest((error as any).message, {
+          data: { success: false, error: (error as any).message },
+        });
+      }
+    },
   })
 );
