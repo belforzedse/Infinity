@@ -1,5 +1,6 @@
 import { Strapi } from "@strapi/strapi";
 import {
+  ensurePaymentGateway,
   requestMellatPayment,
   requestSamanPayment,
   requestSnappPayment,
@@ -188,8 +189,9 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       );
 
       // Transaction record (Minus)
+      let walletDebitTx: any = null;
       try {
-        await strapi.entityService.create(
+        walletDebitTx = await strapi.entityService.create(
           "api::local-user-wallet-transaction.local-user-wallet-transaction",
           {
             data: {
@@ -202,7 +204,64 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
             },
           }
         );
-      } catch {}
+      } catch (error) {
+        strapi.log.error("Failed to persist wallet transaction entry", error);
+      }
+
+      // Persist contract transaction as settled (wallet)
+      let walletGateway: any = null;
+      try {
+        walletGateway = await ensurePaymentGateway(strapi, "Wallet", {
+          Description: "Infinity wallet balance",
+        });
+      } catch (error) {
+        strapi.log.error("Failed to ensure wallet payment gateway", error);
+      }
+
+      const discountIrr = Math.round(Number(financialSummary?.discount || 0) * 10);
+      const walletReference = walletDebitTx?.id
+        ? `wallet-tx-${walletDebitTx.id}`
+        : `wallet-${order.id}`;
+
+      try {
+        const contractTransactionData: any = {
+          Type: "Gateway",
+          Amount: totalIrr,
+          DiscountAmount: discountIrr,
+          Step: 1,
+          Status: "Success",
+          TrackId: walletReference,
+          external_id: walletReference,
+          external_source: "Wallet",
+          contract: contract.id,
+          Date: new Date(),
+        };
+        if (walletGateway?.id) {
+          contractTransactionData.payment_gateway = walletGateway.id;
+        }
+
+        await strapi.entityService.create(
+          "api::contract-transaction.contract-transaction",
+          {
+            data: contractTransactionData,
+          }
+        );
+      } catch (error) {
+        strapi.log.error("Failed to persist wallet contract transaction", error);
+      }
+
+      // Mark contract as confirmed
+      try {
+        await strapi.entityService.update("api::contract.contract", contract.id, {
+          data: {
+            Status: "Confirmed",
+            external_source: "Wallet",
+            external_id: walletReference,
+          },
+        });
+      } catch (error) {
+        strapi.log.error("Failed to confirm contract for wallet payment", error);
+      }
 
       // Immediately mark order as paid (Started) and decrement stock (wallet is instant-settlement)
       try {
