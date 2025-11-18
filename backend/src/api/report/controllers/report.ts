@@ -198,21 +198,22 @@ export default {
 
       // Build join between orders and contracts for settlement tracing
       let paidOrdersContractJoin = "";
-      let contractOrderLink: string | undefined;
-      const contractLinkTablesRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables
-         WHERE table_schema = 'public' AND table_name LIKE '%contract%order%links%'`,
-      );
-      const contractLinkTables =
-        contractLinkTablesRes.rows || contractLinkTablesRes[0] || [];
-      if (Array.isArray(contractLinkTables) && contractLinkTables.length > 0) {
-        contractOrderLink = String(contractLinkTables[0].table_name);
-      }
+      let contractJoinResolved = false;
 
-      if (contractOrderLink) {
+      const contractLinkCandidatesRes = await knex.raw(
+        `SELECT table_name FROM information_schema.tables
+         WHERE table_schema = 'public' AND table_name LIKE '%links%'`,
+      );
+      const contractLinkCandidates =
+        contractLinkCandidatesRes.rows || contractLinkCandidatesRes[0] || [];
+      for (const row of contractLinkCandidates) {
+        const tableName = String(row.table_name);
+        const lower = tableName.toLowerCase();
+        if (!lower.includes("order") || !lower.includes("contract")) continue;
+
         const colsRes = await knex.raw(
           `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [contractOrderLink],
+          [tableName],
         );
         const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
           String(r.column_name),
@@ -222,37 +223,50 @@ export default {
           cols.find((c: string) => c.endsWith("order_id")) ||
           cols.find(
             (c: string) => c.startsWith("order") && c.endsWith("_id"),
-          ) ||
-          "order_id";
+          );
         const contractFk =
           cols.find((c: string) => c === "contract_id") ||
           cols.find((c: string) => c.endsWith("contract_id")) ||
           cols.find(
             (c: string) => c.startsWith("contract") && c.endsWith("_id"),
-          ) ||
-          "contract_id";
+          );
 
-        paidOrdersContractJoin = `
-          JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
-          JOIN contracts c ON c.id = col.${contractFk}
-        `;
-      } else {
+        if (orderFk && contractFk) {
+          paidOrdersContractJoin = `
+            JOIN ${tableName} col ON col.${orderFk} = o.id
+            JOIN contracts c ON c.id = col.${contractFk}
+          `;
+          contractJoinResolved = true;
+          break;
+        }
+      }
+
+      if (!contractJoinResolved) {
         const contractOrderFkRes = await knex.raw(
           `SELECT column_name FROM information_schema.columns WHERE table_name = 'contracts' AND column_name IN ('order_id','order')`,
         );
         const contractOrderFkRows =
           contractOrderFkRes.rows || contractOrderFkRes[0] || [];
-        const orderFkColumn = contractOrderFkRows.find(
-          (r: any) => r.column_name === "order_id",
-        )
-          ? "order_id"
-          : contractOrderFkRows.find((r: any) => r.column_name === "order")
-            ? '"order"'
-            : "order_id";
+        if (contractOrderFkRows.length > 0) {
+          const orderFkColumn = contractOrderFkRows.find(
+            (r: any) => r.column_name === "order_id",
+          )
+            ? "order_id"
+            : contractOrderFkRows.find((r: any) => r.column_name === "order")
+              ? '"order"'
+              : contractOrderFkRows[0].column_name;
 
-        paidOrdersContractJoin = `
-          JOIN contracts c ON c.${orderFkColumn} = o.id
-        `;
+          paidOrdersContractJoin = `
+            JOIN contracts c ON c.${orderFkColumn} = o.id
+          `;
+          contractJoinResolved = true;
+        }
+      }
+
+      if (!contractJoinResolved) {
+        throw new Error(
+          "CONTRACT_RELATION_NOT_FOUND: Unable to resolve order-contract relation for reports",
+        );
       }
 
       const paidOrdersCte = `
