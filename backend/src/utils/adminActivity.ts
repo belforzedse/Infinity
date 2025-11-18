@@ -20,11 +20,66 @@ export async function logAdminActivity(
   params: AdminActivityParams,
 ) {
   try {
-    const performedByName =
-      params.performedBy?.name ||
-      params.performedBy?.id
-        ? `User ${params.performedBy?.id}`
-        : "System";
+    // Normalize name to always be a string (never an object)
+    let performedByName: string = "System";
+    let performedByRole: string | null = null;
+
+    if (params.performedBy?.id) {
+      // If we have a user ID, try to fetch the user to get name and role
+      try {
+        const user = await strapi.entityService.findOne(
+          "plugin::users-permissions.user",
+          params.performedBy.id,
+          { fields: ["username", "email", "Phone"], populate: { role: true } }
+        );
+
+        if (user) {
+          performedByName =
+            user.username ||
+            user.email ||
+            user.Phone ||
+            `User ${params.performedBy.id}`;
+          
+          // Extract role name if available
+          if (user.role) {
+            performedByRole =
+              typeof user.role === "object" && user.role.name
+                ? user.role.name
+                : typeof user.role === "string"
+                  ? user.role
+                  : null;
+          }
+        } else {
+          performedByName = params.performedBy.name
+            ? String(params.performedBy.name)
+            : `User ${params.performedBy.id}`;
+        }
+      } catch (userError) {
+        // Fallback to provided name or User ID
+        performedByName =
+          params.performedBy.name && typeof params.performedBy.name === "string"
+            ? params.performedBy.name
+            : `User ${params.performedBy.id}`;
+      }
+
+      // Use provided role if we didn't fetch one
+      if (!performedByRole && params.performedBy.role) {
+        performedByRole =
+          typeof params.performedBy.role === "string"
+            ? params.performedBy.role
+            : null;
+      }
+    } else if (params.performedBy?.name) {
+      // If we only have a name (no ID), use it directly
+      performedByName =
+        typeof params.performedBy.name === "string"
+          ? params.performedBy.name
+          : String(params.performedBy.name);
+      performedByRole =
+        params.performedBy.role && typeof params.performedBy.role === "string"
+          ? params.performedBy.role
+          : null;
+    }
 
     await strapi.entityService.create("api::admin-activity.admin-activity" as any, {
       data: {
@@ -35,7 +90,7 @@ export async function logAdminActivity(
         Metadata: params.metadata,
         performed_by: params.performedBy?.id || undefined,
         PerformedByName: performedByName,
-        PerformedByRole: params.performedBy?.role,
+        PerformedByRole: performedByRole,
         IP: params.ip,
         UserAgent: params.userAgent,
       },

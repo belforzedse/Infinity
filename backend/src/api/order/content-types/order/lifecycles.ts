@@ -1,3 +1,6 @@
+import { resolveAuditActor } from "../../../../utils/audit";
+import { logAdminActivity } from "../../../../utils/adminActivity";
+
 type AuditAction = "Create" | "Update" | "Delete";
 
 function diffChanges(
@@ -31,7 +34,8 @@ export default {
     const { result } = event;
     if (!result?.id) return;
 
-    const userId = (event as any)?.state?.user?.id;
+    const actor = resolveAuditActor(event as any);
+    const userId = actor.userId || (event as any)?.state?.user?.id;
 
     await strapi.entityService.create("api::order-log.order-log" as any, {
       data: {
@@ -40,6 +44,26 @@ export default {
         Action: "Create" as AuditAction,
         Description: "Order created",
       },
+    });
+
+    // Log to admin activity
+    await logAdminActivity(strapi as any, {
+      resourceType: "Order",
+      resourceId: result.id,
+      action: "Create",
+      description: "سفارش ایجاد شد",
+      metadata: {
+        orderId: result.id,
+        orderType: result.Type,
+        orderStatus: result.Status,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 
@@ -97,7 +121,8 @@ export default {
     const changes = diffChanges(previous, current);
     if (Object.keys(changes).length === 0) return;
 
-    const userId = (event as any)?.state?.user?.id;
+    const actor = resolveAuditActor(event as any);
+    const userId = actor.userId || (event as any)?.state?.user?.id;
 
     await strapi.entityService.create("api::order-log.order-log" as any, {
       data: {
@@ -107,6 +132,25 @@ export default {
         Changes: changes,
         Description: "Order updated",
       },
+    });
+
+    // Log to admin activity
+    await logAdminActivity(strapi as any, {
+      resourceType: "Order",
+      resourceId: result.id,
+      action: "Update",
+      description: "سفارش بروزرسانی شد",
+      metadata: {
+        orderId: result.id,
+        changes,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 
@@ -121,7 +165,8 @@ export default {
     const id = (event as any)?.state?.deletingOrderId;
     if (!id) return;
 
-    const userId = (event as any)?.state?.user?.id;
+    const actor = resolveAuditActor(event as any);
+    const userId = actor.userId || (event as any)?.state?.user?.id;
 
     await strapi.entityService.create("api::order-log.order-log" as any, {
       data: {
@@ -130,6 +175,24 @@ export default {
         Action: "Delete" as AuditAction,
         Description: "Order deleted",
       },
+    });
+
+    // Log to admin activity
+    await logAdminActivity(strapi as any, {
+      resourceType: "Order",
+      resourceId: id,
+      action: "Delete",
+      description: "سفارش حذف شد",
+      metadata: {
+        orderId: id,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 };

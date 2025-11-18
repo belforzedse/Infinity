@@ -1,4 +1,5 @@
 import { resolveAuditActor } from "../../../../utils/audit";
+import { logAdminActivity } from "../../../../utils/adminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -44,6 +45,27 @@ export default {
         Action: "Create" as AuditAction,
         Description: "Contract created",
       },
+    });
+
+    // Log to admin activity
+    await logAdminActivity(strapi as any, {
+      resourceType: "Contract",
+      resourceId: result.id,
+      action: "Create",
+      description: "قرارداد ایجاد شد",
+      metadata: {
+        contractId: result.id,
+        contractType: result.Type,
+        contractStatus: result.Status,
+        amount: result.Amount,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 
@@ -94,6 +116,25 @@ export default {
         Description: "Contract updated",
       },
     });
+
+    // Log to admin activity
+    await logAdminActivity(strapi as any, {
+      resourceType: "Contract",
+      resourceId: result.id,
+      action: "Update",
+      description: "قرارداد بروزرسانی شد",
+      metadata: {
+        contractId: result.id,
+        changes,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
+    });
   },
 
   async beforeDelete(event) {
@@ -118,6 +159,24 @@ export default {
         Action: "Delete" as AuditAction,
         Description: "Contract deleted",
       },
+    });
+
+    // Log to admin activity
+    await logAdminActivity(strapi as any, {
+      resourceType: "Contract",
+      resourceId: id,
+      action: "Delete",
+      description: "قرارداد حذف شد",
+      metadata: {
+        contractId: id,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 };
