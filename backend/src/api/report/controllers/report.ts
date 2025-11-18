@@ -406,11 +406,21 @@ export default {
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
-      const userId_filter = ctx.query.user_id as string;
-      const actionType = ctx.query.action_type as string;
-      const logType = ctx.query.log_type as string;
+      const allowedAdminRoles = new Set([
+        ROLE_NAMES.SUPERADMIN,
+        ROLE_NAMES.STORE_MANAGER,
+      ]);
+
+      const userIdFilterRaw = (ctx.query.user_id as string) || "";
+      const userIdFilter =
+        typeof userIdFilterRaw === "string"
+          ? userIdFilterRaw.trim().toLowerCase()
+          : "";
+      const actionType = (ctx.query.action_type as string) || "";
+      const logType = (ctx.query.log_type as string) || "All";
       const limit = Math.min(Number(ctx.query.limit || 100), 1000);
-      const offset = Number(ctx.query.offset || 0);
+      const offset = Math.max(Number(ctx.query.offset || 0), 0);
+      const perTableLimit = limit + offset;
 
       // Helper to query a log table using Strapi query API
       async function queryLogTable(entity: string, resourceType: string) {
@@ -429,31 +439,60 @@ export default {
           where: filters,
           populate: { performed_by: { populate: { role: true } } },
           orderBy: { createdAt: "desc" },
-          limit,
-          offset,
+          limit: perTableLimit,
         } as any);
 
-        return (Array.isArray(logs) ? logs : []).map((log: any) => ({
-          id: log.id,
-          log_type: resourceType,
-          action_type: log.Action,
-          admin_username:
-            log.performed_by?.username ||
+        return (Array.isArray(logs) ? logs : []).map((log: any) => {
+          const actor = log.performed_by;
+          const actorRole = actor?.role?.name || null;
+          const actorUsername =
+            actor?.username ||
+            actor?.email ||
+            actor?.phone ||
             log.PerformedBy ||
-            "System",
-          admin_role: log.performed_by?.role?.name || "Unknown",
-          description: log.Description,
-          changes: log.Changes,
-          ip_address: log.IP,
-          user_agent: log.UserAgent,
-          timestamp: log.createdAt,
-        }));
+            null;
+          const actorLabel = actorUsername || (actor?.id ? `User ${actor.id}` : null);
+          const isSystemLabel =
+            !actorLabel ||
+            actorLabel.toLowerCase() === "system" ||
+            actorLabel === "[object Object]";
+          const actorUserId =
+            typeof actor?.id === "number" ? actor.id : Number(actor?.id) || null;
+
+          const includeFromRole =
+            !!actorRole && allowedAdminRoles.has(actorRole as RoleName);
+          const includeFromLabel = !includeFromRole && !isSystemLabel;
+
+          if (!includeFromRole && !includeFromLabel) {
+            return null;
+          }
+
+          return {
+            id: `${resourceType}-${log.id}`,
+            log_type: resourceType,
+            action_type: log.Action,
+            admin_username: actorLabel || "System",
+            admin_role: includeFromRole ? actorRole : includeFromLabel ? "Unknown" : "System",
+            admin_user_id: actorUserId,
+            admin_email: actor?.email || null,
+            description: log.Description,
+            changes: log.Changes,
+            ip_address: log.IP,
+            user_agent: log.UserAgent,
+            timestamp: log.createdAt,
+          };
+        });
       }
 
       // Query all log tables
       let allLogs: any[] = [];
 
-      if (!logType || logType === "All" || logType === "Orders") {
+      const wantsLogType = (type: string) => {
+        if (!logType || logType === "All") return true;
+        return logType.toLowerCase() === type.toLowerCase();
+      };
+
+      if (wantsLogType("Order")) {
         const orderLogs = await queryLogTable(
           "api::order-log.order-log",
           "Order"
@@ -461,7 +500,7 @@ export default {
         allLogs = allLogs.concat(orderLogs);
       }
 
-      if (!logType || logType === "All" || logType === "Products") {
+      if (wantsLogType("Product")) {
         const productLogs = await queryLogTable(
           "api::product-log.product-log",
           "Product"
@@ -469,7 +508,7 @@ export default {
         allLogs = allLogs.concat(productLogs);
       }
 
-      if (!logType || logType === "All" || logType === "Users") {
+      if (wantsLogType("User")) {
         const userLogs = await queryLogTable(
           "api::local-user-log.local-user-log",
           "User"
@@ -477,7 +516,7 @@ export default {
         allLogs = allLogs.concat(userLogs);
       }
 
-      if (!logType || logType === "All" || logType === "Contracts") {
+      if (wantsLogType("Contract")) {
         const contractLogs = await queryLogTable(
           "api::contract-log.contract-log",
           "Contract"
@@ -485,10 +524,30 @@ export default {
         allLogs = allLogs.concat(contractLogs);
       }
 
+      allLogs = allLogs.filter((log) => !!log);
+
       // Filter by user_id if provided
-      if (userId_filter) {
-        allLogs = allLogs.filter((log) => log.admin_username === userId_filter);
-      }
+      const matchesUserFilter = (log: any) => {
+        if (!userIdFilter) return true;
+        if (log.admin_user_id && String(log.admin_user_id) === userIdFilter) {
+          return true;
+        }
+        if (
+          typeof log.admin_username === "string" &&
+          log.admin_username.toLowerCase() === userIdFilter
+        ) {
+          return true;
+        }
+        if (
+          typeof log.admin_email === "string" &&
+          log.admin_email.toLowerCase() === userIdFilter
+        ) {
+          return true;
+        }
+        return false;
+      };
+
+      allLogs = allLogs.filter(matchesUserFilter);
 
       // Sort by timestamp DESC
       allLogs = allLogs.sort(
@@ -496,62 +555,28 @@ export default {
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
-      // Get total count across all logs
-      async function countLogTable(entity: string) {
-        try {
-          const count = await (strapi.db.query(entity as any) as any).count({
-            where: {
-              createdAt: {
-                $gte: start.toISOString(),
-                $lte: end.toISOString(),
-              },
-            },
-          });
-          return count || 0;
-        } catch {
-          return 0;
-        }
-      }
-
-      const countPromises = [
-        logType && logType !== "All" && logType !== "Orders"
-          ? Promise.resolve(0)
-          : countLogTable("api::order-log.order-log"),
-        logType && logType !== "All" && logType !== "Products"
-          ? Promise.resolve(0)
-          : countLogTable("api::product-log.product-log"),
-        logType && logType !== "All" && logType !== "Users"
-          ? Promise.resolve(0)
-          : countLogTable("api::local-user-log.local-user-log"),
-        logType && logType !== "All" && logType !== "Contracts"
-          ? Promise.resolve(0)
-          : countLogTable("api::contract-log.contract-log"),
-      ];
-
-      const counts = await Promise.all(countPromises);
-      const totalCount = counts.reduce((sum, count) => sum + (count as number), 0);
+      const totalCount = allLogs.length;
+      const pagedLogs = allLogs.slice(offset, offset + limit);
 
       ctx.body = {
         data: {
-          activities: allLogs
-            .slice(offset, offset + limit)
-            .map((log: any) => ({
-              id: log.id,
-              logType: log.log_type,
-              actionType: log.action_type,
-              adminUsername: log.admin_username,
-              adminRole: log.admin_role,
-              description: log.description,
-              changes: log.changes,
-              ipAddress: log.ip_address,
-              userAgent: log.user_agent,
-              timestamp: log.timestamp,
-            })),
+          activities: pagedLogs.map((log: any) => ({
+            id: log.id,
+            logType: log.log_type,
+            actionType: log.action_type,
+            adminUsername: log.admin_username,
+            adminRole: log.admin_role,
+            description: log.description,
+            changes: log.changes,
+            ipAddress: log.ip_address,
+            userAgent: log.user_agent,
+            timestamp: log.timestamp,
+          })),
           pagination: {
             total: totalCount,
             limit,
             offset,
-            hasMore: offset + allLogs.length < totalCount,
+            hasMore: offset + limit < totalCount,
           },
         },
       };
