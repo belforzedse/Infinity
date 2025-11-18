@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
@@ -17,7 +18,9 @@ interface Props {
   title: string;
   orderId?: number;
   shippingBarcode?: string;
+  detailHref: string;
   onViewDetails: () => void;
+  onOpenFullDetails?: () => void;
 }
 
 export default function OrderRow({
@@ -30,7 +33,9 @@ export default function OrderRow({
   title,
   orderId,
   shippingBarcode,
+  detailHref,
   onViewDetails,
+  onOpenFullDetails,
 }: Props) {
   return (
     <tr className="hover:bg-gray-50">
@@ -95,6 +100,14 @@ export default function OrderRow({
             <Eye className="h-4 w-4" />
             <span>جزئیات</span>
           </button>
+          <Link
+            href={detailHref}
+            prefetch={false}
+            onClick={onOpenFullDetails}
+            className="text-xs rounded-lg border border-pink-100 px-2 py-1 text-pink-600 transition hover:bg-pink-50"
+          >
+            مشاهده کامل
+          </Link>
           <ShowFactorButton />
         </div>
       </td>
