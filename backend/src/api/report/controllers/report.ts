@@ -406,7 +406,7 @@ export default {
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
-      const allowedAdminRoles = new Set([
+      const allowedAdminRoles = new Set<string>([
         ROLE_NAMES.SUPERADMIN,
         ROLE_NAMES.STORE_MANAGER,
       ]);
@@ -460,7 +460,8 @@ export default {
             typeof actor?.id === "number" ? actor.id : Number(actor?.id) || null;
 
           const includeFromRole =
-            !!actorRole && allowedAdminRoles.has(actorRole as RoleName);
+            !!actorRole &&
+            allowedAdminRoles.has(actorRole);
           const includeFromLabel = !includeFromRole && !isSystemLabel;
 
           if (!includeFromRole && !includeFromLabel) {
