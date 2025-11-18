@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "admin_activities",
+  "info": {
+    "singularName": "admin-activity",
+    "pluralName": "admin-activities",
+    "displayName": "AdminActivity",
+    "description": "Audit log for admin actions"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "ResourceType": {
+      "type": "enumeration",
+      "enum": ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"],
+      "required": true
+    },
+    "ResourceId": {
+      "type": "string"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"],
+      "required": true
+    },
+    "Description": {
+      "type": "text"
+    },
+    "Metadata": {
+      "type": "json"
+    },
+    "PerformedByName": {
+      "type": "string"
+    },
+    "PerformedByRole": {
+      "type": "string"
+    },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "IP": {
+      "type": "string"
+    },
+    "UserAgent": {
+      "type": "string"
+    }
+  }
+}
+

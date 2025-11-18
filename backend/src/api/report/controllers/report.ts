@@ -575,6 +575,39 @@ export default {
       const offset = Math.max(Number(ctx.query.offset || 0), 0);
       const perTableLimit = limit + offset;
 
+      const adminActivities = (await strapi.entityService.findMany(
+        "api::admin-activity.admin-activity" as any,
+        {
+          filters: {
+            createdAt: {
+              $gte: start.toISOString(),
+              $lte: end.toISOString(),
+            },
+            ...(logType && logType !== "All"
+              ? { ResourceType: logType }
+              : {}),
+            ...(actionType ? { Action: actionType } : {}),
+          },
+          orderBy: { createdAt: "desc" },
+          limit: perTableLimit,
+        },
+      )) as any[];
+
+      let allLogs: any[] = (adminActivities || []).map((log: any) => ({
+        id: `AdminActivity-${log.id}`,
+        log_type: log.ResourceType || "Admin",
+        action_type: log.Action,
+        admin_username: log.PerformedByName || "System",
+        admin_role:
+          log.PerformedByRole ||
+          (log.PerformedByName ? "Unknown" : "System"),
+        description: log.Description,
+        changes: log.Metadata,
+        ip_address: log.IP,
+        user_agent: log.UserAgent,
+        timestamp: log.createdAt,
+      }));
+
       // Helper to query a log table using Strapi query API
       async function queryLogTable(entity: string, resourceType: string) {
         const filters: any = {
@@ -611,22 +644,20 @@ export default {
             actorLabel === "[object Object]";
           const actorUserId =
             typeof actor?.id === "number" ? actor.id : Number(actor?.id) || null;
-
           const includeFromRole =
-            !!actorRole &&
-            allowedAdminRoles.has(actorRole);
-          const includeFromLabel = !includeFromRole && !isSystemLabel;
-
-          if (!includeFromRole && !includeFromLabel) {
-            return null;
-          }
+            !!actorRole && allowedAdminRoles.has(actorRole);
+          const adminRoleLabel = includeFromRole
+            ? actorRole
+            : isSystemLabel
+            ? "System"
+            : "Unknown";
 
           return {
             id: `${resourceType}-${log.id}`,
             log_type: resourceType,
             action_type: log.Action,
             admin_username: actorLabel || "System",
-            admin_role: includeFromRole ? actorRole : includeFromLabel ? "Unknown" : "System",
+            admin_role: adminRoleLabel,
             admin_user_id: actorUserId,
             admin_email: actor?.email || null,
             description: log.Description,
@@ -639,8 +670,6 @@ export default {
       }
 
       // Query all log tables
-      let allLogs: any[] = [];
-
       const wantsLogType = (type: string) => {
         if (!logType || logType === "All") return true;
         return logType.toLowerCase() === type.toLowerCase();
