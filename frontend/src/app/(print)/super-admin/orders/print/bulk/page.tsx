@@ -4,65 +4,11 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiClient } from "@/services";
 import Invoice from "@/components/invoice";
-
-type StrapiOrder = {
-  id: string;
-  attributes: any;
-};
-
-function transformOrder(raw: StrapiOrder) {
-  // --- normalize items to what <Invoice/> expects ---
-  const items = (raw.attributes?.order_items?.data || []).map((item: any) => {
-    const attr = item.attributes || {};
-    const pv = attr.product_variation?.data?.attributes || {};
-    const product = pv.product?.data?.attributes || {};
-    return {
-      id: item.id,
-      attributes: {
-        Count: attr.Quantity ?? attr.Count ?? 1,
-        PerAmount: attr.UnitPrice ?? attr.PerAmount ?? 0,
-        ProductSKU: pv.SKU ?? attr.ProductSKU ?? "—",
-        ProductTitle: product.Name ?? attr.ProductTitle ?? "—",
-      },
-    };
-  });
-
-  // --- derive latest payment gateway title like your edit page ---
-  const txList = raw.attributes?.contract?.data?.attributes?.contract_transactions?.data || [];
-  const lastTx = txList[txList.length - 1]?.attributes;
-  const paymentGateway = lastTx?.payment_gateway?.data?.attributes?.Title || undefined;
-
-  // --- optionally compose address with city/province like edit page ---
-  const addr = raw.attributes?.delivery_address?.data?.attributes;
-  const city = addr?.shipping_city?.data?.attributes?.Title;
-  const province =
-    addr?.shipping_city?.data?.attributes?.shipping_province?.data?.attributes?.Title;
-  const composedAddress = [addr?.FullAddress, city, province].filter(Boolean).join(" - ");
-
-  return {
-    ...raw,
-    attributes: {
-      ...raw.attributes,
-      paymentGateway, // <— used by Invoice
-      order_items: { data: items },
-      // keep delivery_address shape but prefer composed address if available
-      delivery_address: raw.attributes.delivery_address
-        ? {
-            data: {
-              attributes: {
-                ...addr,
-                FullAddress: composedAddress || addr?.FullAddress,
-              },
-            },
-          }
-        : raw.attributes.delivery_address,
-    },
-  };
-}
+import { normalizeOrderForInvoice } from "../normalizeOrder";
 
 export default function BulkPrintPage() {
   const params = useSearchParams();
-  const [orders, setOrders] = useState<StrapiOrder[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const hasPrinted = useRef(false);
 
@@ -77,10 +23,9 @@ export default function BulkPrintPage() {
     const fetchOrders = async () => {
       try {
         const results = await Promise.all(
-          idsParam.map((id) =>
-            apiClient
-              .get(
-                `/orders/${id}?populate[0]=user
+          idsParam.map(async (id) => {
+            const res = await apiClient.get(
+              `/orders/${id}?populate[0]=user
                  &populate[1]=contract
                  &populate[2]=order_items
                  &populate[3]=order_items.product_variation.product.CoverImage
@@ -88,11 +33,11 @@ export default function BulkPrintPage() {
                  &populate[5]=delivery_address.shipping_city.shipping_province
                  &populate[6]=shipping
                  &populate[7]=contract.contract_transactions.payment_gateway`,
-              )
-              .then((res) => transformOrder((res as any).data as StrapiOrder)),
-          ),
+            );
+            return normalizeOrderForInvoice((res as any).data, id);
+          }),
         );
-        setOrders(results);
+        setOrders(results.filter(Boolean) as any[]);
       } finally {
         setLoading(false);
       }
