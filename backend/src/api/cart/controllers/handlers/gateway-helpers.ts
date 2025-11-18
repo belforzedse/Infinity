@@ -44,7 +44,7 @@ const normalizeCellForSaman = (rawPhone?: string): string | undefined => {
   return undefined;
 };
 
-const ensurePaymentGateway = async (
+export const ensurePaymentGateway = async (
   strapi: Strapi,
   title: string,
   defaults: { Description?: string; IsActive?: boolean } = {}
