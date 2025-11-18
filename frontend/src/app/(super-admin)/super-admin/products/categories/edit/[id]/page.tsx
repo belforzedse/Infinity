@@ -44,8 +44,8 @@ export default function EditCategoryPage() {
         }
 
         // Handle Strapi response structure
-        // getCategoryById returns ApiResponse<CategoryDetail>, so response.data is the CategoryDetail
-        const payload = response?.data;
+        // getCategoryById returns CategoryDetail directly (already unwrapped)
+        const payload = response;
 
         if (!payload || !payload.id) {
           if (!hasShownError) {
@@ -61,14 +61,28 @@ export default function EditCategoryPage() {
           return;
         }
 
+        // Extract parent ID - can be from Parent field (string ID) or populated parent relation
+        let parentId = "";
+        if (payload.attributes?.Parent) {
+          // Parent is stored as a string ID
+          parentId = String(payload.attributes.Parent);
+        } else if (payload.attributes?.parent?.data?.id) {
+          // Parent is populated relation
+          parentId = String(payload.attributes.parent.data.id);
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("EditCategoryPage: Extracted parent ID:", parentId, "from payload:", {
+            Parent: payload.attributes?.Parent,
+            parentData: payload.attributes?.parent?.data,
+          });
+        }
+
         setInitialData({
           id: payload.id?.toString(),
           Title: payload.attributes?.Title ?? "",
           Slug: payload.attributes?.Slug ?? "",
-          Parent:
-            payload.attributes?.Parent ??
-            payload.attributes?.parent?.data?.id?.toString() ??
-            "",
+          Parent: parentId,
           createdAt: payload.attributes?.createdAt
             ? new Date(payload.attributes.createdAt)
             : new Date(),

@@ -21,6 +21,18 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
   const CategoriesData = useAtomValue(productCategoryDataAtom);
   const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
 
+  // Debug logging - use useEffect to log when CategoriesData changes
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("MainCategorySelector: CategoriesData changed:", CategoriesData);
+      console.log("MainCategorySelector: CategoriesData length:", CategoriesData?.length || 0);
+      console.log("MainCategorySelector: Is array?", Array.isArray(CategoriesData));
+      if (Array.isArray(CategoriesData) && CategoriesData.length > 0) {
+        console.log("MainCategorySelector: First category:", CategoriesData[0]);
+      }
+    }
+  }, [CategoriesData]);
+
   const onChangeMainCategory = (value: Option) => {
     setSelectedMainCategory(value);
     const category: categoryResponseType = {
@@ -58,10 +70,14 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
         className="w-full"
         value={selectedMainCategory}
         onChange={(value) => onChangeMainCategory(value)}
-        options={(CategoriesData || []).map((category: any) => ({
-          id: category.id.toString(),
-          name: category.attributes.Title,
-        }))}
+        options={
+          Array.isArray(CategoriesData) && CategoriesData.length > 0
+            ? CategoriesData.map((category: any) => ({
+                id: category.id?.toString() || String(category.id),
+                name: category.attributes?.Title || "-",
+              }))
+            : []
+        }
         placeholder="انتخاب دسته بندی اصلی"
       />
 

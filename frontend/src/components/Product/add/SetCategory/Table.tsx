@@ -23,9 +23,16 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
 
   const handleDelete = async (id: string) => {
     await deleteCategory(id);
-    const categories = await getAllCategories();
-    setCategoriesData(categories.data);
-    setCategoriesDataPagination(categories.meta);
+    const response = await getAllCategories();
+    // getAllCategories returns PaginatedResponse<categoryResponseType>
+    // which has structure: { data: categoryResponseType[], meta: {...} }
+    setCategoriesData(response?.data || []);
+    setCategoriesDataPagination(response?.meta || {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: 25,
+    });
   };
 
   return (

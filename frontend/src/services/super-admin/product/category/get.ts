@@ -23,8 +23,8 @@ export interface CategoryDetail {
 
 export const getCategoryById = async (
   id: string | number,
-): Promise<ApiResponse<CategoryDetail>> => {
+): Promise<CategoryDetail> => {
   const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}?populate=parent`;
-  const response = await apiClient.get<ApiResponse<CategoryDetail>>(endpoint);
+  const response = await apiClient.get<CategoryDetail>(endpoint);
   return response.data;
 };
