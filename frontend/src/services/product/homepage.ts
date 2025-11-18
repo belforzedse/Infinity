@@ -33,6 +33,7 @@ export const getHomepageSections = async (): Promise<{
   // Fetch a larger pool of products (60) to ensure we have enough for all sections after filtering
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
     `populate[0]=CoverImage&` +
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
@@ -109,6 +110,7 @@ export const getHomepageSections = async (): Promise<{
 export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
     `populate[0]=CoverImage&` +
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
@@ -179,6 +181,7 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
 export const getNewProducts = async (): Promise<ProductCardProps[]> => {
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
     `populate[0]=CoverImage&` +
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
@@ -211,6 +214,7 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
 export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
     `populate[0]=CoverImage&` +
     `populate[1]=product_main_category&` +
     `populate[2]=product_variations&` +
@@ -246,6 +250,7 @@ export const getRandomProducts = async (
 ): Promise<ProductCardProps[]> => {
   const endpoint = 
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+      `filters[removedAt][$null]=true&` +
       `populate[0]=CoverImage&` +
       `populate[1]=product_main_category&` +
       `populate[2]=product_variations&` +

@@ -3,8 +3,8 @@ import { formatQueryParams } from "@/utils/api";
 
 export interface AdminActivityLog {
   id: string;
-  logType: "Order" | "Product" | "User" | "Contract";
-  actionType: "Create" | "Update" | "Delete";
+  logType: "Order" | "Product" | "User" | "Contract" | "Discount" | "Stock" | "Admin" | "Other";
+  actionType: "Create" | "Update" | "Delete" | "Publish" | "Unpublish" | "Adjust" | "Other";
   adminUsername: string;
   adminRole: string;
   description: string;
@@ -28,8 +28,8 @@ export async function getAdminActivity(params: {
   start?: string;
   end?: string;
   user_id?: string;
-  action_type?: "Create" | "Update" | "Delete";
-  log_type?: "All" | "Order" | "Product" | "User" | "Contract";
+  action_type?: "Create" | "Update" | "Delete" | "Publish" | "Unpublish" | "Adjust" | "Other";
+  log_type?: "All" | "Order" | "Product" | "User" | "Contract" | "Discount" | "Stock" | "Admin" | "Other";
   limit?: number;
   offset?: number;
 }) {
