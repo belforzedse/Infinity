@@ -187,6 +187,7 @@ export default function PLPList({
 
     // Add filters
     queryParams.append("filters[Status][$eq]", "Active");
+    queryParams.append("filters[removedAt][$null]", "true");
 
     // Category filter
     if (category) {
