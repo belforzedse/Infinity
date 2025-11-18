@@ -30,14 +30,14 @@ export async function logAdminActivity(
         const user = await strapi.entityService.findOne(
           "plugin::users-permissions.user",
           params.performedBy.id,
-          { fields: ["username", "email", "Phone"], populate: { role: true } }
-        );
+          { populate: { role: true } }
+        ) as any;
 
         if (user) {
           performedByName =
             user.username ||
             user.email ||
-            user.Phone ||
+            user.phone ||
             `User ${params.performedBy.id}`;
           
           // Extract role name if available
