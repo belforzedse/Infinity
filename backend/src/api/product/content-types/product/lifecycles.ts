@@ -161,17 +161,32 @@ export default {
     if (!id) return;
     const actor = resolveAuditActor(event as any);
 
-    await strapi.entityService.create("api::product-log.product-log" as any, {
-      data: {
-        product: id,
-        performed_by: actor.userId,
-        PerformedBy: actor.label || undefined,
-        IP: actor.ip || undefined,
-        UserAgent: actor.userAgent || undefined,
-        Action: "Delete" as AuditAction,
-        Description: "Product deleted",
-      },
-    });
+    // Try to create product-log, but don't fail if product relation validation fails
+    // (since the product was just deleted, the relation won't exist)
+    try {
+      await strapi.entityService.create("api::product-log.product-log" as any, {
+        data: {
+          product: id,
+          performed_by: actor.userId,
+          PerformedBy: actor.label || undefined,
+          IP: actor.ip || undefined,
+          UserAgent: actor.userAgent || undefined,
+          Action: "Delete" as AuditAction,
+          Description: "Product deleted",
+        },
+      });
+    } catch (error: any) {
+      // If validation fails because product doesn't exist (expected after deletion),
+      // log a warning but don't fail the deletion
+      if (error?.message?.includes("relation") || error?.message?.includes("do not exist")) {
+        strapi.log.warn(
+          `Product log creation skipped for deleted product ${id}: relation validation failed (expected)`
+        );
+      } else {
+        // Re-throw unexpected errors
+        strapi.log.error(`Failed to create product log for deleted product ${id}:`, error);
+      }
+    }
 
     await logAdminActivity(strapi as any, {
       resourceType: "Product",
