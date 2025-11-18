@@ -161,6 +161,13 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
     controller: "discount",
     allowActions: READ_ACTIONS,
   },
+  {
+    typeKey: "api::product",
+    controller: "product",
+    // Allow all actions except "delete" (permanent delete)
+    // Store managers can soft delete (update removedAt) but not hard delete
+    allowActions: ["find", "findOne", "create", "update", "search"],
+  },
 ];
 
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
