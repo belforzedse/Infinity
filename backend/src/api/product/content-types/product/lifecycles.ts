@@ -1,4 +1,5 @@
 import { resolveAuditActor } from "../../../../utils/audit";
+import { logAdminActivity } from "../../../../utils/adminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -44,6 +45,24 @@ export default {
         Action: "Create" as AuditAction,
         Description: "Product created",
       },
+    });
+
+    await logAdminActivity(strapi as any, {
+      resourceType: "Product",
+      resourceId: result.id,
+      action: "Create",
+      description: "محصول ایجاد شد",
+      metadata: {
+        productId: result.id,
+        title: result.Title,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 
@@ -110,6 +129,24 @@ export default {
         Description: "Product updated",
       },
     });
+
+    await logAdminActivity(strapi as any, {
+      resourceType: "Product",
+      resourceId: result.id,
+      action: "Update",
+      description: "محصول بروزرسانی شد",
+      metadata: {
+        productId: result.id,
+        changes,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
+    });
   },
 
   async beforeDelete(event) {
@@ -134,6 +171,23 @@ export default {
         Action: "Delete" as AuditAction,
         Description: "Product deleted",
       },
+    });
+
+    await logAdminActivity(strapi as any, {
+      resourceType: "Product",
+      resourceId: id,
+      action: "Delete",
+      description: "محصول حذف شد",
+      metadata: {
+        productId: id,
+      },
+      performedBy: {
+        id: actor.userId || undefined,
+        name: actor.label || undefined,
+        role: null,
+      },
+      ip: actor.ip,
+      userAgent: actor.userAgent,
     });
   },
 };
