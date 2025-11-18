@@ -51,11 +51,53 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   const fetchAllCategories = useCallback(async () => {
     setIsGetCategoriesLoading(true);
     try {
-      const categories = await getAllCategories();
-      setCategoriesData((categories as any).data);
-      setCategoriesDataPagination((categories as any).meta);
+      const response = await getAllCategories();
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("fetchAllCategories: Raw response:", response);
+        console.log("fetchAllCategories: Response type:", typeof response);
+        console.log("fetchAllCategories: Is array?", Array.isArray(response));
+        console.log("fetchAllCategories: Has data property?", response && typeof response === "object" && "data" in response);
+      }
+
+      // Handle both cases: direct array or PaginatedResponse object
+      let categories: categoryResponseType[] = [];
+      let meta = { currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 25 };
+
+      if (Array.isArray(response)) {
+        // Response is already an array (direct categories) - this is what we're getting!
+        categories = response;
+        if (process.env.NODE_ENV === "development") {
+          console.log("fetchAllCategories: Response is array, using directly");
+        }
+      } else if (response && typeof response === "object" && "data" in response) {
+        // Response is PaginatedResponse with data and meta
+        categories = Array.isArray(response.data) ? response.data : [];
+        meta = response.meta || meta;
+        if (process.env.NODE_ENV === "development") {
+          console.log("fetchAllCategories: Response is PaginatedResponse, extracted data");
+        }
+      } else {
+        console.warn("fetchAllCategories: Unexpected response format:", response);
+        categories = [];
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("fetchAllCategories: Final categories array:", categories);
+        console.log("fetchAllCategories: Categories length:", categories.length);
+        console.log("fetchAllCategories: About to setCategoriesData with:", categories.length, "items");
+      }
+
+      // Set the atom with the categories
+      setCategoriesData(categories);
+      setCategoriesDataPagination(meta);
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("fetchAllCategories: setCategoriesData called with", categories.length, "categories");
+      }
     } catch (error) {
       console.error("Failed to get product categories:", error);
+      setCategoriesData([]);
       // Don't throw error, just log it to prevent crashes
     } finally {
       setIsGetCategoriesLoading(false);
