@@ -196,76 +196,94 @@ export default {
         }
       }
 
-      // Build join between orders and contracts for settlement tracing
-      let paidOrdersContractJoin = "";
-      let contractJoinResolved = false;
-
-      const contractLinkCandidatesRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables
-         WHERE table_schema = 'public' AND table_name LIKE '%links%'`,
-      );
-      const contractLinkCandidates =
-        contractLinkCandidatesRes.rows || contractLinkCandidatesRes[0] || [];
-      for (const row of contractLinkCandidates) {
-        const tableName = String(row.table_name);
-        const lower = tableName.toLowerCase();
-        if (!lower.includes("order") || !lower.includes("contract")) continue;
-
-        const colsRes = await knex.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [tableName],
-        );
-        const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
-          String(r.column_name),
-        );
-        const orderFk =
-          cols.find((c: string) => c === "order_id") ||
-          cols.find((c: string) => c.endsWith("order_id")) ||
-          cols.find(
-            (c: string) => c.startsWith("order") && c.endsWith("_id"),
+      const detectJoin = async () => {
+        const tryLinkTable = async () => {
+          const linkRes = await knex.raw(
+            `SELECT table_name FROM information_schema.tables
+             WHERE table_schema = 'public' AND table_name LIKE '%order%contract%links%'`,
           );
-        const contractFk =
-          cols.find((c: string) => c === "contract_id") ||
-          cols.find((c: string) => c.endsWith("contract_id")) ||
-          cols.find(
-            (c: string) => c.startsWith("contract") && c.endsWith("_id"),
+          const linkTables = linkRes.rows || linkRes[0] || [];
+          for (const row of linkTables) {
+            const tableName = String(row.table_name);
+            const colsRes = await knex.raw(
+              `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
+              [tableName],
+            );
+            const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
+              String(r.column_name),
+            );
+            const orderFk =
+              cols.find((c: string) => c === "order_id") ||
+              cols.find((c: string) => c.endsWith("order_id")) ||
+              cols.find(
+                (c: string) => c.startsWith("order") && c.endsWith("_id"),
+              );
+            const contractFk =
+              cols.find((c: string) => c === "contract_id") ||
+              cols.find((c: string) => c.endsWith("contract_id")) ||
+              cols.find(
+                (c: string) => c.startsWith("contract") && c.endsWith("_id"),
+              );
+
+            if (orderFk && contractFk) {
+              return `
+                JOIN ${tableName} col ON col.${orderFk} = o.id
+                JOIN contracts c ON c.id = col.${contractFk}
+              `;
+            }
+          }
+          return null;
+        };
+
+        const tryDirectFk = async () => {
+          const contractOrderFkRes = await knex.raw(
+            `SELECT column_name FROM information_schema.columns WHERE table_name = 'contracts'`,
           );
+          const cols = (contractOrderFkRes.rows || contractOrderFkRes[0] || []).map(
+            (r: any) => String(r.column_name),
+          );
+          const orderFkColumn =
+            cols.find((c) => c === "order_id") ||
+            cols.find((c) => c === "order") ||
+            cols.find((c) => c.endsWith("order_id"));
+          if (orderFkColumn) {
+            return `JOIN contracts c ON c.${orderFkColumn} = o.id`;
+          }
+          return null;
+        };
 
-        if (orderFk && contractFk) {
-          paidOrdersContractJoin = `
-            JOIN ${tableName} col ON col.${orderFk} = o.id
-            JOIN contracts c ON c.id = col.${contractFk}
-          `;
-          contractJoinResolved = true;
-          break;
+        const viaLink = await tryLinkTable();
+        if (viaLink) {
+          return { join: viaLink, source: "link" };
         }
-      }
-
-      if (!contractJoinResolved) {
-        const contractOrderFkRes = await knex.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_name = 'contracts' AND column_name IN ('order_id','order')`,
-        );
-        const contractOrderFkRows =
-          contractOrderFkRes.rows || contractOrderFkRes[0] || [];
-        if (contractOrderFkRows.length > 0) {
-          const orderFkColumn = contractOrderFkRows.find(
-            (r: any) => r.column_name === "order_id",
-          )
-            ? "order_id"
-            : contractOrderFkRows.find((r: any) => r.column_name === "order")
-              ? '"order"'
-              : contractOrderFkRows[0].column_name;
-
-          paidOrdersContractJoin = `
-            JOIN contracts c ON c.${orderFkColumn} = o.id
-          `;
-          contractJoinResolved = true;
+        const viaDirect = await tryDirectFk();
+        if (viaDirect) {
+          return { join: viaDirect, source: "direct" };
         }
-      }
-
-      if (!contractJoinResolved) {
         throw new Error(
           "CONTRACT_RELATION_NOT_FOUND: Unable to resolve order-contract relation for reports",
+        );
+      };
+
+      const { join: paidOrdersContractJoin, source: contractJoinSource } =
+        await detectJoin();
+
+      const contractTxFkRes = await knex.raw(
+        `SELECT column_name FROM information_schema.columns WHERE table_name = 'contract_transactions'`,
+      );
+      const contractTxColumns =
+        (contractTxFkRes.rows || contractTxFkRes[0] || []).map((r: any) =>
+          String(r.column_name),
+        );
+      const contractTxFk =
+        contractTxColumns.find((c) => c === "contract_id") ||
+        contractTxColumns.find((c) => c === "contract") ||
+        contractTxColumns.find(
+          (c) => c.startsWith("contract") && c.endsWith("_id"),
+        );
+      if (!contractTxFk) {
+        throw new Error(
+          "CONTRACT_TRANSACTION_RELATION_NOT_FOUND: contract_transactions missing contract FK",
         );
       }
 
@@ -278,7 +296,7 @@ export default {
             )::numeric AS settled_amount_irr
           FROM orders o
           ${paidOrdersContractJoin}
-          JOIN contract_transactions ct ON ct.contract_id = c.id
+          JOIN contract_transactions ct ON ct.${contractTxFk} = c.id
           WHERE ct.status = 'Success'
             AND o.date BETWEEN ? AND ?
           GROUP BY o.id
@@ -386,6 +404,8 @@ export default {
              settlementCoverage:
                ordersCount > 0 ? settledOrders / ordersCount : 0,
              settledAmountToman: totalSettledIrr / 10,
+            joinSource: contractJoinSource,
+            contractTxFk,
           },
         };
         return;
