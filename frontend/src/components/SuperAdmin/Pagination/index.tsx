@@ -1,11 +1,11 @@
 "use client";
 
 import { cn } from "@/utils/tailwind";
-import SuperAdminTableSelect from "../Table/Select";
 import ChevronRightIcon from "../Layout/Icons/ChevronRightIcon";
 import ChevronLeftIcon from "../Layout/Icons/ChevronLeftIcon";
-import { useQueryState } from "nuqs";
 import { useEffect } from "react";
+import { useQueryState } from "nuqs";
+import usePageSizeQuery from "@/hooks/usePageSizeQuery";
 
 interface PaginationProps {
   className?: string;
@@ -20,16 +20,14 @@ export default function SuperAdminPagination({
   onPageChange,
 }: PaginationProps) {
   const [page, setPage] = useQueryState("page", { defaultValue: "1" });
-  const [pageSize, setPageSize] = useQueryState("pageSize", {
-    defaultValue: "25",
-  });
   const [totalSize] = useQueryState("totalSize", {
     defaultValue: 0,
     parse: (value) => parseInt(value || "0"),
     serialize: (value) => value.toString(),
   });
 
-  const totalPages = Math.ceil(totalSize / +pageSize);
+  const { pageSize: currentPageSize } = usePageSizeQuery();
+  const totalPages = Math.max(1, Math.ceil(totalSize / +currentPageSize));
 
   useEffect(() => {
     const pageNumber = parseInt(page);
@@ -40,11 +38,6 @@ export default function SuperAdminPagination({
 
   const handlePageChange = async (newPage: number) => {
     await setPage(newPage.toString());
-  };
-
-  const handlePageSizeChange = async (size: number) => {
-    await setPageSize(size.toString());
-    await setPage("1"); // Reset to first page when changing page size
   };
 
   // Generate compact page items with ellipsis
@@ -76,16 +69,7 @@ export default function SuperAdminPagination({
   };
 
   return (
-    <div className={cn("flex items-center justify-between", className)}>
-      <SuperAdminTableSelect
-        options={[
-          { id: 25, title: "نمایش ۲۵ رکورد" },
-          { id: 10, title: "نمایش ۱۰ رکورد" },
-          { id: 50, title: "نمایش ۵۰ رکورد" },
-          { id: 100, title: "نمایش ۱۰۰ رکورد" },
-        ]}
-        onOptionSelect={(optionId) => handlePageSizeChange(optionId as number)}
-      />
+    <div className={cn("flex items-center justify-center", className)}>
       <div className="flex items-center gap-2">
         <button
           className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"

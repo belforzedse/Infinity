@@ -1,14 +1,24 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import { MobileTable, columns } from "./table";
+import { MobileTable, columns, bulkPrintOrders, Order } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
+import { useAtom } from "jotai";
+import { refreshTable } from "@/components/SuperAdmin/Table";
+import toast from "react-hot-toast";
+import {
+  changeOrderStatus,
+  ORDER_STATUS_LABELS,
+  ORDER_STATUSES,
+  OrderLifecycleStatus,
+} from "@/services/super-admin/orders/adjustItems";
 
 export default function OrdersPage() {
   useFreshDataOnPageLoad();
+  const [, setRefresh] = useAtom(refreshTable);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
@@ -28,6 +38,41 @@ export default function OrdersPage() {
       debouncedSearch.cancel();
     };
   }, [debouncedSearch]);
+
+  const bulkOptions = useMemo(() => {
+    const statusOptions = ORDER_STATUSES.map((status) => ({
+      id: `status-${status}`,
+      title: `وضعیت ${ORDER_STATUS_LABELS[status]}`,
+    }));
+
+    return [{ id: "print", title: "پرینت دسته‌ای" }, ...statusOptions];
+  }, []);
+
+  const handleBulkAction = useCallback(
+    async (actionId: string, selectedRows: Order[]) => {
+      if (actionId === "print") {
+        bulkPrintOrders(selectedRows.map((row) => row.id));
+        return;
+      }
+
+      if (actionId.startsWith("status-")) {
+        const statusKey = actionId.replace("status-", "") as OrderLifecycleStatus;
+        try {
+          await Promise.all(
+            selectedRows.map((row) => changeOrderStatus(row.id, statusKey)),
+          );
+          toast.success(
+            `${selectedRows.length} سفارش به وضعیت ${ORDER_STATUS_LABELS[statusKey]} منتقل شد.`,
+          );
+          setRefresh(true);
+        } catch (error) {
+          console.error("Bulk order status update error:", error);
+          toast.error("خطا در بروزرسانی وضعیت سفارش‌ها");
+        }
+      }
+    },
+    [setRefresh],
+  );
 
   return (
     <ContentWrapper
@@ -86,6 +131,9 @@ export default function OrdersPage() {
       <SuperAdminTable
         _removeActions
         columns={columns}
+        enableSelection
+        bulkOptions={bulkOptions}
+        onBulkAction={handleBulkAction}
         url={(() => {
           const base =
             "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract";

@@ -110,6 +110,12 @@ export default {
   					lineHeight: '24px'
   				}
   			],
+  			'base-custom': [
+  				'1.5rem',
+  				{
+  					lineHeight: '2rem'
+  				}
+  			],
   			lg: [
   				'16px',
   				{

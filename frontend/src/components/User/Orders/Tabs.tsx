@@ -161,8 +161,21 @@ export default function OrdersTabs() {
       time: formatTime(order.createdAt),
       orderId: order.id,
       shippingBarcode: order.ShippingBarcode,
+      detailHref: `/orders/${order.id}`,
       rawOrder: order,
     };
+  };
+
+  const persistOrderSnapshot = (order: Order) => {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(
+        `infinity:order-detail:${order.id}`,
+        JSON.stringify(order),
+      );
+    } catch (error) {
+      console.warn("Failed to persist order snapshot", error);
+    }
   };
 
   const tabContent = ORDER_STATUS.map(({ value }) => {
@@ -195,7 +208,12 @@ export default function OrdersTabs() {
         ) : (
           <>
             {mappedOrders.map(({ rawOrder, ...order }) => (
-              <OrderCard key={order.id} {...order} onViewDetails={() => setSelectedOrder(rawOrder)} />
+              <OrderCard
+                key={order.id}
+                {...order}
+                onViewDetails={() => setSelectedOrder(rawOrder)}
+                onOpenFullDetails={() => persistOrderSnapshot(rawOrder)}
+              />
             ))}
 
             <div className="hidden overflow-x-auto lg:flex">
@@ -206,6 +224,7 @@ export default function OrdersTabs() {
                       key={order.id}
                       {...order}
                       onViewDetails={() => setSelectedOrder(rawOrder)}
+                      onOpenFullDetails={() => persistOrderSnapshot(rawOrder)}
                     />
                   ))}
                 </tbody>

@@ -13,10 +13,19 @@ import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { refreshTable } from "@/components/SuperAdmin/Table";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
+import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function ProductsPage() {
   useFreshDataOnPageLoad();
+  const { isStoreManager } = useCurrentUser();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
+  const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false);
+  const [showPermissionDenied, setShowPermissionDenied] = useState(false);
+  const [pendingPermanentDelete, setPendingPermanentDelete] = useState<{
+    actionId: string;
+    selectedProducts: Product[];
+  } | null>(null);
   const [sort, setSort] = useState<
     "newest" | "oldest" | "stock-asc" | "stock-desc" | "sales-asc" | "sales-desc"
   >("newest");
@@ -354,6 +363,18 @@ export default function ProductsPage() {
             break;
           }
 
+          case "permanent_delete": {
+            // Check if user is store manager - deny permanent delete
+            if (isStoreManager) {
+              setShowPermissionDenied(true);
+              return;
+            }
+            // Show confirmation dialog first
+            setPendingPermanentDelete({ actionId, selectedProducts });
+            setShowPermanentDeleteConfirm(true);
+            return; // Don't execute yet, wait for confirmation
+          }
+
           case "set_stock":
             // Set stock to a specific value
             const stockValue = prompt("مقدار موجودی جدید را وارد کنید:");
@@ -437,7 +458,10 @@ export default function ProductsPage() {
   // Bulk action options
   const bulkOptions = useMemo(() => {
     if (isRecycleBinOpen) {
-      return [{ id: "restore", title: "بازیابی محصولات" }];
+      return [
+        { id: "restore", title: "بازیابی محصولات" },
+        { id: "permanent_delete", title: "حذف دائمی محصولات" },
+      ];
     }
     return [
       { id: "remove_stock", title: "حذف موجودی" },
@@ -575,6 +599,78 @@ export default function ProductsPage() {
           />
         </div>
       )}
+
+      {/* Confirmation dialog for permanent delete */}
+      <ConfirmDialog
+        isOpen={showPermanentDeleteConfirm}
+        title="حذف دائمی محصولات"
+        description={`آیا از حذف دائمی ${pendingPermanentDelete?.selectedProducts.length || 0} محصول مطمئن هستید؟ این عملیات غیرقابل برگشت است.`}
+        confirmText="بله، حذف کن"
+        cancelText="انصراف"
+        onConfirm={async () => {
+          if (!pendingPermanentDelete) return;
+          
+          const { selectedProducts } = pendingPermanentDelete;
+          let deletedCount = 0;
+          const failedIds: string[] = [];
+
+          // Show progress toast
+          const progressToast = toast.loading(
+            `در حال حذف دائمی ${selectedProducts.length} محصول...`
+          );
+
+          for (const product of selectedProducts) {
+            try {
+              await apiClient.delete(`/products/${product.id}`);
+              deletedCount++;
+            } catch (error) {
+              console.error(`Failed to permanently delete product ${product.id}:`, error);
+              failedIds.push(product.id);
+            }
+          }
+
+          // Dismiss progress toast
+          toast.dismiss(progressToast);
+
+          // Show result toast
+          if (deletedCount > 0) {
+            const message =
+              failedIds.length === 0
+                ? `${deletedCount} محصول با موفقیت حذف دائمی شد`
+                : `${deletedCount} محصول حذف دائمی شد (${failedIds.length} ناموفق)`;
+            toast.success(message);
+          }
+
+          if (failedIds.length > 0) {
+            toast.error(
+              `خطا در حذف دائمی ${failedIds.length} محصول. لطفا دوباره سعی کنید.`
+            );
+          }
+
+          // Refresh table after deletions
+          if (deletedCount > 0) {
+            setRefresh(true);
+          }
+
+          setShowPermanentDeleteConfirm(false);
+          setPendingPermanentDelete(null);
+        }}
+        onCancel={() => {
+          setShowPermanentDeleteConfirm(false);
+          setPendingPermanentDelete(null);
+        }}
+      />
+
+      {/* Permission denied dialog for store managers */}
+      <ConfirmDialog
+        isOpen={showPermissionDenied}
+        title="عدم دسترسی"
+        description="شما دسترسی مورد نظر برای این عمل رو ندارید"
+        confirmText="باشه"
+        cancelText={undefined}
+        onConfirm={() => setShowPermissionDenied(false)}
+        onCancel={() => setShowPermissionDenied(false)}
+      />
     </ContentWrapper>
   );
 }

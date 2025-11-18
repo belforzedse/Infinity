@@ -22,13 +22,30 @@ const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
 export default function ProductLayout({ children }: { children: React.ReactNode }) {
   const { isDrawerOpen } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
+  const [showHeader, setShowHeader] = React.useState(true);
   const pathname = usePathname();
+  const lastScrollY = React.useRef(0);
 
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 8);
+
+      if (window.innerWidth >= 1024) {
+        lastScrollY.current = currentY;
+        setShowHeader(true);
+        return;
+      }
+
+      const isScrollingUp = currentY <= lastScrollY.current;
+      const nearTop = currentY < 80;
+      setShowHeader(isScrollingUp || nearTop);
+      lastScrollY.current = Math.max(0, currentY);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   const HeaderContent = () => (
     <>
@@ -65,6 +82,10 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
     </>
   );
 
+  const headerStyle = !showHeader
+    ? { borderBottomWidth: 0, borderBottomColor: "transparent", boxShadow: "none" }
+    : undefined;
+
   return (
     <div dir="rtl" className="bg-white pb-[81px] antialiased lg:pb-0">
       {/* Skip to content for accessibility */}
@@ -75,9 +96,12 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         پرش به محتوا
       </a>
       <header
-        className={`sticky top-0 z-50 transition-all allow-overflow ${
-          scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
-        }`}
+        className={`sticky top-0 z-50 transform transition-all duration-200 allow-overflow border-t-0 ${
+          scrolled
+            ? "glass-panel shadow-sm"
+            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+        } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
+        style={headerStyle}
       >
         <div className="relative">
           {scrolled && (

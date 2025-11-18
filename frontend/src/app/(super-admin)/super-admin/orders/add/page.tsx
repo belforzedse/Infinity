@@ -216,6 +216,18 @@ export default function Page() {
       });
 
       // Create order
+      const resolveOrderDate = () => {
+        const raw = data.orderDate as any;
+        if (!raw) return new Date().toISOString();
+        if (raw instanceof Date) return raw.toISOString();
+        if (typeof raw === "string") return new Date(raw).toISOString();
+        if (typeof raw.value === "string" || raw.value instanceof Date) {
+          const value = raw.value instanceof Date ? raw.value : new Date(raw.value);
+          return value.toISOString();
+        }
+        return new Date().toISOString();
+      };
+
       const orderResponse = await apiClient.post(
         "/orders",
         {
@@ -223,7 +235,7 @@ export default function Page() {
             Description: data.description,
             Status: data.orderStatus,
             user: selectedUser?.id || null, // Allow null for manual orders without registered user
-            Date: (data.orderDate as any).value || data.orderDate,
+            Date: resolveOrderDate(),
             ShippingCost: data.shipping || 0,
             Type: "Manual",
             // Store customer info for manual orders
@@ -255,14 +267,61 @@ export default function Page() {
       await Promise.all(itemPromises);
 
       // Create contract if needed
+      let contractId: number | undefined;
       if (data.total > 0) {
         logger.info("Creating contract", { amount: data.total });
-        await apiClient.post("/contracts", {
+        const contractResponse = await apiClient.post("/contracts", {
           data: {
             Amount: data.total,
-            Status: "Not Ready",
+            Status: "Confirmed",
+            Type: "Cash",
+            Date: new Date().toISOString(),
             order: orderId,
           },
+        });
+
+        contractId = (contractResponse as any)?.data?.id;
+
+        if (contractId) {
+          logger.info("Creating contract transaction for manual payment", {
+            contractId,
+            amount: data.total,
+          });
+          await apiClient.post("/contract-transactions", {
+            data: {
+              Amount: Math.round(data.total * 10),
+              DiscountAmount: Math.round((data.discount || 0) * 10),
+              Step: 1,
+              Status: "Success",
+              Type: "Manual",
+              TrackId: `manual-${orderId}-${Date.now()}`,
+              external_id: `manual-${orderId}`,
+              external_source: "ManualOrder",
+              Date: new Date().toISOString(),
+              contract: contractId,
+            },
+          });
+        }
+      }
+
+      try {
+        await apiClient.post("/admin-activities", {
+          data: {
+            ResourceType: "Order",
+            ResourceId: String(orderId),
+            Action: "Create",
+            Description: "Manual order created via super-admin panel",
+            Metadata: {
+              orderId,
+              contractId: contractId || null,
+              total: data.total,
+              userId: selectedUser?.id || null,
+            },
+          },
+        });
+      } catch (activityError) {
+        logger.warn("Failed to log admin activity for manual order", {
+          message: (activityError as any)?.message,
         });
       }
 

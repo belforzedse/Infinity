@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback } from "react";
+import React, { useState, useEffect, memo, useCallback, useRef } from "react";
 import { useAtom } from "jotai";
 import { selectedProvinceAtom } from "@/atoms/provinceAtom";
 
@@ -29,20 +29,67 @@ function DropdownField({
   name,
 }: Props) {
   const [localOptions, setLocalOptions] = useState<Option[]>(options);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedProvince, setSelectedProvince] = useAtom(selectedProvinceAtom);
+  const hasFetchedRef = useRef(false);
 
-  // Memoize the fetch options function
-  const fetchOptionsCallback = useCallback(async () => {
-    if (fetchOptions && localOptions.length === 0) {
-      const fetchedOptions = await fetchOptions("", formData);
-      setLocalOptions(fetchedOptions);
-    }
-  }, [fetchOptions, formData, localOptions.length]);
-
-  // Initial load of options only once
+  // Update localOptions when options prop changes (for static options)
   useEffect(() => {
-    fetchOptionsCallback();
-  }, [fetchOptionsCallback]);
+    if (options.length > 0 && !fetchOptions) {
+      setLocalOptions(options);
+    }
+  }, [options, fetchOptions]);
+
+  // Fetch options when fetchOptions is available
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("DropdownField useEffect:", {
+        hasFetchOptions: !!fetchOptions,
+        optionsLength: options.length,
+        hasFetched: hasFetchedRef.current,
+        isLoading,
+        localOptionsLength: localOptions.length,
+      });
+    }
+
+    // Only fetch if we have fetchOptions, no static options, haven't fetched yet, and not currently loading
+    if (!fetchOptions || options.length > 0 || hasFetchedRef.current || isLoading) {
+      return;
+    }
+
+    hasFetchedRef.current = true;
+    setIsLoading(true);
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("DropdownField: Starting fetch");
+    }
+
+    fetchOptions("", formData)
+      .then((fetchedOptions) => {
+        if (process.env.NODE_ENV === "development") {
+          console.log("DropdownField: Fetched options:", fetchedOptions);
+          console.log("DropdownField: Is array?", Array.isArray(fetchedOptions));
+          if (Array.isArray(fetchedOptions)) {
+            console.log("DropdownField: Options length:", fetchedOptions.length);
+            console.log("DropdownField: First 3 options:", fetchedOptions.slice(0, 3));
+          }
+        }
+        if (Array.isArray(fetchedOptions) && fetchedOptions.length > 0) {
+          setLocalOptions(fetchedOptions);
+          if (process.env.NODE_ENV === "development") {
+            console.log("DropdownField: Set localOptions to", fetchedOptions.length, "options");
+          }
+        } else {
+          console.warn("DropdownField: Fetched options is not an array or is empty:", fetchedOptions);
+        }
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch dropdown options:", error);
+        setIsLoading(false);
+        hasFetchedRef.current = false; // Allow retry on error
+      });
+  }, [fetchOptions, options.length, formData, isLoading]);
 
   // Handle province selection
   const handleChange = (newValue: string) => {
@@ -68,18 +115,29 @@ function DropdownField({
     }
   }, [selectedProvince, name, fetchOptions, formData]);
 
+  // Debug: log current state
+  if (process.env.NODE_ENV === "development") {
+    console.log("DropdownField render:", {
+      localOptionsLength: localOptions.length,
+      localOptions,
+      isLoading,
+      hasFetchOptions: !!fetchOptions,
+      value,
+    });
+  }
+
   return (
     <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
       <div className="relative">
         <select
           className={`text-sm w-full border-l-[20px] border-transparent px-5 py-3 ${
             readOnly ? "bg-slate-100 text-slate-500" : ""
-          }`}
-          disabled={readOnly}
+          } ${isLoading ? "opacity-50" : ""}`}
+          disabled={readOnly || isLoading}
           value={value}
           onChange={(e) => handleChange(e.target.value)}
         >
-          <option value="">{placeholder}</option>
+          <option value="">{isLoading ? "در حال بارگیری..." : placeholder}</option>
           {localOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

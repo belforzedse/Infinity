@@ -22,27 +22,67 @@ export default function EditCategoryPage() {
 
   const [initialData, setInitialData] = useState<ProductCategoryForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (!categoryId) return;
+
+    let isMounted = true;
+    let hasShownError = false; // Prevent duplicate error toasts
+
     const fetchCategory = async () => {
       setIsLoading(true);
+      setHasError(false);
       try {
         const response = await getCategoryById(categoryId);
-        const payload = (response as any)?.data;
-        if (!payload) {
-          toast.error("دسته‌بندی مورد نظر یافت نشد");
-          router.push("/super-admin/products/categories");
+
+        if (!isMounted) return;
+
+        // Debug: log the response structure
+        if (process.env.NODE_ENV === "development") {
+          console.log("Category API Response:", response);
+        }
+
+        // Handle Strapi response structure
+        // getCategoryById returns CategoryDetail directly (already unwrapped)
+        const payload = response;
+
+        if (!payload || !payload.id) {
+          if (!hasShownError) {
+            hasShownError = true;
+            setHasError(true);
+            toast.error("دسته‌بندی مورد نظر یافت نشد");
+            setTimeout(() => {
+              if (isMounted) {
+                router.push("/super-admin/products/categories");
+              }
+            }, 2000);
+          }
           return;
         }
+
+        // Extract parent ID - can be from Parent field (string ID) or populated parent relation
+        let parentId = "";
+        if (payload.attributes?.Parent) {
+          // Parent is stored as a string ID
+          parentId = String(payload.attributes.Parent);
+        } else if (payload.attributes?.parent?.data?.id) {
+          // Parent is populated relation
+          parentId = String(payload.attributes.parent.data.id);
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("EditCategoryPage: Extracted parent ID:", parentId, "from payload:", {
+            Parent: payload.attributes?.Parent,
+            parentData: payload.attributes?.parent?.data,
+          });
+        }
+
         setInitialData({
           id: payload.id?.toString(),
           Title: payload.attributes?.Title ?? "",
           Slug: payload.attributes?.Slug ?? "",
-          Parent:
-            payload.attributes?.Parent ??
-            payload.attributes?.parent?.data?.id?.toString() ??
-            "",
+          Parent: parentId,
           createdAt: payload.attributes?.createdAt
             ? new Date(payload.attributes.createdAt)
             : new Date(),
@@ -51,18 +91,35 @@ export default function EditCategoryPage() {
             : new Date(),
         });
       } catch (error: any) {
+        if (!isMounted) return;
+
         console.error("Failed to load category:", error);
-        const rawErrorMessage = extractErrorMessage(error);
-        const message = translateErrorMessage(rawErrorMessage, "دریافت اطلاعات با خطا مواجه شد");
-        toast.error(message);
-        router.push("/super-admin/products/categories");
+
+        if (!hasShownError) {
+          hasShownError = true;
+          setHasError(true);
+          const rawErrorMessage = extractErrorMessage(error);
+          const message = translateErrorMessage(rawErrorMessage, "دریافت اطلاعات با خطا مواجه شد");
+          toast.error(message);
+          setTimeout(() => {
+            if (isMounted) {
+              router.push("/super-admin/products/categories");
+            }
+          }, 2000);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchCategory();
-  }, [categoryId, router]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [categoryId, router]); // Added router back but it's stable in Next.js
 
   const handleSubmit = async (formData: ProductCategoryForm) => {
     if (!categoryId) return;
@@ -103,12 +160,16 @@ export default function EditCategoryPage() {
     );
   }
 
-  if (!initialData) {
+  if (hasError || (!isLoading && !initialData)) {
     return (
       <div className="rounded-2xl bg-white p-6 text-center text-sm text-neutral-500">
         دسته‌بندی مورد نظر یافت نشد.
       </div>
     );
+  }
+
+  if (!initialData) {
+    return null; // This should never happen due to earlier checks, but TypeScript needs it
   }
 
   return (
@@ -117,7 +178,7 @@ export default function EditCategoryPage() {
         mode: "edit",
         excludeId: initialData.id ? Number(initialData.id) : undefined,
       })}
-      data={initialData ?? createEmptyCategoryFormData()}
+      data={initialData}
       onSubmit={handleSubmit}
     />
   );

@@ -36,13 +36,15 @@ export default function ConfirmDialog({
           >
             {confirmText}
           </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-xl border border-slate-200 px-5 py-2.5 text-neutral-700 hover:bg-slate-50"
-          >
-            {cancelText}
-          </button>
+          {cancelText && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-neutral-700 hover:bg-slate-50"
+            >
+              {cancelText}
+            </button>
+          )}
         </div>
       </div>
     </Modal>

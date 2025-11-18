@@ -10,10 +10,32 @@ export interface ImagePreviewProps {
   index: number;
 }
 
+const resolveSrc = (preview: string): string => {
+  if (!preview) return "/images/placeholder.png";
+  const trimmed = preview.trim();
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:")
+  ) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("/")) {
+    return `${IMAGE_BASE_URL}${trimmed}`;
+  }
+  try {
+    // try constructing absolute URL; if it fails, fall back
+    return new URL(trimmed, IMAGE_BASE_URL).toString();
+  } catch {
+    return `${IMAGE_BASE_URL}${trimmed.startsWith("/") ? trimmed : `/${trimmed}`}`;
+  }
+};
+
 const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({ preview, onRemove, index }) => (
   <div className="relative mb-5 flex aspect-square flex-col items-end justify-center">
     <Image
-      src={IMAGE_BASE_URL + preview}
+      src={resolveSrc(preview)}
       alt={`Uploaded image ${index + 1}`}
       fill
       className="rounded-lg object-cover"

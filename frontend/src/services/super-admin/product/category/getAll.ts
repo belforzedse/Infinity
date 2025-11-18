@@ -24,7 +24,7 @@ export const getAllCategories = async (): Promise<PaginatedResponse<categoryResp
         "pagination[limit]": -1, // Fetch all categories without pagination limit
       },
     });
-    return response as any;
+    return response.data;
   } catch (error) {
     console.error("Failed to get categories:", error);
     throw error;
