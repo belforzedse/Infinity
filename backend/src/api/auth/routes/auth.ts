@@ -7,7 +7,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        // middlewares: ["api::auth.throttle"],
+        middlewares: ["api::auth.throttle"],
       },
     },
     {

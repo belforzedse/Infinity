@@ -387,9 +387,10 @@ async function resetPassword(ctx) {
   }
 
   try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     await strapi.entityService.update("plugin::users-permissions.user", pluginUser.id, {
       data: {
-        password: newPassword,
+        password: hashedPassword,
       },
     });
 
