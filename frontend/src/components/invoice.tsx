@@ -87,6 +87,20 @@ type Props = {
   isPreInvoice?: boolean;
 };
 const nf = new Intl.NumberFormat("fa-IR");
+
+const formatPersianDate = (value?: string) => {
+  if (!value) return "نامشخص";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "نامشخص";
+  return date.toLocaleDateString("fa-IR");
+};
+
+const formatPersianTime = (value?: string) => {
+  if (!value) return "نامشخص";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "نامشخص";
+  return date.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+};
 export default function Invoice({ order, isPreInvoice = false }: Props) {
   const attrs = order.attributes;
   // robust number coercion (handles strings)
@@ -163,12 +177,9 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
           </p>
           <p>
             <span className="font-bold">تاریخ سفارش:</span>{" "}
-            {new Date(attrs.Date).toLocaleDateString("fa-IR")}
+            {formatPersianDate(attrs.Date)}
             {" --- "}
-            {new Date(attrs.createdAt).toLocaleTimeString("fa-IR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {formatPersianTime(attrs.createdAt)}
           </p>
           {(attrs.delivery_address?.data?.attributes?.FullAddress || isPreInvoice) && (
             <p>
