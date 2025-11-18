@@ -109,7 +109,7 @@ export default {
       let ordersItemsJoinSql: string | null = null;
       let ordersItemsLink: string | undefined;
       const ordersItemsLinksRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
+        `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name LIKE '%order%item%links%'`
       );
       const ordersItemsLinks =
@@ -157,7 +157,7 @@ export default {
       let productVariationJoinSql = "";
       let selectProductVariationId = "NULL AS product_variation_id";
       const oiPvLinksRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
+        `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name LIKE '%order%item%product%variation%links%'`
       );
       const oiPvLinks = oiPvLinksRes.rows || oiPvLinksRes[0] || [];
@@ -196,13 +196,12 @@ export default {
         }
       }
 
-      // Optionally join contracts to orders (if a reliable relation is present)
-      let contractJoinSql: string = "";
+      // Build join between orders and contracts for settlement tracing
+      let paidOrdersContractJoin = "";
       let contractOrderLink: string | undefined;
-
       const contractLinkTablesRes = await knex.raw(
-        `SELECT table_name FROM information_schema.tables 
-         WHERE table_schema = 'public' AND table_name LIKE '%contract%order%links%'`
+        `SELECT table_name FROM information_schema.tables
+         WHERE table_schema = 'public' AND table_name LIKE '%contract%order%links%'`,
       );
       const contractLinkTables =
         contractLinkTablesRes.rows || contractLinkTablesRes[0] || [];
@@ -213,59 +212,109 @@ export default {
       if (contractOrderLink) {
         const colsRes = await knex.raw(
           `SELECT column_name FROM information_schema.columns WHERE table_name = ?`,
-          [contractOrderLink]
+          [contractOrderLink],
         );
         const cols = (colsRes.rows || colsRes[0] || []).map((r: any) =>
-          String(r.column_name)
+          String(r.column_name),
         );
         const orderFk =
           cols.find((c: string) => c === "order_id") ||
           cols.find((c: string) => c.endsWith("order_id")) ||
           cols.find(
-            (c: string) => c.startsWith("order") && c.endsWith("_id")
+            (c: string) => c.startsWith("order") && c.endsWith("_id"),
           ) ||
           "order_id";
         const contractFk =
           cols.find((c: string) => c === "contract_id") ||
           cols.find((c: string) => c.endsWith("contract_id")) ||
           cols.find(
-            (c: string) => c.startsWith("contract") && c.endsWith("_id")
+            (c: string) => c.startsWith("contract") && c.endsWith("_id"),
           ) ||
           "contract_id";
 
-        contractJoinSql = `
-          LEFT JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
-          LEFT JOIN contracts c ON c.id = col.${contractFk}
+        paidOrdersContractJoin = `
+          JOIN ${contractOrderLink} col ON col.${orderFk} = o.id
+          JOIN contracts c ON c.id = col.${contractFk}
         `;
       } else {
-        // Fallback to contracts.order_id FK if it exists
-        const hasOrderIdColRes = await knex.raw(
-          `SELECT 1 FROM information_schema.columns WHERE table_name = 'contracts' AND column_name = 'order_id'`
+        const contractOrderFkRes = await knex.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'contracts' AND column_name IN ('order_id','order')`,
         );
-        const hasOrderId =
-          (hasOrderIdColRes.rows || hasOrderIdColRes[0] || []).length > 0;
-        contractJoinSql = hasOrderId
-          ? `LEFT JOIN contracts c ON c.order_id = o.id`
-          : "";
+        const contractOrderFkRows =
+          contractOrderFkRes.rows || contractOrderFkRes[0] || [];
+        const orderFkColumn = contractOrderFkRows.find(
+          (r: any) => r.column_name === "order_id",
+        )
+          ? "order_id"
+          : contractOrderFkRows.find((r: any) => r.column_name === "order")
+            ? '"order"'
+            : "order_id";
+
+        paidOrdersContractJoin = `
+          JOIN contracts c ON c.${orderFkColumn} = o.id
+        `;
       }
 
+      const paidOrdersCte = `
+        WITH paid_orders AS (
+          SELECT
+            o.id AS order_id,
+            SUM(
+              CASE WHEN ct.type = 'Return' THEN -ct.amount ELSE ct.amount END
+            )::numeric AS settled_amount_irr
+          FROM orders o
+          ${paidOrdersContractJoin}
+          JOIN contract_transactions ct ON ct.contract_id = c.id
+          WHERE ct.status = 'Success'
+            AND o.date BETWEEN ? AND ?
+          GROUP BY o.id
+          HAVING SUM(
+            CASE WHEN ct.type = 'Return' THEN -ct.amount ELSE ct.amount END
+          ) > 0
+        )
+      `;
+
       const query = `
-        SELECT ${selectProductVariationId},
-               oi.product_title,
-               oi.product_sku,
-               SUM(oi.count)::bigint AS total_count,
-               SUM((oi.per_amount * oi.count))::bigint AS total_revenue
-        ${ordersItemsJoinSql}
-        ${productVariationJoinSql}
-        ${contractJoinSql}
-        WHERE o.date BETWEEN ? AND ?
-        GROUP BY ${
-          selectProductVariationId.includes("pv.id") ? "pv.id," : ""
-        } oi.product_title, oi.product_sku
+        ${paidOrdersCte},
+        itemized AS (
+          SELECT
+            ${selectProductVariationId},
+            oi.product_title,
+            oi.product_sku,
+            oi.count AS item_count,
+            oi.per_amount AS item_unit_amount,
+            (oi.per_amount * oi.count)::numeric AS item_total_toman,
+            o.id AS order_id,
+            po.settled_amount_irr,
+            SUM((oi.per_amount * oi.count)::numeric) OVER (PARTITION BY o.id) AS order_items_subtotal
+          ${ordersItemsJoinSql}
+          ${productVariationJoinSql}
+          JOIN paid_orders po ON po.order_id = o.id
+          WHERE o.date BETWEEN ? AND ?
+        )
+        SELECT
+          product_variation_id,
+          product_title,
+          product_sku,
+          SUM(item_count)::bigint AS total_count,
+          ROUND(
+            SUM(
+              CASE
+                WHEN settled_amount_irr IS NULL
+                  OR settled_amount_irr <= 0
+                  OR order_items_subtotal IS NULL
+                  OR order_items_subtotal <= 0
+                THEN item_total_toman
+                ELSE (settled_amount_irr / 10.0) * (item_total_toman / order_items_subtotal)
+              END
+            )
+          )::bigint AS total_revenue
+        FROM itemized
+        GROUP BY product_variation_id, product_title, product_sku
         ORDER BY total_revenue DESC
       `;
 
-      const res = await knex.raw(query, [start, end]);
+      const res = await knex.raw(query, [start, end, start, end]);
       const rows = res.rows || res[0];
 
       const payload = rows.map((r: any) => ({
@@ -282,22 +331,35 @@ export default {
         String(ctx.query.debug || "") === "1";
       if (wantsDebug) {
         // Orders in range
-        const ordersCountRes = await knex.raw(
-          `SELECT COUNT(*)::bigint AS c FROM orders o WHERE o.date BETWEEN ? AND ?`,
-          [start, end]
-        );
-        const ordersCount = Number(
-          (ordersCountRes.rows || ordersCountRes[0])[0]?.c || 0
+        const [ordersCountRes, joinCountRes, settledMetaRes] = await Promise.all(
+          [
+            knex.raw(
+              `SELECT COUNT(*)::bigint AS c FROM orders o WHERE o.date BETWEEN ? AND ?`,
+              [start, end],
+            ),
+            knex.raw(
+              `SELECT COUNT(*)::bigint AS c ${ordersItemsJoinSql} WHERE o.date BETWEEN ? AND ?`,
+              [start, end],
+            ),
+            knex.raw(
+              `${paidOrdersCte}
+               SELECT COUNT(*)::bigint AS orders, COALESCE(SUM(settled_amount_irr)::bigint, 0) AS total_amount_irr
+               FROM paid_orders`,
+              [start, end],
+            ),
+          ],
         );
 
-        // Order items matched by join
-        const joinCountRes = await knex.raw(
-          `SELECT COUNT(*)::bigint AS c ${ordersItemsJoinSql} WHERE o.date BETWEEN ? AND ?`,
-          [start, end]
+        const ordersCount = Number(
+          (ordersCountRes.rows || ordersCountRes[0])[0]?.c || 0,
         );
         const joinCount = Number(
-          (joinCountRes.rows || joinCountRes[0])[0]?.c || 0
+          (joinCountRes.rows || joinCountRes[0])[0]?.c || 0,
         );
+        const settledMetaRow =
+          (settledMetaRes.rows || settledMetaRes[0])[0] || {};
+        const settledOrders = Number(settledMetaRow.orders || 0);
+        const totalSettledIrr = Number(settledMetaRow.total_amount_irr || 0);
 
         ctx.body = {
           data: payload,
@@ -306,6 +368,10 @@ export default {
             end,
             ordersInRange: ordersCount,
             orderItemsJoinedCount: joinCount,
+             settledOrders,
+             settlementCoverage:
+               ordersCount > 0 ? settledOrders / ordersCount : 0,
+             settledAmountToman: totalSettledIrr / 10,
           },
         };
         return;
