@@ -1,7 +1,7 @@
 "use client";
 
 import { apiClient } from "@/services";
-import type { Order, OrdersResponse } from "@/services/order";
+import type { Order } from "@/services/order";
 import { useEffect, useState } from "react";
 
 type PaginatedResponse<T> = {
@@ -22,16 +22,37 @@ export type DashboardMetric = {
   helper: string;
 };
 
-type DashboardOrder = Order & {
+type StrapiItem<T> = {
+  id: number;
+  attributes: T;
+};
+
+type StrapiRelation<T> = {
+  data: StrapiItem<T> | null;
+};
+
+type DashboardOrderAttributes = Partial<Order> & {
+  Status?: string;
   OrderNumber?: string;
   PaymentStatus?: string;
   Total?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  contract?: StrapiRelation<{ Amount?: number }>;
+  user?: StrapiRelation<{
+    user_info?: StrapiRelation<{
+      FirstName?: string;
+      LastName?: string;
+    }>;
+  }>;
 };
+
+type DashboardOrderItem = StrapiItem<DashboardOrderAttributes>;
 
 type DashboardState = {
   loading: boolean;
   metrics?: DashboardMetric[];
-  latestOrders?: DashboardOrder[];
+  latestOrders?: DashboardOrderItem[];
   latestRevenue?: number;
   error?: string;
 };
@@ -55,10 +76,10 @@ export function useDashboardMetrics() {
     };
 
     const fetchLatestOrders = async () => {
-      const response = await apiClient.get<Order[]>(
+      const response = await apiClient.get<DashboardOrderItem[]>(
         `${ORDERS_ENDPOINT}?sort[0]=createdAt:desc&pagination[page]=1&pagination[pageSize]=3&populate[0]=user&populate[1]=contract&populate[2]=user.user_info`,
       );
-      return (response?.data as DashboardOrder[]) ?? [];
+      return response.data ?? [];
     };
 
     const load = async () => {
@@ -97,13 +118,10 @@ export function useDashboardMetrics() {
           },
         ];
 
-        const latestRevenue = latestOrders.reduce(
-          (sum, order: any) => {
-            const amount = order?.attributes?.contract?.data?.attributes?.Amount ?? 0;
-            return sum + Number(amount);
-          },
-          0,
-        );
+        const latestRevenue = latestOrders.reduce((sum, order) => {
+          const amount = order.attributes.contract?.data?.attributes?.Amount ?? 0;
+          return sum + Number(amount);
+        }, 0);
 
         setState({
           loading: false,

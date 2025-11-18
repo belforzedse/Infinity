@@ -2,14 +2,33 @@
 
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import { MobileTable, columns } from "./table";
+import { MobileTable, getCategoryColumns } from "./table";
 import { ENDPOINTS } from "@/constants/api";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
-import { useEffect } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useQueryState } from "nuqs";
 
 export default function CategoriesPage() {
   useFreshDataOnPageLoad();
+  const [expandedParentIds, setExpandedParentIds] = useState<Set<string>>(new Set());
+
+  const toggleParentExpansion = useCallback((id: string) => {
+    setExpandedParentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const columns = useMemo(
+    () =>
+      getCategoryColumns({
+        expandedParentIds,
+        toggleParentExpansion,
+      }),
+    [expandedParentIds, toggleParentExpansion],
+  );
   const [filterValue, setFilter] = useQueryState("filter", {
     defaultValue: [],
     parse: (value) => JSON.parse(decodeURIComponent(value || "[]")),
@@ -37,8 +56,14 @@ export default function CategoriesPage() {
       <SuperAdminTable
         _removeActions
         columns={columns}
-        url={`${ENDPOINTS.PRODUCT.CATEGORY}?populate=*`}
-        mobileTable={(data) => <MobileTable data={data} />}
+        url={`${ENDPOINTS.PRODUCT.CATEGORY}?populate[children]=*&filters[parent][id][$null]=true`}
+        mobileTable={(data) => (
+          <MobileTable
+            data={data}
+            expandedParentIds={expandedParentIds}
+            toggleParentExpansion={toggleParentExpansion}
+          />
+        )}
       />
     </ContentWrapper>
   );

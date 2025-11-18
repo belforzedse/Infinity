@@ -118,7 +118,49 @@ export interface Order {
   };
   contract?: {
     Amount?: number;
+    DiscountAmount?: number;
   };
+  delivery_address?: DeliveryAddress | null;
+  orderLogs?: OrderLog[];
+  contract_transactions?: ContractTransaction[];
+}
+
+export interface DeliveryAddress {
+  id: number;
+  FullAddress?: string;
+  PostalCode?: string;
+  Name?: string;
+  Phone?: string;
+  shipping_city?: {
+    id: number;
+    Title: string;
+    shipping_province?: {
+      id: number;
+      Title: string;
+    } | null;
+  } | null;
+}
+
+export interface OrderLog {
+  id: number;
+  Action: string;
+  Description?: string;
+  Changes?: unknown;
+  createdAt?: string;
+}
+
+export interface ContractTransaction {
+  id: number;
+  Amount: number;
+  Status: string;
+  Type: string;
+  TrackId?: string;
+  Date?: string;
+  payment_gateway?: {
+    id: number;
+    Title: string;
+    Code?: string;
+  } | null;
 }
 
 export interface OrdersResponse {
@@ -274,6 +316,19 @@ export const getMyOrders = async (
   }
 };
 
+export const getOrderDetail = async (orderId: number): Promise<Order> => {
+  try {
+    const response = await apiClient.get<Order>(`/orders/my-orders/${orderId}`);
+    if (!response?.data) {
+      throw new Error("سفارش یافت نشد");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching order detail:", error);
+    throw error;
+  }
+};
+
 /**
  * Helper function to get full image URL
  */
@@ -289,6 +344,7 @@ const OrderService = {
   getOrderStatus,
   getOrderPaymentStatus,
   getMyOrders,
+  getOrderDetail,
   async generateAnipoBarcode(orderId: number, weight?: number, boxSizeId?: number): Promise<any> {
     try {
       const body: any = {};

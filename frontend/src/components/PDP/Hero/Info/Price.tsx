@@ -8,10 +8,11 @@ import { faNum } from "@/utils/faNum";
 
 export default function PDPHeroInfoPrice(props: Props) {
   const { price, discountPrice, hasStock = true } = props;
+  const hasDiscount = Boolean(discountPrice && discountPrice > 0 && discountPrice < price);
 
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xl text-foreground-primary">قیمت</span>
+      {!hasDiscount && <span className="text-xl text-foreground-primary">قیمت</span>}
 
       <div className="flex items-center gap-3">
         {!hasStock ? (

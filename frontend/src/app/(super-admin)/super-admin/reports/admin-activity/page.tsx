@@ -12,6 +12,10 @@ const actionTypeMap: Record<string, string> = {
   Create: "ایجاد",
   Update: "بروزرسانی",
   Delete: "حذف",
+  Publish: "انتشار",
+  Unpublish: "برداشتن انتشار",
+  Adjust: "تنظیم",
+  Other: "سایر",
 };
 
 const logTypeMap: Record<string, string> = {
@@ -19,6 +23,10 @@ const logTypeMap: Record<string, string> = {
   Product: "محصول",
   User: "کاربر",
   Contract: "قرارداد",
+  Discount: "تخفیف",
+  Stock: "موجودی",
+  Admin: "ادمین",
+  Other: "سایر",
 };
 
 const descriptionMap: Record<string, string> = {
@@ -53,7 +61,7 @@ export default function AdminActivityReportPage() {
   const [selectedActionType, setSelectedActionType] = useState<string>("");
   const [selectedLogType, setSelectedLogType] = useState<string>("All");
   const [adminUsers, setAdminUsers] = useState<string[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [showSystemActivities, setShowSystemActivities] = useState(false);
 
   // Excel export function
   const exportToExcel = useCallback(async (data: AdminActivityLog[], startDate: Date, endDate: Date) => {
@@ -171,9 +179,14 @@ export default function AdminActivityReportPage() {
     })
       .then((response) => {
         setActivities(response.activities);
-        setTotalCount(response.pagination.total);
         // Extract unique admin users
-        const users = Array.from(new Set(response.activities.map(a => a.adminUsername))).sort();
+        const users = Array.from(
+          new Set(
+            response.activities
+              .map((a) => a.adminUsername)
+              .filter((name) => name && name !== "System")
+          )
+        ).sort();
         setAdminUsers(users);
       })
       .catch((error) => {
@@ -184,10 +197,32 @@ export default function AdminActivityReportPage() {
       .finally(() => setLoading(false));
   }, [startISO, endISO, selectedUser, selectedActionType, selectedLogType]);
 
-  const uniqueAdmins = new Set(activities.map(a => a.adminUsername)).size;
-  const createActions = activities.filter(a => a.actionType === "Create").length;
-  const updateActions = activities.filter(a => a.actionType === "Update").length;
-  const deleteActions = activities.filter(a => a.actionType === "Delete").length;
+  const filteredActivities = useMemo(
+    () =>
+      showSystemActivities
+        ? activities
+        : activities.filter(
+            (activity) =>
+              activity.adminUsername &&
+              activity.adminUsername !== "System"
+          ),
+    [activities, showSystemActivities]
+  );
+
+  const uniqueAdmins = new Set(
+    filteredActivities.map((a) => a.adminUsername)
+  ).size;
+  const createActions = filteredActivities.filter(
+    (a) => a.actionType === "Create"
+  ).length;
+  const updateActions = filteredActivities.filter(
+    (a) => a.actionType === "Update"
+  ).length;
+  const deleteActions = filteredActivities.filter(
+    (a) => a.actionType === "Delete"
+  ).length;
+
+  const visibleCount = filteredActivities.length;
 
   return (
     <ContentWrapper title="گزارش ادمین ها">
@@ -224,6 +259,10 @@ export default function AdminActivityReportPage() {
                   <option value="Create">{actionTypeMap["Create"]}</option>
                   <option value="Update">{actionTypeMap["Update"]}</option>
                   <option value="Delete">{actionTypeMap["Delete"]}</option>
+                  <option value="Publish">{actionTypeMap["Publish"]}</option>
+                  <option value="Unpublish">{actionTypeMap["Unpublish"]}</option>
+                  <option value="Adjust">{actionTypeMap["Adjust"]}</option>
+                  <option value="Other">{actionTypeMap["Other"]}</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
@@ -238,26 +277,43 @@ export default function AdminActivityReportPage() {
                   <option value="Product">{logTypeMap["Product"]}</option>
                   <option value="User">{logTypeMap["User"]}</option>
                   <option value="Contract">{logTypeMap["Contract"]}</option>
+                  <option value="Discount">{logTypeMap["Discount"]}</option>
+                  <option value="Stock">{logTypeMap["Stock"]}</option>
+                  <option value="Admin">{logTypeMap["Admin"]}</option>
+                  <option value="Other">{logTypeMap["Other"]}</option>
                 </select>
               </div>
             </div>
-            {adminUsers.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-neutral-600">ادمین</label>
-                <select
-                  value={selectedUser}
-                  onChange={(e) => setSelectedUser(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                >
-                  <option value="">همه ادمین‌ها</option>
-                  {adminUsers.map((user) => (
-                    <option key={user} value={user}>
-                      {user}
-                    </option>
-                  ))}
-                </select>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-neutral-600">نمایش</label>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-col">
+                  {adminUsers.length > 0 && (
+                    <select
+                      value={selectedUser}
+                      onChange={(e) => setSelectedUser(e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">همه ادمین‌ها</option>
+                      {adminUsers.map((user) => (
+                        <option key={user} value={user}>
+                          {user}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm text-neutral-600">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                    checked={showSystemActivities}
+                    onChange={(e) => setShowSystemActivities(e.target.checked)}
+                  />
+                  نمایش فعالیت‌های سیستمی
+                </label>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -278,7 +334,7 @@ export default function AdminActivityReportPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">کل فعالیت‌ها</h3>
-                      <p className="text-2xl font-bold text-blue-600">{faNum(totalCount)}</p>
+                      <p className="text-2xl font-bold text-blue-600">{faNum(visibleCount)}</p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
                       <svg
@@ -376,7 +432,7 @@ export default function AdminActivityReportPage() {
               {/* Export Button */}
               <div className="flex justify-end">
                 <button
-                  onClick={() => exportToExcel(activities, start, end)}
+                  onClick={() => exportToExcel(filteredActivities, start, end)}
                   className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition-colors"
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,14 +462,14 @@ export default function AdminActivityReportPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {activities.length === 0 ? (
+                    {filteredActivities.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                           فعالیتی یافت نشد
                         </td>
                       </tr>
                     ) : (
-                      activities.map((activity) => (
+                      filteredActivities.map((activity) => (
                         <tr key={activity.id} className="border-b border-neutral-100 hover:bg-neutral-50">
                           <td className="px-6 py-3 text-sm text-neutral-600">
                             {new Date(activity.timestamp).toLocaleString("fa-IR")}

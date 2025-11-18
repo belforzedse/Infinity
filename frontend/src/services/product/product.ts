@@ -195,6 +195,13 @@ export const getProductById = async (id: string): Promise<ApiResponse<ProductDet
   try {
     const response = await apiClient.get<any>(endpoint);
 
+    // Check if product is trashed (removedAt is not null)
+    if (response.data?.attributes?.removedAt) {
+      const error = new Error("Product not found");
+      (error as any).status = 404;
+      throw error;
+    }
+
     return response;
   } catch (error) {
     console.error("Error fetching product details:", error);

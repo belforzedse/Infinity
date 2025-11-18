@@ -34,6 +34,7 @@ const ProductCard: FC<ProductCardProps> = ({
   isAvailable = true,
   priority = false,
 }) => {
+  const hasDiscount = Boolean(discountPrice && discountPrice > 0 && discountPrice < price);
   const { isLiked, isLoading, toggleLike } = useProductLike({
     productId: id.toString(),
   });
@@ -112,12 +113,12 @@ const ProductCard: FC<ProductCardProps> = ({
 
         <div className="mt-auto rounded-2xl bg-stone-100 px-3 py-1.5 md:py-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-stone-500">قیمت</span>
+            {!hasDiscount && <span className="text-sm text-stone-500">قیمت</span>}
 
             {!isAvailable ? (
               <span className="text-base font-medium text-red-600 md:text-lg">ناموجود</span>
             ) : (
-              <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
+              <div className="flex flex-row flex-wrap items-center justify-start gap-3 text-left">
                 {discountPrice && discountPrice > 0 && discountPrice < price && (
                   <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
                     {faNum(discountPrice)} تومان
@@ -145,7 +146,7 @@ const ProductCard: FC<ProductCardProps> = ({
       onClick={(e) => {
         toggleLike(e);
       }}
-      className={`absolute top-5 left-5 glass-chip flex h-11 w-11 items-center justify-center rounded-full ${
+      className={`absolute top-3 left-3 glass-chip flex h-11 w-11 items-center justify-center rounded-full ${
         isLoading ? "cursor-wait opacity-50" : "hover:brightness-[1.05]"
       } z-20 transition-all ring-1 ring-white/60`}
       disabled={isLoading}

@@ -36,6 +36,7 @@ async function getAllProducts(): Promise<StrapiProduct[]> {
     while (true) {
       const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?` +
         `filters[Status][$eq]=Active&` +
+        `filters[removedAt][$null]=true&` +
         `pagination[page]=${currentPage}&` +
         `pagination[pageSize]=${pageSize}&` +
         `fields[0]=Title&` +

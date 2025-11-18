@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
@@ -17,7 +18,9 @@ interface Props {
   title: string;
   orderId?: number;
   shippingBarcode?: string;
+  detailHref: string;
   onViewDetails: () => void;
+  onOpenFullDetails?: () => void;
 }
 
 export default function OrderCard({
@@ -30,7 +33,9 @@ export default function OrderCard({
   title,
   orderId,
   shippingBarcode,
+  detailHref,
   onViewDetails,
+  onOpenFullDetails,
 }: Props) {
   return (
     <div className="mb-3 flex flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
@@ -119,6 +124,14 @@ export default function OrderCard({
               <Eye className="h-4 w-4" />
               <span>جزئیات</span>
             </button>
+            <Link
+              href={detailHref}
+              prefetch={false}
+              onClick={onOpenFullDetails}
+              className="text-xs rounded-lg border border-pink-100 px-3 py-1 text-pink-600 transition hover:bg-pink-50"
+            >
+              مشاهده کامل
+            </Link>
             <ShowFactorButton />
           </div>
         </div>

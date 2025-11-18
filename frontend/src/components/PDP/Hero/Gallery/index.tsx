@@ -72,7 +72,7 @@ export default function PDPHeroGallery(props: Props) {
         goToNextImage={goToNextImage}
         goToPreviousImage={goToPreviousImage}
       />
-      <div className="md:mt-10  xl:hidden">
+      <div className="mt-4 md:mt-10 xl:hidden">
         <ThumbnailList
           assets={assets}
           selectedImage={selectedImage}
