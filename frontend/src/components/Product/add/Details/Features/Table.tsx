@@ -357,17 +357,16 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
     setVariationsCount(potentialVariationsCount);
   }, [features]);
 
-  // Filter options based on input and already selected items
+  // Filter options based on input (keep showing already-added items for clarity)
   useEffect(() => {
     const filterOptions = (type: "colors" | "sizes" | "models") => {
-      const query = inputValues[type].toLowerCase();
-      const selectedIds = features[type].map((item) => item.id);
+      const query = inputValues[type].trim().toLowerCase();
+      if (!query) return [];
 
-      return availableOptions[type].filter(
-        (option) =>
-          option.attributes.Title.toLowerCase().includes(query) &&
-          !selectedIds.includes(String(option.id)),
-      );
+      return availableOptions[type].filter((option) => {
+        const title = (option.attributes.Title || "").toLowerCase();
+        return title.includes(query);
+      });
     };
 
     setFilteredOptions({
@@ -375,7 +374,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
       sizes: filterOptions("sizes"),
       models: filterOptions("models"),
     });
-  }, [inputValues, features, availableOptions]);
+  }, [inputValues, availableOptions]);
 
   const handleInputChange = (type: "colors" | "sizes" | "models", value: string) => {
     setInputValues((prev) => ({
@@ -560,26 +559,41 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                       {inputValues.colors && (
                         <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                           {filteredOptions.colors.length > 0 ? (
-                            filteredOptions.colors.map((option) => (
-                              <div
-                                key={option.id}
-                                onClick={() => addFeature("colors", option)}
-                                className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-slate-100"
-                              >
-                                <span
-                                  className="h-5 w-5 rounded-full border border-slate-200"
-                                  style={{
-                                    backgroundColor: option.attributes.ColorCode || "#f5f5f5",
-                                  }}
-                                />
-                                <span>{option.attributes.Title}</span>
-                                {option.attributes.ColorCode && (
-                                  <span className="text-xs text-slate-400">
-                                    {option.attributes.ColorCode.toUpperCase()}
-                                  </span>
-                                )}
-                              </div>
-                            ))
+                            filteredOptions.colors.map((option) => {
+                              const isSelected = features.colors.some(
+                                (feature) => feature.id === String(option.id),
+                              );
+
+                              return (
+                                <button
+                                  type="button"
+                                  key={option.id}
+                                  onClick={() => !isSelected && addFeature("colors", option)}
+                                  className={`flex w-full items-center gap-3 px-3 py-2 text-sm text-right ${
+                                    isSelected
+                                      ? "cursor-not-allowed text-slate-400"
+                                      : "cursor-pointer hover:bg-slate-100"
+                                  }`}
+                                  aria-disabled={isSelected}
+                                >
+                                  <span
+                                    className="h-5 w-5 rounded-full border border-slate-200"
+                                    style={{
+                                      backgroundColor: option.attributes.ColorCode || "#f5f5f5",
+                                    }}
+                                  />
+                                  <span>{option.attributes.Title}</span>
+                                  {option.attributes.ColorCode && (
+                                    <span className="text-xs text-slate-400" dir="ltr">
+                                      {option.attributes.ColorCode.toUpperCase()}
+                                    </span>
+                                  )}
+                                  {isSelected && (
+                                    <span className="text-[11px] text-green-600">افزوده شده</span>
+                                  )}
+                                </button>
+                              );
+                            })
                           ) : (
                             <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
                           )}
@@ -645,15 +659,32 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                       {inputValues.sizes && (
                         <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                           {filteredOptions.sizes.length > 0 ? (
-                            filteredOptions.sizes.map((option) => (
-                              <div
-                                key={option.id}
-                                onClick={() => addFeature("sizes", option)}
-                                className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
-                              >
-                                {option.attributes.Title}
-                              </div>
-                            ))
+                            filteredOptions.sizes.map((option) => {
+                              const isSelected = features.sizes.some(
+                                (feature) => feature.id === String(option.id),
+                              );
+
+                              return (
+                                <button
+                                  type="button"
+                                  key={option.id}
+                                  onClick={() => !isSelected && addFeature("sizes", option)}
+                                  className={`w-full px-3 py-2 text-sm text-right ${
+                                    isSelected
+                                      ? "cursor-not-allowed text-slate-400"
+                                      : "cursor-pointer hover:bg-slate-100"
+                                  }`}
+                                  aria-disabled={isSelected}
+                                >
+                                  <span>{option.attributes.Title}</span>
+                                  {isSelected && (
+                                    <span className="mr-2 text-[11px] text-green-600">
+                                      افزوده شده
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })
                           ) : (
                             <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
                           )}
@@ -707,15 +738,32 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                       {inputValues.models && (
                         <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                           {filteredOptions.models.length > 0 ? (
-                            filteredOptions.models.map((option) => (
-                              <div
-                                key={option.id}
-                                onClick={() => addFeature("models", option)}
-                                className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
-                              >
-                                {option.attributes.Title}
-                              </div>
-                            ))
+                            filteredOptions.models.map((option) => {
+                              const isSelected = features.models.some(
+                                (feature) => feature.id === String(option.id),
+                              );
+
+                              return (
+                                <button
+                                  type="button"
+                                  key={option.id}
+                                  onClick={() => !isSelected && addFeature("models", option)}
+                                  className={`w-full px-3 py-2 text-sm text-right ${
+                                    isSelected
+                                      ? "cursor-not-allowed text-slate-400"
+                                      : "cursor-pointer hover:bg-slate-100"
+                                  }`}
+                                  aria-disabled={isSelected}
+                                >
+                                  <span>{option.attributes.Title}</span>
+                                  {isSelected && (
+                                    <span className="mr-2 text-[11px] text-green-600">
+                                      افزوده شده
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })
                           ) : (
                             <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
                           )}
