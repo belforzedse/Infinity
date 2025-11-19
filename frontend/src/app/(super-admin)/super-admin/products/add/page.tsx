@@ -4,8 +4,8 @@ import Overall from "@/components/Product/add/Overall";
 import IndexPhotoUploader from "@/components/Product/add/IndexPhotoUploader";
 import { useEffect } from "react";
 import { useProductCategory } from "@/hooks/product/useCategory";
-import { productDataAtom } from "@/atoms/super-admin/products";
-import { useAtomValue } from "jotai";
+import { productDataAtom, resetProductDataAtom } from "@/atoms/super-admin/products";
+import { useAtomValue, useSetAtom } from "jotai";
 import { createProduct } from "@/services/super-admin/product/create";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
@@ -25,10 +25,15 @@ interface ProductApiResponse {
 export default function AddProductsPage() {
   const { fetchAllCategories } = useProductCategory();
   const productData = useAtomValue(productDataAtom);
+  const resetProductData = useSetAtom(resetProductDataAtom);
   const router = useRouter();
   if (process.env.NODE_ENV !== "production") {
     logger.info("productData", { productData });
   }
+  useEffect(() => {
+    resetProductData();
+  }, [resetProductData]);
+
   useEffect(() => {
     // Only fetch categories once on mount to prevent multiple API calls
     fetchAllCategories();

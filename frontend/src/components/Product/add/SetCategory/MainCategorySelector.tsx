@@ -3,23 +3,28 @@ import Select from "@/components/Kits/Form/Select";
 import React, { useEffect, useState } from "react";
 import PlusIcon from "../../Icons/PlusIcon";
 import SetCategoryModal from "./Modal";
-import { editProductDataAtom, productCategoryDataAtom } from "@/atoms/super-admin/products";
+import {
+  editProductDataAtom,
+  productCategoryDataAtom,
+  productDataAtom,
+} from "@/atoms/super-admin/products";
 import { useAtomValue, useAtom } from "jotai";
-import { productDataAtom } from "@/atoms/super-admin/products";
-import { usePathname } from "next/navigation";
 import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
+import type { EditProductData, ProductData } from "@/types/super-admin/products";
 
 interface MainCategorySelectorProps {
   isEditMode?: boolean;
 }
 
 function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps) {
-  const [selectedMainCategory, setSelectedMainCategory] = useState<Option | null>(null);
+  const [selectedMainCategoryId, setSelectedMainCategoryId] = useState<string | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const pathname = usePathname();
 
   const CategoriesData = useAtomValue(productCategoryDataAtom);
-  const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
+  const [draftProductData, setDraftProductData] = useAtom(productDataAtom);
+  const [existingProductData, setExistingProductData] = useAtom(editProductDataAtom);
+
+  const productData = isEditMode ? existingProductData : draftProductData;
 
   // Debug logging - use useEffect to log when CategoriesData changes
   useEffect(() => {
@@ -34,7 +39,7 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
   }, [CategoriesData]);
 
   const onChangeMainCategory = (value: Option) => {
-    setSelectedMainCategory(value);
+    setSelectedMainCategoryId(String(value.id));
     const category: categoryResponseType = {
       id: Number(value.id),
       attributes: {
@@ -43,41 +48,53 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
       },
     };
 
-    setProductData({
-      ...(productData as any),
+    if (isEditMode) {
+      setExistingProductData((prev: EditProductData) => ({
+        ...prev,
+        product_main_category: category,
+      }));
+      return;
+    }
+
+    setDraftProductData((prev: ProductData) => ({
+      ...prev,
       product_main_category: category,
-    });
+    }));
   };
 
   useEffect(() => {
-    if (productData.product_main_category && !pathname.endsWith("/add")) {
-      const mainCategoryData = productData.product_main_category;
-
-      if (mainCategoryData) {
-        setSelectedMainCategory({
-          id: mainCategoryData.id.toString(),
-          name: mainCategoryData.attributes.Title,
-        });
-      }
-    } else {
-      setSelectedMainCategory(null);
+    if (!isEditMode) {
+      return;
     }
-  }, [productData.product_main_category, pathname]);
+
+    const mainCategoryData = productData.product_main_category;
+
+    if (mainCategoryData) {
+      setSelectedMainCategoryId(mainCategoryData.id.toString());
+    } else {
+      setSelectedMainCategoryId(null);
+    }
+  }, [isEditMode, productData.product_main_category]);
+
+  const options: Option[] =
+    Array.isArray(CategoriesData) && CategoriesData.length > 0
+      ? CategoriesData.map((category: any) => ({
+          id: category.id?.toString() || String(category.id),
+          name: category.attributes?.Title || "-",
+        }))
+      : [];
+
+  const selectedOption =
+    (selectedMainCategoryId && options.find((option) => option.id === selectedMainCategoryId)) ||
+    null;
 
   return (
     <>
       <Select
         className="w-full"
-        value={selectedMainCategory}
+        value={selectedOption}
         onChange={(value) => onChangeMainCategory(value)}
-        options={
-          Array.isArray(CategoriesData) && CategoriesData.length > 0
-            ? CategoriesData.map((category: any) => ({
-                id: category.id?.toString() || String(category.id),
-                name: category.attributes?.Title || "-",
-              }))
-            : []
-        }
+        options={options}
         placeholder="انتخاب دسته بندی اصلی"
       />
 
