@@ -8,6 +8,7 @@ import type { Order, OrderItem } from "@/services/order";
 import OrderService from "@/services/order";
 import PaymentStatusButton from "./PaymentStatusButton";
 import { faNum } from "@/utils/faNum";
+import { translateOrderStatus } from "@/utils/statusTranslations";
 
 interface OrderListProps {
   className?: string;
@@ -42,18 +43,6 @@ export default function OrderList({ className = "" }: OrderListProps) {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
-
-  const getStatusTranslation = (status: string): string => {
-    const translations: Record<string, string> = {
-      Started: "ثبت شده",
-      Processing: "در حال پردازش",
-      Shipment: "در حال ارسال",
-      Done: "تکمیل شده",
-      Cancelled: "لغو شده",
-    };
-
-    return translations[status] || status;
-  };
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -138,7 +127,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
           </div>
           <div className="flex flex-col items-end">
             <span className="text-xs mb-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-blue-700">
-              {getStatusTranslation(order.Status)}
+              {translateOrderStatus(order.Status)}
             </span>
             <PaymentStatusButton orderId={order.id} />
           </div>

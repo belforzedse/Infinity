@@ -6,6 +6,7 @@ import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 import Link from "next/link";
 import { faNum } from "@/utils/faNum";
 import { DashboardMetric, useDashboardMetrics } from "@/hooks/useDashboardMetrics";
+import { getOrderStatusMeta } from "@/utils/statusTranslations";
 
 const quickActions = [
   { href: "/super-admin/orders", label: "پیگیری سفارش‌ها" },
@@ -14,11 +15,11 @@ const quickActions = [
 ];
 
 
-const badgeVariants: Record<string, string> = {
-  paid: "bg-emerald-100 text-emerald-700",
-  pending: "bg-amber-100 text-amber-700",
-  failed: "bg-red-100 text-red-700",
-  default: "bg-slate-100 text-slate-600",
+const statusToneBadge: Record<string, string> = {
+  success: "bg-emerald-100 text-emerald-700",
+  warning: "bg-amber-100 text-amber-700",
+  danger: "bg-red-100 text-red-700",
+  info: "bg-blue-100 text-blue-700",
 };
 
 export default function SuperAdminPage() {
@@ -56,19 +57,13 @@ export default function SuperAdminPage() {
         minute: "2-digit",
       },
     );
+    const statusMeta = getOrderStatusMeta(attributes.Status);
     return {
       title: `سفارش #${order.id}`,
-      details: `${fullName || "مشتری نامشخص"} - ${attributes.Status || "وضعیت نامشخص"}`,
-      statusLabel: attributes.Status || "وضعیت نامشخص",
+      details: `${fullName || "مشتری نامشخص"} - ${statusMeta.label}`,
+      statusLabel: statusMeta.label,
       time,
-      badge:
-        attributes.Status === "Done"
-          ? badgeVariants.paid
-          : attributes.Status === "Cancelled"
-          ? badgeVariants.failed
-          : attributes.Status === "Shipment"
-          ? badgeVariants.pending
-          : badgeVariants.default,
+      badge: statusToneBadge[statusMeta.tone] ?? statusToneBadge.info,
       amount: Number(contractAttributes?.Amount ?? 0),
       id: key,
     };

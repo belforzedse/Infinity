@@ -1,4 +1,5 @@
 import type { Order, OrderLog } from "@/services/order";
+import { translateOrderLogMessage, translateOrderStatus } from "@/utils/statusTranslations";
 
 const formatDateTime = (value?: string) => {
   if (!value) return "—";
@@ -44,7 +45,7 @@ const getTimelineEvents = (order: Order): OrderLog[] => {
     {
       id: -2,
       Action: order.Status,
-      Description: `وضعیت فعلی: ${order.Status}`,
+      Description: `وضعیت فعلی: ${translateOrderStatus(order.Status)}`,
       createdAt: order.updatedAt,
     },
   ];
@@ -62,7 +63,7 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
             <span className="absolute -right-[31px] mt-1 h-4 w-4 rounded-full border-2 border-white bg-pink-500 shadow ring-2 ring-pink-100" />
             <div className="flex flex-col gap-1 text-right">
               <span className="text-sm font-medium text-foreground-primary">
-                {event.Description || event.Action || "بروزرسانی"}
+                {translateOrderLogMessage(event.Description || event.Action || "بروزرسانی")}
               </span>
               <span className="text-xs text-slate-500">{formatDateTime(event.createdAt)}</span>
             </div>

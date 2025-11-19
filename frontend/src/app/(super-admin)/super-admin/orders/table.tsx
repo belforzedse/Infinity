@@ -5,6 +5,21 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import OrderRowActions from "@/components/SuperAdmin/Order/OrderRowActions";
+import { getOrderStatusMeta, translateOrderStatus } from "@/utils/statusTranslations";
+const getStatusClassName = (status?: string) => {
+  const tone = getOrderStatusMeta(status).tone;
+  switch (tone) {
+    case "success":
+      return "text-green-600";
+    case "warning":
+      return "text-amber-600";
+    case "danger":
+      return "text-red-600";
+    default:
+      return "text-blue-600";
+  }
+};
+
 
 export type Order = {
   id: string;
@@ -225,23 +240,9 @@ export const MobileTable = ({ data }: Props) => {
                 <span className="text-xs text-neutral-400">|</span>
                 <DateAgo date={new Date(row?.attributes?.Date)} />
                 <span className="text-xs text-neutral-400">|</span>
-                <div
-                  className={twMerge(
-                    row?.attributes?.Status === "Paying" && "text-blue-600",
-                    row?.attributes?.Status === "Started" && "text-yellow-600",
-                    row?.attributes?.Status === "Shipment" && "text-indigo-600",
-                    row?.attributes?.Status === "Done" && "text-green-600",
-                    row?.attributes?.Status === "Returned" && "text-orange-600",
-                    row?.attributes?.Status === "Cancelled" && "text-red-600",
-                  )}
-                >
+                <div className={twMerge("text-xs", getStatusClassName(row?.attributes?.Status))}>
                   <span className="text-xs">
-                    {row?.attributes?.Status === "Paying" && "در حال پرداخت"}
-                    {row?.attributes?.Status === "Started" && "درحال پردازش"}
-                    {row?.attributes?.Status === "Shipment" && "در حال ارسال"}
-                    {row?.attributes?.Status === "Done" && "تکمیل شده"}
-                    {row?.attributes?.Status === "Returned" && "مرجوع شده"}
-                    {row?.attributes?.Status === "Cancelled" && "لغو شده"}
+                    {translateOrderStatus(row?.attributes?.Status)}
                   </span>
                 </div>
                 {row?.attributes?.ShippingBarcode && (
