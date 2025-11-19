@@ -15,6 +15,17 @@ export default factories.createCoreController(
   ({ strapi }: { strapi: Strapi }) => ({
     async findOne(ctx) {
       const { id } = ctx.params;
+      const requester = ctx.state.user;
+
+      const requesterId = requester?.id ? Number(requester.id) : null;
+      const requesterRoleType = requester?.role?.type?.toLowerCase();
+      const requesterRoleName = requester?.role?.name?.toLowerCase();
+      const isAdminUser =
+        requester?.isAdmin === true ||
+        requesterRoleType === "superadmin" ||
+        requesterRoleType === "store-manager" ||
+        requesterRoleName === "superadmin" ||
+        requesterRoleName === "store manager";
 
       try {
         // Query with all necessary relations populated
@@ -62,6 +73,17 @@ export default factories.createCoreController(
 
         if (!order) {
           return ctx.notFound("Order not found");
+        }
+
+        if (!isAdminUser) {
+          if (!requesterId) {
+            return ctx.unauthorized("Authentication required");
+          }
+
+          const orderOwnerId = order.user?.id ? Number(order.user.id) : null;
+          if (!orderOwnerId || orderOwnerId !== requesterId) {
+            return ctx.forbidden("You do not have permission to access this order");
+          }
         }
 
         // Transform the response to match the frontend's expected structure
