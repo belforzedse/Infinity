@@ -120,7 +120,7 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
         "product-review": ["submitReview", "getUserReviews"],
       },
       "api::order": {
-        order: ["getMyOrders", "checkPaymentStatus"],
+        order: ["getMyOrders", "getMyOrderDetail", "checkPaymentStatus"],
       },
       "api::local-user-address": {
         "local-user-address": [
