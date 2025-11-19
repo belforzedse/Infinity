@@ -7,6 +7,7 @@ import Link from "next/link";
 import { faNum } from "@/utils/faNum";
 import { DashboardMetric, useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { getOrderStatusMeta } from "@/utils/statusTranslations";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const quickActions = [
   { href: "/super-admin/orders", label: "پیگیری سفارش‌ها" },
@@ -24,6 +25,7 @@ const statusToneBadge: Record<string, string> = {
 
 export default function SuperAdminPage() {
   const { data: me, isLoading, error } = useMe();
+  const { isStoreManager } = useCurrentUser();
   const {
     metrics,
     latestOrders,
@@ -36,6 +38,16 @@ export default function SuperAdminPage() {
   const userFacingError = error
     ? getUserFacingErrorMessage(error, "خطا در دریافت اطلاعات کاربری")
     : null;
+
+  // Filter out "کاربران" metric for store managers
+  const filteredMetrics = isStoreManager
+    ? metrics?.filter((metric) => metric.label !== "کاربران")
+    : metrics;
+
+  // Filter out "مشتریان" quick action for store managers
+  const filteredQuickActions = isStoreManager
+    ? quickActions.filter((action) => action.href !== "/super-admin/users")
+    : quickActions;
 
   const notifications = (latestOrders ?? []).map((order: any) => {
     // Extract nested Strapi attributes
@@ -84,9 +96,9 @@ export default function SuperAdminPage() {
       )}
 
       <section className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {(metricsLoading || !metrics
-          ? Array.from({ length: 4 }, () => null as DashboardMetric | null)
-          : metrics
+        {(metricsLoading || !filteredMetrics
+          ? Array.from({ length: isStoreManager ? 3 : 4 }, () => null as DashboardMetric | null)
+          : filteredMetrics
         ).map((metric, index) => (
           <article
             key={metric?.label ?? index}
@@ -108,7 +120,7 @@ export default function SuperAdminPage() {
       <section className="mt-6 flex flex-col gap-3">
         <h2 className="text-lg font-semibold text-slate-900">اقدامات سریع</h2>
         <div className="flex flex-wrap gap-3">
-          {quickActions.map((action) => (
+          {filteredQuickActions.map((action) => (
             <Link
               key={action.label}
               href={action.href}
