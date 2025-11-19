@@ -14,6 +14,7 @@ type Order = {
   updatedAt: Date;
   items: OrderItem[];
   shipping: number;
+  shippingMethod?: string;
   subtotal: number;
   discount?: number;
   tax?: number;
@@ -149,7 +150,9 @@ export default function SuperAdminOrderSummaryFooter({
           </div>
         ) : null}
         <div className="flex items-center gap-3">
-          <p className="text-sm text-slate-500">هزینه حمل و نقل (تیپاکس)</p>
+          <p className="text-sm text-slate-500">
+            هزینه حمل و نقل {order.shippingMethod ? `(${order.shippingMethod})` : ""}
+          </p>
           <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>
           <p className="text-base text-foreground-primary">
             {priceFormatter(order.shipping, " تومان")}
@@ -181,32 +184,6 @@ export default function SuperAdminOrderSummaryFooter({
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            className="px-3 py-2 bg-actions-primary text-white rounded-md text-xs md:text-sm"
-            onClick={async () => {
-              try {
-                const mod = await import("@/services/order");
-                const res = await mod.default.generateAnipoBarcode(order.id);
-                // simple feedback; page reload is handled externally if needed
-                alert(
-                  res?.already
-                    ? "بارکد قبلاً ثبت شده است"
-                    : res?.success
-                    ? "بارکد با موفقیت ایجاد شد"
-                    : "درخواست ارسال شد"
-                );
-                // Refresh parent data to reflect ShippingWeight/Barcode changes
-                try {
-                  onReload && (await onReload());
-                } catch {}
-              } catch (e) {
-                alert("خطا در ایجاد بارکد Anipo");
-              }
-            }}
-          >
-            صدور بارکد Anipo
-          </button>
-
           <p className="text-sm md:text-xl text-foreground-primary">
             {priceFormatter(order.total, " تومان")}
           </p>
