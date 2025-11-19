@@ -12,6 +12,7 @@ import Text from "@/components/Kits/Text";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import { AuthService } from "@/services";
 import { useCart } from "@/contexts/CartContext";
+import { setAccessToken } from "@/utils/accessToken";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function RegisterPage() {
         const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
         if (response.token) {
-          localStorage.setItem("accessToken", response.token);
+          setAccessToken(response.token);
 
           // Migrate local cart to API after registration
           await migrateLocalCartToApi();
@@ -92,7 +93,7 @@ export default function RegisterPage() {
             <VerificationInput onChange={setVerificationCode} />
 
             <div className="flex w-full flex-row-reverse items-center justify-between">
-              <span className="text-sm text-foreground-primary/80">{timeLeft}</span>
+              <span className="text-foreground-primary/80 text-sm">{timeLeft}</span>
               <div>
                 <Text variant="helper">
                   کد را دریافت نکردید؟{" "}

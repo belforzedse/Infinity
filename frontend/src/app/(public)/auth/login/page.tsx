@@ -15,6 +15,7 @@ import {
   userLoadingAtom,
 } from "@/lib/atoms/auth";
 import { useEffect } from "react";
+import { setAccessToken } from "@/utils/accessToken";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,17 +43,17 @@ export default function LoginPage() {
       const res = await AuthService.loginPassword(data.phoneNumber, data.password);
 
       if (res.token) {
-        localStorage.setItem("accessToken", res.token);
+        setAccessToken(res.token);
 
         // Migrate local cart to API after login
         await migrateLocalCartToApi();
         // Fetch current user and redirect based on role or redirect URL
         try {
-        const me = await UserService.me();
+          const me = await UserService.me();
 
-        setUserData(me);
-        setLoadingUser(false);
-        setUserError(null);
+          setUserData(me);
+          setLoadingUser(false);
+          setUserError(null);
 
           // Use stored redirect URL if available, otherwise use role-based redirect
           if (storedRedirectUrl) {

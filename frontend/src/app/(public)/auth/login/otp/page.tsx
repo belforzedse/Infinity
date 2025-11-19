@@ -15,6 +15,7 @@ import {
   userErrorAtom,
   userLoadingAtom,
 } from "@/lib/atoms/auth";
+import { setAccessToken } from "@/utils/accessToken";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function LoginPage() {
         const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
         if (response.token) {
-          localStorage.setItem("accessToken", response.token);
+          setAccessToken(response.token);
           localStorage.setItem("refreshToken", response.token);
 
           // Migrate local cart to API after login
