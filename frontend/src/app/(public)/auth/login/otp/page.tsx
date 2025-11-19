@@ -15,6 +15,8 @@ import {
   userErrorAtom,
   userLoadingAtom,
 } from "@/lib/atoms/auth";
+import { setAccessToken } from "@/utils/accessToken";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +44,7 @@ export default function LoginPage() {
         const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));
 
         if (response.token) {
-          localStorage.setItem("accessToken", response.token);
+          setAccessToken(response.token);
           localStorage.setItem("refreshToken", response.token);
 
           // Migrate local cart to API after login
@@ -97,6 +99,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto w-full">
+      <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
       <AuthTitle subtitle={`لطفا کد ارسال شده به شماره همراه  ${phoneNumber} را وارد نمایید`}>
         ورود با رمز یکبار مصرف
       </AuthTitle>

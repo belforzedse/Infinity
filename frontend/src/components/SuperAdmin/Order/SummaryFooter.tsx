@@ -1,6 +1,7 @@
 import { priceFormatter } from "@/utils/price";
 import Image from "next/image";
 import MobileOrderItem from "./MobileOrderItem";
+import { translateContractStatus } from "@/utils/statusTranslations";
 
 type Order = {
   id: number;
@@ -13,6 +14,7 @@ type Order = {
   updatedAt: Date;
   items: OrderItem[];
   shipping: number;
+  shippingMethod?: string;
   subtotal: number;
   discount?: number;
   tax?: number;
@@ -45,6 +47,25 @@ export default function SuperAdminOrderSummaryFooter({
   onReload?: () => void;
 }) {
   if (!order) return null;
+
+  const contractStatusClass = (() => {
+    const normalized = order.contractStatus?.toLowerCase().replace(/\s+/g, " ") || "";
+    switch (normalized) {
+      case "not ready":
+        return "bg-yellow-500";
+      case "confirmed":
+        return "bg-blue-500";
+      case "finished":
+        return "bg-green-500";
+      case "failed":
+        return "bg-red-500";
+      case "cancelled":
+      case "canceled":
+        return "bg-gray-500";
+      default:
+        return "bg-slate-500";
+    }
+  })();
 
   return (
     <div className="bg-white rounded-xl p-5 mt-0 md:mt-6">
@@ -129,7 +150,9 @@ export default function SuperAdminOrderSummaryFooter({
           </div>
         ) : null}
         <div className="flex items-center gap-3">
-          <p className="text-sm text-slate-500">هزینه حمل و نقل (تیپاکس)</p>
+          <p className="text-sm text-slate-500">
+            هزینه حمل و نقل {order.shippingMethod ? `(${order.shippingMethod})` : ""}
+          </p>
           <div className="flex-1 h-[1px] border-t border-slate-300 border-dashed"></div>
           <p className="text-base text-foreground-primary">
             {priceFormatter(order.shipping, " تومان")}
@@ -155,63 +178,12 @@ export default function SuperAdminOrderSummaryFooter({
 
       <div className="mt-8 p-4 flex justify-between items-center border-slate-100 border rounded-xl bg-slate-50">
         <div className="flex flex-col">
-          {order.contractStatus === "Not Ready" && (
-            <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm md:text-base">
-              آماده نشده
-            </button>
-          )}
-          {order.contractStatus === "Confirmed" && (
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm md:text-base">
-              تایید شده
-            </button>
-          )}
-          {order.contractStatus === "Finished" && (
-            <button className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm md:text-base">
-              تکمیل شده
-            </button>
-          )}
-          {order.contractStatus === "Failed" && (
-            <button className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm md:text-base">
-              ناموفق
-            </button>
-          )}
-          {order.contractStatus === "Cancelled" && (
-            <button className="px-4 py-2 bg-gray-500 text-white rounded-lg text-sm md:text-base">
-              لغو شده
-            </button>
-          )}
-          {/* <p className="mr-4 text-xs md:text-sm text-gray-500">
-            از طریق پرداخت اقساطی اسنپ پی
-          </p> */}
+          <button className={`px-4 py-2 ${contractStatusClass} text-white rounded-lg text-sm md:text-base`}>
+            {translateContractStatus(order.contractStatus)}
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            className="px-3 py-2 bg-actions-primary text-white rounded-md text-xs md:text-sm"
-            onClick={async () => {
-              try {
-                const mod = await import("@/services/order");
-                const res = await mod.default.generateAnipoBarcode(order.id);
-                // simple feedback; page reload is handled externally if needed
-                alert(
-                  res?.already
-                    ? "بارکد قبلاً ثبت شده است"
-                    : res?.success
-                    ? "بارکد با موفقیت ایجاد شد"
-                    : "درخواست ارسال شد"
-                );
-                // Refresh parent data to reflect ShippingWeight/Barcode changes
-                try {
-                  onReload && (await onReload());
-                } catch {}
-              } catch (e) {
-                alert("خطا در ایجاد بارکد Anipo");
-              }
-            }}
-          >
-            صدور بارکد Anipo
-          </button>
-
           <p className="text-sm md:text-xl text-foreground-primary">
             {priceFormatter(order.total, " تومان")}
           </p>

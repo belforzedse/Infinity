@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import ForgotPasswordForm from "@/components/Auth/ForgotPassword/Form";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto w-full">
+      <AuthReturnButton href="/auth" label="بازگشت به ورود" preserveRedirect />
       <AuthTitle subtitle="لطفا شماره همراه خود را جهت بازیابی رمز وارد نمایید">
         بازیابی رمز عبور
       </AuthTitle>

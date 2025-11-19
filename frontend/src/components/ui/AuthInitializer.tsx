@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import { currentUserAtom, userLoadingAtom, userErrorAtom } from "@/lib/atoms/auth";
 import UserService from "@/services/user";
 import { __clearOrderCache } from "@/services/order";
+import { ACCESS_TOKEN_EVENT, ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
 
 /**
  * AuthInitializer Component
@@ -29,7 +30,7 @@ export default function AuthInitializer() {
     const handleUserLoad = async () => {
       if (typeof window === "undefined") return;
 
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
 
       // Detect logout: token was present, now it's gone
       if (lastTokenRef.current && !token) {
@@ -85,13 +86,21 @@ export default function AuthInitializer() {
 
     // Listen for storage changes (logout from other tabs, programmatic removal)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "accessToken") {
+      if (e.key === ACCESS_TOKEN_STORAGE_KEY) {
         handleUserLoad();
       }
     };
 
+    const handleTokenEvent = () => {
+      handleUserLoad();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener(ACCESS_TOKEN_EVENT, handleTokenEvent);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(ACCESS_TOKEN_EVENT, handleTokenEvent);
+    };
   }, [user, setUser, setIsLoading, setError]);
 
   return null; // This component doesn't render anything

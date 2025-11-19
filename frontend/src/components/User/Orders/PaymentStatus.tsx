@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { OrderService } from "@/services";
+import { translateOrderStatus, translatePaymentGateway } from "@/utils/statusTranslations";
 
 interface PaymentStatusProps {
   orderId: number;
@@ -110,7 +111,13 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
       {orderStatus && (
         <div className="text-sm mt-1 text-gray-600">
           <span className="ml-1">وضعیت سفارش:</span>
-          <span className="text-gray-800">{getStatusTranslation(orderStatus)}</span>
+          <span className="text-gray-800">{translateOrderStatus(orderStatus)}</span>
+        </div>
+      )}
+      {paymentGateway && (
+        <div className="text-sm mt-1 text-gray-600">
+          <span className="ml-1">درگاه پرداخت:</span>
+          <span className="text-gray-800">{translatePaymentGateway(paymentGateway)}</span>
         </div>
       )}
       {transactionId && paymentGateway === "SnappPay" && (
@@ -123,15 +130,3 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   );
 }
 
-// Helper function to translate status to Persian
-function getStatusTranslation(status: string): string {
-  const translations: Record<string, string> = {
-    Started: "ثبت شده",
-    Processing: "در حال پردازش",
-    Shipment: "در حال ارسال",
-    Done: "تکمیل شده",
-    Cancelled: "لغو شده",
-  };
-
-  return translations[status] || status;
-}

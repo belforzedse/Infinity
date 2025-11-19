@@ -13,6 +13,7 @@
 import { jotaiStore } from "@/lib/jotaiStore";
 import { currentUserAtom, userErrorAtom } from "@/lib/atoms/auth";
 import { __clearOrderCache } from "@/services/order";
+import { clearAccessToken } from "@/utils/accessToken";
 
 export async function performLogout(): Promise<void> {
   try {
@@ -23,9 +24,7 @@ export async function performLogout(): Promise<void> {
     }
 
     // 2. Remove auth token (triggers storage event listener in AuthInitializer)
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
-    }
+    clearAccessToken();
     __clearOrderCache();
 
     // 3. Redirect to auth page

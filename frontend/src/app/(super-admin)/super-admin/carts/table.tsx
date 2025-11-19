@@ -8,6 +8,23 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { twMerge } from "tailwind-merge";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
+import { translateCartStatus } from "@/utils/statusTranslations";
+const cartStatusTextClass = (status?: string) => {
+  const normalized = status?.toLowerCase().replace(/\s+/g, " ") || "";
+  switch (normalized) {
+    case "pending":
+      return "text-blue-600";
+    case "payment":
+      return "text-amber-500";
+    case "left":
+      return "text-red-600";
+    case "completed":
+      return "text-green-600";
+    default:
+      return "text-gray-500";
+  }
+};
+
 
 export type Cart = {
   id: string;
@@ -238,25 +255,8 @@ export const MobileTable = ({ data }: Props) => {
                   <span className="text-xs text-neutral-400">|</span>
                   <SuperAdminTableCellFullDate date={new Date(row?.attributes?.createdAt)} />
                   <span className="text-xs text-neutral-400">|</span>
-                  <span
-                    className={twMerge(
-                      "text-xs",
-                      row?.attributes?.Status === "Pending"
-                        ? "text-blue-600"
-                        : row?.attributes?.Status === "Payment"
-                          ? "text-amber-500"
-                          : row?.attributes?.Status === "Left"
-                            ? "text-red-600"
-                            : "text-gray-400",
-                    )}
-                  >
-                    {row?.attributes?.Status === "Pending"
-                      ? "در حال تصمیم گیری"
-                      : row?.attributes?.Status === "Payment"
-                        ? "در انتظار پرداخت"
-                        : row?.attributes?.Status === "Left"
-                          ? "رها شده"
-                          : "خالی"}
+                  <span className={twMerge("text-xs", cartStatusTextClass(row?.attributes?.Status))}>
+                    {translateCartStatus(row?.attributes?.Status)}
                   </span>
                 </div>
 

@@ -1,5 +1,10 @@
 import type { ContractTransaction, Order } from "@/services/order";
 import { faNum } from "@/utils/faNum";
+import {
+  getPaymentStatusMeta,
+  translatePaymentGateway,
+  translatePaymentStatus,
+} from "@/utils/statusTranslations";
 
 const formatPrice = (amount: number) => `${faNum(amount)} تومان`;
 
@@ -18,7 +23,26 @@ interface PaymentSummaryCardProps {
   order: Order;
 }
 
-const TransactionList = ({ transactions }: { transactions: ContractTransaction[] }) => {
+const toneToClass = (tone: ReturnType<typeof getPaymentStatusMeta>["tone"]) => {
+  switch (tone) {
+    case "success":
+      return "bg-emerald-50 text-emerald-600";
+    case "warning":
+      return "bg-amber-50 text-amber-600";
+    case "danger":
+      return "bg-rose-50 text-rose-600";
+    default:
+      return "bg-slate-100 text-slate-600";
+  }
+};
+
+const TransactionList = ({
+  transactions,
+  fallbackGateway,
+}: {
+  transactions: ContractTransaction[];
+  fallbackGateway?: string;
+}) => {
   if (!transactions.length) {
     return (
       <p className="text-xs text-slate-500">
@@ -36,7 +60,11 @@ const TransactionList = ({ transactions }: { transactions: ContractTransaction[]
         >
           <div className="flex flex-col">
             <span className="font-medium text-foreground-primary">
-              {transaction.payment_gateway?.Title || "درگاه پرداخت"}
+              {translatePaymentGateway(
+                transaction.payment_gateway?.Title ||
+                  transaction.payment_gateway?.Code ||
+                  fallbackGateway,
+              )}
             </span>
             <span className="text-xs text-slate-500">
               {transaction.Type === "Gateway" ? "پرداخت آنلاین" : "پرداخت دستی"}
@@ -44,21 +72,14 @@ const TransactionList = ({ transactions }: { transactions: ContractTransaction[]
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <span className="font-medium text-slate-700">{formatPrice(Number(transaction.Amount || 0))}</span>
-            <span
-              className={`rounded-full px-2 py-0.5 ${
-                transaction.Status === "Success"
-                  ? "bg-emerald-50 text-emerald-600"
-                  : transaction.Status === "Pending"
-                    ? "bg-amber-50 text-amber-600"
-                    : "bg-rose-50 text-rose-600"
-              }`}
-            >
-              {transaction.Status === "Success"
-                ? "موفق"
-                : transaction.Status === "Pending"
-                  ? "در انتظار"
-                  : "ناموفق"}
-            </span>
+            {(() => {
+              const meta = getPaymentStatusMeta(transaction.Status);
+              return (
+                <span className={`rounded-full px-2 py-0.5 ${toneToClass(meta.tone)}`}>
+                  {translatePaymentStatus(transaction.Status)}
+                </span>
+              );
+            })()}
             {transaction.TrackId ? <span>شماره پیگیری: {transaction.TrackId}</span> : null}
           </div>
         </div>
@@ -73,6 +94,12 @@ export default function PaymentSummaryCard({ order }: PaymentSummaryCardProps) {
   const discount = calculateDiscount(order);
   const total = Math.max(subtotal + shipping - discount, 0);
   const transactions = order.contract_transactions ?? [];
+  const primaryGateway = translatePaymentGateway(
+    order.PaymentGateway ||
+      transactions[0]?.payment_gateway?.Title ||
+      transactions[0]?.payment_gateway?.Code ||
+      null,
+  );
 
   return (
     <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -96,11 +123,18 @@ export default function PaymentSummaryCard({ order }: PaymentSummaryCardProps) {
           <span>مبلغ نهایی</span>
           <span>{formatPrice(total)}</span>
         </div>
+        <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
+          <span>روش پرداخت</span>
+          <span className="font-semibold text-foreground-primary">{primaryGateway}</span>
+        </div>
       </div>
 
       <div className="mt-4 border-t border-slate-100 pt-4">
         <h3 className="mb-3 text-sm font-semibold text-foreground-primary">تراکنش‌ها</h3>
-        <TransactionList transactions={transactions} />
+        <TransactionList
+          transactions={transactions}
+          fallbackGateway={order.PaymentGateway || undefined}
+        />
       </div>
     </section>
   );

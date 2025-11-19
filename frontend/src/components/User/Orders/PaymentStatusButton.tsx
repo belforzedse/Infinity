@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { OrderService } from "@/services";
 import toast from "react-hot-toast";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { translateOrderStatus } from "@/utils/statusTranslations";
 
 interface PaymentStatusButtonProps {
   orderId: number;
@@ -38,18 +39,6 @@ export default function PaymentStatusButton({ orderId, className = "" }: Payment
     } finally {
       setLoading(false);
     }
-  };
-
-  const getStatusTranslation = (status: string): string => {
-    const translations: Record<string, string> = {
-      Started: "ثبت شده",
-      Processing: "در حال پردازش",
-      Shipment: "در حال ارسال",
-      Done: "تکمیل شده",
-      Cancelled: "لغو شده",
-    };
-
-    return translations[status] || status;
   };
 
   return (
@@ -93,7 +82,7 @@ export default function PaymentStatusButton({ orderId, className = "" }: Payment
               <div className="text-sm">
                 <div className="mb-2">
                   <span className="ml-1 text-gray-600">وضعیت سفارش:</span>
-                  <span>{getStatusTranslation(statusData.status)}</span>
+                  <span>{translateOrderStatus(statusData.status)}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="ml-2 text-gray-600">وضعیت پرداخت:</span>

@@ -3,7 +3,7 @@ import type { PaginatedResponse } from "@/types/api";
 import type { EditProductData, ProductData } from "@/types/super-admin/products";
 import { atom } from "jotai";
 
-export const productDataAtom = atom<ProductData>({
+const createEmptyProductData = (): ProductData => ({
   Title: "",
   CoverImage: null,
   Description: "",
@@ -15,7 +15,7 @@ export const productDataAtom = atom<ProductData>({
   product_other_categories: [],
 });
 
-export const editProductDataAtom = atom<EditProductData>({
+const createEmptyEditProductData = (): EditProductData => ({
   Title: "",
   CoverImage: null,
   Description: "",
@@ -25,6 +25,18 @@ export const editProductDataAtom = atom<EditProductData>({
   product_tags: [],
   Files: [],
   product_other_categories: [],
+});
+
+export const productDataAtom = atom<ProductData>(createEmptyProductData());
+
+export const editProductDataAtom = atom<EditProductData>(createEmptyEditProductData());
+
+export const resetProductDataAtom = atom(null, (_get, set) => {
+  set(productDataAtom, createEmptyProductData());
+});
+
+export const resetEditProductDataAtom = atom(null, (_get, set) => {
+  set(editProductDataAtom, createEmptyEditProductData());
 });
 
 export const productCategoryDataAtom = atom<categoryResponseType[]>([]);

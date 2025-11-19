@@ -3,6 +3,7 @@ import { jotaiStore } from "@/lib/jotaiStore";
 import { errorNotificationsAtom, addErrorNotification } from "@/lib/atoms/errors";
 import { currentUserAtom } from "@/lib/atoms/auth";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { ACCESS_TOKEN_STORAGE_KEY, clearAccessToken } from "@/utils/accessToken";
 
 /**
  * Handles authentication errors (401, 403) gracefully
@@ -31,7 +32,7 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   // 401: User not authenticated
   if (isUnauthorized) {
     // Clear auth state immediately
-    localStorage.removeItem("accessToken");
+    clearAccessToken();
     jotaiStore.set(currentUserAtom, null);
 
     // Show friendly notification (no hard redirect)
@@ -72,7 +73,7 @@ export function getAccessToken(): string | null {
     return null;
   }
   try {
-    return localStorage.getItem("accessToken");
+    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   } catch {
     return null;
   }
