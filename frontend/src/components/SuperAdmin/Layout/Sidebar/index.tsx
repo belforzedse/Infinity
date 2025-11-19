@@ -1,6 +1,6 @@
 "use client";
 import Logo from "@/components/Kits/Logo";
-import superAdminSidebar from "@/constants/superAdminSidebar";
+import superAdminSidebar, { getSidebarItemsForRole } from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
 import React, { useState, Fragment, useEffect, useMemo } from "react";
@@ -24,23 +24,9 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const { roleName } = useCurrentUser();
-  const isSuperAdmin = (roleName ?? "").toLowerCase() === "superadmin";
-  const sidebarItems = useMemo(() => {
-    if (isSuperAdmin) {
-      return superAdminSidebar;
-    }
-
-    return superAdminSidebar.map((item) => {
-      if (item.id !== "reports") {
-        return item;
-      }
-
-      return {
-        ...item,
-        children: item.children.filter((child) => child.id !== "admin-activity"),
-      };
-    });
-  }, [isSuperAdmin]);
+  const normalizedRole = (roleName ?? "").toLowerCase();
+  const isStoreManager = normalizedRole === "store manager";
+  const sidebarItems = useMemo(() => getSidebarItemsForRole(roleName), [roleName]);
 
   const handleLogout = () => {
     performLogout();
@@ -273,14 +259,16 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
 
           <div className="h-[1px] w-full bg-neutral-100" />
 
-          <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <Link href={"/super-admin/settings"} className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <SettingsIcon />
-                <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>
-              </div>
-            </Link>
-          </div>
+          {!isStoreManager && (
+            <div className="flex cursor-pointer items-center px-2 py-1.5">
+              <Link href={"/super-admin/settings"} className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <SettingsIcon />
+                  <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>
+                </div>
+              </Link>
+            </div>
+          )}
 
           <div className="flex cursor-pointer items-center px-2 py-1.5">
             <button type="button" onClick={openConfirm} className="flex items-center gap-2">
