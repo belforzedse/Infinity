@@ -6,6 +6,7 @@ import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import notify from "@/utils/notify";
 import { cartRequestQueue } from "@/utils/requestQueue";
+import { ACCESS_TOKEN_EVENT, ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
 
 export interface CartItem {
   id: string;
@@ -34,7 +35,7 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+  clearCart: () => Promise<void>;
   totalItems: number;
   totalPrice: number;
   subtotalBeforeDiscount: number;
@@ -65,15 +66,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const readToken = () => localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
     const updateLoginState = () => {
-      setIsLoggedIn(!!localStorage.getItem("accessToken"));
+      setIsLoggedIn(!!readToken());
     };
 
     updateLoginState();
     window.addEventListener("storage", updateLoginState);
+    window.addEventListener(ACCESS_TOKEN_EVENT, updateLoginState);
 
     return () => {
       window.removeEventListener("storage", updateLoginState);
+      window.removeEventListener(ACCESS_TOKEN_EVENT, updateLoginState);
     };
   }, []);
 
@@ -172,106 +176,106 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // Transform API cart format to local format
       const originalItemCount = data?.cart_items?.length || 0;
-      const transformedItems: CartItem[] = data?.cart_items?.map((item) => {
-        const variation = item.product_variation;
-        const product = variation?.product;
+      const transformedItems: CartItem[] = data?.cart_items
+        ?.map((item) => {
+          const variation = item.product_variation;
+          const product = variation?.product;
 
-        // Skip items without product or variation
-        if (!product || !variation) {
-          console.warn("Skipping cart item with missing product/variation data:", {
-            itemId: item.id,
-            hasVariation: !!variation,
-            hasProduct: !!product,
-          });
-          return null;
-        }
-
-        const productId = String(product.id || "");
-        const compositeId = variation.id
-          ? `${productId}-${variation.id}`
-          : String(item.id);
-
-        // Get image URL from CoverImage
-        const imageUrl = getImageUrl(product.CoverImage);
-
-        // Get category from product_main_category or fallback
-        const category = product.product_main_category?.Title || "Unknown";
-
-        // Parse price to ensure it's a number
-        const basePrice = parseNumericValue(variation.Price) ?? 0;
-        const listedDiscountPrice = parseNumericValue((variation as any)?.DiscountPrice);
-        const generalDiscountPercent = extractGeneralDiscountPercent(variation);
-
-        let finalUnitPrice = basePrice;
-        if (
-          listedDiscountPrice &&
-          listedDiscountPrice > 0 &&
-          (finalUnitPrice === 0 || listedDiscountPrice < finalUnitPrice)
-        ) {
-          finalUnitPrice = listedDiscountPrice;
-        }
-
-        if (
-          generalDiscountPercent &&
-          generalDiscountPercent > 0 &&
-          generalDiscountPercent < 100 &&
-          basePrice > 0
-        ) {
-          const computed = Math.round(basePrice * (1 - generalDiscountPercent / 100));
-          if (computed > 0 && (finalUnitPrice === 0 || computed < finalUnitPrice)) {
-            finalUnitPrice = computed;
+          // Skip items without product or variation
+          if (!product || !variation) {
+            console.warn("Skipping cart item with missing product/variation data:", {
+              itemId: item.id,
+              hasVariation: !!variation,
+              hasProduct: !!product,
+            });
+            return null;
           }
-        }
 
-        const lineSum = parseNumericValue(item.Sum);
-        if (lineSum && item.Count && item.Count > 0) {
-          const derivedUnitPrice = lineSum / item.Count;
+          const productId = String(product.id || "");
+          const compositeId = variation.id ? `${productId}-${variation.id}` : String(item.id);
+
+          // Get image URL from CoverImage
+          const imageUrl = getImageUrl(product.CoverImage);
+
+          // Get category from product_main_category or fallback
+          const category = product.product_main_category?.Title || "Unknown";
+
+          // Parse price to ensure it's a number
+          const basePrice = parseNumericValue(variation.Price) ?? 0;
+          const listedDiscountPrice = parseNumericValue((variation as any)?.DiscountPrice);
+          const generalDiscountPercent = extractGeneralDiscountPercent(variation);
+
+          let finalUnitPrice = basePrice;
           if (
-            Number.isFinite(derivedUnitPrice) &&
-            derivedUnitPrice > 0 &&
-            (finalUnitPrice === 0 || derivedUnitPrice < finalUnitPrice)
+            listedDiscountPrice &&
+            listedDiscountPrice > 0 &&
+            (finalUnitPrice === 0 || listedDiscountPrice < finalUnitPrice)
           ) {
-            finalUnitPrice = derivedUnitPrice;
+            finalUnitPrice = listedDiscountPrice;
           }
-        }
 
-        if (finalUnitPrice === 0 && listedDiscountPrice) {
-          finalUnitPrice = listedDiscountPrice;
-        }
-        if (finalUnitPrice === 0 && basePrice > 0) {
-          finalUnitPrice = basePrice;
-        }
+          if (
+            generalDiscountPercent &&
+            generalDiscountPercent > 0 &&
+            generalDiscountPercent < 100 &&
+            basePrice > 0
+          ) {
+            const computed = Math.round(basePrice * (1 - generalDiscountPercent / 100));
+            if (computed > 0 && (finalUnitPrice === 0 || computed < finalUnitPrice)) {
+              finalUnitPrice = computed;
+            }
+          }
 
-        const hasDiscount = basePrice > 0 && finalUnitPrice > 0 && finalUnitPrice < basePrice;
-        const originalPrice = hasDiscount ? basePrice : undefined;
-        const discountPercentage = hasDiscount
-          ? Math.round(((basePrice - finalUnitPrice) / basePrice) * 100)
-          : undefined;
+          const lineSum = parseNumericValue(item.Sum);
+          if (lineSum && item.Count && item.Count > 0) {
+            const derivedUnitPrice = lineSum / item.Count;
+            if (
+              Number.isFinite(derivedUnitPrice) &&
+              derivedUnitPrice > 0 &&
+              (finalUnitPrice === 0 || derivedUnitPrice < finalUnitPrice)
+            ) {
+              finalUnitPrice = derivedUnitPrice;
+            }
+          }
 
-        return {
-          id: compositeId,
-          cartItemId: String(item.id),
-          slug: `${variation.SKU || product.id}-${variation.id}`,
-          productId,
-          variationId: String(variation.id),
-          name: product.Title,
-          category: category,
-          price: finalUnitPrice,
-          originalPrice,
-          discountPercentage,
-          quantity: item.Count,
-          image: imageUrl,
-          color: variation.product_variation_color?.Title,
-          size: variation.product_variation_size?.Title,
-          model: variation.product_variation_model?.Title,
-        };
-      }).filter((item) => item !== null);
+          if (finalUnitPrice === 0 && listedDiscountPrice) {
+            finalUnitPrice = listedDiscountPrice;
+          }
+          if (finalUnitPrice === 0 && basePrice > 0) {
+            finalUnitPrice = basePrice;
+          }
+
+          const hasDiscount = basePrice > 0 && finalUnitPrice > 0 && finalUnitPrice < basePrice;
+          const originalPrice = hasDiscount ? basePrice : undefined;
+          const discountPercentage = hasDiscount
+            ? Math.round(((basePrice - finalUnitPrice) / basePrice) * 100)
+            : undefined;
+
+          return {
+            id: compositeId,
+            cartItemId: String(item.id),
+            slug: `${variation.SKU || product.id}-${variation.id}`,
+            productId,
+            variationId: String(variation.id),
+            name: product.Title,
+            category: category,
+            price: finalUnitPrice,
+            originalPrice,
+            discountPercentage,
+            quantity: item.Count,
+            image: imageUrl,
+            color: variation.product_variation_color?.Title,
+            size: variation.product_variation_size?.Title,
+            model: variation.product_variation_model?.Title,
+          };
+        })
+        .filter((item) => item !== null);
 
       // Notify user if items were removed due to missing data
       if (transformedItems.length < originalItemCount && typeof window !== "undefined") {
         const removedCount = originalItemCount - transformedItems.length;
         console.warn(
-          `${removedCount} item(s) were removed from cart due to missing product data. They may have been deleted.`
+          `${removedCount} item(s) were removed from cart due to missing product data. They may have been deleted.`,
         );
       }
 
@@ -324,10 +328,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           await CartService.addItemToCart(Number(item.variationId), item.quantity);
         } catch (error) {
           const variationLabel = item.sku || item.name || item.variationId;
-          console.warn(
-            `Failed to migrate cart item (${variationLabel}):`,
-            error,
-          );
+          console.warn(`Failed to migrate cart item (${variationLabel}):`, error);
         }
       }
 
@@ -377,14 +378,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Queue API call in the background
       try {
         setIsLoading(true);
-        await cartRequestQueue.enqueue(
-          async () => {
-            await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
-            // Refresh cart to ensure consistency with backend
-            await fetchUserCart();
-          },
-          `add-${newItem.slug}`
-        );
+        await cartRequestQueue.enqueue(async () => {
+          await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
+          // Refresh cart to ensure consistency with backend
+          await fetchUserCart();
+        }, `add-${newItem.slug}`);
       } catch (error: any) {
         console.error("Failed to add item to cart:", error);
 
@@ -449,13 +447,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           throw new Error("Cart item ID not found");
         }
 
-        await cartRequestQueue.enqueue(
-          async () => {
-            await CartService.removeCartItem(Number(cartItemId));
-            await fetchUserCart();
-          },
-          `remove-${cartItemId}`
-        );
+        await cartRequestQueue.enqueue(async () => {
+          await CartService.removeCartItem(Number(cartItemId));
+          await fetchUserCart();
+        }, `remove-${cartItemId}`);
       } catch (error) {
         console.error("Failed to remove item from cart:", error);
 
@@ -488,10 +483,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Update quantity optimistically
       setCartItems((prev) =>
         prev.map((cartItem) =>
-          cartItem.id === id || cartItem.cartItemId === id
-            ? { ...cartItem, quantity }
-            : cartItem
-        )
+          cartItem.id === id || cartItem.cartItemId === id ? { ...cartItem, quantity } : cartItem,
+        ),
       );
 
       // Queue API call in the background
@@ -504,14 +497,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           throw new Error("Cart item ID not found");
         }
 
-        await cartRequestQueue.enqueue(
-          async () => {
-            await CartService.updateCartItem(Number(cartItemId), quantity);
-            // Refresh cart to ensure consistency with backend
-            await fetchUserCart();
-          },
-          `update-${cartItemId}`
-        );
+        await cartRequestQueue.enqueue(async () => {
+          await CartService.updateCartItem(Number(cartItemId), quantity);
+          // Refresh cart to ensure consistency with backend
+          await fetchUserCart();
+        }, `update-${cartItemId}`);
       } catch (error: any) {
         console.error("Failed to update cart item:", error);
 
@@ -535,13 +525,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = async () => {
     if (isLoggedIn) {
-      // For API users, just refresh their cart
-      await fetchUserCart();
-    } else {
-      // For local storage users, clear the cart
+      // Optimistically clear to avoid showing stale items if backend already emptied the cart
       setCartItems([]);
-      localStorage.removeItem("cart");
+      try {
+        await fetchUserCart();
+      } catch (error) {
+        console.error("[CartContext] Failed to refresh cart after clearing:", error);
+      }
+      return;
     }
+
+    // For local storage users, clear the cart
+    setCartItems([]);
+    localStorage.removeItem("cart");
   };
 
   // Check if all items in cart have sufficient stock

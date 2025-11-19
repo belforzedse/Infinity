@@ -97,7 +97,7 @@ function ShoppingCartBillForm({}: Props) {
     | undefined
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
-  const { totalPrice, totalItems } = useCart();
+  const { totalPrice, totalItems, clearCart } = useCart();
 
   // Persist/restore discount code
   useEffect(() => {
@@ -204,6 +204,14 @@ function ShoppingCartBillForm({}: Props) {
       setError(EMPTY_CART_ERROR);
     }
   }, [totalPrice, totalItems, currentUser]);
+
+  const clearCartSafely = async () => {
+    try {
+      await clearCart();
+    } catch (clearError) {
+      console.error("[ShoppingCart] Failed to refresh cart after successful checkout:", clearError);
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     // Clear previous errors
@@ -355,10 +363,12 @@ function ShoppingCartBillForm({}: Props) {
           window.location.href = cartResponse.redirectUrl!;
         } else if (gateway === "wallet") {
           // Wallet flow returns no redirect; just move to success
+          await clearCartSafely();
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         }
       } else {
+        await clearCartSafely();
         setSubmitOrderStep(SubmitOrderStep.Success);
         router.push("/orders/success");
       }

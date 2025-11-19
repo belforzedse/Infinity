@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OrderService } from "@/services";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/atoms/Order";
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
+import { useCart } from "@/contexts/CartContext";
 
 function PaymentCallbackContent() {
   const [loading, setLoading] = useState(true);
@@ -19,8 +20,19 @@ function PaymentCallbackContent() {
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const [___, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const [____, setTransactionId] = useAtom(transactionIdAtom);
+  const { clearCart } = useCart();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const navigateToSuccess = useCallback(async () => {
+    try {
+      await clearCart();
+    } catch (error) {
+      console.error("[PaymentCallback] Failed to refresh cart after payment:", error);
+    }
+    setSubmitOrderStep(SubmitOrderStep.Success);
+    router.push("/orders/success");
+  }, [clearCart, router, setSubmitOrderStep]);
 
   useEffect(() => {
     const handlePaymentCallback = async () => {
@@ -79,8 +91,7 @@ function PaymentCallbackContent() {
 
           // Set step based on payment status from direct API check
           if (paymentStatus.isPaid) {
-            setSubmitOrderStep(SubmitOrderStep.Success);
-            router.push("/orders/success");
+            await navigateToSuccess();
             return;
           }
         } catch {
@@ -89,8 +100,7 @@ function PaymentCallbackContent() {
 
         // If we couldn't check or payment is not verified, use the verification result
         if (verificationResult.success) {
-          setSubmitOrderStep(SubmitOrderStep.Success);
-          router.push("/orders/success");
+          await navigateToSuccess();
         } else {
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
@@ -106,7 +116,15 @@ function PaymentCallbackContent() {
     };
 
     handlePaymentCallback();
-  }, [searchParams, router, setOrderId, setOrderNumber, setSubmitOrderStep]);
+  }, [
+    searchParams,
+    router,
+    setOrderId,
+    setOrderNumber,
+    setSubmitOrderStep,
+    setTransactionId,
+    navigateToSuccess,
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
