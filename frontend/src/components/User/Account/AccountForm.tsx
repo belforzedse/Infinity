@@ -1,11 +1,9 @@
 "use client";
-import type { FormEvent, ChangeEvent} from "react";
+import type { FormEvent, ChangeEvent } from "react";
 import { useState, useEffect } from "react";
 import Input from "@/components/Kits/Form/Input";
-import { RadioGroup } from "@/components/Kits/Form/RadioButton";
 import SaveIcon from "../Icons/SaveIcon";
 import CalenderIcon from "../Icons/CalenderIcon";
-import { GENDER_OPTIONS } from "./constants";
 import useUser from "@/hooks/useUser";
 import { updateProfile } from "@/services/user/updateProfile";
 import { toast } from "react-hot-toast";
@@ -15,9 +13,37 @@ interface AccountFormData {
   lastName: string;
   nationalId: string;
   phone: string;
-  birthDate: string;
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
   gender: "male" | "female" | "";
 }
+
+const parseBirthDate = (value?: string | null) => {
+  if (!value) {
+    return { birthYear: "", birthMonth: "", birthDay: "" };
+  }
+
+  const digits = value.split(/[^\d]/).filter(Boolean);
+  if (digits.length === 3) {
+    if (digits[0].length === 4) {
+      return { birthYear: digits[0], birthMonth: digits[1], birthDay: digits[2] };
+    }
+    if (digits[2].length === 4) {
+      return { birthYear: digits[2], birthMonth: digits[1], birthDay: digits[0] };
+    }
+  }
+
+  return { birthYear: "", birthMonth: "", birthDay: "" };
+};
+
+const formatBirthDate = (year: string, month: string, day: string): string | null => {
+  if (!year || !month || !day) return null;
+  const y = year.padStart(4, "0");
+  const m = month.padStart(2, "0");
+  const d = day.padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
 
 export default function AccountForm() {
   const { userData, isLoading, error, refetch } = useUser();
@@ -26,7 +52,9 @@ export default function AccountForm() {
     lastName: "",
     nationalId: "",
     phone: "",
-    birthDate: "",
+    birthYear: "",
+    birthMonth: "",
+    birthDay: "",
     gender: "",
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -40,12 +68,15 @@ export default function AccountForm() {
   // Update form when user data is loaded
   useEffect(() => {
     if (userData) {
+      const { birthYear, birthMonth, birthDay } = parseBirthDate(userData.BirthDate);
       setFormData({
         firstName: userData.FirstName || "",
         lastName: userData.LastName || "",
         nationalId: userData.NationalCode || "",
         phone: userData.Phone || "",
-        birthDate: userData.BirthDate || "",
+        birthYear,
+        birthMonth,
+        birthDay,
         gender: (userData.Sex as "male" | "female" | "") || "",
       });
     }
@@ -57,12 +88,18 @@ export default function AccountForm() {
     try {
       setIsSaving(true);
 
+      const formattedBirthDate = formatBirthDate(
+        formData.birthYear,
+        formData.birthMonth,
+        formData.birthDay,
+      );
+
       await updateProfile({
         FirstName: formData.firstName,
         LastName: formData.lastName,
         NationalCode: formData.nationalId,
         Phone: formData.phone,
-        BirthDate: formData.birthDate,
+        BirthDate: formattedBirthDate ?? userData?.BirthDate ?? undefined,
         Sex: (formData.gender || null) as any,
       });
 
@@ -85,10 +122,6 @@ export default function AccountForm() {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const handleGenderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleInputChange("gender", e.target.value as "male" | "female");
   };
 
   // Only show loading/error states after hydration to prevent mismatches
@@ -143,18 +176,7 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Input
-            label="کد ملی"
-            name="nationalId"
-            value={formData.nationalId}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleInputChange("nationalId", e.target.value)
-            }
-            placeholder="0543758236"
-            maxLength={10}
-            pattern="[0-9]{10}"
-          />
+        <div>
           <Input
             label="شماره همراه"
             name="phone"
@@ -166,26 +188,50 @@ export default function AccountForm() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Input
-            label="تاریخ تولد"
-            name="birthDate"
-            value={formData.birthDate}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleInputChange("birthDate", e.target.value)
-            }
-            placeholder="1370/06/23"
-            icon={<CalenderIcon />}
-            onIconClick={() => {}}
-          />
-
-          <RadioGroup
-            label="جنسیت"
-            name="gender"
-            options={GENDER_OPTIONS}
-            value={formData.gender}
-            onChange={handleGenderChange}
-          />
+        <div>
+          <label className="mb-2 block text-sm font-medium text-foreground-primary">
+            تاریخ تولد
+          </label>
+          <div className="flex gap-2">
+            <Input
+              label=""
+              name="birthYear"
+              type="number"
+              value={formData.birthYear}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleInputChange("birthYear", e.target.value)
+              }
+              placeholder="سال"
+              min="1300"
+              max="1500"
+            />
+            <Input
+              label=""
+              name="birthMonth"
+              type="number"
+              value={formData.birthMonth}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleInputChange("birthMonth", e.target.value)
+              }
+              placeholder="ماه"
+              min="1"
+              max="12"
+            />
+            <Input
+              label=""
+              name="birthDay"
+              type="number"
+              value={formData.birthDay}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleInputChange("birthDay", e.target.value)
+              }
+              placeholder="روز"
+              min="1"
+              max="31"
+              icon={<CalenderIcon />}
+              onIconClick={() => {}}
+            />
+          </div>
         </div>
 
         <div className="flex w-full justify-end border-t border-neutral-200 pt-6">
