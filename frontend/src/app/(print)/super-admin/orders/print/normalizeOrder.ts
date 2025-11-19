@@ -3,7 +3,7 @@ import { unwrapCollection, unwrapEntity } from "@/utils/strapi";
 const normalizeUserRelation = (user: any) => {
   const entity = unwrapEntity(user);
   if (!entity) return undefined;
-  
+
   // Handle user_info in different possible formats
   let userInfo: any = undefined;
   // Check if user_info exists and is not null
@@ -17,7 +17,7 @@ const normalizeUserRelation = (user: any) => {
       if (nested) userInfo = nested;
     }
   }
-  
+
   return {
     data: {
       id: String(entity.id ?? ""),

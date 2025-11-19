@@ -132,43 +132,46 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
   // Get receiver name from local-user-info (user_info relation on plugin user)
   // Try multiple paths to handle different data structures from API/normalization
   const getUserInfo = () => {
-    const user = attrs.user;
+    const user = attrs.user as any; // Cast to any to handle different data structures
     if (!user) return undefined;
-    
+
     // Check if user_info is explicitly null (no record exists)
-    const userInfoValue = user.data?.attributes?.user_info ?? user.attributes?.user_info;
+    const userInfoValue = (user as any).data?.attributes?.user_info ?? (user as any).attributes?.user_info;
     if (userInfoValue === null) {
       return null; // Explicitly null means no user_info record exists
     }
-    
+
     // Try standard normalized path: user.data.attributes.user_info.data.attributes
     if (user.data?.attributes?.user_info?.data?.attributes) {
       return user.data.attributes.user_info.data.attributes;
     }
-    
+
     // Try alternative normalized path: user.data.attributes.user_info.attributes
     if (user.data?.attributes?.user_info?.attributes) {
       return user.data.attributes.user_info.attributes;
     }
-    
+
     // Try direct attributes path: user.attributes.user_info.data.attributes
-    if (user.attributes?.user_info?.data?.attributes) {
-      return user.attributes.user_info.data.attributes;
+    if ((user as any).attributes?.user_info?.data?.attributes) {
+      return (user as any).attributes.user_info.data.attributes;
     }
-    
+
     // Try direct attributes path: user.attributes.user_info.attributes
-    if (user.attributes?.user_info?.attributes) {
-      return user.attributes.user_info.attributes;
+    if ((user as any).attributes?.user_info?.attributes) {
+      return (user as any).attributes.user_info.attributes;
     }
-    
+
     // Try if user_info is directly unwrapped
-    if (userInfoValue && typeof userInfoValue === 'object' && !userInfoValue.data && (userInfoValue.FirstName || userInfoValue.LastName)) {
-      return userInfoValue;
+    if (userInfoValue && typeof userInfoValue === 'object' && !('data' in userInfoValue)) {
+      const unwrapped = userInfoValue as any;
+      if (unwrapped.FirstName || unwrapped.LastName) {
+        return unwrapped as { FirstName?: string; LastName?: string };
+      }
     }
-    
+
     return undefined;
   };
-  
+
   const userInfo = getUserInfo();
   const fullName =
     userInfo && userInfo !== null && (userInfo.FirstName || userInfo.LastName)
