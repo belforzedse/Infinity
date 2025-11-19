@@ -34,8 +34,11 @@ export default factories.createCoreController(
           populate: {
             user: {
               fields: ["id", "email", "phone", "username"],
+              populate: {
+                user_info: true,
+              },
             },
-            user_info: true,
+            user_info: true, // Legacy support - populate at order level too
             contract: {
               populate: {
                 contract_transactions: {
@@ -87,6 +90,8 @@ export default factories.createCoreController(
         }
 
         // Transform the response to match the frontend's expected structure
+        // Check both order.user_info (legacy) and order.user.user_info (correct structure)
+        const userInfo = order.user?.user_info || order.user_info;
         const transformedOrder = {
           ...order,
           user: order.user
@@ -98,11 +103,11 @@ export default factories.createCoreController(
                     phone: order.user.phone || null,
                     email: order.user.email,
                     username: order.user.username,
-                    user_info: order.user_info
+                    user_info: userInfo
                       ? {
                           data: {
-                            id: order.user_info.id,
-                            attributes: order.user_info,
+                            id: userInfo.id,
+                            attributes: userInfo,
                           },
                         }
                       : null,
