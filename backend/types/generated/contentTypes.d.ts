@@ -303,6 +303,47 @@ export interface AdminUser extends Schema.CollectionType {
   };
 }
 
+export interface ApiAdminActivityAdminActivity extends Schema.CollectionType {
+  collectionName: "admin_activities";
+  info: {
+    description: "Audit log for admin actions";
+    displayName: "AdminActivity";
+    pluralName: "admin-activities";
+    singularName: "admin-activity";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<
+      ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"]
+    > &
+      Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::admin-activity.admin-activity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Description: Attribute.Text;
+    IP: Attribute.String;
+    Metadata: Attribute.JSON;
+    performed_by: Attribute.Relation<
+      "api::admin-activity.admin-activity",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    PerformedByName: Attribute.String;
+    PerformedByRole: Attribute.String;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.Enumeration<
+      ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"]
+    > &
+      Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::admin-activity.admin-activity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    UserAgent: Attribute.String;
+  };
+}
+
 export interface ApiCartItemCartItem extends Schema.CollectionType {
   collectionName: "cart_items";
   info: {
@@ -2544,6 +2585,7 @@ declare module "@strapi/types" {
       "admin::transfer-token": AdminTransferToken;
       "admin::transfer-token-permission": AdminTransferTokenPermission;
       "admin::user": AdminUser;
+      "api::admin-activity.admin-activity": ApiAdminActivityAdminActivity;
       "api::cart-item.cart-item": ApiCartItemCartItem;
       "api::cart.cart": ApiCartCart;
       "api::contract-log.contract-log": ApiContractLogContractLog;
