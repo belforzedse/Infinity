@@ -201,8 +201,12 @@ async function self(ctx) {
 }
 
 async function registerInfo(ctx) {
-  const { firstName, lastName, password, phone } = ctx.request.body;
+  const { firstName, lastName, password, phone, birthDate } = ctx.request.body;
   let user = ctx.state.user;
+  const normalizedBirthDate =
+    typeof birthDate === "string" && birthDate.trim().length > 0
+      ? birthDate.trim()
+      : null;
 
   try {
     if (!user?.id) {
@@ -242,6 +246,7 @@ async function registerInfo(ctx) {
             user: pluginUserId,
             FirstName: firstName,
             LastName: lastName,
+            BirthDate: normalizedBirthDate,
           },
         });
       } else {
@@ -249,6 +254,7 @@ async function registerInfo(ctx) {
           data: {
             FirstName: firstName,
             LastName: lastName,
+            BirthDate: normalizedBirthDate ?? profileRecord?.BirthDate ?? null,
           },
         });
       }
