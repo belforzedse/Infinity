@@ -3,13 +3,28 @@ import { unwrapCollection, unwrapEntity } from "@/utils/strapi";
 const normalizeUserRelation = (user: any) => {
   const entity = unwrapEntity(user);
   if (!entity) return undefined;
-  const userInfo = unwrapEntity(entity.user_info);
+  
+  // Handle user_info in different possible formats
+  let userInfo: any = undefined;
+  // Check if user_info exists and is not null
+  if (entity.user_info != null) {
+    // Try unwrapping if it's in Strapi format
+    userInfo = unwrapEntity(entity.user_info);
+    // If unwrapEntity didn't change it, it might already be unwrapped
+    if (userInfo === entity.user_info && entity.user_info?.data) {
+      // Try accessing the nested structure directly
+      const nested = unwrapEntity(entity.user_info.data);
+      if (nested) userInfo = nested;
+    }
+  }
+  
   return {
     data: {
       id: String(entity.id ?? ""),
       attributes: {
         Phone: entity.Phone ?? entity.phone ?? "",
-        user_info: userInfo
+        // Preserve null structure if user_info was null, otherwise set to undefined if no data
+        user_info: userInfo && (userInfo.FirstName || userInfo.LastName)
           ? {
               data: {
                 id: String(userInfo.id ?? ""),
@@ -19,7 +34,7 @@ const normalizeUserRelation = (user: any) => {
                 },
               },
             }
-          : { data: undefined },
+          : entity.user_info === null ? null : undefined,
       },
     },
   };
