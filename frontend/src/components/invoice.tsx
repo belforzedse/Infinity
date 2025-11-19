@@ -2,6 +2,7 @@
 import Image from "next/image";
 import React from "react";
 import Barcode from "react-barcode";
+import { translatePaymentGateway } from "@/utils/statusTranslations";
 type Props = {
   order: {
     shipping?: {
@@ -108,19 +109,30 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
     typeof v === "number" ? v : Number(String(v ?? 0).replace(/[^\d.-]/g, "")); // strip commas etc.
 
   const shipping = toNum(attrs.ShippingCost);
-  const subtotal = toNum(attrs.contract?.data?.attributes?.Amount);
-  const total = subtotal + shipping;
 
-  // (optional) also compute from line items to detect mismatches
-  const _itemsTotal = (attrs.order_items?.data ?? []).reduce((sum: number, it: any) => {
+  // Calculate subtotal from order items (sum of all items)
+  const itemsSubtotal = (attrs.order_items?.data ?? []).reduce((sum: number, it: any) => {
     const a = it?.attributes || {};
     return sum + toNum(a.PerAmount) * toNum(a.Count);
   }, 0);
-  // if you want to display/compare:
-  // const mathMismatch = Math.abs(itemsTotal - subtotal) > 1;
 
+  // Get contract amount (final total - authoritative source, may include shipping)
+  const contractAmount = toNum(attrs.contract?.data?.attributes?.Amount);
+
+  // Use contract amount as total if available (it's the authoritative final amount)
+  // Otherwise, calculate as itemsSubtotal + shipping
+  // This avoids double-counting shipping if contractAmount already includes it
+  const total = contractAmount > 0
+    ? contractAmount
+    : itemsSubtotal + shipping;
+
+  // Subtotal is always the sum of items (for display purposes)
+  const subtotal = itemsSubtotal;
+
+  // Get receiver name from local-user-info (user_info relation on plugin user)
+  const userInfo = attrs.user?.data?.attributes?.user_info?.data?.attributes;
   const fullName =
-    `${attrs.user?.data?.attributes?.user_info?.data?.attributes?.FirstName ?? ""} ${attrs.user?.data?.attributes?.user_info?.data?.attributes?.LastName ?? ""}`.trim();
+    `${userInfo?.FirstName ?? ""} ${userInfo?.LastName ?? ""}`.trim();
 
   const getDisplayValue = (value: string | null | undefined, fallback = "نامشخص") => {
     if (isPreInvoice) {
@@ -303,7 +315,7 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
         {/* Footer - Payment method */}
         <div className="text-sm mt-6 font-bold">
           روش پرداخت:{" "}
-          {attrs.paymentGateway || attrs.PaymentMethod || attrs.Description || "نامشخص"}{" "}
+          {translatePaymentGateway(attrs.paymentGateway || attrs.PaymentMethod || attrs.Description)}
         </div>
       </div>
     </div>
