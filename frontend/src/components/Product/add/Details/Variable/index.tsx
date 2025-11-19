@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import type { ProductVariable, ProductVariableDisplay } from "./types";
 import { ProductVariableTable } from "./Table";
 import { apiClient } from "@/services";
+import toast from "react-hot-toast";
 
 interface ProductVariablesProps {
   productId: number;
+  refreshKey?: number;
 }
 
 const DEFAULT_TITLES = {
@@ -12,7 +14,9 @@ const DEFAULT_TITLES = {
   models: "استاندارد",
 };
 
-const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
+const MAX_STOCK = 1000;
+
+const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshKey = 0 }) => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [variables, setVariables] = useState<ProductVariableDisplay[]>([]);
   const [loading, setLoading] = useState(false);
@@ -126,7 +130,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
     };
 
     fetchVariations();
-  }, [productId]);
+  }, [productId, refreshKey]);
 
   const handleCheckboxChange = (id: number) => {
     setSelectedRows((prev) =>
@@ -164,6 +168,15 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
   const handleSaveVariation = async (updatedVariation: ProductVariableDisplay) => {
     try {
+      if (updatedVariation.stock > MAX_STOCK) {
+        toast.error(`موجودی هر تنوع نمی‌تواند بیشتر از ${MAX_STOCK.toLocaleString()} باشد.`);
+        return;
+      }
+      if (updatedVariation.stock < 0) {
+        toast.error("موجودی نمی‌تواند مقدار منفی باشد.");
+        return;
+      }
+
       // Update variation data
       await apiClient.put(`/product-variations/${updatedVariation.id}`, {
         data: {
@@ -178,14 +191,14 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
       if (updatedVariation.stockId) {
         await apiClient.put(`/product-stocks/${updatedVariation.stockId}`, {
           data: {
-            Count: updatedVariation.stock,
+            Count: Math.min(Math.max(updatedVariation.stock, 0), MAX_STOCK),
           },
         });
       } else {
         // Create new stock and link to variation
         const stockResponse = await apiClient.post("/product-stocks", {
           data: {
-            Count: updatedVariation.stock,
+            Count: Math.min(Math.max(updatedVariation.stock, 0), MAX_STOCK),
             product_variation: updatedVariation.id,
           },
         });
@@ -209,14 +222,14 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
 
   return (
     <div className="w-full p-5 pt-0" dir="rtl">
-      <h2 className="text-base mb-4 text-neutral-400">متغیر های محصول</h2>
+      <h2 className="mb-4 text-base text-neutral-400">متغیر های محصول</h2>
 
       {loading ? (
         <div className="p-8 text-center">در حال بارگذاری...</div>
       ) : variables.length === 0 ? (
         <div className="rounded-lg border border-slate-100 p-8 text-center">
           <p className="text-slate-500">هیچ متغیری برای این محصول تعریف نشده است.</p>
-          <p className="text-sm mt-2 text-slate-400">
+          <p className="mt-2 text-sm text-slate-400">
             ابتدا ویژگی‌های محصول را تعریف کنید و سپس تنوع‌های محصول را ایجاد کنید.
           </p>
         </div>
@@ -234,11 +247,11 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
       {editModalOpen && currentVariation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-lg rounded-xl bg-white p-6">
-            <h3 className="text-lg mb-4 font-medium">ویرایش متغیر محصول</h3>
+            <h3 className="mb-4 text-lg font-medium">ویرایش متغیر محصول</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm mb-1 block">کد محصول (SKU)</label>
+                <label className="mb-1 block text-sm">کد محصول (SKU)</label>
                 <input
                   type="text"
                   value={currentVariation.sku}
@@ -253,7 +266,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">قیمت اصلی (تومان)</label>
+                <label className="mb-1 block text-sm">قیمت اصلی (تومان)</label>
                 <input
                   type="number"
                   value={currentVariation.price}
@@ -268,7 +281,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">تخفیف اختصاصی این متغیر (تومان)</label>
+                <label className="mb-1 block text-sm">تخفیف اختصاصی این متغیر (تومان)</label>
                 <input
                   type="number"
                   value={currentVariation.discountPrice || ""}
@@ -281,49 +294,57 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                   placeholder="خالی بگذارید برای عدم تخفیف"
                   className="w-full rounded-lg border border-slate-300 p-2"
                 />
-                <div className="text-xs mt-1 text-slate-500">
+                <div className="mt-1 text-xs text-slate-500">
                   تخفیف مخصوص این متغیر - مستقل از تخفیف‌های عمومی
                 </div>
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">تخفیف‌های عمومی</label>
+                <label className="mb-1 block text-sm">تخفیف‌های عمومی</label>
                 <div className="min-h-[40px] rounded-lg border border-slate-300 bg-slate-50 p-2">
-                  {currentVariation.generalDiscounts && currentVariation.generalDiscounts.length > 0 ? (
+                  {currentVariation.generalDiscounts &&
+                  currentVariation.generalDiscounts.length > 0 ? (
                     currentVariation.generalDiscounts.map((discount, index: number) => (
                       <div key={index} className="text-sm text-slate-600">
                         {discount.attributes.Type === "Discount"
                           ? `${discount.attributes.Amount}% تخفیف`
-                          : `${Number(discount.attributes.Amount).toLocaleString()} تومان تخفیف`
-                        }
+                          : `${Number(discount.attributes.Amount).toLocaleString()} تومان تخفیف`}
                       </div>
                     ))
                   ) : (
                     <div className="text-sm text-slate-400">هیچ تخفیف فعالی تعریف نشده</div>
                   )}
                 </div>
-                <div className="text-xs mt-1 text-slate-500">
+                <div className="mt-1 text-xs text-slate-500">
                   برای مدیریت تخفیف‌ها از بخش &quot;تخفیف‌های عمومی&quot; استفاده کنید
                 </div>
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">موجودی</label>
+                <label className="mb-1 block text-sm">موجودی</label>
                 <input
                   type="number"
                   value={currentVariation.stock}
                   onChange={(e) =>
                     setCurrentVariation({
                       ...currentVariation,
-                      stock: Number(e.target.value),
+                      stock: Math.min(
+                        Math.max(Number(e.target.value), 0),
+                        MAX_STOCK,
+                      ),
                     })
                   }
+                  max={MAX_STOCK}
+                  min={0}
                   className="w-full rounded-lg border border-slate-300 p-2"
                 />
+                <p className="mt-1 text-xs text-slate-500">
+                  حداکثر موجودی قابل ثبت برای هر تنوع {MAX_STOCK.toLocaleString()} عدد است.
+                </p>
               </div>
 
               <div>
-                <label className="text-sm mb-1 block">وضعیت انتشار</label>
+                <label className="mb-1 block text-sm">وضعیت انتشار</label>
                 <div className="flex items-center space-x-4 space-x-reverse">
                   <label className="inline-flex items-center">
                     <input
@@ -337,7 +358,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                       }
                       className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm mr-2 text-gray-700">منتشر شده</span>
+                    <span className="mr-2 text-sm text-gray-700">منتشر شده</span>
                   </label>
                   <label className="inline-flex items-center">
                     <input
@@ -351,7 +372,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
                       }
                       className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm mr-2 text-gray-700">پیش نویس</span>
+                    <span className="mr-2 text-sm text-gray-700">پیش نویس</span>
                   </label>
                 </div>
               </div>
@@ -382,7 +403,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId }) => {
       {deleteConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-xl bg-white p-6">
-            <h3 className="text-lg mb-4 font-medium">حذف متغیر محصول</h3>
+            <h3 className="mb-4 text-lg font-medium">حذف متغیر محصول</h3>
             <p className="mb-6 text-slate-600">
               آیا از حذف این متغیر محصول اطمینان دارید؟ این عمل قابل بازگشت نیست.
             </p>

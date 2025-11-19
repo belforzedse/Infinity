@@ -37,7 +37,7 @@ type SidebarChild = {
   icon?: ReactNode;
 };
 
-type SidebarItem = {
+export type SidebarItem = {
   id: string;
   label: string;
   href?: string;
@@ -233,5 +233,33 @@ const superAdminSidebar: SidebarItem[] = [
   //   children: [],
   // },
 ];
+
+const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set(["users", "reports", "shipping", "settings"]);
+const STORE_MANAGER_HIDDEN_CHILD_IDS = new Set(["product-comments", "admin-activity"]);
+
+const cloneWithFilteredChildren = (item: SidebarItem) => {
+  const filteredChildren = item.children
+    .filter((child) => !STORE_MANAGER_HIDDEN_CHILD_IDS.has(child.id))
+    .map((child) => ({ ...child }));
+
+  return {
+    ...item,
+    children: filteredChildren,
+  };
+};
+
+const normalizeRole = (roleName?: string | null) => (roleName ?? "").trim().toLowerCase();
+
+export const getSidebarItemsForRole = (roleName?: string | null): SidebarItem[] => {
+  const normalizedRole = normalizeRole(roleName);
+
+  if (normalizedRole === "superadmin") {
+    return superAdminSidebar;
+  }
+
+  return superAdminSidebar
+    .filter((item) => !STORE_MANAGER_HIDDEN_PARENT_IDS.has(item.id))
+    .map((item) => cloneWithFilteredChildren(item));
+};
 
 export default superAdminSidebar;

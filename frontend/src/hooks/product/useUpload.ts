@@ -1,11 +1,10 @@
 import imageCompression from "browser-image-compression";
 import { uploadFile } from "@/services/super-admin/files/upload";
-import { useEffect } from "react"; // removed unused: useState
+import { useEffect, useRef } from "react";
 import logger from "@/utils/logger";
 import toast from "react-hot-toast";
-import { useAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
-import { atom } from "jotai";
 import type { FileType } from "@/components/Product/add/FileUploader/types";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
@@ -37,10 +36,24 @@ const imagesAtom = atom<FileWithPreview[]>([]);
 const videosAtom = atom<FileWithPreview[]>([]);
 const filesAtom = atom<FileWithPreview[]>([]);
 
+const cleanupObjectURLs = (items: FileWithPreview[]) => {
+  items.forEach((item) => {
+    if (item?.preview?.startsWith("blob:")) {
+      URL.revokeObjectURL(item.preview);
+    }
+  });
+};
+
+const mapUrlsToFileWithPreview = (urls: string[], placeholderName: string) =>
+  urls.map((url, index) => ({
+    file: new File([], `${placeholderName}-${index}`),
+    preview: url,
+  }));
+
 export function useUpload({
-  initialImages = [],
-  initialVideos = [],
-  initialFiles = [],
+  initialImages,
+  initialVideos,
+  initialFiles,
   isEditMode = false,
 }: UseUploadProps = {}) {
   // States for all file types
@@ -51,42 +64,46 @@ export function useUpload({
   const [uploadingState, setUploadingState] = useAtom(uploadingStateAtom);
   const [productData, setProductData] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
 
-  // Initialize with initial files if provided
+  const previousImageKeyRef = useRef<string | null>(null);
+  const previousVideoKeyRef = useRef<string | null>(null);
+  const previousFileKeyRef = useRef<string | null>(null);
+
+  // Synchronize global atoms with incoming initial values.
   useEffect(() => {
-    if (initialImages.length > 0 && !images.length) {
-      const imageFiles = initialImages.map((url) => ({
-        file: new File([], "image.jpg"),
-        preview: url,
-      }));
-      setImages(imageFiles);
-    }
+    if (initialImages === undefined) return;
+    const normalizedImages = initialImages ?? [];
+    const nextKey = JSON.stringify(normalizedImages);
 
-    if (initialVideos.length > 0 && !videos.length) {
-      const videoFiles = initialVideos.map((url) => ({
-        file: new File([], "video.mp4"),
-        preview: url,
-      }));
-      setVideos(videoFiles);
-    }
+    if (previousImageKeyRef.current === nextKey) return;
+    previousImageKeyRef.current = nextKey;
 
-    if (initialFiles.length > 0 && !files.length) {
-      const otherFiles = initialFiles.map((url) => ({
-        file: new File([], "file"),
-        preview: url,
-      }));
-      setFiles(otherFiles);
-    }
-  }, [
-    initialImages,
-    initialVideos,
-    initialFiles,
-    images.length,
-    videos.length,
-    files.length,
-    setImages,
-    setVideos,
-    setFiles,
-  ]);
+    cleanupObjectURLs(images);
+    setImages(mapUrlsToFileWithPreview(normalizedImages, "image"));
+  }, [initialImages, images, setImages]);
+
+  useEffect(() => {
+    if (initialVideos === undefined) return;
+    const normalizedVideos = initialVideos ?? [];
+    const nextKey = JSON.stringify(normalizedVideos);
+
+    if (previousVideoKeyRef.current === nextKey) return;
+    previousVideoKeyRef.current = nextKey;
+
+    cleanupObjectURLs(videos);
+    setVideos(mapUrlsToFileWithPreview(normalizedVideos, "video"));
+  }, [initialVideos, videos, setVideos]);
+
+  useEffect(() => {
+    if (initialFiles === undefined) return;
+    const normalizedFiles = initialFiles ?? [];
+    const nextKey = JSON.stringify(normalizedFiles);
+
+    if (previousFileKeyRef.current === nextKey) return;
+    previousFileKeyRef.current = nextKey;
+
+    cleanupObjectURLs(files);
+    setFiles(mapUrlsToFileWithPreview(normalizedFiles, "file"));
+  }, [initialFiles, files, setFiles]);
 
   const getFileType = (file: File): "image" | "video" | "other" => {
     if (file.type.startsWith("image/")) return "image";

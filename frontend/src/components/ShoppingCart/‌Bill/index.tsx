@@ -77,7 +77,7 @@ function ShoppingCartBillForm({}: Props) {
   const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet">("samankish");
+  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet" | "mellat">("samankish");
   const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
   const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
   const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
@@ -97,7 +97,7 @@ function ShoppingCartBillForm({}: Props) {
     | undefined
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
-  const { totalPrice, totalItems } = useCart();
+  const { totalPrice, totalItems, clearCart } = useCart();
 
   // Persist/restore discount code
   useEffect(() => {
@@ -204,6 +204,14 @@ function ShoppingCartBillForm({}: Props) {
       setError(EMPTY_CART_ERROR);
     }
   }, [totalPrice, totalItems, currentUser]);
+
+  const clearCartSafely = async () => {
+    try {
+      await clearCart();
+    } catch (clearError) {
+      console.error("[ShoppingCart] Failed to refresh cart after successful checkout:", clearError);
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     // Clear previous errors
@@ -351,14 +359,16 @@ function ShoppingCartBillForm({}: Props) {
         localStorage.setItem("pendingRefId", cartResponse.refId || "");
 
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
-        if (gateway === "snappay" || gateway === "samankish") {
+        if (gateway === "snappay" || gateway === "samankish" || gateway === "mellat") {
           window.location.href = cartResponse.redirectUrl!;
         } else if (gateway === "wallet") {
           // Wallet flow returns no redirect; just move to success
+          await clearCartSafely();
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         }
       } else {
+        await clearCartSafely();
         setSubmitOrderStep(SubmitOrderStep.Success);
         router.push("/orders/success");
       }

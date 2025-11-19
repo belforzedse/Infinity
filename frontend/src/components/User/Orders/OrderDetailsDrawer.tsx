@@ -7,27 +7,13 @@ import { faNum } from "@/utils/faNum";
 import type { Order, OrderItem } from "@/services/order";
 import PaymentStatusButton from "./PaymentStatusButton";
 import Link from "next/link";
+import { getOrderStatusMeta, StatusTone, translateOrderStatus } from "@/utils/statusTranslations";
 
 interface OrderDetailsDrawerProps {
   order: Order | null;
   isOpen: boolean;
   onClose: () => void;
 }
-
-type StatusTone = "info" | "success" | "warning" | "danger";
-
-const statusLabelMap: Record<string, { label: string; tone: StatusTone }> =
-  {
-    started: { label: "ثبت شده", tone: "info" },
-    processing: { label: "در حال آماده‌سازی", tone: "info" },
-    paying: { label: "در حال پرداخت", tone: "info" },
-
-    shipment: { label: "در حال ارسال", tone: "warning" },
-    done: { label: "تحویل شده", tone: "success" },
-    delivered: { label: "تحویل شده", tone: "success" },
-    cancelled: { label: "لغو شده", tone: "danger" },
-    canceled: { label: "لغو شده", tone: "danger" },
-  };
 
 const toneClasses = (tone: "info" | "success" | "warning" | "danger") => {
   switch (tone) {
@@ -85,18 +71,6 @@ const getVariationDescription = (item: OrderItem) => {
   return parts.join(" | ");
 };
 
-const getStatusInfo = (status?: string): { label: string; tone: StatusTone } => {
-  const key = status?.toLowerCase?.() || "";
-  if (!status) {
-    return { label: "نامشخص", tone: "info" };
-  }
-
-  const mapped = statusLabelMap[key];
-  if (mapped) return mapped;
-
-  return { label: status, tone: "info" };
-};
-
 const calculateTotals = (order: Order) => {
   const subtotal = order.order_items.reduce((sum, item) => {
     const count = Number(item.Count || 0);
@@ -116,7 +90,7 @@ export default function OrderDetailsDrawer({ order, isOpen, onClose }: OrderDeta
     return calculateTotals(order);
   }, [order]);
 
-  const statusInfo = order ? getStatusInfo(order.Status) : null;
+  const statusInfo = order ? getOrderStatusMeta(order.Status) : null;
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -172,7 +146,7 @@ export default function OrderDetailsDrawer({ order, isOpen, onClose }: OrderDeta
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                       <span className="text-slate-500">وضعیت:</span>
                       <span className={`rounded-full px-3 py-1 ${statusInfo ? toneClasses(statusInfo.tone) : ""}`}>
-                        {statusInfo?.label ?? order.Status}
+                        {statusInfo?.label ?? translateOrderStatus(order?.Status)}
                       </span>
                       {order.ShippingBarcode ? (
                         <Link

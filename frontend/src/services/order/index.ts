@@ -110,6 +110,7 @@ export interface Order {
   Note?: string;
   createdAt: string;
   updatedAt: string;
+  PaymentGateway?: string | null;
   order_items: OrderItem[];
   shipping: {
     id: number;

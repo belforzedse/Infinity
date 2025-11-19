@@ -104,7 +104,7 @@ export interface FinalizeCartRequest {
   note?: string;
   callbackURL?: string;
   addressId?: number;
-  gateway?: "samankish" | "snappay" | "wallet";
+  gateway?: "samankish" | "snappay" | "wallet" | "mellat";
   mobile?: string;
   discountCode?: string;
 }

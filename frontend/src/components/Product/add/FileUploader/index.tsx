@@ -21,9 +21,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   isEditMode = false,
 }) => {
   const { images, videos, files, handleFileUpload, removeFile } = useUpload({
-    initialImages: fileType === "image" ? initialFiles : [],
-    initialVideos: fileType === "video" ? initialFiles : [],
-    initialFiles: fileType === "other" ? initialFiles : [],
+    initialImages: fileType === "image" ? initialFiles : undefined,
+    initialVideos: fileType === "video" ? initialFiles : undefined,
+    initialFiles: fileType === "other" ? initialFiles : undefined,
     isEditMode,
   });
 

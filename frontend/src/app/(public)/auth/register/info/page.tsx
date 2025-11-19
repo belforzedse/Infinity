@@ -9,11 +9,15 @@ import AuthButton from "@/components/Kits/Auth/Button";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
 import { AuthService } from "@/services";
 import toast from "react-hot-toast";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 interface FormData {
   firstName: string;
   lastName: string;
   phoneNumber: string;
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
   password: string;
   confirmPassword: string;
 }
@@ -26,6 +30,9 @@ export default function RegisterInfoPage() {
     firstName: "",
     lastName: "",
     phoneNumber: "",
+    birthYear: "",
+    birthMonth: "",
+    birthDay: "",
     password: "",
     confirmPassword: "",
   });
@@ -56,16 +63,26 @@ export default function RegisterInfoPage() {
     return `+${trimmed}`;
   };
 
+  const formatBirthDate = (year: string, month: string, day: string): string => {
+    // Format Persian date as yyyy-MM-dd (keep Persian year, no conversion)
+    const y = year.padStart(4, "0");
+    const m = month.padStart(2, "0");
+    const d = day.padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       const normalizedPhone = normalizePhone(formData.phoneNumber);
+      const birthDate = formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay);
       const res = await AuthService.register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         password: formData.password,
         phone: normalizedPhone,
+        birthDate: birthDate,
       });
 
       if (res.token || res.message) {
@@ -95,6 +112,7 @@ export default function RegisterInfoPage() {
 
   return (
     <div className="space-y-8" dir="rtl">
+      <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
       <AuthTitle subtitle="لطفا اطلاعات خود را تکمیل نمایید">ایجاد حساب کاربری</AuthTitle>
 
       <form onSubmit={handleSubmit} className="space-y-7">
@@ -120,6 +138,44 @@ export default function RegisterInfoPage() {
               onChange={handleChange("lastName")}
               placeholder="نام خانوادگی"
             />
+          </div>
+        </div>
+
+        <div>
+          <Text variant="label" className="mb-2 md:mb-2.5">
+            تاریخ تولد
+          </Text>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <AuthInput
+                type="number"
+                value={formData.birthYear}
+                onChange={handleChange("birthYear")}
+                placeholder="سال (مثلا 1370)"
+                min="1300"
+                max="1450"
+              />
+            </div>
+            <div className="flex-1">
+              <AuthInput
+                type="number"
+                value={formData.birthMonth}
+                onChange={handleChange("birthMonth")}
+                placeholder="ماه (1-12)"
+                min="1"
+                max="12"
+              />
+            </div>
+            <div className="flex-1">
+              <AuthInput
+                type="number"
+                value={formData.birthDay}
+                onChange={handleChange("birthDay")}
+                placeholder="روز (1-31)"
+                min="1"
+                max="31"
+              />
+            </div>
           </div>
         </div>
 
@@ -170,6 +226,9 @@ export default function RegisterInfoPage() {
             isLoading ||
             !formData.firstName ||
             !formData.lastName ||
+            !formData.birthYear ||
+            !formData.birthMonth ||
+            !formData.birthDay ||
             !formData.password ||
             !formData.confirmPassword ||
             formData.password !== formData.confirmPassword

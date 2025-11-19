@@ -1,6 +1,6 @@
 "use client";
 import Logo from "@/components/Kits/Logo";
-import superAdminSidebar from "@/constants/superAdminSidebar";
+import superAdminSidebar, { getSidebarItemsForRole } from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
 import React, { useState, Fragment, useEffect, useMemo } from "react";
@@ -24,23 +24,9 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const { roleName } = useCurrentUser();
-  const isSuperAdmin = (roleName ?? "").toLowerCase() === "superadmin";
-  const sidebarItems = useMemo(() => {
-    if (isSuperAdmin) {
-      return superAdminSidebar;
-    }
-
-    return superAdminSidebar.map((item) => {
-      if (item.id !== "reports") {
-        return item;
-      }
-
-      return {
-        ...item,
-        children: item.children.filter((child) => child.id !== "admin-activity"),
-      };
-    });
-  }, [isSuperAdmin]);
+  const normalizedRole = (roleName ?? "").toLowerCase();
+  const isStoreManager = normalizedRole === "store manager";
+  const sidebarItems = useMemo(() => getSidebarItemsForRole(roleName), [roleName]);
 
   const handleLogout = () => {
     performLogout();
@@ -133,18 +119,36 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                 (!isDashboardItem && curr.startsWith(itemBase + "/")));
             const isActive = Boolean(isActiveBase) || hasActiveChild;
 
+              if (!hasChildren) {
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href ? item.href : ""}
+                    className={clsx(
+                      "relative mb-2 flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-150",
+                      "hover:bg-neutral-50",
+                      isActive ? "bg-pink-50 text-pink-600" : "text-neutral-600",
+                    )}
+                  >
+                    {isActive && (
+                      <span className="pointer-events-none absolute -right-1.5 top-1/2 h-10 w-2 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-pink-600 to-pink-400" />
+                    )}
+                    <div className="flex w-full items-center gap-2">
+                      {item.icon}
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </div>
+                  </Link>
+                );
+              }
+
               return (
                 <div key={item.id} className="flex flex-col">
-                  {/* Parent row */}
                   <div
                     role="button"
                     tabIndex={0}
                     className={clsx(
-                      "relative flex items-center justify-between rounded-lg px-2 py-1.5",
-                      "transition-colors duration-150 ",
-                      !hasChildren && "cursor-pointer hover:bg-neutral-50",
-                      hasChildren && "mb-2 cursor-default",
-                      isActive && !hasChildren ? "bg-pink-50 text-pink-600" : "",
+                      "relative mb-2 flex items-center justify-between rounded-lg px-2 py-1.5",
+                      "cursor-default transition-colors duration-150",
                     )}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -153,73 +157,48 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                       }
                     }}
                   >
-                    {isActive && !hasChildren && (
-                      <span className="pointer-events-none absolute -right-1.5 top-1/2 h-10 w-2 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-pink-600 to-pink-400" />
-                    )}
-                    {hasChildren ? (
-                      <div className="flex items-center gap-2">
-                        {item.icon}
-                        <span
-                          className={clsx(
-                            "text-sm font-medium",
-                            isActive ? "text-pink-600" : "text-neutral-600",
-                          )}
-                        >
-                          {item.label}
-                        </span>
-                      </div>
-                    ) : (
-                      <Link
-                        href={item.href ? item.href : ""}
-                        className="flex items-center gap-2"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex items-center gap-2">
-                          {item.icon}
-                          <span
-                            className={clsx(
-                              "text-sm font-medium",
-                              isActive ? "text-pink-600" : "text-neutral-600",
-                            )}
-                          >
-                            {item.label}
-                          </span>
-                        </div>
-                      </Link>
-                    )}
-
-                    {hasChildren && (
-                      <div
-                        role="button"
-                        tabIndex={0}
+                    <div className="flex items-center gap-2">
+                      {item.icon}
+                      <span
                         className={clsx(
-                          "rounded-md p-1 transition-transform duration-200",
-                          "transition-colors duration-150 hover:bg-neutral-50",
-                          isOpenMenu && "rotate-180",
+                          "text-sm font-medium",
+                          isActive ? "text-pink-600" : "text-neutral-600",
                         )}
-                        onClick={(e) => {
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      className={clsx(
+                        "rounded-md p-1 transition-transform duration-200",
+                        "transition-colors duration-150 hover:bg-neutral-50",
+                        isOpenMenu && "rotate-180",
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenus((p) => ({
+                          ...p,
+                          [item.id]: !p[item.id],
+                        }));
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
                           e.stopPropagation();
                           setOpenMenus((p) => ({
                             ...p,
                             [item.id]: !p[item.id],
                           }));
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setOpenMenus((p) => ({
-                              ...p,
-                              [item.id]: !p[item.id],
-                            }));
-                          }
-                        }}
-                        aria-expanded={isOpenMenu}
-                        aria-controls={`submenu-${item.id}`}
-                      >
-                        <ChevronDownIcon />
-                      </div>
-                    )}
+                        }
+                      }}
+                      aria-expanded={isOpenMenu}
+                      aria-controls={`submenu-${item.id}`}
+                    >
+                      <ChevronDownIcon />
+                    </div>
                   </div>
 
                   {/* Submenu with expand/collapse animation */}
@@ -280,14 +259,16 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
 
           <div className="h-[1px] w-full bg-neutral-100" />
 
-          <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <Link href={"/super-admin/settings"} className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <SettingsIcon />
-                <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>
-              </div>
-            </Link>
-          </div>
+          {!isStoreManager && (
+            <div className="flex cursor-pointer items-center px-2 py-1.5">
+              <Link href={"/super-admin/settings"} className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <SettingsIcon />
+                  <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>
+                </div>
+              </Link>
+            </div>
+          )}
 
           <div className="flex cursor-pointer items-center px-2 py-1.5">
             <button type="button" onClick={openConfirm} className="flex items-center gap-2">

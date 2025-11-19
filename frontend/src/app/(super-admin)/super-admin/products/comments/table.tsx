@@ -5,6 +5,7 @@ import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveAction
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
+import { translateCommentStatus } from "@/utils/statusTranslations";
 
 // This is a sample data type. Modify according to your needs
 export type Comment = {
@@ -72,11 +73,7 @@ export const columns: ColumnDef<Comment>[] = [
                   : "text-yellow-600"
             } text-xs`}
           >
-            {row.original?.attributes?.Status === "Accepted"
-              ? "تایید شده"
-              : row.original?.attributes?.Status === "Rejected"
-                ? "رد شده"
-                : "درحال بررسی"}
+            {translateCommentStatus(row.original?.attributes?.Status)}
           </span>
 
           <span className="text-xs text-right text-foreground-primary">
@@ -144,11 +141,7 @@ export const MobileTable = ({ data }: Props) => {
             <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
               <div className="flex gap-1">
                 <span className="text-xs text-neutral-400">
-                  {row.attributes?.Status === "Accepted"
-                    ? "تایید شده"
-                    : row.attributes?.Status === "Rejected"
-                      ? "رد شده"
-                      : "درحال بررسی"}
+                  {translateCommentStatus(row.attributes?.Status)}
                 </span>
                 <span className="text-xs text-neutral-400">|</span>
                 <span className="text-xs inline-block max-w-[70vw] overflow-hidden text-ellipsis whitespace-nowrap text-neutral-400">
