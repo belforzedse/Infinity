@@ -1,5 +1,6 @@
 import type { ContractTransaction, Order } from "@/services/order";
 import { faNum } from "@/utils/faNum";
+import { getPaymentStatusMeta, translatePaymentStatus } from "@/utils/statusTranslations";
 
 const formatPrice = (amount: number) => `${faNum(amount)} تومان`;
 
@@ -17,6 +18,19 @@ const calculateDiscount = (order: Order): number => {
 interface PaymentSummaryCardProps {
   order: Order;
 }
+
+const toneToClass = (tone: ReturnType<typeof getPaymentStatusMeta>["tone"]) => {
+  switch (tone) {
+    case "success":
+      return "bg-emerald-50 text-emerald-600";
+    case "warning":
+      return "bg-amber-50 text-amber-600";
+    case "danger":
+      return "bg-rose-50 text-rose-600";
+    default:
+      return "bg-slate-100 text-slate-600";
+  }
+};
 
 const TransactionList = ({ transactions }: { transactions: ContractTransaction[] }) => {
   if (!transactions.length) {
@@ -44,21 +58,14 @@ const TransactionList = ({ transactions }: { transactions: ContractTransaction[]
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <span className="font-medium text-slate-700">{formatPrice(Number(transaction.Amount || 0))}</span>
-            <span
-              className={`rounded-full px-2 py-0.5 ${
-                transaction.Status === "Success"
-                  ? "bg-emerald-50 text-emerald-600"
-                  : transaction.Status === "Pending"
-                    ? "bg-amber-50 text-amber-600"
-                    : "bg-rose-50 text-rose-600"
-              }`}
-            >
-              {transaction.Status === "Success"
-                ? "موفق"
-                : transaction.Status === "Pending"
-                  ? "در انتظار"
-                  : "ناموفق"}
-            </span>
+            {(() => {
+              const meta = getPaymentStatusMeta(transaction.Status);
+              return (
+                <span className={`rounded-full px-2 py-0.5 ${toneToClass(meta.tone)}`}>
+                  {translatePaymentStatus(transaction.Status)}
+                </span>
+              );
+            })()}
             {transaction.TrackId ? <span>شماره پیگیری: {transaction.TrackId}</span> : null}
           </div>
         </div>
