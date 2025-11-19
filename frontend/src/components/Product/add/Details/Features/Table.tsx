@@ -1,5 +1,5 @@
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useCallback } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
@@ -72,6 +72,7 @@ interface FeatureGroup {
 
 interface FeaturesTableProps {
   productId: number;
+  onVariationsGenerated?: () => void;
 }
 
 const COLOR_PALETTE = [
@@ -134,7 +135,7 @@ const DEFAULT_TITLES: Record<"sizes" | "models", string> = {
   models: "استاندارد",
 };
 
-export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
+export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTableProps) => {
   const [features, setFeatures] = useState<FeatureGroup>({
     colors: [],
     sizes: [],
@@ -208,7 +209,10 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     } catch (error: any) {
       console.error("Error creating variation option:", error);
       const rawErrorMessage = extractErrorMessage(error);
-      const message = translateErrorMessage(rawErrorMessage, "خطا در ایجاد ویژگی جدید. لطفاً دوباره تلاش کنید.");
+      const message = translateErrorMessage(
+        rawErrorMessage,
+        "خطا در ایجاد ویژگی جدید. لطفاً دوباره تلاش کنید.",
+      );
       toast.error(message);
       return null;
     } finally {
@@ -256,10 +260,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     }
   };
 
-  const handleCreateTextOption = async (
-    type: "sizes" | "models",
-    label: string,
-  ) => {
+  const handleCreateTextOption = async (type: "sizes" | "models", label: string) => {
     const created = await createAttributeOption(type, {
       Title: label.trim(),
     });
@@ -268,80 +269,83 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     }
   };
 
+  const fetchVariationData = useCallback(async () => {
+    try {
+      const [colorsRes, sizesRes, modelsRes] = await Promise.all([
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors"),
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes"),
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models"),
+      ]);
+
+      setAvailableOptions({
+        colors: (colorsRes as any).data || [],
+        sizes: (sizesRes as any).data || [],
+        models: (modelsRes as any).data || [],
+      });
+
+      if (!productId) {
+        setFeatures({
+          colors: [],
+          sizes: [],
+          models: [],
+        });
+        setVariationsCount(0);
+        return;
+      }
+
+      const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
+        `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
+      );
+
+      const existingVariations = (existingVariationsRes as any).data || [];
+
+      const existingColors = new Map<string, Feature>();
+      const existingSizes = new Map<string, Feature>();
+      const existingModels = new Map<string, Feature>();
+
+      existingVariations.forEach((variation: any) => {
+        if (variation.attributes.product_variation_color?.data) {
+          const colorData = variation.attributes.product_variation_color.data;
+          existingColors.set(String(colorData.id), {
+            id: String(colorData.id),
+            value: colorData.attributes.Title,
+            colorCode: colorData.attributes.ColorCode,
+          });
+        }
+
+        if (variation.attributes.product_variation_size?.data) {
+          const sizeData = variation.attributes.product_variation_size.data;
+          existingSizes.set(String(sizeData.id), {
+            id: String(sizeData.id),
+            value: sizeData.attributes.Title,
+          });
+        }
+
+        if (variation.attributes.product_variation_model?.data) {
+          const modelData = variation.attributes.product_variation_model.data;
+          existingModels.set(String(modelData.id), {
+            id: String(modelData.id),
+            value: modelData.attributes.Title,
+          });
+        }
+      });
+
+      setFeatures({
+        colors: Array.from(existingColors.values()),
+        sizes: Array.from(existingSizes.values()),
+        models: Array.from(existingModels.values()),
+      });
+
+      setVariationsCount(existingVariations.length);
+    } catch (error) {
+      console.error("Error fetching variation data:", error);
+    }
+  }, [productId]);
+
   // Fetch all available options and existing variations
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch all available variation options
-        const [colorsRes, sizesRes, modelsRes] = await Promise.all([
-          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors"),
-          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes"),
-          apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models"),
-        ]);
-
-        setAvailableOptions({
-          colors: (colorsRes as any).data || [],
-          sizes: (sizesRes as any).data || [],
-          models: (modelsRes as any).data || [],
-        });
-
-        // Fetch existing product variations for this product
-        if (productId) {
-          const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
-            `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
-          );
-
-          const existingVariations = (existingVariationsRes as any).data || [];
-
-          // Extract unique colors, sizes, and models from existing variations
-          const existingColors = new Map<string, Feature>();
-          const existingSizes = new Map<string, Feature>();
-          const existingModels = new Map<string, Feature>();
-
-          existingVariations.forEach((variation: any) => {
-            if (variation.attributes.product_variation_color?.data) {
-              const colorData = variation.attributes.product_variation_color.data;
-              existingColors.set(String(colorData.id), {
-                id: String(colorData.id),
-                value: colorData.attributes.Title,
-                colorCode: colorData.attributes.ColorCode,
-              });
-            }
-
-            if (variation.attributes.product_variation_size?.data) {
-              const sizeData = variation.attributes.product_variation_size.data;
-              existingSizes.set(String(sizeData.id), {
-                id: String(sizeData.id),
-                value: sizeData.attributes.Title,
-              });
-            }
-
-            if (variation.attributes.product_variation_model?.data) {
-              const modelData = variation.attributes.product_variation_model.data;
-              existingModels.set(String(modelData.id), {
-                id: String(modelData.id),
-                value: modelData.attributes.Title,
-              });
-            }
-          });
-
-          // Set the existing features
-          setFeatures({
-            colors: Array.from(existingColors.values()),
-            sizes: Array.from(existingSizes.values()),
-            models: Array.from(existingModels.values()),
-          });
-
-          // Update variations count
-          setVariationsCount(existingVariations.length);
-        }
-      } catch (error) {
-        console.error("Error fetching variation data:", error);
-      }
-    };
-
-    fetchData();
-  }, [productId]);
+    fetchVariationData();
+  }, [fetchVariationData]);
 
   // Generate combinations and calculate potential variations count
   useEffect(() => {
@@ -432,9 +436,13 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
       const combinations = [];
       const colorList = features.colors;
       const sizeOptions =
-        features.sizes.length > 0 ? features.sizes : [{ id: "default-size", value: DEFAULT_TITLES.sizes }];
+        features.sizes.length > 0
+          ? features.sizes
+          : [{ id: "default-size", value: DEFAULT_TITLES.sizes }];
       const modelOptions =
-        features.models.length > 0 ? features.models : [{ id: "default-model", value: DEFAULT_TITLES.models }];
+        features.models.length > 0
+          ? features.models
+          : [{ id: "default-model", value: DEFAULT_TITLES.models }];
       for (const color of colorList) {
         for (const size of sizeOptions) {
           for (const model of modelOptions) {
@@ -448,9 +456,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
             combinations.push({
               product: productId,
               product_variation_color: parseInt(color.id),
-              ...(features.sizes.length > 0
-                ? { product_variation_size: parseInt(size.id) }
-                : {}),
+              ...(features.sizes.length > 0 ? { product_variation_size: parseInt(size.id) } : {}),
               ...(features.models.length > 0
                 ? { product_variation_model: parseInt(model.id) }
                 : {}),
@@ -484,15 +490,21 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
         });
       });
 
-      // Create new variations
       for (const combination of newCombinations) {
         await apiClient.post("/product-variations", { data: combination });
       }
 
-      alert(`${newCombinations.length} تنوع محصول با موفقیت ایجاد شد`);
+      await fetchVariationData();
+      onVariationsGenerated?.();
+
+      if (newCombinations.length === 0) {
+        toast("هیچ تنوع جدیدی برای ایجاد وجود نداشت");
+      } else {
+        toast.success(`${newCombinations.length} تنوع جدید با موفقیت ایجاد شد`);
+      }
     } catch (error) {
       console.error("Error generating variations:", error);
-      alert("خطا در ایجاد تنوع‌های محصول");
+      toast.error("خطا در ایجاد تنوع‌های محصول");
     } finally {
       setIsGeneratingVariations(false);
     }
@@ -502,230 +514,232 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
     <>
       <div className="space-y-4">
         <div className="w-full rounded-xl border border-slate-100">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b border-slate-100">
-              <th className="w-[20%] border-l border-slate-100 px-4 py-2 text-right font-normal text-gray-900">
-                ویژگی
-              </th>
-              <th className="w-[80%] px-4 py-2 text-right font-normal text-gray-900">مقدارها</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-slate-100">
-              <td className="text-sm border-l border-slate-100 px-4 py-3 text-right text-gray-900">
-                رنگ
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  {features.colors.map((color) => (
-                    <div
-                      key={color.id}
-                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1"
-                    >
-                      <span
-                        className="h-4 w-4 rounded-full border border-slate-200"
-                        style={{ backgroundColor: color.colorCode || "#f5f5f5" }}
-                        aria-label={`کد رنگ ${color.colorCode || "نامشخص"}`}
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="w-[20%] border-l border-slate-100 px-4 py-2 text-right font-normal text-gray-900">
+                  ویژگی
+                </th>
+                <th className="w-[80%] px-4 py-2 text-right font-normal text-gray-900">مقدارها</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-slate-100">
+                <td className="border-l border-slate-100 px-4 py-3 text-right text-sm text-gray-900">
+                  رنگ
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {features.colors.map((color) => (
+                      <div
+                        key={color.id}
+                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1"
+                      >
+                        <span
+                          className="h-4 w-4 rounded-full border border-slate-200"
+                          style={{ backgroundColor: color.colorCode || "#f5f5f5" }}
+                          aria-label={`کد رنگ ${color.colorCode || "نامشخص"}`}
+                        />
+                        <span className="text-sm text-slate-500">{color.value}</span>
+                        <button
+                          onClick={() => removeFeature("colors", color.id)}
+                          className="text-slate-400"
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </div>
+                    ))}
+                    <div className="relative min-w-[140px] flex-1">
+                      <input
+                        type="text"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+                        placeholder="جستجوی رنگ..."
+                        value={inputValues.colors}
+                        onChange={(e) => handleInputChange("colors", e.target.value)}
                       />
-                      <span className="text-sm text-slate-500">{color.value}</span>
-                      <button
-                        onClick={() => removeFeature("colors", color.id)}
-                        className="text-slate-400"
-                      >
-                        <DeleteIcon />
-                      </button>
+                      {inputValues.colors && (
+                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                          {filteredOptions.colors.length > 0 ? (
+                            filteredOptions.colors.map((option) => (
+                              <div
+                                key={option.id}
+                                onClick={() => addFeature("colors", option)}
+                                className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-slate-100"
+                              >
+                                <span
+                                  className="h-5 w-5 rounded-full border border-slate-200"
+                                  style={{
+                                    backgroundColor: option.attributes.ColorCode || "#f5f5f5",
+                                  }}
+                                />
+                                <span>{option.attributes.Title}</span>
+                                {option.attributes.ColorCode && (
+                                  <span className="text-xs text-slate-400">
+                                    {option.attributes.ColorCode.toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
+                          )}
+                          <button
+                            type="button"
+                            disabled={creationLoading.colors}
+                            onClick={() => openColorModal(inputValues.colors)}
+                            className={`flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 text-xs ${
+                              creationLoading.colors
+                                ? "cursor-not-allowed text-slate-400"
+                                : "text-blue-600 hover:bg-blue-50"
+                            }`}
+                          >
+                            <span>افزودن رنگ «{inputValues.colors}»</span>
+                            <span aria-hidden="true">+</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                  <div className="relative min-w-[140px] flex-1">
-                    <input
-                      type="text"
-                      className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
-                      placeholder="جستجوی رنگ..."
-                      value={inputValues.colors}
-                      onChange={(e) => handleInputChange("colors", e.target.value)}
-                    />
-                    {inputValues.colors && (
-                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                        {filteredOptions.colors.length > 0 ? (
-                          filteredOptions.colors.map((option) => (
-                            <div
-                              key={option.id}
-                              onClick={() => addFeature("colors", option)}
-                              className="text-sm flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-slate-100"
-                            >
-                              <span
-                                className="h-5 w-5 rounded-full border border-slate-200"
-                                style={{ backgroundColor: option.attributes.ColorCode || "#f5f5f5" }}
-                              />
-                              <span>{option.attributes.Title}</span>
-                              {option.attributes.ColorCode && (
-                                <span className="text-xs text-slate-400">
-                                  {option.attributes.ColorCode.toUpperCase()}
-                                </span>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
-                        )}
-                        <button
-                          type="button"
-                          disabled={creationLoading.colors}
-                          onClick={() => openColorModal(inputValues.colors)}
-                          className={`text-xs flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 ${
-                            creationLoading.colors
-                              ? "cursor-not-allowed text-slate-400"
-                              : "text-blue-600 hover:bg-blue-50"
-                          }`}
-                        >
-                          <span>افزودن رنگ «{inputValues.colors}»</span>
-                          <span aria-hidden="true">+</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    disabled={creationLoading.colors}
-                    onClick={() => openColorModal()}
-                    className={`text-xs rounded-full border border-dashed border-slate-200 px-3 py-1 transition ${
-                      creationLoading.colors
-                        ? "cursor-not-allowed text-slate-400"
-                        : "text-blue-600 hover:border-blue-400 hover:text-blue-700"
-                    }`}
-                  >
-                    افزودن رنگ دلخواه
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr className="border-b border-slate-100">
-              <td className="text-sm border-l border-slate-100 px-4 py-3 text-right text-gray-900">
-                سایز
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  {features.sizes.map((size) => (
-                    <div
-                      key={size.id}
-                      className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
+                    <button
+                      type="button"
+                      disabled={creationLoading.colors}
+                      onClick={() => openColorModal()}
+                      className={`rounded-full border border-dashed border-slate-200 px-3 py-1 text-xs transition ${
+                        creationLoading.colors
+                          ? "cursor-not-allowed text-slate-400"
+                          : "text-blue-600 hover:border-blue-400 hover:text-blue-700"
+                      }`}
                     >
-                      <span className="text-sm text-slate-500">{size.value}</span>
-                      <button
-                        onClick={() => removeFeature("sizes", size.id)}
-                        className="text-slate-400"
+                      افزودن رنگ دلخواه
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr className="border-b border-slate-100">
+                <td className="border-l border-slate-100 px-4 py-3 text-right text-sm text-gray-900">
+                  سایز
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {features.sizes.map((size) => (
+                      <div
+                        key={size.id}
+                        className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
                       >
-                        <DeleteIcon />
-                      </button>
-                    </div>
-                  ))}
-                  <div className="relative min-w-[140px] flex-1">
-                    <input
-                      type="text"
-                      className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
-                      placeholder="جستجوی سایز..."
-                      value={inputValues.sizes}
-                      onChange={(e) => handleInputChange("sizes", e.target.value)}
-                    />
-                    {inputValues.sizes && (
-                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                        {filteredOptions.sizes.length > 0 ? (
-                          filteredOptions.sizes.map((option) => (
-                            <div
-                              key={option.id}
-                              onClick={() => addFeature("sizes", option)}
-                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                            >
-                              {option.attributes.Title}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
-                        )}
+                        <span className="text-sm text-slate-500">{size.value}</span>
                         <button
-                          type="button"
-                          disabled={creationLoading.sizes}
-                          onClick={() => handleCreateTextOption("sizes", inputValues.sizes)}
-                          className={`text-xs flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 ${
-                            creationLoading.sizes
-                              ? "cursor-not-allowed text-slate-400"
-                              : "text-blue-600 hover:bg-blue-50"
-                          }`}
+                          onClick={() => removeFeature("sizes", size.id)}
+                          className="text-slate-400"
                         >
-                          <span>افزودن سایز «{inputValues.sizes}»</span>
-                          <span aria-hidden="true">+</span>
+                          <DeleteIcon />
                         </button>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="text-sm border-l border-slate-100 px-4 py-3 text-right text-gray-900">
-                مدل
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  {features.models.map((model) => (
-                    <div
-                      key={model.id}
-                      className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
-                    >
-                      <span className="text-sm text-slate-500">{model.value}</span>
-                      <button
-                        onClick={() => removeFeature("models", model.id)}
-                        className="text-slate-400"
-                      >
-                        <DeleteIcon />
-                      </button>
+                    ))}
+                    <div className="relative min-w-[140px] flex-1">
+                      <input
+                        type="text"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+                        placeholder="جستجوی سایز..."
+                        value={inputValues.sizes}
+                        onChange={(e) => handleInputChange("sizes", e.target.value)}
+                      />
+                      {inputValues.sizes && (
+                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                          {filteredOptions.sizes.length > 0 ? (
+                            filteredOptions.sizes.map((option) => (
+                              <div
+                                key={option.id}
+                                onClick={() => addFeature("sizes", option)}
+                                className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
+                              >
+                                {option.attributes.Title}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
+                          )}
+                          <button
+                            type="button"
+                            disabled={creationLoading.sizes}
+                            onClick={() => handleCreateTextOption("sizes", inputValues.sizes)}
+                            className={`flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 text-xs ${
+                              creationLoading.sizes
+                                ? "cursor-not-allowed text-slate-400"
+                                : "text-blue-600 hover:bg-blue-50"
+                            }`}
+                          >
+                            <span>افزودن سایز «{inputValues.sizes}»</span>
+                            <span aria-hidden="true">+</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                  <div className="relative min-w-[140px] flex-1">
-                    <input
-                      type="text"
-                      className="text-sm w-full rounded-lg border border-slate-200 px-3 py-1.5"
-                      placeholder="جستجوی مدل..."
-                      value={inputValues.models}
-                      onChange={(e) => handleInputChange("models", e.target.value)}
-                    />
-                    {inputValues.models && (
-                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                        {filteredOptions.models.length > 0 ? (
-                          filteredOptions.models.map((option) => (
-                            <div
-                              key={option.id}
-                              onClick={() => addFeature("models", option)}
-                              className="text-sm cursor-pointer px-3 py-2 hover:bg-slate-100"
-                            >
-                              {option.attributes.Title}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
-                        )}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="border-l border-slate-100 px-4 py-3 text-right text-sm text-gray-900">
+                  مدل
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {features.models.map((model) => (
+                      <div
+                        key={model.id}
+                        className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-100 px-2 py-1"
+                      >
+                        <span className="text-sm text-slate-500">{model.value}</span>
                         <button
-                          type="button"
-                          disabled={creationLoading.models}
-                          onClick={() => handleCreateTextOption("models", inputValues.models)}
-                          className={`text-xs flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 ${
-                            creationLoading.models
-                              ? "cursor-not-allowed text-slate-400"
-                              : "text-blue-600 hover:bg-blue-50"
-                          }`}
+                          onClick={() => removeFeature("models", model.id)}
+                          className="text-slate-400"
                         >
-                          <span>افزودن مدل «{inputValues.models}»</span>
-                          <span aria-hidden="true">+</span>
+                          <DeleteIcon />
                         </button>
                       </div>
-                    )}
+                    ))}
+                    <div className="relative min-w-[140px] flex-1">
+                      <input
+                        type="text"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+                        placeholder="جستجوی مدل..."
+                        value={inputValues.models}
+                        onChange={(e) => handleInputChange("models", e.target.value)}
+                      />
+                      {inputValues.models && (
+                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                          {filteredOptions.models.length > 0 ? (
+                            filteredOptions.models.map((option) => (
+                              <div
+                                key={option.id}
+                                onClick={() => addFeature("models", option)}
+                                className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
+                              >
+                                {option.attributes.Title}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-xs text-neutral-500">موردی یافت نشد</div>
+                          )}
+                          <button
+                            type="button"
+                            disabled={creationLoading.models}
+                            onClick={() => handleCreateTextOption("models", inputValues.models)}
+                            className={`flex w-full items-center justify-between border-t border-slate-100 px-3 py-2 text-xs ${
+                              creationLoading.models
+                                ? "cursor-not-allowed text-slate-400"
+                                : "text-blue-600 hover:bg-blue-50"
+                            }`}
+                          >
+                            <span>افزودن مدل «{inputValues.models}»</span>
+                            <span aria-hidden="true">+</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div className="flex items-center justify-between rounded-xl border border-slate-100 p-4">
@@ -734,7 +748,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
               تعداد تنوع‌های محصول: <span className="font-semibold">{variationsCount}</span>
             </p>
             {variationsCount > 0 && (
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 با ترکیب ویژگی‌های انتخاب شده {variationsCount} تنوع محصول ایجاد خواهد شد
               </p>
             )}
@@ -742,7 +756,7 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
           <button
             onClick={generateVariations}
             disabled={isGeneratingVariations || variationsCount === 0}
-            className={`text-sm rounded-lg px-4 py-2 text-white ${
+            className={`rounded-lg px-4 py-2 text-sm text-white ${
               isGeneratingVariations || variationsCount === 0
                 ? "bg-blue-300"
                 : "bg-blue-600 hover:bg-blue-700"
@@ -802,7 +816,10 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                       <label className="text-sm text-neutral-600">انتخاب رنگ</label>
                       <div className="mt-3 flex flex-col gap-4 md:flex-row">
                         <div className="flex-1">
-                          <HexColorPicker color={colorModal.colorCode} onChange={handleColorChange} />
+                          <HexColorPicker
+                            color={colorModal.colorCode}
+                            onChange={handleColorChange}
+                          />
                         </div>
                         <div className="flex-1 space-y-3">
                           <div>
@@ -827,7 +844,8 @@ export const FeaturesTable = ({ productId }: FeaturesTableProps) => {
                             </div>
                           </div>
                           <p className="text-xs text-neutral-500">
-                            می‌توانید کد رنگ را بچسبانید یا از انتخاب‌گر برای پیدا کردن دقیق‌ترین طیف استفاده کنید.
+                            می‌توانید کد رنگ را بچسبانید یا از انتخاب‌گر برای پیدا کردن دقیق‌ترین
+                            طیف استفاده کنید.
                           </p>
                         </div>
                       </div>
