@@ -8,7 +8,7 @@ import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
 import { useState, useEffect, useRef } from "react";
 import { apiClient } from "@/services";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCoverImage } from "@/types/Product";
@@ -38,6 +38,7 @@ export type Order = {
   updatedAt: Date;
   items: OrderItem[];
   shipping: number;
+  shippingMethod?: string;
   subtotal: number;
   discount?: number;
   tax?: number;
@@ -235,6 +236,14 @@ export default function EditOrderPage() {
             coverImage?.url ??
             coverImage?.data?.attributes?.url;
 
+          // Construct image URL properly
+          let imageUrl = "";
+          if (thumbnailUrl) {
+            imageUrl = thumbnailUrl.startsWith("http") 
+              ? thumbnailUrl 
+              : `${IMAGE_BASE_URL}${thumbnailUrl}`;
+          }
+
           return {
             id: Number(item?.id ?? item?.orderItemId ?? 0),
             productId: Number(productVariation?.id ?? product?.id ?? 0),
@@ -244,9 +253,7 @@ export default function EditOrderPage() {
             quantity: Number(item?.Count ?? 0),
             color: color?.Title,
             size: size?.Title,
-            image: thumbnailUrl
-              ? API_BASE_URL.split("/api")[0] + thumbnailUrl
-              : "",
+            image: imageUrl,
           };
         });
 
@@ -279,6 +286,9 @@ export default function EditOrderPage() {
         const fullAddress = [addr?.FullAddress, city?.Title, province?.Title]
           .filter(Boolean)
           .join(" - ");
+
+        const shippingEntity = unwrapEntity((normalizedOrder as any).shipping);
+        const shippingMethod = shippingEntity?.Name || shippingEntity?.Title || undefined;
 
         const txList = contractTransactions || [];
         const lastTx = txList[txList.length - 1];
@@ -327,6 +337,7 @@ export default function EditOrderPage() {
           transactionId,
           paymentToken,
           shipping: shippingCost,
+          shippingMethod,
           userId: String(user?.id ?? (normalizedOrder as any)?.userId ?? ""),
           userName: userName.trim() || String(user?.id ?? ""),
           items: items,
@@ -415,7 +426,7 @@ export default function EditOrderPage() {
             {data?.id ? <GatewayLogs orderId={data.id} /> : null}
           </>
         }
-        customSidebar={<Sidebar />}
+        customSidebar={<Sidebar shippingBarcode={data?.shippingBarcode} />}
       />
     </>
   );
