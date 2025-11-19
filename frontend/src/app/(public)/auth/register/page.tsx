@@ -13,6 +13,7 @@ import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";
 import { AuthService } from "@/services";
 import { useCart } from "@/contexts/CartContext";
 import { setAccessToken } from "@/utils/accessToken";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -82,6 +83,7 @@ export default function RegisterPage() {
 
   return (
     <div className="space-y-8" dir="rtl">
+      <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
       <AuthTitle subtitle={`لطفا کد ارسال شده به شماره همراه ${phoneNumber} را وارد نمایید`}>
         ایجاد حساب کاربری
       </AuthTitle>

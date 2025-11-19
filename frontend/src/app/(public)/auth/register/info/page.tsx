@@ -9,6 +9,7 @@ import AuthButton from "@/components/Kits/Auth/Button";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
 import { AuthService } from "@/services";
 import toast from "react-hot-toast";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 interface FormData {
   firstName: string;
@@ -111,6 +112,7 @@ export default function RegisterInfoPage() {
 
   return (
     <div className="space-y-8" dir="rtl">
+      <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
       <AuthTitle subtitle="لطفا اطلاعات خود را تکمیل نمایید">ایجاد حساب کاربری</AuthTitle>
 
       <form onSubmit={handleSubmit} className="space-y-7">

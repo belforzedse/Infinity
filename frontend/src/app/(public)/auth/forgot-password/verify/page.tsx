@@ -8,6 +8,7 @@ import { AuthService } from "@/services";
 import toast from "react-hot-toast";
 import { extractErrorStatus } from "@/utils/errorMessages";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 function VerifyContent() {
   const queryParams = useSearchParams();
@@ -47,6 +48,7 @@ function VerifyContent() {
 
   return (
     <div className="mx-auto w-full">
+      <AuthReturnButton href="/auth/forgot-password" label="بازگشت" preserveRedirect />
       <AuthTitle subtitle={`لطفا کد تایید ارسال شده  به شماره همراه ${phoneNumber} را وارد نمایید`}>
         بازیابی رمز عبور
       </AuthTitle>

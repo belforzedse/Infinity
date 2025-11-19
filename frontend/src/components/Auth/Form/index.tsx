@@ -6,6 +6,7 @@ import AuthButton from "@/components/Kits/Auth/Button";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import AuthInput from "@/components/Kits/Auth/Input";
 import Text from "@/components/Kits/Text";
+import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 export default function AuthForm() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -18,6 +19,7 @@ export default function AuthForm() {
 
   return (
     <>
+      <AuthReturnButton href="/" label="بازگشت به فروشگاه" />
       <AuthTitle subtitle="لطفا شماره همراه خود را جهت بررسی وارد نمایید">
         ورود به حساب کاربری
       </AuthTitle>
