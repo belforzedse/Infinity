@@ -66,7 +66,10 @@ const COMMENT_STATUS_MAP: Record<string, string> = {
 
 const ORDER_LOG_TRANSLATIONS: Array<{ key: string; label: string }> = [
   { key: "create", label: "سفارش ثبت شد" },
+  { key: "order created", label: "سفارش ثبت شد" },
   { key: "payment", label: "پرداخت ثبت شد" },
+  { key: "payment recorded", label: "پرداخت ثبت شد" },
+  { key: "payment updated", label: "پرداخت بروزرسانی شد" },
   { key: "success", label: "پرداخت موفق بود" },
   { key: "fail", label: "پرداخت ناموفق بود" },
   { key: "ship", label: "سفارش ارسال شد" },
@@ -74,9 +77,25 @@ const ORDER_LOG_TRANSLATIONS: Array<{ key: string; label: string }> = [
   { key: "cancel", label: "سفارش لغو شد" },
   { key: "return", label: "مرجوعی ثبت شد" },
   { key: "status changed", label: "وضعیت سفارش بروزرسانی شد" },
+  { key: "order updated", label: "سفارش بروزرسانی شد" },
   { key: "contract created", label: "قرارداد ایجاد شد" },
   { key: "contract failed", label: "قرارداد با خطا مواجه شد" },
 ];
+
+const PAYMENT_GATEWAY_MAP: Record<string, string> = {
+  wallet: "کیف پول",
+  "wallet gateway": "کیف پول",
+  "wallet payment": "کیف پول",
+  mellat: "بانک ملت",
+  "mellat bank": "بانک ملت",
+  "beh pardakht": "بانک ملت",
+  "snapp pay": "پرداخت اقساطی اسنپ‌پی",
+  snappay: "پرداخت اقساطی اسنپ‌پی",
+  "snapp pay installment": "پرداخت اقساطی اسنپ‌پی",
+  samankish: "درگاه پرداخت سامان‌کیش",
+  saman: "درگاه پرداخت سامان‌کیش",
+  "saman kish": "درگاه پرداخت سامان‌کیش",
+};
 
 const GENERIC_TRANSLATIONS: Record<string, string> = {
   pending: "در انتظار",
@@ -149,4 +168,10 @@ export const translateBackendValue = (value?: string | null): string => {
   if (GENERIC_TRANSLATIONS[normalized]) return GENERIC_TRANSLATIONS[normalized];
 
   return value;
+};
+
+export const translatePaymentGateway = (value?: string | null): string => {
+  if (!value) return "نامشخص";
+  const normalized = normalizeKey(value);
+  return PAYMENT_GATEWAY_MAP[normalized] ?? value;
 };

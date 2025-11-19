@@ -77,7 +77,7 @@ function ShoppingCartBillForm({}: Props) {
   const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet">("samankish");
+  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet" | "mellat">("samankish");
   const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
   const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
   const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
@@ -359,7 +359,7 @@ function ShoppingCartBillForm({}: Props) {
         localStorage.setItem("pendingRefId", cartResponse.refId || "");
 
         // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
-        if (gateway === "snappay" || gateway === "samankish") {
+        if (gateway === "snappay" || gateway === "samankish" || gateway === "mellat") {
           window.location.href = cartResponse.redirectUrl!;
         } else if (gateway === "wallet") {
           // Wallet flow returns no redirect; just move to success

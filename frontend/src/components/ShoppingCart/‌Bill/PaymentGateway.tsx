@@ -3,8 +3,8 @@ import Image from "next/image";
 import classNames from "classnames";
 
 interface Props {
-  selected: "samankish" | "snappay" | "wallet";
-  onChange: (gw: "samankish" | "snappay" | "wallet") => void;
+  selected: "samankish" | "snappay" | "wallet" | "mellat";
+  onChange: (gw: "samankish" | "snappay" | "wallet" | "mellat") => void;
   snappEligible?: boolean;
   snappTitle?: string;
   snappDescription?: string;
@@ -38,8 +38,14 @@ function ShoppingCartBillPaymentGateway({
 
   const saman = {
     id: "samankish" as const,
-    name: "سپ",
+    name: "سامان‌کیش",
     img: "/images/cart/samankish.png",
+  };
+
+  const mellat = {
+    id: "mellat" as const,
+    name: "بانک ملت",
+    img: "/images/cart/melat.png",
   };
 
   const wallet = {
@@ -95,8 +101,8 @@ function ShoppingCartBillPaymentGateway({
         </div>
       </button>
       <div className="flex w-full flex-col gap-2">
-        {/* Bottom row: Saman and Wallet */}
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        {/* Bottom row: Saman, Mellat, Wallet */}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
           {/* Saman Kish Payment Gateway */}
           <button
             onClick={() => onChange(saman.id)}
@@ -116,6 +122,27 @@ function ShoppingCartBillPaymentGateway({
               />
             </div>
             <span className="text-sm lg:text-base">درگاه پرداخت {saman.name}</span>
+          </button>
+
+          {/* Mellat Payment Gateway */}
+          <button
+            onClick={() => onChange(mellat.id)}
+            className={classNames(
+              "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
+              selected === mellat.id && "!border-pink-600",
+            )}
+            type="button"
+          >
+            <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
+              <Image
+                src={mellat.img}
+                alt={mellat.name}
+                fill
+                className="bg-stone-50 object-contain p-3"
+                sizes="(min-width: 1024px) 128px, 96px"
+              />
+            </div>
+            <span className="text-sm lg:text-base">درگاه پرداخت {mellat.name}</span>
           </button>
 
           {/* Wallet Payment Gateway */}
@@ -140,7 +167,7 @@ function ShoppingCartBillPaymentGateway({
                 sizes="(min-width: 1024px) 128px, 96px"
               />
             </div>
-            <span className="text-sm lg:text-base">{wallet.name} درگاه پرداخت</span>
+            <span className="text-sm lg:text-base"> درگاه پرداخت {wallet.name}</span>
             {showWalletDetails && (
               <div className="flex w-full flex-col items-center gap-3 pt-3 text-center">
                 <div className="flex flex-col items-center gap-2">

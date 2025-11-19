@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { ProductVariable, ProductVariableDisplay } from "./types";
 import { ProductVariableTable } from "./Table";
 import { apiClient } from "@/services";
+import toast from "react-hot-toast";
 
 interface ProductVariablesProps {
   productId: number;
@@ -12,6 +13,8 @@ const DEFAULT_TITLES = {
   sizes: "تک سایز",
   models: "استاندارد",
 };
+
+const MAX_STOCK = 1000;
 
 const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshKey = 0 }) => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -165,6 +168,15 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
 
   const handleSaveVariation = async (updatedVariation: ProductVariableDisplay) => {
     try {
+      if (updatedVariation.stock > MAX_STOCK) {
+        toast.error(`موجودی هر تنوع نمی‌تواند بیشتر از ${MAX_STOCK.toLocaleString()} باشد.`);
+        return;
+      }
+      if (updatedVariation.stock < 0) {
+        toast.error("موجودی نمی‌تواند مقدار منفی باشد.");
+        return;
+      }
+
       // Update variation data
       await apiClient.put(`/product-variations/${updatedVariation.id}`, {
         data: {
@@ -179,14 +191,14 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
       if (updatedVariation.stockId) {
         await apiClient.put(`/product-stocks/${updatedVariation.stockId}`, {
           data: {
-            Count: updatedVariation.stock,
+            Count: Math.min(Math.max(updatedVariation.stock, 0), MAX_STOCK),
           },
         });
       } else {
         // Create new stock and link to variation
         const stockResponse = await apiClient.post("/product-stocks", {
           data: {
-            Count: updatedVariation.stock,
+            Count: Math.min(Math.max(updatedVariation.stock, 0), MAX_STOCK),
             product_variation: updatedVariation.id,
           },
         });
@@ -316,11 +328,19 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
                   onChange={(e) =>
                     setCurrentVariation({
                       ...currentVariation,
-                      stock: Number(e.target.value),
+                      stock: Math.min(
+                        Math.max(Number(e.target.value), 0),
+                        MAX_STOCK,
+                      ),
                     })
                   }
+                  max={MAX_STOCK}
+                  min={0}
                   className="w-full rounded-lg border border-slate-300 p-2"
                 />
+                <p className="mt-1 text-xs text-slate-500">
+                  حداکثر موجودی قابل ثبت برای هر تنوع {MAX_STOCK.toLocaleString()} عدد است.
+                </p>
               </div>
 
               <div>
