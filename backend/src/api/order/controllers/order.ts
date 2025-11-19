@@ -15,6 +15,17 @@ export default factories.createCoreController(
   ({ strapi }: { strapi: Strapi }) => ({
     async findOne(ctx) {
       const { id } = ctx.params;
+      const requester = ctx.state.user;
+
+      const requesterId = requester?.id ? Number(requester.id) : null;
+      const requesterRoleType = requester?.role?.type?.toLowerCase();
+      const requesterRoleName = requester?.role?.name?.toLowerCase();
+      const isAdminUser =
+        requester?.isAdmin === true ||
+        requesterRoleType === "superadmin" ||
+        requesterRoleType === "store-manager" ||
+        requesterRoleName === "superadmin" ||
+        requesterRoleName === "store manager";
 
       try {
         // Query with all necessary relations populated
@@ -23,8 +34,11 @@ export default factories.createCoreController(
           populate: {
             user: {
               fields: ["id", "email", "phone", "username"],
+              populate: {
+                user_info: true,
+              },
             },
-            user_info: true,
+            user_info: true, // Legacy support - populate at order level too
             contract: {
               populate: {
                 contract_transactions: {
@@ -64,7 +78,20 @@ export default factories.createCoreController(
           return ctx.notFound("Order not found");
         }
 
+        if (!isAdminUser) {
+          if (!requesterId) {
+            return ctx.unauthorized("Authentication required");
+          }
+
+          const orderOwnerId = order.user?.id ? Number(order.user.id) : null;
+          if (!orderOwnerId || orderOwnerId !== requesterId) {
+            return ctx.forbidden("You do not have permission to access this order");
+          }
+        }
+
         // Transform the response to match the frontend's expected structure
+        // Check both order.user_info (legacy) and order.user.user_info (correct structure)
+        const userInfo = order.user?.user_info || order.user_info;
         const transformedOrder = {
           ...order,
           user: order.user
@@ -76,11 +103,11 @@ export default factories.createCoreController(
                     phone: order.user.phone || null,
                     email: order.user.email,
                     username: order.user.username,
-                    user_info: order.user_info
+                    user_info: userInfo
                       ? {
                           data: {
-                            id: order.user_info.id,
-                            attributes: order.user_info,
+                            id: userInfo.id,
+                            attributes: userInfo,
                           },
                         }
                       : null,

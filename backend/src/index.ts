@@ -120,7 +120,7 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
         "product-review": ["submitReview", "getUserReviews"],
       },
       "api::order": {
-        order: ["getMyOrders", "checkPaymentStatus"],
+        order: ["getMyOrders", "getMyOrderDetail", "checkPaymentStatus"],
       },
       "api::local-user-address": {
         "local-user-address": [
@@ -168,6 +168,9 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
     // Store managers can soft delete (update removedAt) but not hard delete
     allowActions: ["find", "findOne", "create", "update", "search"],
   },
+  // Restrict users management - completely disabled for store managers
+  { typeKey: "plugin::users-permissions", controller: "user" , allowActions: READ_ACTIONS},
+
 ];
 
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {

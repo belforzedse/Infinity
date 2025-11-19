@@ -1,4 +1,24 @@
 import type { Strapi } from "@strapi/strapi";
+const getFrontendBaseUrl = () =>
+  (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://infinitycolor.org").replace(
+    /\/$/,
+    "",
+  );
+
+const buildPaymentRedirectUrl = (
+  type: "success" | "failure" | "cancelled",
+  params?: Record<string, string | number | null | undefined>,
+) => {
+  const base = getFrontendBaseUrl();
+  const url = new URL(`${base}/payment/${type}`);
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") return;
+      url.searchParams.set(key, String(value));
+    });
+  }
+  return url.toString();
+};
 
 async function incrementDiscountUsageCounter(
   strapi: Strapi,
@@ -395,9 +415,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           normalizedState || `Status ${samanStatusInput || "Unknown"}`
         );
         return ctx.redirect(
-          `https://infinitycolor.org/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
-            normalizedState || String(samanStatusInput || "FAILED")
-          )}`
+          buildPaymentRedirectUrl("failure", {
+            orderId,
+            error: normalizedState || String(samanStatusInput || "FAILED"),
+          })
         );
       }
 
@@ -419,9 +440,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           strapi.log.error("Saman reverse attempt failed", reverseErr);
         }
         return ctx.redirect(
-          `https://infinitycolor.org/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
-            verifyResult?.resultDescription || "Verification failed"
-          )}`
+          buildPaymentRedirectUrl("failure", {
+            orderId,
+            error: verifyResult?.resultDescription || "Verification failed",
+          })
         );
       }
 
@@ -560,9 +582,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       await clearCartAfterPayment(strapi, orderId);
 
       return ctx.redirect(
-        `https://infinitycolor.org/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
-          refNum || ""
-        )}`
+        buildPaymentRedirectUrl("success", {
+          orderId,
+          transactionId: refNum || "",
+        })
       );
     }
 
@@ -691,9 +714,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://infinitycolor.org/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
-            transactionIdInput || ""
-          )}`
+          buildPaymentRedirectUrl("failure", {
+            orderId,
+            transactionId: transactionIdInput || "",
+          })
         );
       }
 
@@ -730,9 +754,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         } catch {}
         return ctx.redirect(
-          `https://infinitycolor.org/payment/failure?orderId=${orderId}&transactionId=${encodeURIComponent(
-            transactionIdInput || ""
-          )}`
+          buildPaymentRedirectUrl("failure", {
+            orderId,
+            transactionId: transactionIdInput || "",
+          })
         );
       }
 
@@ -922,9 +947,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       await clearCartAfterPayment(strapi, orderId);
 
       return ctx.redirect(
-        `https://infinitycolor.org/payment/success?orderId=${orderId}&transactionId=${encodeURIComponent(
-          transactionIdInput || ""
-        )}`
+        buildPaymentRedirectUrl("success", {
+          orderId,
+          transactionId: transactionIdInput || "",
+        })
       );
     }
 
@@ -970,15 +996,16 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         strapi.log.info("Payment cancelled by user:", { orderId, ResCode });
         // User cancelled - redirect to frontend cancellation page
         ctx.redirect(
-          `https://infinitycolor.org/payment/cancelled?orderId=${orderId}&reason=user-cancelled`
+          buildPaymentRedirectUrl("cancelled", { orderId, reason: "user-cancelled" })
         );
       } else {
         strapi.log.error("Payment failed with ResCode:", ResCode);
         // Other payment failures - redirect to frontend failure page
         ctx.redirect(
-          `https://infinitycolor.org/payment/failure?orderId=${orderId}&error=${encodeURIComponent(
-            `Payment failed with code: ${ResCode}`
-          )}`
+          buildPaymentRedirectUrl("failure", {
+            orderId,
+            error: `Payment failed with code: ${ResCode}`,
+          })
         );
       }
       return;
@@ -1094,9 +1121,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         await clearCartAfterPayment(strapi, orderId);
 
         // Redirect to frontend success page
-        ctx.redirect(
-          `https://infinitycolor.org/payment/success?orderId=${orderId}`
-        );
+        ctx.redirect(buildPaymentRedirectUrl("success", { orderId }));
       } else {
         // Settlement failed
         console.error("Payment settlement failed:", settlementResult.error);
@@ -1121,9 +1146,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           );
         }
         ctx.redirect(
-          `https://infinitycolor.org/payment/failure?error=${encodeURIComponent(
-            settlementResult.error || "Settlement failed"
-          )}`
+          buildPaymentRedirectUrl("failure", {
+            error: settlementResult.error || "Settlement failed",
+          })
         );
       }
     } else {
@@ -1155,9 +1180,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       // Redirect to frontend failure page
       ctx.redirect(
-        `https://infinitycolor.org/payment/failure?error=${encodeURIComponent(
-          verificationResult.error
-        )}`
+        buildPaymentRedirectUrl("failure", { error: verificationResult.error || "Verification failed" })
       );
     }
   } catch (error) {
@@ -1178,9 +1201,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       strapi.log.error("Failed to persist gateway internal error log", e);
     }
     ctx.redirect(
-      `https://infinitycolor.org/payment/failure?error=${encodeURIComponent(
-        "Internal server error"
-      )}`
+      buildPaymentRedirectUrl("failure", { error: "Internal server error" })
     );
   }
 }
