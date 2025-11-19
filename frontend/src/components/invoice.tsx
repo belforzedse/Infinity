@@ -130,9 +130,50 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
   const subtotal = itemsSubtotal;
 
   // Get receiver name from local-user-info (user_info relation on plugin user)
-  const userInfo = attrs.user?.data?.attributes?.user_info?.data?.attributes;
+  // Try multiple paths to handle different data structures from API/normalization
+  const getUserInfo = () => {
+    const user = attrs.user;
+    if (!user) return undefined;
+    
+    // Check if user_info is explicitly null (no record exists)
+    const userInfoValue = user.data?.attributes?.user_info ?? user.attributes?.user_info;
+    if (userInfoValue === null) {
+      return null; // Explicitly null means no user_info record exists
+    }
+    
+    // Try standard normalized path: user.data.attributes.user_info.data.attributes
+    if (user.data?.attributes?.user_info?.data?.attributes) {
+      return user.data.attributes.user_info.data.attributes;
+    }
+    
+    // Try alternative normalized path: user.data.attributes.user_info.attributes
+    if (user.data?.attributes?.user_info?.attributes) {
+      return user.data.attributes.user_info.attributes;
+    }
+    
+    // Try direct attributes path: user.attributes.user_info.data.attributes
+    if (user.attributes?.user_info?.data?.attributes) {
+      return user.attributes.user_info.data.attributes;
+    }
+    
+    // Try direct attributes path: user.attributes.user_info.attributes
+    if (user.attributes?.user_info?.attributes) {
+      return user.attributes.user_info.attributes;
+    }
+    
+    // Try if user_info is directly unwrapped
+    if (userInfoValue && typeof userInfoValue === 'object' && !userInfoValue.data && (userInfoValue.FirstName || userInfoValue.LastName)) {
+      return userInfoValue;
+    }
+    
+    return undefined;
+  };
+  
+  const userInfo = getUserInfo();
   const fullName =
-    `${userInfo?.FirstName ?? ""} ${userInfo?.LastName ?? ""}`.trim();
+    userInfo && userInfo !== null && (userInfo.FirstName || userInfo.LastName)
+      ? `${userInfo.FirstName ?? ""} ${userInfo.LastName ?? ""}`.trim()
+      : "";
 
   const getDisplayValue = (value: string | null | undefined, fallback = "نامشخص") => {
     if (isPreInvoice) {
