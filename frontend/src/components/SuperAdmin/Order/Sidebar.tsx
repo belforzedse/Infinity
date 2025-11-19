@@ -1,15 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { apiClient } from "@/services";
+import AnipoBarcodeDialog from "./AnipoBarcodeDialog";
+import { translateOrderLogMessage } from "@/utils/statusTranslations";
 
 interface SuperAdminOrderSidebarProps {
   orderData?: any;
   selectedItems?: any[];
+  shippingBarcode?: string;
 }
+
+type OrderLog = {
+  id: number;
+  attributes: {
+    createdAt: string;
+    Description?: string;
+    Changes?: any;
+  };
+};
 
 export default function SuperAdminOrderSidebar({
   orderData,
-  selectedItems = []
+  selectedItems = [],
+  shippingBarcode
 }: SuperAdminOrderSidebarProps = {}) {
   const router = useRouter();
   const { id } = useParams();
@@ -17,6 +31,57 @@ export default function SuperAdminOrderSidebar({
     message: "",
     type: "sms",
   });
+  const [orderLogs, setOrderLogs] = useState<OrderLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (!id) return;
+      try {
+        setLogsLoading(true);
+        const res = await apiClient.get(
+          `/order-logs?filters[order][id][$eq]=${id}&sort[0]=createdAt:desc` as any,
+        );
+        setOrderLogs(((res as any).data || []) as OrderLog[]);
+      } catch (error) {
+        console.error("Error fetching order logs:", error);
+      } finally {
+        setLogsLoading(false);
+      }
+    };
+    fetchLogs();
+  }, [id]);
+
+  useEffect(() => {
+    setHasBarcode(!!shippingBarcode);
+  }, [shippingBarcode]);
+
+  const handleGenerateBarcode = async (weight?: number, boxSizeId?: number) => {
+    if (!id) return;
+    setIsGenerating(true);
+    try {
+      const mod = await import("@/services/order");
+      const res = await mod.default.generateAnipoBarcode(parseInt(String(id)), weight, boxSizeId);
+
+      if (res?.success || res?.already) {
+        setHasBarcode(true);
+        alert(res?.already ? "بارکد قبلاً ثبت شده است" : "بارکد با موفقیت ایجاد شد");
+      } else {
+        alert("درخواست ارسال شد");
+      }
+
+      setShowBarcodeDialog(false);
+      // Reload page to reflect barcode changes
+      window.location.reload();
+    } catch (e) {
+      alert("خطا در ایجاد بارکد Anipo");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handlePrintPreInvoice = () => {
     if (!orderData || selectedItems.length === 0) {
@@ -201,38 +266,110 @@ export default function SuperAdminOrderSidebar({
             </button>
           </div>
 
-          {/* Pre-Invoice Button - Full Width */}
+          {/* Anipo Barcode Button - Full Width */}
           <div className="flex w-full mt-2">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handlePrintPreInvoice();
-              }}
-              className="flex w-full items-center justify-center gap-1 rounded-md bg-green-50 py-1.5 hover:bg-green-100 transition-colors"
-              type="button"
-            >
-              <span className="text-sm text-green-600">چاپ پیش‌فاکتور</span>
-              <PrintIcon />
-            </button>
+            {hasBarcode ? (
+              <button
+                className="flex w-full items-center justify-center gap-1 rounded-md bg-green-50 py-1.5 text-green-600 cursor-default"
+                type="button"
+                disabled
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20 6L9 17l-5-5"></path>
+                </svg>
+                <span className="text-sm">بارکد صادر شده</span>
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (id) {
+                    setShowBarcodeDialog(true);
+                  } else {
+                    alert("لطفا ابتدا سفارش را ذخیره کنید");
+                  }
+                }}
+                disabled={isGenerating}
+                className="flex w-full items-center justify-center gap-1 rounded-md bg-orange-50 py-1.5 text-orange-600 hover:bg-orange-100 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M3 5V19H21V5H3Z"></path>
+                  <path d="M12 8V16"></path>
+                  <path d="M8 12H16"></path>
+                </svg>
+                <span className="text-sm">صدور بارکد Anipo</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl bg-white p-5">
         <div className="flex items-center justify-between">
-          <span className="text-lg text-foreground-primary">یادداشت های سیستم پرداخت</span>
+          <span className="text-lg text-foreground-primary">اعلانات سفارش</span>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <span className="text-sm text-neutral-400">
-            رویدادهای درگاه (درخواست، ارجاع، بازگشت) در جزئیات سفارش نمایش داده می‌شود.
-          </span>
-          <span className="text-xs text-neutral-400">
-            برای مشاهده کامل، به بخش جزئیات پرداخت در بدنه صفحه مراجعه کنید.
-          </span>
-        </div>
+        {logsLoading ? (
+          <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
+        ) : orderLogs.length === 0 ? (
+          <div className="text-sm text-neutral-400">اعلانی ثبت نشده است</div>
+        ) : (
+          <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+            {orderLogs.map((log, index) => {
+              const date = new Date(log.attributes.createdAt);
+              const formattedDate = date.toLocaleDateString("fa-IR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              });
+              const formattedTime = date.toLocaleTimeString("fa-IR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              const isEven = index % 2 === 0;
+
+              return (
+                <div
+                  key={log.id}
+                  className={`rounded-lg p-3 ${
+                    isEven ? "bg-blue-50" : "bg-purple-50"
+                  }`}
+                >
+                  <div className="text-sm text-foreground-primary mb-1">
+                    {translateOrderLogMessage(log.attributes.Description) || "ثبت رویداد"}
+                  </div>
+                  <div className="text-xs text-neutral-500 mt-1">
+                    {formattedDate} در {formattedTime}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      <AnipoBarcodeDialog
+        isOpen={showBarcodeDialog}
+        onClose={() => setShowBarcodeDialog(false)}
+        onGenerate={handleGenerateBarcode}
+        loading={isGenerating}
+      />
     </div>
   );
 }
