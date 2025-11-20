@@ -72,7 +72,7 @@ process.env.REDIS_URL = 'redis://localhost:6379';
 jest.mock('axios');
 
 // Mock Redis client
-jest.mock('../../index', () => ({
+jest.mock('../index', () => ({
   RedisClient: Promise.resolve({
     get: jest.fn(),
     set: jest.fn(),
