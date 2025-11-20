@@ -21,6 +21,11 @@ export async function performLogout(): Promise<void> {
     if (typeof window !== "undefined") {
       jotaiStore.set(currentUserAtom, null);
       jotaiStore.set(userErrorAtom, null);
+      try {
+        localStorage.removeItem("refreshToken");
+      } catch {
+        // ignore storage errors
+      }
     }
 
     // 2. Remove auth token (triggers storage event listener in AuthInitializer)
