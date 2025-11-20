@@ -23,11 +23,12 @@ export const decrementStockAtomic = async (
     }
 
     // Use raw SQL for atomic decrement with stock validation
+    // Note: Strapi converts camelCase to snake_case, so "Count" becomes "count"
     const result = await strapi.db.connection.raw(
       `UPDATE product_stocks
-       SET "Count" = "Count" - ?
-       WHERE id = ? AND "Count" >= ?
-       RETURNING "Count"`,
+       SET count = count - ?
+       WHERE id = ? AND count >= ?
+       RETURNING count`,
       [quantity, stockId, quantity]
     );
 
@@ -50,7 +51,7 @@ export const decrementStockAtomic = async (
       };
     }
 
-    return { success: true, newCount: rows[0].Count };
+    return { success: true, newCount: rows[0].count };
   } catch (error) {
     strapi.log.error("Failed to decrement stock atomically", {
       stockId,
