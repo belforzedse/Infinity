@@ -22,25 +22,7 @@ jest.mock("mellat-checkout", () => {
   }));
 });
 
-type StrapiMockHelpers = ReturnType<typeof createStrapiMock>;
-
-const createStrapiMock = () => {
-  const serviceMap: Record<string, any> = {};
-  const strapi: any = {
-    log: {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    },
-  };
-
-  const registerService = (uid: string, impl: any) => {
-    serviceMap[uid] = impl;
-  };
-
-  return { strapi, registerService };
-};
+import { createStrapiMock } from "../../../__tests__/helpers/test-utils";
 
 describe("Mellat v3 Payment Gateway (Improved)", () => {
   let mellatServiceFactory: any;
@@ -453,7 +435,9 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
       service.logMellatErrorCode("REQ-TEST", 17);
 
       expect(strapi.log.error).toHaveBeenCalledWith(
-        expect.stringContaining("[REQ-TEST] Mellat Error Code 17"),
+        expect.stringContaining("[REQ-TEST] Mellat Error Code 17:")
+      );
+      expect(strapi.log.error).toHaveBeenCalledWith(
         expect.stringContaining("کاربر از انجام تراکنش منصرف شده است")
       );
     });

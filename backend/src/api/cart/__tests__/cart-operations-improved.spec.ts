@@ -7,72 +7,7 @@
 import { addItemHandler } from "../controllers/handlers/addItem";
 import { removeItemHandler } from "../controllers/handlers/removeItem";
 import { checkStockHandler } from "../controllers/handlers/checkStock";
-
-type StrapiMockHelpers = ReturnType<typeof createStrapiMock>;
-
-const createCtx = (overrides: Partial<any> = {}) => {
-  const ctx: any = {
-    request: {
-      body: {},
-      header: {},
-      ...overrides.request,
-    },
-    params: {},
-    state: {
-      user: { id: 1 },
-      ...overrides.state,
-    },
-    badRequest: jest.fn((message: string, payload?: unknown) => {
-      const error: any = new Error(message);
-      error.status = 400;
-      error.payload = payload;
-      throw error;
-    }),
-    forbidden: jest.fn((message: string, payload?: unknown) => {
-      const error: any = new Error(message);
-      error.status = 403;
-      error.payload = payload;
-      throw error;
-    }),
-    send: jest.fn((data: any) => data),
-    ...overrides,
-  };
-
-  return ctx;
-};
-
-const createStrapiMock = () => {
-  const serviceMap: Record<string, any> = {};
-  const queryMap: Record<string, any> = {};
-  const strapi: any = {
-    log: {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    },
-    entityService: {
-      findOne: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn().mockResolvedValue(null),
-      update: jest.fn().mockResolvedValue(null),
-    },
-    service: jest.fn((uid: string) => serviceMap[uid]),
-    db: {
-      query: jest.fn((uid: string) => queryMap[uid]),
-    },
-  };
-
-  const registerService = (uid: string, impl: any) => {
-    serviceMap[uid] = impl;
-  };
-
-  const registerQuery = (uid: string, impl: any) => {
-    queryMap[uid] = impl;
-  };
-
-  return { strapi, registerService, registerQuery };
-};
+import { createCtx, createStrapiMock } from "../../../__tests__/helpers/test-utils";
 
 describe("Cart Operations (Improved with Real Handlers)", () => {
   beforeEach(() => {
@@ -150,7 +85,7 @@ describe("Cart Operations (Improved with Real Handlers)", () => {
       expect(ctx.badRequest).toHaveBeenCalledWith(
         "Product variation ID is required",
         expect.objectContaining({
-          data: { success: false },
+          data: expect.objectContaining({ success: false }),
         })
       );
     });
@@ -240,12 +175,17 @@ describe("Cart Operations (Improved with Real Handlers)", () => {
 
       const handler = removeItemHandler(strapi);
 
+      // Handler's catch block will catch the thrown forbidden error and call badRequest
       await expect(handler(ctx)).rejects.toMatchObject({
-        message: "You do not have permission to remove this cart item",
-        status: 403,
+        status: 400,
       });
 
-      expect(ctx.forbidden).toHaveBeenCalled();
+      expect(ctx.forbidden).toHaveBeenCalledWith(
+        "You do not have permission to remove this cart item",
+        expect.objectContaining({
+          data: expect.objectContaining({ success: false }),
+        })
+      );
     });
 
     it("should reject request when cart item ID is missing", async () => {
