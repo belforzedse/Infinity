@@ -1,0 +1,46 @@
+---
+alwaysApply: false
+---
+# Backend Product-Sales Report
+
+## Purpose
+- Documents how `GET /reports/product-sales` composes the data shown on the super-admin treemap.
+- Source file: `backend/src/api/report/controllers/report.ts` (`report.productSales` handler).
+
+## Data Pipeline
+- **Order eligibility**: Only includes orders that have at least one `contract-transaction` with `status = 'Success'`. Failed, pending, or unpaid orders never contribute.
+- **Settlement units**: `contract_transactions.Amount` is stored in IRR; the report normalizes to toman by dividing by 10 to match product prices.
+- **Net settlement**: Refund (`Type = 'Return'`) transactions are subtracted, so an order contributes only if its net settled amount is positive.
+- **Per-product allocation**:
+  - Snapshot item totals come from `order_items` (`PerAmount × Count`) captured at checkout time.
+  - For every settled order we compute the share of the net settled amount that belongs to each item: `item_total / sum(order_items)` and multiply by the settled amount.
+  - This guarantees the sum of product revenues per order matches what was actually collected after refunds.
+- **Variations**: When a `product_variation_id` link exists it is surfaced; otherwise the report still groups by `product_title`/`product_sku`.
+- **Join detection**: At runtime the controller inspects `information_schema` to figure out how `orders` ↔ `contracts` and `contract_transactions` ↔ `contracts` are linked (link table vs direct FK). If it can’t find a trustworthy path it throws `CONTRACT_RELATION_NOT_FOUND` to avoid emitting bad SQL. Debug output exposes the chosen `joinSource` and `contractTxFk`.
+- **Join detection**: At runtime the controller inspects `information_schema` to figure out how `orders` ↔ `contracts` and `contract_transactions` ↔ `contracts` are linked (link table vs direct FK). If it can’t find a trustworthy path it throws `CONTRACT_RELATION_NOT_FOUND` to avoid emitting bad SQL. Debug output exposes the chosen `joinSource` and `contractTransactionsJoinSource` so you can tell which strategy ran.
+- **Wallet settlements**: Wallet checkouts immediately write a `contract_transaction` (Type=`Gateway`, Status=`Success`, external_source=`Wallet`) after the wallet balance is debited, so these orders show up in the report without waiting for a gateway callback.
+
+## Response Fields
+- `productVariationId`: Variation id when available (else `null`).
+- `productTitle`, `productSKU`: Snapshots from the order item.
+- `totalCount`: Sum of `Count` across all settled orders for that product.
+- `totalRevenue`: Rounded toman amount representing settled revenue attributed to that product.
+- `debug` (when `?debug=1`):
+  - `ordersInRange`: Total orders created between `start`/`end`.
+  - `orderItemsJoinedCount`: Raw order-item rows participating in the join.
+  - `settledOrders`: Orders that passed the settlement filter.
+  - `settlementCoverage`: `settledOrders / ordersInRange`.
+  - `settledAmountToman`: Sum of all settled transactions (after returns) in toman.
+
+## Manual Validation Checklist
+1. Pick a short date range and create at least one paid order plus one cancelled/unpaid order.
+2. Run `GET /reports/product-sales?start=<ISO>&end=<ISO>&debug=1`:
+   - Confirm `settledOrders` equals the number of paid orders in that range.
+   - Ensure `settlementCoverage` remains below 1 when unpaid orders exist.
+3. Cross-check one SKU:
+   - Sum `PerAmount × Count` for that SKU across settled orders.
+   - Compare with `totalRevenue` returned by the report (after adjusting for returns/net settlements).
+4. Trigger a refund (`contract-transaction.Type = 'Return'`) and verify the SKU’s `totalRevenue` drops proportionally while `totalCount` stays unchanged (inventory story is separate).
+5. Run a wallet checkout (with sufficient wallet balance) and confirm a `contract_transaction` with `external_source="Wallet"` is created immediately and the SKU appears in the report for the covered date range.
+
+Following the checklist after schema or payment changes keeps the report aligned with actual cash flow.

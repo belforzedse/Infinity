@@ -1,0 +1,22 @@
+# Backend CI Build Optimizations
+
+## Workflow
+- File: `backend/.github/workflows/backend-cicd.yml`
+- Triggers: push to `main`, `dev`, `experimental`, relevant pull requests, manual dispatch.
+
+## Key Steps
+1. **paths-filter** detects schema changes (`typegen` filter) to decide when to run `npm run type:generate`.
+2. Conditional Node setup (`actions/setup-node@v4`) with npm cache for type generation tools.
+3. Clean-tree verification fails the job if generated types differ from the committed ones.
+4. Docker Buildx builds the backend image from `backend/` context using:
+   - GHCR authentication for pushing both `${{ github.sha }}` and environment tags.
+   - GHA cache (`--cache-from/--cache-to type=gha`) to reuse npm install + Strapi build layers.
+   - Build args for `STRAPI_DISABLE_SOURCEMAPS`, `STRAPI_TELEMETRY_DISABLED`, and optional `NODE_OPTIONS`.
+5. Step timings are appended to `GITHUB_STEP_SUMMARY` to highlight where time is spent (`npm ci`, `type:generate`, docker build).
+
+## Dockerfile Notes
+- `backend/main.Dockerfile` and `backend/dev.Dockerfile` now use BuildKit syntax (`# syntax=docker/dockerfile:1.7`) and cache mounts for `npm ci` / `npm prune`.
+- Build args propagate Strapi telemetry/sourcemap flags and configurable `NODE_OPTIONS` during the build and runtime stages.
+
+## Runtime Deployments
+- Deployment steps (prod/staging/experimental) remain unchanged; they pull the freshly pushed GHCR tags and recreate services through SSH/Compose scripts.
