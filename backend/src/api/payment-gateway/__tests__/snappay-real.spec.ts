@@ -475,8 +475,8 @@ describe('SnappPay Service - Real Implementation', () => {
     });
 
     it('should use staging endpoint from environment', () => {
-      // Verify the service uses the env var set in setup.ts
-      expect(process.env.SNAPPAY_BASE_URL).toBe('https://staging-api.snapppay.ir');
+      // Verify the service uses the real staging URL from dev.env
+      expect(process.env.SNAPPAY_BASE_URL).toBe('https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io');
     });
   });
 });

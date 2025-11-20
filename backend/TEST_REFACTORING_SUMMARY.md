@@ -37,10 +37,13 @@ it('should reject zero quantity - REAL validation', async () => {
 - ✅ Added JWT plugin mock for users-permissions
 
 **Configuration:**
-- All payment gateway credentials use test values
-- SnappPay uses staging endpoint: `https://staging-api.snapppay.ir`
-- Mellat uses mock endpoint for testing
+- All payment gateway credentials use **real staging values from dev.env**
+- SnappPay uses **actual staging endpoint**: `https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io`
+- SnappPay credentials: `infinity` account with real staging credentials
+- Mellat uses test credentials (production gateway is mocked)
 - SMS gateway mocked to prevent accidental sends
+
+**Important:** Even though we use real staging credentials, **axios is globally mocked**, so no actual HTTP requests are made to SnappPay or any external service. The tests verify that our code would call the correct endpoints with the correct data.
 
 ### 2. Enhanced Mock Factories (`src/__tests__/mocks/factories.ts`)
 **Added:**
@@ -285,17 +288,19 @@ npm test -- --watch
 ## Security Considerations
 
 ### Test Environment Safety
-- ✅ All payment gateway credentials are test values
+- ✅ **SnappPay uses real staging credentials** from dev.env
+- ✅ **All HTTP requests are mocked** - no actual calls to staging/production
 - ✅ SMS gateway is mocked (no real SMS sent)
 - ✅ Database uses in-memory SQLite for tests
 - ✅ Redis client is mocked
-- ✅ No production endpoints called
+- ✅ Mellat uses test credentials (not production)
 
 ### What Prevents Accidental Production Calls
-1. `NODE_ENV=test` set in setup.ts
-2. All external HTTP clients mocked via `jest.mock('axios')`
-3. Payment gateway URLs use test/staging endpoints
-4. Database configured for `:memory:` SQLite
+1. **`jest.mock('axios')` globally mocks ALL HTTP requests** - No actual network calls happen
+2. `NODE_ENV=test` set in setup.ts
+3. Database configured for `:memory:` SQLite
+4. Redis is mocked
+5. Even though SnappPay staging credentials are real, axios is mocked so no requests reach their servers
 
 ---
 
