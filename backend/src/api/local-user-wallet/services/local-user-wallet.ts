@@ -31,12 +31,14 @@ export async function deductWalletBalanceAtomic(
     }
 
     // Use raw SQL for atomic deduction with balance validation
+    // Note: Strapi converts camelCase to snake_case for database columns
+    // So "Balance" becomes "balance" and "LastTransactionDate" becomes "last_transaction_date"
     const result = await strapi.db.connection.raw(
       `UPDATE local_user_wallets
-       SET "Balance" = "Balance" - ?,
-           "LastTransactionDate" = NOW()
-       WHERE id = ? AND "Balance" >= ?
-       RETURNING "Balance", id`,
+       SET balance = balance - ?,
+           last_transaction_date = NOW()
+       WHERE id = ? AND balance >= ?
+       RETURNING balance, id`,
       [amount, wallet.id, amount]
     );
 
@@ -58,7 +60,7 @@ export async function deductWalletBalanceAtomic(
 
     return {
       success: true,
-      newBalance: rows[0].Balance,
+      newBalance: rows[0].balance,
       walletId: rows[0].id
     };
   } catch (error) {
