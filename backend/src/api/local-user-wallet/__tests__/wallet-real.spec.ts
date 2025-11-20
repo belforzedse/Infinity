@@ -3,6 +3,13 @@
  * Tests actual wallet balance queries and topup flow
  */
 
+// Simplify Strapi controller factory for tests
+jest.mock('@strapi/strapi', () => ({
+  factories: {
+    createCoreController: (_uid: string, extension: any) => (params: any) => extension(params),
+  },
+}));
+
 import { createStrapiMock, mockContext, mockUser } from '../../../__tests__/mocks/factories';
 
 describe('Wallet Operations - Real Implementation', () => {
@@ -11,14 +18,13 @@ describe('Wallet Operations - Real Implementation', () => {
   let topupController: any;
   let jwtService: any;
   let mellatService: any;
+  let walletModule: any;
+  let topupModule: any;
 
   beforeAll(async () => {
     // Dynamic imports
-    const walletModule = await import('../controllers/local-user-wallet');
-    walletController = walletModule.default({ strapi: null as any });
-
-    const topupModule = await import('../../wallet-topup/controllers/wallet-topup');
-    topupController = topupModule.default({ strapi: null as any });
+    walletModule = await import('../controllers/local-user-wallet');
+    topupModule = await import('../../wallet-topup/controllers/wallet-topup');
   });
 
   beforeEach(() => {
@@ -28,6 +34,10 @@ describe('Wallet Operations - Real Implementation', () => {
 
     // Make global strapi available
     (global as any).strapi = mockStrapi;
+
+    // Recreate controllers with the mocked strapi instance
+    walletController = walletModule.default({ strapi: mockStrapi });
+    topupController = topupModule.default({ strapi: mockStrapi });
 
     // Mock JWT service
     jwtService = {
@@ -129,6 +139,7 @@ describe('Wallet Operations - Real Implementation', () => {
       const ctx = mockContext({
         request: { header: {} },
         state: {},
+        unauthorized: jest.fn(),
       });
 
       await walletController.getCurrentUserWallet(ctx);
@@ -214,6 +225,7 @@ describe('Wallet Operations - Real Implementation', () => {
       const ctx = mockContext({
         request: { body: { amount: 0 } },
         state: { user: { id: 1 } },
+        badRequest: jest.fn(),
       });
 
       await topupController.chargeIntent(ctx);
@@ -226,6 +238,7 @@ describe('Wallet Operations - Real Implementation', () => {
       const ctx = mockContext({
         request: { body: { amount: 'invalid' } },
         state: { user: { id: 1 } },
+        badRequest: jest.fn(),
       });
 
       await topupController.chargeIntent(ctx);
@@ -250,6 +263,7 @@ describe('Wallet Operations - Real Implementation', () => {
       const ctx = mockContext({
         request: { body: { amount: amountIrr } },
         state: { user: { id: userId } },
+        badRequest: jest.fn(),
       });
 
       await topupController.chargeIntent(ctx);
@@ -270,6 +284,8 @@ describe('Wallet Operations - Real Implementation', () => {
       const ctx = mockContext({
         request: { body: { amount: 1000000 } },
         state: {},
+        unauthorized: jest.fn(),
+        badRequest: jest.fn(),
       });
 
       await topupController.chargeIntent(ctx);
