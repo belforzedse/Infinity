@@ -131,3 +131,4 @@ To prevent future issues:
 2. Match the actual database column names, not the Strapi schema field names
 3. Test raw SQL queries with actual database operations
 4. Check migration files or database schema to verify actual column names
+

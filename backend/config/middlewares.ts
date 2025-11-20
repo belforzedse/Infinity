@@ -8,7 +8,12 @@ export default [
     config: {
       origin: process.env.CORS_ORIGIN
         ? process.env.CORS_ORIGIN.split(",")
-        : ["https://infinitycolor.org", "https://staging.infinitycolor.org"],
+        : [
+            "https://infinitycolor.org",
+            "https://staging.infinitycolor.org",
+            "http://localhost:2888",
+            "http://127.0.0.1:2888",
+          ],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       headers: ["Content-Type", "Authorization", "X-Requested-With"],
