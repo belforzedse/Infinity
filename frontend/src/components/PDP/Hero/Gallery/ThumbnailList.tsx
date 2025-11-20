@@ -115,7 +115,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
       ref={scrollContainerRef}
       className="relative h-auto w-full overflow-x-auto xl:h-[473px] xl:w-[139px] xl:overflow-y-auto xl:overflow-x-hidden"
     >
-      <div className="flex w-full flex-row-reverse gap-2 xl:w-full xl:flex-col">
+      <div className="flex w-full flex-row-reverse flex-nowrap xl:flex-wrap gap-2 xl:w-full xl:flex-col">
         {assets.map((asset) => (
           <div
             key={asset.id}
@@ -123,7 +123,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
               setSelectedImage(asset.id);
             }}
             onMouseEnter={() => preloadSrc(asset.src)}
-            className="relative h-[70px] w-[84px] cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
+            className="relative h-[70px] w-[84px] flex-shrink-0 md:pt-2 xl:pt-0 cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
           >
             <div className={asset.id === selectedImage ? "opacity-50" : ""}>
               <Image

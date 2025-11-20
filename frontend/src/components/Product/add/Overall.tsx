@@ -15,6 +15,9 @@ export default function Overall({ productData, isEditMode = false }: OverallProp
     logger.info("productData", { productData });
   }
 
+  // Temporarily hide advanced media uploaders in the super-admin UI.
+  const showMediaUploaders = false;
+
   const images =
     productData?.Media?.filter((media) => media.attributes.mime.startsWith("image/")).map(
       (media) => media.attributes.url,
@@ -33,21 +36,25 @@ export default function Overall({ productData, isEditMode = false }: OverallProp
 
       <PhotoUploader initialImages={images} isEditMode={isEditMode} />
 
-      <FileUploader
-        title="ویدیوها"
-        fileType="video"
-        iconSrc="/images/video-icon.png"
-        initialFiles={videos}
-        isEditMode={isEditMode}
-      />
+      {showMediaUploaders && (
+        <>
+          <FileUploader
+            title="ویدیوها"
+            fileType="video"
+            iconSrc="/images/video-icon.png"
+            initialFiles={videos}
+            isEditMode={isEditMode}
+          />
 
-      <FileUploader
-        title="فایل‌ها"
-        fileType="other"
-        iconSrc="/images/pdf-icon.png"
-        initialFiles={files}
-        isEditMode={isEditMode}
-      />
+          <FileUploader
+            title="فایل‌ها"
+            fileType="other"
+            iconSrc="/images/pdf-icon.png"
+            initialFiles={files}
+            isEditMode={isEditMode}
+          />
+        </>
+      )}
     </div>
   );
 }

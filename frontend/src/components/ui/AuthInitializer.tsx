@@ -56,6 +56,11 @@ export default function AuthInitializer() {
         return; // Already loaded, token hasn't changed
       }
 
+      if (tokenChanged) {
+        setUser(null);
+        setError(null);
+      }
+
       lastTokenRef.current = token;
 
       try {
