@@ -231,6 +231,8 @@ export const createStrapiMock = () => {
     db: {
       query: jest.fn((uid: string) => queryMap[uid]),
     },
+    // Provide strapi.query alias used by controllers
+    query: jest.fn((uid: string) => queryMap[uid]),
     plugin: jest.fn((pluginName: string) => {
       if (pluginName === 'users-permissions') {
         return {
