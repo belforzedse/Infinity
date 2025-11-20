@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import AnipoBarcodeDialog from "./AnipoBarcodeDialog";
 import { translateOrderLogMessage } from "@/utils/statusTranslations";
+import { getOrderEvents, type EventLog } from "@/services/event-log";
 
 interface SuperAdminOrderSidebarProps {
   orderData?: any;
@@ -32,7 +33,10 @@ export default function SuperAdminOrderSidebar({
     type: "sms",
   });
   const [orderLogs, setOrderLogs] = useState<OrderLog[]>([]);
+  const [eventLogs, setEventLogs] = useState<EventLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [eventLogsLoading, setEventLogsLoading] = useState(false);
+  const [activeLogTab, setActiveLogTab] = useState<"events" | "audit">("events");
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
@@ -53,6 +57,26 @@ export default function SuperAdminOrderSidebar({
       }
     };
     fetchLogs();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchEventLogs = async () => {
+      if (!id) return;
+      try {
+        setEventLogsLoading(true);
+        const res = await getOrderEvents(
+          parseInt(String(id)),
+          { audience: "admin" },
+          { sort: "createdAt:desc", pageSize: 50 }
+        );
+        setEventLogs(res.data || []);
+      } catch (error) {
+        console.error("Error fetching event logs:", error);
+      } finally {
+        setEventLogsLoading(false);
+      }
+    };
+    fetchEventLogs();
   }, [id]);
 
   useEffect(() => {
@@ -325,42 +349,144 @@ export default function SuperAdminOrderSidebar({
           <span className="text-lg text-foreground-primary">اعلانات سفارش</span>
         </div>
 
-        {logsLoading ? (
-          <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
-        ) : orderLogs.length === 0 ? (
-          <div className="text-sm text-neutral-400">اعلانی ثبت نشده است</div>
-        ) : (
-          <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
-            {orderLogs.map((log, index) => {
-              const date = new Date(log.attributes.createdAt);
-              const formattedDate = date.toLocaleDateString("fa-IR", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              });
-              const formattedTime = date.toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-              const isEven = index % 2 === 0;
+        {/* Tabs for Events and Audit Logs */}
+        <div className="flex gap-2 border-b border-neutral-200">
+          <button
+            type="button"
+            onClick={() => setActiveLogTab("events")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeLogTab === "events"
+                ? "border-b-2 border-pink-500 text-pink-600"
+                : "text-neutral-500 hover:text-neutral-700"
+            }`}
+          >
+            رویدادهای خوانا ({eventLogs.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveLogTab("audit")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeLogTab === "audit"
+                ? "border-b-2 border-pink-500 text-pink-600"
+                : "text-neutral-500 hover:text-neutral-700"
+            }`}
+          >
+            لاگ‌های فنی ({orderLogs.length})
+          </button>
+        </div>
 
-              return (
-                <div
-                  key={log.id}
-                  className={`rounded-lg p-3 ${
-                    isEven ? "bg-blue-50" : "bg-purple-50"
-                  }`}
-                >
-                  <div className="text-sm text-foreground-primary mb-1">
-                    {translateOrderLogMessage(log.attributes.Description) || "ثبت رویداد"}
-                  </div>
-                  <div className="text-xs text-neutral-500 mt-1">
-                    {formattedDate} در {formattedTime}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {activeLogTab === "events" ? (
+          <>
+            {eventLogsLoading ? (
+              <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
+            ) : eventLogs.length === 0 ? (
+              <div className="text-sm text-neutral-400">رویداد خوانایی ثبت نشده است</div>
+            ) : (
+              <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+                {eventLogs.map((event, index) => {
+                  const date = new Date(event.createdAt);
+                  const formattedDate = date.toLocaleDateString("fa-IR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  });
+                  const formattedTime = date.toLocaleTimeString("fa-IR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  const getSeverityColor = (severity: "info" | "success" | "warning" | "error"): string => {
+                    switch (severity) {
+                      case "success":
+                        return "bg-green-50 border-green-200";
+                      case "warning":
+                        return "bg-yellow-50 border-yellow-200";
+                      case "error":
+                        return "bg-red-50 border-red-200";
+                      default:
+                        return "bg-blue-50 border-blue-200";
+                    }
+                  };
+                  const isEven = index % 2 === 0;
+
+                  return (
+                    <div
+                      key={event.id}
+                      className={`rounded-lg p-3 border ${
+                        isEven ? getSeverityColor(event.Severity) : "bg-neutral-50 border-neutral-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
+                            event.Severity === "success"
+                              ? "bg-green-100 text-green-700 border-green-200"
+                              : event.Severity === "warning"
+                              ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                              : event.Severity === "error"
+                              ? "bg-red-100 text-red-700 border-red-200"
+                              : "bg-blue-100 text-blue-700 border-blue-200"
+                          }`}
+                        >
+                          {event.EventType}
+                        </span>
+                      </div>
+                      <div className="text-sm text-foreground-primary mb-1">
+                        {event.Message}
+                      </div>
+                      <div className="text-xs text-neutral-500 mt-1">
+                        {formattedDate} در {formattedTime}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {logsLoading ? (
+              <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
+            ) : orderLogs.length === 0 ? (
+              <div className="text-sm text-neutral-400">اعلانی ثبت نشده است</div>
+            ) : (
+              <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+                {orderLogs.map((log, index) => {
+                  const date = new Date(log.attributes.createdAt);
+                  const formattedDate = date.toLocaleDateString("fa-IR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  });
+                  const formattedTime = date.toLocaleTimeString("fa-IR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  const isEven = index % 2 === 0;
+
+                  return (
+                    <div
+                      key={log.id}
+                      className={`rounded-lg p-3 ${
+                        isEven ? "bg-blue-50" : "bg-purple-50"
+                      }`}
+                    >
+                      <div className="text-sm text-foreground-primary mb-1">
+                        {translateOrderLogMessage(log.attributes.Description) || "ثبت رویداد"}
+                      </div>
+                      {log.attributes.Changes && (
+                        <pre className="mt-1 whitespace-pre-wrap break-all text-xs text-neutral-500 mb-1">
+                          {JSON.stringify(log.attributes.Changes, null, 2)}
+                        </pre>
+                      )}
+                      <div className="text-xs text-neutral-500 mt-1">
+                        {formattedDate} در {formattedTime}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 
