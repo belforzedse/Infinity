@@ -74,7 +74,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       const address = await strapi.entityService.findOne(
         "api::local-user-address.local-user-address",
         addressId,
-        { populate: { shipping_city: true } }
+        { populate: { user: true, shipping_city: true } }
       );
       if (!address) {
         return ctx.badRequest("آدرس انتخاب شده یافت نشد", {
@@ -85,8 +85,31 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           },
         });
       }
-      // Note: Add user ownership check if needed
-      // if (address.user !== user.id) { ... }
+
+      // Validate address ownership - critical security check
+      const addressUserId =
+        typeof address.user === "object" && address.user?.id
+          ? address.user.id
+          : typeof address.user === "number"
+          ? address.user
+          : null;
+
+      if (!addressUserId || Number(addressUserId) !== Number(user.id)) {
+        strapi.log.warn("Address ownership validation failed", {
+          userId: user.id,
+          addressId,
+          addressUserId,
+          attempt: "unauthorized_address_access",
+        });
+
+        return ctx.badRequest("آدرس انتخاب شده متعلق به شما نیست", {
+          data: {
+            success: false,
+            errorCode: "ADDRESS_UNAUTHORIZED",
+            message: "آدرس انتخاب شده متعلق به شما نیست",
+          },
+        });
+      }
     } catch (err) {
       strapi.log.error("Failed to validate address:", err);
       return ctx.badRequest("خطا در بررسی آدرس", {
@@ -169,24 +192,42 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       const totalToman = Math.round(contract.Amount || 0);
       const totalIrr = totalToman * 10;
 
-      // Load wallet
-      const wallet = await strapi.db
-        .query("api::local-user-wallet.local-user-wallet")
-        .findOne({ where: { user: user.id } });
+      // Import atomic wallet deduction helper
+      const { deductWalletBalanceAtomic } = await import(
+        "../../../local-user-wallet/services/local-user-wallet"
+      );
 
-      if (!wallet || Number(wallet.Balance || 0) < totalIrr) {
-        return ctx.badRequest("Wallet balance is insufficient", {
-          data: { success: false, error: "insufficient_wallet" },
+      // Atomically deduct wallet balance (prevents race conditions)
+      const walletResult = await deductWalletBalanceAtomic(
+        strapi,
+        user.id,
+        totalIrr
+      );
+
+      if (!walletResult.success) {
+        strapi.log.warn("Wallet payment failed", {
+          userId: user.id,
+          orderId: order.id,
+          amountRequired: totalIrr,
+          error: walletResult.error,
+        });
+
+        return ctx.badRequest(walletResult.error || "Wallet balance is insufficient", {
+          data: {
+            success: false,
+            error: "insufficient_wallet",
+            message: walletResult.error,
+          },
         });
       }
 
-      // Deduct and persist atomically
-      const newBalance = Number(wallet.Balance || 0) - totalIrr;
-      await strapi.entityService.update(
-        "api::local-user-wallet.local-user-wallet",
-        wallet.id,
-        { data: { Balance: newBalance, LastTransactionDate: new Date() } }
-      );
+      strapi.log.info("Wallet balance deducted successfully", {
+        userId: user.id,
+        orderId: order.id,
+        amountDeducted: totalIrr,
+        newBalance: walletResult.newBalance,
+        walletId: walletResult.walletId,
+      });
 
       // Transaction record (Minus)
       let walletDebitTx: any = null;
@@ -200,7 +241,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
               Date: new Date(),
               Cause: "Order Payment",
               ReferenceId: String(order.id),
-              user_wallet: wallet.id,
+              user_wallet: walletResult.walletId,
             },
           }
         );
@@ -278,18 +319,67 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
             },
           }
         );
+
+        // Import atomic stock decrement helper
+        const { decrementStockAtomic } = await import(
+          "../../services/lib/stock"
+        );
+
+        const stockErrors: any[] = [];
         for (const it of orderWithItems?.order_items || []) {
           const v = it?.product_variation;
           if (v?.product_stock?.id && typeof it?.Count === "number") {
             const stockId = v.product_stock.id as number;
-            const current = Number(v.product_stock.Count || 0);
-            const dec = Number(it.Count || 0);
-            await strapi.entityService.update(
-              "api::product-stock.product-stock",
-              stockId,
-              { data: { Count: current - dec } }
-            );
+            const quantity = Number(it.Count || 0);
+
+            // Use atomic decrement to prevent race conditions
+            const result = await decrementStockAtomic(strapi, stockId, quantity);
+
+            if (!result.success) {
+              stockErrors.push({
+                stockId,
+                quantity,
+                error: result.error,
+                variationId: v.id,
+                productTitle: v.product?.Title,
+              });
+              strapi.log.error("Failed to decrement stock atomically", {
+                orderId: order.id,
+                stockId,
+                quantity,
+                error: result.error,
+              });
+            } else {
+              strapi.log.info("Stock decremented successfully", {
+                orderId: order.id,
+                stockId,
+                quantity,
+                newCount: result.newCount,
+              });
+            }
           }
+        }
+
+        // If any stock decrements failed, log it but don't block the order
+        // (wallet has already been charged at this point)
+        if (stockErrors.length > 0) {
+          strapi.log.error(
+            "Some stock decrements failed for wallet payment - manual intervention may be required",
+            {
+              orderId: order.id,
+              errors: stockErrors,
+            }
+          );
+
+          // Create order log for tracking
+          await strapi.entityService.create("api::order-log.order-log", {
+            data: {
+              order: order.id,
+              Action: "Update",
+              Description: "Stock decrement failures detected",
+              Changes: { stockErrors },
+            },
+          });
         }
       } catch (e) {
         strapi.log.error("Failed to decrement stock for wallet payment", e);
