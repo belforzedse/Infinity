@@ -17,7 +17,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: [],
+        middlewares: ["api::auth.login-throttle"], // Prevent brute force: 5 attempts per 10 min
       },
     },
     {
@@ -61,7 +61,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: [],
+        middlewares: ["api::auth.login-throttle"], // Prevent brute force: 5 attempts per 10 min
       },
     },
     {
@@ -71,7 +71,7 @@ export default {
       config: {
         auth: false,
         policies: [],
-        middlewares: [],
+        middlewares: ["api::auth.login-throttle"], // Prevent brute force: 5 attempts per 10 min
       },
     },
   ],
