@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import AuthButton from "@/components/Kits/Auth/Button";
-import LeftArrowIcon from "@/components/Kits/Icons/LeftArrowIcon";
+import ChevronLeftIcon from "@/components/Product/Icons/ChevronLeftIcon";
 
 interface AuthReturnButtonProps {
   href: string;
@@ -27,17 +26,16 @@ export default function AuthReturnButton({ href, label, preserveRedirect = false
 
   return (
     <div className="mb-4 flex justify-start">
-      <AuthButton
-        onClick={handleClick}
+      <button
         type="button"
-        className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
-        icon={<LeftArrowIcon />}
-        iconPosition="right"
-        fullWidth={false}
+        onClick={handleClick}
+        className="group inline-flex items-center gap-1 text-sm font-medium text-pink-600 transition-colors hover:text-pink-500 focus:outline-none"
       >
-        {label}
-      </AuthButton>
+        <span>{label}</span>
+        <ChevronLeftIcon className="h-4 w-4 text-pink-600 transition-colors group-hover:text-pink-500" />
+      </button>
     </div>
   );
 }
+
 
