@@ -29,6 +29,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine backend layout
+        id: layout
+        run: |
+          if [[ -f backend/package.json ]]; then
+            echo "docker_context=backend" >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=backend" >> "$GITHUB_OUTPUT"
+          else
+            echo "docker_context=." >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=." >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Detect backend changes
         id: changes
         uses: dorny/paths-filter@v3
@@ -87,17 +98,20 @@ jobs:
         id: meta
         run: |
           set -euo pipefail
+          base="${{ steps.layout.outputs.dockerfile_base }}"
+          main_path=$([[ "$base" == "." ]] && echo "main.Dockerfile" || echo "$base/main.Dockerfile")
+          dev_path=$([[ "$base" == "." ]] && echo "dev.Dockerfile" || echo "$base/dev.Dockerfile")
           case "${GITHUB_REF_NAME}" in
             dev)
-              echo "dockerfile=backend/dev.Dockerfile" >> "$GITHUB_OUTPUT"
+              echo "dockerfile=${dev_path}" >> "$GITHUB_OUTPUT"
               echo "runtime_tag=dev" >> "$GITHUB_OUTPUT"
               ;;
             experimental)
-              echo "dockerfile=backend/main.Dockerfile" >> "$GITHUB_OUTPUT"
+              echo "dockerfile=${main_path}" >> "$GITHUB_OUTPUT"
               echo "runtime_tag=experimental" >> "$GITHUB_OUTPUT"
               ;;
             *)
-              echo "dockerfile=backend/main.Dockerfile" >> "$GITHUB_OUTPUT"
+              echo "dockerfile=${main_path}" >> "$GITHUB_OUTPUT"
               echo "runtime_tag=main" >> "$GITHUB_OUTPUT"
               ;;
           esac
@@ -121,7 +135,7 @@ jobs:
         id: docker_build
         env:
           NODE_OPTIONS_ARG: ${{ steps.heap.outputs.node_options }}
-          BUILD_CONTEXT: ${{ github.workspace }}/backend
+          BUILD_CONTEXT: ${{ steps.layout.outputs.docker_context }}
         run: |
           set -euo pipefail
           SECONDS=0
