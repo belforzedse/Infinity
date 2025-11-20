@@ -12,6 +12,7 @@ export default {
   otp,
   login,
   self,
+  updateSelf,
   welcome,
   registerInfo,
   loginWithPassword,
@@ -132,27 +133,7 @@ async function login(ctx) {
 
 async function self(ctx) {
   try {
-    // Ensure user context exists
-    let pluginUserId = ctx.state.user?.id;
-
-    if (!pluginUserId) {
-      const authHeader = ctx.request.header.authorization || "";
-      const token = authHeader.toLowerCase().startsWith("bearer ")
-        ? authHeader.split(" ")[1]
-        : null;
-      if (token) {
-        try {
-          const payload = await strapi
-            .plugin("users-permissions")
-            .service("jwt")
-            .verify(token);
-          pluginUserId = payload?.id ? Number(payload.id) : undefined;
-        } catch (err) {
-          strapi.log.debug("Failed to verify JWT for self", err);
-        }
-      }
-    }
-
+    let pluginUserId = await resolvePluginUserId(ctx);
     if (!pluginUserId) {
       return ctx.unauthorized("Unauthorized");
     }
@@ -191,6 +172,107 @@ async function self(ctx) {
       isAdmin,
       roleName: roleName ?? null,
     };
+  } catch (err) {
+    strapi.log.error(err);
+    ctx.status = 500;
+    ctx.body = {
+      message: err.message,
+    };
+  }
+}
+
+async function updateSelf(ctx) {
+  try {
+    const pluginUserId = await resolvePluginUserId(ctx);
+    if (!pluginUserId) {
+      return ctx.unauthorized("Unauthorized");
+    }
+
+    const body = ctx.request.body ?? {};
+    const profilePayload: Record<string, any> = {};
+    const hasOwn = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty);
+
+    if (hasOwn(body, "FirstName")) {
+      profilePayload.FirstName =
+        typeof body.FirstName === "string" && body.FirstName.trim().length > 0
+          ? body.FirstName.trim()
+          : null;
+    }
+    if (hasOwn(body, "LastName")) {
+      profilePayload.LastName =
+        typeof body.LastName === "string" && body.LastName.trim().length > 0
+          ? body.LastName.trim()
+          : null;
+    }
+    if (hasOwn(body, "NationalCode")) {
+      profilePayload.NationalCode =
+        typeof body.NationalCode === "string" && body.NationalCode.trim().length > 0
+          ? body.NationalCode.trim()
+          : null;
+    }
+    if (hasOwn(body, "BirthDate")) {
+      const normalizedBirthDate =
+        typeof body.BirthDate === "string" && body.BirthDate.trim().length > 0
+          ? body.BirthDate.trim()
+          : null;
+      profilePayload.BirthDate = normalizedBirthDate;
+    }
+    if (hasOwn(body, "Sex")) {
+      const rawSex = body.Sex;
+      if (rawSex === null || rawSex === undefined || rawSex === "") {
+        profilePayload.Sex = null;
+      } else if (typeof rawSex === "boolean") {
+        profilePayload.Sex = rawSex;
+      } else if (typeof rawSex === "string") {
+        profilePayload.Sex = rawSex === "true" || rawSex === "1";
+      } else {
+        profilePayload.Sex = Boolean(rawSex);
+      }
+    }
+    if (hasOwn(body, "Bio")) {
+      profilePayload.Bio =
+        typeof body.Bio === "string" && body.Bio.trim().length > 0 ? body.Bio.trim() : null;
+    }
+
+    let profileRecord = await strapi.db
+      .query("api::local-user-info.local-user-info")
+      .findOne({ where: { user: pluginUserId } });
+
+    if (!profileRecord) {
+      if (Object.keys(profilePayload).length > 0) {
+        profileRecord = await strapi.entityService.create("api::local-user-info.local-user-info", {
+          data: {
+            user: pluginUserId,
+            ...profilePayload,
+          },
+        });
+      }
+    } else if (Object.keys(profilePayload).length > 0) {
+      await strapi.entityService.update("api::local-user-info.local-user-info", profileRecord.id, {
+        data: profilePayload,
+      });
+    }
+
+    if (hasOwn(body, "Phone")) {
+      let normalizedPhone = String(body.Phone ?? "").trim();
+      if (normalizedPhone.length > 0) {
+        if (normalizedPhone.startsWith("0")) {
+          normalizedPhone = `+98${normalizedPhone.substring(1)}`;
+        }
+        if (!normalizedPhone.startsWith("+")) {
+          normalizedPhone = `+${normalizedPhone}`;
+        }
+        await strapi.entityService.update("plugin::users-permissions.user", pluginUserId, {
+          data: {
+            phone: normalizedPhone,
+            username: normalizedPhone,
+            email: `${normalizedPhone.replace(/\D/g, "") || "user"}@placeholder.local`,
+          },
+        });
+      }
+    }
+
+    await self(ctx);
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
@@ -406,4 +488,28 @@ async function resetPassword(ctx) {
     ctx.status = 500;
     ctx.body = { message: err.message };
   }
+}
+
+async function resolvePluginUserId(ctx) {
+  let pluginUserId = ctx.state.user?.id;
+
+  if (!pluginUserId) {
+    const authHeader = ctx.request.header.authorization || "";
+    const token = authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
+    if (token) {
+      try {
+        const payload = await strapi
+          .plugin("users-permissions")
+          .service("jwt")
+          .verify(token);
+        pluginUserId = payload?.id ? Number(payload.id) : undefined;
+      } catch (err) {
+        strapi.log.debug("Failed to verify JWT for resolvePluginUserId", err);
+      }
+    }
+  }
+
+  return pluginUserId ? Number(pluginUserId) : undefined;
 }
