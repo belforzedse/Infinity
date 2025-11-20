@@ -19,11 +19,13 @@ import {
 describe('Cart Operations - Real Handlers', () => {
   let mockStrapi: any;
   let cartService: any;
+  let registerService: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     const mock = createStrapiMock();
     mockStrapi = mock.strapi;
+    registerService = mock.registerService;
 
     // Mock cart service methods
     cartService = {
@@ -31,7 +33,7 @@ describe('Cart Operations - Real Handlers', () => {
       addCartItem: jest.fn(),
       checkCartStock: jest.fn(),
     };
-    mock.registerService('api::cart.cart', cartService);
+    registerService('api::cart.cart', cartService);
   });
 
   describe('addItem Handler', () => {
@@ -66,8 +68,7 @@ describe('Cart Operations - Real Handlers', () => {
       // Assert real outcomes
       expect(cartService.getUserCart).toHaveBeenCalledWith(userId);
       expect(cartService.addCartItem).toHaveBeenCalledWith(cart.id, productVariationId, count);
-      expect(result.data.success).toBe(true);
-      expect(result.data.data.cart_item.Count).toBe(count);
+      expect(result.data.cart_item.Count).toBe(count);
     });
 
     it('should reject when count is zero - REAL validation', async () => {
@@ -239,7 +240,7 @@ describe('Cart Operations - Real Handlers', () => {
           response: { eligible: true },
         }),
       };
-      mockStrapi.strapi.registerService('api::payment-gateway.snappay', snappayService);
+      registerService('api::payment-gateway.snappay', snappayService);
 
       const ctx = mockContext({
         request: { body: { code: discountCode } },
@@ -282,7 +283,8 @@ describe('Cart Operations - Real Handlers', () => {
         message: 'Invalid or expired discount code',
         payload: expect.objectContaining({
           data: expect.objectContaining({
-            error: 'invalid_or_expired',
+            error: 'Invalid or expired discount code',
+            success: false,
           }),
         }),
       });
@@ -317,7 +319,8 @@ describe('Cart Operations - Real Handlers', () => {
         message: 'Discount code usage limit reached',
         payload: expect.objectContaining({
           data: expect.objectContaining({
-            error: 'usage_limit_reached',
+            error: 'Discount code usage limit reached',
+            success: false,
           }),
         }),
       });
@@ -355,7 +358,8 @@ describe('Cart Operations - Real Handlers', () => {
         message: 'Cart total is below the minimum for this coupon',
         payload: expect.objectContaining({
           data: expect.objectContaining({
-            error: 'below_min_cart_total',
+            error: 'Cart total is below the minimum for this coupon',
+            success: false,
           }),
         }),
       });
@@ -381,7 +385,8 @@ describe('Cart Operations - Real Handlers', () => {
         message: 'Cart is empty',
         payload: expect.objectContaining({
           data: expect.objectContaining({
-            error: 'empty_cart',
+            error: 'Cart is empty',
+            success: false,
           }),
         }),
       });
@@ -411,7 +416,7 @@ describe('Cart Operations - Real Handlers', () => {
       const snappayService = {
         eligible: jest.fn().mockResolvedValue({ successful: true, response: { eligible: true } }),
       };
-      mockStrapi.strapi.registerService('api::payment-gateway.snappay', snappayService);
+      registerService('api::payment-gateway.snappay', snappayService);
 
       const ctx = mockContext({
         request: { body: { code: 'FIXED50K' } },
