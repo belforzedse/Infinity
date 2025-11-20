@@ -112,8 +112,10 @@ export default function RegisterInfoPage() {
 
   return (
     <div className="space-y-8" dir="rtl">
-      <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
       <AuthTitle subtitle="لطفا اطلاعات خود را تکمیل نمایید">ایجاد حساب کاربری</AuthTitle>
+      <div>
+        <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-7">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
