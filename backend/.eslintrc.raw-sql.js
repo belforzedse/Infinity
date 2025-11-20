@@ -36,3 +36,4 @@ module.exports = {
     /strapi\.entityService\./,         // Strapi entity service (handles naming automatically)
   ]
 };
+
