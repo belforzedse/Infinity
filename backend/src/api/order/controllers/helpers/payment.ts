@@ -52,11 +52,12 @@ async function incrementDiscountUsageCounter(
     let updateResult: any;
     if (limitUsage > 0) {
       // Check limit: only increment if UsedTimes < LimitUsage
+      // Note: Strapi converts camelCase to snake_case, so "UsedTimes" becomes "used_times"
       const result = await strapi.db.connection.raw(
         `UPDATE discounts
-         SET "UsedTimes" = "UsedTimes" + 1
-         WHERE id = ? AND "UsedTimes" < ?
-         RETURNING "UsedTimes"`,
+         SET used_times = used_times + 1
+         WHERE id = ? AND used_times < ?
+         RETURNING used_times`,
         [discountId, limitUsage],
       );
 
@@ -76,14 +77,15 @@ async function incrementDiscountUsageCounter(
         return;
       }
 
-      updateResult = { UsedTimes: rows[0].UsedTimes };
+      updateResult = { UsedTimes: rows[0].used_times };
     } else {
       // Unlimited usage - safe to increment directly
+      // Note: Strapi converts camelCase to snake_case, so "UsedTimes" becomes "used_times"
       const result = await strapi.db.connection.raw(
         `UPDATE discounts
-         SET "UsedTimes" = "UsedTimes" + 1
+         SET used_times = used_times + 1
          WHERE id = ?
-         RETURNING "UsedTimes"`,
+         RETURNING used_times`,
         [discountId],
       );
 
@@ -93,7 +95,7 @@ async function incrementDiscountUsageCounter(
         return;
       }
 
-      updateResult = { UsedTimes: rows[0].UsedTimes };
+      updateResult = { UsedTimes: rows[0].used_times };
     }
 
     const newUsedTimes = updateResult.UsedTimes;
