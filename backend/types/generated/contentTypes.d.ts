@@ -623,6 +623,48 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
   };
 }
 
+export interface ApiEventLogEventLog extends Schema.CollectionType {
+  collectionName: "event_logs";
+  info: {
+    description: "Human-readable event log for users and admins";
+    displayName: "EventLog";
+    pluralName: "event-logs";
+    singularName: "event-log";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Audience: Attribute.Enumeration<["user", "admin", "superadmin", "all"]> & Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::event-log.event-log", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    EventCategory: Attribute.Enumeration<
+      ["StatusChange", "Action", "Notification", "Error", "Info"]
+    > &
+      Attribute.Required;
+    EventType: Attribute.Enumeration<
+      ["Order", "Payment", "User", "Product", "Cart", "Wallet", "Shipping", "Admin", "System"]
+    > &
+      Attribute.Required;
+    Message: Attribute.Text & Attribute.Required;
+    MessageEn: Attribute.String;
+    Metadata: Attribute.JSON;
+    performed_by: Attribute.Relation<
+      "api::event-log.event-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    RelatedUserId: Attribute.Integer;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.String;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> & Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::event-log.event-log", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiFooterFooter extends Schema.SingleType {
   collectionName: "footers";
   info: {
@@ -2592,6 +2634,7 @@ declare module "@strapi/types" {
       "api::contract-transaction.contract-transaction": ApiContractTransactionContractTransaction;
       "api::contract.contract": ApiContractContract;
       "api::discount.discount": ApiDiscountDiscount;
+      "api::event-log.event-log": ApiEventLogEventLog;
       "api::footer.footer": ApiFooterFooter;
       "api::general-discount.general-discount": ApiGeneralDiscountGeneralDiscount;
       "api::local-user-address.local-user-address": ApiLocalUserAddressLocalUserAddress;
