@@ -122,6 +122,11 @@ export async function getOrderEvents(
   const queryString = queryParams.toString();
   const url = `/event-logs/order/${orderId}${queryString ? `?${queryString}` : ""}`;
 
+  // Strapi API returns { data: [...], meta: {...} } directly
+  // apiClient.get returns ApiResponse<T> where T is what we specify
+  // Since EventLogResponse already has { data, meta }, apiClient returns ApiResponse<EventLogResponse>
+  // which is { data: EventLogResponse, meta?: ... }
+  // So we need to unwrap it: response.data gives us EventLogResponse
   const response = await apiClient.get<EventLogResponse>(url);
   return response.data;
 }
