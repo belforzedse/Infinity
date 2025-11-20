@@ -1,5 +1,6 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logAdminActivity } from "../../../../utils/adminActivity";
+import { logOrderEvent, logAdminEvent } from "../../../../utils/eventLogger";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -65,6 +66,49 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    // Log human-readable event for user
+    // Extract userId: result.user can be an object {id: number} or just a number
+    const orderUserId = typeof result.user === "object" && result.user?.id
+      ? result.user.id
+      : typeof result.user === "number"
+      ? result.user
+      : userId;
+
+    if (orderUserId) {
+      await logOrderEvent(strapi as any, {
+        category: "Action",
+        orderId: result.id,
+        orderStatus: result.Status,
+        newStatus: result.Status, // Required for message generator "Action" category check
+        userId: orderUserId,
+        performedBy: {
+          id: actor.userId || undefined,
+          name: actor.label || undefined,
+        },
+        audience: "user",
+        metadata: {
+          orderType: result.Type,
+        },
+      });
+    }
+
+    // Log event for admin if created by admin
+    if (actor.userId && actor.label) {
+      await logAdminEvent(strapi as any, {
+        category: "Action",
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Create",
+        adminName: actor.label,
+        adminId: actor.userId,
+        audience: "admin",
+        metadata: {
+          orderType: result.Type,
+          orderStatus: result.Status,
+        },
+      });
+    }
   },
 
   async beforeUpdate(event) {
@@ -152,6 +196,55 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    // Log human-readable events for status changes
+    // Extract userId: current.user can be an object {id: number} or just a number
+    const orderUserId = typeof current?.user === "object" && current.user?.id
+      ? current.user.id
+      : typeof current?.user === "number"
+      ? current.user
+      : userId;
+
+    const oldStatus = previous?.Status;
+    const newStatus = current?.Status;
+
+    // If status changed, log user-facing event
+    if (oldStatus !== newStatus && newStatus && orderUserId) {
+      await logOrderEvent(strapi as any, {
+        category: "StatusChange",
+        orderId: result.id,
+        orderStatus: newStatus,
+        oldStatus: oldStatus,
+        newStatus: newStatus,
+        userId: orderUserId,
+        performedBy: {
+          id: actor.userId || undefined,
+          name: actor.label || undefined,
+        },
+        audience: "user",
+        metadata: {
+          changes,
+        },
+      });
+    }
+
+    // Log admin event if updated by admin
+    if (actor.userId && actor.label && Object.keys(changes).length > 0) {
+      await logAdminEvent(strapi as any, {
+        category: "Action",
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Update",
+        adminName: actor.label,
+        adminId: actor.userId,
+        audience: "admin",
+        metadata: {
+          changes,
+          oldStatus,
+          newStatus,
+        },
+      });
+    }
   },
 
   async beforeDelete(event) {
@@ -194,5 +287,21 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    // Log admin event for deletion
+    if (actor.userId && actor.label) {
+      await logAdminEvent(strapi as any, {
+        category: "Action",
+        resourceType: "Order",
+        resourceId: id,
+        action: "Delete",
+        adminName: actor.label,
+        adminId: actor.userId,
+        audience: "admin",
+        metadata: {
+          orderId: id,
+        },
+      });
+    }
   },
 };

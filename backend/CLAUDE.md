@@ -283,12 +283,83 @@ npm run type:generate
 ```
 This updates type definitions in `types/generated/` based on Strapi schemas.
 
+## Event Logging System
+
+The project uses a human-readable event logging system that complements technical audit logs. Events are designed for end-users and administrators.
+
+### Overview
+
+**Event Logs** (`api::event-log.event-log`):
+- Human-readable Persian messages for users/admins
+- Event categorization (Order, Payment, Admin, etc.)
+- Severity levels (info, success, warning, error)
+- Audience separation (user, admin, superadmin, all)
+
+**Audit Logs** (existing system):
+- Technical debugging (field-level changes, JSON diffs)
+- Compliance and auditing
+- System internals
+
+**Rule**: Event logs are for humans, audit logs are for debugging.
+
+### Usage
+
+**Logging Events**:
+```typescript
+import { logOrderEvent, logPaymentEvent, logAdminEvent } from "../../../../utils/eventLogger";
+
+// Order status change
+await logOrderEvent(strapi, {
+  category: "StatusChange",
+  orderId: order.id,
+  oldStatus: "pending",
+  newStatus: "processing",
+  userId: order.user?.id,
+  audience: "user",
+});
+
+// Payment event
+await logPaymentEvent(strapi, {
+  category: "StatusChange",
+  orderId: order.id,
+  amount: 1000000, // IRR
+  paymentGateway: "Mellat",
+  newStatus: "success",
+  userId: order.user?.id,
+  audience: "user",
+});
+
+// Admin action
+await logAdminEvent(strapi, {
+  category: "Action",
+  resourceType: "Order",
+  resourceId: order.id,
+  action: "Update",
+  adminName: "مدیر سیستم",
+  adminId: admin.id,
+  audience: "admin",
+});
+```
+
+**API Endpoints**:
+- `GET /event-logs/my-events` - User's events
+- `GET /event-logs/order/:orderId` - Order-specific events
+- `GET /event-logs/admin` - Admin events
+
+**Integration**:
+- Event logging is integrated into order lifecycles alongside audit logs
+- Frontend components use event logs for user-facing displays
+- Falls back to audit logs if no events exist
+
+See `.cursor/rules/event-logging.mdc` for complete documentation.
+
 ## Debugging Payment Issues
 
-1. Check `order-log` entries for the order
-2. Review `scripts/debug-mellat.js` for gateway testing
-3. Use `npm run test:mellat-v3` to test Mellat integration
-4. Check `src/api/payment-gateway/services/mellat-v3.ts` for implementation details
+1. Check `order-log` entries for the order (technical audit logs)
+2. Check `event-log` entries for the order (human-readable events)
+3. Review `scripts/debug-mellat.js` for gateway testing
+4. Use `npm run test:mellat-v3` to test Mellat integration
+5. Check `src/api/payment-gateway/services/mellat-v3.ts` for implementation details
 
 ## Database Initialization & Deployment
 
