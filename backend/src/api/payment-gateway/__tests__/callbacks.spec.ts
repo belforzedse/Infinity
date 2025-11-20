@@ -202,7 +202,7 @@ describe("verifyPaymentHandler", () => {
       }),
     );
     expect(ctx.redirect).toHaveBeenCalledWith(
-      "https://infinitycolor.org/payment/failure?error=Internal%20server%20error",
+      "https://infinitycolor.org/payment/failure?error=Internal+server+error",
     );
   });
 
