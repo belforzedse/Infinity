@@ -322,13 +322,18 @@ async function assignRolePermissions(strapi: Strapi, role: { id: number; name: s
 
 export const RedisClient = createClient({
   url: process.env.REDIS_URL,
-  password: process.env.REDIS_PASSWORD,
+  ...(process.env.REDIS_PASSWORD && { password: process.env.REDIS_PASSWORD }),
 })
   .on("error", (err) => console.log("Redis Client Error", err))
   .connect()
   .then((client) => {
     console.log("Redis connected");
     return client;
+  })
+  .catch((err) => {
+    console.error("Failed to connect to Redis:", err.message);
+    // Return a mock client that fails gracefully for development
+    throw err;
   });
 
 export default {

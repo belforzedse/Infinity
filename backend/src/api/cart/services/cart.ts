@@ -44,14 +44,32 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
     }
 
     const cartItems = cart.cart_items || [];
-    for (const item of cartItems) {
+    if (cartItems.length > 0) {
+      // Batch delete to avoid N+1 query problem
       try {
-        await strapi.entityService.delete("api::cart-item.cart-item", item.id);
+        const itemIds = cartItems.map((item: any) => item.id).filter((id: any) => id);
+        if (itemIds.length > 0) {
+          await strapi.db
+            .query("api::cart-item.cart-item")
+            .deleteMany({ where: { id: { $in: itemIds } } });
+        }
       } catch (err) {
-        strapi.log.error("Failed to remove cart item during clearCart", {
-          cartItemId: item.id,
+        strapi.log.error("Failed to batch delete cart items during clearCart", {
+          cartId: cart.id,
+          itemCount: cartItems.length,
           error: err,
         });
+        // Fallback to individual deletes if batch fails
+        for (const item of cartItems) {
+          try {
+            await strapi.entityService.delete("api::cart-item.cart-item", item.id);
+          } catch (itemErr) {
+            strapi.log.error("Failed to remove cart item during clearCart fallback", {
+              cartItemId: item.id,
+              error: itemErr,
+            });
+          }
+        }
       }
     }
 

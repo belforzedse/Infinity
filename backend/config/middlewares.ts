@@ -3,7 +3,17 @@ export default [
   "strapi::errors",
   "strapi::security",
   "strapi::poweredBy",
-  "strapi::cors",
+  {
+    name: "strapi::cors",
+    config: {
+      origin: process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(",")
+        : ["https://infinitycolor.org", "https://staging.infinitycolor.org"],
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      headers: ["Content-Type", "Authorization", "X-Requested-With"],
+    },
+  },
   "strapi::query",
   "strapi::body",
   "strapi::session",

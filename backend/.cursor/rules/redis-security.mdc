@@ -1,0 +1,71 @@
+---
+description: Redis password authentication configuration and security best practices
+globs: src/index.ts,docker-compose.yml,*.env*
+---
+
+## Redis Security Configuration
+
+### Password Authentication
+
+Redis uses password authentication via the `--requirepass` flag and the `REDIS_PASSWORD` environment variable.
+
+**Required Settings:**
+
+1. **Environment Variable**: `REDIS_PASSWORD` must be set in all environment files:
+   - `.env` (local development)
+   - `dev.env` (staging)
+   - `main.env` (production)
+
+2. **Docker Compose**: Redis command includes `--requirepass ${REDIS_PASSWORD}`:
+   ```yaml
+   command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+   ```
+
+3. **Health Check**: Uses password for authentication:
+   ```yaml
+   healthcheck:
+     test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+   ```
+
+4. **Application Connection**: Redis client in `src/index.ts` uses password parameter:
+   ```typescript
+   export const RedisClient = createClient({
+     url: process.env.REDIS_URL,
+     password: process.env.REDIS_PASSWORD,
+   })
+   ```
+
+### Redis URL Format
+
+The `REDIS_URL` should **NOT** include the password in the URL:
+- ✅ Correct: `redis://infinity-redis:6379` (password in separate env var)
+- ❌ Incorrect: `redis://:password@infinity-redis:6379` (exposes password in URL)
+
+The password is provided separately via the `password` parameter in the Redis client configuration.
+
+### Security Notes
+
+- **Never commit passwords**: `.env`, `main.env`, `dev.env` should be in `.gitignore`
+- **Generate strong passwords**: Use cryptographically secure random passwords (32+ bytes base64)
+- **Different passwords per environment**: Use different passwords for production, staging, and local development
+- **Rotate passwords**: Change Redis passwords periodically, especially if exposed
+- **Network isolation**: Redis should only be accessible within Docker network or localhost (not exposed publicly)
+
+### Password Generation
+
+Generate strong passwords using:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+### Troubleshooting
+
+**Connection fails:**
+- Verify `REDIS_PASSWORD` is set in environment file
+- Check password matches between `docker-compose.yml` command and application config
+- Ensure Redis container has password set: `docker-compose exec infinity-redis redis-cli -a <password> ping`
+
+**Health check fails:**
+- Verify environment variable is passed to container
+- Check password format (no extra quotes or spaces)
+- Test manually: `docker-compose exec infinity-redis redis-cli -a "$REDIS_PASSWORD" ping`
