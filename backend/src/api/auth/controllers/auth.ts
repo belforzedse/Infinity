@@ -53,8 +53,15 @@ async function otp(ctx) {
       otpToken,
     };
   } catch (err) {
+    strapi.log.error("Failed to send OTP", {
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
     ctx.status = 500;
-    ctx.body = err;
+    ctx.body = {
+      message: "Failed to send OTP. Please try again later.",
+      error: "OTP_SEND_FAILED",
+    };
   }
 }
 
@@ -141,9 +148,15 @@ async function login(ctx) {
 
     ctx.body = { message: "login successful", token };
   } catch (err) {
-    strapi.log.error(err);
+    strapi.log.error("Login failed", {
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
     ctx.status = 500;
-    ctx.body = JSON.stringify(err);
+    ctx.body = {
+      message: "Login failed. Please try again later.",
+      error: "LOGIN_FAILED",
+    };
   }
 }
 

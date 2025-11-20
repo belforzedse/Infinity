@@ -6,7 +6,7 @@ export default () => ({
         getTimeout: 100,
         options: {
           max: 100000,
-          maxAge: 30 * 10 * 1000, // 30 seconds
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours (86400000ms)
         },
       },
       strategy: {

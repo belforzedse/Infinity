@@ -377,7 +377,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
               order: order.id,
               Action: "Update",
               Description: "Stock decrement failures detected",
-              Changes: { stockErrors },
+              Changes: { stockErrors: JSON.parse(JSON.stringify(stockErrors)) },
             },
           });
         }

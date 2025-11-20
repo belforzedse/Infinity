@@ -6,7 +6,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "include": ["./", "./**/*.ts", "./**/*.js", "src/**/*.json"],
   "exclude": [
