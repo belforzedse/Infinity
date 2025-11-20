@@ -60,11 +60,13 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
         // Fetch event logs for this order (user-facing only)
         const response = await getOrderEvents(order.id, { audience: "user" }, { sort: "createdAt:asc" });
 
-        if (response.data && response.data.length > 0) {
+        // Check if response has data array
+        const eventsData = response?.data || [];
+        if (eventsData.length > 0) {
           // Use event logs
-          const timelineEvents: TimelineEvent[] = response.data.map((event: EventLog) => ({
+          const timelineEvents: TimelineEvent[] = eventsData.map((event: EventLog) => ({
             id: event.id,
-            message: event.Message,
+            message: event.Message || event.MessageEn || "رویداد سفارش",
             createdAt: event.createdAt,
             severity: event.Severity,
           }));
