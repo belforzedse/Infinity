@@ -121,6 +121,7 @@ jobs:
         id: docker_build
         env:
           NODE_OPTIONS_ARG: ${{ steps.heap.outputs.node_options }}
+          BUILD_CONTEXT: ${{ github.workspace }}/backend
         run: |
           set -euo pipefail
           SECONDS=0
@@ -134,7 +135,7 @@ jobs:
             --build-arg STRAPI_TELEMETRY_DISABLED="${STRAPI_TELEMETRY_DISABLED}" \
             --build-arg NODE_OPTIONS="${NODE_OPTIONS_ARG}" \
             --push \
-            backend
+            "$BUILD_CONTEXT"
           echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
 
       - name: Summarize backend timings
