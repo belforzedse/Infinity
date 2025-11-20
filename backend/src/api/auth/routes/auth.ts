@@ -29,6 +29,14 @@ export default {
       },
     },
     {
+      method: "PUT",
+      path: "/auth/self",
+      handler: "auth.updateSelf",
+      config: {
+        auth: false,
+      },
+    },
+    {
       method: "POST",
       path: "/auth/welcome",
       handler: "auth.welcome",
