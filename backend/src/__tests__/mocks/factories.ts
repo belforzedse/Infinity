@@ -137,38 +137,49 @@ export const mockContract = (overrides?: Partial<any>) => ({
   ...overrides,
 });
 
-export const mockContext = (overrides?: Partial<any>) => ({
-  request: {
-    body: {},
-    ...overrides?.request,
-  },
-  response: {
+export const mockContext = (overrides?: Partial<any>) => {
+  const baseCtx = {
+    request: {
+      body: {},
+      ...overrides?.request,
+    },
+    response: {
+      status: 200,
+      body: {},
+      ...overrides?.response,
+    },
+    state: {
+      user: mockUser(),
+      ...overrides?.state,
+    },
+    body: undefined as any,
     status: 200,
-    body: {},
-  },
-  state: {
-    user: mockUser(),
-    ...overrides?.state,
-  },
-  throw: jest.fn((status, message) => {
-    const error = new Error(message);
-    (error as any).status = status;
-    throw error;
-  }),
-  badRequest: jest.fn((message, payload) => {
-    const error: any = new Error(message);
-    error.status = 400;
-    error.payload = payload;
-    throw error;
-  }),
-  unauthorized: jest.fn((message) => {
-    const error: any = new Error(message);
-    error.status = 401;
-    throw error;
-  }),
-  redirect: jest.fn(),
-  ...overrides,
-});
+    send: jest.fn(),
+    notFound: jest.fn(),
+    throw: jest.fn((status, message) => {
+      const error = new Error(message);
+      (error as any).status = status;
+      throw error;
+    }),
+    badRequest: jest.fn((message, payload) => {
+      const error: any = new Error(message);
+      error.status = 400;
+      error.payload = payload;
+      throw error;
+    }),
+    unauthorized: jest.fn((message) => {
+      const error: any = new Error(message);
+      error.status = 401;
+      throw error;
+    }),
+    redirect: jest.fn(),
+  };
+
+  return {
+    ...baseCtx,
+    ...overrides,
+  };
+};
 
 export const mockDiscount = (overrides?: Partial<any>) => ({
   id: 1,
