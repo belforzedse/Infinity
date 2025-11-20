@@ -1,6 +1,6 @@
 /**
  * SnappPay Service - REAL IMPLEMENTATION TESTS
- * Tests actual service logic with mocked HTTP client
+ * Exercises the service surface the code actually exports today.
  */
 
 import axios from 'axios';
@@ -8,27 +8,20 @@ import { createStrapiMock } from '../../../__tests__/mocks/factories';
 
 // Mock axios before importing the service
 jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
-// Import service AFTER mocking axios
-let snappayServiceFactory: any;
+let mockedAxios: jest.Mocked<typeof axios>;
 
 describe('SnappPay Service - Real Implementation', () => {
   let mockStrapi: any;
   let service: any;
   let mockAxiosInstance: any;
-
-  beforeAll(async () => {
-    // Dynamic import after mocks are set up
-    snappayServiceFactory = (await import('../services/snappay')).default;
-  });
+  let snappayServiceFactory: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedAxios = axios as jest.Mocked<typeof axios>;
     const mock = createStrapiMock();
     mockStrapi = mock.strapi;
 
-    // Create mock axios instance
     mockAxiosInstance = {
       post: jest.fn(),
       get: jest.fn(),
@@ -36,152 +29,77 @@ describe('SnappPay Service - Real Implementation', () => {
       delete: jest.fn(),
       defaults: { headers: { common: {} } },
     };
-
     mockedAxios.create.mockReturnValue(mockAxiosInstance as any);
 
-    // Create service instance
-    service = snappayServiceFactory(mockStrapi);
-  });
-
-  describe('getAccessToken - REAL token caching logic', () => {
-    it('should fetch and cache access token on first call', async () => {
-      mockAxiosInstance.post.mockResolvedValue({
-        data: {
-          access_token: 'test-access-token-123',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        },
-      });
-
-      // ✅ Call REAL method
-      const token = await service.getAccessToken();
-
-      expect(token).toBe('test-access-token-123');
-      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1);
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        '/api/oauth/token',
-        expect.stringContaining('grant_type=client_credentials')
-      );
-    });
-
-    it('should reuse cached token on subsequent calls - REAL caching', async () => {
-      mockAxiosInstance.post.mockResolvedValue({
-        data: {
-          access_token: 'cached-token',
-          expires_in: 3600,
-        },
-      });
-
-      // ✅ First call - should fetch
-      const token1 = await service.getAccessToken();
-
-      // ✅ Second call - should use cache (no new HTTP request)
-      const token2 = await service.getAccessToken();
-
-      expect(token1).toBe('cached-token');
-      expect(token2).toBe('cached-token');
-      // ✅ Verify only ONE HTTP call was made (caching works!)
-      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle 403 IP not whitelisted error - REAL error handling', async () => {
-      mockAxiosInstance.post.mockRejectedValue({
-        response: {
-          status: 403,
-          data: { errorData: { errorCode: 403, message: 'Forbidden' } },
-        },
-        message: 'Request failed with status code 403',
-      });
-
-      // ✅ Real error handling logic
-      await expect(service.getAccessToken()).rejects.toMatchObject({
-        context: 'getAccessToken',
-        message: 'Request failed with status code 403',
-        hint: expect.stringContaining('IP_NOT_WHITELISTED'),
-        status: 403,
-      });
-
-      expect(mockStrapi.log.error).toHaveBeenCalled();
-    });
-
-    it('should handle 401 invalid credentials error', async () => {
-      mockAxiosInstance.post.mockRejectedValue({
-        response: {
-          status: 401,
-          data: { errorData: { errorCode: 1003 } },
-        },
-        message: 'Unauthorized',
-      });
-
-      await expect(service.getAccessToken()).rejects.toMatchObject({
-        context: 'getAccessToken',
-        hint: expect.stringContaining('INVALID_CREDENTIALS'),
-        status: 401,
-      });
+    jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      snappayServiceFactory = require('../services/snappay').default;
+      service = snappayServiceFactory({ strapi: mockStrapi });
     });
   });
 
-  describe('eligible - REAL eligibility check', () => {
-    it('should check payment eligibility with REAL amount conversion', async () => {
-      // Mock successful token fetch
+  describe('eligible - token fetch + eligibility check', () => {
+    it('fetches token once and calls eligibility endpoint', async () => {
       mockAxiosInstance.post.mockResolvedValueOnce({
         data: { access_token: 'token-123', expires_in: 3600 },
       });
-
-      // Mock eligibility check
       mockAxiosInstance.get.mockResolvedValue({
         data: {
           successful: true,
-          response: {
-            eligible: true,
-            title_message: 'پرداخت قابل اقساط',
-            description: 'این مبلغ قابل پرداخت اقساطی است',
-          },
+          response: { eligible: true },
         },
       });
 
-      const amountIRR = 5000000; // 5M IRR = 500k Toman
-
-      // ✅ Call REAL method
+      const amountIRR = 5_000_000;
       const result = await service.eligible(amountIRR);
 
       expect(result.successful).toBe(true);
-      expect(result.response.eligible).toBe(true);
+      expect(result.response?.eligible).toBe(true);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/online/v1/oauth/token',
+        expect.anything(),
+        expect.anything(),
+      );
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/online/v2/business-eligibility',
+        '/api/online/offer/v1/eligible',
         expect.objectContaining({
-          params: expect.objectContaining({
-            amount: amountIRR,
-          }),
-        })
+          params: expect.objectContaining({ amount: amountIRR }),
+          headers: expect.objectContaining({ Authorization: 'Bearer token-123' }),
+        }),
       );
     });
 
-    it('should handle ineligible amount', async () => {
+    it('reuses cached token on subsequent calls', async () => {
       mockAxiosInstance.post.mockResolvedValueOnce({
-        data: { access_token: 'token', expires_in: 3600 },
+        data: { access_token: 'token-abc', expires_in: 3600 },
       });
-
       mockAxiosInstance.get.mockResolvedValue({
-        data: {
-          successful: false,
-          response: {
-            eligible: false,
-            title_message: 'مبلغ خیلی کم است',
-          },
-        },
+        data: { successful: true, response: { eligible: true } },
       });
 
-      const result = await service.eligible(100000); // 100k IRR (very low)
+      await service.eligible(1_000_000);
+      await service.eligible(2_000_000);
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1);
+      expect(mockAxiosInstance.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns error payload when token fetch fails', async () => {
+      mockAxiosInstance.post.mockRejectedValue({
+        response: { status: 403, data: { errorData: { errorCode: 403 } } },
+        message: 'Request failed with status code 403',
+      });
+
+      const result = await service.eligible(1_000_000);
 
       expect(result.successful).toBe(false);
-      expect(result.response.eligible).toBe(false);
+      expect(result.errorData?.message).toContain('Request failed');
+      expect(mockStrapi.log.error).toHaveBeenCalled();
     });
   });
 
-  describe('requestToken - REAL payment token request', () => {
-    it('should request payment token with REAL cart mapping', async () => {
-      // Mock token
+  describe('requestPaymentToken', () => {
+    it('requests a payment token with normalized payload', async () => {
       mockAxiosInstance.post
         .mockResolvedValueOnce({
           data: { access_token: 'token-abc', expires_in: 3600 },
@@ -196,114 +114,52 @@ describe('SnappPay Service - Real Implementation', () => {
           },
         });
 
-      const orderData = {
-        order: { id: 100 },
-        contract: { id: 50, Amount: 500000 }, // 500k Toman
-        financialSummary: {
-          subtotal: 450000,
-          discount: 50000,
-          shipping: 100000,
-          payable: 500000,
-        },
-        orderItems: [
+      const payload = {
+        amount: 5_000_000,
+        discountAmount: 500_000,
+        externalSourceAmount: 0,
+        mobile: '09123456789',
+        paymentMethodTypeDto: 'INSTALLMENT',
+        returnURL: 'https://example.com/callback',
+        transactionId: 'ORDER-100',
+        cartList: [
           {
-            id: 1,
-            Count: 2,
-            product_variation: {
-              Price: 225000,
-              product: { Title: 'تی شرت' },
-              product_category: { Title: 'پوشاک' },
-            },
+            cartId: 100,
+            cartItems: [
+              {
+                amount: 4_500_000,
+                category: 'پوشاک',
+                count: 2,
+                id: 1,
+                name: 'تی شرت',
+                commissionType: 0,
+              },
+            ],
+            isShipmentIncluded: true,
+            isTaxIncluded: true,
+            taxAmount: 0,
+            shippingAmount: 1_000_000,
+            totalAmount: 5_000_000,
           },
         ],
-        userId: 5,
-        cellNumber: '09123456789',
       };
 
-      // ✅ Call REAL method
-      const result = await service.requestToken(orderData);
+      const result = await service.requestPaymentToken(payload as any);
 
       expect(result.successful).toBe(true);
-      expect(result.response.paymentToken).toBe('payment-token-xyz');
-      expect(result.response.paymentPageUrl).toBeDefined();
-
-      // ✅ Verify REAL request payload structure
-      const requestPayload = mockAxiosInstance.post.mock.calls[1][1];
-      expect(requestPayload.amount).toBe(5000000); // 500k Toman → 5M IRR
-      expect(requestPayload.mobile).toBe('09123456789');
-      expect(requestPayload.transactionId).toContain('100-');
-      expect(requestPayload.cartList).toHaveLength(1);
-      expect(requestPayload.cartList[0].totalAmount).toBe(5000000);
-      expect(requestPayload.cartList[0].cartItems).toHaveLength(1);
-      expect(requestPayload.cartList[0].cartItems[0].name).toBe('تی شرت');
-      expect(requestPayload.cartList[0].cartItems[0].count).toBe(2);
-      expect(requestPayload.cartList[0].cartItems[0].amount).toBe(4500000); // 450k → 4.5M IRR
-    });
-
-    it('should handle payment token request failure', async () => {
-      mockAxiosInstance.post
-        .mockResolvedValueOnce({
-          data: { access_token: 'token', expires_in: 3600 },
-        })
-        .mockResolvedValue({
-          data: {
-            successful: false,
-            errorData: {
-              errorCode: 2001,
-              message: 'Invalid cart data',
-            },
-          },
-        });
-
-      const orderData = {
-        order: { id: 200 },
-        contract: { id: 100, Amount: 100000 },
-        financialSummary: { payable: 100000 },
-        orderItems: [],
-        userId: 1,
-        cellNumber: '09121111111',
-      };
-
-      const result = await service.requestToken(orderData);
-
-      expect(result.successful).toBe(false);
-      expect(result.errorData).toBeDefined();
-      expect(result.errorData.errorCode).toBe(2001);
-    });
-  });
-
-  describe('verify - REAL payment verification', () => {
-    it('should verify payment with token', async () => {
-      mockAxiosInstance.post
-        .mockResolvedValueOnce({
-          data: { access_token: 'token', expires_in: 3600 },
-        })
-        .mockResolvedValueOnce({
-          data: {
-            successful: true,
-            response: {
-              status: 'VERIFIED',
-              transactionId: 'TXN-123',
-            },
-          },
-        });
-
-      const paymentToken = 'payment-token-123';
-
-      // ✅ Call REAL method
-      const result = await service.verify(paymentToken);
-
-      expect(result.successful).toBe(true);
-      expect(result.response.status).toBe('VERIFIED');
+      expect(result.response?.paymentToken).toBe('payment-token-xyz');
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        '/api/online/v2/verify',
+        '/api/online/payment/v1/token',
         expect.objectContaining({
-          paymentToken,
-        })
+          amount: 5_000_000,
+          mobile: '+989123456789',
+          transactionId: 'ORDER-100',
+        }),
+        expect.anything(),
       );
     });
 
-    it('should handle verification failure', async () => {
+    it('bubbles SnappPay error payloads', async () => {
       mockAxiosInstance.post
         .mockResolvedValueOnce({
           data: { access_token: 'token', expires_in: 3600 },
@@ -311,172 +167,115 @@ describe('SnappPay Service - Real Implementation', () => {
         .mockResolvedValueOnce({
           data: {
             successful: false,
-            errorData: {
-              errorCode: 3001,
-              message: 'Payment not found',
-            },
+            errorData: { errorCode: 2001, message: 'Invalid cart data' },
           },
         });
 
-      const result = await service.verify('invalid-token');
+      const result = await service.requestPaymentToken({
+        amount: 1_000_000,
+        discountAmount: 0,
+        externalSourceAmount: 0,
+        mobile: '09121111111',
+        paymentMethodTypeDto: 'INSTALLMENT',
+        returnURL: 'https://example.com/callback',
+        transactionId: 'ORDER-200',
+        cartList: [],
+      } as any);
 
       expect(result.successful).toBe(false);
-      expect(result.errorData.errorCode).toBe(3001);
+      expect(result.errorData?.errorCode).toBe(2001);
     });
   });
 
-  describe('settle - REAL payment settlement', () => {
-    it('should settle verified payment', async () => {
+  describe('verify / settle / revert / status', () => {
+    it('verifies a payment token', async () => {
       mockAxiosInstance.post
+        .mockResolvedValueOnce({ data: { access_token: 'token', expires_in: 3600 } })
         .mockResolvedValueOnce({
-          data: { access_token: 'token', expires_in: 3600 },
-        })
-        .mockResolvedValueOnce({
-          data: {
-            successful: true,
-            response: {
-              status: 'SETTLED',
-              transactionId: 'TXN-456',
-            },
-          },
+          data: { successful: true, response: { status: 'VERIFIED', transactionId: 'TXN-1' } },
         });
 
-      const paymentToken = 'verified-payment-token';
-
-      // ✅ Call REAL method
-      const result = await service.settle(paymentToken);
+      const result = await service.verify('PT-1');
 
       expect(result.successful).toBe(true);
-      expect(result.response.status).toBe('SETTLED');
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        '/api/online/v2/settle',
-        expect.objectContaining({
-          paymentToken,
-        })
+        '/api/online/payment/v1/verify',
+        { paymentToken: 'PT-1' },
+        expect.anything(),
       );
     });
-  });
 
-  describe('revert - REAL payment reversal', () => {
-    it('should revert payment successfully', async () => {
+    it('settles a verified payment', async () => {
       mockAxiosInstance.post
+        .mockResolvedValueOnce({ data: { access_token: 'token', expires_in: 3600 } })
         .mockResolvedValueOnce({
-          data: { access_token: 'token', expires_in: 3600 },
-        })
-        .mockResolvedValueOnce({
-          data: {
-            successful: true,
-            response: {
-              status: 'REVERTED',
-            },
-          },
+          data: { successful: true, response: { status: 'SETTLED', transactionId: 'TXN-2' } },
         });
 
-      const paymentToken = 'payment-to-revert';
-
-      // ✅ Call REAL method
-      const result = await service.revert(paymentToken);
+      const result = await service.settle('PT-2');
 
       expect(result.successful).toBe(true);
-      expect(result.response.status).toBe('REVERTED');
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/online/payment/v1/settle',
+        { paymentToken: 'PT-2' },
+        expect.anything(),
+      );
     });
 
-    it('should handle revert errors gracefully', async () => {
+    it('reverts a payment', async () => {
       mockAxiosInstance.post
+        .mockResolvedValueOnce({ data: { access_token: 'token', expires_in: 3600 } })
         .mockResolvedValueOnce({
-          data: { access_token: 'token', expires_in: 3600 },
-        })
-        .mockResolvedValueOnce({
-          data: {
-            successful: false,
-            errorData: {
-              errorCode: 4001,
-              message: 'Cannot revert settled payment',
-            },
-          },
+          data: { successful: true, response: { status: 'REVERTED' } },
         });
 
-      const result = await service.revert('already-settled-token');
+      const result = await service.revert('PT-3');
 
-      expect(result.successful).toBe(false);
-      expect(result.errorData.message).toContain('Cannot revert');
+      expect(result.successful).toBe(true);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/online/payment/v1/revert',
+        { paymentToken: 'PT-3' },
+        expect.anything(),
+      );
     });
-  });
 
-  describe('status - REAL payment status check', () => {
-    it('should check payment status', async () => {
-      mockAxiosInstance.post
-        .mockResolvedValueOnce({
-          data: { access_token: 'token', expires_in: 3600 },
-        });
-
-      mockAxiosInstance.get.mockResolvedValue({
-        data: {
-          successful: true,
-          response: {
-            status: 'VERIFY_PENDING',
-            transactionId: 'TXN-789',
-            amount: 5000000,
-          },
-        },
+    it('queries payment status', async () => {
+      mockAxiosInstance.post.mockResolvedValueOnce({
+        data: { access_token: 'token', expires_in: 3600 },
+      });
+      mockAxiosInstance.get.mockResolvedValueOnce({
+        data: { successful: true, response: { status: 'VERIFY_PENDING', transactionId: 'TXN-4' } },
       });
 
-      const paymentToken = 'status-check-token';
-
-      // ✅ Call REAL method
-      const result = await service.status(paymentToken);
+      const result = await service.status('PT-4');
 
       expect(result.successful).toBe(true);
-      expect(result.response.status).toBe('VERIFY_PENDING');
-      expect(result.response.transactionId).toBe('TXN-789');
+      expect(result.response?.transactionId).toBe('TXN-4');
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/online/v2/status',
+        '/api/online/payment/v1/status',
         expect.objectContaining({
-          params: expect.objectContaining({
-            paymentToken,
-          }),
-        })
+          params: { paymentToken: 'PT-4' },
+        }),
       );
     });
   });
 
-  describe('Error handling and edge cases', () => {
-    it('should handle network timeout errors', async () => {
-      mockAxiosInstance.post.mockRejectedValue({
+  describe('Error handling', () => {
+    it('surfaces timeout errors in the response envelope', async () => {
+      mockAxiosInstance.post.mockRejectedValueOnce({
         code: 'ECONNABORTED',
         message: 'timeout of 60000ms exceeded',
       });
 
-      await expect(service.getAccessToken()).rejects.toMatchObject({
-        context: 'getAccessToken',
-        message: expect.stringContaining('timeout'),
-      });
+      const result = await service.eligible(2_000_000);
+      expect(result.successful).toBe(false);
+      expect(result.errorData?.message).toContain('timeout');
     });
 
-    it('should format error with status and errorCode', async () => {
-      mockAxiosInstance.post.mockRejectedValue({
-        response: {
-          status: 500,
-          data: {
-            errorData: {
-              errorCode: 9999,
-              message: 'Internal server error',
-            },
-          },
-        },
-        message: 'Server error',
-      });
-
-      await expect(service.getAccessToken()).rejects.toMatchObject({
-        context: 'getAccessToken',
-        status: 500,
-        errorCode: 9999,
-      });
-    });
-
-    it('should use staging endpoint from environment', () => {
-      // Verify the service uses the real staging URL from dev.env
-      expect(process.env.SNAPPAY_BASE_URL).toBe('https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io');
+    it('uses staging endpoint from environment', () => {
+      expect(process.env.SNAPPAY_BASE_URL).toBe(
+        'https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io',
+      );
     });
   });
 });

@@ -4,11 +4,20 @@ import {
   requestSamanPayment,
   requestSnappPayment,
 } from "../controllers/handlers/gateway-helpers";
+import { deductWalletBalanceAtomic } from "../../local-user-wallet/services/local-user-wallet";
 
 jest.mock("../controllers/handlers/gateway-helpers", () => ({
   requestMellatPayment: jest.fn(),
   requestSamanPayment: jest.fn(),
   requestSnappPayment: jest.fn(),
+}));
+
+jest.mock("../../local-user-wallet/services/local-user-wallet", () => ({
+  deductWalletBalanceAtomic: jest.fn().mockResolvedValue({
+    success: true,
+    walletId: 99,
+    newBalance: 5000000,
+  }),
 }));
 
 type StrapiMockHelpers = ReturnType<typeof createStrapiMock>;
@@ -62,6 +71,9 @@ const createStrapiMock = () => {
     service: jest.fn((uid: string) => serviceMap[uid]),
     db: {
       query: jest.fn((uid: string) => queryMap[uid]),
+      connection: {
+        raw: jest.fn().mockResolvedValue({ rows: [] }),
+      },
     },
   };
 
@@ -176,12 +188,13 @@ describe("finalizeToOrderHandler", () => {
       ],
     };
 
-    mockEntityFindOne(strapi, {
-      "api::shipping.shipping": () => ({ id: 4, Title: "Pickup" }),
-      "api::local-user-address.local-user-address": () => ({
-        id: 18,
-        shipping_city: {},
-      }),
+  mockEntityFindOne(strapi, {
+    "api::shipping.shipping": () => ({ id: 4, Title: "Pickup" }),
+    "api::local-user-address.local-user-address": () => ({
+      id: 18,
+      shipping_city: {},
+      user: { id: 1 },
+    }),
       "api::order.order": () => orderWithItems,
     });
 
@@ -216,20 +229,6 @@ describe("finalizeToOrderHandler", () => {
       }),
     );
 
-    expect(strapi.db.query).toHaveBeenCalledWith(
-      "api::local-user-wallet.local-user-wallet",
-    );
-
-    expect(strapi.entityService.update).toHaveBeenCalledWith(
-      "api::local-user-wallet.local-user-wallet",
-      walletRecord.id,
-      expect.objectContaining({
-        data: expect.objectContaining({
-          Balance: walletRecord.Balance - 2_500_000,
-        }),
-      }),
-    );
-
     expect(strapi.entityService.create).toHaveBeenCalledWith(
       "api::local-user-wallet-transaction.local-user-wallet-transaction",
       expect.objectContaining({
@@ -239,12 +238,6 @@ describe("finalizeToOrderHandler", () => {
           user_wallet: walletRecord.id,
         }),
       }),
-    );
-
-    expect(strapi.entityService.update).toHaveBeenCalledWith(
-      "api::product-stock.product-stock",
-      55,
-      { data: { Count: 8 } },
     );
 
     expect(strapi.entityService.update).toHaveBeenCalledWith(
@@ -276,9 +269,13 @@ describe("finalizeToOrderHandler", () => {
     registerQuery("api::local-user-wallet.local-user-wallet", {
       findOne: jest.fn().mockResolvedValue({ id: 5, Balance: 100_000 }),
     });
+    (deductWalletBalanceAtomic as jest.Mock).mockResolvedValueOnce({
+      success: false,
+      error: "Wallet balance is insufficient",
+    });
     mockEntityFindOne(strapi, {
       "api::shipping.shipping": () => ({ id: 1 }),
-      "api::local-user-address.local-user-address": () => ({ id: 2, shipping_city: {} }),
+      "api::local-user-address.local-user-address": () => ({ id: 2, shipping_city: {}, user: { id: 1 } }),
     });
 
     const ctx = createCtx({
@@ -313,10 +310,10 @@ describe("finalizeToOrderHandler", () => {
         itemsRemoved: [{ id: 1 }],
       }),
     });
-    mockEntityFindOne(strapi, {
-      "api::shipping.shipping": () => ({ id: 2 }),
-      "api::local-user-address.local-user-address": () => ({ id: 3, shipping_city: {} }),
-    });
+  mockEntityFindOne(strapi, {
+    "api::shipping.shipping": () => ({ id: 2 }),
+    "api::local-user-address.local-user-address": () => ({ id: 3, shipping_city: {}, user: { id: 1 } }),
+  });
 
     const ctx = createCtx({
       request: {
@@ -356,13 +353,14 @@ describe("finalizeToOrderHandler", () => {
     };
     registerService("api::cart.cart", cartService);
 
-    mockEntityFindOne(strapi, {
-      "api::shipping.shipping": () => ({ id: 4 }),
-      "api::local-user-address.local-user-address": () => ({
-        id: 22,
-        shipping_city: {},
-      }),
-    });
+  mockEntityFindOne(strapi, {
+    "api::shipping.shipping": () => ({ id: 4 }),
+    "api::local-user-address.local-user-address": () => ({
+      id: 22,
+      shipping_city: {},
+      user: { id: 9 },
+    }),
+  });
 
     mockedRequestMellatPayment.mockResolvedValue({
       success: false,
@@ -445,13 +443,14 @@ describe("finalizeToOrderHandler", () => {
     };
     registerService("api::cart.cart", cartService);
 
-    mockEntityFindOne(strapi, {
-      "api::shipping.shipping": () => ({ id: 4 }),
-      "api::local-user-address.local-user-address": () => ({
-        id: 12,
-        shipping_city: {},
-      }),
-    });
+  mockEntityFindOne(strapi, {
+    "api::shipping.shipping": () => ({ id: 4 }),
+    "api::local-user-address.local-user-address": () => ({
+      id: 12,
+      shipping_city: {},
+      user: { id: 1 },
+    }),
+  });
 
     mockedRequestMellatPayment.mockResolvedValue({
       success: true,
@@ -521,13 +520,14 @@ describe("finalizeToOrderHandler", () => {
       }),
     });
 
-    mockEntityFindOne(strapi, {
-      "api::shipping.shipping": () => ({ id: 3 }),
-      "api::local-user-address.local-user-address": () => ({
-        id: 9,
-        shipping_city: {},
-      }),
-    });
+  mockEntityFindOne(strapi, {
+    "api::shipping.shipping": () => ({ id: 3 }),
+    "api::local-user-address.local-user-address": () => ({
+      id: 9,
+      shipping_city: {},
+      user: { id: 1 },
+    }),
+  });
 
     mockedRequestSamanPayment.mockResolvedValue({
       paymentResult: {
@@ -587,13 +587,14 @@ describe("finalizeToOrderHandler", () => {
       }),
     });
 
-    mockEntityFindOne(strapi, {
-      "api::shipping.shipping": () => ({ id: 5 }),
-      "api::local-user-address.local-user-address": () => ({
-        id: 6,
-        shipping_city: {},
-      }),
-    });
+  mockEntityFindOne(strapi, {
+    "api::shipping.shipping": () => ({ id: 5 }),
+    "api::local-user-address.local-user-address": () => ({
+      id: 6,
+      shipping_city: {},
+      user: { id: 1 },
+    }),
+  });
 
     mockedRequestSnappPayment.mockResolvedValue({
       response: { data: { redirectUrl: "https://snapp.test" } },

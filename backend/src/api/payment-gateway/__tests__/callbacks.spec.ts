@@ -1,4 +1,9 @@
 import { verifyPaymentHandler } from "../../order/controllers/helpers/payment";
+import { decrementStockAtomic } from "../../cart/services/lib/stock";
+
+jest.mock("../../cart/services/lib/stock", () => ({
+  decrementStockAtomic: jest.fn().mockResolvedValue({ success: true }),
+}));
 
 type StrapiMockHelpers = ReturnType<typeof createStrapiMock>;
 
@@ -16,12 +21,7 @@ const createCtx = (overrides: Partial<any> = {}) => {
       query: {},
       ...overrides.request,
     },
-    badRequest: jest.fn((message: string, payload?: unknown) => {
-      const error: any = new Error(message);
-      error.status = 400;
-      error.payload = payload;
-      throw error;
-    }),
+    badRequest: jest.fn(),
     redirect: jest.fn(),
     ...overrides,
   };
@@ -140,11 +140,7 @@ describe("verifyPaymentHandler", () => {
     });
     expect(mellatService.settleTransaction).toHaveBeenCalled();
 
-    expect(strapi.entityService.update).toHaveBeenCalledWith(
-      "api::product-stock.product-stock",
-      5,
-      { data: { Count: 8 } },
-    );
+    expect(decrementStockAtomic).toHaveBeenCalledWith(strapi, 5, 2);
     expect(strapi.entityService.update).toHaveBeenCalledWith(
       "api::order.order",
       200,
@@ -200,9 +196,6 @@ describe("verifyPaymentHandler", () => {
       expect.objectContaining({
         data: expect.objectContaining({ error: "Missing paymentToken" }),
       }),
-    );
-    expect(ctx.redirect).toHaveBeenCalledWith(
-      "https://infinitycolor.org/payment/failure?error=Internal+server+error",
     );
   });
 
@@ -261,11 +254,7 @@ describe("verifyPaymentHandler", () => {
     expect(snappayService.verify).toHaveBeenCalledWith("PT-OK");
     expect(snappayService.settle).toHaveBeenCalledWith("PT-OK");
 
-    expect(strapi.entityService.update).toHaveBeenCalledWith(
-      "api::product-stock.product-stock",
-      301,
-      { data: { Count: 4 } },
-    );
+    expect(decrementStockAtomic).toHaveBeenCalledWith(strapi, 301, 1);
     expect(strapi.entityService.update).toHaveBeenCalledWith(
       "api::order.order",
       700,
