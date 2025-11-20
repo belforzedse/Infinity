@@ -19,10 +19,12 @@ export default function AuthForm() {
 
   return (
     <>
-      <AuthReturnButton href="/" label="بازگشت به فروشگاه" />
       <AuthTitle subtitle="لطفا شماره همراه خود را جهت بررسی وارد نمایید">
         ورود به حساب کاربری
       </AuthTitle>
+      <div className="mb-6">
+        <AuthReturnButton href="/" label="بازگشت به فروشگاه" />
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6 md:space-y-7">
         <div className="space-y-5 md:space-y-6">

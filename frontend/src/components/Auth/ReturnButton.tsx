@@ -25,7 +25,7 @@ export default function AuthReturnButton({ href, label, preserveRedirect = false
   };
 
   return (
-    <div className="mb-4 flex justify-start">
+    <div className="mt-4 flex justify-center md:mt-5">
       <button
         type="button"
         onClick={handleClick}

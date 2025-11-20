@@ -98,11 +98,13 @@ export default function LoginPage() {
   }, [phoneNumber, router]);
 
   return (
-    <div className="mx-auto w-full">
-      <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
+    <div className="mx-auto w/full">
       <AuthTitle subtitle={`لطفا کد ارسال شده به شماره همراه  ${phoneNumber} را وارد نمایید`}>
         ورود با رمز یکبار مصرف
       </AuthTitle>
+      <div className="mb-6">
+        <AuthReturnButton href="/" label="بازگشت به فروشگاه" preserveRedirect />
+      </div>
 
       <OTPLoginForm
         onSubmit={handleLogin}
