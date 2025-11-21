@@ -22,27 +22,49 @@ export type ManualActivityParams = {
   userAgent?: string | null;
 };
 
+async function getAdminIdentity(strapi: Strapi, userId?: number) {
+  if (!userId) return { name: null, role: null };
+
+  try {
+    const user = await strapi.entityService.findOne(
+      "plugin::users-permissions.user",
+      userId,
+      {
+        populate: { user_info: true, role: true },
+      },
+    ) as any;
+
+    if (!user) return { name: null, role: null };
+
+    const role =
+      (user.role && typeof user.role?.name === "string" ? user.role.name : null) || null;
+
+    const info = user.user_info;
+    const fullName = info?.FirstName || info?.LastName
+      ? `${info?.FirstName || ""} ${info?.LastName || ""}`.trim()
+      : null;
+
+    const fallback =
+      user.username || user.email || user.phone || (userId ? `User ${userId}` : null);
+
+    return { name: fullName || fallback, role };
+  } catch {
+    return { name: null, role: null };
+  }
+}
+
 export async function logManualActivity(
   strapi: Strapi,
   params: ManualActivityParams,
 ) {
   try {
-    let performedByRole: string | undefined =
-      typeof params.performedBy?.role === "string" ? params.performedBy.role : undefined;
+    let name = typeof params.performedBy?.name === "string" ? params.performedBy.name : undefined;
+    let role = typeof params.performedBy?.role === "string" ? params.performedBy.role : undefined;
 
-    if (!performedByRole && params.performedBy?.id) {
-      try {
-        const user = await strapi.entityService.findOne(
-          "plugin::users-permissions.user",
-          params.performedBy.id,
-          { populate: { role: true } },
-        ) as any;
-        if (user?.role?.name) {
-          performedByRole = user.role.name;
-        }
-      } catch {
-        // ignore
-      }
+    if ((!name || !role) && params.performedBy?.id) {
+      const resolved = await getAdminIdentity(strapi, params.performedBy.id);
+      if (!name) name = resolved.name || undefined;
+      if (!role) role = resolved.role || undefined;
     }
 
     await strapi.entityService.create(
@@ -60,9 +82,8 @@ export async function logManualActivity(
           Description: params.description,
           Metadata: params.metadata,
           performed_by: params.performedBy?.id || undefined,
-          PerformedByName:
-            typeof params.performedBy?.name === "string" ? params.performedBy.name : undefined,
-          PerformedByRole: performedByRole,
+          PerformedByName: name,
+          PerformedByRole: role,
           IP: params.ip,
           UserAgent: params.userAgent,
         },

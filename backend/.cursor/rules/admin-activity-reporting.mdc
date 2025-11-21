@@ -12,6 +12,7 @@
    - `resourceType`, `action`, and `description` that mirror the user-facing message.
    - `metadata` or `changes` to describe what was updated.
    - `performedBy.role` should be the canonical role name (Superadmin / Store manager); if omitted, the helper will fetch it automatically if the user ID is known.
+   - Variation creation/deletion, stock updates, color adjustments, and manual order status changes now log through this helper as well so the report shows all admin edits.
 3. Stick to manual operations executed through `/super-admin` or other protected admin UIs. Routines triggered by background jobs or customer requests must not use this helper, otherwise they will appear in the report.
 
 ## Report Controller

@@ -1097,6 +1097,61 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
   };
 }
 
+export interface ApiManualAdminActivityManualAdminActivity extends Schema.CollectionType {
+  collectionName: "manual_admin_activities";
+  info: {
+    description: "Structured log for manual actions performed through super-admin/store manager interfaces";
+    displayName: "ManualAdminActivity";
+    pluralName: "manual-admin-activities";
+    singularName: "manual-admin-activity";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<
+      ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"]
+    > &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::manual-admin-activity.manual-admin-activity",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    IP: Attribute.String;
+    Message: Attribute.Text;
+    MessageEn: Attribute.String;
+    Metadata: Attribute.JSON;
+    performed_by: Attribute.Relation<
+      "api::manual-admin-activity.manual-admin-activity",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    PerformedByName: Attribute.String;
+    PerformedByRole: Attribute.String;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.Enumeration<
+      ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"]
+    > &
+      Attribute.Required;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> &
+      Attribute.DefaultTo<"info">;
+    Title: Attribute.String;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      "api::manual-admin-activity.manual-admin-activity",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    UserAgent: Attribute.String;
+  };
+}
+
 export interface ApiNavigationNavigation extends Schema.SingleType {
   collectionName: "navigations";
   info: {
@@ -2714,6 +2769,7 @@ declare module "@strapi/types" {
       "api::local-user-wallet-transaction.local-user-wallet-transaction": ApiLocalUserWalletTransactionLocalUserWalletTransaction;
       "api::local-user-wallet.local-user-wallet": ApiLocalUserWalletLocalUserWallet;
       "api::local-user.local-user": ApiLocalUserLocalUser;
+      "api::manual-admin-activity.manual-admin-activity": ApiManualAdminActivityManualAdminActivity;
       "api::navigation.navigation": ApiNavigationNavigation;
       "api::order-item.order-item": ApiOrderItemOrderItem;
       "api::order-log.order-log": ApiOrderLogOrderLog;
