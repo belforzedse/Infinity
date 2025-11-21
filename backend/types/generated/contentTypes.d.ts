@@ -319,11 +319,14 @@ export interface ApiAdminActivityAdminActivity extends Schema.CollectionType {
       ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"]
     > &
       Attribute.Required;
+    Changes: Attribute.JSON;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::admin-activity.admin-activity", "oneToOne", "admin::user"> &
       Attribute.Private;
     Description: Attribute.Text;
     IP: Attribute.String;
+    Message: Attribute.Text;
+    MessageEn: Attribute.String;
     Metadata: Attribute.JSON;
     performed_by: Attribute.Relation<
       "api::admin-activity.admin-activity",
@@ -337,6 +340,9 @@ export interface ApiAdminActivityAdminActivity extends Schema.CollectionType {
       ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"]
     > &
       Attribute.Required;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> &
+      Attribute.DefaultTo<"info">;
+    Title: Attribute.String;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::admin-activity.admin-activity", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -2194,6 +2200,69 @@ export interface ApiShippingShipping extends Schema.CollectionType {
   };
 }
 
+export interface ApiUserActivityUserActivity extends Schema.CollectionType {
+  collectionName: "user_activities";
+  info: {
+    description: "User-facing activity feed entries with readable messages";
+    displayName: "User Activity";
+    pluralName: "user-activities";
+    singularName: "user-activity";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    ActivityType: Attribute.Enumeration<
+      [
+        "order_placed",
+        "order_payment_success",
+        "order_payment_failed",
+        "order_shipped",
+        "order_delivered",
+        "order_cancelled",
+        "cart_item_added",
+        "cart_item_removed",
+        "cart_cleared",
+        "wallet_credited",
+        "wallet_debited",
+        "address_added",
+        "address_updated",
+        "address_deleted",
+        "profile_updated",
+        "product_liked",
+        "product_unliked",
+        "review_submitted",
+        "discount_applied",
+        "discount_removed",
+      ]
+    > &
+      Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::user-activity.user-activity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Icon: Attribute.String;
+    IsRead: Attribute.Boolean & Attribute.DefaultTo<false>;
+    Message: Attribute.Text & Attribute.Required;
+    Metadata: Attribute.JSON;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.Enumeration<
+      ["order", "cart", "wallet", "address", "product", "review", "discount", "other"]
+    >;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> &
+      Attribute.Required &
+      Attribute.DefaultTo<"info">;
+    Title: Attribute.String & Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::user-activity.user-activity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::user-activity.user-activity",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
 export interface ApiWalletTopupWalletTopup extends Schema.CollectionType {
   collectionName: "wallet_topups";
   info: {
@@ -2671,6 +2740,7 @@ declare module "@strapi/types" {
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;
       "api::shipping.shipping": ApiShippingShipping;
+      "api::user-activity.user-activity": ApiUserActivityUserActivity;
       "api::wallet-topup.wallet-topup": ApiWalletTopupWalletTopup;
       "plugin::content-releases.release": PluginContentReleasesRelease;
       "plugin::content-releases.release-action": PluginContentReleasesReleaseAction;
