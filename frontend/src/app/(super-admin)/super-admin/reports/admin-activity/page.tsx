@@ -173,7 +173,8 @@ export default function AdminActivityReportPage() {
       startDate: startISO,
       endDate: endISO,
       performedBy: selectedUser ? Number(selectedUser) : undefined,
-      resourceType: selectedLogType !== "All" ? selectedLogType : undefined,
+      logType: selectedLogType !== "All" ? selectedLogType : undefined,
+      actionType: selectedActionType || undefined,
       page: 1,
       pageSize: 100,
     })
@@ -183,7 +184,7 @@ export default function AdminActivityReportPage() {
         const users = Array.from(
           new Set(
             (response.data || [])
-              .map((a) => a.PerformedByName || a.performed_by?.username || a.performed_by?.email || a.performed_by?.phone)
+              .map((a) => getAdminName(a))
               .filter((name): name is string => !!name && name !== "System")
           )
         ).sort();
@@ -197,20 +198,27 @@ export default function AdminActivityReportPage() {
       .finally(() => setLoading(false));
   }, [startISO, endISO, selectedUser, selectedActionType, selectedLogType]);
 
+  const getAdminName = (activity: any) =>
+    activity.PerformedByName ||
+    activity.adminUsername ||
+    activity.performed_by?.username ||
+    activity.performed_by?.email ||
+    activity.performed_by?.phone ||
+    null;
+
   const filteredActivities = useMemo(
     () =>
       showSystemActivities
         ? activities
-        : activities.filter(
-            (activity) =>
-              (activity.PerformedByName || activity.performed_by?.username || activity.performed_by?.email || activity.performed_by?.phone) &&
-              activity.PerformedByName !== "System"
-          ),
+        : activities.filter((activity) => {
+            const name = getAdminName(activity);
+            return !!name && name !== "System";
+          }),
     [activities, showSystemActivities]
   );
 
   const uniqueAdmins = new Set(
-    filteredActivities.map((a) => a.PerformedByName || a.performed_by?.username || a.performed_by?.email || a.performed_by?.phone || "Unknown")
+    filteredActivities.map((a) => getAdminName(a) || "Unknown")
   ).size;
   const createActions = filteredActivities.filter(
     (a) => a.Action === "Create"
@@ -470,10 +478,11 @@ export default function AdminActivityReportPage() {
                       </tr>
                     ) : (
                       filteredActivities.map((activity) => {
-                        const adminName = activity.PerformedByName || activity.performed_by?.username || activity.performed_by?.email || activity.performed_by?.phone || "نامشخص";
-                        const adminRole = activity.PerformedByRole || "-";
+                        const adminName = getAdminName(activity) || "نامشخص";
+                        const adminRole = activity.PerformedByRole || activity.adminRole || "-";
                         const title = activity.Title || translateDescription(activity.Description || "");
                         const severity = activity.Severity || "info";
+                        const timestamp = activity.timestamp || activity.createdAt;
                         const severityColors = {
                           info: "bg-blue-100 text-blue-700",
                           success: "bg-green-100 text-green-700",
@@ -484,7 +493,7 @@ export default function AdminActivityReportPage() {
                         return (
                           <tr key={activity.id} className="border-b border-neutral-100 hover:bg-neutral-50">
                             <td className="px-6 py-3 text-sm text-neutral-600">
-                              {new Date(activity.createdAt).toLocaleString("fa-IR")}
+                              {new Date(timestamp).toLocaleString("fa-IR")}
                             </td>
                             <td className="px-6 py-3 text-sm font-medium text-neutral-700">
                               {adminName}

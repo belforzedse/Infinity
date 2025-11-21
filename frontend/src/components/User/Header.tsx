@@ -5,6 +5,7 @@ import Image from "next/image";
 import MobileHamburgerMenu from "./MobileHamburgerMenu";
 import ShoppingCartCounter from "../ShoppingCart/Counter";
 import BackButtonToStore from "../BackButtonToStore";
+import Logo from "../Kits/Logo";
 
 const UserHeader: React.FC = () => {
   return (
@@ -21,15 +22,9 @@ const UserHeader: React.FC = () => {
       </div>
 
       {/* Center: Logo */}
-      <div className="relative h-10 w-28 flex-shrink-0 md:h-12 md:w-36">
-        <Image
-          src="/images/full-logo.png"
-          alt="Logo"
-          fill
-          className="object-contain"
-          priority
-          sizes="(max-width: 768px) 112px, 144px"
-        />
+      <div className="relative -translate-y-4 h-10 w-28 flex-shrink-0 md:h-12 md:w-36">
+        <Logo />
+
       </div>
       <div className="lg:hidden">
         <BackButtonToStore />

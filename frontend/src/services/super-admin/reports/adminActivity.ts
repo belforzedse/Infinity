@@ -19,6 +19,9 @@ export interface AdminActivityLog {
   ResourceId?: string;
   createdAt: string;
   updatedAt: string;
+  adminRole?: string;
+  timestamp?: string;
+  adminUsername?: string;
   performed_by?: {
     id: number;
     username?: string;
@@ -46,13 +49,31 @@ export async function getAdminActivity(params: {
   startDate?: string;
   endDate?: string;
   performedBy?: string | number;
-  resourceType?: string;
+  logType?: string;
+  actionType?: string;
   page?: number;
   pageSize?: number;
 }): Promise<AdminActivityResponse> {
-  const query = params ? formatQueryParams(params as any) : "";
-  const res = await apiClient.get(`/admin-activities/report${query}` as any);
-  return res as AdminActivityResponse;
+  const query = formatQueryParams({
+    startDate: params.startDate,
+    endDate: params.endDate,
+    performedBy: params.performedBy,
+    log_type: params.logType,
+    action_type: params.actionType,
+    page: params.page,
+    pageSize: params.pageSize,
+  });
+  const res = await apiClient.get(`/reports/admin-activity${query}` as any);
+  const responseData = (res as any)?.data || [];
+  const pagination = (res as any)?.meta?.pagination || undefined;
+  return {
+    data: responseData,
+    meta: pagination
+      ? {
+          pagination,
+        }
+      : undefined,
+  };
 }
 
 /**
