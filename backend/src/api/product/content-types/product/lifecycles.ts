@@ -1,5 +1,5 @@
 import { resolveAuditActor } from "../../../../utils/audit";
-import { logAdminActivity } from "../../../../utils/adminActivity";
+import { logAdminActivity, logAdminProductEdit } from "../../../../utils/adminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -130,6 +130,26 @@ export default {
       },
     });
 
+    // Log with enhanced admin activity if actor is an admin
+    if (actor.userId) {
+      try {
+        await logAdminProductEdit(
+          strapi as any,
+          result.id,
+          changes,
+          actor.userId,
+          actor.ip || null,
+          actor.userAgent || null,
+        );
+      } catch (activityError) {
+        strapi.log.error("Failed to log admin activity for product edit", {
+          productId: result.id,
+          error: (activityError as Error).message,
+        });
+      }
+    }
+
+    // Also keep the legacy logAdminActivity call for backward compatibility
     await logAdminActivity(strapi as any, {
       resourceType: "Product",
       resourceId: result.id,

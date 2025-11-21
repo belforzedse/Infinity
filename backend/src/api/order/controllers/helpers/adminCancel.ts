@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { logAdminOrderCancel } from "../../../../utils/adminActivity";
 
 const computePaidAmountToman = (order: any): number => {
   const txList = order?.contract?.contract_transactions || [];
@@ -226,6 +227,26 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           PerformedBy: `Admin User ${fullUser.id}`,
         },
       });
+
+      // Log admin activity
+      try {
+        const ip = ctx.request?.ip || ctx.ip || null;
+        const userAgent = ctx.request?.headers?.["user-agent"] || ctx.headers?.["user-agent"] || null;
+
+        await logAdminOrderCancel(
+          strapi,
+          orderIdNum,
+          reason || "بدون دلیل",
+          fullUser.id,
+          ip,
+          userAgent,
+        );
+      } catch (activityError) {
+        strapi.log.error("Failed to log admin activity for order cancel", {
+          orderId: orderIdNum,
+          error: (activityError as Error).message,
+        });
+      }
 
       return {
         data: {

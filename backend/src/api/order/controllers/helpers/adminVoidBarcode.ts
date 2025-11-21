@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { logAdminBarcodeOperation } from "../../../../utils/adminActivity";
 
 export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
@@ -52,6 +53,28 @@ export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
               PerformedBy: `Admin User ${fullUser.id}`,
       },
     });
+
+    // Log admin activity
+    try {
+      const ip = ctx.request?.ip || ctx.ip || null;
+      const userAgent = ctx.request?.headers?.["user-agent"] || ctx.headers?.["user-agent"] || null;
+
+      await logAdminBarcodeOperation(
+        strapi,
+        id,
+        "void",
+        fullUser.id,
+        order.ShippingBarcode || undefined,
+        reason || undefined,
+        ip,
+        userAgent,
+      );
+    } catch (activityError) {
+      strapi.log.error("Failed to log admin activity for barcode void", {
+        orderId: id,
+        error: (activityError as Error).message,
+      });
+    }
 
     return {
       data: {

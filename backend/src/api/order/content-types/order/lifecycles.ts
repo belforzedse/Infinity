@@ -91,6 +91,30 @@ export default {
           orderType: result.Type,
         },
       });
+
+      // Also log to user activity feed
+      try {
+        const activityService = strapi.service("api::user-activity.user-activity") as any;
+        // Get order total from contract or calculate from items
+        const orderWithContract = await strapi.entityService.findOne("api::order.order", result.id, {
+          populate: { contract: true, order_items: true },
+        }) as any;
+        const totalAmount = orderWithContract?.contract?.Amount
+          ? Number(orderWithContract.contract.Amount)
+          : orderWithContract?.Total
+          ? Number(orderWithContract.Total)
+          : 0;
+
+        if (activityService?.logOrderPlaced) {
+          await activityService.logOrderPlaced(orderUserId, result.id, totalAmount);
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log order placed to user activity", {
+          orderId: result.id,
+          userId: orderUserId,
+          error: (activityError as Error).message,
+        });
+      }
     }
 
     // Log event for admin if created by admin
@@ -226,6 +250,31 @@ export default {
           changes,
         },
       });
+
+      // Also log to user activity feed for milestone statuses
+      try {
+        const activityService = strapi.service("api::user-activity.user-activity") as any;
+        const normalizedStatus = newStatus?.toLowerCase();
+
+        if (normalizedStatus === "shipment" && activityService?.logOrderShipped) {
+          // Get tracking code from metadata if available
+          const trackingCode = changes?.ShippingBarcode || changes?.barcode || undefined;
+          await activityService.logOrderShipped(orderUserId, result.id, trackingCode);
+        } else if (normalizedStatus === "done" && activityService?.logOrderDelivered) {
+          await activityService.logOrderDelivered(orderUserId, result.id);
+        } else if (normalizedStatus === "cancelled" && activityService?.logOrderCancelled) {
+          const reason = changes?.Description || changes?.Note || undefined;
+          await activityService.logOrderCancelled(orderUserId, result.id, reason);
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log status change to user activity", {
+          orderId: result.id,
+          userId: orderUserId,
+          oldStatus,
+          newStatus,
+          error: (activityError as Error).message,
+        });
+      }
     }
 
     // Log admin event if updated by admin

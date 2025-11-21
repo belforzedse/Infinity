@@ -993,6 +993,27 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         data: { Status: "Started" },
       });
 
+      // Log payment success to user activity feed
+      try {
+        const order = await strapi.entityService.findOne("api::order.order", orderId, {
+          populate: { user: true, contract: true },
+        }) as any;
+        const userId = order?.user?.id ? Number(order.user.id) : null;
+        const amount = order?.contract?.Amount ? Number(order.contract.Amount) : order?.Total ? Number(order.Total) : 0;
+
+        if (userId) {
+          const activityService = strapi.service("api::user-activity.user-activity") as any;
+          if (activityService?.logPaymentSuccess) {
+            await activityService.logPaymentSuccess(userId, orderId, amount);
+          }
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log payment success to user activity", {
+          orderId,
+          error: (activityError as Error).message,
+        });
+      }
+
       // Increment discount usage counter if discount was applied
       try {
         const orderWithDiscount = await strapi.entityService.findOne("api::order.order", orderId);
@@ -1039,6 +1060,27 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       // Update order status to Cancelled if we have a valid order ID
       if (!isNaN(orderId)) {
         try {
+          // Log payment failure to user activity feed before cancelling
+          try {
+            const order = await strapi.entityService.findOne("api::order.order", orderId, {
+              populate: { user: true },
+            }) as any;
+            const userId = order?.user?.id ? Number(order.user.id) : null;
+
+            if (userId) {
+              const activityService = strapi.service("api::user-activity.user-activity") as any;
+              const reason = ResCode === "17" ? "لغو شده توسط کاربر" : "خطا در پرداخت";
+              if (activityService?.logPaymentFailed) {
+                await activityService.logPaymentFailed(userId, orderId, reason);
+              }
+            }
+          } catch (activityError) {
+            strapi.log.error("Failed to log payment failure to user activity", {
+              orderId,
+              error: (activityError as Error).message,
+            });
+          }
+
           await strapi.entityService.update("api::order.order", orderId, {
             data: { Status: "Cancelled" },
           });
