@@ -240,6 +240,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           fullUser.id,
           ip,
           userAgent,
+          roleName,
         );
       } catch (activityError) {
         strapi.log.error("Failed to log admin activity for order cancel", {

@@ -68,6 +68,7 @@ export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
         reason || undefined,
         ip,
         userAgent,
+        roleName,
       );
     } catch (activityError) {
       strapi.log.error("Failed to log admin activity for barcode void", {
