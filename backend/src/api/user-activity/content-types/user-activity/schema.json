@@ -1,0 +1,79 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_activities",
+  "info": {
+    "singularName": "user-activity",
+    "pluralName": "user-activities",
+    "displayName": "User Activity",
+    "description": "User-facing activity feed entries with readable messages"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "user_activities"
+    },
+    "ActivityType": {
+      "type": "enumeration",
+      "enum": [
+        "order_placed",
+        "order_payment_success",
+        "order_payment_failed",
+        "order_shipped",
+        "order_delivered",
+        "order_cancelled",
+        "cart_item_added",
+        "cart_item_removed",
+        "cart_cleared",
+        "wallet_credited",
+        "wallet_debited",
+        "address_added",
+        "address_updated",
+        "address_deleted",
+        "profile_updated",
+        "product_liked",
+        "product_unliked",
+        "review_submitted",
+        "discount_applied",
+        "discount_removed"
+      ],
+      "required": true
+    },
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "Message": {
+      "type": "text",
+      "required": true
+    },
+    "Severity": {
+      "type": "enumeration",
+      "enum": ["info", "success", "warning", "error"],
+      "default": "info",
+      "required": true
+    },
+    "IsRead": {
+      "type": "boolean",
+      "default": false
+    },
+    "ResourceType": {
+      "type": "enumeration",
+      "enum": ["order", "cart", "wallet", "address", "product", "review", "discount", "other"]
+    },
+    "ResourceId": {
+      "type": "string"
+    },
+    "Metadata": {
+      "type": "json"
+    },
+    "Icon": {
+      "type": "string"
+    }
+  }
+}
+

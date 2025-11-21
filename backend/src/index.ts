@@ -170,6 +170,10 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   },
   // Restrict users management - completely disabled for store managers
   { typeKey: "plugin::users-permissions", controller: "user" , allowActions: READ_ACTIONS},
+  // Restrict admin activity - store managers cannot view admin activities
+  { typeKey: "api::admin-activity", controller: "admin-activity", allowActions: [] },
+  // Restrict user activity - store managers cannot view other users' activities
+  { typeKey: "api::user-activity", controller: "user-activity", allowActions: [] },
 
 ];
 
