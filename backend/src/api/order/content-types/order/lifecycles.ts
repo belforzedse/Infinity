@@ -1,6 +1,7 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logAdminActivity } from "../../../../utils/adminActivity";
 import { logOrderEvent, logAdminEvent } from "../../../../utils/eventLogger";
+import { logManualActivity } from "../../../../utils/manualAdminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -66,6 +67,22 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Create",
+        title: "سفارش ایجاد شد",
+        message: `سفارش #${result.id} توسط ادمین ایجاد شد`,
+        messageEn: `Order #${result.id} created`,
+        severity: "success",
+        metadata: { orderId: result.id, status: result.Status },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
 
     // Log human-readable event for user
     // Extract userId: result.user can be an object {id: number} or just a number
@@ -220,6 +237,22 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Update",
+        title: "سفارش بروزرسانی شد",
+        message: `سفارش #${result.id} توسط ادمین بروزرسانی شد`,
+        messageEn: `Order #${result.id} updated`,
+        severity: "info",
+        metadata: { changes, status: current?.Status },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
 
     // Log human-readable events for status changes
     // Extract userId: current.user can be an object {id: number} or just a number

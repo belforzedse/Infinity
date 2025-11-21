@@ -1,4 +1,5 @@
 import { resolveAuditActor } from "../../../../utils/audit";
+import { logManualActivity } from "../../../../utils/manualAdminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -48,6 +49,22 @@ export default {
         },
       }
     );
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Product",
+        resourceId: result.product || undefined,
+        action: "Create",
+        title: "محصول-ورژن جدید ایجاد شد",
+        message: `ورژن جدید برای محصول ${result.product} ایجاد شد`,
+        messageEn: `Product variation #${result.id} created`,
+        severity: "success",
+        metadata: { variationId: result.id, sku: result.SKU },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 
   async beforeUpdate(event) {
@@ -113,6 +130,23 @@ export default {
         },
       }
     );
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Product",
+        resourceId: result.product || undefined,
+        action: "Update",
+        title: "ورژن محصول ویرایش شد",
+        message: `ورژن #${result.id} محصول ${result.product} بروزرسانی شد`,
+        messageEn: `Product variation #${result.id} updated`,
+        severity: "info",
+        changes,
+        metadata: { variationId: result.id },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 
   async beforeDelete(event) {
@@ -141,5 +175,21 @@ export default {
         },
       }
     );
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Product",
+        resourceId: null,
+        action: "Delete",
+        title: "ورژن محصول حذف شد",
+        message: `ورژن ${id} محصول حذف شد`,
+        messageEn: `Product variation #${id} deleted`,
+        severity: "warning",
+        metadata: { variationId: id },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 };

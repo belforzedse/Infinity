@@ -1,3 +1,6 @@
+import { resolveAuditActor } from "../../../../utils/audit";
+import { logManualActivity } from "../../../../utils/manualAdminActivity";
+
 export default {
   async afterCreate(event) {
     const { result } = event;
@@ -59,5 +62,22 @@ export default {
         },
       }
     );
+
+    const actor = resolveAuditActor(event as any);
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Stock",
+        resourceId: result.id,
+        action: "Update",
+        title: "موجودی تغییر کرد",
+        message: `موجودی ${result.id} از ${previous} به ${current} تغییر یافت`,
+        messageEn: `Stock ${result.id} changed from ${previous} to ${current}`,
+        severity: "info",
+        metadata: { previous, current, delta },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 };
