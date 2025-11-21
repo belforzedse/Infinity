@@ -1,13 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import AnipoBarcodeDialog from "./AnipoBarcodeDialog";
 import { translateOrderLogMessage } from "@/utils/statusTranslations";
-import { getOrderEvents, type EventLog } from "@/services/event-log";
+import SuperAdminOrderLogs from "./SuperAdminOrderLogs";
+import { type OrderTimelineEvent } from "@/components/User/Orders/Detail/OrderTimeline";
+import type { SuperAdminOrderDetail } from "@/types/super-admin/order";
 
 interface SuperAdminOrderSidebarProps {
-  orderData?: any;
+  orderData?: SuperAdminOrderDetail;
   selectedItems?: any[];
   shippingBarcode?: string;
 }
@@ -33,10 +35,17 @@ export default function SuperAdminOrderSidebar({
     type: "sms",
   });
   const [orderLogs, setOrderLogs] = useState<OrderLog[]>([]);
-  const [eventLogs, setEventLogs] = useState<EventLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
-  const [eventLogsLoading, setEventLogsLoading] = useState(false);
   const [activeLogTab, setActiveLogTab] = useState<"events" | "audit">("events");
+  const [readableEventCount, setReadableEventCount] = useState(0);
+  const handleReadableEventsChange = useCallback(
+    (events: OrderTimelineEvent[]) => {
+      setReadableEventCount(events.length);
+    },
+    [],
+  );
+
+  const timelineOrderId = orderData?.id ?? (id ? Number(id) : undefined);
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
@@ -60,24 +69,8 @@ export default function SuperAdminOrderSidebar({
   }, [id]);
 
   useEffect(() => {
-    const fetchEventLogs = async () => {
-      if (!id) return;
-      try {
-        setEventLogsLoading(true);
-        const res = await getOrderEvents(
-          parseInt(String(id)),
-          { audience: "admin" },
-          { sort: "createdAt:desc", pageSize: 50 }
-        );
-        setEventLogs(res.data || []);
-      } catch (error) {
-        console.error("Error fetching event logs:", error);
-      } finally {
-        setEventLogsLoading(false);
-      }
-    };
-    fetchEventLogs();
-  }, [id]);
+    setReadableEventCount(0);
+  }, [orderData?.id]);
 
   useEffect(() => {
     setHasBarcode(!!shippingBarcode);
@@ -360,7 +353,7 @@ export default function SuperAdminOrderSidebar({
                 : "text-neutral-500 hover:text-neutral-700"
             }`}
           >
-            رویدادهای خوانا ({eventLogs.length})
+            رویدادهای خوانا ({readableEventCount})
           </button>
           <button
             type="button"
@@ -376,72 +369,11 @@ export default function SuperAdminOrderSidebar({
         </div>
 
         {activeLogTab === "events" ? (
-          <>
-            {eventLogsLoading ? (
-              <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
-            ) : eventLogs.length === 0 ? (
-              <div className="text-sm text-neutral-400">رویداد خوانایی ثبت نشده است</div>
-            ) : (
-              <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
-                {eventLogs.map((event, index) => {
-                  const date = new Date(event.createdAt);
-                  const formattedDate = date.toLocaleDateString("fa-IR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  });
-                  const formattedTime = date.toLocaleTimeString("fa-IR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
-                  const getSeverityColor = (severity: "info" | "success" | "warning" | "error"): string => {
-                    switch (severity) {
-                      case "success":
-                        return "bg-green-50 border-green-200";
-                      case "warning":
-                        return "bg-yellow-50 border-yellow-200";
-                      case "error":
-                        return "bg-red-50 border-red-200";
-                      default:
-                        return "bg-blue-50 border-blue-200";
-                    }
-                  };
-                  const isEven = index % 2 === 0;
-
-                  return (
-                    <div
-                      key={event.id}
-                      className={`rounded-lg p-3 border ${
-                        isEven ? getSeverityColor(event.Severity) : "bg-neutral-50 border-neutral-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
-                            event.Severity === "success"
-                              ? "bg-green-100 text-green-700 border-green-200"
-                              : event.Severity === "warning"
-                              ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                              : event.Severity === "error"
-                              ? "bg-red-100 text-red-700 border-red-200"
-                              : "bg-blue-100 text-blue-700 border-blue-200"
-                          }`}
-                        >
-                          {event.EventType}
-                        </span>
-                      </div>
-                      <div className="text-sm text-foreground-primary mb-1">
-                        {event.Message}
-                      </div>
-                      <div className="text-xs text-neutral-500 mt-1">
-                        {formattedDate} در {formattedTime}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
+          <SuperAdminOrderLogs
+            orderId={timelineOrderId}
+            hideHeader
+            onEventsChange={handleReadableEventsChange}
+          />
         ) : (
           <>
             {logsLoading ? (
