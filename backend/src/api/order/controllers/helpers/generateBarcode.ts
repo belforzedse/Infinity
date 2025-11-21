@@ -113,6 +113,7 @@ export async function generateAnipoBarcodeHandler(strapi: Strapi, ctx: any) {
             undefined,
             ip,
             userAgent,
+            fullUser.role?.name,
           );
         }
       }

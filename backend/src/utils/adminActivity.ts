@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { logManualActivity } from "./manualAdminActivity";
 
 export type Severity = "info" | "success" | "warning" | "error";
 
@@ -126,11 +127,17 @@ export async function logAdminOrderEdit(
   reason?: string,
   ip?: string | null,
   userAgent?: string | null,
+  adminRole?: string,
 ) {
   const changesKeys = Object.keys(changes || {});
   const hasChanges = changesKeys.length > 0;
+  const messageEn = hasChanges
+    ? `Order #${orderId} was edited${reason ? `. Reason: ${reason}` : ""}. Changes: ${changesKeys.join(
+        ", ",
+      )}`
+    : `Order #${orderId} was edited${reason ? `. Reason: ${reason}` : ""}`;
 
-  return logAdminActivity(strapi, {
+  const result = await logAdminActivity(strapi, {
     resourceType: "Order",
     resourceId: orderId,
     action: "Update",
@@ -138,9 +145,7 @@ export async function logAdminOrderEdit(
     message: hasChanges
       ? `سفارش #${orderId} ویرایش شد${reason ? `. دلیل: ${reason}` : ""}. تغییرات: ${changesKeys.join(", ")}`
       : `سفارش #${orderId} ویرایش شد${reason ? `. دلیل: ${reason}` : ""}`,
-    messageEn: hasChanges
-      ? `Order #${orderId} was edited${reason ? `. Reason: ${reason}` : ""}. Changes: ${changesKeys.join(", ")}`
-      : `Order #${orderId} was edited${reason ? `. Reason: ${reason}` : ""}`,
+    messageEn,
     severity: "info",
     changes,
     description: `Order #${orderId} edited`,
@@ -149,6 +154,28 @@ export async function logAdminOrderEdit(
     ip,
     userAgent,
   });
+
+  await logManualActivity(strapi, {
+    resourceType: "Order",
+    resourceId: orderId,
+    action: "Update",
+    title: "سفارش ویرایش شد",
+    message: hasChanges
+      ? `سفارش #${orderId} ویرایش شد${reason ? `. دلیل: ${reason}` : ""}. تغییرات: ${changesKeys.join(
+          ", ",
+        )}`
+      : `سفارش #${orderId} ویرایش شد${reason ? `. دلیل: ${reason}` : ""}`,
+    messageEn,
+    severity: "info",
+    changes,
+    description: `Order #${orderId} edited`,
+    metadata: { reason, changesCount: changesKeys.length },
+    performedBy: { id: adminId, role: adminRole },
+    ip,
+    userAgent,
+  });
+
+  return result;
 }
 
 /**
@@ -161,8 +188,9 @@ export async function logAdminOrderCancel(
   adminId: number,
   ip?: string | null,
   userAgent?: string | null,
+  adminRole?: string,
 ) {
-  return logAdminActivity(strapi, {
+  const result = await logAdminActivity(strapi, {
     resourceType: "Order",
     resourceId: orderId,
     action: "Adjust",
@@ -176,6 +204,23 @@ export async function logAdminOrderCancel(
     ip,
     userAgent,
   });
+
+  await logManualActivity(strapi, {
+    resourceType: "Order",
+    resourceId: orderId,
+    action: "Adjust",
+    title: "سفارش لغو شد",
+    message: `سفارش #${orderId} توسط ادمین لغو شد. دلیل: ${reason}`,
+    messageEn: `Order #${orderId} was cancelled by admin. Reason: ${reason}`,
+    severity: "warning",
+    description: `Order #${orderId} cancelled`,
+    metadata: { reason },
+    performedBy: { id: adminId, role: adminRole },
+    ip,
+    userAgent,
+  });
+
+  return result;
 }
 
 /**
@@ -190,9 +235,10 @@ export async function logAdminBarcodeOperation(
   reason?: string,
   ip?: string | null,
   userAgent?: string | null,
+  adminRole?: string,
 ) {
   const isGenerate = action === "generate";
-  return logAdminActivity(strapi, {
+  const result = await logAdminActivity(strapi, {
     resourceType: "Order",
     resourceId: orderId,
     action: "Adjust",
@@ -211,6 +257,32 @@ export async function logAdminBarcodeOperation(
     ip,
     userAgent,
   });
+
+  await logManualActivity(strapi, {
+    resourceType: "Order",
+    resourceId: orderId,
+    action: "Adjust",
+    title: isGenerate ? "بارکد ارسال ایجاد شد" : "بارکد ارسال لغو شد",
+    message: isGenerate
+      ? `بارکد ارسال برای سفارش #${orderId} ایجاد شد${barcode ? `. بارکد: ${barcode}` : ""}`
+      : `بارکد ارسال برای سفارش #${orderId} لغو شد${reason ? `. دلیل: ${reason}` : ""}`,
+    messageEn: isGenerate
+      ? `Shipping barcode generated for order #${orderId}${barcode ? `. Barcode: ${barcode}` : ""}`
+      : `Shipping barcode voided for order #${orderId}${reason ? `. Reason: ${reason}` : ""}`,
+    severity: isGenerate ? "success" : "warning",
+    changes: barcode
+      ? { ShippingBarcode: { from: isGenerate ? null : barcode, to: isGenerate ? barcode : null } }
+      : undefined,
+    description: isGenerate
+      ? `Barcode generated for order #${orderId}`
+      : `Barcode voided for order #${orderId}`,
+    metadata: { barcode, reason, operation: action },
+    performedBy: { id: adminId, role: adminRole },
+    ip,
+    userAgent,
+  });
+
+  return result;
 }
 
 /**
@@ -222,8 +294,9 @@ export async function logAdminInvoicePrint(
   adminId: number,
   ip?: string | null,
   userAgent?: string | null,
+  adminRole?: string,
 ) {
-  return logAdminActivity(strapi, {
+  const result = await logAdminActivity(strapi, {
     resourceType: "Order",
     resourceId: orderId,
     action: "Other",
@@ -237,6 +310,23 @@ export async function logAdminInvoicePrint(
     ip,
     userAgent,
   });
+
+  await logManualActivity(strapi, {
+    resourceType: "Order",
+    resourceId: orderId,
+    action: "Other",
+    title: "فاکتور پرینت شد",
+    message: `فاکتور سفارش #${orderId} پرینت شد`,
+    messageEn: `Invoice for order #${orderId} was printed`,
+    severity: "info",
+    description: `Invoice printed for order #${orderId}`,
+    metadata: {},
+    performedBy: { id: adminId, role: adminRole },
+    ip,
+    userAgent,
+  });
+
+  return result;
 }
 
 /**
@@ -249,11 +339,12 @@ export async function logAdminProductEdit(
   adminId: number,
   ip?: string | null,
   userAgent?: string | null,
+  adminRole?: string,
 ) {
   const changesKeys = Object.keys(changes || {});
   const hasChanges = changesKeys.length > 0;
 
-  return logAdminActivity(strapi, {
+  const result = await logAdminActivity(strapi, {
     resourceType: "Product",
     resourceId: productId,
     action: "Update",
@@ -272,6 +363,28 @@ export async function logAdminProductEdit(
     ip,
     userAgent,
   });
+
+  await logManualActivity(strapi, {
+    resourceType: "Product",
+    resourceId: productId,
+    action: "Update",
+    title: "محصول ویرایش شد",
+    message: hasChanges
+      ? `محصول #${productId} ویرایش شد. تغییرات: ${changesKeys.join(", ")}`
+      : `محصول #${productId} ویرایش شد`,
+    severity: "info",
+    changes,
+    description: `Product #${productId} edited`,
+    metadata: { changesCount: changesKeys.length },
+    performedBy: { id: adminId, role: adminRole },
+    ip,
+    userAgent,
+    messageEn: hasChanges
+      ? `Product #${productId} was edited. Changes: ${changesKeys.join(", ")}`
+      : `Product #${productId} was edited`,
+  });
+
+  return result;
 }
 
 /**
@@ -284,11 +397,12 @@ export async function logAdminUserEdit(
   adminId: number,
   ip?: string | null,
   userAgent?: string | null,
+  adminRole?: string,
 ) {
   const changesKeys = Object.keys(changes || {});
   const hasChanges = changesKeys.length > 0;
 
-  return logAdminActivity(strapi, {
+  const result = await logAdminActivity(strapi, {
     resourceType: "User",
     resourceId: userId,
     action: "Update",
@@ -307,5 +421,27 @@ export async function logAdminUserEdit(
     ip,
     userAgent,
   });
+
+  await logManualActivity(strapi, {
+    resourceType: "User",
+    resourceId: userId,
+    action: "Update",
+    title: "کاربر ویرایش شد",
+    message: hasChanges
+      ? `کاربر #${userId} ویرایش شد. تغییرات: ${changesKeys.join(", ")}`
+      : `کاربر #${userId} ویرایش شد`,
+    severity: "info",
+    changes,
+    description: `User #${userId} edited`,
+    metadata: { changesCount: changesKeys.length },
+    performedBy: { id: adminId, role: adminRole },
+    ip,
+    userAgent,
+    messageEn: hasChanges
+      ? `User #${userId} was edited. Changes: ${changesKeys.join(", ")}`
+      : `User #${userId} was edited`,
+  });
+
+  return result;
 }
 

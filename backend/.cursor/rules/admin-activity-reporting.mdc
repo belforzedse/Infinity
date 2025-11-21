@@ -1,0 +1,32 @@
+# Manual Admin Activity Reporting
+
+## Purpose
+
+- The admin activity report under `/reports/admin-activity` now surfaces only _manual_ actions triggered by Superadmin or Store manager flows inside the `/super-admin` experience.
+- System-generated events (user checkout, automated order status changes, etc.) should continue using the legacy `admin-activity` entries and audit logs; the reporting endpoint never reads those tables directly anymore.
+
+## Logging Guidelines
+
+1. Use the `logManualActivity` helper in `backend/src/utils/manualAdminActivity.ts` whenever a super-admin/store manager performs a manual operation (order adjustments, barcode generation, invoice prints, etc.).
+2. Provide as much context as possible:
+   - `resourceType`, `action`, and `description` that mirror the user-facing message.
+   - `metadata` or `changes` to describe what was updated.
+   - `performedBy.role` should be the canonical role name (Superadmin / Store manager); if omitted, the helper will fetch it automatically if the user ID is known.
+3. Stick to manual operations executed through `/super-admin` or other protected admin UIs. Routines triggered by background jobs or customer requests must not use this helper, otherwise they will appear in the report.
+
+## Report Controller
+
+- `backend/src/api/report/controllers/report.ts` now queries `api::manual-admin-activity.manual-admin-activity`.
+- Filters enforce `PerformedByRole` ∈ {Superadmin, Store manager} even if the helper logs a different role.
+- Pagination metadata is returned under `meta.pagination`; frontend services should read `res.data.data` for the payload.
+
+## Frontend Expectations
+
+- `frontend/src/services/super-admin/reports/adminActivity.ts` is the canonical consumer of the report. It only expects the manual log's shape (`ResourceType`, `Action`, `PerformedByName`, `PerformedByRole`, etc.).
+- The `/super-admin/reports/admin-activity` page still applies filters and exports to Excel, but the data now originates solely from the manual log collection.
+
+## Testing Checklist
+
+1. Perform a manual order adjustment or barcode operation via the super-admin UI and ensure a new matching entry appears in `manual_admin_activities`.
+2. Confirm `/reports/admin-activity` returns only these manual entries (no customer actions).
+3. Validate the frontend filters/export still work with the new response format.

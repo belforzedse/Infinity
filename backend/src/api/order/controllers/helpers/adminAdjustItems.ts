@@ -552,6 +552,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           reason,
           ip,
           userAgent,
+          roleName,
         );
       } catch (activityError) {
         strapi.log.error("Failed to log admin activity for order edit", {

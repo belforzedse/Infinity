@@ -1,0 +1,69 @@
+{
+  "kind": "collectionType",
+  "collectionName": "manual_admin_activities",
+  "info": {
+    "singularName": "manual-admin-activity",
+    "pluralName": "manual-admin-activities",
+    "displayName": "ManualAdminActivity",
+    "description": "Structured log for manual actions performed through super-admin/store manager interfaces"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "ResourceType": {
+      "type": "enumeration",
+      "enum": ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"],
+      "required": true
+    },
+    "ResourceId": {
+      "type": "string"
+    },
+    "Action": {
+      "type": "enumeration",
+      "enum": ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"],
+      "required": true
+    },
+    "Title": {
+      "type": "string"
+    },
+    "Message": {
+      "type": "text"
+    },
+    "MessageEn": {
+      "type": "string"
+    },
+    "Severity": {
+      "type": "enumeration",
+      "enum": ["info", "success", "warning", "error"],
+      "default": "info"
+    },
+    "Changes": {
+      "type": "json"
+    },
+    "Description": {
+      "type": "text"
+    },
+    "Metadata": {
+      "type": "json"
+    },
+    "PerformedByName": {
+      "type": "string"
+    },
+    "PerformedByRole": {
+      "type": "string"
+    },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "IP": {
+      "type": "string"
+    },
+    "UserAgent": {
+      "type": "string"
+    }
+  }
+}
+
