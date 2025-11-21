@@ -260,7 +260,7 @@ export default factories.createCoreController(
 
         const order = await strapi.db.query("api::order.order").findOne({
           where: { id: orderId, user: { id: user.id } },
-          populate: {
+        populate: {
             order_items: {
               populate: {
                 product_variation: {
@@ -293,6 +293,9 @@ export default factories.createCoreController(
                 },
               },
             },
+          user: {
+            fields: ["id", "phone", "username", "email"],
+          },
           },
         });
 
