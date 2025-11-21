@@ -3,15 +3,7 @@ export default [
   "strapi::errors",
   "strapi::security",
   "strapi::poweredBy",
-  {
-    name: "strapi::cors",
-    config: {
-      origin: true,
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      headers: ["Content-Type", "Authorization", "X-Requested-With"],
-    },
-  },
+  "strapi::cors",
   "strapi::query",
   "strapi::body",
   "strapi::session",
