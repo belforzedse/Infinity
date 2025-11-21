@@ -43,6 +43,9 @@ export async function getUserActivities(
 ): Promise<UserActivityResponse> {
   const query = params ? formatQueryParams(params as any) : "";
   const res = await apiClient.get(`/user-activities/user/${userId}${query}` as any);
+  if (Array.isArray(res)) {
+    return { data: res };
+  }
   return res as UserActivityResponse;
 }
 

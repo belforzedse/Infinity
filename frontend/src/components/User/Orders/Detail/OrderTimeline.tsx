@@ -69,7 +69,11 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
         ];
 
         // Get user activities for the order owner
-        const orderUserId = order.user?.id || (order as any).user;
+        const orderUserId =
+          order.user?.id ||
+          (order.user as any)?.data?.id ||
+          (order as any).user ||
+          null;
         if (!orderUserId) {
           setEvents([]);
           setLoading(false);
