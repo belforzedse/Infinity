@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { getAdminActivity, AdminActivityLog } from "@/services/super-admin/reports/adminActivity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
@@ -85,13 +86,13 @@ export default function AdminActivityReportPage() {
       // Prepare data for Excel export
       const exportData = data.map((row, index) => ({
         رتبه: index + 1,
-        "نام ادمین": row.adminUsername || "نامشخص",
-        "نقش ادمین": row.adminRole || "نامشخص",
-        "نوع گزارش": logTypeMap[row.logType] || row.logType || "نامشخص",
-        "نوع فعالیت": actionTypeMap[row.actionType] || row.actionType || "نامشخص",
-        "توضیحات": translateDescription(row.description),
-        "آدرس IP": row.ipAddress || "",
-        "تاریخ و زمان": new Date(row.timestamp).toLocaleString("fa-IR"),
+        "نام ادمین": row.PerformedByName || row.performed_by?.username || row.performed_by?.email || row.performed_by?.phone || "نامشخص",
+        "نقش ادمین": row.PerformedByRole || "نامشخص",
+        "نوع گزارش": logTypeMap[row.ResourceType] || row.ResourceType || "نامشخص",
+        "نوع فعالیت": actionTypeMap[row.Action] || row.Action || "نامشخص",
+        "عنوان": row.Title || translateDescription(row.Description || ""),
+        "آدرس IP": row.IP || "",
+        "تاریخ و زمان": new Date(row.createdAt).toLocaleString("fa-IR"),
       }));
 
       // Create worksheet
@@ -169,22 +170,21 @@ export default function AdminActivityReportPage() {
   useEffect(() => {
     setLoading(true);
     getAdminActivity({
-      start: startISO,
-      end: endISO,
-      user_id: selectedUser || undefined,
-      action_type: selectedActionType as "Create" | "Update" | "Delete" | undefined,
-      log_type: selectedLogType as any,
-      limit: 100,
-      offset: 0,
+      startDate: startISO,
+      endDate: endISO,
+      performedBy: selectedUser ? Number(selectedUser) : undefined,
+      resourceType: selectedLogType !== "All" ? selectedLogType : undefined,
+      page: 1,
+      pageSize: 100,
     })
       .then((response) => {
-        setActivities(response.activities);
+        setActivities(response.data || []);
         // Extract unique admin users
         const users = Array.from(
           new Set(
-            response.activities
-              .map((a) => a.adminUsername)
-              .filter((name) => name && name !== "System")
+            (response.data || [])
+              .map((a) => a.PerformedByName || a.performed_by?.username || a.performed_by?.email || a.performed_by?.phone)
+              .filter((name): name is string => !!name && name !== "System")
           )
         ).sort();
         setAdminUsers(users);
@@ -203,23 +203,23 @@ export default function AdminActivityReportPage() {
         ? activities
         : activities.filter(
             (activity) =>
-              activity.adminUsername &&
-              activity.adminUsername !== "System"
+              (activity.PerformedByName || activity.performed_by?.username || activity.performed_by?.email || activity.performed_by?.phone) &&
+              activity.PerformedByName !== "System"
           ),
     [activities, showSystemActivities]
   );
 
   const uniqueAdmins = new Set(
-    filteredActivities.map((a) => a.adminUsername)
+    filteredActivities.map((a) => a.PerformedByName || a.performed_by?.username || a.performed_by?.email || a.performed_by?.phone || "Unknown")
   ).size;
   const createActions = filteredActivities.filter(
-    (a) => a.actionType === "Create"
+    (a) => a.Action === "Create"
   ).length;
   const updateActions = filteredActivities.filter(
-    (a) => a.actionType === "Update"
+    (a) => a.Action === "Update"
   ).length;
   const deleteActions = filteredActivities.filter(
-    (a) => a.actionType === "Delete"
+    (a) => a.Action === "Delete"
   ).length;
 
   const visibleCount = filteredActivities.length;
@@ -469,43 +469,61 @@ export default function AdminActivityReportPage() {
                         </td>
                       </tr>
                     ) : (
-                      filteredActivities.map((activity) => (
-                        <tr key={activity.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                          <td className="px-6 py-3 text-sm text-neutral-600">
-                            {new Date(activity.timestamp).toLocaleString("fa-IR")}
-                          </td>
-                          <td className="px-6 py-3 text-sm font-medium text-neutral-700">
-                            {activity.adminUsername}
-                          </td>
-                          <td className="px-6 py-3 text-sm">
-                            <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-                              {activity.adminRole}
-                            </span>
-                          </td>
-                          <td className="px-6 py-3 text-sm text-neutral-600">
-                            {logTypeMap[activity.logType] || activity.logType}
-                          </td>
-                          <td className="px-6 py-3 text-sm">
-                            <span
-                              className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                                activity.actionType === "Create"
-                                  ? "bg-green-100 text-green-700"
-                                  : activity.actionType === "Update"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {actionTypeMap[activity.actionType] || activity.actionType}
-                            </span>
-                          </td>
-                          <td className="px-6 py-3 text-sm text-neutral-600">
-                            <span className="line-clamp-2">{translateDescription(activity.description)}</span>
-                          </td>
-                          <td className="px-6 py-3 text-xs text-neutral-500">
-                            {activity.ipAddress || "-"}
-                          </td>
-                        </tr>
-                      ))
+                      filteredActivities.map((activity) => {
+                        const adminName = activity.PerformedByName || activity.performed_by?.username || activity.performed_by?.email || activity.performed_by?.phone || "نامشخص";
+                        const adminRole = activity.PerformedByRole || "-";
+                        const title = activity.Title || translateDescription(activity.Description || "");
+                        const severity = activity.Severity || "info";
+                        const severityColors = {
+                          info: "bg-blue-100 text-blue-700",
+                          success: "bg-green-100 text-green-700",
+                          warning: "bg-yellow-100 text-yellow-700",
+                          error: "bg-red-100 text-red-700",
+                        };
+
+                        return (
+                          <tr key={activity.id} className="border-b border-neutral-100 hover:bg-neutral-50">
+                            <td className="px-6 py-3 text-sm text-neutral-600">
+                              {new Date(activity.createdAt).toLocaleString("fa-IR")}
+                            </td>
+                            <td className="px-6 py-3 text-sm font-medium text-neutral-700">
+                              {adminName}
+                            </td>
+                            <td className="px-6 py-3 text-sm">
+                              <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                                {adminRole}
+                              </span>
+                            </td>
+                            <td className="px-6 py-3 text-sm text-neutral-600">
+                              {logTypeMap[activity.ResourceType] || activity.ResourceType}
+                            </td>
+                            <td className="px-6 py-3 text-sm">
+                              <span
+                                className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
+                                  activity.Action === "Create"
+                                    ? "bg-green-100 text-green-700"
+                                    : activity.Action === "Update"
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {actionTypeMap[activity.Action] || activity.Action}
+                              </span>
+                            </td>
+                            <td className="px-6 py-3 text-sm text-neutral-600">
+                              <Link
+                                href={`/super-admin/reports/admin-activity/${activity.id}`}
+                                className="text-pink-600 hover:text-pink-700 hover:underline font-medium"
+                              >
+                                {title}
+                              </Link>
+                            </td>
+                            <td className="px-6 py-3 text-xs text-neutral-500">
+                              {activity.IP || "-"}
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
