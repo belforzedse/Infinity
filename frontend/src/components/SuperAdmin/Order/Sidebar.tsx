@@ -353,7 +353,7 @@ export default function SuperAdminOrderSidebar({
                 : "text-neutral-500 hover:text-neutral-700"
             }`}
           >
-            رویدادهای خوانا ({readableEventCount})
+            رویدادها ({readableEventCount})
           </button>
           <button
             type="button"
