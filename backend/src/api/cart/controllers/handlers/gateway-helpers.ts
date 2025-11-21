@@ -467,9 +467,7 @@ export const requestMellatPayment = async (
     contractId?: number;
   }
 ): Promise<any> => {
-  // TESTING: Using mellat-v2 instead of mellat-v3
-  // To revert: change "mellat-v2" back to "mellat-v3"
-  const paymentService = strapi.service("api::payment-gateway.mellat-v2");
+  const paymentService = strapi.service("api::payment-gateway.mellat-v3");
   return await paymentService.requestPayment({
     orderId: params.orderId,
     amount: params.amount,
