@@ -554,3 +554,102 @@ The current system is **highly extensible**:
 1. Start with Option 1 (SMS as Event Type) - Quick to implement
 2. Add Option 3 (Webhook Config) - When you need flexibility
 3. Consider Option 2 (Event Bus) - For complex multi-listener scenarios
+
+## User Activity Feed System
+
+The user activity feed complements the event-log system by providing a dedicated user-facing notification system with read/unread state tracking.
+
+### Overview
+
+The `user-activity` content type stores user-facing activity notifications with:
+- User-specific activity entries (relation to user)
+- Activity types (order_placed, order_payment_success, order_shipped, etc.)
+- Persian titles and messages
+- Severity levels (info, success, warning, error)
+- Read/unread state (IsRead boolean)
+- Resource linking (ResourceType, ResourceId)
+- Icons for visual representation
+- Metadata for additional context
+
+### Schema
+
+Located in: `backend/src/api/user-activity/content-types/user-activity/schema.json`
+
+Key fields:
+- `user`: Relation to plugin::users-permissions.user
+- `ActivityType`: Enum (order_placed, order_payment_success, order_payment_failed, order_shipped, order_delivered, order_cancelled, cart_item_added, cart_item_removed, cart_cleared, wallet_credited, wallet_debited, address_added, address_updated, address_deleted, profile_updated, product_liked, product_unliked, review_submitted, discount_applied, discount_removed)
+- `Title`: Persian title (string, required)
+- `Message`: Persian message (text, required)
+- `Severity`: Enum (info, success, warning, error)
+- `IsRead`: Boolean (default: false)
+- `ResourceType`: Enum (order, cart, wallet, address, product, review, discount, other)
+- `ResourceId`: String identifier
+- `Metadata`: JSON for additional context
+- `Icon`: String (emoji or icon identifier)
+
+### Service Methods
+
+Located in: `backend/src/api/user-activity/services/user-activity.ts`
+
+#### Core Methods
+
+- `logActivity(params)`: Generic method to log any activity
+- `logOrderPlaced(userId, orderId, amount)`: Log order creation
+- `logPaymentSuccess(userId, orderId, amount)`: Log successful payment
+- `logPaymentFailed(userId, orderId, reason)`: Log failed payment
+- `logOrderShipped(userId, orderId, trackingCode?)`: Log order shipment
+- `logOrderDelivered(userId, orderId)`: Log order delivery
+- `logOrderCancelled(userId, orderId, reason?)`: Log order cancellation
+- `logWalletTransaction(userId, type, amount, cause)`: Log wallet credit/debit
+- `logCartActivity(params)`: Log cart-related activities
+- `markAsRead(activityIds)`: Mark specific activities as read
+- `markAllAsRead(userId)`: Mark all user activities as read
+
+### API Endpoints
+
+Located in: `backend/src/api/user-activity/routes/custom-router.ts`
+
+#### GET `/api/user-activities/me`
+
+Get current user's activity feed.
+
+Query parameters:
+- `page` (default: 1): Page number
+- `pageSize` (default: 20): Items per page
+- `unreadOnly` (default: false): Filter only unread activities
+
+#### POST `/api/user-activities/mark-read`
+
+Mark specific activities as read. Request body: `{ "ids": [1, 2, 3] }`
+
+#### POST `/api/user-activities/mark-all-read`
+
+Mark all user activities as read.
+
+#### GET `/api/user-activities/unread-count`
+
+Get count of unread activities.
+
+### Integration Points
+
+User activity logging is automatically triggered in:
+
+1. **Order Creation** (`backend/src/api/order/content-types/order/lifecycles.ts`):
+   - After order is created → `logOrderPlaced()`
+
+2. **Order Status Changes** (`backend/src/api/order/content-types/order/lifecycles.ts`):
+   - Status → "Shipment" → `logOrderShipped()`
+   - Status → "Done" → `logOrderDelivered()`
+   - Status → "Cancelled" → `logOrderCancelled()`
+
+3. **Payment Events** (`backend/src/api/order/controllers/helpers/payment.ts`):
+   - Payment successful → `logPaymentSuccess()`
+   - Payment failed → `logPaymentFailed()`
+
+### Relationship to Event-Log
+
+The `user-activity` system complements `event-log`:
+- **event-log**: Comprehensive audit trail for all audiences (user, admin, superadmin)
+- **user-activity**: User-specific notification feed with read/unread state
+
+Both systems can log simultaneously - event-log for comprehensive tracking, user-activity for user-facing notifications.
