@@ -132,3 +132,5 @@ To prevent future issues:
 3. Test raw SQL queries with actual database operations
 4. Check migration files or database schema to verify actual column names
 
+
+
