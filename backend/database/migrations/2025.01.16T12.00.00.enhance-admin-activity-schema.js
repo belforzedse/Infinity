@@ -70,7 +70,7 @@ module.exports = {
     // Add indexes for better query performance
     await knex.schema.alterTable("admin_activities", (table) => {
       table.index(["resource_type", "resource_id"], "admin_activities_resource_idx");
-      table.index(["performed_by"], "admin_activities_performed_by_idx");
+      table.index(["user"], "admin_activities_user_idx");
       table.index(["created_at"], "admin_activities_created_at_idx");
     });
   },
@@ -78,9 +78,9 @@ module.exports = {
   async down(knex) {
     // Remove indexes
     await knex.schema.alterTable("admin_activities", (table) => {
-      table.dropIndex([], "admin_activities_resource_idx");
-      table.dropIndex([], "admin_activities_performed_by_idx");
-      table.dropIndex([], "admin_activities_created_at_idx");
+      table.dropIndex(["resource_type", "resource_id"], "admin_activities_resource_idx");
+      table.dropIndex(["user"], "admin_activities_user_idx");
+      table.dropIndex(["created_at"], "admin_activities_created_at_idx");
     });
 
     // Remove new columns
