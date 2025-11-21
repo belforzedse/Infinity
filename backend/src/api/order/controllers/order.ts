@@ -206,6 +206,9 @@ export default factories.createCoreController(
         const orders = await strapi.db.query("api::order.order").findMany({
           where: filters,
           populate: {
+            user: {
+              fields: ["id", "phone", "username", "email"],
+            },
             order_items: {
               populate: {
                 product_variation: {
