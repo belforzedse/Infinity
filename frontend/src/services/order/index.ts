@@ -100,6 +100,7 @@ export interface OrderItem {
 }
 
 export interface Order {
+
   id: number;
   Status: string;
   Date: string;
@@ -111,6 +112,12 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   PaymentGateway?: string | null;
+  user?: {
+    id: number;
+    Phone?: string;
+    FirstName?: string;
+    LastName?: string;
+  } | null;
   order_items: OrderItem[];
   shipping: {
     id: number;

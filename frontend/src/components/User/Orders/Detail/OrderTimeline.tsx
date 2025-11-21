@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Order, OrderLog } from "@/services/order";
 import { translateOrderStatus } from "@/utils/statusTranslations";
-import { getOrderEvents, type EventLog } from "@/services/event-log";
+import { getUserActivities, type UserActivity } from "@/services/user-activity";
 
 const formatDateTime = (value?: string) => {
   if (!value) return "—";
@@ -57,56 +57,72 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Fetch event logs for this order (user-facing only)
-        const response = await getOrderEvents(order.id, { audience: "user" }, { sort: "createdAt:asc" });
+        // Fetch user activities for this order - only milestone events
+        // Milestone activity types: order_placed, order_payment_success, order_payment_failed, order_shipped, order_delivered, order_cancelled
+        const milestoneTypes = [
+          "order_placed",
+          "order_payment_success",
+          "order_payment_failed",
+          "order_shipped",
+          "order_delivered",
+          "order_cancelled",
+        ];
 
-        // Check if response has data array
-        const eventsData = response?.data || [];
-        if (eventsData.length > 0) {
-          // Use event logs
-          const timelineEvents: TimelineEvent[] = eventsData.map((event: EventLog) => ({
-            id: event.id,
-            message: event.Message || event.MessageEn || "رویداد سفارش",
-            createdAt: event.createdAt,
-            severity: event.Severity,
-          }));
-          setEvents(timelineEvents);
-        } else {
-          // Fallback to audit logs if no events exist
-          const logs = [...(order.orderLogs ?? [])].sort((a, b) => {
-            const aDate = new Date(a.createdAt ?? order.createdAt).getTime();
-            const bDate = new Date(b.createdAt ?? order.createdAt).getTime();
+        // Get user activities for the order owner
+        const orderUserId = order.user?.id || (order as any).user;
+        if (!orderUserId) {
+          setEvents([]);
+          setLoading(false);
+          return;
+        }
+
+        const response = await getUserActivities(Number(orderUserId), {
+          page: 1,
+          pageSize: 50,
+        });
+
+        // Filter to only order-related milestone activities for this specific order
+        const orderActivities = (response.data || []).filter(
+          (activity: UserActivity) =>
+            activity.ResourceType === "order" &&
+            activity.ResourceId === String(order.id) &&
+            milestoneTypes.includes(activity.ActivityType)
+        );
+
+        if (orderActivities.length > 0) {
+          // Sort by creation date ascending
+          orderActivities.sort((a, b) => {
+            const aDate = new Date(a.createdAt).getTime();
+            const bDate = new Date(b.createdAt).getTime();
             return aDate - bDate;
           });
 
-          if (logs.length > 0) {
-            const timelineEvents: TimelineEvent[] = logs.map((log) => ({
-              id: log.id,
-              message: log.Description || `سفارش ${log.Action === "Create" ? "ایجاد شد" : "بروزرسانی شد"}`,
-              createdAt: log.createdAt || order.createdAt,
+          const timelineEvents: TimelineEvent[] = orderActivities.map((activity: UserActivity) => ({
+            id: activity.id,
+            message: activity.Title || activity.Message || "رویداد سفارش",
+            createdAt: activity.createdAt,
+            severity: activity.Severity || "info",
+          }));
+          setEvents(timelineEvents);
+        } else {
+          // Fallback: show basic order status
+          setEvents([
+            {
+              id: -1,
+              message: "سفارش ثبت شد",
+              createdAt: order.createdAt,
+              severity: "success" as const,
+            },
+            {
+              id: -2,
+              message: `وضعیت فعلی: ${translateOrderStatus(order.Status)}`,
+              createdAt: order.updatedAt,
               severity: "info" as const,
-            }));
-            setEvents(timelineEvents);
-          } else {
-            // Final fallback: default events
-            setEvents([
-              {
-                id: -1,
-                message: "سفارش ثبت شد",
-                createdAt: order.createdAt,
-                severity: "success" as const,
-              },
-              {
-                id: -2,
-                message: `وضعیت فعلی: ${translateOrderStatus(order.Status)}`,
-                createdAt: order.updatedAt,
-                severity: "info" as const,
-              },
-            ]);
-          }
+            },
+          ]);
         }
       } catch (error) {
-        console.error("Error fetching order events:", error);
+        console.error("Error fetching order user activities:", error);
         // Fallback to default events on error
         setEvents([
           {
@@ -130,7 +146,7 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
     if (order.id) {
       fetchEvents();
     }
-  }, [order.id, order.orderLogs, order.createdAt, order.updatedAt, order.Status]);
+  }, [order.id, order.user, order.createdAt, order.updatedAt, order.Status]);
 
   if (loading) {
     return (
