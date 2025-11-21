@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Order, OrderLog } from "@/services/order";
 import { translateOrderStatus } from "@/utils/statusTranslations";
 import { getUserActivities, type UserActivity } from "@/services/user-activity";
@@ -26,6 +26,8 @@ const formatDateTime = (value?: string) => {
 
 interface OrderTimelineProps {
   order: Order;
+  hideHeader?: boolean;
+  onEventsChange?: (events: TimelineEvent[]) => void;
 }
 
 interface TimelineEvent {
@@ -34,6 +36,8 @@ interface TimelineEvent {
   createdAt: string;
   severity?: "info" | "success" | "warning" | "error";
 }
+
+export type OrderTimelineEvent = TimelineEvent;
 
 // Map event severity to color
 const getSeverityColor = (severity?: "info" | "success" | "warning" | "error"): string => {
@@ -49,9 +53,17 @@ const getSeverityColor = (severity?: "info" | "success" | "warning" | "error"): 
   }
 };
 
-export default function OrderTimeline({ order }: OrderTimelineProps) {
+export default function OrderTimeline({ order, hideHeader, onEventsChange }: OrderTimelineProps) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleEventsChange = useCallback(
+    (nextEvents: TimelineEvent[]) => {
+      setEvents(nextEvents);
+      onEventsChange?.(nextEvents);
+    },
+    [onEventsChange],
+  );
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -75,7 +87,7 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
           (order as any).user ||
           null;
         if (!orderUserId) {
-          setEvents([]);
+          handleEventsChange([]);
           setLoading(false);
           return;
         }
@@ -107,10 +119,10 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
             createdAt: activity.createdAt,
             severity: activity.Severity || "info",
           }));
-          setEvents(timelineEvents);
+          handleEventsChange(timelineEvents);
         } else {
           // Fallback: show basic order status
-          setEvents([
+          handleEventsChange([
             {
               id: -1,
               message: "سفارش ثبت شد",
@@ -128,7 +140,7 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
       } catch (error) {
         console.error("Error fetching order user activities:", error);
         // Fallback to default events on error
-        setEvents([
+        handleEventsChange([
           {
             id: -1,
             message: "سفارش ثبت شد",
@@ -150,7 +162,7 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
     if (order.id) {
       fetchEvents();
     }
-  }, [order.id, order.user, order.createdAt, order.updatedAt, order.Status]);
+  }, [order.id, order.user, order.createdAt, order.updatedAt, order.Status, handleEventsChange]);
 
   if (loading) {
     return (
@@ -163,7 +175,9 @@ export default function OrderTimeline({ order }: OrderTimelineProps) {
 
   return (
     <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-      <h2 className="mb-4 text-base font-semibold text-foreground-primary">وضعیت سفارش</h2>
+      {!hideHeader && (
+        <h2 className="mb-4 text-base font-semibold text-foreground-primary">وضعیت سفارش</h2>
+      )}
       {events.length === 0 ? (
         <div className="text-sm text-slate-500">رویدادی ثبت نشده است</div>
       ) : (
