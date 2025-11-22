@@ -80,31 +80,35 @@ export default factories.createCoreController("api::user-activity.user-activity"
   },
 
   async findUserActivitiesByUserId(ctx) {
-    const user = await fetchUserWithRole(strapi, ctx.state.user?.id);
-    if (!user) {
+    const authenticatedUser = await fetchUserWithRole(strapi, ctx.state.user?.id);
+    if (!authenticatedUser) {
       return ctx.unauthorized("Authentication required");
     }
 
-    const roleName = normalizeRoleName(user?.role?.name);
-    // Only superadmins can view other users' activities
-    if (roleName !== ROLE_NAMES.SUPERADMIN) {
-      return ctx.forbidden("Only superadmins can view other users' activities");
-    }
-
     const { userId } = ctx.params;
+    const requestedUserId = Number(userId);
+    const authenticatedUserId = authenticatedUser.id;
+    const authenticatedUserRole = authenticatedUser?.role?.name || null;
+
     const page = Number(ctx.query.page ?? 1);
     const pageSize = Number(ctx.query.pageSize ?? 20);
 
-    const activities = await strapi.entityService.findMany("api::user-activity.user-activity" as any, {
-      filters: {
-        user: { id: Number(userId) },
-      },
-      sort: { createdAt: "desc" },
-      populate: ["user"],
-      pagination: { page, pageSize },
-    });
-
-    return ctx.send(activities);
+    try {
+      const service = strapi.service("api::user-activity.user-activity") as any;
+      const activities = await service.findUserActivitiesByUserId(
+        requestedUserId,
+        authenticatedUserId,
+        authenticatedUserRole,
+        { page, pageSize }
+      );
+      return ctx.send(activities);
+    } catch (error: any) {
+      if (error.message === "You can only view your own activities") {
+        return ctx.forbidden(error.message);
+      }
+      strapi.log.error("Error fetching user activities by userId", error);
+      return ctx.internalServerError("An error occurred while fetching activities");
+    }
   },
 }));
 

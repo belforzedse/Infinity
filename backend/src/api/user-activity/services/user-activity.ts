@@ -1,5 +1,7 @@
 import { factories } from "@strapi/strapi";
 import type { Strapi } from "@strapi/strapi";
+import { ROLE_NAMES } from "../../../utils/roles";
+import { normalizeRoleName } from "../../../utils/roles";
 
 type Severity = "info" | "success" | "warning" | "error";
 
@@ -188,6 +190,34 @@ export default factories.createCoreService("api::user-activity.user-activity" as
     });
     return this.markAsRead(activities.map((a) => a.id));
   },
+
+  async findUserActivitiesByUserId(
+    requestedUserId: number,
+    authenticatedUserId: number,
+    authenticatedUserRole: string | null,
+    options?: { page?: number; pageSize?: number }
+  ) {
+    const roleName = normalizeRoleName(authenticatedUserRole);
+
+    // Allow users to access their own activities, or superadmins to access any user's activities
+    if (requestedUserId !== authenticatedUserId && roleName !== ROLE_NAMES.SUPERADMIN) {
+      throw new Error("You can only view your own activities");
+    }
+
+    const page = options?.page ?? 1;
+    const pageSize = options?.pageSize ?? 20;
+
+    const activities = await strapi.entityService.findMany("api::user-activity.user-activity" as any, {
+      filters: {
+        user: { id: requestedUserId },
+      },
+      sort: { createdAt: "desc" },
+      populate: ["user"],
+      pagination: { page, pageSize },
+    });
+
+    return activities;
+  },
 })) as unknown as {
   logActivity: (params: LogActivityParams) => Promise<any>;
   logOrderPlaced: (userId: number, orderId: number, amount: number) => Promise<any>;
@@ -211,5 +241,11 @@ export default factories.createCoreService("api::user-activity.user-activity" as
   }) => Promise<any>;
   markAsRead: (activityIds: number[]) => Promise<any>;
   markAllAsRead: (userId: number) => Promise<any>;
+  findUserActivitiesByUserId: (
+    requestedUserId: number,
+    authenticatedUserId: number,
+    authenticatedUserRole: string | null,
+    options?: { page?: number; pageSize?: number }
+  ) => Promise<any>;
 };
 
