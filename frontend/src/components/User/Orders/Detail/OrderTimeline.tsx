@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Order, OrderLog } from "@/services/order";
+import type { Order } from "@/services/order";
 import { translateOrderStatus } from "@/utils/statusTranslations";
 import { getUserActivities, type UserActivity } from "@/services/user-activity";
 

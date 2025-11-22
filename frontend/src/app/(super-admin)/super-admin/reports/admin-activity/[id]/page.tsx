@@ -102,7 +102,7 @@ export default function AdminActivityDetailPage() {
 
     switch (activity.ResourceType) {
       case "Order":
-        return `/super-admin/orders/${activity.ResourceId}`;
+        return `/super-admin/orders/edit/${activity.ResourceId}`;
       case "Product":
         return `/super-admin/products/${activity.ResourceId}`;
       case "User":
