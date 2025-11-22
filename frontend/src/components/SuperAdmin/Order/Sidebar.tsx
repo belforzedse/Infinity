@@ -1,12 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import AnipoBarcodeDialog from "./AnipoBarcodeDialog";
 import { translateOrderLogMessage } from "@/utils/statusTranslations";
+import SuperAdminOrderLogs from "./SuperAdminOrderLogs";
+import { type OrderTimelineEvent } from "@/components/User/Orders/Detail/OrderTimeline";
+import type { SuperAdminOrderDetail } from "@/types/super-admin/order";
 
 interface SuperAdminOrderSidebarProps {
-  orderData?: any;
+  orderData?: SuperAdminOrderDetail;
   selectedItems?: any[];
   shippingBarcode?: string;
 }
@@ -33,6 +36,16 @@ export default function SuperAdminOrderSidebar({
   });
   const [orderLogs, setOrderLogs] = useState<OrderLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [activeLogTab, setActiveLogTab] = useState<"events" | "audit">("events");
+  const [readableEventCount, setReadableEventCount] = useState(0);
+  const handleReadableEventsChange = useCallback(
+    (events: OrderTimelineEvent[]) => {
+      setReadableEventCount(events.length);
+    },
+    [],
+  );
+
+  const timelineOrderId = orderData?.id ?? (id ? Number(id) : undefined);
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasBarcode, setHasBarcode] = useState(!!shippingBarcode);
@@ -54,6 +67,10 @@ export default function SuperAdminOrderSidebar({
     };
     fetchLogs();
   }, [id]);
+
+  useEffect(() => {
+    setReadableEventCount(0);
+  }, [orderData?.id]);
 
   useEffect(() => {
     setHasBarcode(!!shippingBarcode);
@@ -325,42 +342,83 @@ export default function SuperAdminOrderSidebar({
           <span className="text-lg text-foreground-primary">اعلانات سفارش</span>
         </div>
 
-        {logsLoading ? (
-          <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
-        ) : orderLogs.length === 0 ? (
-          <div className="text-sm text-neutral-400">اعلانی ثبت نشده است</div>
-        ) : (
-          <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
-            {orderLogs.map((log, index) => {
-              const date = new Date(log.attributes.createdAt);
-              const formattedDate = date.toLocaleDateString("fa-IR", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              });
-              const formattedTime = date.toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-              const isEven = index % 2 === 0;
+        {/* Tabs for Events and Audit Logs */}
+        <div className="flex gap-2 border-b border-neutral-200">
+          <button
+            type="button"
+            onClick={() => setActiveLogTab("events")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeLogTab === "events"
+                ? "border-b-2 border-pink-500 text-pink-600"
+                : "text-neutral-500 hover:text-neutral-700"
+            }`}
+          >
+            رویدادها ({readableEventCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveLogTab("audit")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeLogTab === "audit"
+                ? "border-b-2 border-pink-500 text-pink-600"
+                : "text-neutral-500 hover:text-neutral-700"
+            }`}
+          >
+            لاگ‌های فنی ({orderLogs.length})
+          </button>
+        </div>
 
-              return (
-                <div
-                  key={log.id}
-                  className={`rounded-lg p-3 ${
-                    isEven ? "bg-blue-50" : "bg-purple-50"
-                  }`}
-                >
-                  <div className="text-sm text-foreground-primary mb-1">
-                    {translateOrderLogMessage(log.attributes.Description) || "ثبت رویداد"}
-                  </div>
-                  <div className="text-xs text-neutral-500 mt-1">
-                    {formattedDate} در {formattedTime}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {activeLogTab === "events" ? (
+          <SuperAdminOrderLogs
+            orderId={timelineOrderId}
+            hideHeader
+            onEventsChange={handleReadableEventsChange}
+          />
+        ) : (
+          <>
+            {logsLoading ? (
+              <div className="text-sm text-neutral-400">در حال بارگذاری...</div>
+            ) : orderLogs.length === 0 ? (
+              <div className="text-sm text-neutral-400">اعلانی ثبت نشده است</div>
+            ) : (
+              <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+                {orderLogs.map((log, index) => {
+                  const date = new Date(log.attributes.createdAt);
+                  const formattedDate = date.toLocaleDateString("fa-IR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  });
+                  const formattedTime = date.toLocaleTimeString("fa-IR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  const isEven = index % 2 === 0;
+
+                  return (
+                    <div
+                      key={log.id}
+                      className={`rounded-lg p-3 ${
+                        isEven ? "bg-blue-50" : "bg-purple-50"
+                      }`}
+                    >
+                      <div className="text-sm text-foreground-primary mb-1">
+                        {translateOrderLogMessage(log.attributes.Description) || "ثبت رویداد"}
+                      </div>
+                      {log.attributes.Changes && (
+                        <pre className="mt-1 whitespace-pre-wrap break-all text-xs text-neutral-500 mb-1">
+                          {JSON.stringify(log.attributes.Changes, null, 2)}
+                        </pre>
+                      )}
+                      <div className="text-xs text-neutral-500 mt-1">
+                        {formattedDate} در {formattedTime}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -1,0 +1,33 @@
+# Frontend Updates (Nov 2025)
+
+This note documents several UX and infrastructure adjustments so future contributors can maintain consistent behavior.
+
+## PDP Gallery Thumbnails
+- File: `frontend/src/components/PDP/Hero/Gallery/ThumbnailList.tsx`
+- Thumbnails now use `flex-nowrap` with `flex-shrink-0` to prevent compression on mobile when the gallery has many assets.
+- The parent wrapper (`Gallery/index.tsx`) includes `min-w-0` so the gallery does not squeeze next to the info column.
+- When modifying gallery layout, keep the horizontal scroll behavior intact for viewports `< 768px`.
+
+## Auth Session Refresh
+- File: `frontend/src/components/ui/AuthInitializer.tsx`
+- Any access-token change now clears `currentUserAtom` before refetching `/auth/self`. This prevents store-manager data from leaking into the next admin session.
+- New regression test: `frontend/src/components/ui/__tests__/AuthInitializer.test.tsx` ensures logout → login cycles refresh the user atom.
+- When touching auth flows, update the test to cover new states instead of removing it.
+
+## Wallet Callback Domain
+- `backend/main.env` now sets `FRONTEND_URL=https://infinitycolor.org`.
+- Backend wallet callbacks (e.g., `wallet-topup` controller) redirect to this domain; do not reintroduce `new.infinitycolor.org`.
+- Frontend wallet page listens for `?status=success|failure|pending` (plus `reason`/`code`) and shows a dismissible banner. Any future callback should keep using these query params for consistency.
+
+## Super-Admin Product Media Uploads
+- File: `frontend/src/components/Product/add/Overall.tsx`
+- Video/file uploaders are intentionally hidden via `showMediaUploaders = false`. Logic remains for future enablement—toggle this flag (and design) when reintroducing advanced media uploads.
+
+## Auth Return Buttons
+- File: `frontend/src/components/Auth/ReturnButton.tsx`
+- Navigation buttons at `/auth/*` mimic the checkout “مشاهده سبد خرید” text link (pink text with chevron). Do not revert to boxed buttons without UX approval.
+
+## Gateway Log Visibility
+- File: `frontend/src/components/SuperAdmin/Order/GatewayLogs.tsx`
+- Store managers no longer see gateway events. Super-admins get a collapsible panel with a count summary.
+- When adding new order widgets, respect `useCurrentUser().isStoreManager` to avoid exposing sensitive data.
