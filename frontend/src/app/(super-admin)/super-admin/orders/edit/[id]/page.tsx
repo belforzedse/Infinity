@@ -8,48 +8,12 @@ import { config } from "./config";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
 import { useState, useEffect, useRef } from "react";
 import { apiClient } from "@/services";
-import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
+import { IMAGE_BASE_URL } from "@/constants/api";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ProductCoverImage } from "@/types/Product";
-import { apiClient as _ } from "@/services";
+import type { SuperAdminOrderDetail, SuperAdminOrderItem } from "@/types/super-admin/order";
 import { unwrapCollection, unwrapEntity } from "@/utils/strapi";
-
-export type Order = {
-  id: number;
-  orderDate: Date;
-  orderStatus: string;
-  userId: string;
-  userName: string;
-  description: string;
-  phoneNumber: string;
-  address?: string;
-  postalCode?: string;
-  paymentGateway?: string;
-  transactionId?: string;
-  paymentToken?: string;
-  createdAt: Date;
-  contractStatus:
-    | "Not Ready"
-    | "Confirmed"
-    | "Finished"
-    | "Failed"
-    | "Cancelled";
-  updatedAt: Date;
-  items: OrderItem[];
-  shipping: number;
-  shippingMethod?: string;
-  subtotal: number;
-  discount?: number;
-  tax?: number;
-  total: number;
-  // Anipo fields
-  shippingBarcode?: string;
-  shippingPostPrice?: number;
-  shippingTax?: number;
-  shippingWeight?: number;
-  shippingBoxSizeId?: number;
-};
 
 type OrderResponse = {
   id: string;
@@ -177,19 +141,8 @@ type OrderResponse = {
   };
 };
 
-type OrderItem = {
-  id: number;
-  productId: number;
-  productName: string;
-  productCode: string;
-  price: number;
-  quantity: number;
-  color: string;
-  image: string;
-};
-
 export default function EditOrderPage() {
-  const [data, setData] = useState<Order>();
+  const [data, setData] = useState<SuperAdminOrderDetail>();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,7 +177,7 @@ export default function EditOrderPage() {
         const orderItemsRaw = unwrapCollection(
           (normalizedOrder as any).order_items,
         );
-        const items = orderItemsRaw.map((rawItem: any) => {
+        const items: SuperAdminOrderItem[] = orderItemsRaw.map((rawItem: any) => {
           const item = unwrapEntity(rawItem);
           const productVariation = unwrapEntity(item?.product_variation);
           const product = unwrapEntity(productVariation?.product);
@@ -239,8 +192,8 @@ export default function EditOrderPage() {
           // Construct image URL properly
           let imageUrl = "";
           if (thumbnailUrl) {
-            imageUrl = thumbnailUrl.startsWith("http") 
-              ? thumbnailUrl 
+            imageUrl = thumbnailUrl.startsWith("http")
+              ? thumbnailUrl
               : `${IMAGE_BASE_URL}${thumbnailUrl}`;
           }
 
@@ -402,7 +355,7 @@ export default function EditOrderPage() {
   return (
     <>
       {data && <AdjustItemsPanel order={data} onSuccess={load} />}
-      <UpsertPageContentWrapper<Order>
+      <UpsertPageContentWrapper<SuperAdminOrderDetail>
         config={config}
         data={data}
         onSubmit={async (data) => {
@@ -426,7 +379,7 @@ export default function EditOrderPage() {
             {data?.id ? <GatewayLogs orderId={data.id} /> : null}
           </>
         }
-        customSidebar={<Sidebar shippingBarcode={data?.shippingBarcode} />}
+        customSidebar={<Sidebar shippingBarcode={data?.shippingBarcode} orderData={data} />}
       />
     </>
   );
