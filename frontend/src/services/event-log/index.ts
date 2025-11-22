@@ -103,6 +103,9 @@ export async function getOrderEvents(
   filters?: Pick<EventLogFilters, "audience" | "severity">,
   params?: EventLogQueryParams
 ): Promise<EventLogResponse> {
+  if (!orderId) {
+    throw new Error("orderId is required");
+  }
   const queryParams = new URLSearchParams();
 
   if (filters) {
