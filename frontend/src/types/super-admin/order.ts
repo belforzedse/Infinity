@@ -18,14 +18,14 @@ export interface SuperAdminOrderDetail {
   orderDate: Date;
   orderStatus: string;
   userId: string;
-  userName: string;
+  userName?: string;
   description: string;
   phoneNumber: string;
   address?: string;
   postalCode?: string;
   paymentGateway?: string;
   transactionId?: string;
-  paymentToken?: string;
+  paymentToken?: string | null;
   createdAt: Date;
   updatedAt: Date;
   contractStatus:
