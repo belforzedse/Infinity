@@ -35,6 +35,7 @@
     "test:coverage": "jest --coverage",
     "type:generate": "strapi ts:generate-types",
     "type-check": "tsc --noEmit",
+    "check:sql": "node scripts/check-sql-column-names.js",
     "clean": "rm -rf .cache build dist .tmp",
     "logs": "pm2 logs infinity-backend --lines 100",
     "validate": "npm run type-check && npm run test"

@@ -1,0 +1,28 @@
+---
+alwaysApply: false
+---
+    metadata: { orderId: order.id },
+    performedBy: {
+      id: ctx.state.user?.id,
+      name: ctx.state.user?.username,
+      role: ctx.state.user?.user_role?.Name,
+    },
+    ip: ctx.request.ip,
+    userAgent: ctx.request.header["user-agent"],
+  });
+  ```
+- Helper wraps insertion in try/catch so failing to log never breaks the original flow (error is logged via `strapi.log.error`).
+
+## Reporting
+
+- `/reports/admin-activity` now reads from `admin_activities` first, then merges legacy `order-log`, `product-log`, etc. Legacy logs are no longer discarded when `performed_by` is absent—those entries show up as `admin_role = "System"`.
+
+## Manual Activity Logging (frontend)
+
+- After a super-admin creates a manual order, the UI posts to `/admin-activities` with a summary payload so the action appears immediately in the report. (See `frontend/src/app/(super-admin)/super-admin/orders/add/page.tsx`.)
+
+## Validation Checklist
+
+1. Create a manual order → confirm a new row appears in `/admin-activities` and on `/super-admin/reports/admin-activity`.
+2. Trigger a legacy log (e.g., change order status) → ensure the entry still appears (log type “Order”).
+3. Use the report filters (log type/action/user) and confirm new enums (Discount, Stock, Publish, etc.) work.

@@ -1,0 +1,210 @@
+---
+description: Human-readable event logging system for users and admins
+alwaysApply: false
+---
+
+# Event Logging System
+
+This project implements a human-readable event logging system that complements the technical audit logs. Events are designed for end-users and administrators, providing clear Persian messages about what happened.
+
+## Overview
+
+The event logging system provides:
+- **Human-readable messages** in Persian (and English fallback)
+- **Event categorization** (Order, Payment, Admin, etc.)
+- **Severity levels** (info, success, warning, error)
+- **Audience separation** (user, admin, superadmin, all)
+- **Context-aware messages** with resource IDs, amounts, names
+
+## When to Use Event Logs vs Audit Logs
+
+### Use Event Logs For:
+- User-facing status updates (order status changes, payment confirmations)
+- Admin activity summaries (what admins did, not technical details)
+- Notifications (shipping updates, wallet transactions)
+- Error messages users should see
+
+### Use Audit Logs For:
+- Technical debugging (field-level changes, JSON diffs)
+- Compliance and auditing (who changed what, when)
+- System internals (gateway callbacks, internal state changes)
+
+**Rule**: Event logs are for humans, audit logs are for debugging.
+
+## Architecture
+
+### Content Type: `event-log`
+
+**Schema**: `backend/src/api/event-log/content-types/event-log/schema.json`
+
+**Key Fields**:
+- `EventType`: Order, Payment, User, Product, Cart, Wallet, Shipping, Admin, System
+- `EventCategory`: StatusChange, Action, Notification, Error, Info
+- `Severity`: info, success, warning, error
+- `Message`: Persian message (required)
+- `MessageEn`: English fallback (optional)
+- `Audience`: user, admin, superadmin, all
+- `ResourceType`: Related resource type (e.g., "Order")
+- `ResourceId`: Related resource ID
+- `RelatedUserId`: User ID if event is related to a user
+- `Metadata`: Additional context (JSON)
+
+### Utilities
+
+**Message Templates**: `backend/src/utils/eventMessages.ts`
+- Contains Persian message templates for common events
+- Supports placeholders (orderId, amount, status, etc.)
+- Automatically formats currency (IRR to Toman)
+
+**Event Logger**: `backend/src/utils/eventLogger.ts`
+- Main logging function: `logEvent(strapi, params)`
+- Helper functions: `logOrderEvent()`, `logPaymentEvent()`, `logAdminEvent()`, `logShippingEvent()`
+
+## Usage Examples
+
+### Logging Order Status Change
+
+```typescript
+import { logOrderEvent } from "../../../../utils/eventLogger";
+
+await logOrderEvent(strapi, {
+  category: "StatusChange",
+  orderId: order.id,
+  oldStatus: "pending",
+  newStatus: "processing",
+  userId: order.user?.id,
+  performedBy: {
+    id: actor.userId,
+    name: actor.label,
+  },
+  audience: "user",
+  metadata: {
+    // Additional context
+  },
+});
+```
+
+### Logging Payment Event
+
+```typescript
+import { logPaymentEvent } from "../../../../utils/eventLogger";
+
+await logPaymentEvent(strapi, {
+  category: "StatusChange",
+  orderId: order.id,
+  amount: 1000000, // IRR
+  paymentGateway: "Mellat",
+  newStatus: "success",
+  userId: order.user?.id,
+  audience: "user",
+});
+```
+
+### Logging Admin Action
+
+```typescript
+import { logAdminEvent } from "../../../../utils/eventLogger";
+
+await logAdminEvent(strapi, {
+  category: "Action",
+  resourceType: "Order",
+  resourceId: order.id,
+  action: "Update",
+  adminName: "مدیر سیستم",
+  adminId: admin.id,
+  audience: "admin",
+});
+```
+
+## Message Templates
+
+Messages are generated from templates in `backend/src/utils/eventMessages.ts`.
+
+**Template Functions**:
+- `getOrderMessage()` - Order-related events
+- `getPaymentMessage()` - Payment-related events
+- `getAdminMessage()` - Admin actions
+- `getShippingMessage()` - Shipping updates
+
+**Adding New Templates**:
+1. Add template function in `eventMessages.ts`
+2. Add event type to `EventType` enum
+3. Add case in `generateEventMessage()`
+
+## API Endpoints
+
+### Get User Events
+```
+GET /event-logs/my-events?page=1&pageSize=20&eventType=Order&audience=user
+```
+
+### Get Order Events
+```
+GET /event-logs/order/:orderId?audience=user&sort=createdAt:asc
+```
+
+### Get Admin Events
+```
+GET /event-logs/admin?eventType=Admin&severity=warning&page=1
+```
+
+## Frontend Integration
+
+### Service: `frontend/src/services/event-log/index.ts`
+
+**Functions**:
+- `getMyEvents(filters, params)` - User's events
+- `getOrderEvents(orderId, filters, params)` - Order-specific events
+- `getAdminEvents(filters, params)` - Admin events
+
+### Components
+
+**User Timeline**: `frontend/src/components/User/Orders/Detail/OrderTimeline.tsx`
+- Shows human-readable event logs for users
+- Falls back to audit logs if no events exist
+
+**Admin Gateway Logs**: `frontend/src/components/SuperAdmin/Order/GatewayLogs.tsx`
+- Shows both: event logs (human-readable) and audit logs (technical)
+- Tabs to switch between views
+
+**Event Viewer**: `frontend/src/components/SuperAdmin/Events/EventLogViewer.tsx`
+- Reusable component for viewing events
+- Supports filtering by type, severity, date range
+
+## Best Practices
+
+1. **Always log user-facing events** when status changes (orders, payments)
+2. **Include context** in metadata (orderId, amount, gateway, etc.)
+3. **Use appropriate audience** (user vs admin vs superadmin)
+4. **Set correct severity** (success for positive outcomes, error for failures)
+5. **Don't duplicate audit logs** - event logs complement, don't replace them
+
+## Performance
+
+- **Database indexes** on: `RelatedUserId`, `ResourceType+ResourceId`, `createdAt`, `Audience+createdAt`
+- **Migration**: `database/migrations/2025.01.15T12.00.00.add-event-log-indexes.js`
+- **Pagination** supported in all queries
+- **Filtering** by EventType, Audience, Severity, date range
+
+## Migration Notes
+
+Event logging runs alongside audit logs. No breaking changes:
+- Audit logs remain unchanged
+- Event logs are additive
+- Frontend falls back to audit logs if no events exist
+- Gradual migration supported (can generate events from audit logs later)
+
+## Testing
+
+When testing event logging:
+1. Verify messages are human-readable
+2. Check audience filtering (users only see user events)
+3. Test message generation with various contexts
+4. Verify Persian text rendering in UI
+
+## Future Enhancements
+
+- Event archiving (move old events to separate table)
+- Real-time event notifications (WebSocket)
+- Event aggregation (daily/weekly summaries)
+- Multi-language support (beyond Persian/English)

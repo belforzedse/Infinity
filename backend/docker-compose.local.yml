@@ -1,0 +1,53 @@
+# Local Development Docker Compose
+# Only runs PostgreSQL and Redis - Strapi runs locally via npm run develop
+
+services:
+  infinity-postgres:
+    container_name: infinity-postgres-local
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: infinity
+      POSTGRES_PASSWORD: infinity123
+      POSTGRES_DB: infinity_local
+    volumes:
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - infinity-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U infinity -d infinity_local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - infinity-network
+
+  infinity-redis:
+    container_name: infinity-redis-local
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass 2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
+    environment:
+      - REDIS_PASSWORD=2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
+    volumes:
+      - infinity-redis-data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - infinity-network
+
+volumes:
+  infinity-postgres-data:
+  infinity-redis-data:
+
+networks:
+  infinity-network:
+    driver: bridge
+
+

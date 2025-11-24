@@ -1,0 +1,242 @@
+---
+description: Event logging system extensibility guide for adding webhooks and new event types
+alwaysApply: false
+---
+
+# Event System Extensibility Guide
+
+## Quick Answer: How Expandable Is It?
+
+**Very expandable!** The system is designed for extensibility:
+
+✅ **Adding new event types**: Just update enum + add message template (5-10 minutes)  
+✅ **Adding webhooks**: Multiple approaches available (see below)  
+✅ **No breaking changes**: All extensions are additive  
+✅ **Scalable**: Handles high volume with proper indexing
+
+## Architecture Extensibility Points
+
+### 1. Event Type Expansion
+
+**Current:** 9 event types (Order, Payment, User, Product, Cart, Wallet, Shipping, Admin, System)
+
+**To add SMS:**
+1. Add "SMS" to `EventType` enum in `schema.json` (simple migration)
+2. Add `getSMSMessage()` function in `eventMessages.ts`
+3. Add case in `generateEventMessage()`
+4. Optionally add `logSMSEvent()` helper
+
+**Time:** ~10 minutes  
+**Risk:** None (additive only)
+
+### 2. Message Template System
+
+**Current:** Template functions for each event type
+
+**Extensible because:**
+- `EventContext` interface allows any context data (`[key: string]: unknown`)
+- `Metadata` JSON field stores any additional data
+- Easy to add new template functions
+
+### 3. Webhook Integration Points
+
+**Option A: Event Logging Triggers Webhooks**
+- After `logEvent()` creates event, trigger webhook
+- Webhook handler can send SMS, email, etc.
+- Track webhook delivery status in Metadata
+
+**Option B: Event Bus Pattern**
+- Create event emitter service
+- Register listeners for specific events
+- SMS handler subscribes to Order/Payment events
+- Can have multiple listeners per event
+
+**Option C: Webhook Configuration Content Type**
+- Admin-configurable webhooks
+- Store webhook configs in database
+- Automatically deliver to configured webhooks
+
+### 4. Metadata Flexibility
+
+**Current:** `Metadata` is JSON (can store anything)
+
+**For webhooks, you can store:**
+- Webhook URL
+- Delivery status
+- Retry count
+- Response data
+- Error messages
+
+## Adding SMS Webhooks - Step by Step
+
+### Phase 1: Quick Implementation (Recommended First)
+
+**1. Add SMS Event Type**
+
+Update `schema.json`:
+```json
+"EventType": {
+  "enum": ["Order", "Payment", "User", "Product", "Cart", "Wallet", "Shipping", "Admin", "System", "SMS"]
+}
+```
+
+**2. Add SMS Message Template**
+
+In `eventMessages.ts`:
+```typescript
+function getSMSMessage(...): EventMessageResult {
+  // SMS-specific messages
+  return {
+    message: `پیامک به ${phoneNumber} ارسال شد`,
+    severity: "success",
+    category: "Notification",
+    audience: "admin",
+  };
+}
+
+// Add case in generateEventMessage():
+case "SMS":
+  return getSMSMessage(category, context, defaultAudience);
+```
+
+**3. Add SMS Helper Function**
+
+In `eventLogger.ts`:
+```typescript
+export async function logSMSEvent(strapi: Strapi, params: {...}) {
+  return logEvent(strapi, {
+    eventType: "SMS",
+    // ... params
+  });
+}
+```
+
+**4. Use in SMS Service**
+
+```typescript
+async function sendSMS(strapi: Strapi, phone: string, message: string) {
+  try {
+    const result = await smsProvider.send(phone, message);
+    await logSMSEvent(strapi, {
+      category: "Notification",
+      phoneNumber: phone,
+      status: "sent",
+      messageId: result.id,
+    });
+    return result;
+  } catch (error) {
+    await logSMSEvent(strapi, {
+      category: "Error",
+      phoneNumber: phone,
+      status: "failed",
+      errorMessage: error.message,
+    });
+    throw error;
+  }
+}
+```
+
+### Phase 2: Webhook Infrastructure (When Needed)
+
+**1. Create Webhook Service**
+
+```typescript
+// backend/src/services/webhooks/index.ts
+export async function triggerWebhooks(
+  strapi: Strapi,
+  eventType: EventType,
+  eventData: EventLog
+) {
+  // Get configured webhooks for this event
+  const webhooks = await getWebhooksForEvent(strapi, eventType);
+  
+  for (const webhook of webhooks) {
+    if (webhook.type === 'SMS') {
+      await callSMSWebhook(webhook, eventData);
+    }
+  }
+}
+```
+
+**2. Integrate into Event Logger**
+
+```typescript
+export async function logEvent(strapi: Strapi, params: EventLoggerParams) {
+  // Create event log
+  const eventLog = await strapi.entityService.create(...);
+  
+  // Trigger webhooks asynchronously (don't block)
+  setImmediate(async () => {
+    try {
+      await triggerWebhooks(strapi, params.eventType, eventLog);
+    } catch (error) {
+      strapi.log.error("Webhook trigger failed", { error, params });
+    }
+  });
+  
+  return eventLog;
+}
+```
+
+## Extensibility Metrics
+
+### Current System Capacity:
+
+| Feature | Current | Limit | Expandable? |
+|---------|---------|-------|-------------|
+| Event Types | 9 | ~50 | ✅ Yes (enum) |
+| Resource Types | Any string | Unlimited | ✅ Yes |
+| Message Templates | 5 | Unlimited | ✅ Yes |
+| Metadata Size | JSON | ~64KB | ✅ Yes |
+| Query Performance | Indexed | Fast | ✅ Yes (can add indexes) |
+| Event Volume | High | Very High | ✅ Yes (with archiving) |
+
+### Adding New Features:
+
+**New Event Type (e.g., Email, Push):**
+- Time: 10-15 minutes
+- Files changed: 2-3
+- Migration needed: Yes (simple enum update)
+
+**New Webhook Type:**
+- Time: 30-60 minutes
+- Files changed: 2-3
+- Migration needed: Possibly (for webhook config)
+
+**Event Bus System:**
+- Time: 2-4 hours
+- Files changed: 3-5
+- Migration needed: No
+
+## Best Practices for Extensibility
+
+1. **Use Metadata for Webhook Data**
+   - Store webhook URLs, delivery status, retries
+   - Don't create new fields for each webhook type
+
+2. **Keep Event Types Generic**
+   - "SMS" is good (covers all SMS events)
+   - "SMS_Sent" and "SMS_Failed" - too specific (use category instead)
+
+3. **Leverage Categories**
+   - Use `EventCategory` (StatusChange, Action, Notification, Error)
+   - Don't create new event types for similar events
+
+4. **Async Webhook Delivery**
+   - Always deliver webhooks asynchronously
+   - Don't block event logging
+
+5. **Track Webhook Status**
+   - Log webhook delivery attempts as events
+   - Store retry count in metadata
+
+## Future-Proofing
+
+The current system can evolve to:
+- Event-driven architecture (event bus)
+- Microservices (events via message queue)
+- Real-time notifications (WebSocket + events)
+- Analytics (event aggregation)
+- External integrations (webhook delivery)
+
+All without breaking existing code!

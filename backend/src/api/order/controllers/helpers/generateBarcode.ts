@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { logAdminBarcodeOperation } from "../../../../utils/adminActivity";
 
 export async function generateAnipoBarcodeHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
@@ -91,6 +92,37 @@ export async function generateAnipoBarcodeHandler(strapi: Strapi, ctx: any) {
     await strapi.entityService.update("api::order.order", Number(id), {
       data: updateData as any,
     });
+
+    // Log admin activity
+    try {
+      const pluginUser = ctx.state?.user;
+      if (pluginUser?.id) {
+        const fullUser = await strapi.db
+          .query("plugin::users-permissions.user")
+          .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
+        if (fullUser) {
+          const ip = ctx.request?.ip || ctx.ip || null;
+          const userAgent = ctx.request?.headers?.["user-agent"] || ctx.headers?.["user-agent"] || null;
+
+          await logAdminBarcodeOperation(
+            strapi,
+            Number(id),
+            "generate",
+            fullUser.id,
+            res.data.barcode,
+            undefined,
+            ip,
+            userAgent,
+            fullUser.role?.name,
+          );
+        }
+      }
+    } catch (activityError) {
+      strapi.log.error("Failed to log admin activity for barcode generation", {
+        orderId: id,
+        error: (activityError as Error).message,
+      });
+    }
 
     ctx.body = { success: true, data: res.data };
   } catch (error: any) {

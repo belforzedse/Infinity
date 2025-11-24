@@ -39,18 +39,40 @@ function resolveSnappayToken(order: any): { token?: string; source?: string } {
 }
 
 async function decrementStock(strapi: Strapi, order: any) {
+  const { decrementStockAtomic } = await import(
+    "../../../cart/services/lib/stock"
+  );
+
+  const stockErrors: any[] = [];
   for (const it of order?.order_items || []) {
     const variation = it?.product_variation;
     const stockId = variation?.product_stock?.id;
     if (stockId && typeof it?.Count === "number") {
-      const current = Number(variation.product_stock.Count || 0);
-      const dec = Number(it.Count || 0);
-      await strapi.entityService.update(
-        "api::product-stock.product-stock",
-        stockId,
-        { data: { Count: current - dec } }
-      );
+      const quantity = Number(it.Count || 0);
+
+      const result = await decrementStockAtomic(strapi, stockId, quantity);
+      if (!result.success) {
+        stockErrors.push({
+          stockId,
+          quantity,
+          error: result.error,
+          variationId: variation?.id,
+        });
+        strapi.log.error("Failed to decrement stock atomically (settleSnappay)", {
+          orderId: order?.id,
+          stockId,
+          quantity,
+          error: result.error,
+        });
+      }
     }
+  }
+
+  if (stockErrors.length > 0) {
+    strapi.log.error("Some stock decrements failed in settleSnappay", {
+      orderId: order?.id,
+      errors: stockErrors,
+    });
   }
 }
 

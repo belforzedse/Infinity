@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "event_logs",
+  "info": {
+    "singularName": "event-log",
+    "pluralName": "event-logs",
+    "displayName": "EventLog",
+    "description": "Human-readable event log for users and admins"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "EventType": {
+      "type": "enumeration",
+      "enum": ["Order", "Payment", "User", "Product", "Cart", "Wallet", "Shipping", "Admin", "System"],
+      "required": true
+    },
+    "EventCategory": {
+      "type": "enumeration",
+      "enum": ["StatusChange", "Action", "Notification", "Error", "Info"],
+      "required": true
+    },
+    "Severity": {
+      "type": "enumeration",
+      "enum": ["info", "success", "warning", "error"],
+      "required": true
+    },
+    "Message": {
+      "type": "text",
+      "required": true
+    },
+    "MessageEn": {
+      "type": "string"
+    },
+    "Audience": {
+      "type": "enumeration",
+      "enum": ["user", "admin", "superadmin", "all"],
+      "required": true
+    },
+    "ResourceType": {
+      "type": "string"
+    },
+    "ResourceId": {
+      "type": "string"
+    },
+    "RelatedUserId": {
+      "type": "integer"
+    },
+    "Metadata": {
+      "type": "json"
+    },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    }
+  }
+}

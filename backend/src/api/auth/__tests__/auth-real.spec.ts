@@ -87,6 +87,11 @@ describe('Auth Controller - Real Implementation', () => {
     mock.registerQuery('plugin::users-permissions.user', mockQuery);
     mock.registerQuery('api::local-user-info.local-user-info', mockQuery);
     mock.registerQuery('api::local-user.local-user', mockQuery);
+    mock.registerQuery('plugin::users-permissions.role', {
+      findOne: jest.fn().mockResolvedValue({ id: 1, name: 'Customer' }),
+      create: jest.fn(),
+      update: jest.fn(),
+    });
   });
 
   describe('welcome - Check if user exists', () => {
@@ -297,14 +302,14 @@ describe('Auth Controller - Real Implementation', () => {
       const otpToken = 'invalid-token';
       mockRedisGet.mockResolvedValue(null);
 
-      const ctx = mockContext({
-        request: { body: { otp: '123456', otpToken } },
-      });
-
-      await authController.login(ctx);
-
-      expect(ctx.badRequest).toHaveBeenCalledWith('otpToken is invalid');
+    const ctx = mockContext({
+      request: { body: { otp: '123456', otpToken } },
     });
+
+    await authController.login(ctx);
+
+    expect(ctx.badRequest).toHaveBeenCalledWith('otp or otpToken is invalid');
+  });
 
     it('should reject malformed otpToken format', async () => {
       const ctx = mockContext({
@@ -370,17 +375,16 @@ describe('Auth Controller - Real Implementation', () => {
 
       userService.validatePassword.mockResolvedValue(true);
 
-      const ctx = mockContext({
-        request: { body: { phone, password } },
-      });
+    const ctx = mockContext({
+      request: { body: { phone, password } },
+    });
 
-      // ✅ Call REAL controller action
-      await authController.loginWithPassword(ctx);
+    await authController.loginWithPassword(ctx);
 
-      expect(userService.validatePassword).toHaveBeenCalledWith(password, user.password);
-      expect(jwtService.issue).toHaveBeenCalledWith({ id: 1 });
-      expect(ctx.body).toEqual({
-        message: 'login successful',
+    expect(userService.validatePassword).toHaveBeenCalledWith(password, user.password);
+    expect(jwtService.issue).toHaveBeenCalledWith({ id: 1 });
+    expect(ctx.body).toEqual({
+      message: 'login successful',
         token: 'mock-jwt-token-1',
       });
     });
@@ -400,38 +404,44 @@ describe('Auth Controller - Real Implementation', () => {
 
       userService.validatePassword.mockResolvedValue(false);
 
-      const ctx = mockContext({
-        request: { body: { phone, password } },
-      });
-
-      await authController.loginWithPassword(ctx);
-
-      expect(ctx.unauthorized).toHaveBeenCalledWith('User not found or password is incorrect');
-      expect(jwtService.issue).not.toHaveBeenCalled();
+    const ctx = mockContext({
+      request: { body: { phone, password } },
     });
+
+    await expect(authController.loginWithPassword(ctx)).rejects.toThrow(
+      'User not found or password is incorrect'
+    );
+
+    expect(ctx.unauthorized).toHaveBeenCalledWith('User not found or password is incorrect');
+    expect(jwtService.issue).not.toHaveBeenCalled();
+  });
 
     it('should reject missing credentials', async () => {
-      const ctx = mockContext({
-        request: { body: {} },
-      });
-
-      await authController.loginWithPassword(ctx);
-
-      expect(ctx.badRequest).toHaveBeenCalledWith('Phone and password are required');
+    const ctx = mockContext({
+      request: { body: {} },
     });
+
+    await expect(authController.loginWithPassword(ctx)).rejects.toThrow(
+      'Phone and password are required'
+    );
+
+    expect(ctx.badRequest).toHaveBeenCalledWith('Phone and password are required');
+  });
 
     it('should handle user not found', async () => {
       const mockQuery = mockStrapi.db.query('plugin::users-permissions.user');
       mockQuery.findOne.mockResolvedValue(null);
 
-      const ctx = mockContext({
-        request: { body: { phone: '09999999999', password: 'password' } },
-      });
-
-      await authController.loginWithPassword(ctx);
-
-      expect(ctx.unauthorized).toHaveBeenCalledWith('User not found or password is incorrect');
+    const ctx = mockContext({
+      request: { body: { phone: '09999999999', password: 'password' } },
     });
+
+    await expect(authController.loginWithPassword(ctx)).rejects.toThrow(
+      'User not found or password is incorrect'
+    );
+
+    expect(ctx.unauthorized).toHaveBeenCalledWith('User not found or password is incorrect');
+  });
   });
 
   describe('resetPassword - Password reset with OTP', () => {
@@ -484,15 +494,15 @@ describe('Auth Controller - Real Implementation', () => {
         })
       );
 
-      const ctx = mockContext({
-        request: { body: { otp: '999999', otpToken: '1234567890.abc', newPassword: 'new-pass' } },
-      });
-
-      await authController.resetPassword(ctx);
-
-      expect(ctx.badRequest).toHaveBeenCalledWith('otp is invalid');
-      expect(mockStrapi.entityService.update).not.toHaveBeenCalled();
+    const ctx = mockContext({
+      request: { body: { otp: '999999', otpToken: '1234567890.abc', newPassword: 'new-pass' } },
     });
+
+    await expect(authController.resetPassword(ctx)).rejects.toThrow('otp is invalid');
+
+    expect(ctx.badRequest).toHaveBeenCalledWith('otp is invalid');
+    expect(mockStrapi.entityService.update).not.toHaveBeenCalled();
+  });
   });
 
   describe('self - Get current user profile', () => {

@@ -1,0 +1,136 @@
+---
+description: PostgreSQL column naming rules for raw SQL queries in Strapi
+alwaysApply: true
+---
+
+# SQL Column Naming Rules for Raw Queries
+
+## ⚠️ CRITICAL RULE
+
+**NEVER use quoted camelCase identifiers in raw SQL queries!**
+
+## Strapi Column Naming Convention
+
+When Strapi creates PostgreSQL tables, it converts schema field names to database columns:
+
+| Schema Field (camelCase) | Database Column (snake_case/lowercase) |
+|-------------------------|----------------------------------------|
+| `Balance` | `balance` |
+| `UsedTimes` | `used_times` |
+| `Count` | `count` |
+| `LastTransactionDate` | `last_transaction_date` |
+| `PerAmount` | `per_amount` |
+| `Amount` | `amount` |
+| `Status` | `status` |
+| `Type` | `type` |
+| `Date` | `date` |
+
+**Pattern:** camelCase → snake_case (multiple words) or lowercase (single word)
+
+## Rule for Raw SQL Queries
+
+### ❌ WRONG - Don't Use Quoted Identifiers
+```sql
+UPDATE local_user_wallets
+SET "Balance" = "Balance" - ?
+WHERE id = ? AND "Balance" >= ?
+RETURNING "Balance"
+```
+
+### ✅ CORRECT - Use Unquoted Lowercase/snake_case
+```sql
+UPDATE local_user_wallets
+SET balance = balance - ?
+WHERE id = ? AND balance >= ?
+RETURNING balance
+```
+
+## Why This Matters
+
+1. **PostgreSQL behavior:**
+   - Quoted identifiers (`"Balance"`) are **case-sensitive** and must match exactly
+   - Unquoted identifiers (`balance`) are **folded to lowercase** automatically
+   - Strapi creates columns as **unquoted lowercase/snake_case**
+
+2. **Error you'll see:**
+   ```
+   column "Balance" does not exist
+   ```
+   This happens because the database has `balance` (lowercase) but the query looks for `"Balance"` (quoted, case-sensitive).
+
+## How to Find Correct Column Names
+
+1. **Check the schema:** `src/api/{content-type}/content-types/{content-type}/schema.json`
+2. **Convert camelCase → snake_case:**
+   - `Balance` → `balance`
+   - `UsedTimes` → `used_times`
+   - `LastTransactionDate` → `last_transaction_date`
+3. **Or check actual database:**
+   ```sql
+   SELECT column_name
+   FROM information_schema.columns
+   WHERE table_name = 'local_user_wallets';
+   ```
+
+## Examples of Fixed Queries
+
+### Wallet Balance Decrement
+```typescript
+// ✅ CORRECT
+const result = await strapi.db.connection.raw(
+  `UPDATE local_user_wallets
+   SET balance = balance - ?,
+       last_transaction_date = NOW()
+   WHERE id = ? AND balance >= ?
+   RETURNING balance, id`,
+  [amount, wallet.id, amount]
+);
+```
+
+### Discount Usage Tracking
+```typescript
+// ✅ CORRECT
+const result = await strapi.db.connection.raw(
+  `UPDATE discounts
+   SET used_times = used_times + 1
+   WHERE id = ? AND used_times < ?
+   RETURNING used_times`,
+  [discountId, limitUsage]
+);
+```
+
+### Stock Decrement
+```typescript
+// ✅ CORRECT
+const result = await strapi.db.connection.raw(
+  `UPDATE product_stocks
+   SET count = count - ?
+   WHERE id = ? AND count >= ?
+   RETURNING count`,
+  [quantity, stockId, quantity]
+);
+```
+
+## Code Review Checklist
+
+When reviewing code with raw SQL queries:
+- [ ] No quoted camelCase identifiers (`"Balance"`, `"Count"`, etc.)
+- [ ] All column names use lowercase/snake_case
+- [ ] Result access uses lowercase keys (`rows[0].balance`, not `rows[0].Balance`)
+
+## Prevention
+
+1. **Always use Strapi query builder when possible** (avoids raw SQL)
+2. **If raw SQL is needed**, convert schema field names to database column names
+3. **Test raw SQL queries** with actual database operations
+4. **Add this rule to code review guidelines**
+
+## Related Files
+
+Fixed files:
+- `src/api/local-user-wallet/services/local-user-wallet.ts`
+- `src/api/order/controllers/helpers/payment.ts`
+- `src/api/cart/services/lib/stock.ts`
+
+Verified files (using correct naming):
+- `src/api/report/controllers/report.ts` - All queries use lowercase column names

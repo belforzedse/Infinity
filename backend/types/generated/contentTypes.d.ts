@@ -319,11 +319,14 @@ export interface ApiAdminActivityAdminActivity extends Schema.CollectionType {
       ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"]
     > &
       Attribute.Required;
+    Changes: Attribute.JSON;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::admin-activity.admin-activity", "oneToOne", "admin::user"> &
       Attribute.Private;
     Description: Attribute.Text;
     IP: Attribute.String;
+    Message: Attribute.Text;
+    MessageEn: Attribute.String;
     Metadata: Attribute.JSON;
     performed_by: Attribute.Relation<
       "api::admin-activity.admin-activity",
@@ -337,6 +340,9 @@ export interface ApiAdminActivityAdminActivity extends Schema.CollectionType {
       ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"]
     > &
       Attribute.Required;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> &
+      Attribute.DefaultTo<"info">;
+    Title: Attribute.String;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::admin-activity.admin-activity", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -620,6 +626,48 @@ export interface ApiDiscountDiscount extends Schema.CollectionType {
         number
       > &
       Attribute.DefaultTo<0>;
+  };
+}
+
+export interface ApiEventLogEventLog extends Schema.CollectionType {
+  collectionName: "event_logs";
+  info: {
+    description: "Human-readable event log for users and admins";
+    displayName: "EventLog";
+    pluralName: "event-logs";
+    singularName: "event-log";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Audience: Attribute.Enumeration<["user", "admin", "superadmin", "all"]> & Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::event-log.event-log", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    EventCategory: Attribute.Enumeration<
+      ["StatusChange", "Action", "Notification", "Error", "Info"]
+    > &
+      Attribute.Required;
+    EventType: Attribute.Enumeration<
+      ["Order", "Payment", "User", "Product", "Cart", "Wallet", "Shipping", "Admin", "System"]
+    > &
+      Attribute.Required;
+    Message: Attribute.Text & Attribute.Required;
+    MessageEn: Attribute.String;
+    Metadata: Attribute.JSON;
+    performed_by: Attribute.Relation<
+      "api::event-log.event-log",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    RelatedUserId: Attribute.Integer;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.String;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> & Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::event-log.event-log", "oneToOne", "admin::user"> &
+      Attribute.Private;
   };
 }
 
@@ -1046,6 +1094,61 @@ export interface ApiLocalUserLocalUser extends Schema.CollectionType {
       "oneToOne",
       "api::local-user-wallet.local-user-wallet"
     >;
+  };
+}
+
+export interface ApiManualAdminActivityManualAdminActivity extends Schema.CollectionType {
+  collectionName: "manual_admin_activities";
+  info: {
+    description: "Structured log for manual actions performed through super-admin/store manager interfaces";
+    displayName: "ManualAdminActivity";
+    pluralName: "manual-admin-activities";
+    singularName: "manual-admin-activity";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Action: Attribute.Enumeration<
+      ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"]
+    > &
+      Attribute.Required;
+    Changes: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::manual-admin-activity.manual-admin-activity",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    Description: Attribute.Text;
+    IP: Attribute.String;
+    Message: Attribute.Text;
+    MessageEn: Attribute.String;
+    Metadata: Attribute.JSON;
+    performed_by: Attribute.Relation<
+      "api::manual-admin-activity.manual-admin-activity",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    PerformedByName: Attribute.String;
+    PerformedByRole: Attribute.String;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.Enumeration<
+      ["Order", "Product", "User", "Contract", "Discount", "Stock", "Other"]
+    > &
+      Attribute.Required;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> &
+      Attribute.DefaultTo<"info">;
+    Title: Attribute.String;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      "api::manual-admin-activity.manual-admin-activity",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    UserAgent: Attribute.String;
   };
 }
 
@@ -2152,6 +2255,69 @@ export interface ApiShippingShipping extends Schema.CollectionType {
   };
 }
 
+export interface ApiUserActivityUserActivity extends Schema.CollectionType {
+  collectionName: "user_activities";
+  info: {
+    description: "User-facing activity feed entries with readable messages";
+    displayName: "User Activity";
+    pluralName: "user-activities";
+    singularName: "user-activity";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    ActivityType: Attribute.Enumeration<
+      [
+        "order_placed",
+        "order_payment_success",
+        "order_payment_failed",
+        "order_shipped",
+        "order_delivered",
+        "order_cancelled",
+        "cart_item_added",
+        "cart_item_removed",
+        "cart_cleared",
+        "wallet_credited",
+        "wallet_debited",
+        "address_added",
+        "address_updated",
+        "address_deleted",
+        "profile_updated",
+        "product_liked",
+        "product_unliked",
+        "review_submitted",
+        "discount_applied",
+        "discount_removed",
+      ]
+    > &
+      Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::user-activity.user-activity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Icon: Attribute.String;
+    IsRead: Attribute.Boolean & Attribute.DefaultTo<false>;
+    Message: Attribute.Text & Attribute.Required;
+    Metadata: Attribute.JSON;
+    ResourceId: Attribute.String;
+    ResourceType: Attribute.Enumeration<
+      ["order", "cart", "wallet", "address", "product", "review", "discount", "other"]
+    >;
+    Severity: Attribute.Enumeration<["info", "success", "warning", "error"]> &
+      Attribute.Required &
+      Attribute.DefaultTo<"info">;
+    Title: Attribute.String & Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::user-activity.user-activity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::user-activity.user-activity",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
 export interface ApiWalletTopupWalletTopup extends Schema.CollectionType {
   collectionName: "wallet_topups";
   info: {
@@ -2592,6 +2758,7 @@ declare module "@strapi/types" {
       "api::contract-transaction.contract-transaction": ApiContractTransactionContractTransaction;
       "api::contract.contract": ApiContractContract;
       "api::discount.discount": ApiDiscountDiscount;
+      "api::event-log.event-log": ApiEventLogEventLog;
       "api::footer.footer": ApiFooterFooter;
       "api::general-discount.general-discount": ApiGeneralDiscountGeneralDiscount;
       "api::local-user-address.local-user-address": ApiLocalUserAddressLocalUserAddress;
@@ -2602,6 +2769,7 @@ declare module "@strapi/types" {
       "api::local-user-wallet-transaction.local-user-wallet-transaction": ApiLocalUserWalletTransactionLocalUserWalletTransaction;
       "api::local-user-wallet.local-user-wallet": ApiLocalUserWalletLocalUserWallet;
       "api::local-user.local-user": ApiLocalUserLocalUser;
+      "api::manual-admin-activity.manual-admin-activity": ApiManualAdminActivityManualAdminActivity;
       "api::navigation.navigation": ApiNavigationNavigation;
       "api::order-item.order-item": ApiOrderItemOrderItem;
       "api::order-log.order-log": ApiOrderLogOrderLog;
@@ -2628,6 +2796,7 @@ declare module "@strapi/types" {
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;
       "api::shipping.shipping": ApiShippingShipping;
+      "api::user-activity.user-activity": ApiUserActivityUserActivity;
       "api::wallet-topup.wallet-topup": ApiWalletTopupWalletTopup;
       "plugin::content-releases.release": PluginContentReleasesRelease;
       "plugin::content-releases.release-action": PluginContentReleasesReleaseAction;

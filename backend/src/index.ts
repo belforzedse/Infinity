@@ -170,6 +170,10 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   },
   // Restrict users management - completely disabled for store managers
   { typeKey: "plugin::users-permissions", controller: "user" , allowActions: READ_ACTIONS},
+  // Restrict admin activity - store managers cannot view admin activities
+  { typeKey: "api::admin-activity", controller: "admin-activity", allowActions: [] },
+  // Restrict user activity - store managers cannot view other users' activities
+  { typeKey: "api::user-activity", controller: "user-activity", allowActions: [] },
 
 ];
 
@@ -322,13 +326,18 @@ async function assignRolePermissions(strapi: Strapi, role: { id: number; name: s
 
 export const RedisClient = createClient({
   url: process.env.REDIS_URL,
-  password: process.env.REDIS_PASSWORD,
+  ...(process.env.REDIS_PASSWORD && { password: process.env.REDIS_PASSWORD }),
 })
   .on("error", (err) => console.log("Redis Client Error", err))
   .connect()
   .then((client) => {
     console.log("Redis connected");
     return client;
+  })
+  .catch((err) => {
+    console.error("Failed to connect to Redis:", err.message);
+    // Return a mock client that fails gracefully for development
+    throw err;
   });
 
 export default {

@@ -1,0 +1,13 @@
+---
+description: Jest typing requirements for backend tests
+globs:
+  - src/**/__tests__/**/*.ts
+alwaysApply: false
+---
+# Jest Type Definitions
+
+- `@types/jest` is already installed in `devDependencies`; keep versions aligned with `jest`.
+- `tsconfig.json` must include `jest` inside `compilerOptions.types` so Strapi builds understand globals such as `describe`, `it`, `expect`, and `jest.fn`.
+- `ts-jest` transformer in `jest.config.js` also injects `types: ['jest', 'node']` for isolated test transpilation.
+- If adding additional test folders, ensure they're covered by Jest's `roots`/`testMatch` patterns and that TypeScript includes them (e.g., `src/__tests__/**`).
+- Avoid removing Jest types from the global config unless you add a dedicated `tsconfig.build.json` that excludes tests from the regular build pipeline.

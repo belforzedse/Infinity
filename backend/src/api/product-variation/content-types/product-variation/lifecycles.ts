@@ -1,4 +1,5 @@
 import { resolveAuditActor } from "../../../../utils/audit";
+import { logManualActivity } from "../../../../utils/manualAdminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -48,6 +49,33 @@ export default {
         },
       }
     );
+
+    if (actor.userId) {
+      const productId =
+        typeof result.product === "object"
+          ? result.product?.id
+          : typeof result.product === "number"
+            ? result.product
+            : undefined;
+      const productLabel =
+        typeof result.product === "object"
+          ? result.product?.Title || result.product?.Name
+          : undefined;
+
+    await logManualActivity(strapi, {
+      resourceType: "Product",
+      resourceId: productId,
+      action: "Create",
+      title: "محصول-ورژن جدید ایجاد شد",
+      message: `ورژن جدید برای محصول ${productLabel || productId || "نامشخص"} ایجاد شد`,
+      messageEn: `Product variation #${result.id} created for product ${productLabel || productId || "unknown"}`,
+        severity: "success",
+        metadata: { variationId: result.id, sku: result.SKU },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 
   async beforeUpdate(event) {
@@ -113,6 +141,34 @@ export default {
         },
       }
     );
+
+    if (actor.userId) {
+      const productId =
+        typeof result.product === "object"
+          ? result.product?.id
+          : typeof result.product === "number"
+            ? result.product
+            : undefined;
+      const productLabel =
+        typeof result.product === "object"
+          ? result.product?.Title || result.product?.Name
+          : undefined;
+
+      await logManualActivity(strapi, {
+        resourceType: "Product",
+        resourceId: productId,
+        action: "Update",
+        title: "ورژن محصول ویرایش شد",
+        message: `ورژن #${result.id} محصول ${productLabel || productId || "نامشخص"} بروزرسانی شد`,
+        messageEn: `Product variation #${result.id} updated for product ${productLabel || productId || "unknown"}`,
+        severity: "info",
+        changes,
+        metadata: { variationId: result.id },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 
   async beforeDelete(event) {
@@ -141,5 +197,21 @@ export default {
         },
       }
     );
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Product",
+        resourceId: null,
+        action: "Delete",
+        title: "ورژن محصول حذف شد",
+        message: `ورژن ${id} حذف شد`,
+        messageEn: `Product variation #${id} deleted`,
+        severity: "warning",
+        metadata: { variationId: id },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
   },
 };

@@ -1,5 +1,7 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logAdminActivity } from "../../../../utils/adminActivity";
+import { logOrderEvent, logAdminEvent } from "../../../../utils/eventLogger";
+import { logManualActivity } from "../../../../utils/manualAdminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -65,6 +67,89 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Create",
+        title: "سفارش ایجاد شد",
+        message: `سفارش #${result.id} توسط ادمین ایجاد شد`,
+        messageEn: `Order #${result.id} created`,
+        severity: "success",
+        metadata: { orderId: result.id, status: result.Status },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
+
+    // Log human-readable event for user
+    // Extract userId: result.user can be an object {id: number} or just a number
+    const orderUserId = typeof result.user === "object" && result.user?.id
+      ? result.user.id
+      : typeof result.user === "number"
+      ? result.user
+      : userId;
+
+    if (orderUserId) {
+      await logOrderEvent(strapi as any, {
+        category: "Action",
+        orderId: result.id,
+        orderStatus: result.Status,
+        newStatus: result.Status, // Required for message generator "Action" category check
+        userId: orderUserId,
+        performedBy: {
+          id: actor.userId || undefined,
+          name: actor.label || undefined,
+        },
+        audience: "user",
+        metadata: {
+          orderType: result.Type,
+        },
+      });
+
+      // Also log to user activity feed
+      try {
+        const activityService = strapi.service("api::user-activity.user-activity") as any;
+        // Get order total from contract or calculate from items
+        const orderWithContract = await strapi.entityService.findOne("api::order.order", result.id, {
+          populate: { contract: true, order_items: true },
+        }) as any;
+        const totalAmount = orderWithContract?.contract?.Amount
+          ? Number(orderWithContract.contract.Amount)
+          : orderWithContract?.Total
+          ? Number(orderWithContract.Total)
+          : 0;
+
+        if (activityService?.logOrderPlaced) {
+          await activityService.logOrderPlaced(orderUserId, result.id, totalAmount);
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log order placed to user activity", {
+          orderId: result.id,
+          userId: orderUserId,
+          error: (activityError as Error).message,
+        });
+      }
+    }
+
+    // Log event for admin if created by admin
+    if (actor.userId && actor.label) {
+      await logAdminEvent(strapi as any, {
+        category: "Action",
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Create",
+        adminName: actor.label,
+        adminId: actor.userId,
+        audience: "admin",
+        metadata: {
+          orderType: result.Type,
+          orderStatus: result.Status,
+        },
+      });
+    }
   },
 
   async beforeUpdate(event) {
@@ -152,6 +237,96 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    if (actor.userId) {
+      await logManualActivity(strapi, {
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Update",
+        title: "سفارش بروزرسانی شد",
+        message: `سفارش #${result.id} توسط ادمین بروزرسانی شد`,
+        messageEn: `Order #${result.id} updated`,
+        severity: "info",
+        metadata: { changes, status: current?.Status },
+        performedBy: { id: actor.userId },
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    }
+
+    // Log human-readable events for status changes
+    // Extract userId: current.user can be an object {id: number} or just a number
+    const orderUserId = typeof current?.user === "object" && current.user?.id
+      ? current.user.id
+      : typeof current?.user === "number"
+      ? current.user
+      : userId;
+
+    const oldStatus = previous?.Status;
+    const newStatus = current?.Status;
+
+    // If status changed, log user-facing event
+    if (oldStatus !== newStatus && newStatus && orderUserId) {
+      await logOrderEvent(strapi as any, {
+        category: "StatusChange",
+        orderId: result.id,
+        orderStatus: newStatus,
+        oldStatus: oldStatus,
+        newStatus: newStatus,
+        userId: orderUserId,
+        performedBy: {
+          id: actor.userId || undefined,
+          name: actor.label || undefined,
+        },
+        audience: "user",
+        metadata: {
+          changes,
+        },
+      });
+
+      // Also log to user activity feed for milestone statuses
+      try {
+        const activityService = strapi.service("api::user-activity.user-activity") as any;
+        const normalizedStatus = newStatus?.toLowerCase();
+
+        if (normalizedStatus === "shipment" && activityService?.logOrderShipped) {
+          // Get tracking code from metadata if available
+          const trackingCode = changes?.ShippingBarcode || changes?.barcode || undefined;
+          await activityService.logOrderShipped(orderUserId, result.id, trackingCode);
+        } else if (normalizedStatus === "done" && activityService?.logOrderDelivered) {
+          await activityService.logOrderDelivered(orderUserId, result.id);
+        } else if (normalizedStatus === "cancelled" && activityService?.logOrderCancelled) {
+          const reason = changes?.Description || changes?.Note || undefined;
+          await activityService.logOrderCancelled(orderUserId, result.id, reason);
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log status change to user activity", {
+          orderId: result.id,
+          userId: orderUserId,
+          oldStatus,
+          newStatus,
+          error: (activityError as Error).message,
+        });
+      }
+    }
+
+    // Log admin event if updated by admin
+    if (actor.userId && actor.label && Object.keys(changes).length > 0) {
+      await logAdminEvent(strapi as any, {
+        category: "Action",
+        resourceType: "Order",
+        resourceId: result.id,
+        action: "Update",
+        adminName: actor.label,
+        adminId: actor.userId,
+        audience: "admin",
+        metadata: {
+          changes,
+          oldStatus,
+          newStatus,
+        },
+      });
+    }
   },
 
   async beforeDelete(event) {
@@ -194,5 +369,21 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    // Log admin event for deletion
+    if (actor.userId && actor.label) {
+      await logAdminEvent(strapi as any, {
+        category: "Action",
+        resourceType: "Order",
+        resourceId: id,
+        action: "Delete",
+        adminName: actor.label,
+        adminId: actor.userId,
+        audience: "admin",
+        metadata: {
+          orderId: id,
+        },
+      });
+    }
   },
 };

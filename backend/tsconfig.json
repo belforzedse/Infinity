@@ -16,7 +16,9 @@
     ".cache/",
     ".tmp/",
     "src/admin/",
+    "src/__tests__/**",
     "**/*.test.*",
+    "**/*.spec.*",
     "src/plugins/**"
   ]
 }
