@@ -358,8 +358,22 @@ function ShoppingCartBillForm({}: Props) {
         localStorage.setItem("pendingOrderId", cartResponse.orderId.toString());
         localStorage.setItem("pendingRefId", cartResponse.refId || "");
 
-        // If SnappPay, just redirect with GET; if Mellat, keep current POST with RefId
-        if (gateway === "snappay" || gateway === "samankish" || gateway === "mellat") {
+        // Handle different gateway redirect methods
+        if (gateway === "mellat" && cartResponse.refId) {
+          // Mellat requires POST with RefId (similar to wallet topup flow)
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = cartResponse.redirectUrl;
+          form.style.display = "none";
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "RefId";
+          input.value = String(cartResponse.refId);
+          form.appendChild(input);
+          document.body.appendChild(form);
+          form.submit();
+        } else if (gateway === "snappay" || gateway === "samankish") {
+          // SnappPay and Samankish use GET redirect with token in URL
           window.location.href = cartResponse.redirectUrl!;
         } else if (gateway === "wallet") {
           // Wallet flow returns no redirect; just move to success
