@@ -1,12 +1,12 @@
 "use client";
 
 import { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { type Order } from "./page";
+import type { SuperAdminOrderDetail } from "@/types/super-admin/order";
 import Link from "next/link";
 import ArrowLeftIcon from "@/components/SuperAdmin/UpsertPage/Icons/ArrowLeftIcon";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 
-export const config: UpsertPageConfigType<Order> = {
+export const config: UpsertPageConfigType<SuperAdminOrderDetail> = {
   headTitle: "ویرایش سفارش",
   addButton: {
     text: "افزودن سفارش  جدید",

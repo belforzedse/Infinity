@@ -1,0 +1,1349 @@
+Folder PATH listing
+Volume serial number is 2626-D02F
+D:.
+¦   tree.txt
+¦   
++---app
+¦   ¦   error.tsx
+¦   ¦   favicon.ico
+¦   ¦   globals.css
+¦   ¦   layout.tsx
+¦   ¦   loading.tsx
+¦   ¦   not-found.tsx
+¦   ¦   Providers.tsx
+¦   ¦   sitemap.ts
+¦   ¦   
+¦   +---(print)
+¦   ¦   +---super-admin
+¦   ¦       +---orders
+¦   ¦           +---anipo-barcode
+¦   ¦           ¦   ¦   layout.tsx
+¦   ¦           ¦   ¦   print.css
+¦   ¦           ¦   ¦   
+¦   ¦           ¦   +---[id]
+¦   ¦           ¦           page.tsx
+¦   ¦           ¦           
+¦   ¦           +---print
+¦   ¦               ¦   layout.tsx
+¦   ¦               ¦   normalizeOrder.ts
+¦   ¦               ¦   print.css
+¦   ¦               ¦   
+¦   ¦               +---bulk
+¦   ¦               ¦       page.tsx
+¦   ¦               ¦       
+¦   ¦               +---[id]
+¦   ¦                       page.tsx
+¦   ¦                       
+¦   +---(product)
+¦   ¦   ¦   error.tsx
+¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   page.tsx
+¦   ¦   ¦   
+¦   ¦   +---cart
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---checkout
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---pdp
+¦   ¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---[slug]
+¦   ¦   ¦           page.tsx
+¦   ¦   ¦           
+¦   ¦   +---plp
+¦   ¦           page.tsx
+¦   ¦           
+¦   +---(public)
+¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   
+¦   ¦   +---auth
+¦   ¦       ¦   layout.tsx
+¦   ¦       ¦   loading.tsx
+¦   ¦       ¦   page.tsx
+¦   ¦       ¦   
+¦   ¦       +---forgot-password
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---verify
+¦   ¦       ¦           page.tsx
+¦   ¦       ¦           
+¦   ¦       +---login
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---otp
+¦   ¦       ¦           page.tsx
+¦   ¦       ¦           
+¦   ¦       +---register
+¦   ¦           ¦   page.tsx
+¦   ¦           ¦   
+¦   ¦           +---info
+¦   ¦                   page.tsx
+¦   ¦                   
+¦   +---(super-admin)
+¦   ¦   ¦   ClientLayout.tsx
+¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   loading.tsx
+¦   ¦   ¦   
+¦   ¦   +---super-admin
+¦   ¦       ¦   not-found.tsx
+¦   ¦       ¦   page.tsx
+¦   ¦       ¦   
+¦   ¦       +---carts
+¦   ¦       ¦       page.tsx
+¦   ¦       ¦       table.tsx
+¦   ¦       ¦       
+¦   ¦       +---coupons
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       config.tsx
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---edit
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦               config.tsx
+¦   ¦       ¦               page.tsx
+¦   ¦       ¦               
+¦   ¦       +---discounts
+¦   ¦       ¦       page.tsx
+¦   ¦       ¦       
+¦   ¦       +---footer
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---edit
+¦   ¦       ¦           config.tsx
+¦   ¦       ¦           page.tsx
+¦   ¦       ¦           
+¦   ¦       +---general-discounts
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       config.tsx
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---edit
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦               config.tsx
+¦   ¦       ¦               page.tsx
+¦   ¦       ¦               
+¦   ¦       +---logout
+¦   ¦       ¦       page.tsx
+¦   ¦       ¦       
+¦   ¦       +---navigation
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---edit
+¦   ¦       ¦           config.tsx
+¦   ¦       ¦           page.tsx
+¦   ¦       ¦           
+¦   ¦       +---notifications
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       config.tsx
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---edit
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦               config.tsx
+¦   ¦       ¦               page.tsx
+¦   ¦       ¦               
+¦   ¦       +---orders
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       config.tsx
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---edit
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦               config.tsx
+¦   ¦       ¦               page.tsx
+¦   ¦       ¦               
+¦   ¦       +---payment-methods
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       config.tsx
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---edit
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦               config.tsx
+¦   ¦       ¦               page.tsx
+¦   ¦       ¦               
+¦   ¦       +---products
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---attributes
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       table.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---categories
+¦   ¦       ¦   ¦   ¦   categoryFormConfig.tsx
+¦   ¦       ¦   ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   ¦   
+¦   ¦       ¦   ¦   +---add
+¦   ¦       ¦   ¦   ¦       page.tsx
+¦   ¦       ¦   ¦   ¦       
+¦   ¦       ¦   ¦   +---edit
+¦   ¦       ¦   ¦       +---[id]
+¦   ¦       ¦   ¦               page.tsx
+¦   ¦       ¦   ¦               
+¦   ¦       ¦   +---colors
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---comments
+¦   ¦       ¦   ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   ¦   
+¦   ¦       ¦   ¦   +---edit
+¦   ¦       ¦   ¦       +---[id]
+¦   ¦       ¦   ¦               config.tsx
+¦   ¦       ¦   ¦               page.tsx
+¦   ¦       ¦   ¦               
+¦   ¦       ¦   +---size-guide
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       table.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---tags
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       table.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---[id]
+¦   ¦       ¦           page.tsx
+¦   ¦       ¦           
+¦   ¦       +---reports
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---admin-activity
+¦   ¦       ¦   ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   ¦   
+¦   ¦       ¦   ¦   +---[id]
+¦   ¦       ¦   ¦           page.tsx
+¦   ¦       ¦   ¦           
+¦   ¦       ¦   +---gateway-liquidity
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---liquidity
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---product-sales
+¦   ¦       ¦           page.tsx
+¦   ¦       ¦           
+¦   ¦       +---settings
+¦   ¦       ¦       config.tsx
+¦   ¦       ¦       page.tsx
+¦   ¦       ¦       
+¦   ¦       +---shipping
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---areas
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       table.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---provinces
+¦   ¦       ¦       ¦   page.tsx
+¦   ¦       ¦       ¦   table.tsx
+¦   ¦       ¦       ¦   
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦           +---cities
+¦   ¦       ¦                   page.tsx
+¦   ¦       ¦                   table.tsx
+¦   ¦       ¦                   
+¦   ¦       +---users
+¦   ¦       ¦   ¦   page.tsx
+¦   ¦       ¦   ¦   table.tsx
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---add
+¦   ¦       ¦   ¦       page.tsx
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---edit
+¦   ¦       ¦       +---[id]
+¦   ¦       ¦               config.tsx
+¦   ¦       ¦               page.tsx
+¦   ¦       ¦               
+¦   ¦       +---[...notfound]
+¦   ¦               page.tsx
+¦   ¦               
+¦   +---(user)
+¦   ¦   ¦   error.tsx
+¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   
+¦   ¦   +---account
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---addresses
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---favorites
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---orders
+¦   ¦   ¦   ¦   loading.tsx
+¦   ¦   ¦   ¦   page.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---[id]
+¦   ¦   ¦           page.tsx
+¦   ¦   ¦           
+¦   ¦   +---password
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---privileges
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---wallet
+¦   ¦           page.tsx
+¦   ¦           
+¦   +---api
+¦   ¦   +---snapp
+¦   ¦       +---return
+¦   ¦               route.ts
+¦   ¦               
+¦   +---categories
+¦   ¦       page.tsx
+¦   ¦       
+¦   +---orders
+¦   ¦   +---failure
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---payment-callback
+¦   ¦   ¦       page.test.tsx
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---success
+¦   ¦           page.tsx
+¦   ¦           
+¦   +---payment
+¦       +---cancelled
+¦       ¦       page.tsx
+¦       ¦       
+¦       +---failure
+¦       ¦       page.tsx
+¦       ¦       
+¦       +---success
+¦               page.tsx
+¦               
++---atoms
+¦   ¦   addressesAtom.ts
+¦   ¦   loading.ts
+¦   ¦   Order.ts
+¦   ¦   provinceAtom.ts
+¦   ¦   
+¦   +---super-admin
+¦           products.ts
+¦           
++---components
+¦   ¦   BackButtonToStore.tsx
+¦   ¦   FluidGlass.tsx
+¦   ¦   GlassSurface.tsx
+¦   ¦   invoice.tsx
+¦   ¦   Reveal.tsx
+¦   ¦   RouteList.tsx
+¦   ¦   ScrollToTop.tsx
+¦   ¦   
+¦   +---Auth
+¦   ¦   ¦   ReturnButton.tsx
+¦   ¦   ¦   
+¦   ¦   +---ForgotPassword
+¦   ¦   ¦   +---Form
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---VerifyForm
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---__tests__
+¦   ¦   ¦           Form.test.tsx
+¦   ¦   ¦           
+¦   ¦   +---Form
+¦   ¦   ¦       index.test.tsx
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       
+¦   ¦   +---Illustration
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       
+¦   ¦   +---Login
+¦   ¦   ¦   ¦   OTPForm.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Actions
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Form
+¦   ¦   ¦           index.test.tsx
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           
+¦   ¦   +---VerificationInput
+¦   ¦       ¦   index.tsx
+¦   ¦       ¦   
+¦   ¦       +---__tests__
+¦   ¦               index.test.tsx
+¦   ¦               
+¦   +---Debug
+¦   ¦       DebugConsole.tsx
+¦   ¦       DebugInfo.tsx
+¦   ¦       DebugNetwork.tsx
+¦   ¦       DebugPanel.tsx
+¦   ¦       DebugPerformance.tsx
+¦   ¦       DebugState.tsx
+¦   ¦       index.ts
+¦   ¦       
+¦   +---Hero
+¦   ¦   ¦   animations.ts
+¦   ¦   ¦   desktopHero.tsx
+¦   ¦   ¦   desktopSlider.tsx
+¦   ¦   ¦   mobileHero.tsx
+¦   ¦   ¦   mobileSlider.tsx
+¦   ¦   ¦   Pagination.tsx
+¦   ¦   ¦   PaginationDesktop.tsx
+¦   ¦   ¦   PaginationMobile.tsx
+¦   ¦   ¦   tabletHero.tsx
+¦   ¦   ¦   tabletSlider.tsx
+¦   ¦   ¦   types.ts
+¦   ¦   ¦   
+¦   ¦   +---Banners
+¦   ¦   ¦       ActionBanner.tsx
+¦   ¦   ¦       BannerImage.tsx
+¦   ¦   ¦       LeftBanner.tsx
+¦   ¦   ¦       TextBanner.tsx
+¦   ¦   ¦       
+¦   ¦   +---config
+¦   ¦   ¦   ¦   desktopSlides.ts
+¦   ¦   ¦   ¦   index.ts
+¦   ¦   ¦   ¦   mobileSlides.ts
+¦   ¦   ¦   ¦   README.md
+¦   ¦   ¦   ¦   slideFactory.ts
+¦   ¦   ¦   ¦   tabletSlides.ts
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---slides
+¦   ¦   ¦       +---desktop
+¦   ¦   ¦       ¦       index.ts
+¦   ¦   ¦       ¦       slide1.ts
+¦   ¦   ¦       ¦       slide2.ts
+¦   ¦   ¦       ¦       slide3.ts
+¦   ¦   ¦       ¦       slide4.ts
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---mobile
+¦   ¦   ¦       ¦       index.ts
+¦   ¦   ¦       ¦       slide1.ts
+¦   ¦   ¦       ¦       slide2.ts
+¦   ¦   ¦       ¦       slide3.ts
+¦   ¦   ¦       ¦       slide4.ts
+¦   ¦   ¦       ¦       slide5.ts
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---tablet
+¦   ¦   ¦               index.ts
+¦   ¦   ¦               slide1.ts
+¦   ¦   ¦               slide2.ts
+¦   ¦   ¦               
+¦   ¦   +---__tests__
+¦   ¦           mobileHero.test.tsx
+¦   ¦           
+¦   +---Home
+¦   ¦       HeroSlider.tsx
+¦   ¦       
+¦   +---Icons
+¦   ¦       LogoutIcon.tsx
+¦   ¦       SettingIcon.tsx
+¦   ¦       
+¦   +---Kits
+¦   ¦   ¦   Breadcrumb.tsx
+¦   ¦   ¦   ConfirmDialog.tsx
+¦   ¦   ¦   Disclosure.tsx
+¦   ¦   ¦   Logo.tsx
+¦   ¦   ¦   Modal.tsx
+¦   ¦   ¦   Tabs.tsx
+¦   ¦   ¦   Text.tsx
+¦   ¦   ¦   Voice.tsx
+¦   ¦   ¦   
+¦   ¦   +---Auth
+¦   ¦   ¦   ¦   Button.tsx
+¦   ¦   ¦   ¦   Checkbox.tsx
+¦   ¦   ¦   ¦   Title.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Icons
+¦   ¦   ¦   ¦       CodeIcon.tsx
+¦   ¦   ¦   ¦       EditIcon.tsx
+¦   ¦   ¦   ¦       EyeIcon.tsx
+¦   ¦   ¦   ¦       EyeOffIcon.tsx
+¦   ¦   ¦   ¦       LockIcon.tsx
+¦   ¦   ¦   ¦       LoginIcon.tsx
+¦   ¦   ¦   ¦       OtpIcon.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Input
+¦   ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---Password
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       Strength.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---Phone
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---__tests__
+¦   ¦   ¦   ¦           index.test.tsx
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---__tests__
+¦   ¦   ¦           Button.test.tsx
+¦   ¦   ¦           Checkbox.test.tsx
+¦   ¦   ¦           
+¦   ¦   +---Form
+¦   ¦   ¦   ¦   Input.tsx
+¦   ¦   ¦   ¦   RadioButton.tsx
+¦   ¦   ¦   ¦   Select.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---__tests__
+¦   ¦   ¦           Input.test.tsx
+¦   ¦   ¦           
+¦   ¦   +---Icons
+¦   ¦   ¦       CheckIcon.tsx
+¦   ¦   ¦       DeleteIcon.tsx
+¦   ¦   ¦       LeftArrowIcon.tsx
+¦   ¦   ¦       PauseIcon.tsx
+¦   ¦   ¦       PlayIcon.tsx
+¦   ¦   ¦       PlusIcon.tsx
+¦   ¦   ¦       SearchIcon.tsx
+¦   ¦   ¦       
+¦   ¦   +---PLP
+¦   ¦   ¦       Button.tsx
+¦   ¦   ¦       FilterBox.tsx
+¦   ¦   ¦       FilterBoxWithItems.tsx
+¦   ¦   ¦       
+¦   ¦   +---__tests__
+¦   ¦           Breadcrumb.test.tsx
+¦   ¦           ConfirmDialog.test.tsx
+¦   ¦           Disclosure.test.tsx
+¦   ¦           Logo.test.tsx
+¦   ¦           Modal.test.tsx
+¦   ¦           Tabs.test.tsx
+¦   ¦           Text.test.tsx
+¦   ¦           Voice.test.tsx
+¦   ¦           
+¦   +---layout
+¦   ¦       PageContainer.tsx
+¦   ¦       UserContainer.tsx
+¦   ¦       
+¦   +---PDP
+¦   ¦   ¦   NavigationButtons.tsx
+¦   ¦   ¦   OffersList.tsx
+¦   ¦   ¦   OffersListHomePage.tsx
+¦   ¦   ¦   
+¦   ¦   +---Comment
+¦   ¦   ¦   ¦   CommentModal.tsx
+¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   List.tsx
+¦   ¦   ¦   ¦   ListItem.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Add
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           SpecialOffer.tsx
+¦   ¦   ¦           
+¦   ¦   +---Hero
+¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   SizeModal.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Gallery
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       SingleImage.tsx
+¦   ¦   ¦   ¦       ThumbnailList.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Icons
+¦   ¦   ¦   ¦       BasketIcon.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Info
+¦   ¦   ¦       ¦   Action.tsx
+¦   ¦   ¦       ¦   Color.tsx
+¦   ¦   ¦       ¦   CommentsInfo.tsx
+¦   ¦   ¦       ¦   FAQItem.tsx
+¦   ¦   ¦       ¦   index.tsx
+¦   ¦   ¦       ¦   Main.tsx
+¦   ¦   ¦       ¦   Model.tsx
+¦   ¦   ¦       ¦   Price.tsx
+¦   ¦   ¦       ¦   Size.tsx
+¦   ¦   ¦       ¦   
+¦   ¦   ¦       +---Color
+¦   ¦   ¦               index.tsx
+¦   ¦   ¦               
+¦   ¦   +---Icons
+¦   ¦   ¦       ArrowLeftIcon.tsx
+¦   ¦   ¦       BasketIcon.tsx
+¦   ¦   ¦       ChatIcon.tsx
+¦   ¦   ¦       ChevronDownIcon.tsx
+¦   ¦   ¦       ChevronLeftIcon.tsx
+¦   ¦   ¦       ChevronRightIcon.tsx
+¦   ¦   ¦       DiscountIcon.tsx
+¦   ¦   ¦       EmptyStarIcon.tsx
+¦   ¦   ¦       FavoriteIcon.tsx
+¦   ¦   ¦       HeartIcon.tsx
+¦   ¦   ¦       IceIcon.tsx
+¦   ¦   ¦       InboxIcon.tsx
+¦   ¦   ¦       LookBasketIcon.tsx
+¦   ¦   ¦       MessagesIcon.tsx
+¦   ¦   ¦       NewIcon.tsx
+¦   ¦   ¦       NoDataIcon.tsx
+¦   ¦   ¦       OffIcon.tsx
+¦   ¦   ¦       ReplyIcon.tsx
+¦   ¦   ¦       RulerIcon.tsx
+¦   ¦   ¦       SendCommentIcon.tsx
+¦   ¦   ¦       ShareIcon.tsx
+¦   ¦   ¦       ShuffleIcon.tsx
+¦   ¦   ¦       StarIcon.tsx
+¦   ¦   ¦       ThumbsDownIcon.tsx
+¦   ¦   ¦       ThumbsUpIcon.tsx
+¦   ¦   ¦       
+¦   ¦   +---SpecTable
+¦   ¦           data.ts
+¦   ¦           index.tsx
+¦   ¦           
+¦   +---PLP
+¦   ¦   ¦   BottomNavigation.tsx
+¦   ¦   ¦   CategoriesModal.tsx
+¦   ¦   ¦   HeroBanner.tsx
+¦   ¦   ¦   List.tsx
+¦   ¦   ¦   NoData.tsx
+¦   ¦   ¦   SEOContent.tsx
+¦   ¦   ¦   sortOptions.ts
+¦   ¦   ¦   
+¦   ¦   +---Footer
+¦   ¦   ¦       CustomerServiceSection.tsx
+¦   ¦   ¦       FooterLink.tsx
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       LogoSection.tsx
+¦   ¦   ¦       QuickAccessSection.tsx
+¦   ¦   ¦       StoresSection.tsx
+¦   ¦   ¦       UserAccountSection.tsx
+¦   ¦   ¦       
+¦   ¦   +---Header
+¦   ¦   ¦   ¦   DesktopActions.tsx
+¦   ¦   ¦   ¦   DesktopNav.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Mobile
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           MobileMenu.tsx
+¦   ¦   ¦           MobileSearch.tsx
+¦   ¦   ¦           
+¦   ¦   +---Icons
+¦   ¦   ¦       BasketIcon.tsx
+¦   ¦   ¦       CartIcon.tsx
+¦   ¦   ¦       CategoryIcon.tsx
+¦   ¦   ¦       CloseIcon.tsx
+¦   ¦   ¦       DiscountIcon.tsx
+¦   ¦   ¦       FilterIcon.tsx
+¦   ¦   ¦       HeartIcon.tsx
+¦   ¦   ¦       HomeIcon.tsx
+¦   ¦   ¦       MenuIcon.tsx
+¦   ¦   ¦       OrderTrackingIcon.tsx
+¦   ¦   ¦       ProfileIcon.tsx
+¦   ¦   ¦       SearchIcon.tsx
+¦   ¦   ¦       ShoppingCartIcon.tsx
+¦   ¦   ¦       SortDescIcon.tsx
+¦   ¦   ¦       UserProfileIcon.tsx
+¦   ¦   ¦       WalletIcon.tsx
+¦   ¦   ¦       XIcon.tsx
+¦   ¦   ¦       
+¦   ¦   +---List
+¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   MobileFilter.tsx
+¦   ¦   ¦   ¦   SidebarSuggestions.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Content
+¦   ¦   ¦   ¦       Header.tsx
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       Items.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Filter
+¦   ¦   ¦           Availability.tsx
+¦   ¦   ¦           Category.tsx
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           Price.tsx
+¦   ¦   ¦           
+¦   ¦   +---Pagination
+¦   ¦           index.tsx
+¦   ¦           
+¦   +---Product
+¦   ¦   ¦   Card.tsx
+¦   ¦   ¦   Chip.tsx
+¦   ¦   ¦   ImageSlider.tsx
+¦   ¦   ¦   SmallCard.tsx
+¦   ¦   ¦   
+¦   ¦   +---add
+¦   ¦   ¦   ¦   Details.tsx
+¦   ¦   ¦   ¦   Overall.tsx
+¦   ¦   ¦   ¦   SetPrice.tsx
+¦   ¦   ¦   ¦   SetStatus.tsx
+¦   ¦   ¦   ¦   Tags.tsx
+¦   ¦   ¦   ¦   UploadButton.tsx
+¦   ¦   ¦   ¦   Variables.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Details
+¦   ¦   ¦   ¦   ¦   MetaOptions.tsx
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---Features
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       Table.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---Variable
+¦   ¦   ¦   ¦           Card.tsx
+¦   ¦   ¦   ¦           Header.tsx
+¦   ¦   ¦   ¦           index.tsx
+¦   ¦   ¦   ¦           ProductVariableHeader.tsx
+¦   ¦   ¦   ¦           Row.tsx
+¦   ¦   ¦   ¦           Table.tsx
+¦   ¦   ¦   ¦           types.ts
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---FileUploader
+¦   ¦   ¦   ¦       FileItem.tsx
+¦   ¦   ¦   ¦       FileList.tsx
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       types.ts
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Gallery
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---IndexPhotoUploader
+¦   ¦   ¦   ¦       ActionButtons.tsx
+¦   ¦   ¦   ¦       ImagePreview.tsx
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---MediaUploadModal
+¦   ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   ¦   types.ts
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---components
+¦   ¦   ¦   ¦       ¦   FilterSection.tsx
+¦   ¦   ¦   ¦       ¦   MediaUploader.tsx
+¦   ¦   ¦   ¦       ¦   Sidebar.tsx
+¦   ¦   ¦   ¦       ¦   TabItem.tsx
+¦   ¦   ¦   ¦       ¦   UploadedPhotosSelector.tsx
+¦   ¦   ¦   ¦       ¦   Uploader.tsx
+¦   ¦   ¦   ¦       ¦   
+¦   ¦   ¦   ¦       +---DetailSection
+¦   ¦   ¦   ¦               index.tsx
+¦   ¦   ¦   ¦               text.tsx
+¦   ¦   ¦   ¦               
+¦   ¦   ¦   +---PhotoUploader
+¦   ¦   ¦   ¦       ImageGrid.tsx
+¦   ¦   ¦   ¦       ImagePreview.tsx
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---SetCategory
+¦   ¦   ¦   ¦       Import.tsx
+¦   ¦   ¦   ¦       MainCategorySelector.tsx
+¦   ¦   ¦   ¦       Modal.tsx
+¦   ¦   ¦   ¦       SetCategory.tsx
+¦   ¦   ¦   ¦       SimilarCategorySelector.tsx
+¦   ¦   ¦   ¦       Table.tsx
+¦   ¦   ¦   ¦       TablePagination.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Size
+¦   ¦   ¦           Guide.tsx
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           SizeGuideEditor.tsx
+¦   ¦   ¦           Table.tsx
+¦   ¦   ¦           
+¦   ¦   +---Icons
+¦   ¦   ¦       ArrowDownIcon.tsx
+¦   ¦   ¦       CameraIcon.tsx
+¦   ¦   ¦       ChevronDownIcon.tsx
+¦   ¦   ¦       ChevronLeftIcon.tsx
+¦   ¦   ¦       ChevronRightIcon.tsx
+¦   ¦   ¦       ChevronUpIcon.tsx
+¦   ¦   ¦       CopyIcon.tsx
+¦   ¦   ¦       DeleteIcon.tsx
+¦   ¦   ¦       EditIcon.tsx
+¦   ¦   ¦       EyeIcon.tsx
+¦   ¦   ¦       GridIcon.tsx
+¦   ¦   ¦       HeartIcon.tsx
+¦   ¦   ¦       MoreIcon.tsx
+¦   ¦   ¦       PlusIcon.tsx
+¦   ¦   ¦       SearchIcon.tsx
+¦   ¦   ¦       SettingIcon.tsx
+¦   ¦   ¦       ThreeDotsIcon.tsx
+¦   ¦   ¦       
+¦   ¦   +---__tests__
+¦   ¦           Card.test.tsx
+¦   ¦           ImageSlider.test.tsx
+¦   ¦           
+¦   +---Search
+¦   ¦   ¦   PLPDesktopSearch.tsx
+¦   ¦   ¦   SearchSuggestionCard.tsx
+¦   ¦   ¦   SearchSuggestionCard.tsx.bak
+¦   ¦   ¦   
+¦   ¦   +---Icons
+¦   ¦           ChevronDownIcon.tsx
+¦   ¦           SearchIcon.tsx
+¦   ¦           
+¦   +---SEO
+¦   ¦       BreadcrumbSchema.tsx
+¦   ¦       OrganizationSchema.tsx
+¦   ¦       ProductSchema.tsx
+¦   ¦       
+¦   +---ShoppingCart
+¦   ¦   ¦   CheckoutProgress.tsx
+¦   ¦   ¦   Counter.tsx
+¦   ¦   ¦   Empty.tsx
+¦   ¦   ¦   index.tsx
+¦   ¦   ¦   OrderSummaryCard.tsx
+¦   ¦   ¦   PopUp.tsx
+¦   ¦   ¦   QuantityControl.tsx
+¦   ¦   ¦   SuccessOrderSubmit.tsx
+¦   ¦   ¦   
+¦   ¦   +---Drawer
+¦   ¦   ¦       Content.tsx
+¦   ¦   ¦       Empty.tsx
+¦   ¦   ¦       Footer.tsx
+¦   ¦   ¦       Header.tsx
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       Item.tsx
+¦   ¦   ¦       
+¦   ¦   +---Icons
+¦   ¦   ¦       BasketIcon.tsx
+¦   ¦   ¦       CategoryIcon.tsx
+¦   ¦   ¦       CirculeInformationIcon.tsx
+¦   ¦   ¦       GiftIcon.tsx
+¦   ¦   ¦       MinusIcon.tsx
+¦   ¦   ¦       PlusIcon.tsx
+¦   ¦   ¦       TrashIcon.tsx
+¦   ¦   ¦       
+¦   ¦   +---Table
+¦   ¦   ¦       Desktop.tsx
+¦   ¦   ¦       Mobile.tsx
+¦   ¦   ¦       MobileProductCard.tsx
+¦   ¦   ¦       
+¦   ¦   +---?Bill
+¦   ¦           CustomRadioGroup.tsx
+¦   ¦           DeliveryForm.tsx
+¦   ¦           DeliveryOptions.tsx
+¦   ¦           DeliveryTime.tsx
+¦   ¦           DiscountCoupon.tsx
+¦   ¦           index.tsx
+¦   ¦           InformationForm.tsx
+¦   ¦           PaymentGateway.tsx
+¦   ¦           
+¦   +---Skeletons
+¦   ¦       CartSkeleton.tsx
+¦   ¦       ProductListSkeleton.tsx
+¦   ¦       ReportTableSkeleton.tsx
+¦   ¦       
+¦   +---SuperAdmin
+¦   ¦   ¦   ShippingTabs.tsx
+¦   ¦   ¦   StoreManagerNotice.tsx
+¦   ¦   ¦   
+¦   ¦   +---Coupons
+¦   ¦   ¦       DeliverySelector.tsx
+¦   ¦   ¦       ProductSelector.tsx
+¦   ¦   ¦       
+¦   ¦   +---Events
+¦   ¦   ¦       EventLogViewer.tsx
+¦   ¦   ¦       
+¦   ¦   +---Layout
+¦   ¦   ¦   +---ContentWrapper
+¦   ¦   ¦   ¦   ¦   Desktop.tsx
+¦   ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   ¦   Mobile.tsx
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---Button
+¦   ¦   ¦   ¦           Add.tsx
+¦   ¦   ¦   ¦           Filter.tsx
+¦   ¦   ¦   ¦           RecycleBin.tsx
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---Header
+¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦       Search.tsx
+¦   ¦   ¦   ¦       UserProfile.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Icons
+¦   ¦   ¦   ¦       BellIcon.tsx
+¦   ¦   ¦   ¦       CartIcon.tsx
+¦   ¦   ¦   ¦       ChevronDownIcon.tsx
+¦   ¦   ¦   ¦       ChevronLeftIcon.tsx
+¦   ¦   ¦   ¦       ChevronRightIcon.tsx
+¦   ¦   ¦   ¦       DashboardIcon.tsx
+¦   ¦   ¦   ¦       DragIcon.tsx
+¦   ¦   ¦   ¦       DuplicateIcon.tsx
+¦   ¦   ¦   ¦       EditIcon.tsx
+¦   ¦   ¦   ¦       ExitIcon.tsx
+¦   ¦   ¦   ¦       EyeIcon.tsx
+¦   ¦   ¦   ¦       FilterCloseIcon.tsx
+¦   ¦   ¦   ¦       FilterIcon.tsx
+¦   ¦   ¦   ¦       KeyIcon.tsx
+¦   ¦   ¦   ¦       OrdersIcon.tsx
+¦   ¦   ¦   ¦       PaymentIcon.tsx
+¦   ¦   ¦   ¦       PercentIcon.tsx
+¦   ¦   ¦   ¦       PlusIcon.tsx
+¦   ¦   ¦   ¦       PrintIcon.tsx
+¦   ¦   ¦   ¦       ProductIcon.tsx
+¦   ¦   ¦   ¦       RecycleIcon.tsx
+¦   ¦   ¦   ¦       SearchIcon.tsx
+¦   ¦   ¦   ¦       SettingsIcon.tsx
+¦   ¦   ¦   ¦       ShippingIcon.tsx
+¦   ¦   ¦   ¦       ShowIcon.tsx
+¦   ¦   ¦   ¦       ShowMoreIcon.tsx
+¦   ¦   ¦   ¦       SmallChevronDownIcon.tsx
+¦   ¦   ¦   ¦       TrashIcon.tsx
+¦   ¦   ¦   ¦       UndoIcon.tsx
+¦   ¦   ¦   ¦       UsersIcon.tsx
+¦   ¦   ¦   ¦       WhitePlusIcon.tsx
+¦   ¦   ¦   ¦       WhiteSearchIcon.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Sidebar
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           
+¦   ¦   +---Order
+¦   ¦   ¦       AdjustItemsPanel.tsx
+¦   ¦   ¦       AnipoBarcodeDialog.tsx
+¦   ¦   ¦       AnipoBarcodeLabel.tsx
+¦   ¦   ¦       EditableFieldLabel.tsx
+¦   ¦   ¦       GatewayLogs.tsx
+¦   ¦   ¦       MobileOrderItem.tsx
+¦   ¦   ¦       OrderRowActions.tsx
+¦   ¦   ¦       ProductSearch.tsx
+¦   ¦   ¦       ProductSelectionSection.tsx
+¦   ¦   ¦       SelectedProducts.tsx
+¦   ¦   ¦       Sidebar.tsx
+¦   ¦   ¦       SummaryFooter.tsx
+¦   ¦   ¦       SuperAdminOrderLogs.tsx
+¦   ¦   ¦       UserSearchSection.tsx
+¦   ¦   ¦       
+¦   ¦   +---Pagination
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       PageSizeSelect.tsx
+¦   ¦   ¦       
+¦   ¦   +---PaymentMethod
+¦   ¦   ¦       Footer.tsx
+¦   ¦   ¦       Sidebar.tsx
+¦   ¦   ¦       
+¦   ¦   +---reports
+¦   ¦   ¦       AreaLineChart.tsx
+¦   ¦   ¦       
+¦   ¦   +---Table
+¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   Select.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Cells
+¦   ¦   ¦   ¦       ActionButton.tsx
+¦   ¦   ¦   ¦       EmailLink.tsx
+¦   ¦   ¦   ¦       FullDate.tsx
+¦   ¦   ¦   ¦       RemoveActionButton.tsx
+¦   ¦   ¦   ¦       SimplePrice.tsx
+¦   ¦   ¦   ¦       Switch.tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Mobile
+¦   ¦   ¦       +---Row
+¦   ¦   ¦               Box.tsx
+¦   ¦   ¦               Open.tsx
+¦   ¦   ¦               
+¦   ¦   +---UpsertPage
+¦   ¦       +---ContentWrapper
+¦   ¦       ¦   ¦   ActiveBox.tsx
+¦   ¦       ¦   ¦   ExtendedTypes.ts
+¦   ¦       ¦   ¦   ExtendedWrapper.tsx
+¦   ¦       ¦   ¦   FieldRenderer.tsx
+¦   ¦       ¦   ¦   index.tsx
+¦   ¦       ¦   ¦   types.ts
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---Fields
+¦   ¦       ¦           CategoriesListField.tsx
+¦   ¦       ¦           CheckboxField.tsx
+¦   ¦       ¦           CopyTextField.tsx
+¦   ¦       ¦           DateField.tsx
+¦   ¦       ¦           DropdownField.tsx
+¦   ¦       ¦           index.ts
+¦   ¦       ¦           JsonField.tsx
+¦   ¦       ¦           MultilineTextField.tsx
+¦   ¦       ¦           PasswordField.tsx
+¦   ¦       ¦           PasswordWithBtn.tsx
+¦   ¦       ¦           ProvinceCityField.tsx
+¦   ¦       ¦           RadioTextWithChips.tsx
+¦   ¦       ¦           TagTextField.tsx
+¦   ¦       ¦           TermsField.tsx
+¦   ¦       ¦           TextField.tsx
+¦   ¦       ¦           
+¦   ¦       +---Icons
+¦   ¦               ArrowLeftIcon.tsx
+¦   ¦               BluePlusIcon.tsx
+¦   ¦               CalendarIcon.tsx
+¦   ¦               CopyIcon.tsx
+¦   ¦               EditIcon.tsx
+¦   ¦               KeyIcon.tsx
+¦   ¦               
+¦   +---ui
+¦   ¦   ¦   AuthInitializer.tsx
+¦   ¦   ¦   BlurImage.tsx
+¦   ¦   ¦   Button.test.tsx
+¦   ¦   ¦   Button.tsx
+¦   ¦   ¦   card.tsx
+¦   ¦   ¦   ErrorNotification.tsx
+¦   ¦   ¦   GlobalErrorDisplay.tsx
+¦   ¦   ¦   GlobalFetchInterceptor.tsx
+¦   ¦   ¦   GlobalLoadingOverlay.tsx
+¦   ¦   ¦   ImageEffects.tsx
+¦   ¦   ¦   Input.test.tsx
+¦   ¦   ¦   Input.tsx
+¦   ¦   ¦   NavigationProgress.tsx
+¦   ¦   ¦   PreloadBlur.tsx
+¦   ¦   ¦   ServiceWorkerRegistration.tsx
+¦   ¦   ¦   SuspenseLoader.tsx
+¦   ¦   ¦   textarea.tsx
+¦   ¦   ¦   TopProgressBar.tsx
+¦   ¦   ¦   
+¦   ¦   +---__tests__
+¦   ¦           AuthInitializer.test.tsx
+¦   ¦           
+¦   +---User
+¦       ¦   BreadCrumb.tsx
+¦       ¦   Constnats.tsx
+¦       ¦   Header.tsx
+¦       ¦   
+¦       +---Account
+¦       ¦       AccountForm.tsx
+¦       ¦       constants.ts
+¦       ¦       OverviewCards.tsx
+¦       ¦       QuickLinks.tsx
+¦       ¦       RecentOrders.tsx
+¦       ¦       WelcomNotifBar.tsx
+¦       ¦       
+¦       +---Address
+¦       ¦       AddAddress.tsx
+¦       ¦       AddressCard.tsx
+¦       ¦       index.tsx
+¦       ¦       
+¦       +---Icons
+¦       ¦       AccountIcon.tsx
+¦       ¦       ArrowDownIcon.tsx
+¦       ¦       ArrowLeftIcon.tsx
+¦       ¦       CalenderIcon.tsx
+¦       ¦       CancelIcon.tsx
+¦       ¦       CirculePlusIcon.tsx
+¦       ¦       DebitIcon.tsx
+¦       ¦       DeleteIcon.tsx
+¦       ¦       DepositIcon.tsx
+¦       ¦       EditIcon.tsx
+¦       ¦       FactorIcon.tsx
+¦       ¦       LeftCarouselIcon.tsx
+¦       ¦       LeftUpArrowIcon.tsx
+¦       ¦       MenuIcon.tsx
+¦       ¦       MessageIcon.tsx
+¦       ¦       MinusIcon.tsx
+¦       ¦       PlusIcon.tsx
+¦       ¦       RightArrowIcon.tsx
+¦       ¦       SaveIcon.tsx
+¦       ¦       SortIcon.tsx
+¦       ¦       TickIcon.tsx
+¦       ¦       TransactionsIcon.tsx
+¦       ¦       UserAddressesIcon.tsx
+¦       ¦       UserFavoritesIcon.tsx
+¦       ¦       UserOrdersIcon.tsx
+¦       ¦       UserPasswordIcon.tsx
+¦       ¦       UserScoresIcon.tsx
+¦       ¦       UserWalletIcon.tsx
+¦       ¦       XIcon.tsx
+¦       ¦       
+¦       +---MobileHamburgerMenu
+¦       ¦       index.tsx
+¦       ¦       Menu.tsx
+¦       ¦       
+¦       +---Orders
+¦       ¦   ¦   OrderCard.tsx
+¦       ¦   ¦   OrderCardSkeleton.tsx
+¦       ¦   ¦   OrderDetailsDrawer.tsx
+¦       ¦   ¦   OrderList.tsx
+¦       ¦   ¦   OrderRow.tsx
+¦       ¦   ¦   OrderRowSkeleton.tsx
+¦       ¦   ¦   PaymentStatus.tsx
+¦       ¦   ¦   PaymentStatusButton.tsx
+¦       ¦   ¦   ShowFactorButton.tsx
+¦       ¦   ¦   Tabs.tsx
+¦       ¦   ¦   
+¦       ¦   +---Detail
+¦       ¦           OrderDetailPageClient.tsx
+¦       ¦           OrderItemsList.tsx
+¦       ¦           OrderTimeline.tsx
+¦       ¦           PaymentSummaryCard.tsx
+¦       ¦           ShippingInfoCard.tsx
+¦       ¦           SupportActions.tsx
+¦       ¦           
+¦       +---Password
+¦       ¦       PasswordChangeForm.tsx
+¦       ¦       
+¦       +---Sidebar
+¦       ¦       index.tsx
+¦       ¦       SidebarItem.tsx
+¦       ¦       
+¦       +---Wallet
+¦               Balance.tsx
+¦               EmptyState.tsx
+¦               IncreaseBalance.tsx
+¦               TransactionHeader.tsx
+¦               TransactionSection.tsx
+¦               TransactionsList.tsx
+¦               TransactionsListRow.tsx
+¦               
++---constants
+¦       api.ts
+¦       categories.ts
+¦       enums.ts
+¦       productFilters.ts
+¦       roleLabels.ts
+¦       superAdminSidebar.tsx
+¦       
++---contexts
+¦       CartContext.tsx
+¦       
++---hooks
+¦   ¦   useAccountFreshData.ts
+¦   ¦   useAddToCart.ts
+¦   ¦   useAudioPlayer.ts
+¦   ¦   useCheckPhoneNumber.ts
+¦   ¦   useCountdown.ts
+¦   ¦   useCurrentUser.ts
+¦   ¦   useDashboardMetrics.ts
+¦   ¦   useDebug.ts
+¦   ¦   useFreshDataOnPageLoad.ts
+¦   ¦   useFreshDataOnVisibility.ts
+¦   ¦   useHourlyRefresh.ts
+¦   ¦   useIndexImageUpload.ts
+¦   ¦   useOptimisticDelete.tsx
+¦   ¦   usePageSizeQuery.ts
+¦   ¦   useProductLike.ts
+¦   ¦   useSmoothLoading.ts
+¦   ¦   useToggle.ts
+¦   ¦   useUser.ts
+¦   ¦   useUserAccountOverview.ts
+¦   ¦   
+¦   +---api
+¦   ¦       useMe.ts
+¦   ¦       useNavigation.ts
+¦   ¦       
+¦   +---product
+¦   ¦       useCategory.ts
+¦   ¦       useTag.ts
+¦   ¦       useUpload.ts
+¦   ¦       
+¦   +---__tests__
+¦           useAddToCart.test.ts
+¦           useCheckPhoneNumber.test.ts
+¦           useCountdown.test.ts
+¦           useProductLike.test.tsx
+¦           useToggle.test.ts
+¦           useUser.test.ts
+¦           
++---lib
+¦   ¦   api-client.ts
+¦   ¦   colorPalettes.ts
+¦   ¦   errorTranslations.ts
+¦   ¦   jotaiStore.ts
+¦   ¦   utils.ts
+¦   ¦   
+¦   +---atoms
+¦           auth.ts
+¦           errors.ts
+¦           optimisticDelete.ts
+¦           
++---services
+¦   ¦   footer.ts
+¦   ¦   index.test.ts
+¦   ¦   index.ts
+¦   ¦   location.ts
+¦   ¦   shipping.ts
+¦   ¦   
+¦   +---auth
+¦   ¦   ¦   exists.ts
+¦   ¦   ¦   index.ts
+¦   ¦   ¦   loginPassword.ts
+¦   ¦   ¦   register.ts
+¦   ¦   ¦   resetPassword.ts
+¦   ¦   ¦   sendOTP.ts
+¦   ¦   ¦   verifyOTP.ts
+¦   ¦   ¦   
+¦   ¦   +---__tests__
+¦   ¦           authService.test.ts
+¦   ¦           loginPassword.test.ts
+¦   ¦           sendOTP.test.ts
+¦   ¦           verifyOTP.test.ts
+¦   ¦           
+¦   +---cart
+¦   ¦   ¦   base.ts
+¦   ¦   ¦   discount.ts
+¦   ¦   ¦   index.ts
+¦   ¦   ¦   mutations.ts
+¦   ¦   ¦   queries.ts
+¦   ¦   ¦   
+¦   ¦   +---helpers
+¦   ¦   ¦       response.ts
+¦   ¦   ¦       
+¦   ¦   +---types
+¦   ¦   ¦       cart.ts
+¦   ¦   ¦       media.ts
+¦   ¦   ¦       
+¦   ¦   +---__tests__
+¦   ¦           cartService.test.ts
+¦   ¦           
+¦   +---event-log
+¦   ¦       index.ts
+¦   ¦       
+¦   +---order
+¦   ¦   ¦   index.ts
+¦   ¦   ¦   
+¦   ¦   +---__tests__
+¦   ¦           index.test.ts
+¦   ¦           
+¦   +---product
+¦   ¦   ¦   homepage.ts
+¦   ¦   ¦   product-like.ts
+¦   ¦   ¦   product.ts
+¦   ¦   ¦   reviews.ts
+¦   ¦   ¦   search.ts
+¦   ¦   ¦   
+¦   ¦   +---__tests__
+¦   ¦           product.test.ts
+¦   ¦           
+¦   +---super-admin
+¦   ¦   +---files
+¦   ¦   ¦       download.ts
+¦   ¦   ¦       upload.ts
+¦   ¦   ¦       
+¦   ¦   +---footer
+¦   ¦   ¦       get.ts
+¦   ¦   ¦       update.ts
+¦   ¦   ¦       
+¦   ¦   +---navigation
+¦   ¦   ¦       get.ts
+¦   ¦   ¦       getProductCategories.ts
+¦   ¦   ¦       update.ts
+¦   ¦   ¦       
+¦   ¦   +---orders
+¦   ¦   ¦       adjustItems.ts
+¦   ¦   ¦       
+¦   ¦   +---product
+¦   ¦   ¦   ¦   create.ts
+¦   ¦   ¦   ¦   duplicate.ts
+¦   ¦   ¦   ¦   get.ts
+¦   ¦   ¦   ¦   stock-removal.ts
+¦   ¦   ¦   ¦   update.ts
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---category
+¦   ¦   ¦   ¦       create.ts
+¦   ¦   ¦   ¦       delete.ts
+¦   ¦   ¦   ¦       get.ts
+¦   ¦   ¦   ¦       getAll.ts
+¦   ¦   ¦   ¦       update.ts
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---size-helper
+¦   ¦   ¦   ¦       create.ts
+¦   ¦   ¦   ¦       get.ts
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---tag
+¦   ¦   ¦           create.ts
+¦   ¦   ¦           get.ts
+¦   ¦   ¦           
+¦   ¦   +---reports
+¦   ¦   ¦       adminActivity.ts
+¦   ¦   ¦       gatewayLiquidity.ts
+¦   ¦   ¦       liquidity.ts
+¦   ¦   ¦       productSales.ts
+¦   ¦   ¦       
+¦   ¦   +---settings
+¦   ¦           get.ts
+¦   ¦           update.ts
+¦   ¦           
+¦   +---user
+¦   ¦   ¦   addresses.ts
+¦   ¦   ¦   getAll.ts
+¦   ¦   ¦   getDetails.ts
+¦   ¦   ¦   getInfo.ts
+¦   ¦   ¦   index.ts
+¦   ¦   ¦   me.ts
+¦   ¦   ¦   updateProfile.ts
+¦   ¦   ¦   
+¦   ¦   +---__tests__
+¦   ¦           addresses.test.ts
+¦   ¦           
+¦   +---user-activity
+¦   ¦       index.ts
+¦   ¦       
+¦   +---wallet
+¦   ¦       index.ts
+¦   ¦       
+¦   +---__tests__
+¦           apiClient.test.ts
+¦           
++---styles
+¦       components.css
+¦       fonts.ts
+¦       
++---types
+¦   ¦   api.ts
+¦   ¦   global.d.ts
+¦   ¦   Order.ts
+¦   ¦   Product.ts
+¦   ¦   Tabs.tsx
+¦   ¦   
+¦   +---super-admin
+¦           footer.ts
+¦           navigation.ts
+¦           order.ts
+¦           products.ts
+¦           settings.ts
+¦           
++---utils
+¦   ¦   accessToken.ts
+¦   ¦   api.test.ts
+¦   ¦   api.ts
+¦   ¦   auth.ts
+¦   ¦   debug.ts
+¦   ¦   discounts.ts
+¦   ¦   errorMessages.ts
+¦   ¦   faNum.ts
+¦   ¦   fetchWithTimeout.ts
+¦   ¦   imageLoader.ts
+¦   ¦   imagePreloader.ts
+¦   ¦   isNullish.ts
+¦   ¦   logger.ts
+¦   ¦   logout.ts
+¦   ¦   notify.ts
+¦   ¦   paramCreator.ts
+¦   ¦   populatedProductData.ts
+¦   ¦   price.ts
+¦   ¦   requestQueue.ts
+¦   ¦   resolveAssetUrl.ts
+¦   ¦   routes.ts
+¦   ¦   sizeGuide.ts
+¦   ¦   statusTranslations.ts
+¦   ¦   strapi.ts
+¦   ¦   tailwind.ts
+¦   ¦   userErrorMessage.ts
+¦   ¦   
+¦   +---__tests__
+¦           api.test.ts
+¦           auth.test.ts
+¦           discounts.test.ts
+¦           errorMessages.test.ts
+¦           faNum.test.ts
+¦           fetchWithTimeout.test.ts
+¦           imageLoader.test.ts
+¦           isNullish.test.ts
+¦           logger.test.ts
+¦           notify.test.ts
+¦           paramCreator.test.ts
+¦           price.test.ts
+¦           routes.test.ts
+¦           tailwind.test.ts
+¦           
++---__tests__
+        auth-flow.integration.test.ts
+        auth.integration.test.ts
+        pdp-selection.test.tsx
+        setup.test.ts
+        

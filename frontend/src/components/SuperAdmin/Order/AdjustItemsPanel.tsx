@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Order } from "@/app/(super-admin)/super-admin/orders/edit/[id]/page";
+import type { SuperAdminOrderDetail } from "@/types/super-admin/order";
 import {
   previewAdjustItems,
   adjustItems,
@@ -17,7 +17,7 @@ const ALLOWED_STATUSES = [
 ];
 
 type Props = {
-  order: Order;
+  order: SuperAdminOrderDetail;
   onSuccess: () => void;
 };
 
