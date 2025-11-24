@@ -6,49 +6,39 @@ export default () => ({
         getTimeout: 100,
         options: {
           max: 100000,
-          maxAge: 30 * 10 * 1000, // 30 seconds
+          maxAge: 5 * 60 * 1000, // 5 minutes (300000ms) - reasonable for e-commerce
         },
       },
       strategy: {
         contentTypes: [
-          "api::cart.cart",
-          "api::cart-item.cart-item",
-          "api::contract.contract",
-          "api::contract-transaction.contract-transaction",
-          "api::discount.discount",
+          // Static/reference data - safe to cache
           "api::footer.footer",
-          "api::general-discount.general-discount",
-
-          "api::local-user-address.local-user-address",
-          "api::local-user-info.local-user-info",
-          "api::local-user-permission.local-user-permission",
-          "api::local-user-role.local-user-role",
-          "api::local-user-wallet.local-user-wallet",
-          "api::local-user-wallet-transaction.local-user-wallet-transaction",
           "api::navigation.navigation",
-          "api::order.order",
-          "api::order-item.order-item",
-          "api::payment-gateway.payment-gateway",
-          "api::product.product",
           "api::product-category.product-category",
           "api::product-category-content.product-category-content",
-          "api::product-faq.product-faq",
-          "api::product-like.product-like",
-          "api::product-review.product-review",
-          "api::product-review-like.product-review-like",
-          "api::product-review-reply.product-review-reply",
           "api::product-size-helper.product-size-helper",
-          "api::product-stock.product-stock",
-          "api::product-stock-log.product-stock-log",
           "api::product-tag.product-tag",
-          "api::product-variation.product-variation",
           "api::product-variation-color.product-variation-color",
           "api::product-variation-model.product-variation-model",
           "api::product-variation-size.product-variation-size",
           "api::shipping.shipping",
           "api::shipping-city.shipping-city",
           "api::shipping-province.shipping-province",
+
+          // Semi-dynamic - products, reviews (5 min cache acceptable)
+          "api::product.product",
+          "api::product-variation.product-variation",
+          "api::product-faq.product-faq",
+          "api::product-review.product-review",
+          "api::product-review-like.product-review-like",
+          "api::product-review-reply.product-review-reply",
+
+          // Discounts (5 min acceptable, changes infrequently)
+          "api::discount.discount",
+          "api::general-discount.general-discount",
         ],
+        // Exclude real-time content types - they need fresh data
+        // Cart, Order, Stock, Wallet, Address, Transactions are NOT cached
       },
     },
   },

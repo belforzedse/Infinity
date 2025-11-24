@@ -23,36 +23,82 @@ const buildPaymentRedirectUrl = (
 async function incrementDiscountUsageCounter(
   strapi: Strapi,
   discountCode: string,
-  orderId: number
+  orderId: number,
 ) {
   if (!discountCode) return; // No discount code to track
 
   try {
     // Find the discount by code
-    const discount = await strapi.entityService.findMany(
-      "api::discount.discount",
-      {
-        filters: { Code: discountCode },
-        limit: 1,
-      }
-    );
+    const discount = await strapi.entityService.findMany("api::discount.discount", {
+      filters: { Code: discountCode },
+      limit: 1,
+    });
 
     if (!discount || !discount[0]) {
       strapi.log.warn(
-        `Discount code "${discountCode}" not found when incrementing usage for order ${orderId}`
+        `Discount code "${discountCode}" not found when incrementing usage for order ${orderId}`,
       );
       return;
     }
 
     const discountId = discount[0].id;
+    const limitUsage = Number(discount[0].LimitUsage || 0);
     const currentUsedTimes = Number(discount[0].UsedTimes || 0);
     const discountAmount = Number(discount[0].Amount || 0);
     const discountType = discount[0].Type || "Unknown";
 
-    // Increment UsedTimes
-    await strapi.entityService.update("api::discount.discount", discountId, {
-      data: { UsedTimes: currentUsedTimes + 1 },
-    });
+    // Atomically increment UsedTimes with race condition protection
+    // Only increment if usage limit hasn't been reached (LimitUsage = 0 means unlimited)
+    let updateResult: any;
+    if (limitUsage > 0) {
+      // Check limit: only increment if UsedTimes < LimitUsage
+      // Note: Strapi converts camelCase to snake_case, so "UsedTimes" becomes "used_times"
+      const result = await strapi.db.connection.raw(
+        `UPDATE discounts
+         SET used_times = used_times + 1
+         WHERE id = ? AND used_times < ?
+         RETURNING used_times`,
+        [discountId, limitUsage],
+      );
+
+      const rows = result.rows || [];
+      if (rows.length === 0) {
+        // No rows updated means limit already reached or exceeded
+        strapi.log.warn(
+          `Discount code "${discountCode}" usage limit already reached (${currentUsedTimes}/${limitUsage})`,
+          {
+            orderId,
+            discountId,
+            discountCode,
+            currentUsedTimes,
+            limitUsage,
+          },
+        );
+        return;
+      }
+
+      updateResult = { UsedTimes: rows[0].used_times };
+    } else {
+      // Unlimited usage - safe to increment directly
+      // Note: Strapi converts camelCase to snake_case, so "UsedTimes" becomes "used_times"
+      const result = await strapi.db.connection.raw(
+        `UPDATE discounts
+         SET used_times = used_times + 1
+         WHERE id = ?
+         RETURNING used_times`,
+        [discountId],
+      );
+
+      const rows = result.rows || [];
+      if (rows.length === 0) {
+        strapi.log.warn(`Discount with id ${discountId} not found for atomic update`);
+        return;
+      }
+
+      updateResult = { UsedTimes: rows[0].used_times };
+    }
+
+    const newUsedTimes = updateResult.UsedTimes;
 
     // Log to order-log for audit trail
     try {
@@ -67,7 +113,7 @@ async function incrementDiscountUsageCounter(
             discountType,
             discountAmount,
             usageTrackingBefore: currentUsedTimes,
-            usageTrackingAfter: currentUsedTimes + 1,
+            usageTrackingAfter: newUsedTimes,
           },
         },
       });
@@ -76,21 +122,20 @@ async function incrementDiscountUsageCounter(
     }
 
     strapi.log.info(
-      `Discount usage incremented for code "${discountCode}" (order ${orderId}): ${currentUsedTimes} → ${
-        currentUsedTimes + 1
-      }`,
+      `Discount usage incremented atomically for code "${discountCode}" (order ${orderId}): ${currentUsedTimes} → ${newUsedTimes}`,
       {
         orderId,
         discountId,
         discountCode,
         discountType,
         discountAmount,
-      }
+        limitUsage: limitUsage > 0 ? limitUsage : "unlimited",
+      },
     );
   } catch (error) {
     strapi.log.error(
       `Failed to increment discount usage counter for code "${discountCode}" on order ${orderId}:`,
-      error
+      error,
     );
     // Don't throw - this shouldn't block payment completion
   }
@@ -124,8 +169,7 @@ async function clearCartAfterPayment(strapi: Strapi, orderId?: number) {
 
 export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Mellat returns: ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId
-  const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } =
-    (ctx.request as any).body || {};
+  const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } = (ctx.request as any).body || {};
 
   // SnappPay callback fields may arrive via POST body or GET query
   // Normalize from both sources and accept common aliases
@@ -140,8 +184,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
     q.transactionId ??
     b.transaction_id ??
     q.transaction_id) as any;
-  const samanStateInput: any =
-    b.State ?? q.State ?? b.STATE ?? q.STATE ?? b.state ?? q.state;
+  const samanStateInput: any = b.State ?? q.State ?? b.STATE ?? q.STATE ?? b.state ?? q.state;
   const samanStatusInput: any =
     b.Status ?? q.Status ?? b.STATUS ?? q.STATUS ?? b.status ?? q.status;
   const samanRefNumInput: any =
@@ -177,8 +220,8 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             timestamp: new Date().toISOString(),
           },
           null,
-          2
-        )
+          2,
+        ),
       );
     } catch {}
 
@@ -254,16 +297,33 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               populate: { contract: { populate: { order: true } } },
               sort: { createdAt: "desc" },
               limit: 1,
-            }
+            },
           )) as any[];
           if (txMatches?.length) {
             contractTransaction = txMatches[0];
+
+            // Idempotency check: If transaction already processed successfully, skip
+            if (contractTransaction.Status === "Success") {
+              const existingOrderId =
+                contractTransaction.contract?.order?.id || contractTransaction.contract?.order;
+              if (existingOrderId) {
+                strapi.log.info(
+                  `Saman callback already processed (idempotency check): resNum=${resNumRaw}, orderId=${existingOrderId}`,
+                  {
+                    resNum: resNumRaw,
+                    orderId: existingOrderId,
+                    existingTxId: contractTransaction.id,
+                  },
+                );
+                // Redirect to success page - transaction already processed
+                return ctx.redirect(
+                  buildPaymentRedirectUrl("success", { orderId: existingOrderId }),
+                );
+              }
+            }
           }
         } catch (err) {
-          strapi.log.error(
-            "Failed to locate Saman contract transaction by resNum",
-            err
-          );
+          strapi.log.error("Failed to locate Saman contract transaction by resNum", err);
         }
       }
 
@@ -279,26 +339,19 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               populate: { contract: { populate: { order: true } } },
               sort: { createdAt: "desc" },
               limit: 1,
-            }
+            },
           )) as any[];
           if (txMatches?.length) {
             contractTransaction = txMatches[0];
           }
         } catch (err) {
-          strapi.log.error(
-            "Failed to locate Saman contract transaction by refNum",
-            err
-          );
+          strapi.log.error("Failed to locate Saman contract transaction by refNum", err);
         }
       }
 
-      if (
-        (!orderId || Number.isNaN(orderId)) &&
-        contractTransaction?.contract?.order
-      ) {
+      if ((!orderId || Number.isNaN(orderId)) && contractTransaction?.contract?.order) {
         const co = contractTransaction.contract.order;
-        const derivedOrderId =
-          typeof co === "object" && co ? Number(co.id) : Number(co);
+        const derivedOrderId = typeof co === "object" && co ? Number(co.id) : Number(co);
         if (!Number.isNaN(derivedOrderId)) {
           orderId = derivedOrderId;
         }
@@ -318,20 +371,16 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         });
       }
 
-      const orderEntity = (await strapi.entityService.findOne(
-        "api::order.order",
-        orderId,
-        {
-          populate: {
-            contract: true,
-            order_items: {
-              populate: {
-                product_variation: { populate: { product_stock: true } },
-              },
+      const orderEntity = (await strapi.entityService.findOne("api::order.order", orderId, {
+        populate: {
+          contract: true,
+          order_items: {
+            populate: {
+              product_variation: { populate: { product_stock: true } },
             },
           },
-        }
-      )) as any;
+        },
+      })) as any;
 
       if (!orderEntity) {
         strapi.log.error("Saman order not found", { orderId });
@@ -346,9 +395,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           ? orderEntity.contract.id
           : orderEntity.contract);
 
-      const contractAmountToman = Math.round(
-        (orderEntity.contract?.Amount ?? 0) as number
-      );
+      const contractAmountToman = Math.round((orderEntity.contract?.Amount ?? 0) as number);
       const contractAmountIrr = contractAmountToman * 10;
 
       const markOrderCancelled = async (reason: string) => {
@@ -361,13 +408,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         }
         if (contractId) {
           try {
-            await strapi.entityService.update(
-              "api::contract.contract",
-              contractId,
-              {
-                data: { Status: "Cancelled", external_source: "SamanKish" },
-              }
-            );
+            await strapi.entityService.update("api::contract.contract", contractId, {
+              data: { Status: "Cancelled", external_source: "SamanKish" },
+            });
           } catch (err) {
             strapi.log.error("Failed to cancel contract (Saman)", err);
           }
@@ -377,13 +420,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             await strapi.entityService.update(
               "api::contract-transaction.contract-transaction",
               contractTransaction.id,
-              { data: { Status: "Failed" } }
+              { data: { Status: "Failed" } },
             );
           } catch (err) {
-            strapi.log.error(
-              "Failed to update contract transaction status (Saman)",
-              err
-            );
+            strapi.log.error("Failed to update contract transaction status (Saman)", err);
           }
         }
         try {
@@ -411,14 +451,12 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         (!Number.isNaN(statusNumeric) && statusNumeric === 2);
 
       if (!stateSuccessful) {
-        await markOrderCancelled(
-          normalizedState || `Status ${samanStatusInput || "Unknown"}`
-        );
+        await markOrderCancelled(normalizedState || `Status ${samanStatusInput || "Unknown"}`);
         return ctx.redirect(
           buildPaymentRedirectUrl("failure", {
             orderId,
             error: normalizedState || String(samanStatusInput || "FAILED"),
-          })
+          }),
         );
       }
 
@@ -428,9 +466,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       });
 
       if (!verifyResult?.success || verifyResult?.resultCode !== 0) {
-        await markOrderCancelled(
-          verifyResult?.resultDescription || "Verification failed"
-        );
+        await markOrderCancelled(verifyResult?.resultDescription || "Verification failed");
         try {
           await samanService.reverseTransaction({
             refNum,
@@ -443,29 +479,47 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           buildPaymentRedirectUrl("failure", {
             orderId,
             error: verifyResult?.resultDescription || "Verification failed",
-          })
+          }),
         );
       }
 
-      const detail =
-        verifyResult.transactionDetail || verifyResult.TransactionDetail || {};
-      const affectiveAmountIrr = Number(
-        detail?.AffectiveAmount ?? detail?.OrginalAmount ?? 0
-      );
+      const detail = verifyResult.transactionDetail || verifyResult.TransactionDetail || {};
+      const affectiveAmountIrr = Number(detail?.AffectiveAmount ?? detail?.OrginalAmount ?? 0);
 
+      // Decrement stock atomically for Saman payment
       try {
+        const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
+
+        const stockErrors: any[] = [];
         for (const it of orderEntity?.order_items || []) {
           const variation = it?.product_variation;
           if (variation?.product_stock?.id && typeof it?.Count === "number") {
             const stockId = variation.product_stock.id as number;
-            const current = Number(variation.product_stock.Count || 0);
-            const dec = Number(it.Count || 0);
-            await strapi.entityService.update(
-              "api::product-stock.product-stock",
-              stockId,
-              { data: { Count: current - dec } }
-            );
+            const quantity = Number(it.Count || 0);
+
+            const result = await decrementStockAtomic(strapi, stockId, quantity);
+            if (!result.success) {
+              stockErrors.push({
+                stockId,
+                quantity,
+                error: result.error,
+                variationId: variation.id,
+              });
+              strapi.log.error("Failed to decrement stock atomically (Saman)", {
+                orderId,
+                stockId,
+                quantity,
+                error: result.error,
+              });
+            }
           }
+        }
+
+        if (stockErrors.length > 0) {
+          strapi.log.error("Some stock decrements failed for Saman payment", {
+            orderId,
+            errors: stockErrors,
+          });
         }
       } catch (stockErr) {
         strapi.log.error("Failed to decrement stock after Saman payment", stockErr);
@@ -485,26 +539,18 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       // Increment discount usage counter if discount was applied
       if (orderEntity?.DiscountCode) {
-        await incrementDiscountUsageCounter(
-          strapi,
-          orderEntity.DiscountCode,
-          orderId
-        );
+        await incrementDiscountUsageCounter(strapi, orderEntity.DiscountCode, orderId);
       }
 
       if (contractId) {
         try {
-          await strapi.entityService.update(
-            "api::contract.contract",
-            contractId,
-            {
-              data: {
-                Status: "Confirmed",
-                external_source: "SamanKish",
-                external_id: refNum,
-              },
-            }
-          );
+          await strapi.entityService.update("api::contract.contract", contractId, {
+            data: {
+              Status: "Confirmed",
+              external_source: "SamanKish",
+              external_id: refNum,
+            },
+          });
         } catch (err) {
           strapi.log.error("Failed to update contract for Saman", err);
         }
@@ -527,13 +573,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
                 contract: contractId,
                 Date: new Date(),
               },
-            }
+            },
           );
         } catch (err) {
-          strapi.log.error(
-            "Failed to create Saman contract transaction at verify",
-            err
-          );
+          strapi.log.error("Failed to create Saman contract transaction at verify", err);
         }
       }
 
@@ -549,13 +592,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
                 external_id: resNumRaw || contractTransaction.external_id,
                 Amount: affectiveAmountIrr || contractAmountIrr,
               },
-            }
+            },
           );
         } catch (err) {
-          strapi.log.error(
-            "Failed to mark Saman contract transaction success",
-            err
-          );
+          strapi.log.error("Failed to mark Saman contract transaction success", err);
         }
       }
 
@@ -585,16 +625,14 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         buildPaymentRedirectUrl("success", {
           orderId,
           transactionId: refNum || "",
-        })
+        }),
       );
     }
 
     // If this is a SnappPay flow (state provided or paymentToken present), follow SnappPay verify+settle
     if (state || paymentTokenInput || transactionIdInput) {
       // Resolve orderId and token using transactionId first (exact match), then fallback to paymentToken
-      let orderId: number | undefined = OrderId
-        ? parseInt(OrderId, 10)
-        : undefined;
+      let orderId: number | undefined = OrderId ? parseInt(OrderId, 10) : undefined;
       let chosenTx: any | undefined;
 
       try {
@@ -609,7 +647,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               populate: { contract: { populate: { order: true } } },
               sort: { createdAt: "desc" },
               limit: 1,
-            }
+            },
           )) as any[];
           if (exactByTx?.length) {
             chosenTx = exactByTx[0];
@@ -629,7 +667,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               populate: { contract: { populate: { order: true } } },
               sort: { createdAt: "desc" },
               limit: 1,
-            }
+            },
           )) as any[];
           if (byToken?.length) {
             chosenTx = byToken[0];
@@ -638,10 +676,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           }
         }
       } catch (e) {
-        strapi.log.error(
-          "Failed to resolve order from SnappPay transaction",
-          e
-        );
+        strapi.log.error("Failed to resolve order from SnappPay transaction", e);
       }
 
       if (!orderId || isNaN(orderId)) {
@@ -673,7 +708,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               },
               sort: { createdAt: "desc" },
               limit: 1,
-            }
+            },
           )) as any[];
           tokenForOps = txForOrder?.[0]?.TrackId;
           if (!chosenTx && txForOrder?.length) chosenTx = txForOrder[0];
@@ -684,6 +719,40 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         return ctx.badRequest("Missing payment token for SnappPay", {
           data: { success: false, error: "Missing paymentToken" },
         });
+      }
+
+      // Idempotency check: Check if this SnappPay callback has already been processed
+      const transactionIdForIdempotency = transactionIdInput || paymentTokenInput || tokenForOps;
+      if (transactionIdForIdempotency) {
+        try {
+          const existingTx = await strapi.entityService.findMany(
+            "api::contract-transaction.contract-transaction",
+            {
+              filters: {
+                external_source: "SnappPay",
+                external_id: String(transactionIdForIdempotency),
+                Status: "Success",
+              },
+              limit: 1,
+            },
+          );
+
+          if (existingTx && existingTx.length > 0) {
+            strapi.log.info(
+              `SnappPay callback already processed (idempotency check): transactionId=${transactionIdForIdempotency}, orderId=${orderId}`,
+              {
+                transactionId: String(transactionIdForIdempotency),
+                orderId,
+                existingTxId: existingTx[0].id,
+              },
+            );
+            // Redirect to success page - transaction already processed
+            return ctx.redirect(buildPaymentRedirectUrl("success", { orderId }));
+          }
+        } catch (idempotencyErr) {
+          strapi.log.error("Failed to check SnappPay callback idempotency", idempotencyErr);
+          // Continue processing if idempotency check fails
+        }
       }
 
       // Log resolved identifiers
@@ -717,7 +786,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           buildPaymentRedirectUrl("failure", {
             orderId,
             transactionId: transactionIdInput || "",
-          })
+          }),
         );
       }
 
@@ -757,7 +826,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           buildPaymentRedirectUrl("failure", {
             orderId,
             transactionId: transactionIdInput || "",
-          })
+          }),
         );
       }
 
@@ -775,9 +844,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         newlySettled ||
         settleResult?.errorData?.errorCode === 409 ||
         /already\s+settled/i.test(
-          settleResult?.errorData?.message ||
-            settleResult?.errorData?.data ||
-            ""
+          settleResult?.errorData?.message || settleResult?.errorData?.data || "",
         );
 
       // Retry settlement if it failed (not already settled)
@@ -797,7 +864,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               orderId,
               tokenForOps,
               previousError: finalSettleResult?.errorData,
-            }
+            },
           );
 
           // Wait 30 seconds before retry
@@ -819,9 +886,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             retryNewlySettled ||
             finalSettleResult?.errorData?.errorCode === 409 ||
             /already\s+settled/i.test(
-              finalSettleResult?.errorData?.message ||
-                finalSettleResult?.errorData?.data ||
-                ""
+              finalSettleResult?.errorData?.message || finalSettleResult?.errorData?.data || "",
             );
 
           if (retrySettled) {
@@ -837,7 +902,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               orderId,
               tokenForOps,
               finalError: finalSettleResult?.errorData,
-            }
+            },
           );
 
           try {
@@ -871,34 +936,51 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         });
       } catch {}
 
-      // If newly settled (including after retries), decrement stock and generate barcode
+      // If newly settled (including after retries), decrement stock atomically
       if (retryNewlySettled) {
         try {
-          const orderWithItems = await strapi.entityService.findOne(
-            "api::order.order",
-            orderId,
-            {
-              populate: {
-                order_items: {
-                  populate: {
-                    product_variation: { populate: { product_stock: true } },
-                  },
+          const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
+
+          const orderWithItems = await strapi.entityService.findOne("api::order.order", orderId, {
+            populate: {
+              order_items: {
+                populate: {
+                  product_variation: { populate: { product_stock: true } },
                 },
               },
-            }
-          );
+            },
+          });
+
+          const stockErrors: any[] = [];
           for (const it of orderWithItems?.order_items || []) {
             const v = it?.product_variation;
             if (v?.product_stock?.id && typeof it?.Count === "number") {
               const stockId = v.product_stock.id as number;
-              const current = Number(v.product_stock.Count || 0);
-              const dec = Number(it.Count || 0);
-              await strapi.entityService.update(
-                "api::product-stock.product-stock",
-                stockId,
-                { data: { Count: current - dec } }
-              );
+              const quantity = Number(it.Count || 0);
+
+              const result = await decrementStockAtomic(strapi, stockId, quantity);
+              if (!result.success) {
+                stockErrors.push({
+                  stockId,
+                  quantity,
+                  error: result.error,
+                  variationId: v.id,
+                });
+                strapi.log.error("Failed to decrement stock atomically (SnappPay)", {
+                  orderId,
+                  stockId,
+                  quantity,
+                  error: result.error,
+                });
+              }
             }
+          }
+
+          if (stockErrors.length > 0) {
+            strapi.log.error("Some stock decrements failed for SnappPay payment", {
+              orderId,
+              errors: stockErrors,
+            });
           }
         } catch (e) {
           strapi.log.error("Failed to decrement stock after settlement", e);
@@ -911,18 +993,32 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         data: { Status: "Started" },
       });
 
+      // Log payment success to user activity feed
+      try {
+        const order = await strapi.entityService.findOne("api::order.order", orderId, {
+          populate: { user: true, contract: true },
+        }) as any;
+        const userId = order?.user?.id ? Number(order.user.id) : null;
+        const amount = order?.contract?.Amount ? Number(order.contract.Amount) : order?.Total ? Number(order.Total) : 0;
+
+        if (userId) {
+          const activityService = strapi.service("api::user-activity.user-activity") as any;
+          if (activityService?.logPaymentSuccess) {
+            await activityService.logPaymentSuccess(userId, orderId, amount);
+          }
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log payment success to user activity", {
+          orderId,
+          error: (activityError as Error).message,
+        });
+      }
+
       // Increment discount usage counter if discount was applied
       try {
-        const orderWithDiscount = await strapi.entityService.findOne(
-          "api::order.order",
-          orderId
-        );
+        const orderWithDiscount = await strapi.entityService.findOne("api::order.order", orderId);
         if (orderWithDiscount?.DiscountCode) {
-          await incrementDiscountUsageCounter(
-            strapi,
-            orderWithDiscount.DiscountCode,
-            orderId
-          );
+          await incrementDiscountUsageCounter(strapi, orderWithDiscount.DiscountCode, orderId);
         }
       } catch (err) {
         strapi.log.error("Failed to increment discount for SnappPay order", err);
@@ -934,7 +1030,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             order: orderId,
             Action: "Update",
             Description: retryNewlySettled
-              ? `SnappPay verify+settle succeeded${retryCount > 0 ? ` (after ${retryCount} retries)` : ""}`
+              ? `SnappPay verify+settle succeeded${
+                  retryCount > 0 ? ` (after ${retryCount} retries)` : ""
+                }`
               : "SnappPay verify succeeded (already settled)",
             Changes: {
               transactionId: transactionIdInput,
@@ -950,7 +1048,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         buildPaymentRedirectUrl("success", {
           orderId,
           transactionId: transactionIdInput || "",
-        })
+        }),
       );
     }
 
@@ -962,17 +1060,35 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       // Update order status to Cancelled if we have a valid order ID
       if (!isNaN(orderId)) {
         try {
+          // Log payment failure to user activity feed before cancelling
+          try {
+            const order = await strapi.entityService.findOne("api::order.order", orderId, {
+              populate: { user: true },
+            }) as any;
+            const userId = order?.user?.id ? Number(order.user.id) : null;
+
+            if (userId) {
+              const activityService = strapi.service("api::user-activity.user-activity") as any;
+              const reason = ResCode === "17" ? "لغو شده توسط کاربر" : "خطا در پرداخت";
+              if (activityService?.logPaymentFailed) {
+                await activityService.logPaymentFailed(userId, orderId, reason);
+              }
+            }
+          } catch (activityError) {
+            strapi.log.error("Failed to log payment failure to user activity", {
+              orderId,
+              error: (activityError as Error).message,
+            });
+          }
+
           await strapi.entityService.update("api::order.order", orderId, {
             data: { Status: "Cancelled" },
           });
           strapi.log.info(
-            `Order ${orderId} marked as Cancelled due to payment failure/cancellation`
+            `Order ${orderId} marked as Cancelled due to payment failure/cancellation`,
           );
         } catch (updateError) {
-          strapi.log.error(
-            `Failed to update order ${orderId} status:`,
-            updateError
-          );
+          strapi.log.error(`Failed to update order ${orderId} status:`, updateError);
         }
       }
 
@@ -995,9 +1111,7 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       if (ResCode === "17") {
         strapi.log.info("Payment cancelled by user:", { orderId, ResCode });
         // User cancelled - redirect to frontend cancellation page
-        ctx.redirect(
-          buildPaymentRedirectUrl("cancelled", { orderId, reason: "user-cancelled" })
-        );
+        ctx.redirect(buildPaymentRedirectUrl("cancelled", { orderId, reason: "user-cancelled" }));
       } else {
         strapi.log.error("Payment failed with ResCode:", ResCode);
         // Other payment failures - redirect to frontend failure page
@@ -1005,10 +1119,47 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           buildPaymentRedirectUrl("failure", {
             orderId,
             error: `Payment failed with code: ${ResCode}`,
-          })
+          }),
         );
       }
       return;
+    }
+
+    // Idempotency check: Check if this Mellat callback has already been processed
+    if (SaleReferenceId) {
+      try {
+        const existingTx = await strapi.entityService.findMany(
+          "api::contract-transaction.contract-transaction",
+          {
+            filters: {
+              external_source: "Mellat",
+              external_id: String(SaleReferenceId),
+              Status: "Success",
+            },
+            limit: 1,
+          },
+        );
+
+        if (existingTx && existingTx.length > 0) {
+          const orderId = parseInt(OrderId || SaleOrderId, 10);
+          strapi.log.info(
+            `Mellat callback already processed (idempotency check): SaleReferenceId=${SaleReferenceId}, orderId=${orderId}`,
+            {
+              saleReferenceId: String(SaleReferenceId),
+              orderId,
+              existingTxId: existingTx[0].id,
+            },
+          );
+          // Redirect to success page - transaction already processed
+          if (!isNaN(orderId)) {
+            return ctx.redirect(buildPaymentRedirectUrl("success", { orderId }));
+          }
+          return ctx.badRequest("Callback already processed");
+        }
+      } catch (idempotencyErr) {
+        strapi.log.error("Failed to check Mellat callback idempotency", idempotencyErr);
+        // Continue processing if idempotency check fails
+      }
     }
 
     // Mellat: verify and settle
@@ -1040,33 +1191,50 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       if (settlementResult.success) {
         // Update order status to Started (Paid)
-        // Decrement stock for each order item NOW (after settlement)
+        // Decrement stock atomically for each order item NOW (after settlement)
         try {
-          const orderWithItems = await strapi.entityService.findOne(
-            "api::order.order",
-            orderId,
-            {
-              populate: {
-                order_items: {
-                  populate: {
-                    product_variation: { populate: { product_stock: true } },
-                  },
+          const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
+
+          const orderWithItems = await strapi.entityService.findOne("api::order.order", orderId, {
+            populate: {
+              order_items: {
+                populate: {
+                  product_variation: { populate: { product_stock: true } },
                 },
               },
-            }
-          );
+            },
+          });
+
+          const stockErrors: any[] = [];
           for (const it of orderWithItems?.order_items || []) {
             const v = it?.product_variation;
             if (v?.product_stock?.id && typeof it?.Count === "number") {
               const stockId = v.product_stock.id as number;
-              const current = Number(v.product_stock.Count || 0);
-              const dec = Number(it.Count || 0);
-              await strapi.entityService.update(
-                "api::product-stock.product-stock",
-                stockId,
-                { data: { Count: current - dec } }
-              );
+              const quantity = Number(it.Count || 0);
+
+              const result = await decrementStockAtomic(strapi, stockId, quantity);
+              if (!result.success) {
+                stockErrors.push({
+                  stockId,
+                  quantity,
+                  error: result.error,
+                  variationId: v.id,
+                });
+                strapi.log.error("Failed to decrement stock atomically (Mellat)", {
+                  orderId,
+                  stockId,
+                  quantity,
+                  error: result.error,
+                });
+              }
             }
+          }
+
+          if (stockErrors.length > 0) {
+            strapi.log.error("Some stock decrements failed for Mellat payment", {
+              orderId,
+              errors: stockErrors,
+            });
           }
         } catch (e) {
           strapi.log.error("Failed to decrement stock after settlement", e);
@@ -1080,16 +1248,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
         // Increment discount usage counter if discount was applied
         try {
-          const orderWithDiscount = await strapi.entityService.findOne(
-            "api::order.order",
-            orderId
-          );
+          const orderWithDiscount = await strapi.entityService.findOne("api::order.order", orderId);
           if (orderWithDiscount?.DiscountCode) {
-            await incrementDiscountUsageCounter(
-              strapi,
-              orderWithDiscount.DiscountCode,
-              orderId
-            );
+            await incrementDiscountUsageCounter(strapi, orderWithDiscount.DiscountCode, orderId);
           }
         } catch (err) {
           strapi.log.error("Failed to increment discount for Mellat order", err);
@@ -1140,15 +1301,12 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             },
           });
         } catch (e) {
-          strapi.log.error(
-            "Failed to persist gateway settlement failure log",
-            e
-          );
+          strapi.log.error("Failed to persist gateway settlement failure log", e);
         }
         ctx.redirect(
           buildPaymentRedirectUrl("failure", {
             error: settlementResult.error || "Settlement failed",
-          })
+          }),
         );
       }
     } else {
@@ -1172,15 +1330,14 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           });
         }
       } catch (e) {
-        strapi.log.error(
-          "Failed to persist gateway verification failure log",
-          e
-        );
+        strapi.log.error("Failed to persist gateway verification failure log", e);
       }
 
       // Redirect to frontend failure page
       ctx.redirect(
-        buildPaymentRedirectUrl("failure", { error: verificationResult.error || "Verification failed" })
+        buildPaymentRedirectUrl("failure", {
+          error: verificationResult.error || "Verification failed",
+        }),
       );
     }
   } catch (error) {
@@ -1200,8 +1357,6 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
     } catch (e) {
       strapi.log.error("Failed to persist gateway internal error log", e);
     }
-    ctx.redirect(
-      buildPaymentRedirectUrl("failure", { error: "Internal server error" })
-    );
+    ctx.redirect(buildPaymentRedirectUrl("failure", { error: "Internal server error" }));
   }
 }

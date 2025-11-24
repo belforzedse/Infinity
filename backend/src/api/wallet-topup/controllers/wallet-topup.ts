@@ -112,6 +112,19 @@ export default factories.createCoreController(
           );
         }
 
+        // Idempotency check: If topup already succeeded, skip processing
+        if (topup.Status === "Success") {
+          strapi.log.info(
+            `Wallet topup callback already processed (idempotency check): SaleOrderId=${SaleOrderId}, SaleReferenceId=${SaleReferenceId}`,
+            {
+              topupId: topup.id,
+              saleOrderId: String(SaleOrderId || ""),
+              saleReferenceId: String(SaleReferenceId || ""),
+            }
+          );
+          return ctx.redirect(`${FRONTEND_BASE}/wallet?status=success`);
+        }
+
         // If user cancelled or error code
         if (String(ResCode) !== "0") {
           try {

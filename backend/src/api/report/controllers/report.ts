@@ -559,207 +559,93 @@ export default {
 
       const start = parseDate(ctx.query.start as string);
       const end = parseDate(ctx.query.end as string, 0);
-      const allowedAdminRoles = new Set<string>([
-        ROLE_NAMES.SUPERADMIN,
-        ROLE_NAMES.STORE_MANAGER,
-      ]);
-
-      const userIdFilterRaw = (ctx.query.user_id as string) || "";
-      const userIdFilter =
-        typeof userIdFilterRaw === "string"
-          ? userIdFilterRaw.trim().toLowerCase()
-          : "";
       const actionType = (ctx.query.action_type as string) || "";
       const logType = (ctx.query.log_type as string) || "All";
-      const limit = Math.min(Number(ctx.query.limit || 100), 1000);
-      const offset = Math.max(Number(ctx.query.offset || 0), 0);
-      const perTableLimit = limit + offset;
+      const page = Math.max(Number(ctx.query.page || 1), 1);
+      const pageSize = Math.max(Number(ctx.query.pageSize || 20), 1);
 
-      const adminActivities = (await strapi.entityService.findMany(
-        "api::admin-activity.admin-activity" as any,
-        {
-          filters: {
-            createdAt: {
-              $gte: start.toISOString(),
-              $lte: end.toISOString(),
-            },
-            ...(logType && logType !== "All"
-              ? { ResourceType: logType }
-              : {}),
-            ...(actionType ? { Action: actionType } : {}),
-          },
-          orderBy: { createdAt: "desc" },
-          limit: perTableLimit,
+      const filters: any = {
+        createdAt: {
+          $gte: start.toISOString(),
+          $lte: end.toISOString(),
         },
-      )) as any[];
+      };
 
-      let allLogs: any[] = (adminActivities || []).map((log: any) => ({
-        id: `AdminActivity-${log.id}`,
-        log_type: log.ResourceType || "Admin",
-        action_type: log.Action,
-        admin_username: log.PerformedByName || "System",
-        admin_role:
-          log.PerformedByRole ||
-          (log.PerformedByName ? "Unknown" : "System"),
-        description: log.Description,
-        changes: log.Metadata,
-        ip_address: log.IP,
-        user_agent: log.UserAgent,
-        timestamp: log.createdAt,
-      }));
+      if (logType && logType !== "All") {
+        filters.ResourceType = logType;
+      }
 
-      // Helper to query a log table using Strapi query API
-      async function queryLogTable(entity: string, resourceType: string) {
-        const filters: any = {
-          createdAt: {
-            $gte: start.toISOString(),
-            $lte: end.toISOString(),
+      if (actionType) {
+        filters.Action = actionType;
+      }
+
+      if (ctx.query.performedBy) {
+        filters.performed_by = { id: Number(ctx.query.performedBy) };
+      }
+
+      const allowedRoles = [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER];
+      filters.PerformedByRole = { $in: allowedRoles };
+
+      const manualActivities = await strapi.entityService.findMany(
+        "api::manual-admin-activity.manual-admin-activity" as any,
+        {
+          filters,
+          sort: { createdAt: "desc" },
+          populate: ["performed_by"],
+          pagination: {
+            page,
+            pageSize,
           },
-        };
-
-        if (actionType) {
-          filters.Action = actionType;
-        }
-
-        const logs = await (strapi.db.query(entity as any) as any).findMany({
-          where: filters,
-          populate: { performed_by: { populate: { role: true } } },
-          orderBy: { createdAt: "desc" },
-          limit: perTableLimit,
-        } as any);
-
-        return (Array.isArray(logs) ? logs : []).map((log: any) => {
-          const actor = log.performed_by;
-          const actorRole = actor?.role?.name || null;
-          const actorUsername =
-            actor?.username ||
-            actor?.email ||
-            actor?.phone ||
-            log.PerformedBy ||
-            null;
-          const actorLabel = actorUsername || (actor?.id ? `User ${actor.id}` : null);
-          const isSystemLabel =
-            !actorLabel ||
-            actorLabel.toLowerCase() === "system" ||
-            actorLabel === "[object Object]";
-          const actorUserId =
-            typeof actor?.id === "number" ? actor.id : Number(actor?.id) || null;
-          const includeFromRole =
-            !!actorRole && allowedAdminRoles.has(actorRole);
-          const adminRoleLabel = includeFromRole
-            ? actorRole
-            : isSystemLabel
-            ? "System"
-            : "Unknown";
-
-          return {
-            id: `${resourceType}-${log.id}`,
-            log_type: resourceType,
-            action_type: log.Action,
-            admin_username: actorLabel || "System",
-            admin_role: adminRoleLabel,
-            admin_user_id: actorUserId,
-            admin_email: actor?.email || null,
-            description: log.Description,
-            changes: log.Changes,
-            ip_address: log.IP,
-            user_agent: log.UserAgent,
-            timestamp: log.createdAt,
-          };
-        });
-      }
-
-      // Query all log tables
-      const wantsLogType = (type: string) => {
-        if (!logType || logType === "All") return true;
-        return logType.toLowerCase() === type.toLowerCase();
-      };
-
-      if (wantsLogType("Order")) {
-        const orderLogs = await queryLogTable(
-          "api::order-log.order-log",
-          "Order"
-        );
-        allLogs = allLogs.concat(orderLogs);
-      }
-
-      if (wantsLogType("Product")) {
-        const productLogs = await queryLogTable(
-          "api::product-log.product-log",
-          "Product"
-        );
-        allLogs = allLogs.concat(productLogs);
-      }
-
-      if (wantsLogType("User")) {
-        const userLogs = await queryLogTable(
-          "api::local-user-log.local-user-log",
-          "User"
-        );
-        allLogs = allLogs.concat(userLogs);
-      }
-
-      if (wantsLogType("Contract")) {
-        const contractLogs = await queryLogTable(
-          "api::contract-log.contract-log",
-          "Contract"
-        );
-        allLogs = allLogs.concat(contractLogs);
-      }
-
-      allLogs = allLogs.filter((log) => !!log);
-
-      // Filter by user_id if provided
-      const matchesUserFilter = (log: any) => {
-        if (!userIdFilter) return true;
-        if (log.admin_user_id && String(log.admin_user_id) === userIdFilter) {
-          return true;
-        }
-        if (
-          typeof log.admin_username === "string" &&
-          log.admin_username.toLowerCase() === userIdFilter
-        ) {
-          return true;
-        }
-        if (
-          typeof log.admin_email === "string" &&
-          log.admin_email.toLowerCase() === userIdFilter
-        ) {
-          return true;
-        }
-        return false;
-      };
-
-      allLogs = allLogs.filter(matchesUserFilter);
-
-      // Sort by timestamp DESC
-      allLogs = allLogs.sort(
-        (a: any, b: any) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        },
       );
 
-      const totalCount = allLogs.length;
-      const pagedLogs = allLogs.slice(offset, offset + limit);
+      const totalCount = await strapi.entityService.count(
+        "api::manual-admin-activity.manual-admin-activity" as any,
+        { filters },
+      );
+
+      const data = (Array.isArray(manualActivities) ? manualActivities : []).map(
+        (log: any) => {
+          const actor = log.performed_by;
+          return {
+            id: log.id,
+            ResourceType: log.ResourceType || "Admin",
+            Action: log.Action,
+            Title: log.Title,
+            Message: log.Message,
+            MessageEn: log.MessageEn,
+            Severity: log.Severity,
+            Changes: log.Changes,
+            PerformedByName:
+              log.PerformedByName ||
+              actor?.username ||
+              actor?.email ||
+              actor?.phone ||
+              (actor?.id ? `User ${actor.id}` : "System"),
+            PerformedByRole:
+              log.PerformedByRole ||
+              actor?.role?.name ||
+              (actor ? "Unknown" : "System"),
+            Description: log.Description,
+            Metadata: log.Metadata,
+            IP: log.IP,
+            UserAgent: log.UserAgent,
+            ResourceId: log.ResourceId,
+            createdAt: log.createdAt,
+            updatedAt: log.updatedAt,
+            performed_by: actor,
+          };
+        },
+      );
 
       ctx.body = {
-        data: {
-          activities: pagedLogs.map((log: any) => ({
-            id: log.id,
-            logType: log.log_type,
-            actionType: log.action_type,
-            adminUsername: log.admin_username,
-            adminRole: log.admin_role,
-            description: log.description,
-            changes: log.changes,
-            ipAddress: log.ip_address,
-            userAgent: log.user_agent,
-            timestamp: log.timestamp,
-          })),
+        data,
+        meta: {
           pagination: {
+            page,
+            pageSize,
             total: totalCount,
-            limit,
-            offset,
-            hasMore: offset + limit < totalCount,
+            pageCount: Math.ceil(totalCount / pageSize) || 1,
           },
         },
       };

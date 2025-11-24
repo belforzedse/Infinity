@@ -6,16 +6,18 @@ on:
       - main
       - dev
       - experimental
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io/${{ github.repository_owner }}
   IMAGE_NAME: infinity-backend
-  SNAPPAY_BASE_URL: ${{ secrets.SNAPPAY_BASE_URL || 'https://api.snapppay.ir' }}
-  SNAPPAY_CLIENT_ID: ${{ secrets.SNAPPAY_CLIENT_ID || 'infinity' }}
-  SNAPPAY_CLIENT_SECRET: ${{ secrets.SNAPPAY_CLIENT_SECRET || 'SNAPPAY_CLIENT_SECRET' }}
-  SNAPPAY_USERNAME: ${{ secrets.SNAPPAY_USERNAME || 'infinity-purchase' }}
-  SNAPPAY_PASSWORD: ${{ secrets.SNAPPAY_PASSWORD || 'SNAPPAY_PASSWORD' }}
+  STRAPI_DISABLE_SOURCEMAPS: "true"
+  STRAPI_TELEMETRY_DISABLED: "true"
+  ENABLE_LARGE_HEAP: "false"
 
 jobs:
   build-and-deploy:
@@ -27,34 +29,138 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine backend layout
+        id: layout
+        run: |
+          if [[ -f backend/package.json ]]; then
+            echo "docker_context=backend" >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=backend" >> "$GITHUB_OUTPUT"
+          else
+            echo "docker_context=." >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Detect backend changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            backend:
+              - 'backend/**'
+            typegen:
+              - 'backend/src/api/**/content-types/**'
+              - 'backend/src/components/**'
+              - 'backend/types/**'
+              - 'backend/package.json'
+              - 'backend/package-lock.json'
+              - 'backend/tsconfig.json'
+
+      - name: Setup Node.js (tooling)
+        if: steps.changes.outputs.typegen == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies for tooling
+        if: steps.changes.outputs.typegen == 'true'
+        id: install_tooling
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          SECONDS=0
+          npm ci --prefer-offline
+          echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Strapi types (schema changes only)
+        if: steps.changes.outputs.typegen == 'true'
+        id: typegen
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          SECONDS=0
+          npm run type:generate
+          echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify generated types committed
+        if: steps.changes.outputs.typegen == 'true'
+        run: |
+          set -euo pipefail
+          if [[ -n "$(git status --short backend/types/generated)" ]]; then
+            echo "::error::Detected uncommitted generated types. Please run npm run type:generate locally."
+            git status --short backend/types/generated
+            exit 1
+          fi
+
       - name: Select Dockerfile and image tag
         id: meta
         run: |
           set -euo pipefail
+          base="${{ steps.layout.outputs.dockerfile_base }}"
+          main_path=$([[ "$base" == "." ]] && echo "main.Dockerfile" || echo "$base/main.Dockerfile")
+          dev_path=$([[ "$base" == "." ]] && echo "dev.Dockerfile" || echo "$base/dev.Dockerfile")
           case "${GITHUB_REF_NAME}" in
             dev)
-              echo "dockerfile=dev.Dockerfile" >> "$GITHUB_OUTPUT"
+              echo "dockerfile=${dev_path}" >> "$GITHUB_OUTPUT"
               echo "runtime_tag=dev" >> "$GITHUB_OUTPUT"
               ;;
             experimental)
-              echo "dockerfile=main.Dockerfile" >> "$GITHUB_OUTPUT"
+              echo "dockerfile=${main_path}" >> "$GITHUB_OUTPUT"
               echo "runtime_tag=experimental" >> "$GITHUB_OUTPUT"
               ;;
             *)
-              echo "dockerfile=main.Dockerfile" >> "$GITHUB_OUTPUT"
+              echo "dockerfile=${main_path}" >> "$GITHUB_OUTPUT"
               echo "runtime_tag=main" >> "$GITHUB_OUTPUT"
               ;;
           esac
+
+      - name: Configure Node heap
+        id: heap
+        run: |
+          if [[ "${ENABLE_LARGE_HEAP}" == "true" ]]; then
+            echo "node_options=--max-old-space-size=4096" >> "$GITHUB_OUTPUT"
+          else
+            echo "node_options=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and push Docker image
+        id: docker_build
+        env:
+          NODE_OPTIONS_ARG: ${{ steps.heap.outputs.node_options }}
+          BUILD_CONTEXT: ${{ steps.layout.outputs.docker_context }}
         run: |
-          docker build -f ${{ steps.meta.outputs.dockerfile }} -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} .
-          docker tag $REGISTRY/$IMAGE_NAME:${{ github.sha }} $REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}
-          docker push $REGISTRY/$IMAGE_NAME:${{ github.sha }}
-          docker push $REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}
+          set -euo pipefail
+          SECONDS=0
+          docker buildx build \
+            --file "${{ steps.meta.outputs.dockerfile }}" \
+            --tag "$REGISTRY/$IMAGE_NAME:${{ github.sha }}" \
+            --tag "$REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}" \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --build-arg STRAPI_DISABLE_SOURCEMAPS="${STRAPI_DISABLE_SOURCEMAPS}" \
+            --build-arg STRAPI_TELEMETRY_DISABLED="${STRAPI_TELEMETRY_DISABLED}" \
+            --build-arg NODE_OPTIONS="${NODE_OPTIONS_ARG}" \
+            --push \
+            "$BUILD_CONTEXT"
+          echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
+
+      - name: Summarize backend timings
+        run: |
+          {
+            echo "### Backend pipeline timings"
+            echo ""
+            echo "- npm ci (tooling): ${{ steps.install_tooling.outputs.duration || 'skipped' }}s"
+            echo "- type:generate: ${{ steps.typegen.outputs.duration || 'skipped' }}s"
+            echo "- docker build+push: ${{ steps.docker_build.outputs.duration || 'n/a' }}s"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload docker-compose (prod)
         if: github.ref == 'refs/heads/main'

@@ -24,6 +24,23 @@
       "enum": ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"],
       "required": true
     },
+    "Title": {
+      "type": "string"
+    },
+    "Message": {
+      "type": "text"
+    },
+    "MessageEn": {
+      "type": "string"
+    },
+    "Severity": {
+      "type": "enumeration",
+      "enum": ["info", "success", "warning", "error"],
+      "default": "info"
+    },
+    "Changes": {
+      "type": "json"
+    },
     "Description": {
       "type": "text"
     },

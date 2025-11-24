@@ -1,6 +1,7 @@
 import type { Strapi } from "@strapi/strapi";
 import { computeTotals } from "../../../cart/services/lib/financials";
 import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
+import { logAdminOrderEdit } from "../../../../utils/adminActivity";
 
 type ItemAdjustment = {
   orderItemId: number;
@@ -500,6 +501,65 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           PerformedBy: `Admin User ${fullUser.id}`,
         },
       });
+
+      // Build changes object for admin activity log
+      const adminActivityChanges: Record<string, { from?: any; to?: any }> = {};
+      if (order.ShippingCost !== newShipping) {
+        adminActivityChanges.ShippingCost = {
+          from: order.ShippingCost,
+          to: newShipping,
+        };
+      }
+      if (order.Status !== (allRemoved ? "Cancelled" : order.Status)) {
+        adminActivityChanges.Status = {
+          from: order.Status,
+          to: allRemoved ? "Cancelled" : order.Status,
+        };
+      }
+      if (contract && contract.Amount !== newTotals.total) {
+        adminActivityChanges.ContractAmount = {
+          from: contract.Amount,
+          to: newTotals.total,
+        };
+      }
+      if (allRemoved) {
+        adminActivityChanges.ItemsRemoved = {
+          from: order.order_items?.length || 0,
+          to: 0,
+        };
+      } else {
+        changes.forEach((change) => {
+          const item = orderItemsMap.get(change.orderItemId);
+          if (item) {
+            adminActivityChanges[`Item_${change.orderItemId}_Count`] = {
+              from: item.Count,
+              to: change.newCount,
+            };
+          }
+        });
+      }
+
+      // Log admin activity
+      try {
+        const ip = ctx.request?.ip || ctx.ip || null;
+        const userAgent = ctx.request?.headers?.["user-agent"] || ctx.headers?.["user-agent"] || null;
+
+        await logAdminOrderEdit(
+          strapi,
+          orderIdNum,
+          adminActivityChanges,
+          fullUser.id,
+          reason,
+          ip,
+          userAgent,
+          roleName,
+        );
+      } catch (activityError) {
+        strapi.log.error("Failed to log admin activity for order edit", {
+          orderId: orderIdNum,
+          error: (activityError as Error).message,
+        });
+      }
 
       return {
         data: {
