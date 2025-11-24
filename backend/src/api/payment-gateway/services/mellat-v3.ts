@@ -223,7 +223,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         });
 
         if (response.resCode === 0) {
-          // Success - create redirect URL with RefId parameter
+          // Success - create redirect URL (RefId will be sent via POST form by frontend, similar to wallet flow)
+          if (!response.refId || response.refId.trim() === "") {
+            strapi.log.error(`[${requestId}] RefId is missing from successful response`, {
+              resCode: response.resCode,
+              response: response,
+            });
+            throw new Error("RefId not received from Mellat gateway");
+          }
+          // Return base URL - frontend will send RefId via POST form field (matches wallet topup implementation)
           const redirectUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat`;
           const totalDuration = Date.now() - startTime;
 
