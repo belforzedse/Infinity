@@ -3,6 +3,7 @@ import { Strapi } from "@strapi/strapi";
 export const ROLE_NAMES = {
   SUPERADMIN: "Superadmin",
   STORE_MANAGER: "Store manager",
+  EDITOR: "Editor",
   CUSTOMER: "Customer",
 } as const;
 
@@ -14,12 +15,14 @@ const ROLE_ALIAS_MAP: Record<string, RoleName> = {
   manager: ROLE_NAMES.STORE_MANAGER,
   storemanager: ROLE_NAMES.STORE_MANAGER,
   "store-manager": ROLE_NAMES.STORE_MANAGER,
+  editor: ROLE_NAMES.EDITOR,
   customer: ROLE_NAMES.CUSTOMER,
 };
 
 export const MANAGEMENT_ROLES: RoleName[] = [
   ROLE_NAMES.SUPERADMIN,
   ROLE_NAMES.STORE_MANAGER,
+  ROLE_NAMES.EDITOR,
 ];
 
 export function normalizeRoleName(name?: string | null): RoleName | null {

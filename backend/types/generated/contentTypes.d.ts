@@ -350,6 +350,245 @@ export interface ApiAdminActivityAdminActivity extends Schema.CollectionType {
   };
 }
 
+export interface ApiBlogAuthorBlogAuthor extends Schema.CollectionType {
+  collectionName: "blog_authors";
+  info: {
+    description: "Authors who can write blog posts";
+    displayName: "Blog Author";
+    pluralName: "blog-authors";
+    singularName: "blog-author";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Avatar: Attribute.Media<"images">;
+    Bio: Attribute.Text &
+      Attribute.SetMinMaxLength<{
+        maxLength: 1000;
+      }>;
+    blog_posts: Attribute.Relation<
+      "api::blog-author.blog-author",
+      "oneToMany",
+      "api::blog-post.blog-post"
+    >;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::blog-author.blog-author", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Email: Attribute.Email;
+    local_user: Attribute.Relation<
+      "api::blog-author.blog-author",
+      "oneToOne",
+      "api::local-user.local-user"
+    >;
+    Name: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::blog-author.blog-author", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiBlogCategoryBlogCategory extends Schema.CollectionType {
+  collectionName: "blog_categories";
+  info: {
+    description: "Categories for organizing blog posts";
+    displayName: "Blog Category";
+    pluralName: "blog-categories";
+    singularName: "blog-category";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    blog_posts: Attribute.Relation<
+      "api::blog-category.blog-category",
+      "oneToMany",
+      "api::blog-post.blog-post"
+    >;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::blog-category.blog-category", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Description: Attribute.Text &
+      Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    FeaturedImage: Attribute.Media<"images">;
+    Slug: Attribute.UID<"api::blog-category.blog-category", "Title"> & Attribute.Required;
+    Title: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::blog-category.blog-category", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiBlogCommentBlogComment extends Schema.CollectionType {
+  collectionName: "blog_comments";
+  info: {
+    description: "Comments on blog posts with moderation support";
+    displayName: "Blog Comment";
+    pluralName: "blog-comments";
+    singularName: "blog-comment";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    blog_post: Attribute.Relation<
+      "api::blog-comment.blog-comment",
+      "manyToOne",
+      "api::blog-post.blog-post"
+    >;
+    Content: Attribute.Text &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 2000;
+      }>;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::blog-comment.blog-comment", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Date: Attribute.DateTime & Attribute.Required;
+    parent_comment: Attribute.Relation<
+      "api::blog-comment.blog-comment",
+      "manyToOne",
+      "api::blog-comment.blog-comment"
+    >;
+    replies: Attribute.Relation<
+      "api::blog-comment.blog-comment",
+      "oneToMany",
+      "api::blog-comment.blog-comment"
+    >;
+    Status: Attribute.Enumeration<["Pending", "Approved", "Rejected"]> &
+      Attribute.Required &
+      Attribute.DefaultTo<"Pending">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::blog-comment.blog-comment", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::blog-comment.blog-comment",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
+export interface ApiBlogPostBlogPost extends Schema.CollectionType {
+  collectionName: "blog_posts";
+  info: {
+    description: "Blog posts with rich content and SEO features";
+    displayName: "Blog Post";
+    pluralName: "blog-posts";
+    singularName: "blog-post";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    blog_author: Attribute.Relation<
+      "api::blog-post.blog-post",
+      "manyToOne",
+      "api::blog-author.blog-author"
+    >;
+    blog_category: Attribute.Relation<
+      "api::blog-post.blog-post",
+      "manyToOne",
+      "api::blog-category.blog-category"
+    >;
+    blog_comments: Attribute.Relation<
+      "api::blog-post.blog-post",
+      "oneToMany",
+      "api::blog-comment.blog-comment"
+    >;
+    blog_tags: Attribute.Relation<
+      "api::blog-post.blog-post",
+      "manyToMany",
+      "api::blog-tag.blog-tag"
+    >;
+    Content: Attribute.RichText & Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::blog-post.blog-post", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Excerpt: Attribute.Text &
+      Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    FeaturedImage: Attribute.Media<"images">;
+    Keywords: Attribute.Text;
+    MetaDescription: Attribute.Text &
+      Attribute.SetMinMaxLength<{
+        maxLength: 160;
+      }>;
+    MetaTitle: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
+    PublishedAt: Attribute.DateTime;
+    Slug: Attribute.UID<"api::blog-post.blog-post", "Title"> & Attribute.Required;
+    Status: Attribute.Enumeration<["Draft", "Published", "Scheduled"]> &
+      Attribute.Required &
+      Attribute.DefaultTo<"Draft">;
+    Title: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::blog-post.blog-post", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    ViewCount: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
+  };
+}
+
+export interface ApiBlogTagBlogTag extends Schema.CollectionType {
+  collectionName: "blog_tags";
+  info: {
+    description: "Tags for categorizing and filtering blog posts";
+    displayName: "Blog Tag";
+    pluralName: "blog-tags";
+    singularName: "blog-tag";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    blog_posts: Attribute.Relation<
+      "api::blog-tag.blog-tag",
+      "manyToMany",
+      "api::blog-post.blog-post"
+    >;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::blog-tag.blog-tag", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Description: Attribute.Text &
+      Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    Name: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    Slug: Attribute.UID<"api::blog-tag.blog-tag", "Name"> & Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::blog-tag.blog-tag", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiCartItemCartItem extends Schema.CollectionType {
   collectionName: "cart_items";
   info: {
@@ -2752,6 +2991,11 @@ declare module "@strapi/types" {
       "admin::transfer-token-permission": AdminTransferTokenPermission;
       "admin::user": AdminUser;
       "api::admin-activity.admin-activity": ApiAdminActivityAdminActivity;
+      "api::blog-author.blog-author": ApiBlogAuthorBlogAuthor;
+      "api::blog-category.blog-category": ApiBlogCategoryBlogCategory;
+      "api::blog-comment.blog-comment": ApiBlogCommentBlogComment;
+      "api::blog-post.blog-post": ApiBlogPostBlogPost;
+      "api::blog-tag.blog-tag": ApiBlogTagBlogTag;
       "api::cart-item.cart-item": ApiCartItemCartItem;
       "api::cart.cart": ApiCartCart;
       "api::contract-log.contract-log": ApiContractLogContractLog;

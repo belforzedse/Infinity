@@ -90,6 +90,38 @@ npm run build
 yarn build
 ```
 
+## 📝 Blog System
+
+The backend includes a comprehensive blog system with the following content types:
+
+### Content Types
+- **blog-post**: Main blog posts with rich text content, SEO metadata, and relations
+- **blog-category**: Post categories for organization
+- **blog-tag**: Post tags for flexible categorization
+- **blog-author**: Author profiles with bio and avatar
+- **blog-comment**: User comments with moderation support
+
+### Features
+- Rich text content with Strapi's built-in editor
+- SEO metadata fields (title, description, keywords)
+- Role-based access control (Editor role for content management)
+- Comment moderation system (Pending/Approved/Rejected)
+- Slug validation to prevent URL conflicts
+- View counting and analytics support
+
+### API Endpoints
+- Public endpoints for published content
+- Authenticated endpoints for comments
+- Admin endpoints for content management (Editor+ role required)
+
+### Role Management
+The system includes an "Editor" role with permissions to:
+- Create, read, update, and delete blog content
+- Moderate comments
+- Manage categories, tags, and authors
+
+For detailed documentation, see `BLOG_SYSTEM.md` in the project root.
+
 ## ⚙️ Deployment
 
 Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
