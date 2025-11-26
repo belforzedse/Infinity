@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "blog_tags",
+  "info": {
+    "singularName": "blog-tag",
+    "pluralName": "blog-tags",
+    "displayName": "Blog Tag",
+    "description": "Tags for categorizing and filtering blog posts"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    "Slug": {
+      "type": "uid",
+      "targetField": "Name",
+      "required": true
+    },
+    "Description": {
+      "type": "text",
+      "maxLength": 200
+    },
+    "blog_posts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::blog-post.blog-post",
+      "inversedBy": "blog_tags"
+    }
+  }
+}
