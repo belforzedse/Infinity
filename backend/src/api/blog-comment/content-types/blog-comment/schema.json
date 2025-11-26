@@ -34,8 +34,7 @@
     "user": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "blog_comments"
+      "target": "plugin::users-permissions.user"
     },
     "blog_post": {
       "type": "relation",
