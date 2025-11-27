@@ -65,6 +65,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   readOnly = false,
   className = "",
 }) => {
+  const [viewMode, setViewMode] = React.useState<"visual" | "code">("visual");
+  const [codeValue, setCodeValue] = React.useState(content || "");
   const editor = useEditor({
     immediatelyRender: false, // Prevent SSR hydration mismatches
     extensions: [
@@ -97,6 +99,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         HTMLAttributes: {
           rel: "noopener noreferrer nofollow",
           target: "_blank",
+          class: "text-blue-600 underline hover:text-blue-700",
         },
         validate: (href) => /^https?:\/\//i.test(href) || href.startsWith("/"),
       }),
@@ -118,10 +121,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       if (onChange) {
         onChange(editor.getHTML());
       }
+      setCodeValue(editor.getHTML());
     },
     editorProps: {
       attributes: {
-        class: `prose prose-sm max-w-none focus:outline-none ${className} ${readOnly ? "text-slate-500" : ""}`,
+        class: `prose prose-base prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none focus:outline-none ${className} ${readOnly ? "text-slate-500" : ""}`,
         dir: "rtl",
       },
     },
@@ -131,7 +135,21 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
     }
+    setCodeValue(content || "");
   }, [content, editor]);
+
+  React.useEffect(() => {
+    if (viewMode === "visual" && editor && codeValue !== editor.getHTML()) {
+      editor.commands.setContent(codeValue);
+    }
+  }, [viewMode, codeValue, editor]);
+
+  const handleCodeChange = (value: string) => {
+    setCodeValue(value);
+    if (onChange) {
+      onChange(value);
+    }
+  };
 
   if (!editor) {
     return null;
@@ -139,13 +157,44 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   return (
     <div className="w-full border border-neutral-200 rounded-lg overflow-hidden bg-white">
-      {!readOnly && <RichTextToolbar editor={editor} />}
+      <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-2">
+        <div className="flex gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => setViewMode("visual")}
+            className={`rounded-md px-3 py-1 ${viewMode === "visual" ? "bg-pink-100 text-pink-600" : "text-neutral-500"}`}
+          >
+            دیداری
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("code")}
+            className={`rounded-md px-3 py-1 ${viewMode === "code" ? "bg-pink-100 text-pink-600" : "text-neutral-500"}`}
+          >
+            کد
+          </button>
+        </div>
+      </div>
+
+      {!readOnly && viewMode === "visual" && <RichTextToolbar editor={editor} />}
+
       <div className="min-h-[200px] p-5">
-        <EditorContent
-          editor={editor}
-          className="min-h-[150px] focus-within:outline-none text-sm"
-          placeholder={placeholder}
-        />
+        {viewMode === "visual" ? (
+          <EditorContent
+            editor={editor}
+            className="min-h-[150px] focus-within:outline-none text-sm"
+            placeholder={placeholder}
+          />
+        ) : (
+          <textarea
+            value={codeValue}
+            onChange={(e) => handleCodeChange(e.target.value)}
+            dir="ltr"
+            className="min-h-[150px] w-full rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs text-neutral-700 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            disabled={readOnly}
+            placeholder="<p>...</p>"
+          />
+        )}
       </div>
     </div>
   );
