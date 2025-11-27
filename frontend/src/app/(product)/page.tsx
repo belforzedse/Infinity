@@ -10,6 +10,8 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { categories } from "@/constants/categories";
 import { getHomepageSections } from "@/services/product/homepage";
+import { blogService } from "@/services/blog/blog.service";
+import { BlogCarousel } from "@/components/Blog";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
 import TabletSlider from "@/components/Hero/tabletSlider";
@@ -17,12 +19,28 @@ import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 
+async function getLatestBlogPosts() {
+  try {
+    const response = await blogService.getBlogPosts({
+      pageSize: 8,
+      status: "Published",
+      sort: "PublishedAt:desc"
+    });
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching latest blog posts:", error);
+    return [];
+  }
+}
+
 export default async function Home() {
-  const {
-    discounted: discountedProducts,
-    new: newProducts,
-    favorites: favoriteProducts,
-  } = await getHomepageSections();
+  const [
+    { discounted: discountedProducts, new: newProducts, favorites: favoriteProducts },
+    latestBlogPosts
+  ] = await Promise.all([
+    getHomepageSections(),
+    getLatestBlogPosts()
+  ]);
 
   return (
     <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
@@ -150,6 +168,19 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {/* Blog Section */}
+      {latestBlogPosts.length > 0 && (
+        <section>
+          <Reveal variant="fade-up" duration={700}>
+            <BlogCarousel
+              posts={latestBlogPosts}
+              title="اینفینیتی مگ"
+              viewAllHref="/blog"
+            />
+          </Reveal>
+        </section>
+      )}
     </PageContainer>
   );
 }
