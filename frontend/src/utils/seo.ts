@@ -31,10 +31,10 @@ export interface SEOConfig {
 }
 
 const defaultSEOConfig: SEOConfig = {
-  siteName: 'Infinity Color',
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitycolor.org',
-  defaultImage: '/images/og-default.jpg',
-  twitterHandle: '@infinitycolor',
+  siteName: "فروشگاه اینفینیتی",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org",
+  defaultImage: "/images/og-default.jpg",
+  twitterHandle: "@infinitycolor",
 };
 
 export function generateBlogPostMetadata(
@@ -42,7 +42,10 @@ export function generateBlogPostMetadata(
   config: SEOConfig = defaultSEOConfig
 ): Metadata {
   const title = post.metaTitle || post.title;
-  const description = post.metaDescription || post.excerpt || `Read ${post.title} on ${config.siteName}`;
+  const description =
+    post.metaDescription ||
+    post.excerpt ||
+    `مطالعه «${post.title}» در ${config.siteName}`;
   const url = `${config.siteUrl}/${post.slug}`;
   const imageUrl = post.featuredImage?.url
     ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${post.featuredImage.url}`
@@ -111,8 +114,8 @@ export function generateBlogPostMetadata(
 export function generateBlogListingMetadata(
   config: SEOConfig = defaultSEOConfig
 ): Metadata {
-  const title = `Blog | ${config.siteName}`;
-  const description = `Explore our latest articles, tutorials, and insights on ${config.siteName}`;
+  const title = `وبلاگ | ${config.siteName}`;
+  const description = `آخرین مقالات، آموزش‌ها و بینش‌های ${config.siteName} را در این بخش بخوانید.`;
   const url = `${config.siteUrl}/blog`;
 
   return {
@@ -120,7 +123,7 @@ export function generateBlogListingMetadata(
     description,
 
     openGraph: {
-      type: 'website',
+      type: "website",
       title,
       description,
       url,
@@ -130,13 +133,13 @@ export function generateBlogListingMetadata(
           url: `${config.siteUrl}${config.defaultImage}`,
           width: 1200,
           height: 630,
-          alt: `${config.siteName} Blog`,
+          alt: `${config.siteName} | وبلاگ`,
         },
       ],
     },
 
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
       images: [`${config.siteUrl}${config.defaultImage}`],
