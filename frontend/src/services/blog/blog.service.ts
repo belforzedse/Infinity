@@ -159,12 +159,29 @@ class BlogService {
     if (!entry) return entry;
     const attrs = entry.attributes || entry;
     const featuredImageData = attrs.FeaturedImage?.data;
+    const authorData = attrs.blog_author?.data || attrs.blog_author;
+    const authorAttrs = authorData?.attributes || authorData;
+    const authorUserInfo =
+      authorAttrs?.user_info ||
+      authorAttrs?.local_user?.user_info ||
+      attrs.createdBy?.user_info;
+    const authorName =
+      [authorUserInfo?.FirstName, authorUserInfo?.LastName].filter(Boolean).join(" ").trim() ||
+      authorAttrs?.Name ||
+      attrs.createdBy?.username ||
+      attrs.createdBy?.email;
 
     return {
       id: entry.id ?? attrs.id,
       ...attrs,
       blog_category: this.unwrapRelation(attrs.blog_category),
-      blog_author: this.unwrapRelation(attrs.blog_author),
+      blog_author: authorAttrs
+        ? {
+            id: authorData?.id ?? authorAttrs.id,
+            ...authorAttrs,
+            Name: authorName || authorAttrs?.Name,
+          }
+        : this.unwrapRelation(attrs.blog_author),
       blog_tags: Array.isArray(attrs.blog_tags?.data)
         ? attrs.blog_tags.data.map((tag: any) => this.unwrapRelation(tag)).filter(Boolean) as BlogTag[]
         : attrs.blog_tags || [],
@@ -172,6 +189,11 @@ class BlogService {
         ? {
             id: featuredImageData.id,
             ...(featuredImageData.attributes || {}),
+            url:
+              featuredImageData.attributes?.formats?.medium?.url ||
+              featuredImageData.attributes?.formats?.small?.url ||
+              featuredImageData.attributes?.formats?.large?.url ||
+              featuredImageData.attributes?.url,
           }
         : attrs.FeaturedImage?.data === null
           ? undefined
@@ -219,8 +241,13 @@ class BlogService {
     // Add population
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
-    searchParams.append("populate[blog_author]", "*");
+    searchParams.append("populate[blog_author][populate][Avatar]", "*");
+    searchParams.append("populate[blog_author][populate][user_info]", "*");
+    searchParams.append("populate[blog_author][populate][local_user][populate][user_info]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
+    searchParams.append("populate[createdBy][populate][user_info]", "*");
+    searchParams.append("populate[createdBy][populate][user_info]", "*");
+    searchParams.append("populate[createdBy][populate][user_info]", "*");
 
     const response = await fetch(`${this.baseUrl}/blog-posts?${searchParams}`, {
       headers: this.getHeaders(),

@@ -34,7 +34,13 @@ export default function FeaturedImagePanel({
       const uploaded = await uploadFile(file);
       if (uploaded && uploaded.length > 0) {
         const img = uploaded[0];
-        onFeaturedImageChange({ id: img.id, url: img.url });
+        const bestUrl =
+          img.formats?.medium?.url ||
+          img.formats?.small?.url ||
+          img.formats?.large?.url ||
+          img.formats?.thumbnail?.url ||
+          img.url;
+        onFeaturedImageChange({ id: img.id, url: bestUrl });
         toast.success("تصویر با موفقیت بارگذاری شد");
       } else {
         throw new Error("Upload failed");
@@ -56,7 +62,9 @@ export default function FeaturedImagePanel({
 
   const getImageUrl = (url: string) => {
     if (url.startsWith("http") || url.startsWith("blob:")) return url;
-    return `${IMAGE_BASE_URL}${url}`;
+    const base = IMAGE_BASE_URL.replace(/\/+$/, "");
+    const path = url.startsWith("/") ? url : `/${url}`;
+    return `${base}${path}`;
   };
 
   return (

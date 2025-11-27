@@ -81,14 +81,20 @@ export default function BlogPostsPage() {
     {
       accessorKey: "blog_author",
       header: "نویسنده",
-      cell: ({ row }: { row: { original: BlogPost } }) => (
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-slate-400" />
-          <span className="text-sm text-neutral-700">
-            {row.original.blog_author?.Name || "نامشخص"}
-          </span>
-        </div>
-      ),
+      cell: ({ row }: { row: { original: BlogPost } }) => {
+        const author = row.original.blog_author;
+        const ui = author?.user_info || author?.local_user?.user_info;
+        const displayName =
+          [ui?.FirstName, ui?.LastName].filter(Boolean).join(" ").trim() ||
+          author?.Name ||
+          "نامشخص";
+        return (
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-slate-400" />
+            <span className="text-sm text-neutral-700">{displayName}</span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "blog_category",
