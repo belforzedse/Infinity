@@ -7,6 +7,7 @@ import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import type { BlogPost } from "@/services/blog/blog.service";
+import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -29,7 +30,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, priority = false, className =
   const imageUrl = getImageUrl();
 
   return (
-    <article className={`group w-full max-w-[328px] ${className}`}>
+    <article className={`group w-full max-w-none ${className}`}>
       <Link
         href={`/${post.Slug}`}
         className="block rounded-3xl bg-white border-2 border-pink-100 p-2 transition-all duration-200 hover:shadow-md hover:border-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
@@ -76,6 +77,15 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, priority = false, className =
             </span>
           </div>
         </div>
+
+        {/* Author Row */}
+        {post.blog_author && (
+          <div className="flex items-center justify-end mb-2">
+            <span className="text-xs text-neutral-500 leading-[1.74]">
+              نویسنده: {resolveBlogAuthorDisplayName(post.blog_author)}
+            </span>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex flex-col items-end gap-1">

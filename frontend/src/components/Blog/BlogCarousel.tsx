@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import BlogCard from "./BlogCard";
 import BlogCardMobile from "./BlogCardMobile";
-import PaginationDesktop from "@/components/Hero/PaginationDesktop";
+import BlogPagination from "./BlogPagination";
 import { blogService, BlogPost } from "@/services/blog/blog.service";
 
 interface BlogCarouselProps {
@@ -139,23 +139,44 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         {/* Title */}
-        <h2 className="text-xl md:text-2xl font-medium text-neutral-800 leading-[1.24]">{title}</h2>
+        <div className="flex items-center gap-2">
+          {title === "اینفینیتی مگ" && (
+            <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-pink-600" />
+          )}
+          <h2 className="text-xl md:text-2xl font-medium text-neutral-800 leading-[1.24]">{title}</h2>
+        </div>
 
-        {/* View All Link */}
-        <Link
-          href={getViewAllHref()}
-          className="flex items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
-        >
-          <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-          <span>{viewAllText}</span>
-        </Link>
+        {/* Right Side - Navigation and View All */}
+        <div className="flex items-center gap-4">
+          {/* Desktop Navigation - only show if more than one page */}
+          {totalPages > 1 && (
+            <div className="hidden md:block">
+              <BlogPagination
+                total={totalPages}
+                current={currentPage}
+                onPageChange={goToPage}
+                onNext={nextPage}
+                onPrev={prevPage}
+              />
+            </div>
+          )}
+
+          {/* View All Link */}
+          <Link
+            href={getViewAllHref()}
+            className="flex items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+          >
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
+            <span>{viewAllText}</span>
+          </Link>
+        </div>
       </div>
 
       {/* Desktop Carousel */}
       <div className="hidden md:block">
         <div
           ref={scrollRef}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-300 ease-out"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 transition-all duration-300 ease-out"
         >
           {currentPosts.map((post, index) => (
             <div
@@ -166,20 +187,6 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
             </div>
           ))}
         </div>
-
-        {/* Desktop Pagination - only show if more than one page */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center mt-6">
-            <PaginationDesktop
-              total={totalPages}
-              index={currentPage}
-              onDotClick={goToPage}
-              onNext={nextPage}
-              onPrev={prevPage}
-              className="bg-white/80 backdrop-blur-sm border border-pink-100"
-            />
-          </div>
-        )}
       </div>
 
       {/* Mobile Grid */}

@@ -17,6 +17,7 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { blogService, BlogPost } from "@/services/blog/blog.service";
+import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 
 const statusConfig = {
   Draft: { label: "پیش‌نویس", className: "bg-slate-100 text-slate-700" },
@@ -82,12 +83,8 @@ export default function BlogPostsPage() {
       accessorKey: "blog_author",
       header: "نویسنده",
       cell: ({ row }: { row: { original: BlogPost } }) => {
-        const author = row.original.blog_author;
-        const ui = author?.user_info || author?.local_user?.user_info;
-        const displayName =
-          [ui?.FirstName, ui?.LastName].filter(Boolean).join(" ").trim() ||
-          author?.Name ||
-          "نامشخص";
+        const displayName = resolveBlogAuthorDisplayName(row.original.blog_author);
+        
         return (
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-slate-400" />
