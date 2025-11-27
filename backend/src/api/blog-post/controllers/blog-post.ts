@@ -11,14 +11,14 @@ import { normalizePopulateQuery } from "../../../utils/normalizePopulate";
 const blogPostController = factories.createCoreController("api::blog-post.blog-post" as any, ({ strapi }: { strapi: any }) => ({
   ensureDefaultPopulate(ctx: any, _populate?: any) {
     const defaultPopulate = {
-      blog_category: { populate: "*" },
-      blog_tags: { populate: "*" },
+      blog_category: true,
+      blog_tags: true,
       blog_author: {
         populate: {
-          Avatar: "*",
+          Avatar: true,
         },
       },
-      FeaturedImage: { populate: "*" },
+      FeaturedImage: true,
     };
     if (!ctx.query) ctx.query = {};
     // Always ensure blog_author fields (including avatar) are available
@@ -27,7 +27,7 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
       ...(ctx.query.populate || {}),
       blog_author: {
         populate: {
-          Avatar: "*",
+          Avatar: true,
         },
       },
     };
@@ -167,16 +167,32 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }
 
     const sanitizedQuery = await (this as any).sanitizeQuery(ctx);
-    sanitizedQuery.populate = ctx.query.populate;
 
-    const { results, pagination } = await strapi
-      .service("api::blog-post.blog-post")
-      .find(sanitizedQuery);
+    // Use entityService directly to bypass sanitization issues
+    const results = await strapi.entityService.findMany("api::blog-post.blog-post", {
+      ...sanitizedQuery,
+      populate: ctx.query.populate,
+    });
+
+    // Calculate pagination manually since we're using entityService
+    const total = await strapi.entityService.count("api::blog-post.blog-post", {
+      filters: sanitizedQuery.filters,
+    });
+
+    const page = sanitizedQuery.pagination?.page || 1;
+    const pageSize = sanitizedQuery.pagination?.pageSize || 25;
+    const pageCount = Math.ceil(total / pageSize);
+
+    const pagination = {
+      page,
+      pageSize,
+      pageCount,
+      total,
+    };
 
     const enrichedResults = enrichBlogPostsWithAuthorNames(results);
-    const sanitizedResults = await (this as any).sanitizeOutput(enrichedResults, ctx);
 
-    const response = await (this as any).transformResponse(sanitizedResults, {
+    const response = await (this as any).transformResponse(enrichedResults, {
       pagination,
     }) as any;
 
@@ -365,14 +381,14 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     const posts = await strapi.entityService.findMany("api::blog-post.blog-post", {
       filters: { Slug: slug },
       populate: {
-        blog_category: { populate: ["*"] },
-        blog_tags: { populate: ["*"] },
+        blog_category: true,
+        blog_tags: true,
         blog_author: {
           populate: {
-            Avatar: "*",
+            Avatar: true,
           },
         },
-        FeaturedImage: { populate: ["*"] },
+        FeaturedImage: true,
       },
     });
 
