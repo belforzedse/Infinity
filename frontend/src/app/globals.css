@@ -11,7 +11,7 @@ html {
 
 ::selection {
   background: #ffe4f1; /* brand-tinted */
-  color: #111827;
+  color: #53354c;
 }
 
 /* Accessible focus outlines on interactive elements */

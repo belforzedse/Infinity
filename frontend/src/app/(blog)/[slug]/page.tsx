@@ -80,6 +80,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     return `${IMAGE_BASE_URL}${url}`;
   };
 
+  const authorDisplayName = resolveBlogAuthorDisplayName(post.blog_author);
+  const authorInitial = authorDisplayName.trim().charAt(0) || "ن";
+
   return (
     <>
       {/* JSON-LD Structured Data */}
@@ -112,13 +115,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       ) : (
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-pink-100">
                           <span className="text-lg font-medium text-pink-600">
-                            {post.blog_author.Name.charAt(0)}
+                            {authorInitial}
                           </span>
                         </div>
                       )}
                       <div>
                         <h4 className="font-medium text-neutral-900">
-                          {resolveBlogAuthorDisplayName(post.blog_author)}
+                          {authorDisplayName}
                         </h4>
                         {post.blog_author.Bio && (
                           <p className="mt-1 text-sm text-neutral-600 line-clamp-3">

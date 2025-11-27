@@ -237,6 +237,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
             )}
           </div>
           <div className="flex items-center justify-between">
+            <p className="text-xs text-neutral-500">نظر شما پس از تایید نمایش داده خواهد شد</p>
             <button
               type="submit"
               disabled={isSubmitting}
@@ -245,7 +246,6 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
               <Send className="h-4 w-4" />
               {isSubmitting ? "در حال ارسال..." : "ارسال نظر"}
             </button>
-            <p className="text-xs text-neutral-500">نظر شما پس از تایید نمایش داده خواهد شد</p>
           </div>
         </form>
       </div>

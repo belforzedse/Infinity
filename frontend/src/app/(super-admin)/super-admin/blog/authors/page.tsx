@@ -28,11 +28,52 @@ export default function BlogAuthorsPage() {
   const [formData, setFormData] = useState({ Name: "", Bio: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const normalizeAuthor = useCallback((entry: any): BlogAuthor => {
+    if (!entry) return entry;
+    const attrs = entry.attributes || entry;
+    const avatarData = attrs.Avatar?.data;
+    const avatarAttrs = avatarData?.attributes || avatarData;
+
+    return {
+      id: entry.id ?? attrs.id,
+      Name: attrs.Name || "",
+      Bio: attrs.Bio || "",
+      Email: attrs.Email,
+      Avatar: avatarAttrs
+        ? {
+            id: avatarData?.id ?? avatarAttrs.id,
+            url: avatarAttrs.url,
+            alternativeText: avatarAttrs.alternativeText,
+          }
+        : undefined,
+      users_permissions_user: attrs.users_permissions_user,
+      ResolvedName: attrs.ResolvedName,
+      ResolvedAuthorName: attrs.ResolvedAuthorName,
+      createdAt: attrs.createdAt,
+      updatedAt: attrs.updatedAt,
+    };
+  }, []);
+
+  const formatPersianDate = (dateString?: string) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+    return date.toLocaleDateString("fa-IR-u-ca-persian", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const fetchAuthors = useCallback(async () => {
     try {
       setLoading(true);
       const response = await blogService.getBlogAuthors();
-      setAuthors(response.data || []);
+      const normalized =
+        Array.isArray(response.data) ? response.data.map((item: any) => normalizeAuthor(item)) : [];
+      setAuthors(normalized);
     } catch (err) {
       console.error("Error fetching authors:", err);
       toast.error("خطا در دریافت نویسندگان");
@@ -40,7 +81,7 @@ export default function BlogAuthorsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [normalizeAuthor]);
 
   useEffect(() => {
     fetchAuthors();
@@ -98,8 +139,9 @@ export default function BlogAuthorsPage() {
     setFormData({ Name: "", Bio: "" });
   };
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredAuthors = authors.filter((author) =>
-    author.Name.toLowerCase().includes(searchTerm.toLowerCase())
+    (author.Name || "").toLowerCase().includes(normalizedSearch)
   );
 
   const getAvatarUrl = (avatar?: { url: string }) => {
@@ -128,7 +170,9 @@ export default function BlogAuthorsPage() {
               </div>
             )}
             <div>
-              <div className="font-medium text-neutral-900">{row.original.Name}</div>
+              <div className="font-medium text-neutral-900">
+                {row.original.Name || "بدون نام"}
+              </div>
             </div>
           </div>
         );
@@ -150,7 +194,7 @@ export default function BlogAuthorsPage() {
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-slate-400" />
           <span className="text-sm text-neutral-700">
-            {new Date(row.original.createdAt).toLocaleDateString("fa-IR")}
+            {formatPersianDate(row.original.createdAt)}
           </span>
         </div>
       ),

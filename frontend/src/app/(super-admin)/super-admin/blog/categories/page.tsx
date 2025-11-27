@@ -15,6 +15,7 @@ import {
   Check,
 } from "lucide-react";
 import { blogService, BlogCategory } from "@/services/blog/blog.service";
+import Modal from "@/components/Kits/Modal";
 
 export default function BlogCategoriesPage() {
   const [categories, setCategories] = useState<BlogCategory[]>([]);
@@ -22,10 +23,21 @@ export default function BlogCategoriesPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Add/Edit form state
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ Name: "", Description: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const formatPersianDate = (dateString?: string) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("fa-IR-u-ca-persian", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -60,8 +72,11 @@ export default function BlogCategoriesPage() {
 
   const handleEdit = (category: BlogCategory) => {
     setEditingId(category.id);
-    setFormData({ Name: category.Name, Description: category.Description || "" });
-    setShowForm(true);
+    setFormData({
+      Name: category.Name || category.Title || "",
+      Description: category.Description || "",
+    });
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -79,7 +94,7 @@ export default function BlogCategoriesPage() {
         await blogService.createBlogCategory(formData);
         toast.success("دسته‌بندی با موفقیت ایجاد شد");
       }
-      setShowForm(false);
+      setIsModalOpen(false);
       setEditingId(null);
       setFormData({ Name: "", Description: "" });
       fetchCategories();
@@ -91,14 +106,22 @@ export default function BlogCategoriesPage() {
     }
   };
 
-  const handleCancel = () => {
-    setShowForm(false);
+  const closeModal = () => {
+    if (isSubmitting) return;
+    setIsModalOpen(false);
     setEditingId(null);
     setFormData({ Name: "", Description: "" });
   };
 
+  const openCreateModal = () => {
+    setEditingId(null);
+    setFormData({ Name: "", Description: "" });
+    setIsModalOpen(true);
+  };
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredCategories = categories.filter((cat) =>
-    cat.Name.toLowerCase().includes(searchTerm.toLowerCase())
+    (cat.Name || cat.Title || "").toLowerCase().includes(normalizedSearch)
   );
 
   const columns = [
@@ -111,8 +134,12 @@ export default function BlogCategoriesPage() {
             <FolderOpen className="h-5 w-5 text-slate-500" />
           </div>
           <div>
-            <div className="font-medium text-neutral-900">{row.original.Name}</div>
-            <div className="text-xs text-neutral-500">/{row.original.Slug}</div>
+            <div className="font-medium text-neutral-900">
+              {row.original.Name || row.original.Title || "بدون نام"}
+            </div>
+            <div className="text-xs text-neutral-500">
+              {row.original.Slug ? `/${row.original.Slug}` : "-"}
+            </div>
           </div>
         </div>
       ),
@@ -133,7 +160,7 @@ export default function BlogCategoriesPage() {
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-slate-400" />
           <span className="text-sm text-neutral-700">
-            {new Date(row.original.createdAt).toLocaleDateString("fa-IR")}
+            {formatPersianDate(row.original.createdAt)}
           </span>
         </div>
       ),
@@ -167,81 +194,73 @@ export default function BlogCategoriesPage() {
   return (
     <ContentWrapper
       title="مدیریت دسته‌بندی‌ها"
-      hasAddButton
-      addButtonText="دسته‌بندی جدید"
+      titleSuffixComponent={
+        <button
+          type="button"
+          onClick={openCreateModal}
+          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+        >
+          <Plus className="h-4 w-4" />
+          دسته‌بندی جدید
+        </button>
+      }
     >
-      {/* Add/Edit Form */}
-      {showForm && (
-        <div className="mb-4 rounded-2xl bg-white p-5">
-          <h3 className="mb-4 text-lg font-medium text-neutral-800">
-            {editingId ? "ویرایش دسته‌بندی" : "افزودن دسته‌بندی جدید"}
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                نام دسته‌بندی
-              </label>
-              <input
-                type="text"
-                value={formData.Name}
-                onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
-                placeholder="نام دسته‌بندی را وارد کنید"
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                توضیحات
-              </label>
-              <textarea
-                value={formData.Description}
-                onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
-                placeholder="توضیحات دسته‌بندی (اختیاری)"
-                rows={3}
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-              />
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-              >
-                <X className="h-4 w-4" />
-                انصراف
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <Check className="h-4 w-4" />
-                )}
-                {editingId ? "بروزرسانی" : "ذخیره"}
-              </button>
-            </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingId ? "ویرایش دسته‌بندی" : "افزودن دسته‌بندی جدید"}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
+              نام دسته‌بندی
+            </label>
+            <input
+              type="text"
+              value={formData.Name}
+              onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
+              placeholder="نام دسته‌بندی را وارد کنید"
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
+              توضیحات
+            </label>
+            <textarea
+              value={formData.Description}
+              onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
+              placeholder="توضیحات دسته‌بندی (اختیاری)"
+              rows={3}
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            >
+              <X className="h-4 w-4" />
+              انصراف
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+              {editingId ? "بروزرسانی" : "ذخیره"}
+            </button>
           </div>
         </div>
-      )}
-
-      {/* Add Button (when form is hidden) */}
-      {!showForm && (
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
-          >
-            <Plus className="h-4 w-4" />
-            دسته‌بندی جدید
-          </button>
-        </div>
-      )}
+      </Modal>
 
       {/* Search */}
       <div className="mb-4 rounded-2xl bg-white p-4">
