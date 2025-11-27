@@ -15,7 +15,8 @@ export default {
       path: "/blog-comments/:id/approve",
       handler: "blog-comment.approve",
       config: {
-        middlewares: ['global::authentication'],
+        auth: { scope: [] },
+        middlewares: [],
         policies: [],
       },
     },
@@ -24,9 +25,11 @@ export default {
       path: "/blog-comments/:id/reject",
       handler: "blog-comment.reject",
       config: {
-        middlewares: ['global::authentication'],
+        auth: { scope: [] },
+        middlewares: [],
         policies: [],
       },
     },
   ],
 };
+

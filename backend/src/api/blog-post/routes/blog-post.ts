@@ -15,16 +15,13 @@ export default factories.createCoreRouter("api::blog-post.blog-post", {
       middlewares: [],
     },
     create: {
-      auth: false,
-      middlewares: ["global::authentication"],
+      auth: { scope: [] },
     },
     update: {
-      auth: false,
-      middlewares: ["global::authentication"],
+      auth: { scope: [] },
     },
     delete: {
-      auth: false,
-      middlewares: ["global::authentication"],
+      auth: { scope: [] },
     },
   },
 });
