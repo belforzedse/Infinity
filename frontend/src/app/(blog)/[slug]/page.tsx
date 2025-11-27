@@ -105,7 +105,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="sticky top-8 space-y-6">
                 {/* Author Info */}
                 {post.blog_author && (
-                  <div className="rounded-2xl bg-white p-5 shadow-sm">
+                  <div className="rounded-2xl  bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
                         <User className="h-4 w-4 text-slate-500" />
