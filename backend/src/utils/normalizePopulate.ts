@@ -1,4 +1,4 @@
-type PopulateValue = Record<string, unknown> | string | string[] | undefined;
+type PopulateValue = Record<string, unknown> | string | string[] | boolean | undefined;
 
 const mergePopulateObjects = (target: Record<string, unknown>, source: Record<string, unknown>) => {
   const merged: Record<string, unknown> = { ...target };
@@ -33,19 +33,12 @@ export const normalizePopulateQuery = (value: unknown): PopulateValue => {
       return undefined;
     }
 
-    const hasOnlyPrimitives = normalizedEntries.every(
-      (entry) => typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean"
-    );
-
-    if (hasOnlyPrimitives) {
-      return normalizedEntries as string[];
-    }
-
     let mergedObject: Record<string, unknown> | undefined;
     let hasWildcard = false;
+    const primitiveEntries: Array<string | number | boolean> = [];
 
     for (const entry of normalizedEntries) {
-      if (entry === "*") {
+      if (entry === true || entry === "*") {
         hasWildcard = true;
         continue;
       }
@@ -54,6 +47,11 @@ export const normalizePopulateQuery = (value: unknown): PopulateValue => {
         mergedObject = mergedObject
           ? mergePopulateObjects(mergedObject, entry as Record<string, unknown>)
           : (entry as Record<string, unknown>);
+        continue;
+      }
+
+      if (typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean") {
+        primitiveEntries.push(entry);
       }
     }
 
@@ -62,14 +60,18 @@ export const normalizePopulateQuery = (value: unknown): PopulateValue => {
     }
 
     if (hasWildcard) {
-      return "*";
+      return true;
+    }
+
+    if (primitiveEntries.length === normalizedEntries.length) {
+      return primitiveEntries.map((entry) => (entry === "*" ? true : entry)) as string[];
     }
 
     return normalizedEntries[normalizedEntries.length - 1] as PopulateValue;
   }
 
-  if (value === true) {
-    return "*";
+  if (value === "*" || value === true) {
+    return true;
   }
 
   if (value && typeof value === "object") {
