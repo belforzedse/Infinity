@@ -84,11 +84,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
       {/* Featured Image */}
       {getImageUrl() && (
         <div className="aspect-video overflow-hidden">
-          <img
-            src={getImageUrl()!}
-            alt={post.Title}
-            className="h-full w-full object-cover"
-          />
+          <img src={getImageUrl()!} alt={post.Title} className="h-full w-full object-cover" />
         </div>
       )}
 
@@ -159,11 +155,13 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
         </div>
 
         {/* Content */}
-        <div
-          className="prose prose-lg prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-pre:bg-slate-900"
-          dangerouslySetInnerHTML={{ __html: post.Content }}
-          dir="rtl"
-        />
+        <div className="mx-auto max-w-[900px]">
+          <div
+            className="prose prose-lg prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
+            dangerouslySetInnerHTML={{ __html: post.Content }}
+            dir="rtl"
+          />
+        </div>
 
         {/* Tags */}
         {post.blog_tags && post.blog_tags.length > 0 && (

@@ -16,6 +16,7 @@ import {
   Clock,
 } from "lucide-react";
 import { blogService, BlogComment } from "@/services/blog/blog.service";
+import { resolveBlogCommentUserDisplayName } from "@/utils/blogCommentAuthorName";
 
 const statusConfig = {
   Pending: { label: "در انتظار", className: "bg-yellow-100 text-yellow-700", icon: Clock },
@@ -88,7 +89,7 @@ export default function BlogCommentsPage() {
           <div className="flex items-center gap-2 mb-1">
             <User className="h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium text-neutral-800">
-              {row.original.user?.username || "کاربر ناشناس"}
+              {resolveBlogCommentUserDisplayName(row.original.user)}
             </span>
           </div>
           <p className="text-sm text-neutral-600 line-clamp-2">

@@ -91,17 +91,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <div className="min-h-screen bg-slate-50 py-8" dir="rtl">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-            {/* Main Content */}
-            <div className="lg:col-span-3">
-              <BlogPostDetail post={post} />
-
-              {/* Comments Section */}
-              <div className="mt-12">
-                <BlogComments postId={post.id} />
-              </div>
-            </div>
-
-            {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-8 space-y-6">
                 {/* Author Info */}
@@ -193,6 +182,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </Link>
               </div>
             </div>
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              <BlogPostDetail post={post} />
+
+              {/* Comments Section */}
+              <div className="mt-12">
+                <BlogComments postId={post.id} />
+              </div>
+            </div>
+
+            {/* Sidebar */}
+
           </div>
         </div>
       </div>

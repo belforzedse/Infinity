@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { blogService, BlogComment } from "@/services/blog/blog.service";
+import { resolveBlogCommentUserDisplayName } from "@/utils/blogCommentAuthorName";
 
 interface BlogCommentsProps {
   postId: number;
@@ -52,11 +53,6 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
     } finally {
       setLoading(false);
     }
-  };
-
-  const getUserDisplayName = (user: BlogComment["user"]) => {
-    if (!user) return "کاربر ناشناس";
-    return user.username || user.email || "کاربر";
   };
 
   const onSubmit = async (data: CommentForm) => {
@@ -104,7 +100,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
               </div>
               <div>
                 <div className="font-medium text-neutral-900">
-                  {getUserDisplayName(comment.user)}
+                  {resolveBlogCommentUserDisplayName(comment.user)}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-neutral-500">
                   <Calendar className="h-3.5 w-3.5" />
