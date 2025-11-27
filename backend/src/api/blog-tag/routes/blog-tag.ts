@@ -15,16 +15,16 @@ export default factories.createCoreRouter("api::blog-tag.blog-tag", {
       middlewares: [],
     },
     create: {
-      auth: false,
-      middlewares: ["global::authentication"],
+      auth: { scope: [] },
+      middlewares: [],
     },
     update: {
-      auth: false,
-      middlewares: ["global::authentication"],
+      auth: { scope: [] },
+      middlewares: [],
     },
     delete: {
-      auth: false,
-      middlewares: ["global::authentication"],
+      auth: { scope: [] },
+      middlewares: [],
     },
   },
 });

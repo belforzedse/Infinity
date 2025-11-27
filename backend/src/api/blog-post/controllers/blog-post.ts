@@ -3,17 +3,87 @@
  */
 
 import { factories } from "@strapi/strapi";
-import { roleIsAllowed } from "../../../utils/roles";
+import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
 import { validateBlogSlug, generateUniqueBlogSlug } from "../../../utils/slugValidation";
 
 export default factories.createCoreController("api::blog-post.blog-post", ({ strapi }) => ({
+  async resolveUserFromAuthHeader(ctx) {
+    if (ctx.state?.user) return ctx.state.user;
+
+    const authHeader = ctx.request?.header?.authorization || ctx.request?.headers?.authorization;
+    const token = typeof authHeader === "string" && authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token) return null;
+
+    try {
+      const payload = await strapi.plugin("users-permissions").service("jwt").verify(token);
+      const userId = Number(payload?.id || payload?.userId);
+      if (!userId || Number.isNaN(userId)) return null;
+
+      const user = await strapi.entityService.findOne("plugin::users-permissions.user", userId, {
+        populate: ["role", "user_role"],
+      });
+      if (user) {
+        ctx.state.user = user;
+      }
+      return user;
+    } catch {
+      return null;
+    }
+  },
+
+  async getOrCreateAuthorForUser(user: any) {
+    if (!user) return null;
+
+    const identifier = user.email || user.username || user.phone || `user-${user.id}`;
+
+    // Try to find an existing blog-author by email/Name
+    const existing = await strapi.entityService.findMany("api::blog-author.blog-author", {
+      filters: {
+        $or: [
+          { Email: user.email },
+          { Name: identifier },
+        ],
+      },
+      limit: 1,
+    });
+
+    if (existing && existing.length > 0) {
+      return existing[0];
+    }
+
+    // Create a new author entry
+    return strapi.entityService.create("api::blog-author.blog-author", {
+      data: {
+        Name: identifier,
+        Email: user.email,
+      },
+    });
+  },
+
+  async getActorRoleName(userId?: number, fallback?: any) {
+    if (!userId) {
+      return fallback?.user_role?.Title || fallback?.user_role?.Name || fallback?.role?.name || null;
+    }
+
+    const userWithRole = await fetchUserWithRole(strapi, userId);
+    return (
+      userWithRole?.user_role?.Title ||
+      userWithRole?.user_role?.Name ||
+      userWithRole?.role?.name ||
+      null
+    );
+  },
+
   // Override find to filter by status for public users
   async find(ctx) {
-    const { user } = ctx.state;
-    
-    // Check if user has Editor+ role
-    const hasEditorRole = user && roleIsAllowed(user.user_role?.Name, ["Superadmin", "Store manager", "Editor"]);
-    
+    const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
+
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
+
     // If not Editor+, only show published posts
     if (!hasEditorRole) {
       ctx.query.filters = {
@@ -28,11 +98,11 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
 
   // Override findOne to filter by status for public users
   async findOne(ctx) {
-    const { user } = ctx.state;
+    const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
     const { id } = ctx.params;
-    
-    // Check if user has Editor+ role
-    const hasEditorRole = user && roleIsAllowed(user.user_role?.Name, ["Superadmin", "Store manager", "Editor"]);
+
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
     
     // Get the post
     const post = await strapi.entityService.findOne("api::blog-post.blog-post", id, {
@@ -61,8 +131,9 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   // Create post (Editor+ only)
   async create(ctx) {
     const { user } = ctx.state;
-    
-    if (!user || !roleIsAllowed(user.user_role?.Name, ["Superadmin", "Store manager", "Editor"])) {
+
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
       return ctx.forbidden("You don't have permission to create blog posts");
     }
     
@@ -82,8 +153,11 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     }
     
     // Set author automatically if not provided
-    if (!data.blog_author && user.blog_author) {
-      data.blog_author = user.blog_author.id;
+    if (!data.blog_author) {
+      const author = await this.getOrCreateAuthorForUser(user);
+      if (author) {
+        data.blog_author = author.id;
+      }
     }
     
     // Set published date if status is Published
@@ -103,8 +177,9 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   async update(ctx) {
     const { user } = ctx.state;
     const { id } = ctx.params;
-    
-    if (!user || !roleIsAllowed(user.user_role?.Name, ["Superadmin", "Store manager", "Editor"])) {
+
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
       return ctx.forbidden("You don't have permission to update blog posts");
     }
     
@@ -122,6 +197,14 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     if (data.Status === "Published" && !data.PublishedAt) {
       data.PublishedAt = new Date();
     }
+
+    // Auto-assign author if missing
+    if (!data.blog_author) {
+      const author = await this.getOrCreateAuthorForUser(user);
+      if (author) {
+        data.blog_author = author.id;
+      }
+    }
     
     const post = await strapi.entityService.update("api::blog-post.blog-post", id, {
       data,
@@ -134,8 +217,9 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   // Delete post (Editor+ only)
   async delete(ctx) {
     const { user } = ctx.state;
-    
-    if (!user || !roleIsAllowed(user.user_role?.Name, ["Superadmin", "Store manager", "Editor"])) {
+
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
       return ctx.forbidden("You don't have permission to delete blog posts");
     }
     
@@ -148,10 +232,10 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   // Get post by slug
   async findBySlug(ctx) {
     const { slug } = ctx.params;
-    const { user } = ctx.state;
-    
-    // Check if user has Editor+ role
-    const hasEditorRole = user && roleIsAllowed(user.user_role?.Name, ["Superadmin", "Store manager", "Editor"]);
+    const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
+
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
     
     const posts = await strapi.entityService.findMany("api::blog-post.blog-post", {
       filters: { Slug: slug },
