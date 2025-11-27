@@ -24,4 +24,5 @@ export default factories.createCoreRouter("api::blog-post.blog-post", {
       auth: { scope: [] },
     },
   },
+  only: ["find", "findOne", "create", "update", "delete"],
 });
