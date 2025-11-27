@@ -132,6 +132,21 @@ export interface CreateBlogAuthorData {
 class BlogService {
   private baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
+  private getBaseUrl(): string {
+    const envBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.API_BASE_URL ||
+      this.baseUrl;
+
+    if (envBase) {
+      return envBase.replace(/\/$/, "");
+    }
+
+    // Fallback for local dev if env isn't loaded (server & client safe)
+    const defaultBase = "http://localhost:1337/api";
+    return defaultBase;
+  }
+
   private getAuthToken(): string | null {
     if (typeof window !== "undefined") {
       return localStorage.getItem("accessToken");
@@ -193,6 +208,7 @@ class BlogService {
               featuredImageData.attributes?.formats?.medium?.url ||
               featuredImageData.attributes?.formats?.small?.url ||
               featuredImageData.attributes?.formats?.large?.url ||
+              featuredImageData.attributes?.formats?.thumbnail?.url ||
               featuredImageData.attributes?.url,
           }
         : attrs.FeaturedImage?.data === null
@@ -293,6 +309,9 @@ class BlogService {
 
   // Get single blog post by slug (public)
   async getBlogPostBySlug(slug: string): Promise<ApiResponse<BlogPost>> {
+    const baseUrl = this.getBaseUrl();
+    const encodedSlug = encodeURIComponent(slug);
+
     const searchParams = new URLSearchParams();
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
@@ -301,8 +320,9 @@ class BlogService {
     searchParams.append("populate[blog_comments][populate][user]", "*");
     searchParams.append("populate[blog_comments][populate][parent_comment]", "*");
 
-    const response = await fetch(`${this.baseUrl}/blog-posts/slug/${slug}?${searchParams}`, {
+    const response = await fetch(`${baseUrl}/blog-posts/slug/${encodedSlug}?${searchParams}`, {
       headers: this.getHeaders(),
+      cache: "no-store",
     });
 
     if (!response.ok) {

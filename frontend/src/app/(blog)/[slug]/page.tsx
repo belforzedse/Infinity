@@ -9,6 +9,10 @@ import { generateBlogPostMetadata, generateJSONLD } from "@/utils/seo";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import { User, FolderOpen, Tag } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const runtime = "nodejs";
+
 interface BlogPostPageProps {
   params: {
     slug: string;
@@ -17,8 +21,10 @@ interface BlogPostPageProps {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
   try {
-    const { data: post } = await blogService.getBlogPostBySlug(params.slug);
+    const { data: post } = await blogService.getBlogPostBySlug(slug);
 
     return generateBlogPostMetadata({
       title: post.Title,
@@ -42,10 +48,11 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { slug } = await params;
   let post;
 
   try {
-    const response = await blogService.getBlogPostBySlug(params.slug);
+    const response = await blogService.getBlogPostBySlug(slug);
     post = response.data;
   } catch (error) {
     notFound();

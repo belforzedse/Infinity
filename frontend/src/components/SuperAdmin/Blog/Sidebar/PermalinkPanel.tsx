@@ -63,7 +63,11 @@ export default function PermalinkPanel({
           <input
             type="text"
             value={slug}
-            onChange={(e) => onSlugChange?.(e.target.value)}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const cleaned = raw.replace(/[\s\u200c]+/g, "-");
+              onSlugChange?.(cleaned);
+            }}
             dir="ltr"
             className="flex-1 border-none bg-transparent text-sm text-neutral-700 placeholder:text-slate-400 focus:outline-none focus:ring-0"
             placeholder="example-slug"

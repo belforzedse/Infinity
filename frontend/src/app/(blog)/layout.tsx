@@ -1,47 +1,159 @@
+"use client";
+
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { FileText, Home } from "lucide-react";
+import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
+import DesktopSearch from "@/components/Search/PLPDesktopSearch";
+import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
+import Footer from "@/components/PLP/Footer";
+import MobileHeader from "@/components/PLP/Header/Mobile";
+import BottomNavigation from "@/components/PLP/BottomNavigation";
+import ScrollToTop from "@/components/ScrollToTop";
+import GlassSurface from "@/components/GlassSurface";
+import { useCart } from "@/contexts/CartContext";
 
-interface BlogLayoutProps {
-  children: React.ReactNode;
-}
+const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
+  ssr: false,
+});
 
-export default function BlogLayout({ children }: BlogLayoutProps) {
-  return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
-      {/* Blog Header */}
-      <header className="border-b border-slate-100 bg-white">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <Link href="/blog" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500">
-              <FileText className="h-5 w-5 text-white" />
+export default function BlogLayout({ children }: { children: React.ReactNode }) {
+  const { isDrawerOpen } = useCart();
+  const [scrolled, setScrolled] = React.useState(false);
+  const [showHeader, setShowHeader] = React.useState(true);
+  const pathname = usePathname();
+  const lastScrollY = React.useRef(0);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 8);
+
+      if (window.innerWidth >= 1024) {
+        lastScrollY.current = currentY;
+        setShowHeader(true);
+        return;
+      }
+
+      const isScrollingUp = currentY <= lastScrollY.current;
+      const nearTop = currentY < 80;
+      setShowHeader(isScrollingUp || nearTop);
+      lastScrollY.current = Math.max(0, currentY);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const HeaderContent = () => (
+    <>
+      <div className="hidden lg:block">
+        <div className="px-10 py-3">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+              <div className="justify-self-start">
+                <DesktopHeaderActions />
+              </div>
+              <div className="justify-self-center">
+                <Link href="/">
+                  <Image
+                    alt="logo"
+                    width={210}
+                    height={72}
+                    src="/images/full-logo.png"
+                    className="h-[48px] w-[150px] object-contain md:h-[72px] md:w-[210px]"
+                    priority
+                  />
+                </Link>
+              </div>
+              <div className="justify-self-end">
+                <DesktopSearch />
+              </div>
             </div>
-            <span className="text-lg font-semibold text-neutral-900">وبلاگ اینفینیتی</span>
-          </Link>
+          </div>
+        </div>
+      </div>
 
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-neutral-600 transition-colors hover:bg-slate-50"
-            >
-              <Home className="h-4 w-4" />
-              صفحه اصلی
-            </Link>
-          </nav>
+      <div className="lg:hidden">
+        <MobileHeader />
+      </div>
+    </>
+  );
+
+  const headerStyle = !showHeader
+    ? { borderBottomWidth: 0, borderBottomColor: "transparent", boxShadow: "none" }
+    : undefined;
+
+  return (
+    <div dir="rtl" className="bg-white pb-[81px] antialiased lg:pb-0">
+      {/* Skip to content for accessibility */}
+      <a
+        href="#content"
+        className="shadow-elevated sr-only fixed left-4 top-4 z-[60] rounded-md bg-black/80 px-3 py-2 text-white focus:not-sr-only"
+      >
+        پرش به محتوا
+      </a>
+      <header
+        className={`sticky top-0 z-50 transform transition-all duration-200 allow-overflow border-t-0 ${
+          scrolled
+            ? "glass-panel shadow-sm"
+            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+        } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
+        style={headerStyle}
+      >
+        <div className="relative">
+          {scrolled && (
+            <GlassSurface
+              disableLayoutStyles
+              width="100%"
+              height="100%"
+              borderRadius={0}
+              blur={14}
+              brightness={88}
+              opacity={0.7}
+              backgroundOpacity={0.14}
+              saturation={1.3}
+              distortionScale={-80}
+              redOffset={4}
+              greenOffset={7}
+              blueOffset={9}
+              mixBlendMode="screen"
+              className="pointer-events-none absolute inset-0 -z-10 opacity-95"
+              contentClassName="hidden"
+              style={{ width: "100%", height: "100%" }}
+            />
+          )}
+          <HeaderContent />
         </div>
       </header>
 
-      {/* Blog Content */}
-      <main>{children}</main>
+      <div className="hidden lg:block">
+        <HeaderDesktopNav />
+      </div>
 
-      {/* Blog Footer */}
-      <footer className="border-t border-slate-100 bg-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-neutral-500">
-            © {new Date().getFullYear()} فروشگاه اینفینیتی - تمامی حقوق محفوظ است
-          </p>
-        </div>
+      <motion.section
+        key={pathname}
+        id="content"
+        initial={{ opacity: 0, x: 16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+      >
+        {children}
+      </motion.section>
+
+      <footer>
+        <Footer />
       </footer>
+
+      <BottomNavigation />
+
+      {isDrawerOpen && <CartDrawer />}
+
+      <ScrollToTop />
     </div>
   );
 }

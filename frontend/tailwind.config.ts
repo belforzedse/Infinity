@@ -189,6 +189,7 @@ export default {
       nocompatible: true,
       themeKey: "scrollbar",
     }),
-    require("tailwindcss-animate")
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography")
 ],
 } satisfies Config;
