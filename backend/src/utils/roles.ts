@@ -68,7 +68,10 @@ export async function fetchUserWithRole(strapi: Strapi, userId?: number) {
 
   return strapi
     .query("plugin::users-permissions.user")
-    .findOne({ where: { id: userId }, populate: ["role"] });
+    .findOne({
+      where: { id: userId },
+      populate: ["role", "user_role", "user_info"],
+    });
 }
 
 export async function fetchRoleByName(strapi: Strapi, roleName: RoleName) {
