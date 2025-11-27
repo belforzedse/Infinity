@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { BlogPost } from "@/services/blog/blog.service";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 
 interface BlogPostDetailProps {
   post: BlogPost;
@@ -126,7 +127,9 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
                     <User className="h-4 w-4 text-pink-600" />
                   </div>
                 )}
-                <span className="font-medium">{post.blog_author.Name}</span>
+                <span className="font-medium">
+                  {resolveBlogAuthorDisplayName(post.blog_author)}
+                </span>
               </div>
             )}
             <div className="flex items-center gap-1.5">

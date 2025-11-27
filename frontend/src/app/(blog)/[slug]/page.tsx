@@ -8,6 +8,7 @@ import { blogService, BlogTag } from "@/services/blog/blog.service";
 import { generateBlogPostMetadata, generateJSONLD } from "@/utils/seo";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import { User, FolderOpen, Tag } from "lucide-react";
+import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -127,7 +128,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         </div>
                       )}
                       <div>
-                        <h4 className="font-medium text-neutral-900">{post.blog_author.Name}</h4>
+                        <h4 className="font-medium text-neutral-900">
+                          {resolveBlogAuthorDisplayName(post.blog_author)}
+                        </h4>
                         {post.blog_author.Bio && (
                           <p className="mt-1 text-sm text-neutral-600 line-clamp-3">
                             {post.blog_author.Bio}

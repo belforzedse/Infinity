@@ -62,6 +62,16 @@ export interface BlogAuthor {
     url: string;
     alternativeText?: string;
   };
+  users_permissions_user?: {
+    id: number;
+    username?: string;
+    email?: string;
+    user_info?: {
+      FirstName?: string;
+      LastName?: string;
+    };
+  };
+  ResolvedName?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -170,21 +180,38 @@ class BlogService {
     return { id: rel.data.id, ...(rel.data.attributes || {}) };
   }
 
+  private normalizeBlogComment(entry: any): BlogComment {
+    if (!entry) return entry;
+    const attrs = entry.attributes || entry;
+
+    const replies =
+      Array.isArray(attrs.replies?.data)
+        ? attrs.replies.data.map((item: any) => this.normalizeBlogComment(item)).filter(Boolean)
+        : attrs.replies || [];
+
+    return {
+      id: entry.id ?? attrs.id,
+      ...attrs,
+      user: this.unwrapRelation(attrs.user),
+      blog_post: this.unwrapRelation(attrs.blog_post),
+      parent_comment: this.unwrapRelation(attrs.parent_comment),
+      replies,
+    };
+  }
+
   private normalizeBlogPost(entry: any): BlogPost {
     if (!entry) return entry;
     const attrs = entry.attributes || entry;
     const featuredImageData = attrs.FeaturedImage?.data;
     const authorData = attrs.blog_author?.data || attrs.blog_author;
     const authorAttrs = authorData?.attributes || authorData;
-    const authorUserInfo =
-      authorAttrs?.user_info ||
-      authorAttrs?.local_user?.user_info ||
-      attrs.createdBy?.user_info;
-    const authorName =
-      [authorUserInfo?.FirstName, authorUserInfo?.LastName].filter(Boolean).join(" ").trim() ||
-      authorAttrs?.Name ||
-      attrs.createdBy?.username ||
-      attrs.createdBy?.email;
+    
+    // Get user_info from the users_permissions_user relation (same structure as orders table)
+    // Handle Strapi's nested data structure: blog_author.users_permissions_user.data.attributes.user_info.data.attributes
+    const usersPermissionsUserData = authorAttrs?.users_permissions_user?.data;
+    const usersPermissionsUserAttrs = usersPermissionsUserData?.attributes || usersPermissionsUserData;
+    const userInfoData = usersPermissionsUserAttrs?.user_info?.data;
+    const userInfoAttrs = userInfoData?.attributes || userInfoData;
 
     return {
       id: entry.id ?? attrs.id,
@@ -194,7 +221,13 @@ class BlogService {
         ? {
             id: authorData?.id ?? authorAttrs.id,
             ...authorAttrs,
-            Name: authorName || authorAttrs?.Name,
+            // Preserve the full nested structure so frontend can access it (same as orders table)
+            users_permissions_user: usersPermissionsUserAttrs
+              ? {
+                  ...usersPermissionsUserAttrs,
+                  user_info: userInfoAttrs,
+                }
+              : authorAttrs.users_permissions_user,
           }
         : this.unwrapRelation(attrs.blog_author),
       blog_tags: Array.isArray(attrs.blog_tags?.data)
@@ -258,12 +291,8 @@ class BlogService {
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
     searchParams.append("populate[blog_author][populate][Avatar]", "*");
-    searchParams.append("populate[blog_author][populate][user_info]", "*");
-    searchParams.append("populate[blog_author][populate][local_user][populate][user_info]", "*");
+    searchParams.append("populate[blog_author][populate][users_permissions_user][populate][user_info]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
-    searchParams.append("populate[createdBy][populate][user_info]", "*");
-    searchParams.append("populate[createdBy][populate][user_info]", "*");
-    searchParams.append("populate[createdBy][populate][user_info]", "*");
 
     const response = await fetch(`${this.baseUrl}/blog-posts?${searchParams}`, {
       headers: this.getHeaders(),
@@ -290,6 +319,7 @@ class BlogService {
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
     searchParams.append("populate[blog_author][populate][Avatar]", "*");
+    searchParams.append("populate[blog_author][populate][users_permissions_user][populate][user_info]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
 
     const response = await fetch(`${this.baseUrl}/blog-posts/${id}?${searchParams}`, {
@@ -316,6 +346,7 @@ class BlogService {
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
     searchParams.append("populate[blog_author][populate][Avatar]", "*");
+    searchParams.append("populate[blog_author][populate][users_permissions_user][populate][user_info]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
     searchParams.append("populate[blog_comments][populate][user]", "*");
     searchParams.append("populate[blog_comments][populate][parent_comment]", "*");
@@ -599,7 +630,12 @@ class BlogService {
       throw new Error("Failed to fetch blog comments");
     }
 
-    return response.json();
+    const json = await response.json();
+    const normalized = Array.isArray(json.data)
+      ? json.data.map((item: any) => this.normalizeBlogComment(item)).filter(Boolean)
+      : [];
+
+    return { data: normalized, meta: json.meta };
   }
 
   // Get all comments (admin)
@@ -624,7 +660,12 @@ class BlogService {
       throw new Error("Failed to fetch blog comments");
     }
 
-    return response.json();
+    const json = await response.json();
+    const normalized = Array.isArray(json.data)
+      ? json.data.map((item: any) => this.normalizeBlogComment(item)).filter(Boolean)
+      : [];
+
+    return { data: normalized, meta: json.meta };
   }
 
   // Create comment (authenticated)
@@ -650,7 +691,8 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to create comment");
     }
 
-    return response.json();
+    const json = await response.json();
+    return { data: this.normalizeBlogComment(json.data), meta: json.meta };
   }
 
   // Update comment status (admin)
@@ -666,7 +708,8 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to update comment status");
     }
 
-    return response.json();
+    const json = await response.json();
+    return { data: this.normalizeBlogComment(json.data), meta: json.meta };
   }
 
   // Delete comment (admin)
