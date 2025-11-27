@@ -5,25 +5,38 @@
 
 import type { BlogAuthor } from "@/services/blog/blog.service";
 
-export function resolveBlogAuthorDisplayName(author?: BlogAuthor | null): string {
-  if (!author) return " - ";
-
-  // Try to get name from users_permissions_user.user_info (same as other admin interfaces)
-  // Handle both normalized structure and raw API response structure
-  let userInfo = author.users_permissions_user?.user_info;
-  
-  // If user_info is wrapped in data.attributes (raw API response)
-  if (!userInfo && author.users_permissions_user) {
-    const upUserData = (author.users_permissions_user as any)?.data;
-    const upUserAttrs = upUserData?.attributes || upUserData;
-    const userInfoData = upUserAttrs?.user_info?.data;
-    userInfo = userInfoData?.attributes || userInfoData || upUserAttrs?.user_info;
+function unwrapAuthor(author?: BlogAuthor | null) {
+  if (!author) return null;
+  if ((author as any).data?.attributes) {
+    return { ...(author as any).data.attributes, id: (author as any).data.id };
   }
-  
-  const firstName = userInfo?.FirstName ?? "";
-  const lastName = userInfo?.LastName ?? "";
-  const fullName = `${firstName} ${lastName}`.trim();
+  return author;
+}
 
-  // Fallback to blog_author.Name if no user_info
-  return fullName || author.Name || " - ";
+export function resolveBlogAuthorDisplayName(author?: BlogAuthor | null): string {
+  const normalized = unwrapAuthor(author);
+  if (!normalized) return " - ";
+
+  const resolvedName =
+    normalized.ResolvedAuthorName?.trim() ||
+    normalized.ResolvedName?.trim() ||
+    normalized.Name?.trim() ||
+    normalized.DisplayName?.trim() ||
+    normalized.Title?.trim();
+
+  if (resolvedName) {
+    return resolvedName;
+  }
+
+  const username = normalized.users_permissions_user?.username?.trim();
+  if (username) {
+    return username;
+  }
+
+  const email = normalized.users_permissions_user?.email?.trim();
+  if (email) {
+    return email;
+  }
+
+  return normalized.slug || " - ";
 }

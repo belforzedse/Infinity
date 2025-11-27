@@ -17,7 +17,6 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { blogService, BlogPost } from "@/services/blog/blog.service";
-import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 
 const statusConfig = {
   Draft: { label: "پیش‌نویس", className: "bg-slate-100 text-slate-700" },
@@ -83,7 +82,8 @@ export default function BlogPostsPage() {
       accessorKey: "blog_author",
       header: "نویسنده",
       cell: ({ row }: { row: { original: BlogPost } }) => {
-        const displayName = resolveBlogAuthorDisplayName(row.original.blog_author);
+        const author = row.original.blog_author;
+        const displayName = author?.Name || " - ";
         
         return (
           <div className="flex items-center gap-2">

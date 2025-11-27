@@ -66,12 +66,9 @@ export interface BlogAuthor {
     id: number;
     username?: string;
     email?: string;
-    user_info?: {
-      FirstName?: string;
-      LastName?: string;
-    };
   };
   ResolvedName?: string;
+  ResolvedAuthorName?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -83,14 +80,22 @@ export interface BlogComment {
   Date: string;
   user?: {
     id: number;
-    username: string;
-    email: string;
+    username?: string;
+    email?: string;
+    user_info?: BlogUserInfo | null;
   };
   blog_post?: { id: number; Title: string };
   parent_comment?: BlogComment;
   replies?: BlogComment[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BlogUserInfo {
+  id?: number;
+  FirstName?: string;
+  LastName?: string;
+  [key: string]: any;
 }
 
 export interface BlogListParams {
@@ -180,6 +185,26 @@ class BlogService {
     return { id: rel.data.id, ...(rel.data.attributes || {}) };
   }
 
+  private normalizeBlogCommentUser(userEntry: any): BlogComment["user"] | undefined {
+    const user = this.unwrapRelation(userEntry);
+    if (!user) return undefined;
+
+    const userInfoCandidate =
+      userEntry?.data?.attributes?.user_info ??
+      userEntry?.attributes?.user_info ??
+      user.user_info;
+
+    const normalizedUserInfo =
+      this.unwrapRelation(userInfoCandidate) ??
+      userInfoCandidate?.attributes ??
+      userInfoCandidate ??
+      null;
+
+    user.user_info = normalizedUserInfo ? { ...normalizedUserInfo } : null;
+
+    return user;
+  }
+
   private normalizeBlogComment(entry: any): BlogComment {
     if (!entry) return entry;
     const attrs = entry.attributes || entry;
@@ -192,7 +217,7 @@ class BlogService {
     return {
       id: entry.id ?? attrs.id,
       ...attrs,
-      user: this.unwrapRelation(attrs.user),
+      user: this.normalizeBlogCommentUser(attrs.user),
       blog_post: this.unwrapRelation(attrs.blog_post),
       parent_comment: this.unwrapRelation(attrs.parent_comment),
       replies,
@@ -205,13 +230,6 @@ class BlogService {
     const featuredImageData = attrs.FeaturedImage?.data;
     const authorData = attrs.blog_author?.data || attrs.blog_author;
     const authorAttrs = authorData?.attributes || authorData;
-    
-    // Get user_info from the users_permissions_user relation (same structure as orders table)
-    // Handle Strapi's nested data structure: blog_author.users_permissions_user.data.attributes.user_info.data.attributes
-    const usersPermissionsUserData = authorAttrs?.users_permissions_user?.data;
-    const usersPermissionsUserAttrs = usersPermissionsUserData?.attributes || usersPermissionsUserData;
-    const userInfoData = usersPermissionsUserAttrs?.user_info?.data;
-    const userInfoAttrs = userInfoData?.attributes || userInfoData;
 
     return {
       id: entry.id ?? attrs.id,
@@ -221,13 +239,6 @@ class BlogService {
         ? {
             id: authorData?.id ?? authorAttrs.id,
             ...authorAttrs,
-            // Preserve the full nested structure so frontend can access it (same as orders table)
-            users_permissions_user: usersPermissionsUserAttrs
-              ? {
-                  ...usersPermissionsUserAttrs,
-                  user_info: userInfoAttrs,
-                }
-              : authorAttrs.users_permissions_user,
           }
         : this.unwrapRelation(attrs.blog_author),
       blog_tags: Array.isArray(attrs.blog_tags?.data)
@@ -290,8 +301,7 @@ class BlogService {
     // Add population
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
-    searchParams.append("populate[blog_author][populate][Avatar]", "*");
-    searchParams.append("populate[blog_author][populate][users_permissions_user][populate][user_info]", "*");
+    searchParams.append("populate[blog_author]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
 
     const response = await fetch(`${this.baseUrl}/blog-posts?${searchParams}`, {
@@ -318,8 +328,7 @@ class BlogService {
     const searchParams = new URLSearchParams();
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
-    searchParams.append("populate[blog_author][populate][Avatar]", "*");
-    searchParams.append("populate[blog_author][populate][users_permissions_user][populate][user_info]", "*");
+    searchParams.append("populate[blog_author]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
 
     const response = await fetch(`${this.baseUrl}/blog-posts/${id}?${searchParams}`, {
@@ -345,8 +354,7 @@ class BlogService {
     const searchParams = new URLSearchParams();
     searchParams.append("populate[blog_category]", "*");
     searchParams.append("populate[blog_tags]", "*");
-    searchParams.append("populate[blog_author][populate][Avatar]", "*");
-    searchParams.append("populate[blog_author][populate][users_permissions_user][populate][user_info]", "*");
+    searchParams.append("populate[blog_author]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
     searchParams.append("populate[blog_comments][populate][user]", "*");
     searchParams.append("populate[blog_comments][populate][parent_comment]", "*");
@@ -618,9 +626,10 @@ class BlogService {
   // Get comments for a blog post (public - only approved)
   async getBlogComments(postId: number): Promise<ApiResponse<BlogComment[]>> {
     const searchParams = new URLSearchParams();
-    searchParams.append("populate[user]", "*");
+    searchParams.append("populate[user][populate][user_info]", "*");
     searchParams.append("populate[parent_comment]", "*");
     searchParams.append("populate[replies][populate][user]", "*");
+    searchParams.append("populate[replies][populate][user][populate][user_info]", "*");
 
     const response = await fetch(`${this.baseUrl}/blog-comments/post/${postId}?${searchParams}`, {
       headers: this.getHeaders(),
@@ -644,7 +653,7 @@ class BlogService {
     searchParams.append("pagination[page]", (params.page || 1).toString());
     searchParams.append("pagination[pageSize]", (params.pageSize || 20).toString());
     searchParams.append("sort", "createdAt:desc");
-    searchParams.append("populate[user]", "*");
+    searchParams.append("populate[user][populate][user_info]", "*");
     searchParams.append("populate[blog_post]", "*");
     searchParams.append("populate[parent_comment]", "*");
 
