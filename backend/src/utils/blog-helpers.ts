@@ -3,8 +3,8 @@
  */
 
 /**
- * Resolves the display name for a blog author from user_info with fallbacks
- * @param blogAuthor - The blog author object with potential user relations
+ * Resolves the display name for a blog author directly from the blog_author entity
+ * @param blogAuthor - The blog author object returned from Strapi
  * @returns The resolved author name
  */
 export function resolveBlogAuthorName(blogAuthor: any): string {
@@ -12,29 +12,23 @@ export function resolveBlogAuthorName(blogAuthor: any): string {
     return "نویسنده اینفینیتی";
   }
 
-  // Try to get name from linked users-permissions user's user_info
-  const userInfo = blogAuthor.users_permissions_user?.user_info;
-  if (userInfo && (userInfo.FirstName || userInfo.LastName)) {
-    const firstName = userInfo.FirstName?.trim() || "";
-    const lastName = userInfo.LastName?.trim() || "";
-    const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
-    if (fullName) {
-      return fullName;
-    }
-  }
-
-  // Fallback to blog_author.Name field
   if (blogAuthor.Name?.trim()) {
     return blogAuthor.Name.trim();
   }
 
-  // Fallback to username from users-permissions user (but not email)
+  const fallbackTitle =
+    blogAuthor.DisplayName?.trim() ||
+    blogAuthor.Title?.trim() ||
+    blogAuthor.slug?.trim();
+  if (fallbackTitle) {
+    return fallbackTitle;
+  }
+
   const user = blogAuthor.users_permissions_user;
-  if (user && user.username?.trim()) {
+  if (user && typeof user === "object" && user.username?.trim()) {
     return user.username.trim();
   }
 
-  // Final fallback
   return "نویسنده اینفینیتی";
 }
 
@@ -52,7 +46,7 @@ export function enrichBlogPostWithAuthorName(blogPost: any): any {
     const resolvedName = resolveBlogAuthorName(blogPost.blog_author);
     blogPost.blog_author = {
       ...blogPost.blog_author,
-      ResolvedName: resolvedName, // Add as separate field, don't override Name
+      ResolvedAuthorName: resolvedName, // Add as separate field, don't override Name
     };
   }
 

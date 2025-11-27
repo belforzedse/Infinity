@@ -4,6 +4,7 @@
 
 import { factories } from "@strapi/strapi";
 import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
+import { normalizePopulateQuery } from "../../../utils/normalizePopulate";
 
 export default factories.createCoreController("api::blog-comment.blog-comment", ({ strapi }) => ({
   // Resolve user even when auth middleware is disabled (auth: false)
@@ -51,6 +52,10 @@ export default factories.createCoreController("api::blog-comment.blog-comment", 
 
   // Override find to filter by status for public users
   async find(ctx) {
+    if (ctx.query?.populate) {
+      ctx.query.populate = normalizePopulateQuery(ctx.query.populate);
+    }
+
     const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
