@@ -15,6 +15,7 @@ import {
   ProvinceCityField,
   CategoriesListField,
 } from "./Fields";
+import RichTextField from "./Fields/RichTextField";
 import type {
   Field} from "./types";
 import {
@@ -207,6 +208,19 @@ export default function FieldRenderer<T>({
           provincePlaceholder={field.provincePlaceholder}
           cityPlaceholder={field.cityPlaceholder}
           formData={formData}
+        />
+      );
+    },
+    richtext: () => {
+      if (!isStandardField(field) || field.type !== "richtext") return null;
+      return (
+        <RichTextField
+          value={formData[field.name] as string}
+          onChange={(value) => updateFormData(field.name, value)}
+          readOnly={isReadOnly}
+          label={field.label}
+          placeholder={field.placeholder}
+          helper={field.helper ? field.helper(data ?? ({} as T)) : undefined}
         />
       );
     },
