@@ -3,15 +3,57 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
 
 export default factories.createCoreController("api::blog-comment.blog-comment", ({ strapi }) => ({
+  // Resolve user even when auth middleware is disabled (auth: false)
+  async resolveUserFromAuthHeader(ctx) {
+    if (ctx.state?.user) return ctx.state.user;
+
+    const authHeader = ctx.request?.header?.authorization || ctx.request?.headers?.authorization;
+    const token = typeof authHeader === "string" && authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token) return null;
+
+    try {
+      const payload = await strapi.plugin("users-permissions").service("jwt").verify(token);
+      const userId = Number(payload?.id || payload?.userId);
+      if (!userId || Number.isNaN(userId)) return null;
+
+      const user = await strapi.entityService.findOne("plugin::users-permissions.user", userId, {
+        populate: ["role", "user_role", "user_info"],
+      });
+
+      if (user) {
+        ctx.state.user = user;
+      }
+      return user;
+    } catch {
+      return null;
+    }
+  },
+
+  async getActorRoleName(userId?: number, fallback?: any) {
+    if (!userId) {
+      return fallback?.user_role?.Title || fallback?.user_role?.Name || fallback?.role?.name || null;
+    }
+
+    const userWithRole = await fetchUserWithRole(strapi, userId);
+    return (
+      userWithRole?.user_role?.Title ||
+      userWithRole?.user_role?.Name ||
+      userWithRole?.role?.name ||
+      null
+    );
+  },
+
   // Override find to filter by status for public users
   async find(ctx) {
-    const { user } = ctx.state;
-
-    // Check if user has Editor+ role
-    const hasEditorRole = user?.role?.name &&
-      ["Superadmin", "Store manager", "Editor"].includes(user.role.name);
+    const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
     // If not Editor+, only show approved comments
     if (!hasEditorRole) {
@@ -124,11 +166,9 @@ export default factories.createCoreController("api::blog-comment.blog-comment", 
   // Get comments for a specific blog post
   async findByPost(ctx) {
     const { postId } = ctx.params;
-    const { user } = ctx.state;
-
-    // Check if user has Editor+ role
-    const hasEditorRole = user?.role?.name &&
-      ["Superadmin", "Store manager", "Editor"].includes(user.role.name);
+    const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
+    const actorRoleName = await this.getActorRoleName(user?.id, user);
+    const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
     const filters: any = { blog_post: postId };
 
