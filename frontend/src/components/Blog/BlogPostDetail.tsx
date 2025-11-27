@@ -58,7 +58,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
   };
 
   return (
-    <article className="mx-8 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <article className="lg:mx-8 overflow-hidden rounded-2xl bg-white shadow-sm">
       {/* Breadcrumb */}
       <div className="border-b border-slate-100 px-6 py-4">
         <nav className="flex items-center gap-2 text-sm text-neutral-600">
@@ -82,11 +82,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
       </div>
 
       {/* Featured Image */}
-      {getImageUrl() && (
-        <div className="aspect-video overflow-hidden">
-          <img src={getImageUrl()!} alt={post.Title} className="h-full w-full object-cover" />
-        </div>
-      )}
+
 
       <div className="p-6 md:p-8">
         {/* Category Badge */}
@@ -155,9 +151,9 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
         </div>
 
         {/* Content */}
-        <div className="mx-auto max-w-[900px]">
+        <div className="mx-auto max-w-3xl">
           <div
-            className="prose prose-lg prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
+            className="prose prose-md prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-3xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
             dangerouslySetInnerHTML={{ __html: post.Content }}
             dir="rtl"
           />

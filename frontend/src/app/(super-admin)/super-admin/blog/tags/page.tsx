@@ -15,6 +15,7 @@ import {
   Check,
 } from "lucide-react";
 import { blogService, BlogTag } from "@/services/blog/blog.service";
+import Modal from "@/components/Kits/Modal";
 
 export default function BlogTagsPage() {
   const [tags, setTags] = useState<BlogTag[]>([]);
@@ -22,10 +23,21 @@ export default function BlogTagsPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Add/Edit form state
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ Name: "", Color: "#6366f1" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const formatPersianDate = (dateString?: string) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("fa-IR-u-ca-persian", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   const fetchTags = useCallback(async () => {
     try {
@@ -61,7 +73,7 @@ export default function BlogTagsPage() {
   const handleEdit = (tag: BlogTag) => {
     setEditingId(tag.id);
     setFormData({ Name: tag.Name, Color: tag.Color || "#6366f1" });
-    setShowForm(true);
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -79,7 +91,7 @@ export default function BlogTagsPage() {
         await blogService.createBlogTag(formData);
         toast.success("برچسب با موفقیت ایجاد شد");
       }
-      setShowForm(false);
+      setIsModalOpen(false);
       setEditingId(null);
       setFormData({ Name: "", Color: "#6366f1" });
       fetchTags();
@@ -91,14 +103,22 @@ export default function BlogTagsPage() {
     }
   };
 
-  const handleCancel = () => {
-    setShowForm(false);
+  const closeModal = () => {
+    if (isSubmitting) return;
+    setIsModalOpen(false);
     setEditingId(null);
     setFormData({ Name: "", Color: "#6366f1" });
   };
 
+  const openCreateModal = () => {
+    setEditingId(null);
+    setFormData({ Name: "", Color: "#6366f1" });
+    setIsModalOpen(true);
+  };
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredTags = tags.filter((tag) =>
-    tag.Name.toLowerCase().includes(searchTerm.toLowerCase())
+    (tag.Name || "").toLowerCase().includes(normalizedSearch)
   );
 
   const columns = [
@@ -118,7 +138,9 @@ export default function BlogTagsPage() {
           </div>
           <div>
             <div className="font-medium text-neutral-900">{row.original.Name}</div>
-            <div className="text-xs text-neutral-500">/{row.original.Slug}</div>
+            <div className="text-xs text-neutral-500">
+              {row.original.Slug ? `/${row.original.Slug}` : "-"}
+            </div>
           </div>
         </div>
       ),
@@ -145,7 +167,7 @@ export default function BlogTagsPage() {
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-slate-400" />
           <span className="text-sm text-neutral-700">
-            {new Date(row.original.createdAt).toLocaleDateString("fa-IR")}
+            {formatPersianDate(row.original.createdAt)}
           </span>
         </div>
       ),
@@ -179,89 +201,81 @@ export default function BlogTagsPage() {
   return (
     <ContentWrapper
       title="مدیریت برچسب‌ها"
-      hasAddButton
-      addButtonText="برچسب جدید"
+      titleSuffixComponent={
+        <button
+          type="button"
+          onClick={openCreateModal}
+          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+        >
+          <Plus className="h-4 w-4" />
+          برچسب جدید
+        </button>
+      }
     >
-      {/* Add/Edit Form */}
-      {showForm && (
-        <div className="mb-4 rounded-2xl bg-white p-5">
-          <h3 className="mb-4 text-lg font-medium text-neutral-800">
-            {editingId ? "ویرایش برچسب" : "افزودن برچسب جدید"}
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                نام برچسب
-              </label>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingId ? "ویرایش برچسب" : "افزودن برچسب جدید"}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
+              نام برچسب
+            </label>
+            <input
+              type="text"
+              value={formData.Name}
+              onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
+              placeholder="نام برچسب را وارد کنید"
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
+              رنگ برچسب
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={formData.Color}
+                onChange={(e) => setFormData({ ...formData, Color: e.target.value })}
+                className="h-10 w-20 cursor-pointer rounded-lg border border-slate-100"
+              />
               <input
                 type="text"
-                value={formData.Name}
-                onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
-                placeholder="نام برچسب را وارد کنید"
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                value={formData.Color}
+                onChange={(e) => setFormData({ ...formData, Color: e.target.value })}
+                placeholder="#6366f1"
+                className="flex-1 rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm font-mono text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
               />
             </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                رنگ برچسب
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={formData.Color}
-                  onChange={(e) => setFormData({ ...formData, Color: e.target.value })}
-                  className="h-10 w-20 cursor-pointer rounded-lg border border-slate-100"
-                />
-                <input
-                  type="text"
-                  value={formData.Color}
-                  onChange={(e) => setFormData({ ...formData, Color: e.target.value })}
-                  placeholder="#6366f1"
-                  className="flex-1 rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm font-mono text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-              >
-                <X className="h-4 w-4" />
-                انصراف
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <Check className="h-4 w-4" />
-                )}
-                {editingId ? "بروزرسانی" : "ذخیره"}
-              </button>
-            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            >
+              <X className="h-4 w-4" />
+              انصراف
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+              {editingId ? "بروزرسانی" : "ذخیره"}
+            </button>
           </div>
         </div>
-      )}
-
-      {/* Add Button (when form is hidden) */}
-      {!showForm && (
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
-          >
-            <Plus className="h-4 w-4" />
-            برچسب جدید
-          </button>
-        </div>
-      )}
+      </Modal>
 
       {/* Search */}
       <div className="mb-4 rounded-2xl bg-white p-4">

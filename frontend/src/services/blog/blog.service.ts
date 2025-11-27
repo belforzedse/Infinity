@@ -36,7 +36,8 @@ export interface BlogPost {
 
 export interface BlogCategory {
   id: number;
-  Name: string;
+  Name?: string;
+  Title?: string;
   Slug: string;
   Description?: string;
   parent_category?: BlogCategory;
@@ -57,6 +58,7 @@ export interface BlogAuthor {
   id: number;
   Name: string;
   Bio?: string;
+  Email?: string;
   Avatar?: {
     id: number;
     url: string;
@@ -126,7 +128,8 @@ export interface CreateBlogPostData {
 }
 
 export interface CreateBlogCategoryData {
-  Name: string;
+  Name?: string;
+  Title?: string;
   Slug?: string;
   Description?: string;
   parent_category?: number;
@@ -224,6 +227,53 @@ class BlogService {
     };
   }
 
+  private normalizeBlogCategory(entry: any): BlogCategory | undefined {
+    if (!entry) return undefined;
+    return this.normalizeCategoryReference(entry);
+  }
+
+  private normalizeBlogTag(entry: any): BlogTag | undefined {
+    if (!entry) return undefined;
+    return this.normalizeTagReference(entry);
+  }
+
+  private normalizeCategoryReference(entry: any): BlogCategory | undefined {
+    if (!entry) return undefined;
+    const relation = this.unwrapRelation(entry);
+    const source = relation?.attributes || relation || entry?.attributes || entry;
+    if (!source) return undefined;
+    const normalizedName = source.Name || source.Title || source.name || source.title || "";
+    const normalizedTitle = source.Title || normalizedName;
+
+    return {
+      id: source.id ?? entry.id ?? relation?.id,
+      Name: normalizedName,
+      Title: normalizedTitle,
+      Slug: source.Slug || source.slug || "",
+      Description: source.Description || source.description || "",
+      parent_category: source.parent_category
+        ? this.normalizeCategoryReference(source.parent_category)
+        : undefined,
+      createdAt: source.createdAt,
+      updatedAt: source.updatedAt,
+    };
+  }
+
+  private normalizeTagReference(entry: any): BlogTag | undefined {
+    if (!entry) return undefined;
+    const relation = this.unwrapRelation(entry);
+    const source = relation?.attributes || relation || entry?.attributes || entry;
+    if (!source) return undefined;
+    return {
+      id: source.id ?? entry.id ?? relation?.id,
+      Name: source.Name || source.name || "",
+      Slug: source.Slug || source.slug || "",
+      Color: source.Color || source.color || "",
+      createdAt: source.createdAt,
+      updatedAt: source.updatedAt,
+    };
+  }
+
   private normalizeBlogPost(entry: any): BlogPost {
     if (!entry) return entry;
     const attrs = entry.attributes || entry;
@@ -234,7 +284,7 @@ class BlogService {
     return {
       id: entry.id ?? attrs.id,
       ...attrs,
-      blog_category: this.unwrapRelation(attrs.blog_category),
+      blog_category: this.normalizeCategoryReference(attrs.blog_category),
       blog_author: authorAttrs
         ? {
             id: authorData?.id ?? authorAttrs.id,
@@ -242,8 +292,10 @@ class BlogService {
           }
         : this.unwrapRelation(attrs.blog_author),
       blog_tags: Array.isArray(attrs.blog_tags?.data)
-        ? attrs.blog_tags.data.map((tag: any) => this.unwrapRelation(tag)).filter(Boolean) as BlogTag[]
-        : attrs.blog_tags || [],
+        ? attrs.blog_tags.data.map((tag: any) => this.normalizeTagReference(tag)).filter(Boolean) as BlogTag[]
+        : Array.isArray(attrs.blog_tags)
+          ? (attrs.blog_tags.map((tag: any) => this.normalizeTagReference(tag)).filter(Boolean) as BlogTag[])
+          : [],
       FeaturedImage: featuredImageData
         ? {
             id: featuredImageData.id,
@@ -438,18 +490,36 @@ class BlogService {
       throw new Error("Failed to fetch blog categories");
     }
 
-    return response.json();
+    const json = await response.json();
+    const normalizedData = Array.isArray(json.data)
+      ? json.data.map((item: any) => this.normalizeBlogCategory(item)).filter(Boolean)
+      : [];
+
+    return {
+      data: normalizedData as BlogCategory[],
+      meta: json.meta,
+    };
   }
 
   // Create blog category (authenticated)
   async createBlogCategory(data: CreateBlogCategoryData): Promise<ApiResponse<BlogCategory>> {
-    // Auto-generate slug if not provided
-    const slug = data.Slug || this.generateSlug(data.Name);
+    const title = data.Title || data.Name;
+    if (!title) {
+      throw new Error("Title is required");
+    }
+
+    const slug = data.Slug || this.generateSlug(title);
+    const payload: Record<string, unknown> = {
+      ...data,
+      Title: title,
+      Slug: slug,
+    };
+    delete payload.Name;
 
     const response = await fetch(`${this.baseUrl}/blog-categories`, {
       method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify({ data: { ...data, Slug: slug } }),
+      body: JSON.stringify({ data: payload }),
     });
 
     if (!response.ok) {
@@ -457,15 +527,25 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to create blog category");
     }
 
-    return response.json();
+    const json = await response.json();
+    return {
+      data: this.normalizeBlogCategory(json.data) as BlogCategory,
+      meta: json.meta,
+    };
   }
 
   // Update blog category (authenticated)
   async updateBlogCategory(id: number, data: Partial<CreateBlogCategoryData>): Promise<ApiResponse<BlogCategory>> {
+    const payload: Record<string, unknown> = { ...data };
+    if (!payload.Title && payload.Name) {
+      payload.Title = payload.Name;
+    }
+    delete payload.Name;
+
     const response = await fetch(`${this.baseUrl}/blog-categories/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
-      body: JSON.stringify({ data }),
+      body: JSON.stringify({ data: payload }),
     });
 
     if (!response.ok) {
@@ -473,7 +553,11 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to update blog category");
     }
 
-    return response.json();
+    const json = await response.json();
+    return {
+      data: this.normalizeBlogCategory(json.data) as BlogCategory,
+      meta: json.meta,
+    };
   }
 
   // Delete blog category (authenticated)
@@ -505,7 +589,15 @@ class BlogService {
       throw new Error("Failed to fetch blog tags");
     }
 
-    return response.json();
+    const json = await response.json();
+    const normalizedData = Array.isArray(json.data)
+      ? json.data.map((item: any) => this.normalizeBlogTag(item)).filter(Boolean)
+      : [];
+
+    return {
+      data: normalizedData as BlogTag[],
+      meta: json.meta,
+    };
   }
 
   // Create blog tag (authenticated)
@@ -524,7 +616,11 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to create blog tag");
     }
 
-    return response.json();
+    const json = await response.json();
+    return {
+      data: this.normalizeBlogTag(json.data) as BlogTag,
+      meta: json.meta,
+    };
   }
 
   // Update blog tag (authenticated)
@@ -540,7 +636,11 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to update blog tag");
     }
 
-    return response.json();
+    const json = await response.json();
+    return {
+      data: this.normalizeBlogTag(json.data) as BlogTag,
+      meta: json.meta,
+    };
   }
 
   // Delete blog tag (authenticated)

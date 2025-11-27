@@ -2,9 +2,8 @@
 
 import React from "react";
 import PublishingPanel from "./PublishingPanel";
-import CategoryPanel from "./CategoryPanel";
+import CategoryTagsPanel from "./CategoryTagsPanel";
 import FeaturedImagePanel, { FeaturedImageValue } from "./FeaturedImagePanel";
-import TagsPanel from "./TagsPanel";
 import PermalinkPanel from "./PermalinkPanel";
 import type { BlogCategory, BlogTag } from "@/services/blog/blog.service";
 
@@ -96,12 +95,16 @@ export default function BlogSidebar({
         isLoading={isLoading}
       />
 
-      {/* Category Panel */}
-      <CategoryPanel
+      {/* Category & Tags Panel */}
+      <CategoryTagsPanel
         selectedCategory={selectedCategory}
         onCategoryChange={onCategoryChange}
         categories={categories}
         onAddCategory={onAddCategory}
+        selectedTags={selectedTags}
+        onTagsChange={onTagsChange}
+        tags={tags}
+        onAddTag={onAddTag}
       />
 
       {/* Featured Image Panel */}
@@ -109,14 +112,6 @@ export default function BlogSidebar({
         featuredImage={featuredImage}
         onFeaturedImageChange={onFeaturedImageChange}
         onUploadImage={onUploadImage}
-      />
-
-      {/* Tags Panel */}
-      <TagsPanel
-        selectedTags={selectedTags}
-        onTagsChange={onTagsChange}
-        tags={tags}
-        onAddTag={onAddTag}
       />
     </div>
   );
