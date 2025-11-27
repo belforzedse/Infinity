@@ -240,6 +240,13 @@ export function SuperAdminTable<TData, TValue>({
     };
   }, []);
 
+  // Keep internal data in sync when data prop is provided (non-URL usage)
+  useEffect(() => {
+    if (data !== undefined) {
+      setTableData(data);
+    }
+  }, [data]);
+
   const table = useReactTable({
     data: useMemo(() => {
       if (!tableData) return [] as TData[];

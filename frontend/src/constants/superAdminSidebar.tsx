@@ -7,6 +7,7 @@ import ShippingIcon from "@/components/SuperAdmin/Layout/Icons/ShippingIcon";
 import PercentIcon from "@/components/SuperAdmin/Layout/Icons/PercentIcon";
 import DashboardIcon from "@/components/SuperAdmin/Layout/Icons/DashboardIcon";
 import PaymentIcon from "@/components/SuperAdmin/Layout/Icons/PaymentIcon";
+import BlogIcon from "@/components/SuperAdmin/Layout/Icons/BlogIcon";
 import {
   //FiLayout,
   FiMenu,
@@ -89,6 +90,44 @@ const superAdminSidebar: SidebarItem[] = [
         id: "product-colors",
         label: "مدیریت رنگ‌ها",
         href: "/super-admin/products/colors",
+      },
+    ],
+  },
+  {
+    id: "blog",
+    label: "مدیریت وبلاگ",
+    href: "",
+    icon: <BlogIcon />,
+    children: [
+      {
+        id: "blog-dashboard",
+        label: "داشبورد وبلاگ",
+        href: "/super-admin/blog",
+      },
+      {
+        id: "blog-posts",
+        label: "مدیریت پست‌ها",
+        href: "/super-admin/blog/posts",
+      },
+      {
+        id: "blog-categories",
+        label: "دسته‌بندی‌ها",
+        href: "/super-admin/blog/categories",
+      },
+      {
+        id: "blog-tags",
+        label: "برچسب‌ها",
+        href: "/super-admin/blog/tags",
+      },
+      {
+        id: "blog-authors",
+        label: "نویسندگان",
+        href: "/super-admin/blog/authors",
+      },
+      {
+        id: "blog-comments",
+        label: "مدیریت نظرات",
+        href: "/super-admin/blog/comments",
       },
     ],
   },
