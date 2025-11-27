@@ -32,10 +32,10 @@
     "Email": {
       "type": "email"
     },
-    "local_user": {
+    "users_permissions_user": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::local-user.local-user"
+      "target": "plugin::users-permissions.user"
     },
     "blog_posts": {
       "type": "relation",
@@ -45,4 +45,3 @@
     }
   }
 }
-

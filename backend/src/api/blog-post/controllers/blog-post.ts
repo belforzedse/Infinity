@@ -7,6 +7,19 @@ import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
 import { validateBlogSlug, generateUniqueBlogSlug } from "../../../utils/slugValidation";
 
 export default factories.createCoreController("api::blog-post.blog-post", ({ strapi }) => ({
+  ensureDefaultPopulate(ctx) {
+    const defaultPopulate = {
+      blog_category: { populate: ["*"] },
+      blog_tags: { populate: ["*"] },
+      blog_author: { populate: ["Avatar", "user_info", "local_user", "local_user.user_info"] },
+      FeaturedImage: { populate: ["*"] },
+    };
+    if (!ctx.query) ctx.query = {};
+    if (!ctx.query.populate) {
+      ctx.query.populate = defaultPopulate;
+    }
+  },
+
   async resolveUserFromAuthHeader(ctx) {
     if (ctx.state?.user) return ctx.state.user;
 
@@ -23,7 +36,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       if (!userId || Number.isNaN(userId)) return null;
 
       const user = await strapi.entityService.findOne("plugin::users-permissions.user", userId, {
-        populate: ["role", "user_role"],
+        populate: ["role", "user_role", "user_info"],
       });
       if (user) {
         ctx.state.user = user;
@@ -37,7 +50,12 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   async getOrCreateAuthorForUser(user: any) {
     if (!user) return null;
 
-    const identifier = user.email || user.username || user.phone || `user-${user.id}`;
+    const identifier =
+      [user.user_info?.FirstName, user.user_info?.LastName].filter(Boolean).join(" ").trim() ||
+      user.username ||
+      user.email ||
+      user.phone ||
+      `user-${user.id}`;
 
     // Try to find an existing blog-author by email/Name
     const existing = await strapi.entityService.findMany("api::blog-author.blog-author", {
@@ -59,6 +77,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       data: {
         Name: identifier,
         Email: user.email,
+        local_user: user.id,
       },
     });
   },
@@ -80,6 +99,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   // Override find to filter by status for public users
   async find(ctx) {
     const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
+    this.ensureDefaultPopulate(ctx);
 
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
@@ -100,6 +120,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   async findOne(ctx) {
     const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
     const { id } = ctx.params;
+    this.ensureDefaultPopulate(ctx);
 
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
@@ -118,8 +139,8 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       return ctx.notFound("Post not found");
     }
     
-    // Increment view count for published posts
-    if (post.Status === "Published") {
+    // Increment view count for published posts (only for non-admin users)
+    if (post.Status === "Published" && !hasEditorRole) {
       await strapi.entityService.update("api::blog-post.blog-post", id, {
         data: { ViewCount: (post.ViewCount || 0) + 1 }
       });
@@ -239,7 +260,12 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     
     const posts = await strapi.entityService.findMany("api::blog-post.blog-post", {
       filters: { Slug: slug },
-      populate: ["blog_category", "blog_tags", "blog_author", "FeaturedImage"]
+      populate: {
+        blog_category: { populate: ["*"] },
+        blog_tags: { populate: ["*"] },
+        blog_author: { populate: ["Avatar", "user_info", "local_user", "local_user.user_info"] },
+        FeaturedImage: { populate: ["*"] },
+      },
     });
     
     const post = posts[0];
@@ -253,8 +279,8 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       return ctx.notFound("Post not found");
     }
     
-    // Increment view count for published posts
-    if (post.Status === "Published") {
+    // Increment view count for published posts (only for non-admin users)
+    if (post.Status === "Published" && !hasEditorRole) {
       await strapi.entityService.update("api::blog-post.blog-post", post.id, {
         data: { ViewCount: (post.ViewCount || 0) + 1 }
       });
