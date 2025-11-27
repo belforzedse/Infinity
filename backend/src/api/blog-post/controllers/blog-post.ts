@@ -5,13 +5,23 @@
 import { factories } from "@strapi/strapi";
 import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
 import { validateBlogSlug, generateUniqueBlogSlug } from "../../../utils/slugValidation";
+import { enrichBlogPostWithAuthorName, enrichBlogPostsWithAuthorNames } from "../../../utils/blog-helpers";
 
 export default factories.createCoreController("api::blog-post.blog-post", ({ strapi }) => ({
   ensureDefaultPopulate(ctx) {
     const defaultPopulate = {
       blog_category: { populate: ["*"] },
       blog_tags: { populate: ["*"] },
-      blog_author: { populate: ["Avatar", "user_info", "local_user", "local_user.user_info"] },
+      blog_author: { 
+        populate: {
+          Avatar: true,
+          users_permissions_user: {
+            populate: {
+              user_info: true,
+            },
+          },
+        },
+      },
       FeaturedImage: { populate: ["*"] },
     };
     if (!ctx.query) ctx.query = {};
@@ -50,34 +60,57 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
   async getOrCreateAuthorForUser(user: any) {
     if (!user) return null;
 
-    const identifier =
-      [user.user_info?.FirstName, user.user_info?.LastName].filter(Boolean).join(" ").trim() ||
-      user.username ||
-      user.email ||
-      user.phone ||
-      `user-${user.id}`;
+    // Get the user's actual name from user_info (same as other admin interfaces)
+    const firstName = user.user_info?.FirstName ?? "";
+    const lastName = user.user_info?.LastName ?? "";
+    const fullName = `${firstName} ${lastName}`.trim();
 
-    // Try to find an existing blog-author by email/Name
+    // Use the actual name, fallback to username if no name
+    const authorName = fullName || user.username || user.email || `user-${user.id}`;
+
+    // Try to find an existing blog-author by users_permissions_user relation
     const existing = await strapi.entityService.findMany("api::blog-author.blog-author", {
       filters: {
-        $or: [
-          { Email: user.email },
-          { Name: identifier },
-        ],
+        users_permissions_user: user.id,
+      },
+      populate: {
+        users_permissions_user: {
+          populate: {
+            user_info: true,
+          },
+        },
       },
       limit: 1,
     });
 
     if (existing && existing.length > 0) {
-      return existing[0];
+      const existingAuthor = existing[0];
+      // Update the Name if it's different from the user's actual name
+      if (fullName && existingAuthor.Name !== fullName) {
+        await strapi.entityService.update("api::blog-author.blog-author", existingAuthor.id, {
+          data: {
+            Name: fullName,
+            Email: user.email,
+          },
+        });
+        existingAuthor.Name = fullName;
+      }
+      return existingAuthor;
     }
 
-    // Create a new author entry
+    // Create a new author entry with proper users_permissions_user relation
     return strapi.entityService.create("api::blog-author.blog-author", {
       data: {
-        Name: identifier,
+        Name: authorName,
         Email: user.email,
-        local_user: user.id,
+        users_permissions_user: user.id, // Link to users-permissions user, not local_user
+      },
+      populate: {
+        users_permissions_user: {
+          populate: {
+            user_info: true,
+          },
+        },
       },
     });
   },
@@ -113,7 +146,8 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     }
     
     const { data, meta } = await super.find(ctx);
-    return { data, meta };
+    const enrichedData = enrichBlogPostsWithAuthorNames(data);
+    return { data: enrichedData, meta };
   },
 
   // Override findOne to filter by status for public users
@@ -146,7 +180,8 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       });
     }
     
-    return { data: post };
+    const enrichedPost = enrichBlogPostWithAuthorName(post);
+    return { data: enrichedPost };
   },
 
   // Create post (Editor+ only)
@@ -156,6 +191,18 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
       return ctx.forbidden("You don't have permission to create blog posts");
+    }
+    
+    // Fetch user with user_info populated
+    const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", user.id, {
+      populate: {
+        user_info: true,
+        role: true,
+      },
+    });
+
+    if (!fullUser) {
+      return ctx.forbidden("User not found");
     }
     
     const { data } = ctx.request.body;
@@ -175,7 +222,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     
     // Set author automatically if not provided
     if (!data.blog_author) {
-      const author = await this.getOrCreateAuthorForUser(user);
+      const author = await this.getOrCreateAuthorForUser(fullUser);
       if (author) {
         data.blog_author = author.id;
       }
@@ -191,7 +238,8 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       populate: ["blog_category", "blog_tags", "blog_author", "FeaturedImage"]
     });
     
-    return { data: post };
+    const enrichedPost = enrichBlogPostWithAuthorName(post);
+    return { data: enrichedPost };
   },
 
   // Update post (Editor+ only)
@@ -202,6 +250,18 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
       return ctx.forbidden("You don't have permission to update blog posts");
+    }
+    
+    // Fetch user with user_info populated
+    const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", user.id, {
+      populate: {
+        user_info: true,
+        role: true,
+      },
+    });
+
+    if (!fullUser) {
+      return ctx.forbidden("User not found");
     }
     
     const { data } = ctx.request.body;
@@ -221,7 +281,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
 
     // Auto-assign author if missing
     if (!data.blog_author) {
-      const author = await this.getOrCreateAuthorForUser(user);
+      const author = await this.getOrCreateAuthorForUser(fullUser);
       if (author) {
         data.blog_author = author.id;
       }
@@ -232,7 +292,8 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       populate: ["blog_category", "blog_tags", "blog_author", "FeaturedImage"]
     });
     
-    return { data: post };
+    const enrichedPost = enrichBlogPostWithAuthorName(post);
+    return { data: enrichedPost };
   },
 
   // Delete post (Editor+ only)
@@ -263,7 +324,16 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       populate: {
         blog_category: { populate: ["*"] },
         blog_tags: { populate: ["*"] },
-        blog_author: { populate: ["Avatar", "user_info", "local_user", "local_user.user_info"] },
+        blog_author: { 
+          populate: {
+            Avatar: true,
+            users_permissions_user: {
+              populate: {
+                user_info: true,
+              },
+            },
+          },
+        },
         FeaturedImage: { populate: ["*"] },
       },
     });
@@ -286,6 +356,7 @@ export default factories.createCoreController("api::blog-post.blog-post", ({ str
       });
     }
     
-    return { data: post };
+    const enrichedPost = enrichBlogPostWithAuthorName(post);
+    return { data: enrichedPost };
   }
 }));

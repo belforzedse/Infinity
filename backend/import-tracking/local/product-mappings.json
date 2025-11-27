@@ -1,0 +1,245 @@
+{
+  "520425": {
+    "strapiId": 1,
+    "importedAt": "2025-11-27T10:28:35.742Z",
+    "name": "پیراهن کبریتی B00272",
+    "slug": "pirahanb00272",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520426": {
+    "strapiId": 2,
+    "importedAt": "2025-11-27T10:28:34.942Z",
+    "name": "مانتو نخی آستین بند دار(B00403)",
+    "slug": "mantob00403",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520427": {
+    "strapiId": 5,
+    "importedAt": "2025-11-27T10:28:36.522Z",
+    "name": "دامن کوتاه ساسبندی b00464",
+    "slug": "daman-b00464",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "520428": {
+    "strapiId": 3,
+    "importedAt": "2025-11-27T10:28:36.227Z",
+    "name": "شلوار جین رنگی (b00562)",
+    "slug": "shalvarb00562",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520429": {
+    "strapiId": 4,
+    "importedAt": "2025-11-27T10:28:35.886Z",
+    "name": "مانتو آستین دوبل (B00563)",
+    "slug": "mantub00563",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520430": {
+    "strapiId": 6,
+    "importedAt": "2025-11-27T10:28:39.888Z",
+    "name": "سوتین گیپوری جلو باز شو 00205",
+    "slug": "%d8%b3%d9%88%d8%aa%db%8c%d9%86-%da%af%db%8c%d9%be%d9%88%d8%b1%db%8c-%d8%ac%d9%84%d9%88-%d8%a8%d8%a7%d8%b2-%d8%b4%d9%88-00205",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520431": {
+    "strapiId": 7,
+    "importedAt": "2025-11-27T10:28:45.120Z",
+    "name": "پیراهن کوتاه کبریتی (B00596)",
+    "slug": "pirahan00596",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520432": {
+    "strapiId": 10,
+    "importedAt": "2025-11-27T10:28:39.695Z",
+    "name": "مانتو مشکی 00601",
+    "slug": "manto-meshki00601",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "520434": {
+    "strapiId": 8,
+    "importedAt": "2025-11-27T10:28:40.915Z",
+    "name": "پیراهن پشت پاپیونی (b00621)",
+    "slug": "pirahan-posht-papiony-b00621",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520435": {
+    "strapiId": 9,
+    "importedAt": "2025-11-27T10:28:39.786Z",
+    "name": "دامن ساسبندی b00627",
+    "slug": "daman-sasbandy-b00627",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520438": {
+    "strapiId": 11,
+    "importedAt": "2025-11-27T10:28:48.171Z",
+    "name": "شلوار کلاسیک منگو m00112",
+    "slug": "shalvar-classic-mengo-m00112",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "520441": {
+    "strapiId": 13,
+    "importedAt": "2025-11-27T10:28:50.128Z",
+    "name": "بافت موهر یقه گرد m0043",
+    "slug": "baft-moher-yaghe-gerd-m0043",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520442": {
+    "strapiId": 12,
+    "importedAt": "2025-11-27T10:28:50.650Z",
+    "name": "پلیور بافت مردانه m00157",
+    "slug": "poliver-baft-mardane-m00157",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520443": {
+    "strapiId": 14,
+    "importedAt": "2025-11-27T10:28:49.268Z",
+    "name": "دامن پایین زیپ (M0079)",
+    "slug": "daman-paiin-zip-m0079",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "520444": {
+    "strapiId": 15,
+    "importedAt": "2025-11-27T10:28:50.226Z",
+    "name": "تاپ کبریتی بابونه M00195",
+    "slug": "chamomile-match-top-m00195",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "520447": {
+    "strapiId": 16,
+    "importedAt": "2025-11-27T10:28:53.299Z",
+    "name": "دامن ساسبندی M00116",
+    "slug": "daman-sas-bandy-m00116",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "520466": {
+    "strapiId": 19,
+    "importedAt": "2025-11-27T10:28:52.664Z",
+    "name": "هودی جیبدار (m00240)",
+    "slug": "hody-jibdar-m00240",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522344": {
+    "strapiId": 21,
+    "importedAt": "2025-11-27T10:29:19.343Z",
+    "name": "کراپ کبریتی آستین چین A00172",
+    "slug": "a00172-chinese-sleeve-match-crop",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522348": {
+    "strapiId": 22,
+    "importedAt": "2025-11-27T10:29:17.545Z",
+    "name": "شورت زبرا خرسی 00465 🐻",
+    "slug": "zebra-bear-shorts-00465",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522349": {
+    "strapiId": 23,
+    "importedAt": "2025-11-27T10:29:18.438Z",
+    "name": "شورت آدم فضایی 00467",
+    "slug": "space-man-shorts-00467",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522350": {
+    "strapiId": 24,
+    "importedAt": "2025-11-27T10:29:17.724Z",
+    "name": "شورت فانتزی برگ سبز 00469",
+    "slug": "green-leaf-fantasy-shorts-00469",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522351": {
+    "strapiId": 25,
+    "importedAt": "2025-11-27T10:29:23.664Z",
+    "name": "پیراهن مجلسی آستین پفی A00168",
+    "slug": "dress-shirt-with-puff-sleeves-a00168",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "522353": {
+    "strapiId": 26,
+    "importedAt": "2025-11-27T10:29:29.094Z",
+    "name": "پیراهن مردانه راه راه A00145",
+    "slug": "mens-striped-shirt-a00145",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522354": {
+    "strapiId": 27,
+    "importedAt": "2025-11-27T10:29:28.413Z",
+    "name": "شلوارک نخی طرحدار و ساده A00138",
+    "slug": "patterned-and-simple-cotton-pants-a00138",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522379": {
+    "strapiId": 28,
+    "importedAt": "2025-11-27T10:29:27.407Z",
+    "name": "پیراهن خامه دوزی A00169",
+    "slug": "cream-embroidered-shirt-a00169",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522380": {
+    "strapiId": 30,
+    "importedAt": "2025-11-27T10:29:30.392Z",
+    "name": "شومیز حریر جلو مروارید A00171",
+    "slug": "pearl-front-silk-paper-a00171",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "522398": {
+    "strapiId": 29,
+    "importedAt": "2025-11-27T10:29:28.301Z",
+    "name": "کراپ ساده آستین چین A00173",
+    "slug": "a00173-simple-sleeve-pleated-crop",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  }
+}
