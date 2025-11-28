@@ -1,5 +1,18 @@
 import { Metadata } from 'next';
 
+/**
+ * Sanitizes user-controlled strings for safe JSON-LD injection
+ * Prevents XSS by escaping closing script tags and angle brackets
+ */
+function sanitizeForJSONLD(value: string | undefined | null): string | undefined {
+  if (!value) return undefined;
+  
+  return String(value)
+    .replace(/<\/script>/gi, '<\\/script>') // Escape closing script tags
+    .replace(/</g, '\\u003C') // Escape opening angle brackets
+    .replace(/>/g, '\\u003E'); // Escape closing angle brackets
+}
+
 export interface BlogPostSEO {
   title: string;
   slug: string;
@@ -163,18 +176,25 @@ export function generateJSONLD(post: BlogPostSEO, config: SEOConfig = defaultSEO
     ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${post.featuredImage.url}`
     : `${config.siteUrl}${config.defaultImage}`;
 
+  // Sanitize all user-controlled fields to prevent XSS
+  const sanitizedTitle = sanitizeForJSONLD(post.title);
+  const sanitizedDescription = sanitizeForJSONLD(post.metaDescription || post.excerpt);
+  const sanitizedAuthorName = sanitizeForJSONLD(post.author?.Name);
+  const sanitizedCategoryName = sanitizeForJSONLD(post.category?.Name);
+  const sanitizedKeywords = sanitizeForJSONLD(post.keywords);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.metaDescription || post.excerpt,
+    headline: sanitizedTitle,
+    description: sanitizedDescription,
     image: imageUrl,
     url: `${config.siteUrl}/${post.slug}`,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
-    author: post.author ? {
+    author: sanitizedAuthorName ? {
       '@type': 'Person',
-      name: post.author.Name,
+      name: sanitizedAuthorName,
     } : undefined,
     publisher: {
       '@type': 'Organization',
@@ -188,7 +208,7 @@ export function generateJSONLD(post: BlogPostSEO, config: SEOConfig = defaultSEO
       '@type': 'WebPage',
       '@id': `${config.siteUrl}/${post.slug}`,
     },
-    articleSection: post.category?.Name,
-    keywords: post.keywords,
+    articleSection: sanitizedCategoryName,
+    keywords: sanitizedKeywords,
   };
 }

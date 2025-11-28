@@ -152,7 +152,7 @@ export async function generateMetadata({
     const openGraphBase: any = {
       title,
       description,
-      type: "website", // Next.js doesn't support "product" type, but we'll add product properties
+      type: "product",
       url: `${SITE_URL}/pdp/${slug}`,
       siteName: "اینفینیتی استور",
       locale: "fa_IR",
