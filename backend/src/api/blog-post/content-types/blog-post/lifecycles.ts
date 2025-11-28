@@ -1,6 +1,6 @@
 /**
  * Blog Post Lifecycle Hooks
- * 
+ *
  * Triggers Next.js on-demand revalidation when blog posts are published or updated
  */
 
@@ -9,28 +9,14 @@
  * Supports multiple frontend URLs (staging, production)
  */
 async function triggerRevalidation(slug: string) {
-  // Get frontend URLs from environment (support multiple environments)
+  // Hardcoded for now (TODO: move to environment variables)
   const frontendUrls = [
-    process.env.NEXTJS_REVALIDATION_URL,
-    process.env.NEXTJS_STAGING_URL,
-    process.env.NEXTJS_PRODUCTION_URL,
-  ].filter(Boolean) as string[];
+    "https://staging.infinitycolor.org",
+    "https://infinitycolor.org",
+  ];
 
-  // Fallback URLs if not configured
-  if (frontendUrls.length === 0) {
-    frontendUrls.push(
-      process.env.NODE_ENV === "production"
-        ? "https://infinitycolor.org"
-        : "https://staging.infinitycolor.org"
-    );
-  }
-
-  const revalidationSecret = process.env.REVALIDATION_SECRET || process.env.NEXTJS_REVALIDATION_SECRET;
-
-  if (!revalidationSecret) {
-    strapi.log.warn("[Blog Post Lifecycle] REVALIDATION_SECRET not configured, skipping revalidation");
-    return;
-  }
+  // Hardcoded secret (must match frontend)
+  const revalidationSecret = "REVALIDATION_SECRET";
 
   // Trigger revalidation for all configured frontend URLs
   const revalidationPromises = frontendUrls.map(async (frontendUrl) => {
@@ -77,7 +63,7 @@ async function triggerRevalidation(slug: string) {
 export default {
   async afterCreate(event: any) {
     const { result } = event;
-    
+
     // Only trigger revalidation if post is published
     if (result?.Status === "Published" && result?.Slug) {
       await triggerRevalidation(result.Slug);
@@ -86,7 +72,7 @@ export default {
 
   async afterUpdate(event: any) {
     const { result } = event;
-    
+
     // Trigger revalidation when:
     // 1. Post is published (Status changed to Published)
     // 2. Post is updated and already published
@@ -96,35 +82,45 @@ export default {
   },
 
   async afterDelete(event: any) {
-    const { result } = event;
-    
     // Revalidate blog listing when a post is deleted
-    const frontendUrl = process.env.NEXTJS_REVALIDATION_URL || "http://localhost:3000";
-    const revalidationSecret = process.env.REVALIDATION_SECRET || process.env.NEXTJS_REVALIDATION_SECRET;
+    // Hardcoded for now (TODO: move to environment variables)
+    const frontendUrls = [
+      "https://staging.infinitycolor.org",
+      "https://infinitycolor.org",
+    ];
+    const revalidationSecret = "REVALIDATION_SECRET";
 
-    if (!revalidationSecret) {
-      strapi.log.warn("[Blog Post Lifecycle] REVALIDATION_SECRET not configured, skipping revalidation");
-      return;
-    }
+    const revalidationPromises = frontendUrls.map(async (frontendUrl) => {
+      try {
+        const url = `${frontendUrl.replace(/\/$/, "")}/api/revalidate`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${revalidationSecret}`,
+          },
+          body: JSON.stringify({
+            type: "blog-listing",
+          }),
+          signal: AbortSignal.timeout(5000),
+        });
 
-    try {
-      const response = await fetch(`${frontendUrl}/api/revalidate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${revalidationSecret}`,
-        },
-        body: JSON.stringify({
-          type: "blog-listing",
-        }),
-      });
-
-      if (response.ok) {
-        strapi.log.info("[Blog Post Lifecycle] Blog listing revalidated after post deletion");
+        if (response.ok) {
+          strapi.log.info(`[Blog Post Lifecycle] Blog listing revalidated for ${frontendUrl}`);
+          return { url: frontendUrl, success: true };
+        }
+        return { url: frontendUrl, success: false };
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          strapi.log.warn(`[Blog Post Lifecycle] Revalidation timeout for ${frontendUrl}`);
+        } else {
+          strapi.log.error(`[Blog Post Lifecycle] Error revalidating blog listing for ${frontendUrl}:`, error);
+        }
+        return { url: frontendUrl, success: false };
       }
-    } catch (error) {
-      strapi.log.error("[Blog Post Lifecycle] Error revalidating blog listing:", error);
-    }
+    });
+
+    await Promise.allSettled(revalidationPromises);
   },
 };
 
