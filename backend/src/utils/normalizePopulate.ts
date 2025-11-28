@@ -1,4 +1,4 @@
-type PopulateValue = Record<string, unknown> | string | string[] | boolean | undefined;
+type PopulateValue = Record<string, unknown> | string | string[] | (string | boolean)[] | boolean | undefined;
 
 const mergePopulateObjects = (target: Record<string, unknown>, source: Record<string, unknown>) => {
   const merged: Record<string, unknown> = { ...target };
@@ -23,6 +23,38 @@ const mergePopulateObjects = (target: Record<string, unknown>, source: Record<st
   return merged;
 };
 
+/**
+ * Normalizes populate query values into a consistent format.
+ *
+ * Handles various input formats and converts them to a standardized PopulateValue:
+ * - Arrays of strings/objects are merged or converted appropriately
+ * - Wildcard values ("*" or true) are normalized to boolean true
+ * - Objects are recursively normalized
+ * - Primitives are preserved as-is
+ *
+ * @example
+ * // Array of strings
+ * normalizePopulateQuery(["posts", "comments"]) // returns ["posts", "comments"]
+ *
+ * @example
+ * // Array of objects
+ * normalizePopulateQuery([{ posts: true }, { comments: true }]) // returns { posts: true, comments: true }
+ *
+ * @example
+ * // Wildcard
+ * normalizePopulateQuery("*") // returns true
+ *
+ * @example
+ * // Mixed array with wildcard
+ * normalizePopulateQuery(["posts", "*", "comments"]) // returns true (wildcard takes precedence)
+ *
+ * @example
+ * // Nested object
+ * normalizePopulateQuery({ posts: { populate: { author: true } } }) // returns normalized object
+ *
+ * @param value - The populate value to normalize (can be string, array, object, boolean, or "*")
+ * @returns The normalized populate value conforming to PopulateValue type
+ */
 export const normalizePopulateQuery = (value: unknown): PopulateValue => {
   if (Array.isArray(value)) {
     const normalizedEntries = value
@@ -64,7 +96,7 @@ export const normalizePopulateQuery = (value: unknown): PopulateValue => {
     }
 
     if (primitiveEntries.length === normalizedEntries.length) {
-      return primitiveEntries.map((entry) => (entry === "*" ? true : entry)) as string[];
+      return primitiveEntries.map((entry) => (entry === "*" ? true : entry)) as (string | boolean)[];
     }
 
     return normalizedEntries[normalizedEntries.length - 1] as PopulateValue;

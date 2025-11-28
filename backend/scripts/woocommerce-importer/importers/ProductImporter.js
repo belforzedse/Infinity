@@ -2,6 +2,45 @@ const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
 const DuplicateTracker = require('../utils/DuplicateTracker');
 const ImageUploader = require('../utils/ImageUploader');
 
+// Import the central Unicode slug utility to ensure consistent slug behavior
+let generateUnicodeSlug;
+try {
+  // Try to import from source TypeScript file (works in Strapi context with ts-node/tsx)
+  generateUnicodeSlug = require('../../../src/utils/unicodeSlug.ts').generateUnicodeSlug;
+} catch (e) {
+  try {
+    // Fallback to compiled dist directory (production builds)
+    generateUnicodeSlug = require('../../../dist/src/utils/unicodeSlug.js').generateUnicodeSlug;
+  } catch (e2) {
+    // If both fail, use inline implementation matching the central utility exactly
+    generateUnicodeSlug = (text, fallbackPrefix = 'product') => {
+      if (!text) {
+        return `${fallbackPrefix}-${Date.now()}`;
+      }
+
+      // First, replace spaces and ZWNJ with hyphens
+      let slug = text
+        .toString()
+        .trim()
+        .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+      // Lowercase only ASCII letters (a-z), preserve Persian characters
+      slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+      // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+      slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/g, '');
+
+      // Collapse multiple hyphens
+      slug = slug.replace(/-+/g, '-');
+
+      // Trim leading/trailing hyphens
+      slug = slug.replace(/^-|-$/g, '');
+
+      return slug || `${fallbackPrefix}-${Date.now()}`;
+    };
+  }
+}
+
 /**
  * Product Importer - Handles importing WooCommerce products to Strapi
  *
@@ -852,6 +891,7 @@ class ProductImporter {
         slug = decodeURIComponent(slug);
       } catch (e) {
         // If decoding fails, use as-is
+        this.logger.debug(`⚠️ Failed to decode slug "${slug}", using as-is`);
       }
 
       // Clean and normalize the slug
@@ -868,62 +908,27 @@ class ProductImporter {
   /**
    * Generate a slug from a product title
    * Supports Persian/Arabic characters
+   * Uses the central generateUnicodeSlug utility for consistency
    * @param {string} title - Product title
    * @returns {string} - Generated slug
    */
   generateSlugFromTitle(title) {
-    if (!title) {
-      return `product-${Date.now()}`;
-    }
-
-    // First, replace spaces and ZWNJ with hyphens
-    let slug = title
-      .toString()
-      .trim()
-      .replace(/[\s\u200c]+/g, "-"); // Convert spaces and ZWNJ to hyphen
-
-    // Lowercase only ASCII letters (a-z), preserve Persian characters
-    slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
-
-    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
-    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, "");
-
-    // Collapse multiple hyphens
-    slug = slug.replace(/-+/g, "-");
-
-    // Trim leading/trailing hyphens
-    slug = slug.replace(/^-|-$/g, "");
-
-    return slug || `product-${Date.now()}`;
+    return generateUnicodeSlug(title, "product");
   }
 
   /**
    * Clean and normalize a slug
+   * Uses the central generateUnicodeSlug utility for consistency
    * @param {string} slug - Raw slug
    * @returns {string} - Cleaned slug
    */
   cleanSlug(slug) {
     if (!slug) return "";
-
-    // First, replace spaces and ZWNJ with hyphens
-    let cleaned = slug
-      .toString()
-      .trim()
-      .replace(/[\s\u200c]+/g, "-"); // Convert spaces and ZWNJ to hyphen
-
-    // Lowercase only ASCII letters (a-z), preserve Persian characters
-    cleaned = cleaned.replace(/[A-Z]/g, (char) => char.toLowerCase());
-
-    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
-    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, "");
-
-    // Collapse multiple hyphens
-    cleaned = cleaned.replace(/-+/g, "-");
-
-    // Trim leading/trailing hyphens
-    cleaned = cleaned.replace(/^-|-$/g, "");
-
-    return cleaned;
+    // Use generateUnicodeSlug with empty fallback prefix to get just the cleaned slug
+    const cleaned = generateUnicodeSlug(slug, "");
+    // If the result is just a timestamp (fallback with or without leading hyphen), return empty string instead
+    // generateUnicodeSlug returns "-<timestamp>" when prefix is empty and slug is cleaned away
+    return cleaned.match(/^-?\d+$/) ? "" : cleaned;
   }
 
   /**

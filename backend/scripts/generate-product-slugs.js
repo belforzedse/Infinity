@@ -2,28 +2,27 @@
 
 /**
  * Migration Script: Generate slugs for all existing products
- * 
+ *
  * This script:
  * 1. Finds all products without slugs
  * 2. Generates unique Persian-compatible slugs from titles
  * 3. Updates products in batches
  * 4. Handles duplicates by appending counters
- * 
+ *
  * Usage:
  *   npm run strapi console  # Then run this script
  *   OR
  *   node scripts/generate-product-slugs.js
- * 
+ *
  * Run from the backend directory with Strapi loaded.
  */
 
 const BATCH_SIZE = 50;
 
 /**
- * Create a URL-friendly slug from text while preserving Persian/Arabic characters.
- * @param {string|any} text - Source text to convert into a slug; falsy values produce a fallback slug.
- * @param {string} [fallbackPrefix='product'] - Prefix used when generating a fallback slug.
- * @returns {string} The generated slug containing ASCII letters/numbers, Persian/Arabic characters (U+0600–U+06FF), and hyphens; if the result would be empty, returns a fallback of the form `<fallbackPrefix>-<timestamp>`.
+ * Import the central Unicode slug utility to ensure consistent slug behavior
+ * This replaces the local implementation to avoid divergence
+ * Uses the same implementation as src/utils/unicodeSlug.ts
  */
 function generateUnicodeSlug(text, fallbackPrefix = 'product') {
   // Import the central utility from src/utils/unicodeSlug.ts
@@ -70,11 +69,7 @@ function generateUnicodeSlug(text, fallbackPrefix = 'product') {
 }
 
 /**
- * Determine whether a given slug is unused by other products.
- *
- * @param {string} slug - The slug to check for availability.
- * @param {number|string|null} [excludeId=null] - Optional product id to exclude from the check.
- * @returns {boolean} `true` if the slug is not used by any other product, `false` otherwise.
+ * Check if a slug is already in use
  */
 async function isSlugAvailable(strapi, slug, excludeId = null) {
   const filters = { Slug: slug };
@@ -91,12 +86,7 @@ async function isSlugAvailable(strapi, slug, excludeId = null) {
 }
 
 /**
- * Produce a unique, Unicode-friendly slug from a product title, retrying with numeric suffixes until an unused slug is found.
- *
- * If more than 1000 numeric attempts are required, appends the current timestamp to the base slug as a fallback.
- * @param {string} title - Product title to base the slug on.
- * @param {(string|number|null)} productId - ID of the product to exclude from uniqueness checks.
- * @returns {string} The first available slug.
+ * Generate a unique slug for a product
  */
 async function generateUniqueSlug(strapi, title, productId) {
   const baseSlug = generateUnicodeSlug(title);
@@ -118,25 +108,18 @@ async function generateUniqueSlug(strapi, title, productId) {
 }
 
 /**
- * Generate and assign unique, Unicode-friendly slugs to all products that lack a slug.
- *
- * Processes products in batches, skipping items that already have a non-empty slug,
- * generates a unique slug (preserving Persian/Arabic characters), updates the product,
- * and accumulates migration statistics.
- *
- * @returns {Object} An object with aggregated counts: `total` (processed), `updated` (slugs created), `skipped` (already had slugs), and `errors` (failed updates).
- * @throws {Error} If the migration fails due to an unexpected error.
+ * Main migration function
  */
 async function migrateProductSlugs() {
   // Check if running in Strapi context
-  if (typeof strapi === 'undefined') {
-    console.error('❌ This script must be run in Strapi context.');
-    console.error('   Run: npm run strapi console');
+  if (typeof strapi === "undefined") {
+    console.error("❌ This script must be run in Strapi context.");
+    console.error("   Run: npm run strapi console");
     console.error('   Then: await require("./scripts/generate-product-slugs.js")()');
     process.exit(1);
   }
 
-  console.log('🚀 Starting product slug migration...\n');
+  console.log("🚀 Starting product slug migration...\n");
 
   const stats = {
     total: 0,
@@ -147,37 +130,33 @@ async function migrateProductSlugs() {
 
   try {
     // Count total products without slugs
-    const totalWithoutSlugs = await strapi.db.query('api::product.product').count({
+    const totalWithoutSlugs = await strapi.db.query("api::product.product").count({
       where: {
-        $or: [
-          { Slug: null },
-          { Slug: '' },
-        ],
+        $or: [{ Slug: null }, { Slug: "" }],
       },
     });
 
     console.log(`📊 Found ${totalWithoutSlugs} products without slugs\n`);
 
     if (totalWithoutSlugs === 0) {
-      console.log('✅ All products already have slugs. Nothing to do.');
+      console.log("✅ All products already have slugs. Nothing to do.");
       return stats;
     }
 
     // Process in batches
-    let offset = 0;
+    // Always use start: 0 to prevent skipping records when products are updated
+    // (updating a product changes the filtered result set)
     let hasMore = true;
+    let batchNumber = 1;
 
     while (hasMore) {
-      // Fetch batch of products without slugs
-      const products = await strapi.entityService.findMany('api::product.product', {
+      // Fetch batch of products without slugs (always from start to get next matching items)
+      const products = await strapi.entityService.findMany("api::product.product", {
         filters: {
-          $or: [
-            { Slug: null },
-            { Slug: '' },
-          ],
+          $or: [{ Slug: null }, { Slug: "" }],
         },
-        fields: ['id', 'Title', 'Slug'],
-        pagination: { start: offset, limit: BATCH_SIZE },
+        fields: ["id", "Title", "Slug"],
+        pagination: { start: 0, limit: BATCH_SIZE },
       });
 
       if (products.length === 0) {
@@ -185,7 +164,7 @@ async function migrateProductSlugs() {
         break;
       }
 
-      console.log(`\n📦 Processing batch: ${offset + 1} - ${offset + products.length}`);
+      console.log(`\n📦 Processing batch ${batchNumber}: ${products.length} products`);
 
       for (const product of products) {
         stats.total++;
@@ -201,7 +180,7 @@ async function migrateProductSlugs() {
           const slug = await generateUniqueSlug(strapi, product.Title, product.id);
 
           // Update product with new slug
-          await strapi.entityService.update('api::product.product', product.id, {
+          await strapi.entityService.update("api::product.product", product.id, {
             data: { Slug: slug },
           });
 
@@ -213,24 +192,29 @@ async function migrateProductSlugs() {
         }
       }
 
-      offset += BATCH_SIZE;
+      batchNumber++;
+
+      // Stop if we got fewer products than the batch size (no more to process)
+      if (products.length < BATCH_SIZE) {
+        hasMore = false;
+      }
 
       // Small delay to prevent overwhelming the database
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    console.log('\n' + '='.repeat(50));
-    console.log('📊 Migration Complete!');
-    console.log('='.repeat(50));
+    console.log("\n" + "=".repeat(50));
+    console.log("📊 Migration Complete!");
+    console.log("=".repeat(50));
     console.log(`   Total processed: ${stats.total}`);
     console.log(`   Updated: ${stats.updated}`);
     console.log(`   Skipped: ${stats.skipped}`);
     console.log(`   Errors: ${stats.errors}`);
-    console.log('='.repeat(50) + '\n');
+    console.log("=".repeat(50) + "\n");
 
     return stats;
   } catch (error) {
-    console.error('\n❌ Migration failed:', error.message);
+    console.error("\n❌ Migration failed:", error.message);
     throw error;
   }
 }
@@ -264,5 +248,6 @@ if (require.main === module) {
 ╚════════════════════════════════════════════════════════════════╝
   `);
 }
+
 
 
