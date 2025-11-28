@@ -2,6 +2,45 @@ const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
 const DuplicateTracker = require('../utils/DuplicateTracker');
 const ImageUploader = require('../utils/ImageUploader');
 
+// Import the central Unicode slug utility to ensure consistent slug behavior
+let generateUnicodeSlug;
+try {
+  // Try to import from source TypeScript file (works in Strapi context with ts-node/tsx)
+  generateUnicodeSlug = require('../../../src/utils/unicodeSlug.ts').generateUnicodeSlug;
+} catch (e) {
+  try {
+    // Fallback to compiled dist directory (production builds)
+    generateUnicodeSlug = require('../../../dist/src/utils/unicodeSlug.js').generateUnicodeSlug;
+  } catch (e2) {
+    // If both fail, use inline implementation matching the central utility exactly
+    generateUnicodeSlug = (text, fallbackPrefix = 'product') => {
+      if (!text) {
+        return `${fallbackPrefix}-${Date.now()}`;
+      }
+
+      // First, replace spaces and ZWNJ with hyphens
+      let slug = text
+        .toString()
+        .trim()
+        .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+      // Lowercase only ASCII letters (a-z), preserve Persian characters
+      slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+      // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+      slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/g, '');
+
+      // Collapse multiple hyphens
+      slug = slug.replace(/-+/g, '-');
+
+      // Trim leading/trailing hyphens
+      slug = slug.replace(/^-|-$/g, '');
+
+      return slug || `${fallbackPrefix}-${Date.now()}`;
+    };
+  }
+}
+
 /**
  * Product Importer - Handles importing WooCommerce products to Strapi
  *
@@ -73,22 +112,22 @@ class ProductImporter {
 
     this.stats.startTime = Date.now();
 
-    const normalizedCreatedAfter = this.normalizeDateFilter(createdAfter, 'createdAfter');
-    const normalizedCreatedBefore = this.normalizeDateFilter(createdBefore, 'createdBefore');
-    const normalizedPublishedAfter = this.normalizeDateFilter(publishedAfter, 'publishedAfter');
+    const normalizedCreatedAfter = this.normalizeDateFilter(createdAfter, "createdAfter");
+    const normalizedCreatedBefore = this.normalizeDateFilter(createdBefore, "createdBefore");
+    const normalizedPublishedAfter = this.normalizeDateFilter(publishedAfter, "publishedAfter");
 
     if (
       normalizedCreatedAfter &&
       normalizedCreatedBefore &&
       new Date(normalizedCreatedAfter) > new Date(normalizedCreatedBefore)
     ) {
-      throw new Error('createdAfter date must be before createdBefore date');
+      throw new Error("createdAfter date must be before createdBefore date");
     }
 
     const dateFilterLabel = this.describeDateFilters(
       normalizedCreatedAfter,
       normalizedCreatedBefore,
-      normalizedPublishedAfter
+      normalizedPublishedAfter,
     );
 
     // Determine categories to import
@@ -97,13 +136,21 @@ class ProductImporter {
       // If no specific categories provided, import all products
       categoriesToProcess = [null];
       this.logger.info(
-        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${normalizedPublishedAfter ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}` : ''})`,
+        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${
+          normalizedPublishedAfter
+            ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}`
+            : ""
+        })`,
       );
     } else {
       this.logger.info(
         `🛍️ Starting product import from categories: [${categoriesToProcess.join(
           ", ",
-        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${normalizedPublishedAfter ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}` : ''})`,
+        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${
+          normalizedPublishedAfter
+            ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}`
+            : ""
+        })`,
       );
     }
 
@@ -178,7 +225,7 @@ class ProductImporter {
                     `⏭️ Skipping product ${wcProduct.id} (${wcProduct.name}) - already imported from another category`,
                   );
                   this.stats.skipped++;
-                  return { status: 'skipped', reason: 'duplicate' };
+                  return { status: "skipped", reason: "duplicate" };
                 }
 
                 // Import products that have the needed demo titles
@@ -187,7 +234,7 @@ class ProductImporter {
                     `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - doesnt match name filter`,
                   );
                   this.stats.skipped++;
-                  return { status: 'skipped', reason: 'filter' };
+                  return { status: "skipped", reason: "filter" };
                 }
 
                 // Check publishedAfter filter - only import products that were uploaded/published after timestamp
@@ -195,17 +242,23 @@ class ProductImporter {
                   const publishedAt = wcProduct.date_created || wcProduct.date_modified;
                   if (!publishedAt || new Date(publishedAt) < new Date(normalizedPublishedAfter)) {
                     this.logger.debug(
-                      `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - published before ${this.formatDateForLog(normalizedPublishedAfter)} (published: ${publishedAt ? this.formatDateForLog(publishedAt) : 'unknown'})`,
+                      `⏩ Skipping product ${wcProduct.id} (${
+                        wcProduct.name
+                      }) - published before ${this.formatDateForLog(
+                        normalizedPublishedAfter,
+                      )} (published: ${
+                        publishedAt ? this.formatDateForLog(publishedAt) : "unknown"
+                      })`,
                     );
                     this.stats.skipped++;
-                    return { status: 'skipped', reason: 'publishedAfter' };
+                    return { status: "skipped", reason: "publishedAfter" };
                   }
                 }
 
                 await this.importSingleProduct(wcProduct, dryRun);
                 processedProductIds.add(wcProduct.id);
-                return { status: 'success', productId: wcProduct.id };
-              })
+                return { status: "success", productId: wcProduct.id };
+              }),
             );
 
             // Process results and update stats
@@ -213,7 +266,7 @@ class ProductImporter {
               const result = batchResults[j];
               const wcProduct = batch[j];
 
-              if (result.status === 'fulfilled' && result.value.status === 'success') {
+              if (result.status === "fulfilled" && result.value.status === "success") {
                 totalProcessed++;
                 processedInThisSession++;
                 sessionProcessed++;
@@ -234,7 +287,7 @@ class ProductImporter {
                     `📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`,
                   );
                 }
-              } else if (result.status === 'rejected') {
+              } else if (result.status === "rejected") {
                 this.stats.errors++;
                 this.logger.error(
                   `❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`,
@@ -379,8 +432,8 @@ class ProductImporter {
     }
   }
 
-  normalizeDateFilter(value, label = 'dateFilter') {
-    if (value === undefined || value === null || value === '') {
+  normalizeDateFilter(value, label = "dateFilter") {
+    if (value === undefined || value === null || value === "") {
       return undefined;
     }
 
@@ -391,7 +444,7 @@ class ProductImporter {
       return value.toISOString();
     }
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const trimmed = value.trim();
       if (!trimmed) {
         return undefined;
@@ -637,8 +690,12 @@ class ProductImporter {
       throw new Error(`Product ${wcProduct.id}: Missing product name/title`);
     }
 
+    // Generate slug from WooCommerce slug or title
+    const slug = this.generateProductSlug(wcProduct);
+
     const strapiProduct = {
       Title: wcProduct.name.trim(),
+      Slug: slug,
       Description: this.cleanHtmlContent(wcProduct.description),
       Status: this.mapProductStatus(wcProduct.status),
       AverageRating: wcProduct.average_rating ? parseFloat(wcProduct.average_rating) : null,
@@ -760,9 +817,7 @@ class ProductImporter {
     }
 
     const sizeGuideKeys = ["product_size_guide", "product-custom-meta-inp"];
-    const metaEntry = wcProduct.meta_data.find(
-      (meta) => meta && sizeGuideKeys.includes(meta.key),
-    );
+    const metaEntry = wcProduct.meta_data.find((meta) => meta && sizeGuideKeys.includes(meta.key));
 
     if (!metaEntry || metaEntry.value === undefined || metaEntry.value === null) {
       return null;
@@ -810,6 +865,70 @@ class ProductImporter {
   mapProductStatus(wcStatus) {
     const mapping = this.config.import.statusMappings.product;
     return mapping[wcStatus] || this.config.import.defaults.productStatus;
+  }
+
+  /**
+   * Generate a product slug from WooCommerce data
+   * Always generates Persian slugs from product name to preserve Persian characters
+   * instead of using transliterated WooCommerce slugs
+   * @param {Object} wcProduct - WooCommerce product object
+   * @returns {string} - Generated slug with Persian characters preserved
+   */
+  generateProductSlug(wcProduct) {
+    // Always generate slug from product name to preserve Persian characters
+    // WooCommerce slugs are often transliterated (e.g., "baroni" instead of "بارانی")
+    // We want to preserve the Persian characters from the product name
+    if (wcProduct.name && wcProduct.name.trim()) {
+      const generatedSlug = this.generateSlugFromTitle(wcProduct.name);
+      return generatedSlug;
+    }
+
+    // Fallback: use WooCommerce slug if name is not available (shouldn't happen normally)
+    if (wcProduct.slug && wcProduct.slug.trim()) {
+      // Decode URL-encoded Persian slugs
+      let slug = wcProduct.slug;
+      try {
+        slug = decodeURIComponent(slug);
+      } catch (e) {
+        // If decoding fails, use as-is
+        this.logger.debug(`⚠️ Failed to decode slug "${slug}", using as-is`);
+      }
+
+      // Clean and normalize the slug
+      const cleanedSlug = this.cleanSlug(slug);
+      if (cleanedSlug) {
+        return cleanedSlug;
+      }
+    }
+
+    // Last resort: use WooCommerce ID
+    return `product-${wcProduct.id}`;
+  }
+
+  /**
+   * Generate a slug from a product title
+   * Supports Persian/Arabic characters
+   * Uses the central generateUnicodeSlug utility for consistency
+   * @param {string} title - Product title
+   * @returns {string} - Generated slug
+   */
+  generateSlugFromTitle(title) {
+    return generateUnicodeSlug(title, "product");
+  }
+
+  /**
+   * Clean and normalize a slug
+   * Uses the central generateUnicodeSlug utility for consistency
+   * @param {string} slug - Raw slug
+   * @returns {string} - Cleaned slug
+   */
+  cleanSlug(slug) {
+    if (!slug) return "";
+    // Use generateUnicodeSlug with empty fallback prefix to get just the cleaned slug
+    const cleaned = generateUnicodeSlug(slug, "");
+    // If the result is just a timestamp (fallback with or without leading hyphen), return empty string instead
+    // generateUnicodeSlug returns "-<timestamp>" when prefix is empty and slug is cleaned away
+    return cleaned.match(/^-?\d+$/) ? "" : cleaned;
   }
 
   /**

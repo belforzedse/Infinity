@@ -5,14 +5,47 @@
  */
 module.exports = {
   async up(knex) {
-    // Add new columns
-    await knex.schema.alterTable("admin_activities", (table) => {
-      table.string("title").nullable();
-      table.text("message").nullable();
-      table.string("message_en").nullable();
-      table.enum("severity", ["info", "success", "warning", "error"]).defaultTo("info");
-      table.json("changes").nullable();
-    });
+    // Check if table exists
+    const hasTable = await knex.schema.hasTable("admin_activities");
+    if (!hasTable) {
+      console.log("[Migration] admin_activities table does not exist yet. Skipping migration - Strapi will create it with the correct schema.");
+      return;
+    }
+
+    // Check which columns already exist
+    const columns = await knex("admin_activities").columnInfo();
+    const hasTitle = "title" in columns;
+    const hasMessage = "message" in columns;
+    const hasMessageEn = "message_en" in columns;
+    const hasSeverity = "severity" in columns;
+    const hasChanges = "changes" in columns;
+
+    // Add new columns only if they don't exist (using separate alterTable calls)
+    if (!hasTitle) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.string("title").nullable();
+      });
+    }
+    if (!hasMessage) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.text("message").nullable();
+      });
+    }
+    if (!hasMessageEn) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.string("message_en").nullable();
+      });
+    }
+    if (!hasSeverity) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.enum("severity", ["info", "success", "warning", "error"]).defaultTo("info");
+      });
+    }
+    if (!hasChanges) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.json("changes").nullable();
+      });
+    }
 
     // Backfill existing records with basic titles/messages based on existing data
     const activities = await knex("admin_activities").select("*");
@@ -71,16 +104,47 @@ module.exports = {
   },
 
   async down(knex) {
-    // Remove indexes
+    // Check if table exists
+    const hasTable = await knex.schema.hasTable("admin_activities");
+    if (!hasTable) {
+      console.log("[Migration] admin_activities table does not exist. Nothing to rollback.");
+      return;
+    }
 
-    // Remove new columns
-    await knex.schema.alterTable("admin_activities", (table) => {
-      table.dropColumn("title");
-      table.dropColumn("message");
-      table.dropColumn("message_en");
-      table.dropColumn("severity");
-      table.dropColumn("changes");
-    });
+    // Check which columns exist before trying to drop them
+    const columns = await knex("admin_activities").columnInfo();
+    const hasTitle = "title" in columns;
+    const hasMessage = "message" in columns;
+    const hasMessageEn = "message_en" in columns;
+    const hasSeverity = "severity" in columns;
+    const hasChanges = "changes" in columns;
+
+    // Remove new columns only if they exist (using separate alterTable calls)
+    if (hasTitle) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.dropColumn("title");
+      });
+    }
+    if (hasMessage) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.dropColumn("message");
+      });
+    }
+    if (hasMessageEn) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.dropColumn("message_en");
+      });
+    }
+    if (hasSeverity) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.dropColumn("severity");
+      });
+    }
+    if (hasChanges) {
+      await knex.schema.alterTable("admin_activities", (table) => {
+        table.dropColumn("changes");
+      });
+    }
   },
 };
 

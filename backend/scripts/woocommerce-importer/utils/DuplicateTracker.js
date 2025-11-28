@@ -13,15 +13,13 @@ class DuplicateTracker {
     this.logger = logger;
     this.storageDir = config.duplicateTracking.storageDir;
     this.mappingFiles = config.duplicateTracking.mappingFiles;
+    this.mappingTypes = Object.keys(this.mappingFiles);
     
     // In-memory cache of mappings
-    this.mappings = {
-      categories: new Map(),
-      products: new Map(),
-      variations: new Map(),
-      orders: new Map(),
-      users: new Map()
-    };
+    this.mappings = this.mappingTypes.reduce((acc, type) => {
+      acc[type] = new Map();
+      return acc;
+    }, {});
     
     this.init();
   }
@@ -63,12 +61,23 @@ class DuplicateTracker {
   }
 
   /**
+   * Ensure we have an in-memory map for the requested type.
+   */
+  ensureMapping(type) {
+    if (!this.mappings[type]) {
+      this.mappings[type] = new Map();
+    }
+    return this.mappings[type];
+  }
+
+  /**
    * Save mappings to JSON files
    */
   saveMappings(type = null) {
     const typesToSave = type ? [type] : Object.keys(this.mappingFiles);
     
     for (const saveType of typesToSave) {
+      this.ensureMapping(saveType);
       const filename = this.mappingFiles[saveType];
       const filePath = path.join(this.storageDir, filename);
       
@@ -86,14 +95,14 @@ class DuplicateTracker {
    * Check if a WooCommerce item has already been imported
    */
   isImported(type, wooCommerceId) {
-    return this.mappings[type].has(wooCommerceId.toString());
+    return this.ensureMapping(type).has(wooCommerceId.toString());
   }
 
   /**
    * Get the Strapi ID for a WooCommerce ID
    */
   getStrapiId(type, wooCommerceId) {
-    return this.mappings[type].get(wooCommerceId.toString());
+    return this.ensureMapping(type).get(wooCommerceId.toString());
   }
 
   /**
@@ -106,7 +115,7 @@ class DuplicateTracker {
       ...additionalData
     };
     
-    this.mappings[type].set(wooCommerceId.toString(), mapping);
+    this.ensureMapping(type).set(wooCommerceId.toString(), mapping);
     this.logger.debug(`🔗 Recorded ${type} mapping: WC:${wooCommerceId} → Strapi:${strapiId}`);
     
     // Save immediately to persist the mapping
@@ -119,14 +128,15 @@ class DuplicateTracker {
   getStats() {
     const stats = {};
     for (const [type, mapping] of Object.entries(this.mappings)) {
+      const map = this.ensureMapping(type);
       stats[type] = {
-        total: mapping.size,
+        total: map.size,
         oldest: null,
         newest: null
       };
       
-      if (mapping.size > 0) {
-        const importDates = Array.from(mapping.values())
+      if (map.size > 0) {
+        const importDates = Array.from(map.values())
           .map(item => new Date(item.importedAt))
           .filter(date => !isNaN(date));
         
@@ -164,14 +174,14 @@ class DuplicateTracker {
    * Get all mappings for a specific type
    */
   getAllMappings(type) {
-    return Object.fromEntries(this.mappings[type]);
+    return Object.fromEntries(this.ensureMapping(type));
   }
 
   /**
    * Remove a mapping (useful for reimporting specific items)
    */
   removeMapping(type, wooCommerceId) {
-    const removed = this.mappings[type].delete(wooCommerceId.toString());
+    const removed = this.ensureMapping(type).delete(wooCommerceId.toString());
     if (removed) {
       this.saveMappings(type);
       this.logger.info(`🗑️ Removed ${type} mapping for WC ID: ${wooCommerceId}`);
@@ -183,8 +193,9 @@ class DuplicateTracker {
    * Clear all mappings for a type (useful for full reimport)
    */
   clearMappings(type) {
-    const count = this.mappings[type].size;
-    this.mappings[type].clear();
+    const mapping = this.ensureMapping(type);
+    const count = mapping.size;
+    mapping.clear();
     this.saveMappings(type);
     this.logger.warn(`🧹 Cleared ${count} ${type} mappings`);
   }
