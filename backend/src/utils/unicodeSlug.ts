@@ -1,6 +1,9 @@
 /**
- * Create slugs that keep Persian characters (and standard ASCII) intact.
- * Persian characters are preserved as-is, only ASCII letters are lowercased.
+ * Generate a URL-friendly slug from the given text while preserving Persian characters and lowercasing only ASCII letters.
+ *
+ * @param text - The source string to convert into a slug.
+ * @param fallbackPrefix - Prefix used when `text` is falsy or the resulting slug is empty; combined with the current timestamp.
+ * @returns The slug containing digits, lowercase ASCII letters, Persian characters (U+0600–U+06FF), and hyphens; if no slug can be produced returns `${fallbackPrefix}-{timestamp}`.
  */
 export function generateUnicodeSlug(text: string, fallbackPrefix = "slug"): string {
   if (!text) {

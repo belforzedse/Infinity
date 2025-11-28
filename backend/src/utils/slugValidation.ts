@@ -161,11 +161,17 @@ export async function validateBlogSlug(
 }
 
 /**
- * Generates a unique slug from a title
- * @param strapi - Strapi instance
- * @param title - The title to generate slug from
- * @param excludeId - Optional ID to exclude from uniqueness check
- * @returns a unique slug
+ * Generates a URL-safe, unique blog post slug from a title.
+ *
+ * The generated base slug preserves Persian and English letters, digits, spaces, and hyphens,
+ * collapses spaces to single hyphens, trims surrounding hyphens, and falls back to `post-<timestamp>`
+ * if the base slug is empty or invalid. If a slug already exists the function appends a numeric
+ * suffix (`-1`, `-2`, ...) until an available slug is found; after 1000 attempts it falls back to
+ * a timestamp-based slug.
+ *
+ * @param title - Source title to convert into a slug
+ * @param excludeId - Optional post ID to exclude from uniqueness checks
+ * @returns A slug string that does not conflict with existing blog posts
  */
 export async function generateUniqueBlogSlug(
   strapi: Strapi,
@@ -203,4 +209,3 @@ export async function generateUniqueBlogSlug(
 
   return slug;
 }
-

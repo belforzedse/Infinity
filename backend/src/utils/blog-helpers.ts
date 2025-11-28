@@ -3,9 +3,10 @@
  */
 
 /**
- * Resolves the display name for a blog author directly from the blog_author entity
- * @param blogAuthor - The blog author object returned from Strapi
- * @returns The resolved author name
+ * Determine a display name for a blog author entity from Strapi.
+ *
+ * @param blogAuthor - The Strapi `blog_author` entity (may be `null`/`undefined`)
+ * @returns The resolved author name. Prefers `Name`, then `DisplayName`, `Title`, `slug`, then the linked user's `username`; returns `نویسنده اینفینیتی` if none are available.
  */
 export function resolveBlogAuthorName(blogAuthor: any): string {
   if (!blogAuthor) {
@@ -32,6 +33,15 @@ export function resolveBlogAuthorName(blogAuthor: any): string {
   return "نویسنده اینفینیتی";
 }
 
+/**
+ * Resolve a user's display name from a user object.
+ *
+ * Prefers a full name composed from `user.user_info` (checks `data.attributes`, `attributes`, or the object directly),
+ * then `user.username`, then `user.email`; falls back to the Persian string `کاربر ناشناس` when no name is available.
+ *
+ * @param user - The user object which may contain nested `user_info`, `username`, or `email` fields.
+ * @returns The resolved display name: the concatenated `FirstName` and `LastName` if present, otherwise `username`, otherwise `email`, otherwise `کاربر ناشناس`.
+ */
 export function resolveUserDisplayName(user: any): string {
   if (!user) {
     return "کاربر ناشناس";
@@ -63,9 +73,10 @@ export function resolveUserDisplayName(user: any): string {
 }
 
 /**
- * Enriches a blog post object with resolved author names
- * @param blogPost - The blog post object to enrich
- * @returns The enriched blog post with resolved author name
+ * Attach a resolved author display name to a blog post's `blog_author` object.
+ *
+ * @param blogPost - Blog post object to enrich; if falsy it is returned unchanged
+ * @returns The same `blogPost` object. When `blogPost.blog_author` exists, it will include a `ResolvedAuthorName` property with the resolved author name (existing fields are preserved)
  */
 export function enrichBlogPostWithAuthorName(blogPost: any): any {
   if (!blogPost) {
@@ -84,9 +95,10 @@ export function enrichBlogPostWithAuthorName(blogPost: any): any {
 }
 
 /**
- * Enriches multiple blog posts with resolved author names
- * @param blogPosts - Array of blog post objects to enrich
- * @returns Array of enriched blog posts with resolved author names
+ * Add resolved author names to each blog post in the provided array.
+ *
+ * @param blogPosts - The array of blog post objects to enrich; if the argument is not an array, it is returned unchanged.
+ * @returns The same array with each post transformed so that, when available, `blog_author` contains a `ResolvedAuthorName` property.
  */
 export function enrichBlogPostsWithAuthorNames(blogPosts: any[]): any[] {
   if (!Array.isArray(blogPosts)) {

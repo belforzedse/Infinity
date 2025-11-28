@@ -160,6 +160,19 @@ async function login(ctx) {
   }
 }
 
+/**
+ * Responds with the authenticated plugin user's merged profile and role information.
+ *
+ * Loads the plugin user (including role) and any linked local-user-info profile, computes an `isAdmin`
+ * flag from the user's role name (case-insensitive, treating "superadmin", "store manager", and "editor" as admin),
+ * and sets `ctx.body` to a merged object containing existing `ctx.state.user`, profile fields, and these explicit fields:
+ * `Phone`, `phone`, `UserName`, `Email`, `isAdmin`, and `roleName`.
+ *
+ * If no authenticated plugin user can be resolved or the user record is missing, the function responds with 401 Unauthorized.
+ * On unexpected errors the function responds with status 500 and a body of the form `{ message: string }`.
+ *
+ * @param ctx - Koa request/response context used to resolve the current user and to set the HTTP response
+ */
 async function self(ctx) {
   try {
     let pluginUserId = await resolvePluginUserId(ctx);
