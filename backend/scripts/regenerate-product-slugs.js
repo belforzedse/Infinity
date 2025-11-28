@@ -114,3 +114,4 @@ if (require.main === module) {
 // Export for use in Strapi console
 module.exports = regenerateProductSlugs;
 
+

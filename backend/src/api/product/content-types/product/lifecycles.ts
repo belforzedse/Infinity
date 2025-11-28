@@ -33,7 +33,7 @@ function diffChanges(
 export default {
   async beforeCreate(event) {
     const { data } = event.params;
-    
+
     // Auto-generate slug from Title if not provided
     // This must run BEFORE Strapi's uid field auto-generation to preserve Persian characters
     if (!data.Slug && data.Title) {
