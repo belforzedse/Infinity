@@ -6,7 +6,9 @@ import { blogService, BlogPost, BlogCategory } from "@/services/blog/blog.servic
 import { generateBlogListingMetadata } from "@/utils/seo";
 
 export const metadata: Metadata = generateBlogListingMetadata();
-export const revalidate = 600;
+// Use on-demand revalidation (triggered by Strapi lifecycle hooks)
+// Fallback to 1 hour if revalidation API is not called
+export const revalidate = 3600; // 1 hour fallback (on-demand is primary)
 
 const FEATURED_CATEGORY_LIMIT = 4;
 const LATEST_POSTS_LIMIT = 8;
