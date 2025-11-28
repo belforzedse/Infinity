@@ -15,20 +15,14 @@ import { refreshTable } from "@/components/SuperAdmin/Table";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useRouter } from "next/navigation";
+import { useEditorRedirect } from "@/hooks/useEditorRedirect";
 
 export default function ProductsPage() {
   useFreshDataOnPageLoad();
-  const router = useRouter();
-  const { isStoreManager, roleName } = useCurrentUser();
+  const { isStoreManager } = useCurrentUser();
 
   // Redirect editors away from product pages
-  useEffect(() => {
-    const normalizedRole = (roleName ?? "").toLowerCase().trim();
-    if (normalizedRole === "editor") {
-      router.replace("/super-admin/blog");
-    }
-  }, [roleName, router]);
+  useEditorRedirect();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false);
   const [showPermissionDenied, setShowPermissionDenied] = useState(false);

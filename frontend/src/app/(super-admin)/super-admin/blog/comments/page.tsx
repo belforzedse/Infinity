@@ -354,57 +354,6 @@ export default function BlogCommentsPage() {
           </div>
         )}
       </Modal>
-
-      <Modal
-        isOpen={!!viewComment}
-        onClose={() => setViewComment(null)}
-        title="جزئیات نظر"
-        className="max-w-2xl"
-      >
-        {viewComment && (
-          <div className="space-y-4 text-sm text-neutral-700">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-slate-400" />
-              <span className="font-medium text-neutral-900">
-                {resolveBlogCommentUserDisplayName(viewComment.user, viewComment.Name)}
-              </span>
-              {viewComment.user?.email && (
-                <span className="text-xs text-neutral-500">{viewComment.user.email}</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-slate-400" />
-              {viewComment.blog_post?.Title ? (
-                <Link
-                  href={viewComment.blog_post.Slug ? `/blog/${viewComment.blog_post.Slug}` : "#"}
-                  target="_blank"
-                  className="text-pink-600 hover:text-pink-700"
-                >
-                  {viewComment.blog_post.Title}
-                </Link>
-              ) : (
-                <span>-</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-slate-400" />
-              <span>{new Date(viewComment.createdAt).toLocaleDateString("fa-IR")}</span>
-            </div>
-            <div>
-              <p className="mb-1 text-xs text-neutral-500">متن نظر</p>
-              <p className="whitespace-pre-wrap text-neutral-800">{viewComment.Content}</p>
-            </div>
-            <div>
-              <p className="mb-1 text-xs text-neutral-500">وضعیت</p>
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${statusConfig[viewComment.Status].className}`}
-              >
-                {statusConfig[viewComment.Status].label}
-              </span>
-            </div>
-          </div>
-        )}
-      </Modal>
     </>
   );
 

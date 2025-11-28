@@ -49,6 +49,9 @@ export default function CategoryTagsPanel({
       setNewCategoryName("");
       setParentCategoryId(undefined);
       setShowAddCategoryForm(false);
+    } catch (error) {
+      // Error already shown via toast in page.tsx handler
+      // Optional: Add additional logging or state recovery here
     } finally {
       setIsAddingCategory(false);
     }
@@ -74,6 +77,9 @@ export default function CategoryTagsPanel({
       await onAddTag(newTagName.trim());
       setNewTagName("");
       setShowAddTagForm(false);
+    } catch (error) {
+      // Error already shown via toast in page.tsx handler
+      // Optional: Add additional logging or state recovery here
     } finally {
       setIsAddingTag(false);
     }

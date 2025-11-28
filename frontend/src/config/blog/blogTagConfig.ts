@@ -8,8 +8,8 @@ export interface BlogTag {
   Name: string;
   Slug: string;
   Color?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const blogTagConfig: UpsertPageConfigType<BlogTag> = {

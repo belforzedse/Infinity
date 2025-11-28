@@ -34,7 +34,7 @@ function fetch(url) {
     const urlObj = new URL(url);
     const client = urlObj.protocol === 'https:' ? https : http;
     
-    client.get(url, (res) => {
+    const request = client.get(url, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
@@ -45,6 +45,12 @@ function fetch(url) {
         }
       });
     }).on('error', reject);
+    
+    // Add 10-second timeout
+    request.setTimeout(10000, () => {
+      request.destroy();
+      reject(new Error('Request timeout'));
+    });
   });
 }
 
@@ -140,10 +146,12 @@ async function testPage(url, label) {
     const ogTags = extractAllMetaTags(body, 'og:');
     if (ogTags.length > 0) {
       const required = ['og:title', 'og:description', 'og:type', 'og:url'];
-      const found = ogTags.map(tag => {
-        const match = body.match(new RegExp(`<meta[^>]*property=["']([^"']*)["'][^>]*content=["']([^"']*)["']`, 'i'));
-        return match ? match[1] : null;
-      }).filter(Boolean);
+      const ogRegex = /<meta[^>]*property=["']([^"']*)["'][^>]*content=["']([^"']*)["']/gi;
+      const found = [];
+      let match;
+      while ((match = ogRegex.exec(body)) !== null) {
+        found.push(match[1]);
+      }
       
       const missing = required.filter(req => !found.some(f => f === req));
       if (missing.length === 0) {
