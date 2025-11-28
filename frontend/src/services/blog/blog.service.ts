@@ -6,6 +6,7 @@ export interface BlogPost {
   Title: string;
   Slug: string;
   Content: string;
+  ShortContent?: string;
   Excerpt?: string;
   FeaturedImage?: {
     id: number;
@@ -80,13 +81,14 @@ export interface BlogComment {
   Content: string;
   Status: "Pending" | "Approved" | "Rejected";
   Date: string;
+  Name?: string;
   user?: {
     id: number;
     username?: string;
     email?: string;
     user_info?: BlogUserInfo | null;
   };
-  blog_post?: { id: number; Title: string };
+  blog_post?: { id: number; Title: string ; Slug?: string };
   parent_comment?: BlogComment;
   replies?: BlogComment[];
   createdAt: string;
@@ -211,6 +213,11 @@ class BlogService {
   private normalizeBlogComment(entry: any): BlogComment {
     if (!entry) return entry;
     const attrs = entry.attributes || entry;
+    const blogPostRelation =
+      this.unwrapRelation(attrs.blog_post) ||
+      (attrs.blog_post?.attributes
+        ? { id: attrs.blog_post.id, ...(attrs.blog_post.attributes || {}) }
+        : attrs.blog_post);
 
     const replies =
       Array.isArray(attrs.replies?.data)
@@ -220,8 +227,15 @@ class BlogService {
     return {
       id: entry.id ?? attrs.id,
       ...attrs,
+      Name: attrs.Name || entry.Name,
       user: this.normalizeBlogCommentUser(attrs.user),
-      blog_post: this.unwrapRelation(attrs.blog_post),
+      blog_post: blogPostRelation
+        ? {
+            id: blogPostRelation.id,
+            Title: blogPostRelation.Title || blogPostRelation.title,
+            Slug: blogPostRelation.Slug || blogPostRelation.slug,
+          }
+        : undefined,
       parent_comment: this.unwrapRelation(attrs.parent_comment),
       replies,
     };
@@ -235,6 +249,31 @@ class BlogService {
   private normalizeBlogTag(entry: any): BlogTag | undefined {
     if (!entry) return undefined;
     return this.normalizeTagReference(entry);
+  }
+
+
+  private createShortContent(html: string, maxLength: number = 140): string {
+  if (!html) return "";
+
+  // Try to find the first <p>...</p>
+  const pMatch = html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+
+  // If we found a <p>, use only its inner HTML
+  const raw = pMatch ? pMatch[1] : "";
+
+  // If you REALLY want a generic fallback when no <p> exists,
+  // change "" to html instead. For now we respect "only p".
+  const source = raw || "";
+
+  // Strip inner tags (strong, span, a, etc.) from the paragraph
+  const text = source
+    .replace(/<[^>]+>/g, "") // remove any remaining HTML tags
+    .replace(/\s+/g, " ") // normalize whitespace
+    .trim();
+
+  if (!text) return "";
+
+  return text.length > maxLength ? text.slice(0, maxLength).trimEnd() + "..." : text;
   }
 
   private normalizeCategoryReference(entry: any): BlogCategory | undefined {
@@ -280,10 +319,12 @@ class BlogService {
     const featuredImageData = attrs.FeaturedImage?.data;
     const authorData = attrs.blog_author?.data || attrs.blog_author;
     const authorAttrs = authorData?.attributes || authorData;
+    const ShortContent = this.createShortContent(attrs.Content || "", 150);
 
     return {
       id: entry.id ?? attrs.id,
       ...attrs,
+      ShortContent: ShortContent,
       blog_category: this.normalizeCategoryReference(attrs.blog_category),
       blog_author: authorAttrs
         ? {

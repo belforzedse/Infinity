@@ -1,106 +1,93 @@
-"use client";
+  "use client";
 
-import React from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import BlurImage from "@/components/ui/BlurImage";
-import imageLoader from "@/utils/imageLoader";
+  import React from "react";
+  import Link from "next/link";
+  import Image from "next/image";
+  import { ArrowLeft } from "lucide-react";
+  import imageLoader from "@/utils/imageLoader";
+  import { link } from "fs";
 
-interface BlogCategoryBannerProps {
-  /** Banner title */
-  title: string;
-  /** Banner subtitle/description */
-  subtitle?: string;
-  /** Background image URL */
-  backgroundImage?: string;
-  /** Background color (used if no image) */
-  backgroundColor?: string;
-  /** Link to category page */
-  href: string;
-  /** Link text */
-  linkText?: string;
-  /** Text color - 'light' for dark backgrounds, 'dark' for light backgrounds */
-  textColor?: "light" | "dark";
-  /** Banner height */
-  height?: "sm" | "md" | "lg";
-  /** Additional CSS classes */
-  className?: string;
-}
+  interface BlogCategoryBannerProps {
+    title: string;
+    subtitle?: string;
+    backgroundImage?: string;
+    href: string;
+    linkText?: string;
 
-const heightClasses = {
-  sm: "h-[200px] md:h-[240px]",
-  md: "h-[280px] md:h-[320px]",
-  lg: "h-[360px] md:h-[420px]",
-};
+    textColor?: string;
+    linkColor?: string;
+    subtitleColor?: string;
 
-const BlogCategoryBanner: React.FC<BlogCategoryBannerProps> = ({
-  title,
-  subtitle,
-  backgroundImage,
-  backgroundColor = "bg-gradient-to-br from-pink-100 to-pink-200",
-  href,
-  linkText = "مقالات بیشتر",
-  textColor = "dark",
-  height = "md",
-  className = "",
-}) => {
-  const textColorClasses = textColor === "light"
-    ? "text-white"
-    : "text-neutral-800";
+    height?: "sm" | "md" | "lg";
+    className?: string;
+  }
 
-  const subtitleColorClasses = textColor === "light"
-    ? "text-white/90"
-    : "text-neutral-600";
+  const heightClasses = {
+    sm: "h-[200px] md:h-[240px]",
+    md: "h-[340px] md:h-[380px]",
+    lg: "h-[300px] md:h-[490px]",
+  };
 
-  const linkColorClasses = textColor === "light"
-    ? "text-white hover:text-white/80 border-white/30 hover:border-white/50"
-    : "text-neutral-700 hover:text-pink-600 border-neutral-300 hover:border-pink-300";
+  const BlogCategoryBanner: React.FC<BlogCategoryBannerProps> = ({
+    title,
+    subtitle,
+    backgroundImage,
+    href,
+    linkText = "مشاهده مقالات",
+    textColor,
+    linkColor,
+    subtitleColor,
+    height = "lg",
+    className = "",
+  }) => {
+  const textColorClasses = textColor ?? "text-neutral-800";
+  const subtitleColorClasses = subtitleColor ?? "text-neutral-600";
+  const linkColorClasses = linkColor ?? "text-neutral-800";
 
-  return (
-    <div
-      className={`relative w-full overflow-hidden rounded-[32px] ${heightClasses[height]} ${className}`}
-    >
-      {/* Background */}
-      {backgroundImage ? (
-        <BlurImage
-          src={backgroundImage}
-          alt={title}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          loader={imageLoader}
-        />
-      ) : (
-        <div className={`absolute inset-0 ${backgroundColor}`} />
-      )}
 
-      {/* Overlay for better text readability */}
-      {backgroundImage && (
-        <div className="absolute inset-0 bg-black/20" />
-      )}
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
-        <h2 className={`text-2xl md:text-4xl font-bold mb-2 ${textColorClasses}`}>
-          {title}
-        </h2>
 
-        {subtitle && (
-          <p className={`text-sm md:text-base mb-6 max-w-md ${subtitleColorClasses}`}>
-            {subtitle}
-          </p>
+    return (
+      <div
+        className={`relative w-full overflow-hidden rounded-2xl ${heightClasses[height]} ${className}`}
+      >
+        {/* Background Image */}
+        {backgroundImage && (
+          <Image
+            src={backgroundImage}
+            alt={title}
+            fill
+            loader={imageLoader}
+            sizes="100vw"
+            className="scale-105 object-cover"
+          />
         )}
 
-        <Link
-          href={href}
-          className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 text-sm font-medium transition-all duration-200 ${linkColorClasses}`}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>{linkText}</span>
-        </Link>
-      </div>
-    </div>
-  );
-};
+        {/* Global dark overlay */}
+        <div className="absolute inset-0 bg-black/10 " />
 
-export default BlogCategoryBanner;
+        {/* Content */}
+        <div className="relative z-10 flex h-full flex-col items-start justify-center px-6 text-right md:px-24">
+          <h2 className={`mb-3 text-3xl leading-snug md:text-[66px] ${textColorClasses}`}>
+            {title}
+          </h2>
+
+          {subtitle && (
+            <p className={`text-md mb-6 max-w-xl md:text-[30px] ${subtitleColorClasses}`}>
+              {subtitle}
+            </p>
+          )}
+
+          <Link
+            href={href}
+            className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium backdrop-blur-md transition-all duration-200 ${linkColorClasses}`}
+          >
+            {linkText}
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  };
+
+  export default BlogCategoryBanner;
