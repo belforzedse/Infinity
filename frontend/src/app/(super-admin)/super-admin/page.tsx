@@ -8,6 +8,8 @@ import { faNum } from "@/utils/faNum";
 import { DashboardMetric, useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { getOrderStatusMeta } from "@/utils/statusTranslations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const quickActions = [
   { href: "/super-admin/orders", label: "پیگیری سفارش‌ها" },
@@ -24,8 +26,9 @@ const statusToneBadge: Record<string, string> = {
 };
 
 export default function SuperAdminPage() {
+  const router = useRouter();
   const { data: me, isLoading, error } = useMe();
-  const { isStoreManager } = useCurrentUser();
+  const { isStoreManager, roleName } = useCurrentUser();
   const {
     metrics,
     latestOrders,
@@ -33,6 +36,14 @@ export default function SuperAdminPage() {
     loading: metricsLoading,
     error: metricsError,
   } = useDashboardMetrics();
+
+  // Redirect editors to blog dashboard
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
 
   const name = `${me?.FirstName || ""} ${me?.LastName || ""}`;
   const userFacingError = error

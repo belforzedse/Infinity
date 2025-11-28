@@ -17,11 +17,23 @@ import {
 } from "lucide-react";
 import { blogService, BlogAuthor } from "@/services/blog/blog.service";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
 
 export default function BlogAuthorsPage() {
+  const router = useRouter();
+  const { roleName, isStoreManager } = useCurrentUser();
+  const isEditor = (roleName ?? "").toLowerCase().trim() === "editor";
   const [authors, setAuthors] = useState<BlogAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Redirect store managers away from blog pages
+  useEffect(() => {
+    if (isStoreManager) {
+      router.replace("/super-admin");
+    }
+  }, [isStoreManager, router]);
 
   // Add/Edit form state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -158,7 +170,7 @@ export default function BlogAuthorsPage() {
     return `${IMAGE_BASE_URL}${avatar.url}`;
   };
 
-  const columns = [
+  const baseColumns = [
     {
       accessorKey: "Name",
       header: "نویسنده",
@@ -207,44 +219,49 @@ export default function BlogAuthorsPage() {
         </div>
       ),
     },
-    {
-      id: "actions",
-      header: "عملیات",
-      cell: ({ row }: { row: { original: BlogAuthor } }) => (
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => handleEdit(row.original)}
-            className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200"
-            title="ویرایش"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDelete(row.original.id)}
-            className="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-600 transition-colors hover:bg-red-100"
-            title="حذف"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      ),
-    },
   ];
+
+  const actionColumn = {
+    id: "actions",
+    header: "عملیات",
+    cell: ({ row }: { row: { original: BlogAuthor } }) => (
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => handleEdit(row.original)}
+          className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200"
+          title="ویرایش"
+        >
+          <Edit className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDelete(row.original.id)}
+          className="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-600 transition-colors hover:bg-red-100"
+          title="حذف"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+    ),
+  };
+
+  const columns = isEditor ? baseColumns : [...baseColumns, actionColumn];
 
   return (
     <ContentWrapper
       title="مدیریت نویسندگان"
       titleSuffixComponent={
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
-        >
-          <Plus className="h-4 w-4" />
-          نویسنده جدید
-        </button>
+        !isEditor ? (
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+          >
+            <Plus className="h-4 w-4" />
+            نویسنده جدید
+          </button>
+        ) : null
       }
     >
       <Modal

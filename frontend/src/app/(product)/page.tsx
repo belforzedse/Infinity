@@ -185,18 +185,20 @@ export default async function Home() {
   );
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+
 export const metadata: Metadata = {
   title: "صفحه اصلی | اینفینیتی استور",
   description:
     "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
   keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی"],
-  alternates: { canonical: "/" },
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "صفحه اصلی | اینفینیتی استور",
     description:
       "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
     type: "website",
-    url: "/",
+    url: SITE_URL,
     siteName: "اینفینیتی استور",
     locale: "fa_IR",
     images: [

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import {
   FileText,
@@ -16,6 +17,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { blogService, BlogPost } from "@/services/blog/blog.service";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface Stats {
   posts: number;
@@ -27,6 +29,8 @@ interface Stats {
 }
 
 export default function BlogDashboard() {
+  const router = useRouter();
+  const { isStoreManager, roleName } = useCurrentUser();
   const [stats, setStats] = useState<Stats>({
     posts: 0,
     categories: 0,
@@ -37,6 +41,13 @@ export default function BlogDashboard() {
   });
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Redirect store managers away from blog pages
+  useEffect(() => {
+    if (isStoreManager) {
+      router.replace("/super-admin");
+    }
+  }, [isStoreManager, router]);
 
   useEffect(() => {
     const fetchStats = async () => {

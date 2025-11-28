@@ -9,6 +9,7 @@ import clsx from "clsx";
 
 export interface ProductSmallCardProps {
   id: number;
+  slug?: string;
   title: string;
   category: string;
   likedCount: number;
@@ -23,6 +24,7 @@ export interface ProductSmallCardProps {
 
 const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   id,
+  slug,
   title,
   category,
   likedCount,
@@ -38,8 +40,11 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
   );
 
+  // Use slug if available, otherwise fall back to ID for backwards compatibility
+  const productUrl = slug ? `/pdp/${slug}` : `/pdp/${id}`;
+
   return (
-    <Link href={`/pdp/${id}`} className={clsx("w-full md:w-[269px]", className)}>
+    <Link href={productUrl} className={clsx("w-full md:w-[269px]", className)}>
       <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
         <div className="relative h-[100px] w-24">
           {discount && discount > 0 && (

@@ -50,11 +50,33 @@ const categoryBannerConfigs: Record<
 
 
 function getBannerConfig(slug: string) {
-  return categoryBannerConfigs[slug] || categoryBannerConfigs.default;
+  if (!slug) return categoryBannerConfigs.default;
+  // Try exact match first
+  if (slug in categoryBannerConfigs && slug !== "default") {
+    return categoryBannerConfigs[slug];
+  }
+  // Try case-insensitive match
+  const lowerSlug = slug.toLowerCase();
+  const matchingKey = Object.keys(categoryBannerConfigs).find(
+    (key) => key.toLowerCase() === lowerSlug && key !== "default"
+  );
+  if (matchingKey) {
+    return categoryBannerConfigs[matchingKey];
+  }
+  return categoryBannerConfigs.default;
 }
 
 function hasBannerConfig(slug: string): boolean {
-  return slug in categoryBannerConfigs && slug !== "default";
+  if (!slug) return false;
+  // Try exact match first
+  if (slug in categoryBannerConfigs && slug !== "default") {
+    return true;
+  }
+  // Try case-insensitive match
+  const lowerSlug = slug.toLowerCase();
+  return Object.keys(categoryBannerConfigs).some(
+    (key) => key.toLowerCase() === lowerSlug && key !== "default"
+  );
 }
 
 async function fetchLatestPublishedPosts(): Promise<BlogPost[]> {
@@ -220,37 +242,40 @@ export default async function BlogPage({
 
       {/* Alternating Banners and Category Rows */}
       <div className="container mx-auto space-y-12 px-4 pb-16">
-        {/* Interleave banners and rows */}
-        {Array.from({ length: Math.max(bannerCategories.length, rowCategories.length) }).map((_, index) => {
-          const bannerCategory = bannerCategories[index];
-          const rowCategory = rowCategories[index];
-
+        {/* Show banner categories as banners first */}
+        {bannerCategories.map((bannerCategory, index) => {
+          const bannerConfig = getBannerConfig(bannerCategory.Slug);
           return (
-            <React.Fragment key={`section-${index}`}>
+            <React.Fragment key={`banner-${bannerCategory.Slug}-${index}`}>
               {/* Banner */}
-              {bannerCategory && (
-                <BlogCategoryBanner
-                  title={categoryBannerConfigs[bannerCategory.Slug]?.title || bannerCategory.Title || "مقالات بیشتر"}
-                  subtitle={categoryBannerConfigs[bannerCategory.Slug]?.subtitle}
-                  href={`/blog?category=${bannerCategory.Slug}`}
-                  backgroundImage={categoryBannerConfigs[bannerCategory.Slug]?.image}
-                  textColor={categoryBannerConfigs[bannerCategory.Slug]?.textColor}
-                  subtitleColor={categoryBannerConfigs[bannerCategory.Slug]?.subtitleColor}
-                  linkColor={categoryBannerConfigs[bannerCategory.Slug]?.linkColor}
-                  linkText={categoryBannerConfigs[bannerCategory.Slug]?.linkText || "مشاهده دسته بندی"}
-                  height="lg"
-                />
-              )}
+              <BlogCategoryBanner
+                title={bannerConfig.title || bannerCategory.Title || "مقالات بیشتر"}
+                subtitle={bannerConfig.subtitle}
+                href={`/blog?category=${bannerCategory.Slug}`}
+                backgroundImage={bannerConfig.image}
+                textColor={bannerConfig.textColor}
+                subtitleColor={bannerConfig.subtitleColor}
+                linkColor={bannerConfig.linkColor}
+                linkText={bannerConfig.linkText || "مشاهده دسته بندی"}
+                height="lg"
+              />
+            </React.Fragment>
+          );
+        })}
 
-              {/* Category row */}
-              {rowCategory && postsByCategory[rowCategory.Slug]?.length > 0 && (
-                <BlogCarousel
-                  posts={postsByCategory[rowCategory.Slug]}
-                  title={categoryBannerConfigs[rowCategory.Slug]?.title || rowCategory.Title || "مقالات"}
-                  viewAllHref={`/blog?category=${rowCategory.Slug}`}
-                  isCategory
-                />
-              )}
+        {/* Then show row categories as carousels */}
+        {rowCategories.map((rowCategory, index) => {
+          const posts = postsByCategory[rowCategory.Slug] || [];
+          if (posts.length === 0) return null;
+          
+          return (
+            <React.Fragment key={`row-${rowCategory.Slug}-${index}`}>
+              <BlogCarousel
+                posts={posts}
+                title={rowCategory.Title || "مقالات"}
+                viewAllHref={`/blog?category=${rowCategory.Slug}`}
+                isCategory
+              />
             </React.Fragment>
           );
         })}

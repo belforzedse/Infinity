@@ -64,6 +64,7 @@ export default function PDPOffersList(props: Props) {
               key={product.id}
               category={product.category}
               id={product.id}
+              slug={product.slug}
               title={product.title}
               likedCount={product.seenCount}
               price={product.price}

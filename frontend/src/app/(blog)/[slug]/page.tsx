@@ -6,18 +6,67 @@ import BlogPostDetail from "@/components/Blog/BlogPostDetail";
 import BlogComments from "@/components/Blog/BlogComments";
 import { blogService, BlogTag } from "@/services/blog/blog.service";
 import { generateBlogPostMetadata, generateJSONLD } from "@/utils/seo";
-import { IMAGE_BASE_URL } from "@/constants/api";
+import { IMAGE_BASE_URL, API_BASE_URL } from "@/constants/api";
 import { User, FolderOpen, Tag } from "lucide-react";
 import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
+import logger from "@/utils/logger";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const runtime = "nodejs";
+// Use ISR with 10-minute revalidation for better SEO and performance
+export const revalidate = 600; // 10 minutes
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
+}
+
+/**
+ * Generate static params for published blog posts
+ * Pre-generates all published posts at build time for better SEO
+ */
+export async function generateStaticParams() {
+  try {
+    const allPosts: Array<{ slug: string }> = [];
+    let currentPage = 1;
+    const pageSize = 100;
+
+    while (true) {
+      const endpoint = `${API_BASE_URL}/blog-posts?` +
+        `filters[Status][$eq]=Published&` +
+        `pagination[page]=${currentPage}&` +
+        `pagination[pageSize]=${pageSize}&` +
+        `fields[0]=Slug`;
+
+      const response = await fetch(endpoint, {
+        next: { revalidate: 3600 }, // Cache for 1 hour
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      }).then((res) => res.json());
+
+      const posts = response?.data || [];
+      if (posts.length === 0) break;
+
+      allPosts.push(
+        ...posts.map((post: any) => ({
+          slug: post.attributes?.Slug || post.Slug || post.id.toString(),
+        }))
+      );
+
+      const pageCount = response?.meta?.pagination?.pageCount || 1;
+      if (currentPage >= pageCount) break;
+
+      currentPage++;
+    }
+
+    logger.info(`[generateStaticParams] Generated ${allPosts.length} static params for blog posts`);
+    return allPosts;
+  } catch (error) {
+    logger.error('[generateStaticParams] Error generating static params for blog:', error as any);
+    // Return empty array on error - ISR will handle remaining posts
+    return [];
+  }
 }
 
 // Generate metadata for SEO
@@ -36,7 +85,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       keywords: post.Keywords,
       featuredImage: post.FeaturedImage,
       author: post.blog_author,
-      category: post.blog_category,
+      category: post.blog_category?.Name ? { Name: post.blog_category.Name } : undefined,
       publishedAt: post.PublishedAt,
       updatedAt: post.updatedAt,
     });
@@ -69,7 +118,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     keywords: post.Keywords,
     featuredImage: post.FeaturedImage,
     author: post.blog_author,
-    category: post.blog_category,
+    category: post.blog_category?.Name ? { Name: post.blog_category.Name } : undefined,
     publishedAt: post.PublishedAt,
     updatedAt: post.updatedAt,
   });

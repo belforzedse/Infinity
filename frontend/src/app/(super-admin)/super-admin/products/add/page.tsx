@@ -9,6 +9,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { createProduct } from "@/services/super-admin/product/create";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // Define the type for the API response
 interface ProductApiResponse {
@@ -27,6 +28,15 @@ export default function AddProductsPage() {
   const productData = useAtomValue(productDataAtom);
   const resetProductData = useSetAtom(resetProductDataAtom);
   const router = useRouter();
+  const { roleName } = useCurrentUser();
+
+  // Redirect editors away from product pages
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
   if (process.env.NODE_ENV !== "production") {
     logger.info("productData", { productData });
   }
