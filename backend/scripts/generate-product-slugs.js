@@ -20,28 +20,52 @@
 const BATCH_SIZE = 50;
 
 /**
- * Generate a Unicode-compatible slug from text
- * Keeps Persian/Arabic characters intact
+ * Import the central Unicode slug utility to ensure consistent slug behavior
+ * This replaces the local implementation to avoid divergence
+ * Uses the same implementation as src/utils/unicodeSlug.ts
  */
 function generateUnicodeSlug(text, fallbackPrefix = 'product') {
-  if (!text) {
-    return `${fallbackPrefix}-${Date.now()}`;
+  // Import the central utility from src/utils/unicodeSlug.ts
+  // Following the pattern from regenerate-product-slugs.js which uses require for src/utils
+  let unicodeSlug;
+  try {
+    // Try to import from source TypeScript file (works in Strapi context with ts-node/tsx)
+    unicodeSlug = require('../src/utils/unicodeSlug.ts').generateUnicodeSlug;
+  } catch (e) {
+    try {
+      // Fallback to compiled dist directory (production builds)
+      unicodeSlug = require('../dist/src/utils/unicodeSlug.js').generateUnicodeSlug;
+    } catch (e2) {
+      // If both fail, use inline implementation matching the central utility exactly
+      // This matches src/utils/unicodeSlug.ts to prevent divergence
+      if (!text) {
+        return `${fallbackPrefix}-${Date.now()}`;
+      }
+
+      // First, replace spaces and ZWNJ with hyphens
+      let slug = text
+        .toString()
+        .trim()
+        .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+      // Lowercase only ASCII letters (a-z), preserve Persian characters
+      slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+      // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+      slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+      // Collapse multiple hyphens
+      slug = slug.replace(/-+/g, '-');
+
+      // Trim leading/trailing hyphens
+      slug = slug.replace(/^-|-$/g, '');
+
+      return slug || `${fallbackPrefix}-${Date.now()}`;
+    }
   }
 
-  const slug = text
-    .toString()
-    .trim()
-    .toLowerCase()
-    // Replace spaces and ZWNJ (zero-width non-joiner used in Persian) with hyphens
-    .replace(/[\s\u200c]+/g, '-')
-    // Keep ASCII letters/numbers and Persian/Arabic letters (Unicode range 0600-06FF)
-    .replace(/[^0-9a-z\u0600-\u06ff-]/gi, '')
-    // Collapse multiple hyphens
-    .replace(/-+/g, '-')
-    // Trim leading/trailing hyphens
-    .replace(/^-|-$/g, '');
-
-  return slug || `${fallbackPrefix}-${Date.now()}`;
+  // Use the imported utility with fallback prefix support
+  return unicodeSlug(text, fallbackPrefix);
 }
 
 /**

@@ -73,22 +73,22 @@ class ProductImporter {
 
     this.stats.startTime = Date.now();
 
-    const normalizedCreatedAfter = this.normalizeDateFilter(createdAfter, 'createdAfter');
-    const normalizedCreatedBefore = this.normalizeDateFilter(createdBefore, 'createdBefore');
-    const normalizedPublishedAfter = this.normalizeDateFilter(publishedAfter, 'publishedAfter');
+    const normalizedCreatedAfter = this.normalizeDateFilter(createdAfter, "createdAfter");
+    const normalizedCreatedBefore = this.normalizeDateFilter(createdBefore, "createdBefore");
+    const normalizedPublishedAfter = this.normalizeDateFilter(publishedAfter, "publishedAfter");
 
     if (
       normalizedCreatedAfter &&
       normalizedCreatedBefore &&
       new Date(normalizedCreatedAfter) > new Date(normalizedCreatedBefore)
     ) {
-      throw new Error('createdAfter date must be before createdBefore date');
+      throw new Error("createdAfter date must be before createdBefore date");
     }
 
     const dateFilterLabel = this.describeDateFilters(
       normalizedCreatedAfter,
       normalizedCreatedBefore,
-      normalizedPublishedAfter
+      normalizedPublishedAfter,
     );
 
     // Determine categories to import
@@ -97,13 +97,21 @@ class ProductImporter {
       // If no specific categories provided, import all products
       categoriesToProcess = [null];
       this.logger.info(
-        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${normalizedPublishedAfter ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}` : ''})`,
+        `🛍️ Starting product import (all categories, limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${
+          normalizedPublishedAfter
+            ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}`
+            : ""
+        })`,
       );
     } else {
       this.logger.info(
         `🛍️ Starting product import from categories: [${categoriesToProcess.join(
           ", ",
-        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${normalizedPublishedAfter ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}` : ''})`,
+        )}] (limit: ${limit}, page: ${page}, dryRun: ${dryRun}${dateFilterLabel}${
+          normalizedPublishedAfter
+            ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}`
+            : ""
+        })`,
       );
     }
 
@@ -178,7 +186,7 @@ class ProductImporter {
                     `⏭️ Skipping product ${wcProduct.id} (${wcProduct.name}) - already imported from another category`,
                   );
                   this.stats.skipped++;
-                  return { status: 'skipped', reason: 'duplicate' };
+                  return { status: "skipped", reason: "duplicate" };
                 }
 
                 // Import products that have the needed demo titles
@@ -187,7 +195,7 @@ class ProductImporter {
                     `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - doesnt match name filter`,
                   );
                   this.stats.skipped++;
-                  return { status: 'skipped', reason: 'filter' };
+                  return { status: "skipped", reason: "filter" };
                 }
 
                 // Check publishedAfter filter - only import products that were uploaded/published after timestamp
@@ -195,17 +203,23 @@ class ProductImporter {
                   const publishedAt = wcProduct.date_created || wcProduct.date_modified;
                   if (!publishedAt || new Date(publishedAt) < new Date(normalizedPublishedAfter)) {
                     this.logger.debug(
-                      `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - published before ${this.formatDateForLog(normalizedPublishedAfter)} (published: ${publishedAt ? this.formatDateForLog(publishedAt) : 'unknown'})`,
+                      `⏩ Skipping product ${wcProduct.id} (${
+                        wcProduct.name
+                      }) - published before ${this.formatDateForLog(
+                        normalizedPublishedAfter,
+                      )} (published: ${
+                        publishedAt ? this.formatDateForLog(publishedAt) : "unknown"
+                      })`,
                     );
                     this.stats.skipped++;
-                    return { status: 'skipped', reason: 'publishedAfter' };
+                    return { status: "skipped", reason: "publishedAfter" };
                   }
                 }
 
                 await this.importSingleProduct(wcProduct, dryRun);
                 processedProductIds.add(wcProduct.id);
-                return { status: 'success', productId: wcProduct.id };
-              })
+                return { status: "success", productId: wcProduct.id };
+              }),
             );
 
             // Process results and update stats
@@ -213,7 +227,7 @@ class ProductImporter {
               const result = batchResults[j];
               const wcProduct = batch[j];
 
-              if (result.status === 'fulfilled' && result.value.status === 'success') {
+              if (result.status === "fulfilled" && result.value.status === "success") {
                 totalProcessed++;
                 processedInThisSession++;
                 sessionProcessed++;
@@ -234,7 +248,7 @@ class ProductImporter {
                     `📈 Progress: ${totalProcessed} products processed, current page: ${currentPage}`,
                   );
                 }
-              } else if (result.status === 'rejected') {
+              } else if (result.status === "rejected") {
                 this.stats.errors++;
                 this.logger.error(
                   `❌ Failed to import product ${wcProduct.id} (${wcProduct.name}):`,
@@ -379,8 +393,8 @@ class ProductImporter {
     }
   }
 
-  normalizeDateFilter(value, label = 'dateFilter') {
-    if (value === undefined || value === null || value === '') {
+  normalizeDateFilter(value, label = "dateFilter") {
+    if (value === undefined || value === null || value === "") {
       return undefined;
     }
 
@@ -391,7 +405,7 @@ class ProductImporter {
       return value.toISOString();
     }
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const trimmed = value.trim();
       if (!trimmed) {
         return undefined;
@@ -764,9 +778,7 @@ class ProductImporter {
     }
 
     const sizeGuideKeys = ["product_size_guide", "product-custom-meta-inp"];
-    const metaEntry = wcProduct.meta_data.find(
-      (meta) => meta && sizeGuideKeys.includes(meta.key),
-    );
+    const metaEntry = wcProduct.meta_data.find((meta) => meta && sizeGuideKeys.includes(meta.key));
 
     if (!metaEntry || metaEntry.value === undefined || metaEntry.value === null) {
       return null;
@@ -818,12 +830,21 @@ class ProductImporter {
 
   /**
    * Generate a product slug from WooCommerce data
-   * Supports Persian/Unicode slugs
+   * Always generates Persian slugs from product name to preserve Persian characters
+   * instead of using transliterated WooCommerce slugs
    * @param {Object} wcProduct - WooCommerce product object
-   * @returns {string} - Generated slug
+   * @returns {string} - Generated slug with Persian characters preserved
    */
   generateProductSlug(wcProduct) {
-    // First, try to use the WooCommerce slug if available
+    // Always generate slug from product name to preserve Persian characters
+    // WooCommerce slugs are often transliterated (e.g., "baroni" instead of "بارانی")
+    // We want to preserve the Persian characters from the product name
+    if (wcProduct.name && wcProduct.name.trim()) {
+      const generatedSlug = this.generateSlugFromTitle(wcProduct.name);
+      return generatedSlug;
+    }
+
+    // Fallback: use WooCommerce slug if name is not available (shouldn't happen normally)
     if (wcProduct.slug && wcProduct.slug.trim()) {
       // Decode URL-encoded Persian slugs
       let slug = wcProduct.slug;
@@ -838,12 +859,6 @@ class ProductImporter {
       if (cleanedSlug) {
         return cleanedSlug;
       }
-    }
-
-    // Fallback: generate slug from product name
-    if (wcProduct.name && wcProduct.name.trim()) {
-      const generatedSlug = this.generateSlugFromTitle(wcProduct.name);
-      return generatedSlug;
     }
 
     // Last resort: use WooCommerce ID
@@ -865,19 +880,19 @@ class ProductImporter {
     let slug = title
       .toString()
       .trim()
-      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+      .replace(/[\s\u200c]+/g, "-"); // Convert spaces and ZWNJ to hyphen
 
     // Lowercase only ASCII letters (a-z), preserve Persian characters
     slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
 
     // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
-    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, "");
 
     // Collapse multiple hyphens
-    slug = slug.replace(/-+/g, '-');
+    slug = slug.replace(/-+/g, "-");
 
     // Trim leading/trailing hyphens
-    slug = slug.replace(/^-|-$/g, '');
+    slug = slug.replace(/^-|-$/g, "");
 
     return slug || `product-${Date.now()}`;
   }
@@ -888,25 +903,25 @@ class ProductImporter {
    * @returns {string} - Cleaned slug
    */
   cleanSlug(slug) {
-    if (!slug) return '';
+    if (!slug) return "";
 
     // First, replace spaces and ZWNJ with hyphens
     let cleaned = slug
       .toString()
       .trim()
-      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+      .replace(/[\s\u200c]+/g, "-"); // Convert spaces and ZWNJ to hyphen
 
     // Lowercase only ASCII letters (a-z), preserve Persian characters
     cleaned = cleaned.replace(/[A-Z]/g, (char) => char.toLowerCase());
 
     // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
-    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, "");
 
     // Collapse multiple hyphens
-    cleaned = cleaned.replace(/-+/g, '-');
+    cleaned = cleaned.replace(/-+/g, "-");
 
     // Trim leading/trailing hyphens
-    cleaned = cleaned.replace(/^-|-$/g, '');
+    cleaned = cleaned.replace(/^-|-$/g, "");
 
     return cleaned;
   }
