@@ -2,7 +2,6 @@
 
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { createCategory, type CategoryData } from "@/services/super-admin/product/category/create";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
@@ -11,19 +10,13 @@ import {
   getCategoryFormConfig,
   type ProductCategoryForm,
 } from "../categoryFormConfig";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useEditorRedirect } from "@/hooks/useEditorRedirect";
 
 export default function AddCategoryPage() {
   const router = useRouter();
-  const { roleName } = useCurrentUser();
 
   // Redirect editors away from product pages
-  useEffect(() => {
-    const normalizedRole = (roleName ?? "").toLowerCase().trim();
-    if (normalizedRole === "editor") {
-      router.replace("/super-admin/blog");
-    }
-  }, [roleName, router]);
+  useEditorRedirect();
 
   const handleSubmit = async (formData: ProductCategoryForm) => {
     const title = formData.Title?.trim();

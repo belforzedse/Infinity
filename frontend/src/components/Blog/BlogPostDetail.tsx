@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import DOMPurify from "dompurify";
 import {
   Calendar,
   User,
@@ -154,7 +155,11 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
         <div className="mx-auto max-w-3xl">
           <div
             className="prose prose-md prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-3xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
-            dangerouslySetInnerHTML={{ __html: post.Content }}
+            dangerouslySetInnerHTML={{ 
+              __html: typeof window !== "undefined" 
+                ? DOMPurify.sanitize(post.Content) 
+                : post.Content 
+            }}
             dir="rtl"
           />
         </div>

@@ -171,6 +171,7 @@ class BlogService {
     if (typeof window !== "undefined") {
       return localStorage.getItem("accessToken");
     }
+    // TODO: For SSR, consider reading from cookies or passing token from server context
     return null;
   }
 

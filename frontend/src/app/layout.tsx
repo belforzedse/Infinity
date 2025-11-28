@@ -8,9 +8,8 @@ import Providers from "./Providers";
 import { peyda, peydaFanum, rokh, kaghaz } from "@/styles/fonts";
 import { DebugPanel } from "@/components/Debug";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
-const SITE_NAME = "اینفینیتی استور";
+import { IMAGE_BASE_URL } from "@/constants/api";
+import { SITE_URL, SITE_NAME } from "@/config/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -74,7 +73,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
+  userScalable: true,
   viewportFit: "cover",
   themeColor: "#ec4899", // Pink theme color for mobile browsers
 };
@@ -84,8 +83,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:1337";
-  const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || API_BASE_URL;
+  // Extract base domain for prefetch (API_BASE_URL in constants includes /api suffix)
+  const API_BASE_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL 
+    ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api$/, '') 
+    : "http://localhost:1337";
   
   return (
     <html
@@ -95,13 +96,13 @@ export default function RootLayout({
     >
       <head>
         {/* DNS prefetch for external domains */}
-        <link rel="dns-prefetch" href={IMAGE_BASE_URL} />
+        <link rel="dns-prefetch" href={IMAGE_BASE_URL || API_BASE_DOMAIN} />
         <link rel="dns-prefetch" href="https://www.instagram.com" />
         <link rel="dns-prefetch" href="https://www.telegram.org" />
         
         {/* Preconnect to API for faster requests */}
-        <link rel="preconnect" href={API_BASE_URL} crossOrigin="anonymous" />
-        <link rel="preconnect" href={IMAGE_BASE_URL} crossOrigin="anonymous" />
+        <link rel="preconnect" href={API_BASE_DOMAIN} crossOrigin="anonymous" />
+        <link rel="preconnect" href={IMAGE_BASE_URL || API_BASE_DOMAIN} crossOrigin="anonymous" />
         
         {/* OpenSearch descriptor for browser search integration */}
         <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="اینفینیتی استور" />

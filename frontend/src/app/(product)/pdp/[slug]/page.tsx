@@ -120,9 +120,9 @@ export async function generateMetadata({
       const data = await response.json();
       product = data?.data as ProductDetail | undefined;
     } else {
-      logger.warn("[PDP Metadata] Failed to fetch product for metadata", { 
-        slug, 
-        status: response.status 
+      logger.warn("[PDP Metadata] Failed to fetch product for metadata", {
+        slug,
+        status: response.status
       });
     }
 
@@ -149,10 +149,12 @@ export async function generateMetadata({
     const hasStock = variations.length > 0;
 
     // Build OpenGraph object with product-specific properties
+    // Note: Next.js Metadata API only supports: "website", "article", "book", "profile"
+    // Product-specific properties are added as custom metadata
     const openGraphBase: any = {
       title,
       description,
-      type: "product",
+      type: "website",
       url: `${SITE_URL}/pdp/${slug}`,
       siteName: "اینفینیتی استور",
       locale: "fa_IR",
@@ -193,9 +195,9 @@ export async function generateMetadata({
       },
     };
   } catch (error) {
-    logger.error("[PDP Metadata] Error fetching product for metadata", { 
-      slug, 
-      error: String(error) 
+    logger.error("[PDP Metadata] Error fetching product for metadata", {
+      slug,
+      error: String(error)
     });
     const fallbackTitle = "مشاهده محصول | اینفینیتی استور";
     return {
@@ -243,11 +245,11 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
     const apiUrl = `${API_BASE_URL}${endpoint}`;
 
-    logger.info("[PDP] Making API request", { 
+    logger.info("[PDP] Making API request", {
       originalSlug: slug,
       decodedSlug,
-      encodedSlug, 
-      endpoint, 
+      encodedSlug,
+      endpoint,
       apiUrl,
       apiBaseUrl: API_BASE_URL,
       hasApiBaseUrl: !!API_BASE_URL,
@@ -262,10 +264,10 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       next: { revalidate: 30 }, // ISR: revalidate every 30 seconds
     });
 
-    logger.info("[PDP] API response received", { 
-      status: response.status, 
+    logger.info("[PDP] API response received", {
+      status: response.status,
       statusText: response.statusText,
-      ok: response.ok 
+      ok: response.ok
     });
 
     if (!response.ok) {
@@ -280,19 +282,19 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     }
 
     const data = await response.json();
-    
+
     if (data?.data) {
       // Normalize data structure: backend may return flat structure or Strapi REST format
       const rawProduct = data.data;
-      
+
       // Helper function to normalize a relation (single or array)
       // Also handles nested relations within variations
       const normalizeRelation = (rel: any, isVariation = false): any => {
         if (!rel) return null;
-        
+
         // If already in Strapi format (has data wrapper), return as-is
         if (rel.data) return rel;
-        
+
         // If it's an array of flat objects
         if (Array.isArray(rel)) {
           return {
@@ -317,7 +319,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
               // Flat structure - normalize it
               const { id, product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item;
               const normalized: any = { id, attributes: rest };
-              
+
               // Normalize nested relations if this is a variation
               if (isVariation) {
                 normalized.attributes.product_stock = normalizeRelation(product_stock);
@@ -325,12 +327,12 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
                 normalized.attributes.product_variation_size = normalizeRelation(product_variation_size);
                 normalized.attributes.product_variation_model = normalizeRelation(product_variation_model);
               }
-              
+
               return normalized;
             }),
           };
         }
-        
+
         // Single flat object - wrap in Strapi format
         if (rel.id !== undefined) {
           const { id, ...rest } = rel;
@@ -338,10 +340,10 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
             data: { id, attributes: rest },
           };
         }
-        
+
         return null;
       };
-      
+
       if (rawProduct.attributes) {
         // Already in Strapi REST format - but normalize relations
         productData = {
@@ -379,7 +381,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
         };
         logger.info("[PDP] Normalized flat product structure to Strapi format", { productId: id });
       }
-      
+
       // Check if product is trashed (removedAt is not null)
       if (productData && productData.attributes?.removedAt) {
         errorDetails = {
@@ -390,9 +392,9 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
         logger.warn("[PDP] Product is trashed", { slug, productId: productData?.id });
         throw new Error("Product not found");
       }
-      
-      logger.info("[PDP] Product found successfully", { 
-        productId: productData?.id, 
+
+      logger.info("[PDP] Product found successfully", {
+        productId: productData?.id,
         title: productData?.attributes?.Title?.substring(0, 50),
         hasAttributes: !!productData?.attributes
       });
@@ -406,8 +408,8 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       status: err?.status || (err as any)?.response?.status,
       endpoint: errorDetails.endpoint || `${API_BASE_URL}${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodeURIComponent(slug)}`,
     };
-    logger.error("[PDP] Error fetching product", { 
-      slug, 
+    logger.error("[PDP] Error fetching product", {
+      slug,
       error: errorDetails.message,
       status: errorDetails.status,
       stack: err?.stack,
@@ -432,7 +434,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
   // If we still don't have product data, show error message with details in dev mode
   if (!productData || !productData.attributes) {
     const isDev = process.env.NODE_ENV === "development";
-    
+
     return (
       <div className="flex flex-col items-center justify-center gap-8 p-10">
         <h1 className="text-2xl font-bold">محصول مورد نظر یافت نشد</h1>

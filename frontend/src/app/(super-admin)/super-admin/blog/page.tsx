@@ -30,7 +30,7 @@ interface Stats {
 
 export default function BlogDashboard() {
   const router = useRouter();
-  const { isStoreManager, roleName } = useCurrentUser();
+  const { isStoreManager } = useCurrentUser();
   const [stats, setStats] = useState<Stats>({
     posts: 0,
     categories: 0,
@@ -52,8 +52,9 @@ export default function BlogDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [postsRes, categoriesRes, tagsRes, authorsRes, commentsRes] = await Promise.all([
-          blogService.getBlogPosts({ pageSize: 5 }),
+        const [postsRes, allPostsRes, categoriesRes, tagsRes, authorsRes, commentsRes] = await Promise.all([
+          blogService.getBlogPosts({ pageSize: 5 }), // For recent posts display
+          blogService.getBlogPosts({ pageSize: 1000 }), // For total views calculation
           blogService.getBlogCategories(),
           blogService.getBlogTags(),
           blogService.getBlogAuthors(),
@@ -62,7 +63,7 @@ export default function BlogDashboard() {
 
         setRecentPosts(postsRes.data || []);
 
-        const totalViews = (postsRes.data || []).reduce((sum, post) => sum + (post.ViewCount || 0), 0);
+        const totalViews = (allPostsRes.data || []).reduce((sum, post) => sum + (post.ViewCount || 0), 0);
 
         setStats({
           posts: postsRes.meta?.totalItems || postsRes.data?.length || 0,
