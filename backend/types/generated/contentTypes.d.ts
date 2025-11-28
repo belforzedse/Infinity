@@ -2403,6 +2403,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
     RatingCount: Attribute.Integer;
     removedAt: Attribute.DateTime;
     ReturnConditions: Attribute.Text;
+    Slug: Attribute.String & Attribute.Unique;
     Status: Attribute.Enumeration<["Active", "InActive"]>;
     Title: Attribute.String & Attribute.Required;
     updatedAt: Attribute.DateTime;

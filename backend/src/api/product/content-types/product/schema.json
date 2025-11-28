@@ -16,6 +16,11 @@
       "type": "string",
       "required": true
     },
+    "Slug": {
+      "type": "string",
+      "required": false,
+      "unique": true
+    },
     "Weight": {
       "type": "integer",
       "default": 100

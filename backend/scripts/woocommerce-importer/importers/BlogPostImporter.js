@@ -38,6 +38,15 @@ class BlogPostImporter {
     this.strapiMediaBase = (this.config.strapi.baseUrl || "")
       .replace(/\/api\/?$/, "")
       .replace(/\/$/, "");
+    // Frontend blog base path for internal links (empty -> "/<slug>")
+    this.blogBasePath = "";
+    // WordPress base host for internal link detection
+    try {
+      const wpUrl = new URL(config.wordpress.baseUrl);
+      this.wpHost = wpUrl.host;
+    } catch {
+      this.wpHost = null;
+    }
   }
 
   /**
@@ -145,7 +154,9 @@ class BlogPostImporter {
     const payload = {
       Title: title,
       Slug: slug,
-      Content: await this.rewriteContentImages(wpPost.content?.rendered || excerpt || title),
+      Content: await this.rewriteContentLinks(
+        await this.rewriteContentImages(wpPost.content?.rendered || excerpt || title),
+      ),
       Excerpt: excerpt,
       MetaTitle: this.truncate(title, 60),
       MetaDescription: metaDescription,
@@ -204,7 +215,11 @@ class BlogPostImporter {
 
     const savedId = this.extractId(result) || existingPostId;
     if (savedId) {
-      this.duplicateTracker.recordMapping('blogPosts', wpPost.id, savedId, { slug, status });
+      this.duplicateTracker.recordMapping('blogPosts', wpPost.id, savedId, {
+        slug,
+        status,
+        importedSlug: slug,
+      });
     }
 
     return result;
@@ -599,18 +614,107 @@ class BlogPostImporter {
   }
 
   normalizeSlug(slug, title) {
-    const raw = slug || this.slugify(title || '');
-    return (raw || `wp-post-${Date.now()}`).toLowerCase();
+    // First, try to use the provided slug if available
+    if (slug && slug.trim()) {
+      // Decode URL-encoded or hex-encoded Persian slugs
+      let decodedSlug = slug;
+      try {
+        // Try URL decoding first (handles %D8%A2... format)
+        decodedSlug = decodeURIComponent(slug);
+      } catch (e) {
+        // If URL decoding fails, try hex decoding (handles d8a2... format)
+        try {
+          // Check if it looks like hex-encoded (only hex chars, even length)
+          if (/^[0-9a-f]+$/i.test(slug) && slug.length % 2 === 0) {
+            decodedSlug = Buffer.from(slug, 'hex').toString('utf-8');
+          }
+        } catch (e2) {
+          // If both fail, use as-is
+        }
+      }
+      
+      // Clean and normalize the slug
+      const cleanedSlug = this.cleanSlug(decodedSlug);
+      if (cleanedSlug) {
+        return cleanedSlug;
+      }
+    }
+
+    // Fallback: generate slug from title
+    if (title && title.trim()) {
+      const generatedSlug = this.generateSlugFromTitle(title);
+      return generatedSlug;
+    }
+
+    // Last resort: use timestamp
+    return `wp-post-${Date.now()}`;
+  }
+
+  /**
+   * Generate a slug from a title
+   * Supports Persian/Arabic characters
+   * @param {string} title - Title text
+   * @returns {string} - Generated slug
+   */
+  generateSlugFromTitle(title) {
+    if (!title) {
+      return `wp-post-${Date.now()}`;
+    }
+
+    // First, replace spaces and ZWNJ with hyphens
+    let slug = title
+      .toString()
+      .trim()
+      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+    // Lowercase only ASCII letters (a-z), preserve Persian characters
+    slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+    // Collapse multiple hyphens
+    slug = slug.replace(/-+/g, '-');
+
+    // Trim leading/trailing hyphens
+    slug = slug.replace(/^-|-$/g, '');
+
+    return slug || `wp-post-${Date.now()}`;
+  }
+
+  /**
+   * Clean and normalize a slug
+   * Preserves Persian/Arabic characters
+   * @param {string} slug - Slug to clean
+   * @returns {string} - Cleaned slug
+   */
+  cleanSlug(slug) {
+    if (!slug) return '';
+
+    // First, replace spaces and ZWNJ with hyphens
+    let cleaned = slug
+      .toString()
+      .trim()
+      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+    // Lowercase only ASCII letters (a-z), preserve Persian characters
+    cleaned = cleaned.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+    // Collapse multiple hyphens
+    cleaned = cleaned.replace(/-+/g, '-');
+
+    // Trim leading/trailing hyphens
+    cleaned = cleaned.replace(/^-|-$/g, '');
+
+    return cleaned;
   }
 
   slugify(value) {
-    return value
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0600-\u06FF\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
+    // Deprecated: use generateSlugFromTitle instead
+    return this.generateSlugFromTitle(value);
   }
 
   stripHtml(html) {
@@ -697,6 +801,102 @@ class BlogPostImporter {
     }
 
     return rewritten;
+  }
+
+  /**
+   * Rewrite internal blog links from WordPress domain to our frontend blog structure.
+   */
+  async rewriteContentLinks(html) {
+    if (!html || typeof html !== "string") {
+      return html;
+    }
+
+    const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>/gi;
+    const sources = new Set();
+    let match;
+    while ((match = linkRegex.exec(html)) !== null) {
+      if (match[1]) {
+        sources.add(match[1]);
+      }
+    }
+
+    if (sources.size === 0) {
+      return html;
+    }
+
+    let rewritten = html;
+    for (const href of sources) {
+      try {
+        const newHref = this.rewriteSingleLink(href);
+        if (newHref && newHref !== href) {
+          const escaped = href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const hrefRegex = new RegExp(escaped, "g");
+          rewritten = rewritten.replace(hrefRegex, newHref);
+        }
+      } catch (error) {
+        this.logger.debug(`⚠️ Failed to rewrite link ${href}: ${error.message}`);
+      }
+    }
+
+    return rewritten;
+  }
+
+  rewriteSingleLink(href) {
+    try {
+      const url = new URL(href, this.wpHost ? `https://${this.wpHost}` : undefined);
+      const isInternal =
+        (this.wpHost && url.host === this.wpHost) || (!url.host && href.startsWith("/"));
+
+      if (!isInternal) {
+        return href;
+      }
+
+      const wpId = this.extractWpPostId(url);
+      const wpSlug = this.extractSlugFromPath(url.pathname);
+      const mappedSlug = this.getMappedSlug(wpId, wpSlug);
+
+      if (!mappedSlug) {
+        return href;
+      }
+
+      // If blogBasePath is empty, use "/<slug>"
+      return `${this.blogBasePath}/${mappedSlug}`.replace(/\/+/g, "/");
+    } catch {
+      // If parsing fails, leave the link untouched
+      return href;
+    }
+  }
+
+  extractWpPostId(url) {
+    if (!url) return null;
+    const pid = url.searchParams?.get("p");
+    if (pid && /^\d+$/.test(pid)) {
+      return Number.parseInt(pid, 10);
+    }
+    return null;
+  }
+
+  extractSlugFromPath(pathname) {
+    if (!pathname) return null;
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts.length === 0) return null;
+    return this.normalizeSlug(decodeURIComponent(parts[parts.length - 1]));
+  }
+
+  getMappedSlug(wpId, fallbackSlug) {
+    if (wpId) {
+      const mapping = this.duplicateTracker.getStrapiId("blogPosts", wpId);
+      if (mapping?.slug) {
+        return mapping.slug;
+      }
+      if (mapping?.strapiId && mapping?.importedSlug) {
+        return mapping.importedSlug;
+      }
+    }
+    if (fallbackSlug) {
+      return this.normalizeSlug(fallbackSlug);
+    }
+    return null;
   }
 
   normalizeMediaUrl(url) {
