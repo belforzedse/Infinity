@@ -115,3 +115,4 @@ npm run strapi db:migrate:down
 - **Manual Script**: `backend/scripts/generate-product-slugs.js` (alternative method)
 
 
+

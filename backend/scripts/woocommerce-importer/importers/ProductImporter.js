@@ -832,7 +832,7 @@ class ProductImporter {
       } catch (e) {
         // If decoding fails, use as-is
       }
-      
+
       // Clean and normalize the slug
       const cleanedSlug = this.cleanSlug(slug);
       if (cleanedSlug) {
