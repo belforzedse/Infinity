@@ -223,6 +223,121 @@ class WooCommerceClient extends BaseApiClient {
 }
 
 /**
+ * WordPress API Client (posts, categories, tags, media, users)
+ */
+class WordPressClient extends BaseApiClient {
+  constructor(config, logger) {
+    super(config.wordpress, logger);
+
+    this.username = config.wordpress.auth.username;
+    this.password = config.wordpress.auth.password;
+    this.useEmbeddedResponses = config.wordpress.useEmbeddedResponses;
+
+    this.client = axios.create({
+      baseURL: config.wordpress.baseUrl,
+      timeout: 60000,
+      auth:
+        this.username && this.password
+          ? {
+              username: this.username,
+              password: this.password
+            }
+          : undefined,
+      headers: {
+        'User-Agent': 'WordPress-Strapi-Importer/1.0'
+      }
+    });
+
+    // Request interceptor for rate limiting
+    this.client.interceptors.request.use(async (requestConfig) => {
+      this.logger.info(`🔄 Making WP API request: ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`);
+      await this.rateLimitDelay();
+
+      requestConfig.params = requestConfig.params || {};
+      if (this.useEmbeddedResponses && requestConfig.method?.toLowerCase() === 'get') {
+        requestConfig.params._embed = 1;
+      }
+
+      return requestConfig;
+    });
+
+    this.client.interceptors.response.use(
+      (response) => {
+        this.logger.info(`✅ WP API Response: ${response.config.method?.toUpperCase()} ${response.config.url} → ${response.status}`);
+        return response;
+      },
+      (error) => {
+        if (error.response) {
+          this.logger.error(`❌ WP API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`);
+          if (error.response.data) {
+            this.logger.error(`Error details: ${JSON.stringify(error.response.data)}`);
+          }
+        } else {
+          this.logger.error(`❌ WP API Error: ${error.message}`);
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  async getPosts(page = 1, perPage = 20, options = {}) {
+    const params = {
+      page,
+      per_page: perPage,
+      orderby: 'date',
+      order: 'desc',
+      status: options.status || 'publish'
+    };
+
+    if (options.after) {
+      params.after = options.after;
+    }
+
+    if (options.search) {
+      params.search = options.search;
+    }
+
+    if (options.category) {
+      params.categories = options.category;
+    }
+
+    if (options.tag) {
+      params.tags = options.tag;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/posts', { params })
+    );
+
+    return {
+      data: response.data,
+      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1', 10),
+      totalItems: parseInt(response.headers['x-wp-total'] || '0', 10)
+    };
+  }
+
+  async getCategory(id) {
+    const response = await this.retryRequest(() => this.client.get(`/categories/${id}`));
+    return response.data;
+  }
+
+  async getTag(id) {
+    const response = await this.retryRequest(() => this.client.get(`/tags/${id}`));
+    return response.data;
+  }
+
+  async getUser(id) {
+    const response = await this.retryRequest(() => this.client.get(`/users/${id}`));
+    return response.data;
+  }
+
+  async getMedia(id) {
+    const response = await this.retryRequest(() => this.client.get(`/media/${id}`));
+    return response.data;
+  }
+}
+
+/**
  * Strapi API Client
  */
 class StrapiClient extends BaseApiClient {
@@ -701,6 +816,26 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Find a plugin user by email
+   */
+  async findPluginUserByEmail(email) {
+    if (!email) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/users', {
+        params: {
+          'filters[email][$eq]': email,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data ?? response);
+  }
+
+  /**
    * Extract the first entity from a Strapi collection response
    */
   extractFirstEntry(responseData) {
@@ -751,6 +886,137 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Blog helpers
+   */
+  async findBlogCategoryBySlug(slug) {
+    if (!slug) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/blog-categories', {
+        params: {
+          'filters[Slug][$eq]': slug,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  async createBlogCategory(data) {
+    const response = await this.retryRequest(() =>
+      this.client.post('/blog-categories', { data })
+    );
+    return response.data;
+  }
+
+  async findBlogTagBySlug(slug) {
+    if (!slug) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/blog-tags', {
+        params: {
+          'filters[Slug][$eq]': slug,
+          'pagination[pageSize]': 1
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  async createBlogTag(data) {
+    const response = await this.retryRequest(() =>
+      this.client.post('/blog-tags', { data })
+    );
+    return response.data;
+  }
+
+  async findBlogAuthorByEmailOrName(email, name) {
+    if (email) {
+      const byEmail = await this.retryRequest(() =>
+        this.client.get('/blog-authors', {
+          params: {
+            'filters[Email][$eq]': email,
+            'pagination[pageSize]': 1
+          }
+        })
+      );
+      const emailMatch = this.extractFirstEntry(byEmail.data);
+      if (emailMatch) {
+        return emailMatch;
+      }
+    }
+
+    if (name) {
+      const byName = await this.retryRequest(() =>
+        this.client.get('/blog-authors', {
+          params: {
+            'filters[Name][$eq]': name,
+            'pagination[pageSize]': 1
+          }
+        })
+      );
+      const nameMatch = this.extractFirstEntry(byName.data);
+      if (nameMatch) {
+        return nameMatch;
+      }
+    }
+
+    return null;
+  }
+
+  async createBlogAuthor(data) {
+    const response = await this.retryRequest(() =>
+      this.client.post('/blog-authors', { data })
+    );
+    return response.data;
+  }
+
+  async updateBlogAuthor(id, data) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/blog-authors/${id}`, { data })
+    );
+    return response.data;
+  }
+
+  async findBlogPostBySlug(slug) {
+    if (!slug) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get('/blog-posts', {
+        params: {
+          'filters[Slug][$eq]': slug,
+          'pagination[pageSize]': 1,
+          populate: 'blog_author,blog_category,blog_tags,FeaturedImage'
+        }
+      })
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  async createBlogPost(data) {
+    const response = await this.retryRequest(() =>
+      this.client.post('/blog-posts', { data })
+    );
+    return response.data;
+  }
+
+  async updateBlogPost(id, data) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/blog-posts/${id}`, { data })
+    );
+    return response.data;
+  }
+
+  /**
    * Get existing items by external ID (stored in meta_data)
    */
   async findByExternalId(endpoint, externalId) {
@@ -775,6 +1041,16 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Generic update method
+   */
+  async update(endpoint, id, data) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`${endpoint}/${id}`, { data })
+    );
+    return response.data;
+  }
+
+  /**
    * Generic get method
    */
   async get(endpoint, params = {}) {
@@ -787,5 +1063,6 @@ class StrapiClient extends BaseApiClient {
 
 module.exports = {
   WooCommerceClient,
-  StrapiClient
+  StrapiClient,
+  WordPressClient
 }; 

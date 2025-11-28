@@ -32,6 +32,36 @@ export function resolveBlogAuthorName(blogAuthor: any): string {
   return "نویسنده اینفینیتی";
 }
 
+export function resolveUserDisplayName(user: any): string {
+  if (!user) {
+    return "کاربر ناشناس";
+  }
+
+  const userInfo =
+    user.user_info?.data?.attributes ||
+    user.user_info?.attributes ||
+    user.user_info;
+
+  if (userInfo) {
+    const firstName = (userInfo.FirstName || "").trim();
+    const lastName = (userInfo.LastName || "").trim();
+    const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+    if (fullName) {
+      return fullName;
+    }
+  }
+
+  if (user.username?.trim()) {
+    return user.username.trim();
+  }
+
+  if (user.email?.trim()) {
+    return user.email.trim();
+  }
+
+  return "کاربر ناشناس";
+}
+
 /**
  * Enriches a blog post object with resolved author names
  * @param blogPost - The blog post object to enrich

@@ -31,6 +31,11 @@
       "type": "datetime",
       "required": true
     },
+    "Name": {
+      "type": "string",
+      "required": false,
+      "maxLength": 150
+    },
     "user": {
       "type": "relation",
       "relation": "manyToOne",

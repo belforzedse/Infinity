@@ -52,6 +52,21 @@ module.exports = {
     },
   },
 
+  // WordPress API Configuration (for blog import)
+  wordpress: {
+    baseUrl: process.env.WORDPRESS_BASE_URL || "https://infinitycolor.co/wp-json/wp/v2",
+    auth: {
+      username: process.env.WORDPRESS_BASIC_USER || "",
+      password: process.env.WORDPRESS_BASIC_PASSWORD || "",
+    },
+    // Rate limiting to keep the public WP API happy
+    rateLimiting: {
+      requestsPerSecond: toNumber(process.env.WORDPRESS_REQUESTS_PER_SECOND, 4),
+      delayBetweenRequests: toNumber(process.env.WORDPRESS_REQUEST_DELAY, 300),
+    },
+    useEmbeddedResponses: process.env.WORDPRESS_USE_EMBED !== "false",
+  },
+
   // Strapi API Configuration
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
@@ -76,7 +91,7 @@ module.exports = {
         baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
         token:
           process.env.STRAPI_IMPORT_LOCAL_TOKEN ||
-          "9ffae40589b6477c5cbc1a6b80d5be773e8e94affcf7122c0bffeb1370798c24e3f56ca8a4d8a721e5d44b22e7d3378334aa6fed9713087ea32824ef10a2ffccc53b633171aff1b284cc536d7575a11317dd879ee65dd9faf005c8c5a27995e96a62d7ae3a259c697c52d527d1c3470290486715d59b5fbc5b4c2e7761e45326",
+          "e13d550a7dbe76fb522f5da662338d1b613b75a9ce468188ba93dbf17ca55da71c1d1a9eded063475793c95694bcd9e6f3a6b062b6a4719edce40e591666892a80798d064de9c6b98bd3adc8d1a131b614ecd7518dfe19532c07ff02f5aa932735397e38468845e2e88b1812fd77719ab166ca9fc88c8a6a0be8501665d5ea7e",
       },
     },
     endpoints: {
@@ -93,6 +108,10 @@ module.exports = {
       users: "/users",
       userInfos: "/local-user-infos",
       userRoles: "/users-permissions/roles",
+      blogPosts: "/blog-posts",
+      blogCategories: "/blog-categories",
+      blogTags: "/blog-tags",
+      blogAuthors: "/blog-authors",
     },
   },
 
@@ -109,6 +128,7 @@ module.exports = {
       variations: toNumber(process.env.IMPORT_BATCH_VARIATIONS, 100),
       orders: toNumber(process.env.IMPORT_BATCH_ORDERS, 50),
       users: toNumber(process.env.IMPORT_BATCH_USERS, 50),
+      blogPosts: toNumber(process.env.IMPORT_BATCH_BLOG_POSTS, 20),
     },
 
     // Currency conversion (IRT to our internal format)
@@ -209,6 +229,12 @@ module.exports = {
       variations: process.env.IMPORT_TRACKING_VARIATIONS_FILE || "variation-mappings.json",
       orders: process.env.IMPORT_TRACKING_ORDERS_FILE || "order-mappings.json",
       users: process.env.IMPORT_TRACKING_USERS_FILE || "user-mappings.json",
+      blogPosts: process.env.IMPORT_TRACKING_BLOG_POSTS_FILE || "blog-post-mappings.json",
+      blogCategories:
+        process.env.IMPORT_TRACKING_BLOG_CATEGORIES_FILE || "blog-category-mappings.json",
+      blogTags: process.env.IMPORT_TRACKING_BLOG_TAGS_FILE || "blog-tag-mappings.json",
+      blogAuthors: process.env.IMPORT_TRACKING_BLOG_AUTHORS_FILE || "blog-author-mappings.json",
+      blogMedia: process.env.IMPORT_TRACKING_BLOG_MEDIA_FILE || "blog-media-mappings.json",
     },
     // Environment-specific directories
     environments: {
