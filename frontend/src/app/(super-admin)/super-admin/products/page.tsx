@@ -15,10 +15,14 @@ import { refreshTable } from "@/components/SuperAdmin/Table";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useEditorRedirect } from "@/hooks/useEditorRedirect";
 
 export default function ProductsPage() {
   useFreshDataOnPageLoad();
   const { isStoreManager } = useCurrentUser();
+
+  // Redirect editors away from product pages
+  useEditorRedirect();
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false);
   const [showPermissionDenied, setShowPermissionDenied] = useState(false);
@@ -609,7 +613,7 @@ export default function ProductsPage() {
         cancelText="انصراف"
         onConfirm={async () => {
           if (!pendingPermanentDelete) return;
-          
+
           const { selectedProducts } = pendingPermanentDelete;
           let deletedCount = 0;
           const failedIds: string[] = [];

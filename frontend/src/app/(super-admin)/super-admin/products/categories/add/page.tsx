@@ -10,9 +10,13 @@ import {
   getCategoryFormConfig,
   type ProductCategoryForm,
 } from "../categoryFormConfig";
+import { useEditorRedirect } from "@/hooks/useEditorRedirect";
 
 export default function AddCategoryPage() {
   const router = useRouter();
+
+  // Redirect editors away from product pages
+  useEditorRedirect();
 
   const handleSubmit = async (formData: ProductCategoryForm) => {
     const title = formData.Title?.trim();

@@ -1,0 +1,237 @@
+---
+description: SEO optimization guidelines and best practices for the Infinity Store frontend
+globs: src/app/**/*.tsx,src/components/SEO/**/*.tsx,src/app/sitemap.ts,src/app/robots.ts
+---
+
+## SEO Optimization Guidelines
+
+This document outlines SEO best practices and implementation patterns for the Infinity Store Next.js frontend.
+
+## Core Principles
+
+1. **Metadata First**: Every public page must have proper metadata (title, description, OpenGraph, Twitter cards)
+2. **Structured Data**: Use JSON-LD schemas for products, organization, breadcrumbs, and other content types
+3. **Absolute URLs**: All canonical URLs and OpenGraph URLs must be absolute using `NEXT_PUBLIC_SITE_URL`
+4. **Sitemap Coverage**: All public pages must be included in the sitemap
+5. **Performance**: Optimize for Core Web Vitals (LCP, FID, CLS)
+
+## Implementation Patterns
+
+### Metadata Template
+
+The root layout (`src/app/layout.tsx`) defines a metadata template:
+
+```typescript
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    template: `%s | ${SITE_NAME}`,
+    default: `${SITE_NAME} | فروشگاه پوشاک آنلاین`,
+  },
+  // ... defaults for OpenGraph, Twitter, etc.
+};
+```
+
+Pages should only specify the title part (before the pipe):
+
+```typescript
+export const metadata: Metadata = {
+  title: "صفحه اصلی", // Will become "صفحه اصلی | اینفینیتی استور"
+  // ...
+};
+```
+
+### Canonical URLs
+
+Always use absolute URLs with `NEXT_PUBLIC_SITE_URL`:
+
+```typescript
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: `${SITE_URL}/page-path`,
+  },
+};
+```
+
+### Structured Data Components
+
+Located in `src/components/SEO/`:
+
+- **ProductSchema**: Product schema with pricing, ratings, availability
+- **OrganizationSchema**: Organization info with contact points and social links
+- **BreadcrumbSchema**: Breadcrumb navigation schema
+- **FAQSchema**: FAQ page schema (when FAQ content is available)
+
+Usage:
+
+```typescript
+import { ProductSchema } from "@/components/SEO/ProductSchema";
+
+export default function ProductPage({ product, slug }) {
+  return (
+    <>
+      <ProductSchema product={product} slug={slug} />
+      {/* Page content */}
+    </>
+  );
+}
+```
+
+### Sitemap Generation
+
+The sitemap (`src/app/sitemap.ts`) automatically includes:
+
+- Homepage
+- Product listing pages (PLP)
+- Individual product pages (using slugs, not IDs)
+- Blog listing page
+- Individual blog posts
+- Blog categories
+- Static pages (categories, etc.)
+
+**Important**: Product URLs use slugs when available, falling back to IDs:
+
+```typescript
+const slug = product.attributes?.slug || product.attributes?.Slug;
+const urlPath = slug ? `/pdp/${slug}` : `/pdp/${product.id}`;
+```
+
+### Robots.txt
+
+Dynamic robots.txt is generated via `src/app/robots.ts`. The static `public/robots.txt` should not be used.
+
+### Page-Specific Guidelines
+
+#### Product Pages (PDP)
+
+- Use `generateMetadata` to fetch product data and build dynamic metadata
+- Include ProductSchema and BreadcrumbSchema
+- Ensure OpenGraph images are 1200x630px
+- Canonical URL must use product slug
+
+#### Product Listing Pages (PLP)
+
+- Handle search and category filters in metadata
+- Use dynamic canonical URLs based on query parameters
+- Include category-specific descriptions
+
+#### Blog Pages
+
+- Blog posts use Article schema (via `generateJSONLD` utility)
+- Blog listing page has its own metadata
+- Category-filtered blog pages should have category-specific metadata
+
+#### Transactional Pages
+
+Cart and checkout pages should be marked as `noindex`:
+
+```typescript
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+```
+
+## Image SEO
+
+1. **Alt Attributes**: All images must have descriptive alt text
+2. **Lazy Loading**: Use `loading="lazy"` for below-fold images
+3. **Priority**: Set `priority={true}` for above-fold hero images
+4. **Sizes**: Specify `sizes` attribute for responsive images
+5. **Formats**: Prefer WebP/AVIF formats (handled by Next.js Image)
+
+## Performance Optimization
+
+### Resource Hints
+
+Added in root layout:
+
+- DNS prefetch for external domains (API, CDN, social media)
+- Preconnect for API endpoints
+- Preload for critical fonts (handled by Next.js)
+
+### Core Web Vitals
+
+- **LCP**: Optimize hero images, use `priority` for above-fold images
+- **FID**: Minimize JavaScript execution, use code splitting
+- **CLS**: Set explicit image dimensions, avoid layout shifts
+
+## Testing Checklist
+
+Before deploying SEO changes:
+
+- [ ] Verify sitemap.xml includes all public pages
+- [ ] Test robots.txt generation
+- [ ] Validate structured data with [Google Rich Results Test](https://search.google.com/test/rich-results)
+- [ ] Check OpenGraph previews on [Facebook Debugger](https://developers.facebook.com/tools/debug/)
+- [ ] Verify Twitter card previews
+- [ ] Run Lighthouse SEO audit (target: 95+)
+- [ ] Check all canonical URLs are absolute
+- [ ] Verify hreflang tags for Persian locale
+- [ ] Test mobile-friendliness
+
+## Environment Variables
+
+Required for SEO:
+
+- `NEXT_PUBLIC_SITE_URL`: Base URL for canonical URLs and sitemap (default: `https://infinitycolor.org`)
+- `NEXT_PUBLIC_IMAGE_BASE_URL`: Base URL for images (default: API base URL)
+- `NEXT_PUBLIC_API_BASE_URL`: API endpoint URL
+
+## Common Issues
+
+### Issue: Relative Canonical URLs
+
+**Problem**: Canonical URLs are relative instead of absolute
+
+**Solution**: Always use `NEXT_PUBLIC_SITE_URL`:
+
+```typescript
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+canonical: `${SITE_URL}/path`
+```
+
+### Issue: Missing Metadata
+
+**Problem**: Page doesn't have metadata export
+
+**Solution**: Add `export const metadata` or `generateMetadata` function
+
+### Issue: Undefined Fields in JSON-LD
+
+**Problem**: Schema includes `undefined` values
+
+**Solution**: Conditionally add fields only if they exist:
+
+```typescript
+const schema: Record<string, any> = {
+  // ... required fields
+};
+
+if (optionalField) {
+  schema.optionalField = optionalField;
+}
+```
+
+### Issue: Sitemap Uses IDs Instead of Slugs
+
+**Problem**: Product URLs in sitemap use numeric IDs
+
+**Solution**: Fetch `slug` field and use it when available:
+
+```typescript
+const slug = product.attributes?.slug || product.attributes?.Slug;
+const urlPath = slug ? `/pdp/${slug}` : `/pdp/${product.id}`;
+```
+
+## References
+
+- [Next.js Metadata API](https://nextjs.org/docs/app/api-reference/functions/generate-metadata)
+- [Schema.org Documentation](https://schema.org/)
+- [Google Search Central](https://developers.google.com/search)
+- [Open Graph Protocol](https://ogp.me/)
+- [Twitter Cards](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards)

@@ -7,6 +7,7 @@ Modern, RTL‑first e‑commerce frontend built with Next.js (App Router), TypeS
 - Authentication with OTP/password, JWT handling, and responsive RTL UI
 - Product catalog with variations, filters (PLP), and media gallery (PDP)
 - Shopping cart with drawer UI, local persistence, and checkout flow
+- **Blog system with rich text editor, SEO optimization, and comment management**
 - Super‑admin and admin sections for content/product management
 - API services layer with typed endpoints and helper utilities
 - Tailwind + component kits; toast notifications; loading/progress UX
@@ -19,6 +20,7 @@ Modern, RTL‑first e‑commerce frontend built with Next.js (App Router), TypeS
 - Styling: Tailwind CSS 3.4.1
 - State: Jotai 2.11.1
 - Forms: React Hook Form 7.54.2
+- Rich Text: Tiptap (for blog content editing)
 - Notifications: react-hot-toast
 - Backend: Strapi v4.25.21 (via REST APIs)
 
@@ -53,6 +55,37 @@ npm run dev
 Open http://localhost:2888
 
 Environment variables are automatically loaded from `dev.env` - no manual configuration needed!
+
+## Blog System
+
+The frontend includes a comprehensive blog system with:
+
+### Public Features
+- **Blog Listing**: `/blog` - Paginated list of published posts with filtering
+- **Individual Posts**: `/{slug}` - Root-level URLs for SEO optimization
+- **Categories & Tags**: Organized content with filtering capabilities
+- **Comments**: Authenticated user comments with real-time loading
+
+### Admin Features
+- **Content Management**: Full CRUD operations for posts, categories, tags, authors
+- **Rich Text Editor**: Tiptap-based editor with comprehensive formatting
+- **SEO Optimization**: Complete metadata management with Open Graph support
+- **Comment Moderation**: Three-state approval system for user comments
+
+### Technical Features
+- **Server-Side Rendering**: Full SSR support for SEO
+- **Metadata Generation**: Automatic Open Graph and Twitter Card generation
+- **Structured Data**: JSON-LD implementation for search engines
+- **Slug Validation**: Automatic conflict prevention with existing routes
+- **Image Optimization**: Next.js Image component integration
+
+### Components
+- `BlogList` - Post listing with search and filters
+- `BlogPostDetail` - Individual post display with sidebar
+- `BlogComments` - Comment system with threading support
+- `RichTextEditor` - Tiptap-based content editor
+
+For detailed documentation, see `BLOG_SYSTEM.md` in the project root.
 
 ## Environment Variables
 

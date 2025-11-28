@@ -9,6 +9,7 @@ import SearchSuggestionCard from "./SearchSuggestionCard";
 
 type Suggestion = {
   id: number;
+  slug?: string;
   Title: string;
   Price?: number;
   DiscountPrice?: number;
@@ -125,6 +126,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
 
           const item: Suggestion = {
             id,
+            slug: attrs?.Slug ?? undefined,
             Title: title,
             Price: attrs?.Price ?? undefined,
             DiscountPrice: attrs?.DiscountPrice ?? undefined,
@@ -181,7 +183,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
       const item = suggestions[activeIndex];
-      if (item) router.push(`/pdp/${item.id}`);
+      if (item) router.push(`/pdp/${item.slug || item.id}`);
     } else if (e.key === "Escape") {
       setOpen(false);
     }
@@ -322,7 +324,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                         isAvailable={s.isAvailable}
                         onClick={() => {
                           persistRecent(s.Title);
-                          router.push(`/pdp/${s.id}`);
+                          router.push(`/pdp/${s.slug || s.id}`);
                         }}
                         index={idx}
                         isActive={activeIndex === idx}

@@ -26,6 +26,7 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
   const { roleName } = useCurrentUser();
   const normalizedRole = (roleName ?? "").toLowerCase();
   const isStoreManager = normalizedRole === "store manager";
+  const isEditor = normalizedRole === "editor" || normalizedRole.includes("editor");
   const sidebarItems = useMemo(() => getSidebarItemsForRole(roleName), [roleName]);
 
   const handleLogout = () => {
@@ -259,7 +260,7 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
 
           <div className="h-[1px] w-full bg-neutral-100" />
 
-          {!isStoreManager && (
+          {!isStoreManager && !isEditor && (
             <div className="flex cursor-pointer items-center px-2 py-1.5">
               <Link href={"/super-admin/settings"} className="flex items-center gap-2">
                 <div className="flex items-center gap-2">

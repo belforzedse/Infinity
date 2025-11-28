@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>اینفینیتی استور</ShortName>
+  <Description>جستجو در فروشگاه اینفینیتی استور</Description>
+  <Tags>پوشاک فروشگاه آنلاین</Tags>
+  <Contact>info@infinitycolor.org</Contact>
+  <Url type="text/html" method="get" template="https://infinitycolor.org/plp?search={searchTerms}"/>
+  <Url type="application/rss+xml" method="get" template="https://infinitycolor.org/blog/feed.xml?search={searchTerms}"/>
+  <Image height="16" width="16" type="image/x-icon">https://infinitycolor.org/favicon.ico</Image>
+  <Developer>Infinity Store</Developer>
+  <Attribution>
+    جستجو در فروشگاه اینفینیتی استور
+  </Attribution>
+  <SyndicationRight>open</SyndicationRight>
+  <AdultContent>false</AdultContent>
+  <Language>fa-IR</Language>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <InputEncoding>UTF-8</InputEncoding>
+</OpenSearchDescription>
+
+
+

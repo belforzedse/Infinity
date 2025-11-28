@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { apiClient } from "@/services";
 import { ENDPOINTS } from "@/constants/api";
@@ -9,6 +10,7 @@ import { HexColorPicker, HexColorInput } from "react-colorful";
 import { Dialog, Transition } from "@headlessui/react";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import { COLOR_CATEGORIES, QUICK_COLORS } from "@/lib/colorPalettes";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 type ApiColor = {
   id: number;
@@ -34,11 +36,21 @@ const INITIAL_MODAL_STATE: ModalState = {
 };
 
 export default function ProductColorsPage() {
+  const router = useRouter();
+  const { roleName } = useCurrentUser();
   const [colors, setColors] = useState<ApiColor[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalState, setModalState] = useState<ModalState>({ ...INITIAL_MODAL_STATE });
   const [saving, setSaving] = useState(false);
+
+  // Redirect editors away from product pages
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
 
   const fetchColors = useCallback(async () => {
     setLoading(true);

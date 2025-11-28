@@ -58,6 +58,7 @@ export interface ProductDetail {
   id: number;
   attributes: {
     Title: string;
+    Slug?: string;
     Description: string;
     Status: "Active" | "InActive";
     AverageRating?: number;
@@ -209,15 +210,40 @@ export const getProductById = async (id: string): Promise<ApiResponse<ProductDet
   }
 };
 
-// Keeping the original method for compatibility
+/**
+ * Get product by slug (SEO-friendly URL)
+ * Uses the new backend endpoint that supports Persian slugs
+ * Falls back to ID-based lookup for backwards compatibility
+ */
 export const getProductBySlug = async (slug: string): Promise<ApiResponse<ProductDetail>> => {
-  // Since slug is not available, let's try to get a product by ID
-  // If slug can be converted to a number, we'll use it as an ID
-  const productId = isNaN(parseInt(slug)) ? "1" : slug;
+  // Encode the slug for URL (supports Persian characters)
+  const encodedSlug = encodeURIComponent(slug);
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
 
   try {
-    return await getProductById(productId);
+    const response = await apiClient.get<any>(endpoint);
+
+    // Check if product is trashed (removedAt is not null)
+    if (response.data?.attributes?.removedAt) {
+      const error = new Error("Product not found");
+      (error as Error & { status?: number }).status = 404;
+      throw error;
+    }
+
+    return response;
   } catch (error) {
+    // If slug-based lookup fails and slug looks like an ID, try ID-based lookup
+    const isNumericSlug = /^\d+$/.test(slug);
+    if (isNumericSlug) {
+      console.warn(`Slug lookup failed, falling back to ID-based lookup for: ${slug}`);
+      try {
+        return await getProductById(slug);
+      } catch (idError) {
+        console.error("Error fetching product by ID fallback:", idError);
+        throw idError;
+      }
+    }
+
     console.error("Error fetching product details by slug:", error);
     throw error;
   }
@@ -588,7 +614,7 @@ export const getRelatedProductsByMainCategory = async (
     return [];
   }
 
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -620,12 +646,12 @@ export const getRelatedProductsByOtherCategories = async (
   }
 
   try {
-    // Build filter for other categories
+    // Build filter for other categories - include Slug field
     const categoryFilters = validCategoryIds
       .map((id, index) => `filters[product_other_categories][id][$in][${index}]=${id}`)
       .join("&");
 
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&pagination[limit]=${limit}`;
+    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
 
     const response = await apiClient.get<any>(endpoint);
     return formatProductsToCardProps((response as any).data);
@@ -688,6 +714,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 
       const result: ProductCardProps = {
         id: parseInt(product.id),
+        slug: product.attributes.Slug || undefined,
         images: [resolveAssetUrl(product.attributes.CoverImage?.data?.attributes?.url)],
         category: product.attributes.product_main_category?.data?.attributes?.Title || "",
         title: product.attributes.Title,
