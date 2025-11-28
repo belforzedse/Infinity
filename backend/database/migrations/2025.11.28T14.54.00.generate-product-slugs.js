@@ -16,10 +16,16 @@
 const BATCH_SIZE = 50;
 
 /**
- * Generate a Unicode-compatible slug from text
- * Keeps Persian/Arabic characters intact
- * Persian characters are preserved as-is, only ASCII letters are lowercased
- * (Copied from src/utils/unicodeSlug.ts for use in migration)
+ * Create a Unicode-friendly slug from input text, preserving Persian/Arabic characters while lowercasing ASCII letters.
+ *
+ * Produces a slug suitable for URLs: spaces and zero-width non-joiners are converted to hyphens, ASCII letters are lowercased,
+ * disallowed characters are removed (digits, ASCII letters, Persian/Arabic code block, and hyphens are kept), consecutive
+ * hyphens are collapsed, and leading/trailing hyphens are trimmed. If `text` is falsy or the resulting slug is empty,
+ * a fallback of the form `<fallbackPrefix>-<timestamp>` is returned.
+ *
+ * @param {string|any} text - Source text to convert into a slug. Non-string inputs are coerced to string.
+ * @param {string} [fallbackPrefix='product'] - Prefix to use when generating a fallback slug.
+ * @returns {string} The generated slug, or a fallback `<fallbackPrefix>-<timestamp>` when input is falsy or produces no slug.
  */
 function generateUnicodeSlug(text, fallbackPrefix = 'product') {
   if (!text) {
@@ -62,7 +68,10 @@ const RESERVED_ROUTES = [
 ];
 
 /**
- * Validates if a slug is allowed for products
+ * Determine whether a candidate slug is permitted for product URLs.
+ * Performs normalization and rejects reserved routes and common conflict patterns.
+ * @param {string} slug - Candidate slug to validate; will be lowercased and trimmed before checks.
+ * @returns {boolean} `true` if the slug is permitted for products, `false` otherwise.
  */
 function isValidProductSlug(slug) {
   if (!slug || typeof slug !== 'string') {
@@ -95,7 +104,10 @@ function isValidProductSlug(slug) {
 }
 
 /**
- * Check if a slug is already in use (using Knex query)
+ * Determine whether a product slug is available (not used by another product).
+ * @param {string} slug - The slug to check.
+ * @param {(number|string|null)} [excludeId=null] - Optional product ID to ignore when checking (useful when updating a product).
+ * @returns {boolean} `true` if the slug is available, `false` otherwise.
  */
 async function isSlugAvailable(knex, slug, excludeId = null) {
   let query = knex('products').where('slug', slug);
@@ -109,7 +121,12 @@ async function isSlugAvailable(knex, slug, excludeId = null) {
 }
 
 /**
- * Generate a unique slug for a product
+ * Generate a unique, valid product slug based on a title.
+ *
+ * Produces a Unicode-preserving slug from the provided title, replaces it with a timestamp-based fallback if the slug is invalid, and appends numeric suffixes until a unique slug is found (with a safety fallback if too many attempts occur).
+ * @param {string} title - The product title to generate the base slug from.
+ * @param {number|null} productId - Optional product ID to exclude from uniqueness checks.
+ * @returns {string} The generated unique slug.
  */
 async function generateUniqueSlug(knex, title, productId) {
   let baseSlug = generateUnicodeSlug(title);
@@ -136,6 +153,16 @@ async function generateUniqueSlug(knex, title, productId) {
   return slug;
 }
 
+/**
+ * Generate missing product slugs and update products in batches.
+ *
+ * Processes products that have a null or empty slug, generates unique Unicode-preserving slugs
+ * from their titles, updates those records in the database in batches, and logs progress.
+ * If the `products` table or the `slug` column is missing, the migration is skipped.
+ *
+ * @param {import('knex')} knex - Knex instance connected to the target database.
+ * @throws {Error} If the migration encounters an unexpected error during processing.
+ */
 async function up(knex) {
   console.log('🔄 Generating slugs for existing products...\n');
 
@@ -249,6 +276,12 @@ async function up(knex) {
   }
 }
 
+/**
+ * Placeholder rollback for the product slug generation migration that leaves existing slugs intact.
+ *
+ * This function intentionally does not remove or modify product slugs on rollback to preserve data.
+ * To remove slugs, run a dedicated migration or perform the changes manually.
+ */
 async function down(knex) {
   console.log('🔄 Rolling back product slug generation...');
   console.log('⚠️  This will NOT remove slugs from products (data preservation)');
@@ -258,5 +291,4 @@ async function down(knex) {
 }
 
 module.exports = { up, down };
-
 

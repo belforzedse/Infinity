@@ -4,6 +4,13 @@ import { generateUniqueProductSlug } from "../../../../utils/productSlug";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
+/**
+ * Compute the field-level differences between two record snapshots.
+ *
+ * @param previous - The prior state of the record (field name → value).
+ * @param current - The new state of the record (field name → value).
+ * @returns An object mapping each changed field name to an object with `from` (previous value) and `to` (current value). The fields `"updatedAt"`, `"createdAt"`, `"id"`, and `"documentId"` are ignored.
+ */
 function diffChanges(
   previous: Record<string, any>,
   current: Record<string, any>

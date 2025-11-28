@@ -29,7 +29,11 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-// Helper function for prompts
+/**
+ * Prompt the user with a question and return their trimmed response.
+ * @param {string} question - The prompt text displayed to the user.
+ * @returns {Promise<string>} The trimmed user input.
+ */
 function prompt(question) {
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
@@ -41,6 +45,15 @@ function prompt(question) {
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Normalize a date-like input into an ISO 8601 timestamp string, adjusting date-only inputs to the requested boundary.
+ *
+ * @param {string|Date|null|undefined} value - The input date value; empty or falsy values produce `null`.
+ * @param {"after"|"before"|undefined} boundary - When the input is date-only (no time component), adjust the result:
+ *   use `"after"` to return the timestamp at the start of the next day, `"before"` to return the timestamp at the end of the given day.
+ * @returns {string|null} An ISO 8601 timestamp string representing the normalized date/time, or `null` for empty input.
+ * @throws {Error} If the input cannot be parsed as a valid date.
+ */
 function normalizeDateInput(value, boundary) {
   if (!value) {
     return null;
@@ -64,6 +77,13 @@ function normalizeDateInput(value, boundary) {
   return new Date(timestamp).toISOString();
 }
 
+/**
+ * Format a date-like value as an ISO 8601 string for display.
+ *
+ * If `value` is falsy, returns an empty string. If `value` can be parsed to a valid Date, returns its ISO string; otherwise returns the original `value`.
+ * @param {*} value - A date value (Date object, timestamp, or date string).
+ * @returns {*} The ISO 8601 string when parseable, an empty string for falsy input, or the original value when parsing fails.
+ */
 function formatDateDisplay(value) {
   if (!value) {
     return "";
@@ -77,7 +97,12 @@ function formatDateDisplay(value) {
 }
 
 /**
- * Check API health before import
+ * Verify connectivity to external APIs and prompt the user if any check fails.
+ *
+ * Checks WooCommerce and Strapi APIs and, when blog post import is enabled, WordPress as well.
+ * Logs each API's status and measured response time, and prompts the user to continue if any check fails.
+ *
+ * @returns {boolean} `true` if all required API checks succeeded or the user chose to continue despite failures, `false` if the user declined to proceed after failures.
  */
 async function checkApiHealth() {
   console.log("\n🔍 Checking API Health...\n");
@@ -149,7 +174,9 @@ async function checkApiHealth() {
 }
 
 /**
- * Validate import dependencies
+ * Check that required imports for a given importer type have been performed and prompt the user if a dependency is missing.
+ * @param {string} type - Importer type to validate (e.g., "products", "variations", "orders").
+ * @returns {boolean} `true` if dependencies are satisfied or the user chose to continue despite missing dependencies, `false` otherwise.
  */
 async function validateImportDependencies(type) {
   const stats = duplicateTracker.getStats();
@@ -187,7 +214,11 @@ async function validateImportDependencies(type) {
 }
 
 /**
- * Show import preview
+ * Display a dry-run preview for the specified importer and prompt the user whether to proceed with the real import.
+ *
+ * @param {string} type - Importer identifier: "categories", "users", "products", "variations", "orders", or "blogPosts".
+ * @param {Object} options - Importer-specific options (e.g., limit, page, dryRun override, date/keyword filters, categoryIds, batchSize).
+ * @returns {boolean} `true` if the user confirms proceeding with the actual import, `false` otherwise (also `false` if the preview fails).
  */
 async function showImportPreview(type, options) {
   console.log(`\n📋 Preview: ${type.toUpperCase()}`);
@@ -267,7 +298,12 @@ let importOptions = {
 };
 
 /**
- * Select Strapi credentials (production or staging)
+ * Prompt the user to choose a Strapi environment and apply its credentials.
+ *
+ * Updates global state and configuration to use the selected environment: sets
+ * `selectedCredentialEnv`, applies `config.strapi.baseUrl` and `config.strapi.auth.token`,
+ * updates `config.duplicateTracking.storageDir`, and recreates the `duplicateTracker`
+ * instance with the new storage directory. Waits for the user to press Enter before returning.
  */
 async function selectCredentials() {
   console.clear();
@@ -316,7 +352,11 @@ async function selectCredentials() {
 }
 
 /**
- * Display main menu
+ * Show the interactive main menu with current credentials and import configuration, then prompt for a choice.
+ *
+ * Displays current Strapi environment, base URL, per-importer settings (enabled, limits, dry-run and type-specific options),
+ * and a numbered list of actions for the user to select.
+ * @returns {string} The user's menu choice as entered. 
  */
 async function showMainMenu() {
   console.clear();
@@ -397,7 +437,15 @@ async function showMainMenu() {
 }
 
 /**
- * Configure an importer
+ * Interactively configure options for a named importer.
+ *
+ * Prompts the user to enable/disable the importer and to set common settings
+ * (limit, starting page, dry-run) as well as type-specific options:
+ * - products: category filters, image settings, name filter, created/published date filters
+ * - variations: restrict to already-imported parents, name filter
+ * - blogPosts: WordPress status, created-after filter, batch size
+ *
+ * @param {string} type - Importer key to configure (e.g., "categories", "users", "products", "variations", "orders", "blogPosts").
  */
 async function configureImporter(type) {
   console.clear();
@@ -755,7 +803,11 @@ async function runAllImporters() {
 }
 
 /**
- * Show import status and mappings
+ * Display current import statistics and mapping file location, then wait for user confirmation.
+ *
+ * Prints per-type totals and optional oldest/newest timestamps from the duplicate tracker,
+ * shows the mapping files directory configured for duplicate tracking, and waits for the user
+ * to press Enter before returning.
  */
 async function showStatus() {
   console.clear();
@@ -782,7 +834,11 @@ async function showStatus() {
 }
 
 /**
- * Clear all mappings
+ * Interactively clear all import mapping data used to track imported items.
+ *
+ * Prompts the user to confirm by typing "clear"; if confirmed, iterates all mapping types
+ * in the DuplicateTracker and removes their mappings, reporting per-type failures.
+ * If not confirmed, the operation is cancelled. Prompts to press Enter when finished.
  */
 async function clearMappings() {
   console.clear();
@@ -811,7 +867,12 @@ async function clearMappings() {
 }
 
 /**
- * Main loop
+ * Run the interactive main loop for the WooCommerce → Strapi importer CLI.
+ *
+ * Starts by selecting credentials, then repeatedly shows the main menu and dispatches
+ * user-selected actions (configure importers, run imports, view or clear mappings,
+ * sync shipping locations, or exit) until the user quits. Ensures the readline
+ * interface is closed and terminates the process on unrecoverable errors.
  */
 async function main() {
   try {
