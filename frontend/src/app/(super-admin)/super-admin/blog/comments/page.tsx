@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
+import Modal from "@/components/Kits/Modal";
 import {
   Search,
   Trash2,
@@ -14,6 +16,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Eye,
 } from "lucide-react";
 import { blogService, BlogComment } from "@/services/blog/blog.service";
 import { resolveBlogCommentUserDisplayName } from "@/utils/blogCommentAuthorName";
@@ -29,6 +32,7 @@ export default function BlogCommentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [viewComment, setViewComment] = useState<BlogComment | null>(null);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -75,28 +79,46 @@ export default function BlogCommentsPage() {
     }
   };
 
+  const normalizedSearch = searchTerm.toLowerCase();
   const filteredComments = comments.filter((comment) =>
-    comment.Content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comment.user?.username?.toLowerCase().includes(searchTerm.toLowerCase())
+    comment.Content.toLowerCase().includes(normalizedSearch) ||
+    comment.Name?.toLowerCase().includes(normalizedSearch) ||
+    comment.user?.username?.toLowerCase().includes(normalizedSearch)
   );
 
   const columns = [
     {
-      accessorKey: "Content",
-      header: "متن نظر",
+      accessorKey: "User",
+      header: "کاربر",
       cell: ({ row }: { row: { original: BlogComment } }) => (
         <div className="max-w-md">
           <div className="flex items-center gap-2 mb-1">
             <User className="h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium text-neutral-800">
-              {resolveBlogCommentUserDisplayName(row.original.user)}
+              {resolveBlogCommentUserDisplayName(row.original.user, row.original.Name)}
             </span>
           </div>
-          <p className="text-sm text-neutral-600 line-clamp-2">
-            {row.original.Content}
-          </p>
+
         </div>
       ),
+    },
+    {
+      accessorKey: "Content",
+      header: "متن نظر",
+      cell: ({ row }: { row: { original: BlogComment } }) => {
+        const text = row.original.Content || "";
+        const max = 40; // choose your limit
+
+        const trimmed = text.length > max ? text.slice(0, max) + "..." : text;
+
+        return (
+          <div className="max-w-md">
+            <p className="text-sm text-neutral-600">
+              {trimmed}
+            </p>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "blog_post",
@@ -104,9 +126,21 @@ export default function BlogCommentsPage() {
       cell: ({ row }: { row: { original: BlogComment } }) => (
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-slate-400" />
-          <span className="text-sm text-neutral-700 truncate max-w-[150px]">
-            {row.original.blog_post?.Title || "-"}
-          </span>
+          {row.original.blog_post?.Title ? (
+            <Link
+              href={
+                row.original.blog_post.Slug
+                  ? `/blog/${row.original.blog_post.Slug}`
+                  : "#"
+              }
+              target="_blank"
+              className="truncate text-sm text-pink-600 transition-colors hover:text-pink-700 max-w-[150px]"
+            >
+              {row.original.blog_post.Title}
+            </Link>
+          ) : (
+            <span className="text-sm text-neutral-500">-</span>
+          )}
         </div>
       ),
     },
@@ -141,6 +175,14 @@ export default function BlogCommentsPage() {
       header: "عملیات",
       cell: ({ row }: { row: { original: BlogComment } }) => (
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setViewComment(row.original)}
+            className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200"
+            title="مشاهده"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
           {row.original.Status !== "Approved" && (
             <button
               type="button"
@@ -180,78 +222,179 @@ export default function BlogCommentsPage() {
   const rejectedCount = comments.filter((c) => c.Status === "Rejected").length;
 
   return (
-    <ContentWrapper title="مدیریت نظرات">
-      {/* Stats */}
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl bg-white p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100">
-              <Clock className="h-5 w-5 text-yellow-600" />
+    <>
+      <ContentWrapper title="مدیریت نظرات">
+        {/* Stats */}
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100">
+                <Clock className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-neutral-900">{pendingCount}</p>
+                <p className="text-sm text-neutral-500">در انتظار تایید</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-semibold text-neutral-900">{pendingCount}</p>
-              <p className="text-sm text-neutral-500">در انتظار تایید</p>
+          </div>
+          <div className="rounded-2xl bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-neutral-900">{approvedCount}</p>
+                <p className="text-sm text-neutral-500">تایید شده</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
+                <XCircle className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-neutral-900">{rejectedCount}</p>
+                <p className="text-sm text-neutral-500">رد شده</p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-white p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-neutral-900">{approvedCount}</p>
-              <p className="text-sm text-neutral-500">تایید شده</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-2xl bg-white p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
-              <XCircle className="h-5 w-5 text-red-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-neutral-900">{rejectedCount}</p>
-              <p className="text-sm text-neutral-500">رد شده</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Filters */}
-      <div className="mb-4 flex flex-col gap-4 rounded-2xl bg-white p-4 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="جستجو در نظرات..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pr-10 pl-4 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-          />
+        {/* Filters */}
+        <div className="mb-4 flex flex-col gap-4 rounded-2xl bg-white p-4 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="جستجو در نظرات..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pl-4 pr-10 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            />
+          </div>
+          <div className="sm:w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            >
+              <option value="all">همه وضعیت‌ها</option>
+              <option value="Pending">در انتظار</option>
+              <option value="Approved">تایید شده</option>
+              <option value="Rejected">رد شده</option>
+            </select>
+          </div>
         </div>
-        <div className="sm:w-48">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-          >
-            <option value="all">همه وضعیت‌ها</option>
-            <option value="Pending">در انتظار</option>
-            <option value="Approved">تایید شده</option>
-            <option value="Rejected">رد شده</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Table */}
-      <div className="rounded-2xl bg-white">
-        <SuperAdminTable
-          data={filteredComments}
-          columns={columns}
-          loading={loading}
-        />
-      </div>
-    </ContentWrapper>
+        {/* Table */}
+        <div className="rounded-2xl bg-white">
+          <SuperAdminTable data={filteredComments} columns={columns} loading={loading} />
+        </div>
+      </ContentWrapper>
+
+      <Modal
+        isOpen={!!viewComment}
+        onClose={() => setViewComment(null)}
+        title="جزئیات نظر"
+        className="max-w-2xl"
+      >
+        {viewComment && (
+          <div className="space-y-4 text-sm text-neutral-700">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-slate-400" />
+              <span className="font-medium text-neutral-900">
+                {resolveBlogCommentUserDisplayName(viewComment.user, viewComment.Name)}
+              </span>
+              {viewComment.user?.email && (
+                <span className="text-xs text-neutral-500">{viewComment.user.email}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-slate-400" />
+              {viewComment.blog_post?.Title ? (
+                <Link
+                  href={viewComment.blog_post.Slug ? `/blog/${viewComment.blog_post.Slug}` : "#"}
+                  target="_blank"
+                  className="text-pink-600 hover:text-pink-700"
+                >
+                  {viewComment.blog_post.Title}
+                </Link>
+              ) : (
+                <span>-</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-slate-400" />
+              <span>{new Date(viewComment.createdAt).toLocaleDateString("fa-IR")}</span>
+            </div>
+            <div>
+              <p className="mb-1 text-xs text-neutral-500">متن نظر</p>
+              <p className="whitespace-pre-wrap text-neutral-800">{viewComment.Content}</p>
+            </div>
+            <div>
+              <p className="mb-1 text-xs text-neutral-500">وضعیت</p>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${statusConfig[viewComment.Status].className}`}
+              >
+                {statusConfig[viewComment.Status].label}
+              </span>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={!!viewComment}
+        onClose={() => setViewComment(null)}
+        title="جزئیات نظر"
+        className="max-w-2xl"
+      >
+        {viewComment && (
+          <div className="space-y-4 text-sm text-neutral-700">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-slate-400" />
+              <span className="font-medium text-neutral-900">
+                {resolveBlogCommentUserDisplayName(viewComment.user, viewComment.Name)}
+              </span>
+              {viewComment.user?.email && (
+                <span className="text-xs text-neutral-500">{viewComment.user.email}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-slate-400" />
+              {viewComment.blog_post?.Title ? (
+                <Link
+                  href={viewComment.blog_post.Slug ? `/blog/${viewComment.blog_post.Slug}` : "#"}
+                  target="_blank"
+                  className="text-pink-600 hover:text-pink-700"
+                >
+                  {viewComment.blog_post.Title}
+                </Link>
+              ) : (
+                <span>-</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-slate-400" />
+              <span>{new Date(viewComment.createdAt).toLocaleDateString("fa-IR")}</span>
+            </div>
+            <div>
+              <p className="mb-1 text-xs text-neutral-500">متن نظر</p>
+              <p className="whitespace-pre-wrap text-neutral-800">{viewComment.Content}</p>
+            </div>
+            <div>
+              <p className="mb-1 text-xs text-neutral-500">وضعیت</p>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${statusConfig[viewComment.Status].className}`}
+              >
+                {statusConfig[viewComment.Status].label}
+              </span>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </>
   );
+
 }

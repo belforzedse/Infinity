@@ -1,427 +1,254 @@
 import React from "react";
 import { Metadata } from "next";
-import { BlogCarousel, BlogCategoryBanner } from "@/components/Blog";
-import { BlogPost, BlogCategory } from "@/services/blog/blog.service";
+import Link from "next/link";
+import { BlogCarousel, BlogCategoryBanner, BlogCard } from "@/components/Blog";
+import { blogService, BlogPost, BlogCategory } from "@/services/blog/blog.service";
 import { generateBlogListingMetadata } from "@/utils/seo";
 
 export const metadata: Metadata = generateBlogListingMetadata();
+export const revalidate = 600;
 
-// Placeholder data for development
-const placeholderPosts: BlogPost[] = [
+const FEATURED_CATEGORY_LIMIT = 4;
+const LATEST_POSTS_LIMIT = 8;
+const CATEGORY_POSTS_LIMIT = 8;
+
+const categoryBannerConfigs: Record<
+  string,
   {
-    id: 1,
-    Title: "لورم ایپسوم به او گفت که چرا تو سلام نمیگویی",
-    Slug: "lorem-ipsum-post-1",
-    Content: "طبق تعریف سازمان ملل متحد، این روز به منظور بزرگداشت حقوق و فرصت‌های برابر برای دختران است. اولین روز جهانی...",
-    Excerpt: "طبق تعریف سازمان ملل متحد، این روز به منظور بزرگداشت حقوق و فرصت‌های برابر برای دختران است. اولین روز جهانی...",
-    FeaturedImage: {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=500&h=300&fit=crop",
-      alternativeText: "Blog post image",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/17",
-    ViewCount: 1250,
-    blog_category: {
-      id: 1,
-      Name: "اینفینیتی",
-      Slug: "infinity",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-17T00:00:00.000Z",
-    updatedAt: "2024-09-17T00:00:00.000Z"
-  },
-  {
-    id: 2,
-    Title: "راهنمای کامل انتخاب رنگ مناسب برای خانه",
-    Slug: "color-guide-home",
-    Content: "انتخاب رنگ مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است...",
-    Excerpt: "انتخاب رنگ مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است...",
-    FeaturedImage: {
-      id: 2,
-      url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop",
-      alternativeText: "Color palette",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/16",
-    ViewCount: 890,
-    blog_category: {
-      id: 2,
-      Name: "مد و پوشاک",
-      Slug: "mod-o-poshak",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-16T00:00:00.000Z",
-    updatedAt: "2024-09-16T00:00:00.000Z"
-  },
-  {
-    id: 3,
-    Title: "نکات مهم برای سلامت پوست در فصل زمستان",
-    Slug: "winter-skin-care",
-    Content: "در فصل زمستان، پوست نیاز به مراقبت‌های ویژه‌ای دارد...",
-    Excerpt: "در فصل زمستان، پوست نیاز به مراقبت‌های ویژه‌ای دارد...",
-    FeaturedImage: {
-      id: 3,
-      url: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&h=300&fit=crop",
-      alternativeText: "Skincare products",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/15",
-    ViewCount: 654,
-    blog_category: {
-      id: 3,
-      Name: "پزشکی و سلامتی",
-      Slug: "pezeshki-va-salamati",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-15T00:00:00.000Z",
-    updatedAt: "2024-09-15T00:00:00.000Z"
-  },
-  {
-    id: 4,
-    Title: "ورزش‌های مناسب برای تقویت سیستم ایمنی بدن",
-    Slug: "exercise-immune-system",
-    Content: "ورزش منظم یکی از بهترین راه‌های تقویت سیستم ایمنی بدن است...",
-    Excerpt: "ورزش منظم یکی از بهترین راه‌های تقویت سیستم ایمنی بدن است...",
-    FeaturedImage: {
-      id: 4,
-      url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop",
-      alternativeText: "Exercise and fitness",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/14",
-    ViewCount: 432,
-    blog_category: {
-      id: 4,
-      Name: "تناسب اندام و تغذیه",
-      Slug: "tanasob-andam-va-taghzieh",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-14T00:00:00.000Z",
-    updatedAt: "2024-09-14T00:00:00.000Z"
-  },
-  {
-    id: 5,
-    Title: "آرایش طبیعی برای روزهای کاری",
-    Slug: "natural-makeup-work",
-    Content: "آرایش طبیعی و ملایم برای محیط کار بسیار مناسب است...",
-    Excerpt: "آرایش طبیعی و ملایم برای محیط کار بسیار مناسب است...",
-    FeaturedImage: {
-      id: 5,
-      url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&h=300&fit=crop",
-      alternativeText: "Natural makeup",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/13",
-    ViewCount: 789,
-    blog_category: {
-      id: 5,
-      Name: "زیبایی و آرایش",
-      Slug: "zibayi-va-arayesh",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-13T00:00:00.000Z",
-    updatedAt: "2024-09-13T00:00:00.000Z"
-  },
-  {
-    id: 6,
-    Title: "تغذیه سالم برای پوست درخشان",
-    Slug: "healthy-diet-glowing-skin",
-    Content: "تغذیه مناسب تأثیر مستقیمی بر سلامت و زیبایی پوست دارد...",
-    Excerpt: "تغذیه مناسب تأثیر مستقیمی بر سلامت و زیبایی پوست دارد...",
-    FeaturedImage: {
-      id: 6,
-      url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&h=300&fit=crop",
-      alternativeText: "Healthy food",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/12",
-    ViewCount: 567,
-    blog_category: {
-      id: 4,
-      Name: "تناسب اندام و تغذیه",
-      Slug: "tanasob-andam-va-taghzieh",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-12T00:00:00.000Z",
-    updatedAt: "2024-09-12T00:00:00.000Z"
-  },
-  {
-    id: 7,
-    Title: "ترکیب رنگ‌ها در لباس‌پوشی",
-    Slug: "color-combination-fashion",
-    Content: "ترکیب صحیح رنگ‌ها در لباس می‌تواند ظاهر شما را متحول کند...",
-    Excerpt: "ترکیب صحیح رنگ‌ها در لباس می‌تواند ظاهر شما را متحول کند...",
-    FeaturedImage: {
-      id: 7,
-      url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&h=300&fit=crop",
-      alternativeText: "Fashion colors",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/11",
-    ViewCount: 923,
-    blog_category: {
-      id: 2,
-      Name: "مد و پوشاک",
-      Slug: "mod-o-poshak",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-11T00:00:00.000Z",
-    updatedAt: "2024-09-11T00:00:00.000Z"
-  },
-  {
-    id: 8,
-    Title: "مراقبت از مو در فصل پاییز",
-    Slug: "autumn-hair-care",
-    Content: "در فصل پاییز، موها نیاز به مراقبت‌های خاصی دارند...",
-    Excerpt: "در فصل پاییز، موها نیاز به مراقبت‌های خاصی دارند...",
-    FeaturedImage: {
-      id: 8,
-      url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&h=300&fit=crop",
-      alternativeText: "Hair care",
-      formats: {
-        medium: { url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&h=300&fit=crop" },
-        small: { url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=200&fit=crop" },
-        thumbnail: { url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=150&h=100&fit=crop" }
-      }
-    },
-    Status: "Published",
-    PublishedAt: "2024/09/10",
-    ViewCount: 445,
-    blog_category: {
-      id: 5,
-      Name: "زیبایی و آرایش",
-      Slug: "zibayi-va-arayesh",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    blog_author: {
-      id: 1,
-      Name: "نویسنده اینفینیتی",
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z"
-    },
-    createdAt: "2024-09-10T00:00:00.000Z",
-    updatedAt: "2024-09-10T00:00:00.000Z"
+    image?: string;
+    textColor?: string;
+    subtitleColor?: string;
+    linkColor?: string;
+    linkText?: string;
+    title?: string;
+    subtitle?: string;
   }
-];
-
-const placeholderCategories: BlogCategory[] = [
-  {
-    id: 1,
-    Name: "مد و پوشاک",
-    Slug: "mod-o-poshak",
-    Description: "آخرین ترندها و نکات استایل",
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z"
+> = {
+  cooking: {
+    image: "/images/blog/Cooking.webp",
+    title: "هنرهای آشپزی",
+    textColor: "text-white",
+    subtitle: "مجله اینفینیتی پر از فوت و فن آشپزیه!",
+    subtitleColor: "text-[#745721]",
+    linkColor: "text-white",
+    linkText: "مقالات آشپزی",
   },
-  {
-    id: 2,
-    Name: "پزشکی و سلامتی",
-    Slug: "pezeshki-va-salamati",
-    Description: "مقالات تخصصی سلامت و بهداشت",
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z"
+  beauty: {
+    image: "/images/blog/Beauty.webp",
+    title: "پوست، مو و زیبایی",
+    textColor: "text-[#EB7A4D]",
+    subtitle: "هرچیزی که نیازه برای مراقب از خودت بدونی!",
+    subtitleColor: "text-[#A3A3A3]",
+    linkColor: "text-[#EB7A4D]",
+    linkText: "مقالات زیبایی",
   },
-  {
-    id: 3,
-    Name: "تناسب اندام و تغذیه",
-    Slug: "tanasob-andam-va-taghzieh",
-    Description: "راهنمای تناسب اندام و تغذیه سالم",
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z"
-  },
-  {
-    id: 4,
-    Name: "زیبایی و آرایش",
-    Slug: "zibayi-va-arayesh",
-    Description: "نکات زیبایی و آرایش حرفه‌ای",
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z"
-  }
-];
-
-// Banner configurations for different categories
-const categoryBannerConfigs: Record<string, {
-  backgroundColor: string;
-  textColor: "light" | "dark";
-  subtitle?: string;
-}> = {
-  "mod-o-poshak": {
-    backgroundColor: "bg-gradient-to-br from-rose-400 to-pink-600",
-    textColor: "light",
-    subtitle: "آخرین ترندها و نکات استایل",
-  },
-  "pezeshki-va-salamati": {
-    backgroundColor: "bg-gradient-to-br from-emerald-400 to-teal-600",
-    textColor: "light",
-    subtitle: "مقالات تخصصی سلامت و بهداشت",
-  },
-  "tanasob-andam-va-taghzieh": {
-    backgroundColor: "bg-gradient-to-br from-amber-400 to-orange-500",
-    textColor: "light",
-    subtitle: "راهنمای تناسب اندام و تغذیه سالم",
-  },
-  "zibayi-va-arayesh": {
-    backgroundColor: "bg-gradient-to-br from-fuchsia-400 to-purple-600",
-    textColor: "light",
-    subtitle: "نکات زیبایی و آرایش حرفه‌ای",
-  },
-  "default": {
-    backgroundColor: "bg-gradient-to-br from-pink-100 to-pink-200",
+  default: {
+    image: "/images/blog/Cooking.webp",
     textColor: "dark",
   },
 };
 
+
 function getBannerConfig(slug: string) {
-  return categoryBannerConfigs[slug] || categoryBannerConfigs["default"];
+  return categoryBannerConfigs[slug] || categoryBannerConfigs.default;
 }
 
-// Filter posts by category
-function getPostsByCategory(categorySlug: string): BlogPost[] {
-  return placeholderPosts.filter(post => post.blog_category?.Slug === categorySlug);
+function hasBannerConfig(slug: string): boolean {
+  return slug in categoryBannerConfigs && slug !== "default";
 }
 
-export default async function BlogPage() {
-  // Use placeholder data instead of API calls
-  const latestPosts = placeholderPosts.slice(0, 8);
-  const categories = placeholderCategories;
+async function fetchLatestPublishedPosts(): Promise<BlogPost[]> {
+  try {
+    const response = await blogService.getBlogPosts({
+      pageSize: LATEST_POSTS_LIMIT,
+      status: "Published",
+      sort: "PublishedAt:desc",
+    });
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching latest blog posts:", error);
+    return [];
+  }
+}
+
+async function fetchFeaturedCategories(limit: number): Promise<BlogCategory[]> {
+  try {
+    const response = await blogService.getBlogCategories();
+    const categories = response.data || [];
+
+    return categories.filter((category) => Boolean(category?.Slug)).slice(0, limit);
+  } catch (error) {
+    console.error("Error fetching blog categories:", error);
+    return [];
+  }
+}
+
+async function fetchPostsForCategories(
+  categories: BlogCategory[]
+): Promise<Record<string, BlogPost[]>> {
+  const postsByCategory = await Promise.all(
+    categories.map(async (category) => {
+      if (!category.Slug) return [];
+
+      try {
+        const response = await blogService.getBlogPosts({
+          pageSize: CATEGORY_POSTS_LIMIT,
+          status: "Published",
+          category: category.Slug,
+          sort: "PublishedAt:desc",
+        });
+
+        return response.data || [];
+      } catch (error) {
+        console.error(`Error fetching posts for category ${category.Slug}:`, error);
+        return [];
+      }
+    })
+  );
+
+  return categories.reduce<Record<string, BlogPost[]>>((acc, category, index) => {
+    if (category.Slug) {
+      acc[category.Slug] = postsByCategory[index] || [];
+    }
+    return acc;
+  }, {});
+}
+
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const categoryFilter = typeof params.category === "string" ? params.category : undefined;
+
+  const [latestPosts, categories] = await Promise.all([
+    fetchLatestPublishedPosts(),
+    fetchFeaturedCategories(FEATURED_CATEGORY_LIMIT),
+  ]);
+
+  let postsByCategory: Record<string, BlogPost[]> =
+    categories.length > 0 ? await fetchPostsForCategories(categories) : {};
+
+  // WORKAROUND: Backend filter not working, so filter on frontend
+  // Group posts by their actual category slugs with deduplication
+  const actualPostsByCategory: Record<string, BlogPost[]> = {};
+  const seenPostIds = new Set<string>();
+
+  Object.entries(postsByCategory).forEach(([_, posts]) => {
+    posts.forEach((post) => {
+      const categorySlug = post.blog_category?.Slug;
+      const postKey = `${categorySlug}-${post.id}`;
+
+      if (categorySlug && !seenPostIds.has(postKey)) {
+        seenPostIds.add(postKey);
+        if (!actualPostsByCategory[categorySlug]) {
+          actualPostsByCategory[categorySlug] = [];
+        }
+        actualPostsByCategory[categorySlug].push(post);
+      }
+    });
+  });
+  postsByCategory = actualPostsByCategory;
+
+  // Split categories: those with banner configs become banners, others become rows
+  // Banners show even without posts, rows only show if they have posts
+  // Pattern: newest blogs → banner (if config exists) → row → banner (if config exists) → row → default banner
+  const bannerCategories = categories.filter((cat) => hasBannerConfig(cat.Slug));
+  const rowCategories = categories.filter((cat) => {
+    if (hasBannerConfig(cat.Slug)) return false; // Already in banners
+    const posts = postsByCategory[cat.Slug] || [];
+    return posts.length > 0; // Only show rows with posts
+  });
+
+  // If category filter is active, fetch and show only that category's posts
+  if (categoryFilter) {
+    const filteredCategory = categories.find(cat => cat.Slug === categoryFilter);
+    const filteredPosts = postsByCategory[categoryFilter] || [];
+    const bannerConfig = getBannerConfig(categoryFilter);
+    const categoryTitle = bannerConfig.title || filteredCategory?.Title || "مقالات";
+
+    return (
+      <div className="min-h-screen bg-slate-50" dir="rtl">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-b from-pink-50 to-slate-50 py-12 md:py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="mb-4 text-3xl font-bold text-neutral-900 md:text-5xl">{categoryTitle}</h1>
+            <p className="mx-auto max-w-2xl text-base text-neutral-600 md:text-lg">
+              {bannerConfig.subtitle || `مقالات دسته‌بندی ${categoryTitle}`}
+            </p>
+          </div>
+        </div>
+
+        {/* Filtered Posts Grid */}
+        <div className="container mx-auto px-4 py-12 pb-20">
+          {filteredPosts.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredPosts.map((post) => (
+                <BlogCard key={post.id} post={post} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-neutral-600">هیچ مقاله‌ای در این دسته‌بندی یافت نشد.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50" dir="rtl">
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-pink-50 to-slate-50 py-12 md:py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="mb-4 text-3xl font-bold text-neutral-900 md:text-5xl">
-            اینفینیتی مگ
-          </h1>
-          <p className="mx-auto max-w-2xl text-base md:text-lg text-neutral-600">
+          <h1 className="mb-4 text-3xl font-bold text-neutral-900 md:text-5xl">اینفینیتی مگ</h1>
+          <p className="mx-auto max-w-2xl text-base text-neutral-600 md:text-lg">
             آخرین مقالات، آموزش‌ها و بینش‌های ما را در زمینه رنگ، طراحی و دکوراسیون کشف کنید
           </p>
         </div>
       </div>
 
       {/* Latest Posts Carousel */}
-      <div className="container mx-auto px-4 py-8">
-        <BlogCarousel
-          posts={latestPosts}
-          title="اینفینیتی مگ"
-          viewAllHref="/blog"
-        />
-      </div>
+      {latestPosts.length > 0 && (
+        <div className="container mx-auto px-4 py-8">
+          <BlogCarousel posts={latestPosts} title="جدید ترین ها" viewAllHref="/blog" />
+        </div>
+      )}
 
-      {/* Category Sections with Banners */}
-      <div className="container mx-auto px-4 space-y-12 pb-16">
-        {categories.map((category, index) => {
-          const bannerConfig = getBannerConfig(category.Slug);
-          const categoryPosts = getPostsByCategory(category.Slug);
+      {/* Alternating Banners and Category Rows */}
+      <div className="container mx-auto space-y-12 px-4 pb-16">
+        {/* Interleave banners and rows */}
+        {Array.from({ length: Math.max(bannerCategories.length, rowCategories.length) }).map((_, index) => {
+          const bannerCategory = bannerCategories[index];
+          const rowCategory = rowCategories[index];
 
           return (
-            <React.Fragment key={category.id}>
-              {/* Category Carousel */}
-              {categoryPosts.length > 0 && (
-                <BlogCarousel
-                  posts={categoryPosts}
-                  title={category.Name}
-                  viewAllHref={`/blog?category=${category.Slug}`}
-                  isCategory
+            <React.Fragment key={`section-${index}`}>
+              {/* Banner */}
+              {bannerCategory && (
+                <BlogCategoryBanner
+                  title={categoryBannerConfigs[bannerCategory.Slug]?.title || bannerCategory.Title || "مقالات بیشتر"}
+                  subtitle={categoryBannerConfigs[bannerCategory.Slug]?.subtitle}
+                  href={`/blog?category=${bannerCategory.Slug}`}
+                  backgroundImage={categoryBannerConfigs[bannerCategory.Slug]?.image}
+                  textColor={categoryBannerConfigs[bannerCategory.Slug]?.textColor}
+                  subtitleColor={categoryBannerConfigs[bannerCategory.Slug]?.subtitleColor}
+                  linkColor={categoryBannerConfigs[bannerCategory.Slug]?.linkColor}
+                  linkText={categoryBannerConfigs[bannerCategory.Slug]?.linkText || "مشاهده دسته بندی"}
+                  height="lg"
                 />
               )}
 
-              {/* Banner after every 2 categories (index 1 and 3) */}
-              {(index === 1) && index < categories.length - 1 && (
-                <BlogCategoryBanner
-                  title={categories[index + 1]?.Name || "مقالات بیشتر"}
-                  subtitle={getBannerConfig(categories[index + 1]?.Slug || "default").subtitle}
-                  href={`/blog?category=${categories[index + 1]?.Slug || ""}`}
-                  backgroundColor={getBannerConfig(categories[index + 1]?.Slug || "default").backgroundColor}
-                  textColor={getBannerConfig(categories[index + 1]?.Slug || "default").textColor}
-                  linkText="مشاهده دسته بندی"
-                  height="sm"
+              {/* Category row */}
+              {rowCategory && postsByCategory[rowCategory.Slug]?.length > 0 && (
+                <BlogCarousel
+                  posts={postsByCategory[rowCategory.Slug]}
+                  title={categoryBannerConfigs[rowCategory.Slug]?.title || rowCategory.Title || "مقالات"}
+                  viewAllHref={`/blog?category=${rowCategory.Slug}`}
+                  isCategory
                 />
               )}
             </React.Fragment>
@@ -433,10 +260,12 @@ export default async function BlogPage() {
           title="همه مقالات اینفینیتی مگ"
           subtitle="تمامی مقالات و محتوای آموزشی ما را مشاهده کنید"
           href="/blog"
-          backgroundColor="bg-gradient-to-br from-neutral-800 to-neutral-900"
-          textColor="light"
+          backgroundImage="/images/blog/default.png"
+          textColor="text-white"
+          subtitleColor="text-slate-500"
+          linkColor="text-white"
           linkText="مشاهده همه مقالات"
-          height="md"
+          height="lg"
         />
       </div>
     </div>

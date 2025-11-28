@@ -100,7 +100,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
               </div>
               <div>
                 <div className="font-medium text-neutral-900">
-                  {resolveBlogCommentUserDisplayName(comment.user)}
+                  {resolveBlogCommentUserDisplayName(comment.user, comment.Name)}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-neutral-500">
                   <Calendar className="h-3.5 w-3.5" />

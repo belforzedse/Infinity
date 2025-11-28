@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
+import Modal from "@/components/Kits/Modal";
 import {
   Search,
   Edit,
@@ -23,7 +24,7 @@ export default function BlogAuthorsPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Add/Edit form state
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ Name: "", Bio: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,7 +104,7 @@ export default function BlogAuthorsPage() {
   const handleEdit = (author: BlogAuthor) => {
     setEditingId(author.id);
     setFormData({ Name: author.Name, Bio: author.Bio || "" });
-    setShowForm(true);
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -121,7 +122,7 @@ export default function BlogAuthorsPage() {
         await blogService.createBlogAuthor(formData);
         toast.success("نویسنده با موفقیت ایجاد شد");
       }
-      setShowForm(false);
+      setIsModalOpen(false);
       setEditingId(null);
       setFormData({ Name: "", Bio: "" });
       fetchAuthors();
@@ -133,10 +134,17 @@ export default function BlogAuthorsPage() {
     }
   };
 
-  const handleCancel = () => {
-    setShowForm(false);
+  const closeModal = () => {
+    if (isSubmitting) return;
+    setIsModalOpen(false);
     setEditingId(null);
     setFormData({ Name: "", Bio: "" });
+  };
+
+  const openCreateModal = () => {
+    setEditingId(null);
+    setFormData({ Name: "", Bio: "" });
+    setIsModalOpen(true);
   };
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -228,81 +236,73 @@ export default function BlogAuthorsPage() {
   return (
     <ContentWrapper
       title="مدیریت نویسندگان"
-      hasAddButton
-      addButtonText="نویسنده جدید"
+      titleSuffixComponent={
+        <button
+          type="button"
+          onClick={openCreateModal}
+          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+        >
+          <Plus className="h-4 w-4" />
+          نویسنده جدید
+        </button>
+      }
     >
-      {/* Add/Edit Form */}
-      {showForm && (
-        <div className="mb-4 rounded-2xl bg-white p-5">
-          <h3 className="mb-4 text-lg font-medium text-neutral-800">
-            {editingId ? "ویرایش نویسنده" : "افزودن نویسنده جدید"}
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                نام نویسنده
-              </label>
-              <input
-                type="text"
-                value={formData.Name}
-                onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
-                placeholder="نام نویسنده را وارد کنید"
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                بیوگرافی
-              </label>
-              <textarea
-                value={formData.Bio}
-                onChange={(e) => setFormData({ ...formData, Bio: e.target.value })}
-                placeholder="بیوگرافی نویسنده (اختیاری)"
-                rows={4}
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-              />
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-              >
-                <X className="h-4 w-4" />
-                انصراف
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <Check className="h-4 w-4" />
-                )}
-                {editingId ? "بروزرسانی" : "ذخیره"}
-              </button>
-            </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingId ? "ویرایش نویسنده" : "افزودن نویسنده جدید"}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
+              نام نویسنده
+            </label>
+            <input
+              type="text"
+              value={formData.Name}
+              onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
+              placeholder="نام نویسنده را وارد کنید"
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
+              بیوگرافی
+            </label>
+            <textarea
+              value={formData.Bio}
+              onChange={(e) => setFormData({ ...formData, Bio: e.target.value })}
+              placeholder="بیوگرافی نویسنده (اختیاری)"
+              rows={4}
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            >
+              <X className="h-4 w-4" />
+              انصراف
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+              {editingId ? "بروزرسانی" : "ذخیره"}
+            </button>
           </div>
         </div>
-      )}
-
-      {/* Add Button (when form is hidden) */}
-      {!showForm && (
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
-          >
-            <Plus className="h-4 w-4" />
-            نویسنده جدید
-          </button>
-        </div>
-      )}
+      </Modal>
 
       {/* Search */}
       <div className="mb-4 rounded-2xl bg-white p-4">

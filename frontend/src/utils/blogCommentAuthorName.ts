@@ -17,7 +17,14 @@ function extractUserInfo(user?: BlogComment["user"]) {
   return candidate;
 }
 
-export function resolveBlogCommentUserDisplayName(user?: BlogComment["user"]): string {
+export function resolveBlogCommentUserDisplayName(
+  user?: BlogComment["user"],
+  fallbackName?: string
+): string {
+  if (fallbackName?.trim()) {
+    return fallbackName.trim();
+  }
+
   if (!user) return "کاربر ناشناس";
 
   const normalizedInfo = extractUserInfo(user);
