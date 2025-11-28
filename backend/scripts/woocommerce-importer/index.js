@@ -13,6 +13,7 @@ const ProductImporter = require('./importers/ProductImporter');
 const VariationImporter = require('./importers/VariationImporter');
 const OrderImporter = require('./importers/OrderImporter');
 const UserImporter = require('./importers/UserImporter');
+const BlogPostImporter = require('./importers/BlogPostImporter');
 const Logger = require('./utils/Logger');
 const config = require('./config');
 
@@ -325,6 +326,36 @@ program
       logger.success('✅ User import completed!');
     } catch (error) {
       logger.error('❌ User import failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('blog-posts')
+  .description('Import blog posts from WordPress (categories, tags, authors handled automatically)')
+  .option('-l, --limit <number>', 'Limit number of posts to import', '50')
+  .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-b, --batch-size <number>', 'Items per page', '20')
+  .option('-s, --status <status>', 'WordPress status to import (publish,draft,future)', 'publish')
+  .option('--after <timestamp>', 'Only import posts created after this ISO date')
+  .option('--dry-run', 'Run without writing to Strapi', false)
+  .action(async (options) => {
+    try {
+      logger.info('📰 Starting blog post import...');
+
+      const importer = new BlogPostImporter(config, logger);
+      await importer.import({
+        limit: parseInt(options.limit),
+        page: parseInt(options.page),
+        batchSize: parseInt(options.batchSize),
+        status: options.status,
+        after: options.after || null,
+        dryRun: options.dryRun,
+      });
+
+      logger.success('✅ Blog post import completed!');
+    } catch (error) {
+      logger.error('❌ Blog post import failed:', error);
       process.exit(1);
     }
   });

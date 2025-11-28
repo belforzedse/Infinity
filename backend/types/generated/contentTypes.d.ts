@@ -376,11 +376,6 @@ export interface ApiBlogAuthorBlogAuthor extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::blog-author.blog-author", "oneToOne", "admin::user"> &
       Attribute.Private;
     Email: Attribute.Email;
-    local_user: Attribute.Relation<
-      "api::blog-author.blog-author",
-      "oneToOne",
-      "api::local-user.local-user"
-    >;
     Name: Attribute.String &
       Attribute.Required &
       Attribute.SetMinMaxLength<{
@@ -389,6 +384,11 @@ export interface ApiBlogAuthorBlogAuthor extends Schema.CollectionType {
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::blog-author.blog-author", "oneToOne", "admin::user"> &
       Attribute.Private;
+    users_permissions_user: Attribute.Relation<
+      "api::blog-author.blog-author",
+      "oneToOne",
+      "plugin::users-permissions.user"
+    >;
   };
 }
 
@@ -417,7 +417,12 @@ export interface ApiBlogCategoryBlogCategory extends Schema.CollectionType {
         maxLength: 500;
       }>;
     FeaturedImage: Attribute.Media<"images">;
-    Slug: Attribute.UID<"api::blog-category.blog-category", "Title"> & Attribute.Required;
+    Slug: Attribute.String &
+      Attribute.Required &
+      Attribute.Unique &
+      Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
     Title: Attribute.String &
       Attribute.Required &
       Attribute.SetMinMaxLength<{
@@ -455,6 +460,10 @@ export interface ApiBlogCommentBlogComment extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::blog-comment.blog-comment", "oneToOne", "admin::user"> &
       Attribute.Private;
     Date: Attribute.DateTime & Attribute.Required;
+    Name: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
     parent_comment: Attribute.Relation<
       "api::blog-comment.blog-comment",
       "manyToOne",
@@ -582,7 +591,12 @@ export interface ApiBlogTagBlogTag extends Schema.CollectionType {
       Attribute.SetMinMaxLength<{
         maxLength: 50;
       }>;
-    Slug: Attribute.UID<"api::blog-tag.blog-tag", "Name"> & Attribute.Required;
+    Slug: Attribute.String &
+      Attribute.Required &
+      Attribute.Unique &
+      Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::blog-tag.blog-tag", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -2389,6 +2403,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
     RatingCount: Attribute.Integer;
     removedAt: Attribute.DateTime;
     ReturnConditions: Attribute.Text;
+    Slug: Attribute.String & Attribute.Unique;
     Status: Attribute.Enumeration<["Active", "InActive"]>;
     Title: Attribute.String & Attribute.Required;
     updatedAt: Attribute.DateTime;

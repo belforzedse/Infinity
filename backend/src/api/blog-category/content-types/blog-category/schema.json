@@ -18,9 +18,10 @@
       "maxLength": 100
     },
     "Slug": {
-      "type": "uid",
-      "targetField": "Title",
-      "required": true
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 150
     },
     "Description": {
       "type": "text",

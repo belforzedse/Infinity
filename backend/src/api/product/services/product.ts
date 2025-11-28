@@ -33,9 +33,11 @@ export default factories.createCoreService(
       };
 
       // Find products matching the search query with pagination
+      // Include Slug field for SEO-friendly URLs
       const [results, total] = await Promise.all([
         strapi.entityService.findMany("api::product.product", {
           filters,
+          fields: ["id", "Title", "Slug", "Description", "Status", "AverageRating", "RatingCount", "createdAt", "updatedAt"],
           populate: {
             CoverImage: true,
             product_main_category: true,
