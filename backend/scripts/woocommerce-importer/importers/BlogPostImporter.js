@@ -33,6 +33,11 @@ class BlogPostImporter {
       startTime: null,
       endTime: null,
     };
+
+    // Base URL for media links (strip trailing /api if present)
+    this.strapiMediaBase = (this.config.strapi.baseUrl || "")
+      .replace(/\/api\/?$/, "")
+      .replace(/\/$/, "");
   }
 
   /**
@@ -140,7 +145,7 @@ class BlogPostImporter {
     const payload = {
       Title: title,
       Slug: slug,
-      Content: wpPost.content?.rendered || excerpt || title,
+      Content: await this.rewriteContentImages(wpPost.content?.rendered || excerpt || title),
       Excerpt: excerpt,
       MetaTitle: this.truncate(title, 60),
       MetaDescription: metaDescription,
@@ -482,8 +487,8 @@ class BlogPostImporter {
     const mapped = this.duplicateTracker.getStrapiId('blogMedia', key);
     if (mapped?.strapiId || typeof mapped === 'number') {
       const strapiId = mapped.strapiId || mapped;
-      this.mediaCache.set(key, strapiId);
-      return strapiId;
+      this.mediaCache.set(key, { id: strapiId, url: mapped?.uploadedUrl });
+      return { id: strapiId, url: mapped?.uploadedUrl };
     }
 
     if (dryRun) {
@@ -499,10 +504,14 @@ class BlogPostImporter {
     );
 
     const uploadedId = this.extractId(uploaded);
+    const uploadedUrl = uploaded?.url || uploaded?.urlPath || null;
     if (uploadedId) {
-      this.mediaCache.set(key, uploadedId);
-      this.duplicateTracker.recordMapping('blogMedia', key, uploadedId, { url: mediaInfo.url });
-      return uploadedId;
+      this.mediaCache.set(key, { id: uploadedId, url: uploadedUrl });
+      this.duplicateTracker.recordMapping('blogMedia', key, uploadedId, {
+        url: mediaInfo.url,
+        uploadedUrl,
+      });
+      return { id: uploadedId, url: uploadedUrl };
     }
 
     return null;
@@ -635,6 +644,70 @@ class BlogPostImporter {
     if (mediaInfo.id) return `wp-media:${mediaInfo.id}`;
     if (mediaInfo.url) return `url:${mediaInfo.url}`;
     return fallback || null;
+  }
+
+  /**
+   * Rewrite image URLs in post content by uploading them to Strapi and replacing src attributes.
+   */
+  async rewriteContentImages(html) {
+    if (!html || typeof html !== "string") {
+      return html;
+    }
+
+    const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+    const sources = new Set();
+    let match;
+    while ((match = imgRegex.exec(html)) !== null) {
+      if (match[1]) {
+        sources.add(match[1]);
+      }
+    }
+
+    if (sources.size === 0) {
+      return html;
+    }
+
+    let rewritten = html;
+    for (const src of sources) {
+      try {
+        const cacheKey = this.buildMediaMappingKey({ url: src }) || `url:${src}`;
+        let uploaded = this.mediaCache.get(cacheKey);
+
+        if (!uploaded) {
+          const mapped = this.duplicateTracker.getStrapiId("blogMedia", cacheKey);
+          if (mapped?.strapiId || typeof mapped === "number") {
+            uploaded = { id: mapped.strapiId || mapped, url: mapped?.uploadedUrl };
+            this.mediaCache.set(cacheKey, uploaded);
+          }
+        }
+
+        if (!uploaded) {
+          uploaded = await this.ensureMediaUpload({ url: src, alt: "Content image" }, cacheKey, false);
+        }
+
+        const newUrl = this.normalizeMediaUrl(uploaded?.url);
+        if (uploaded?.id && newUrl) {
+          const escaped = src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const srcRegex = new RegExp(escaped, "g");
+          rewritten = rewritten.replace(srcRegex, newUrl);
+        }
+      } catch (error) {
+        this.logger.warn(`⚠️ Failed to rewrite image ${src}: ${error.message}`);
+      }
+    }
+
+    return rewritten;
+  }
+
+  normalizeMediaUrl(url) {
+    if (!url) return null;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    if (url.startsWith("/")) {
+      return `${this.strapiMediaBase}${url}`;
+    }
+    return `${this.strapiMediaBase}/${url}`;
   }
 
   extractId(entry) {

@@ -243,27 +243,17 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     return { data: post };
   },
 
-  // Create post (Editor+ only)
+  // Create post (Editor+ or API token)
   async create(ctx: any) {
     const { user } = ctx.state;
 
-    const actorRoleName = await this.getActorRoleName(user?.id, user);
-    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
-      return ctx.forbidden("You don't have permission to create blog posts");
+    // Allow API tokens (no user) or users with proper roles
+    if (user) {
+      const actorRoleName = await this.getActorRoleName(user?.id, user);
+      if (!roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
+        return ctx.forbidden("You don't have permission to create blog posts");
+      }
     }
-
-    // Fetch user with user_info populated
-    const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", user.id, {
-      populate: {
-        user_info: "*",
-        role: true,
-      },
-    });
-
-    if (!fullUser) {
-      return ctx.forbidden("User not found");
-    }
-
 
     const { data } = ctx.request.body;
 
@@ -280,11 +270,21 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
       return ctx.badRequest("Title is required to generate slug");
     }
 
-    // Set author automatically if not provided
-    if (!data.blog_author) {
-      const author = await (this as any).getOrCreateAuthorForUser(fullUser);
-      if (author) {
-        data.blog_author = author.id;
+    // Set author automatically if not provided and user exists
+    if (!data.blog_author && user) {
+      // Fetch user with user_info populated
+      const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", user.id, {
+        populate: {
+          user_info: "*",
+          role: true,
+        },
+      });
+
+      if (fullUser) {
+        const author = await (this as any).getOrCreateAuthorForUser(fullUser);
+        if (author) {
+          data.blog_author = author.id;
+        }
       }
     }
 
@@ -301,26 +301,17 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     return { data: post };
   },
 
-  // Update post (Editor+ only)
+  // Update post (Editor+ or API token)
   async update(ctx: any) {
     const { user } = ctx.state;
     const { id } = ctx.params;
 
-    const actorRoleName = await this.getActorRoleName(user?.id, user);
-    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
-      return ctx.forbidden("You don't have permission to update blog posts");
-    }
-
-    // Fetch user with user_info populated
-    const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", user.id, {
-      populate: {
-        user_info: "*",
-        role: true,
-      },
-    });
-
-    if (!fullUser) {
-      return ctx.forbidden("User not found");
+    // Allow API tokens (no user) or users with proper roles
+    if (user) {
+      const actorRoleName = await this.getActorRoleName(user?.id, user);
+      if (!roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
+        return ctx.forbidden("You don't have permission to update blog posts");
+      }
     }
 
     const { data } = ctx.request.body;
@@ -338,11 +329,21 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
       data.PublishedAt = new Date();
     }
 
-    // Auto-assign author if missing
-    if (!data.blog_author) {
-      const author = await (this as any).getOrCreateAuthorForUser(fullUser);
-      if (author) {
-        data.blog_author = author.id;
+    // Auto-assign author if missing and user exists
+    if (!data.blog_author && user) {
+      // Fetch user with user_info populated
+      const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", user.id, {
+        populate: {
+          user_info: "*",
+          role: true,
+        },
+      });
+
+      if (fullUser) {
+        const author = await (this as any).getOrCreateAuthorForUser(fullUser);
+        if (author) {
+          data.blog_author = author.id;
+        }
       }
     }
 
