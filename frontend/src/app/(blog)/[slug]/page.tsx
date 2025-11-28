@@ -11,8 +11,10 @@ import { User, FolderOpen, Tag } from "lucide-react";
 import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 import logger from "@/utils/logger";
 
-// Use ISR with 10-minute revalidation for better SEO and performance
-export const revalidate = 600; // 10 minutes
+// Use on-demand revalidation (triggered by Strapi lifecycle hooks)
+// Fallback to 1 hour if revalidation API is not called
+// This ensures pages stay fresh even if webhook fails
+export const revalidate = 3600; // 1 hour fallback (on-demand is primary)
 
 interface BlogPostPageProps {
   params: Promise<{
