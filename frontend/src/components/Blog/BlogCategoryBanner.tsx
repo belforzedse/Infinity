@@ -5,7 +5,6 @@
   import Image from "next/image";
   import { ArrowLeft } from "lucide-react";
   import imageLoader from "@/utils/imageLoader";
-  import { link } from "fs";
 
   interface BlogCategoryBannerProps {
     title: string;
