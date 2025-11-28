@@ -5,12 +5,12 @@ export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "اینفینیتی استور",
+    name: "فروشگاه اینفینیتی",
     alternateName: "Infinity Store",
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${IMAGE_BASE_URL}/uploads/logo_5a5e2f8a4d.png`,
+      url: `${SITE_URL}/images/logo.png`,
       width: 400,
       height: 400,
     },
@@ -19,8 +19,8 @@ export function OrganizationSchema() {
     address: {
       "@type": "PostalAddress",
       addressCountry: "IR",
-      addressLocality: "تهران",
-      addressRegion: "تهران",
+      addressLocality: "گرگام",
+      addressRegion: "گلستان",
     },
     sameAs: [
       "https://www.instagram.com/infinitycolor",
