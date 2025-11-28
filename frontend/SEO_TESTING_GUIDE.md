@@ -309,3 +309,4 @@ curl http://localhost:2888/pdp/[slug] | grep -i "application/ld+json"
 - **Check console errors**: Make sure there are no JavaScript errors that might break SEO components
 
 
+

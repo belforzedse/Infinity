@@ -36,3 +36,4 @@ export function FAQSchema({ faqs }: FAQSchemaProps) {
 }
 
 
+

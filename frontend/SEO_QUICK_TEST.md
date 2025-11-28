@@ -111,3 +111,4 @@ document.querySelectorAll('script[type="application/ld+json"]').forEach((script,
 
 For comprehensive testing, see: `frontend/SEO_TESTING_GUIDE.md`
 
+
