@@ -20,9 +20,10 @@
 const BATCH_SIZE = 50;
 
 /**
- * Import the central Unicode slug utility to ensure consistent slug behavior
- * This replaces the local implementation to avoid divergence
- * Uses the same implementation as src/utils/unicodeSlug.ts
+ * Create a URL-friendly slug from text while preserving Persian/Arabic characters.
+ * @param {string|any} text - Source text to convert into a slug; falsy values produce a fallback slug.
+ * @param {string} [fallbackPrefix='product'] - Prefix used when generating a fallback slug.
+ * @returns {string} The generated slug containing ASCII letters/numbers, Persian/Arabic characters (U+0600–U+06FF), and hyphens; if the result would be empty, returns a fallback of the form `<fallbackPrefix>-<timestamp>`.
  */
 function generateUnicodeSlug(text, fallbackPrefix = 'product') {
   // Import the central utility from src/utils/unicodeSlug.ts
@@ -69,7 +70,11 @@ function generateUnicodeSlug(text, fallbackPrefix = 'product') {
 }
 
 /**
- * Check if a slug is already in use
+ * Determine whether a given slug is unused by other products.
+ *
+ * @param {string} slug - The slug to check for availability.
+ * @param {number|string|null} [excludeId=null] - Optional product id to exclude from the check.
+ * @returns {boolean} `true` if the slug is not used by any other product, `false` otherwise.
  */
 async function isSlugAvailable(strapi, slug, excludeId = null) {
   const filters = { Slug: slug };
@@ -86,7 +91,12 @@ async function isSlugAvailable(strapi, slug, excludeId = null) {
 }
 
 /**
- * Generate a unique slug for a product
+ * Produce a unique, Unicode-friendly slug from a product title, retrying with numeric suffixes until an unused slug is found.
+ *
+ * If more than 1000 numeric attempts are required, appends the current timestamp to the base slug as a fallback.
+ * @param {string} title - Product title to base the slug on.
+ * @param {(string|number|null)} productId - ID of the product to exclude from uniqueness checks.
+ * @returns {string} The first available slug.
  */
 async function generateUniqueSlug(strapi, title, productId) {
   const baseSlug = generateUnicodeSlug(title);
@@ -108,7 +118,14 @@ async function generateUniqueSlug(strapi, title, productId) {
 }
 
 /**
- * Main migration function
+ * Generate and assign unique, Unicode-friendly slugs to all products that lack a slug.
+ *
+ * Processes products in batches, skipping items that already have a non-empty slug,
+ * generates a unique slug (preserving Persian/Arabic characters), updates the product,
+ * and accumulates migration statistics.
+ *
+ * @returns {Object} An object with aggregated counts: `total` (processed), `updated` (slugs created), `skipped` (already had slugs), and `errors` (failed updates).
+ * @throws {Error} If the migration fails due to an unexpected error.
  */
 async function migrateProductSlugs() {
   // Check if running in Strapi context
@@ -247,6 +264,5 @@ if (require.main === module) {
 ╚════════════════════════════════════════════════════════════════╝
   `);
 }
-
 
 
