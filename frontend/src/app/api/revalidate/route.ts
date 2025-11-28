@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     // Hardcoded secret for now (TODO: move to environment variable)
     const secret = "REVALIDATION_SECRET";
-    
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Missing or invalid authorization header" },
