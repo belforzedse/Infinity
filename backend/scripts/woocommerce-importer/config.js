@@ -91,7 +91,7 @@ module.exports = {
         baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
         token:
           process.env.STRAPI_IMPORT_LOCAL_TOKEN ||
-          "5c0aa793d1e26338f3e15077d4ed0fb0ffadcaa73b2c7858496c1c8f267aba9037051140daee80919893b7964840d1c172697101d901d832b9ad7585450d2de3933399d70985f0655f3bc47017d5f9acb83f4674bef922a6eeac4899492d59c93be492277f86c6a9c7cb50dc562dfc6e107832606d9e5ae810ec5415c1714a8c",
+          "STRAPI_API_TOKEN_LOCAL",
       },
     },
     endpoints: {

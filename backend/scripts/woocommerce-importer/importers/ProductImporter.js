@@ -637,8 +637,12 @@ class ProductImporter {
       throw new Error(`Product ${wcProduct.id}: Missing product name/title`);
     }
 
+    // Generate slug from WooCommerce slug or title
+    const slug = this.generateProductSlug(wcProduct);
+
     const strapiProduct = {
       Title: wcProduct.name.trim(),
+      Slug: slug,
       Description: this.cleanHtmlContent(wcProduct.description),
       Status: this.mapProductStatus(wcProduct.status),
       AverageRating: wcProduct.average_rating ? parseFloat(wcProduct.average_rating) : null,
@@ -810,6 +814,101 @@ class ProductImporter {
   mapProductStatus(wcStatus) {
     const mapping = this.config.import.statusMappings.product;
     return mapping[wcStatus] || this.config.import.defaults.productStatus;
+  }
+
+  /**
+   * Generate a product slug from WooCommerce data
+   * Supports Persian/Unicode slugs
+   * @param {Object} wcProduct - WooCommerce product object
+   * @returns {string} - Generated slug
+   */
+  generateProductSlug(wcProduct) {
+    // First, try to use the WooCommerce slug if available
+    if (wcProduct.slug && wcProduct.slug.trim()) {
+      // Decode URL-encoded Persian slugs
+      let slug = wcProduct.slug;
+      try {
+        slug = decodeURIComponent(slug);
+      } catch (e) {
+        // If decoding fails, use as-is
+      }
+      
+      // Clean and normalize the slug
+      const cleanedSlug = this.cleanSlug(slug);
+      if (cleanedSlug) {
+        return cleanedSlug;
+      }
+    }
+
+    // Fallback: generate slug from product name
+    if (wcProduct.name && wcProduct.name.trim()) {
+      const generatedSlug = this.generateSlugFromTitle(wcProduct.name);
+      return generatedSlug;
+    }
+
+    // Last resort: use WooCommerce ID
+    return `product-${wcProduct.id}`;
+  }
+
+  /**
+   * Generate a slug from a product title
+   * Supports Persian/Arabic characters
+   * @param {string} title - Product title
+   * @returns {string} - Generated slug
+   */
+  generateSlugFromTitle(title) {
+    if (!title) {
+      return `product-${Date.now()}`;
+    }
+
+    // First, replace spaces and ZWNJ with hyphens
+    let slug = title
+      .toString()
+      .trim()
+      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+    // Lowercase only ASCII letters (a-z), preserve Persian characters
+    slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+    // Collapse multiple hyphens
+    slug = slug.replace(/-+/g, '-');
+
+    // Trim leading/trailing hyphens
+    slug = slug.replace(/^-|-$/g, '');
+
+    return slug || `product-${Date.now()}`;
+  }
+
+  /**
+   * Clean and normalize a slug
+   * @param {string} slug - Raw slug
+   * @returns {string} - Cleaned slug
+   */
+  cleanSlug(slug) {
+    if (!slug) return '';
+
+    // First, replace spaces and ZWNJ with hyphens
+    let cleaned = slug
+      .toString()
+      .trim()
+      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+    // Lowercase only ASCII letters (a-z), preserve Persian characters
+    cleaned = cleaned.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+    // Collapse multiple hyphens
+    cleaned = cleaned.replace(/-+/g, '-');
+
+    // Trim leading/trailing hyphens
+    cleaned = cleaned.replace(/^-|-$/g, '');
+
+    return cleaned;
   }
 
   /**

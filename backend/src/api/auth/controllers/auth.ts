@@ -177,7 +177,11 @@ async function self(ctx) {
 
     // Determine administrative flag based on plugin role name
     const roleName = fullUser?.role?.name;
-    const isAdmin = roleName === "Superadmin" || roleName === "Store manager";
+    const normalizedRoleName = roleName?.toLowerCase().trim();
+    const isAdmin =
+      normalizedRoleName === "superadmin" ||
+      normalizedRoleName === "store manager" ||
+      normalizedRoleName === "editor";
 
     // Load profile from local-user-info which now points to plugin user
     const localUserInfo = await strapi.db

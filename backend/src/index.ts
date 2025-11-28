@@ -17,6 +17,7 @@ type GranularSpec = {
 type RolePermissionSpec = FullAccessSpec | GranularSpec;
 
 const READ_ACTIONS = ["find", "findOne"] as const;
+const CRUD_ACTIONS = ["find", "findOne", "create", "update", "delete"] as const;
 
 const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
   public: {
@@ -90,6 +91,21 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::wallet-topup": {
         "wallet-topup": ["paymentCallback"],
       },
+      "api::blog-post": {
+        "blog-post": READ_ACTIONS,
+      },
+      "api::blog-category": {
+        "blog-category": READ_ACTIONS,
+      },
+      "api::blog-tag": {
+        "blog-tag": READ_ACTIONS,
+      },
+      "api::blog-author": {
+        "blog-author": READ_ACTIONS,
+      },
+      "api::blog-comment": {
+        "blog-comment": READ_ACTIONS,
+      },
     },
   },
   customer: {
@@ -144,6 +160,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       },
     },
   },
+  editor: {
+    mode: "all",
+  },
   "store-manager": { mode: "all" },
   superadmin: { mode: "all" },
 };
@@ -174,7 +193,12 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::admin-activity", controller: "admin-activity", allowActions: [] },
   // Restrict user activity - store managers cannot view other users' activities
   { typeKey: "api::user-activity", controller: "user-activity", allowActions: [] },
-
+  // Restrict blog management - store managers can only read blog posts (like normal users)
+  { typeKey: "api::blog-post", controller: "blog-post", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-category", controller: "blog-category", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-tag", controller: "blog-tag", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-author", controller: "blog-author", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-comment", controller: "blog-comment", allowActions: READ_ACTIONS },
 ];
 
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
@@ -270,6 +294,18 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
     const tree = usersPermissionsService.getActions({ defaultEnable: true });
     if (roleType === "store-manager") {
       applyRestrictedControllers(tree, STORE_MANAGER_RESTRICTED_CONTROLLERS, strapi);
+    } else if (roleType === "editor") {
+      // Editors get store-manager restrictions EXCEPT blog restrictions (they need full CRUD for blog)
+      const editorRestrictions = STORE_MANAGER_RESTRICTED_CONTROLLERS.filter(
+        (restriction) =>
+          !restriction.typeKey.startsWith("api::blog-") &&
+          restriction.typeKey !== "api::blog-post" &&
+          restriction.typeKey !== "api::blog-category" &&
+          restriction.typeKey !== "api::blog-tag" &&
+          restriction.typeKey !== "api::blog-author" &&
+          restriction.typeKey !== "api::blog-comment"
+      );
+      applyRestrictedControllers(tree, editorRestrictions, strapi);
     }
     return tree;
   }
@@ -490,6 +526,11 @@ export default {
             name: "Store manager",
             description: "Manage store and orders, cannot manage user wallets",
             type: "store-manager",
+          },
+          {
+            name: "Editor",
+            description: "Blog content editor - can manage blog posts, categories, tags, authors, and comments",
+            type: "editor",
           },
           { name: "Customer", description: "End customer role", type: "customer" },
         ];
