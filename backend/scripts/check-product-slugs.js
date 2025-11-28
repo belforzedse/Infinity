@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Script to check product slugs and verify migration status
- * 
- * Usage:
- *   node scripts/check-product-slugs.js [productId]
- * 
- * If productId is provided, checks that specific product.
- * Otherwise, shows statistics about all products.
+ * Check product slug migration status for a single product or for all products and print results to the console.
+ *
+ * When `productId` is provided, prints details for that product (including slug presence and removed status); when omitted, prints aggregate statistics for all products and lists up to 10 products missing slugs.
+ * @param {string|null} productId - Optional product ID to inspect; when omitted, runs statistics for all products.
  */
 
 async function checkProductSlugs(productId = null) {
@@ -106,4 +103,3 @@ checkProductSlugs(productId)
     console.error("\n❌ Check failed:", error);
     process.exit(1);
   });
-

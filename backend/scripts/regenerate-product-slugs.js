@@ -17,6 +17,11 @@
 
 const strapi = require("@strapi/strapi");
 
+/**
+ * Regenerates product Slug values (with Persian character support) for all active products in Strapi.
+ *
+ * Iterates active products (removedAt is null), generates unique slugs, updates the product Slug when it differs from the existing value, and logs counts of updated, skipped, and errored items. Ensures the Strapi instance is destroyed and rethrows any top-level errors.
+ */
 async function regenerateProductSlugs() {
   const instance = await strapi({
     distDir: "./dist",
@@ -113,5 +118,4 @@ if (require.main === module) {
 
 // Export for use in Strapi console
 module.exports = regenerateProductSlugs;
-
 

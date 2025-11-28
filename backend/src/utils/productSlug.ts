@@ -61,9 +61,12 @@ const RESERVED_ROUTES = [
 ];
 
 /**
- * Validates if a slug is allowed for products
- * @param slug - The slug to validate
- * @returns true if valid, false if conflicts with reserved routes
+ * Determine whether a product slug is allowed.
+ *
+ * Checks that the provided slug is a non-empty string that does not collide with reserved routes or commonly conflicting patterns (API paths, Next.js internals/hidden files, admin prefixes, or common file extensions).
+ *
+ * @param slug - The slug to check
+ * @returns `true` if the slug is allowed for products, `false` otherwise
  */
 export function isValidProductSlug(slug: string): boolean {
   if (!slug || typeof slug !== "string") {
@@ -98,11 +101,11 @@ export function isValidProductSlug(slug: string): boolean {
 }
 
 /**
- * Checks if a slug is already in use by another product
- * @param strapi - Strapi instance
- * @param slug - The slug to check
- * @param excludeId - Optional ID to exclude from the check (for updates)
- * @returns true if slug is available, false if already in use
+ * Determines whether a product slug is unused in the database.
+ *
+ * @param slug - The slug to check for conflicts
+ * @param excludeId - Optional product ID to exclude from the check (commonly used when updating)
+ * @returns `true` if no other product uses `slug`, `false` otherwise
  */
 export async function isProductSlugAvailable(
   strapi: Strapi,
@@ -130,11 +133,11 @@ export async function isProductSlugAvailable(
 }
 
 /**
- * Validates a product slug completely
- * @param strapi - Strapi instance
- * @param slug - The slug to validate
- * @param excludeId - Optional ID to exclude from the check (for updates)
- * @returns object with validation result and error message if invalid
+ * Validate a product slug for allowed format and uniqueness.
+ *
+ * @param slug - The slug string to validate
+ * @param excludeId - Optional product ID to exclude from the uniqueness check (useful when updating that product)
+ * @returns An object with `isValid: true` when the slug is allowed and not in use; otherwise `isValid: false` and `error` with a brief reason
  */
 export async function validateProductSlug(
   strapi: Strapi,
@@ -162,12 +165,16 @@ export async function validateProductSlug(
 }
 
 /**
- * Generates a unique slug from a product title
- * Uses Persian-compatible slug generation
- * @param strapi - Strapi instance
- * @param title - The title to generate slug from
- * @param excludeId - Optional ID to exclude from uniqueness check
- * @returns a unique slug
+ * Produce a unique, Persian-friendly product slug derived from a title.
+ *
+ * Attempts to generate a product-safe slug from `title`, ensures it does not
+ * conflict with reserved routes or existing products, and appends a numeric
+ * suffix when necessary; falls back to a timestamp-based slug if generation
+ * or repeated collisions prevent a stable unique value.
+ *
+ * @param title - The product title to derive the slug from
+ * @param excludeId - Optional product ID to exclude from uniqueness checks (useful when updating)
+ * @returns A product-valid slug string that is not used by any other product
  */
 export async function generateUniqueProductSlug(
   strapi: Strapi,
@@ -199,6 +206,5 @@ export async function generateUniqueProductSlug(
 
   return slug;
 }
-
 
 

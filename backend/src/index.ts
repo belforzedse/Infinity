@@ -201,6 +201,12 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::blog-comment", controller: "blog-comment", allowActions: READ_ACTIONS },
 ];
 
+/**
+ * Determines whether a role permission spec grants all permissions.
+ *
+ * @param spec - The role permission spec to check
+ * @returns `true` if the spec's mode equals `"all"`, `false` otherwise
+ */
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
   return spec.mode === "all";
 }
@@ -282,6 +288,12 @@ function applySpecRecursive(
   });
 }
 
+/**
+ * Builds the default permissions action tree for the given role type.
+ *
+ * @param roleType - The role type key (for example: "public", "customer", "store-manager", "editor", "superadmin")
+ * @returns A permissions tree object mapping content types and controllers to their action permission flags, configured according to the role's permission spec; if no spec exists for `roleType`, returns a tree with all actions disabled by default. 
+ */
 function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string, any> {
   const usersPermissionsService = strapi.plugin("users-permissions").service("users-permissions");
   const spec = ROLE_PERMISSION_SPECS[roleType];
