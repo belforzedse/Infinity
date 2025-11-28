@@ -255,6 +255,57 @@ class BlogService {
     return this.normalizeTagReference(entry);
   }
 
+  private normalizeBlogAuthor(entry: any): BlogAuthor | undefined {
+    if (!entry) return undefined;
+    const relation = this.unwrapRelation(entry);
+    const source = relation?.attributes || relation || entry?.attributes || entry;
+    if (!source) return undefined;
+
+    // Unwrap users_permissions_user relation if present
+    const userRelation = source.users_permissions_user;
+    const unwrappedUser = userRelation?.data
+      ? { id: userRelation.data.id, ...(userRelation.data.attributes || {}) }
+      : userRelation;
+
+    // Unwrap Avatar relation if present
+    const avatarRelation = source.Avatar;
+    const unwrappedAvatar = avatarRelation?.data
+      ? {
+          id: avatarRelation.data.id,
+          url: avatarRelation.data.attributes?.url || avatarRelation.data.url,
+          alternativeText: avatarRelation.data.attributes?.alternativeText || avatarRelation.data.alternativeText,
+        }
+      : avatarRelation
+        ? {
+            id: avatarRelation.id,
+            url: avatarRelation.url || avatarRelation.attributes?.url,
+            alternativeText: avatarRelation.alternativeText || avatarRelation.attributes?.alternativeText,
+          }
+        : undefined;
+
+    // Extract name - prefer ResolvedName or ResolvedAuthorName, fallback to Name
+    const normalizedName = source.ResolvedName || source.ResolvedAuthorName || source.Name || source.name || "";
+
+    return {
+      id: source.id ?? entry.id ?? relation?.id,
+      Name: normalizedName,
+      Bio: source.Bio || source.bio,
+      Email: source.Email || source.email || unwrappedUser?.email,
+      Avatar: unwrappedAvatar,
+      users_permissions_user: unwrappedUser
+        ? {
+            id: unwrappedUser.id,
+            username: unwrappedUser.username,
+            email: unwrappedUser.email,
+          }
+        : undefined,
+      ResolvedName: source.ResolvedName,
+      ResolvedAuthorName: source.ResolvedAuthorName,
+      createdAt: source.createdAt,
+      updatedAt: source.updatedAt,
+    };
+  }
+
 
   private createShortContent(html: string, maxLength: number = 140): string {
   if (!html) return "";
@@ -711,6 +762,7 @@ class BlogService {
     const searchParams = new URLSearchParams();
     searchParams.append("sort", "Name:asc");
     searchParams.append("populate[Avatar]", "*");
+    searchParams.append("populate[users_permissions_user]", "*");
     searchParams.append("pagination[pageSize]", "100");
 
     const response = await fetch(`${this.getBaseUrl()}/blog-authors?${searchParams}`, {
@@ -721,7 +773,15 @@ class BlogService {
       throw new Error("Failed to fetch blog authors");
     }
 
-    return response.json();
+    const json = await response.json();
+    const normalizedData = Array.isArray(json.data)
+      ? json.data.map((item: any) => this.normalizeBlogAuthor(item)).filter(Boolean)
+      : [];
+
+    return {
+      data: normalizedData as BlogAuthor[],
+      meta: json.meta,
+    };
   }
 
   // Create blog author (authenticated)
@@ -737,7 +797,11 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to create blog author");
     }
 
-    return response.json();
+    const json = await response.json();
+    return {
+      data: this.normalizeBlogAuthor(json.data) as BlogAuthor,
+      meta: json.meta,
+    };
   }
 
   // Update blog author (authenticated)
@@ -753,7 +817,11 @@ class BlogService {
       throw new Error(error.error?.message || "Failed to update blog author");
     }
 
-    return response.json();
+    const json = await response.json();
+    return {
+      data: this.normalizeBlogAuthor(json.data) as BlogAuthor,
+      meta: json.meta,
+    };
   }
 
   // Delete blog author (authenticated)

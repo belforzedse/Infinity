@@ -6,11 +6,26 @@ import { Metadata } from 'next';
  */
 function sanitizeForJSONLD(value: string | undefined | null): string | undefined {
   if (!value) return undefined;
-  
+
   return String(value)
     .replace(/<\/script>/gi, '<\\/script>') // Escape closing script tags
     .replace(/</g, '\\u003C') // Escape opening angle brackets
     .replace(/>/g, '\\u003E'); // Escape closing angle brackets
+}
+
+/**
+ * Safely escapes JSON-LD for injection into dangerouslySetInnerHTML
+ * Prevents script termination and line separator issues
+ * @param json - The JSON object to stringify and escape
+ * @returns Safe string for use in __html
+ */
+export function safeJsonLd(json: object): string {
+  const stringified = JSON.stringify(json);
+  return stringified
+    .replace(/</g, '\\u003C') // Escape < to prevent script tag injection
+    .replace(/>/g, '\\u003E') // Escape > to prevent script tag injection
+    .replace(/\u2028/g, '\\u2028') // Escape line separator
+    .replace(/\u2029/g, '\\u2029'); // Escape paragraph separator
 }
 
 /**
@@ -20,13 +35,13 @@ function sanitizeForJSONLD(value: string | undefined | null): string | undefined
 function buildImageUrl(imagePath: string, config: SEOConfig): string {
   // Use IMAGE_BASE_URL if available, otherwise fallback to siteUrl
   const baseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || config.siteUrl;
-  
+
   // Remove trailing slash from base URL
   const cleanBase = baseUrl.replace(/\/$/, '');
-  
+
   // Ensure image path starts with a slash
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-  
+
   return `${cleanBase}${cleanPath}`;
 }
 

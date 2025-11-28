@@ -91,11 +91,18 @@ export default function BlogCommentsPage() {
   };
 
   const normalizedSearch = searchTerm.toLowerCase();
-  const filteredComments = comments.filter((comment) =>
-    comment.Content.toLowerCase().includes(normalizedSearch) ||
-    comment.Name?.toLowerCase().includes(normalizedSearch) ||
-    comment.user?.username?.toLowerCase().includes(normalizedSearch)
-  );
+  const filteredComments = comments.filter((comment) => {
+    // Normalize each field to safe string before calling string methods
+    const normalizedContent = (comment.Content || "").toLowerCase();
+    const normalizedName = (comment.Name || "").toLowerCase();
+    const normalizedUsername = (comment.user?.username || "").toLowerCase();
+    
+    return (
+      normalizedContent.includes(normalizedSearch) ||
+      normalizedName.includes(normalizedSearch) ||
+      normalizedUsername.includes(normalizedSearch)
+    );
+  });
 
   const columns = [
     {

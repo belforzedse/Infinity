@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 import {
   Calendar,
   User,
@@ -52,9 +52,16 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
         console.log("Error sharing:", err);
       }
     } else {
-      // Fallback: copy to clipboard
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("لینک کپی شد!");
+      // Fallback: copy to clipboard with error handling
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("لینک کپی شد!");
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
+        toast.error("خطا در کپی لینک. لطفاً به صورت دستی کپی کنید.");
+        // Fallback: show prompt for manual copy
+        window.prompt("لینک را کپی کنید:", window.location.href);
+      }
     }
   };
 
@@ -156,9 +163,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
           <div
             className="prose prose-md prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-3xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
             dangerouslySetInnerHTML={{ 
-              __html: typeof window !== "undefined" 
-                ? DOMPurify.sanitize(post.Content) 
-                : post.Content 
+              __html: DOMPurify.sanitize(post.Content)
             }}
             dir="rtl"
           />

@@ -1,4 +1,5 @@
 import type { ProductReview } from "@/components/PDP/Comment/List";
+import { safeJsonLd } from "@/utils/seo";
 
 interface ReviewSchemaProps {
   productName: string;
@@ -78,7 +79,7 @@ export function ReviewSchema({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 }

@@ -17,7 +17,6 @@ import { ReviewSchema } from "@/components/SEO/ReviewSchema";
 import type {
   ProductDetail} from "@/services/product/product";
 import {
-  getProductById,
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
@@ -416,17 +415,133 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     });
 
     // Try ID fallback if slug looks like a number
+    // Use server-safe fetch instead of getProductById (which uses apiClient with localStorage)
     const isNumericSlug = /^\d+$/.test(decodedSlug);
     if (isNumericSlug && !productData) {
       logger.info("[PDP] Attempting ID-based fallback", { decodedSlug });
       try {
-        const response = await getProductById(decodedSlug);
-        if (response.data) {
-          productData = response.data;
+        // Server-safe fetch with same populate parameters as getProductById
+        const fallbackEndpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${decodedSlug}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies`;
+        const fallbackUrl = `${API_BASE_URL}${fallbackEndpoint}`;
+
+        const fallbackResponse = await fetch(fallbackUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          next: { revalidate: 30 },
+        });
+
+        if (!fallbackResponse.ok) {
+          throw new Error(`HTTP ${fallbackResponse.status}: ${fallbackResponse.statusText}`);
+        }
+
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackData?.data) {
+          // Apply same normalization logic as main path
+          const rawProduct = fallbackData.data;
+
+          // Helper function to normalize a relation (same as main path)
+          const normalizeRelation = (rel: any, isVariation = false): any => {
+            if (!rel) return null;
+            if (rel.data) return rel;
+
+            if (Array.isArray(rel)) {
+              return {
+                data: rel.map((item: any) => {
+                  if (item.attributes) {
+                    if (isVariation) {
+                      const { product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item.attributes;
+                      return {
+                        ...item,
+                        attributes: {
+                          ...rest,
+                          product_stock: normalizeRelation(product_stock),
+                          product_variation_color: normalizeRelation(product_variation_color),
+                          product_variation_size: normalizeRelation(product_variation_size),
+                          product_variation_model: normalizeRelation(product_variation_model),
+                        },
+                      };
+                    }
+                    return item;
+                  }
+                  const { id, product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item;
+                  const normalized: any = { id, attributes: rest };
+
+                  if (isVariation) {
+                    normalized.attributes.product_stock = normalizeRelation(product_stock);
+                    normalized.attributes.product_variation_color = normalizeRelation(product_variation_color);
+                    normalized.attributes.product_variation_size = normalizeRelation(product_variation_size);
+                    normalized.attributes.product_variation_model = normalizeRelation(product_variation_model);
+                  }
+
+                  return normalized;
+                }),
+              };
+            }
+
+            if (rel.id !== undefined) {
+              const { id, ...rest } = rel;
+              return {
+                data: { id, attributes: rest },
+              };
+            }
+
+            return null;
+          };
+
+          if (rawProduct.attributes) {
+            productData = {
+              ...rawProduct,
+              attributes: {
+                ...rawProduct.attributes,
+                product_main_category: normalizeRelation(rawProduct.attributes.product_main_category),
+                product_other_categories: normalizeRelation(rawProduct.attributes.product_other_categories),
+                product_variations: normalizeRelation(rawProduct.attributes.product_variations, true),
+                product_reviews: normalizeRelation(rawProduct.attributes.product_reviews),
+                product_tags: normalizeRelation(rawProduct.attributes.product_tags),
+                CoverImage: normalizeRelation(rawProduct.attributes.CoverImage),
+                Media: normalizeRelation(rawProduct.attributes.Media),
+                Files: normalizeRelation(rawProduct.attributes.Files),
+                product_size_helper: normalizeRelation(rawProduct.attributes.product_size_helper),
+              },
+            };
+          } else {
+            const { id, product_main_category, product_other_categories, product_variations, product_reviews, product_tags, CoverImage, Media, Files, product_size_helper, ...rest } = rawProduct;
+            productData = {
+              id,
+              attributes: {
+                ...rest,
+                product_main_category: normalizeRelation(product_main_category),
+                product_other_categories: normalizeRelation(product_other_categories),
+                product_variations: normalizeRelation(product_variations, true),
+                product_reviews: normalizeRelation(product_reviews),
+                product_tags: normalizeRelation(product_tags),
+                CoverImage: normalizeRelation(CoverImage),
+                Media: normalizeRelation(Media),
+                Files: normalizeRelation(Files),
+                product_size_helper: normalizeRelation(product_size_helper),
+              },
+            };
+            logger.info("[PDP] Normalized flat product structure to Strapi format (fallback)", { productId: id });
+          }
+
+          // Check if product is trashed
+          if (productData && productData.attributes?.removedAt) {
+            throw new Error("Product has been removed");
+          }
+
           logger.info("[PDP] Product found via ID fallback", { productId: productData?.id });
         }
-      } catch (idError) {
-        logger.error("[PDP] ID fallback also failed", { decodedSlug, error: String(idError) });
+      } catch (idError: any) {
+        logger.error("[PDP] ID fallback also failed", {
+          decodedSlug,
+          error: idError?.message || String(idError),
+          status: idError?.status,
+          stack: idError?.stack,
+        });
       }
     }
   }
