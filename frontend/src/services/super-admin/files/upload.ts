@@ -65,9 +65,15 @@ export const uploadFile = async (file: File): Promise<Response | undefined> => {
     }
 
     const data = await response.json();
+    const files = Array.isArray(data) ? data : data?.data;
 
-    return data as Response;
-  } catch {
+    if (!files || !Array.isArray(files)) {
+      throw new Error("Invalid upload response");
+    }
+
+    return files as Response;
+  } catch (err) {
+    console.error("Upload failed", err);
     toast.error("خطا در آپلود تصویر");
   }
 };

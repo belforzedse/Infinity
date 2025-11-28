@@ -180,6 +180,10 @@ export default function PLPList({
     queryParams.append("populate[2]", "product_variations");
     queryParams.append("populate[3]", "product_variations.product_stock");
     queryParams.append("populate[4]", "product_variations.general_discounts");
+    queryParams.append("fields[0]", "Title");
+    queryParams.append("fields[1]", "Slug");
+    queryParams.append("fields[2]", "Description");
+    queryParams.append("fields[3]", "Status");
 
     // Add pagination
     queryParams.append("pagination[page]", page);
@@ -244,7 +248,22 @@ export default function PLPList({
     apiClient
       .getPublic<any>(endpoint, { suppressAuthRedirect: true })
       .then((data) => {
-        setProducts(Array.isArray(data?.data) ? data.data : []);
+        const productsArray = Array.isArray(data?.data) ? data.data : [];
+        
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[PLP] Fetched products:", {
+            count: productsArray.length,
+            endpoint,
+            firstProduct: productsArray[0] ? {
+              id: productsArray[0].id,
+              title: productsArray[0].attributes?.Title,
+              slug: productsArray[0].attributes?.Slug,
+              hasVariations: !!productsArray[0].attributes?.product_variations?.data?.length,
+            } : null,
+          });
+        }
+        
+        setProducts(productsArray);
         setPagination(
           data?.meta?.pagination || {
             page: parseInt(page) || 1,
@@ -255,7 +274,12 @@ export default function PLPList({
         );
       })
       .catch((error) => {
-        console.error("[PLP] Error fetching products:", error);
+        console.error("[PLP] Error fetching products:", {
+          error,
+          endpoint,
+          message: error?.message || "Unknown error",
+          status: (error as any)?.status,
+        });
         notify.error("خطا در بارگیری محصولات");
         setProducts([]);
         setPagination({
@@ -407,7 +431,7 @@ export default function PLPList({
               discount: discount,
               image: product.attributes.CoverImage?.data?.attributes?.url
                 ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-                : "/images/placeholders/product-placeholder.png",
+                : "", // Empty string will trigger BlurImage fallback SVG
             };
           } catch (error) {
             console.warn("Error creating sidebar product:", error, product);
@@ -763,7 +787,7 @@ export default function PLPList({
                           ? [
                               `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
                             ]
-                          : ["/images/placeholders/product-placeholder.png"]
+                          : [""] // Empty string will trigger BlurImage fallback SVG
                       }
                       category={
                         product.attributes.product_main_category?.data?.attributes?.Title || ""
@@ -830,7 +854,7 @@ export default function PLPList({
                       image={
                         product.attributes.CoverImage?.data?.attributes?.url
                           ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-                          : "/images/placeholders/product-placeholder.png"
+                          : "" // Empty string will trigger BlurImage fallback SVG
                       }
                       isAvailable={isAvailable}
                       priority={index < 3}

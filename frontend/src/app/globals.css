@@ -1,3 +1,6 @@
+/* Syntax highlighting for code blocks */
+@import 'highlight.js/styles/github.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,7 +11,7 @@ html {
 
 ::selection {
   background: #ffe4f1; /* brand-tinted */
-  color: #111827;
+  color: #53354c;
 }
 
 /* Accessible focus outlines on interactive elements */
@@ -440,6 +443,35 @@ textarea:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* RTL-specific prose styles for rich text editor */
+@layer components {
+  [dir="rtl"] .prose {
+    /* Headers */
+    @apply prose-headings:text-right;
+
+    /* Lists */
+    @apply prose-ul:mr-6 prose-ol:mr-6;
+
+    /* Blockquotes */
+    @apply prose-blockquote:border-r-4 prose-blockquote:border-l-0 prose-blockquote:pr-4 prose-blockquote:pl-0;
+  }
+
+  /* Ensure proper styling for all prose elements */
+  .prose {
+    @apply prose-slate;
+    @apply prose-headings:font-semibold prose-headings:text-neutral-800;
+    @apply prose-p:text-neutral-700 prose-p:leading-relaxed;
+    @apply prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline;
+    @apply prose-strong:text-neutral-900 prose-strong:font-bold;
+    @apply prose-code:text-pink-600 prose-code:bg-pink-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded;
+    @apply prose-pre:bg-neutral-50 prose-pre:text-neutral-800 prose-pre:border prose-pre:border-neutral-200;
+    @apply prose-blockquote:border-neutral-300 prose-blockquote:text-neutral-600 prose-blockquote:bg-neutral-50 prose-blockquote:italic;
+    @apply prose-ul:list-disc prose-ol:list-decimal;
+    @apply prose-li:text-neutral-700;
+    @apply prose-hr:border-neutral-300;
   }
 }
 

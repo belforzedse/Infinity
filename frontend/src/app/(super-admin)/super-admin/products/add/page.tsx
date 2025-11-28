@@ -9,6 +9,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { createProduct } from "@/services/super-admin/product/create";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
+import { useEditorRedirect } from "@/hooks/useEditorRedirect";
 
 // Define the type for the API response
 interface ProductApiResponse {
@@ -27,6 +28,9 @@ export default function AddProductsPage() {
   const productData = useAtomValue(productDataAtom);
   const resetProductData = useSetAtom(resetProductDataAtom);
   const router = useRouter();
+
+  // Redirect editors away from product pages
+  useEditorRedirect();
   if (process.env.NODE_ENV !== "production") {
     logger.info("productData", { productData });
   }

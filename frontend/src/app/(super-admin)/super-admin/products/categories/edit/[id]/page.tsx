@@ -13,12 +13,22 @@ import {
 import { getCategoryById } from "@/services/super-admin/product/category/get";
 import { updateCategory } from "@/services/super-admin/product/category/update";
 import type { CategoryData } from "@/services/super-admin/product/category/create";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function EditCategoryPage() {
   const router = useRouter();
+  const { roleName } = useCurrentUser();
   const params = useParams<{ id: string }>();
   const rawId = params?.id;
   const categoryId = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  // Redirect editors away from product pages
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
 
   const [initialData, setInitialData] = useState<ProductCategoryForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
