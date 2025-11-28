@@ -20,8 +20,8 @@ export default function middleware(request: NextRequest) {
   );
 
   // Cache control for static assets
+  // Note: /_next/static and /api/ are excluded by matcher, so cache-control for those paths is handled by Next.js
   if (
-    pathname.startsWith('/_next/static') ||
     pathname.startsWith('/images/') ||
     pathname.startsWith('/fonts/')
   ) {
@@ -29,11 +29,6 @@ export default function middleware(request: NextRequest) {
       'Cache-Control',
       'public, max-age=31536000, immutable'
     );
-  }
-
-  // Cache control for API routes (shorter cache)
-  if (pathname.startsWith('/api/')) {
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
   }
 
   // Handle trailing slashes - redirect to non-trailing slash for SEO
@@ -59,10 +54,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - api (API routes) - excluded because Next.js handles API route caching
+     * - _next/static (static files) - excluded because Next.js handles static file caching
+     * - _next/image (image optimization files) - excluded for performance
+     * - favicon.ico (favicon file) - excluded for performance
+     * 
+     * Cache-control headers for excluded paths are handled by Next.js automatically.
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
