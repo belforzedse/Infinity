@@ -6,19 +6,18 @@ import { useEffect, useState } from "react";
  * Google Consent Mode v2 implementation
  * Handles user consent for analytics and advertising
  * Required for GDPR/CCPA compliance in EEA/UK
+ * 
+ * Note: This component requires Google Analytics (gtag) to be loaded externally.
+ * The gtag script must be loaded via Next.js Script component, Google Tag Manager,
+ * or another method before this component can initialize consent mode.
  */
 export function ConsentManager() {
   const [consentGiven, setConsentGiven] = useState<boolean | null>(null);
   const [showBanner, setShowBanner] = useState(false);
+  const [gtagAvailable, setGtagAvailable] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // Check if consent was previously given
-    const storedConsent = localStorage.getItem("analytics-consent");
-    const hasConsent = storedConsent === "granted" || storedConsent === "denied";
-
-    // Initialize Google Consent Mode v2
+  // Initialize consent mode with gtag
+  const initializeConsentMode = (storedConsent: string | null) => {
     if (typeof window.gtag !== "undefined") {
       window.gtag("consent", "default", {
         ad_storage: storedConsent === "granted" ? "granted" : "denied",
@@ -29,11 +28,49 @@ export function ConsentManager() {
         personalization_storage: storedConsent === "granted" ? "granted" : "denied",
         security_storage: "granted",
       });
+      setGtagAvailable(true);
+      return true;
     }
+    return false;
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Check if consent was previously given
+    const storedConsent = localStorage.getItem("analytics-consent");
+    const hasConsent = storedConsent === "granted" || storedConsent === "denied";
 
     setConsentGiven(storedConsent === "granted");
     // Show banner only if user hasn't made a choice yet
     setShowBanner(!hasConsent);
+
+    // Try to initialize consent mode immediately
+    if (initializeConsentMode(storedConsent)) {
+      return; // gtag is available, no need to poll
+    }
+
+    // Poll for gtag availability with timeout (10 seconds)
+    const maxAttempts = 20; // 20 attempts * 500ms = 10 seconds
+    let attempts = 0;
+    const pollInterval = setInterval(() => {
+      attempts++;
+      
+      if (initializeConsentMode(storedConsent)) {
+        clearInterval(pollInterval);
+        return;
+      }
+
+      // Stop polling after timeout
+      if (attempts >= maxAttempts) {
+        clearInterval(pollInterval);
+        // gtag not available - consent mode will be initialized when user interacts with banner
+      }
+    }, 500); // Check every 500ms
+
+    return () => {
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const grantConsent = () => {
@@ -43,7 +80,7 @@ export function ConsentManager() {
     setConsentGiven(true);
     setShowBanner(false);
 
-    // Update consent mode
+    // Update consent mode (retry if gtag wasn't available before)
     if (typeof window.gtag !== "undefined") {
       window.gtag("consent", "update", {
         ad_storage: "granted",
@@ -52,6 +89,21 @@ export function ConsentManager() {
         analytics_storage: "granted",
         personalization_storage: "granted",
       });
+      setGtagAvailable(true);
+    } else if (!gtagAvailable) {
+      // If gtag still not available, try one more time after a short delay
+      setTimeout(() => {
+        if (typeof window.gtag !== "undefined") {
+          window.gtag("consent", "update", {
+            ad_storage: "granted",
+            ad_user_data: "granted",
+            ad_personalization: "granted",
+            analytics_storage: "granted",
+            personalization_storage: "granted",
+          });
+          setGtagAvailable(true);
+        }
+      }, 1000);
     }
   };
 
@@ -62,7 +114,7 @@ export function ConsentManager() {
     setConsentGiven(false);
     setShowBanner(false);
 
-    // Update consent mode
+    // Update consent mode (retry if gtag wasn't available before)
     if (typeof window.gtag !== "undefined") {
       window.gtag("consent", "update", {
         ad_storage: "denied",
@@ -71,6 +123,21 @@ export function ConsentManager() {
         analytics_storage: "denied",
         personalization_storage: "denied",
       });
+      setGtagAvailable(true);
+    } else if (!gtagAvailable) {
+      // If gtag still not available, try one more time after a short delay
+      setTimeout(() => {
+        if (typeof window.gtag !== "undefined") {
+          window.gtag("consent", "update", {
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied",
+            analytics_storage: "denied",
+            personalization_storage: "denied",
+          });
+          setGtagAvailable(true);
+        }
+      }, 1000);
     }
   };
 

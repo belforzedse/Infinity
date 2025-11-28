@@ -13,6 +13,23 @@ function sanitizeForJSONLD(value: string | undefined | null): string | undefined
     .replace(/>/g, '\\u003E'); // Escape closing angle brackets
 }
 
+/**
+ * Builds an absolute image URL with proper fallback
+ * Ensures valid absolute URLs in all environments
+ */
+function buildImageUrl(imagePath: string, config: SEOConfig): string {
+  // Use IMAGE_BASE_URL if available, otherwise fallback to siteUrl
+  const baseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || config.siteUrl;
+  
+  // Remove trailing slash from base URL
+  const cleanBase = baseUrl.replace(/\/$/, '');
+  
+  // Ensure image path starts with a slash
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  return `${cleanBase}${cleanPath}`;
+}
+
 export interface BlogPostSEO {
   title: string;
   slug: string;
@@ -61,8 +78,8 @@ export function generateBlogPostMetadata(
     `مطالعه «${post.title}» در ${config.siteName}`;
   const url = `${config.siteUrl}/${post.slug}`;
   const imageUrl = post.featuredImage?.url
-    ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${post.featuredImage.url}`
-    : `${config.siteUrl}${config.defaultImage}`;
+    ? buildImageUrl(post.featuredImage.url, config)
+    : buildImageUrl(config.defaultImage, config);
 
   const metadata: Metadata = {
     title: `${title} | ${config.siteName}`,
@@ -173,8 +190,8 @@ export function generateBlogListingMetadata(
 
 export function generateJSONLD(post: BlogPostSEO, config: SEOConfig = defaultSEOConfig) {
   const imageUrl = post.featuredImage?.url
-    ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${post.featuredImage.url}`
-    : `${config.siteUrl}${config.defaultImage}`;
+    ? buildImageUrl(post.featuredImage.url, config)
+    : buildImageUrl(config.defaultImage, config);
 
   // Sanitize all user-controlled fields to prevent XSS
   const sanitizedTitle = sanitizeForJSONLD(post.title);
