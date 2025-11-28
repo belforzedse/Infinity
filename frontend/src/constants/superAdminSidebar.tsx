@@ -16,6 +16,10 @@ import {
   FiBell,
   FiBarChart,
   FiDatabase,
+  FiFileText,
+  FiTag,
+  FiEdit3,
+  FiMessageSquare,
 } from "react-icons/fi";
 
 // Create a styled layout/menu icons (unused definitions removed)
@@ -273,7 +277,7 @@ const superAdminSidebar: SidebarItem[] = [
   // },
 ];
 
-const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set(["users", "reports", "shipping", "settings"]);
+const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set(["users", "reports", "shipping", "settings", "blog"]);
 const STORE_MANAGER_HIDDEN_CHILD_IDS = new Set(["product-comments", "admin-activity"]);
 
 const cloneWithFilteredChildren = (item: SidebarItem) => {
@@ -287,13 +291,76 @@ const cloneWithFilteredChildren = (item: SidebarItem) => {
   };
 };
 
-const normalizeRole = (roleName?: string | null) => (roleName ?? "").trim().toLowerCase();
+const normalizeRole = (roleName?: string | null) => {
+  if (!roleName) return "";
+  // Handle various formats: "Editor", "editor", "EDITOR", " Editor ", etc.
+  return roleName.toString().trim().toLowerCase();
+};
 
 export const getSidebarItemsForRole = (roleName?: string | null): SidebarItem[] => {
   const normalizedRole = normalizeRole(roleName);
 
+  // Debug logging (remove in production if needed)
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+    console.log("[Sidebar] Role detection:", { roleName, normalizedRole });
+  }
+
   if (normalizedRole === "superadmin") {
     return superAdminSidebar;
+  }
+
+  // Check for editor role (handle "Editor", "editor", etc.)
+  if (normalizedRole === "editor" || normalizedRole.includes("editor")) {
+    // Editor role sees blog items as separate menu items (not nested)
+    // Dashboard points to blog dashboard
+
+    // Create separate menu items for each blog section with unique icons
+    const editorSidebar: SidebarItem[] = [
+      {
+        id: "dashboard",
+        label: "پیشخوان",
+        href: "/super-admin/blog", // Blog dashboard for editors
+        icon: <DashboardIcon />,
+        children: [],
+      },
+      {
+        id: "blog-posts",
+        label: "مدیریت پست‌ها",
+        href: "/super-admin/blog/posts",
+        icon: <FiFileText className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        children: [],
+      },
+      {
+        id: "blog-categories",
+        label: "دسته‌بندی‌ها",
+        href: "/super-admin/blog/categories",
+        icon: <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        children: [],
+      },
+      {
+        id: "blog-tags",
+        label: "برچسب‌ها",
+        href: "/super-admin/blog/tags",
+        icon: <FiTag className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        children: [],
+      },
+      {
+        id: "blog-authors",
+        label: "نویسندگان",
+        href: "/super-admin/blog/authors",
+        icon: <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        children: [],
+      },
+      {
+        id: "blog-comments",
+        label: "مدیریت نظرات",
+        href: "/super-admin/blog/comments",
+        icon: <FiMessageSquare className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        children: [],
+      },
+    ];
+
+    return editorSidebar;
   }
 
   return superAdminSidebar

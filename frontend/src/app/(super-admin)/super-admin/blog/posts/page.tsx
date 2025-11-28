@@ -17,6 +17,7 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { blogService, BlogPost } from "@/services/blog/blog.service";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const statusConfig = {
   Draft: { label: "پیش‌نویس", className: "bg-slate-100 text-slate-700" },
@@ -26,8 +27,16 @@ const statusConfig = {
 
 export default function BlogPostsPage() {
   const router = useRouter();
+  const { isStoreManager } = useCurrentUser();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Redirect store managers away from blog pages
+  useEffect(() => {
+    if (isStoreManager) {
+      router.replace("/super-admin");
+    }
+  }, [isStoreManager, router]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 

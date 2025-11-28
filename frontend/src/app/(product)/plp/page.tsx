@@ -3,16 +3,41 @@ export const revalidate = 30; // refresh product listing every 30 seconds
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import logger from "@/utils/logger";
 import type { Metadata } from "next";
+import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
+
+interface ProductVariation {
+  attributes: {
+    SKU: string;
+    Price: string;
+    IsPublished: boolean;
+    DiscountPrice?: string;
+    product_stock?: {
+      data?: {
+        attributes: {
+          Count: number;
+        };
+      };
+    };
+    general_discounts?: {
+      data: Array<{
+        attributes: {
+          Amount: number;
+        };
+      }>;
+    };
+  };
+}
 
 interface Product {
   id: number;
   attributes: {
     Title: string;
+    Slug?: string;
     Description: string;
     Status: string;
     AverageRating: number | null;
@@ -33,28 +58,7 @@ interface Product {
       };
     };
     product_variations: {
-      data: Array<{
-        attributes: {
-          SKU: string;
-          Price: string;
-          IsPublished: boolean;
-          DiscountPrice?: string;
-          product_stock?: {
-            data?: {
-              attributes: {
-                Count: number;
-              };
-            };
-          };
-          general_discounts?: {
-            data: Array<{
-              attributes: {
-                Amount: number;
-              };
-            }>;
-          };
-        };
-      }>;
+      data: ProductVariation[];
     };
   };
 }
@@ -87,6 +91,7 @@ async function getProducts(
             id: item.id,
             attributes: {
               Title: item.Title,
+              Slug: (item as { Slug?: string }).Slug || undefined,
               Description: item.Description,
               Status: "Active",
               CoverImage: {
@@ -146,6 +151,10 @@ async function getProducts(
   queryParams.append("populate[2]", "product_variations");
   queryParams.append("populate[3]", "product_variations.product_stock");
   queryParams.append("populate[4]", "product_variations.general_discounts");
+  queryParams.append("fields[0]", "Title");
+  queryParams.append("fields[1]", "Slug");
+  queryParams.append("fields[2]", "Description");
+  queryParams.append("fields[3]", "Status");
 
   // Add pagination
   queryParams.append("pagination[page]", page.toString());
@@ -317,8 +326,64 @@ export default async function PLPPage({
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+  const pageName = category
+    ? `خرید ${category}`
+    : search
+      ? `نتایج جستجو برای "${search}"`
+      : "فروشگاه";
+  const pageDescription = category
+    ? `خرید ${category} با بهترین قیمت و ارسال سریع از اینفینیتی استور`
+    : search
+      ? `نتایج جستجو برای «${search}» در فروشگاه اینفینیتی استور`
+      : "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور";
+  const pageUrl = category
+    ? `${SITE_URL}/plp?category=${encodeURIComponent(category)}`
+    : search
+      ? `${SITE_URL}/plp?search=${encodeURIComponent(search)}`
+      : `${SITE_URL}/plp`;
+
+  // Map products to CollectionPageSchema format
+  const collectionItems = products.slice(0, 20).map((product: Product) => {
+    const variations = product.attributes.product_variations?.data || [];
+    const prices = variations
+      .map((v: ProductVariation) => {
+        const price = parseFloat(v.attributes.Price || "0");
+        const discountPrice = parseFloat(v.attributes.DiscountPrice || "0");
+        return discountPrice > 0 ? discountPrice : price;
+      })
+      .filter((p: number) => p > 0);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
+    const imageUrl = product.attributes.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+      : undefined;
+
+    // Use slug if available, otherwise fall back to ID
+    const productSlug = product.attributes.Slug || product.id.toString();
+
+    return {
+      id: product.id,
+      title: product.attributes.Title,
+      url: `/pdp/${productSlug}`,
+      image: imageUrl,
+      price: minPrice,
+      currency: "IRR",
+    };
+  });
+
   return (
     <PageContainer variant="wide" className="space-y-6 pb-20 pt-6">
+      {/* CollectionPage Schema for SEO */}
+      {products.length > 0 && (
+        <CollectionPageSchema
+          name={pageName}
+          description={pageDescription}
+          url={pageUrl}
+          items={collectionItems}
+          itemCount={pagination.total}
+        />
+      )}
+
       {!isSearchResults && <PLPHeroBanner category={category} />}
 
       <PLPList
@@ -337,6 +402,7 @@ export async function generateMetadata({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
   const params = await searchParams;
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
   const category = typeof params.category === "string" ? params.category : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
 
@@ -347,6 +413,7 @@ export async function generateMetadata({
     const q = search?.slice(0, 60) || "";
     const title = `نتایج جستجو برای "${q}" | اینفینیتی استور`;
     const description = `مشاهده نتایج جستجو برای «${q}» در فروشگاه اینفینیتی استور. جدیدترین و محبوب‌ترین محصولات.`;
+    const canonicalUrl = `${SITE_URL}/plp${q ? `?search=${encodeURIComponent(q)}` : ""}`;
     return {
       title,
       description,
@@ -354,10 +421,10 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
-        url: `/plp?search=${encodeURIComponent(q)}`,
+        url: canonicalUrl,
       },
       alternates: {
-        canonical: `/plp${q ? `?search=${encodeURIComponent(q)}` : ""}`,
+        canonical: canonicalUrl,
       },
     };
   }
@@ -365,6 +432,7 @@ export async function generateMetadata({
   if (category) {
     const title = `خرید ${category} | اینفینیتی استور`;
     const description = `خرید ${category} با بهترین قیمت و ارسال سریع از اینفینیتی استور. جدیدترین محصولات ${category}.`;
+    const canonicalUrl = `${SITE_URL}/plp?category=${encodeURIComponent(category)}`;
     return {
       title,
       description,
@@ -372,10 +440,10 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
-        url: `/plp?category=${encodeURIComponent(category)}`,
+        url: canonicalUrl,
       },
       alternates: {
-        canonical: `/plp?category=${encodeURIComponent(category)}`,
+        canonical: canonicalUrl,
       },
     };
   }
@@ -383,6 +451,6 @@ export async function generateMetadata({
   return {
     title: baseTitle,
     description: "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
-    alternates: { canonical: "/plp" },
+    alternates: { canonical: `${SITE_URL}/plp` },
   };
 }

@@ -17,14 +17,24 @@ import { useRouter } from "next/navigation";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import { useProductTag } from "@/hooks/product/useTag";
 import logger from "@/utils/logger";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function EditProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
   const [productData, setProductData] = useAtom(editProductDataAtom);
   const router = useRouter();
+  const { roleName } = useCurrentUser();
   const { fetchAllCategories } = useProductCategory();
   const { handleFetchTags } = useProductTag();
+
+  // Redirect editors away from product pages
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
 
   const getProductParams = useMemo(
     () => ({

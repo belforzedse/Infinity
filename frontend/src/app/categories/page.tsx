@@ -1,7 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from "next";
 import { categories } from "@/constants/categories";
 import PageContainer from "@/components/layout/PageContainer";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+
+export const metadata: Metadata = {
+  title: "دسته‌بندی‌ها",
+  description: "مشاهده تمام دسته‌بندی‌های محصولات اینفینیتی استور. سریع به دسته مورد نظر بروید و خرید خود را آغاز کنید.",
+  alternates: {
+    canonical: `${SITE_URL}/categories`,
+  },
+  openGraph: {
+    title: "دسته‌بندی‌های اینفینیتی استور",
+    description: "مشاهده تمام دسته‌بندی‌های محصولات اینفینیتی استور",
+    url: `${SITE_URL}/categories`,
+    type: "website",
+  },
+};
 
 export default function CategoriesPage() {
   return (

@@ -185,19 +185,19 @@ class BlogService {
     return headers;
   }
 
-  private unwrapRelation<T extends { id: number }>(rel: any): T | undefined {
+  private unwrapRelation(rel: any): { id: number; [key: string]: any } | undefined {
     if (!rel?.data) return undefined;
     return { id: rel.data.id, ...(rel.data.attributes || {}) };
   }
 
   private normalizeBlogCommentUser(userEntry: any): BlogComment["user"] | undefined {
-    const user = this.unwrapRelation(userEntry);
-    if (!user) return undefined;
+    const unwrapped = this.unwrapRelation(userEntry);
+    if (!unwrapped) return undefined;
 
     const userInfoCandidate =
       userEntry?.data?.attributes?.user_info ??
       userEntry?.attributes?.user_info ??
-      user.user_info;
+      unwrapped.user_info;
 
     const normalizedUserInfo =
       this.unwrapRelation(userInfoCandidate) ??
@@ -205,9 +205,12 @@ class BlogService {
       userInfoCandidate ??
       null;
 
-    user.user_info = normalizedUserInfo ? { ...normalizedUserInfo } : null;
-
-    return user;
+    return {
+      id: unwrapped.id,
+      username: unwrapped.username,
+      email: unwrapped.email,
+      user_info: normalizedUserInfo ? { ...normalizedUserInfo } : null,
+    };
   }
 
   private normalizeBlogComment(entry: any): BlogComment {
@@ -397,7 +400,8 @@ class BlogService {
     searchParams.append("populate[blog_author]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
 
-    const response = await fetch(`${this.baseUrl}/blog-posts?${searchParams}`, {
+    const baseUrl = this.getBaseUrl();
+    const response = await fetch(`${baseUrl}/blog-posts?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -424,7 +428,8 @@ class BlogService {
     searchParams.append("populate[blog_author]", "*");
     searchParams.append("populate[FeaturedImage]", "*");
 
-    const response = await fetch(`${this.baseUrl}/blog-posts/${id}?${searchParams}`, {
+    const baseUrl = this.getBaseUrl();
+    const response = await fetch(`${baseUrl}/blog-posts/${id}?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -470,7 +475,7 @@ class BlogService {
 
   // Create blog post (authenticated)
   async createBlogPost(data: CreateBlogPostData): Promise<ApiResponse<BlogPost>> {
-    const response = await fetch(`${this.baseUrl}/blog-posts`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-posts`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({ data }),
@@ -487,7 +492,7 @@ class BlogService {
 
   // Update blog post (authenticated)
   async updateBlogPost(id: number, data: Partial<CreateBlogPostData>): Promise<ApiResponse<BlogPost>> {
-    const response = await fetch(`${this.baseUrl}/blog-posts/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-posts/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
       body: JSON.stringify({ data }),
@@ -504,7 +509,7 @@ class BlogService {
 
   // Delete blog post (authenticated)
   async deleteBlogPost(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog-posts/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-posts/${id}`, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
@@ -523,7 +528,8 @@ class BlogService {
     searchParams.append("sort", "Title:asc");
     searchParams.append("pagination[pageSize]", "100");
 
-    const response = await fetch(`${this.baseUrl}/blog-categories?${searchParams}`, {
+    const baseUrl = this.getBaseUrl();
+    const response = await fetch(`${baseUrl}/blog-categories?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -557,7 +563,7 @@ class BlogService {
     };
     delete payload.Name;
 
-    const response = await fetch(`${this.baseUrl}/blog-categories`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-categories`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({ data: payload }),
@@ -583,7 +589,7 @@ class BlogService {
     }
     delete payload.Name;
 
-    const response = await fetch(`${this.baseUrl}/blog-categories/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-categories/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
       body: JSON.stringify({ data: payload }),
@@ -603,7 +609,7 @@ class BlogService {
 
   // Delete blog category (authenticated)
   async deleteBlogCategory(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog-categories/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-categories/${id}`, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
@@ -622,7 +628,7 @@ class BlogService {
     searchParams.append("sort", "Name:asc");
     searchParams.append("pagination[pageSize]", "100");
 
-    const response = await fetch(`${this.baseUrl}/blog-tags?${searchParams}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-tags?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -646,7 +652,7 @@ class BlogService {
     // Auto-generate slug if not provided
     const slug = data.Slug || this.generateSlug(data.Name);
 
-    const response = await fetch(`${this.baseUrl}/blog-tags`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-tags`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({ data: { ...data, Slug: slug } }),
@@ -666,7 +672,7 @@ class BlogService {
 
   // Update blog tag (authenticated)
   async updateBlogTag(id: number, data: Partial<CreateBlogTagData>): Promise<ApiResponse<BlogTag>> {
-    const response = await fetch(`${this.baseUrl}/blog-tags/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-tags/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
       body: JSON.stringify({ data }),
@@ -686,7 +692,7 @@ class BlogService {
 
   // Delete blog tag (authenticated)
   async deleteBlogTag(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog-tags/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-tags/${id}`, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
@@ -706,7 +712,7 @@ class BlogService {
     searchParams.append("populate[Avatar]", "*");
     searchParams.append("pagination[pageSize]", "100");
 
-    const response = await fetch(`${this.baseUrl}/blog-authors?${searchParams}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-authors?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -719,7 +725,7 @@ class BlogService {
 
   // Create blog author (authenticated)
   async createBlogAuthor(data: CreateBlogAuthorData): Promise<ApiResponse<BlogAuthor>> {
-    const response = await fetch(`${this.baseUrl}/blog-authors`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-authors`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({ data }),
@@ -735,7 +741,7 @@ class BlogService {
 
   // Update blog author (authenticated)
   async updateBlogAuthor(id: number, data: Partial<CreateBlogAuthorData>): Promise<ApiResponse<BlogAuthor>> {
-    const response = await fetch(`${this.baseUrl}/blog-authors/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-authors/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
       body: JSON.stringify({ data }),
@@ -751,7 +757,7 @@ class BlogService {
 
   // Delete blog author (authenticated)
   async deleteBlogAuthor(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog-authors/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-authors/${id}`, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
@@ -772,7 +778,7 @@ class BlogService {
     searchParams.append("populate[replies][populate][user]", "*");
     searchParams.append("populate[replies][populate][user][populate][user_info]", "*");
 
-    const response = await fetch(`${this.baseUrl}/blog-comments/post/${postId}?${searchParams}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-comments/post/${postId}?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -802,7 +808,7 @@ class BlogService {
       searchParams.append("filters[Status][$eq]", params.status);
     }
 
-    const response = await fetch(`${this.baseUrl}/blog-comments?${searchParams}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-comments?${searchParams}`, {
       headers: this.getHeaders(),
     });
 
@@ -824,7 +830,7 @@ class BlogService {
     content: string,
     parentCommentId?: number
   ): Promise<ApiResponse<BlogComment>> {
-    const response = await fetch(`${this.baseUrl}/blog-comments`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-comments`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({
@@ -847,7 +853,7 @@ class BlogService {
 
   // Update comment status (admin)
   async updateBlogCommentStatus(id: number, status: "Pending" | "Approved" | "Rejected"): Promise<ApiResponse<BlogComment>> {
-    const response = await fetch(`${this.baseUrl}/blog-comments/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-comments/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
       body: JSON.stringify({ data: { Status: status } }),
@@ -864,7 +870,7 @@ class BlogService {
 
   // Delete comment (admin)
   async deleteBlogComment(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog-comments/${id}`, {
+    const response = await fetch(`${this.getBaseUrl()}/blog-comments/${id}`, {
       method: "DELETE",
       headers: this.getHeaders(),
     });

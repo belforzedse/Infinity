@@ -22,6 +22,7 @@ export interface ProductSearchResponse {
  */
 export interface ProductSearchItem {
   id: number;
+  Slug?: string;
   Title: string;
   Description: string;
   Price: number;
