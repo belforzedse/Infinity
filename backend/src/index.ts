@@ -17,7 +17,6 @@ type GranularSpec = {
 type RolePermissionSpec = FullAccessSpec | GranularSpec;
 
 const READ_ACTIONS = ["find", "findOne"] as const;
-const CRUD_ACTIONS = ["find", "findOne", "create", "update", "delete"] as const;
 
 const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
   public: {
@@ -292,7 +291,7 @@ function applySpecRecursive(
  * Builds the default permissions action tree for the given role type.
  *
  * @param roleType - The role type key (for example: "public", "customer", "store-manager", "editor", "superadmin")
- * @returns A permissions tree object mapping content types and controllers to their action permission flags, configured according to the role's permission spec; if no spec exists for `roleType`, returns a tree with all actions disabled by default. 
+ * @returns A permissions tree object mapping content types and controllers to their action permission flags, configured according to the role's permission spec; if no spec exists for `roleType`, returns a tree with all actions disabled by default.
  */
 function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string, any> {
   const usersPermissionsService = strapi.plugin("users-permissions").service("users-permissions");
@@ -309,13 +308,7 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
     } else if (roleType === "editor") {
       // Editors get store-manager restrictions EXCEPT blog restrictions (they need full CRUD for blog)
       const editorRestrictions = STORE_MANAGER_RESTRICTED_CONTROLLERS.filter(
-        (restriction) =>
-          !restriction.typeKey.startsWith("api::blog-") &&
-          restriction.typeKey !== "api::blog-post" &&
-          restriction.typeKey !== "api::blog-category" &&
-          restriction.typeKey !== "api::blog-tag" &&
-          restriction.typeKey !== "api::blog-author" &&
-          restriction.typeKey !== "api::blog-comment"
+        (restriction) => !restriction.typeKey.startsWith("api::blog-")
       );
       applyRestrictedControllers(tree, editorRestrictions, strapi);
     }

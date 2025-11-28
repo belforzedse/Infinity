@@ -4,6 +4,36 @@
 
 import { factories } from "@strapi/strapi";
 
+const PRODUCT_POPULATE = {
+  CoverImage: true,
+  Media: true,
+  Files: true,
+  product_main_category: true,
+  product_other_categories: true,
+  product_tags: true,
+  product_reviews: {
+    populate: {
+      user: {
+        fields: ["id", "username", "FirstName", "LastName"],
+      },
+    },
+  },
+  product_variations: {
+    populate: {
+      product_variation_color: true,
+      product_variation_size: true,
+      product_variation_model: true,
+      product_stock: true,
+    },
+  },
+  product_faqs: true,
+  product_size_helper: {
+    populate: {
+      Image: true,
+    },
+  },
+} as const;
+
 export default factories.createCoreController(
   "api::product.product",
   ({ strapi }) => ({
@@ -68,35 +98,7 @@ export default factories.createCoreController(
             Slug: decodedSlug,
             removedAt: { $null: true }, // Exclude trashed products
           },
-          populate: {
-            CoverImage: true,
-            Media: true,
-            Files: true,
-            product_main_category: true,
-            product_other_categories: true,
-            product_tags: true,
-            product_reviews: {
-              populate: {
-                user: {
-                  fields: ["id", "username", "FirstName", "LastName"],
-                },
-              },
-            },
-            product_variations: {
-              populate: {
-                product_variation_color: true,
-                product_variation_size: true,
-                product_variation_model: true,
-                product_stock: true,
-              },
-            },
-            product_faqs: true,
-            product_size_helper: {
-              populate: {
-                Image: true,
-              },
-            },
-          },
+          populate: PRODUCT_POPULATE,
           pagination: { limit: 1 },
         });
 
@@ -116,35 +118,7 @@ export default factories.createCoreController(
               const productId = rawProducts[0].id;
               const foundProducts = await strapi.entityService.findMany("api::product.product", {
                 filters: { id: productId },
-                populate: {
-                  CoverImage: true,
-                  Media: true,
-                  Files: true,
-                  product_main_category: true,
-                  product_other_categories: true,
-                  product_tags: true,
-                  product_reviews: {
-                    populate: {
-                      user: {
-                        fields: ["id", "username", "FirstName", "LastName"],
-                      },
-                    },
-                  },
-                  product_variations: {
-                    populate: {
-                      product_variation_color: true,
-                      product_variation_size: true,
-                      product_variation_model: true,
-                      product_stock: true,
-                    },
-                  },
-                  product_faqs: true,
-                  product_size_helper: {
-                    populate: {
-                      Image: true,
-                    },
-                  },
-                },
+                populate: PRODUCT_POPULATE,
                 pagination: { limit: 1 },
               });
               product = (foundProducts as unknown[])[0];
@@ -168,38 +142,10 @@ export default factories.createCoreController(
             strapi.log.info(`[Product.findBySlug] Attempting ID-based lookup for product ID: ${productId}`);
             const productsById = await strapi.entityService.findMany("api::product.product", {
               filters: {
-                id: parseInt(decodedSlug, 10),
+                id: productId,
                 removedAt: { $null: true }, // Exclude trashed products
               },
-              populate: {
-                CoverImage: true,
-                Media: true,
-                Files: true,
-                product_main_category: true,
-                product_other_categories: true,
-                product_tags: true,
-                product_reviews: {
-                  populate: {
-                    user: {
-                      fields: ["id", "username", "FirstName", "LastName"],
-                    },
-                  },
-                },
-                product_variations: {
-                  populate: {
-                    product_variation_color: true,
-                    product_variation_size: true,
-                    product_variation_model: true,
-                    product_stock: true,
-                  },
-                },
-                product_faqs: true,
-                product_size_helper: {
-                  populate: {
-                    Image: true,
-                  },
-                },
-              },
+              populate: PRODUCT_POPULATE,
               pagination: { limit: 1 },
             });
 
@@ -221,8 +167,8 @@ export default factories.createCoreController(
           return ctx.notFound("Product not found");
         }
 
-        const productData = product as { id: number; attributes?: { Title?: string } };
-        strapi.log.info(`[Product.findBySlug] Successfully found product: ${productData.id} (${productData.attributes?.Title || 'N/A'})`);
+        const productData = product as { id: number; Title?: string };
+        strapi.log.info(`[Product.findBySlug] Successfully found product: ${productData.id} (${productData.Title || 'N/A'})`);
         return {
           data: product,
         };

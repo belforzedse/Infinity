@@ -76,7 +76,7 @@ export function resolveUserDisplayName(user: any): string {
  * Attach a resolved author display name to a blog post's `blog_author` object.
  *
  * @param blogPost - Blog post object to enrich; if falsy it is returned unchanged
- * @returns The same `blogPost` object. When `blogPost.blog_author` exists, it will include a `ResolvedAuthorName` property with the resolved author name (existing fields are preserved)
+ * @returns A new object with the enriched blog post. When `blogPost.blog_author` exists, it will include a `ResolvedAuthorName` property with the resolved author name (existing fields are preserved)
  */
 export function enrichBlogPostWithAuthorName(blogPost: any): any {
   if (!blogPost) {
@@ -85,9 +85,12 @@ export function enrichBlogPostWithAuthorName(blogPost: any): any {
 
   if (blogPost.blog_author) {
     const resolvedName = resolveBlogAuthorName(blogPost.blog_author);
-    blogPost.blog_author = {
-      ...blogPost.blog_author,
-      ResolvedAuthorName: resolvedName, // Add as separate field, don't override Name
+    return {
+      ...blogPost,
+      blog_author: {
+        ...blogPost.blog_author,
+        ResolvedAuthorName: resolvedName, // Add as separate field, don't override Name
+      },
     };
   }
 
@@ -98,9 +101,9 @@ export function enrichBlogPostWithAuthorName(blogPost: any): any {
  * Add resolved author names to each blog post in the provided array.
  *
  * @param blogPosts - The array of blog post objects to enrich; if the argument is not an array, it is returned unchanged.
- * @returns The same array with each post transformed so that, when available, `blog_author` contains a `ResolvedAuthorName` property.
+ * @returns A new array with each post transformed so that, when available, `blog_author` contains a `ResolvedAuthorName` property. If input is not an array, returns the input unchanged.
  */
-export function enrichBlogPostsWithAuthorNames(blogPosts: any[]): any[] {
+export function enrichBlogPostsWithAuthorNames(blogPosts: any[] | any): any[] | any {
   if (!Array.isArray(blogPosts)) {
     return blogPosts;
   }

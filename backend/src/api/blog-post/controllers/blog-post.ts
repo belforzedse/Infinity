@@ -22,12 +22,15 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     };
     if (!ctx.query) ctx.query = {};
     // Always ensure blog_author fields (including avatar) are available
+    // Deep merge blog_author.populate instead of overwriting
+    const userPopulate = ctx.query.populate || {};
     const mergedPopulate = {
       ...defaultPopulate,
-      ...(ctx.query.populate || {}),
+      ...userPopulate,
       blog_author: {
         populate: {
           Avatar: true,
+          ...(userPopulate.blog_author?.populate || {}),
         },
       },
     };
@@ -109,28 +112,22 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }
 
     // Create a new author entry with proper users_permissions_user relation
-
-    try {
-      const newAuthor = await strapi.entityService.create("api::blog-author.blog-author", {
-        data: {
-          Name: authorName,
-          Email: user.email,
-          users_permissions_user: user.id, // Link to users-permissions user, not local_user
-        },
-        populate: {
-          users_permissions_user: {
-            populate: {
-              user_info: "*",
-            },
+    const newAuthor = await strapi.entityService.create("api::blog-author.blog-author", {
+      data: {
+        Name: authorName,
+        Email: user.email,
+        users_permissions_user: user.id, // Link to users-permissions user, not local_user
+      },
+      populate: {
+        users_permissions_user: {
+          populate: {
+            user_info: "*",
           },
         },
-      });
+      },
+    });
 
-
-      return newAuthor;
-    } catch (error) {
-      throw error;
-    }
+    return newAuthor;
   },
 
   async getActorRoleName(userId?: number, fallback?: any): Promise<string | null> {
@@ -153,7 +150,7 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
 
     const user = (await (this as any).resolveUserFromAuthHeader(ctx)) || ctx.state.user;
 
-    console.log("🔍 Original populate from frontend:", JSON.stringify(ctx.query.populate, null, 2));
+    strapi.log.debug("🔍 Original populate from frontend:", JSON.stringify(ctx.query.populate, null, 2));
 
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
@@ -197,13 +194,13 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }) as any;
 
     const postsCount = response?.data?.length || 0;
-    console.log("📊 Blog post find result:", postsCount, "posts");
+    strapi.log.debug(`📊 Blog post find result: ${postsCount} posts`);
     if (postsCount > 0) {
       const firstPost = response.data?.[0];
       const firstAuthor = firstPost?.attributes?.blog_author || firstPost?.blog_author;
-      console.log("👤 Author in response:", firstAuthor ? "EXISTS" : "MISSING");
+      strapi.log.debug(`👤 Author in response: ${firstAuthor ? "EXISTS" : "MISSING"}`);
       if (firstAuthor) {
-        console.log("📝 Author name:", firstAuthor.ResolvedAuthorName || firstAuthor.Name);
+        strapi.log.debug(`📝 Author name: ${firstAuthor.ResolvedAuthorName || firstAuthor.Name}`);
       }
     }
 
@@ -234,10 +231,14 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }
 
     // Increment view count for published posts (only for non-admin users)
+    // Use atomic database update to prevent race conditions
     if (post.Status === "Published" && !hasEditorRole) {
-      await strapi.entityService.update("api::blog-post.blog-post", id, {
-        data: { ViewCount: (post.ViewCount || 0) + 1 } as any
-      });
+      await strapi.db.connection.raw(
+        `UPDATE blog_posts
+         SET "ViewCount" = COALESCE("ViewCount", 0) + 1
+         WHERE id = ? AND "Status" = 'Published'`,
+        [id]
+      );
     }
 
     return { data: post };
@@ -405,10 +406,14 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }
 
     // Increment view count for published posts (only for non-admin users)
+    // Use atomic database update to prevent race conditions
     if (post.Status === "Published" && !hasEditorRole) {
-      await strapi.entityService.update("api::blog-post.blog-post", post.id, {
-        data: { ViewCount: (post.ViewCount || 0) + 1 } as any
-      });
+      await strapi.db.connection.raw(
+        `UPDATE blog_posts
+         SET "ViewCount" = COALESCE("ViewCount", 0) + 1
+         WHERE id = ? AND "Status" = 'Published'`,
+        [post.id]
+      );
     }
 
     return { data: post };

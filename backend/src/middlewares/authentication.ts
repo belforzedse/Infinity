@@ -20,9 +20,16 @@ export default (_config, { strapi }: { strapi: Strapi }) => {
       let payload: any = null;
       try {
         payload = await strapi.plugin("users-permissions").service("jwt").verify(token);
-      } catch {
+      } catch (pluginError) {
+        strapi.log.debug("Plugin JWT verification failed, trying manual verification", pluginError);
         // Fallback to manual verify with JWT_SECRET for legacy tokens
-        payload = jwt.verify(token, process.env.JWT_SECRET || "default_jwt_secret");
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+          strapi.log.error("JWT_SECRET environment variable is not set");
+          ctx.unauthorized("Authentication configuration error");
+          return;
+        }
+        payload = jwt.verify(token, jwtSecret);
       }
 
       const userId = Number(payload?.id || payload?.userId);
