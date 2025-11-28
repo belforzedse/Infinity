@@ -3,30 +3,24 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 /**
  * On-demand revalidation API route
- * 
+ *
  * This endpoint allows Strapi to trigger Next.js cache revalidation
  * when blog posts are published, updated, or deleted.
- * 
+ *
  * Usage from Strapi:
  * POST /api/revalidate
  * Headers: { "Authorization": "Bearer <secret>" }
  * Body: { "path": "/blog-post-slug", "type": "blog-post" }
- * 
+ *
  * Security: Protected by REVALIDATION_SECRET token
  */
 export async function POST(request: NextRequest) {
   try {
     // Verify authorization token
     const authHeader = request.headers.get("authorization");
-    const secret = process.env.REVALIDATION_SECRET || process.env.NEXT_PUBLIC_REVALIDATION_SECRET;
+    // Hardcoded secret for now (TODO: move to environment variable)
+    const secret = "REVALIDATION_SECRET";
     
-    if (!secret) {
-      return NextResponse.json(
-        { error: "Revalidation secret not configured" },
-        { status: 500 }
-      );
-    }
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Missing or invalid authorization header" },
@@ -57,14 +51,14 @@ export async function POST(request: NextRequest) {
     if (type === "blog-post" && path) {
       // Ensure path starts with / (blog post routes are at /[slug], not /blog/[slug])
       const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-      
+
       // Revalidate the specific blog post page
       revalidatePath(normalizedPath);
       // Also revalidate the blog listing page
       revalidatePath("/blog");
       // Revalidate sitemap
       revalidatePath("/sitemap.xml");
-      
+
       return NextResponse.json({
         revalidated: true,
         now: Date.now(),
@@ -76,7 +70,7 @@ export async function POST(request: NextRequest) {
       // Revalidate blog listing and sitemap
       revalidatePath("/blog");
       revalidatePath("/sitemap.xml");
-      
+
       return NextResponse.json({
         revalidated: true,
         now: Date.now(),
@@ -96,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     // Tag-based revalidation
     if (tag) {
-      revalidateTag(tag);
+      revalidateTag(tag, "page");
       return NextResponse.json({
         revalidated: true,
         now: Date.now(),
