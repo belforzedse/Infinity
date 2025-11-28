@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * Google Consent Mode v2 implementation
  * Handles user consent for analytics and advertising
  * Required for GDPR/CCPA compliance in EEA/UK
- * 
+ *
  * Note: This component requires Google Analytics (gtag) to be loaded externally.
  * The gtag script must be loaded via Next.js Script component, Google Tag Manager,
  * or another method before this component can initialize consent mode.
@@ -55,7 +55,7 @@ export function ConsentManager() {
     let attempts = 0;
     const pollInterval = setInterval(() => {
       attempts++;
-      
+
       if (initializeConsentMode(storedConsent)) {
         clearInterval(pollInterval);
         return;

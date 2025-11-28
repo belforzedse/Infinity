@@ -1,3 +1,5 @@
+import { safeJsonLd } from "@/utils/seo";
+
 interface FAQItem {
   question: string;
   answer: string;
@@ -28,7 +30,7 @@ export function FAQSchema({ faqs }: FAQSchemaProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { ProductDetail } from "@/services/product/product";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { safeJsonLd } from "@/utils/seo";
 
 interface ProductSchemaProps {
   product: ProductDetail;
@@ -115,7 +116,7 @@ export function ProductSchema({ product, slug }: ProductSchemaProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 }

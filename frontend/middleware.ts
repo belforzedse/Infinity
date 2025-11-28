@@ -58,7 +58,7 @@ export const config = {
      * - _next/static (static files) - excluded because Next.js handles static file caching
      * - _next/image (image optimization files) - excluded for performance
      * - favicon.ico (favicon file) - excluded for performance
-     * 
+     *
      * Cache-control headers for excluded paths are handled by Next.js automatically.
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
