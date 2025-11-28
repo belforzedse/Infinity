@@ -44,8 +44,8 @@ export default function BlurImage({
   const [error, setError] = useState(false);
 
   // Use fallback image if src is empty, null, or undefined
-  const imageSrc = !src || src === "" || (typeof src === "string" && src.trim() === "") 
-    ? generateFallbackImage() 
+  const imageSrc = !src || src === "" || (typeof src === "string" && src.trim() === "")
+    ? generateFallbackImage()
     : src;
 
   const defaultBlurDataURL = blurDataURL || generateBlurDataURL();

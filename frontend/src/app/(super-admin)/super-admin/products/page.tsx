@@ -619,7 +619,7 @@ export default function ProductsPage() {
         cancelText="انصراف"
         onConfirm={async () => {
           if (!pendingPermanentDelete) return;
-          
+
           const { selectedProducts } = pendingPermanentDelete;
           let deletedCount = 0;
           const failedIds: string[] = [];
