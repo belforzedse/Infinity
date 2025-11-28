@@ -4,6 +4,7 @@
 
 import { factories } from "@strapi/strapi";
 import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
+import { resolveUserDisplayName } from "../../../utils/blog-helpers";
 import { normalizePopulateQuery } from "../../../utils/normalizePopulate";
 
 export default factories.createCoreController("api::blog-comment.blog-comment", ({ strapi }) => ({
@@ -81,13 +82,17 @@ export default factories.createCoreController("api::blog-comment.blog-comment", 
     }
 
     const { data } = ctx.request.body;
+    const populatedUser = await fetchUserWithRole(strapi, user.id);
+    const commentAuthor = populatedUser || user;
+    const resolvedName = resolveUserDisplayName(commentAuthor);
 
     // Set user and date automatically
     const commentData = {
       ...data,
       user: user.id,
       Date: new Date(),
-      Status: "Pending" // All comments start as pending
+      Status: "Pending", // All comments start as pending
+      Name: resolvedName,
     };
 
     const comment = await strapi.entityService.create("api::blog-comment.blog-comment", {

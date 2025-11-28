@@ -460,6 +460,10 @@ export interface ApiBlogCommentBlogComment extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::blog-comment.blog-comment", "oneToOne", "admin::user"> &
       Attribute.Private;
     Date: Attribute.DateTime & Attribute.Required;
+    Name: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
     parent_comment: Attribute.Relation<
       "api::blog-comment.blog-comment",
       "manyToOne",

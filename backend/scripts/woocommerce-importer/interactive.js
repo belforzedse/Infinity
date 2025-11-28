@@ -7,16 +7,17 @@
  * with support for all entity types: Categories, Products, Variations, Orders, Users
  */
 
-const readline = require('readline');
-const CategoryImporter = require('./importers/CategoryImporter');
-const ProductImporter = require('./importers/ProductImporter');
-const VariationImporter = require('./importers/VariationImporter');
-const OrderImporter = require('./importers/OrderImporter');
-const UserImporter = require('./importers/UserImporter');
-const DuplicateTracker = require('./utils/DuplicateTracker');
-const { syncShippingLocations } = require('./utils/ShippingSeeder');
-const Logger = require('./utils/Logger');
-const config = require('./config');
+const readline = require("readline");
+const CategoryImporter = require("./importers/CategoryImporter");
+const ProductImporter = require("./importers/ProductImporter");
+const VariationImporter = require("./importers/VariationImporter");
+const OrderImporter = require("./importers/OrderImporter");
+const UserImporter = require("./importers/UserImporter");
+const BlogPostImporter = require("./importers/BlogPostImporter");
+const DuplicateTracker = require("./utils/DuplicateTracker");
+const { syncShippingLocations } = require("./utils/ShippingSeeder");
+const Logger = require("./utils/Logger");
+const config = require("./config");
 
 // Initialize
 const logger = new Logger();
@@ -25,13 +26,13 @@ let duplicateTracker = new DuplicateTracker(config, logger);
 // Create readline interface for prompts
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 // Helper function for prompts
 function prompt(question) {
-  return new Promise(resolve => {
-    rl.question(question, answer => {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
       resolve(answer.trim());
     });
   });
@@ -54,9 +55,9 @@ function normalizeDateInput(value, boundary) {
   const isDateOnly = DATE_ONLY_REGEX.test(raw);
   let timestamp = parsed.getTime();
 
-  if (isDateOnly && boundary === 'after') {
+  if (isDateOnly && boundary === "after") {
     timestamp += ONE_DAY_MS;
-  } else if (isDateOnly && boundary === 'before') {
+  } else if (isDateOnly && boundary === "before") {
     timestamp += ONE_DAY_MS - 1;
   }
 
@@ -65,7 +66,7 @@ function normalizeDateInput(value, boundary) {
 
 function formatDateDisplay(value) {
   if (!value) {
-    return '';
+    return "";
   }
 
   try {
@@ -79,16 +80,19 @@ function formatDateDisplay(value) {
  * Check API health before import
  */
 async function checkApiHealth() {
-  console.log('\n🔍 Checking API Health...\n');
+  console.log("\n🔍 Checking API Health...\n");
 
-  const { WooCommerceClient, StrapiClient } = require('./utils/ApiClient');
+  const { WooCommerceClient, StrapiClient, WordPressClient } = require("./utils/ApiClient");
   const wooClient = new WooCommerceClient(config, logger);
   const strapiClient = new StrapiClient(config, logger);
+  const wpClient = new WordPressClient(config, logger);
 
-  let wooStatus = '❌ Unknown';
-  let strapiStatus = '❌ Unknown';
+  let wooStatus = "❌ Unknown";
+  let strapiStatus = "❌ Unknown";
+  let wordpressStatus = "⏭️ Skipped (blog import disabled)";
   let wooResponseTime = 0;
   let strapiResponseTime = 0;
+  let wordpressResponseTime = 0;
 
   // Check WooCommerce
   try {
@@ -110,18 +114,37 @@ async function checkApiHealth() {
     strapiStatus = `❌ Failed (${error.message})`;
   }
 
+  if (importOptions.blogPosts?.enabled) {
+    try {
+      const startTime = Date.now();
+      await wpClient.getPosts(1, 1, { status: "publish" });
+      wordpressResponseTime = Date.now() - startTime;
+      wordpressStatus = `✅ Connected (${wordpressResponseTime}ms)`;
+    } catch (error) {
+      wordpressStatus = `❌ Failed (${error.message})`;
+    }
+  }
+
   console.log(`WooCommerce API:  ${wooStatus}`);
   console.log(`Strapi API:       ${strapiStatus}`);
+  if (importOptions.blogPosts?.enabled) {
+    console.log(`WordPress API:    ${wordpressStatus}`);
+  }
 
-  if (wooStatus.includes('❌') || strapiStatus.includes('❌')) {
-    console.log('\n⚠️  One or more APIs are unreachable!');
-    const proceed = await prompt('Continue anyway? (y/n): ');
-    if (proceed.toLowerCase() !== 'y') {
+  const hasFailure =
+    wooStatus.includes("❌") ||
+    strapiStatus.includes("❌") ||
+    (importOptions.blogPosts?.enabled && wordpressStatus.includes("❌"));
+
+  if (hasFailure) {
+    console.log("\n⚠️  One or more APIs are unreachable!");
+    const proceed = await prompt("Continue anyway? (y/n): ");
+    if (proceed.toLowerCase() !== "y") {
       return false;
     }
   }
 
-  console.log('\n✅ API health check complete!');
+  console.log("\n✅ API health check complete!");
   return true;
 }
 
@@ -133,20 +156,20 @@ async function validateImportDependencies(type) {
 
   const checks = {
     products: {
-      description: 'Products require categories to be imported first',
-      required: 'categories',
-      checkFn: () => (stats.categories?.total || 0) > 0
+      description: "Products require categories to be imported first",
+      required: "categories",
+      checkFn: () => (stats.categories?.total || 0) > 0,
     },
     variations: {
-      description: 'Variations require products to be imported first',
-      required: 'products',
-      checkFn: () => (stats.products?.total || 0) > 0
+      description: "Variations require products to be imported first",
+      required: "products",
+      checkFn: () => (stats.products?.total || 0) > 0,
     },
     orders: {
-      description: 'Orders require products and users to be imported first',
-      required: 'products, users',
-      checkFn: () => (stats.products?.total || 0) > 0 && (stats.users?.total || 0) > 0
-    }
+      description: "Orders require products and users to be imported first",
+      required: "products, users",
+      checkFn: () => (stats.products?.total || 0) > 0 && (stats.users?.total || 0) > 0,
+    },
   };
 
   if (!checks[type]) {
@@ -156,8 +179,8 @@ async function validateImportDependencies(type) {
   const check = checks[type];
   if (!check.checkFn()) {
     console.log(`\n⚠️  WARNING: ${check.description}`);
-    const proceed = await prompt('Continue anyway? (y/n): ');
-    return proceed.toLowerCase() === 'y';
+    const proceed = await prompt("Continue anyway? (y/n): ");
+    return proceed.toLowerCase() === "y";
   }
 
   return true;
@@ -168,32 +191,34 @@ async function validateImportDependencies(type) {
  */
 async function showImportPreview(type, options) {
   console.log(`\n📋 Preview: ${type.toUpperCase()}`);
-  console.log('Running dry-run to show preview...\n');
+  console.log("Running dry-run to show preview...\n");
 
   try {
     let importer;
-    if (type === 'categories') {
+    if (type === "categories") {
       importer = new CategoryImporter(config, logger);
-    } else if (type === 'users') {
+    } else if (type === "users") {
       importer = new UserImporter(config, logger);
-    } else if (type === 'products') {
+    } else if (type === "products") {
       importer = new ProductImporter(config, logger);
-    } else if (type === 'variations') {
+    } else if (type === "variations") {
       importer = new VariationImporter(config, logger);
-    } else if (type === 'orders') {
+    } else if (type === "orders") {
       importer = new OrderImporter(config, logger);
+    } else if (type === "blogPosts") {
+      importer = new BlogPostImporter(config, logger);
     }
 
     const dryRunStats = await importer.import({ ...options, dryRun: true });
 
-    console.log('\n📊 Preview Results:');
+    console.log("\n📊 Preview Results:");
     console.log(`  ├─ Total to process: ${dryRunStats.total || 0}`);
     console.log(`  ├─ Would import: ${dryRunStats.success || 0}`);
     console.log(`  ├─ Would skip: ${dryRunStats.skipped || 0}`);
     console.log(`  └─ Would fail: ${dryRunStats.failed || 0}`);
 
-    const proceed = await prompt('\nProceed with actual import? (y/n): ');
-    return proceed.toLowerCase() === 'y';
+    const proceed = await prompt("\nProceed with actual import? (y/n): ");
+    return proceed.toLowerCase() === "y";
   } catch (error) {
     console.log(`❌ Preview failed: ${error.message}`);
     return false;
@@ -201,7 +226,7 @@ async function showImportPreview(type, options) {
 }
 
 // Track selected credentials environment
-let selectedCredentialEnv = 'production';
+let selectedCredentialEnv = "production";
 
 // Import options
 let importOptions = {
@@ -219,7 +244,7 @@ let importOptions = {
     publishedAfter: null, // Only import products uploaded/published after this timestamp
     // Image options
     maxImagesPerProduct: 3, // Default: 3 images per product
-    updateProductsWithExistingImages: true // Always update images, even for existing products to avoid dangling references
+    updateProductsWithExistingImages: true, // Always update images, even for existing products to avoid dangling references
   },
   variations: {
     enabled: true,
@@ -227,9 +252,18 @@ let importOptions = {
     page: 1,
     dryRun: false,
     onlyImported: true,
-    useNameFilter: false
+    useNameFilter: false,
   },
-  orders: { enabled: false, limit: 50, page: 1, dryRun: true }
+  orders: { enabled: false, limit: 50, page: 1, dryRun: false },
+  blogPosts: {
+    enabled: false,
+    limit: 100,
+    page: 1,
+    dryRun: true,
+    status: "publish",
+    after: null,
+    batchSize: config.import.batchSizes.blogPosts || 20,
+  },
 };
 
 /**
@@ -245,21 +279,21 @@ async function selectCredentials() {
 ╚════════════════════════════════════════════════════════════════════════════╝
   `);
 
-  console.log('\n📋 Available Environments:\n');
-  console.log('  1️⃣  Production');
-  console.log('     URL: https://api.infinitycolor.co/api\n');
-  console.log('  2️⃣  Staging');
-  console.log('     URL: https://api.infinity.rgbgroup.ir/api\n');
-  console.log('  3️⃣  Local');
-  console.log('     URL: http://localhost:1337/api\n');
+  console.log("\n📋 Available Environments:\n");
+  console.log("  1️⃣  Production");
+  console.log("     URL: https://api.infinitycolor.co/api\n");
+  console.log("  2️⃣  Staging");
+  console.log("     URL: https://api.infinity.rgbgroup.ir/api\n");
+  console.log("  3️⃣  Local");
+  console.log("     URL: http://localhost:1337/api\n");
 
-  const choice = await prompt('Select environment (1-3, default: 1): ');
+  const choice = await prompt("Select environment (1-3, default: 1): ");
 
-  let selected = 'production';
-  if (choice === '2') {
-    selected = 'staging';
-  } else if (choice === '3') {
-    selected = 'local';
+  let selected = "production";
+  if (choice === "2") {
+    selected = "staging";
+  } else if (choice === "3") {
+    selected = "local";
   }
 
   selectedCredentialEnv = selected;
@@ -278,8 +312,8 @@ async function selectCredentials() {
   console.log(`\n✅ Using ${selected.toUpperCase()} credentials`);
   console.log(`   Base URL: ${config.strapi.baseUrl}`);
   console.log(`   Tracking Directory: ${config.duplicateTracking.storageDir}\n`);
-  await prompt('Press Enter to continue...');
-};
+  await prompt("Press Enter to continue...");
+}
 
 /**
  * Display main menu
@@ -298,21 +332,27 @@ async function showMainMenu() {
   console.log(`🔐 Current Credentials: ${selectedCredentialEnv.toUpperCase()}`);
   console.log(`   Base URL: ${config.strapi.baseUrl}\n`);
 
-  console.log('📋 Current Import Configuration:\n');
+  console.log("📋 Current Import Configuration:\n");
 
   // Display current settings
   Object.entries(importOptions).forEach(([type, opts]) => {
-    const status = opts.enabled ? '✅' : '⭕';
+    const status = opts.enabled ? "✅" : "⭕";
     console.log(`  ${status} ${type.toUpperCase()}`);
-    console.log(`     Limit: ${opts.limit} | Dry Run: ${opts.dryRun ? 'Yes' : 'No'}`);
+    console.log(`     Limit: ${opts.limit} | Dry Run: ${opts.dryRun ? "Yes" : "No"}`);
     if (opts.categoryIds && opts.categoryIds.length > 0) {
-      console.log(`     Categories: [${opts.categoryIds.join(', ')}]`);
+      console.log(`     Categories: [${opts.categoryIds.join(", ")}]`);
     }
     // Show image options for products
-    if (type === 'products') {
-      console.log(`     Max Images: ${opts.maxImagesPerProduct === 999 ? 'Unlimited' : opts.maxImagesPerProduct}`);
-      console.log(`     Update Existing Images: ${opts.updateProductsWithExistingImages ? 'Yes' : 'No'}`);
-      console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? 'On' : 'Off'}`);
+    if (type === "products") {
+      console.log(
+        `     Max Images: ${
+          opts.maxImagesPerProduct === 999 ? "Unlimited" : opts.maxImagesPerProduct
+        }`,
+      );
+      console.log(
+        `     Update Existing Images: ${opts.updateProductsWithExistingImages ? "Yes" : "No"}`,
+      );
+      console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? "On" : "Off"}`);
       if (opts.createdAfter) {
         console.log(`     Created After: ${formatDateDisplay(opts.createdAfter)}`);
       }
@@ -324,27 +364,35 @@ async function showMainMenu() {
       }
     }
     // Show variations filter
-    if (type === 'variations') {
-      console.log(`     Only Imported Parents: ${opts.onlyImported ? 'Yes' : 'No'}`);
-      console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? 'On' : 'Off'}`);
+    if (type === "variations") {
+      console.log(`     Only Imported Parents: ${opts.onlyImported ? "Yes" : "No"}`);
+      console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? "On" : "Off"}`);
+    }
+    if (type === "blogPosts") {
+      console.log(`     WP Status: ${opts.status}`);
+      if (opts.after) {
+        console.log(`     Created After: ${formatDateDisplay(opts.after)}`);
+      }
+      console.log(`     Batch Size: ${opts.batchSize}`);
     }
   });
 
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-  console.log('\n📝 Main Menu:\n');
-  console.log('  1️⃣  Change Credentials (Production/Staging)');
-  console.log('  2️⃣  Configure Categories Import');
-  console.log('  3️⃣  Configure Users Import');
-  console.log('  4️⃣  Configure Products Import');
-  console.log('  5️⃣  Configure Variations Import');
-  console.log('  6️⃣  Configure Orders Import');
-  console.log('  7️⃣  Run All Enabled Importers');
-  console.log('  8️⃣  View Import Status & Mappings');
-  console.log('  9️⃣  Clear All Mappings (Reset Progress)');
-  console.log('  🔟  Sync Shipping Provinces & Cities');
-  console.log('  1️⃣1️⃣  Exit\n');
+  console.log("\n📝 Main Menu:\n");
+  console.log("  1️⃣  Change Credentials (Production/Staging)");
+  console.log("  2️⃣  Configure Categories Import");
+  console.log("  3️⃣  Configure Users Import");
+  console.log("  4️⃣  Configure Products Import");
+  console.log("  5️⃣  Configure Variations Import");
+  console.log("  6️⃣  Configure Orders Import");
+  console.log("  7️⃣  Configure Blog Posts Import (WordPress)");
+  console.log("  8️⃣  Run All Enabled Importers");
+  console.log("  9️⃣  View Import Status & Mappings");
+  console.log("  🔟  Clear All Mappings (Reset Progress)");
+  console.log("  1️⃣1️⃣ Sync Shipping Provinces & Cities");
+  console.log("  1️⃣2️⃣ Exit\n");
 
-  const choice = await prompt('Enter your choice (1-11): ');
+  const choice = await prompt("Enter your choice (1-12): ");
   return choice;
 }
 
@@ -359,7 +407,7 @@ async function configureImporter(type) {
 
   // Enable/disable
   const enable = await prompt(`Enable ${type} import? (y/n): `);
-  opts.enabled = enable.toLowerCase() === 'y';
+  opts.enabled = enable.toLowerCase() === "y";
 
   if (!opts.enabled) {
     return;
@@ -380,49 +428,87 @@ async function configureImporter(type) {
   // Dry run
   const dryRunInput = await prompt(`Dry run mode (y/n)? (default: y): `);
   if (dryRunInput.trim()) {
-    opts.dryRun = dryRunInput.toLowerCase() !== 'n';
+    opts.dryRun = dryRunInput.toLowerCase() !== "n";
   }
 
   // Only import variations for already-imported products (only for variations)
-  if (type === 'variations') {
+  if (type === "variations") {
     const onlyImportedInput = await prompt(
-      `Only import variations for products already in mappings? (y/n, default: y): `
+      `Only import variations for products already in mappings? (y/n, default: y): `,
     );
     if (onlyImportedInput.trim()) {
-      opts.onlyImported = onlyImportedInput.toLowerCase() !== 'n';
-      const status = opts.onlyImported ? '✅ ENABLED' : '⭕ DISABLED';
-      console.log(`${status} - Will ${opts.onlyImported ? '' : 'NOT '}filter by imported parent products`);
+      opts.onlyImported = onlyImportedInput.toLowerCase() !== "n";
+      const status = opts.onlyImported ? "✅ ENABLED" : "⭕ DISABLED";
+      console.log(
+        `${status} - Will ${opts.onlyImported ? "" : "NOT "}filter by imported parent products`,
+      );
     }
 
     const variationNameFilterInput = await prompt(
-      `Use default کیف/کفش keyword filter for parent products? (y/n, default: y): `
+      `Use default کیف/کفش keyword filter for parent products? (y/n, default: y): `,
     );
     if (variationNameFilterInput.trim()) {
-      opts.useNameFilter = variationNameFilterInput.toLowerCase() !== 'n';
+      opts.useNameFilter = variationNameFilterInput.toLowerCase() !== "n";
+    }
+  }
+
+  if (type === "blogPosts") {
+    const statusInput = await prompt(
+      `WordPress status to import (publish,draft,future) (default: ${opts.status}): `,
+    );
+    if (statusInput.trim()) {
+      opts.status = statusInput.toLowerCase();
+    }
+
+    const afterInput = await prompt(
+      `Only import posts created after (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${
+        opts.after ? `, current ${formatDateDisplay(opts.after)}` : ""
+      }): `,
+    );
+    if (afterInput) {
+      if (afterInput.toLowerCase() === "clear") {
+        opts.after = null;
+        console.log("⭕ Created-after filter removed");
+      } else {
+        try {
+          opts.after = normalizeDateInput(afterInput, "after");
+          console.log(`✅ Created-after filter set to: ${formatDateDisplay(opts.after)}`);
+        } catch (error) {
+          console.log(`❌ ${error.message}. Keeping previous value.`);
+        }
+      }
+    }
+
+    const batchInput = await prompt(`Posts per page? (default: ${opts.batchSize}): `);
+    if (batchInput.trim()) {
+      const parsed = parseInt(batchInput);
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        opts.batchSize = parsed;
+      }
     }
   }
 
   // Category filter (only for products)
-  if (type === 'products') {
+  if (type === "products") {
     const catInput = await prompt(
-      `Filter by WooCommerce category IDs? (comma-separated, e.g., "5,12,18", or leave blank): `
+      `Filter by WooCommerce category IDs? (comma-separated, e.g., "5,12,18", or leave blank): `,
     );
     if (catInput.trim()) {
       opts.categoryIds = catInput
-        .split(',')
-        .map(id => parseInt(id.trim()))
-        .filter(id => !isNaN(id));
+        .split(",")
+        .map((id) => parseInt(id.trim()))
+        .filter((id) => !isNaN(id));
       if (opts.categoryIds.length > 0) {
-        console.log(`✅ Filtering by categories: [${opts.categoryIds.join(', ')}]`);
+        console.log(`✅ Filtering by categories: [${opts.categoryIds.join(", ")}]`);
       }
     }
 
     // Image configuration options
-    console.log('\n🖼️  Image Configuration:');
+    console.log("\n🖼️  Image Configuration:");
 
     // Max images per product
     const maxImagesInput = await prompt(
-      `Max gallery images per product? (default: ${opts.maxImagesPerProduct}): `
+      `Max gallery images per product? (default: ${opts.maxImagesPerProduct}): `,
     );
     if (maxImagesInput.trim()) {
       const maxImages = parseInt(maxImagesInput);
@@ -434,31 +520,37 @@ async function configureImporter(type) {
 
     // Update existing images toggle
     const updateExistingInput = await prompt(
-      `Update products that already have images? (y/n, default: n): `
+      `Update products that already have images? (y/n, default: n): `,
     );
     if (updateExistingInput.trim()) {
-      opts.updateProductsWithExistingImages = updateExistingInput.toLowerCase() === 'y';
-      const status = opts.updateProductsWithExistingImages ? '✅ ENABLED' : '⭕ DISABLED';
-      console.log(`${status} - Will ${opts.updateProductsWithExistingImages ? '' : 'NOT '}update products with existing images`);
+      opts.updateProductsWithExistingImages = updateExistingInput.toLowerCase() === "y";
+      const status = opts.updateProductsWithExistingImages ? "✅ ENABLED" : "⭕ DISABLED";
+      console.log(
+        `${status} - Will ${
+          opts.updateProductsWithExistingImages ? "" : "NOT "
+        }update products with existing images`,
+      );
     }
 
     const productNameFilterInput = await prompt(
-      `Use default کیف/کفش keyword filter for products? (y/n, default: y): `
+      `Use default کیف/کفش keyword filter for products? (y/n, default: y): `,
     );
     if (productNameFilterInput.trim()) {
-      opts.useNameFilter = productNameFilterInput.toLowerCase() !== 'n';
+      opts.useNameFilter = productNameFilterInput.toLowerCase() !== "n";
     }
 
     const createdAfterInput = await prompt(
-      `Created-after filter (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${opts.createdAfter ? `, current ${formatDateDisplay(opts.createdAfter)}` : ''}): `
+      `Created-after filter (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${
+        opts.createdAfter ? `, current ${formatDateDisplay(opts.createdAfter)}` : ""
+      }): `,
     );
     if (createdAfterInput) {
-      if (createdAfterInput.toLowerCase() === 'clear') {
+      if (createdAfterInput.toLowerCase() === "clear") {
         opts.createdAfter = null;
-        console.log('⭕ Created-after filter removed');
+        console.log("⭕ Created-after filter removed");
       } else {
         try {
-        opts.createdAfter = normalizeDateInput(createdAfterInput, 'after');
+          opts.createdAfter = normalizeDateInput(createdAfterInput, "after");
           console.log(`✅ Created-after filter set to: ${formatDateDisplay(opts.createdAfter)}`);
         } catch (error) {
           console.log(`❌ ${error.message}. Keeping previous value.`);
@@ -467,15 +559,17 @@ async function configureImporter(type) {
     }
 
     const createdBeforeInput = await prompt(
-      `Created-before filter (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${opts.createdBefore ? `, current ${formatDateDisplay(opts.createdBefore)}` : ''}): `
+      `Created-before filter (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${
+        opts.createdBefore ? `, current ${formatDateDisplay(opts.createdBefore)}` : ""
+      }): `,
     );
     if (createdBeforeInput) {
-      if (createdBeforeInput.toLowerCase() === 'clear') {
+      if (createdBeforeInput.toLowerCase() === "clear") {
         opts.createdBefore = null;
-        console.log('⭕ Created-before filter removed');
+        console.log("⭕ Created-before filter removed");
       } else {
         try {
-        opts.createdBefore = normalizeDateInput(createdBeforeInput, 'before');
+          opts.createdBefore = normalizeDateInput(createdBeforeInput, "before");
           console.log(`✅ Created-before filter set to: ${formatDateDisplay(opts.createdBefore)}`);
         } catch (error) {
           console.log(`❌ ${error.message}. Keeping previous value.`);
@@ -484,16 +578,20 @@ async function configureImporter(type) {
     }
 
     const publishedAfterInput = await prompt(
-      `Published-after filter - only import products uploaded after this date (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${opts.publishedAfter ? `, current ${formatDateDisplay(opts.publishedAfter)}` : ''}): `
+      `Published-after filter - only import products uploaded after this date (YYYY-MM-DD or ISO, 'clear' to remove, leave blank to keep${
+        opts.publishedAfter ? `, current ${formatDateDisplay(opts.publishedAfter)}` : ""
+      }): `,
     );
     if (publishedAfterInput) {
-      if (publishedAfterInput.toLowerCase() === 'clear') {
+      if (publishedAfterInput.toLowerCase() === "clear") {
         opts.publishedAfter = null;
-        console.log('⭕ Published-after filter removed');
+        console.log("⭕ Published-after filter removed");
       } else {
         try {
-          opts.publishedAfter = normalizeDateInput(publishedAfterInput, 'after');
-          console.log(`✅ Published-after filter set to: ${formatDateDisplay(opts.publishedAfter)}`);
+          opts.publishedAfter = normalizeDateInput(publishedAfterInput, "after");
+          console.log(
+            `✅ Published-after filter set to: ${formatDateDisplay(opts.publishedAfter)}`,
+          );
         } catch (error) {
           console.log(`❌ ${error.message}. Keeping previous value.`);
         }
@@ -502,7 +600,7 @@ async function configureImporter(type) {
   }
 
   console.log(`\n✅ ${type.toUpperCase()} configuration saved!`);
-  await prompt('Press Enter to continue...');
+  await prompt("Press Enter to continue...");
 }
 
 /**
@@ -510,9 +608,9 @@ async function configureImporter(type) {
  */
 async function runAllImporters() {
   console.clear();
-  console.log(`\n${'='.repeat(80)}`);
-  console.log('🚀 Starting Import Process');
-  console.log(`${'='.repeat(80)}\n`);
+  console.log(`\n${"=".repeat(80)}`);
+  console.log("🚀 Starting Import Process");
+  console.log(`${"=".repeat(80)}\n`);
 
   // Check if any importer is enabled
   const enabled = Object.entries(importOptions)
@@ -520,39 +618,39 @@ async function runAllImporters() {
     .map(([type, _]) => type);
 
   if (enabled.length === 0) {
-    console.log('❌ No importers enabled! Configure them first.\n');
-    await prompt('Press Enter to continue...');
+    console.log("❌ No importers enabled! Configure them first.\n");
+    await prompt("Press Enter to continue...");
     return;
   }
 
-  console.log(`📊 Enabled importers: ${enabled.join(', ').toUpperCase()}\n`);
+  console.log(`📊 Enabled importers: ${enabled.join(", ").toUpperCase()}\n`);
 
   // Check API health
   const healthOk = await checkApiHealth();
   if (!healthOk) {
-    console.log('\n❌ API health check failed. Aborting.\n');
-    await prompt('Press Enter to continue...');
+    console.log("\n❌ API health check failed. Aborting.\n");
+    await prompt("Press Enter to continue...");
     return;
   }
 
   // Confirm
-  const confirm = await prompt('\nProceed with import? (y/n): ');
-  if (confirm.toLowerCase() !== 'y') {
-    console.log('\n❌ Import cancelled');
-    await prompt('Press Enter to continue...');
+  const confirm = await prompt("\nProceed with import? (y/n): ");
+  if (confirm.toLowerCase() !== "y") {
+    console.log("\n❌ Import cancelled");
+    await prompt("Press Enter to continue...");
     return;
   }
 
   // Run importers in correct order
-  const importOrder = ['categories', 'users', 'products', 'variations', 'orders'];
+  const importOrder = ["categories", "users", "products", "variations", "orders", "blogPosts"];
   const stats = {};
 
   for (const type of importOrder) {
     if (!importOptions[type].enabled) continue;
 
-    console.log(`\n${'─'.repeat(80)}`);
+    console.log(`\n${"─".repeat(80)}`);
     console.log(`📦 Running ${type.toUpperCase()} Importer`);
-    console.log(`${'─'.repeat(80)}\n`);
+    console.log(`${"─".repeat(80)}\n`);
 
     // Validate dependencies
     const depsOk = await validateImportDependencies(type);
@@ -564,24 +662,25 @@ async function runAllImporters() {
     try {
       const opts = importOptions[type];
 
-      if (type === 'categories') {
+      if (type === "categories") {
         const importer = new CategoryImporter(config, logger);
         stats[type] = await importer.import({
           limit: opts.limit,
           page: opts.page,
-          dryRun: opts.dryRun
+          dryRun: opts.dryRun,
         });
-      } else if (type === 'users') {
+      } else if (type === "users") {
         const importer = new UserImporter(config, logger);
         stats[type] = await importer.import({
           limit: opts.limit,
           page: opts.page,
-          dryRun: opts.dryRun
+          dryRun: opts.dryRun,
         });
-      } else if (type === 'products') {
+      } else if (type === "products") {
         // Update config with image options before importing
         config.import.images.maxImagesPerProduct = opts.maxImagesPerProduct;
-        config.import.images.updateProductsWithExistingImages = opts.updateProductsWithExistingImages;
+        config.import.images.updateProductsWithExistingImages =
+          opts.updateProductsWithExistingImages;
 
         const importer = new ProductImporter(config, logger);
         stats[type] = await importer.import({
@@ -592,44 +691,57 @@ async function runAllImporters() {
           nameFilter: opts.useNameFilter ? undefined : null,
           createdAfter: opts.createdAfter,
           createdBefore: opts.createdBefore,
-          publishedAfter: opts.publishedAfter
+          publishedAfter: opts.publishedAfter,
         });
-      } else if (type === 'variations') {
+      } else if (type === "variations") {
         const importer = new VariationImporter(config, logger);
         stats[type] = await importer.import({
           limit: opts.limit,
           page: opts.page,
           dryRun: opts.dryRun,
           onlyImported: opts.onlyImported,
-          nameFilter: opts.useNameFilter ? undefined : null
+          nameFilter: opts.useNameFilter ? undefined : null,
         });
-      } else if (type === 'orders') {
+      } else if (type === "orders") {
         const importer = new OrderImporter(config, logger);
         stats[type] = await importer.import({
           limit: opts.limit,
           page: opts.page,
-          dryRun: opts.dryRun
+          dryRun: opts.dryRun,
+        });
+      } else if (type === "blogPosts") {
+        const importer = new BlogPostImporter(config, logger);
+        stats[type] = await importer.import({
+          limit: opts.limit,
+          page: opts.page,
+          batchSize: opts.batchSize,
+          status: opts.status,
+          after: opts.after,
+          dryRun: opts.dryRun,
         });
       }
 
       console.log(`\n✅ ${type.toUpperCase()} import completed!\n`);
     } catch (error) {
       console.error(`\n❌ ${type.toUpperCase()} import failed:`, error.message);
-      const continueOnError = await prompt('Continue with next importer? (y/n): ');
-      if (continueOnError.toLowerCase() !== 'y') {
+      const continueOnError = await prompt("Continue with next importer? (y/n): ");
+      if (continueOnError.toLowerCase() !== "y") {
         break;
       }
     }
   }
 
   // Display summary
-  console.log(`\n${'='.repeat(80)}`);
-  console.log('📊 Import Summary');
-  console.log(`${'='.repeat(80)}\n`);
+  console.log(`\n${"=".repeat(80)}`);
+  console.log("📊 Import Summary");
+  console.log(`${"=".repeat(80)}\n`);
 
   Object.entries(stats).forEach(([type, stat]) => {
     console.log(`${type.toUpperCase()}:`);
     console.log(`  ✅ Success: ${stat.success || 0}`);
+    if (typeof stat.updated === "number") {
+      console.log(`  🔄 Updated: ${stat.updated}`);
+    }
     console.log(`  ⏭️  Skipped: ${stat.skipped || 0}`);
     console.log(`  ❌ Failed: ${stat.failed || 0}`);
     console.log(`  ⚠️  Errors: ${stat.errors || 0}`);
@@ -639,7 +751,7 @@ async function runAllImporters() {
   });
 
   console.log(`\n🎉 All imports complete!\n`);
-  await prompt('Press Enter to return to main menu...');
+  await prompt("Press Enter to return to main menu...");
 }
 
 /**
@@ -647,9 +759,9 @@ async function runAllImporters() {
  */
 async function showStatus() {
   console.clear();
-  console.log(`\n${'='.repeat(80)}`);
-  console.log('📊 Import Status & Mappings');
-  console.log(`${'='.repeat(80)}\n`);
+  console.log(`\n${"=".repeat(80)}`);
+  console.log("📊 Import Status & Mappings");
+  console.log(`${"=".repeat(80)}\n`);
 
   const stats = duplicateTracker.getStats();
 
@@ -662,11 +774,11 @@ async function showStatus() {
     if (stat.newest) {
       console.log(`  📅 Newest: ${stat.newest}`);
     }
-    console.log('');
+    console.log("");
   });
 
   console.log(`📁 Mapping files location: ${config.duplicateTracking.storageDir}\n`);
-  await prompt('Press Enter to continue...');
+  await prompt("Press Enter to continue...");
 }
 
 /**
@@ -675,24 +787,27 @@ async function showStatus() {
 async function clearMappings() {
   console.clear();
   console.log(`\n⚠️  WARNING: Clear All Mappings\n`);
-  console.log('This will reset all import tracking, allowing items to be re-imported.');
-  console.log('This is useful if you want to start fresh or fix duplicate imports.\n');
+  console.log("This will reset all import tracking, allowing items to be re-imported.");
+  console.log("This is useful if you want to start fresh or fix duplicate imports.\n");
 
   const confirm = await prompt('Type "clear" to confirm clearing all mappings: ');
 
-  if (confirm === 'clear') {
-    console.log('\n🧹 Clearing mappings...\n');
-    duplicateTracker.clearMappings('categories');
-    duplicateTracker.clearMappings('products');
-    duplicateTracker.clearMappings('variations');
-    duplicateTracker.clearMappings('orders');
-    duplicateTracker.clearMappings('users');
-    console.log('✅ All mappings cleared!\n');
+  if (confirm === "clear") {
+    console.log("\n🧹 Clearing mappings...\n");
+    const mappingTypes = Object.keys(duplicateTracker.mappings);
+    mappingTypes.forEach((type) => {
+      try {
+        duplicateTracker.clearMappings(type);
+      } catch (error) {
+        console.log(`⚠️  Failed to clear ${type}: ${error.message}`);
+      }
+    });
+    console.log("✅ All mappings cleared!\n");
   } else {
-    console.log('\n❌ Cancelled\n');
+    console.log("\n❌ Cancelled\n");
   }
 
-  await prompt('Press Enter to continue...');
+  await prompt("Press Enter to continue...");
 }
 
 /**
@@ -709,52 +824,55 @@ async function main() {
       const choice = await showMainMenu();
 
       switch (choice) {
-        case '1':
+        case "1":
           await selectCredentials();
           break;
-        case '2':
-          await configureImporter('categories');
+        case "2":
+          await configureImporter("categories");
           break;
-        case '3':
-          await configureImporter('users');
+        case "3":
+          await configureImporter("users");
           break;
-        case '4':
-          await configureImporter('products');
+        case "4":
+          await configureImporter("products");
           break;
-        case '5':
-          await configureImporter('variations');
+        case "5":
+          await configureImporter("variations");
           break;
-        case '6':
-          await configureImporter('orders');
+        case "6":
+          await configureImporter("orders");
           break;
-        case '7':
+        case "7":
+          await configureImporter("blogPosts");
+          break;
+        case "8":
           await runAllImporters();
           break;
-        case '8':
+        case "9":
           await showStatus();
           break;
-        case '9':
+        case "10":
           await clearMappings();
           break;
-        case '10':
+        case "11":
           try {
             await syncShippingLocations(config, logger);
           } catch (error) {
             console.log(`\n❌ Shipping sync failed: ${error.message}\n`);
           }
-          await prompt('Press Enter to continue...');
+          await prompt("Press Enter to continue...");
           break;
-        case '11':
-          console.log('\n👋 Goodbye!\n');
+        case "12":
+          console.log("\n👋 Goodbye!\n");
           running = false;
           break;
         default:
-          console.log('\n❌ Invalid choice. Please try again.\n');
-          await prompt('Press Enter to continue...');
+          console.log("\n❌ Invalid choice. Please try again.\n");
+          await prompt("Press Enter to continue...");
       }
     }
   } catch (error) {
-    console.error('❌ Fatal error:', error);
+    console.error("❌ Fatal error:", error);
     process.exit(1);
   } finally {
     rl.close();
