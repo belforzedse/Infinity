@@ -10,6 +10,7 @@ import type { ProductReview } from "@/components/PDP/Comment/List";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL, API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { SITE_NAME } from "@/config/site";
 import logger from "@/utils/logger";
 import { ProductSchema } from "@/components/SEO/ProductSchema";
 import { BreadcrumbSchema } from "@/components/SEO/BreadcrumbSchema";
@@ -132,7 +133,7 @@ export async function generateMetadata({
       ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
-    const title = `خرید ${titleRaw} | اینفینیتی استور`;
+    const title = `خرید ${titleRaw} | ${SITE_NAME}`;
     const productId = product?.id || slug;
 
     // Get price info for OpenGraph
@@ -155,7 +156,7 @@ export async function generateMetadata({
       description,
       type: "website",
       url: `${SITE_URL}/pdp/${slug}`,
-      siteName: "اینفینیتی استور",
+      siteName: SITE_NAME,
       locale: "fa_IR",
       images: imageUrl
         ? [
@@ -198,10 +199,10 @@ export async function generateMetadata({
       slug,
       error: String(error)
     });
-    const fallbackTitle = "مشاهده محصول | اینفینیتی استور";
+    const fallbackTitle = `مشاهده محصول | ${SITE_NAME}`;
     return {
       title: fallbackTitle,
-      description: "جزئیات و مشخصات کامل محصول در اینفینیتی استور",
+      description: `جزئیات و مشخصات کامل محصول در ${SITE_NAME}`,
       alternates: { canonical: `${SITE_URL}/pdp/${slug}` },
     };
   }

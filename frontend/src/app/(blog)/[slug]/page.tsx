@@ -16,6 +16,10 @@ import logger from "@/utils/logger";
 // This ensures pages stay fresh even if webhook fails
 export const revalidate = 3600; // 1 hour fallback (on-demand is primary)
 
+// Allow dynamic generation of blog posts not in generateStaticParams
+// This ensures ISR can generate pages on-demand even if build-time generation failed
+export const dynamicParams = true;
+
 interface BlogPostPageProps {
   params: Promise<{
     slug: string;
@@ -152,10 +156,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   let post;
 
   try {
+    logger.info(`[BlogPostPage] Fetching blog post with slug: ${slug}, API_BASE_URL: ${API_BASE_URL}`);
     const response = await blogService.getBlogPostBySlug(slug);
+
+    if (!response || !response.data) {
+      logger.error(`[BlogPostPage] Invalid response structure for slug: ${slug}`, { response });
+      notFound();
+      return;
+    }
+
     post = response.data;
+    logger.info(`[BlogPostPage] Successfully fetched blog post: ${post.Title || post.id}`);
   } catch (error) {
+    logger.error(`[BlogPostPage] Error fetching blog post with slug: ${slug}`, {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      API_BASE_URL,
+      slug,
+    });
     notFound();
+    return;
   }
 
   // Generate JSON-LD structured data

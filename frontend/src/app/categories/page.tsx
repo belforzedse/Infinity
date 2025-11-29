@@ -3,18 +3,17 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { categories } from "@/constants/categories";
 import PageContainer from "@/components/layout/PageContainer";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "دسته‌بندی‌ها",
-  description: "مشاهده تمام دسته‌بندی‌های محصولات اینفینیتی استور. سریع به دسته مورد نظر بروید و خرید خود را آغاز کنید.",
+  description: `مشاهده تمام دسته‌بندی‌های محصولات ${SITE_NAME}. سریع به دسته مورد نظر بروید و خرید خود را آغاز کنید.`,
   alternates: {
     canonical: `${SITE_URL}/categories`,
   },
   openGraph: {
-    title: "دسته‌بندی‌های اینفینیتی استور",
-    description: "مشاهده تمام دسته‌بندی‌های محصولات اینفینیتی استور",
+    title: `دسته‌بندی‌های ${SITE_NAME}`,
+    description: `مشاهده تمام دسته‌بندی‌های محصولات ${SITE_NAME}`,
     url: `${SITE_URL}/categories`,
     type: "website",
   },

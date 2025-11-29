@@ -105,7 +105,7 @@ export default function RootLayout({
         <link rel="preconnect" href={IMAGE_BASE_URL || API_BASE_DOMAIN} crossOrigin="anonymous" />
         
         {/* OpenSearch descriptor for browser search integration */}
-        <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="اینفینیتی استور" />
+        <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title={SITE_NAME} />
         
         {/* PWA meta tags for mobile */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
