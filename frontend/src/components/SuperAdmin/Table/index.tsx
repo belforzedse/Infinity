@@ -351,19 +351,20 @@ export function SuperAdminTable<TData, TValue>({
       </div>
 
       <div className="hidden w-full overflow-auto md:block">
-        <table className={cn("text-sm w-full caption-bottom", className)}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr className="rounded-2xl bg-slate-50" key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th
-                      key={header.id}
-                      className={twMerge(
-                        "text-sm h-12 px-4 text-right align-middle font-normal text-foreground-primary",
-                        header.column.columnDef.meta?.headerClassName,
-                      )}
-                    >
+        <div className="overflow-x-auto">
+          <table className={cn("text-sm w-full caption-bottom", className)}>
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr className="rounded-2xl bg-slate-50" key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <th
+                        key={header.id}
+                        className={twMerge(
+                          "text-sm h-12 px-2 md:px-3 lg:px-4 text-right align-middle font-normal text-foreground-primary",
+                          header.column.columnDef.meta?.headerClassName,
+                        )}
+                      >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -450,7 +451,7 @@ export function SuperAdminTable<TData, TValue>({
                       <td
                         key={cell.id}
                         className={twMerge(
-                          "p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
+                          "p-2 md:p-3 lg:p-4 text-right align-middle [&:has([role=checkbox])]:pr-0",
                           cell.column.columnDef.meta?.cellClassName,
                         )}
                       >
@@ -498,6 +499,7 @@ export function SuperAdminTable<TData, TValue>({
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {mobileTable && (

@@ -16,9 +16,11 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 interface SuperAdminLayoutSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminLayoutSidebarProps) {
+export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed = false, onToggleCollapse }: SuperAdminLayoutSidebarProps) {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const pathname = usePathname();
   const router = useRouter();
@@ -58,9 +60,10 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
 
   return (
     <>
+      {/* Dark overlay - only show on mobile (not on tablets/desktop) */}
       <div
         className={clsx(
-          "fixed inset-0 bg-black bg-opacity-50 transition-opacity lg:hidden",
+          "fixed inset-0 bg-black bg-opacity-50 transition-opacity md:hidden",
           isOpen ? "z-40 opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -69,15 +72,28 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
       <div
         id="sidebar"
         className={clsx(
-          "fixed right-0 top-0 z-50 h-full lg:static lg:z-auto",
-          "w-[280px] lg:w-auto",
-          "transform transition-transform duration-300 ease-in-out lg:transform-none",
-          isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0",
+          // Mobile: fixed overlay
+          "fixed right-0 top-0 z-50 h-full",
+          // Tablet: static (not fixed, so content flows around it)
+          "md:static md:z-auto",
+          // Desktop: static
+          "lg:static lg:z-auto",
+          "transition-all duration-300 ease-in-out",
+          // Mobile: full width overlay
+          "w-[280px]",
+          // Tablet: collapsible width
+          isCollapsed ? "md:w-[80px]" : "md:w-[280px]",
+          // Desktop: fixed width
+          "lg:w-[250px]",
+          // Transform for mobile overlay only
+          "transform md:transform-none",
+          isOpen ? "translate-x-0" : "translate-x-full md:translate-x-0",
           "flex flex-col gap-4 rounded-bl-xl rounded-tl-xl bg-white p-3",
         )}
       >
+        {/* Close button for mobile only */}
         <button
-          className="absolute left-4 top-4 rounded-full p-2 hover:bg-neutral-100 lg:hidden"
+          className="absolute left-4 top-4 rounded-full p-2 hover:bg-neutral-100 md:hidden"
           onClick={onClose}
         >
           <svg
@@ -97,9 +113,37 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
           </svg>
         </button>
 
-        <div className="flex items-center justify-center">
-          <Logo />
-        </div>
+        {/* Toggle button for tablet (md-lg) */}
+        {onToggleCollapse && (
+          <button
+            className="absolute left-2 top-4 hidden rounded-full p-1.5 hover:bg-neutral-100 md:flex lg:hidden items-center justify-center"
+            onClick={onToggleCollapse}
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className={clsx("transition-transform duration-200", isCollapsed ? "" : "rotate-180")}
+            >
+              <path
+                d="M9 18L15 12L9 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
+
+        {!isCollapsed && (
+          <div className="flex items-center justify-center">
+            <Logo />
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-6">
@@ -129,14 +173,16 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                       "relative mb-2 flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-150",
                       "hover:bg-neutral-50",
                       isActive ? "bg-pink-50 text-pink-600" : "text-neutral-600",
+                      isCollapsed && "md:justify-center md:px-2",
                     )}
+                    title={isCollapsed ? item.label : undefined}
                   >
-                    {isActive && (
+                    {isActive && !isCollapsed && (
                       <span className="pointer-events-none absolute -right-1.5 top-1/2 h-10 w-2 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-pink-600 to-pink-400" />
                     )}
-                    <div className="flex w-full items-center gap-2">
+                    <div className={clsx("flex w-full items-center gap-2", isCollapsed && "md:justify-center md:gap-0")}>
                       {item.icon}
-                      <span className="text-sm font-medium">{item.label}</span>
+                      {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
                     </div>
                   </Link>
                 );
@@ -149,62 +195,111 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
                     tabIndex={0}
                     className={clsx(
                       "relative mb-2 flex items-center justify-between rounded-lg px-2 py-1.5",
-                      "cursor-default transition-colors duration-150",
+                      "cursor-pointer transition-colors duration-150",
+                      "hover:bg-neutral-50",
+                      isActive && !isCollapsed && "bg-pink-50 text-pink-600",
+                      !isActive && "text-neutral-600",
+                      isCollapsed && "md:justify-center md:px-2",
                     )}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        openAndNavigate(item);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      {item.icon}
-                      <span
-                        className={clsx(
-                          "text-sm font-medium",
-                          isActive ? "text-pink-600" : "text-neutral-600",
-                        )}
-                      >
-                        {item.label}
-                      </span>
-                    </div>
-
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      className={clsx(
-                        "rounded-md p-1 transition-transform duration-200",
-                        "transition-colors duration-150 hover:bg-neutral-50",
-                        isOpenMenu && "rotate-180",
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenus((p) => ({
-                          ...p,
-                          [item.id]: !p[item.id],
-                        }));
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          e.stopPropagation();
+                    onClick={() => {
+                      // When collapsed on tablet, expand sidebar first, then navigate if has href
+                      if (isCollapsed && onToggleCollapse) {
+                        onToggleCollapse();
+                        // Small delay to allow sidebar to expand before navigation
+                        if (item.href) {
+                          const href = item.href;
+                          setTimeout(() => {
+                            router.push(href);
+                          }, 100);
+                        } else if (item.children.length > 0) {
+                          // If no href but has children, just expand the menu
                           setOpenMenus((p) => ({
                             ...p,
                             [item.id]: !p[item.id],
                           }));
                         }
-                      }}
-                      aria-expanded={isOpenMenu}
-                      aria-controls={`submenu-${item.id}`}
-                    >
-                      <ChevronDownIcon />
+                      } else {
+                        openAndNavigate(item);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        if (isCollapsed && onToggleCollapse) {
+                          onToggleCollapse();
+                          if (item.href) {
+                            const href = item.href;
+                            setTimeout(() => {
+                              router.push(href);
+                            }, 100);
+                          } else if (item.children.length > 0) {
+                            // If no href but has children, just expand the menu
+                            setOpenMenus((p) => ({
+                              ...p,
+                              [item.id]: !p[item.id],
+                            }));
+                          }
+                        } else {
+                          openAndNavigate(item);
+                        }
+                      }
+                    }}
+                    title={isCollapsed ? item.label : undefined}
+                  >
+                    <div className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")}>
+                      {item.icon}
+                      {!isCollapsed && (
+                        <span
+                          className={clsx(
+                            "text-sm font-medium",
+                            isActive ? "text-pink-600" : "text-neutral-600",
+                          )}
+                        >
+                          {item.label}
+                        </span>
+                      )}
                     </div>
+                    {isActive && !isCollapsed && (
+                      <span className="pointer-events-none absolute -right-1.5 top-1/2 h-10 w-2 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-pink-600 to-pink-400" />
+                    )}
+
+                    {!isCollapsed && (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className={clsx(
+                          "rounded-md p-1 transition-transform duration-200",
+                          "transition-colors duration-150 hover:bg-neutral-50",
+                          isOpenMenu && "rotate-180",
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenus((p) => ({
+                            ...p,
+                            [item.id]: !p[item.id],
+                          }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOpenMenus((p) => ({
+                              ...p,
+                              [item.id]: !p[item.id],
+                            }));
+                          }
+                        }}
+                        aria-expanded={isOpenMenu}
+                        aria-controls={`submenu-${item.id}`}
+                      >
+                        <ChevronDownIcon />
+                      </div>
+                    )}
                   </div>
 
                   {/* Submenu with expand/collapse animation */}
                   <AnimatePresence initial={false}>
-                    {hasChildren && isOpenMenu && (
+                    {hasChildren && isOpenMenu && !isCollapsed && (
                       <motion.div
                         key={`${item.id}-submenu`}
                         initial={{ height: 0, opacity: 0 }}
@@ -261,21 +356,21 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose }: SuperAdminL
           <div className="h-[1px] w-full bg-neutral-100" />
 
           {!isStoreManager && !isEditor && (
-            <div className="flex cursor-pointer items-center px-2 py-1.5">
-              <Link href={"/super-admin/settings"} className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
+            <div className={clsx("flex cursor-pointer items-center px-2 py-1.5", isCollapsed && "md:justify-center md:px-2")}>
+              <Link href={"/super-admin/settings"} className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")} title={isCollapsed ? "تنظیمات سایت" : undefined}>
+                <div className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")}>
                   <SettingsIcon />
-                  <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>
+                  {!isCollapsed && <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>}
                 </div>
               </Link>
             </div>
           )}
 
-          <div className="flex cursor-pointer items-center px-2 py-1.5">
-            <button type="button" onClick={openConfirm} className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
+          <div className={clsx("flex cursor-pointer items-center px-2 py-1.5", isCollapsed && "md:justify-center md:px-2")}>
+            <button type="button" onClick={openConfirm} className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")} title={isCollapsed ? "خروج" : undefined}>
+              <div className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")}>
                 <ExitIcon />
-                <span className="text-sm font-medium text-neutral-600">خروج</span>
+                {!isCollapsed && <span className="text-sm font-medium text-neutral-600">خروج</span>}
               </div>
             </button>
             <ConfirmDialog

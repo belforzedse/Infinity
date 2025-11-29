@@ -9,6 +9,7 @@ import { UserService } from "@/services";
 import { HTTP_STATUS } from "@/constants/api";
 import { currentUserAtom } from "@/lib/atoms/auth";
 import { useSetAtom } from "jotai";
+import clsx from "clsx";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -200,12 +201,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <Suspense fallback={<div>Loading...</div>}>
-        <div className="hidden md:block">
-          <Desktop>{children}</Desktop>
-        </div>
-
         <div className="block md:hidden">
           <Mobile>{children}</Mobile>
+        </div>
+
+        <div className="hidden md:block lg:hidden">
+          <Tablet>{children}</Tablet>
+        </div>
+
+        <div className="hidden lg:block">
+          <Desktop>{children}</Desktop>
         </div>
       </Suspense>
       <div className="[&_button]:!left-4 [&_button]:!right-auto">
@@ -228,9 +233,64 @@ function Mobile({ children }: { children: React.ReactNode }) {
   );
 }
 
+function Tablet({ children }: { children: React.ReactNode }) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to collapse sidebar on tablets
+  useEffect(() => {
+    // Only add listener when sidebar is expanded
+    if (isSidebarCollapsed) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      // Only collapse if click is outside sidebar
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
+        setIsSidebarCollapsed(true);
+      }
+    };
+
+    // Add listeners for both mouse and touch events
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isSidebarCollapsed]);
+
+  return (
+    <div className="flex min-h-screen gap-3 bg-neutral-50 pl-4 md:pl-6">
+      <div
+        ref={sidebarRef}
+        className={clsx(
+          "sticky top-0 h-screen overflow-y-auto transition-all duration-300 z-10 flex-shrink-0",
+          isSidebarCollapsed ? "w-[80px]" : "w-[280px]"
+        )}
+      >
+        <Sidebar
+          isOpen={true}
+          onClose={() => {}}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      </div>
+      <div className="flex w-full flex-1 flex-col gap-3 p-4 min-w-0 overflow-hidden">
+        <div className="w-full max-w-screen-3xl space-y-3 mx-auto min-w-0">
+          <Header onMenuClick={() => {}} />
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Desktop({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen gap-5 bg-neutral-50 pl-10">
+    <div className="flex min-h-screen gap-5 bg-neutral-50 pl-6 lg:pl-10">
       <div className="sticky top-0 h-screen w-[250px] overflow-y-auto">
         <Sidebar isOpen={true} onClose={() => {}} />
       </div>
