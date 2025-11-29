@@ -113,6 +113,9 @@
     "typescript": "^5"
   },
   "overrides": {
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "isomorphic-dompurify": {
+      "jsdom": "^26.1.0"
+    }
   }
 }

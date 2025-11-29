@@ -24,6 +24,7 @@ const nextConfig = {
     scrollRestoration: true,
     optimizeCss: false,
   },
+  serverExternalPackages: ["jsdom"],
   compress: true,
 };
 module.exports = nextConfig;
