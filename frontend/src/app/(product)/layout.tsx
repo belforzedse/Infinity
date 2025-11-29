@@ -101,7 +101,10 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
             ? "glass-panel shadow-sm"
             : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
-        style={headerStyle}
+        style={{
+          ...headerStyle,
+          paddingTop: "max(0px, env(safe-area-inset-top))",
+        }}
       >
         <div className="relative">
           {scrolled && (
