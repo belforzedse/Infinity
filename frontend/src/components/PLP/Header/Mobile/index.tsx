@@ -21,7 +21,7 @@ export default function PLPMobileHeader({}: Props) {
   // Search is handled within the MobileSearch modal
 
   return (
-    <header className="lg:hidden" style={{ paddingTop: "max(0px, env(safe-area-inset-top))" }}>
+    <header className="lg:hidden" style={{ paddingTop: "max(0.75rem, calc(0.75rem + env(safe-area-inset-top) * 0.5))" }}>
       <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
         <button
           onClick={() => window.location.href = "/orders"}

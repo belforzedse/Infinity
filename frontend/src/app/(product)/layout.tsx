@@ -103,7 +103,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
         style={{
           ...headerStyle,
-          paddingTop: "max(0px, env(safe-area-inset-top))",
+          paddingTop: "max(0.75rem, calc(0.75rem + env(safe-area-inset-top) * 0.5))",
         }}
       >
         <div className="relative">
