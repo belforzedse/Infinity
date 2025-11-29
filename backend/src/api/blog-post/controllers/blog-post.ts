@@ -231,14 +231,11 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }
 
     // Increment view count for published posts (only for non-admin users)
-    // Use atomic database update to prevent race conditions
     if (post.Status === "Published" && !hasEditorRole) {
-      await strapi.db.connection.raw(
-        `UPDATE blog_posts
-         SET "ViewCount" = COALESCE("ViewCount", 0) + 1
-         WHERE id = ? AND "Status" = 'Published'`,
-        [id]
-      );
+      const currentViewCount = post.ViewCount || 0;
+      await strapi.entityService.update("api::blog-post.blog-post", id, {
+        data: { ViewCount: currentViewCount + 1 },
+      });
     }
 
     return { data: post };
@@ -406,14 +403,11 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     }
 
     // Increment view count for published posts (only for non-admin users)
-    // Use atomic database update to prevent race conditions
     if (post.Status === "Published" && !hasEditorRole) {
-      await strapi.db.connection.raw(
-        `UPDATE blog_posts
-         SET "ViewCount" = COALESCE("ViewCount", 0) + 1
-         WHERE id = ? AND "Status" = 'Published'`,
-        [post.id]
-      );
+      const currentViewCount = post.ViewCount || 0;
+      await strapi.entityService.update("api::blog-post.blog-post", post.id, {
+        data: { ViewCount: currentViewCount + 1 },
+      });
     }
 
     return { data: post };
