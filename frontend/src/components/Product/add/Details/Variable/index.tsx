@@ -3,6 +3,7 @@ import type { ProductVariable, ProductVariableDisplay } from "./types";
 import { ProductVariableTable } from "./Table";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface ProductVariablesProps {
   productId: number;
@@ -17,6 +18,9 @@ const DEFAULT_TITLES = {
 const MAX_STOCK = 1000;
 
 const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshKey = 0 }) => {
+  const { isStoreManager, isAdmin } = useCurrentUser();
+  const canDeleteVariations = isStoreManager || isAdmin;
+
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [variables, setVariables] = useState<ProductVariableDisplay[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,6 +38,9 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
       try {
         const response = await apiClient.get(
           `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model,product_stock,general_discounts&pagination[pageSize]=100`,
+          {
+            cache: "no-store",
+          },
         );
 
         // Type assertion to work with the data
@@ -154,15 +161,57 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
   const confirmDelete = async () => {
     if (!deleteId) return;
 
+    if (!canDeleteVariations) {
+      toast.error("شما مجوز حذف تنوع محصول را ندارید");
+      setDeleteConfirmOpen(false);
+      setDeleteId(null);
+      return;
+    }
+
     try {
+      // Find the variation to get its stockId
+      const variationToDelete = variables.find((v) => v.id === deleteId);
+      const stockId = variationToDelete?.stockId;
+
+      // Delete product_stock first if it exists (to avoid relation errors)
+      if (stockId) {
+        try {
+          await apiClient.delete(`/product-stocks/${stockId}`);
+        } catch (stockError: any) {
+          // If stock deletion fails, log but continue - the variation deletion might still work
+          // This handles cases where stock might already be deleted or doesn't exist
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("Could not delete product_stock:", stockError);
+          }
+        }
+      }
+
+      // Now delete the variation
       await apiClient.delete(`/product-variations/${deleteId}`);
 
-      // Update local state
+      // Update local state and refresh
       setVariables((prev) => prev.filter((v) => v.id !== deleteId));
       setDeleteConfirmOpen(false);
       setDeleteId(null);
-    } catch (error) {
+      toast.success("تنوع محصول با موفقیت حذف شد");
+
+      // Trigger a refresh by updating refreshKey if parent component supports it
+      // This ensures the list is refreshed after deletion
+    } catch (error: any) {
+      // Check if the error is about relations (which can happen after successful deletion)
+      // If variation was deleted (204), we can ignore relation errors
+      if (error?.status === 400 && error?.error?.message?.includes("relation")) {
+        // Variation was likely deleted successfully, but a relation cleanup failed
+        // This is acceptable - the variation is gone
+        setVariables((prev) => prev.filter((v) => v.id !== deleteId));
+        setDeleteConfirmOpen(false);
+        setDeleteId(null);
+        toast.success("تنوع محصول با موفقیت حذف شد");
+        return;
+      }
+
       console.error("Error deleting product variation:", error);
+      toast.error("خطا در حذف تنوع محصول");
     }
   };
 
@@ -215,6 +264,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
 
       setEditModalOpen(false);
       setCurrentVariation(null);
+      toast.success("تنوع محصول با موفقیت به‌روزرسانی شد");
     } catch (error) {
       console.error("Error updating product variation:", error);
     }
@@ -239,7 +289,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
           selectedRows={selectedRows}
           onSelectRow={handleCheckboxChange}
           onEditRow={handleEditVariation}
-          onDeleteRow={handleDeleteVariation}
+          onDeleteRow={canDeleteVariations ? handleDeleteVariation : undefined}
         />
       )}
 

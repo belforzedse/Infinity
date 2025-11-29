@@ -3,95 +3,184 @@
 import Header from "@/components/SuperAdmin/Layout/Header";
 import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
 import ScrollToTop from "@/components/ScrollToTop";
-import { Suspense, useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { UserService } from "@/services";
 import { HTTP_STATUS } from "@/constants/api";
 import { currentUserAtom } from "@/lib/atoms/auth";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [, setCurrentUser] = useAtom(currentUserAtom);
+  const setCurrentUser = useSetAtom(currentUserAtom);
+  const hasRunRef = useRef(false);
+  const lastCheckRef = useRef<number>(0);
+  const isCheckingRef = useRef(false);
 
-  const checkAdminAccess = useCallback(async () => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-    if (!token) {
-      router.replace("/auth");
-      return false;
+  const redirectToPrevious = useCallback(() => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.replace("/");
     }
+  }, [router]);
 
-    const redirectToPrevious = () => {
-      if (typeof window !== "undefined" && window.history.length > 1) {
-        router.back();
-      } else {
-        router.replace("/");
-      }
-    };
+  // Silent background auth check - doesn't show loading state
+  const checkAuthSilently = useCallback(async () => {
+    // Prevent concurrent checks
+    if (isCheckingRef.current) return;
+
+    // Throttle: don't check more than once per 30 seconds
+    const now = Date.now();
+    if (now - lastCheckRef.current < 30000) return;
+
+    isCheckingRef.current = true;
+    lastCheckRef.current = now;
 
     try {
-      // Force refresh user data by clearing cache first, then fetching fresh data
-      setCurrentUser(null);
-      const me = await UserService.me(true);
-
-      // Update the cached user data with fresh data
-      setCurrentUser(me);
-
-      if (!me?.isAdmin) {
-        redirectToPrevious();
-        return false;
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      if (!token) {
+        setIsAuthorized(false);
+        router.replace("/auth");
+        return;
       }
 
-      return true;
+      const me = await UserService.me(true);
+      setCurrentUser(me);
+
+      // Check if user is still admin - update isAuthorized state and redirect immediately
+      if (!me?.isAdmin) {
+        setIsAuthorized(false);
+        // Redirect immediately - don't wait
+        redirectToPrevious();
+        return;
+      }
+
+      // Ensure isAuthorized is true if user is admin
+      setIsAuthorized(true);
     } catch (error: any) {
-      // Clear user data on auth errors
       setCurrentUser(null);
 
       if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
+        setIsAuthorized(false);
         router.replace("/auth");
-        return false;
+        return;
       }
       if (error?.status === HTTP_STATUS.FORBIDDEN) {
+        setIsAuthorized(false);
         redirectToPrevious();
-        return false;
+        return;
       }
-      redirectToPrevious();
-      return false;
+      // For other errors, don't redirect - might be temporary network issues
+      // But still update isAuthorized if we can't verify
+      setIsAuthorized(false);
+    } finally {
+      isCheckingRef.current = false;
     }
-  }, [router, setCurrentUser]);
+  }, [router, setCurrentUser, redirectToPrevious]);
 
+  // Initial mount check - with loading state
   useEffect(() => {
+    // Prevent running multiple times
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
     let isMounted = true;
     setIsLoading(true);
 
-    checkAdminAccess().then((authorized) => {
-      if (!isMounted) return;
-      setIsAuthorized(authorized);
-      setIsLoading(false);
-    });
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+    if (!token) {
+      router.replace("/auth");
+      return;
+    }
+
+    // Force refresh user data by clearing cache first, then fetching fresh data
+    setCurrentUser(null);
+    UserService.me(true)
+      .then((me) => {
+        if (!isMounted) return;
+        // Update the cached user data with fresh data
+        setCurrentUser(me);
+
+        if (!me?.isAdmin) {
+          redirectToPrevious();
+          return;
+        }
+        setIsAuthorized(true);
+        setIsLoading(false);
+        // Update last check time for initial mount
+        lastCheckRef.current = Date.now();
+      })
+      .catch((error: any) => {
+        if (!isMounted) return;
+        // Clear user data on auth errors
+        setCurrentUser(null);
+
+        if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
+          router.replace("/auth");
+          return;
+        }
+        if (error?.status === HTTP_STATUS.FORBIDDEN) {
+          redirectToPrevious();
+          return;
+        }
+        redirectToPrevious();
+      });
 
     return () => {
       isMounted = false;
     };
-  }, [checkAdminAccess, pathname]); // Re-check on route changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - use ref to prevent re-runs
 
-  // Also check on window focus to catch role changes from other tabs/windows
+  // Background check on window focus (when user returns to tab)
   useEffect(() => {
+    if (!isAuthorized) return; // Only check if already authorized
+
     const handleFocus = () => {
-      checkAdminAccess().then((authorized) => {
-        if (!authorized && isAuthorized) {
-          // Role was revoked, redirect immediately
-          setIsAuthorized(false);
-        }
-      });
+      checkAuthSilently();
     };
 
     window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [checkAdminAccess, isAuthorized]);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [isAuthorized, checkAuthSilently]);
+
+  // Periodic background check (every 5 minutes)
+  useEffect(() => {
+    if (!isAuthorized) return; // Only check if already authorized
+
+    const interval = setInterval(() => {
+      checkAuthSilently();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isAuthorized, checkAuthSilently]);
+
+  // Background check on route changes (throttled)
+  useEffect(() => {
+    if (!isAuthorized) return; // Only check if already authorized
+
+    // Throttle route change checks - only if last check was more than 30 seconds ago
+    const now = Date.now();
+    if (now - lastCheckRef.current >= 30000) {
+      checkAuthSilently();
+    }
+  }, [pathname, isAuthorized, checkAuthSilently]);
+
+  // Immediately redirect if user loses authorization
+  useEffect(() => {
+    if (!isLoading && !isAuthorized) {
+      // User is no longer authorized - redirect immediately
+      redirectToPrevious();
+    }
+  }, [isLoading, isAuthorized, redirectToPrevious]);
 
   if (isLoading) {
     return (

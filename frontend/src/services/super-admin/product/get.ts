@@ -81,7 +81,10 @@ export const getProduct = async (
   params: PopulateObject,
 ): Promise<ApiResponse<Item>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?${paramCreator(params)}`;
-  const response = await apiClient.get<ApiResponse<Item>>(endpoint);
+  // Use no-store cache for super-admin pages to ensure fresh data
+  const response = await apiClient.get<ApiResponse<Item>>(endpoint, {
+    cache: "no-store",
+  });
 
   return response as any;
 };

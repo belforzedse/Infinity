@@ -74,7 +74,9 @@ function SortableItem({
 export default function CategoriesListField({ value, onChange, readOnly, fetchCategories }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Set up sensors for drag and drop
@@ -118,31 +120,26 @@ export default function CategoriesListField({ value, onChange, readOnly, fetchCa
   }, [fetchCategories]);
 
   // Handle adding a category
-  const handleAddCategory = () => {
-    if (!selectedCategory) return;
+  const handleAddCategory = (category: Category) => {
+    if (!category) return;
 
-    try {
-      const categoryToAdd = JSON.parse(selectedCategory);
-
-      // Check if already exists
-      const alreadyExists = categories.some((cat) => cat.id === categoryToAdd.id);
-      if (alreadyExists) {
-        alert("این دسته بندی قبلاً در لیست وجود دارد");
-        return;
-      }
-
-      // Add to categories
-      const newCategories = [...categories, categoryToAdd];
-      setCategories(newCategories);
-
-      // Update parent component
-      onChange(JSON.stringify(newCategories, null, 2));
-
-      // Reset selection
-      setSelectedCategory("");
-    } catch (e) {
-      console.error("Error adding category:", e);
+    // Check if already exists
+    const alreadyExists = categories.some((cat) => cat.id === category.id);
+    if (alreadyExists) {
+      alert("این دسته بندی قبلاً در لیست وجود دارد");
+      return;
     }
+
+    // Add to categories
+    const newCategories = [...categories, category];
+    setCategories(newCategories);
+
+    // Update parent component
+    onChange(JSON.stringify(newCategories, null, 2));
+
+    // Reset search
+    setSearchQuery("");
+    setShowDropdown(false);
   };
 
   // Handle removing a category
@@ -168,7 +165,24 @@ export default function CategoriesListField({ value, onChange, readOnly, fetchCa
     }
   };
 
-  // Filter available categories to exclude already selected ones
+  // Filter available categories based on search query and exclude already selected ones
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const filtered = availableCategories.filter((cat) => {
+      const isNotSelected = !categories.some((selected) => selected.id === cat.id);
+      if (!isNotSelected) return false;
+
+      if (!query) return true;
+
+      const title = (cat.title || "").toLowerCase();
+      const slug = (cat.slug || "").toLowerCase();
+      return title.includes(query) || slug.includes(query);
+    });
+
+    setFilteredCategories(filtered);
+  }, [searchQuery, availableCategories, categories]);
+
+  // Filter available categories to exclude already selected ones (for backward compatibility)
   const filteredAvailableCategories = availableCategories.filter(
     (cat) => !categories.some((selected) => selected.id === cat.id),
   );
@@ -176,30 +190,52 @@ export default function CategoriesListField({ value, onChange, readOnly, fetchCa
   return (
     <div className="flex flex-col gap-4">
       {/* Category Selection */}
-      <div className="flex gap-2">
-        <select
-          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-neutral-600"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+      <div className="relative">
+        <input
+          type="text"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+          placeholder="جستجوی دسته بندی..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => setShowDropdown(true)}
           disabled={readOnly || loading}
-        >
-          <option value="">انتخاب دسته بندی</option>
-          {filteredAvailableCategories.map((category) => (
-            <option key={category.id} value={JSON.stringify(category)}>
-              {category.title} ({category.slug})
-            </option>
-          ))}
-        </select>
+        />
 
-        <button
-          onClick={handleAddCategory}
-          disabled={!selectedCategory || readOnly}
-          className="rounded-lg bg-green-500 px-4 py-2 text-white disabled:opacity-50"
-          type="button"
-        >
-          افزودن
-        </button>
+        {showDropdown && searchQuery.trim() && filteredCategories.length > 0 && (
+          <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+            {filteredCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => handleAddCategory(category)}
+                className="flex w-full items-center justify-between px-3 py-2 text-sm text-right hover:bg-slate-100"
+              >
+                <div className="flex flex-col">
+                  <span className="font-medium text-neutral-800">{category.title}</span>
+                  <span className="text-xs text-neutral-500">{category.slug}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showDropdown && searchQuery.trim() && filteredCategories.length === 0 && (
+          <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-neutral-500 shadow-lg">
+            موردی یافت نشد
+          </div>
+        )}
       </div>
+
+      {/* Click outside to close dropdown */}
+      {showDropdown && (
+        <div
+          className="fixed inset-0 z-0"
+          onClick={() => setShowDropdown(false)}
+        />
+      )}
 
       {/* Selected Categories */}
       <div className="rounded-lg border border-slate-100">
