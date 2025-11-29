@@ -41,7 +41,7 @@ export async function generateStaticParams() {
         `pagination[pageSize]=${pageSize}&` +
         `fields[0]=Slug`;
 
-      logger.debug(`[generateStaticParams] Fetching page ${currentPage} from: ${endpoint}`);
+      logger.info(`[generateStaticParams] Fetching page ${currentPage} from: ${endpoint}`);
 
       const fetchResponse = await fetch(endpoint, {
         next: { revalidate: 3600 }, // Cache for 1 hour
@@ -77,7 +77,7 @@ export async function generateStaticParams() {
 
       const posts = response?.data || [];
       if (posts.length === 0) {
-        logger.debug(`[generateStaticParams] No posts found on page ${currentPage}, stopping pagination`);
+        logger.info(`[generateStaticParams] No posts found on page ${currentPage}, stopping pagination`);
         break;
       }
 
@@ -90,12 +90,12 @@ export async function generateStaticParams() {
           }
           return { slug };
         })
-        .filter((post): post is { slug: string } => post !== null);
+        .filter((post: { slug: string } | null): post is { slug: string } => post !== null);
 
       allPosts.push(...validPosts);
 
       const pageCount = response?.meta?.pagination?.pageCount || 1;
-      logger.debug(`[generateStaticParams] Page ${currentPage}/${pageCount}, total posts so far: ${allPosts.length}`);
+      logger.info(`[generateStaticParams] Page ${currentPage}/${pageCount}, total posts so far: ${allPosts.length}`);
 
       if (currentPage >= pageCount) break;
 
