@@ -32,6 +32,8 @@ export async function generateStaticParams() {
     let currentPage = 1;
     const pageSize = 100;
 
+    logger.info(`[generateStaticParams] Starting static params generation with API_BASE_URL: ${API_BASE_URL}`);
+
     while (true) {
       const endpoint = `${API_BASE_URL}/blog-posts?` +
         `filters[Status][$eq]=Published&` +
@@ -39,34 +41,80 @@ export async function generateStaticParams() {
         `pagination[pageSize]=${pageSize}&` +
         `fields[0]=Slug`;
 
-      const response = await fetch(endpoint, {
+      logger.debug(`[generateStaticParams] Fetching page ${currentPage} from: ${endpoint}`);
+
+      const fetchResponse = await fetch(endpoint, {
         next: { revalidate: 3600 }, // Cache for 1 hour
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-      }).then((res) => res.json());
+      });
+
+      if (!fetchResponse.ok) {
+        const errorText = await fetchResponse.text();
+        logger.error(
+          `[generateStaticParams] API request failed: ${fetchResponse.status} ${fetchResponse.statusText}`,
+          { endpoint, errorText }
+        );
+        // If first page fails, return empty to let ISR handle it
+        if (currentPage === 1) {
+          logger.warn('[generateStaticParams] First page failed, returning empty array. ISR will handle posts.');
+          return [];
+        }
+        // If later page fails, break and return what we have
+        break;
+      }
+
+      const response = await fetchResponse.json();
+
+      // Validate response structure
+      if (!response || typeof response !== 'object') {
+        logger.error('[generateStaticParams] Invalid response structure', { response });
+        if (currentPage === 1) return [];
+        break;
+      }
 
       const posts = response?.data || [];
-      if (posts.length === 0) break;
+      if (posts.length === 0) {
+        logger.debug(`[generateStaticParams] No posts found on page ${currentPage}, stopping pagination`);
+        break;
+      }
 
-      allPosts.push(
-        ...posts.map((post: any) => ({
-          slug: post.attributes?.Slug || post.Slug || post.id.toString(),
-        }))
-      );
+      const validPosts = posts
+        .map((post: any) => {
+          const slug = post.attributes?.Slug || post.Slug || post.id?.toString();
+          if (!slug) {
+            logger.warn('[generateStaticParams] Post missing slug', { postId: post.id, post });
+            return null;
+          }
+          return { slug };
+        })
+        .filter((post): post is { slug: string } => post !== null);
+
+      allPosts.push(...validPosts);
 
       const pageCount = response?.meta?.pagination?.pageCount || 1;
+      logger.debug(`[generateStaticParams] Page ${currentPage}/${pageCount}, total posts so far: ${allPosts.length}`);
+
       if (currentPage >= pageCount) break;
 
       currentPage++;
     }
 
-    logger.info(`[generateStaticParams] Generated ${allPosts.length} static params for blog posts`);
+    logger.info(`[generateStaticParams] Successfully generated ${allPosts.length} static params for blog posts`);
+    if (allPosts.length === 0) {
+      logger.warn('[generateStaticParams] No static params generated. This may cause 404s until ISR generates pages.');
+    }
     return allPosts;
   } catch (error) {
-    logger.error('[generateStaticParams] Error generating static params for blog:', error as any);
+    logger.error('[generateStaticParams] Error generating static params for blog:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      API_BASE_URL,
+    });
     // Return empty array on error - ISR will handle remaining posts
+    logger.warn('[generateStaticParams] Returning empty array. ISR will handle blog post generation.');
     return [];
   }
 }
