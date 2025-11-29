@@ -146,6 +146,33 @@ class ApiClient {
           // Call auth error handler with only the error object. The second
           // parameter is optional and tests expect a single-argument call.
           handleAuthErrors(error);
+
+          // If it's a 403 error, refresh user data to catch role changes
+          // This ensures that if a user's role was changed in the backend,
+          // the frontend will get the updated role information
+          // NOTE: We do NOT clear the access token - user stays logged in
+          if (response.status === 403 && typeof window !== "undefined") {
+            // Import dynamically to avoid circular dependencies
+            import("@/lib/atoms/auth").then(({ currentUserAtom }) => {
+              import("@/lib/jotaiStore").then(({ jotaiStore }) => {
+                // Clear cached user data (but NOT the token - user remains logged in)
+                jotaiStore.set(currentUserAtom, null);
+
+                // If we're on an admin page, redirect immediately
+                // The ClientLayout will also handle the redirect, but this is more immediate
+                if (window.location.pathname.startsWith("/super-admin")) {
+                  // Use a small delay to let the error handler finish
+                  setTimeout(() => {
+                    if (window.history.length > 1) {
+                      window.history.back();
+                    } else {
+                      window.location.href = "/";
+                    }
+                  }, 100);
+                }
+              });
+            });
+          }
         }
 
         throw error;
