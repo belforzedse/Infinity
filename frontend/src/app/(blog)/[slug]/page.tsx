@@ -228,10 +228,39 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 }
 
+// Patterns that should NOT be handled as blog posts
+const EXCLUDED_PATTERNS = [
+  /\.(html|xml|json|txt|ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/i, // Static files
+  /^_next/, // Next.js internal routes
+  /^api\//, // API routes
+  /^offline/, // Service worker offline page
+  /^sw\.js/, // Service worker
+  /^manifest/, // Web app manifest
+  /^robots\.txt/, // Robots file
+  /^sitemap/, // Sitemap
+  /^favicon/, // Favicon
+];
+
+function shouldExcludeSlug(slug: string): boolean {
+  return EXCLUDED_PATTERNS.some(pattern => pattern.test(slug));
+}
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const env = process.env.NODE_ENV || 'development';
   const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+
+  // Exclude static files and other non-blog routes
+  if (shouldExcludeSlug(slug)) {
+    logger.info(`[BlogPostPage] Excluding slug from blog post handling`, {
+      slug,
+      reason: 'Matches excluded pattern',
+      env,
+      isStaging,
+    });
+    notFound();
+    return;
+  }
 
   logger.info(`[BlogPostPage] Route handler called`, {
     slug,
