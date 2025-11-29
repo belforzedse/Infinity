@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
-  <ShortName>قروشگاه پوشاک اینفینیتی</ShortName>
-  <Description>جستجو در فروشگاه  پوشاک اینفینیتی </Description>
-  <Tags> فروشگاه پوشاک آنلاین</Tags>
+  <ShortName>فروشگاه پوشاک اینفینیتی</ShortName>
+  <Description>جستجو در فروشگاه پوشاک اینفینیتی</Description>
+  <Tags>فروشگاه پوشاک آنلاین</Tags>
   <Contact>info@infinitycolor.org</Contact>
   <Url type="text/html" method="get" template="https://infinitycolor.org/plp?search={searchTerms}"/>
   <Url type="application/rss+xml" method="get" template="https://infinitycolor.org/blog/feed.xml?search={searchTerms}"/>
