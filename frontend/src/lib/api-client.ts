@@ -92,7 +92,17 @@ class ApiClient {
     }
 
     // Build URL with query parameters using URL and URLSearchParams APIs
-    const url = new URL(endpoint, this.baseUrl);
+    // Fix: new URL() with absolute paths (starting with /) replaces the base URL's pathname
+    // So we need to manually join the paths to preserve /api prefix
+    const baseUrlObj = new URL(this.baseUrl);
+    // Remove leading slash from endpoint if present, then append to baseUrl pathname
+    const endpointPath = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    // Ensure baseUrl pathname ends with / for proper joining
+    const basePath = baseUrlObj.pathname.endsWith('/')
+      ? baseUrlObj.pathname
+      : `${baseUrlObj.pathname}/`;
+    const fullPath = `${basePath}${endpointPath}`;
+    const url = new URL(fullPath, `${baseUrlObj.protocol}//${baseUrlObj.host}`);
 
     // Append params from options.params if provided
     if (options?.params) {
