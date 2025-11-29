@@ -125,23 +125,23 @@ module.exports = {
 
     if (await tableExists("product_variation_colors")) {
       try {
-        // Re-add unique constraint on Title
+        // Re-add unique constraint on Title (column name is 'title' in database)
         await knex.raw(
-          `CREATE UNIQUE INDEX IF NOT EXISTS product_variation_colors_title_unique ON product_variation_colors (Title)`,
+          `CREATE UNIQUE INDEX IF NOT EXISTS product_variation_colors_title_unique ON product_variation_colors (title)`,
         );
-        console.log("✓ Re-added unique constraint on product_variation_colors.Title");
+        console.log("✓ Re-added unique constraint on product_variation_colors.title");
       } catch (error) {
-        console.log("Error re-adding Title unique constraint:", error.message);
+        console.log("Error re-adding title unique constraint:", error.message);
       }
 
       try {
-        // Re-add unique constraint on ColorCode
+        // Re-add unique constraint on ColorCode (column name is 'color_code' in database)
         await knex.raw(
-          `CREATE UNIQUE INDEX IF NOT EXISTS product_variation_colors_color_code_unique ON product_variation_colors (ColorCode)`,
+          `CREATE UNIQUE INDEX IF NOT EXISTS product_variation_colors_color_code_unique ON product_variation_colors (color_code)`,
         );
-        console.log("✓ Re-added unique constraint on product_variation_colors.ColorCode");
+        console.log("✓ Re-added unique constraint on product_variation_colors.color_code");
       } catch (error) {
-        console.log("Error re-adding ColorCode unique constraint:", error.message);
+        console.log("Error re-adding color_code unique constraint:", error.message);
       }
 
       console.log("✅ Color unique constraints rollback completed");
