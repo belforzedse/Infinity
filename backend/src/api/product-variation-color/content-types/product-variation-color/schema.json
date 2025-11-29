@@ -13,13 +13,11 @@
   "attributes": {
     "Title": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "ColorCode": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "external_id": {
       "type": "string",
