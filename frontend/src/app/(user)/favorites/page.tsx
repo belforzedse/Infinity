@@ -18,7 +18,7 @@ export default function FavoritesPage() {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const pageSize = 12;
-  
+
   // Subscribe to global liked products atom for optimistic updates
   const [likedProducts] = useAtom(likedProductsAtom);
 
@@ -49,7 +49,7 @@ export default function FavoritesPage() {
     const likedProductIds = new Set(
       likedProducts.map((lp) => lp.product?.id?.toString()).filter(Boolean)
     );
-    
+
     // Only show favorites that are still in the liked products atom
     // This provides instant updates when items are added/removed
     return favorites.filter((favorite) => {
