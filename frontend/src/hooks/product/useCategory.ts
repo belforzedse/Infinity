@@ -78,7 +78,9 @@ export function useProductCategory(props?: UseProductCategoryProps) {
           console.log("fetchAllCategories: Response is PaginatedResponse, extracted data");
         }
       } else {
-        console.warn("fetchAllCategories: Unexpected response format:", response);
+        if (process.env.NODE_ENV === "development") {
+          console.warn("fetchAllCategories: Unexpected response format:", response);
+        }
         categories = [];
       }
 
@@ -96,7 +98,9 @@ export function useProductCategory(props?: UseProductCategoryProps) {
         console.log("fetchAllCategories: setCategoriesData called with", categories.length, "categories");
       }
     } catch (error) {
-      console.error("Failed to get product categories:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to get product categories:", error);
+      }
       setCategoriesData([]);
       // Don't throw error, just log it to prevent crashes
     } finally {

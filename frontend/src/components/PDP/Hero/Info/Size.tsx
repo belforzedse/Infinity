@@ -119,23 +119,32 @@ export default function PDPHeroInfoSize(props: Props) {
         </div>
 
         <div className="flex gap-1">
-          <div
+          <button
+            type="button"
             className="flex h-5 w-5 cursor-pointer items-center justify-center"
             onClick={onPrevClick}
+            aria-label="اسکرول به راست"
           >
             <ChevronRightIcon color="#262626" />
-          </div>
+          </button>
 
-          <div
+          <button
+            type="button"
             className="flex h-5 w-5 cursor-pointer items-center justify-center"
             onClick={onNextClick}
+            aria-label="اسکرول به چپ"
           >
             <ChevronLeftIcon color="#262626" />
-          </div>
+          </button>
         </div>
       </div>
 
-      <div ref={scrollContainerRef} className="w-full overflow-x-hidden">
+      <div
+        ref={scrollContainerRef}
+        className="w-full overflow-x-hidden"
+        role="radiogroup"
+        aria-label="انتخاب سایز محصول"
+      >
         <div className="flex w-fit gap-2">
           {sizes.map((size) => {
             const isSelected = size.id === selectedSize;
@@ -154,6 +163,8 @@ export default function PDPHeroInfoSize(props: Props) {
                 onClick={() => handleSizeClick(size.id)}
                 disabled={isDisabled}
                 aria-disabled={isDisabled}
+                aria-label={isDisabled ? `سایز ${size.title} ناموجود` : `انتخاب سایز ${size.title}`}
+                aria-pressed={isSelected ? "true" : "false"}
                 title={isDisabled ? "ناموجود" : size.title}
               >
                 <span className="text-xs">{size.title}</span>
