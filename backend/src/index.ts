@@ -151,6 +151,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::local-user-wallet": {
         "local-user-wallet": ["getCurrentUserWallet"],
       },
+      "api::local-user-wallet-transaction": {
+        "local-user-wallet-transaction": READ_ACTIONS,
+      },
       "api::wallet-topup": {
         "wallet-topup": ["chargeIntent"],
       },
