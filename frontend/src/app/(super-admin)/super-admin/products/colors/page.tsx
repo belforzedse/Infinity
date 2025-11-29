@@ -37,12 +37,16 @@ const INITIAL_MODAL_STATE: ModalState = {
 
 export default function ProductColorsPage() {
   const router = useRouter();
-  const { roleName } = useCurrentUser();
+  const { roleName, isStoreManager, isAdmin } = useCurrentUser();
+  const canDeleteColors = isStoreManager || isAdmin;
   const [colors, setColors] = useState<ApiColor[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalState, setModalState] = useState<ModalState>({ ...INITIAL_MODAL_STATE });
   const [saving, setSaving] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Redirect editors away from product pages
   useEffect(() => {
@@ -150,6 +154,44 @@ export default function ProductColorsPage() {
     }
   };
 
+  const handleDeleteColor = (color: ApiColor) => {
+    if (!canDeleteColors) {
+      toast.error("شما مجوز حذف رنگ را ندارید");
+      return;
+    }
+    setDeleteId(color.id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+
+    if (!canDeleteColors) {
+      toast.error("شما مجوز حذف رنگ را ندارید");
+      setDeleteConfirmOpen(false);
+      setDeleteId(null);
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await apiClient.delete(`${ENDPOINTS.PRODUCT.COLORS}/${deleteId}`);
+
+      // Update local state
+      setColors((prev) => prev.filter((c) => c.id !== deleteId));
+      setDeleteConfirmOpen(false);
+      setDeleteId(null);
+      toast.success("رنگ با موفقیت حذف شد");
+    } catch (error: any) {
+      console.error("Error deleting color:", error);
+      const rawErrorMessage = extractErrorMessage(error);
+      const message = translateErrorMessage(rawErrorMessage, "خطا در حذف رنگ");
+      toast.error(message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <ContentWrapper
       title="مدیریت رنگ‌ها"
@@ -217,13 +259,24 @@ export default function ProductColorsPage() {
                     <span>
                       کد خارجی: {color.attributes?.external_id?.trim() || "ثبت نشده"}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => openModal(color)}
-                      className="text-sm rounded-lg border border-slate-200 px-4 py-1.5 text-neutral-700 transition-colors hover:bg-slate-50"
-                    >
-                      ویرایش
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openModal(color)}
+                        className="text-sm rounded-lg border border-slate-200 px-4 py-1.5 text-neutral-700 transition-colors hover:bg-slate-50"
+                      >
+                        ویرایش
+                      </button>
+                      {canDeleteColors && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteColor(color)}
+                          className="text-sm rounded-lg border border-red-200 bg-red-50 px-4 py-1.5 text-red-700 transition-colors hover:bg-red-100"
+                        >
+                          حذف
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -360,6 +413,98 @@ export default function ProductColorsPage() {
                       }`}
                     >
                       {saving ? "در حال ذخیره..." : "ذخیره"}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Delete Confirmation Modal */}
+      <Transition appear show={deleteConfirmOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => (!deleting ? setDeleteConfirmOpen(false) : null)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                  <Dialog.Title className="text-xl font-semibold text-neutral-900">
+                    حذف رنگ
+                  </Dialog.Title>
+
+                  <div className="mt-4">
+                    <p className="text-sm text-neutral-600">
+                      آیا از حذف این رنگ اطمینان دارید؟ این عمل قابل بازگشت نیست.
+                    </p>
+                    {deleteId && (
+                      <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <span
+                          className="h-10 w-10 rounded-lg border border-slate-200"
+                          style={{
+                            backgroundColor:
+                              colors.find((c) => c.id === deleteId)?.attributes?.ColorCode || "#f5f5f5",
+                          }}
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-neutral-800">
+                            {colors.find((c) => c.id === deleteId)?.attributes?.Title}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            {(colors.find((c) => c.id === deleteId)?.attributes?.ColorCode || "").toUpperCase()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 flex justify-end gap-3 border-t border-slate-200 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteConfirmOpen(false);
+                        setDeleteId(null);
+                      }}
+                      disabled={deleting}
+                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      انصراف
+                    </button>
+                    <button
+                      type="button"
+                      onClick={confirmDelete}
+                      disabled={deleting}
+                      className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
+                        deleting
+                          ? "bg-red-300 cursor-not-allowed"
+                          : "bg-red-600 hover:bg-red-700"
+                      }`}
+                    >
+                      {deleting ? "در حال حذف..." : "حذف"}
                     </button>
                   </div>
                 </Dialog.Panel>

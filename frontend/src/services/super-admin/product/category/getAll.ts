@@ -19,10 +19,12 @@ export const getAllCategories = async (): Promise<PaginatedResponse<categoryResp
   const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}`;
   //const accessToken = localStorage.getItem("accessToken");
   try {
+    // Use no-store cache for super-admin pages to ensure fresh data
     const response = await apiClient.get<PaginatedResponse<categoryResponseType>>(endpoint, {
       params: {
-        "pagination[limit]": -1, // Fetch all categories without pagination limit
+        "pagination[pageSize]": 1000, // Fetch all categories (up to 1000, should be enough)
       },
+      cache: "no-store",
     });
     return response.data;
   } catch (error) {

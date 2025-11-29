@@ -3,25 +3,33 @@
 import Header from "@/components/SuperAdmin/Layout/Header";
 import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
 import ScrollToTop from "@/components/ScrollToTop";
-import { Suspense, useEffect, useState, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { Suspense, useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { UserService } from "@/services";
 import { HTTP_STATUS } from "@/constants/api";
 import { currentUserAtom } from "@/lib/atoms/auth";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [, setCurrentUser] = useAtom(currentUserAtom);
+  const setCurrentUser = useSetAtom(currentUserAtom);
+  const hasRunRef = useRef(false);
 
-  const checkAdminAccess = useCallback(async () => {
+  // Only check on initial mount - no background checks to avoid flickering
+  useEffect(() => {
+    // Prevent running multiple times
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
+    let isMounted = true;
+    setIsLoading(true);
+
     const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) {
       router.replace("/auth");
-      return false;
+      return;
     }
 
     const redirectToPrevious = () => {
@@ -32,66 +40,42 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       }
     };
 
-    try {
-      // Force refresh user data by clearing cache first, then fetching fresh data
-      setCurrentUser(null);
-      const me = await UserService.me(true);
+    // Force refresh user data by clearing cache first, then fetching fresh data
+    setCurrentUser(null);
+    UserService.me(true)
+      .then((me) => {
+        if (!isMounted) return;
+        // Update the cached user data with fresh data
+        setCurrentUser(me);
 
-      // Update the cached user data with fresh data
-      setCurrentUser(me);
+        if (!me?.isAdmin) {
+          redirectToPrevious();
+          return;
+        }
+        setIsAuthorized(true);
+        setIsLoading(false);
+      })
+      .catch((error: any) => {
+        if (!isMounted) return;
+        // Clear user data on auth errors
+        setCurrentUser(null);
 
-      if (!me?.isAdmin) {
+        if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
+          router.replace("/auth");
+          return;
+        }
+        if (error?.status === HTTP_STATUS.FORBIDDEN) {
+          redirectToPrevious();
+          return;
+        }
         redirectToPrevious();
-        return false;
-      }
-
-      return true;
-    } catch (error: any) {
-      // Clear user data on auth errors
-      setCurrentUser(null);
-
-      if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
-        router.replace("/auth");
-        return false;
-      }
-      if (error?.status === HTTP_STATUS.FORBIDDEN) {
-        redirectToPrevious();
-        return false;
-      }
-      redirectToPrevious();
-      return false;
-    }
-  }, [router, setCurrentUser]);
-
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-
-    checkAdminAccess().then((authorized) => {
-      if (!isMounted) return;
-      setIsAuthorized(authorized);
-      setIsLoading(false);
-    });
+      });
 
     return () => {
       isMounted = false;
     };
-  }, [checkAdminAccess, pathname]); // Re-check on route changes
-
-  // Also check on window focus to catch role changes from other tabs/windows
-  useEffect(() => {
-    const handleFocus = () => {
-      checkAdminAccess().then((authorized) => {
-        if (!authorized && isAuthorized) {
-          // Role was revoked, redirect immediately
-          setIsAuthorized(false);
-        }
-      });
-    };
-
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [checkAdminAccess, isAuthorized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - use ref to prevent re-runs
 
   if (isLoading) {
     return (
