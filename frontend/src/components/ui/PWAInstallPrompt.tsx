@@ -20,6 +20,7 @@ export default function PWAInstallPrompt() {
   useEffect(() => {
     // Check if app is already installed
     if (window.matchMedia("(display-mode: standalone)").matches) {
+      console.log("[PWA] App is already installed (standalone mode)");
       setIsInstalled(true);
       return;
     }
@@ -27,12 +28,20 @@ export default function PWAInstallPrompt() {
     // Check if app was installed before (localStorage flag)
     const wasInstalled = localStorage.getItem("pwa-installed");
     if (wasInstalled === "true") {
+      console.log("[PWA] App was previously installed");
       setIsInstalled(true);
       return;
     }
 
+    // Check if running on HTTPS or localhost (required for PWA)
+    const isSecure = window.location.protocol === "https:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (!isSecure) {
+      console.warn("[PWA] App must be served over HTTPS (or localhost) for install prompt to work");
+    }
+
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
+      console.log("[PWA] beforeinstallprompt event fired!");
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setShowPrompt(true);
@@ -42,35 +51,62 @@ export default function PWAInstallPrompt() {
 
     // Check if app was just installed
     window.addEventListener("appinstalled", () => {
+      console.log("[PWA] App was just installed");
       setIsInstalled(true);
       setShowPrompt(false);
       localStorage.setItem("pwa-installed", "true");
     });
 
+    // Fallback: Check if PWA is installable after a delay (for browsers that don't fire event immediately)
+    const checkInstallability = setTimeout(() => {
+      // If we haven't received the event yet, check if we can show manual install instructions
+      if (!deferredPrompt && !isInstalled && isSecure) {
+        // Check if service worker is registered (required for installability)
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistration().then((registration) => {
+            if (registration) {
+              console.log("[PWA] Service worker is registered, but beforeinstallprompt hasn't fired yet");
+              // You could show a manual install button here if needed
+            }
+          });
+        }
+      }
+    }, 3000); // Wait 3 seconds
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      clearTimeout(checkInstallability);
     };
-  }, []);
+  }, [deferredPrompt, isInstalled]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    // Show the install prompt
-    await deferredPrompt.prompt();
-
-    // Wait for user response
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      console.log("[PWA] User accepted the install prompt");
-      localStorage.setItem("pwa-installed", "true");
-    } else {
-      console.log("[PWA] User dismissed the install prompt");
+    if (!deferredPrompt) {
+      console.warn("[PWA] No deferred prompt available. User may need to use browser's install button.");
+      // Fallback: Show instructions for manual installation
+      alert("برای نصب اپلیکیشن، از منوی مرورگر خود استفاده کنید:\n\nChrome/Edge: روی آیکون + در نوار آدرس کلیک کنید\nFirefox: از منوی ⋮ گزینه 'نصب' را انتخاب کنید");
+      return;
     }
 
-    // Clear the deferred prompt
-    setDeferredPrompt(null);
-    setShowPrompt(false);
+    try {
+      // Show the install prompt
+      await deferredPrompt.prompt();
+
+      // Wait for user response
+      const { outcome } = await deferredPrompt.userChoice;
+
+      if (outcome === "accepted") {
+        console.log("[PWA] User accepted the install prompt");
+        localStorage.setItem("pwa-installed", "true");
+      } else {
+        console.log("[PWA] User dismissed the install prompt");
+      }
+    } catch (error) {
+      console.error("[PWA] Error showing install prompt:", error);
+    } finally {
+      // Clear the deferred prompt
+      setDeferredPrompt(null);
+      setShowPrompt(false);
+    }
   };
 
   const handleDismiss = () => {
