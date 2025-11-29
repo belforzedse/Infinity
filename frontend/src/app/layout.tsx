@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   },
   description: "فروشگاه پوشاک آنلاین اینفینیتی - جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه",
   keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی", "خرید آنلاین"],
+  applicationName: "اینفینیتی",
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
@@ -72,7 +73,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
   themeColor: "#ec4899", // Pink theme color for mobile browsers
@@ -84,10 +85,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // Extract base domain for prefetch (API_BASE_URL in constants includes /api suffix)
-  const API_BASE_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL 
-    ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api$/, '') 
+  const API_BASE_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL
+    ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api$/, '')
     : "http://localhost:1337";
-  
+
   return (
     <html
       lang="fa"
@@ -95,18 +96,33 @@ export default function RootLayout({
       className={`${peyda.variable} ${peydaFanum.variable} ${rokh.variable} ${kaghaz.variable}`}
     >
       <head>
-        {/* DNS prefetch for external domains */}
+        {/* Preload critical font */}
+        <link
+          rel="preload"
+          href="/fonts/peyda-regular-fanum.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+
+        {/* DNS prefetch for external domains - API first for critical requests */}
+        <link rel="dns-prefetch" href={API_BASE_DOMAIN} />
         <link rel="dns-prefetch" href={IMAGE_BASE_URL || API_BASE_DOMAIN} />
         <link rel="dns-prefetch" href="https://www.instagram.com" />
         <link rel="dns-prefetch" href="https://www.telegram.org" />
-        
-        {/* Preconnect to API for faster requests */}
+
+        {/* Preconnect to API for faster requests - critical for initial load */}
         <link rel="preconnect" href={API_BASE_DOMAIN} crossOrigin="anonymous" />
         <link rel="preconnect" href={IMAGE_BASE_URL || API_BASE_DOMAIN} crossOrigin="anonymous" />
-        
+
+        {/* Prefetch likely next-page resources */}
+        <link rel="prefetch" href="/plp" />
+
+        <link rel="prefetch" href="/blog" />
+
         {/* OpenSearch descriptor for browser search integration */}
         <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title={SITE_NAME} />
-        
+
         {/* PWA meta tags for mobile */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -116,7 +132,7 @@ export default function RootLayout({
       <body className={`${peydaFanum.className} antialiased`}>
         {/* Organization Schema for SEO */}
         <OrganizationSchema />
-        
+
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main-content"

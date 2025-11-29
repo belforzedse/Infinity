@@ -23,7 +23,8 @@ export default function imageLoader({ src, width, quality = 75 }: ImageLoaderPro
     const params = new URLSearchParams();
     params.set("w", String(width));
     params.set("q", String(quality));
-    params.set("f", "webp");
+    // Prefer AVIF, fallback to WebP
+    params.set("f", "avif");
 
     // This path will be resolved by the frontend origin (Next.js server)
     return `${src}?${params.toString()}`;
@@ -38,7 +39,8 @@ export default function imageLoader({ src, width, quality = 75 }: ImageLoaderPro
       if (!url.pathname.includes("/uploads/")) {
         url.searchParams.set("w", String(width));
         url.searchParams.set("q", String(quality));
-        url.searchParams.set("f", "webp");
+        // Prefer AVIF, fallback to WebP
+        url.searchParams.set("f", "avif");
       }
 
       return url.toString();
@@ -53,7 +55,8 @@ export default function imageLoader({ src, width, quality = 75 }: ImageLoaderPro
     if (!url.pathname.includes("/uploads/")) {
       url.searchParams.set("w", String(width));
       url.searchParams.set("q", String(quality));
-      url.searchParams.set("f", "webp");
+      // Prefer AVIF, fallback to WebP
+      url.searchParams.set("f", "avif");
     }
     return url.toString();
   } catch {

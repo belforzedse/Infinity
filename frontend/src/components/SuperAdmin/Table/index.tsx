@@ -170,7 +170,7 @@ export function SuperAdminTable<TData, TValue>({
           setTotalSize(total);
         }
       } catch (error) {
-        if ((error as any)?.name !== "AbortError") {
+        if ((error as any)?.name !== "AbortError" && process.env.NODE_ENV === "development") {
           console.error("Failed to fetch table data:", error);
         }
       } finally {
