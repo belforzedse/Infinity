@@ -15,17 +15,10 @@ const NETWORK_FIRST = "network-first";
 const NETWORK_ONLY = "network-only";
 
 // URLs to cache on install
-const URLS_TO_CACHE = [
-  "/",
-  "/offline.html",
-];
+const URLS_TO_CACHE = ["/", "/offline.html"];
 
 // API routes that should be cached
-const CACHEABLE_API_ROUTES = [
-  "/api/cart",
-  "/api/products",
-  "/api/categories",
-];
+const CACHEABLE_API_ROUTES = ["/api/cart", "/api/products", "/api/categories"];
 
 /**
  * Install event: cache essential files
@@ -43,7 +36,7 @@ self.addEventListener("install", (event) => {
           return Promise.resolve();
         });
       })
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -53,23 +46,25 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   console.log("[SW] Activating service worker...");
 
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          // Delete old cache versions
-          if (
-            cacheName !== CART_CACHE &&
-            cacheName !== API_CACHE &&
-            cacheName !== RUNTIME_CACHE
-          ) {
-            console.log("[SW] Deleting old cache:", cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  ).then(() => self.clients.claim());
+  event
+    .waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            // Delete old cache versions
+            if (
+              cacheName !== CART_CACHE &&
+              cacheName !== API_CACHE &&
+              cacheName !== RUNTIME_CACHE
+            ) {
+              console.log("[SW] Deleting old cache:", cacheName);
+              return caches.delete(cacheName);
+            }
+          }),
+        );
+      }),
+    )
+    .then(() => self.clients.claim());
 });
 
 /**
@@ -81,6 +76,17 @@ self.addEventListener("fetch", (event) => {
 
   // Skip non-GET requests and non-http(s) schemes
   if (request.method !== "GET" || !url.protocol.startsWith("http")) {
+    return;
+  }
+
+  // Skip service worker for auth endpoints - they need fresh data for role checks
+  // Also skip Next.js static assets - Next.js handles cache-busting with hashed filenames
+  if (
+    url.pathname.includes("/auth/self") ||
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/_next/chunks/")
+  ) {
+    // Let these requests pass through without service worker interception
     return;
   }
 
@@ -131,17 +137,13 @@ async function handleCartRequest(request) {
     }
 
     // Return offline response
-    return new Response(
-      JSON.stringify({ error: "Offline", data: null }),
-      {
-        status: 503,
-        statusText: "Service Unavailable",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Offline", data: null }), {
+      status: 503,
+      statusText: "Service Unavailable",
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
-
 /**
  * Handle API requests (cache-first)
  * Use cache if available, fall back to network
@@ -164,14 +166,11 @@ async function handleAPIRequest(request) {
     return response;
   } catch (error) {
     // Return offline response
-    return new Response(
-      JSON.stringify({ error: "Offline", data: null }),
-      {
-        status: 503,
-        statusText: "Service Unavailable",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Offline", data: null }), {
+      status: 503,
+      statusText: "Service Unavailable",
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
@@ -201,7 +200,7 @@ async function handleStaticAsset(request) {
     if (request.destination === "image") {
       return new Response(
         `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#f0f0f0" width="200" height="200"/></svg>`,
-        { headers: { "Content-Type": "image/svg+xml" } }
+        { headers: { "Content-Type": "image/svg+xml" } },
       );
     }
 

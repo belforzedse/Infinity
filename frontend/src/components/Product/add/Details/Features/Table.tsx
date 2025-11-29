@@ -272,9 +272,15 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
   const fetchVariationData = useCallback(async () => {
     try {
       const [colorsRes, sizesRes, modelsRes] = await Promise.all([
-        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors"),
-        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes"),
-        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models"),
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors?pagination[pageSize]=1000&sort=Title:asc", {
+          cache: "no-store",
+        }),
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes", {
+          cache: "no-store",
+        }),
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models", {
+          cache: "no-store",
+        }),
       ]);
 
       setAvailableOptions({
@@ -295,6 +301,9 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
 
       const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
         `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
+        {
+          cache: "no-store",
+        },
       );
 
       const existingVariations = (existingVariationsRes as any).data || [];
@@ -365,6 +374,14 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
 
       return availableOptions[type].filter((option) => {
         const title = (option.attributes.Title || "").toLowerCase();
+
+        // For colors, also search by ColorCode
+        if (type === "colors") {
+          const colorCode = (option.attributes.ColorCode || "").toLowerCase();
+          return title.includes(query) || colorCode.includes(query);
+        }
+
+        // For sizes and models, only search by Title
         return title.includes(query);
       });
     };
@@ -442,7 +459,27 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
         features.models.length > 0
           ? features.models
           : [{ id: "default-model", value: DEFAULT_TITLES.models }];
+
+      // Validate color IDs exist in available options
+      const availableColorIds = new Set(availableOptions.colors.map((c) => String(c.id)));
+      const invalidColors = colorList.filter((color) => !availableColorIds.has(String(color.id)));
+
+      if (invalidColors.length > 0) {
+        toast.error(
+          `رنگ‌های نامعتبر یافت شد. لطفاً رنگ‌ها را دوباره انتخاب کنید. (${invalidColors.map((c) => c.value).join(", ")})`
+        );
+        setIsGeneratingVariations(false);
+        return;
+      }
+
       for (const color of colorList) {
+        const colorId = parseInt(color.id);
+        if (isNaN(colorId) || colorId <= 0) {
+          toast.error(`شناسه رنگ نامعتبر: ${color.value} (${color.id})`);
+          setIsGeneratingVariations(false);
+          return;
+        }
+
         for (const size of sizeOptions) {
           for (const model of modelOptions) {
             // Generate a unique SKU for this variation
@@ -454,7 +491,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
 
             combinations.push({
               product: productId,
-              product_variation_color: parseInt(color.id),
+              product_variation_color: colorId,
               ...(features.sizes.length > 0 ? { product_variation_size: parseInt(size.id) } : {}),
               ...(features.models.length > 0
                 ? { product_variation_model: parseInt(model.id) }
@@ -470,6 +507,9 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
       // Fetch existing variations to avoid duplicates
       const existingVariationsRes = await apiClient.get<ApiResponse<ProductVariation[]>>(
         `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model`,
+        {
+          cache: "no-store",
+        },
       );
 
       const existingVariations = (existingVariationsRes as any).data || [];
@@ -493,6 +533,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
         await apiClient.post("/product-variations", { data: combination });
       }
 
+      // Refresh variation data after creation
       await fetchVariationData();
       onVariationsGenerated?.();
 

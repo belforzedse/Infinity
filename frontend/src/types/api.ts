@@ -32,6 +32,7 @@ export interface ApiRequestOptions {
   skipAuth?: boolean; // Flag to skip authentication for public endpoints
   suppressAuthRedirect?: boolean;
   signal?: AbortSignal; // Optional external abort signal for cancellation
+  cache?: RequestCache; // Cache option for fetch API (e.g., 'no-store', 'no-cache', 'default')
 }
 
 // Pagination Types

@@ -91,7 +91,13 @@ class ApiClient {
       });
     }
 
-    const url = `${this.baseUrl}${endpoint}`;
+    // Add cache-busting query parameter if cache is set to 'no-store'
+    let url = `${this.baseUrl}${endpoint}`;
+    if (options?.cache === 'no-store') {
+      const separator = endpoint.includes('?') ? '&' : '?';
+      url = `${url}${separator}_cb=${Date.now()}`;
+    }
+
     const headers = this.getHeaders(options?.headers, options?.skipAuth);
 
     const config: RequestInit = {
@@ -99,6 +105,7 @@ class ApiClient {
       headers,
       credentials: options?.withCredentials ? "include" : "same-origin",
       body: data ? JSON.stringify(data) : undefined,
+      cache: options?.cache || 'default', // Support cache option from RequestOptions
     };
 
     try {

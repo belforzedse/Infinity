@@ -52,6 +52,7 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        // Force fresh data fetch - no cache
         const result = await getProduct(id, getProductParams);
         setProductData(transformToProductData(result.data.attributes));
       } catch (error: any) {

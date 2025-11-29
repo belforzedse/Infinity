@@ -35,49 +35,73 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
     });
   };
 
+  // Split categories into two columns
+  const midPoint = Math.ceil(categories.length / 2);
+  const leftColumn = categories.slice(0, midPoint);
+  const rightColumn = categories.slice(midPoint);
+
+  const renderTable = (columnCategories: typeof categories, keyPrefix: string) => (
+    <div className="flex flex-col h-full">
+      <div className="sticky top-0 bg-white z-10 border-b border-slate-200">
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="text-xs text-right text-slate-400 bg-white py-2">نام</th>
+              <th className="text-xs text-right text-slate-400 bg-white py-2">نامک</th>
+              <th className="text-xs text-right text-slate-400 bg-white py-2">والد</th>
+              <th className="text-right bg-white py-2"></th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div className="overflow-y-auto flex-1">
+        <table className="w-full">
+          <tbody className="divide-y divide-slate-100">
+            {columnCategories.map((category) => (
+              <tr key={`${keyPrefix}-${category.id}`} className="">
+                <td className="text-sm py-3 text-right text-neutral-800">
+                  {category.attributes.Title}
+                </td>
+                <td className="text-sm py-3 text-right text-neutral-800">
+                  {category.attributes.Slug}
+                </td>
+                <td className="text-sm py-3 text-right text-neutral-800">
+                  {category.attributes.Parent ? category.attributes.Parent : ""}
+                </td>
+                <td className="text-sm py-3 text-right text-neutral-800">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => {}}
+                      className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(category.id.toString())}
+                      className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
+                    >
+                      <DeleteIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full">
-      <table className="w-full">
-        <thead>
-          <tr>
-            <th className="text-xs text-right text-slate-400">نام</th>
-            <th className="text-xs text-right text-slate-400">نامک</th>
-            <th className="text-xs text-right text-slate-400">والد</th>
-            <th className="text-right"></th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {categories.map((category) => (
-            <tr key={category.id} className="">
-              <td className="text-sm py-3 text-right text-neutral-800">
-                {category.attributes.Title}
-              </td>
-              <td className="text-sm py-3 text-right text-neutral-800">
-                {category.attributes.Slug}
-              </td>
-              <td className="text-sm py-3 text-right text-neutral-800">
-                {category.attributes.Parent ? category.attributes.Parent : ""}
-              </td>
-              <td className="text-sm py-3 text-right text-neutral-800">
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => {}}
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
-                  >
-                    <EditIcon />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(category.id.toString())}
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
-                  >
-                    <DeleteIcon className="h-5 w-5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="w-full max-h-[60vh] border border-slate-200 rounded-lg overflow-hidden">
+          {renderTable(leftColumn, "left")}
+        </div>
+        <div className="w-full max-h-[60vh] border border-slate-200 rounded-lg overflow-hidden">
+          {renderTable(rightColumn, "right")}
+        </div>
+      </div>
     </div>
   );
 };

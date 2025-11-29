@@ -4,11 +4,9 @@ import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
 import SearchIcon from "../../Icons/SearchIcon";
 import ImportCategorty from "./Import";
 import SetCategoryTable from "./Table";
-import SetCategoryTablePagination from "./TablePagination";
 import { useAtomValue } from "jotai";
 import {
   productCategoryDataAtom,
-  productCategoryDataAtomPagination,
 } from "@/atoms/super-admin/products";
 
 interface CategoryModalProps {
@@ -20,7 +18,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
   const [searchText, setSearchText] = useState("");
 
   const categoriesData = useAtomValue(productCategoryDataAtom);
-  const categoriesDataPagination = useAtomValue(productCategoryDataAtomPagination);
 
   const filteredCategories = useMemo(() => {
     const safeCategoriesData = categoriesData || [];
@@ -39,6 +36,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
       onClose={onClose}
       closeIcon={<DeleteIcon className="text-pink-500" />}
       titleClassName="!justify-end"
+      className="max-w-4xl lg:max-w-6xl"
     >
       <div className="flex flex-col gap-4">
         <div className="flex justify-between">
@@ -57,12 +55,9 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
 
         <ImportCategorty />
 
-        <SetCategoryTable categories={filteredCategories} />
-
-        <SetCategoryTablePagination
-          totalItems={categoriesDataPagination?.totalItems || 0}
-          itemsPerPage={categoriesDataPagination?.itemsPerPage || 10}
-        />
+        <div className="max-h-[60vh] overflow-y-auto">
+          <SetCategoryTable categories={filteredCategories} />
+        </div>
       </div>
     </Modal>
   );
