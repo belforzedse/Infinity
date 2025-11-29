@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
-  <ShortName>اینفینیتی استور</ShortName>
-  <Description>جستجو در فروشگاه اینفینیتی استور</Description>
-  <Tags>پوشاک فروشگاه آنلاین</Tags>
+  <ShortName>فروشگاه پوشاک اینفینیتی</ShortName>
+  <Description>جستجو در فروشگاه پوشاک اینفینیتی</Description>
+  <Tags>فروشگاه پوشاک آنلاین</Tags>
   <Contact>info@infinitycolor.org</Contact>
   <Url type="text/html" method="get" template="https://infinitycolor.org/plp?search={searchTerms}"/>
   <Url type="application/rss+xml" method="get" template="https://infinitycolor.org/blog/feed.xml?search={searchTerms}"/>
   <Image height="16" width="16" type="image/x-icon">https://infinitycolor.org/favicon.ico</Image>
-  <Developer>Infinity Store</Developer>
+  <Developer>Infinitycolor</Developer>
   <Attribution>
-    جستجو در فروشگاه اینفینیتی استور
+    جستجو در فروشگاه اینفینیتی
   </Attribution>
   <SyndicationRight>open</SyndicationRight>
   <AdultContent>false</AdultContent>

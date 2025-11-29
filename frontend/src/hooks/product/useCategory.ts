@@ -107,11 +107,16 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   const filteredTags =
     categorySearchQuery === ""
       ? categoryOptions
-      : categoryOptions.filter((category) =>
-          category.attributes.Title.replace(/\s/g, "")
-            .toLowerCase()
-            .includes(categorySearchQuery.replace(/\s/g, "").toLowerCase()),
-        );
+      : categoryOptions.filter((category) => {
+          const query = categorySearchQuery.trim().toLowerCase();
+          if (!query) return true;
+
+          const title = (category.attributes.Title || "").toLowerCase();
+          const slug = (category.attributes.Slug || "").toLowerCase();
+
+          // Search in both Title and Slug with fuzzy matching
+          return title.includes(query) || slug.includes(query);
+        });
 
   const handleSelectOtherCategory = (selectedCategory: categoryResponseType | null) => {
     if (!selectedCategory) {

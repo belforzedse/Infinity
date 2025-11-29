@@ -91,7 +91,26 @@ class ApiClient {
       });
     }
 
-    const url = `${this.baseUrl}${endpoint}`;
+    // Build URL with query parameters using URL and URLSearchParams APIs
+    const url = new URL(endpoint, this.baseUrl);
+
+    // Append params from options.params if provided
+    if (options?.params) {
+      Object.entries(options.params).forEach(([key, value]) => {
+        // Skip undefined values
+        if (value !== undefined) {
+          // Convert to string (handles number, boolean, string)
+          url.searchParams.set(key, String(value));
+        }
+      });
+    }
+
+    // Add cache-busting query parameter if cache is set to 'no-store'
+    // This is added after params are merged to respect existing query string
+    if (options?.cache === 'no-store') {
+      url.searchParams.set('_cb', String(Date.now()));
+    }
+
     const headers = this.getHeaders(options?.headers, options?.skipAuth);
 
     const config: RequestInit = {
@@ -99,6 +118,7 @@ class ApiClient {
       headers,
       credentials: options?.withCredentials ? "include" : "same-origin",
       body: data ? JSON.stringify(data) : undefined,
+      cache: options?.cache || 'default', // Support cache option from RequestOptions
     };
 
     try {
@@ -114,7 +134,7 @@ class ApiClient {
         : undefined;
       const timeoutId = setTimeout(() => controller.abort(), options?.timeout || REQUEST_TIMEOUT);
 
-      const response = await fetch(url, {
+      const response = await fetch(url.toString(), {
         ...config,
         signal: controller.signal,
       });

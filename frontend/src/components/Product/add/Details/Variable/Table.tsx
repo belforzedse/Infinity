@@ -24,7 +24,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
       {/* Desktop Table View */}
       <div className="hidden w-full overflow-hidden rounded-lg border border-slate-100 bg-white md:block">
         <table className="w-full table-fixed">
-          <ProductVariableHeader />
+          <ProductVariableHeader showDelete={!!onDeleteRow} />
           <tbody>
             {variables.map((item, index) => (
               <ProductVariableRow
@@ -34,6 +34,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
                 isSelected={selectedRows.includes(item.id)}
                 onSelect={onSelectRow}
                 onEdit={onEditRow}
+                onDelete={onDeleteRow}
               />
             ))}
           </tbody>
@@ -47,7 +48,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
             key={item.id}
             item={item}
             onEdit={() => onEditRow(item.id)}
-            onDelete={() => onDeleteRow && onDeleteRow(item.id)}
+            onDelete={onDeleteRow ? () => onDeleteRow(item.id) : undefined}
           />
         ))}
       </div>
