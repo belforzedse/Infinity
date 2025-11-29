@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { useAtom } from "jotai";
 import ProductSmallCard from "@/components/Product/SmallCard";
 import type { ProductLike } from "@/services/product/product-like";
 import ProductLikeService from "@/services/product/product-like";
@@ -8,6 +9,7 @@ import { IMAGE_BASE_URL } from "@/constants/api";
 import UserContainer from "@/components/layout/UserContainer";
 import UserSidebar from "@/components/User/Sidebar";
 import AccountQuickLinks from "@/components/User/Account/QuickLinks";
+import { likedProductsAtom } from "@/hooks/useProductLike";
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<ProductLike[]>([]);
@@ -16,6 +18,9 @@ export default function FavoritesPage() {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const pageSize = 12;
+  
+  // Subscribe to global liked products atom for optimistic updates
+  const [likedProducts] = useAtom(likedProductsAtom);
 
   const fetchFavorites = useCallback(async () => {
     try {
@@ -38,6 +43,20 @@ export default function FavoritesPage() {
   useEffect(() => {
     fetchFavorites();
   }, [fetchFavorites]);
+
+  // Filter favorites based on global liked products atom for optimistic updates
+  const visibleFavorites = useMemo(() => {
+    const likedProductIds = new Set(
+      likedProducts.map((lp) => lp.product?.id?.toString()).filter(Boolean)
+    );
+    
+    // Only show favorites that are still in the liked products atom
+    // This provides instant updates when items are added/removed
+    return favorites.filter((favorite) => {
+      const productId = favorite.product?.id?.toString();
+      return productId && likedProductIds.has(productId);
+    });
+  }, [favorites, likedProducts]);
 
   const mapFavoriteToProps = (favorite: ProductLike) => {
     const product = favorite.product;
@@ -109,13 +128,13 @@ export default function FavoritesPage() {
               <div className="rounded-lg bg-gray-50 p-8 text-center">
                 <p className="text-gray-600">{error}</p>
               </div>
-            ) : favorites.length === 0 ? (
+            ) : visibleFavorites.length === 0 ? (
               <div className="rounded-lg bg-gray-50 p-8 text-center">
                 <p className="text-gray-600">محصولی در لیست علاقه‌مندی‌ها وجود ندارد.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {favorites.map((favorite) => (
+                {visibleFavorites.map((favorite) => (
                   <ProductSmallCard
                     key={favorite.id}
                     {...mapFavoriteToProps(favorite)}

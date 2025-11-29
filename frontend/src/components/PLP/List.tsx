@@ -236,8 +236,8 @@ export default function PLPList({
       queryParams.append("filters[product_variations][Usage][$eq]", usage);
     }
 
-    // Sorting
-    if (sort) {
+    // Sorting - only send to backend if not price sorting (price sorting done on frontend)
+    if (sort && sort !== "price:asc" && sort !== "price:desc") {
       queryParams.append("sort[0]", sort);
     }
 
@@ -248,8 +248,42 @@ export default function PLPList({
     apiClient
       .getPublic<any>(endpoint, { suppressAuthRedirect: true })
       .then((data) => {
-        const productsArray = Array.isArray(data?.data) ? data.data : [];
-        
+        let productsArray = Array.isArray(data?.data) ? data.data : [];
+
+        // Frontend price sorting
+        if (sort === "price:asc" || sort === "price:desc") {
+          const { computeDiscountForVariation } = require("@/utils/discounts");
+
+          const getMinVariationPrice = (product: any): number => {
+            const variations = product.attributes?.product_variations?.data || [];
+            let minPrice = Infinity;
+
+            for (const variation of variations) {
+              // Only consider published variations with stock
+              if (!variation.attributes?.IsPublished) continue;
+
+              const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
+              if (typeof stockCount === "number" && stockCount <= 0) continue;
+
+              // Compute final price with discounts
+              const discountResult = computeDiscountForVariation(variation);
+              const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes?.Price || "0");
+
+              if (finalPrice > 0 && finalPrice < minPrice) {
+                minPrice = finalPrice;
+              }
+            }
+
+            return minPrice === Infinity ? 0 : minPrice;
+          };
+
+          productsArray = [...productsArray].sort((a: any, b: any) => {
+            const priceA = getMinVariationPrice(a);
+            const priceB = getMinVariationPrice(b);
+            return sort === "price:asc" ? priceA - priceB : priceB - priceA;
+          });
+        }
+
         if (process.env.NODE_ENV !== "production") {
           console.log("[PLP] Fetched products:", {
             count: productsArray.length,
@@ -262,7 +296,7 @@ export default function PLPList({
             } : null,
           });
         }
-        
+
         setProducts(productsArray);
         setPagination(
           data?.meta?.pagination || {

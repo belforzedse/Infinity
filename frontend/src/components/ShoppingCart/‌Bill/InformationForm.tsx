@@ -7,6 +7,7 @@ import type {
 import {
   Controller
 } from "react-hook-form";
+import { useAtom } from "jotai";
 import Input from "@/components/Kits/Form/Input";
 import type { Option } from "@/components/Kits/Form/Select";
 import Select from "@/components/Kits/Form/Select";
@@ -18,6 +19,7 @@ import type { UserAddress } from "@/services/user/addresses";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
+import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
 
 interface Props {
   register: UseFormRegister<FormData>;
@@ -27,19 +29,23 @@ interface Props {
 }
 
 function ShoppingCartBillInformationForm({ register, errors, control, setValue }: Props) {
-  const [addresses, setAddresses] = useState<UserAddress[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Use global addresses atom for real-time updates
+  const [addresses, setAddresses] = useAtom(addressesAtom);
+  const [loading, setLoading] = useAtom(addressesLoadingAtom);
+  const [error, setError] = useAtom(addressesErrorAtom);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchAddresses = async () => {
+      // Only fetch if atom is empty (initial load)
+      if (addresses.length > 0) return;
+
       try {
         setLoading(true);
         setError(null);
-        const addresses = await UserService.addresses.getAll();
-        setAddresses(addresses);
+        const fetchedAddresses = await UserService.addresses.getAll();
+        setAddresses(fetchedAddresses);
       } catch (err: any) {
         console.error("Failed to fetch addresses:", err);
         const rawErrorMessage = extractErrorMessage(err);
@@ -69,7 +75,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
 
     fetchAddresses();
     fetchUserInfo();
-  }, [setValue]);
+  }, [setValue, addresses.length, setAddresses, setLoading, setError]);
 
   // Convert addresses to select options
   const addressOptions: Option[] = addresses.map((address) => ({
