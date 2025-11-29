@@ -3,24 +3,25 @@
 import Header from "@/components/SuperAdmin/Layout/Header";
 import Sidebar from "@/components/SuperAdmin/Layout/Sidebar";
 import ScrollToTop from "@/components/ScrollToTop";
-import { Suspense, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { UserService } from "@/services";
 import { HTTP_STATUS } from "@/constants/api";
+import { currentUserAtom } from "@/lib/atoms/auth";
+import { useAtom } from "jotai";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [, setCurrentUser] = useAtom(currentUserAtom);
 
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-
+  const checkAdminAccess = useCallback(async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) {
       router.replace("/auth");
-      return undefined;
+      return false;
     }
 
     const redirectToPrevious = () => {
@@ -31,29 +32,66 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       }
     };
 
-    UserService.me(true)
-      .then((me) => {
-        if (!isMounted) return;
-        if (!me?.isAdmin) {
-          redirectToPrevious();
-          return;
-        }
-        setIsAuthorized(true);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        if (!isMounted) return;
-        if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
-          router.replace("/auth");
-          return;
-        }
+    try {
+      // Force refresh user data by clearing cache first, then fetching fresh data
+      setCurrentUser(null);
+      const me = await UserService.me(true);
+
+      // Update the cached user data with fresh data
+      setCurrentUser(me);
+
+      if (!me?.isAdmin) {
         redirectToPrevious();
-      });
+        return false;
+      }
+
+      return true;
+    } catch (error: any) {
+      // Clear user data on auth errors
+      setCurrentUser(null);
+
+      if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
+        router.replace("/auth");
+        return false;
+      }
+      if (error?.status === HTTP_STATUS.FORBIDDEN) {
+        redirectToPrevious();
+        return false;
+      }
+      redirectToPrevious();
+      return false;
+    }
+  }, [router, setCurrentUser]);
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    checkAdminAccess().then((authorized) => {
+      if (!isMounted) return;
+      setIsAuthorized(authorized);
+      setIsLoading(false);
+    });
 
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, [checkAdminAccess, pathname]); // Re-check on route changes
+
+  // Also check on window focus to catch role changes from other tabs/windows
+  useEffect(() => {
+    const handleFocus = () => {
+      checkAdminAccess().then((authorized) => {
+        if (!authorized && isAuthorized) {
+          // Role was revoked, redirect immediately
+          setIsAuthorized(false);
+        }
+      });
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [checkAdminAccess, isAuthorized]);
 
   if (isLoading) {
     return (
