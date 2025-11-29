@@ -47,7 +47,7 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
     }
   }, [CategoriesData]);
 
-  const onChangeMainCategory = (category: categoryResponseType | null) => {
+  const onChangeMainCategory = (category: categoryResponseType | null | undefined) => {
     if (!category) {
       // Clear selection
       setSelectedMainCategoryId(null);
@@ -115,9 +115,9 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
 
   const selectedCategory = useMemo(() => {
     if (!selectedMainCategoryId || !Array.isArray(CategoriesData)) {
-      return null;
+      return undefined;
     }
-    return CategoriesData.find((cat: categoryResponseType) => cat.id.toString() === selectedMainCategoryId) || null;
+    return CategoriesData.find((cat: categoryResponseType) => cat.id.toString() === selectedMainCategoryId) || undefined;
   }, [selectedMainCategoryId, CategoriesData]);
 
   return (
