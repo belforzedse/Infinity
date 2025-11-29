@@ -43,6 +43,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
       if (!token) {
+        setIsAuthorized(false);
         router.replace("/auth");
         return;
       }
@@ -50,22 +51,32 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       const me = await UserService.me(true);
       setCurrentUser(me);
 
+      // Check if user is still admin - update isAuthorized state and redirect immediately
       if (!me?.isAdmin) {
+        setIsAuthorized(false);
+        // Redirect immediately - don't wait
         redirectToPrevious();
         return;
       }
+
+      // Ensure isAuthorized is true if user is admin
+      setIsAuthorized(true);
     } catch (error: any) {
       setCurrentUser(null);
 
       if (error?.status === HTTP_STATUS.UNAUTHORIZED) {
+        setIsAuthorized(false);
         router.replace("/auth");
         return;
       }
       if (error?.status === HTTP_STATUS.FORBIDDEN) {
+        setIsAuthorized(false);
         redirectToPrevious();
         return;
       }
       // For other errors, don't redirect - might be temporary network issues
+      // But still update isAuthorized if we can't verify
+      setIsAuthorized(false);
     } finally {
       isCheckingRef.current = false;
     }
@@ -162,6 +173,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       checkAuthSilently();
     }
   }, [pathname, isAuthorized, checkAuthSilently]);
+
+  // Immediately redirect if user loses authorization
+  useEffect(() => {
+    if (!isLoading && !isAuthorized) {
+      // User is no longer authorized - redirect immediately
+      redirectToPrevious();
+    }
+  }, [isLoading, isAuthorized, redirectToPrevious]);
 
   if (isLoading) {
     return (

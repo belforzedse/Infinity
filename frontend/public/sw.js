@@ -46,25 +46,24 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   console.log("[SW] Activating service worker...");
 
-  event
-    .waitUntil(
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            // Delete old cache versions
-            if (
-              cacheName !== CART_CACHE &&
-              cacheName !== API_CACHE &&
-              cacheName !== RUNTIME_CACHE
-            ) {
-              console.log("[SW] Deleting old cache:", cacheName);
-              return caches.delete(cacheName);
-            }
-          }),
-        );
-      }),
-    )
+  // Compute the full Promise chain first
+  const activationPromise = caches
+    .keys()
+    .then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          // Delete old cache versions
+          if (cacheName !== CART_CACHE && cacheName !== API_CACHE && cacheName !== RUNTIME_CACHE) {
+            console.log("[SW] Deleting old cache:", cacheName);
+            return caches.delete(cacheName);
+          }
+        }),
+      );
+    })
     .then(() => self.clients.claim());
+
+  // Then pass the complete promise to waitUntil
+  event.waitUntil(activationPromise);
 });
 
 /**
