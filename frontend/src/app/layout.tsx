@@ -134,7 +134,6 @@ export default function RootLayout({
         {/* PWA meta tags for mobile */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="viewport" content="width=device-width, initialScale=1, maximum-scale=5, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ec4899" />

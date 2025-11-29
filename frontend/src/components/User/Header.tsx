@@ -9,9 +9,9 @@ import Logo from "../Kits/Logo";
 
 const UserHeader: React.FC = () => {
   return (
-    <header 
+    <header
       className="mb-6 flex w-full items-center justify-between bg-neutral-50 px-6 py-4 lg:mb-8 lg:rounded-2xl lg:px-10"
-      style={{ paddingTop: "max(1rem, calc(1rem + env(safe-area-inset-top)))" }}
+      style={{ paddingTop: "max(1rem, calc(1rem + env(safe-area-inset-top) * 0.5))" }}
     >
       <div className="flex items-center gap-2 lg:hidden">
         <div className="lg:hidden">

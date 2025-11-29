@@ -49,7 +49,10 @@ const Menu = ({ isOpen, onClose }: Props) => {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all">
+              <Dialog.Panel 
+                className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all"
+                style={{ paddingTop: "max(1.25rem, calc(1.25rem + env(safe-area-inset-top) * 0.5))" }}
+              >
                 <nav className="p-5">
                   <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
                     <XIcon />
