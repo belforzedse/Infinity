@@ -18,6 +18,8 @@ export const revalidate = 3600; // 1 hour fallback (on-demand is primary)
 
 // Allow dynamic generation of blog posts not in generateStaticParams
 // This ensures ISR can generate pages on-demand even if build-time generation failed
+// CRITICAL: This allows routes to be generated at request time if they weren't pre-generated
+// during build. This is essential for staging environments where build-time API calls might fail.
 export const dynamicParams = true;
 
 interface BlogPostPageProps {
@@ -29,14 +31,34 @@ interface BlogPostPageProps {
 /**
  * Generate static params for published blog posts
  * Pre-generates all published posts at build time for better SEO
+ * Falls back to ISR if build-time generation fails (staging-safe)
  */
 export async function generateStaticParams() {
+  const env = process.env.NODE_ENV || 'development';
+  const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+
   try {
     const allPosts: Array<{ slug: string }> = [];
     let currentPage = 1;
     const pageSize = 100;
 
-    logger.info(`[generateStaticParams] Starting static params generation with API_BASE_URL: ${API_BASE_URL}`);
+    logger.info(`[generateStaticParams] Starting static params generation`, {
+      env,
+      isStaging,
+      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      hasApiBaseUrl: !!API_BASE_URL,
+    });
+
+    // Validate API_BASE_URL is set
+    if (!API_BASE_URL || API_BASE_URL === 'undefined') {
+      logger.error('[generateStaticParams] API_BASE_URL is not configured', {
+        API_BASE_URL,
+        envVar: process.env.NEXT_PUBLIC_API_BASE_URL,
+        env,
+      });
+      logger.warn('[generateStaticParams] Returning empty array. ISR will handle blog post generation.');
+      return [];
+    }
 
     while (true) {
       const endpoint = `${API_BASE_URL}/blog-posts?` +
@@ -45,21 +67,48 @@ export async function generateStaticParams() {
         `pagination[pageSize]=${pageSize}&` +
         `fields[0]=Slug`;
 
-      logger.info(`[generateStaticParams] Fetching page ${currentPage} from: ${endpoint}`);
-
-      const fetchResponse = await fetch(endpoint, {
-        next: { revalidate: 3600 }, // Cache for 1 hour
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+      logger.info(`[generateStaticParams] Fetching page ${currentPage}`, {
+        endpoint: endpoint.replace(API_BASE_URL, '[API_BASE_URL]'),
+        isStaging,
       });
 
+      let fetchResponse: Response;
+      try {
+        fetchResponse = await fetch(endpoint, {
+          next: { revalidate: 3600 }, // Cache for 1 hour
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        });
+      } catch (fetchError) {
+        logger.error('[generateStaticParams] Network error during fetch', {
+          error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+          endpoint: endpoint.replace(API_BASE_URL, '[API_BASE_URL]'),
+          isStaging,
+          API_BASE_URL: API_BASE_URL || 'NOT_SET',
+        });
+        // If first page fails, return empty to let ISR handle it
+        if (currentPage === 1) {
+          logger.warn('[generateStaticParams] First page network error, returning empty array. ISR will handle posts.');
+          return [];
+        }
+        // If later page fails, break and return what we have
+        break;
+      }
+
       if (!fetchResponse.ok) {
-        const errorText = await fetchResponse.text();
+        const errorText = await fetchResponse.text().catch(() => 'Unable to read error response');
         logger.error(
           `[generateStaticParams] API request failed: ${fetchResponse.status} ${fetchResponse.statusText}`,
-          { endpoint, errorText }
+          {
+            endpoint: endpoint.replace(API_BASE_URL, '[API_BASE_URL]'),
+            status: fetchResponse.status,
+            statusText: fetchResponse.statusText,
+            errorText: errorText.slice(0, 500),
+            isStaging,
+            currentPage,
+          }
         );
         // If first page fails, return empty to let ISR handle it
         if (currentPage === 1) {
@@ -70,11 +119,26 @@ export async function generateStaticParams() {
         break;
       }
 
-      const response = await fetchResponse.json();
+      let response: any;
+      try {
+        response = await fetchResponse.json();
+      } catch (parseError) {
+        logger.error('[generateStaticParams] Failed to parse JSON response', {
+          error: parseError instanceof Error ? parseError.message : String(parseError),
+          status: fetchResponse.status,
+          isStaging,
+        });
+        if (currentPage === 1) return [];
+        break;
+      }
 
       // Validate response structure
       if (!response || typeof response !== 'object') {
-        logger.error('[generateStaticParams] Invalid response structure', { response });
+        logger.error('[generateStaticParams] Invalid response structure', {
+          responseType: typeof response,
+          hasData: !!response?.data,
+          isStaging,
+        });
         if (currentPage === 1) return [];
         break;
       }
@@ -106,19 +170,32 @@ export async function generateStaticParams() {
       currentPage++;
     }
 
-    logger.info(`[generateStaticParams] Successfully generated ${allPosts.length} static params for blog posts`);
+    logger.info(`[generateStaticParams] Successfully generated ${allPosts.length} static params for blog posts`, {
+      totalPosts: allPosts.length,
+      isStaging,
+      sampleSlugs: allPosts.slice(0, 5).map(p => p.slug),
+    });
+
     if (allPosts.length === 0) {
-      logger.warn('[generateStaticParams] No static params generated. This may cause 404s until ISR generates pages.');
+      logger.warn('[generateStaticParams] No static params generated. This may cause 404s until ISR generates pages.', {
+        isStaging,
+        API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      });
     }
+
     return allPosts;
   } catch (error) {
     logger.error('[generateStaticParams] Error generating static params for blog:', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      API_BASE_URL,
+      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      env,
+      isStaging,
     });
     // Return empty array on error - ISR will handle remaining posts
-    logger.warn('[generateStaticParams] Returning empty array. ISR will handle blog post generation.');
+    logger.warn('[generateStaticParams] Returning empty array. ISR will handle blog post generation.', {
+      isStaging,
+    });
     return [];
   }
 }
@@ -153,27 +230,79 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
+  const env = process.env.NODE_ENV || 'development';
+  const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+
+  logger.info(`[BlogPostPage] Route handler called`, {
+    slug,
+    env,
+    isStaging,
+    API_BASE_URL: API_BASE_URL || 'NOT_SET',
+    hasApiBaseUrl: !!API_BASE_URL,
+    timestamp: new Date().toISOString(),
+  });
+
   let post;
 
+  // Validate API_BASE_URL before attempting fetch
+  if (!API_BASE_URL || API_BASE_URL === 'undefined') {
+    logger.error(`[BlogPostPage] API_BASE_URL is not configured`, {
+      slug,
+      API_BASE_URL,
+      envVar: process.env.NEXT_PUBLIC_API_BASE_URL,
+      env,
+      isStaging,
+    });
+    logger.error(`[BlogPostPage] Calling notFound() due to missing API_BASE_URL`);
+    notFound();
+    return;
+  }
+
   try {
-    logger.info(`[BlogPostPage] Fetching blog post with slug: ${slug}, API_BASE_URL: ${API_BASE_URL}`);
+    logger.info(`[BlogPostPage] Fetching blog post with slug: ${slug}`, {
+      slug,
+      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      env,
+      isStaging,
+    });
+
     const response = await blogService.getBlogPostBySlug(slug);
 
     if (!response || !response.data) {
-      logger.error(`[BlogPostPage] Invalid response structure for slug: ${slug}`, { response });
+      logger.error(`[BlogPostPage] Invalid response structure for slug: ${slug}`, {
+        response: response ? { hasData: !!response.data, hasMeta: !!response.meta } : 'null',
+        env,
+        isStaging,
+      });
+      logger.error(`[BlogPostPage] Calling notFound() due to invalid response structure`);
       notFound();
       return;
     }
 
     post = response.data;
-    logger.info(`[BlogPostPage] Successfully fetched blog post: ${post.Title || post.id}`);
-  } catch (error) {
-    logger.error(`[BlogPostPage] Error fetching blog post with slug: ${slug}`, {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      API_BASE_URL,
+    logger.info(`[BlogPostPage] Successfully fetched blog post`, {
       slug,
+      postId: post.id,
+      title: post.Title || 'NO_TITLE',
+      env,
+      isStaging,
     });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isNotFoundError = errorMessage.includes('not found') || errorMessage.includes('404');
+
+    logger.error(`[BlogPostPage] Error fetching blog post with slug: ${slug}`, {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      slug,
+      env,
+      isStaging,
+      isNotFoundError,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+    });
+
+    logger.error(`[BlogPostPage] Calling notFound() due to fetch error: ${errorMessage}`);
     notFound();
     return;
   }

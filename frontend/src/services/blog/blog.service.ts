@@ -1,6 +1,7 @@
 import { apiClient } from "@/services";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
 import { API_BASE_URL } from "@/constants/api";
+import logger from "@/utils/logger";
 
 export interface BlogPost {
   id: number;
@@ -507,12 +508,17 @@ class BlogService {
 
     // Log the request for debugging (server-side only)
     if (typeof window === 'undefined') {
-      console.log(`[BlogService] Fetching blog post:`, {
+      const env = process.env.NODE_ENV || 'development';
+      const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+      
+      logger.info(`[BlogService] Fetching blog post by slug`, {
         originalSlug: slug,
         cleanSlug,
         encodedSlug,
         url: url.replace(encodedSlug, '[SLUG]'), // Don't log full URL with slug
         baseUrl,
+        env,
+        isStaging,
       });
     }
 
@@ -526,12 +532,18 @@ class BlogService {
       const errorMessage = `Failed to fetch blog post: ${response.status} ${response.statusText}`;
 
       if (typeof window === 'undefined') {
-        console.error(`[BlogService] API error for slug "${slug}":`, {
+        const env = process.env.NODE_ENV || 'development';
+        const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+        
+        logger.error(`[BlogService] API error for slug "${slug}"`, {
           status: response.status,
           statusText: response.statusText,
           url: url.replace(encodedSlug, '[SLUG]'),
           baseUrl,
-          errorText: errorText.slice(0, 200), // Limit error text length
+          errorText: errorText.slice(0, 500), // Limit error text length
+          slug,
+          env,
+          isStaging,
         });
       }
 
@@ -547,12 +559,32 @@ class BlogService {
     if (!json || !json.data) {
       const errorMessage = `Invalid API response structure for slug: ${slug}`;
       if (typeof window === 'undefined') {
-        console.error(`[BlogService] ${errorMessage}`, {
+        const env = process.env.NODE_ENV || 'development';
+        const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+        
+        logger.error(`[BlogService] ${errorMessage}`, {
           json: json ? Object.keys(json) : 'null',
           hasData: !!json?.data,
+          slug,
+          env,
+          isStaging,
         });
       }
       throw new Error(errorMessage);
+    }
+    
+    // Log successful fetch (server-side only)
+    if (typeof window === 'undefined') {
+      const env = process.env.NODE_ENV || 'development';
+      const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+      
+      logger.info(`[BlogService] Successfully fetched blog post by slug`, {
+        slug,
+        postId: json.data?.id,
+        hasData: !!json.data,
+        env,
+        isStaging,
+      });
     }
 
     return { data: this.normalizeBlogPost(json.data), meta: json.meta };
