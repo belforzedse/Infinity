@@ -9,60 +9,121 @@ This document outlines the responsive design patterns used in the Super Admin se
 
 ## Layout Structure
 
-The Super Admin layout uses different components for desktop and mobile views:
+The Super Admin layout uses a three-tier responsive system: Mobile, Tablet, and Desktop:
 
 ```tsx
-// From src/app/(super-admin)/layout.tsx
+// From src/app/(super-admin)/ClientLayout.tsx
 <Suspense fallback={<div>Loading...</div>}>
-  <div className="hidden md:block">
-    <Desktop>{children}</Desktop>
-  </div>
-
   <div className="block md:hidden">
     <Mobile>{children}</Mobile>
+  </div>
+
+  <div className="hidden md:block lg:hidden">
+    <Tablet>{children}</Tablet>
+  </div>
+
+  <div className="hidden lg:block">
+    <Desktop>{children}</Desktop>
   </div>
 </Suspense>
 ```
 
 This approach uses Tailwind's responsive utilities to show/hide components based on screen size.
 
-## Mobile Components
+## Breakpoint Strategy
 
-For mobile-specific implementations, use the Mobile-specific components:
+- **Mobile**: `< 768px` (sm, default)
+- **Tablet**: `768px - 1024px` (md to lg)
+- **Desktop**: `>= 1024px` (lg, xl, 2xl)
 
+## Layout Components
+
+### Mobile Layout
+- Full-width layout with overlay sidebar
+- Card-based table views
+- Compact spacing
+
+Components:
 - [src/components/SuperAdmin/Layout/ContentWrapper/Mobile.tsx](mdc:src/components/SuperAdmin/Layout/ContentWrapper/Mobile.tsx)
 - [src/components/SuperAdmin/Order/MobileOrderItem.tsx](mdc:src/components/SuperAdmin/Order/MobileOrderItem.tsx)
 
-## Responsive Tables
+### Tablet Layout
+- Collapsible sidebar (icon-only by default)
+- Optimized spacing for 768px-1024px viewports
+- Horizontal scroll for tables when needed
 
-Tables should adapt to different screen sizes:
-- On desktop: Use full table layout with all columns
-- On mobile: Replace tables with card-like layouts or simplified tables with fewer columns
+Components:
+- [src/components/SuperAdmin/Layout/ContentWrapper/Tablet.tsx](mdc:src/components/SuperAdmin/Layout/ContentWrapper/Tablet.tsx)
 
-Example implementation:
-- [src/components/SuperAdmin/Table/Mobile/Row/Box.tsx](mdc:src/components/SuperAdmin/Table/Mobile/Row/Box.tsx)
+### Desktop Layout
+- Always-expanded sidebar
+- Full table layouts with all columns
+- Comfortable spacing
+
+Components:
+- [src/components/SuperAdmin/Layout/ContentWrapper/Desktop.tsx](mdc:src/components/SuperAdmin/Layout/ContentWrapper/Desktop.tsx)
 
 ## Sidebar Navigation
 
 The sidebar navigation has specific behavior based on screen size:
-- Desktop: Always visible (expanded)
-- Mobile: Hidden by default, shown when toggled
+
+- **Mobile**: Hidden by default, shown as overlay when toggled (280px width)
+- **Tablet**: Collapsible sidebar, icon-only by default (80px collapsed, 280px expanded)
+- **Desktop**: Always visible and expanded (250px width)
+
+### Sidebar Collapse Behavior
+
+On tablets (md-lg breakpoint):
+- Default state: Collapsed (icon-only, 80px width)
+- Expanded state: Full labels visible (280px width)
+- Toggle button visible in top-left of sidebar
+- Submenus only show when expanded
 
 Implementation in [src/components/SuperAdmin/Layout/Sidebar/index.tsx](mdc:src/components/SuperAdmin/Layout/Sidebar/index.tsx)
+
+## Responsive Tables
+
+Tables should adapt to different screen sizes:
+
+- **Mobile**: Card-like layouts or simplified tables
+- **Tablet**: Full table with horizontal scroll wrapper, reduced padding
+- **Desktop**: Full table layout with all columns, comfortable padding
+
+Table padding:
+- Mobile: `p-2` (handled by mobile table components)
+- Tablet: `px-2 md:px-3` for cells, `px-2 md:px-3 lg:px-4` for headers
+- Desktop: `px-4` for cells and headers
+
+Example implementation:
+- [src/components/SuperAdmin/Table/Mobile/Row/Box.tsx](mdc:src/components/SuperAdmin/Table/Mobile/Row/Box.tsx)
+- [src/components/SuperAdmin/Table/index.tsx](mdc:src/components/SuperAdmin/Table/index.tsx)
+
+## Content Wrapper Spacing
+
+Progressive spacing based on breakpoints:
+
+- **Mobile**: Compact spacing (`gap-2`, `p-4`)
+- **Tablet**: Moderate spacing (`gap-3`, `p-4` in cards)
+- **Desktop**: Comfortable spacing (`gap-4 lg:gap-7`, `p-4 md:p-5 lg:p-7` in cards)
+
+Title sizes:
+- Mobile: `text-3xl`
+- Tablet: `text-2xl`
+- Desktop: `text-2xl lg:text-3xl`
 
 ## Tailwind Responsive Classes
 
 Use Tailwind's responsive prefixes consistently:
 - `sm:` (640px and up)
-- `md:` (768px and up)
-- `lg:` (1024px and up)
+- `md:` (768px and up) - Tablet breakpoint
+- `lg:` (1024px and up) - Desktop breakpoint
 - `xl:` (1280px and up)
 - `2xl:` (1536px and up)
 
 Example:
 ```tsx
 <div className="p-2 md:p-4 lg:p-6">
-  {/* Content that has different padding at different breakpoints */}
+  {/* Progressive padding: mobile → tablet → desktop */}
 </div>
 ```
 

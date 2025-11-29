@@ -30,7 +30,7 @@ type Props = {
   }[];
 };
 
-export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
+export default function SuperAdminLayoutContentWrapperTablet(props: Props) {
   const {
     children,
     title,
@@ -81,13 +81,13 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl lg:text-3xl text-[#202224]">{isRecycleBinOpen ? "زباله‌دان" : title}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl text-[#202224]">{isRecycleBinOpen ? "زباله‌دان" : title}</span>
 
           {titleSuffixComponent}
         </div>
 
-        <div className="flex items-center gap-2 lg:gap-3">
+        <div className="flex items-center gap-2">
           {hasRecycleBin && (
             <RecycleBinButton
               count={count}
@@ -109,14 +109,14 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
         </div>
       </div>
       {hasPagination && (
-        <div className="mt-3 flex justify-end">
+        <div className="mt-2 flex justify-end">
           <SuperAdminPageSizeSelect />
         </div>
       )}
-      <div className="card mt-3 p-4 md:p-5 lg:p-7">{children}</div>
+      <div className="card mt-2 p-4">{children}</div>
       {hasPagination && (
         <SuperAdminPagination
-          className="mt-4"
+          className="mt-3"
           currentPage={currentPage}
           totalPages={totalPages ?? 1}
           onPageChange={handlePageChange}
@@ -125,3 +125,4 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
     </>
   );
 }
+

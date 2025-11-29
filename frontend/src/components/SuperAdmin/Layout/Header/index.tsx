@@ -15,11 +15,11 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
   const userFacingError = error ? getUserFacingErrorMessage(error, "خطا در دریافت اطلاعات کاربر") : null;
 
   return (
-    <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 lg:h-[76px] lg:bg-white lg:px-6">
-      {/* Mobile Menu Button */}
+    <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 md:h-[60px] lg:h-[76px] md:bg-white md:px-4 lg:px-6">
+      {/* Mobile Menu Button - only show on mobile, not tablets */}
       <button
         onClick={onMenuClick}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 hover:bg-neutral-100 lg:hidden"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 hover:bg-neutral-100 md:hidden"
       >
         <MenuIcon />
       </button>
