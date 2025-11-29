@@ -41,5 +41,35 @@ export const startTopup = async (
   } as any;
 };
 
-const WalletService = { getMyWallet, startTopup };
+export interface WalletTransaction {
+  id: number;
+  Amount: number;
+  Type: "Add" | "Minus";
+  Date: string;
+  Cause?: string;
+  ReferenceId?: string;
+  Note?: string;
+  Description?: string;
+}
+
+export interface WalletTransactionsResponse {
+  data: WalletTransaction[];
+  meta?: {
+    pagination?: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
+export const getWalletTransactions = async (walletId: number): Promise<WalletTransactionsResponse> => {
+  const res = await apiClient.get<WalletTransactionsResponse>(
+    `/local-user-wallet-transactions?filters[user_wallet][id][$eq]=${walletId}&sort[0]=Date:desc&pagination[pageSize]=100`
+  );
+  return res as any;
+};
+
+const WalletService = { getMyWallet, startTopup, getWalletTransactions };
 export default WalletService;

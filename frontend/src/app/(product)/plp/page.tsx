@@ -10,6 +10,7 @@ import logger from "@/utils/logger";
 import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
+import { computeDiscountForVariation } from "@/utils/discounts";
 
 interface ProductVariation {
   attributes: {
@@ -178,9 +179,9 @@ async function getProducts(
     queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
   }
 
-  // Availability filter
+  // Availability filter - check for actual stock (Count > 0) not just IsPublished
   if (showAvailableOnly) {
-    queryParams.append("filters[product_variations][IsPublished][$eq]", "true");
+    queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
   }
 
   // Size filter
@@ -208,8 +209,8 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
-  // Sorting
-  if (sort) {
+  // Sorting - only send to backend if not price sorting (price sorting done on frontend)
+  if (sort && sort !== "price:asc" && sort !== "price:desc") {
     queryParams.append("sort[0]", sort);
   }
 
@@ -262,6 +263,38 @@ async function getProducts(
           return discountPrice && discountPrice < price;
         }),
       );
+    }
+
+    // Frontend price sorting
+    if (sort === "price:asc" || sort === "price:desc") {
+      const getMinVariationPrice = (product: Product): number => {
+        const variations = product.attributes.product_variations?.data || [];
+        let minPrice = Infinity;
+
+        for (const variation of variations) {
+          // Only consider published variations with stock
+          if (!variation.attributes.IsPublished) continue;
+
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          if (typeof stockCount === "number" && stockCount <= 0) continue;
+
+          // Compute final price with discounts
+          const discountResult = computeDiscountForVariation(variation as any);
+          const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes.Price || "0");
+
+          if (finalPrice > 0 && finalPrice < minPrice) {
+            minPrice = finalPrice;
+          }
+        }
+
+        return minPrice === Infinity ? 0 : minPrice;
+      };
+
+      filteredProducts.sort((a: Product, b: Product) => {
+        const priceA = getMinVariationPrice(a);
+        const priceB = getMinVariationPrice(b);
+        return sort === "price:asc" ? priceA - priceB : priceB - priceA;
+      });
     }
 
     return {

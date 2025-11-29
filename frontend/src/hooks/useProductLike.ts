@@ -15,7 +15,7 @@ type LikedProduct = {
   updatedAt: string;
 };
 
-const likedProductsAtom = atom<LikedProduct[]>([]);
+export const likedProductsAtom = atom<LikedProduct[]>([]);
 const likedProductsLoadingAtom = atom<boolean>(false);
 const likedProductsLoadedAtom = atom<boolean>(false);
 
