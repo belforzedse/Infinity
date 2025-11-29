@@ -66,8 +66,7 @@ export default function SuperAdminLayoutContentWrapperDesktop(props: Props) {
           setCount((res as any)?.meta?.pagination?.total);
           setHasCountError(false);
         })
-        .catch((err) => {
-          console.error(err);
+        .catch(() => {
           setCount(0);
           setHasCountError(true);
         });

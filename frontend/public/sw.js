@@ -15,7 +15,7 @@ const NETWORK_FIRST = "network-first";
 const NETWORK_ONLY = "network-only";
 
 // URLs to cache on install
-const URLS_TO_CACHE = ["/", "/offline.html"];
+const URLS_TO_CACHE = ["/", "/offline.html", "/manifest.json"];
 
 // API routes that should be cached
 const CACHEABLE_API_ROUTES = ["/api/cart", "/api/products", "/api/categories"];

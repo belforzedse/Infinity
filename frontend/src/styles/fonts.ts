@@ -42,6 +42,8 @@ export const peydaFanum = localFont({
   ],
   display: "swap",
   variable: "--font-peyda-fanum",
+  preload: true,
+  adjustFontFallback: false,
 });
 
 export const rokh = localFont({
@@ -88,17 +90,8 @@ export const kaghaz = localFont({
       weight: "400",
       style: "normal",
     },
-    {
-      path: "../../public/fonts/kaghaz.woff",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/kaghaz.ttf",
-      weight: "400",
-      style: "normal",
-    },
   ],
   display: "swap",
   variable: "--font-kaghaz",
+  adjustFontFallback: false,
 });

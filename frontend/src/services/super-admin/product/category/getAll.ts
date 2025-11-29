@@ -28,7 +28,7 @@ export const getAllCategories = async (): Promise<PaginatedResponse<categoryResp
     });
     return response.data;
   } catch (error) {
-    console.error("Failed to get categories:", error);
+    // Error will be thrown and handled by caller
     throw error;
   }
 };
