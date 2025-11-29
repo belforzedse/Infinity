@@ -9,6 +9,7 @@ import { searchProducts } from "@/services/product/search";
 import logger from "@/utils/logger";
 import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 
 interface ProductVariation {
   attributes: {
@@ -332,11 +333,12 @@ export default async function PLPPage({
     : search
       ? `نتایج جستجو برای "${search}"`
       : "فروشگاه";
+  const SITE_NAME = "فروشگاه پوشاک اینفینیتی";
   const pageDescription = category
-    ? `خرید ${category} با بهترین قیمت و ارسال سریع از اینفینیتی استور`
+    ? `خرید ${category} با بهترین قیمت و ارسال سریع از ${SITE_NAME}`
     : search
-      ? `نتایج جستجو برای «${search}» در فروشگاه اینفینیتی استور`
-      : "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور";
+      ? `نتایج جستجو برای «${search}» در ${SITE_NAME}`
+      : `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}`;
   const pageUrl = category
     ? `${SITE_URL}/plp?category=${encodeURIComponent(category)}`
     : search
@@ -402,17 +404,16 @@ export async function generateMetadata({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
   const category = typeof params.category === "string" ? params.category : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
 
   const isSearch = !!search;
-  const baseTitle = "فروشگاه | اینفینیتی استور";
+  const baseTitle = `فروشگاه | ${SITE_NAME}`;
 
   if (isSearch) {
     const q = search?.slice(0, 60) || "";
-    const title = `نتایج جستجو برای "${q}" | اینفینیتی استور`;
-    const description = `مشاهده نتایج جستجو برای «${q}» در فروشگاه اینفینیتی استور. جدیدترین و محبوب‌ترین محصولات.`;
+    const title = `نتایج جستجو برای "${q}" | ${SITE_NAME}`;
+    const description = `مشاهده نتایج جستجو برای «${q}» در ${SITE_NAME}. جدیدترین و محبوب‌ترین محصولات.`;
     const canonicalUrl = `${SITE_URL}/plp${q ? `?search=${encodeURIComponent(q)}` : ""}`;
     return {
       title,
@@ -430,8 +431,8 @@ export async function generateMetadata({
   }
 
   if (category) {
-    const title = `خرید ${category} | اینفینیتی استور`;
-    const description = `خرید ${category} با بهترین قیمت و ارسال سریع از اینفینیتی استور. جدیدترین محصولات ${category}.`;
+    const title = `خرید ${category} | ${SITE_NAME}`;
+    const description = `خرید ${category} با بهترین قیمت و ارسال سریع از ${SITE_NAME}. جدیدترین محصولات ${category}.`;
     const canonicalUrl = `${SITE_URL}/plp?category=${encodeURIComponent(category)}`;
     return {
       title,
@@ -450,7 +451,7 @@ export async function generateMetadata({
 
   return {
     title: baseTitle,
-    description: "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
+    description: `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}.`,
     alternates: { canonical: `${SITE_URL}/plp` },
   };
 }

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { blogService } from '@/services/blog/blog.service';
 import { IMAGE_BASE_URL } from '@/constants/api';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitycolor.org';
-const SITE_NAME = 'اینفینیتی استور';
+import { SITE_NAME, SITE_URL } from '@/config/site';
 
 export async function GET(request: Request) {
   try {

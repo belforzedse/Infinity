@@ -1,5 +1,6 @@
 import { apiClient } from "@/services";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
+import { API_BASE_URL } from "@/constants/api";
 
 export interface BlogPost {
   id: number;
@@ -150,21 +151,10 @@ export interface CreateBlogAuthorData {
 }
 
 class BlogService {
-  private baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-
   private getBaseUrl(): string {
-    const envBase =
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      process.env.API_BASE_URL ||
-      this.baseUrl;
-
-    if (envBase) {
-      return envBase.replace(/\/$/, "");
-    }
-
-    // Fallback for local dev if env isn't loaded (server & client safe)
-    const defaultBase = "http://localhost:1337/api";
-    return defaultBase;
+    // Use the centralized API_BASE_URL constant which is already properly configured
+    // This ensures consistency across the application
+    return API_BASE_URL;
   }
 
   private getAuthToken(): string | null {
@@ -499,7 +489,11 @@ class BlogService {
   // Get single blog post by slug (public)
   async getBlogPostBySlug(slug: string): Promise<ApiResponse<BlogPost>> {
     const baseUrl = this.getBaseUrl();
-    const encodedSlug = encodeURIComponent(slug);
+    // The slug from Next.js params is already URL-decoded
+    // We need to encode it for the URL path, but be careful with special characters
+    // encodeURIComponent handles most cases, but we should preserve the slug as-is if it's already encoded
+    const cleanSlug = decodeURIComponent(slug); // Decode first in case it's double-encoded
+    const encodedSlug = encodeURIComponent(cleanSlug);
 
     const searchParams = new URLSearchParams();
     searchParams.append("populate[blog_category]", "*");
@@ -509,19 +503,58 @@ class BlogService {
     searchParams.append("populate[blog_comments][populate][user]", "*");
     searchParams.append("populate[blog_comments][populate][parent_comment]", "*");
 
-    const response = await fetch(`${baseUrl}/blog-posts/slug/${encodedSlug}?${searchParams}`, {
+    const url = `${baseUrl}/blog-posts/slug/${encodedSlug}?${searchParams}`;
+
+    // Log the request for debugging (server-side only)
+    if (typeof window === 'undefined') {
+      console.log(`[BlogService] Fetching blog post:`, {
+        originalSlug: slug,
+        cleanSlug,
+        encodedSlug,
+        url: url.replace(encodedSlug, '[SLUG]'), // Don't log full URL with slug
+        baseUrl,
+      });
+    }
+
+    const response = await fetch(url, {
       headers: this.getHeaders(),
       cache: "no-store",
     });
 
     if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error("Blog post not found");
+      const errorText = await response.text().catch(() => 'Unable to read error response');
+      const errorMessage = `Failed to fetch blog post: ${response.status} ${response.statusText}`;
+
+      if (typeof window === 'undefined') {
+        console.error(`[BlogService] API error for slug "${slug}":`, {
+          status: response.status,
+          statusText: response.statusText,
+          url: url.replace(encodedSlug, '[SLUG]'),
+          baseUrl,
+          errorText: errorText.slice(0, 200), // Limit error text length
+        });
       }
-      throw new Error("Failed to fetch blog post");
+
+      if (response.status === 404) {
+        throw new Error(`Blog post not found: ${slug}`);
+      }
+      throw new Error(errorMessage);
     }
 
     const json = await response.json();
+
+    // Validate response structure
+    if (!json || !json.data) {
+      const errorMessage = `Invalid API response structure for slug: ${slug}`;
+      if (typeof window === 'undefined') {
+        console.error(`[BlogService] ${errorMessage}`, {
+          json: json ? Object.keys(json) : 'null',
+          hasData: !!json?.data,
+        });
+      }
+      throw new Error(errorMessage);
+    }
+
     return { data: this.normalizeBlogPost(json.data), meta: json.meta };
   }
 

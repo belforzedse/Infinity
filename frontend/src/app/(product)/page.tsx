@@ -18,6 +18,7 @@ import TabletSlider from "@/components/Hero/tabletSlider";
 import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 
 async function getLatestBlogPosts() {
   try {
@@ -185,35 +186,33 @@ export default async function Home() {
   );
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
-
 export const metadata: Metadata = {
-  title: "صفحه اصلی | اینفینیتی استور",
+  title: `صفحه اصلی | ${SITE_NAME}`,
   description:
-    "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+    `جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه ${SITE_NAME} را مشاهده کنید و آنلاین خرید کنید.`,
   keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی"],
   alternates: { canonical: SITE_URL },
   openGraph: {
-    title: "صفحه اصلی | اینفینیتی استور",
+    title: `صفحه اصلی | ${SITE_NAME}`,
     description:
-      "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+      `جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه ${SITE_NAME} را مشاهده کنید و آنلاین خرید کنید.`,
     type: "website",
     url: SITE_URL,
-    siteName: "اینفینیتی استور",
+    siteName: SITE_NAME,
     locale: "fa_IR",
     images: [
       {
         url: "https://api.infinitycolor.org/uploads/logo_5a5e2f8a4d.png",
         width: 1200,
         height: 630,
-        alt: "اینفینیتی استور - فروشگاه پوشاک",
+        alt: `${SITE_NAME} - فروشگاه پوشاک`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "صفحه اصلی | اینفینیتی استور",
+    title: `صفحه اصلی | ${SITE_NAME}`,
     description:
-      "جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه اینفینیتی استور را مشاهده کنید و آنلاین خرید کنید.",
+      `جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه ${SITE_NAME} را مشاهده کنید و آنلاین خرید کنید.`,
   },
 };

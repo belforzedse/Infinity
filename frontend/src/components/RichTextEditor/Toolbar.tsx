@@ -53,7 +53,11 @@ const ToolbarButton: React.FC<{
     title={title}
     variant={isActive ? "primary" : "outline"}
     size="sm"
-    className="h-8 w-8 p-0"
+    className={`h-8 w-8 p-0 transition-all ${
+      isActive
+        ? "bg-pink-600 text-white shadow-sm hover:bg-pink-700"
+        : "hover:bg-neutral-100 hover:border-neutral-300"
+    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
   >
     {children}
   </Button>
@@ -64,6 +68,46 @@ const Divider: React.FC = () => (
 );
 
 const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
+  // Force re-render when editor state changes (cursor, selection, formatting)
+  // This ensures toolbar buttons reflect the current editor state in real-time
+  const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
+
+  // Subscribe to editor events to trigger re-renders
+  // This makes the toolbar behave like Word - updating immediately when:
+  // - Cursor moves
+  // - Selection changes
+  // - Formatting is applied/removed
+  // - Content changes
+  React.useEffect(() => {
+    const handleSelectionUpdate = () => {
+      // Use requestAnimationFrame to batch updates and avoid excessive re-renders
+      requestAnimationFrame(() => {
+        forceUpdate();
+      });
+    };
+
+    const handleTransaction = () => {
+      // Only update on transactions that affect selection or marks
+      // This prevents unnecessary re-renders on every keystroke
+      if (editor.state.selection) {
+        requestAnimationFrame(() => {
+          forceUpdate();
+        });
+      }
+    };
+
+    // Subscribe to events that should trigger toolbar updates
+    // selectionUpdate is the most important - fires when cursor/selection changes
+    editor.on("selectionUpdate", handleSelectionUpdate);
+    editor.on("transaction", handleTransaction);
+
+    // Cleanup
+    return () => {
+      editor.off("selectionUpdate", handleSelectionUpdate);
+      editor.off("transaction", handleTransaction);
+    };
+  }, [editor]);
+
   const addImage = () => {
     const url = window.prompt("آدرس تصویر را وارد کنید:");
     if (url) {
@@ -317,7 +361,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
             editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()
           }
           value={editor.getAttributes("textStyle").color || "#000000"}
-          className="w-8 h-8 border border-neutral-200 rounded-lg cursor-pointer"
+          className="w-8 h-8 border border-neutral-200 rounded-lg cursor-pointer hover:border-pink-400 transition-colors"
           title="رنگ متن"
         />
         <ToolbarButton

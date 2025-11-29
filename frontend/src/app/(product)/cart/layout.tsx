@@ -1,10 +1,9 @@
 import { Metadata } from "next";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "سبد خرید",
-  description: "مشاهده و مدیریت سبد خرید خود در اینفینیتی استور",
+  description: `مشاهده و مدیریت سبد خرید خود در ${SITE_NAME}`,
   robots: {
     index: false,
     follow: false,
