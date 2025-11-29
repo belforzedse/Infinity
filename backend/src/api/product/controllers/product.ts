@@ -14,7 +14,12 @@ const PRODUCT_POPULATE = {
   product_reviews: {
     populate: {
       user: {
-        fields: ["id", "username", "FirstName", "LastName"],
+        fields: ["id", "username", "phone", "email"],
+        populate: {
+          user_info: {
+            fields: ["FirstName", "LastName"],
+          },
+        },
       },
     },
   },
