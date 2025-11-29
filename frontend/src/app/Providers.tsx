@@ -15,6 +15,7 @@ import AuthInitializer from "@/components/ui/AuthInitializer";
 import { Suspense } from "react";
 import { useFreshDataOnVisibility } from "@/hooks/useFreshDataOnVisibility";
 import { ConsentManager } from "@/components/Analytics/ConsentManager";
+import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 
 export default function Providers({ children }: { children: ReactNode }) {
   // Enable automatic data refresh on all pages when tab becomes visible (10 min debounce)
@@ -44,6 +45,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       <ImageEffects />
       {children}
       <GlobalLoadingOverlay />
+      <PWAInstallPrompt />
     </Provider>
   );
 }

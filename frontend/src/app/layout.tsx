@@ -96,6 +96,11 @@ export default function RootLayout({
       className={`${peyda.variable} ${peydaFanum.variable} ${rokh.variable} ${kaghaz.variable}`}
     >
       <head>
+        {/* Favicons */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
+
         {/* Preload critical font */}
         <link
           rel="preload"
@@ -123,11 +128,19 @@ export default function RootLayout({
         {/* OpenSearch descriptor for browser search integration */}
         <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title={SITE_NAME} />
 
+        {/* PWA Web App Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
         {/* PWA meta tags for mobile */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#ec4899" />
+
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
       </head>
       <body className={`${peydaFanum.className} antialiased`}>
         {/* Organization Schema for SEO */}
