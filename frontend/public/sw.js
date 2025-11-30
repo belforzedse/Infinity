@@ -91,10 +91,12 @@ self.addEventListener("fetch", (event) => {
 
   // Skip service worker for auth endpoints - they need fresh data for role checks
   // Also skip Next.js static assets - Next.js handles cache-busting with hashed filenames
+  // Skip Next.js image optimization - let Next.js handle image optimization
   if (
     url.pathname.includes("/auth/self") ||
     url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/_next/chunks/")
+    url.pathname.startsWith("/_next/chunks/") ||
+    url.pathname.startsWith("/_next/image")
   ) {
     // Let these requests pass through without service worker interception
     return;
@@ -187,11 +189,42 @@ async function handleAPIRequest(request) {
 }
 
 /**
- * Handle static assets (cache-first)
+ * Handle static assets (cache-first with network fallback)
  * Images, CSS, JS, etc.
+ * For images, we use network-first to ensure they load properly
  */
 async function handleStaticAsset(request) {
   const { RUNTIME_CACHE } = getCacheNames();
+
+  // For images, try network first to ensure they load properly
+  // This prevents stale cache from blocking image loading
+  if (request.destination === "image" || isImagePath(request.url)) {
+    try {
+      const response = await fetch(request);
+
+      // Cache successful responses
+      if (response.ok) {
+        const cache = await caches.open(RUNTIME_CACHE);
+        cache.put(request, response.clone());
+      }
+
+      return response;
+    } catch (error) {
+      // If network fails, try cache
+      const cached = await caches.match(request);
+      if (cached) {
+        return cached;
+      }
+
+      // Only return placeholder if truly offline and no cache
+      console.log("[SW] Failed to fetch image:", request.url);
+      // Don't return placeholder - let the browser handle the error naturally
+      // This allows Next.js Image component to show alt text properly
+      throw error;
+    }
+  }
+
+  // For other static assets, use cache-first
   const cached = await caches.match(request);
   if (cached) {
     return cached;
@@ -209,14 +242,6 @@ async function handleStaticAsset(request) {
     return response;
   } catch (error) {
     console.log("[SW] Failed to fetch static asset:", request.url);
-    // For images, return a placeholder
-    if (request.destination === "image") {
-      return new Response(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#f0f0f0" width="200" height="200"/></svg>`,
-        { headers: { "Content-Type": "image/svg+xml" } },
-      );
-    }
-
     // For other assets, return error
     return new Response("Asset not available offline", {
       status: 503,
@@ -226,10 +251,81 @@ async function handleStaticAsset(request) {
 }
 
 /**
+ * Check if URL is an image path
+ */
+function isImagePath(url) {
+  const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"];
+  try {
+    const urlObj = new URL(url);
+    return imageExtensions.some((ext) => urlObj.pathname.toLowerCase().endsWith(ext));
+  } catch {
+    return false;
+  }
+}
+
+// Store PWA mode status per client
+const pwaModeClients = new Set();
+
+/**
+ * Check if a client is in PWA mode (standalone display mode)
+ * Clients should send a message with type "PWA_MODE" and isPWA boolean
+ */
+async function isPWAMode(clientId) {
+  // If we have stored info about this client, use it
+  if (clientId && pwaModeClients.has(clientId)) {
+    return true;
+  }
+
+  // Default: don't assume PWA mode (conservative approach)
+  // offline.html should only show for confirmed PWA users
+  return false;
+}
+
+/**
+ * Check if request is a navigation request (HTML page request)
+ */
+function isNavigationRequest(request) {
+  // Check if request mode is navigate (browser navigation)
+  if (request.mode === "navigate") {
+    return true;
+  }
+
+  // Check Accept header for HTML content
+  const acceptHeader = request.headers.get("Accept");
+  if (acceptHeader && acceptHeader.includes("text/html")) {
+    return true;
+  }
+
+  // Check if request destination is document
+  if (request.destination === "document") {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if error indicates offline state (network error)
+ */
+function isNetworkError(error) {
+  // Network errors typically have no response or are TypeError
+  // Server errors (4xx, 5xx) are not network errors
+  return (
+    error instanceof TypeError ||
+    error.name === "NetworkError" ||
+    error.message?.includes("Failed to fetch") ||
+    error.message?.includes("NetworkError")
+  );
+}
+
+/**
  * Handle generic requests (network-first)
  * Try network first, fall back to cache
+ * Only show offline.html for PWA users when actually offline and for navigation requests
  */
 async function handleGenericRequest(request) {
+  const { RUNTIME_CACHE } = getCacheNames();
+
   try {
     const response = await fetch(request);
 
@@ -241,18 +337,66 @@ async function handleGenericRequest(request) {
 
     return response;
   } catch (error) {
-    // Try cache
+    // Check if this is a network error (offline) vs server error
+    const isOffline = isNetworkError(error);
+
+    // Try cache first
     const cached = await caches.match(request);
     if (cached) {
       return cached;
     }
 
-    // Return offline page if available
-    return caches.match("/offline.html").catch(() => {
-      return new Response("Offline - Page not available", {
+    // Only show offline.html if:
+    // 1. It's a navigation request (HTML page)
+    // 2. User is actually offline (network error, not server error)
+    // 3. User is in PWA mode (confirmed via client message)
+    const isNav = isNavigationRequest(request);
+
+    if (isNav && isOffline) {
+      // Check if user is in PWA mode by checking stored client info
+      try {
+        const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+        let isPWA = false;
+
+        // Check if any of the clients are in PWA mode
+        for (const client of clients) {
+          const clientId = client.id || client.url || "default";
+          if (pwaModeClients.has(clientId)) {
+            isPWA = true;
+            break;
+          }
+        }
+
+        // Only return offline.html for PWA users
+        if (isPWA) {
+          const offlinePage = await caches.match("/offline.html");
+          if (offlinePage) {
+            console.log("[SW] Returning offline.html for PWA user");
+            return offlinePage;
+          }
+        } else {
+          console.log("[SW] Not showing offline.html - user is not in PWA mode");
+        }
+      } catch (err) {
+        console.log("[SW] Error checking PWA mode:", err);
+      }
+    }
+
+    // For non-navigation requests or when not offline, return appropriate error
+    if (isNavigationRequest(request)) {
+      // For navigation requests that failed but aren't offline, return error page
+      return new Response("Page not available", {
         status: 503,
         statusText: "Service Unavailable",
+        headers: { "Content-Type": "text/html; charset=utf-8" },
       });
+    }
+
+    // For API or other requests, return JSON error
+    return new Response(JSON.stringify({ error: "Request failed", message: error.message }), {
+      status: 503,
+      statusText: "Service Unavailable",
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
@@ -339,6 +483,24 @@ self.addEventListener("message", (event) => {
 
   if (event.data && event.data.type === "CACHE_URLS") {
     cacheUrls(event.data.urls);
+  }
+
+  // Handle PWA mode status from client
+  if (event.data && event.data.type === "PWA_MODE") {
+    // Get the client that sent the message
+    const client = event.source;
+    if (client) {
+      if (event.data.isPWA) {
+        // Store client ID or use client object as key
+        const clientId = client.id || client.url || "default";
+        pwaModeClients.add(clientId);
+        console.log("[SW] Client is in PWA mode:", clientId);
+      } else {
+        const clientId = client.id || client.url || "default";
+        pwaModeClients.delete(clientId);
+        console.log("[SW] Client is not in PWA mode:", clientId);
+      }
+    }
   }
 });
 
