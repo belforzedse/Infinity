@@ -1,3 +1,28 @@
+/**
+ * Load build version from generated JSON file
+ * This version is used for cache invalidation and is injected as NEXT_PUBLIC_BUILD_VERSION
+ */
+let BUILD_VERSION = 'dev';
+
+try {
+  const fs = require('fs');
+  const path = require('path');
+  const buildVersionPath = path.join(__dirname, 'src/constants/build-version.json');
+  
+  if (fs.existsSync(buildVersionPath)) {
+    const buildVersionData = JSON.parse(fs.readFileSync(buildVersionPath, 'utf-8'));
+    BUILD_VERSION = buildVersionData.BUILD_VERSION || BUILD_VERSION;
+  }
+} catch (error) {
+  // Fallback to 'dev' if file doesn't exist or can't be read
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[Next Config] Warning: Could not load build version, using fallback');
+  }
+}
+
+// Inject build version as environment variable for client-side access
+process.env.NEXT_PUBLIC_BUILD_VERSION = BUILD_VERSION;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',

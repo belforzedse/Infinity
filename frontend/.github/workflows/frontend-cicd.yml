@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for build version generation
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -84,6 +86,7 @@ jobs:
             --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="${{ steps.env.outputs.image }}" \
             --build-arg NEXT_PUBLIC_STRAPI_TOKEN="${{ steps.env.outputs.token }}" \
             --build-arg NEXT_PUBLIC_SITE_URL="${{ steps.env.outputs.site }}" \
+            --build-arg GITHUB_SHA="${{ github.sha }}" \
             -f ${{ steps.meta.outputs.dockerfile }} \
             -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} .
           docker tag $REGISTRY/$IMAGE_NAME:${{ github.sha }} $REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}
