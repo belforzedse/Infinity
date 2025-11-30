@@ -37,6 +37,9 @@ export default function UsersPage() {
       hasFilterButton
       hasRecycleBin
       hasPagination
+      hasAddButton
+      addButtonText="کاربر جدید"
+      addButtonPath="/super-admin/users/add"
       apiUrl={ENDPOINTS.USER.GET_ALL}
       isRecycleBinOpen={isRecycleBinOpen}
       setIsRecycleBinOpen={setIsRecycleBinOpen}

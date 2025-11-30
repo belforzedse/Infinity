@@ -68,7 +68,7 @@ export default function AddUserPage() {
           // Trigger table refresh
           setRefresh(true);
           toast.success("کاربر با موفقیت ایجاد شد");
-          router.push(`/super-admin/users/${userId}`);
+          router.push(`/super-admin/users/edit/${userId}`);
         } else {
           // Fallback to users list
           setRefresh(true);

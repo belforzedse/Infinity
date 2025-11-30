@@ -8,7 +8,7 @@ import { useState } from "react";
 import UserService from "@/services/user";
 import { apiClient } from "@/services";
 import { getUserActivities, UserActivity } from "@/services/user-activity";
-import Link from "next/link"; 
+import Link from "next/link";
 
 export type User = {
   id: string;
@@ -107,11 +107,19 @@ export default function Page() {
         config={config}
         data={userData}
         onSubmit={async (data) => {
+          // Format birthdate as YYYY-MM-DD string if provided
+          let birthDateString: string | undefined;
+          if (data.birthDate && data.birthDate instanceof Date) {
+            const year = data.birthDate.getFullYear();
+            const month = String(data.birthDate.getMonth() + 1).padStart(2, "0");
+            const day = String(data.birthDate.getDate()).padStart(2, "0");
+            birthDateString = `${year}-${month}-${day}`;
+          }
+
           const localPayload = {
             firstName: data.firstname,
             lastName: data.lastname,
-            birthDate: data.birthDate,
-            gender: data.gender === "male",
+            ...(birthDateString && { birthDate: birthDateString }),
             bio: data.bio,
             isActive: data.isActive,
             nationalCode: data.nationalCode,
