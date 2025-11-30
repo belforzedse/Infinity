@@ -16,10 +16,10 @@ import type { FormData } from "./index";
 import CirculeInformationIcon from "../Icons/CirculeInformationIcon";
 import UserService from "@/services/user";
 import type { UserAddress } from "@/services/user/addresses";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
+import AddAddress from "@/components/User/Address/AddAddress";
 
 interface Props {
   register: UseFormRegister<FormData>;
@@ -34,13 +34,10 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
   const [loading, setLoading] = useAtom(addressesLoadingAtom);
   const [error, setError] = useAtom(addressesErrorAtom);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-  const router = useRouter();
+  const [isAddAddressModalOpen, setIsAddAddressModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAddresses = async () => {
-      // Only fetch if atom is empty (initial load)
-      if (addresses.length > 0) return;
-
       try {
         setLoading(true);
         setError(null);
@@ -73,9 +70,23 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
       }
     };
 
+    // Fetch addresses on mount
     fetchAddresses();
     fetchUserInfo();
-  }, [setValue, addresses.length, setAddresses, setLoading, setError]);
+
+    // Refetch addresses when page becomes visible (user returns from another tab/page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchAddresses();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [setValue, setAddresses, setLoading, setError]);
 
   // Convert addresses to select options
   const addressOptions: Option[] = addresses.map((address) => ({
@@ -84,7 +95,24 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
   }));
 
   const handleAddAddress = () => {
-    router.push("/addresses");
+    setIsAddAddressModalOpen(true);
+  };
+
+  const handleAddressAdded = async () => {
+    // Refetch addresses to ensure we have the latest data
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchedAddresses = await UserService.addresses.getAll();
+      setAddresses(fetchedAddresses);
+    } catch (err: any) {
+      console.error("Failed to fetch addresses:", err);
+      const rawErrorMessage = extractErrorMessage(err);
+      const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت آدرس‌ها");
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -147,6 +175,14 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           <CirculePlusIcon className="h-5 w-5" />
         </button>
       </div>
+
+      {/* Add Address Modal */}
+      <AddAddress
+        isOpen={isAddAddressModalOpen}
+        onOpenChange={setIsAddAddressModalOpen}
+        showButton={false}
+        onAddressAdded={handleAddressAdded}
+      />
 
       <div className="w-full">
         <label className="text-base mb-1 block text-right text-foreground-primary lg:text-lg lg:mb-2">

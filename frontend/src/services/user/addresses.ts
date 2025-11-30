@@ -1,6 +1,7 @@
 // removed unused import: HTTP_STATUS from "@/constants/api"
 import { handleAuthErrors } from "@/utils/auth";
 import { apiClient } from "@/lib/api-client";
+import { apiCache } from "@/lib/api-cache";
 
 // Use the central auth error handler instead of local implementation
 const handleAuthError = (error: any) => {
@@ -47,6 +48,14 @@ export interface AddAddressRequest {
   FullAddress: string;
   shipping_city: number;
 }
+
+/**
+ * Invalidate API cache for addresses endpoint
+ * Call this after add/update/delete operations to ensure fresh data
+ */
+export const invalidateAddressCache = (): void => {
+  apiCache.clearByPattern(/local-user-addresses/);
+};
 
 export const getUserAddresses = async (): Promise<UserAddress[]> => {
   const token = localStorage.getItem("accessToken");
@@ -99,6 +108,9 @@ export const addUserAddress = async (address: AddAddressRequest): Promise<UserAd
       },
     });
 
+    // Invalidate cache after successful add
+    invalidateAddressCache();
+
     return response.data as UserAddress;
   } catch (error) {
     console.error("Error adding user address:", error);
@@ -124,6 +136,9 @@ export const updateUserAddress = async (
       },
     });
 
+    // Invalidate cache after successful update
+    invalidateAddressCache();
+
     return response.data as UserAddress;
   } catch (error) {
     console.error("Error updating user address:", error);
@@ -145,6 +160,9 @@ export const deleteUserAddress = async (id: number): Promise<void> => {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    // Invalidate cache after successful delete
+    invalidateAddressCache();
   } catch (error) {
     console.error("Error deleting user address:", error);
     handleAuthError(error);
