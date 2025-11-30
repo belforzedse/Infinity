@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import MobileMenu from "./MobileMenu";
 import MobileSearch from "./MobileSearch";
 import OrderTrackingIcon from "../../Icons/OrderTrackingIcon";
@@ -18,10 +18,29 @@ export default function PLPMobileHeader({}: Props) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems, openDrawer } = useCart();
 
+  const isStandalone = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(display-mode: standalone)").matches;
+  }, []);
+
   // Search is handled within the MobileSearch modal
 
   return (
-    <header className="lg:hidden" style={{ paddingTop: "max(0.75rem, calc(0.75rem + env(safe-area-inset-top) * 0.5))" }}>
+    <>
+      {/* Safe area white bar for standalone mode */}
+      {isStandalone && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[60] bg-white lg:hidden"
+          style={{ height: "env(safe-area-inset-top)" }}
+        />
+      )}
+      <header
+        className="lg:hidden"
+        style={{
+          paddingTop: isStandalone ? "0.75rem" : "0.75rem",
+          marginTop: isStandalone ? "env(safe-area-inset-top)" : "0",
+        }}
+      >
       <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
         <button
           onClick={() => window.location.href = "/orders"}
@@ -76,5 +95,6 @@ export default function PLPMobileHeader({}: Props) {
       {/* Mobile Search Modal */}
       <MobileSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
+    </>
   );
 }

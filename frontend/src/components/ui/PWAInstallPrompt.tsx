@@ -24,6 +24,31 @@ function isMobileDevice(): boolean {
 }
 
 /**
+ * Check if device is iOS (iPhone, iPad, iPod)
+ */
+function isIOSDevice(): boolean {
+  if (typeof window === "undefined") return false;
+
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  const iosRegex = /iphone|ipad|ipod/i;
+
+  return iosRegex.test(userAgent.toLowerCase());
+}
+
+/**
+ * Check if running in Safari on iOS
+ */
+function isSafariIOS(): boolean {
+  if (typeof window === "undefined") return false;
+
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  const isIOS = /iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+  const isSafari = /safari/i.test(userAgent.toLowerCase()) && !/chrome|crios|fxios/i.test(userAgent.toLowerCase());
+
+  return isIOS && isSafari;
+}
+
+/**
  * PWA Install Prompt Component
  * Shows a full-screen overlay to prompt users to install the PWA when available
  * Only shows on mobile devices, and only once per user
@@ -33,11 +58,14 @@ export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Check if on mobile device
     const mobile = isMobileDevice();
+    const ios = isIOSDevice();
     setIsMobile(mobile);
+    setIsIOS(ios);
 
     if (!mobile) {
       console.log("[PWA] Not showing prompt - desktop device");
@@ -76,7 +104,17 @@ export default function PWAInstallPrompt() {
       return;
     }
 
-    // Listen for beforeinstallprompt event
+    // For iOS, show prompt immediately (iOS doesn't support beforeinstallprompt)
+    if (ios && isSafariIOS()) {
+      console.log("[PWA] iOS device detected - showing manual install prompt");
+      // Show prompt after a short delay to ensure page is loaded
+      const timer = setTimeout(() => {
+        setShowPrompt(true);
+      }, 2000); // 2 second delay
+      return () => clearTimeout(timer);
+    }
+
+    // For Android/other browsers, listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log("[PWA] beforeinstallprompt event fired!");
       e.preventDefault();
@@ -197,6 +235,18 @@ export default function PWAInstallPrompt() {
           اپلیکیشن ما!
         </p>
 
+        {/* iOS-specific instructions */}
+        {isIOS && (
+          <div className="mb-6 rounded-xl bg-pink-50 p-4 rtl:text-right">
+            <p className="mb-2 text-sm font-semibold text-pink-900">نحوه نصب:</p>
+            <ol className="list-inside list-decimal space-y-1 text-sm text-pink-800 rtl:list-decimal">
+              <li>دکمه Share (اشتراک‌گذاری) را در پایین صفحه بزنید</li>
+              <li>گزینه "Add to Home Screen" (افزودن به صفحه اصلی) را انتخاب کنید</li>
+              <li>روی "Add" (افزودن) کلیک کنید</li>
+            </ol>
+          </div>
+        )}
+
         {/* Benefits List */}
         <ul className="mb-6 space-y-2 text-sm text-gray-600">
           <li className="flex items-center gap-2 rtl:flex-row-reverse">
@@ -251,12 +301,21 @@ export default function PWAInstallPrompt() {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3">
-          <button
-            onClick={handleInstallClick}
-            className="w-full transform rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-pink-700 hover:shadow-xl active:scale-[0.98]"
-          >
-            نصب اپلیکیشن
-          </button>
+          {isIOS ? (
+            <button
+              onClick={handleDismiss}
+              className="w-full transform rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-pink-700 hover:shadow-xl active:scale-[0.98]"
+            >
+              متوجه شدم
+            </button>
+          ) : (
+            <button
+              onClick={handleInstallClick}
+              className="w-full transform rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-pink-700 hover:shadow-xl active:scale-[0.98]"
+            >
+              نصب اپلیکیشن
+            </button>
+          )}
           <button
             onClick={handleDismiss}
             className="w-full rounded-xl bg-gray-100 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-200"

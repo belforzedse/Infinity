@@ -18,6 +18,13 @@ const PLPBottomNavigation = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+    }
+  }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -100,6 +107,9 @@ const PLPBottomNavigation = () => {
       <nav
         data-bottom-nav
         className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white lg:hidden"
+        style={{
+          paddingBottom: isStandalone ? "env(safe-area-inset-bottom)" : "0",
+        }}
       >
         <div className="flex items-center justify-between px-4 py-2.5">
           {navItems.map((item) => {

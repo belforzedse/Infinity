@@ -86,8 +86,21 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
     ? { borderBottomWidth: 0, borderBottomColor: "transparent", boxShadow: "none" }
     : undefined;
 
+  const isStandalone = React.useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(display-mode: standalone)").matches;
+  }, []);
+
   return (
     <div dir="rtl" className="bg-white pb-[81px] antialiased lg:pb-0">
+      {/* Safe area white bar for standalone mode */}
+      {isStandalone && (
+        <div
+          className="fixed left-0 right-0 top-0 z-[60] bg-white"
+          style={{ height: "env(safe-area-inset-top)" }}
+        />
+      )}
+
       {/* Skip to content for accessibility */}
       <a
         href="#content"
@@ -96,14 +109,12 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         پرش به محتوا
       </a>
       <header
-        className={`sticky top-0 z-50 transform transition-all duration-200 allow-overflow border-t-0 ${
-          scrolled
-            ? "glass-panel shadow-sm"
-            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+        className={`allow-overflow sticky z-50 transform border-t-0 transition-all duration-200 ${
+          scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
         style={{
           ...headerStyle,
-          paddingTop: "max(0.75rem, calc(0.75rem + env(safe-area-inset-top) * 0.5))",
+          top: isStandalone ? "env(safe-area-inset-top)" : "0",
         }}
       >
         <div className="relative">
