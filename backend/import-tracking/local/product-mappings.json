@@ -2617,5 +2617,905 @@
     "type": "variable",
     "status": "publish",
     "rating": "0.00"
+  },
+  "653555": {
+    "strapiId": 305,
+    "importedAt": "2025-11-30T10:01:21.441Z",
+    "name": "پیراهن زارا R00331",
+    "slug": "zara-shirt-r00331",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "653568": {
+    "strapiId": 303,
+    "importedAt": "2025-11-30T10:01:21.592Z",
+    "name": "تونیک کتان (4) R00249",
+    "slug": "linen-tunic-4-r00249",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "653645": {
+    "strapiId": 302,
+    "importedAt": "2025-11-30T10:01:42.207Z",
+    "name": "شال پلیسه S00180",
+    "slug": "pleated-shawl-s00180",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "653839": {
+    "strapiId": 304,
+    "importedAt": "2025-11-30T10:01:22.407Z",
+    "name": "شورت 00339 GhANGE",
+    "slug": "shorts-00339-change",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "653963": {
+    "strapiId": 306,
+    "importedAt": "2025-11-30T10:01:20.711Z",
+    "name": "شال پلیسه s00182",
+    "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d9%84%db%8c%d8%b3%d9%87-s00182",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654416": {
+    "strapiId": 307,
+    "importedAt": "2025-11-30T10:01:55.286Z",
+    "name": "شلوار نیم بگ لینن R00332",
+    "slug": "shalwar-linen-r00332",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654458": {
+    "strapiId": 308,
+    "importedAt": "2025-11-30T10:01:57.590Z",
+    "name": "شومیز طرحدار R00305",
+    "slug": "patterned-paper-r00305",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654483": {
+    "strapiId": 309,
+    "importedAt": "2025-11-30T10:02:00.485Z",
+    "name": "شومیز آستین سه ربع R00303",
+    "slug": "r00303-short-sleeve-paper",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654489": {
+    "strapiId": 310,
+    "importedAt": "2025-11-30T10:01:49.914Z",
+    "name": "شال کنفی شاین S00184",
+    "slug": "shine-hemp-shawl-s00184",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654508": {
+    "strapiId": 311,
+    "importedAt": "2025-11-30T10:01:52.553Z",
+    "name": "تونیک جلو بسته R00321",
+    "slug": "front-closed-tunic-r00321",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "654524": {
+    "strapiId": 312,
+    "importedAt": "2025-11-30T10:02:19.177Z",
+    "name": "دامن پلیسه گلدار R00276",
+    "slug": "floral-pleated-skirt-r00276",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654565": {
+    "strapiId": 313,
+    "importedAt": "2025-11-30T10:02:09.714Z",
+    "name": "شومیز یقه پاپیون OppsiR0099",
+    "slug": "oppsir0099-bow-tie-paper",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654576": {
+    "strapiId": 314,
+    "importedAt": "2025-11-30T10:02:08.838Z",
+    "name": "کراپ آستین حلقه ای OppsiR00210",
+    "slug": "oppsir00210-ring-sleeve-crop",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654915": {
+    "strapiId": 315,
+    "importedAt": "2025-11-30T10:02:09.955Z",
+    "name": "روسری طرحدار نخی OppsiS00168",
+    "slug": "patterned-cotton-scarf-oppsis00168",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "654918": {
+    "strapiId": 316,
+    "importedAt": "2025-11-30T10:02:15.606Z",
+    "name": "شال پانچی لینن OppsiS00164",
+    "slug": "oppsis00164-linen-punchy-shawl",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654927": {
+    "strapiId": 317,
+    "importedAt": "2025-11-30T10:02:34.999Z",
+    "name": "شال پلیسه شاین زنجیری OppsiS00161",
+    "slug": "oppsis00161-chain-chain-pleated-shawl",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654950": {
+    "strapiId": 318,
+    "importedAt": "2025-11-30T10:02:28.717Z",
+    "name": "شال نخی کد OppsiS00143",
+    "slug": "cotton-shawl-code-oppsis00143",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654969": {
+    "strapiId": 319,
+    "importedAt": "2025-11-30T10:02:35.136Z",
+    "name": "کت گلدوزی Z00379",
+    "slug": "embroidery-coat-z00379",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654991": {
+    "strapiId": 321,
+    "importedAt": "2025-11-30T10:02:40.383Z",
+    "name": "ست هارنس توری 00342",
+    "slug": "lace-harness-set-00342",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "654992": {
+    "strapiId": 320,
+    "importedAt": "2025-11-30T10:02:31.378Z",
+    "name": "پیراهن R00330",
+    "slug": "shirt-r00330",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655037": {
+    "strapiId": 322,
+    "importedAt": "2025-11-30T10:02:48.225Z",
+    "name": "تونیک تک جیب R00311",
+    "slug": "tonic-single-pocket-r00311",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655057": {
+    "strapiId": 323,
+    "importedAt": "2025-11-30T10:02:52.454Z",
+    "name": "شال کنفی پولکی S00187",
+    "slug": "sequined-hemp-shawl-s00187",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655081": {
+    "strapiId": 324,
+    "importedAt": "2025-11-30T10:02:47.884Z",
+    "name": "شال لینن S00186",
+    "slug": "linen-shawl-s00186",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655715": {
+    "strapiId": 325,
+    "importedAt": "2025-11-30T10:02:52.706Z",
+    "name": "سوتین رویه تور 00332",
+    "slug": "00332-net-top-bra",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655737": {
+    "strapiId": 326,
+    "importedAt": "2025-11-30T10:02:53.342Z",
+    "name": "نیم تنه ضربدری دوبند 00344",
+    "slug": "00344-double-breasted-cross-body",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655869": {
+    "strapiId": 327,
+    "importedAt": "2025-11-30T10:03:04.625Z",
+    "name": "شال طرحدار S00194",
+    "slug": "patterned-shawl-s00194",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655876": {
+    "strapiId": 329,
+    "importedAt": "2025-11-30T10:03:03.460Z",
+    "name": "شال طرحدار S00195",
+    "slug": "patterned-shawl-s00195",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655880": {
+    "strapiId": 328,
+    "importedAt": "2025-11-30T10:03:03.406Z",
+    "name": "شال طرحدار S00196",
+    "slug": "patterned-shawl-s00196",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655885": {
+    "strapiId": 330,
+    "importedAt": "2025-11-30T10:03:03.408Z",
+    "name": "شال نخی S00197",
+    "slug": "cotton-shawl-s00197",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655888": {
+    "strapiId": 331,
+    "importedAt": "2025-11-30T10:03:04.751Z",
+    "name": "شال خالخالی S00193",
+    "slug": "polka-dot-shawl-s00193",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655893": {
+    "strapiId": 333,
+    "importedAt": "2025-11-30T10:03:11.387Z",
+    "name": "شال طرحدار S00199",
+    "slug": "patterned-shawl-s00199",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655898": {
+    "strapiId": 334,
+    "importedAt": "2025-11-30T10:03:18.261Z",
+    "name": "شال امواج S00185",
+    "slug": "wave-shawl-s00185",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655919": {
+    "strapiId": 336,
+    "importedAt": "2025-11-30T10:03:12.093Z",
+    "name": "شال پلیسه لبه مروارید S00192",
+    "slug": "pearl-edge-pleated-shawl-s00192",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655931": {
+    "strapiId": 332,
+    "importedAt": "2025-11-30T10:03:15.654Z",
+    "name": "شال شیمر S00191",
+    "slug": "shall-shimmer-s00191",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "655958": {
+    "strapiId": 335,
+    "importedAt": "2025-11-30T10:03:12.410Z",
+    "name": "شال پلیسه شاین s00308",
+    "slug": "shain-pleated-shawl-s00189",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "656137": {
+    "strapiId": 338,
+    "importedAt": "2025-11-30T10:03:29.103Z",
+    "name": "کراپ رنگی کد R00342",
+    "slug": "color-crop-code-r00342",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "656472": {
+    "strapiId": 337,
+    "importedAt": "2025-11-30T10:03:35.391Z",
+    "name": "تیشرت اسپرت R00299",
+    "slug": "sports-t-shirt-r00299",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "656566": {
+    "strapiId": 339,
+    "importedAt": "2025-11-30T10:03:23.037Z",
+    "name": "شومیز سرشونه چین R00158",
+    "slug": "r00158-chinese-paperback",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "656590": {
+    "strapiId": 340,
+    "importedAt": "2025-11-30T10:03:24.166Z",
+    "name": "شلوار مام فیت لینن R00196",
+    "slug": "mom-fit-linen-pants-r00196-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657003": {
+    "strapiId": 341,
+    "importedAt": "2025-11-30T10:03:29.354Z",
+    "name": "تیشرتR00326 BACK",
+    "slug": "r00326-back",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657022": {
+    "strapiId": 342,
+    "importedAt": "2025-11-30T10:03:42.945Z",
+    "name": "شال پلیسه شاین (لبه پولک) S00190",
+    "slug": "shine-pleated-scarf-sequin-edge-s00190",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657038": {
+    "strapiId": 343,
+    "importedAt": "2025-11-30T10:03:47.376Z",
+    "name": "شال کنفی S00188",
+    "slug": "hemp-scarf-s00188",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657057": {
+    "strapiId": 344,
+    "importedAt": "2025-11-30T10:03:49.097Z",
+    "name": "شلوار کتان R00176",
+    "slug": "linen-pants-r00176",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657130": {
+    "strapiId": 345,
+    "importedAt": "2025-11-30T10:03:46.393Z",
+    "name": "سوتین جلوباز شو 00341",
+    "slug": "front-open-bra-00341",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657197": {
+    "strapiId": 346,
+    "importedAt": "2025-11-30T10:03:35.562Z",
+    "name": "شورت سیملس توردار 00343",
+    "slug": "mesh-seamless-shorts-00343",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657209": {
+    "strapiId": 348,
+    "importedAt": "2025-11-30T10:04:03.345Z",
+    "name": "سوتین توپ توپی فنردار 00347",
+    "slug": "spring-ball-bra-00347",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657259": {
+    "strapiId": 347,
+    "importedAt": "2025-11-30T10:04:01.072Z",
+    "name": "شومیز لینن رنگی R00295",
+    "slug": "colored-linen-paperback-r00295",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657347": {
+    "strapiId": 349,
+    "importedAt": "2025-11-30T10:04:00.669Z",
+    "name": "تونیک کتان (3) R00248",
+    "slug": "%d8%aa%d9%88%d9%86%db%8c%da%a9-%da%a9%d8%aa%d8%a7%d9%86-3-r00248",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657457": {
+    "strapiId": 350,
+    "importedAt": "2025-11-30T10:04:00.811Z",
+    "name": "شلوار کمرکش مام استایل لینن R00347",
+    "slug": "waist-trousers-linen-style-r00347",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657706": {
+    "strapiId": 351,
+    "importedAt": "2025-11-30T10:03:59.319Z",
+    "name": "شال طرحدار S00200",
+    "slug": "scarf-s00200",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657708": {
+    "strapiId": 355,
+    "importedAt": "2025-11-30T10:04:09.853Z",
+    "name": "شال حریر مجلسی S00201",
+    "slug": "silk-shawl-s00201",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657712": {
+    "strapiId": 354,
+    "importedAt": "2025-11-30T10:04:23.356Z",
+    "name": "سوتین اسفنجی 00346",
+    "slug": "sponge-bra-00346",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657729": {
+    "strapiId": 352,
+    "importedAt": "2025-11-30T10:04:12.637Z",
+    "name": "شال پلیسه طرحدار S00202",
+    "slug": "pleated-scarf-s00202",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657732": {
+    "strapiId": 353,
+    "importedAt": "2025-11-30T10:04:15.940Z",
+    "name": "سوتین توردار 00348",
+    "slug": "mesh-bra-00348",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657737": {
+    "strapiId": 356,
+    "importedAt": "2025-11-30T10:04:10.992Z",
+    "name": "شال طرح برگ S00204",
+    "slug": "s00204-leaf-design-shawl",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657791": {
+    "strapiId": 357,
+    "importedAt": "2025-11-30T10:04:31.494Z",
+    "name": "تیشرت لانگ R00341",
+    "slug": "long-t-shirt-r00341",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657847": {
+    "strapiId": 359,
+    "importedAt": "2025-11-30T10:04:35.080Z",
+    "name": "تونیک رنگی R00339",
+    "slug": "tonic-r00339",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657932": {
+    "strapiId": 358,
+    "importedAt": "2025-11-30T10:04:31.371Z",
+    "name": "کت لینن گلدوزی R00314",
+    "slug": "embroidery-manto-r00314",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657950": {
+    "strapiId": 361,
+    "importedAt": "2025-11-30T10:04:36.246Z",
+    "name": "تونیک شکوفه R00340",
+    "slug": "bloom-paperback-r00340",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "657986": {
+    "strapiId": 360,
+    "importedAt": "2025-11-30T10:04:33.375Z",
+    "name": "شلوار جلو خط گلکسی R00356",
+    "slug": "front-pants-galaxy-line-r00356",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "658697": {
+    "strapiId": 363,
+    "importedAt": "2025-11-30T10:04:51.262Z",
+    "name": "سوتین اسفنجی 00333",
+    "slug": "sponge-bra-00333",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "658732": {
+    "strapiId": 364,
+    "importedAt": "2025-11-30T10:04:45.382Z",
+    "name": "شورت کد 00349 teenager",
+    "slug": "short-code-00349-teenager",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "658743": {
+    "strapiId": 362,
+    "importedAt": "2025-11-30T10:04:46.434Z",
+    "name": "شورت لیزری پروتزدار 00340",
+    "slug": "%d8%b4%d9%88%d8%b1%d8%aa-%d9%84%db%8c%d8%b2%d8%b1%db%8c-%d9%be%d8%b1%d9%88%d8%aa%d8%b2%d8%af%d8%a7%d8%b1-00340",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "659738": {
+    "strapiId": 365,
+    "importedAt": "2025-11-30T10:04:49.623Z",
+    "name": "تیشرت خرسی R00350",
+    "slug": "bear-t-shirt-r00350",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "659744": {
+    "strapiId": 366,
+    "importedAt": "2025-11-30T10:04:56.250Z",
+    "name": "تونیک آستین پاکتی R00337",
+    "slug": "pocket-sleeve-tunic-r00337",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "659810": {
+    "strapiId": 367,
+    "importedAt": "2025-11-30T10:04:56.391Z",
+    "name": "شورت کبریتی بکلس 00350",
+    "slug": "backless-match-shorts-00350",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "659820": {
+    "strapiId": 370,
+    "importedAt": "2025-11-30T10:05:12.537Z",
+    "name": "سوتین بغل چسب 00369",
+    "slug": "adhesive-bra-00369",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "659861": {
+    "strapiId": 368,
+    "importedAt": "2025-11-30T10:05:05.147Z",
+    "name": "شلوار بگ لینن R00357",
+    "slug": "bag-linen-pants-r00357",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660055": {
+    "strapiId": 369,
+    "importedAt": "2025-11-30T10:04:59.307Z",
+    "name": "شال طرحدار S00212",
+    "slug": "patterned-shawl-s00212",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660059": {
+    "strapiId": 371,
+    "importedAt": "2025-11-30T10:05:10.435Z",
+    "name": "شال کنفی خالخالی S00206",
+    "slug": "dotted-hemp-shawl-s00206",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660309": {
+    "strapiId": 373,
+    "importedAt": "2025-11-30T10:05:23.505Z",
+    "name": "اورال ورزشی سیملس بلند 00374",
+    "slug": "oral-sports-seamless-long-00374",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660465": {
+    "strapiId": 372,
+    "importedAt": "2025-11-30T10:05:21.149Z",
+    "name": "تونیک پشت پیله R00343",
+    "slug": "tunic-back-cocoon-r00343",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660508": {
+    "strapiId": 374,
+    "importedAt": "2025-11-30T10:05:12.712Z",
+    "name": "شلوار بگ بند دار R00358",
+    "slug": "r00358-strapless-bag-pants",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660520": {
+    "strapiId": 375,
+    "importedAt": "2025-11-30T10:05:22.337Z",
+    "name": "پیراهن حلقه ای R00345",
+    "slug": "shirt-ring-r00345",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660530": {
+    "strapiId": 376,
+    "importedAt": "2025-11-30T10:05:25.184Z",
+    "name": "تیشرت راحتی گلدار R00348",
+    "slug": "floral-comfort-t-shirt-r00348",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660567": {
+    "strapiId": 378,
+    "importedAt": "2025-11-30T10:05:37.463Z",
+    "name": "شلوارک جین R00359",
+    "slug": "denim-shorts-r00359",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660948": {
+    "strapiId": 377,
+    "importedAt": "2025-11-30T10:05:28.806Z",
+    "name": "دامن جلو چاک R00317",
+    "slug": "front-chuck-skirt-r00317",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660955": {
+    "strapiId": 379,
+    "importedAt": "2025-11-30T10:05:38.137Z",
+    "name": "تونیک کراش R00336",
+    "slug": "tonic-crush-r00336",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660965": {
+    "strapiId": 380,
+    "importedAt": "2025-11-30T10:05:35.606Z",
+    "name": "تونیک لینن طرحدار R00363",
+    "slug": "textured-linen-tonic-r00363",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660974": {
+    "strapiId": 381,
+    "importedAt": "2025-11-30T10:05:25.337Z",
+    "name": "شورت فانتزی خالخالی 00359",
+    "slug": "polka-dot-fantasy-shorts-00359",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660980": {
+    "strapiId": 383,
+    "importedAt": "2025-11-30T10:05:38.312Z",
+    "name": "شورت عروسکی 00354",
+    "slug": "doll-shorts-00354",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "660995": {
+    "strapiId": 382,
+    "importedAt": "2025-11-30T10:05:46.986Z",
+    "name": "شلوار کلاسیک R00367",
+    "slug": "classic-pants-r00367",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661038": {
+    "strapiId": 385,
+    "importedAt": "2025-11-30T10:05:44.577Z",
+    "name": "شلوار لینن کمربندی R00379",
+    "slug": "waist-linen-pants-r00379",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661040": {
+    "strapiId": 384,
+    "importedAt": "2025-11-30T10:05:38.317Z",
+    "name": "اورال ورزشی سیملس کوتاه 00373",
+    "slug": "short-seamless-sports-oral-00373",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661086": {
+    "strapiId": 386,
+    "importedAt": "2025-11-30T10:05:38.319Z",
+    "name": "شورت نخی گلدار 00355",
+    "slug": "floral-cotton-shorts-00355",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661095": {
+    "strapiId": 388,
+    "importedAt": "2025-11-30T10:06:03.177Z",
+    "name": "دامن حریر پلیسه R00329",
+    "slug": "pleated-silk-skirt-r00329",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661102": {
+    "strapiId": 387,
+    "importedAt": "2025-11-30T10:05:55.757Z",
+    "name": "تیشرت راحتی R00364",
+    "slug": "t-shirt-r00364",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661130": {
+    "strapiId": 389,
+    "importedAt": "2025-11-30T10:05:56.130Z",
+    "name": "تیشرتR00365 SATURDAY",
+    "slug": "t-shirt-r00365-saturday",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661152": {
+    "strapiId": 390,
+    "importedAt": "2025-11-30T10:05:55.867Z",
+    "name": "شال لینن راه راه S00213",
+    "slug": "striped-linen-shawl-s00213",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661186": {
+    "strapiId": 391,
+    "importedAt": "2025-11-30T10:05:58.385Z",
+    "name": "شورت خرسی راه راه 00356",
+    "slug": "striped-bear-shorts-00356",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661192": {
+    "strapiId": 392,
+    "importedAt": "2025-11-30T10:06:13.746Z",
+    "name": "نیم تنه کاپدارضربدری کد 00368",
+    "slug": "code-00368-kapdar-zabardi-bust",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661246": {
+    "strapiId": 393,
+    "importedAt": "2025-11-30T10:06:13.742Z",
+    "name": "گن شورتی کد 00352",
+    "slug": "shorty-gun-code-00352",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661264": {
+    "strapiId": 394,
+    "importedAt": "2025-11-30T10:06:13.744Z",
+    "name": "شال پلیسه خالخالی مجلسی S00210",
+    "slug": "s00210-polka-dot-pleated-shawl",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "661407": {
+    "strapiId": 396,
+    "importedAt": "2025-11-30T10:06:15.714Z",
+    "name": "شومیز سرشونه چین جلو پلیسه R00182",
+    "slug": "r00182-pleated-front-fold-paper",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "662224": {
+    "strapiId": 395,
+    "importedAt": "2025-11-30T10:06:03.335Z",
+    "name": "شورت کبریتی بکلس 00372",
+    "slug": "backless-match-shorts-00372",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "662254": {
+    "strapiId": 398,
+    "importedAt": "2025-11-30T10:06:15.883Z",
+    "name": "سوتین اسفنجی شیردهی خرسی 00377",
+    "slug": "bear-breast-feeding-sponge-bra-00377",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "662256": {
+    "strapiId": 397,
+    "importedAt": "2025-11-30T10:06:20.160Z",
+    "name": "بادی پشت باز R00382",
+    "slug": "%d8%a8%d8%a7%d8%af%db%8c-%d9%be%d8%b4%d8%aa-%d8%a8%d8%a7%d8%b2-r00382",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "662283": {
+    "strapiId": 399,
+    "importedAt": "2025-11-30T10:06:26.008Z",
+    "name": "شلوارک R00362",
+    "slug": "shorts-r00362",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "662304": {
+    "strapiId": 400,
+    "importedAt": "2025-11-30T10:06:26.005Z",
+    "name": "شلوار لینن جیب نما R00355",
+    "slug": "linen-pants-front-pocket-r00355",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "662352": {
+    "strapiId": 401,
+    "importedAt": "2025-11-30T10:06:33.337Z",
+    "name": "شال لینن شاین S00209",
+    "slug": "linen-shine-shawl-s00209",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
   }
 }
