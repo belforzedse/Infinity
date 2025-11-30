@@ -2135,7 +2135,7 @@ export interface ApiProductVariationColorProductVariationColor extends Schema.Co
     draftAndPublish: false;
   };
   attributes: {
-    ColorCode: Attribute.String & Attribute.Required & Attribute.Unique;
+    ColorCode: Attribute.String & Attribute.Required;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       "api::product-variation-color.product-variation-color",
@@ -2145,7 +2145,7 @@ export interface ApiProductVariationColorProductVariationColor extends Schema.Co
       Attribute.Private;
     external_id: Attribute.String;
     external_source: Attribute.String;
-    Title: Attribute.String & Attribute.Required & Attribute.Unique;
+    Title: Attribute.String & Attribute.Required;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
       "api::product-variation-color.product-variation-color",
