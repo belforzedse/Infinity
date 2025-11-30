@@ -17,6 +17,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 import { SORT_LABELS } from "./sortOptions";
+import { computeDiscountForVariation } from "@/utils/discounts";
 
 const humanize = (value: string) =>
   value
@@ -266,8 +267,6 @@ export default function PLPList({
 
         // Frontend price sorting
         if (sort === "price:asc" || sort === "price:desc") {
-          const { computeDiscountForVariation } = require("@/utils/discounts");
-
           const getMinVariationPrice = (product: any): number => {
             const variations = product.attributes?.product_variations?.data || [];
             let minPrice = Infinity;
