@@ -160,6 +160,22 @@ class ApiCache {
   }
 
   /**
+   * Clear cached entries matching a pattern
+   */
+  clearByPattern(pattern: RegExp | string): void {
+    const regex = typeof pattern === "string" ? new RegExp(pattern, "i") : pattern;
+    const keysToDelete: string[] = [];
+
+    this.cache.forEach((_, key) => {
+      if (regex.test(key)) {
+        keysToDelete.push(key);
+      }
+    });
+
+    keysToDelete.forEach(key => this.cache.delete(key));
+  }
+
+  /**
    * Clear expired entries (cleanup)
    */
   cleanup(): void {
