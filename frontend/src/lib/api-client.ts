@@ -13,6 +13,19 @@ interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
+/**
+ * Custom error class for 304 Not Modified responses
+ * This sentinel error bypasses retry logic and error wrapping
+ */
+class NotModifiedError extends Error {
+  constructor() {
+    super("304_NOT_MODIFIED");
+    this.name = "NotModifiedError";
+    // Ensure instanceof checks work across module boundaries
+    Object.setPrototypeOf(this, NotModifiedError.prototype);
+  }
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -34,6 +47,11 @@ class ApiClient {
         return await requestFn();
       } catch (error: any) {
         lastError = error;
+
+        // 304 Not Modified sentinel bypasses retry logic completely
+        if (error instanceof NotModifiedError) {
+          throw error;
+        }
 
         // Don't retry on final attempt
         if (attempt >= retries) {
@@ -285,8 +303,9 @@ class ApiClient {
       // If we get 304, it means cached data is still valid
       // We'll let the caller handle this (should not happen in normal flow since we return cached first)
       if (response.status === 304) {
-        // For 304, we don't have response body, so throw to indicate we should use cache
-        throw new Error("304_NOT_MODIFIED");
+        // For 304, we don't have response body, so throw sentinel error to indicate we should use cache
+        // This sentinel bypasses retry logic and error wrapping
+        throw new NotModifiedError();
       }
 
       // Parse the response
@@ -338,6 +357,11 @@ class ApiClient {
     } catch (error: unknown) {
       clearTimeout(timeoutId);
       if (cleanupExternalAbort) cleanupExternalAbort();
+
+      // 304 Not Modified sentinel must be rethrown immediately without wrapping
+      if (error instanceof NotModifiedError) {
+        throw error;
+      }
 
       if (error instanceof Error && error.name === "AbortError") {
         throw this.handleError(408, { message: ERROR_MESSAGES.TIMEOUT });
