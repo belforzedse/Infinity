@@ -152,8 +152,15 @@ export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onO
       setLoading(true);
       const newAddress = await UserService.addresses.add(addressData);
 
-      // Optimistically update the atom immediately for instant UI update
-      setAddresses([...addresses, newAddress]);
+      // Verify the address has the required structure for the dropdown
+      // If it doesn't have shipping_city.Title, we need to wait for the refetch
+      const hasFullStructure = newAddress?.shipping_city?.Title &&
+                                newAddress?.shipping_city?.shipping_province?.Title;
+
+      if (hasFullStructure) {
+        // Optimistically update the atom immediately for instant UI update
+        setAddresses([...addresses, newAddress]);
+      }
 
       // Invalidate API cache for addresses endpoint
       apiCache.clearByPattern(/local-user-addresses/);
@@ -171,9 +178,13 @@ export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onO
       setIsOpen(false);
 
       // Callback to refresh addresses list from backend for sync
-      // This ensures backend and UI are in sync
+      // This ensures backend and UI are in sync and updates the atom with full data
       if (onAddressAdded) {
         await onAddressAdded();
+      } else if (!hasFullStructure) {
+        // If no callback provided and structure is incomplete, refetch addresses
+        const fetchedAddresses = await UserService.addresses.getAll();
+        setAddresses(fetchedAddresses);
       }
     } catch (error: any) {
       console.error("Failed to add address:", error);

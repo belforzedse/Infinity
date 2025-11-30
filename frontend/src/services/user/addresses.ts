@@ -111,7 +111,25 @@ export const addUserAddress = async (address: AddAddressRequest): Promise<UserAd
     // Invalidate cache after successful add
     invalidateAddressCache();
 
-    return response.data as UserAddress;
+    // apiClient.post returns response.data where response is { data: ApiResponse<T>, headers }
+    // Strapi returns { data: address }, so response.data is { data: address }
+    // We need to access response.data to get the address object
+    // But based on getUserAddresses pattern, response.data is already the array/object
+    // So for POST, response.data should be the address directly or { data: address }
+    const addressData = (response as any).data?.data || (response as any).data || response;
+
+    // Verify the address has the required structure
+    if (!addressData || !addressData.shipping_city) {
+      console.warn("Address response missing shipping_city, fetching full address");
+      // If the response doesn't have full data, fetch it
+      const fullAddresses = await getUserAddresses();
+      const fullAddress = fullAddresses.find(addr => addr.id === addressData.id);
+      if (fullAddress) {
+        return fullAddress;
+      }
+    }
+
+    return addressData as UserAddress;
   } catch (error) {
     console.error("Error adding user address:", error);
     handleAuthError(error);
