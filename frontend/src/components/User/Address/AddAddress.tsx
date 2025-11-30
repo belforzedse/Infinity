@@ -26,7 +26,7 @@ interface Props {
 export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onOpenChange, showButton = true }: Props) {
   const [addresses, setAddresses] = useAtom(addressesAtom);
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  
+
   // Use external state if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = (open: boolean) => {
@@ -151,13 +151,13 @@ export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onO
     try {
       setLoading(true);
       const newAddress = await UserService.addresses.add(addressData);
-      
+
       // Optimistically update the atom immediately for instant UI update
       setAddresses([...addresses, newAddress]);
-      
+
       // Invalidate API cache for addresses endpoint
       apiCache.clearByPattern(/local-user-addresses/);
-      
+
       toast.success("آدرس با موفقیت اضافه شد");
 
       // Reset form fields
