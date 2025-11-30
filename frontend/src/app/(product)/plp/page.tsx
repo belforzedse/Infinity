@@ -87,43 +87,48 @@ async function getProducts(
       // Use the search service
       const searchResults = await searchProducts(search, page, pageSize);
       return {
-        products: searchResults.data.map((item) => {
-          // Transform search API format to match product data format
-          return {
-            id: item.id,
-            attributes: {
-              Title: item.Title,
-              Slug: (item as { Slug?: string }).Slug || undefined,
-              Description: item.Description,
-              Status: "Active",
-              CoverImage: {
-                data: {
-                  attributes: {
-                    url: item.CoverImage?.url,
+        products: searchResults.data
+          .filter((item) => {
+            // Filter out products without images
+            return !!(item.CoverImage?.url || item.CoverImage);
+          })
+          .map((item) => {
+            // Transform search API format to match product data format
+            return {
+              id: item.id,
+              attributes: {
+                Title: item.Title,
+                Slug: (item as { Slug?: string }).Slug || undefined,
+                Description: item.Description,
+                Status: "Active",
+                CoverImage: {
+                  data: {
+                    attributes: {
+                      url: item.CoverImage?.url,
+                    },
                   },
                 },
-              },
-              product_main_category: {
-                data: {
-                  attributes: {
-                    Title: item.product_main_category?.Title || "",
-                    Slug: "",
+                product_main_category: {
+                  data: {
+                    attributes: {
+                      Title: item.product_main_category?.Title || "",
+                      Slug: "",
+                    },
                   },
                 },
+                product_variations: {
+                  data: item.product_variations.map((variation) => ({
+                    attributes: {
+                      SKU: "",
+                      Price: variation.Price.toString(),
+                      DiscountPrice: variation.DiscountPrice?.toString(),
+                      IsPublished: true,
+                    },
+                  })),
+                },
               },
-              product_variations: {
-                data: item.product_variations.map((variation) => ({
-                  attributes: {
-                    SKU: "",
-                    Price: variation.Price.toString(),
-                    DiscountPrice: variation.DiscountPrice?.toString(),
-                    IsPublished: true,
-                  },
-                })),
-              },
-            },
-          };
-        }),
+            };
+          }),
         pagination: {
           ...searchResults.meta.pagination,
           total: searchResults.meta.pagination.total,
@@ -224,8 +229,18 @@ async function getProducts(
     });
     const data = await response.json();
 
-    // Filter out products with zero price and check availability if needed
+    // Filter out products with zero price, no images, and check availability if needed
     let filteredProducts = data.data.filter((product: Product) => {
+      // Check if product has an image
+      const hasImage = !!(
+        product.attributes.CoverImage?.data?.attributes?.url ||
+        product.attributes.CoverImage?.data
+      );
+
+      if (!hasImage) {
+        return false;
+      }
+
       // Check if any variation has a valid price
       const hasValidPrice = product.attributes.product_variations?.data?.some((variation) => {
         const price = variation.attributes.Price;

@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import MobileMenu from "./MobileMenu";
 import MobileSearch from "./MobileSearch";
 import OrderTrackingIcon from "../../Icons/OrderTrackingIcon";
@@ -17,10 +16,26 @@ export default function PLPMobileHeader({}: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems, openDrawer } = useCart();
+  const [isStandalone, setIsStandalone] = useState(false);
 
-  const isStandalone = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(display-mode: standalone)").matches;
+  useEffect(() => {
+    if (typeof window !== "undefined" && "matchMedia" in window) {
+      const mq = window.matchMedia("(display-mode: standalone)");
+      setIsStandalone(mq.matches);
+      
+      // Optional: listen for changes
+      const handleChange = (e: MediaQueryListEvent) => {
+        setIsStandalone(e.matches);
+      };
+      
+      if (mq.addEventListener) {
+        mq.addEventListener("change", handleChange);
+        return () => mq.removeEventListener("change", handleChange);
+      } else if (mq.addListener) {
+        mq.addListener(handleChange);
+        return () => mq.removeListener(handleChange);
+      }
+    }
   }, []);
 
   // Search is handled within the MobileSearch modal
@@ -37,7 +52,7 @@ export default function PLPMobileHeader({}: Props) {
       <header
         className="lg:hidden"
         style={{
-          paddingTop: isStandalone ? "0.75rem" : "0.75rem",
+          paddingTop: "0.75rem",
           marginTop: isStandalone ? "env(safe-area-inset-top)" : "0",
         }}
       >

@@ -108,12 +108,22 @@ export default function Page() {
         data={userData}
         onSubmit={async (data) => {
           // Format birthdate as YYYY-MM-DD string if provided
+          // Normalize birthDate by treating it as either a Date or a string/number
           let birthDateString: string | undefined;
-          if (data.birthDate && data.birthDate instanceof Date) {
-            const year = data.birthDate.getFullYear();
-            const month = String(data.birthDate.getMonth() + 1).padStart(2, "0");
-            const day = String(data.birthDate.getDate()).padStart(2, "0");
-            birthDateString = `${year}-${month}-${day}`;
+          if (data.birthDate) {
+            // Create a Date object if not already a Date instance
+            const birthDate = data.birthDate instanceof Date 
+              ? data.birthDate 
+              : new Date(data.birthDate);
+            
+            // Check that the resulting Date is valid (not NaN)
+            if (!isNaN(birthDate.getTime())) {
+              const year = birthDate.getFullYear();
+              const month = String(birthDate.getMonth() + 1).padStart(2, "0");
+              const day = String(birthDate.getDate()).padStart(2, "0");
+              birthDateString = `${year}-${month}-${day}`;
+            }
+            // If invalid, birthDateString remains undefined so payload omits it
           }
 
           const localPayload = {

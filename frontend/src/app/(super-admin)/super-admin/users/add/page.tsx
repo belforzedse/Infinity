@@ -57,12 +57,20 @@ export default function AddUserPage() {
         role: data.role ? Number(data.role) : undefined,
       });
 
+      // Handle error case explicitly
+      if (!result || result.success === false) {
+        const errorMessage = result?.error?.message || "خطا در ایجاد کاربر";
+        toast.error(errorMessage);
+        return;
+      }
+
+      // Handle success case
       if (result.success && result.data) {
         // Clear user-related cache entries
         apiCache.clearByPattern(/\/api\/users/i);
 
         // Get the user ID from the response
-      const userId = result.data.id || (result.data as any)?.user?.id;
+        const userId = result.data.id;
 
         if (userId) {
           // Trigger table refresh
