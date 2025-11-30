@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -9,15 +8,42 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 /**
+ * Check if device is mobile
+ */
+function isMobileDevice(): boolean {
+  if (typeof window === "undefined") return false;
+
+  // Check screen width
+  if (window.innerWidth >= 768) return false;
+
+  // Check user agent for mobile devices
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+
+  return mobileRegex.test(userAgent.toLowerCase());
+}
+
+/**
  * PWA Install Prompt Component
- * Shows a banner to prompt users to install the PWA when available
+ * Shows a full-screen overlay to prompt users to install the PWA when available
+ * Only shows on mobile devices, and only once per user
  */
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Check if on mobile device
+    const mobile = isMobileDevice();
+    setIsMobile(mobile);
+
+    if (!mobile) {
+      console.log("[PWA] Not showing prompt - desktop device");
+      return;
+    }
+
     // Check if app is already installed
     if (window.matchMedia("(display-mode: standalone)").matches) {
       console.log("[PWA] App is already installed (standalone mode)");
@@ -33,10 +59,21 @@ export default function PWAInstallPrompt() {
       return;
     }
 
+    // Check if user has permanently dismissed the prompt
+    const wasDismissed = localStorage.getItem("pwa-prompt-dismissed-permanently");
+    if (wasDismissed === "true") {
+      console.log("[PWA] User has permanently dismissed the prompt");
+      return;
+    }
+
     // Check if running on HTTPS or localhost (required for PWA)
-    const isSecure = window.location.protocol === "https:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const isSecure =
+      window.location.protocol === "https:" ||
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
     if (!isSecure) {
       console.warn("[PWA] App must be served over HTTPS (or localhost) for install prompt to work");
+      return;
     }
 
     // Listen for beforeinstallprompt event
@@ -57,33 +94,23 @@ export default function PWAInstallPrompt() {
       localStorage.setItem("pwa-installed", "true");
     });
 
-    // Fallback: Check if PWA is installable after a delay (for browsers that don't fire event immediately)
-    const checkInstallability = setTimeout(() => {
-      // If we haven't received the event yet, check if we can show manual install instructions
-      if (!deferredPrompt && !isInstalled && isSecure) {
-        // Check if service worker is registered (required for installability)
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.getRegistration().then((registration) => {
-            if (registration) {
-              console.log("[PWA] Service worker is registered, but beforeinstallprompt hasn't fired yet");
-              // You could show a manual install button here if needed
-            }
-          });
-        }
-      }
-    }, 3000); // Wait 3 seconds
-
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      clearTimeout(checkInstallability);
     };
-  }, [deferredPrompt, isInstalled]);
+  }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      console.warn("[PWA] No deferred prompt available. User may need to use browser's install button.");
+      console.warn(
+        "[PWA] No deferred prompt available. User may need to use browser's install button.",
+      );
       // Fallback: Show instructions for manual installation
-      alert("برای نصب اپلیکیشن، از منوی مرورگر خود استفاده کنید:\n\nChrome/Edge: روی آیکون + در نوار آدرس کلیک کنید\nFirefox: از منوی ⋮ گزینه 'نصب' را انتخاب کنید");
+      alert(
+        "برای نصب اپلیکیشن، از منوی مرورگر خود استفاده کنید:\n\nChrome/Edge: روی آیکون + در نوار آدرس کلیک کنید\nFirefox: از منوی ⋮ گزینه 'نصب' را انتخاب کنید",
+      );
+      // Still mark as dismissed since we showed instructions
+      localStorage.setItem("pwa-prompt-dismissed-permanently", "true");
+      setShowPrompt(false);
       return;
     }
 
@@ -99,9 +126,13 @@ export default function PWAInstallPrompt() {
         localStorage.setItem("pwa-installed", "true");
       } else {
         console.log("[PWA] User dismissed the install prompt");
+        // Mark as permanently dismissed
+        localStorage.setItem("pwa-prompt-dismissed-permanently", "true");
       }
     } catch (error) {
       console.error("[PWA] Error showing install prompt:", error);
+      // Mark as dismissed on error
+      localStorage.setItem("pwa-prompt-dismissed-permanently", "true");
     } finally {
       // Clear the deferred prompt
       setDeferredPrompt(null);
@@ -110,48 +141,130 @@ export default function PWAInstallPrompt() {
   };
 
   const handleDismiss = () => {
+    // Mark as permanently dismissed
+    localStorage.setItem("pwa-prompt-dismissed-permanently", "true");
     setShowPrompt(false);
-    // Remember dismissal for this session
-    sessionStorage.setItem("pwa-prompt-dismissed", "true");
+    console.log("[PWA] User dismissed the prompt permanently");
   };
 
-  // Don't show if already installed or dismissed this session
-  if (isInstalled || !showPrompt || sessionStorage.getItem("pwa-prompt-dismissed") === "true") {
+  // Don't show if:
+  // - Not on mobile
+  // - Already installed
+  // - Prompt not ready
+  // - User has dismissed it permanently
+  if (!isMobile || isInstalled || !showPrompt) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[2147483645] md:left-auto md:right-4 md:max-w-md">
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-start gap-3 rtl:flex-row-reverse">
-        <div className="flex-1">
-          <h3 className="font-bold text-gray-900 mb-1 text-sm">نصب اپلیکیشن</h3>
-          <p className="text-xs text-gray-600 mb-3">
-            اینفینیتی را به صفحه اصلی خود اضافه کنید و سریع‌تر دسترسی داشته باشید
-          </p>
-          <div className="flex gap-2 rtl:flex-row-reverse">
-            <button
-              onClick={handleInstallClick}
-              className="px-4 py-2 bg-pink-600 text-white text-xs font-semibold rounded-lg hover:bg-pink-700 transition-colors"
+    <div
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4"
+      style={{ backdropFilter: "blur(4px)" }}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={handleDismiss} aria-hidden="true" />
+
+      {/* Modal Content */}
+      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl rtl:text-right">
+        {/* Icon/Logo */}
+        <div className="mb-4 flex justify-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 shadow-lg">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-12 w-12 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
             >
-              نصب
-            </button>
-            <button
-              onClick={handleDismiss}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              بعداً
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+              />
+            </svg>
           </div>
         </div>
-        <button
-          onClick={handleDismiss}
-          className="text-gray-400 hover:text-gray-600 transition-colors p-1"
-          aria-label="بستن"
-        >
-          <X className="w-4 h-4" />
-        </button>
+
+        {/* Title */}
+        <h2 className="mb-2 text-center text-2xl font-bold text-gray-900">
+          نصب اپلیکیشن اینفینیتی
+        </h2>
+
+        {/* Description */}
+        <p className="mb-6 text-center leading-relaxed text-gray-600">
+          اینفینیتی را به صفحه اصلی خود اضافه کنید و سریع‌تر دسترسی داشته باشید. تجربه بهتر خرید با
+          اپلیکیشن ما!
+        </p>
+
+        {/* Benefits List */}
+        <ul className="mb-6 space-y-2 text-sm text-gray-600">
+          <li className="flex items-center gap-2 rtl:flex-row-reverse">
+            <svg
+              className="h-5 w-5 flex-shrink-0 text-pink-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span>دسترسی سریع‌تر</span>
+          </li>
+          <li className="flex items-center gap-2 rtl:flex-row-reverse">
+            <svg
+              className="h-5 w-5 flex-shrink-0 text-pink-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span>کار بدون اینترنت</span>
+          </li>
+          <li className="flex items-center gap-2 rtl:flex-row-reverse">
+            <svg
+              className="h-5 w-5 flex-shrink-0 text-pink-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span>تجربه بهتر</span>
+          </li>
+        </ul>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={handleInstallClick}
+            className="w-full transform rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-pink-700 hover:shadow-xl active:scale-[0.98]"
+          >
+            نصب اپلیکیشن
+          </button>
+          <button
+            onClick={handleDismiss}
+            className="w-full rounded-xl bg-gray-100 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+          >
+            نه، ممنون
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-
