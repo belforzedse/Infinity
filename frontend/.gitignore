@@ -56,3 +56,6 @@ temp
 build.log
 build-final.log
 .env
+
+# Generated build files
+src/constants/build-version.json

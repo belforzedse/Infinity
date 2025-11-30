@@ -3,9 +3,10 @@
  * Base class for making API requests
  */
 
-import { API_BASE_URL, REQUEST_TIMEOUT, ERROR_MESSAGES } from "@/constants/api";
+import { API_BASE_URL, REQUEST_TIMEOUT, RETRY_CONFIG, ERROR_MESSAGES } from "@/constants/api";
 import type { ApiRequestOptions, ApiResponse, ApiError } from "@/types/api";
 import { handleAuthErrors } from "@/utils/auth";
+import { apiCache, shouldCache, getCacheConfig } from "./api-cache";
 
 interface ErrorResponse {
   message?: string;
@@ -17,6 +18,50 @@ class ApiClient {
 
   constructor(baseUrl: string = `${API_BASE_URL}`) {
     this.baseUrl = baseUrl;
+  }
+
+  /**
+   * Retry a request with exponential backoff
+   */
+  private async retryRequest<T>(
+    requestFn: () => Promise<T>,
+    retries: number = RETRY_CONFIG.maxRetries,
+  ): Promise<T> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        return await requestFn();
+      } catch (error: any) {
+        lastError = error;
+
+        // Don't retry on final attempt
+        if (attempt >= retries) {
+          break;
+        }
+
+        // Don't retry on client errors (4xx) except timeout
+        if (error?.status && error.status >= 400 && error.status < 500 && error.status !== 408) {
+          break;
+        }
+
+        // Don't retry if not a retryable status code
+        if (error?.status && !RETRY_CONFIG.retryableStatusCodes.includes(error.status)) {
+          break;
+        }
+
+        // Calculate exponential backoff delay
+        const delay = Math.min(
+          RETRY_CONFIG.baseDelay * Math.pow(2, attempt),
+          RETRY_CONFIG.maxDelay,
+        );
+
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    throw lastError;
   }
 
   /**
@@ -78,6 +123,7 @@ class ApiClient {
 
   /**
    * Make a request with the given method, endpoint, and data
+   * Includes caching, deduplication, ETag support, and retry logic
    */
   private async request<T>(
     method: string,
@@ -91,13 +137,9 @@ class ApiClient {
       });
     }
 
-    // Build URL with query parameters using URL and URLSearchParams APIs
-    // Fix: new URL() with absolute paths (starting with /) replaces the base URL's pathname
-    // So we need to manually join the paths to preserve /api prefix
+    // Build URL with query parameters
     const baseUrlObj = new URL(this.baseUrl);
-    // Remove leading slash from endpoint if present, then append to baseUrl pathname
     const endpointPath = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    // Ensure baseUrl pathname ends with / for proper joining
     const basePath = baseUrlObj.pathname.endsWith('/')
       ? baseUrlObj.pathname
       : `${baseUrlObj.pathname}/`;
@@ -107,44 +149,138 @@ class ApiClient {
     // Append params from options.params if provided
     if (options?.params) {
       Object.entries(options.params).forEach(([key, value]) => {
-        // Skip undefined values
         if (value !== undefined) {
-          // Convert to string (handles number, boolean, string)
           url.searchParams.set(key, String(value));
         }
       });
     }
 
     // Add cache-busting query parameter if cache is set to 'no-store'
-    // This is added after params are merged to respect existing query string
     if (options?.cache === 'no-store') {
       url.searchParams.set('_cb', String(Date.now()));
     }
 
-    const headers = this.getHeaders(options?.headers, options?.skipAuth);
+    const urlString = url.toString();
+
+    // Generate cache key for request deduplication and caching
+    const cacheKey = apiCache.generateKey(method, urlString, data);
+
+    // Request deduplication: if same request is pending, share the promise
+    const pendingRequest = apiCache.getPending<ApiResponse<T>>(cacheKey);
+    if (pendingRequest) {
+      return pendingRequest;
+    }
+
+    // Check if caching is enabled for this endpoint
+    const enableCache = typeof window !== "undefined" &&
+                       shouldCache(method, urlString) &&
+                       options?.cache !== 'no-store';
+
+    // Get cache config if caching is enabled
+    const cacheConfig = enableCache ? getCacheConfig(urlString) : null;
+
+    // Check cache for GET requests
+    if (enableCache && cacheConfig && method.toUpperCase() === "GET") {
+      const cached = apiCache.get<ApiResponse<T>>(cacheKey);
+
+      if (cached) {
+        // Always fetch fresh in background (stale-while-revalidate pattern)
+        // Don't await - let it run in background, fire and forget
+        // Don't track this as a pending request since it doesn't return data to await
+        this.retryRequest(() =>
+          this.executeRequest<T>(method, urlString, data, options, cached.etag)
+        )
+          .then(response => {
+            // Update cache with fresh response
+            const etag = this.extractETag(response.headers);
+            apiCache.set(cacheKey, response.data, etag, cacheConfig);
+          })
+          .catch((error: any) => {
+            // Ignore 304 errors (cache still valid) and other errors in background refresh
+            // Cached data is still valid to serve
+            if (error?.message === "304_NOT_MODIFIED") {
+              // Cache is still valid, just update timestamp if needed
+              return;
+            }
+            // Ignore other errors - cached data is still valid
+          });
+
+        // Return cached data immediately (stale-while-revalidate)
+        return Promise.resolve(cached.data);
+      }
+    }
+
+    // Execute request with retry logic
+    const requestPromise = this.retryRequest(() =>
+      this.executeRequest<T>(method, urlString, data, options, null)
+    );
+
+    // Transform promise to extract just the data for pending request tracking
+    // This matches the return type expected by getPending callers
+    const dataPromise = requestPromise.then(response => response.data);
+
+    // Track pending request (transformed to return only data)
+    apiCache.setPending(cacheKey, dataPromise);
+
+    try {
+      const response = await requestPromise;
+
+      // Cache successful GET responses
+      if (enableCache && cacheConfig && method.toUpperCase() === "GET" && response) {
+        const etag = this.extractETag(response.headers);
+        apiCache.set(cacheKey, response.data, etag, cacheConfig);
+      }
+
+      return response.data;
+    } catch (error) {
+      // Re-throw error after cleanup
+      throw error;
+    }
+  }
+
+  /**
+   * Execute the actual HTTP request
+   */
+  private async executeRequest<T>(
+    method: string,
+    url: string,
+    data: unknown,
+    options: ApiRequestOptions | undefined,
+    etag: string | null,
+  ): Promise<{ data: ApiResponse<T>; headers: Headers }> {
+    let headers = this.getHeaders(options?.headers, options?.skipAuth);
+
+    // Add If-None-Match header for conditional request (ETag support)
+    if (etag && method.toUpperCase() === "GET") {
+      // Ensure headers is a Record<string, string> to add custom header
+      const headersObj = headers instanceof Headers
+        ? Object.fromEntries(headers.entries())
+        : headers as Record<string, string>;
+      headersObj["If-None-Match"] = etag;
+      headers = headersObj;
+    }
 
     const config: RequestInit = {
       method,
       headers,
       credentials: options?.withCredentials ? "include" : "same-origin",
       body: data ? JSON.stringify(data) : undefined,
-      cache: options?.cache || 'default', // Support cache option from RequestOptions
+      cache: options?.cache || 'default',
     };
 
-    try {
-      // Create an AbortController to handle request timeout
-      const controller = new AbortController();
-      // If caller provided a signal, abort our controller when theirs aborts
-      const cleanupExternalAbort = options?.signal
-        ? (() => {
-            const onAbort = () => controller.abort();
-            options.signal!.addEventListener("abort", onAbort);
-            return () => options.signal!.removeEventListener("abort", onAbort);
-          })()
-        : undefined;
-      const timeoutId = setTimeout(() => controller.abort(), options?.timeout || REQUEST_TIMEOUT);
+    // Create an AbortController to handle request timeout
+    const controller = new AbortController();
+    const cleanupExternalAbort = options?.signal
+      ? (() => {
+          const onAbort = () => controller.abort();
+          options.signal!.addEventListener("abort", onAbort);
+          return () => options.signal!.removeEventListener("abort", onAbort);
+        })()
+      : undefined;
+    const timeoutId = setTimeout(() => controller.abort(), options?.timeout || REQUEST_TIMEOUT);
 
-      const response = await fetch(url.toString(), {
+    try {
+      const response = await fetch(url, {
         ...config,
         signal: controller.signal,
       });
@@ -153,12 +289,19 @@ class ApiClient {
       clearTimeout(timeoutId);
       if (cleanupExternalAbort) cleanupExternalAbort();
 
+      // Handle 304 Not Modified (conditional request)
+      // If we get 304, it means cached data is still valid
+      // We'll let the caller handle this (should not happen in normal flow since we return cached first)
+      if (response.status === 304) {
+        // For 304, we don't have response body, so throw to indicate we should use cache
+        throw new Error("304_NOT_MODIFIED");
+      }
+
       // Parse the response
       const responseData: unknown = await response.json();
 
       // Check if the response is successful
       if (!response.ok) {
-        // For 400 errors, preserve the original error structure from the API
         if (response.status === 400) {
           const parsed = responseData as { error?: { message?: string } };
           const error = {
@@ -171,27 +314,15 @@ class ApiClient {
 
         const error = this.handleError(response.status, responseData as ErrorResponse);
 
-        // Handle auth errors here for centralized auth redirects
+        // Handle auth errors
         if (!options?.suppressAuthRedirect) {
-          // Call auth error handler with only the error object. The second
-          // parameter is optional and tests expect a single-argument call.
           handleAuthErrors(error);
 
-          // If it's a 403 error, refresh user data to catch role changes
-          // This ensures that if a user's role was changed in the backend,
-          // the frontend will get the updated role information
-          // NOTE: We do NOT clear the access token - user stays logged in
           if (response.status === 403 && typeof window !== "undefined") {
-            // Import dynamically to avoid circular dependencies
             import("@/lib/atoms/auth").then(({ currentUserAtom }) => {
               import("@/lib/jotaiStore").then(({ jotaiStore }) => {
-                // Clear cached user data (but NOT the token - user remains logged in)
                 jotaiStore.set(currentUserAtom, null);
-
-                // If we're on an admin page, redirect immediately
-                // The ClientLayout will also handle the redirect, but this is more immediate
                 if (window.location.pathname.startsWith("/super-admin")) {
-                  // Use a small delay to let the error handler finish
                   setTimeout(() => {
                     if (window.history.length > 1) {
                       window.history.back();
@@ -208,15 +339,18 @@ class ApiClient {
         throw error;
       }
 
-      // For Strapi API, just return the responseData directly
-      // as it already has the format we need (data and meta properties)
-      return responseData as ApiResponse<T>;
+      return {
+        data: responseData as ApiResponse<T>,
+        headers: response.headers,
+      };
     } catch (error: unknown) {
+      clearTimeout(timeoutId);
+      if (cleanupExternalAbort) cleanupExternalAbort();
+
       if (error instanceof Error && error.name === "AbortError") {
         throw this.handleError(408, { message: ERROR_MESSAGES.TIMEOUT });
       }
 
-      // If error already has our expected structure, just rethrow it
       if (
         typeof error === "object" &&
         error !== null &&
@@ -228,6 +362,14 @@ class ApiClient {
 
       throw this.handleError(500, { message: ERROR_MESSAGES.DEFAULT });
     }
+  }
+
+  /**
+   * Extract ETag from response headers
+   */
+  private extractETag(headers: Headers): string | null {
+    const etag = headers.get("etag");
+    return etag || null;
   }
 
   /**

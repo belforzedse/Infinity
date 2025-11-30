@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { BUILD_VERSION } from "@/constants/build";
 
 /**
  * Service Worker Registration Component
@@ -35,6 +36,9 @@ export default function ServiceWorkerRegistration() {
 
       console.log("[SW] Service worker registered successfully:", registration);
 
+      // Send build version to service worker
+      sendBuildVersion(registration);
+
       // Check for updates periodically
       setInterval(() => {
         registration.update();
@@ -58,6 +62,48 @@ export default function ServiceWorkerRegistration() {
       });
     } catch (error) {
       console.error("[SW] Failed to register service worker:", error);
+    }
+  };
+
+  const sendBuildVersion = async (registration: ServiceWorkerRegistration) => {
+    try {
+      // Wait for service worker to be ready
+      if (registration.active) {
+        registration.active.postMessage({
+          type: "SET_BUILD_VERSION",
+          version: BUILD_VERSION,
+        });
+        console.log("[SW] Build version sent to service worker:", BUILD_VERSION);
+      } else if (registration.installing) {
+        registration.installing.addEventListener("statechange", () => {
+          if (registration.installing?.state === "activated") {
+            registration.active?.postMessage({
+              type: "SET_BUILD_VERSION",
+              version: BUILD_VERSION,
+            });
+            console.log("[SW] Build version sent to service worker:", BUILD_VERSION);
+          }
+        });
+      } else if (registration.waiting) {
+        registration.waiting.postMessage({
+          type: "SET_BUILD_VERSION",
+          version: BUILD_VERSION,
+        });
+        console.log("[SW] Build version sent to service worker:", BUILD_VERSION);
+      }
+
+      // Also listen for when service worker becomes ready
+      navigator.serviceWorker.ready.then((registration) => {
+        if (registration.active) {
+          registration.active.postMessage({
+            type: "SET_BUILD_VERSION",
+            version: BUILD_VERSION,
+          });
+          console.log("[SW] Build version sent to ready service worker:", BUILD_VERSION);
+        }
+      });
+    } catch (error) {
+      console.error("[SW] Failed to send build version:", error);
     }
   };
 

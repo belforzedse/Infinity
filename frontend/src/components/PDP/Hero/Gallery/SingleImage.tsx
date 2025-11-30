@@ -247,7 +247,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                   fill
                   loader={imageLoader}
                   sizes="(max-width: 768px) 100vw, 640px"
-                  onLoadingComplete={() => setIsLoading(false)}
+                  onLoad={() => setIsLoading(false)}
                   onError={() => {
                     setBroken(true);
                     setIsLoading(false);
