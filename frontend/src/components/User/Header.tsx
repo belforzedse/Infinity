@@ -13,12 +13,12 @@ const UserHeader: React.FC = () => {
     if (typeof window !== "undefined" && "matchMedia" in window) {
       const mq = window.matchMedia("(display-mode: standalone)");
       setIsStandalone(mq.matches);
-      
+
       // Optional: listen for changes
       const handleChange = (e: MediaQueryListEvent) => {
         setIsStandalone(e.matches);
       };
-      
+
       if (mq.addEventListener) {
         mq.addEventListener("change", handleChange);
         return () => mq.removeEventListener("change", handleChange);
