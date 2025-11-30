@@ -196,14 +196,18 @@ export default function PWAInstallPrompt() {
 
   return (
     <div
-      className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4 animate-in fade-in duration-300"
       style={{ backdropFilter: "blur(4px)" }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={handleDismiss} aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-black/50 animate-in fade-in duration-300"
+        onClick={handleDismiss}
+        aria-hidden="true"
+      />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl rtl:text-right">
+      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl rtl:text-right animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Icon/Logo */}
         <div className="mb-4 flex justify-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 shadow-lg">
@@ -235,17 +239,115 @@ export default function PWAInstallPrompt() {
           اپلیکیشن ما!
         </p>
 
-        {/* iOS-specific instructions */}
-        {isIOS && (
-          <div className="mb-6 rounded-xl bg-pink-50 p-4 rtl:text-right">
-            <p className="mb-2 text-sm font-semibold text-pink-900">نحوه نصب:</p>
-            <ol className="list-inside list-decimal space-y-1 text-sm text-pink-800 rtl:list-decimal">
-              <li>دکمه Share (اشتراک‌گذاری) را در پایین صفحه بزنید</li>
-              <li>گزینه "Add to Home Screen" (افزودن به صفحه اصلی) را انتخاب کنید</li>
-              <li>روی "Add" (افزودن) کلیک کنید</li>
-            </ol>
-          </div>
-        )}
+        {/* Installation Instructions - Unified style for both platforms */}
+        <div className="mb-6 rounded-xl bg-gray-50 p-4 rtl:text-right">
+          <p className="mb-3 text-sm font-semibold text-gray-900">نحوه نصب:</p>
+          <ol className="space-y-2 text-sm text-gray-700">
+            {isIOS ? (
+              <>
+                <li className="flex items-start gap-2 rtl:flex-row-reverse">
+                  <svg
+                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  <span>دکمه Share (اشتراک‌گذاری) را در پایین صفحه بزنید</span>
+                </li>
+                <li className="flex items-start gap-2 rtl:flex-row-reverse">
+                  <svg
+                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    />
+                  </svg>
+                  <span>گزینه "Add to Home Screen" (افزودن به صفحه اصلی) را انتخاب کنید</span>
+                </li>
+                <li className="flex items-start gap-2 rtl:flex-row-reverse">
+                  <svg
+                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span>روی "Add" (افزودن) کلیک کنید</span>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="flex items-start gap-2 rtl:flex-row-reverse">
+                  <svg
+                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <span>روی دکمه "نصب اپلیکیشن" در پایین کلیک کنید</span>
+                </li>
+                <li className="flex items-start gap-2 rtl:flex-row-reverse">
+                  <svg
+                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>در پنجره باز شده، روی "نصب" یا "Install" کلیک کنید</span>
+                </li>
+                <li className="flex items-start gap-2 rtl:flex-row-reverse">
+                  <svg
+                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    />
+                  </svg>
+                  <span>اپلیکیشن به صفحه اصلی شما اضافه می‌شود</span>
+                </li>
+              </>
+            )}
+          </ol>
+        </div>
 
         {/* Benefits List */}
         <ul className="mb-6 space-y-2 text-sm text-gray-600">
