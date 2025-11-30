@@ -2,12 +2,20 @@
  * Service Worker for Offline Cart Support
  * Caches cart data and API requests for offline availability
  * Syncs data when connection is restored
+ * Uses build version for automatic cache invalidation on deployments
  */
 
-const CACHE_VERSION = "v1";
-const CART_CACHE = `cart-cache-${CACHE_VERSION}`;
-const API_CACHE = `api-cache-${CACHE_VERSION}`;
-const RUNTIME_CACHE = `runtime-cache-${CACHE_VERSION}`;
+// Build version will be set via message from client
+let BUILD_VERSION = "v1-dev"; // Fallback version
+
+// Generate cache names with build version
+function getCacheNames() {
+  return {
+    CART_CACHE: `cart-cache-v${BUILD_VERSION}`,
+    API_CACHE: `api-cache-v${BUILD_VERSION}`,
+    RUNTIME_CACHE: `runtime-cache-v${BUILD_VERSION}`,
+  };
+}
 
 // Cache strategies
 const CACHE_FIRST = "cache-first";
@@ -25,6 +33,7 @@ const CACHEABLE_API_ROUTES = ["/api/cart", "/api/products", "/api/categories"];
  */
 self.addEventListener("install", (event) => {
   console.log("[SW] Installing service worker...");
+  const { RUNTIME_CACHE } = getCacheNames();
 
   event.waitUntil(
     caches
@@ -45,6 +54,7 @@ self.addEventListener("install", (event) => {
  */
 self.addEventListener("activate", (event) => {
   console.log("[SW] Activating service worker...");
+  const { CART_CACHE, API_CACHE, RUNTIME_CACHE } = getCacheNames();
 
   // Compute the full Promise chain first
   const activationPromise = caches
@@ -52,8 +62,9 @@ self.addEventListener("activate", (event) => {
     .then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          // Delete old cache versions
-          if (cacheName !== CART_CACHE && cacheName !== API_CACHE && cacheName !== RUNTIME_CACHE) {
+          // Delete old cache versions (any cache that doesn't match current version)
+          const currentCaches = [CART_CACHE, API_CACHE, RUNTIME_CACHE];
+          if (!currentCaches.includes(cacheName)) {
             console.log("[SW] Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
@@ -116,6 +127,7 @@ self.addEventListener("fetch", (event) => {
  * Try network first, fall back to cache
  */
 async function handleCartRequest(request) {
+  const { CART_CACHE } = getCacheNames();
   try {
     // Try network first
     const response = await fetch(request);
@@ -148,6 +160,7 @@ async function handleCartRequest(request) {
  * Use cache if available, fall back to network
  */
 async function handleAPIRequest(request) {
+  const { API_CACHE } = getCacheNames();
   const cached = await caches.match(request);
   if (cached) {
     return cached;
@@ -178,6 +191,7 @@ async function handleAPIRequest(request) {
  * Images, CSS, JS, etc.
  */
 async function handleStaticAsset(request) {
+  const { RUNTIME_CACHE } = getCacheNames();
   const cached = await caches.match(request);
   if (cached) {
     return cached;
@@ -310,6 +324,11 @@ async function syncCartData() {
 self.addEventListener("message", (event) => {
   console.log("[SW] Message received:", event.data);
 
+  if (event.data && event.data.type === "SET_BUILD_VERSION") {
+    BUILD_VERSION = event.data.version || BUILD_VERSION;
+    console.log("[SW] Build version set:", BUILD_VERSION);
+  }
+
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
@@ -335,6 +354,7 @@ async function clearAllCaches() {
  * Cache specific URLs
  */
 async function cacheUrls(urls) {
+  const { RUNTIME_CACHE } = getCacheNames();
   const cache = await caches.open(RUNTIME_CACHE);
   return cache.addAll(urls).catch((err) => {
     console.log("[SW] Failed to cache URLs:", err);

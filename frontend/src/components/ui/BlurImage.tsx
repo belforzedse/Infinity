@@ -4,7 +4,7 @@ import type { ImageProps } from "next/image";
 import Image from "next/image";
 import { useState } from "react";
 
-type Props = ImageProps & {
+type Props = Omit<ImageProps, 'onLoadingComplete'> & {
   blurDataURL?: string;
   priority?: boolean;
 };
@@ -35,9 +35,9 @@ const generateFallbackImage = (width = 400, height = 400) => {
 export default function BlurImage({
   className,
   blurDataURL,
-  onLoadingComplete,
   priority = false,
   src,
+  onLoad,
   ...props
 }: Props) {
   const [loaded, setLoaded] = useState(false);
@@ -66,9 +66,9 @@ export default function BlurImage({
         error || !src || src === "" ? "opacity-60" : "",
         className || "",
       ].join(" ")}
-      onLoadingComplete={(img) => {
+      onLoad={(event) => {
         setLoaded(true);
-        onLoadingComplete?.(img);
+        onLoad?.(event);
       }}
       onError={() => {
         setError(true);
