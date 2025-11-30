@@ -1,7 +1,7 @@
 "use client";
 
 import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
-import type { User } from "./page";
+import type { User } from "../edit/[id]/page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import { apiClient } from "@/services";
 import { translatePluginRoleLabel } from "@/constants/roleLabels";
@@ -40,13 +40,8 @@ const fetchRoles = async (
 };
 
 export const config: UpsertPageConfigType<User> = {
-  headTitle: "ویرایش کاربر",
+  headTitle: "ایجاد کاربر جدید",
   showTimestamp: false,
-  isActiveBox: {
-    key: "isActive",
-    header: "وضیعت حساب کاربری",
-    label: (value: boolean) => (value ? "حساب فعال" : "حساب غیرفعال"),
-  },
   actionButtons: (props) => (
     <>
       <button
@@ -93,7 +88,7 @@ export const config: UpsertPageConfigType<User> = {
             },
             {
               name: "phone",
-              type: "copy-text",
+              type: "text",
               label: "شماره تماس",
               colSpan: 6,
               mobileColSpan: 12,
@@ -107,7 +102,7 @@ export const config: UpsertPageConfigType<User> = {
             },
             {
               name: "password",
-              type: "password-with-btn",
+              type: "password",
               label: "کلمه عبور",
               colSpan: 9,
               mobileColSpan: 12,
@@ -155,3 +150,4 @@ export const config: UpsertPageConfigType<User> = {
     },
   ],
 };
+
