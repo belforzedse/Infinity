@@ -155,7 +155,7 @@ export default function RootLayout({
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main-content"
-          className="sr-only fixed right-0 top-0 z-[2147483646] rounded-b-lg bg-pink-600 px-4 py-2 text-white focus:not-sr-only"
+          className="sr-only fixed right-0 top-0 z-[2147483648] rounded-b-lg bg-pink-600 px-4 py-2 text-white focus:not-sr-only"
         >
           رفتن به محتوای اصلی
         </a>

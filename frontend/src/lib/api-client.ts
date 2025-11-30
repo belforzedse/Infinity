@@ -40,12 +40,7 @@ class ApiClient {
           break;
         }
 
-        // Don't retry on client errors (4xx) except timeout
-        if (error?.status && error.status >= 400 && error.status < 500 && error.status !== 408) {
-          break;
-        }
-
-        // Don't retry if not a retryable status code
+        // Only retry on configured retryable status codes
         if (error?.status && !RETRY_CONFIG.retryableStatusCodes.includes(error.status)) {
           break;
         }
@@ -166,9 +161,10 @@ class ApiClient {
     const cacheKey = apiCache.generateKey(method, urlString, data);
 
     // Request deduplication: if same request is pending, share the promise
-    const pendingRequest = apiCache.getPending<ApiResponse<T>>(cacheKey);
+    const pendingRequest = apiCache.getPending<{ data: ApiResponse<T>; headers: Headers }>(cacheKey);
     if (pendingRequest) {
-      return pendingRequest;
+      // Transform to match return type (extract data from response)
+      return pendingRequest.then(response => response.data);
     }
 
     // Check if caching is enabled for this endpoint
@@ -185,25 +181,28 @@ class ApiClient {
 
       if (cached) {
         // Always fetch fresh in background (stale-while-revalidate pattern)
-        // Don't await - let it run in background, fire and forget
-        // Don't track this as a pending request since it doesn't return data to await
-        this.retryRequest(() =>
-          this.executeRequest<T>(method, urlString, data, options, cached.etag)
-        )
-          .then(response => {
-            // Update cache with fresh response
-            const etag = this.extractETag(response.headers);
-            apiCache.set(cacheKey, response.data, etag, cacheConfig);
-          })
-          .catch((error: any) => {
-            // Ignore 304 errors (cache still valid) and other errors in background refresh
-            // Cached data is still valid to serve
-            if (error?.message === "304_NOT_MODIFIED") {
-              // Cache is still valid, just update timestamp if needed
-              return;
-            }
-            // Ignore other errors - cached data is still valid
-          });
+        // Check if background refresh is already in progress to prevent duplicates
+        const bgRefreshKey = `bg-${cacheKey}`;
+        if (!apiCache.getPending(bgRefreshKey)) {
+          // Track background refresh to prevent duplicates
+          const bgPromise = this.retryRequest(() =>
+            this.executeRequest<T>(method, urlString, data, options, cached.etag)
+          )
+            .then(response => {
+              // Update cache with fresh response
+              const etag = this.extractETag(response.headers);
+              apiCache.set(cacheKey, response.data, etag, cacheConfig);
+            })
+            .catch((error: any) => {
+              // Ignore 304 errors (cache still valid) and other errors in background refresh
+              if (error?.message === "304_NOT_MODIFIED") {
+                // Cache is still valid, just update timestamp if needed
+                return;
+              }
+              // Ignore other errors - cached data is still valid
+            });
+          apiCache.setPending(bgRefreshKey, bgPromise);
+        }
 
         // Return cached data immediately (stale-while-revalidate)
         return Promise.resolve(cached.data);
@@ -215,12 +214,9 @@ class ApiClient {
       this.executeRequest<T>(method, urlString, data, options, null)
     );
 
-    // Transform promise to extract just the data for pending request tracking
-    // This matches the return type expected by getPending callers
-    const dataPromise = requestPromise.then(response => response.data);
-
-    // Track pending request (transformed to return only data)
-    apiCache.setPending(cacheKey, dataPromise);
+    // Track pending request (store the full requestPromise, not just data)
+    // This ensures the cached pending value matches the method contract (Promise<ApiResponse<T>>)
+    apiCache.setPending(cacheKey, requestPromise);
 
     try {
       const response = await requestPromise;
@@ -231,6 +227,7 @@ class ApiClient {
         apiCache.set(cacheKey, response.data, etag, cacheConfig);
       }
 
+      // Return just the data (extract from ApiResponse)
       return response.data;
     } catch (error) {
       // Re-throw error after cleanup
@@ -252,12 +249,7 @@ class ApiClient {
 
     // Add If-None-Match header for conditional request (ETag support)
     if (etag && method.toUpperCase() === "GET") {
-      // Ensure headers is a Record<string, string> to add custom header
-      const headersObj = headers instanceof Headers
-        ? Object.fromEntries(headers.entries())
-        : headers as Record<string, string>;
-      headersObj["If-None-Match"] = etag;
-      headers = headersObj;
+      (headers as Record<string, string>)["If-None-Match"] = etag;
     }
 
     const config: RequestInit = {

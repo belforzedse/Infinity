@@ -88,9 +88,26 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
     ? { borderBottomWidth: 0, borderBottomColor: "transparent", boxShadow: "none" }
     : undefined;
 
-  const isStandalone = React.useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(display-mode: standalone)").matches;
+  const [isStandalone, setIsStandalone] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && "matchMedia" in window) {
+      const mq = window.matchMedia("(display-mode: standalone)");
+      setIsStandalone(mq.matches);
+      
+      // Optional: listen for changes
+      const handleChange = (e: MediaQueryListEvent) => {
+        setIsStandalone(e.matches);
+      };
+      
+      if (mq.addEventListener) {
+        mq.addEventListener("change", handleChange);
+        return () => mq.removeEventListener("change", handleChange);
+      } else if (mq.addListener) {
+        mq.addListener(handleChange);
+        return () => mq.removeListener(handleChange);
+      }
+    }
   }, []);
 
   return (

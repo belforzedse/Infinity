@@ -15,17 +15,32 @@ export default function ServiceWorkerRegistration() {
       return;
     }
 
-    registerServiceWorker();
+    let cleanup: (() => void) | undefined;
+
+    registerServiceWorker().then((cleanupFn) => {
+      cleanup = cleanupFn;
+    });
 
     // Listen for service worker updates
+    const handleControllerChange = () => {
+      console.log("[SW] Service worker controller changed");
+    };
+    
     if (navigator.serviceWorker) {
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        console.log("[SW] Service worker controller changed");
-      });
+      navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
     }
+
+    return () => {
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+      }
+      if (cleanup) {
+        cleanup();
+      }
+    };
   }, []);
 
-  const registerServiceWorker = async () => {
+  const registerServiceWorker = async (): Promise<(() => void) | undefined> => {
     try {
       console.log("[SW] Registering service worker...");
 
@@ -39,29 +54,45 @@ export default function ServiceWorkerRegistration() {
       // Send build version to service worker
       sendBuildVersion(registration);
 
-      // Send PWA mode status to service worker
-      sendPWAModeStatus(registration);
+      // Send PWA mode status to service worker (returns cleanup function)
+      const pwaCleanup = sendPWAModeStatus(registration);
 
       // Check for updates periodically
-      setInterval(() => {
+      const updateInterval = setInterval(() => {
         registration.update();
       }, 60000); // Check every minute
 
       // Handle service worker updates
-      registration.addEventListener("updatefound", () => {
+      const handleUpdateFound = () => {
         const newWorker = registration.installing;
         if (!newWorker) return;
 
-        newWorker.addEventListener("statechange", () => {
-          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+        // Capture newWorker reference before attaching listener
+        const worker = newWorker;
+        const handleStateChange = () => {
+          if (worker.state === "installed" && navigator.serviceWorker.controller) {
             console.log("[SW] New service worker available");
             // Notify user about update (optional)
             notifyUpdateAvailable();
           }
-        });
-      });
+        };
+        
+        worker.addEventListener("statechange", handleStateChange);
+      };
+      
+      registration.addEventListener("updatefound", handleUpdateFound);
+
+      // Return cleanup function
+      return () => {
+        clearInterval(updateInterval);
+        registration.removeEventListener("updatefound", handleUpdateFound);
+        if (pwaCleanup) {
+          pwaCleanup();
+        }
+      };
     } catch (error) {
       console.error("[SW] Failed to register service worker:", error);
+      return undefined;
     }
   };
 
@@ -75,9 +106,13 @@ export default function ServiceWorkerRegistration() {
         });
         console.log("[SW] Build version sent to service worker:", BUILD_VERSION);
       } else if (registration.installing) {
-        registration.installing.addEventListener("statechange", () => {
-          if (registration.installing?.state === "activated") {
-            registration.active?.postMessage({
+        // Capture installing worker reference before attaching listener
+        const installing = registration.installing;
+        installing.addEventListener("statechange", (e) => {
+          // Check event target's state instead of registration.installing which may be null
+          const target = e.target as ServiceWorker;
+          if (target?.state === "activated" && registration.active) {
+            registration.active.postMessage({
               type: "SET_BUILD_VERSION",
               version: BUILD_VERSION,
             });
@@ -107,7 +142,7 @@ export default function ServiceWorkerRegistration() {
     }
   };
 
-  const sendPWAModeStatus = async (registration: ServiceWorkerRegistration) => {
+  const sendPWAModeStatus = (registration: ServiceWorkerRegistration): (() => void) | undefined => {
     try {
       // Check if user is in PWA mode (standalone display mode)
       const isPWA =
@@ -129,8 +164,12 @@ export default function ServiceWorkerRegistration() {
       if (registration.active) {
         sendMessage(registration.active);
       } else if (registration.installing) {
-        registration.installing.addEventListener("statechange", () => {
-          if (registration.installing?.state === "activated" && registration.active) {
+        // Capture installing worker reference before attaching listener
+        const installing = registration.installing;
+        installing.addEventListener("statechange", (e) => {
+          // Check event target's state instead of registration.installing which may be null
+          const target = e.target as ServiceWorker;
+          if (target?.state === "activated" && registration.active) {
             sendMessage(registration.active);
           }
         });
@@ -168,9 +207,23 @@ export default function ServiceWorkerRegistration() {
           // Fallback for older browsers
           mediaQuery.addListener(handleChange);
         }
+        
+        // Return cleanup function to remove listener
+        return () => {
+          if (mediaQuery) {
+            if (mediaQuery.removeEventListener) {
+              mediaQuery.removeEventListener("change", handleChange);
+            } else if (mediaQuery.removeListener) {
+              mediaQuery.removeListener(handleChange);
+            }
+          }
+        };
       }
+      
+      return undefined;
     } catch (error) {
       console.error("[SW] Failed to send PWA mode status:", error);
+      return undefined;
     }
   };
 

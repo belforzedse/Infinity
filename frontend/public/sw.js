@@ -6,7 +6,7 @@
  */
 
 // Build version will be set via message from client
-let BUILD_VERSION = "v1-dev"; // Fallback version
+let BUILD_VERSION = "80eda9c-1764496749208"; // Injected at build time
 
 // Generate cache names with build version
 function getCacheNames() {
@@ -36,42 +36,53 @@ self.addEventListener("install", (event) => {
   const { RUNTIME_CACHE } = getCacheNames();
 
   event.waitUntil(
-    caches
-      .open(RUNTIME_CACHE)
-      .then((cache) => {
-        return cache.addAll(URLS_TO_CACHE).catch((err) => {
-          console.log("[SW] Some files failed to cache:", err);
-          // Don't fail the install if some files fail
-          return Promise.resolve();
-        });
-      })
-      .then(() => self.skipWaiting()),
+    Promise.all([
+      // Load PWA clients from IndexedDB on install
+      loadPWAClientsFromIDB(),
+      // Cache essential files
+      caches
+        .open(RUNTIME_CACHE)
+        .then((cache) => {
+          return cache.addAll(URLS_TO_CACHE).catch((err) => {
+            console.log("[SW] Some files failed to cache:", err);
+            // Don't fail the install if some files fail
+            return Promise.resolve();
+          });
+        }),
+    ]).then(() => self.skipWaiting()),
   );
 });
+
+/**
+ * Delete old caches that don't match current version
+ */
+async function deleteOldCaches() {
+  try {
+    const { CART_CACHE, API_CACHE, RUNTIME_CACHE } = getCacheNames();
+    const currentCaches = [CART_CACHE, API_CACHE, RUNTIME_CACHE];
+    
+    const cacheNames = await caches.keys();
+    const deletePromises = cacheNames
+      .filter((cacheName) => !currentCaches.includes(cacheName))
+      .map((cacheName) => {
+        console.log("[SW] Deleting old cache:", cacheName);
+        return caches.delete(cacheName);
+      });
+    
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("[SW] Error deleting old caches:", error);
+  }
+}
 
 /**
  * Activate event: clean up old caches
  */
 self.addEventListener("activate", (event) => {
   console.log("[SW] Activating service worker...");
-  const { CART_CACHE, API_CACHE, RUNTIME_CACHE } = getCacheNames();
 
   // Compute the full Promise chain first
-  const activationPromise = caches
-    .keys()
-    .then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          // Delete old cache versions (any cache that doesn't match current version)
-          const currentCaches = [CART_CACHE, API_CACHE, RUNTIME_CACHE];
-          if (!currentCaches.includes(cacheName)) {
-            console.log("[SW] Deleting old cache:", cacheName);
-            return caches.delete(cacheName);
-          }
-        }),
-      );
-    })
-    .then(() => self.clients.claim());
+  const activationPromise = deleteOldCaches().then(() => self.clients.claim());
 
   // Then pass the complete promise to waitUntil
   event.waitUntil(activationPromise);
@@ -218,9 +229,22 @@ async function handleStaticAsset(request) {
 
       // Only return placeholder if truly offline and no cache
       console.log("[SW] Failed to fetch image:", request.url);
-      // Don't return placeholder - let the browser handle the error naturally
-      // This allows Next.js Image component to show alt text properly
-      throw error;
+      // Return a transparent 1x1 PNG placeholder to avoid unhandled rejection
+      // This prevents breaking offline UX while still allowing Next.js Image to handle gracefully
+      return new Response(
+        new Uint8Array([
+          0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+          0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+          0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+          0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
+          0x42, 0x60, 0x82
+        ]),
+        {
+          status: 200,
+          statusText: "OK",
+          headers: { "Content-Type": "image/png" },
+        }
+      );
     }
   }
 
@@ -263,8 +287,97 @@ function isImagePath(url) {
   }
 }
 
-// Store PWA mode status per client
+// Store PWA mode status per client (in-memory cache)
 const pwaModeClients = new Set();
+
+// IndexedDB database name and store name for PWA mode persistence
+const IDB_DB_NAME = "pwa-mode-db";
+const IDB_STORE_NAME = "pwa-clients";
+
+/**
+ * Initialize IndexedDB for PWA mode persistence
+ */
+async function initPWAIndexedDB() {
+  return new Promise((resolve, reject) => {
+    try {
+      const request = indexedDB.open(IDB_DB_NAME, 1);
+      
+      request.onerror = () => {
+        console.warn("[SW] Failed to open IndexedDB for PWA mode, using in-memory only");
+        resolve(null);
+      };
+      
+      request.onsuccess = () => {
+        resolve(request.result);
+      };
+      
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(IDB_STORE_NAME)) {
+          db.createObjectStore(IDB_STORE_NAME, { keyPath: "clientId" });
+        }
+      };
+    } catch (error) {
+      console.warn("[SW] IndexedDB not available, using in-memory only:", error);
+      resolve(null);
+    }
+  });
+}
+
+/**
+ * Load PWA mode clients from IndexedDB
+ */
+async function loadPWAClientsFromIDB() {
+  try {
+    const db = await initPWAIndexedDB();
+    if (!db) {
+      return; // Fall back to in-memory only
+    }
+    
+    const transaction = db.transaction([IDB_STORE_NAME], "readonly");
+    const store = transaction.objectStore(IDB_STORE_NAME);
+    const request = store.getAll();
+    
+    request.onsuccess = () => {
+      const clients = request.result || [];
+      clients.forEach((item) => {
+        if (item.clientId) {
+          pwaModeClients.add(item.clientId);
+        }
+      });
+      console.log("[SW] Loaded PWA clients from IndexedDB:", clients.length);
+    };
+    
+    request.onerror = () => {
+      console.warn("[SW] Failed to load PWA clients from IndexedDB");
+    };
+  } catch (error) {
+    console.warn("[SW] Error loading PWA clients from IndexedDB:", error);
+  }
+}
+
+/**
+ * Store PWA client in IndexedDB
+ */
+async function storePWAClientInIDB(clientId, isPWA) {
+  try {
+    const db = await initPWAIndexedDB();
+    if (!db) {
+      return; // Fall back to in-memory only
+    }
+    
+    const transaction = db.transaction([IDB_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(IDB_STORE_NAME);
+    
+    if (isPWA) {
+      store.put({ clientId, isPWA, timestamp: Date.now() });
+    } else {
+      store.delete(clientId);
+    }
+  } catch (error) {
+    console.warn("[SW] Error storing PWA client in IndexedDB:", error);
+  }
+}
 
 /**
  * Check if a client is in PWA mode (standalone display mode)
@@ -280,6 +393,9 @@ async function isPWAMode(clientId) {
   // offline.html should only show for confirmed PWA users
   return false;
 }
+
+// Load PWA clients from IndexedDB on service worker startup
+loadPWAClientsFromIDB();
 
 /**
  * Check if request is a navigation request (HTML page request)
@@ -312,7 +428,7 @@ function isNetworkError(error) {
   // Server errors (4xx, 5xx) are not network errors
   return (
     error instanceof TypeError ||
-    error.name === "NetworkError" ||
+    error?.name === "NetworkError" ||
     error.message?.includes("Failed to fetch") ||
     error.message?.includes("NetworkError")
   );
@@ -438,6 +554,7 @@ self.addEventListener("sync", (event) => {
  */
 async function syncCartData() {
   try {
+    const { CART_CACHE } = getCacheNames();
     const cache = await caches.open(CART_CACHE);
     const cartRequest = new Request("/api/cart");
     const cached = await cache.match(cartRequest);
@@ -469,8 +586,14 @@ self.addEventListener("message", (event) => {
   console.log("[SW] Message received:", event.data);
 
   if (event.data && event.data.type === "SET_BUILD_VERSION") {
+    const oldVersion = BUILD_VERSION;
     BUILD_VERSION = event.data.version || BUILD_VERSION;
     console.log("[SW] Build version set:", BUILD_VERSION);
+    
+    // If version changed, delete old caches
+    if (oldVersion !== BUILD_VERSION) {
+      deleteOldCaches();
+    }
   }
 
   if (event.data && event.data.type === "SKIP_WAITING") {
@@ -490,14 +613,18 @@ self.addEventListener("message", (event) => {
     // Get the client that sent the message
     const client = event.source;
     if (client) {
-      if (event.data.isPWA) {
-        // Store client ID or use client object as key
-        const clientId = client.id || client.url || "default";
+      const clientId = client.id || client.url || "default";
+      const isPWA = event.data.isPWA;
+      
+      if (isPWA) {
+        // Store client ID in memory and IndexedDB
         pwaModeClients.add(clientId);
+        storePWAClientInIDB(clientId, true);
         console.log("[SW] Client is in PWA mode:", clientId);
       } else {
-        const clientId = client.id || client.url || "default";
+        // Remove client ID from memory and IndexedDB
         pwaModeClients.delete(clientId);
+        storePWAClientInIDB(clientId, false);
         console.log("[SW] Client is not in PWA mode:", clientId);
       }
     }

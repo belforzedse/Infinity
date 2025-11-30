@@ -119,8 +119,19 @@ export default function PLPList({
   const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
 
+  // Helper function to check if product has an image
+  const hasImage = (product: Product): boolean => {
+    return !!(
+      product.attributes?.CoverImage?.data?.attributes?.url ||
+      product.attributes?.CoverImage?.data
+    );
+  };
+
+  // Filter initial products to only include those with images
+  const filteredInitialProducts = initialProducts.filter(hasImage);
+
   // Local state for products and pagination
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>(filteredInitialProducts);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
@@ -249,6 +260,9 @@ export default function PLPList({
       .getPublic<any>(endpoint, { suppressAuthRedirect: true })
       .then((data) => {
         let productsArray = Array.isArray(data?.data) ? data.data : [];
+
+        // Filter out products without images
+        productsArray = productsArray.filter(hasImage);
 
         // Frontend price sorting
         if (sort === "price:asc" || sort === "price:desc") {

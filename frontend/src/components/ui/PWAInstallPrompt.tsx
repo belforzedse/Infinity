@@ -20,7 +20,10 @@ function isMobileDevice(): boolean {
   const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
   const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
 
-  return mobileRegex.test(userAgent.toLowerCase());
+  // Modern iPads (iPadOS 13+) report as MacIntel, check for touch capability
+  const isIPadOS = navigator.maxTouchPoints > 1 && /MacIntel/.test(navigator.platform);
+
+  return mobileRegex.test(userAgent.toLowerCase()) || isIPadOS;
 }
 
 /**
@@ -125,15 +128,18 @@ export default function PWAInstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     // Check if app was just installed
-    window.addEventListener("appinstalled", () => {
+    const handleAppInstalled = () => {
       console.log("[PWA] App was just installed");
       setIsInstalled(true);
       setShowPrompt(false);
       localStorage.setItem("pwa-installed", "true");
-    });
+    };
+
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
@@ -196,8 +202,7 @@ export default function PWAInstallPrompt() {
 
   return (
     <div
-      className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4 animate-in fade-in duration-300"
-      style={{ backdropFilter: "blur(4px)" }}
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4 animate-in fade-in duration-300 backdrop-blur-sm"
     >
       {/* Backdrop */}
       <div

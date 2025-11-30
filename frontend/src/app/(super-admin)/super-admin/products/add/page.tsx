@@ -17,10 +17,8 @@ import { apiCache } from "@/lib/api-cache";
 interface ProductApiResponse {
   success: boolean;
   data?: {
-    data: {
-      id: number;
-      [key: string]: any;
-    };
+    id: number;
+    [key: string]: any;
   };
   error?: any;
 }
@@ -55,7 +53,7 @@ export default function AddProductsPage() {
         apiCache.clearByPattern(/\/api\/products/i);
 
         // Get the product ID from the response and redirect to its edit page
-        const productId = (result as any).data?.id;
+        const productId = result.data?.id;
         if (productId) {
           // Trigger table refresh before redirecting
           setRefresh(true);

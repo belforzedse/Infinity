@@ -1,5 +1,6 @@
 import { apiClient } from "@/services";
 import { toast } from "react-hot-toast";
+import { handleAuthErrors } from "@/utils/auth";
 
 export interface CreateUserRequest {
   firstName: string;
@@ -12,14 +13,14 @@ export interface CreateUserRequest {
   role?: number;
 }
 
+/**
+ * Response shape from /sp/plugin-users endpoint
+ * The backend returns the created user object directly in the response data
+ */
 export interface CreateUserResponse {
   success: boolean;
   data?: {
-    user?: {
-      id: number;
-      [key: string]: any;
-    };
-    id?: number;
+    id: number;
     [key: string]: any;
   };
   error?: any;
@@ -34,7 +35,7 @@ export const createUser = async (payload: CreateUserRequest): Promise<CreateUser
     const endpoint = "/sp/plugin-users";
 
     // Prepare the request payload with all fields
-    const requestPayload: any = {
+    const requestPayload: Record<string, string | number | undefined> = {
       firstName: payload.firstName,
       lastName: payload.lastName,
       password: payload.password,
@@ -55,28 +56,31 @@ export const createUser = async (payload: CreateUserRequest): Promise<CreateUser
       requestPayload.role = payload.role;
     }
 
-    const response = await apiClient.post(endpoint, requestPayload);
+    const response = await apiClient.post<{ id: number; [key: string]: any }>(endpoint, requestPayload);
 
-    // Extract user ID from response
-    // Backend returns the user object directly, so check response.data first, then response
-    const userId =
-      (response as any)?.data?.id ||
-      (response as any)?.id ||
-      (response as any)?.data?.user?.id ||
-      (response as any)?.user?.id;
+    // Backend returns the user object directly in response.data
+    // The response from apiClient.post is already the data (ApiResponse<T>)
+    const userId = response?.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in response");
+    }
 
     return {
       success: true,
       data: {
-        ...response,
         id: userId,
-        user: userId ? { id: userId } : undefined,
+        ...response,
       },
     };
   } catch (error: any) {
+    // Handle authentication errors first
+    handleAuthErrors(error);
+    
     const errorMessage =
       error.response?.data?.error?.message ||
       error.response?.data?.message ||
+      error?.message ||
       "خطا در ایجاد کاربر";
     toast.error(errorMessage);
     return { success: false, error };

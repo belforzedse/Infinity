@@ -10,6 +10,30 @@
 
 import { BUILD_VERSION } from "@/constants/build";
 
+/**
+ * Safely parse a URL, handling both absolute and relative URLs
+ * @param url - URL string (can be absolute or relative)
+ * @returns URL object or null if parsing fails
+ */
+function safeUrlParse(url: string): URL | null {
+  try {
+    // Try parsing as-is (works for absolute URLs)
+    return new URL(url);
+  } catch {
+    // If that fails, try with a base origin (for relative URLs)
+    try {
+      const baseOrigin =
+        typeof window !== "undefined" && window.location
+          ? window.location.origin
+          : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost";
+      return new URL(url, baseOrigin);
+    } catch {
+      // If both fail, return null
+      return null;
+    }
+  }
+}
+
 interface CachedResponse<T> {
   data: T;
   etag: string | null;
@@ -56,7 +80,12 @@ const NO_CACHE_PATTERNS = [
  * Generate cache key from request details
  */
 function generateCacheKey(method: string, url: string, paramsHash?: string): string {
-  const urlObj = new URL(url);
+  const urlObj = safeUrlParse(url);
+  if (!urlObj) {
+    // Fallback: use the URL string as-is if parsing fails
+    return `v${BUILD_VERSION}:${method}:${url}:${paramsHash || ''}`;
+  }
+  
   const path = urlObj.pathname;
   const search = urlObj.search;
   const hash = paramsHash || search || '';
@@ -73,7 +102,12 @@ function shouldCache(method: string, url: string): boolean {
     return false;
   }
 
-  const urlObj = new URL(url);
+  const urlObj = safeUrlParse(url);
+  if (!urlObj) {
+    // If URL parsing fails, don't cache
+    return false;
+  }
+  
   const path = urlObj.pathname;
 
   // Check no-cache patterns
@@ -89,7 +123,11 @@ function shouldCache(method: string, url: string): boolean {
  * Get cache config for endpoint
  */
 function getCacheConfig(url: string): CacheConfig | null {
-  const urlObj = new URL(url);
+  const urlObj = safeUrlParse(url);
+  if (!urlObj) {
+    return null;
+  }
+  
   const path = urlObj.pathname;
 
   const match = CACHE_CONFIGS.find(({ pattern }) => pattern.test(path));
@@ -218,11 +256,22 @@ class ApiCache {
 
     if (body) {
       try {
-        // Hash body for cache key (simple hash for now)
+        // Serialize body with stable JSON stringify
         const bodyStr = JSON.stringify(body);
-        paramsHash = bodyStr.length.toString(); // Simple hash, can be improved
-      } catch {
-        // Ignore serialization errors
+        
+        // Compute deterministic hash using a simple but effective algorithm
+        // This works synchronously in browser environments
+        // Uses djb2-like hash algorithm for fast, deterministic hashing
+        let hash = 5381;
+        for (let i = 0; i < bodyStr.length; i++) {
+          hash = ((hash << 5) + hash) + bodyStr.charCodeAt(i);
+        }
+        // Convert to positive hex string
+        paramsHash = Math.abs(hash).toString(16).padStart(8, '0');
+      } catch (error) {
+        // Fallback to timestamp-based hash on error
+        console.warn('[api-cache] Failed to hash request body:', error);
+        paramsHash = Date.now().toString();
       }
     }
 

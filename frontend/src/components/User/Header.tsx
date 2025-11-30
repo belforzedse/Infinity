@@ -1,16 +1,32 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import MobileHamburgerMenu from "./MobileHamburgerMenu";
 import ShoppingCartCounter from "../ShoppingCart/Counter";
 import BackButtonToStore from "../BackButtonToStore";
 import Logo from "../Kits/Logo";
 
 const UserHeader: React.FC = () => {
-  const isStandalone = React.useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(display-mode: standalone)").matches;
+  const [isStandalone, setIsStandalone] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && "matchMedia" in window) {
+      const mq = window.matchMedia("(display-mode: standalone)");
+      setIsStandalone(mq.matches);
+      
+      // Optional: listen for changes
+      const handleChange = (e: MediaQueryListEvent) => {
+        setIsStandalone(e.matches);
+      };
+      
+      if (mq.addEventListener) {
+        mq.addEventListener("change", handleChange);
+        return () => mq.removeEventListener("change", handleChange);
+      } else if (mq.addListener) {
+        mq.addListener(handleChange);
+        return () => mq.removeListener(handleChange);
+      }
+    }
   }, []);
 
   return (
