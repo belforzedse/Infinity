@@ -100,7 +100,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
               priority={index < 3}
               loading={index < 3 ? "eager" : "lazy"}
               className={`h-full w-full object-cover transition-opacity duration-200 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-              onLoadingComplete={() => setImgLoaded(true)}
+              onLoad={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
             />
           ) : (

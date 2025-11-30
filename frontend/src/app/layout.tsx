@@ -117,6 +117,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.telegram.org" />
 
         {/* Preconnect to API for faster requests - critical for initial load */}
+        {/* Establishes early connection (DNS + TCP + TLS) for faster API requests */}
         <link rel="preconnect" href={API_BASE_DOMAIN} crossOrigin="anonymous" />
         <link rel="preconnect" href={IMAGE_BASE_URL || API_BASE_DOMAIN} crossOrigin="anonymous" />
 

@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node load-env.js",
+    "predev": "node load-env.js && npm run generate:version",
     "dev": "next dev -p 2888",
-    "prebuild": "node load-env.js",
+    "generate:version": "node scripts/generate-build-version.js",
+    "prebuild": "node load-env.js && npm run generate:version",
     "build": "next build",
     "prestart": "node load-env.js",
     "start": "next start",
