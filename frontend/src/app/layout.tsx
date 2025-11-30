@@ -127,14 +127,19 @@ export default function RootLayout({
         <link rel="prefetch" href="/blog" />
 
         {/* OpenSearch descriptor for browser search integration */}
-        <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title={SITE_NAME} />
+        <link
+          rel="search"
+          type="application/opensearchdescription+xml"
+          href="/opensearch.xml"
+          title={SITE_NAME}
+        />
 
         {/* PWA Web App Manifest */}
         <link rel="manifest" href="/manifest.json" />
 
         {/* PWA meta tags for mobile */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ec4899" />
@@ -143,14 +148,14 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
       </head>
-      <body className={`${peydaFanum.className} antialiased`}>
+      <body className={`${peydaFanum.className} bg-white antialiased`}>
         {/* Organization Schema for SEO */}
         <OrganizationSchema />
 
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only fixed top-0 right-0 z-[2147483646] bg-pink-600 text-white px-4 py-2 rounded-b-lg"
+          className="sr-only fixed right-0 top-0 z-[2147483646] rounded-b-lg bg-pink-600 px-4 py-2 text-white focus:not-sr-only"
         >
           رفتن به محتوای اصلی
         </a>

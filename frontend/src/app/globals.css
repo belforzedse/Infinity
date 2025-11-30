@@ -7,6 +7,12 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #ec4899; /* Match manifest background_color for splash screen */
+}
+
+body {
+  background-color: white; /* Page content background */
+  min-height: 100vh;
 }
 
 /* Safe area support for mobile notches (PWA) - Only for side edges, not top/bottom */

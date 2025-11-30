@@ -8,11 +8,26 @@ import BackButtonToStore from "../BackButtonToStore";
 import Logo from "../Kits/Logo";
 
 const UserHeader: React.FC = () => {
+  const isStandalone = React.useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(display-mode: standalone)").matches;
+  }, []);
+
   return (
-    <header
-      className="mb-6 flex w-full items-center justify-between bg-neutral-50 px-6 py-4 lg:mb-8 lg:rounded-2xl lg:px-10"
-      style={{ paddingTop: "max(1rem, calc(1rem + env(safe-area-inset-top) * 0.5))" }}
-    >
+    <>
+      {/* Safe area white bar for standalone mode */}
+      {isStandalone && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[60] bg-white"
+          style={{ height: "env(safe-area-inset-top)" }}
+        />
+      )}
+      <header
+        className="mb-6 flex w-full items-center justify-between bg-neutral-50 px-6 py-4 lg:mb-8 lg:rounded-2xl lg:px-10"
+        style={{
+          marginTop: isStandalone ? "env(safe-area-inset-top)" : "0",
+        }}
+      >
       <div className="flex items-center gap-2 lg:hidden">
         <div className="lg:hidden">
           <MobileHamburgerMenu />
@@ -40,6 +55,7 @@ const UserHeader: React.FC = () => {
         </div>
       </div>
     </header>
+    </>
   );
 };
 
