@@ -114,7 +114,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
         style={{
           ...headerStyle,
-          top: isStandalone ? "env(safe-area-inset-top)" : "0",
+
         }}
       >
         <div className="relative">

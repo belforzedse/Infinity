@@ -7,7 +7,7 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: #ead2de; /* Match manifest background_color for splash screen */
+  background-color: white; /* White background for web app */
 }
 
 body {
