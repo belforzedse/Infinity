@@ -1,6 +1,4 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS } from "@/constants/api";
-import { normalizePhoneNumber } from "@/utils/auth";
 import { toast } from "react-hot-toast";
 
 export interface CreateUserRequest {
@@ -28,66 +26,58 @@ export interface CreateUserResponse {
 }
 
 /**
- * Create a new user in super-admin (skips OTP verification)
- * Uses the same registration endpoint but for admin use
+ * Create a new plugin user in super-admin
+ * Creates a plugin user (users-permissions.user) with all related records
  */
 export const createUser = async (payload: CreateUserRequest): Promise<CreateUserResponse> => {
   try {
-    const endpoint = ENDPOINTS.AUTH.REGISTER;
+    const endpoint = "/sp/plugin-users";
 
-    // Normalize phone number
-    const normalizedPhone = normalizePhoneNumber(payload.phone);
-
-    // Prepare the request payload
+    // Prepare the request payload with all fields
     const requestPayload: any = {
       firstName: payload.firstName,
       lastName: payload.lastName,
-      password: payload.password, // Backend will hash this
-      phone: normalizedPhone,
+      password: payload.password,
+      phone: payload.phone.trim(),
     };
 
     // Add optional fields if provided
     if (payload.birthDate) {
       requestPayload.birthDate = payload.birthDate;
     }
+    if (payload.nationalCode) {
+      requestPayload.nationalCode = payload.nationalCode;
+    }
+    if (payload.bio) {
+      requestPayload.bio = payload.bio;
+    }
+    if (payload.role) {
+      requestPayload.role = payload.role;
+    }
 
     const response = await apiClient.post(endpoint, requestPayload);
 
-    // Extract user ID from response (response structure may vary)
-    const userId = (response as any)?.user?.id || (response as any)?.data?.user?.id || (response as any)?.id;
+    // Extract user ID from response
+    // Backend returns the user object directly, so check response.data first, then response
+    const userId =
+      (response as any)?.data?.id ||
+      (response as any)?.id ||
+      (response as any)?.data?.user?.id ||
+      (response as any)?.user?.id;
 
-    // After user is created, update additional info if provided
-    if (userId && (payload.nationalCode || payload.bio)) {
-      try {
-        await apiClient.put(`/sp/local-users/${userId}`, {
-          firstName: payload.firstName,
-          lastName: payload.lastName,
-          ...(payload.birthDate && { birthDate: payload.birthDate }),
-          ...(payload.nationalCode && { nationalCode: payload.nationalCode }),
-          ...(payload.bio && { bio: payload.bio }),
-        });
-      } catch (error) {
-        console.error("Error updating user info:", error);
-        // Don't fail the whole operation if info update fails
-      }
-    }
-
-    // Update role if provided
-    if (userId && payload.role) {
-      try {
-        await apiClient.put(`/users/${userId}`, {
-          role: payload.role,
-        });
-      } catch (error) {
-        console.error("Error updating user role:", error);
-        // Don't fail the whole operation if role update fails
-      }
-    }
-
-    return { success: true, data: { ...response, id: userId } };
+    return {
+      success: true,
+      data: {
+        ...response,
+        id: userId,
+        user: userId ? { id: userId } : undefined,
+      },
+    };
   } catch (error: any) {
     const errorMessage =
-      error.response?.data?.error?.message || "خطا در ایجاد کاربر";
+      error.response?.data?.error?.message ||
+      error.response?.data?.message ||
+      "خطا در ایجاد کاربر";
     toast.error(errorMessage);
     return { success: false, error };
   }
