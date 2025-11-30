@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import type {
   UseFormRegister,
   FieldErrors,
@@ -88,11 +88,21 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
     };
   }, [setValue, setAddresses, setLoading, setError]);
 
-  // Convert addresses to select options
-  const addressOptions: Option[] = addresses.map((address) => ({
-    id: address.id,
-    name: `${address.FullAddress} - ${address.shipping_city.Title}, ${address.shipping_city.shipping_province.Title}`,
-  }));
+  // Convert addresses to select options with useMemo to ensure reactivity
+  const addressOptions: Option[] = useMemo(() => {
+    return addresses
+      .filter((address) => {
+        // Only include addresses with complete data structure
+        return (
+          address?.shipping_city?.Title &&
+          address?.shipping_city?.shipping_province?.Title
+        );
+      })
+      .map((address) => ({
+        id: address.id,
+        name: `${address.FullAddress} - ${address.shipping_city.Title}, ${address.shipping_city.shipping_province.Title}`,
+      }));
+  }, [addresses]);
 
   const handleAddAddress = () => {
     setIsAddAddressModalOpen(true);
@@ -155,6 +165,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           rules={{ required: "آدرس الزامی است" }}
           render={({ field: { onChange, value } }) => (
             <Select
+              key={`address-select-${addresses.length}-${addressOptions.length}`}
               label="آدرس"
               value={value}
               onChange={onChange}
