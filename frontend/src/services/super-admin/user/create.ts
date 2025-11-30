@@ -59,8 +59,8 @@ export const createUser = async (payload: CreateUserRequest): Promise<CreateUser
     const response = await apiClient.post<{ id: number; [key: string]: any }>(endpoint, requestPayload);
 
     // Backend returns the user object directly in response.data
-    // The response from apiClient.post is already the data (ApiResponse<T>)
-    const userId = response?.id;
+    // The response from apiClient.post is ApiResponse<T>, so access via response.data
+    const userId = response?.data?.id;
 
     if (!userId) {
       throw new Error("User ID not found in response");
@@ -69,8 +69,8 @@ export const createUser = async (payload: CreateUserRequest): Promise<CreateUser
     return {
       success: true,
       data: {
-        id: userId,
-        ...response,
+        ...response.data,
+        id: userId, // Ensure id is set (in case response.data doesn't have it)
       },
     };
   } catch (error: any) {
