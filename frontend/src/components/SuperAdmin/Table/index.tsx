@@ -21,6 +21,7 @@ import { atom, useAtom } from "jotai";
 import { useQueryState } from "nuqs";
 import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
 import { optimisticallyDeletedItems } from "@/lib/atoms/optimisticDelete";
+import { apiCache } from "@/lib/api-cache";
 
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData, TValue> {
@@ -155,11 +156,19 @@ export function SuperAdminTable<TData, TValue>({
       lastUrlRef.current = apiUrl;
       if (isFetchingRef.current) return;
 
+      // When forcing refresh, clear cache for this specific URL pattern
+      if (force) {
+        apiCache.clearByPattern(new RegExp(apiUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+      }
+
       const seq = ++fetchSeqRef.current;
       isFetchingRef.current = true;
       setInternalLoading(true);
       try {
-        const res = await apiClient.get<TData[]>(apiUrl);
+        // When forcing refresh, bypass cache to get fresh data
+        const res = await apiClient.get<TData[]>(apiUrl, {
+          cache: force ? 'no-store' : 'default',
+        });
         if (seq === fetchSeqRef.current) {
           const payload = Array.isArray(res) ? res : res?.data;
           setTableData((payload as TData[]) ?? []);
