@@ -92,17 +92,18 @@ export default function AddProductsPage() {
         <Overall key={"overall"} />
       </div>
 
-      <div className="order-3 col-span-3 mt-2 flex items-center justify-end gap-2 border-t border-slate-200 pt-2.5">
-        <button className="w-1/2 rounded-xl bg-slate-200 px-5 py-2 text-sm text-slate-500 lg:w-fit">
-          بیخیال شدن
-        </button>
-        <button
-          onClick={handleCreateProduct}
-          className="w-1/2 rounded-xl bg-pink-500 px-5 py-2 text-sm text-white lg:w-fit"
-        >
-          ذخیره
-        </button>
-      </div>
+<div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/90 backdrop-blur px-4 py-2.5 flex items-center justify-end gap-2">
+  <button className="w-1/2 rounded-xl bg-slate-200 px-5 py-2 text-sm text-slate-500 lg:w-fit">
+    بیخیال شدن
+  </button>
+  <button
+    onClick={handleCreateProduct}
+    className="w-1/2 rounded-xl bg-pink-500 px-5 py-2 text-sm text-white lg:w-fit"
+  >
+    ذخیره
+  </button>
+</div>
+
     </div>
   );
 }

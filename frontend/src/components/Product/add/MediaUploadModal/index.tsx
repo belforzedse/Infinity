@@ -1,16 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Modal from "@/components/Kits/Modal";
-import type { TabType } from "./types";
+import type { SelectedImageDetailsSection, TabType } from "./types";
 import Sidebar from "./components/Sidebar";
 import MediaUploader from "./components/MediaUploader";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
 import DetailsSection from "./components/DetailSection";
-
-interface SelectedImage {
-  name: string;
-  url: string;
-  size?: string;
-}
+import ImageDialog, { type ImageFormValues } from "@/components/RichTextEditor/ImageDialog";
 
 interface MediaUploadModalProps {
   isOpen: boolean;
@@ -20,7 +15,14 @@ interface MediaUploadModalProps {
 export default function MediaUploadModal({ isOpen, onClose }: MediaUploadModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("افزودن رسانه");
   const [dragActive, setDragActive] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<SelectedImageDetailsSection | null>(null);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setMediaPickerOpen(false);
+    }
+  }, [isOpen]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -44,6 +46,24 @@ export default function MediaUploadModal({ isOpen, onClose }: MediaUploadModalPr
     });
   };
 
+  const mediaPickerInitialValues: ImageFormValues = useMemo(
+    () => ({
+      src: selectedImage?.url || "",
+      title: selectedImage?.name || "",
+      alt: selectedImage?.name || "",
+    }),
+    [selectedImage],
+  );
+
+  const handleMediaPickerSubmit = (values: ImageFormValues) => {
+    setSelectedImage({
+      name: values.title || values.alt || values.src.split("/").pop() || "تصویر",
+      url: values.src,
+      size: values.width && values.height ? `${values.width} × ${values.height}` : selectedImage?.size,
+    });
+    setMediaPickerOpen(false);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -62,8 +82,18 @@ export default function MediaUploadModal({ isOpen, onClose }: MediaUploadModalPr
           onImageSelect={handleImageSelect}
         />
 
-        <DetailsSection selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
+        <DetailsSection
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+          onPickFromLibrary={() => setMediaPickerOpen(true)}
+        />
       </div>
+      <ImageDialog
+        isOpen={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        initialValues={mediaPickerInitialValues}
+        onSubmit={handleMediaPickerSubmit}
+      />
     </Modal>
   );
 }

@@ -8,9 +8,14 @@ import DetailsSectionText from "./text";
 interface DetailsSectionProps {
   selectedImage: SelectedImageDetailsSection | null;
   setSelectedImage: Dispatch<SetStateAction<SelectedImageDetailsSection | null>>;
+  onPickFromLibrary: () => void;
 }
 
-export default function DetailsSection({ selectedImage, setSelectedImage }: DetailsSectionProps) {
+export default function DetailsSection({
+  selectedImage,
+  setSelectedImage,
+  onPickFromLibrary,
+}: DetailsSectionProps) {
   return (
     <div className="rounded-lg bg-white p-2">
       {selectedImage ? (
@@ -54,6 +59,26 @@ export default function DetailsSection({ selectedImage, setSelectedImage }: Deta
               درج در محصول
             </button>
           </div>
+        </div>
+      ) : (
+        <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-neutral-500">
+          <p className="text-sm">هیچ تصویری انتخاب نشده است.</p>
+          <button
+            onClick={onPickFromLibrary}
+            className="rounded-lg border border-pink-200 px-4 py-2 text-sm text-pink-600 transition-colors hover:bg-pink-50"
+          >
+            انتخاب از کتابخانه
+          </button>
+        </div>
+      )}
+      {selectedImage ? (
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={onPickFromLibrary}
+            className="rounded-lg border border-pink-200 px-4 py-2 text-sm text-pink-600 transition-colors hover:bg-pink-50"
+          >
+            انتخاب تصویر دیگر
+          </button>
         </div>
       ) : null}
     </div>
