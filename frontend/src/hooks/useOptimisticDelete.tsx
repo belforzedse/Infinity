@@ -66,6 +66,10 @@ export function useOptimisticDelete() {
         newPendingConfirmations.add(itemId);
         setPendingConfirmations(newPendingConfirmations);
 
+        const newDeletedItems = new Map(deletedItems);
+        newDeletedItems.delete(itemId);
+        setDeletedItems(newDeletedItems);
+
         setRefresh(true);
       } catch (error) {
         console.error("Failed to confirm deletion:", error);
@@ -124,27 +128,23 @@ export function useOptimisticDelete() {
         });
         setDeletedItems(newDeletedItems);
 
-        const toastId = toast.custom(
-          (t) => {
-            const baseClasses =
-              "flex items-center justify-between gap-3 rounded-lg bg-green-100 px-4 py-3 text-green-800 shadow-lg transition-all duration-300";
-            const visibilityClass = t.visible ? "opacity-100" : "opacity-0";
-            const divClasses = `${baseClasses} ${visibilityClass}`;
-            return (
-              <div className={divClasses}>
-                <span className="text-sm font-medium">{itemName} با موفقیت حذف شد</span>
-                <button
-                  onClick={() => {
-                    undoDelete(itemId);
-                    toast.dismiss(t.id);
-                  }}
-                  className="whitespace-nowrap rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white hover:bg-green-700"
-                >
-                  لغو
-                </button>
-              </div>
-            );
-          },
+        const toastId = toast(
+          (t) => (
+            <div className="flex w-full items-center justify-between gap-3">
+              <span className="text-sm font-medium text-foreground-primary">
+                {itemName} با موفقیت حذف شد
+              </span>
+              <button
+                onClick={() => {
+                  undoDelete(itemId);
+                  toast.dismiss(t.id);
+                }}
+                className="rounded bg-actions-primary px-3 py-1 text-xs font-semibold text-white"
+              >
+                لغو
+              </button>
+            </div>
+          ),
           { duration: UNDO_TIMEOUT_MS },
         );
 

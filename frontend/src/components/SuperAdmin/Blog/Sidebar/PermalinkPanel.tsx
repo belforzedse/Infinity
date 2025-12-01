@@ -65,7 +65,12 @@ export default function PermalinkPanel({
             value={slug}
             onChange={(e) => {
               const raw = e.target.value;
-              const cleaned = raw.replace(/[\s\u200c]+/g, "-");
+              // Convert spaces to dashes in real-time
+              // Remove non-ASCII characters (blocks Persian) except spaces/dashes, then convert spaces
+              // Keep only alphanumeric and dashes
+              const cleaned = raw
+                .replace(/\s+/g, "-") // Convert spaces to dashes
+                .replace(/[^\w-]/g, ""); // Remove non-ASCII (including Persian) and non-alphanumeric except dashes
               onSlugChange?.(cleaned);
             }}
             dir="ltr"

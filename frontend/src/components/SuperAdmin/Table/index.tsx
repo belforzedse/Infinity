@@ -113,6 +113,7 @@ export function SuperAdminTable<TData, TValue>({
   const [draggedRow, setDraggedRow] = useState<Row<TData> | null>(null);
   const [dragOverRow, setDragOverRow] = useState<Row<TData> | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [refresh, setRefresh] = useAtom(refreshTable);
   const [deletedItems] = useAtom(optimisticallyDeletedItems);
 
@@ -150,7 +151,12 @@ export function SuperAdminTable<TData, TValue>({
   const lastUrlRef = useRef<string | null>(null);
 
   const runFetch = useCallback(
-    async (apiUrl: string, { force = false }: { force?: boolean } = {}) => {
+    async (
+      apiUrl: string,
+      { force = false, silent = false }: { force?: boolean; silent?: boolean } = {},
+    ) => {
+      const useSilent = silent && hasLoadedOnce;
+
       // Avoid duplicate fetch for identical URL unless forced
       if (!force && lastUrlRef.current === apiUrl) return;
       lastUrlRef.current = apiUrl;
@@ -163,7 +169,9 @@ export function SuperAdminTable<TData, TValue>({
 
       const seq = ++fetchSeqRef.current;
       isFetchingRef.current = true;
-      setInternalLoading(true);
+      if (!useSilent) {
+        setInternalLoading(true);
+      }
       try {
         // When forcing refresh, bypass cache to get fresh data
         const res = await apiClient.get<TData[]>(apiUrl, {
@@ -172,6 +180,7 @@ export function SuperAdminTable<TData, TValue>({
         if (seq === fetchSeqRef.current) {
           const payload = Array.isArray(res) ? res : res?.data;
           setTableData((payload as TData[]) ?? []);
+          setHasLoadedOnce(true);
           const total =
             (res as any)?.meta?.pagination?.total ??
             (Array.isArray(payload) ? payload.length : 0) ??
@@ -184,12 +193,14 @@ export function SuperAdminTable<TData, TValue>({
         }
       } finally {
         if (seq === fetchSeqRef.current) {
-          setInternalLoading(false);
+          if (!useSilent) {
+            setInternalLoading(false);
+          }
           isFetchingRef.current = false;
         }
       }
     },
-    [setTotalSize],
+    [setTotalSize, hasLoadedOnce, setHasLoadedOnce],
   );
 
   // Fetch on first mount and when the computed request URL changes
@@ -216,7 +227,7 @@ export function SuperAdminTable<TData, TValue>({
   // External refresh trigger (e.g. after mutations)
   useEffect(() => {
     if (refresh && requestUrl) {
-      runFetch(requestUrl, { force: true });
+      runFetch(requestUrl, { force: true, silent: true });
       setRefresh(false);
     }
   }, [refresh, requestUrl, runFetch, setRefresh]);
@@ -253,6 +264,7 @@ export function SuperAdminTable<TData, TValue>({
   useEffect(() => {
     if (data !== undefined) {
       setTableData(data);
+      setHasLoadedOnce(true);
     }
   }, [data]);
 
@@ -306,6 +318,11 @@ export function SuperAdminTable<TData, TValue>({
     onItemDrag?.(targetRow);
   };
 
+  const resolveRowKey = (rowData: TData | undefined) => {
+    const key = getRowId?.(rowData as TData) ?? (rowData as any)?.id ?? "";
+    return String(key);
+  };
+
   const isLoading = loading ?? internalLoading;
 
   return (
@@ -323,11 +340,9 @@ export function SuperAdminTable<TData, TValue>({
                   onChange={(e) => {
                     if (!tableData) return;
                     const next = new Set<string>();
-                    if (e.target.checked) {
-                      tableData.forEach((row) =>
-                        next.add((getRowId?.(row) || String((row as any)?.id)) ?? ""),
-                      );
-                    }
+                      if (e.target.checked) {
+                        tableData.forEach((row) => next.add(resolveRowKey(row)));
+                      }
                     setSelectedIds(next);
                   }}
                 />
@@ -344,9 +359,7 @@ export function SuperAdminTable<TData, TValue>({
                 <button
                   onClick={() => {
                     if (!onBulkAction || !tableData || !bulkAction) return;
-                    const rows = tableData.filter((r) =>
-                      selectedIds.has((getRowId?.(r) || String((r as any)?.id)) ?? ""),
-                    );
+                    const rows = tableData.filter((r) => selectedIds.has(resolveRowKey(r)));
                     onBulkAction(bulkAction, rows);
                   }}
                   className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white"
@@ -398,9 +411,7 @@ export function SuperAdminTable<TData, TValue>({
                           if (!tableData) return;
                           const next = new Set<string>();
                           if (e.target.checked) {
-                            tableData.forEach((row) =>
-                              next.add((getRowId?.(row) || String((row as any)?.id)) ?? ""),
-                            );
+                      tableData.forEach((row) => next.add(resolveRowKey(row)));
                           }
                           setSelectedIds(next);
                         }}
@@ -418,9 +429,7 @@ export function SuperAdminTable<TData, TValue>({
                       <button
                         onClick={() => {
                           if (!onBulkAction || !tableData || !bulkAction) return;
-                          const rows = tableData.filter((r) =>
-                            selectedIds.has((getRowId?.(r) || String((r as any)?.id)) ?? ""),
-                          );
+                          const rows = tableData.filter((r) => selectedIds.has(resolveRowKey(r)));
                           onBulkAction(bulkAction, rows);
                         }}
                         className="flex items-center justify-between rounded-lg bg-actions-primary px-3 py-2 text-white"
@@ -438,10 +447,8 @@ export function SuperAdminTable<TData, TValue>({
               <ReportTableSkeleton columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const isOptimisticallyDeleted = deletedItems.has(
-                  (getRowId?.(row.original as TData) ||
-                    String((row.original as any)?.id)) ?? ""
-                );
+                const rowKey = resolveRowKey(row.original as TData);
+                const isOptimisticallyDeleted = deletedItems.has(rowKey);
 
                 return (
                   <tr
@@ -453,8 +460,12 @@ export function SuperAdminTable<TData, TValue>({
                     className={twMerge(
                       "border-b border-gray-200 transition-all duration-300 ease-out hover:bg-gray-50/50",
                       dragOverRow?.id === row.id && "border-t-2 border-blue-500",
-                      isOptimisticallyDeleted && "opacity-30 grayscale",
                     )}
+                    style={{
+                      transition: "opacity 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms cubic-bezier(0.4, 0, 0.2, 1)",
+                      opacity: isOptimisticallyDeleted ? 0.15 : 1,
+                      filter: isOptimisticallyDeleted ? "grayscale(1)" : "none",
+                    }}
                   >
                     {row.getVisibleCells().map((cell, index) => (
                       <td
@@ -473,19 +484,11 @@ export function SuperAdminTable<TData, TValue>({
                             )}
                             <input
                               type="checkbox"
-                              checked={selectedIds.has(
-                                (getRowId?.(row.original as TData) ||
-                                  String((row.original as any)?.id)) ??
-                                  "",
-                              )}
+                              checked={selectedIds.has(rowKey)}
                               onChange={(e) => {
-                                const id =
-                                  (getRowId?.(row.original as TData) ||
-                                    String((row.original as any)?.id)) ??
-                                  "";
                                 const next = new Set(selectedIds);
-                                if (e.target.checked) next.add(id);
-                                else next.delete(id);
+                                if (e.target.checked) next.add(rowKey);
+                                else next.delete(rowKey);
                                 setSelectedIds(next);
                               }}
                             />

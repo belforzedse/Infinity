@@ -20,6 +20,7 @@ export interface ProductCardProps {
   colorsCount?: number;
   isAvailable?: boolean;
   priority?: boolean;
+  productCode?: string;
 }
 
 const ProductCard: FC<ProductCardProps> = ({

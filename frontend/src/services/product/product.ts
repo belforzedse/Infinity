@@ -712,6 +712,18 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
           return typeof stockCount === "number" && stockCount > 0;
         }) || false;
 
+      // Calculate unique colors count
+      const uniqueColors = new Set();
+      product.attributes.product_variations?.data?.forEach((v: any) => {
+        if (v.attributes.IsPublished && v.attributes.product_variation_color?.data?.id) {
+          uniqueColors.add(v.attributes.product_variation_color.data.id);
+        }
+      });
+      const colorsCount = uniqueColors.size;
+
+      // Get first variation's SKU as product code
+      const productCode = variation.attributes.SKU || undefined;
+
       const result: ProductCardProps = {
         id: parseInt(product.id),
         slug: product.attributes.Slug || undefined,
@@ -721,6 +733,8 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         price,
         seenCount: product.attributes.RatingCount || 0,
         isAvailable,
+        colorsCount: colorsCount > 0 ? colorsCount : undefined,
+        productCode,
       };
 
       if (
@@ -740,4 +754,73 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
       return result;
     })
     .filter((product): product is ProductCardProps => product !== null);
+};
+
+/**
+ * Get multiple products by their IDs
+ * Returns products formatted for card display
+ */
+export const getProductsByIds = async (
+  ids: (number | string)[],
+): Promise<ProductCardProps[]> => {
+  if (!ids || ids.length === 0) {
+    return [];
+  }
+
+  // Filter out invalid IDs
+  const validIds = ids
+    .map((id) => {
+      const numId = typeof id === "string" ? parseInt(id, 10) : id;
+      return isNaN(numId) ? null : numId;
+    })
+    .filter((id): id is number => id !== null);
+
+  if (validIds.length === 0) {
+    return [];
+  }
+
+  // Build filter for multiple IDs using $in operator
+  const idFilter = `filters[id][$in]=${validIds.join(",")}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validIds.length}`;
+
+  try {
+    const response = await apiClient.get<any>(endpoint);
+    return formatProductsToCardProps((response as any).data || []);
+  } catch (error) {
+    logger.error("Error fetching products by IDs:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+};
+
+/**
+ * Get multiple products by their slugs
+ * Returns products formatted for card display
+ */
+export const getProductsBySlugs = async (slugs: string[]): Promise<ProductCardProps[]> => {
+  if (!slugs || slugs.length === 0) {
+    return [];
+  }
+
+  // Filter out empty slugs
+  const validSlugs = slugs.filter((slug) => slug && slug.trim().length > 0);
+
+  if (validSlugs.length === 0) {
+    return [];
+  }
+
+  // Build filter for multiple slugs using $in operator
+  const slugFilter = `filters[Slug][$in]=${validSlugs.map((slug) => encodeURIComponent(slug)).join(",")}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validSlugs.length}`;
+
+  try {
+    const response = await apiClient.get<any>(endpoint);
+    return formatProductsToCardProps((response as any).data || []);
+  } catch (error) {
+    logger.error("Error fetching products by slugs:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
 };

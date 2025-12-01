@@ -113,7 +113,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     },
     300,
-    [onChange],
   );
   const editor = useEditor({
     immediatelyRender: false, // Prevent SSR hydration mismatches
@@ -246,7 +245,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }
 
   return (
-    <div className="w-full border border-neutral-200 rounded-lg overflow-hidden bg-white">
+    <div className="w-full border border-neutral-200 rounded-lg bg-white">
       {!readOnly && (
         <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-2">
           <div className="flex gap-2 text-xs">
@@ -272,9 +271,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
       )}
 
-      {!readOnly && viewMode === "visual" && <RichTextToolbar editor={editor} />}
+      <div className="relative">
+        {!readOnly && viewMode === "visual" && <RichTextToolbar editor={editor} />}
 
-      <div className="min-h-[200px] p-5">
+        <div className="min-h-[200px] p-5">
         {viewMode === "visual" ? (
           <EditorContent
             editor={editor}
@@ -290,6 +290,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             placeholder="<p>...</p>"
           />
         )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-4 py-2 text-xs text-neutral-500">
