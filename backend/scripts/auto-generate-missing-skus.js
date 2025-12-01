@@ -1,8 +1,15 @@
 const axios = require("axios");
 
 // Configuration
-const STRAPI_URL = "https://api.infinity.rgbgroup.ir";
-const API_TOKEN = "STRAPI_API_TOKEN";
+const STRAPI_URL = process.env.STRAPI_URL || "https://api.infinity.rgbgroup.ir";
+const API_TOKEN = process.env.STRAPI_API_TOKEN;
+
+if (!API_TOKEN) {
+  console.error("❌ Error: STRAPI_API_TOKEN environment variable is required");
+  console.error("   Set it before running this script:");
+  console.error("   export STRAPI_API_TOKEN='your-token-here'");
+  process.exit(1);
+}
 
 const apiClient = axios.create({
   baseURL: STRAPI_URL,

@@ -15,8 +15,12 @@ async function triggerRevalidation(slug: string) {
     "https://infinitycolor.org",
   ];
 
-  // Hardcoded secret (must match frontend)
-  const revalidationSecret = "REVALIDATION_SECRET";
+  // Get revalidation secret from environment variable
+  const revalidationSecret = process.env.REVALIDATION_SECRET;
+  if (!revalidationSecret) {
+    strapi.log.error("[Blog Post Lifecycle] REVALIDATION_SECRET environment variable is required");
+    return;
+  }
 
   // Trigger revalidation for all configured frontend URLs
   const revalidationPromises = frontendUrls.map(async (frontendUrl) => {
@@ -83,12 +87,15 @@ export default {
 
   async afterDelete(event: any) {
     // Revalidate blog listing when a post is deleted
-    // Hardcoded for now (TODO: move to environment variables)
     const frontendUrls = [
       "https://staging.infinitycolor.org",
       "https://infinitycolor.org",
     ];
-    const revalidationSecret = "REVALIDATION_SECRET";
+    const revalidationSecret = process.env.REVALIDATION_SECRET;
+    if (!revalidationSecret) {
+      strapi.log.error("[Blog Post Lifecycle] REVALIDATION_SECRET environment variable is required");
+      return;
+    }
 
     const revalidationPromises = frontendUrls.map(async (frontendUrl) => {
       try {

@@ -40,10 +40,10 @@ const toArray = (value, fallback = []) => {
 module.exports = {
   // WooCommerce API Configuration
   woocommerce: {
-    baseUrl: "https://infinitycolor.co/wp-json/wc/v3",
+    baseUrl: process.env.WOOCOMMERCE_BASE_URL || "https://infinitycolor.co/wp-json/wc/v3",
     auth: {
-      consumerKey: "WOOCOMMERCE_CONSUMER_KEY",
-      consumerSecret: "WOOCOMMERCE_CONSUMER_SECRET",
+      consumerKey: requiredEnvVar("WOOCOMMERCE_CONSUMER_KEY"),
+      consumerSecret: requiredEnvVar("WOOCOMMERCE_CONSUMER_SECRET"),
     },
     // Rate limiting to avoid overwhelming the API
     rateLimiting: {
@@ -70,28 +70,23 @@ module.exports = {
   // Strapi API Configuration
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
-    baseUrl: "https://api.infinitycolor.org/api",
+    baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.org/api",
     auth: {
-      token:
-        "STRAPI_API_TOKEN_PRODUCTION",
+      token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: false }),
     },
     // Credential options for interactive selection
     credentials: {
       production: {
-        baseUrl: "https://api.infinitycolor.org/api",
-        token:
-          "STRAPI_API_TOKEN_PRODUCTION",
+        baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.org/api",
+        token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: false }),
       },
       staging: {
-        baseUrl: "https://api.staging.infinitycolor.org/api",
-        token:
-          "STRAPI_API_TOKEN_STAGING",
+        baseUrl: process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.org/api",
+        token: requiredEnvVar("STRAPI_API_TOKEN_STAGING", { optional: false }),
       },
       local: {
         baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
-        token:
-          process.env.STRAPI_IMPORT_LOCAL_TOKEN ||
-          "STRAPI_API_TOKEN_LOCAL",
+        token: requiredEnvVar("STRAPI_API_TOKEN_LOCAL", { optional: true, defaultValue: "" }),
       },
     },
     endpoints: {
