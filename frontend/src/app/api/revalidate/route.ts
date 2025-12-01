@@ -18,8 +18,15 @@ export async function POST(request: NextRequest) {
   try {
     // Verify authorization token
     const authHeader = request.headers.get("authorization");
-    // Hardcoded secret for now (TODO: move to environment variable)
-    const secret = "REVALIDATION_SECRET";
+    const secret = process.env.REVALIDATION_SECRET;
+
+    if (!secret) {
+      console.error("REVALIDATION_SECRET environment variable is not set");
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(

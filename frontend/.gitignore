@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (only ignore .env.local for personal overrides)
 .env.local
+main.env
+dev.env
 
 # vercel
 .vercel

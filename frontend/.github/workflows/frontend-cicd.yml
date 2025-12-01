@@ -116,13 +116,8 @@ jobs:
             set -euo pipefail
             cd /opt/infinity/frontend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            cat <<EOF > main.env
-            NODE_ENV=production
-            PORT=3000
-            NEXT_PUBLIC_API_BASE_URL=${{ secrets.PROD_FRONTEND_API_BASE_URL }}
-            NEXT_PUBLIC_IMAGE_BASE_URL=${{ secrets.PROD_FRONTEND_IMAGE_BASE_URL }}
-            NEXT_PUBLIC_STRAPI_TOKEN=${{ secrets.PROD_FRONTEND_STRAPI_TOKEN }}
-            NEXT_PUBLIC_SITE_URL=${{ secrets.PROD_SITE_URL }}
+            cat <<-'EOF' > main.env
+            ${{ secrets.PROD_FRONTEND_ENV_FILE }}
             EOF
             export IMAGE_TAG=main
             export ENV_FILE=main.env
@@ -155,13 +150,8 @@ jobs:
             set -euo pipefail
             cd /opt/infinity/frontend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            cat <<EOF > dev.env
-            NODE_ENV=production
-            PORT=3000
-            NEXT_PUBLIC_API_BASE_URL=${{ secrets.STAGING_FRONTEND_API_BASE_URL }}
-            NEXT_PUBLIC_IMAGE_BASE_URL=${{ secrets.STAGING_FRONTEND_IMAGE_BASE_URL }}
-            NEXT_PUBLIC_STRAPI_TOKEN=${{ secrets.STAGING_FRONTEND_STRAPI_TOKEN }}
-            NEXT_PUBLIC_SITE_URL=${{ secrets.STAGING_SITE_URL }}
+            cat <<-'EOF' > dev.env
+            ${{ secrets.STAGING_FRONTEND_ENV_FILE }}
             EOF
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
@@ -194,13 +184,8 @@ jobs:
             set -euo pipefail
             cd /opt/infinity/frontend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
-            cat <<EOF > main.env
-            NODE_ENV=production
-            PORT=3000
-            NEXT_PUBLIC_API_BASE_URL=${{ secrets.EXPERIMENTAL_FRONTEND_API_BASE_URL }}
-            NEXT_PUBLIC_IMAGE_BASE_URL=${{ secrets.EXPERIMENTAL_FRONTEND_IMAGE_BASE_URL }}
-            NEXT_PUBLIC_STRAPI_TOKEN=${{ secrets.EXPERIMENTAL_FRONTEND_STRAPI_TOKEN }}
-            NEXT_PUBLIC_SITE_URL=${{ secrets.EXPERIMENTAL_SITE_URL }}
+            cat <<-'EOF' > main.env
+            ${{ secrets.EXPERIMENTAL_FRONTEND_ENV_FILE }}
             EOF
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env
