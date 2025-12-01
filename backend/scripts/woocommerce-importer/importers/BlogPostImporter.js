@@ -1,6 +1,8 @@
-const { WordPressClient, StrapiClient } = require('../utils/ApiClient');
-const DuplicateTracker = require('../utils/DuplicateTracker');
-const ImageUploader = require('../utils/ImageUploader');
+const { WordPressClient, StrapiClient, WooCommerceClient } = require("../utils/ApiClient");
+const DuplicateTracker = require("../utils/DuplicateTracker");
+const ImageUploader = require("../utils/ImageUploader");
+const ProductImporter = require("./ProductImporter");
+const VariationImporter = require("./VariationImporter");
 
 /**
  * Blog Post Importer - Imports WordPress posts (plus categories, tags, authors, media) into Strapi.
@@ -14,8 +16,11 @@ class BlogPostImporter {
     this.logger = logger;
     this.wpClient = new WordPressClient(config, logger);
     this.strapiClient = new StrapiClient(config, logger);
+    this.wooClient = new WooCommerceClient(config, logger);
     this.duplicateTracker = new DuplicateTracker(config, logger);
     this.imageUploader = new ImageUploader(config, logger);
+    this.productImporter = new ProductImporter(config, logger);
+    this.variationImporter = new VariationImporter(config, logger);
 
     this.categoryCache = new Map();
     this.tagCache = new Map();
@@ -57,7 +62,7 @@ class BlogPostImporter {
       limit = 50,
       page = 1,
       batchSize = this.config.import.batchSizes.blogPosts || 20,
-      status = 'publish',
+      status = "publish",
       after = null,
       dryRun = false,
     } = options;
@@ -77,7 +82,7 @@ class BlogPostImporter {
 
       if (!result.data || result.data.length === 0) {
         if (!progressStarted) {
-          this.logger.warn('📭 No blog posts found to import');
+          this.logger.warn("📭 No blog posts found to import");
         } else {
           this.logger.info(`📄 No posts found on page ${currentPage}`);
         }
@@ -87,7 +92,7 @@ class BlogPostImporter {
       if (!progressStarted) {
         const targetTotal = Math.min(result.totalItems || limit, limit);
         this.stats.total = targetTotal;
-        this.logger.startProgress(targetTotal, 'Importing blog posts');
+        this.logger.startProgress(targetTotal, "Importing blog posts");
         progressStarted = true;
       }
 
@@ -155,12 +160,15 @@ class BlogPostImporter {
       Title: title,
       Slug: slug,
       Content: await this.rewriteContentLinks(
-        await this.rewriteContentImages(wpPost.content?.rendered || excerpt || title),
+        await this.rewriteContentCarousels(
+          await this.rewriteContentImages(wpPost.content?.rendered || excerpt || title),
+          dryRun,
+        ),
       ),
       Excerpt: excerpt,
       MetaTitle: this.truncate(title, 60),
       MetaDescription: metaDescription,
-      Keywords: tagNames.length > 0 ? this.truncate(tagNames.join(', '), 200) : undefined,
+      Keywords: tagNames.length > 0 ? this.truncate(tagNames.join(", "), 200) : undefined,
       Status: status,
       PublishedAt: publishedAt,
       ViewCount: Number.parseInt(wpPost.view_count || wpPost.meta?.view_count || 0, 10) || 0,
@@ -180,15 +188,17 @@ class BlogPostImporter {
     }
 
     // Try to locate an existing record (mapping first, slug fallback)
-    const mapping = this.duplicateTracker.getStrapiId('blogPosts', wpPost.id);
+    const mapping = this.duplicateTracker.getStrapiId("blogPosts", wpPost.id);
     let existingPostId = mapping?.strapiId || mapping;
 
     if (!existingPostId) {
       const existingBySlug = await this.strapiClient.findBlogPostBySlug(slug);
       existingPostId = this.extractId(existingBySlug);
       if (existingPostId) {
-        this.logger.info(`🔁 Found existing post by slug "${slug}" → ID ${existingPostId}, will update`);
-        this.duplicateTracker.recordMapping('blogPosts', wpPost.id, existingPostId, {
+        this.logger.info(
+          `🔁 Found existing post by slug "${slug}" → ID ${existingPostId}, will update`,
+        );
+        this.duplicateTracker.recordMapping("blogPosts", wpPost.id, existingPostId, {
           slug,
           syncedFromExisting: true,
         });
@@ -197,7 +207,7 @@ class BlogPostImporter {
 
     if (dryRun) {
       this.stats.success++;
-      this.logger.info(`🔍 [DRY RUN] Would ${existingPostId ? 'update' : 'create'} post: ${title}`);
+      this.logger.info(`🔍 [DRY RUN] Would ${existingPostId ? "update" : "create"} post: ${title}`);
       return null;
     }
 
@@ -215,7 +225,7 @@ class BlogPostImporter {
 
     const savedId = this.extractId(result) || existingPostId;
     if (savedId) {
-      this.duplicateTracker.recordMapping('blogPosts', wpPost.id, savedId, {
+      this.duplicateTracker.recordMapping("blogPosts", wpPost.id, savedId, {
         slug,
         status,
         importedSlug: slug,
@@ -237,8 +247,8 @@ class BlogPostImporter {
       return this.categoryCache.get(categoryId);
     }
 
-    const mapped = this.duplicateTracker.getStrapiId('blogCategories', categoryId);
-    if (mapped?.strapiId || typeof mapped === 'number') {
+    const mapped = this.duplicateTracker.getStrapiId("blogCategories", categoryId);
+    if (mapped?.strapiId || typeof mapped === "number") {
       const strapiId = mapped.strapiId || mapped;
       this.categoryCache.set(categoryId, strapiId);
       return strapiId;
@@ -256,7 +266,7 @@ class BlogPostImporter {
     const payload = {
       Title: this.decodeText(wpCategory.name || `Category ${categoryId}`),
       Slug: slug,
-      Description: this.decodeText(wpCategory.description || ''),
+      Description: this.decodeText(wpCategory.description || ""),
     };
 
     const existing = await this.strapiClient.findBlogCategoryBySlug(slug);
@@ -274,7 +284,7 @@ class BlogPostImporter {
 
     if (strapiId) {
       this.categoryCache.set(categoryId, strapiId);
-      this.duplicateTracker.recordMapping('blogCategories', categoryId, strapiId, { slug });
+      this.duplicateTracker.recordMapping("blogCategories", categoryId, strapiId, { slug });
     }
 
     return strapiId || null;
@@ -292,19 +302,21 @@ class BlogPostImporter {
 
       if (this.tagCache.has(wpTagId)) {
         strapiIds.push(this.tagCache.get(wpTagId));
-        const cachedName = this.tagNameCache.get(wpTagId) || (await this.fetchAndCacheTagName(wpTagId));
+        const cachedName =
+          this.tagNameCache.get(wpTagId) || (await this.fetchAndCacheTagName(wpTagId));
         if (cachedName) {
           tagNames.push(cachedName);
         }
         continue;
       }
 
-      const mapped = this.duplicateTracker.getStrapiId('blogTags', wpTagId);
-      if (mapped?.strapiId || typeof mapped === 'number') {
+      const mapped = this.duplicateTracker.getStrapiId("blogTags", wpTagId);
+      if (mapped?.strapiId || typeof mapped === "number") {
         const strapiId = mapped.strapiId || mapped;
         this.tagCache.set(wpTagId, strapiId);
         strapiIds.push(strapiId);
-        const cachedName = this.tagNameCache.get(wpTagId) || (await this.fetchAndCacheTagName(wpTagId));
+        const cachedName =
+          this.tagNameCache.get(wpTagId) || (await this.fetchAndCacheTagName(wpTagId));
         if (cachedName) {
           tagNames.push(cachedName);
         }
@@ -323,7 +335,7 @@ class BlogPostImporter {
       const payload = {
         Name: this.decodeText(wpTag.name || `Tag ${wpTagId}`),
         Slug: slug,
-        Description: this.decodeText(wpTag.description || '') || undefined,
+        Description: this.decodeText(wpTag.description || "") || undefined,
       };
       if (payload.Name) {
         this.tagNameCache.set(wpTagId, payload.Name);
@@ -348,7 +360,7 @@ class BlogPostImporter {
           this.tagNameCache.set(wpTagId, payload.Name);
         }
         strapiIds.push(strapiId);
-        this.duplicateTracker.recordMapping('blogTags', wpTagId, strapiId, { slug });
+        this.duplicateTracker.recordMapping("blogTags", wpTagId, strapiId, { slug });
       }
 
       if (payload.Name) {
@@ -372,8 +384,8 @@ class BlogPostImporter {
       return this.authorCache.get(authorId);
     }
 
-    const mapped = this.duplicateTracker.getStrapiId('blogAuthors', authorId);
-    if (mapped?.strapiId || typeof mapped === 'number') {
+    const mapped = this.duplicateTracker.getStrapiId("blogAuthors", authorId);
+    if (mapped?.strapiId || typeof mapped === "number") {
       const strapiId = mapped.strapiId || mapped;
       this.authorCache.set(authorId, strapiId);
       return strapiId;
@@ -389,7 +401,9 @@ class BlogPostImporter {
     }
 
     if (!wpAuthor) {
-      this.logger.warn(`⚠️ Skipping author linkage for post ${wpPost.id} (author ${authorId} unavailable)`);
+      this.logger.warn(
+        `⚠️ Skipping author linkage for post ${wpPost.id} (author ${authorId} unavailable)`,
+      );
       return null;
     }
 
@@ -397,15 +411,15 @@ class BlogPostImporter {
       this.decodeText(wpAuthor.name || wpAuthor.username || `Author ${authorId}`) ||
       `author-${authorId}`;
     const authorEmail = wpAuthor.email || null;
-    const authorBio = this.decodeText(wpAuthor.description || '');
+    const authorBio = this.decodeText(wpAuthor.description || "");
 
     const existing = await this.strapiClient.findBlogAuthorByEmailOrName(authorEmail, authorName);
     let strapiAuthorId = this.extractId(existing);
 
     const avatarUrl =
-      wpAuthor.avatar_urls?.['192'] ||
-      wpAuthor.avatar_urls?.['96'] ||
-      wpAuthor.avatar_urls?.['48'] ||
+      wpAuthor.avatar_urls?.["192"] ||
+      wpAuthor.avatar_urls?.["96"] ||
+      wpAuthor.avatar_urls?.["48"] ||
       null;
     const avatarId = await this.ensureMediaUpload(
       { url: avatarUrl, alt: `${authorName} avatar` },
@@ -445,7 +459,7 @@ class BlogPostImporter {
 
     if (strapiAuthorId) {
       this.authorCache.set(authorId, strapiAuthorId);
-      this.duplicateTracker.recordMapping('blogAuthors', authorId, strapiAuthorId, {
+      this.duplicateTracker.recordMapping("blogAuthors", authorId, strapiAuthorId, {
         email: authorEmail,
       });
     }
@@ -499,8 +513,8 @@ class BlogPostImporter {
       return this.mediaCache.get(key);
     }
 
-    const mapped = this.duplicateTracker.getStrapiId('blogMedia', key);
-    if (mapped?.strapiId || typeof mapped === 'number') {
+    const mapped = this.duplicateTracker.getStrapiId("blogMedia", key);
+    if (mapped?.strapiId || typeof mapped === "number") {
       const strapiId = mapped.strapiId || mapped;
       this.mediaCache.set(key, { id: strapiId, url: mapped?.uploadedUrl });
       return { id: strapiId, url: mapped?.uploadedUrl };
@@ -511,10 +525,14 @@ class BlogPostImporter {
       return null;
     }
 
-    const prefix = key.toString().replace(/[^a-z0-9-]/gi, '-').substring(0, 50) || 'blog-media';
+    const prefix =
+      key
+        .toString()
+        .replace(/[^a-z0-9-]/gi, "-")
+        .substring(0, 50) || "blog-media";
     const uploaded = await this.imageUploader.downloadAndUploadImage(
       mediaInfo.url,
-      mediaInfo.alt || mediaInfo.title || 'Blog media',
+      mediaInfo.alt || mediaInfo.title || "Blog media",
       prefix,
     );
 
@@ -522,7 +540,7 @@ class BlogPostImporter {
     const uploadedUrl = uploaded?.url || uploaded?.urlPath || null;
     if (uploadedId) {
       this.mediaCache.set(key, { id: uploadedId, url: uploadedUrl });
-      this.duplicateTracker.recordMapping('blogMedia', key, uploadedId, {
+      this.duplicateTracker.recordMapping("blogMedia", key, uploadedId, {
         url: mediaInfo.url,
         uploadedUrl,
       });
@@ -536,7 +554,7 @@ class BlogPostImporter {
    * Helpers & transforms
    */
   extractFeaturedMedia(wpPost) {
-    const embeddedMedia = wpPost._embedded?.['wp:featuredmedia']?.[0];
+    const embeddedMedia = wpPost._embedded?.["wp:featuredmedia"]?.[0];
     if (embeddedMedia && embeddedMedia.source_url) {
       return {
         id: embeddedMedia.id || wpPost.featured_media,
@@ -584,33 +602,34 @@ class BlogPostImporter {
 
   mapStatus(wpStatus) {
     const map = {
-      publish: 'Published',
-      future: 'Scheduled',
-      draft: 'Draft',
-      pending: 'Draft',
-      private: 'Draft',
+      publish: "Published",
+      future: "Scheduled",
+      draft: "Draft",
+      pending: "Draft",
+      private: "Draft",
     };
-    return map[wpStatus] || 'Draft';
+    return map[wpStatus] || "Draft";
   }
 
   resolvePublishedAt(wpPost, mappedStatus) {
-    if (mappedStatus === 'Published' || mappedStatus === 'Scheduled') {
+    if (mappedStatus === "Published" || mappedStatus === "Scheduled") {
       return wpPost.date_gmt || wpPost.date || null;
     }
     return null;
   }
 
-  buildExcerpt(html = '') {
+  buildExcerpt(html = "") {
     const cleaned = this.stripHtml(html);
     return this.truncate(cleaned, 500);
   }
 
   buildMetaDescription(wpPost, fallbackExcerpt) {
-    const yoastDescription = wpPost.yoast_head_json?.description || wpPost.yoast_head_json?.og_description;
+    const yoastDescription =
+      wpPost.yoast_head_json?.description || wpPost.yoast_head_json?.og_description;
     if (yoastDescription) {
       return this.truncate(this.decodeText(yoastDescription), 160);
     }
-    return this.truncate(fallbackExcerpt || this.stripHtml(wpPost.content?.rendered || ''), 160);
+    return this.truncate(fallbackExcerpt || this.stripHtml(wpPost.content?.rendered || ""), 160);
   }
 
   normalizeSlug(slug, title) {
@@ -626,13 +645,13 @@ class BlogPostImporter {
         try {
           // Check if it looks like hex-encoded (only hex chars, even length)
           if (/^[0-9a-f]+$/i.test(slug) && slug.length % 2 === 0) {
-            decodedSlug = Buffer.from(slug, 'hex').toString('utf-8');
+            decodedSlug = Buffer.from(slug, "hex").toString("utf-8");
           }
         } catch (e2) {
           // If both fail, use as-is
         }
       }
-      
+
       // Clean and normalize the slug
       const cleanedSlug = this.cleanSlug(decodedSlug);
       if (cleanedSlug) {
@@ -665,19 +684,19 @@ class BlogPostImporter {
     let slug = title
       .toString()
       .trim()
-      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+      .replace(/[\s\u200c]+/g, "-"); // Convert spaces and ZWNJ to hyphen
 
     // Lowercase only ASCII letters (a-z), preserve Persian characters
     slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
 
     // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
-    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, "");
 
     // Collapse multiple hyphens
-    slug = slug.replace(/-+/g, '-');
+    slug = slug.replace(/-+/g, "-");
 
     // Trim leading/trailing hyphens
-    slug = slug.replace(/^-|-$/g, '');
+    slug = slug.replace(/^-|-$/g, "");
 
     return slug || `wp-post-${Date.now()}`;
   }
@@ -689,25 +708,25 @@ class BlogPostImporter {
    * @returns {string} - Cleaned slug
    */
   cleanSlug(slug) {
-    if (!slug) return '';
+    if (!slug) return "";
 
     // First, replace spaces and ZWNJ with hyphens
     let cleaned = slug
       .toString()
       .trim()
-      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+      .replace(/[\s\u200c]+/g, "-"); // Convert spaces and ZWNJ to hyphen
 
     // Lowercase only ASCII letters (a-z), preserve Persian characters
     cleaned = cleaned.replace(/[A-Z]/g, (char) => char.toLowerCase());
 
     // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
-    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, "");
 
     // Collapse multiple hyphens
-    cleaned = cleaned.replace(/-+/g, '-');
+    cleaned = cleaned.replace(/-+/g, "-");
 
     // Trim leading/trailing hyphens
-    cleaned = cleaned.replace(/^-|-$/g, '');
+    cleaned = cleaned.replace(/^-|-$/g, "");
 
     return cleaned;
   }
@@ -718,27 +737,30 @@ class BlogPostImporter {
   }
 
   stripHtml(html) {
-    return this.decodeText(html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return this.decodeText(html || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   decodeText(text) {
-    if (!text) return '';
+    if (!text) return "";
     return text
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&#8217;/g, "'")
-      .replace(/&#8211;/g, '-')
+      .replace(/&#8211;/g, "-")
       .replace(/&#8220;/g, '"')
       .replace(/&#8221;/g, '"')
-      .replace(/&#8230;/g, '...')
+      .replace(/&#8230;/g, "...")
       .trim();
   }
 
   truncate(text, max = 160) {
-    if (!text) return '';
+    if (!text) return "";
     const value = text.toString();
     return value.length > max ? `${value.slice(0, max - 3).trim()}...` : value;
   }
@@ -786,7 +808,11 @@ class BlogPostImporter {
         }
 
         if (!uploaded) {
-          uploaded = await this.ensureMediaUpload({ url: src, alt: "Content image" }, cacheKey, false);
+          uploaded = await this.ensureMediaUpload(
+            { url: src, alt: "Content image" },
+            cacheKey,
+            false,
+          );
         }
 
         const newUrl = this.normalizeMediaUrl(uploaded?.url);
@@ -843,6 +869,12 @@ class BlogPostImporter {
 
   rewriteSingleLink(href) {
     try {
+      // First, check if it's a WordPress product or shop URL
+      const convertedUrl = this.convertWordPressUrlToStrapi(href);
+      if (convertedUrl && convertedUrl !== href) {
+        return convertedUrl;
+      }
+
       const url = new URL(href, this.wpHost ? `https://${this.wpHost}` : undefined);
       const isInternal =
         (this.wpHost && url.host === this.wpHost) || (!url.host && href.startsWith("/"));
@@ -865,6 +897,93 @@ class BlogPostImporter {
       // If parsing fails, leave the link untouched
       return href;
     }
+  }
+
+  /**
+   * Convert WordPress URLs to Strapi format
+   * product/[slug] → pdp/[slug]
+   * shop/[slug] → plp?category=[slug]
+   */
+  convertWordPressUrlToStrapi(url) {
+    if (!url || typeof url !== "string") {
+      return url;
+    }
+
+    try {
+      // Product URL: https://infinitycolor.co/product/[slug]/ → /pdp/[slug]
+      if (url.includes("/product/")) {
+        const slug = this.extractSlugFromWordPressProductUrl(url);
+        if (slug) {
+          return `/pdp/${slug}`;
+        }
+      }
+
+      // Category URL: https://infinitycolor.co/shop/[slug]/ → /plp?category=[slug]
+      if (url.includes("/shop/")) {
+        const slug = this.extractSlugFromWordPressCategoryUrl(url);
+        if (slug) {
+          return `/plp?category=${encodeURIComponent(slug)}`;
+        }
+      }
+    } catch (error) {
+      this.logger.debug(`⚠️ Failed to convert WordPress URL ${url}: ${error.message}`);
+    }
+
+    return url; // No conversion needed
+  }
+
+  /**
+   * Extract slug from WordPress product URL
+   * Handles URL-encoded Persian slugs
+   */
+  extractSlugFromWordPressProductUrl(url) {
+    if (!url || typeof url !== "string") {
+      return null;
+    }
+
+    try {
+      // Match /product/[slug]/ pattern
+      const match = url.match(/\/product\/([^\/\?#]+)/);
+      if (match && match[1]) {
+        // Decode URL-encoded slug
+        try {
+          return decodeURIComponent(match[1]);
+        } catch {
+          return match[1];
+        }
+      }
+    } catch (error) {
+      this.logger.debug(`⚠️ Failed to extract product slug from ${url}: ${error.message}`);
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract slug from WordPress category URL
+   * Handles URL-encoded slugs
+   */
+  extractSlugFromWordPressCategoryUrl(url) {
+    if (!url || typeof url !== "string") {
+      return null;
+    }
+
+    try {
+      // Match /shop/[slug]/ pattern
+      const match = url.match(/\/shop\/([^\/\?#]+)/);
+      if (match && match[1]) {
+        // Decode URL-encoded slug
+        try {
+          return decodeURIComponent(match[1]);
+        } catch {
+          return match[1];
+        }
+      }
+    } catch (error) {
+      this.logger.debug(`⚠️ Failed to extract category slug from ${url}: ${error.message}`);
+    }
+
+    return null;
   }
 
   extractWpPostId(url) {
@@ -910,9 +1029,345 @@ class BlogPostImporter {
     return `${this.strapiMediaBase}/${url}`;
   }
 
+  /**
+   * Extract product carousels from HTML content
+   * Returns array of carousel objects with original HTML and product slugs
+   */
+  extractProductCarousels(html) {
+    if (!html || typeof html !== "string") {
+      return [];
+    }
+
+    const carousels = [];
+
+    // Find all carousel containers (id="the-content-products-swiper")
+    // Use a more robust approach: find the opening tag, then match until the closing tag
+    const carouselStartRegex = /<div[^>]*id=["']the-content-products-swiper["'][^>]*>/gi;
+
+    let startMatch;
+    while ((startMatch = carouselStartRegex.exec(html)) !== null) {
+      const startIndex = startMatch.index;
+      const startTag = startMatch[0];
+
+      // Find the matching closing tag by counting div tags
+      let depth = 1;
+      let currentIndex = startIndex + startTag.length;
+      let endIndex = -1;
+
+      while (currentIndex < html.length && depth > 0) {
+        const nextOpen = html.indexOf("<div", currentIndex);
+        const nextClose = html.indexOf("</div>", currentIndex);
+
+        if (nextClose === -1) {
+          // No closing tag found, break
+          break;
+        }
+
+        if (nextOpen !== -1 && nextOpen < nextClose) {
+          // Found an opening tag before closing tag
+          depth++;
+          currentIndex = nextOpen + 4;
+        } else {
+          // Found a closing tag
+          depth--;
+          if (depth === 0) {
+            endIndex = nextClose + 6; // Include '</div>'
+            break;
+          }
+          currentIndex = nextClose + 6;
+        }
+      }
+
+      if (endIndex === -1) {
+        // Couldn't find matching closing tag, skip this carousel
+        this.logger.warn(
+          `⚠️ Could not find closing tag for carousel starting at index ${startIndex}`,
+        );
+        continue;
+      }
+
+      const carouselHtml = html.substring(startIndex, endIndex);
+
+      // Find all product links within this carousel
+      const productLinkRegex = /<a[^>]+href=["']([^"']*\/product\/[^"']+)["'][^>]*>/gi;
+      const productSlugs = [];
+      let linkMatch;
+
+      while ((linkMatch = productLinkRegex.exec(carouselHtml)) !== null) {
+        const productUrl = linkMatch[1];
+        const slug = this.extractSlugFromWordPressProductUrl(productUrl);
+        if (slug) {
+          productSlugs.push(slug);
+        }
+      }
+
+      if (productSlugs.length > 0) {
+        carousels.push({
+          originalHtml: carouselHtml,
+          productSlugs: [...new Set(productSlugs)], // Remove duplicates
+        });
+      }
+    }
+
+    return carousels;
+  }
+
+  /**
+   * Generate shortcode from product slugs
+   * Quotes non-numeric slugs for Persian support
+   */
+  generateProductShortcode(slugs) {
+    if (!slugs || slugs.length === 0) {
+      return "";
+    }
+
+    const identifiers = slugs.map((slug) => {
+      // Quote non-numeric slugs for Persian support
+      const isNumeric = /^\d+$/.test(slug);
+      if (isNumeric) {
+        return slug;
+      }
+      // Escape quotes in slug
+      return `"${slug.replace(/"/g, '\\"')}"`;
+    });
+
+    return `[products:${identifiers.join(",")}]`;
+  }
+
+  /**
+   * Replace carousel HTML with shortcode
+   */
+  replaceCarouselWithShortcode(html, carousel, shortcode) {
+    if (!html || !carousel || !shortcode) {
+      return html;
+    }
+
+    // Use simple string replacement instead of regex to avoid escaping issues
+    // This is safer for HTML content
+    return html.replace(carousel.originalHtml, shortcode);
+  }
+
+  /**
+   * Get Strapi product slug from WordPress product slug
+   * Imports product if it doesn't exist
+   */
+  async getStrapiSlugFromWordPressSlug(wpSlug, dryRun = false) {
+    if (!wpSlug) {
+      return null;
+    }
+
+    // Check if product already exists in Strapi by checking mappings
+    // First, try to find by WordPress slug in product mappings
+    const allProductMappings = this.duplicateTracker.getAllMappings("products");
+    for (const [wcId, mapping] of Object.entries(allProductMappings)) {
+      if (mapping?.slug === wpSlug || mapping?.importedSlug === wpSlug) {
+        // Product exists, get its Strapi slug
+        try {
+          const strapiId = mapping.strapiId || mapping;
+          if (strapiId) {
+            const strapiProduct = await this.strapiClient.getProductById(strapiId);
+            if (strapiProduct?.data?.attributes?.Slug) {
+              return strapiProduct.data.attributes.Slug;
+            }
+          }
+        } catch (error) {
+          this.logger.debug(
+            `⚠️ Failed to get Strapi product ${mapping.strapiId}: ${error.message}`,
+          );
+        }
+        // Fallback: use the WordPress slug if Strapi slug not found
+        return wpSlug;
+      }
+    }
+
+    // Product doesn't exist, need to import it
+    try {
+      // Get product from WooCommerce by slug
+      const wcProduct = await this.wooClient.getProductBySlug(wpSlug);
+      if (!wcProduct) {
+        this.logger.warn(`⚠️ Product with slug "${wpSlug}" not found in WooCommerce`);
+        return null;
+      }
+
+      // Import product
+      const importResult = await this.productImporter.importSingleProduct(wcProduct, dryRun);
+
+      // Import variations for this product
+      if (
+        !dryRun &&
+        wcProduct.type === "variable" &&
+        Array.isArray(wcProduct.variations) &&
+        wcProduct.variations.length > 0
+      ) {
+        try {
+          // Get variations from WooCommerce
+          let variationPage = 1;
+          let hasMoreVariations = true;
+
+          while (hasMoreVariations) {
+            const variationResult = await this.wooClient.getProductVariations(
+              wcProduct.id,
+              variationPage,
+              100,
+            );
+
+            if (!Array.isArray(variationResult.data) || variationResult.data.length === 0) {
+              hasMoreVariations = false;
+              break;
+            }
+
+            // Get the Strapi product ID from the import result
+            const productMapping = this.duplicateTracker.getStrapiId("products", wcProduct.id);
+            const parentStrapiId = productMapping?.strapiId || importResult?.strapiId;
+
+            if (parentStrapiId) {
+              for (const variation of variationResult.data) {
+                variation._parentProduct = wcProduct;
+                try {
+                  await this.variationImporter.importSingleVariation(
+                    variation,
+                    parentStrapiId,
+                    false,
+                  );
+                } catch (error) {
+                  this.logger.warn(
+                    `⚠️ Failed to import variation ${variation.id}: ${error.message}`,
+                  );
+                }
+              }
+            }
+
+            if (variationResult.totalPages <= variationPage) {
+              hasMoreVariations = false;
+            } else {
+              variationPage++;
+            }
+          }
+        } catch (error) {
+          this.logger.warn(
+            `⚠️ Failed to import variations for product ${wcProduct.id}: ${error.message}`,
+          );
+        }
+      }
+
+      // Get the Strapi slug after import
+      const mapping = this.duplicateTracker.getStrapiId("products", wcProduct.id);
+      if (mapping?.strapiId) {
+        try {
+          const strapiProduct = await this.strapiClient.getProductById(mapping.strapiId);
+          if (strapiProduct?.data?.attributes?.Slug) {
+            return strapiProduct.data.attributes.Slug;
+          }
+        } catch (error) {
+          this.logger.debug(
+            `⚠️ Failed to get Strapi product ${mapping.strapiId}: ${error.message}`,
+          );
+        }
+      } else if (importResult?.strapiId) {
+        // Try using the import result directly
+        try {
+          const strapiProduct = await this.strapiClient.getProductById(importResult.strapiId);
+          if (strapiProduct?.data?.attributes?.Slug) {
+            return strapiProduct.data.attributes.Slug;
+          }
+        } catch (error) {
+          this.logger.debug(
+            `⚠️ Failed to get Strapi product ${importResult.strapiId}: ${error.message}`,
+          );
+        }
+      }
+
+      // Fallback: return WordPress slug
+      return wpSlug;
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to import product with slug "${wpSlug}": ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Import products from carousels and get Strapi slugs
+   * Limits to 6 products per carousel and only includes successfully imported products
+   */
+  async importProductsFromCarousels(carousels, dryRun = false) {
+    const slugMapping = {}; // { wpSlug: strapiSlug }
+    const carouselResults = []; // Array of { carousel, importedSlugs: string[] }
+
+    for (const carousel of carousels) {
+      // Limit to first 6 products per carousel
+      const limitedSlugs = carousel.productSlugs.slice(0, 6);
+      const importedSlugs = [];
+
+      for (const wpSlug of limitedSlugs) {
+        if (!slugMapping[wpSlug]) {
+          const strapiSlug = await this.getStrapiSlugFromWordPressSlug(wpSlug, dryRun);
+          if (strapiSlug) {
+            slugMapping[wpSlug] = strapiSlug;
+            importedSlugs.push(strapiSlug);
+          } else {
+            // If import failed, don't include in shortcode
+            this.logger.warn(
+              `⚠️ Product with slug "${wpSlug}" failed to import, excluding from carousel shortcode`,
+            );
+          }
+        } else {
+          // Already imported, use existing mapping
+          importedSlugs.push(slugMapping[wpSlug]);
+        }
+      }
+
+      carouselResults.push({
+        carousel,
+        importedSlugs,
+      });
+    }
+
+    return { slugMapping, carouselResults };
+  }
+
+  /**
+   * Rewrite content carousels - extract, import products, replace with shortcodes
+   * Limits to 6 products per carousel and only includes successfully imported products
+   */
+  async rewriteContentCarousels(html, dryRun = false) {
+    if (!html || typeof html !== "string") {
+      return html;
+    }
+
+    // Extract all carousels
+    const carousels = this.extractProductCarousels(html);
+    if (carousels.length === 0) {
+      return html;
+    }
+
+    this.logger.info(`🛒 Found ${carousels.length} product carousel(s) in blog content`);
+
+    // Import all referenced products (limited to 6 per carousel)
+    const { slugMapping, carouselResults } = await this.importProductsFromCarousels(
+      carousels,
+      dryRun,
+    );
+
+    // Replace each carousel with shortcode using only successfully imported products
+    let rewritten = html;
+    for (const { carousel, importedSlugs } of carouselResults) {
+      if (importedSlugs.length > 0) {
+        const shortcode = this.generateProductShortcode(importedSlugs);
+        rewritten = this.replaceCarouselWithShortcode(rewritten, carousel, shortcode);
+        this.logger.debug(
+          `✅ Replaced carousel with shortcode: [products:${importedSlugs.length} products] (limited from ${carousel.productSlugs.length} found)`,
+        );
+      } else {
+        this.logger.warn(`⚠️ Carousel had no successfully imported products, leaving HTML as-is`);
+      }
+    }
+
+    return rewritten;
+  }
+
   extractId(entry) {
     if (!entry) return null;
-    if (typeof entry === 'number') return entry;
+    if (typeof entry === "number") return entry;
     if (entry.id) return entry.id;
     if (entry.data?.id) return entry.data.id;
     if (entry.data?.data?.id) return entry.data.data.id;
@@ -921,7 +1376,7 @@ class BlogPostImporter {
   }
 
   logFinalStats() {
-    this.logger.success('🎉 Blog post import completed!');
+    this.logger.success("🎉 Blog post import completed!");
     this.logger.logStats(this.stats);
   }
 }
