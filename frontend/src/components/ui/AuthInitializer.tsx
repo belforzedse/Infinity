@@ -4,11 +4,15 @@ import { useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import { currentUserAtom, userLoadingAtom, userErrorAtom } from "@/lib/atoms/auth";
 import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
+import { likedProductsAtom, likedProductsLoadedAtom, __resetUseProductLikeState } from "@/hooks/useProductLike";
+import { submitOrderStepAtom, orderIdAtom, orderNumberAtom, transactionIdAtom } from "@/atoms/Order";
+import { SubmitOrderStep } from "@/types/Order";
 import UserService from "@/services/user";
 import { __clearOrderCache } from "@/services/order";
 import { invalidateAddressCache } from "@/services/user/addresses";
 import { jotaiStore } from "@/lib/jotaiStore";
 import { ACCESS_TOKEN_EVENT, ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
+import { clearUserStorage } from "@/utils/logout";
 
 /**
  * AuthInitializer Component
@@ -45,6 +49,17 @@ export default function AuthInitializer() {
         jotaiStore.set(addressesLoadingAtom, false);
         jotaiStore.set(addressesErrorAtom, null);
         invalidateAddressCache();
+        // Clear liked products to prevent showing previous user's favorites
+        jotaiStore.set(likedProductsAtom, []);
+        jotaiStore.set(likedProductsLoadedAtom, false);
+        __resetUseProductLikeState();
+        // Clear order-related atoms
+        jotaiStore.set(orderIdAtom, null);
+        jotaiStore.set(orderNumberAtom, null);
+        jotaiStore.set(transactionIdAtom, null);
+        jotaiStore.set(submitOrderStepAtom, SubmitOrderStep.Table);
+        // Clear all user-specific storage and cache
+        clearUserStorage();
         lastTokenRef.current = null;
         return;
       }
@@ -72,6 +87,17 @@ export default function AuthInitializer() {
         jotaiStore.set(addressesLoadingAtom, false);
         jotaiStore.set(addressesErrorAtom, null);
         invalidateAddressCache();
+        // Clear liked products when token changes (new user login)
+        jotaiStore.set(likedProductsAtom, []);
+        jotaiStore.set(likedProductsLoadedAtom, false);
+        __resetUseProductLikeState();
+        // Clear order-related atoms when token changes (new user login)
+        jotaiStore.set(orderIdAtom, null);
+        jotaiStore.set(orderNumberAtom, null);
+        jotaiStore.set(transactionIdAtom, null);
+        jotaiStore.set(submitOrderStepAtom, SubmitOrderStep.Table);
+        // Clear all user-specific storage and cache when token changes (new user login)
+        clearUserStorage();
       }
 
       lastTokenRef.current = token;
