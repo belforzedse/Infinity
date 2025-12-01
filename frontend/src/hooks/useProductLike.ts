@@ -17,7 +17,7 @@ type LikedProduct = {
 
 export const likedProductsAtom = atom<LikedProduct[]>([]);
 const likedProductsLoadingAtom = atom<boolean>(false);
-const likedProductsLoadedAtom = atom<boolean>(false);
+export const likedProductsLoadedAtom = atom<boolean>(false);
 
 interface UseProductLikeParams {
   productId: string;
