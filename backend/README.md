@@ -20,6 +20,7 @@ up and down and up and down and
 - **Secrets**:
   - Repository secrets per environment: `*_BACKEND_HOST`, `*_BACKEND_PORT`, `*_BACKEND_USER`, `*_BACKEND_SSH_KEY`, `*_BACKEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).
   - Shared registry credentials: `GHCR_DEPLOY_USER=belforzedse`, `GHCR_DEPLOY_TOKEN=<PAT with read:packages>`.
+  - **Important**: `main.env` and `dev.env` files are gitignored. Copy the entire file contents into the corresponding GitHub secret (e.g., `PROD_BACKEND_ENV_FILE`, `STAGING_BACKEND_ENV_FILE`).
 - **Compose variables**: `ENV_FILE` (defaults to `main.env`), `IMAGE_TAG` (`main` by default), `STRAPI_PORT`, `POSTGRES_PORT`, `REDIS_PORT`. Override locally, e.g. `ENV_FILE=dev.env STRAPI_PORT=1338 docker compose up`.
 - **Ports**: Strapi exposes `${STRAPI_PORT:-1337}`; Postgres/Redis still publish `5432/6379` for local development. Remove those `ports` lines on production if you do not want them reachable from the host network.
 
