@@ -486,6 +486,40 @@ textarea:focus-visible {
     @apply prose-ul:list-disc prose-ol:list-decimal;
     @apply prose-li:text-neutral-700;
     @apply prose-hr:border-neutral-300;
+    @apply prose-table:text-sm;
+  }
+
+  .prose table {
+    @apply w-full border-collapse overflow-hidden rounded-xl border border-slate-200;
+  }
+
+  .prose table thead th,
+  .prose table tr:first-child th {
+    @apply bg-slate-100 px-4 py-2 text-right text-xs font-medium text-slate-600;
+  }
+
+  .prose table tbody td {
+    @apply border-t border-slate-200 border-l px-4 py-3 text-sm text-neutral-600;
+  }
+
+  .prose table tbody td:first-child {
+    @apply bg-slate-100 font-medium text-slate-600;
+  }
+
+  .tiptap {
+    @apply leading-loose text-neutral-800;
+  }
+
+  .tiptap p.is-editor-empty:first-child::before {
+    color: #94a3b8;
+    content: attr(data-placeholder);
+    float: right;
+    height: 0;
+    pointer-events: none;
+  }
+
+  [dir="ltr"] .tiptap p.is-editor-empty:first-child::before {
+    float: left;
+    text-align: left;
   }
 }
-

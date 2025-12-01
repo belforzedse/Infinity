@@ -33,7 +33,11 @@ import {
   Highlighter,
   Link2,
   Link2Off,
+  X,
 } from "lucide-react";
+import LinkDialog, { type LinkFormValues } from "./LinkDialog";
+import ImageDialog, { type ImageFormValues } from "./ImageDialog";
+import TableBuilderDialog from "./TableBuilderDialog";
 
 interface ToolbarProps {
   editor: Editor;
@@ -45,7 +49,8 @@ const ToolbarButton: React.FC<{
   disabled?: boolean;
   children: React.ReactNode;
   title?: string;
-}> = ({ onClick, isActive = false, disabled = false, children, title }) => (
+  className?: string;
+}> = ({ onClick, isActive = false, disabled = false, children, title, className }) => (
   <Button
     type="button"
     onClick={onClick}
@@ -57,7 +62,7 @@ const ToolbarButton: React.FC<{
       isActive
         ? "bg-pink-600 text-white shadow-sm hover:bg-pink-700"
         : "hover:bg-neutral-100 hover:border-neutral-300"
-    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+    } ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className ?? ""}`}
   >
     {children}
   </Button>
@@ -108,37 +113,96 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
     };
   }, [editor]);
 
-  const addImage = () => {
-    const url = window.prompt("آدرس تصویر را وارد کنید:");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+  const [showLinkDialog, setShowLinkDialog] = React.useState(false);
+  const [linkDefaults, setLinkDefaults] = React.useState<LinkFormValues>({
+    href: "",
+    text: "",
+    openInNewTab: true,
+    nofollow: false,
+  });
+  const [showImageDialog, setShowImageDialog] = React.useState(false);
+  const [showTableBuilder, setShowTableBuilder] = React.useState(false);
+  const [imageDefaults, setImageDefaults] = React.useState<ImageFormValues>({
+    src: "",
+    alt: "",
+    title: "",
+    width: "",
+    height: "",
+  });
+
+  const colorPalette = React.useMemo(
+    () => ["#0f172a", "#dc2626", "#ea580c", "#16a34a", "#2563eb", "#7e22ce", "#d97706", "#0891b2"],
+    [],
+  );
+
+  const openLinkDialog = () => {
+    const attrs = editor.getAttributes("link");
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, " ");
+
+    setLinkDefaults({
+      href: attrs.href || "",
+      text: selectedText || "",
+      openInNewTab: attrs.target ? attrs.target === "_blank" : true,
+      nofollow: (attrs.rel || "").includes("nofollow"),
+    });
+    setShowLinkDialog(true);
+  };
+
+  const openImageDialog = () => {
+    const attrs = editor.getAttributes("image");
+    setImageDefaults({
+      src: attrs.src || "",
+      alt: attrs.alt || "",
+      title: attrs.title || "",
+      width: attrs.width ? String(attrs.width) : "",
+      height: attrs.height ? String(attrs.height) : "",
+    });
+    setShowImageDialog(true);
+  };
+
+  const handleLinkSubmit = (values: LinkFormValues) => {
+    const relBase = values.openInNewTab ? "noopener noreferrer" : "noreferrer";
+    const rel = values.nofollow ? `${relBase} nofollow`.trim() : relBase;
+
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({
+        href: values.href,
+        target: values.openInNewTab ? "_blank" : "_self",
+        rel,
+      })
+      .run();
+
+    if (values.text && editor.state.selection.empty) {
+      editor.chain().focus().insertContent(values.text).run();
     }
   };
 
-  const insertTable = () => {
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  const handleImageSubmit = (values: ImageFormValues) => {
+    editor
+      .chain()
+      .focus()
+      .setImage({
+        src: values.src,
+        alt: values.alt,
+        title: values.title,
+        width: values.width ? Number(values.width) : undefined,
+        height: values.height ? Number(values.height) : undefined,
+      })
+      .run();
   };
 
-  const setLink = () => {
-    const previousUrl = editor.getAttributes("link").href || "";
-    const url = window.prompt("آدرس لینک را وارد کنید:", previousUrl);
-
-    if (url === null) {
-      return;
-    }
-
-    const href = url.trim();
-
-    if (!href) {
-      editor.chain().focus().unsetLink().run();
-      return;
-    }
-
-    editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+  const handleTableInsert = (html: string) => {
+    editor.chain().focus().insertContent(html).run();
+    setShowTableBuilder(false);
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1 p-3 border-b border-neutral-200 bg-white rounded-t-lg">
+    <>
+      <div className="flex flex-wrap items-center gap-1 p-3 border-b border-neutral-200 bg-white rounded-t-lg">
       {/* Headings */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -221,11 +285,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
       >
         <Code size={16} />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={setLink}
-        isActive={editor.isActive("link")}
-        title="افزودن لینک"
-      >
+      <ToolbarButton onClick={openLinkDialog} isActive={editor.isActive("link")} title="افزودن لینک">
         <Link2 size={16} />
       </ToolbarButton>
       <ToolbarButton
@@ -332,10 +392,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
       <Divider />
 
       {/* Media & Elements */}
-      <ToolbarButton
-        onClick={addImage}
-        title="افزودن تصویر"
-      >
+      <ToolbarButton onClick={openImageDialog} title="افزودن تصویر">
         <Image size={16} />
       </ToolbarButton>
       <ToolbarButton
@@ -344,35 +401,74 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
       >
         <Minus size={16} />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={insertTable}
-        title="افزودن جدول"
-      >
+      <ToolbarButton onClick={() => setShowTableBuilder(true)} title="افزودن جدول">
         <Table size={16} />
       </ToolbarButton>
 
       <Divider />
 
       {/* Colors & Highlighting */}
-      <div className="flex items-center gap-1">
-        <input
-          type="color"
-          onInput={(event) =>
-            editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()
-          }
-          value={editor.getAttributes("textStyle").color || "#000000"}
-          className="w-8 h-8 border border-neutral-200 rounded-lg cursor-pointer hover:border-pink-400 transition-colors"
-          title="رنگ متن"
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
-          isActive={editor.isActive("highlight")}
-          title="هایلایت"
-        >
-          <Highlighter size={16} />
-        </ToolbarButton>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1">
+          <input
+            type="color"
+            onInput={(event) =>
+              editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()
+            }
+            value={editor.getAttributes("textStyle").color || "#000000"}
+            className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-200 transition-colors hover:border-pink-400"
+            title="انتخاب رنگ دلخواه"
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            isActive={editor.isActive("highlight")}
+            title="هایلایت"
+          >
+            <Highlighter size={16} />
+          </ToolbarButton>
+        </div>
+        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1">
+          <Palette size={16} className="text-neutral-500" />
+          {colorPalette.map((color) => (
+            <button
+              key={color}
+              type="button"
+              onClick={() => editor.chain().focus().setColor(color).run()}
+              className="h-5 w-5 rounded-full border border-white shadow-sm transition hover:scale-105"
+              style={{ backgroundColor: color }}
+              title={`انتخاب ${color}`}
+            />
+          ))}
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().unsetColor().run()}
+            className="ml-1 flex h-6 w-6 items-center justify-center rounded-full border border-neutral-300 text-neutral-500 transition hover:border-pink-400 hover:text-pink-600"
+            title="حذف رنگ"
+          >
+            <X size={12} />
+          </button>
+        </div>
       </div>
-    </div>
+
+      </div>
+      <LinkDialog
+        isOpen={showLinkDialog}
+        initialValues={linkDefaults}
+        onClose={() => setShowLinkDialog(false)}
+        onSubmit={handleLinkSubmit}
+      />
+      <ImageDialog
+        isOpen={showImageDialog}
+        initialValues={imageDefaults}
+        onClose={() => setShowImageDialog(false)}
+        onSubmit={handleImageSubmit}
+      />
+      <TableBuilderDialog
+        isOpen={showTableBuilder}
+        onClose={() => setShowTableBuilder(false)}
+        onInsert={handleTableInsert}
+      />
+    </>
   );
 };
 

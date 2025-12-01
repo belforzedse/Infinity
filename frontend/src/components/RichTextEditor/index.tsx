@@ -17,6 +17,8 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import { Placeholder } from "@tiptap/extensions";
+import { CharacterCount } from "@tiptap/extensions";
 import { createLowlight } from "lowlight";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
@@ -27,6 +29,7 @@ import bash from "highlight.js/lib/languages/bash";
 import python from "highlight.js/lib/languages/python";
 import sql from "highlight.js/lib/languages/sql";
 import markdown from "highlight.js/lib/languages/markdown";
+import { useDebouncedCallback } from "use-debounce";
 
 // Create lowlight instance and register common languages
 const lowlight = createLowlight();
@@ -50,6 +53,41 @@ lowlight.register("md", markdown);
 
 import RichTextToolbar from "./Toolbar";
 
+const isSafeHref = (href: string): boolean => {
+  if (!href) {
+    return false;
+  }
+
+  const trimmed = href.trim();
+  const normalized = trimmed.toLowerCase();
+
+  if (normalized.startsWith("javascript:") || normalized.startsWith("data:")) {
+    return false;
+  }
+
+  if (
+    normalized.startsWith("http://") ||
+    normalized.startsWith("https://") ||
+    normalized.startsWith("mailto:") ||
+    normalized.startsWith("tel:") ||
+    normalized.startsWith("sms:")
+  ) {
+    return true;
+  }
+
+  if (
+    normalized.startsWith("/") ||
+    normalized.startsWith("./") ||
+    normalized.startsWith("../") ||
+    normalized.startsWith("#") ||
+    normalized.startsWith("//")
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 interface RichTextEditorProps {
   content?: string;
   onChange?: (content: string) => void;
@@ -67,6 +105,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const [viewMode, setViewMode] = React.useState<"visual" | "code">("visual");
   const [codeValue, setCodeValue] = React.useState(content || "");
+  const [stats, setStats] = React.useState({ words: 0, characters: 0 });
+  const debouncedOnChange = useDebouncedCallback(
+    (value: string) => {
+      if (onChange) {
+        onChange(value);
+      }
+    },
+    300,
+    [onChange],
+  );
   const editor = useEditor({
     immediatelyRender: false, // Prevent SSR hydration mismatches
     extensions: [
@@ -97,11 +145,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         autolink: true,
         linkOnPaste: true,
         HTMLAttributes: {
-          rel: "noopener noreferrer nofollow",
-          target: "_blank",
+          rel: "noopener noreferrer",
           class: "text-blue-600 underline hover:text-blue-700",
         },
-        validate: (href) => /^https?:\/\//i.test(href) || href.startsWith("/"),
+        validate: (href) => isSafeHref(href),
       }),
       Image.configure({
         HTMLAttributes: {
@@ -114,22 +161,37 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         multicolor: true,
       }),
       HorizontalRule,
+      Placeholder.configure({
+        placeholder,
+        emptyEditorClass: "is-editor-empty",
+        showOnlyWhenEditable: true,
+        showOnlyCurrent: false,
+        includeChildren: true,
+      }),
+      CharacterCount.configure(),
     ],
     content,
     editable: !readOnly,
     onUpdate: ({ editor }) => {
-      if (onChange) {
-        onChange(editor.getHTML());
-      }
-      setCodeValue(editor.getHTML());
+      const html = editor.getHTML();
+      setCodeValue(html);
+      debouncedOnChange(html);
     },
     editorProps: {
       attributes: {
-        class: `prose prose-base prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none focus:outline-none ${className} ${readOnly ? "text-slate-500" : ""}`,
+        class: `tiptap prose prose-base prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-700 max-w-none focus:outline-none ${className} ${
+          readOnly ? "text-slate-500" : ""
+        }`,
         dir: "rtl",
       },
     },
   });
+
+  React.useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+    };
+  }, [debouncedOnChange]);
 
   React.useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -144,11 +206,39 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [viewMode, codeValue, editor]);
 
+  React.useEffect(() => {
+    if (readOnly && viewMode === "code") {
+      setViewMode("visual");
+    }
+  }, [readOnly, viewMode]);
+
+  React.useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    const updateStats = () => {
+      const characterCount = editor.storage.characterCount?.characters?.() ?? 0;
+      const wordCount = editor.storage.characterCount?.words?.() ?? 0;
+      setStats({
+        characters: characterCount,
+        words: wordCount,
+      });
+    };
+
+    updateStats();
+    editor.on("update", updateStats);
+    editor.on("selectionUpdate", updateStats);
+
+    return () => {
+      editor.off("update", updateStats);
+      editor.off("selectionUpdate", updateStats);
+    };
+  }, [editor]);
+
   const handleCodeChange = (value: string) => {
     setCodeValue(value);
-    if (onChange) {
-      onChange(value);
-    }
+    debouncedOnChange(value);
   };
 
   if (!editor) {
@@ -157,24 +247,30 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   return (
     <div className="w-full border border-neutral-200 rounded-lg overflow-hidden bg-white">
-      <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-2">
-        <div className="flex gap-2 text-xs">
-          <button
-            type="button"
-            onClick={() => setViewMode("visual")}
-            className={`rounded-md px-3 py-1 ${viewMode === "visual" ? "bg-pink-100 text-pink-600" : "text-neutral-500"}`}
-          >
-            دیداری
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("code")}
-            className={`rounded-md px-3 py-1 ${viewMode === "code" ? "bg-pink-100 text-pink-600" : "text-neutral-500"}`}
-          >
-            کد
-          </button>
+      {!readOnly && (
+        <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-2">
+          <div className="flex gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode("visual")}
+              className={`rounded-md px-3 py-1 ${
+                viewMode === "visual" ? "bg-pink-100 text-pink-600" : "text-neutral-500"
+              }`}
+            >
+              دیداری
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("code")}
+              className={`rounded-md px-3 py-1 ${
+                viewMode === "code" ? "bg-pink-100 text-pink-600" : "text-neutral-500"
+              }`}
+            >
+              کد
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {!readOnly && viewMode === "visual" && <RichTextToolbar editor={editor} />}
 
@@ -182,8 +278,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         {viewMode === "visual" ? (
           <EditorContent
             editor={editor}
-            className="min-h-[150px] focus-within:outline-none text-sm"
-            placeholder={placeholder}
+            className="tiptap min-h-[150px] focus-within:outline-none text-sm"
           />
         ) : (
           <textarea
@@ -195,6 +290,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             placeholder="<p>...</p>"
           />
         )}
+      </div>
+
+      <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-4 py-2 text-xs text-neutral-500">
+        <span>کلمات: {stats.words.toLocaleString("fa-IR")}</span>
+        <span>حروف: {stats.characters.toLocaleString("fa-IR")}</span>
       </div>
     </div>
   );
