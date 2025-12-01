@@ -30,10 +30,10 @@ const slugify = (input: string) =>
   input
     .toLowerCase()
     .trim()
-    .replace(/[\s\u200C]+/g, "-")
-    .replace(/[^\w\u0600-\u06FF-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/\s+/g, "-") // Convert spaces to dashes
+    .replace(/[^\w-]/g, "") // Keep only alphanumeric and dashes (no Persian)
+    .replace(/-+/g, "-") // Collapse multiple dashes
+    .replace(/^-|-$/g, ""); // Remove leading/trailing dashes
 
 export default function AddBlogPostPage() {
   const router = useRouter();
@@ -95,7 +95,9 @@ export default function AddBlogPostPage() {
 
   const handleSlugChange = (value: string) => {
     setIsSlugManuallyEdited(true);
-    setValue("Slug", slugify(value), { shouldDirty: true, shouldValidate: true });
+    // Convert spaces to dashes and remove Persian characters
+    const cleaned = value.replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+    setValue("Slug", cleaned, { shouldDirty: true, shouldValidate: true });
   };
 
   const handleUseGeneratedSlug = () => {

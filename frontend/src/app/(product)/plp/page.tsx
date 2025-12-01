@@ -90,10 +90,36 @@ async function getProducts(
         products: searchResults.data
           .filter((item) => {
             // Filter out products without images
-            return !!(item.CoverImage?.url || item.CoverImage);
+            // CoverImage can be either ImageResponse (with url) or { data: ImageResponse | null }
+            const coverImage = item.CoverImage;
+            if (!coverImage) return false;
+
+            // Check if it's the direct format (ImageResponse with url)
+            if ('url' in coverImage && coverImage.url) return true;
+
+            // Check if it's the nested format ({ data: ImageResponse | null })
+            if ('data' in coverImage && coverImage.data?.url) return true;
+
+            return false;
           })
           .map((item) => {
             // Transform search API format to match product data format
+            // Extract url from either ImageResponse or { data: ImageResponse | null } format
+            const coverImage = item.CoverImage;
+            const imageUrl = coverImage && 'url' in coverImage
+              ? coverImage.url
+              : coverImage && 'data' in coverImage
+                ? coverImage.data?.url
+                : undefined;
+
+            // Extract category title from either direct format or nested format
+            const category = item.product_main_category;
+            const categoryTitle = category && 'Title' in category
+              ? category.Title
+              : category && 'data' in category
+                ? category.data?.attributes?.Title || ""
+                : "";
+
             return {
               id: item.id,
               attributes: {
@@ -104,27 +130,36 @@ async function getProducts(
                 CoverImage: {
                   data: {
                     attributes: {
-                      url: item.CoverImage?.url,
+                      url: imageUrl,
                     },
                   },
                 },
                 product_main_category: {
                   data: {
                     attributes: {
-                      Title: item.product_main_category?.Title || "",
+                      Title: categoryTitle,
                       Slug: "",
                     },
                   },
                 },
                 product_variations: {
-                  data: item.product_variations.map((variation) => ({
-                    attributes: {
-                      SKU: "",
-                      Price: variation.Price.toString(),
-                      DiscountPrice: variation.DiscountPrice?.toString(),
-                      IsPublished: true,
-                    },
-                  })),
+                  data: (item.product_variations && Array.isArray(item.product_variations)
+                    ? item.product_variations
+                    : item.product_variations && 'data' in item.product_variations
+                      ? item.product_variations.data
+                      : []
+                  ).map((variation) => {
+                    // Handle both direct variation and nested variation formats
+                    const variationData = 'attributes' in variation ? variation.attributes : variation;
+                    return {
+                      attributes: {
+                        SKU: "",
+                        Price: variationData.Price.toString(),
+                        DiscountPrice: variationData.DiscountPrice?.toString(),
+                        IsPublished: true,
+                      },
+                    };
+                  }),
                 },
               },
             };

@@ -34,11 +34,13 @@ import {
   Link2,
   Link2Off,
   X,
+  ShoppingBag,
 } from "lucide-react";
 import LinkDialog, { type LinkFormValues } from "./LinkDialog";
 import ImageDialog, { type ImageFormValues } from "./ImageDialog";
 import type { UploadedImage } from "@/services/super-admin/files/upload";
 import TableBuilderDialog from "./TableBuilderDialog";
+import ProductShortcodeModal from "./ProductShortcodeModal";
 
 interface ToolbarProps {
   editor: Editor;
@@ -123,6 +125,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
   });
   const [showImageDialog, setShowImageDialog] = React.useState(false);
   const [showTableBuilder, setShowTableBuilder] = React.useState(false);
+  const [showProductShortcodeModal, setShowProductShortcodeModal] = React.useState(false);
   const [imageDefaults, setImageDefaults] = React.useState<ImageFormValues>({
     src: "",
     alt: "",
@@ -201,9 +204,15 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
     setShowTableBuilder(false);
   };
 
+  const handleProductShortcodeInsert = (shortcode: string) => {
+    editor.chain().focus().insertContent(shortcode).run();
+    setShowProductShortcodeModal(false);
+  };
+
   return (
     <>
-      <div className="flex flex-wrap items-center gap-1 p-3 border-b border-neutral-200 bg-white rounded-t-lg">
+      <div className="sticky top-4 z-30 mb-4 flex justify-center">
+        <div className="flex w-fit max-w-full flex-wrap items-center justify-center gap-1 rounded-3xl border border-slate-200 bg-white/10 px-4 py-2.5 shadow-lg backdrop-blur-lg transition-all">
       {/* Headings */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -405,6 +414,12 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
       <ToolbarButton onClick={() => setShowTableBuilder(true)} title="افزودن جدول">
         <Table size={16} />
       </ToolbarButton>
+      <ToolbarButton
+        onClick={() => setShowProductShortcodeModal(true)}
+        title="افزودن کاروسل محصولات"
+      >
+        <ShoppingBag size={16} />
+      </ToolbarButton>
 
       <Divider />
 
@@ -450,7 +465,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
           </button>
         </div>
       </div>
-
+      </div>
       </div>
       <LinkDialog
         isOpen={showLinkDialog}
@@ -468,6 +483,11 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
         isOpen={showTableBuilder}
         onClose={() => setShowTableBuilder(false)}
         onInsert={handleTableInsert}
+      />
+      <ProductShortcodeModal
+        isOpen={showProductShortcodeModal}
+        onClose={() => setShowProductShortcodeModal(false)}
+        onInsert={handleProductShortcodeInsert}
       />
     </>
   );
