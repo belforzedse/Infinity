@@ -3,8 +3,11 @@
 import { useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import { currentUserAtom, userLoadingAtom, userErrorAtom } from "@/lib/atoms/auth";
+import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
 import UserService from "@/services/user";
 import { __clearOrderCache } from "@/services/order";
+import { invalidateAddressCache } from "@/services/user/addresses";
+import { jotaiStore } from "@/lib/jotaiStore";
 import { ACCESS_TOKEN_EVENT, ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
 
 /**
@@ -37,6 +40,11 @@ export default function AuthInitializer() {
         setUser(null); // Clear cached user immediately
         setError(null);
         __clearOrderCache();
+        // Clear address atoms to prevent showing previous user's addresses
+        jotaiStore.set(addressesAtom, []);
+        jotaiStore.set(addressesLoadingAtom, false);
+        jotaiStore.set(addressesErrorAtom, null);
+        invalidateAddressCache();
         lastTokenRef.current = null;
         return;
       }
@@ -59,6 +67,11 @@ export default function AuthInitializer() {
       if (tokenChanged) {
         setUser(null);
         setError(null);
+        // Clear address atoms when token changes (new user login)
+        jotaiStore.set(addressesAtom, []);
+        jotaiStore.set(addressesLoadingAtom, false);
+        jotaiStore.set(addressesErrorAtom, null);
+        invalidateAddressCache();
       }
 
       lastTokenRef.current = token;

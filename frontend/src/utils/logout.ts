@@ -12,7 +12,9 @@
 
 import { jotaiStore } from "@/lib/jotaiStore";
 import { currentUserAtom, userErrorAtom } from "@/lib/atoms/auth";
+import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
 import { __clearOrderCache } from "@/services/order";
+import { invalidateAddressCache } from "@/services/user/addresses";
 import { clearAccessToken } from "@/utils/accessToken";
 
 export async function performLogout(): Promise<void> {
@@ -21,6 +23,10 @@ export async function performLogout(): Promise<void> {
     if (typeof window !== "undefined") {
       jotaiStore.set(currentUserAtom, null);
       jotaiStore.set(userErrorAtom, null);
+      // Clear address atoms to prevent showing previous user's addresses
+      jotaiStore.set(addressesAtom, []);
+      jotaiStore.set(addressesLoadingAtom, false);
+      jotaiStore.set(addressesErrorAtom, null);
       try {
         localStorage.removeItem("refreshToken");
       } catch {
@@ -31,6 +37,7 @@ export async function performLogout(): Promise<void> {
     // 2. Remove auth token (triggers storage event listener in AuthInitializer)
     clearAccessToken();
     __clearOrderCache();
+    invalidateAddressCache();
 
     // 3. Redirect to auth page
     if (typeof window !== "undefined") {
