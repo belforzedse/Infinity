@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import LinkDialog, { type LinkFormValues } from "./LinkDialog";
 import ImageDialog, { type ImageFormValues } from "./ImageDialog";
+import type { UploadedImage } from "@/services/super-admin/files/upload";
 import TableBuilderDialog from "./TableBuilderDialog";
 
 interface ToolbarProps {
@@ -181,7 +182,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
     }
   };
 
-  const handleImageSubmit = (values: ImageFormValues) => {
+  const handleImageSubmit = (values: ImageFormValues, _media?: UploadedImage | null) => {
     editor
       .chain()
       .focus()
