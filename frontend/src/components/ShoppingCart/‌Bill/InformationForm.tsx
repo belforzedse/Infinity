@@ -5,7 +5,8 @@ import type {
   Control,
   UseFormSetValue} from "react-hook-form";
 import {
-  Controller
+  Controller,
+  useWatch
 } from "react-hook-form";
 import { useAtom } from "jotai";
 import Input from "@/components/Kits/Form/Input";
@@ -87,6 +88,20 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [setValue, setAddresses, setLoading, setError]);
+
+  // Watch the current address value from the form
+  const selectedAddress = useWatch({ control, name: "address" });
+
+  // Clear form value if selected address was deleted
+  useEffect(() => {
+    if (selectedAddress && selectedAddress.id) {
+      const addressExists = addresses.some((addr) => addr.id === selectedAddress.id);
+      if (!addressExists) {
+        // Selected address was deleted, clear the form value
+        setValue("address", null);
+      }
+    }
+  }, [addresses, selectedAddress, setValue]);
 
   // Convert addresses to select options with useMemo to ensure reactivity
   const addressOptions: Option[] = useMemo(() => {
