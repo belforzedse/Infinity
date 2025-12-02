@@ -65,16 +65,22 @@ type SnappPaySimpleResponse = {
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
 function getSnappConfig() {
+  // Require critical credentials (no fallbacks)
+  if (!process.env.SNAPPAY_CLIENT_SECRET) {
+    throw new Error("SNAPPAY_CLIENT_SECRET environment variable is required");
+  }
+  if (!process.env.SNAPPAY_PASSWORD) {
+    throw new Error("SNAPPAY_PASSWORD environment variable is required");
+  }
+
   return {
     baseUrl:
       process.env.SNAPPAY_BASE_URL || "https://api.snapppay.ir",
     clientId: process.env.SNAPPAY_CLIENT_ID || "infinity",
-    clientSecret:
-      process.env.SNAPPAY_CLIENT_SECRET || "SNAPPAY_CLIENT_SECRET",
+    clientSecret: process.env.SNAPPAY_CLIENT_SECRET,
     username:
       process.env.SNAPPAY_USERNAME || "infinity-purchase",
-    password:
-      process.env.SNAPPAY_PASSWORD || "SNAPPAY_PASSWORD",
+    password: process.env.SNAPPAY_PASSWORD,
     returnUrl:
       process.env.SNAPPAY_RETURN_URL || process.env.URL + "api/orders/payment-callback",
   };

@@ -90,6 +90,21 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::wallet-topup": {
         "wallet-topup": ["paymentCallback"],
       },
+      "api::blog-post": {
+        "blog-post": READ_ACTIONS,
+      },
+      "api::blog-category": {
+        "blog-category": READ_ACTIONS,
+      },
+      "api::blog-tag": {
+        "blog-tag": READ_ACTIONS,
+      },
+      "api::blog-author": {
+        "blog-author": READ_ACTIONS,
+      },
+      "api::blog-comment": {
+        "blog-comment": READ_ACTIONS,
+      },
     },
   },
   customer: {
@@ -136,6 +151,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::local-user-wallet": {
         "local-user-wallet": ["getCurrentUserWallet"],
       },
+      "api::local-user-wallet-transaction": {
+        "local-user-wallet-transaction": READ_ACTIONS,
+      },
       "api::wallet-topup": {
         "wallet-topup": ["chargeIntent"],
       },
@@ -143,6 +161,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
         "payment-gateway": ["snappEligible"],
       },
     },
+  },
+  editor: {
+    mode: "all",
   },
   "store-manager": { mode: "all" },
   superadmin: { mode: "all" },
@@ -174,9 +195,20 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::admin-activity", controller: "admin-activity", allowActions: [] },
   // Restrict user activity - store managers cannot view other users' activities
   { typeKey: "api::user-activity", controller: "user-activity", allowActions: [] },
-
+  // Restrict blog management - store managers can only read blog posts (like normal users)
+  { typeKey: "api::blog-post", controller: "blog-post", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-category", controller: "blog-category", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-tag", controller: "blog-tag", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-author", controller: "blog-author", allowActions: READ_ACTIONS },
+  { typeKey: "api::blog-comment", controller: "blog-comment", allowActions: READ_ACTIONS },
 ];
 
+/**
+ * Determines whether a role permission spec grants all permissions.
+ *
+ * @param spec - The role permission spec to check
+ * @returns `true` if the spec's mode equals `"all"`, `false` otherwise
+ */
 function isFullAccessSpec(spec: RolePermissionSpec): spec is FullAccessSpec {
   return spec.mode === "all";
 }
@@ -258,6 +290,12 @@ function applySpecRecursive(
   });
 }
 
+/**
+ * Builds the default permissions action tree for the given role type.
+ *
+ * @param roleType - The role type key (for example: "public", "customer", "store-manager", "editor", "superadmin")
+ * @returns A permissions tree object mapping content types and controllers to their action permission flags, configured according to the role's permission spec; if no spec exists for `roleType`, returns a tree with all actions disabled by default.
+ */
 function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string, any> {
   const usersPermissionsService = strapi.plugin("users-permissions").service("users-permissions");
   const spec = ROLE_PERMISSION_SPECS[roleType];
@@ -270,6 +308,12 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
     const tree = usersPermissionsService.getActions({ defaultEnable: true });
     if (roleType === "store-manager") {
       applyRestrictedControllers(tree, STORE_MANAGER_RESTRICTED_CONTROLLERS, strapi);
+    } else if (roleType === "editor") {
+      // Editors get store-manager restrictions EXCEPT blog restrictions (they need full CRUD for blog)
+      const editorRestrictions = STORE_MANAGER_RESTRICTED_CONTROLLERS.filter(
+        (restriction) => !restriction.typeKey.startsWith("api::blog-")
+      );
+      applyRestrictedControllers(tree, editorRestrictions, strapi);
     }
     return tree;
   }
@@ -490,6 +534,11 @@ export default {
             name: "Store manager",
             description: "Manage store and orders, cannot manage user wallets",
             type: "store-manager",
+          },
+          {
+            name: "Editor",
+            description: "Blog content editor - can manage blog posts, categories, tags, authors, and comments",
+            type: "editor",
           },
           { name: "Customer", description: "End customer role", type: "customer" },
         ];

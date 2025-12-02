@@ -86,8 +86,38 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
     ? { borderBottomWidth: 0, borderBottomColor: "transparent", boxShadow: "none" }
     : undefined;
 
+  const [isStandalone, setIsStandalone] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && "matchMedia" in window) {
+      const mq = window.matchMedia("(display-mode: standalone)");
+      setIsStandalone(mq.matches);
+
+      // Optional: listen for changes
+      const handleChange = (e: MediaQueryListEvent) => {
+        setIsStandalone(e.matches);
+      };
+
+      if (mq.addEventListener) {
+        mq.addEventListener("change", handleChange);
+        return () => mq.removeEventListener("change", handleChange);
+      } else if (mq.addListener) {
+        mq.addListener(handleChange);
+        return () => mq.removeListener(handleChange);
+      }
+    }
+  }, []);
+
   return (
     <div dir="rtl" className="bg-white pb-[81px] antialiased lg:pb-0">
+      {/* Safe area white bar for standalone mode */}
+      {isStandalone && (
+        <div
+          className="fixed left-0 right-0 top-0 z-[60] bg-white"
+          style={{ height: "env(safe-area-inset-top)" }}
+        />
+      )}
+
       {/* Skip to content for accessibility */}
       <a
         href="#content"
@@ -96,12 +126,13 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         پرش به محتوا
       </a>
       <header
-        className={`sticky top-0 z-50 transform transition-all duration-200 allow-overflow border-t-0 ${
-          scrolled
-            ? "glass-panel shadow-sm"
-            : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
+        className={`allow-overflow sticky z-50 transform border-t-0 transition-all duration-200 ${
+          scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
-        style={headerStyle}
+        style={{
+          ...headerStyle,
+          top: isStandalone ? "env(safe-area-inset-top)" : "0",
+        }}
       >
         <div className="relative">
           {scrolled && (

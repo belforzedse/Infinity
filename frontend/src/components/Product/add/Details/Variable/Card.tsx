@@ -7,7 +7,7 @@ import type { ProductVariableDisplay } from "./types";
 interface ProductVariableCardProps {
   item: ProductVariableDisplay;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 export const ProductVariableCard: React.FC<ProductVariableCardProps> = ({
@@ -74,12 +74,15 @@ export const ProductVariableCard: React.FC<ProductVariableCardProps> = ({
           <span className="text-xs text-slate-500">ویرایش </span>
           <EditIcon className="h-4 w-4" />
         </button>
-        <button
-          className="w-fit rounded-md bg-slate-100 p-2 text-center text-slate-500"
-          onClick={onDelete}
-        >
-          <DeleteIcon className="h-4 w-4" />
-        </button>
+        {onDelete && (
+          <button
+            className="w-fit rounded-md bg-slate-100 p-2 text-center text-slate-500"
+            onClick={onDelete}
+            title="حذف تنوع"
+          >
+            <DeleteIcon className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   );

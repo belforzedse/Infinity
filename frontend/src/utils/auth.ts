@@ -47,7 +47,16 @@ export const handleAuthErrors = (error?: any, isAdminCheck?: boolean): void => {
   }
 
   // 403: User forbidden/permission denied
+  // NOTE: We do NOT clear the access token here - user stays logged in
+  // We only clear the cached user data so fresh role information is fetched
+  // This allows users to remain authenticated but prevents access to admin pages
   if (isForbidden) {
+    // Refresh user data to get latest role information
+    // This ensures that if a user's role was changed in the backend,
+    // the frontend will get the updated role on the next API call
+    // IMPORTANT: We do NOT call clearAccessToken() - user remains logged in
+    jotaiStore.set(currentUserAtom, null);
+
     if (!isJest) {
       const notification = addErrorNotification(
         403,

@@ -37,6 +37,8 @@ export const me = async (requireAdmin: boolean = false): Promise<MeResponse> => 
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      // Force no caching for admin checks to ensure fresh role data
+      cache: requireAdmin ? 'no-store' : 'default',
     });
 
     // Get the actual response data regardless of shape

@@ -1,0 +1,302 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - experimental
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-cicd.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-cicd.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+  IMAGE_NAME: infinity-backend
+  STRAPI_DISABLE_SOURCEMAPS: "true"
+  STRAPI_TELEMETRY_DISABLED: "true"
+  ENABLE_LARGE_HEAP: "false"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine backend layout
+        id: layout
+        run: |
+          if [[ -f backend/package.json ]]; then
+            echo "docker_context=backend" >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=backend" >> "$GITHUB_OUTPUT"
+          else
+            echo "docker_context=." >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Detect backend changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            backend:
+              - 'backend/**'
+            typegen:
+              - 'backend/src/api/**/content-types/**'
+              - 'backend/src/components/**'
+              - 'backend/types/**'
+              - 'backend/package.json'
+              - 'backend/package-lock.json'
+              - 'backend/tsconfig.json'
+
+      - name: Setup Node.js (tooling)
+        if: steps.changes.outputs.typegen == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies for tooling
+        if: steps.changes.outputs.typegen == 'true'
+        id: install_tooling
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          SECONDS=0
+          npm ci --prefer-offline
+          echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Strapi types (schema changes only)
+        if: steps.changes.outputs.typegen == 'true'
+        id: typegen
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          SECONDS=0
+          npm run type:generate
+          echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify generated types committed
+        if: steps.changes.outputs.typegen == 'true'
+        run: |
+          set -euo pipefail
+          if [[ -n "$(git status --short backend/types/generated)" ]]; then
+            echo "::error::Detected uncommitted generated types. Please run npm run type:generate locally."
+            git status --short backend/types/generated
+            exit 1
+          fi
+
+      - name: Select Dockerfile and image tag
+        id: meta
+        run: |
+          set -euo pipefail
+          base="${{ steps.layout.outputs.dockerfile_base }}"
+          main_path=$([[ "$base" == "." ]] && echo "main.Dockerfile" || echo "$base/main.Dockerfile")
+          dev_path=$([[ "$base" == "." ]] && echo "dev.Dockerfile" || echo "$base/dev.Dockerfile")
+          case "${GITHUB_REF_NAME}" in
+            dev)
+              echo "dockerfile=${dev_path}" >> "$GITHUB_OUTPUT"
+              echo "runtime_tag=dev" >> "$GITHUB_OUTPUT"
+              ;;
+            experimental)
+              echo "dockerfile=${main_path}" >> "$GITHUB_OUTPUT"
+              echo "runtime_tag=experimental" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "dockerfile=${main_path}" >> "$GITHUB_OUTPUT"
+              echo "runtime_tag=main" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Configure Node heap
+        id: heap
+        run: |
+          if [[ "${ENABLE_LARGE_HEAP}" == "true" ]]; then
+            echo "node_options=--max-old-space-size=4096" >> "$GITHUB_OUTPUT"
+          else
+            echo "node_options=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push Docker image
+        id: docker_build
+        env:
+          NODE_OPTIONS_ARG: ${{ steps.heap.outputs.node_options }}
+          BUILD_CONTEXT: ${{ steps.layout.outputs.docker_context }}
+        run: |
+          set -euo pipefail
+          SECONDS=0
+          docker buildx build \
+            --file "${{ steps.meta.outputs.dockerfile }}" \
+            --tag "$REGISTRY/$IMAGE_NAME:${{ github.sha }}" \
+            --tag "$REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}" \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --build-arg STRAPI_DISABLE_SOURCEMAPS="${STRAPI_DISABLE_SOURCEMAPS}" \
+            --build-arg STRAPI_TELEMETRY_DISABLED="${STRAPI_TELEMETRY_DISABLED}" \
+            --build-arg NODE_OPTIONS="${NODE_OPTIONS_ARG}" \
+            --push \
+            "$BUILD_CONTEXT"
+          echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"
+
+      - name: Summarize backend timings
+        run: |
+          {
+            echo "### Backend pipeline timings"
+            echo ""
+            echo "- npm ci (tooling): ${{ steps.install_tooling.outputs.duration || 'skipped' }}s"
+            echo "- type:generate: ${{ steps.typegen.outputs.duration || 'skipped' }}s"
+            echo "- docker build+push: ${{ steps.docker_build.outputs.duration || 'n/a' }}s"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload docker-compose (prod)
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.PROD_BACKEND_HOST }}
+          username: ${{ secrets.PROD_BACKEND_USER }}
+          key: ${{ secrets.PROD_BACKEND_SSH_KEY }}
+          port: ${{ secrets.PROD_BACKEND_PORT || '22' }}
+          source: backend/docker-compose.yml
+          target: /opt/infinity/backend/
+
+      - name: Deploy to production
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.PROD_BACKEND_HOST }}
+          username: ${{ secrets.PROD_BACKEND_USER }}
+          key: ${{ secrets.PROD_BACKEND_SSH_KEY }}
+          port: ${{ secrets.PROD_BACKEND_PORT || '22' }}
+          script: |
+            set -euo pipefail
+            cd /opt/infinity/backend
+            echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
+            cat <<-'EOF' > main.env
+            ${{ secrets.PROD_BACKEND_ENV_FILE }}
+            EOF
+            export DB_ENV_FILE=db.env
+            export ENV_FILE=main.env
+            mkdir -p public/uploads
+            DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            cat > "$DB_ENV_FILE" <<-EOF
+            POSTGRES_USER=${DB_USER}
+            POSTGRES_PASSWORD=${DB_PASS}
+            POSTGRES_DB=${DB_NAME}
+            EOF
+            export IMAGE_TAG=main
+            docker compose --env-file "$ENV_FILE" pull
+            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
+
+      - name: Upload docker-compose (staging)
+        if: github.ref == 'refs/heads/dev'
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.STAGING_BACKEND_HOST }}
+          username: ${{ secrets.STAGING_BACKEND_USER }}
+          key: ${{ secrets.STAGING_BACKEND_SSH_KEY }}
+          port: ${{ secrets.STAGING_BACKEND_PORT || '22' }}
+          source: backend/docker-compose.yml
+          target: /opt/infinity/backend/
+
+      - name: Deploy to staging
+        if: github.ref == 'refs/heads/dev'
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_BACKEND_HOST }}
+          username: ${{ secrets.STAGING_BACKEND_USER }}
+          key: ${{ secrets.STAGING_BACKEND_SSH_KEY }}
+          port: ${{ secrets.STAGING_BACKEND_PORT || '22' }}
+          script: |
+            set -euo pipefail
+            cd /opt/infinity/backend
+            echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
+            cat <<-'EOF' > dev.env
+            ${{ secrets.STAGING_BACKEND_ENV_FILE }}
+            EOF
+            export DB_ENV_FILE=db.env
+            export ENV_FILE=dev.env
+            mkdir -p public/uploads
+            DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            cat > "$DB_ENV_FILE" <<-EOF
+            POSTGRES_USER=${DB_USER}
+            POSTGRES_PASSWORD=${DB_PASS}
+            POSTGRES_DB=${DB_NAME}
+            EOF
+            export IMAGE_TAG=dev
+            docker compose --env-file "$ENV_FILE" pull
+            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
+
+      - name: Upload docker-compose (experimental)
+        if: github.ref == 'refs/heads/experimental'
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.EXPERIMENTAL_BACKEND_HOST }}
+          username: ${{ secrets.EXPERIMENTAL_BACKEND_USER }}
+          key: ${{ secrets.EXPERIMENTAL_BACKEND_SSH_KEY }}
+          port: ${{ secrets.EXPERIMENTAL_BACKEND_PORT || '22' }}
+          source: backend/docker-compose.yml
+          target: /opt/infinity/backend/
+
+      - name: Deploy to experimental
+        if: github.ref == 'refs/heads/experimental'
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EXPERIMENTAL_BACKEND_HOST }}
+          username: ${{ secrets.EXPERIMENTAL_BACKEND_USER }}
+          key: ${{ secrets.EXPERIMENTAL_BACKEND_SSH_KEY }}
+          port: ${{ secrets.EXPERIMENTAL_BACKEND_PORT || '22' }}
+          script: |
+            set -euo pipefail
+            cd /opt/infinity/backend
+            echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
+            cat <<-'EOF' > main.env
+            ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
+            EOF
+            export DB_ENV_FILE=db.env
+            export ENV_FILE=main.env
+            mkdir -p public/uploads
+            DB_USER=$(grep -E "^DATABASE_USERNAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_PASS=$(grep -E "^DATABASE_PASSWORD=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            DB_NAME=$(grep -E "^DATABASE_NAME=" "$ENV_FILE" | tail -1 | cut -d= -f2-)
+            cat > "$DB_ENV_FILE" <<-EOF
+            POSTGRES_USER=${DB_USER}
+            POSTGRES_PASSWORD=${DB_PASS}
+            POSTGRES_DB=${DB_NAME}
+            EOF
+            export IMAGE_TAG=experimental
+            docker compose --env-file "$ENV_FILE" pull
+            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
+            if ! docker image prune -f; then
+              echo "Skipped prune: another operation is already running."
+            fi
+

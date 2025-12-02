@@ -7,6 +7,7 @@ Modern, RTL‑first e‑commerce frontend built with Next.js (App Router), TypeS
 - Authentication with OTP/password, JWT handling, and responsive RTL UI
 - Product catalog with variations, filters (PLP), and media gallery (PDP)
 - Shopping cart with drawer UI, local persistence, and checkout flow
+- **Blog system with rich text editor, SEO optimization, and comment management**
 - Super‑admin and admin sections for content/product management
 - API services layer with typed endpoints and helper utilities
 - Tailwind + component kits; toast notifications; loading/progress UX
@@ -19,6 +20,7 @@ Modern, RTL‑first e‑commerce frontend built with Next.js (App Router), TypeS
 - Styling: Tailwind CSS 3.4.1
 - State: Jotai 2.11.1
 - Forms: React Hook Form 7.54.2
+- Rich Text: Tiptap (for blog content editing)
 - Notifications: react-hot-toast
 - Backend: Strapi v4.25.21 (via REST APIs)
 
@@ -54,6 +56,37 @@ Open http://localhost:2888
 
 Environment variables are automatically loaded from `dev.env` - no manual configuration needed!
 
+## Blog System
+
+The frontend includes a comprehensive blog system with:
+
+### Public Features
+- **Blog Listing**: `/blog` - Paginated list of published posts with filtering
+- **Individual Posts**: `/{slug}` - Root-level URLs for SEO optimization
+- **Categories & Tags**: Organized content with filtering capabilities
+- **Comments**: Authenticated user comments with real-time loading
+
+### Admin Features
+- **Content Management**: Full CRUD operations for posts, categories, tags, authors
+- **Rich Text Editor**: Tiptap-based editor with comprehensive formatting
+- **SEO Optimization**: Complete metadata management with Open Graph support
+- **Comment Moderation**: Three-state approval system for user comments
+
+### Technical Features
+- **Server-Side Rendering**: Full SSR support for SEO
+- **Metadata Generation**: Automatic Open Graph and Twitter Card generation
+- **Structured Data**: JSON-LD implementation for search engines
+- **Slug Validation**: Automatic conflict prevention with existing routes
+- **Image Optimization**: Next.js Image component integration
+
+### Components
+- `BlogList` - Post listing with search and filters
+- `BlogPostDetail` - Individual post display with sidebar
+- `BlogComments` - Comment system with threading support
+- `RichTextEditor` - Tiptap-based content editor
+
+For detailed documentation, see `BLOG_SYSTEM.md` in the project root.
+
 ## Environment Variables
 
 Environment variables are automatically loaded by `load-env.js`:
@@ -67,6 +100,12 @@ Key variables:
 - `NEXT_PUBLIC_API_BASE_URL`: Base URL for backend API
 - `NEXT_PUBLIC_IMAGE_BASE_URL`: Base host for media/CDN
 - `NEXT_PUBLIC_STRAPI_TOKEN`: Public token for Strapi endpoints
+- `REVALIDATION_SECRET`: Secret for blog post cache invalidation (must match backend)
+
+**Important**: `main.env` and `dev.env` files are gitignored. For GitHub Actions, copy the entire file contents into the corresponding GitHub secret:
+- `PROD_FRONTEND_ENV_FILE` (for production/main branch)
+- `STAGING_FRONTEND_ENV_FILE` (for staging/dev branch)
+- `EXPERIMENTAL_FRONTEND_ENV_FILE` (for experimental branch)
 
 To override locally, create `.env.local`:
 
@@ -125,7 +164,7 @@ Compose will forward the env values as both build args and runtime vars so the c
   1. SCP `frontend/docker-compose.yml` to `/opt/infinity/frontend/`.
   2. SSH in with the `deploy` user (key stored as `*_FRONTEND_SSH_KEY` secret).
   3. Rewrite the env file with the GitHub secrets and run `docker compose pull && docker compose up -d --remove-orphans`, then prune dangling images.
-- Required repository secrets (per environment prefix `PROD_`, `STAGING_`, `EXPERIMENTAL_`): `*_FRONTEND_HOST`, `*_FRONTEND_PORT`, `*_FRONTEND_USER`, `*_FRONTEND_SSH_KEY`, `*_FRONTEND_API_BASE_URL`, `*_FRONTEND_IMAGE_BASE_URL`, `*_FRONTEND_STRAPI_TOKEN`.
+- Required repository secrets (per environment prefix `PROD_`, `STAGING_`, `EXPERIMENTAL_`): `*_FRONTEND_HOST`, `*_FRONTEND_PORT`, `*_FRONTEND_USER`, `*_FRONTEND_SSH_KEY`, `*_FRONTEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).
 - Shared registry secrets: `GHCR_DEPLOY_USER` (GitHub username used for pulls) and `GHCR_DEPLOY_TOKEN` (PAT with `read:packages`) so the VMs can `docker login ghcr.io` before pulling.
 - Each VM must have Docker Engine + Compose v2 installed, `deploy` added to the `docker` group, and `/opt/infinity/frontend` owned by `deploy`.***
 

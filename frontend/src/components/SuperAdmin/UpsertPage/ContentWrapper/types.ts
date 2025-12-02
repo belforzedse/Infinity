@@ -12,7 +12,8 @@ export type StandardFieldType =
   | "tag-text"
   | "terms"
   | "json"
-  | "categories-list";
+  | "categories-list"
+  | "richtext";
 
 export type StandardField<T> = {
   name: keyof T;

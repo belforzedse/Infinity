@@ -1,6 +1,7 @@
 // removed unused import: HTTP_STATUS from "@/constants/api"
 import { handleAuthErrors } from "@/utils/auth";
 import { apiClient } from "@/lib/api-client";
+import { apiCache } from "@/lib/api-cache";
 
 // Use the central auth error handler instead of local implementation
 const handleAuthError = (error: any) => {
@@ -47,6 +48,14 @@ export interface AddAddressRequest {
   FullAddress: string;
   shipping_city: number;
 }
+
+/**
+ * Invalidate API cache for addresses endpoint
+ * Call this after add/update/delete operations to ensure fresh data
+ */
+export const invalidateAddressCache = (): void => {
+  apiCache.clearByPattern(/local-user-addresses/);
+};
 
 export const getUserAddresses = async (): Promise<UserAddress[]> => {
   const token = localStorage.getItem("accessToken");
@@ -99,7 +108,28 @@ export const addUserAddress = async (address: AddAddressRequest): Promise<UserAd
       },
     });
 
-    return response.data as UserAddress;
+    // Invalidate cache after successful add
+    invalidateAddressCache();
+
+    // apiClient.post returns response.data where response is { data: ApiResponse<T>, headers }
+    // Strapi returns { data: address }, so response.data is { data: address }
+    // We need to access response.data to get the address object
+    // But based on getUserAddresses pattern, response.data is already the array/object
+    // So for POST, response.data should be the address directly or { data: address }
+    const addressData = (response as any).data?.data || (response as any).data || response;
+
+    // Verify the address has the required structure
+    if (!addressData || !addressData.shipping_city) {
+      console.warn("Address response missing shipping_city, fetching full address");
+      // If the response doesn't have full data, fetch it
+      const fullAddresses = await getUserAddresses();
+      const fullAddress = fullAddresses.find(addr => addr.id === addressData.id);
+      if (fullAddress) {
+        return fullAddress;
+      }
+    }
+
+    return addressData as UserAddress;
   } catch (error) {
     console.error("Error adding user address:", error);
     handleAuthError(error);
@@ -124,6 +154,9 @@ export const updateUserAddress = async (
       },
     });
 
+    // Invalidate cache after successful update
+    invalidateAddressCache();
+
     return response.data as UserAddress;
   } catch (error) {
     console.error("Error updating user address:", error);
@@ -145,6 +178,9 @@ export const deleteUserAddress = async (id: number): Promise<void> => {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    // Invalidate cache after successful delete
+    invalidateAddressCache();
   } catch (error) {
     console.error("Error deleting user address:", error);
     handleAuthError(error);

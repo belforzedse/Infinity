@@ -59,7 +59,11 @@ export default function PDPHeroInfoModel(props: Props) {
     <div className="flex flex-col gap-3">
       <span className="text-xl text-foreground-primary">انتخاب مدل</span>
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        className="flex flex-wrap gap-2"
+        role="radiogroup"
+        aria-label="انتخاب مدل محصول"
+      >
         {models.map((model) => {
           const isSelected = model.id === selectedModel;
           const isDisabled = actualDisabledModelIds.includes(model.id);
@@ -93,6 +97,8 @@ export default function PDPHeroInfoModel(props: Props) {
               }
               disabled={isDisabled}
               aria-disabled={isDisabled}
+              aria-label={isDisabled ? `مدل ${model.title} ناموجود` : `انتخاب مدل ${model.title}`}
+              aria-pressed={isSelected ? "true" : "false"}
               title={isDisabled ? "ناموجود" : model.title}
             >
               {model.title}

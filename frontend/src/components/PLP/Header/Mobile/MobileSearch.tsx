@@ -16,6 +16,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   const [suggestions, setSuggestions] = useState<
     Array<{
       id: number;
+      slug?: string;
       Title: string;
       Price?: number;
       DiscountPrice?: number;
@@ -53,8 +54,8 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        // Start with basic search
-        let url = `${API_BASE_URL}/products?filters[Title][$containsi]=${encodeURIComponent(q)}&pagination[page]=1&pagination[pageSize]=6&fields[0]=id&fields[1]=Title&_skip_global_loader=1`;
+        // Use the search endpoint which includes Slug field
+        const url = `${API_BASE_URL}/products/search?q=${encodeURIComponent(q)}&page=1&pageSize=6&_skip_global_loader=1`;
         const res = await fetch(url, {
           cache: "no-store",
           headers: { Accept: "application/json" },
@@ -66,18 +67,24 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
         // Debug: Log the response
         console.log("Mobile Search API response:", json);
 
-        const items = (json?.data || []).map((i: any) => ({
-          id: i.id,
-          Title: i.attributes?.Title || i.Title,
-          Price: i.attributes?.Price || undefined,
-          DiscountPrice: i.attributes?.DiscountPrice || undefined,
-          Discount: i.attributes?.Discount || undefined,
-          category: i.attributes?.product_category?.data?.attributes?.Title || undefined,
-          image: i.attributes?.CoverImage?.data?.attributes?.url
-            ? `${IMAGE_BASE_URL}${i.attributes.CoverImage.data.attributes.url}`
-            : undefined,
-          isAvailable: i.attributes?.IsAvailable ?? true,
-        }));
+        const items = (json?.data || []).map((i: { id: number; attributes?: Record<string, unknown>; Title?: string; Slug?: string; Price?: number; DiscountPrice?: number; Discount?: number; IsAvailable?: boolean; product_category?: { data?: { attributes?: { Title?: string } } }; CoverImage?: { data?: { attributes?: { url?: string } } } }) => {
+          const attrs = i.attributes ? i.attributes : i;
+          return {
+            id: i.id,
+            slug: (attrs as Record<string, unknown>)?.Slug as string | undefined ?? undefined,
+            Title: (attrs as Record<string, unknown>)?.Title as string ?? i.Title ?? '',
+            Price: (attrs as Record<string, unknown>)?.Price as number | undefined ?? undefined,
+            DiscountPrice: (attrs as Record<string, unknown>)?.DiscountPrice as number | undefined ?? undefined,
+            Discount: (attrs as Record<string, unknown>)?.Discount as number | undefined ?? undefined,
+            category: ((attrs as Record<string, unknown>)?.product_main_category as { Title?: string } | undefined)?.Title ?? undefined,
+            image: ((attrs as Record<string, unknown>)?.CoverImage as { url?: string; data?: { attributes?: { url?: string } } } | undefined)?.url
+              ? `${IMAGE_BASE_URL}${((attrs as Record<string, unknown>)?.CoverImage as { url?: string })?.url}`
+              : ((attrs as Record<string, unknown>)?.CoverImage as { data?: { attributes?: { url?: string } } } | undefined)?.data?.attributes?.url
+                ? `${IMAGE_BASE_URL}${((attrs as Record<string, unknown>)?.CoverImage as { data?: { attributes?: { url?: string } } })?.data?.attributes?.url}`
+                : undefined,
+            isAvailable: (attrs as Record<string, unknown>)?.IsAvailable as boolean ?? true,
+          };
+        });
         setSuggestions(items);
       } catch {
         if (!mounted) return;
@@ -208,7 +215,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                             isAvailable={s.isAvailable}
                             onClick={() => {
                               onClose();
-                              router.push(`/pdp/${s.id}`);
+                              router.push(`/pdp/${s.slug || s.id}`);
                             }}
                             index={idx}
                           />

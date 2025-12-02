@@ -1,14 +1,31 @@
+/* Syntax highlighting for code blocks */
+@import 'highlight.js/styles/github.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html {
   scroll-behavior: smooth;
+  background-color: white; /* White background for web app */
+}
+
+body {
+  background-color: white; /* Page content background */
+  min-height: 100vh;
+}
+
+/* Safe area support for mobile notches (PWA) - Only for side edges, not top/bottom */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }
 
 ::selection {
   background: #ffe4f1; /* brand-tinted */
-  color: #111827;
+  color: #53354c;
 }
 
 /* Accessible focus outlines on interactive elements */
@@ -443,3 +460,66 @@ textarea:focus-visible {
   }
 }
 
+/* RTL-specific prose styles for rich text editor */
+@layer components {
+  [dir="rtl"] .prose {
+    /* Headers */
+    @apply prose-headings:text-right;
+
+    /* Lists */
+    @apply prose-ul:mr-6 prose-ol:mr-6;
+
+    /* Blockquotes */
+    @apply prose-blockquote:border-r-4 prose-blockquote:border-l-0 prose-blockquote:pr-4 prose-blockquote:pl-0;
+  }
+
+  /* Ensure proper styling for all prose elements */
+  .prose {
+    @apply prose-slate;
+    @apply prose-headings:font-semibold prose-headings:text-neutral-800;
+    @apply prose-p:text-neutral-700 prose-p:leading-relaxed;
+    @apply prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline;
+    @apply prose-strong:text-neutral-900 prose-strong:font-bold;
+    @apply prose-code:text-pink-600 prose-code:bg-pink-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded;
+    @apply prose-pre:bg-neutral-50 prose-pre:text-neutral-800 prose-pre:border prose-pre:border-neutral-200;
+    @apply prose-blockquote:border-neutral-300 prose-blockquote:text-neutral-600 prose-blockquote:bg-neutral-50 prose-blockquote:italic;
+    @apply prose-ul:list-disc prose-ol:list-decimal;
+    @apply prose-li:text-neutral-700;
+    @apply prose-hr:border-neutral-300;
+    @apply prose-table:text-sm;
+  }
+
+  .prose table {
+    @apply w-full border-collapse overflow-hidden rounded-xl border border-slate-200;
+  }
+
+  .prose table thead th,
+  .prose table tr:first-child th {
+    @apply bg-slate-100 px-4 py-2 text-right text-xs font-medium text-slate-600;
+  }
+
+  .prose table tbody td {
+    @apply border-t border-slate-200 border-l px-4 py-3 text-sm text-neutral-600;
+  }
+
+  .prose table tbody td:first-child {
+    @apply bg-slate-100 font-medium text-slate-600;
+  }
+
+  .tiptap {
+    @apply leading-loose text-neutral-800;
+  }
+
+  .tiptap p.is-editor-empty:first-child::before {
+    color: #94a3b8;
+    content: attr(data-placeholder);
+    float: right;
+    height: 0;
+    pointer-events: none;
+  }
+
+  [dir="ltr"] .tiptap p.is-editor-empty:first-child::before {
+    float: left;
+    text-align: left;
+  }
+}

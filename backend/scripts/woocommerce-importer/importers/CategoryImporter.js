@@ -294,20 +294,12 @@ class CategoryImporter {
    * Transform WooCommerce category to Strapi format
    */
   async transformCategory(wcCategory) {
-    // Ensure slug is unique by appending ID if needed
-    let slug = wcCategory.slug;
-    if (!slug) {
-      slug = wcCategory.name
-        .toLowerCase()
-        .replace(/[^\u0600-\u06FF\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim('-');
-    }
+    // Generate slug from WooCommerce slug or name
+    let slug = this.generateCategorySlug(wcCategory);
 
-    // Add WooCommerce ID to slug to ensure uniqueness
+    // Add WooCommerce ID to slug to ensure uniqueness (only if not already present)
     if (!slug.endsWith(`-${wcCategory.id}`)) {
-      slug = `${slug}-${wcCategory.id}`.toLowerCase();
+      slug = `${slug}-${wcCategory.id}`;
     }
 
     const strapiCategory = {
@@ -339,6 +331,101 @@ class CategoryImporter {
 
     this.logger.debug(`🔄 Transformed category: ${wcCategory.name} → ${JSON.stringify(strapiCategory, null, 2)}`);
     return strapiCategory;
+  }
+
+  /**
+   * Generate a Persian-compatible slug for a category
+   * @param {Object} wcCategory - WooCommerce category object
+   * @returns {string} - Generated slug
+   */
+  generateCategorySlug(wcCategory) {
+    // First, try to use the WooCommerce slug if available
+    if (wcCategory.slug && wcCategory.slug.trim()) {
+      // Decode URL-encoded Persian slugs
+      let slug = wcCategory.slug;
+      try {
+        slug = decodeURIComponent(slug);
+      } catch (e) {
+        // If decoding fails, use as-is
+      }
+      
+      // Clean and normalize the slug
+      const cleanedSlug = this.cleanSlug(slug);
+      if (cleanedSlug) {
+        return cleanedSlug;
+      }
+    }
+
+    // Fallback: generate slug from category name
+    if (wcCategory.name && wcCategory.name.trim()) {
+      const generatedSlug = this.generateSlugFromTitle(wcCategory.name);
+      return generatedSlug;
+    }
+
+    // Last resort: use WooCommerce ID
+    return `category-${wcCategory.id}`;
+  }
+
+  /**
+   * Generate a slug from a title
+   * Supports Persian/Arabic characters
+   * @param {string} title - Category title
+   * @returns {string} - Generated slug
+   */
+  generateSlugFromTitle(title) {
+    if (!title) {
+      return `category-${Date.now()}`;
+    }
+
+    // First, replace spaces and ZWNJ with hyphens
+    let slug = title
+      .toString()
+      .trim()
+      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+    // Lowercase only ASCII letters (a-z), preserve Persian characters
+    slug = slug.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+    slug = slug.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+    // Collapse multiple hyphens
+    slug = slug.replace(/-+/g, '-');
+
+    // Trim leading/trailing hyphens
+    slug = slug.replace(/^-|-$/g, '');
+
+    return slug || `category-${Date.now()}`;
+  }
+
+  /**
+   * Clean and normalize a slug
+   * Preserves Persian/Arabic characters
+   * @param {string} slug - Slug to clean
+   * @returns {string} - Cleaned slug
+   */
+  cleanSlug(slug) {
+    if (!slug) return '';
+
+    // First, replace spaces and ZWNJ with hyphens
+    let cleaned = slug
+      .toString()
+      .trim()
+      .replace(/[\s\u200c]+/g, '-'); // Convert spaces and ZWNJ to hyphen
+
+    // Lowercase only ASCII letters (a-z), preserve Persian characters
+    cleaned = cleaned.replace(/[A-Z]/g, (char) => char.toLowerCase());
+
+    // Remove unwanted characters but keep ASCII letters/numbers, Persian letters, and hyphens
+    cleaned = cleaned.replace(/[^0-9a-z\u0600-\u06ff-]/gi, '');
+
+    // Collapse multiple hyphens
+    cleaned = cleaned.replace(/-+/g, '-');
+
+    // Trim leading/trailing hyphens
+    cleaned = cleaned.replace(/^-|-$/g, '');
+
+    return cleaned;
   }
 
   /**

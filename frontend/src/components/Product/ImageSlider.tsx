@@ -21,13 +21,23 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
     setCurrentSlide(Math.abs(newSlide));
   };
 
+  // Filter out empty, null, or undefined images
+  const validImages = images.filter(
+    (img) => img && typeof img === "string" && img.trim() !== ""
+  );
+
+  // Don't render if no valid images
+  if (validImages.length === 0) {
+    return null;
+  }
+
   return (
     <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-auto">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         onScroll={handleScroll}
       >
-        {images.map((image, index) => (
+        {validImages.map((image, index) => (
           <div key={index} className="relative h-full w-full flex-none snap-start">
             <BlurImage
               src={image}
@@ -43,9 +53,9 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
         ))}
       </div>
 
-      {images.length > 1 && (
+      {validImages.length > 1 && (
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-0.5">
-          {images.map((_, index) => (
+          {validImages.map((_, index) => (
             <div
               key={index}
               className={`h-0.5 rounded-full transition-all duration-300 ${

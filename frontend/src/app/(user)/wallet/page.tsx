@@ -9,6 +9,7 @@ import TransactionsIcon from "@/components/User/Icons/TransactionsIcon";
 import UserContainer from "@/components/layout/UserContainer";
 import AccountQuickLinks from "@/components/User/Account/QuickLinks";
 import { AlertCircleIcon, CheckIcon } from "lucide-react";
+import WalletService from "@/services/wallet";
 
 function StatusBanner({ variant, title, description }: { variant: "success" | "error"; title: string; description: string }) {
   const styles =
@@ -29,8 +30,16 @@ function StatusBanner({ variant, title, description }: { variant: "success" | "e
   );
 }
 
+interface Transaction {
+  date: string;
+  amount: string;
+}
+
 export default function WalletPage() {
   const [isTransactionsHistoryOpen, setIsTransactionsHistoryOpen] = useState(false);
+  const [depositList, setDepositList] = useState<Transaction[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const status = searchParams.get("status");
@@ -94,6 +103,54 @@ export default function WalletPage() {
     return undefined;
   }, [router, searchParams, statusConfig]);
 
+  // Fetch transactions when transactions history is opened
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (!isTransactionsHistoryOpen) return;
+
+      try {
+        setTransactionsLoading(true);
+        setTransactionsError(null);
+
+        // First get wallet to get wallet ID
+        const walletResponse = await WalletService.getMyWallet();
+        if (!walletResponse.success || !walletResponse.data?.id) {
+          throw new Error("Wallet not found");
+        }
+
+        const walletId = walletResponse.data.id;
+
+        // Fetch transactions
+        const transactionsResponse = await WalletService.getWalletTransactions(walletId);
+        const transactionsData = transactionsResponse.data || [];
+
+        // Transform transactions to match Transaction interface (only deposits)
+        const deposits: Transaction[] = [];
+
+        transactionsData.forEach((tx) => {
+          // Only include "Add" type transactions (deposits)
+          if (tx.Type === "Add") {
+            const transaction: Transaction = {
+              date: tx.Date ? new Date(tx.Date).toISOString().split("T")[0] : "",
+              amount: tx.Amount ? (tx.Amount / 10).toLocaleString() : "0", // Convert IRR to toman
+            };
+            deposits.push(transaction);
+          }
+        });
+
+        setDepositList(deposits);
+      } catch (err: any) {
+        console.error("Failed to fetch transactions:", err);
+        setTransactionsError(err.message || "خطا در دریافت تراکنش‌ها");
+        setDepositList([]);
+      } finally {
+        setTransactionsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [isTransactionsHistoryOpen]);
+
   return (
     <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
       {statusConfig ? (
@@ -132,13 +189,17 @@ export default function WalletPage() {
 
           <div className="flex w-full flex-col gap-6 lg:flex-row lg:gap-5">
             {isTransactionsHistoryOpen ? (
-              <TransactionsList
-                debbitList={[]}
-                depositList={[
-                  { date: "2025-02-07", amount: "50000" },
-                  { date: "2025-02-07", amount: "50000" },
-                ]}
-              />
+              transactionsLoading ? (
+                <div className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white p-8">
+                  <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+                </div>
+              ) : transactionsError ? (
+                <div className="flex w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 p-8 text-red-800">
+                  <span>{transactionsError}</span>
+                </div>
+              ) : (
+                <TransactionsList depositList={depositList} />
+              )
             ) : (
               <>
                 <WalletBalance />

@@ -133,6 +133,8 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
                 sizes="(max-width: 768px) 84px, 139px"
                 loader={imageLoader}
                 loading="lazy"
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTM5IiBoZWlnaHQ9IjEzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
               />
             </div>
 

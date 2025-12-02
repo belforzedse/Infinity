@@ -66,62 +66,99 @@ export const duplicateProduct = async (productId: string) => {
     };
 
     // Create duplicate product
-    const response = await apiClient.post<{ data: StrapiItem<ProductAttributes> }>(
+    const response = await apiClient.post<StrapiItem<ProductAttributes>>(
       ENDPOINTS.PRODUCT.PRODUCT,
       { data: duplicateData },
     );
 
-    const newProductId = response.data.data.id;
+    const newProductId = response.data.id;
 
     // Duplicate product variations
     if (originalData.product_variations?.data?.length) {
+      const variationErrors: string[] = [];
+      
       for (const variation of originalData.product_variations.data) {
         try {
-          const variationResponse = await apiClient.get<{ data: StrapiItem<any> }>(
+          const variationResponse = await apiClient.get<any>(
             `/product-variations/${variation.id}?populate=*`,
           );
 
-          const variationData = variationResponse.data.data.attributes;
+          // apiClient.get returns response.data, which is { data: { id, attributes } } from Strapi
+          // So variationResponse is { data: { id, attributes } }
+          const variationItem = variationResponse.data || variationResponse;
+          const variationData = variationItem.attributes || variationItem;
 
-          const newVariationData = {
+          if (!variationData || !variationData.SKU) {
+            console.warn(`Variation ${variation.id} missing SKU or data, skipping`);
+            variationErrors.push(`Variation ${variation.id}: Missing SKU or data`);
+            continue;
+          }
+
+          // Extract relation IDs properly
+          const productVariationColor = variationData.product_variation_color?.data?.id || null;
+          const productVariationSize = variationData.product_variation_size?.data?.id || null;
+          const productVariationModel = variationData.product_variation_model?.data?.id || null;
+
+          const newVariationData: any = {
             SKU: `${variationData.SKU}-copy-${Date.now()}`,
             Price: variationData.Price,
-            DiscountPrice: variationData.DiscountPrice,
+            DiscountPrice: variationData.DiscountPrice || null,
             IsPublished: false,
             product: newProductId,
-            ...Object.fromEntries(
-              Object.entries(variationData).filter(
-                ([key]) =>
-                  !["id", "createdAt", "updatedAt", "product", "product_stock"].includes(key),
-              ),
-            ),
           };
 
-          const newVariationResponse = await apiClient.post<{ data: StrapiItem<any> }>(
+          // Only add relation fields if they exist
+          if (productVariationColor !== null) {
+            newVariationData.product_variation_color = productVariationColor;
+          }
+          if (productVariationSize !== null) {
+            newVariationData.product_variation_size = productVariationSize;
+          }
+          if (productVariationModel !== null) {
+            newVariationData.product_variation_model = productVariationModel;
+          }
+
+          const newVariationResponse = await apiClient.post<any>(
             `/product-variations`,
             { data: newVariationData },
           );
 
+          // apiClient.post returns response.data, which is { data: { id, attributes } } from Strapi
+          const newVariationItem = newVariationResponse.data || newVariationResponse;
+          const newVariationId = newVariationItem.id || newVariationItem.data?.id;
+
+          if (!newVariationId) {
+            throw new Error(`Failed to get new variation ID from response`);
+          }
+
           // Duplicate stock with 0 count
           if (variationData.product_stock?.data) {
-            await apiClient.post<{ data: StrapiItem<any> }>(
+            await apiClient.post<any>(
               `/product-stocks`,
               {
                 data: {
                   Count: 0,
-                  product_variation: newVariationResponse.data.data.id,
+                  product_variation: newVariationId,
                 },
               },
             );
           }
-        } catch (variationError) {
+        } catch (variationError: any) {
+          const errorMsg = variationError?.response?.data?.error?.message || variationError?.message || "Unknown error";
           console.error(`Failed to duplicate variation ${variation.id}:`, variationError);
+          variationErrors.push(`Variation ${variation.id}: ${errorMsg}`);
+          // Continue with next variation instead of failing entire operation
         }
+      }
+
+      // Log any variation errors but don't fail the entire operation
+      if (variationErrors.length > 0) {
+        console.warn(`Some variations failed to duplicate:`, variationErrors);
       }
     }
 
     toast.success("محصول با موفقیت کپی شد");
-    return { success: true, data: response.data.data, newProductId };
+    return { success: true, data: response.data, newProductId };
   } catch (error: any) {
     console.error("Product duplication error:", error);
     const errorMessage = error.response?.data?.error?.message || "خطا در کپی کردن محصول";

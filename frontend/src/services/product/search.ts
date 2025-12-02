@@ -19,22 +19,91 @@ export interface ProductSearchResponse {
 
 /**
  * Product search item interface
+ * Matches Strapi entityService response format
  */
 export interface ProductSearchItem {
   id: number;
-  Title: string;
-  Description: string;
-  Price: number;
-  product_main_category: {
+  attributes?: {
+    Slug?: string;
+    Title: string;
+    Description: string;
+    product_main_category?: {
+      data: {
+        id: number;
+        attributes: {
+          Title: string;
+        };
+      } | null;
+    };
+    product_variations?: {
+      data: Array<{
+        id: number;
+        attributes: {
+          SKU?: string;
+          Price: number | string;
+          DiscountPrice?: number | string;
+          product_variation_color?: {
+            data: {
+              id: number;
+              attributes: {
+                Title: string;
+              };
+            } | null;
+          };
+          product_variation_size?: {
+            data: {
+              id: number;
+              attributes: {
+                Title: string;
+              };
+            } | null;
+          };
+          product_variation_model?: {
+            data: {
+              id: number;
+              attributes: {
+                Title: string;
+              };
+            } | null;
+          };
+          product_stock?: {
+            data: {
+              id: number;
+              attributes: {
+                Count: number;
+              };
+            } | null;
+          };
+        };
+      }>;
+    };
+    CoverImage?: {
+      data: ImageResponse | null;
+    };
+  };
+  // Flattened format (for backwards compatibility)
+  Slug?: string;
+  Title?: string;
+  Description?: string;
+  Price?: number;
+  product_main_category?: {
     id: number;
     Title: string;
+  } | {
+    data: {
+      id: number;
+      attributes: {
+        Title: string;
+      };
+    } | null;
   };
-  product_tags: {
+  product_tags?: {
     id: number;
     Title: string;
   }[];
-  product_variations: {
+  product_variations?: {
     id: number;
+    SKU?: string;
     Price: number;
     DiscountPrice?: number;
     product_variation_color: {
@@ -53,8 +122,19 @@ export interface ProductSearchItem {
       id: number;
       Count: number;
     };
-  }[];
-  CoverImage: ImageResponse;
+  }[] | {
+    data: Array<{
+      id: number;
+      attributes: {
+        SKU?: string;
+        Price: number | string;
+        DiscountPrice?: number | string;
+      };
+    }>;
+  };
+  CoverImage?: ImageResponse | {
+    data: ImageResponse | null;
+  };
 }
 
 /**
