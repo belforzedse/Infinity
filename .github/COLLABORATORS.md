@@ -99,4 +99,4 @@ For questions about access levels or responsibilities, reach out to the reposito
 
 ---
 
-_Last updated: January 2026_
+_Last updated: December 2025_
