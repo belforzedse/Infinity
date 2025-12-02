@@ -1,0 +1,76 @@
+# CODEOWNERS
+#
+# This file defines who is responsible for code in this repository.
+# Code owners are automatically requested for review when someone
+# opens a pull request that modifies code they own.
+#
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+# These owners will be the default owners for everything in the repo
+* @belforzedse
+
+# Backend
+/backend/ @belforzedse
+/backend/src/api/ @belforzedse
+/backend/config/ @belforzedse
+
+# Frontend
+/frontend/ @belforzedse
+/frontend/src/app/ @belforzedse
+/frontend/src/components/ @belforzedse
+
+# CI/CD and DevOps
+/.github/ @belforzedse
+/.github/workflows/ @belforzedse
+/backend/docker-compose.yml @belforzedse
+/backend/*.Dockerfile @belforzedse
+/frontend/*.Dockerfile @belforzedse
+
+# Documentation
+*.md @belforzedse
+/.cursor/rules/ @belforzedse
+
+# Configuration files
+*.json @belforzedse
+*.yml @belforzedse
+*.yaml @belforzedse
+*.config.* @belforzedse
+
+# Security and sensitive files
+/backend/.env.example @belforzedse
+/frontend/.env.example @belforzedse
+SECURITY.md @belforzedse
+/.github/CODEOWNERS @belforzedse
+
+# Database
+/backend/database/ @belforzedse
+/backend/database/migrations/ @belforzedse
+
+# API Routes
+/backend/src/api/**/routes/ @belforzedse
+
+# Types and Schemas
+/backend/types/ @belforzedse
+/backend/src/api/**/content-types/ @belforzedse
+/frontend/src/types/ @belforzedse
+
+# Tests
+**/__tests__/ @belforzedse
+**/*.test.ts @belforzedse
+**/*.test.tsx @belforzedse
+
+# Example team assignments (uncomment and customize as needed)
+# Frontend team
+# /frontend/ @frontend-team-lead @frontend-developer
+
+# Backend team
+# /backend/ @backend-team-lead @backend-developer
+
+# DevOps team
+# /.github/workflows/ @devops-lead
+# /backend/docker-compose.yml @devops-lead
+
+# Documentation team
+# *.md @docs-lead
+
