@@ -1,273 +1,196 @@
 # Security Policy
 
+Infinity Store takes the security of our users, merchants, and partners seriously. The guidelines below explain how to report vulnerabilities responsibly and summarize the safeguards we currently enforce.
+
 ## Supported Versions
 
-We release patches for security vulnerabilities for the following versions:
+We release security patches for actively developed branches.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| dev     | :white_check_mark: |
-| main    | :white_check_mark: |
+| Version | Supported |
+| ------- | --------- |
+| `main`  | Yes       |
+| `dev`   | Yes       |
 
 ## Reporting a Vulnerability
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+**Never disclose suspected vulnerabilities in public issues or discussions.**
 
-### Reporting Process
+### How to Report
 
-If you discover a security vulnerability, please follow these steps:
+1. Email `security@infinitycolor.com` with the subject line `[SECURITY] <summary>`.
+2. Encrypt communications when possible. Public keys can be requested from the maintainer team.
+3. Only share details with approved security contacts until coordinated disclosure is agreed upon.
 
-1. **Email the maintainers** with details about the vulnerability
+### Information to Include
 
-   - Include a description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if available)
+- Vulnerability category (SQLi, XSS, authorization bypass, etc.)
+- Impacted component or endpoint, including commit hash or release tag
+- Reproduction steps with expected vs. actual results
+- Impact analysis (data exposure, privilege escalation, DoS, etc.)
+- Suggested mitigations or references, if available
+- Environment details (browser, OS, Node/Strapi versions)
 
-2. **Wait for acknowledgment**
+### Response Timeline
 
-   - We will acknowledge receipt within 48 hours
-   - We will provide an initial assessment within 7 days
+- **Acknowledgment:** within 48 hours
+- **Initial assessment:** within 7 calendar days
+- **Remediation ETA:** shared once scope is confirmed
+- **Disclosure coordination:** mutually agreed timeline once a fix is available
 
-3. **Coordinate disclosure**
-   - We will work with you to understand and fix the issue
-   - We will keep you informed about our progress
-   - We will coordinate public disclosure timing
+We credit reporters in release notes unless anonymity is requested.
 
-### What to Include in Your Report
-
-A good security report should include:
-
-- **Type of vulnerability** (e.g., SQL injection, XSS, authentication bypass)
-- **Affected components** (backend API, frontend, authentication system)
-- **Step-by-step reproduction** (with code snippets if possible)
-- **Impact assessment** (what could an attacker do?)
-- **Suggested mitigation** (if you have ideas)
-- **Your testing environment** (version, configuration)
-
-### Example Report Template
+### Report Template
 
 ```
-Subject: [SECURITY] [Component] Brief description
+Subject: [SECURITY] <Component> <Short description>
 
-Vulnerability Type: SQL Injection / XSS / Authentication / etc.
-Affected Component: Backend API / Frontend / Authentication / etc.
-Severity: Critical / High / Medium / Low
-
-Description:
-[Detailed description of the vulnerability]
+Summary:
+Provide a concise overview of the issue and potential impact.
 
 Steps to Reproduce:
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+1. …
+2. …
+3. …
 
 Impact:
-[What can an attacker do with this vulnerability?]
+Describe what an attacker can achieve.
 
-Suggested Fix:
-[Your recommendations, if any]
+Suggested Mitigation:
+Optional recommendations or references.
 
 Environment:
-- Version: [e.g., main branch, commit hash]
-- Configuration: [any special setup]
+- Branch/commit:
+- Browser/OS (if applicable):
+- Additional configuration:
 ```
 
-## Security Measures
+## Preventive Controls
 
-### Current Security Features
+### Backend
 
-#### Backend
+- JWT authentication with refresh token rotation
+- bcrypt password hashing with per-user salts
+- Strapi ORM to avoid raw string concatenation
+- Comprehensive input validation and sanitization
+- Redis-backed rate limiting and login throttling
+- Encrypted database connections and secure session cookies
 
-- ✅ JWT-based authentication
-- ✅ Password hashing with bcrypt
-- ✅ SQL injection prevention (Strapi ORM)
-- ✅ CORS configuration
-- ✅ Rate limiting (Redis-based)
-- ✅ Input validation
-- ✅ Secure session management
-- ✅ Database connection encryption
+### Frontend
 
-#### Frontend
+- React auto-escaping for rendered content
+- Content Security Policy and secure headers
+- HTTP-only cookies plus CSRF mitigation for privileged actions
+- Strict linting for `dangerouslySetInnerHTML` usage
+- RTL-aware layouts validated against accessibility rules
 
-- ✅ XSS prevention (React escaping)
-- ✅ CSRF protection
-- ✅ Secure HTTP-only cookies
-- ✅ Content Security Policy
-- ✅ HTTPS enforcement (production)
-- ✅ Secure headers
+### Infrastructure
 
-#### Infrastructure
+- Secrets managed via GitHub Environments and deployment vaults
+- Least-privilege IAM for CI/CD runners
+- Dependency scanning (npm audit, GitHub Dependabot)
+- Automated image scanning for container builds
+- TLS enforcement for all production endpoints
 
-- ✅ Environment variable management
-- ✅ Secrets stored securely (GitHub Secrets)
-- ✅ Docker security best practices
-- ✅ Database password authentication
-- ✅ Redis password protection
+### Payments & Sensitive Data
 
-### Known Security Considerations
+- Payment tokens are never persisted beyond the payment gateway session
+- Transaction audit logs retained for compliance
+- PCI DSS considerations factored into Mellat and SnappPay integrations
+- Personally identifiable information encrypted at rest
 
-#### Payment Gateway Integration
+## Expectations for Contributors
 
-- Payment tokens are not stored in the database
-- Transaction logs are maintained for audit
-- PCI DSS considerations for payment data
-
-#### User Data
-
-- Passwords are hashed with bcrypt
-- Personal information is encrypted at rest (database level)
-- JWT tokens expire after 30 days
-
-#### API Security
-
-- Rate limiting on all public endpoints
-- Authentication required for sensitive operations
-- Input validation on all user inputs
-- SQL injection protection via ORM
-
-## Security Best Practices for Contributors
-
-### When Contributing Code
-
-1. **Never commit secrets**
-
-   - Use `.env` files (not tracked in git)
-   - Use GitHub Secrets for CI/CD
-   - Check before pushing: `git diff` and review changes
-
-2. **Validate all inputs**
+1. **Never commit secrets.** Use `.env` files locally and GitHub Secrets in CI. Review `git diff` before pushing.
+2. **Validate and sanitize all inputs.**
 
    ```typescript
-   // ✅ Good
    const email = ctx.request.body.email;
    if (!email || !isValidEmail(email)) {
      return ctx.badRequest("Invalid email");
    }
    ```
 
-3. **Use parameterized queries**
+3. **Use parameterized queries.**
 
    ```typescript
-   // ✅ Good - Strapi ORM (safe)
    await strapi.db.query("api::product.product").findMany({
      where: { id: productId },
    });
 
-   // ✅ Good - Raw query with parameters
    await strapi.db.connection.raw("SELECT * FROM products WHERE id = ?", [
      productId,
    ]);
-
-   // ❌ Bad - String concatenation
-   await strapi.db.connection.raw(
-     `SELECT * FROM products WHERE id = ${productId}`
-   );
    ```
 
-4. **Escape output**
+4. **Escape output in the frontend.**
 
    ```tsx
-   {
-     /* ✅ Good - React automatically escapes */
-   }
    <div>{userInput}</div>;
-
-   {
-     /* ❌ Bad - Dangerous HTML */
-   }
-   <div dangerouslySetInnerHTML={{ __html: userInput }} />;
    ```
 
-5. **Implement proper authorization**
+5. **Enforce authorization on every protected resource.**
+
    ```typescript
-   // Check if user owns the resource
    if (order.user.id !== ctx.state.user.id) {
      return ctx.forbidden("Not authorized");
    }
    ```
 
-### Security Checklist for PRs
+## Security Checklist for Pull Requests
 
-Before submitting a PR, ensure:
+- [ ] No hardcoded secrets, credentials, or sensitive file paths
+- [ ] Inputs validated and sanitized, both server and client side
+- [ ] SQL or ORM queries use safe parameterization
+- [ ] Authentication/authorization logic covers new endpoints and UI states
+- [ ] Error messages avoid leaking stack traces or operational details
+- [ ] Dependencies reviewed (`npm audit`, GitHub alerts) before merging
+- [ ] External network calls occur over HTTPS with certificate validation
+- [ ] Sensitive data is never logged or echoed to clients
 
-- [ ] No hardcoded secrets or API keys
-- [ ] All user inputs are validated
-- [ ] SQL queries use parameterization
-- [ ] Authentication/authorization checks are in place
-- [ ] Error messages don't leak sensitive information
-- [ ] Dependencies are up to date (`npm audit`)
-- [ ] HTTPS is used for external API calls
-- [ ] Sensitive data is not logged
+Thank you for helping us keep Infinity Store safe for every user.
 
 ## Dependency Security
 
-### Automated Checks
+### Automated Coverage
 
-We use:
+- **Dependabot** for dependency upgrade PRs
+- **npm audit** via CI for vulnerability scanning
+- **GitHub Security Alerts** for upstream advisories
 
-- **Dependabot** - Automated dependency updates
-- **npm audit** - Vulnerability scanning
-- **GitHub Security Alerts** - Notification of known vulnerabilities
+### Manual Validation
 
-### Manual Review
-
-Run these commands periodically:
+Run the following commands when introducing dependencies or before releases:
 
 ```bash
 # Backend
 cd backend
 npm audit
-npm audit fix
 
 # Frontend
 cd frontend
 npm audit
-npm audit fix
 ```
+
+Resolve reported vulnerabilities promptly or document the rationale for any temporary exceptions.
 
 ## Incident Response
 
-If a security incident occurs:
-
-1. **Immediate Actions**
-
-   - Assess the scope and impact
-   - Contain the vulnerability
-   - Deploy a hotfix if necessary
-
-2. **Investigation**
-
-   - Review logs and audit trails
-   - Identify affected users/data
-   - Document the incident
-
-3. **Notification**
-
-   - Notify affected users (if applicable)
-   - Public disclosure (after fix is deployed)
-   - Update security documentation
-
-4. **Post-Incident**
-   - Conduct retrospective
-   - Improve security measures
-   - Update documentation and training
+1. **Containment** — Evaluate blast radius, revoke compromised credentials, and apply hotfixes.
+2. **Investigation** — Review logs, identify affected users/data, and capture a detailed timeline.
+3. **Notification** — Communicate with stakeholders and, when appropriate, publish a security advisory.
+4. **Remediation** — Patch the vulnerability, update tests, and document changes in the CHANGELOG.
+5. **Post-incident review** — Capture lessons learned and implement follow-up tasks.
 
 ## Security Updates
 
-Security patches will be:
-
-- Released as soon as possible
-- Documented in release notes
-- Announced via GitHub Security Advisories
-- Applied to supported versions
+- Fixes are released as soon as practical once verified.
+- Each fix is documented in release notes and, when warranted, in a GitHub Security Advisory.
+- All supported branches (`main`, `dev`) receive the patch or a mitigation plan.
 
 ## Contact
 
-For security concerns, please contact the repository maintainers.
-
-**Please do not use public channels for security-related communications.**
+Questions about this policy or responsible disclosure can be sent to `security@infinitycolor.com`. Avoid public channels for security-related communications.
 
 ---
 
-_Last updated: December 2025_
+_Last updated: January 2026_
