@@ -1,262 +1,191 @@
-# Blog UI Components - Cursor Rules
+---
+description: Blog UI components documentation for blog cards, carousels, and banners
+globs: frontend/src/components/Blog/**/*.tsx, frontend/src/app/(blog)/**/*.tsx
+---
+
+# Blog UI Components
 
 ## Overview
 
-This document provides guidelines for working with the blog UI components in the Infinity Store frontend application. These components follow the Figma design specifications and maintain consistency with the existing product card patterns.
+The blog system uses a set of reusable UI components for displaying blog posts in various layouts. These components follow the existing design patterns from product cards and carousels.
 
 ## Components
 
-### BlogCard (Default/Desktop)
+### BlogCard (`BlogCard.tsx`)
 
-**File**: `frontend/src/components/Blog/BlogCard.tsx`
+Default/desktop blog post card with vertical layout.
 
-**Purpose**: Default blog card component for desktop and larger screens.
+**Features:**
+- White background with thick pink border (`border-2 border-pink-100`)
+- Featured image with aspect ratio `304:260`
+- "اینفینیتی" watermark overlay on image
+- Category and date metadata with visible icons (`text-neutral-400`)
+- Title and excerpt with line clamping
+- Hover effects with shadow and scale
 
-**Design Specifications**:
-- Width: 328px (max-width with responsive behavior)
-- Vertical layout with image on top
-- White background with pink/50 border
-- Rounded corners (24px)
-- Hover effects with shadow and border color change
-
-**Usage**:
-```tsx
-import { BlogCard } from "@/components/Blog";
-
-<BlogCard 
-  post={blogPost} 
-  priority={false} 
-  className="optional-classes" 
-/>
-```
-
-**Props**:
-- `post: BlogPost` - Blog post data from the API
-- `priority?: boolean` - For image loading optimization (default: false)
-- `className?: string` - Additional CSS classes
-
-### BlogCardMobile
-
-**File**: `frontend/src/components/Blog/BlogCardMobile.tsx`
-
-**Purpose**: Mobile variant of the blog card with horizontal layout.
-
-**Design Specifications**:
-- Width: 361px (max-width with responsive behavior)
-- Horizontal layout with image on the right
-- Smaller image size (110x110px)
-- Content area takes remaining space
-- Same styling as BlogCard but adapted for mobile
-
-**Usage**:
-```tsx
-import { BlogCardMobile } from "@/components/Blog";
-
-<BlogCardMobile 
-  post={blogPost} 
-  priority={false} 
-  className="optional-classes" 
-/>
-```
-
-### BlogCarousel
-
-**File**: `frontend/src/components/Blog/BlogCarousel.tsx`
-
-**Purpose**: Responsive carousel component for displaying multiple blog posts.
-
-**Design Specifications**:
-- Desktop: 2-4 cards per row with pagination navigation
-- Mobile: Vertical stack of 4 cards with "مشاهده همه" button
-- Uses existing PaginationDesktop component
-- Responsive breakpoints: md (768px) and lg (1024px)
-
-**Usage**:
-```tsx
-import { BlogCarousel } from "@/components/Blog";
-
-<BlogCarousel
-  posts={blogPosts}
-  title="اینفینیتی مگ"
-  viewAllHref="/blog"
-  className="optional-classes"
-/>
-```
-
-**Props**:
-- `posts: BlogPost[]` - Array of blog posts to display
-- `title: string` - Section title
-- `viewAllHref?: string` - Link for "view all" button (default: "/blog")
-- `className?: string` - Additional CSS classes
-
-## Design System Integration
-
-### Colors
-- Background: `bg-white`
-- Border: `border-pink-50` (normal), `border-pink-100` (hover)
-- Text: `text-neutral-700` (titles), `text-neutral-400` (metadata)
-- Links: `text-neutral-800` with `hover:text-pink-600`
-
-### Typography
-- Title: `text-base` (BlogCard), `text-sm` (BlogCardMobile)
-- Metadata: `text-xs`
-- Line heights follow Figma specifications: `leading-[2.17]`, `leading-[1.74]`, etc.
-
-### Spacing
-- Padding: `p-3` (BlogCard), `p-2` (BlogCardMobile)
-- Gaps: `gap-1`, `gap-2`, `gap-4` as appropriate
-- Margins: `mb-2`, `mb-3` for consistent spacing
-
-### Responsive Behavior
-- BlogCard: `max-w-[328px]` with `w-full` for flexibility
-- BlogCardMobile: `max-w-[361px]` with `w-full` for flexibility
-- BlogCarousel: `grid-cols-2 lg:grid-cols-4` on desktop, vertical stack on mobile
-- Breakpoints: `md:` (768px+), `lg:` (1024px+)
-
-## Integration Points
-
-### Home Page
-The BlogCarousel is integrated into the home page (`frontend/src/app/(product)/page.tsx`) in the blog section:
-
-```tsx
-{latestBlogPosts.length > 0 && (
-  <section>
-    <Reveal variant="fade-up" duration={700}>
-      <BlogCarousel
-        posts={latestBlogPosts}
-        title="اینفینیتی مگ"
-        viewAllHref="/blog"
-      />
-    </Reveal>
-  </section>
-)}
-```
-
-### Blog Listing Page
-The BlogCarousel is also used on the blog listing page (`frontend/src/app/(blog)/blog/page.tsx`) to showcase latest posts before the main blog list.
-
-## Data Requirements
-
-### BlogPost Interface
+**Props:**
 ```typescript
-interface BlogPost {
-  id: number;
-  Title: string;
-  Slug: string;
-  Excerpt?: string;
-  FeaturedImage?: {
-    url: string;
-    formats?: {
-      small?: { url: string };
-      medium?: { url: string };
-    };
-  };
-  blog_category?: {
-    Name: string;
-    Slug: string;
-  };
-  PublishedAt?: string;
-  createdAt: string;
+interface BlogCardProps {
+  post: BlogPost;
+  priority?: boolean;  // Image loading priority
+  className?: string;
 }
 ```
 
-## Performance Considerations
+**Usage:**
+```tsx
+<BlogCard post={post} priority={index === 0} />
+```
 
-### Image Optimization
-- Uses `BlurImage` component for optimized loading
-- Proper `sizes` attribute for responsive images
-- `priority` prop for above-the-fold images
-- Custom `imageLoader` for CDN optimization
+### BlogCardMobile (`BlogCardMobile.tsx`)
 
-### Responsive Images
-- BlogCard: `sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 328px"`
-- BlogCardMobile: `sizes="110px"`
+Compact horizontal blog card for mobile layouts.
 
-### Loading States
-- Components handle missing images gracefully
-- Proper fallbacks for missing data
-- Smooth transitions and hover effects
+**Features:**
+- Horizontal layout with image on the right
+- Fixed image size: 110x110px
+- Same styling as BlogCard (thick border, visible icons, watermark)
+- Condensed metadata and content
 
-## Accessibility
+**Props:**
+```typescript
+interface BlogCardMobileProps {
+  post: BlogPost;
+  priority?: boolean;
+  className?: string;
+}
+```
 
-### Keyboard Navigation
-- All interactive elements are focusable
-- Proper focus indicators with `focus-visible:ring-2`
-- Semantic HTML structure with `<article>` and proper headings
+### BlogCarousel (`BlogCarousel.tsx`)
 
-### Screen Readers
-- Proper alt text for images
-- Semantic markup with appropriate ARIA labels
-- RTL text direction support
+Responsive carousel for displaying blog posts with pagination.
 
-### Color Contrast
-- All text meets WCAG contrast requirements
-- Focus indicators are clearly visible
-- Hover states provide clear feedback
+**Features:**
+- Desktop: 4 cards per page with pagination controls
+- Mobile: 4 stacked cards with "مشاهده همه" button
+- Category filtering support
+- Dynamic title and button text
+- Loading skeleton state
+
+**Props:**
+```typescript
+interface BlogCarouselProps {
+  posts?: BlogPost[];           // Pre-fetched posts
+  category?: string;            // Category slug for filtering
+  title: string;                // Section title
+  viewAllHref?: string;         // Custom view all link
+  isCategory?: boolean;         // Show "مشاهده دسته بندی" vs "مشاهده همه"
+  className?: string;
+}
+```
+
+**Usage Examples:**
+
+```tsx
+// With pre-fetched posts
+<BlogCarousel
+  posts={latestPosts}
+  title="جدیدترین مقالات"
+/>
+
+// With category filtering (fetches posts automatically)
+<BlogCarousel
+  category="mod-o-poshak"
+  title="مد و پوشاک"
+  isCategory
+/>
+```
+
+### BlogCategoryBanner (`BlogCategoryBanner.tsx`)
+
+Featured banner for category promotion between carousel sections.
+
+**Features:**
+- Customizable background (gradient or image)
+- Light/dark text color variants
+- Three height sizes: sm, md, lg
+- Centered content with title, subtitle, and CTA button
+
+**Props:**
+```typescript
+interface BlogCategoryBannerProps {
+  title: string;
+  subtitle?: string;
+  backgroundImage?: string;
+  backgroundColor?: string;      // Tailwind gradient class
+  href: string;
+  linkText?: string;
+  textColor?: "light" | "dark";
+  height?: "sm" | "md" | "lg";
+  className?: string;
+}
+```
+
+**Usage:**
+```tsx
+<BlogCategoryBanner
+  title="مد و پوشاک"
+  subtitle="آخرین ترندها و نکات استایل"
+  href="/blog?category=mod-o-poshak"
+  backgroundColor="bg-gradient-to-br from-rose-400 to-pink-600"
+  textColor="light"
+  linkText="مشاهده دسته بندی"
+  height="sm"
+/>
+```
+
+## Blog Page Structure
+
+The `/blog` page follows this layout:
+
+1. **Hero Section** - Page title and description
+2. **Latest Posts Carousel** - Most recent posts
+3. **Category Sections** - Each category with its own carousel
+4. **Banners** - Promotional banners between category sections
+5. **Footer Banner** - "View all articles" CTA
+
+## Styling Guidelines
+
+### Colors
+- Border: `border-pink-100` (hover: `border-pink-200`)
+- Icons: `text-neutral-400`
+- Text: `text-neutral-700` (title), `text-neutral-400` (meta)
+- Watermark: `text-neutral-600` on `bg-white/80`
+
+### Spacing
+- Card padding: `p-3` (desktop), `p-2` (mobile)
+- Card gap: `gap-4`
+- Section spacing: `space-y-12`
+
+### Border Radius
+- Cards: `rounded-3xl` (outer), `rounded-[20px]` (image)
+- Mobile cards: `rounded-2xl` (outer), `rounded-xl` (image)
+- Banners: `rounded-[32px]`
 
 ## RTL Support
 
-All components are designed with RTL (Right-to-Left) support:
+All components are designed for RTL layouts:
 - Text alignment: `text-right`
-- Flex direction and justification appropriate for RTL
-- Icon positioning considers RTL layout
-- Proper gap and margin handling
+- Flex direction: Default (respects `dir="rtl"`)
+- Icons: Positioned on the right side of text
 
-## Common Patterns
+## Performance
 
-### Error Handling
-```tsx
-if (!posts || posts.length === 0) {
-  return null;
-}
+- Images use `BlurImage` with `imageLoader` for optimization
+- Priority loading for first visible card
+- Skeleton loading states during data fetch
+- Lazy loading for off-screen images
+
+## Exports
+
+All components are exported from `@/components/Blog`:
+
+```typescript
+import {
+  BlogCard,
+  BlogCardMobile,
+  BlogCarousel,
+  BlogCategoryBanner,
+  BlogList
+} from "@/components/Blog";
 ```
-
-### Image URL Processing
-```tsx
-const getImageUrl = () => {
-  if (!post.FeaturedImage) return null;
-  const url = post.FeaturedImage.formats?.medium?.url || 
-              post.FeaturedImage.formats?.small?.url || 
-              post.FeaturedImage.url;
-  if (!url) return null;
-  if (url.startsWith("http")) return url;
-  return `${IMAGE_BASE_URL}${url}`;
-};
-```
-
-### Date Formatting
-```tsx
-{new Date(post.PublishedAt || post.createdAt).toLocaleDateString("fa-IR")}
-```
-
-## Testing Considerations
-
-### Responsive Testing
-- Test on mobile (< 768px), tablet (768px-1024px), and desktop (1024px+)
-- Verify carousel pagination works correctly
-- Check image loading and sizing
-
-### Content Testing
-- Test with various content lengths (long/short titles and excerpts)
-- Verify proper text truncation with `line-clamp-2`
-- Test with missing images or metadata
-
-### Performance Testing
-- Monitor image loading performance
-- Check carousel smooth transitions
-- Verify hover effects don't cause layout shifts
-
-## Future Enhancements
-
-### Potential Improvements
-1. **Skeleton Loading**: Add skeleton components for loading states
-2. **Infinite Scroll**: Implement infinite scrolling for blog listing
-3. **Search Integration**: Add search functionality to carousel
-4. **Animation Library**: Consider adding more sophisticated animations
-5. **Lazy Loading**: Implement intersection observer for better performance
-
-### Maintenance Notes
-- Keep components in sync with Figma design updates
-- Monitor performance metrics for image loading
-- Update responsive breakpoints as needed
-- Maintain consistency with product card patterns
