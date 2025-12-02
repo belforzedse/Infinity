@@ -1,0 +1,33 @@
+
+> infinity-store@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.6
+   - Environments: .env
+   - Experiments (use with caution):
+     · optimizeCss
+     · scrollRestoration
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/(super-admin)/super-admin/orders/add/page.tsx:500:25
+Type error: Type 'import("D:/cyan/infinity-store/infinityv1/frontend/src/app/(super-admin)/super-admin/orders/add/page").Order' is not assignable to type 'Order'.
+  Types of property 'items' are incompatible.
+    Type 'OrderItem[]' is not assignable to type 'OrderItem[]'. Two different types with this name exist, but they are unrelated.
+      Type 'OrderItem' is not assignable to type 'OrderItem'. Two different types with this name exist, but they are unrelated.
+        Types of property 'color' are incompatible.
+          Type 'string | undefined' is not assignable to type 'string'.
+            Type 'undefined' is not assignable to type 'string'.
+
+[0m [90m 498 |[39m [32m          await submitOrder(data);[39m[0m
+[0m [90m 499 |[39m [32m        }}[39m[0m
+[0m[31m[1m>[22m[39m[90m 500 |[39m [32m        footer={<Footer order={orderData as Order} onReload={() => {}} />}[39m[0m
+[0m [90m     |[39m                         [31m[1m^[22m[39m[0m
+[0m [90m 501 |[39m [32m        customSidebar={<Sidebar orderData={orderData} selectedItems={selectedItems} />}[39m[0m
+[0m [90m 502 |[39m [32m      />[39m[0m
+[0m [90m 503 |[39m[0m
+Static worker exited with code: 1 and signal: null

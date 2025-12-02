@@ -1,0 +1,47 @@
+---
+description: Super Admin order details UI fields, API population, and gateway logs
+alwaysApply: false
+---
+
+# Super Admin Order Details
+
+This rule documents the fields and data sources shown on the Super Admin order details page.
+
+## Fields Rendered
+
+- Exact timestamps: `createdAt`, `updatedAt`, `Date` (order date)
+- Payment gateway: last transaction's `payment_gateway.Title`
+- Address: `order.delivery_address` → `FullAddress` + `shipping_city.Title` + `shipping_province.Title`
+- Postal code: `delivery_address.PostalCode`
+- Phone number: `user.Phone`
+- Contract status and financials (subtotal/total shown via footer component)
+
+## API Population
+
+Populate parameters used when fetching the order:
+
+```
+populate[0]=user
+populate[1]=contract
+populate[2]=order_items
+populate[3]=shipping
+populate[4]=order_items.product_variation.product.CoverImage
+populate[5]=order_items.product_color
+populate[6]=order_items.product_size
+populate[7]=user.user_info
+populate[8]=delivery_address.shipping_city.shipping_province
+populate[9]=contract.contract_transactions.payment_gateway
+```
+
+Endpoint: `GET /orders/:id`
+
+## Gateway Logs
+
+- Logs are retrieved from: `GET /order-logs?filters[order][id][$eq]=:orderId&sort[0]=createdAt:asc`
+- UI component: `components/SuperAdmin/Order/GatewayLogs.tsx`
+- Shows Description, Changes (JSON), and Jalali timestamp
+
+## Checkout Address Capture
+
+- Frontend submits `addressId` in finalize request
+- Backend saves it on the order as `delivery_address`

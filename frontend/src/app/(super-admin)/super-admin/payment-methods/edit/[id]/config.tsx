@@ -1,0 +1,100 @@
+"use client";
+
+import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+import { type PaymentMethod } from "./page";
+
+export const config: UpsertPageConfigType<PaymentMethod> = {
+  headTitle: "ویرایش درگاه پرداخت",
+  addButton: {
+    text: "ثبت درگاه جدید",
+    path: "/super-admin/payment-methods/add",
+  },
+  actionButtons: (props) => (
+    <>
+      <button
+        className="text-sm flex-1 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 md:flex-none"
+        onClick={props.onCancel}
+      >
+        بیخیال شدن
+      </button>
+
+      <button
+        className="text-sm flex-1 rounded-xl bg-actions-primary px-5 py-2 text-white md:flex-none"
+        onClick={props.onSubmit}
+      >
+        ذخیره
+      </button>
+    </>
+  ),
+  showTimestamp: true,
+  isActiveBox: {
+    header: "وضعیت",
+    key: "isActive",
+    label: (value) => (value ? "درگاه پرداخت فعال" : "درگاه پرداخت غیرفعال"),
+  },
+  config: [
+    {
+      title: "اطلاعات درگاه پرداخت",
+      sections: [
+        {
+          fields: [
+            {
+              name: "name",
+              type: "text",
+              label: "نام",
+              colSpan: 6,
+              mobileColSpan: 12,
+            },
+            {
+              name: "accessLevel",
+              type: "dropdown",
+              label: "دسترسی",
+              colSpan: 6,
+              mobileColSpan: 12,
+              options: [
+                {
+                  label: "دسترسی همه",
+                  value: "all",
+                },
+                {
+                  label: "دسترسی محدود",
+                  value: "limited",
+                },
+              ],
+            },
+            {
+              name: "apiKey",
+              type: "copy-text",
+              label: "کلید API",
+              colSpan: 12,
+              mobileColSpan: 12,
+            },
+            {
+              name: "returnUrl",
+              type: "copy-text",
+              label: "لینک بازگشتی",
+              colSpan: 12,
+              mobileColSpan: 12,
+            },
+            {
+              name: "description",
+              type: "multiline-text",
+              label: "توضیحات",
+              colSpan: 12,
+              mobileColSpan: 12,
+              rows: 3,
+            },
+            {
+              name: "configJSON",
+              type: "json",
+              label: "پیکربندی",
+              colSpan: 12,
+              mobileColSpan: 12,
+              rows: 10,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};

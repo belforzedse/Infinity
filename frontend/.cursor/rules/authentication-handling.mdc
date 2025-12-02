@@ -1,0 +1,60 @@
+---
+description: This rule documents the authentication error handling pattern implemented in the Infinity Store application.
+globs: 
+alwaysApply: false
+---
+# Authentication Error Handling
+
+This rule documents the authentication error handling pattern implemented in the Infinity Store application.
+
+## Authentication Error Handling Utility
+
+The application uses a centralized authentication error handling utility in [src/utils/auth.ts](mdc:src/utils/auth.ts). This utility:
+
+- Handles 401 (Unauthorized) and 403 (Forbidden) status code errors
+- Checks if a user is not an admin when required
+- Removes the accessToken from localStorage when authentication fails
+- Redirects users to the `/auth` page when authentication is invalid
+
+## Usage Pattern
+
+### In API Client
+
+The centralized authentication error handling is integrated in the main [ApiClient](mdc:src/services/index.ts) to automatically handle auth errors for all API requests.
+
+### In API Services
+
+When implementing API services that need authentication:
+
+1. Import the auth handling utility:
+```typescript
+import { handleAuthErrors } from "@/utils/auth";
+```
+
+2. Use it directly in catch blocks:
+```typescript
+try {
+  // API call
+} catch (error) {
+  handleAuthErrors(error);
+  throw error;
+}
+```
+
+3. For admin access checking, pass the isAdmin flag:
+```typescript
+// Check if the user is not an admin
+handleAuthErrors(null, userData?.isAdmin);
+```
+
+### Authentication Flow
+
+1. When an API returns 401 or 403 status codes, the user is automatically redirected to the authentication page
+2. When an API response indicates a user doesn't have admin privileges (`isAdmin === false`), the auth token is cleared and the user is redirected
+3. All sensitive API routes should properly verify authentication
+
+## Implementation Examples
+
+- See [src/services/user/me.ts](mdc:src/services/user/me.ts) for an example of handling admin access verification
+- See [src/services/user/addresses.ts](mdc:src/services/user/addresses.ts) for an example of using the utility in API services
+

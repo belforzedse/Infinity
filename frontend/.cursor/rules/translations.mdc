@@ -1,0 +1,40 @@
+# Backend Text Translation Rules
+
+## Overview
+- All English backend statuses/log values must be rendered via `src/utils/statusTranslations.ts`.
+- Prevents duplicated translation maps and ensures Persian UI consistency across user + super-admin surfaces.
+
+## Utility API
+```ts
+import {
+  translateOrderStatus,
+  getOrderStatusMeta,
+  translatePaymentStatus,
+  getPaymentStatusMeta,
+  translateContractStatus,
+  translateCartStatus,
+  translateCommentStatus,
+  translateOrderLogMessage,
+} from "@/utils/statusTranslations";
+```
+- `translate*` functions return the Persian label (`string`).
+- `get*Meta` functions return `{ label: string; tone: "info" | "success" | "warning" | "danger" }` for UI badge coloring.
+
+## Usage Guidelines
+1. **Order Status UI**
+   - Use `getOrderStatusMeta(status)` to style/tone badges.
+   - Use `translateOrderStatus(status)` for plain text (lists, tooltips, notifications).
+2. **Payment Status Pills**
+   - Use `getPaymentStatusMeta(status)` to derive tone classes, `translatePaymentStatus(status)` for labels.
+3. **Order Logs**
+   - Wrap `Description`/`Action` strings with `translateOrderLogMessage`.
+4. **Super Admin Tables**
+   - Always feed `translateCartStatus`, `translateContractStatus`, `translateCommentStatus` before rendering backend strings.
+5. **Fallbacks**
+   - Utilities gracefully fallback to the original value when a mapping is missing. No need for extra guards.
+
+## Do / Don't
+- ✅ Import translation helpers instead of recreating inline dictionaries.
+- ✅ Map badge colors using the returned `tone`.
+- ❌ Do not render raw `order.Status`, `contractStatus`, `transaction.Status`, etc.
+- ❌ Do not duplicate translation dictionaries in component files.

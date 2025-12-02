@@ -1,0 +1,6 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#e0e0e0"/>
+  <circle cx="150" cy="100" r="40" fill="#888"/>
+  <path d="M140,80 L170,100 L140,120 Z" fill="white"/>
+  <text x="150" y="170" font-family="Arial" font-size="16" text-anchor="middle" fill="#555">Video Placeholder</text>
+</svg> 

@@ -1,0 +1,58 @@
+/**
+ * Load environment variables from custom env files (dev.env or main.env)
+ * This script runs before Next.js starts to inject env vars into process.env
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+function loadEnvFile(filename, allowOverride = false) {
+  const envPath = path.resolve(__dirname, filename);
+
+  if (!fs.existsSync(envPath)) {
+    console.warn(`Warning: ${filename} not found`);
+    return;
+  }
+
+  console.log(`Loading environment variables from ${filename}`);
+
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  const lines = envContent.split('\n');
+
+  lines.forEach((line) => {
+    // Skip empty lines and comments
+    line = line.trim();
+    if (!line || line.startsWith('#')) return;
+
+    // Parse KEY=VALUE
+    const match = line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      let value = match[2].trim();
+
+      // Remove quotes if present
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+
+      // Set if allowOverride is true, or if not already defined
+      if (allowOverride || !process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
+
+// Auto-detect which env file to load: prefer dev.env if it exists, otherwise use main.env
+const devEnvExists = fs.existsSync(path.resolve(__dirname, 'dev.env'));
+const envFile = devEnvExists ? 'dev.env' : 'main.env';
+
+// Load .env.local first (prioritized for local overrides)
+loadEnvFile('.env.local', true);
+
+// Load the appropriate env file (as defaults, won't override .env.local)
+loadEnvFile(envFile);
+
+console.log('Environment variables loaded successfully');
+console.log(`API URL: ${process.env.NEXT_PUBLIC_API_BASE_URL || 'not set'}`);

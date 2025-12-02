@@ -1,0 +1,84 @@
+## Product Slug Implementation
+
+Products now use SEO-friendly slugs for URLs instead of numeric IDs.
+
+### URL Pattern
+
+- **Old**: `/pdp/123` (numeric ID)
+- **New**: `/pdp/کفش-زنانه-مشکی` (Persian slug)
+- **Fallback**: ID-based URLs still work for backwards compatibility
+
+### Backend Implementation
+
+1. **Schema**: `backend/src/api/product/content-types/product/schema.json`
+   - `Slug` field: `uid` type, targets `Title` field
+
+2. **Lifecycle Hooks**: `backend/src/api/product/content-types/product/lifecycles.ts`
+   - Auto-generates slug from Title on create if not provided
+   - Uses `generateUniqueProductSlug` from `backend/src/utils/productSlug.ts`
+
+3. **API Endpoint**: `GET /products/by-slug/:slug`
+   - Defined in `backend/src/api/product/routes/custom-router.ts`
+   - Handler in `backend/src/api/product/controllers/product.ts`
+   - Supports Persian slugs (URL-encoded)
+   - Falls back to ID lookup for numeric slugs
+
+4. **Slug Utilities**: `backend/src/utils/productSlug.ts`
+   - `generateUniqueProductSlug()`: Creates Persian-compatible slugs
+   - `isProductSlugAvailable()`: Checks uniqueness
+   - `validateProductSlug()`: Full validation
+
+### Frontend Implementation
+
+1. **Service Layer**: `frontend/src/services/product/product.ts`
+   - `getProductBySlug()`: Calls new backend endpoint
+   - Falls back to ID-based lookup for numeric slugs
+
+2. **Product Card**: `frontend/src/components/Product/Card.tsx`
+   - Accepts `slug?: string` prop
+   - Uses `slug || id` pattern for URL generation
+
+3. **Small Card**: `frontend/src/components/Product/SmallCard.tsx`
+   - Same pattern as Product Card
+
+4. **Cart Context**: `frontend/src/contexts/CartContext.tsx`
+   - Uses product `Slug` field if available
+
+5. **Sitemap**: `frontend/src/app/sitemap.ts`
+   - Fetches `Slug` field for product URLs
+
+6. **Static Generation**: `frontend/src/app/(product)/pdp/[slug]/page.tsx`
+   - `generateStaticParams` uses actual slugs
+
+### Migration
+
+Run the migration script to generate slugs for existing products:
+
+```bash
+cd backend
+npm run strapi console
+# Then run:
+await require('./scripts/generate-product-slugs.js')()
+```
+
+### WooCommerce Import
+
+The importer (`backend/scripts/woocommerce-importer/importers/ProductImporter.js`) automatically:
+- Uses WooCommerce slug if available
+- Generates slug from product name as fallback
+- Handles URL-encoded Persian slugs
+
+### Best Practices
+
+1. **Always use slug when available**: `href={slug ? \`/pdp/${slug}\` : \`/pdp/${id}\`}`
+2. **Include Slug in API queries**: Add `fields[]=Slug` when fetching products
+3. **Handle Persian encoding**: Use `encodeURIComponent()` for URLs
+4. **Backwards compatibility**: Keep ID fallback for old URLs
+
+### References
+
+- [Product Schema](mdc:backend/src/api/product/content-types/product/schema.json)
+- [Product Slug Utils](mdc:backend/src/utils/productSlug.ts)
+- [Product Service](mdc:frontend/src/services/product/product.ts)
+- [Product Card](mdc:frontend/src/components/Product/Card.tsx)
+- [PDP Page](mdc:frontend/src/app/(product)/pdp/[slug]/page.tsx)

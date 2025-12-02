@@ -1,0 +1,326 @@
+import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
+import Modal from "@/components/Kits/Modal";
+import Select from "@/components/Kits/Form/Select";
+import CirculePlusIcon from "../Icons/CirculePlusIcon";
+import type { Option } from "@/components/Kits/Form/Select";
+import SaveIcon from "../Icons/SaveIcon";
+import UserService from "@/services/user";
+import type { MeResponse } from "@/services/user/me";
+import type { AddAddressRequest } from "@/services/user/addresses";
+import type { Province, City } from "@/services/location";
+import { getProvinces, getCities } from "@/services/location";
+import { toast } from "react-hot-toast";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { addressesAtom } from "@/atoms/addressesAtom";
+import { apiCache } from "@/lib/api-cache";
+
+
+interface Props {
+  onAddressAdded?: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showButton?: boolean;
+}
+
+export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onOpenChange, showButton = true }: Props) {
+  const [addresses, setAddresses] = useAtom(addressesAtom);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
+  const [selectedProvince, setSelectedProvince] = useState<Option | null>(null);
+  const [selectedCity, setSelectedCity] = useState<Option | null>(null);
+  const [postalCode, setPostalCode] = useState("");
+  const [details, setDetails] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState<MeResponse | null>(null);
+
+  // State for province and city data
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingProvinces, setLoadingProvinces] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [errorProvinces, setErrorProvinces] = useState<string | null>(null);
+  const [errorCities, setErrorCities] = useState<string | null>(null);
+
+  // Fetch user info when the component mounts
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userInfo = await UserService.me();
+        setUserInfo(userInfo);
+      } catch (err) {
+        console.error("Failed to fetch user info:", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  // Fetch provinces when the component mounts
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        setLoadingProvinces(true);
+        setErrorProvinces(null);
+        const provincesData = await getProvinces({ sort: "Title:asc" });
+        setProvinces(provincesData);
+      } catch (err) {
+        console.error("Failed to fetch provinces:", err);
+        setErrorProvinces("خطا در دریافت استان‌ها");
+      } finally {
+        setLoadingProvinces(false);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+
+  // Fetch cities when province changes
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (!selectedProvince) {
+        setCities([]);
+        return;
+      }
+
+      try {
+        setLoadingCities(true);
+        setErrorCities(null);
+        const citiesData = await getCities(Number(selectedProvince.id), {
+          sort: "Title:asc",
+        });
+        setCities(citiesData);
+      } catch (err) {
+        console.error("Failed to fetch cities:", err);
+        setErrorCities("خطا در دریافت شهرها");
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    fetchCities();
+  }, [selectedProvince]);
+
+  // Convert provinces to select options
+  const provinceOptions: Option[] = provinces.map((province) => ({
+    id: province.id,
+    name: province.attributes.Title,
+  }));
+
+  // Convert cities to select options
+  const cityOptions: Option[] = cities.map((city) => ({
+    id: city.id,
+    name: city.attributes.Title,
+  }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedCity) {
+      toast.error("لطفا شهر را انتخاب کنید");
+      return;
+    }
+
+    if (!postalCode) {
+      toast.error("لطفا کد پستی را وارد کنید");
+      return;
+    }
+
+    if (!fullAddress) {
+      toast.error("لطفا آدرس دقیق را وارد کنید");
+      return;
+    }
+
+    const addressData: AddAddressRequest = {
+      shipping_city: Number(selectedCity.id),
+      PostalCode: postalCode,
+      FullAddress: fullAddress,
+      Description: details || undefined,
+    };
+
+    try {
+      setLoading(true);
+      const newAddress = await UserService.addresses.add(addressData);
+
+      // Verify the address has the required structure for the dropdown
+      // If it doesn't have shipping_city.Title, we need to wait for the refetch
+      const hasFullStructure = newAddress?.shipping_city?.Title &&
+                                newAddress?.shipping_city?.shipping_province?.Title;
+
+      if (hasFullStructure) {
+        // Optimistically update the atom immediately for instant UI update
+        setAddresses([...addresses, newAddress]);
+      }
+
+      // Invalidate API cache for addresses endpoint
+      apiCache.clearByPattern(/local-user-addresses/);
+
+      toast.success("آدرس با موفقیت اضافه شد");
+
+      // Reset form fields
+      setSelectedProvince(null);
+      setSelectedCity(null);
+      setPostalCode("");
+      setDetails("");
+      setFullAddress("");
+
+      // Close modal
+      setIsOpen(false);
+
+      // Callback to refresh addresses list from backend for sync
+      // This ensures backend and UI are in sync and updates the atom with full data
+      if (onAddressAdded) {
+        await onAddressAdded();
+      } else if (!hasFullStructure) {
+        // If no callback provided and structure is incomplete, refetch addresses
+        const fetchedAddresses = await UserService.addresses.getAll();
+        setAddresses(fetchedAddresses);
+      }
+    } catch (error: any) {
+      console.error("Failed to add address:", error);
+      toast.error(getUserFacingErrorMessage(error, "خطا در اضافه کردن آدرس"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {showButton && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
+        >
+          <span className="text-foreground-pink text-sm lg:text-base">افزودن آدرس</span>
+          <CirculePlusIcon className="h-5 w-5" />
+        </button>
+      )}
+
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <form onSubmit={handleSubmit} className="flex max-h-[80vh] flex-col gap-4 overflow-y-auto">
+          <div className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-2">
+          <span className="text-foreground-primary text-lg mb-1 lg:text-2xl lg:col-span-2">
+            افزودن آدرس
+          </span>
+
+          {/* User Info Display */}
+          {userInfo && (
+            <div className="col-span-2 mb-2 flex flex-col gap-3 rounded-lg bg-slate-50 p-3 lg:flex-row">
+              <div className="flex-1">
+                <span className="text-sm text-gray-500">نام و نام خانوادگی:</span>
+                <p className="text-sm font-medium">{`${userInfo.FirstName} ${userInfo.LastName}`}</p>
+              </div>
+              <div className="flex-1">
+                <span className="text-sm text-gray-500">شماره تماس:</span>
+                <p className="text-sm text-black font-medium">{userInfo.UserName}</p>
+              </div>
+            </div>
+          )}
+
+          <Select
+            label="استان"
+            value={selectedProvince}
+            onChange={(province) => {
+              setSelectedProvince(province);
+              setSelectedCity(null);
+            }}
+            options={provinceOptions}
+            placeholder={
+              loadingProvinces
+                ? "در حال دریافت استان‌ها..."
+                : "استان محل سکونت خود را انتخاب نمایید"
+            }
+            isLoading={loadingProvinces}
+            error={errorProvinces || undefined}
+            className="col-span-2 lg:col-span-1"
+          />
+
+          <Select
+            label="شهر"
+            value={selectedCity}
+            onChange={setSelectedCity}
+            options={cityOptions}
+            isLoading={loadingCities}
+            placeholder={
+              !selectedProvince
+                ? "لطفا ابتدا استان را انتخاب کنید"
+                : loadingCities
+                  ? "در حال دریافت شهرها..."
+                  : "شهر محل سکونت خود را انتخاب نمایید"
+            }
+            error={errorCities || undefined}
+            className="col-span-2 lg:col-span-1"
+          />
+
+          <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
+            <label className="text-foreground-primary text-base lg:text-lg">
+              جزئیات آدرس (اختیاری)
+            </label>
+            <input
+              type="text"
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder="جزئیات آدرس"
+              className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
+            />
+          </div>
+
+          <div className="col-span-2 flex flex-col gap-1 lg:col-span-1">
+            <label className="text-foreground-primary text-base lg:text-lg">کد پستی</label>
+            <input
+              type="text"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              placeholder="کد پستی ۱۰ رقمی"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              required
+              className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
+            />
+            <span className="text-xs text-gray-500">کد پستی باید ۱۰ رقم باشد</span>
+          </div>
+
+          <div className="col-span-2 flex flex-col gap-1">
+            <label className="text-foreground-primary text-base lg:text-lg">
+              آدرس دقیق محل سکونت
+            </label>
+            <textarea
+              rows={3}
+              value={fullAddress}
+              onChange={(e) => setFullAddress(e.target.value)}
+              placeholder="آدرس کامل شامل خیابان، کوچه، پلاک و..."
+              required
+              className="focus:ring-primary-500/20 focus:border-primary-500 text-sm w-full resize-none rounded-lg border border-slate-200 p-3 focus:outline-none focus:ring-2"
+            />
+          </div>
+
+          </div>
+          <div className="flex justify-end border-t border-slate-100 bg-white px-4 py-4">
+            <button
+              type="submit"
+              disabled={loading || !selectedCity}
+              className={`hover:bg-[#db3172] text-sm flex w-full items-center justify-center gap-2 rounded-lg bg-[#f45a93] px-8 py-2 font-medium text-white transition-colors lg:w-fit ${
+                loading || !selectedCity ? "cursor-not-allowed opacity-70" : ""
+              }`}
+            >
+              <SaveIcon className="h-5 w-5" />
+              <span className="text-base lg:text-sm">
+                {loading ? "در حال ذخیره..." : "ذخیره آدرس"}
+              </span>
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </>
+  );
+}
