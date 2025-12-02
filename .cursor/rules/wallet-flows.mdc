@@ -10,12 +10,12 @@ description: Frontend wallet service and checkout wallet payment option
 - Service file: [src/services/wallet/index.ts](mdc:infinity-store-front/src/services/wallet/index.ts)
 - Exposes:
   - `getMyWallet()` → GET `/local-user-wallet/me`, returns wallet balance (IRR)
-  - `startTopup(amountIrr)` → POST `/wallet/charge-intent`, returns Mellat `redirectUrl`/`refId`
+  - `startTopup(amountIrr)` → POST `/wallet/charge-intent`, returns Saman Kish `redirectUrl`/`refId`
 
 ### Wallet Page Components
 
 - Balance component displays real wallet balance (IRR → toman): [src/components/User/Wallet/Balance.tsx](mdc:infinity-store-front/src/components/User/Wallet/Balance.tsx)
-- IncreaseBalance triggers top-up via Mellat using `startTopup`: [src/components/User/Wallet/IncreaseBalance.tsx](mdc:infinity-store-front/src/components/User/Wallet/IncreaseBalance.tsx)
+- IncreaseBalance triggers top-up via Saman Kish using `startTopup`: [src/components/User/Wallet/IncreaseBalance.tsx](mdc:infinity-store-front/src/components/User/Wallet/IncreaseBalance.tsx)
 
 ### Checkout – Wallet as Payment Method
 
@@ -28,7 +28,64 @@ description: Frontend wallet service and checkout wallet payment option
 
 - Wallet icon: [public/images/cart/wallet.svg](mdc:infinity-store-front/public/images/cart/wallet.svg)
 
+## Backend Wallet Top-up Flow
+
+### Payment Gateway
+
+- **Current Gateway**: Saman Kish (SEP)
+- **Service**: `api::payment-gateway.saman-kish`
+- **Controller**: `backend/src/api/wallet-topup/controllers/wallet-topup.ts`
+
+### Charge Intent Flow
+
+1. User initiates top-up with amount (IRR)
+2. Backend creates `wallet-topup` record with status "Pending"
+3. Generates unique `SaleOrderId` (timestamp + random suffix)
+4. Calls Saman Kish `requestPayment()` with:
+   - `orderId`: numeric sale order ID
+   - `amount`: amount in IRR
+   - `callbackURL`: absolute URL to `/api/wallet/payment-callback`
+   - `resNum`: sale order ID for tracking
+5. Returns `redirectUrl` and `token` to frontend
+6. User redirected to Saman Kish payment page
+
+### Payment Callback Flow
+
+1. Saman Kish POSTs to `/api/wallet/payment-callback` with:
+   - `State`: payment state (OK, CANCELEDBYUSER, FAILED, etc.)
+   - `RefNum`: reference number from bank
+   - `ResNum`: our sale order ID
+2. Backend loads wallet-topup by `ResNum`
+3. Idempotency check: skip if already processed
+4. If `State !== "OK"`, mark as Failed and redirect to failure page
+5. Call Saman Kish `verifyTransaction({ refNum })` to verify payment
+6. If verification fails or `resultCode !== 0`, mark as Failed
+7. On success:
+   - Update wallet-topup status to "Success"
+   - Load or create user wallet
+   - Increment wallet balance
+   - Create wallet transaction record
+   - Redirect to `${FRONTEND_BASE}/wallet?status=success`
+
+### Environment Variables
+
+```bash
+# Saman Kish (SEP) Configuration
+SAMAN_GATEWAY_URL=https://sep.shaparak.ir/onlinepg/onlinepg
+SAMAN_PAYMENT_PAGE_URL=https://sep.shaparak.ir/OnlinePG/OnlinePG
+SAMAN_SEND_TOKEN_URL=https://sep.shaparak.ir/OnlinePG/SendToken
+SAMAN_VERIFY_URL=https://sep.shaparak.ir/verifyTxnRandomSessionkey/ipg/VerifyTransaction
+SAMAN_REVERSE_URL=https://sep.shaparak.ir/verifyTxnRandomSessionkey/ipg/ReverseTransaction
+SAMAN_TERMINAL_ID=your-terminal-id
+SAMAN_USERNAME=your-username (optional)
+SAMAN_PASSWORD=your-password (optional)
+SAMAN_CALLBACK_URL=https://api.infinitycolor.org/api/wallet/payment-callback
+SAMAN_TOKEN_EXPIRY_MIN=20
+```
+
 ### Notes
 
 - Units: frontend receives wallet in IRR; displays toman using `(irr / 10).toLocaleString()`.
-- Top-up callback redirect handled by backend to `https://new.infinitycolor.co/wallet?status=...`.
+- Top-up callback redirect handled by backend to `https://infinitycolor.org/wallet?status=...`.
+- Saman Kish uses single-step verification (no separate settlement step like Mellat).
+- All amounts are stored and processed in IRR (Iranian Rial).

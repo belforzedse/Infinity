@@ -36,7 +36,7 @@ export default factories.createCoreController(
           },
         });
 
-        const paymentService = strapi.service("api::payment-gateway.mellat-v3");
+        const paymentService = strapi.service("api::payment-gateway.saman-kish");
 
         // Build absolute callback URL and avoid duplicate "/api" prefixes
         const configuredBase = String(
@@ -52,8 +52,8 @@ export default factories.createCoreController(
         const response = await paymentService.requestPayment({
           orderId: Number(saleOrderId),
           amount: Math.round(amountIrr),
-          userId: pluginUserId,
           callbackURL,
+          resNum: saleOrderId,
         } as any);
 
         if (!response?.success) {
@@ -65,13 +65,13 @@ export default factories.createCoreController(
           });
         }
 
-        // Save RefId for tracking
+        // Save token for tracking
         try {
           await strapi.entityService.update("api::wallet-topup.wallet-topup", topup.id, {
-            data: { RefId: response.refId },
+            data: { RefId: response.token || response.resNum },
           });
         } catch (e) {
-          strapi.log.error("Failed to persist wallet topup RefId", {
+          strapi.log.error("Failed to persist wallet topup token", {
             topupId: topup.id,
             saleOrderId,
             error: (e as any)?.message || String(e),
@@ -82,7 +82,7 @@ export default factories.createCoreController(
           data: {
             success: true,
             redirectUrl: response.redirectUrl,
-            refId: response.refId,
+            refId: response.token || response.resNum,
             saleOrderId,
           },
         });
@@ -94,15 +94,14 @@ export default factories.createCoreController(
     },
 
     async paymentCallback(ctx) {
-      // Mellat callback fields
-      const { ResCode, SaleOrderId, SaleReferenceId } = (ctx.request as any)
-        .body;
+      // Saman Kish callback fields
+      const { State, RefNum, ResNum } = (ctx.request as any).body;
 
       try {
-        // Load topup by SaleOrderId
+        // Load topup by ResNum (our SaleOrderId)
         const topups = (await strapi.entityService.findMany(
           "api::wallet-topup.wallet-topup",
-          { filters: { SaleOrderId: String(SaleOrderId) }, limit: 1 }
+          { filters: { SaleOrderId: String(ResNum) }, limit: 1 }
         )) as any[];
         const topup = topups?.[0];
 
@@ -115,18 +114,29 @@ export default factories.createCoreController(
         // Idempotency check: If topup already succeeded, skip processing
         if (topup.Status === "Success") {
           strapi.log.info(
-            `Wallet topup callback already processed (idempotency check): SaleOrderId=${SaleOrderId}, SaleReferenceId=${SaleReferenceId}`,
+            `Wallet topup callback already processed (idempotency check): ResNum=${ResNum}, RefNum=${RefNum}`,
             {
               topupId: topup.id,
-              saleOrderId: String(SaleOrderId || ""),
-              saleReferenceId: String(SaleReferenceId || ""),
+              resNum: String(ResNum || ""),
+              refNum: String(RefNum || ""),
             }
           );
           return ctx.redirect(`${FRONTEND_BASE}/wallet?status=success`);
         }
 
-        // If user cancelled or error code
-        if (String(ResCode) !== "0") {
+        const paymentService = strapi.service("api::payment-gateway.saman-kish");
+
+        // Check if user cancelled or error state
+        const stateNormalized = String(State || "").replace(/\s+/g, "").toUpperCase();
+        if (stateNormalized !== "OK") {
+          const stateDesc = paymentService.describeState(stateNormalized);
+          strapi.log.info("Wallet topup cancelled or failed", {
+            topupId: topup.id,
+            resNum: String(ResNum || ""),
+            state: stateNormalized,
+            stateDesc,
+          });
+
           try {
             await strapi.entityService.update(
               "api::wallet-topup.wallet-topup",
@@ -138,29 +148,34 @@ export default factories.createCoreController(
               "Failed to mark wallet topup as Failed (cancelled)",
               {
                 topupId: topup.id,
-                saleOrderId: String(SaleOrderId || ""),
-                resCode: String(ResCode || ""),
+                resNum: String(ResNum || ""),
+                state: stateNormalized,
                 error: (e as any)?.message || String(e),
               }
             );
           }
           return ctx.redirect(
-            `${FRONTEND_BASE}/wallet?status=failure&code=${encodeURIComponent(
-              String(ResCode || "")
+            `${FRONTEND_BASE}/wallet?status=failure&state=${encodeURIComponent(
+              stateNormalized
             )}`
           );
         }
 
-        const paymentService = strapi.service("api::payment-gateway.mellat-v3");
-
-        // Verify
+        // Verify transaction
         const verification = await paymentService.verifyTransaction({
-          orderId: String(SaleOrderId),
-          saleOrderId: String(SaleOrderId),
-          saleReferenceId: String(SaleReferenceId),
-        } as any);
+          refNum: String(RefNum),
+        });
 
-        if (!verification?.success) {
+        if (!verification?.success || verification.resultCode !== 0) {
+          const resultDesc = paymentService.describeResultCode(verification.resultCode);
+          strapi.log.error("Wallet topup verification failed", {
+            topupId: topup.id,
+            resNum: String(ResNum || ""),
+            refNum: String(RefNum || ""),
+            resultCode: verification.resultCode,
+            resultDesc,
+          });
+
           try {
             await strapi.entityService.update(
               "api::wallet-topup.wallet-topup",
@@ -170,40 +185,13 @@ export default factories.createCoreController(
           } catch (e) {
             strapi.log.error("Failed to mark wallet topup as Failed (verify)", {
               topupId: topup.id,
-              saleOrderId: String(SaleOrderId || ""),
-              saleReferenceId: String(SaleReferenceId || ""),
+              resNum: String(ResNum || ""),
+              refNum: String(RefNum || ""),
               error: (e as any)?.message || String(e),
             });
           }
           return ctx.redirect(
             `${FRONTEND_BASE}/wallet?status=failure&reason=verify`
-          );
-        }
-
-        // Settle
-        const settlement = await paymentService.settleTransaction({
-          orderId: String(SaleOrderId),
-          saleOrderId: String(SaleOrderId),
-          saleReferenceId: String(SaleReferenceId),
-        } as any);
-
-        if (!settlement?.success) {
-          try {
-            await strapi.entityService.update(
-              "api::wallet-topup.wallet-topup",
-              topup.id,
-              { data: { Status: "Failed" } }
-            );
-          } catch (e) {
-            strapi.log.error("Failed to mark wallet topup as Failed (settle)", {
-              topupId: topup.id,
-              saleOrderId: String(SaleOrderId || ""),
-              saleReferenceId: String(SaleReferenceId || ""),
-              error: (e as any)?.message || String(e),
-            });
-          }
-          return ctx.redirect(
-            `${FRONTEND_BASE}/wallet?status=failure&reason=settle`
           );
         }
 
@@ -215,15 +203,15 @@ export default factories.createCoreController(
             {
               data: {
                 Status: "Success",
-                SaleReferenceId: String(SaleReferenceId || ""),
+                SaleReferenceId: String(RefNum || ""),
               },
             }
           );
         } catch (e) {
           strapi.log.error("Failed to update wallet topup as Success", {
             topupId: topup.id,
-            saleOrderId: String(SaleOrderId || ""),
-            saleReferenceId: String(SaleReferenceId || ""),
+            resNum: String(ResNum || ""),
+            refNum: String(RefNum || ""),
             error: (e as any)?.message || String(e),
           });
         }
@@ -259,8 +247,8 @@ export default factories.createCoreController(
           strapi.log.error("Failed to update wallet balance after topup", {
             walletId,
             topupId: topup.id,
-            saleOrderId: String(SaleOrderId || ""),
-            saleReferenceId: String(SaleReferenceId || ""),
+            resNum: String(ResNum || ""),
+            refNum: String(RefNum || ""),
             error: (e as any)?.message || String(e),
           });
           return ctx.redirect(
@@ -274,13 +262,11 @@ export default factories.createCoreController(
             "api::local-user-wallet-transaction.local-user-wallet-transaction",
             {
               data: {
-                Amount: Number(topup.Amount || 0), // TODO: Validate IRR scale from frontend
+                Amount: Number(topup.Amount || 0),
                 Type: "Add",
                 Date: new Date(),
                 Cause: "Wallet Topup",
-                ReferenceId: `${String(SaleOrderId || "")}-${String(
-                  SaleReferenceId || ""
-                )}`,
+                ReferenceId: `${String(ResNum || "")}-${String(RefNum || "")}`,
                 user_wallet: walletId,
               },
             }
@@ -291,8 +277,8 @@ export default factories.createCoreController(
             {
               walletId,
               topupId: topup.id,
-              saleOrderId: String(SaleOrderId || ""),
-              saleReferenceId: String(SaleReferenceId || ""),
+              resNum: String(ResNum || ""),
+              refNum: String(RefNum || ""),
               error: (e as any)?.message || String(e),
             }
           );

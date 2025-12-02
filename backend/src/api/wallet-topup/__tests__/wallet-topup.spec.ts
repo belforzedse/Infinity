@@ -18,14 +18,15 @@ describe("Wallet Topup Operations", () => {
   describe("chargeIntent", () => {
     it("should create topup request and return payment gateway URL", async () => {
       const { strapi, registerService } = createStrapiMock();
-      const mellatService = {
+      const samanService = {
         requestPayment: jest.fn().mockResolvedValue({
           success: true,
-          redirectUrl: "https://bpm.shaparak.ir/pgw/XYZ",
-          refId: "REF-123",
+          redirectUrl: "https://sep.shaparak.ir/OnlinePG/SendToken?token=XYZ",
+          token: "TOKEN-123",
+          resNum: "1234567890123",
         }),
       };
-      registerService("api::payment-gateway.mellat-v3", mellatService);
+      registerService("api::payment-gateway.saman-kish", samanService);
 
       const topupRecord = { id: 1, Amount: 100_000, Status: "Pending" };
       (strapi.entityService.create as jest.Mock)
@@ -57,18 +58,18 @@ describe("Wallet Topup Operations", () => {
       );
 
       // Request payment
-      const paymentResponse = await mellatService.requestPayment({
+      const paymentResponse = await samanService.requestPayment({
         orderId: topup.id,
         amount,
-        userId,
         callbackURL: "https://api.infinitycolor.org/api/wallet/payment-callback",
+        resNum: `${Date.now()}123`,
       });
 
-      // Update with RefId
+      // Update with token
       await strapi.entityService.update(
         "api::wallet-topup.wallet-topup",
         topup.id,
-        { data: { RefId: paymentResponse.refId } }
+        { data: { RefId: paymentResponse.token || paymentResponse.resNum } }
       );
 
       // Assert
@@ -83,17 +84,16 @@ describe("Wallet Topup Operations", () => {
         })
       );
 
-      expect(mellatService.requestPayment).toHaveBeenCalledWith(
+      expect(samanService.requestPayment).toHaveBeenCalledWith(
         expect.objectContaining({
           amount: 100_000,
-          userId: 5,
         })
       );
 
       expect(paymentResponse).toMatchObject({
         success: true,
         redirectUrl: expect.stringContaining("shaparak.ir"),
-        refId: "REF-123",
+        token: "TOKEN-123",
       });
     });
 
@@ -131,13 +131,13 @@ describe("Wallet Topup Operations", () => {
 
     it("should handle payment gateway errors gracefully", async () => {
       const { strapi, registerService } = createStrapiMock();
-      const mellatService = {
+      const samanService = {
         requestPayment: jest.fn().mockResolvedValue({
           success: false,
           error: "Gateway timeout",
         }),
       };
-      registerService("api::payment-gateway.mellat-v3", mellatService);
+      registerService("api::payment-gateway.saman-kish", samanService);
 
       const topupRecord = { id: 10, Amount: 50_000, Status: "Pending" };
       (strapi.entityService.create as jest.Mock).mockResolvedValueOnce(
@@ -160,7 +160,7 @@ describe("Wallet Topup Operations", () => {
         }
       );
 
-      const paymentResponse = await mellatService.requestPayment({
+      const paymentResponse = await samanService.requestPayment({
         orderId: topup.id,
         amount: 50_000,
       });
@@ -184,11 +184,14 @@ describe("Wallet Topup Operations", () => {
   describe("paymentCallback", () => {
     it("should process successful topup callback and update wallet balance", async () => {
       const { strapi, registerService, registerQuery } = createStrapiMock();
-      const mellatService = {
-        verifyTransaction: jest.fn().mockResolvedValue({ success: true }),
-        settleTransaction: jest.fn().mockResolvedValue({ success: true }),
+      const samanService = {
+        verifyTransaction: jest.fn().mockResolvedValue({
+          success: true,
+          resultCode: 0,
+          resultDescription: "عملیات با موفقیت انجام شد",
+        }),
       };
-      registerService("api::payment-gateway.mellat-v3", mellatService);
+      registerService("api::payment-gateway.saman-kish", samanService);
 
       const topupRecord = {
         id: 20,
@@ -210,34 +213,26 @@ describe("Wallet Topup Operations", () => {
       const ctx = createCtx({
         request: {
           body: {
-            ResCode: "0",
-            SaleOrderId: "1234567890123",
-            SaleReferenceId: "REF-ABC",
+            State: "OK",
+            RefNum: "REF-ABC-123",
+            ResNum: "1234567890123",
           },
         },
       });
 
       // Simulate callback flow
-      const { ResCode, SaleOrderId, SaleReferenceId } = ctx.request.body;
+      const { State, RefNum, ResNum } = ctx.request.body;
 
       // Find topup
       const topups = await strapi.entityService.findMany(
         "api::wallet-topup.wallet-topup",
-        { filters: { SaleOrderId }, limit: 1 }
+        { filters: { SaleOrderId: ResNum }, limit: 1 }
       );
       const topup = topups[0];
 
-      // Verify and settle
-      const verification = await mellatService.verifyTransaction({
-        orderId: SaleOrderId,
-        saleOrderId: SaleOrderId,
-        saleReferenceId: SaleReferenceId,
-      });
-
-      const settlement = await mellatService.settleTransaction({
-        orderId: SaleOrderId,
-        saleOrderId: SaleOrderId,
-        saleReferenceId: SaleReferenceId,
+      // Verify transaction
+      const verification = await samanService.verifyTransaction({
+        refNum: RefNum,
       });
 
       // Update topup status
@@ -247,7 +242,7 @@ describe("Wallet Topup Operations", () => {
         {
           data: {
             Status: "Success",
-            SaleReferenceId,
+            SaleReferenceId: RefNum,
           },
         }
       );
@@ -278,15 +273,14 @@ describe("Wallet Topup Operations", () => {
             Amount: topup.Amount,
             Type: "Add",
             Cause: "Wallet Topup",
-            ReferenceId: `${SaleOrderId}-${SaleReferenceId}`,
+            ReferenceId: `${ResNum}-${RefNum}`,
             user_wallet: wallet.id,
           },
         }
       );
 
       // Assert
-      expect(mellatService.verifyTransaction).toHaveBeenCalled();
-      expect(mellatService.settleTransaction).toHaveBeenCalled();
+      expect(samanService.verifyTransaction).toHaveBeenCalled();
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(
         "api::local-user-wallet.local-user-wallet",
@@ -310,7 +304,7 @@ describe("Wallet Topup Operations", () => {
       );
     });
 
-    it("should mark topup as failed when ResCode is not 0 (user cancelled)", async () => {
+    it("should mark topup as failed when State is not OK (user cancelled)", async () => {
       const { strapi } = createStrapiMock();
       const topupRecord = {
         id: 30,
@@ -326,21 +320,22 @@ describe("Wallet Topup Operations", () => {
       const ctx = createCtx({
         request: {
           body: {
-            ResCode: "17", // User cancelled
-            SaleOrderId: "9876543210",
+            State: "CANCELEDBYUSER",
+            ResNum: "9876543210",
           },
         },
       });
 
-      const { ResCode, SaleOrderId } = ctx.request.body;
+      const { State, ResNum } = ctx.request.body;
 
       const topups = await strapi.entityService.findMany(
         "api::wallet-topup.wallet-topup",
-        { filters: { SaleOrderId }, limit: 1 }
+        { filters: { SaleOrderId: ResNum }, limit: 1 }
       );
       const topup = topups[0];
 
-      if (String(ResCode) !== "0") {
+      const stateNormalized = String(State || "").replace(/\s+/g, "").toUpperCase();
+      if (stateNormalized !== "OK") {
         await strapi.entityService.update(
           "api::wallet-topup.wallet-topup",
           topup.id,
@@ -348,8 +343,8 @@ describe("Wallet Topup Operations", () => {
         );
 
         ctx.redirect(
-          `https://infinitycolor.org/wallet?status=failure&code=${encodeURIComponent(
-            String(ResCode)
+          `https://infinitycolor.org/wallet?status=failure&state=${encodeURIComponent(
+            stateNormalized
           )}`
         );
       }
@@ -361,16 +356,20 @@ describe("Wallet Topup Operations", () => {
       );
 
       expect(ctx.redirect).toHaveBeenCalledWith(
-        expect.stringContaining("status=failure&code=17")
+        expect.stringContaining("status=failure&state=CANCELEDBYUSER")
       );
     });
 
     it("should mark topup as failed when verification fails", async () => {
       const { strapi, registerService } = createStrapiMock();
-      const mellatService = {
-        verifyTransaction: jest.fn().mockResolvedValue({ success: false }),
+      const samanService = {
+        verifyTransaction: jest.fn().mockResolvedValue({
+          success: false,
+          resultCode: -2,
+          resultDescription: "تراکنش یافت نشد",
+        }),
       };
-      registerService("api::payment-gateway.mellat-v3", mellatService);
+      registerService("api::payment-gateway.saman-kish", samanService);
 
       const topupRecord = {
         id: 40,
@@ -386,28 +385,26 @@ describe("Wallet Topup Operations", () => {
       const ctx = createCtx({
         request: {
           body: {
-            ResCode: "0",
-            SaleOrderId: "5555555555",
-            SaleReferenceId: "REF-FAIL",
+            State: "OK",
+            RefNum: "REF-FAIL",
+            ResNum: "5555555555",
           },
         },
       });
 
-      const { SaleOrderId, SaleReferenceId } = ctx.request.body;
+      const { RefNum, ResNum } = ctx.request.body;
 
       const topups = await strapi.entityService.findMany(
         "api::wallet-topup.wallet-topup",
-        { filters: { SaleOrderId }, limit: 1 }
+        { filters: { SaleOrderId: ResNum }, limit: 1 }
       );
       const topup = topups[0];
 
-      const verification = await mellatService.verifyTransaction({
-        orderId: SaleOrderId,
-        saleOrderId: SaleOrderId,
-        saleReferenceId: SaleReferenceId,
+      const verification = await samanService.verifyTransaction({
+        refNum: RefNum,
       });
 
-      if (!verification.success) {
+      if (!verification.success || verification.resultCode !== 0) {
         await strapi.entityService.update(
           "api::wallet-topup.wallet-topup",
           topup.id,
@@ -430,85 +427,19 @@ describe("Wallet Topup Operations", () => {
       );
     });
 
-    it("should mark topup as failed when settlement fails", async () => {
-      const { strapi, registerService } = createStrapiMock();
-      const mellatService = {
-        verifyTransaction: jest.fn().mockResolvedValue({ success: true }),
-        settleTransaction: jest.fn().mockResolvedValue({ success: false }),
-      };
-      registerService("api::payment-gateway.mellat-v3", mellatService);
-
-      const topupRecord = {
-        id: 50,
-        Amount: 300_000,
-        Status: "Pending",
-        SaleOrderId: "7777777777",
-      };
-
-      (strapi.entityService.findMany as jest.Mock).mockResolvedValue([
-        topupRecord,
-      ]);
-
-      const ctx = createCtx({
-        request: {
-          body: {
-            ResCode: "0",
-            SaleOrderId: "7777777777",
-            SaleReferenceId: "REF-SETTLE-FAIL",
-          },
-        },
-      });
-
-      const { SaleOrderId, SaleReferenceId } = ctx.request.body;
-
-      const topups = await strapi.entityService.findMany(
-        "api::wallet-topup.wallet-topup",
-        { filters: { SaleOrderId }, limit: 1 }
-      );
-      const topup = topups[0];
-
-      await mellatService.verifyTransaction({
-        orderId: SaleOrderId,
-        saleOrderId: SaleOrderId,
-        saleReferenceId: SaleReferenceId,
-      });
-
-      const settlement = await mellatService.settleTransaction({
-        orderId: SaleOrderId,
-        saleOrderId: SaleOrderId,
-        saleReferenceId: SaleReferenceId,
-      });
-
-      if (!settlement.success) {
-        await strapi.entityService.update(
-          "api::wallet-topup.wallet-topup",
-          topup.id,
-          { data: { Status: "Failed" } }
-        );
-
-        ctx.redirect(
-          "https://infinitycolor.org/wallet?status=failure&reason=settle"
-        );
-      }
-
-      expect(strapi.entityService.update).toHaveBeenCalledWith(
-        "api::wallet-topup.wallet-topup",
-        50,
-        { data: { Status: "Failed" } }
-      );
-
-      expect(ctx.redirect).toHaveBeenCalledWith(
-        expect.stringContaining("reason=settle")
-      );
-    });
+    // Saman Kish doesn't have a separate settlement step - verification is enough
+    // This test is removed as it's specific to Mellat's two-step process
 
     it("should create wallet if it doesn't exist for the user", async () => {
       const { strapi, registerService, registerQuery } = createStrapiMock();
-      const mellatService = {
-        verifyTransaction: jest.fn().mockResolvedValue({ success: true }),
-        settleTransaction: jest.fn().mockResolvedValue({ success: true }),
+      const samanService = {
+        verifyTransaction: jest.fn().mockResolvedValue({
+          success: true,
+          resultCode: 0,
+          resultDescription: "عملیات با موفقیت انجام شد",
+        }),
       };
-      registerService("api::payment-gateway.mellat-v3", mellatService);
+      registerService("api::payment-gateway.saman-kish", samanService);
 
       const topupRecord = {
         id: 60,
@@ -540,23 +471,22 @@ describe("Wallet Topup Operations", () => {
       const ctx = createCtx({
         request: {
           body: {
-            ResCode: "0",
-            SaleOrderId: "8888888888",
-            SaleReferenceId: "REF-NEW-WALLET",
+            State: "OK",
+            RefNum: "REF-NEW-WALLET",
+            ResNum: "8888888888",
           },
         },
       });
 
-      const { SaleOrderId, SaleReferenceId } = ctx.request.body;
+      const { RefNum, ResNum } = ctx.request.body;
 
       const topups = await strapi.entityService.findMany(
         "api::wallet-topup.wallet-topup",
-        { filters: { SaleOrderId }, limit: 1 }
+        { filters: { SaleOrderId: ResNum }, limit: 1 }
       );
       const topup = topups[0];
 
-      await mellatService.verifyTransaction({ orderId: SaleOrderId });
-      await mellatService.settleTransaction({ orderId: SaleOrderId });
+      await samanService.verifyTransaction({ refNum: RefNum });
 
       await strapi.entityService.update(
         "api::wallet-topup.wallet-topup",
@@ -616,17 +546,18 @@ describe("Wallet Topup Operations", () => {
       const ctx = createCtx({
         request: {
           body: {
-            ResCode: "0",
-            SaleOrderId: "9999999999",
+            State: "OK",
+            RefNum: "REF-NOTFOUND",
+            ResNum: "9999999999",
           },
         },
       });
 
-      const { SaleOrderId } = ctx.request.body;
+      const { ResNum } = ctx.request.body;
 
       const topups = await strapi.entityService.findMany(
         "api::wallet-topup.wallet-topup",
-        { filters: { SaleOrderId }, limit: 1 }
+        { filters: { SaleOrderId: ResNum }, limit: 1 }
       );
 
       if (!topups || topups.length === 0) {
