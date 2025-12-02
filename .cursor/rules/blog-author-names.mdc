@@ -1,0 +1,181 @@
+# Blog Author Names - Implementation Guide
+
+## Overview
+
+The blog system has been updated to display author names from `users-permissions.user`'s `user_info.FirstName + LastName` instead of the `blog_author.Name` field, ensuring consistency with the rest of the system.
+
+## Changes Made
+
+### Backend Changes
+
+#### 1. Blog Post Controller (`backend/src/api/blog-post/controllers/blog-post.ts`)
+- **Population Parameters**: Updated to include `users_permissions_user.user_info` relation
+- **Author Enrichment**: All API responses now enrich blog posts with resolved author names
+- **Methods Updated**: `find`, `findOne`, `findBySlug`, `create`, `update`
+
+#### 2. Blog Helper Utility (`backend/src/utils/blog-helpers.ts`)
+- **`resolveBlogAuthorName()`**: Resolves author name with fallback chain:
+  1. `users_permissions_user.user_info.FirstName + LastName`
+  2. `blog_author.Name` (existing field)
+  3. `users_permissions_user.username`
+  4. `users_permissions_user.email`
+  5. "نویسنده اینفینیتی" (default fallback)
+- **`enrichBlogPostWithAuthorName()`**: Enriches single blog post
+- **`enrichBlogPostsWithAuthorNames()`**: Enriches multiple blog posts
+
+### Frontend Changes
+
+#### 1. Blog Service (`frontend/src/services/blog/blog.service.ts`)
+- **Population Parameters**: Updated to include `users_permissions_user.user_info`
+- **`normalizeBlogPost()`**: Updated author name resolution logic
+- **Methods Updated**: `getBlogPosts`, `getBlogPostById`, `getBlogPostBySlug`
+
+#### 2. Blog Components
+- **BlogCard**: Added author name display below metadata
+- **BlogCardMobile**: Added author name display between title and excerpt
+- **BlogPostDetail**: Already had author display (no changes needed)
+
+## Author Name Resolution Logic
+
+```typescript
+// Frontend (blogAuthorName.ts) - Consistent with other admin interfaces
+export function resolveBlogAuthorDisplayName(author?: BlogAuthor | null): string {
+  if (!author) return " - ";
+
+  // Try to get name from users_permissions_user.user_info (same as other admin interfaces)
+  const userInfo = author.users_permissions_user?.user_info;
+  const firstName = userInfo?.FirstName ?? "";
+  const lastName = userInfo?.LastName ?? "";
+  const fullName = `${firstName} ${lastName}`.trim();
+
+  // Fallback to blog_author.Name if no user_info
+  return fullName || author.Name || " - ";
+}
+```
+
+This follows the exact same pattern used in:
+- `/super-admin/orders` (order user names)
+- `/super-admin/users` (user table names)  
+- `/super-admin/reports/admin-activity` (admin names)
+
+## Testing Scenarios
+
+### 1. Blog Author with Complete User Info
+- **Setup**: Blog author linked to users-permissions user with FirstName and LastName
+- **Expected**: Display "FirstName LastName"
+- **Test**: Create/view blog post with properly linked author
+
+### 2. Blog Author with Partial User Info
+- **Setup**: Blog author with only FirstName OR only LastName
+- **Expected**: Display the available name part
+- **Test**: Update user_info to have only one name field
+
+### 3. Blog Author without User Info
+- **Setup**: Blog author linked to users-permissions user without user_info
+- **Expected**: Fall back to blog_author.Name field
+- **Test**: Remove user_info relation or leave FirstName/LastName empty
+
+### 4. Blog Author without Users-Permissions User
+- **Setup**: Blog author not linked to any users-permissions user
+- **Expected**: Display blog_author.Name or "نویسنده اینفینیتی"
+- **Test**: Create blog author without users_permissions_user relation
+
+### 5. No Blog Author
+- **Setup**: Blog post without blog_author
+- **Expected**: No author display or default fallback
+- **Test**: Create blog post without assigning author
+
+## API Population Parameters
+
+The following population parameters are now used:
+
+```typescript
+populate: {
+  blog_author: { 
+    populate: [
+      "Avatar", 
+      "users_permissions_user", 
+      "users_permissions_user.user_info"
+    ] 
+  }
+}
+```
+
+## Migration Notes
+
+### Existing Data
+- Existing blog authors with `Name` field will continue to work
+- Authors linked to users-permissions users will now show user_info names
+- No data migration required - changes are backward compatible
+
+### Performance Considerations
+- Additional population adds minimal overhead
+- Author name resolution happens at API level for consistency
+- Frontend components receive pre-resolved names
+
+## Troubleshooting
+
+### Author Name Not Displaying
+1. Check if blog_author is populated in API response
+2. Verify users_permissions_user relation exists
+3. Confirm user_info has FirstName or LastName
+4. Check fallback chain in blog-helpers.ts
+
+### Incorrect Author Name
+1. Verify user_info.FirstName and LastName are correct
+2. Check if blog_author.Name needs updating
+3. Ensure population parameters include user_info
+
+### API Response Issues
+1. Confirm blog-post controller is using enrichment functions
+2. Check population parameters in controller methods
+3. Verify blog-helpers.ts is imported correctly
+
+## Future Enhancements
+
+### Potential Improvements
+1. **Author Avatar**: Display user avatar from user_info or blog_author
+2. **Author Bio**: Show author bio from user_info or blog_author
+3. **Author Profile**: Link to author profile page
+4. **Author Posts**: List other posts by same author
+
+### Schema Considerations
+1. Consider deprecating blog_author.Name in favor of user_info names
+2. Add validation to ensure blog authors have linked users
+3. Implement author management interface for admins
+
+## Issue Resolution
+
+### Problem Identified
+The user reported two different behaviors for blog author names:
+1. **Super-admin interface** (`/super-admin/blog/posts`): Showing "نامشخص" (unknown)
+2. **Public blog post** (`/123333`): Showing email address instead of name
+
+### Root Cause
+1. **Super-admin interface**: Was using incorrect property paths (`author?.user_info` instead of `author?.users_permissions_user?.user_info`)
+2. **Public blog post**: Backend fallback chain was including email, causing email to display when FirstName/LastName were empty
+
+### Fixes Applied
+1. **Super-admin interface**: Updated to use the enriched `author.Name` from backend
+2. **Backend fallback chain**: Removed email from fallback chain to prevent email display
+3. **All interfaces**: Now consistently show proper names or "نویسنده اینفینیتی" fallback
+
+### Additional Files Updated
+- `frontend/src/app/(super-admin)/super-admin/blog/posts/page.tsx` - Fixed author name display logic
+- `frontend/src/utils/blogAuthorName.ts` - Created utility function for consistent author name resolution
+- Updated all blog components to use the same pattern as other admin interfaces
+
+## Related Files
+
+### Backend
+- `backend/src/api/blog-post/controllers/blog-post.ts`
+- `backend/src/utils/blog-helpers.ts`
+- `backend/src/api/blog-author/content-types/blog-author/schema.json`
+
+### Frontend
+- `frontend/src/services/blog/blog.service.ts`
+- `frontend/src/components/Blog/BlogCard.tsx`
+- `frontend/src/components/Blog/BlogCardMobile.tsx`
+- `frontend/src/components/Blog/BlogPostDetail.tsx`
+- `frontend/src/app/(super-admin)/super-admin/blog/posts/page.tsx`
+- `frontend/src/app/(blog)/[slug]/page.tsx`

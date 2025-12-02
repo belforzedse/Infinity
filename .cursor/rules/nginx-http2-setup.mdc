@@ -1,0 +1,350 @@
+---
+description: Complete nginx HTTP/2 configuration for Infinity Store deployment
+globs: **/*nginx*.conf,**/nginx.conf
+---
+
+# Nginx HTTP/2 Configuration for Infinity Store
+
+## Quick Setup Guide
+
+### Step 1: Verify Nginx Version
+
+HTTP/2 support requires nginx 1.9.5+ (most modern installations include it):
+
+```bash
+nginx -v
+```
+
+### Step 2: Update Your Nginx Configuration
+
+Your current config is at `/etc/nginx/sites-available/infinitycolor.org`. Here's the complete HTTP/2 enabled configuration:
+
+```nginx
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    listen [::]:80;
+    server_name infinitycolor.org www.infinitycolor.org api.infinitycolor.org;
+
+    # Redirect all HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# Frontend (Next.js) - HTTP/2 Enabled
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name infinitycolor.org www.infinitycolor.org;
+
+    # SSL Configuration (Certbot will update these paths)
+    ssl_certificate /etc/letsencrypt/live/infinitycolor.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/infinitycolor.org/privkey.pem;
+    
+    # SSL Security Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # HTTP/2 Optimizations
+    http2_max_field_size 16k;
+    http2_max_header_size 32k;
+    http2_max_concurrent_streams 100;
+    http2_push_preload on;
+
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/json application/javascript application/xml+rss application/rss+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml;
+
+    # Static assets caching (Next.js static files)
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Cache static assets
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Font files with long cache
+    location ~* \.(woff2|woff|ttf|eot)$ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # Images with cache
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp|avif)$ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    # Main proxy to Next.js
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+
+# Backend API (Strapi) - HTTP/2 Enabled
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name api.infinitycolor.org;
+
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/api.infinitycolor.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.infinitycolor.org/privkey.pem;
+    
+    # SSL Security Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # HTTP/2 Optimizations
+    http2_max_field_size 16k;
+    http2_max_header_size 32k;
+    http2_max_concurrent_streams 100;
+
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/json application/javascript application/xml+rss;
+
+    # Proxy to Strapi
+    location / {
+        proxy_pass http://127.0.0.1:1337;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts for API
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+## Installation Steps
+
+### 1. Backup Current Configuration
+
+```bash
+sudo cp /etc/nginx/sites-available/infinitycolor.org /etc/nginx/sites-available/infinitycolor.org.backup
+```
+
+### 2. Update Configuration File
+
+Edit the configuration:
+
+```bash
+sudo nano /etc/nginx/sites-available/infinitycolor.org
+```
+
+Replace the content with the HTTP/2 enabled configuration above.
+
+**Important**: Update the SSL certificate paths based on your Certbot setup:
+- For `infinitycolor.org`: `/etc/letsencrypt/live/infinitycolor.org/`
+- For `api.infinitycolor.org`: `/etc/letsencrypt/live/api.infinitycolor.org/`
+
+### 3. Test Configuration
+
+```bash
+sudo nginx -t
+```
+
+If test passes, you'll see:
+```
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+### 4. Reload Nginx
+
+```bash
+sudo systemctl reload nginx
+```
+
+Or restart if needed:
+```bash
+sudo systemctl restart nginx
+```
+
+### 5. Verify HTTP/2 is Working
+
+#### Using curl:
+```bash
+curl -I --http2 https://infinitycolor.org
+```
+
+Should show:
+```
+HTTP/2 200
+```
+
+#### Using Browser DevTools:
+1. Open Chrome DevTools (F12)
+2. Go to Network tab
+3. Load your site
+4. Right-click on any request → "Protocol"
+5. Should show "h2" for HTTP/2 requests
+
+#### Using Online Tools:
+- https://tools.keycdn.com/http2-test
+- Enter your domain and test
+
+## Staging Environment
+
+For staging (`infinity.rgbgroup.ir` and `api.infinity.rgbgroup.ir`), use the same configuration but update:
+
+```nginx
+server_name infinity.rgbgroup.ir www.infinity.rgbgroup.ir;
+# and
+ssl_certificate /etc/letsencrypt/live/infinity.rgbgroup.ir/fullchain.pem;
+```
+
+## Troubleshooting
+
+### HTTP/2 Not Working
+
+1. **Check nginx version**:
+   ```bash
+   nginx -v
+   ```
+   Must be 1.9.5 or higher.
+
+2. **Verify SSL certificates exist**:
+   ```bash
+   sudo ls -la /etc/letsencrypt/live/infinitycolor.org/
+   ```
+
+3. **Check nginx error logs**:
+   ```bash
+   sudo tail -f /var/log/nginx/error.log
+   ```
+
+4. **Verify HTTP/2 module is compiled**:
+   ```bash
+   nginx -V 2>&1 | grep -o http_v2_module
+   ```
+   Should output `http_v2_module`
+
+### SSL Certificate Issues
+
+If certificates don't exist or need renewal:
+
+```bash
+# Get new certificates
+sudo certbot --nginx -d infinitycolor.org -d www.infinitycolor.org -d api.infinitycolor.org
+
+# Renew existing certificates
+sudo certbot renew
+```
+
+### Performance Issues
+
+1. **Monitor server resources**:
+   ```bash
+   htop
+   ```
+
+2. **Check nginx status**:
+   ```bash
+   sudo systemctl status nginx
+   ```
+
+3. **Review access logs**:
+   ```bash
+   sudo tail -f /var/log/nginx/access.log
+   ```
+
+## Expected Improvements
+
+After enabling HTTP/2, you should see:
+
+- **Lighthouse Performance**: +2-5 points improvement
+- **Load Time**: ~2,140ms faster (91 requests multiplexed)
+- **Network Efficiency**: Reduced connection overhead
+- **Better Core Web Vitals**: Improved LCP and FCP scores
+
+## Additional Optimizations
+
+### Enable Brotli Compression (Optional)
+
+If you want even better compression:
+
+```bash
+sudo apt install nginx-module-brotli
+```
+
+Then add to nginx config:
+```nginx
+brotli on;
+brotli_comp_level 6;
+brotli_types text/plain text/css text/xml text/javascript application/json application/javascript;
+```
+
+## Maintenance
+
+### Regular Tasks
+
+1. **Renew SSL certificates** (auto-renewal should be set up):
+   ```bash
+   sudo certbot renew --dry-run
+   ```
+
+2. **Monitor nginx logs**:
+   ```bash
+   sudo tail -f /var/log/nginx/error.log
+   ```
+
+3. **Check HTTP/2 status**:
+   ```bash
+   curl -I --http2 https://infinitycolor.org | head -1
+   ```
+
+## References
+
+- [Nginx HTTP/2 Module Documentation](https://nginx.org/en/docs/http/ngx_http_v2_module.html)
+- [Certbot Documentation](https://certbot.eff.org/)
+- [SSL Labs SSL Test](https://www.ssllabs.com/ssltest/)
