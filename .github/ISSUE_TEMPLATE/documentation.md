@@ -1,83 +1,58 @@
----
 name: Documentation Issue
-about: Report missing, incorrect, or unclear documentation
-title: "[DOCS] "
+about: Report missing, inaccurate, or unclear documentation
+title: "[DOCS] <short summary>"
 labels: documentation
 assignees: ""
 ---
 
-## Documentation Issue
+## Summary
 
-<!-- Describe the documentation problem -->
+<!-- Provide a concise overview of the documentation gap -->
 
 ## Location
 
-<!-- Where is the documentation issue? -->
-
-**File/Page**: [e.g., README.md, backend/CLAUDE.md, .cursor/rules/cart-implementation.mdc]
-**Section**: [e.g., "Setup Instructions", "API Reference"]
-**URL**: [if applicable]
+- **File / Page**: `path/to/file.md`
+- **Section / Heading**: `Section title`
+- **URL (if applicable)**:
 
 ## Issue Type
 
-<!-- Mark all that apply -->
-
-- [ ] Missing documentation
+- [ ] Missing content
 - [ ] Incorrect information
-- [ ] Unclear/confusing explanation
-- [ ] Outdated information
-- [ ] Broken links
-- [ ] Missing code examples
-- [ ] Typo/grammar issue
-- [ ] Need more details
+- [ ] Unclear explanation
+- [ ] Outdated details
+- [ ] Broken link
+- [ ] Missing example/reference
+- [ ] Grammar / tone issue
 
 ## Current State
 
-<!-- What is currently documented (or missing)? -->
-
-**Current Content:**
-
 ```
-Paste current content here (if exists)
+Paste the relevant excerpt or describe the absence of content.
 ```
 
-## Problem Description
-
-<!-- Explain what's wrong or missing -->
-
-## Suggested Improvement
-
-<!-- How should the documentation be improved? -->
-
-**Proposed Content:**
+## Desired Update
 
 ```
-Paste proposed content here
+Provide replacement text, outline, or references for the fix.
 ```
 
 ## Impact
 
-<!-- Who does this affect? -->
+- Affected audience (new contributors, backend team, frontend team, DevOps, end users):
+- Severity (blocker, high, medium, low):
 
-- [ ] New contributors
-- [ ] Experienced developers
-- [ ] End users
-- [ ] Administrators
-- [ ] Everyone
+## Related Documents
 
-## Related Documentation
-
-<!-- Are there related docs that should be updated? -->
-
--
--
+- Document 1 (if another file also needs updates)
+- Document 2
 
 ## Additional Context
 
-<!-- Add any other context, screenshots, or examples -->
+<!-- Include screenshots, logs, or any supporting material -->
 
-## Checklist
+## Reporter Checklist
 
-- [ ] I have searched existing issues to ensure this is not a duplicate
-- [ ] I have identified the specific location of the issue
-- [ ] I have provided suggestions for improvement (if possible)
+- [ ] I confirmed no existing issue covers this request
+- [ ] I identified the exact location of the issue
+- [ ] I can help with a fix (optional)
