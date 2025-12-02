@@ -44,17 +44,6 @@ jobs:
         working-directory: frontend
         run: npm ci --legacy-peer-deps
 
-      - name: Resolve build environment
-        id: env
-        run: |
-          set -euo pipefail
-          {
-            echo "api=${{ secrets.FRONTEND_API_BASE_URL }}"
-            echo "image=${{ secrets.FRONTEND_IMAGE_BASE_URL }}"
-            echo "token=${{ secrets.FRONTEND_STRAPI_TOKEN }}"
-            echo "site=${{ secrets.SITE_URL }}"
-          } >> "$GITHUB_OUTPUT"
-
       - name: Select Dockerfile and image tag
         id: meta
         run: |
@@ -78,7 +67,7 @@ jobs:
           echo "runtime_tag=${RUNTIME_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
 
       - name: Build and push Docker image
         env:
