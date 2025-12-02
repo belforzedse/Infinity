@@ -1,0 +1,189 @@
+// removed unused import: HTTP_STATUS from "@/constants/api"
+import { handleAuthErrors } from "@/utils/auth";
+import { apiClient } from "@/lib/api-client";
+import { apiCache } from "@/lib/api-cache";
+
+// Use the central auth error handler instead of local implementation
+const handleAuthError = (error: any) => {
+  handleAuthErrors(error);
+  throw error;
+};
+
+export interface ShippingProvince {
+  id: number;
+  Title: string;
+}
+
+export interface ShippingCity {
+  id: number;
+  Title: string;
+  Code: string;
+  shipping_province: ShippingProvince;
+}
+
+export interface UserAddress {
+  id: number;
+  PostalCode: string;
+  Description: string;
+  FullAddress: string;
+  createdAt: string;
+  shipping_city: ShippingCity;
+}
+
+export interface UserAddressesResponse {
+  data: UserAddress[];
+  meta: {
+    pagination: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
+export interface AddAddressRequest {
+  PostalCode: string;
+  Description?: string;
+  FullAddress: string;
+  shipping_city: number;
+}
+
+/**
+ * Invalidate API cache for addresses endpoint
+ * Call this after add/update/delete operations to ensure fresh data
+ */
+export const invalidateAddressCache = (): void => {
+  apiCache.clearByPattern(/local-user-addresses/);
+};
+
+export const getUserAddresses = async (): Promise<UserAddress[]> => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  try {
+    const response = await apiClient.get("/local-user-addresses/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data as UserAddress[];
+  } catch (error) {
+    console.error("Error fetching user addresses:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const addUserAddress = async (address: AddAddressRequest): Promise<UserAddress> => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  // Validate postal code is 10 digits
+  if (!/^\d{10}$/.test(address.PostalCode)) {
+    throw new Error("Postal code must be a 10-digit number");
+  }
+
+  // Validate full address is not empty
+  if (!address.FullAddress || address.FullAddress.trim() === "") {
+    throw new Error("Full address is required");
+  }
+
+  // Validate shipping city is provided
+  if (!address.shipping_city) {
+    throw new Error("Shipping city is required");
+  }
+
+  try {
+    const response = await apiClient.post("/local-user-addresses/create", address, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Invalidate cache after successful add
+    invalidateAddressCache();
+
+    // apiClient.post returns response.data where response is { data: ApiResponse<T>, headers }
+    // Strapi returns { data: address }, so response.data is { data: address }
+    // We need to access response.data to get the address object
+    // But based on getUserAddresses pattern, response.data is already the array/object
+    // So for POST, response.data should be the address directly or { data: address }
+    const addressData = (response as any).data?.data || (response as any).data || response;
+
+    // Verify the address has the required structure
+    if (!addressData || !addressData.shipping_city) {
+      console.warn("Address response missing shipping_city, fetching full address");
+      // If the response doesn't have full data, fetch it
+      const fullAddresses = await getUserAddresses();
+      const fullAddress = fullAddresses.find(addr => addr.id === addressData.id);
+      if (fullAddress) {
+        return fullAddress;
+      }
+    }
+
+    return addressData as UserAddress;
+  } catch (error) {
+    console.error("Error adding user address:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const updateUserAddress = async (
+  id: number,
+  address: AddAddressRequest,
+): Promise<UserAddress> => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  try {
+    const response = await apiClient.put(`/local-user-addresses/${id}`, address, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Invalidate cache after successful update
+    invalidateAddressCache();
+
+    return response.data as UserAddress;
+  } catch (error) {
+    console.error("Error updating user address:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};
+
+export const deleteUserAddress = async (id: number): Promise<void> => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  try {
+    await apiClient.delete(`/local-user-addresses/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Invalidate cache after successful delete
+    invalidateAddressCache();
+  } catch (error) {
+    console.error("Error deleting user address:", error);
+    handleAuthError(error);
+    throw error;
+  }
+};

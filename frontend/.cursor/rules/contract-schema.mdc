@@ -1,0 +1,19 @@
+---
+description: Backend strapi contract Schema
+globs: 
+alwaysApply: false
+---
+# Contract Schema
+
+## Contract Models
+
+The contract system consists of:
+
+- [Contract](mdc:src/api/contract/content-types/contract/schema.json) - The main contract model
+  - Defines agreements between users or between users and the platform
+  - Contains contract terms, conditions, and status
+  
+- [Contract Transaction](mdc:src/api/contract-transaction/content-types/contract-transaction/schema.json) - Transaction records for contracts
+  - Records financial transactions related to contracts
+  - Tracks payment history and status
+

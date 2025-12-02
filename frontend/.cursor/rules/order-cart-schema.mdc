@@ -1,0 +1,45 @@
+---
+description: Order and Cart Schema containing Cart Models and Order Models and Shipping Models.
+globs: 
+alwaysApply: false
+---
+# Order and Cart Schema
+
+## Cart Models
+
+The shopping cart system consists of:
+
+- [Cart](mdc:src/api/cart/content-types/cart/schema.json) - The main cart model
+  - Belongs to a user
+  - Contains multiple cart items
+  - Tracks cart totals and status
+  
+- [Cart Item](mdc:src/api/cart-item/content-types/cart-item/schema.json) - Items in a shopping cart
+  - References product variations
+  - Tracks quantity and price
+
+## Order Models
+
+The order system consists of:
+
+- [Order](mdc:src/api/order/content-types/order/schema.json) - The main order model
+  - Created when a cart is checked out
+  - Contains order metadata, shipping, and payment information
+  - Tracks order status and history
+  
+- [Order Item](mdc:src/api/order-item/content-types/order-item/schema.json) - Items within an order
+  - References product variations
+  - Tracks quantity, price, and status
+
+## Shipping and Payment
+
+- [Shipping](mdc:src/api/shipping/content-types/shipping/schema.json) - Shipping method options
+  - Contains shipping rates, methods, and delivery options
+  
+- [Shipping Province](mdc:src/api/shipping-province/content-types/shipping-province/schema.json) - Province/state data for shipping
+  
+- [Shipping City](mdc:src/api/shipping-city/content-types/shipping-city/schema.json) - City data for shipping
+  
+- [Payment Gateway](mdc:src/api/payment-gateway/content-types/payment-gateway/schema.json) - Payment processing options
+  - Defines available payment methods and gateways
+

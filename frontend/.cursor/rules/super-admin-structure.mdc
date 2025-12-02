@@ -1,0 +1,56 @@
+---
+description: The Super Admin section of the application provides comprehensive management interfaces for various aspects of the store. All Super Admin routes follow the pattern `/super-admin/*`.
+globs: 
+alwaysApply: false
+---
+# Super Admin Section Structure
+
+The Super Admin section of the application provides comprehensive management interfaces for various aspects of the store. All Super Admin routes follow the pattern `/super-admin/*`.
+
+## Directory Structure
+
+The Super Admin pages are organized in the following structure:
+- [src/app/(super-admin)/super-admin](mdc:src/app/(super-admin)/super-admin) - Contains all Super Admin pages
+- [src/components/SuperAdmin](mdc:src/components/SuperAdmin) - Contains reusable components for the Super Admin section
+
+## Authentication & Access Control
+
+The Super Admin section requires authentication with admin privileges:
+
+- Authentication is checked in [src/app/(super-admin)/layout.tsx](mdc:src/app/(super-admin)/layout.tsx)
+- The `/auth/self` API is used to verify admin access
+- If authentication is missing or invalid, users are redirected to `/auth`
+- When the API returns 401/403 errors or `isAdmin: false`, users are automatically redirected
+- See [authentication-handling.mdc](mdc:.cursor/rules/authentication-handling.mdc) for the centralized auth error handling pattern
+
+## Key Components
+
+### Layout
+- [src/app/(super-admin)/layout.tsx](mdc:src/app/(super-admin)/layout.tsx) - The main layout wrapper for all Super Admin pages
+
+### Sidebar Navigation
+- [src/constants/superAdminSidebar.tsx](mdc:src/constants/superAdminSidebar.tsx) - Configuration for the sidebar menu items
+- [src/components/SuperAdmin/Layout/Sidebar/index.tsx](mdc:src/components/SuperAdmin/Layout/Sidebar/index.tsx) - Sidebar component implementation
+
+### Routes
+- [src/utils/routes.ts](mdc:src/utils/routes.ts) - Contains all route definitions, including Super Admin routes
+
+## Main Sections
+
+The Super Admin interface consists of the following main sections:
+- Dashboard (`/super-admin`) - Overview and statistics
+- Products (`/super-admin/products`) - Product management
+- Orders (`/super-admin/orders`) - Order management and monitoring
+- Users (`/super-admin/users`) - User account management
+- Carts (`/super-admin/carts`) - Shopping cart management
+- Shipping (`/super-admin/shipping`) - Shipping options and regions
+- Payment Methods (`/super-admin/payment-methods`) - Payment method configuration
+- Coupons (`/super-admin/coupons`) - Promotional coupon management
+
+## Common UI Components
+
+The Super Admin interface utilizes several reusable components:
+- Tables: [src/components/SuperAdmin/Table](mdc:src/components/SuperAdmin/Table) - Table components for data display
+- Pagination: [src/components/SuperAdmin/Pagination](mdc:src/components/SuperAdmin/Pagination) - Pagination controls
+- Layout components: [src/components/SuperAdmin/Layout](mdc:src/components/SuperAdmin/Layout) - Header, sidebar, and content wrappers
+

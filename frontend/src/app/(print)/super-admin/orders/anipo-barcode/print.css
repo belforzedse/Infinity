@@ -1,0 +1,251 @@
+/* Anipo Label Styles */
+.anipo-label {
+  background: white;
+  padding: 1rem;
+  max-width: 28rem;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  direction: rtl;
+}
+
+.anipo-loading {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* Header */
+.anipo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.anipo-package-info {
+  text-align: right;
+}
+
+.anipo-package-title {
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.anipo-package-size {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.anipo-service {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.anipo-package-number {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Company Info */
+.anipo-company-info {
+  text-align: center;
+}
+
+.anipo-logo {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.5rem auto;
+}
+
+.anipo-logo-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.anipo-company-name {
+  font-size: 0.75rem;
+}
+
+.anipo-service-type {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.anipo-branch {
+  font-size: 0.75rem;
+}
+
+/* QR Code */
+.anipo-qr-code {
+  width: 4rem;
+  height: 4rem;
+  border: 2px solid black;
+}
+
+.anipo-qr-pattern {
+  width: 100%;
+  height: 100%;
+  background: black;
+  background-image:
+    radial-gradient(circle at 25% 25%, white 2px, transparent 2px),
+    radial-gradient(circle at 75% 25%, white 2px, transparent 2px),
+    radial-gradient(circle at 25% 75%, white 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, white 2px, transparent 2px),
+    linear-gradient(45deg, transparent 30%, white 30%, white 35%, transparent 35%),
+    linear-gradient(-45deg, transparent 30%, white 30%, white 35%, transparent 35%);
+  background-size:
+    8px 8px,
+    8px 8px,
+    8px 8px,
+    8px 8px,
+    4px 4px,
+    4px 4px;
+}
+
+/* Content */
+.anipo-content {
+  margin-bottom: 1.5rem;
+}
+
+.anipo-row {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.anipo-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Number Box */
+.anipo-number-box {
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Fields */
+.anipo-field {
+  border: 2px solid black;
+  text-align: center;
+  padding: 0.75rem;
+  font-weight: bold;
+  flex: 1;
+}
+
+.anipo-dual-field {
+  flex: 1;
+  border: 2px solid black;
+  border-right: 0;
+  display: flex;
+}
+
+.anipo-dual-field .anipo-field {
+  border: none;
+  border-left: 1px solid black;
+}
+
+.anipo-dual-field .anipo-field:last-child {
+  border-left: none;
+}
+
+.anipo-bordered-left {
+  border-left: 1px solid black !important;
+}
+
+.anipo-no-right-border {
+  border-right: 0 !important;
+}
+
+.anipo-full-width {
+  width: 100%;
+}
+
+.anipo-weight-dest .anipo-field {
+  height: 3rem;
+}
+
+.anipo-time-date .anipo-field {
+  height: 3rem;
+}
+
+/* Barcode */
+.anipo-barcode-section {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.anipo-barcode-lines {
+  height: 4rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.anipo-barcode-line {
+  background: black;
+  width: 2px;
+  margin: 0 1px;
+}
+
+.anipo-barcode-number {
+  font-size: 1.125rem;
+  font-family: monospace;
+  letter-spacing: 0.1em;
+}
+
+.anipo-recipient-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.75rem;
+}
+
+.anipo-recipient-info > div {
+  margin-bottom: 0.25rem;
+}
+
+/* Print Styles */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  @page {
+    size: A5;
+    margin: 0.5cm;
+  }
+
+  .anipo-label {
+    padding: 0.5rem;
+  }
+
+  .anipo-field,
+  .anipo-number-box,
+  .anipo-qr-code,
+  .anipo-dual-field {
+    border-color: black !important;
+  }
+
+  .anipo-qr-pattern {
+    background-color: black !important;
+  }
+
+  .anipo-barcode-line {
+    background-color: black !important;
+  }
+}

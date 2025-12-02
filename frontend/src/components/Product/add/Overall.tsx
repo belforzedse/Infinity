@@ -1,0 +1,60 @@
+import Details from "@/components/Product/add/Details";
+import PhotoUploader from "@/components/Product/add/PhotoUploader";
+import FileUploader from "./FileUploader";
+import type { EditProductData } from "@/types/super-admin/products";
+import logger from "@/utils/logger";
+
+interface OverallProps {
+  productData?: EditProductData;
+  isEditMode?: boolean;
+}
+
+export default function Overall({ productData, isEditMode = false }: OverallProps) {
+  // Extract media by type
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("productData", { productData });
+  }
+
+  // Temporarily hide advanced media uploaders in the super-admin UI.
+  const showMediaUploaders = false;
+
+  const images =
+    productData?.Media?.filter((media) => media.attributes.mime.startsWith("image/")).map(
+      (media) => media.attributes.url,
+    ) || [];
+
+  const videos =
+    productData?.Media?.filter((media) => media.attributes.mime.startsWith("video/")).map(
+      (media) => media.attributes.url,
+    ) || [];
+
+  const files = productData?.Files?.map((file) => file.attributes.url) || [];
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <Details isEditMode={isEditMode} />
+
+      <PhotoUploader initialImages={images} isEditMode={isEditMode} />
+
+      {showMediaUploaders && (
+        <>
+          <FileUploader
+            title="ویدیوها"
+            fileType="video"
+            iconSrc="/images/video-icon.png"
+            initialFiles={videos}
+            isEditMode={isEditMode}
+          />
+
+          <FileUploader
+            title="فایل‌ها"
+            fileType="other"
+            iconSrc="/images/pdf-icon.png"
+            initialFiles={files}
+            isEditMode={isEditMode}
+          />
+        </>
+      )}
+    </div>
+  );
+}

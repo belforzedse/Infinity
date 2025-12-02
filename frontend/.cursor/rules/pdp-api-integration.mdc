@@ -1,0 +1,114 @@
+---
+description: This rule documents the API integration patterns for the Product Detail Page (PDP) in the Infinity Store application.
+globs: 
+alwaysApply: false
+---
+# PDP API Integration
+
+This rule documents the API integration patterns for the Product Detail Page (PDP) in the Infinity Store application.
+
+## API Service Structure
+
+The product API service is defined in [src/services/product/product.ts](mdc:src/services/product/product.ts) and uses the centralized API client from [src/services/index.ts](mdc:src/services/index.ts).
+
+## API Endpoints and Constants
+
+API endpoints and constants are defined in [src/constants/api.ts](mdc:src/constants/api.ts):
+
+```typescript
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinitycolor.co/api";
+export const STRAPI_TOKEN = process.env.NEXT_PUBLIC_STRAPI_TOKEN || "5ded48b60050770a36fd985fdef2a20b971cd82f26e2e8bc02d38b4fb52258c1ace5049f2bc82b8d336dd20b88d6af9bc826c49a465e4698042fac690650f70a663d357e9bc52e8a6c9cc4a5de7075e07472c6a6d55f0c9a29690a3e6717000c61bb9ba085c233311c9d7e7e1f8f3ab3ff6985a5fd7f2f4ede73204761451fd6";
+export const IMAGE_BASE_URL = "https://api.infinitycolor.co";
+
+export const ENDPOINTS = {
+  // ...other endpoints
+  PRODUCT: {
+    TAG: "/product-tags",
+    CATEGORY: "/product-categories",
+    PRODUCT: "/products",
+    SIZE_HELPER: "/product-size-helpers",
+  },
+  // ...other endpoints
+};
+```
+
+## Fetching Product Data
+
+The `getProductBySlug` function fetches product details from the Strapi API:
+
+```typescript
+export const getProductBySlug = async (slug: string): Promise<ApiResponse<ProductDetail>> => {
+  try {
+    const response = await apiClient.get<any>(`${ENDPOINTS.PRODUCT.PRODUCT}/${slug}?populate=*`);
+    return response;
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    throw error;
+  }
+};
+```
+
+## Media Formatting
+
+The `formatGalleryAssets` function processes the API response to format media assets for the gallery component:
+
+```typescript
+export const formatGalleryAssets = (product: ProductDetail) => {
+  const assets = [];
+  
+  // Process cover image
+  if (product.attributes.CoverImage?.data) {
+    // Add cover image to assets array
+  }
+  
+  // Process media gallery
+  if (product.attributes.Media?.data?.length > 0) {
+    // Add media to assets array
+  }
+  
+  return assets;
+};
+```
+
+## Error Handling and Fallbacks
+
+The PDP implementation includes:
+
+1. Null/undefined checks throughout to handle missing data
+2. Fallback content when API data is unavailable
+3. Placeholder images for different media types
+4. Type conversions for string/number values in the API
+
+## Usage in Components
+
+The PDP page fetches data using these services:
+
+```typescript
+// In src/app/(product)/pdp/[slug]/page.tsx
+try {
+  const response = await getProductBySlug(slug);
+  if (response.data) {
+    productData = response.data;
+  }
+} catch (err) {
+  console.error("Error fetching product:", err);
+}
+```
+
+The Hero component then processes this data:
+
+```typescript
+// In src/components/PDP/Hero/index.tsx
+const assets = productData ? formatGalleryAssets(productData) : [/* fallback assets */];
+```
+
+## Data Type Considerations
+
+When working with the Strapi API, keep in mind:
+
+1. Media items may be of various types (image, video, PDF)
+2. Formats/thumbnails may be missing for some media
+3. Price can be string or number format
+4. Some products may have `removedAt` fields indicating deletion
+5. Color and size variations might not exist on all products
+

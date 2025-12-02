@@ -1,0 +1,160 @@
+---
+description: Strapi automatically generates TypeScript types for all content types and components:  - @Content Types - Interfaces for all collection and single types - @Components - Interfaces for reusable components
+globs: 
+alwaysApply: false
+---
+# TypeScript Types
+
+## Generated Types
+
+Strapi automatically generates TypeScript types for all content types and components:
+
+- @Content Types - Interfaces for all collection and single types
+- @Components - Interfaces for reusable components
+
+## Important Type Interfaces
+
+### Product Types
+
+```typescript
+// Product
+export interface ApiProductProduct extends Schema.CollectionType {
+  collectionName: 'products';
+  info: {
+    singularName: 'product';
+    pluralName: 'products';
+    displayName: 'Product';
+  };
+  attributes: {
+    Title: Attribute.String & Attribute.Required;
+    CoverImage: Attribute.Media & Attribute.Required;
+    Description: Attribute.Text;
+    Status: Attribute.Enumeration<['Active', 'InActive']>;
+    Media: Attribute.Media;
+    product_variations: Attribute.Relation<
+      'api::product.product',
+      'oneToMany',
+      'api::product-variation.product-variation'
+    >;
+    // ... other attributes
+  };
+}
+
+// Product Variation
+export interface ApiProductVariationProductVariation extends Schema.CollectionType {
+  collectionName: 'product_variations';
+  info: {
+    singularName: 'product-variation';
+    pluralName: 'product-variations';
+  };
+  attributes: {
+    SKU: Attribute.String & Attribute.Required;
+    Price: Attribute.Decimal & Attribute.Required;
+    DiscountPrice: Attribute.Decimal;
+    product: Attribute.Relation<
+      'api::product-variation.product-variation',
+      'manyToOne',
+      'api::product.product'
+    >;
+    // ... other attributes
+  };
+}
+```
+
+### User Types
+
+```typescript
+// Local User
+export interface ApiLocalUserLocalUser extends Schema.CollectionType {
+  collectionName: 'local_users';
+  info: {
+    singularName: 'local-user';
+    pluralName: 'local-users';
+  };
+  attributes: {
+    Phone: Attribute.String & Attribute.Required & Attribute.Unique;
+    Password: Attribute.String;
+    IsVerified: Attribute.Boolean & Attribute.DefaultTo<false>;
+    user_info: Attribute.Relation<
+      'api::local-user.local-user',
+      'oneToOne',
+      'api::local-user-info.local-user-info'
+    >;
+    // ... other attributes
+  };
+}
+
+// Local User Info
+export interface ApiLocalUserInfoLocalUserInfo extends Schema.CollectionType {
+  collectionName: 'local_user_infos';
+  info: {
+    singularName: 'local-user-info';
+    pluralName: 'local-user-infos';
+  };
+  attributes: {
+    FirstName: Attribute.String;
+    LastName: Attribute.String;
+    Email: Attribute.Email;
+    user: Attribute.Relation<
+      'api::local-user-info.local-user-info',
+      'oneToOne',
+      'api::local-user.local-user'
+    >;
+    // ... other attributes
+  };
+}
+```
+
+### Order Types
+
+```typescript
+// Order
+export interface ApiOrderOrder extends Schema.CollectionType {
+  collectionName: 'orders';
+  info: {
+    singularName: 'order';
+    pluralName: 'orders';
+  };
+  attributes: {
+    OrderNumber: Attribute.String & Attribute.Required;
+    Status: Attribute.Enumeration<[
+      'Pending',
+      'Processing',
+      'Shipped',
+      'Delivered',
+      'Cancelled'
+    ]>;
+    TotalAmount: Attribute.Decimal;
+    user: Attribute.Relation<
+      'api::order.order',
+      'manyToOne',
+      'api::local-user.local-user'
+    >;
+    order_items: Attribute.Relation<
+      'api::order.order',
+      'oneToMany',
+      'api::order-item.order-item'
+    >;
+    // ... other attributes
+  };
+}
+```
+
+## How to Use Types
+
+Types can be imported and used to strongly type your controllers, services, and API responses:
+
+```typescript
+import type { ApiProductProduct } from '../../../types/generated/contentTypes';
+
+// Using types in a service
+export default {
+  async findProducts(): Promise<ApiProductProduct[]> {
+    const products = await strapi.entityService.findMany('api::product.product', {
+      populate: ['product_variations', 'product_main_category'],
+    });
+    return products;
+  }
+}
+```
+

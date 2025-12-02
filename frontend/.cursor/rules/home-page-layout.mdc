@@ -1,0 +1,46 @@
+---
+description: This rule documents the structure, components, and patterns used for the e-commerce home page. Use this rule when working on home page features, adding new sections, or modifying the existing layout to maintain consistency with the established design patterns.
+globs: 
+alwaysApply: false
+---
+# Home Page Layout
+
+**Description**: This rule documents the structure, components, and patterns used for the e-commerce home page. Use this rule when working on home page features, adding new sections, or modifying the existing layout to maintain consistency with the established design patterns.
+
+The Home Page is structured as follows:
+
+## Main Structure
+- The main component is in [src/app/(product)/page.tsx](mdc:src/app/(product)/page.tsx)
+- Uses responsive design with different layouts for mobile and desktop views
+- Maximum width is constrained with `max-w-screen-xl mx-auto`
+
+## Key Sections
+1. **Hero Section** - Main banner at the top with responsive images for mobile/desktop
+2. **Secondary Banners** - Flex layout with different arrangements on mobile vs desktop
+3. **Discounted Products Section** - Shows products with discounts using `OffersListHomePage` component
+4. **Categories Section** - Grid display of product categories with images and backgrounds
+5. **New Products Section** - Uses `OffersListHomePage` with `NewIcon` component
+6. **Popular Products Section** - Shows highest rated products
+
+## Data Fetching
+- Uses server components with `async` functions
+- Data is fetched in parallel with `Promise.all`
+- Fetches data from Strapi backend API endpoints
+- Transforms API responses to match the component props structure
+
+## Product Cards
+- Product data is transformed to include:
+  - Product ID
+  - Images array with URLs
+  - Category
+  - Title
+  - Price information (original and discounted)
+  - Additional metrics like view counts
+
+## Responsive Design Guidelines
+- Mobile-first approach with responsive classes
+- Different image sources for mobile vs desktop
+- Uses Flexbox for layout with column direction on mobile, row on desktop
+- Consistent padding with `px-4 md:px-8 lg:px-16`
+
+

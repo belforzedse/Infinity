@@ -1,0 +1,33 @@
+Summary of Findings
+- Critical: 1
+- High: 2
+- Medium: 2
+- Low: 0
+
+Detailed Issues
+
+2) File: public/images/cart/wallet.png
+   Severity: High
+   Line(s): N/A (binary asset)
+   Problem: The new image is zero bytes. Any usage (e.g., in the new PaymentGateway) will render a broken image.
+   Suggested Fix: Replace with a valid image or switch references to the existing 'public/images/cart/wallet.svg'. For example, update PaymentGateway image src to '/images/cart/wallet.svg'.
+   Confidence: High
+
+4) File: src/components/ShoppingCart/\034Bill/index.tsx
+   Severity: Medium
+   Line(s): ~318–336 (requiredAmountIrr logic and PaymentGateway props)
+   Problem: 'requiredAmountIrr' is computed from 'discountPreview?.summary?.total'. When no discount is applied, 'discountPreview' stays undefined, so 'requiredAmountIrr' becomes 0. In the new PaymentGateway, wallet disabling logic treats 'requiredAmountIrr <= 0' as disabled, effectively disabling wallet even when the cart has a non-zero total.
+   Suggested Fix: Derive the payable total from a reliable source (e.g., the cart subtotal + tax + shipping from CartService or the shipping preview merge) when 'discountPreview' is undefined. Only fall back to 0 when the cart is truly empty.
+   Confidence: Medium
+
+5) File: src/components/ShoppingCart/‌Bill/PaymentGateway.tsx and src/components/ShoppingCart/\034Bill/PaymentGateway.tsx
+   Severity: Medium
+   Line(s): Icon definitions (old: ~12–26; new: ~28–50)
+   Problem: Both components refer to '/images/cart/snappay.png', but the asset does not exist in 'public/images/cart'. This will result in 404 or broken images wherever the component is used.
+   Suggested Fix: Add 'public/images/cart/snappay.png', or update the path to a valid asset. Confirm naming and casing. use @web search too.
+   Confidence: Medium
+
+Notes
+- Wallet service endpoints match backend custom routes: GET /local-user-wallet/me and POST /wallet/charge-intent. API usage aligns with the shared ApiClient and auth pattern.
+- The IncreaseBalance action posts 'RefId' via a dynamic form for Mellat V3, which is consistent with existing order flows.
+

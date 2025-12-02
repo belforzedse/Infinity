@@ -1,0 +1,58 @@
+---
+description: This rule provides general guidelines for all customer-facing pages in the e-commerce platform. Use this rule as a reference when building new pages, components, or features to ensure consistency in design patterns, responsiveness, data fetching, and performance across the entire user experience.
+globs: 
+alwaysApply: false
+---
+# End-User Pages Guidelines
+
+**Description**: This rule provides general guidelines for all customer-facing pages in the e-commerce platform. Use this rule as a reference when building new pages, components, or features to ensure consistency in design patterns, responsiveness, data fetching, and performance across the entire user experience.
+
+This guide covers consistent patterns and best practices for all end-user facing pages:
+
+## Common Layout Structure
+- All end-user pages follow Next.js App Router architecture
+- Pages are organized in route groups:
+  - `(product)` - Main shopping pages (Home, PLP, PDP)
+  - `(public)` - Authentication and public information pages
+  - `(user)` - User account and cart pages
+
+## Responsive Design Principles
+- Mobile-first approach with progressive enhancement
+- Breakpoints follow Tailwind defaults:
+  - `md:` for tablet/medium screens (768px)
+  - `lg:` for desktop/large screens (1024px)
+- Flex and grid layouts that adjust based on viewport
+- Consistent padding pattern: `px-4 md:px-8 lg:px-16`
+- Max width constraint: `max-w-screen-xl mx-auto`
+
+## Component Patterns
+- Reusable product cards with consistent props interface
+- Consistent hero sections for each page type
+- Shared UI components for product information display
+- Common navigation elements (breadcrumbs, filters)
+
+## Data Fetching Strategy
+- Server components fetch data directly from API
+- API calls to Strapi backend using standard patterns
+- Consistent data transformation for component props
+- Client components use hooks for interactive features
+- URL parameters for state management (filters, pagination)
+
+## Image and Media Guidelines
+- Use different image sizes for mobile/desktop when needed
+- Image paths follow consistent patterns
+- Images have proper alt tags for accessibility
+- Video content supported in product galleries
+
+## Performance Considerations
+- Keep component files under 150 lines
+- Remove unused imports and dead code
+- Lazy loading for below-the-fold content
+- Optimize image delivery with appropriate formats
+
+## Product Information Display
+- Consistent information hierarchy across pages
+- Product cards show: image, category, title, price
+- Discounted prices shown with original price strikethrough
+- Rating and popularity indicators where applicable
+

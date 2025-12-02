@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO Test Tool - Infinity Store</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #DB2777;
+      margin-bottom: 10px;
+    }
+    .section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border-left: 4px solid #DB2777;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .test-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+    }
+    .pass {
+      color: #10b981;
+      font-weight: bold;
+    }
+    .fail {
+      color: #ef4444;
+      font-weight: bold;
+    }
+    .warning {
+      color: #f59e0b;
+      font-weight: bold;
+    }
+    .info {
+      color: #3b82f6;
+    }
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    button {
+      background: #DB2777;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #be185d;
+    }
+    .url-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .results {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 SEO Testing Tool - Infinity Store</h1>
+    <p>Enter a URL from your local development server to test SEO implementation</p>
+    
+    <input 
+      type="text" 
+      id="testUrl" 
+      class="url-input" 
+      placeholder="http://localhost:2888/pdp/[product-slug]"
+      value="http://localhost:2888"
+    >
+    
+    <div>
+      <button onclick="testCurrentPage()">Test Current Page</button>
+      <button onclick="testUrl()">Test URL</button>
+      <button onclick="testAll()">Run All Tests</button>
+    </div>
+
+    <div id="results" class="results"></div>
+  </div>
+
+  <script>
+    async function testCurrentPage() {
+      const results = await runSEOTests(window.location.href);
+      displayResults(results);
+    }
+
+    async function testUrl() {
+      const url = document.getElementById('testUrl').value;
+      if (!url) {
+        alert('Please enter a URL');
+        return;
+      }
+      const results = await runSEOTests(url);
+      displayResults(results);
+    }
+
+    async function testAll() {
+      const baseUrl = document.getElementById('testUrl').value.replace(/\/[^/]*$/, '');
+      const urls = [
+        baseUrl, // Homepage
+        `${baseUrl}/pdp/test-product`, // Product (replace with real slug)
+        `${baseUrl}/blog`, // Blog listing
+        `${baseUrl}/sitemap.xml`, // Sitemap
+        `${baseUrl}/robots.txt`, // Robots
+      ];
+
+      const allResults = [];
+      for (const url of urls) {
+        try {
+          const results = await runSEOTests(url);
+          allResults.push({ url, results });
+        } catch (error) {
+          allResults.push({ url, error: error.message });
+        }
+      }
+      displayAllResults(allResults);
+    }
+
+    async function runSEOTests(url) {
+      try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        return {
+          url,
+          title: testTitle(doc),
+          description: testDescription(doc),
+          canonical: testCanonical(doc),
+          openGraph: testOpenGraph(doc),
+          twitter: testTwitter(doc),
+          jsonLd: testJSONLD(doc),
+          themeColor: testThemeColor(doc),
+          securityHeaders: await testSecurityHeaders(url),
+        };
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+
+    function testTitle(doc) {
+      const title = doc.querySelector('title');
+      if (!title || !title.textContent) {
+        return { pass: false, message: 'Missing title tag' };
+      }
+      const text = title.textContent.trim();
+      if (text.length < 10) {
+        return { pass: false, message: `Title too short: "${text}"` };
+      }
+      if (text.length > 60) {
+        return { pass: false, message: `Title too long (${text.length} chars): "${text.substring(0, 60)}..."` };
+      }
+      return { pass: true, message: `Title: "${text}"` };
+    }
+
+    function testDescription(doc) {
+      const meta = doc.querySelector('meta[name="description"]');
+      if (!meta || !meta.getAttribute('content')) {
+        return { pass: false, message: 'Missing meta description' };
+      }
+      const content = meta.getAttribute('content').trim();
+      if (content.length < 50) {
+        return { pass: false, message: `Description too short: "${content}"` };
+      }
+      if (content.length > 160) {
+        return { pass: false, message: `Description too long (${content.length} chars)` };
+      }
+      return { pass: true, message: `Description: "${content.substring(0, 80)}..."` };
+    }
+
+    function testCanonical(doc) {
+      const canonical = doc.querySelector('link[rel="canonical"]');
+      if (!canonical) {
+        return { pass: false, message: 'Missing canonical URL' };
+      }
+      const href = canonical.getAttribute('href');
+      if (!href) {
+        return { pass: false, message: 'Canonical URL is empty' };
+      }
+      if (!href.startsWith('http')) {
+        return { pass: false, message: `Canonical URL is relative: "${href}"` };
+      }
+      return { pass: true, message: `Canonical: ${href}` };
+    }
+
+    function testOpenGraph(doc) {
+      const required = ['og:title', 'og:description', 'og:type', 'og:url'];
+      const found = {};
+      const missing = [];
+
+      doc.querySelectorAll('meta[property^="og:"]').forEach(meta => {
+        const property = meta.getAttribute('property');
+        const content = meta.getAttribute('content');
+        if (property && content) {
+          found[property] = content;
+        }
+      });
+
+      required.forEach(prop => {
+        if (!found[prop]) {
+          missing.push(prop);
+        }
+      });
+
+      if (missing.length > 0) {
+        return { pass: false, message: `Missing OpenGraph tags: ${missing.join(', ')}` };
+      }
+
+      const extras = Object.keys(found).filter(k => !required.includes(k));
+      return { 
+        pass: true, 
+        message: `OpenGraph: ${required.length} required + ${extras.length} extra tags`,
+        details: found
+      };
+    }
+
+    function testTwitter(doc) {
+      const twitter = doc.querySelectorAll('meta[name^="twitter:"]');
+      if (twitter.length === 0) {
+        return { pass: false, message: 'Missing Twitter Card tags' };
+      }
+      const found = {};
+      twitter.forEach(meta => {
+        const name = meta.getAttribute('name');
+        const content = meta.getAttribute('content');
+        if (name && content) {
+          found[name] = content;
+        }
+      });
+      return { pass: true, message: `Twitter Cards: ${twitter.length} tags found` };
+    }
+
+    function testJSONLD(doc) {
+      const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+      if (scripts.length === 0) {
+        return { pass: false, message: 'No JSON-LD structured data found' };
+      }
+
+      const schemas = [];
+      const errors = [];
+
+      scripts.forEach((script, i) => {
+        try {
+          const data = JSON.parse(script.textContent);
+          if (!data['@type']) {
+            errors.push(`JSON-LD #${i + 1}: Missing @type`);
+          } else {
+            schemas.push(data['@type']);
+          }
+        } catch (e) {
+          errors.push(`JSON-LD #${i + 1}: Invalid JSON - ${e.message}`);
+        }
+      });
+
+      if (errors.length > 0) {
+        return { pass: false, message: errors.join('; ') };
+      }
+
+      return { pass: true, message: `JSON-LD: ${schemas.length} valid schemas (${schemas.join(', ')})` };
+    }
+
+    function testThemeColor(doc) {
+      const themeColor = doc.querySelector('meta[name="theme-color"]');
+      if (!themeColor) {
+        return { pass: false, message: 'Missing theme-color meta tag' };
+      }
+      const color = themeColor.getAttribute('content');
+      return { pass: true, message: `Theme color: ${color}` };
+    }
+
+    async function testSecurityHeaders(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const headers = {};
+        response.headers.forEach((value, key) => {
+          headers[key.toLowerCase()] = value;
+        });
+
+        const securityHeaders = [
+          'x-frame-options',
+          'x-content-type-options',
+          'referrer-policy',
+          'permissions-policy',
+        ];
+
+        const found = [];
+        const missing = [];
+
+        securityHeaders.forEach(header => {
+          if (headers[header]) {
+            found.push(header);
+          } else {
+            missing.push(header);
+          }
+        });
+
+        if (missing.length > 0) {
+          return { pass: false, message: `Missing headers: ${missing.join(', ')}` };
+        }
+
+        return { pass: true, message: `Security headers: ${found.length}/${securityHeaders.length} found` };
+      } catch (error) {
+        return { pass: false, message: `Error checking headers: ${error.message}` };
+      }
+    }
+
+    function displayResults(results) {
+      const container = document.getElementById('results');
+      if (results.error) {
+        container.innerHTML = `<div class="section"><h2>Error</h2><p class="fail">${results.error}</p></div>`;
+        return;
+      }
+
+      let html = `<div class="section"><h2>SEO Test Results for: ${results.url}</h2>`;
+      
+      const tests = [
+        { name: 'Title Tag', result: results.title },
+        { name: 'Meta Description', result: results.description },
+        { name: 'Canonical URL', result: results.canonical },
+        { name: 'OpenGraph Tags', result: results.openGraph },
+        { name: 'Twitter Cards', result: results.twitter },
+        { name: 'JSON-LD Structured Data', result: results.jsonLd },
+        { name: 'Theme Color', result: results.themeColor },
+        { name: 'Security Headers', result: results.securityHeaders },
+      ];
+
+      tests.forEach(test => {
+        const status = test.result.pass ? 'pass' : 'fail';
+        html += `
+          <div class="test-item">
+            <strong>${test.name}:</strong> 
+            <span class="${status}">${test.result.pass ? '✓' : '✗'} ${test.result.message}</span>
+            ${test.result.details ? `<pre>${JSON.stringify(test.result.details, null, 2)}</pre>` : ''}
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function displayAllResults(allResults) {
+      const container = document.getElementById('results');
+      let html = '<div class="section"><h2>All Pages Test Results</h2>';
+      
+      allResults.forEach(({ url, results, error }) => {
+        if (error) {
+          html += `<div class="test-item"><strong>${url}</strong>: <span class="fail">Error: ${error}</span></div>`;
+          return;
+        }
+
+        const passed = Object.values(results).filter(r => r.pass).length;
+        const total = Object.keys(results).length - 1; // Exclude url
+        const status = passed === total ? 'pass' : passed > total / 2 ? 'warning' : 'fail';
+        
+        html += `
+          <div class="test-item">
+            <strong>${url}</strong>: 
+            <span class="${status}">${passed}/${total} tests passed</span>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Auto-test current page on load if it's a localhost URL
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      window.addEventListener('load', () => {
+        document.getElementById('testUrl').value = window.location.href;
+      });
+    }
+  </script>
+</body>
+</html>
+
+
+

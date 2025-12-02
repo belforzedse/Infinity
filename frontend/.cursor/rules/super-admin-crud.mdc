@@ -1,0 +1,66 @@
+---
+description: This document outlines the patterns and best practices for implementing CRUD (Create, Read, Update, Delete) operations in the Super Admin section.
+globs: 
+alwaysApply: false
+---
+# Super Admin CRUD Operations
+
+This document outlines the patterns and best practices for implementing CRUD (Create, Read, Update, Delete) operations in the Super Admin section.
+
+## Service Functions
+
+All API service functions should be organized in the `src/services/super-admin` directory, following this structure:
+
+- `src/services/super-admin/{entity}/{operation}.ts`
+
+For example:
+- [src/services/super-admin/product/create.ts](mdc:src/services/super-admin/product/create.ts)
+- [src/services/super-admin/product/update.ts](mdc:src/services/super-admin/product/update.ts)
+
+## Hooks
+
+Custom hooks for managing entity-specific operations should be created in the `src/hooks` directory:
+
+- [src/hooks/product/useCategory.ts](mdc:src/hooks/product/useCategory.ts)
+- [src/hooks/product/useTag.ts](mdc:src/hooks/product/useTag.ts)
+- [src/hooks/useIndexImageUpload.ts](mdc:src/hooks/useIndexImageUpload.ts)
+
+## Type Definitions
+
+Type definitions for data models should be created in the `src/types/super-admin` directory:
+
+- [src/types/super-admin/products.ts](mdc:src/types/super-admin/products.ts)
+
+## Form Handling
+
+Forms for creating and updating entities should:
+1. Use React Hook Form for form validation and submission
+2. Include proper error handling and validation messages
+3. Show loading states during API calls
+4. Redirect or show confirmation on successful submission
+
+## Table Actions
+
+Table rows should include action buttons for common operations:
+- Edit/Update
+- Delete/Remove
+- View Details
+
+Example implementation:
+- [src/components/SuperAdmin/Table/Cells/ActionButton.tsx](mdc:src/components/SuperAdmin/Table/Cells/ActionButton.tsx)
+- [src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx](mdc:src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx)
+
+## Modal Dialogs
+
+Use modal dialogs for:
+- Confirmation before delete operations
+- Quick edits that don't require a full page
+- Viewing additional details
+
+## Error Handling
+
+All API calls should include proper error handling:
+1. Display user-friendly error messages
+2. Log detailed errors for debugging
+3. Provide recovery options when appropriate
+

@@ -1,0 +1,81 @@
+---
+description: This rule documents the shopping cart implementation in the Infinity Store application, covering the context provider, hooks, and components that work together to provide cart functionality.
+globs: 
+alwaysApply: false
+---
+# Cart Implementation
+
+This rule documents the shopping cart implementation in the Infinity Store application, covering the context provider, hooks, and components that work together to provide cart functionality.
+
+## Cart Context
+
+The cart state is managed globally through a React Context in [src/contexts/CartContext.tsx](mdc:src/contexts/CartContext.tsx). This context provides:
+
+- Global state for cart items
+- Functions for adding, removing, and updating items
+- Methods for opening/closing the cart drawer
+- Persistence through localStorage
+
+Key features of the CartContext:
+- It maintains cart items in localStorage for persistence between sessions
+- Provides utility methods like `totalItems` and `totalPrice` for cart calculations
+- Handles the cart drawer state (open/closed)
+
+## Cart Hooks
+
+### useAddToCart Hook
+
+The [src/hooks/useAddToCart.ts](mdc:src/hooks/useAddToCart.ts) hook provides a clean interface for adding products to the cart. This hook:
+
+- Manages the quantity state for a specific product
+- Provides functions to add the product to cart
+- Syncs with the cart context to maintain state consistency
+- Tracks whether the product is already in the cart
+- Handles state synchronization when quantities are updated from different places
+
+Important implementation details:
+- Uses `isManuallyChanged` flag to prevent circular updates between component and cart
+- Creates unique cart item IDs based on product and variation details
+- Automatically opens the cart drawer when a product is added
+- Includes authentication check through localStorage
+
+## Cart Components
+
+### Cart Drawer Item
+
+The [src/components/ShoppingCart/Drawer/Item.tsx](mdc:src/components/ShoppingCart/Drawer/Item.tsx) component renders individual items in the cart drawer, including:
+
+- Product image with proper base URL handling
+- Product details (name, category, variations)
+- Quantity controls
+- Remove button
+
+### Product Action Component
+
+The [src/components/PDP/Hero/Info/Action.tsx](mdc:src/components/PDP/Hero/Info/Action.tsx) component handles the UI for adding products to the cart and includes:
+
+- "Add to Cart" button for products not in cart
+- "Add" button when product is in cart
+- Quantity selector dropdown
+- Integration with like/share functionality
+
+## Cart Workflow
+
+The cart implementation follows this workflow:
+
+1. User views a product and clicks "Add to Cart" → Sets quantity to 1 and adds to cart
+2. After adding, the UI changes to show quantity selector and "Add" button
+3. User can change quantity via dropdown, which updates cart in real-time
+4. Cart drawer shows current items with controls to adjust quantity or remove items
+5. Cart state persists in localStorage for returning users
+
+## Implementation Guidelines
+
+When modifying cart functionality:
+
+1. Always use the provided hooks and context instead of directly manipulating state
+2. Maintain proper synchronization between different components displaying the same cart data
+3. Ensure proper type safety for quantities to prevent display issues
+4. Use the IMAGE_BASE_URL constant for product images in cart views
+5. Handle authenticated vs unauthenticated users appropriately
+
