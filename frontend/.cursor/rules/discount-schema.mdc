@@ -1,0 +1,20 @@
+---
+description: Backend strapi Discount Schema
+globs: 
+alwaysApply: false
+---
+# Discount Schema
+
+## Discount Models
+
+The discount system consists of:
+
+- @Discount - The main discount model
+  - Contains discount code, type, and value
+  - Defines validity period and usage limits
+  - Can be applied to specific products or categories
+  
+- @General Discount - Store-wide discount campaigns
+  - Contains general promotions that apply site-wide
+  - Defines discount rules, duration, and eligibility criteria
+

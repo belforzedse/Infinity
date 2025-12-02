@@ -1,0 +1,58 @@
+---
+description: This rule documents the product like/favorite functionality in the Infinity Store application.
+globs: 
+alwaysApply: false
+---
+# Product Like Functionality
+
+This rule documents the product like/favorite functionality in the Infinity Store application.
+
+## Components and Hooks
+
+### useProductLike Hook
+
+The main hook for handling product likes is [src/hooks/useProductLike.ts](mdc:src/hooks/useProductLike.ts). This hook:
+
+- Uses Jotai for global state management to prevent redundant API calls
+- Fetches the list of liked products only once for all product cards
+- Provides toggle functionality to like/unlike products
+- Redirects to authentication if a user is not logged in
+- Updates the global state when products are liked/unliked
+
+Key points about the implementation:
+- The hook uses three Jotai atoms to manage state globally:
+  - `likedProductsAtom`: Stores the array of liked product objects
+  - `likedProductsLoadingAtom`: Tracks the global loading state
+  - `likedProductsLoadedAtom`: Tracks if the initial data has been loaded
+- We use a module-level variable `fetchStarted` to prevent multiple concurrent fetches
+
+### Product Card Component
+
+The Product Card component [src/components/Product/Card.tsx](mdc:src/components/Product/Card.tsx) uses the `useProductLike` hook to display and manage like status. It:
+
+- Shows different heart icon states based on liked status
+- Handles loading states during API calls
+- Provides proper accessibility attributes
+
+## API Endpoints
+
+The like functionality uses these API endpoints defined in [src/constants/api.ts](mdc:src/constants/api.ts):
+
+1. `PRODUCT_LIKES.USER_LIKES` (`/product-likes/user/me`): GET endpoint to fetch all products liked by the current user
+2. `PRODUCT_LIKES.TOGGLE` (`/product-likes/toggle`): POST endpoint to toggle the like status for a specific product
+
+## Authentication Integration
+
+The product like functionality is integrated with the authentication system:
+- API requests include the JWT token from localStorage (`accessToken`)
+- Unauthenticated users are redirected to the authentication page when trying to like a product
+- The heart icon is only interactive if the user is logged in
+
+## Implementation Details
+
+When implementing or modifying the product like functionality, remember:
+1. Always use the global Jotai atoms for state management
+2. Prevent event propagation when handling like button clicks
+3. Filter liked products by comparing the product IDs as strings
+4. Handle both the loading state during API calls and the global loading state
+

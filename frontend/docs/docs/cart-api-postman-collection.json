@@ -1,0 +1,297 @@
+{
+  "info": {
+    "name": "Infinity Backend - Cart APIs",
+    "description": "Custom cart APIs for the Infinity Backend project",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"user@example.com\",\n  \"password\": \"your-password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/local",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "local"]
+            },
+            "description": "Login to get JWT token"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints to get JWT token for testing"
+    },
+    {
+      "name": "Cart Operations",
+      "item": [
+        {
+          "name": "Get My Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "me"]
+            },
+            "description": "Retrieve the authenticated user's cart with items"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productVariationId\": 123,\n  \"count\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/add-item",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "add-item"]
+            },
+            "description": "Add a product variation to the user's cart"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cartItemId\": 42,\n  \"count\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/update-item",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "update-item"]
+            },
+            "description": "Update the quantity of an item in the cart"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/remove-item/42",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "remove-item", "42"]
+            },
+            "description": "Remove an item from the cart"
+          },
+          "response": []
+        },
+        {
+          "name": "Check Cart Stock",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/check-stock",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "check-stock"]
+            },
+            "description": "Check if all items in the cart have sufficient stock"
+          },
+          "response": []
+        },
+        {
+          "name": "Finalize Cart to Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipping\": 2,\n  \"shippingCost\": 10000,\n  \"description\": \"Please deliver after 6pm\",\n  \"note\": \"Gift wrapping requested\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/finalize",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "finalize"]
+            },
+            "description": "Convert the cart into an order after checking stock availability"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for managing shopping cart"
+    },
+    {
+      "name": "Common Error Scenarios",
+      "item": [
+        {
+          "name": "Add Item with Insufficient Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productVariationId\": 123,\n  \"count\": 999\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/add-item",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "add-item"]
+            },
+            "description": "Try to add more items than available in stock"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Item with Insufficient Stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cartItemId\": 42,\n  \"count\": 999\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/update-item",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "update-item"]
+            },
+            "description": "Try to update item quantity to more than available in stock"
+          },
+          "response": []
+        },
+        {
+          "name": "Finalize Empty Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipping\": 2,\n  \"shippingCost\": 10000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/finalize",
+              "host": ["{{baseUrl}}"],
+              "path": ["carts", "finalize"]
+            },
+            "description": "Try to finalize an empty cart"
+          },
+          "response": []
+        }
+      ],
+      "description": "Common error scenarios to test error handling"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://your-api-domain.com/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your-jwt-token",
+      "type": "string"
+    }
+  ]
+}

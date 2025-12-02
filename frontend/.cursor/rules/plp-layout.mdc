@@ -1,0 +1,61 @@
+---
+description: This rule outlines the components and architecture of the Product Listing Page (PLP). Use this rule when implementing new filtering options, modifying product card displays, working on pagination, or making any changes to how products are listed and filtered.
+globs: 
+alwaysApply: false
+---
+# Product Listing Page (PLP) Layout
+
+**Description**: This rule outlines the components and architecture of the Product Listing Page (PLP). Use this rule when implementing new filtering options, modifying product card displays, working on pagination, or making any changes to how products are listed and filtered.
+
+The PLP is structured to display product listings with filtering capabilities:
+
+## Main Structure
+- The main component is in [src/app/(product)/plp/page.tsx](mdc:src/app/(product)/plp/page.tsx)
+- Contains a hero banner and product listing section
+- Uses client components for interactive filtering
+
+## Key Components
+1. **PLPHeroBanner** - Category-specific header banner
+2. **PLPList** - Main component for product display and filtering
+
+## Data Fetching
+- Uses server components with `async` functions
+- Fetches product data from Strapi backend using filters
+- Supports URL query parameters for all filters
+- Builds complex query parameters for API calls
+
+## Filter System
+- Filter parameters:
+  - Category
+  - Availability (show available products only)
+  - Price range (min/max)
+  - Size
+  - Material
+  - Season
+  - Gender
+  - Usage
+- Uses `useQueryState` from `nuqs` for state management in URL parameters
+- Filters automatically trigger new API requests
+
+## Product Display
+- Products displayed in grid layout
+- Each product card shows:
+  - Product image
+  - Category
+  - Title
+  - Price (with discount if applicable)
+  - Rating/popularity indicators
+
+## Responsive Components
+- Desktop: Shows sidebar filter panel and grid of products
+- Mobile: Filter drawer accessed via button and product grid
+- Different card styles for different viewports
+
+## Pagination
+- Support for paginated results
+- Page navigation controls
+- Shows count of total available products
+
+## No Results State
+- Dedicated component for when filters return no products
+

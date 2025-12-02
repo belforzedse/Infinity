@@ -1,0 +1,50 @@
+---
+description: Core Product Models ub Strapi Backends
+globs: 
+alwaysApply: false
+---
+# Product Schema
+
+## Core Product Models
+
+The product system consists of several related models:
+
+- @Product - The main product model
+  - Has attributes like Title, Description, CoverImage, Media, Status
+  - Related to categories, variations, reviews, tags, FAQs
+  
+- @Product Variation - Represents different variants of a product
+  - Connected to product variation colors and sizes
+  - Contains pricing, stock, and SKU information
+  
+- @Product Variation Model - Model templates for product variations
+  
+## Product Categorization
+  
+- @Product Category - Hierarchical categories for products
+  - Can be main category or additional categories for products
+  - Contains fields like Name, Image, ParentCategory
+  
+- @Product Category Content - Content for product categories
+
+- @Product Tag - Tags for product filtering and organization
+
+## Product Variants
+
+- @Product Variation Color - Color options for product variations
+- @Product Variation Size - Size options for product variations
+- @Product Size Helper - Size guide for products
+
+## Product Feedback
+
+- @Product Review - Customer reviews for products
+- @Product Review Reply - Replies to product reviews
+- @Product Review Like - Likes on product reviews
+- @Product Like - User likes for products
+- @Product FAQ - Frequently asked questions about products
+
+## Product Inventory
+
+- @Product Stock - Stock management for products
+- @Product Stock Log - Logs of stock changes
+

@@ -1,0 +1,64 @@
+---
+description: This document outlines the coding conventions and patterns used in the Super Admin section of the application.
+globs: 
+alwaysApply: false
+---
+# Super Admin Coding Conventions
+
+This document outlines the coding conventions and patterns used in the Super Admin section of the application.
+
+## Naming Conventions
+
+- Component names should be prefixed with `SuperAdmin` followed by their purpose, e.g., `SuperAdminTable`, `SuperAdminPagination`
+- File and directory names in the `src/components/SuperAdmin` directory should use PascalCase
+- Page components in `src/app/(super-admin)/super-admin/*` should use standard Next.js conventions with `page.tsx` for page components
+
+## Component Structure
+
+- Components should be kept under 150 lines of code for maintainability
+- Reusable UI components should be placed in `src/components/SuperAdmin`
+- Page-specific components should be co-located with their pages in `src/app/(super-admin)/super-admin/*`
+
+## Data Fetching and State Management
+
+- API service functions for Super Admin operations are in [src/services/super-admin](mdc:src/services/super-admin)
+- Type definitions for Super Admin related data are in [src/types/super-admin](mdc:src/types/super-admin)
+- Recoil atoms for state management are in [src/atoms/super-admin](mdc:src/atoms/super-admin)
+
+## Layout and UI
+
+- All pages should use the main Super Admin layout defined in [src/app/(super-admin)/layout.tsx](mdc:src/app/(super-admin)/layout.tsx)
+- Table components should use the standardized [SuperAdminTable](mdc:src/components/SuperAdmin/Table/index.tsx) component
+- Mobile responsiveness is handled through specific Mobile components and conditional rendering based on screen size
+
+## Common Patterns
+
+### Tables and Data Display
+
+Tables should follow this pattern:
+```tsx
+<SuperAdminTable
+  data={data}
+  columns={columns}
+  pagination={pagination}
+  filterComponent={<FilterComponent />}
+/>
+```
+
+### Page Structure
+
+Super Admin pages typically follow this structure:
+```tsx
+export default function SomeSuperAdminPage() {
+  return (
+    <SuperAdminLayoutContentWrapper
+      title="Page Title"
+      description="Page description"
+      actionButtons={<ActionButtons />}
+    >
+      {/* Page content */}
+    </SuperAdminLayoutContentWrapper>
+  );
+}
+```
+
