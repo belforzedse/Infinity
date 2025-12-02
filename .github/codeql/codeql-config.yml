@@ -1,0 +1,5 @@
+name: "Infinity CodeQL"
+
+paths-ignore:
+  - scripts/**
+
