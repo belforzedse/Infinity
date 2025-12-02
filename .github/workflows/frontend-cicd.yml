@@ -25,6 +25,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/dev' && 'staging' || 'experimental' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,22 +48,10 @@ jobs:
         id: env
         run: |
           set -euo pipefail
-          if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
-            echo "api=${{ secrets.STAGING_FRONTEND_API_BASE_URL }}" >> "$GITHUB_OUTPUT"
-            echo "image=${{ secrets.STAGING_FRONTEND_IMAGE_BASE_URL }}" >> "$GITHUB_OUTPUT"
-            echo "token=${{ secrets.STAGING_FRONTEND_STRAPI_TOKEN }}" >> "$GITHUB_OUTPUT"
-            echo "site=${{ secrets.STAGING_SITE_URL }}" >> "$GITHUB_OUTPUT"
-          elif [[ "${GITHUB_REF_NAME}" == "experimental" ]]; then
-            echo "api=${{ secrets.EXPERIMENTAL_FRONTEND_API_BASE_URL }}" >> "$GITHUB_OUTPUT"
-            echo "image=${{ secrets.EXPERIMENTAL_FRONTEND_IMAGE_BASE_URL }}" >> "$GITHUB_OUTPUT"
-            echo "token=${{ secrets.EXPERIMENTAL_FRONTEND_STRAPI_TOKEN }}" >> "$GITHUB_OUTPUT"
-            echo "site=${{ secrets.EXPERIMENTAL_SITE_URL }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "api=${{ secrets.PROD_FRONTEND_API_BASE_URL }}" >> "$GITHUB_OUTPUT"
-            echo "image=${{ secrets.PROD_FRONTEND_IMAGE_BASE_URL }}" >> "$GITHUB_OUTPUT"
-            echo "token=${{ secrets.PROD_FRONTEND_STRAPI_TOKEN }}" >> "$GITHUB_OUTPUT"
-            echo "site=${{ secrets.PROD_SITE_URL }}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "api=${{ secrets.FRONTEND_API_BASE_URL }}" >> "$GITHUB_OUTPUT"
+          echo "image=${{ secrets.FRONTEND_IMAGE_BASE_URL }}" >> "$GITHUB_OUTPUT"
+          echo "token=${{ secrets.FRONTEND_STRAPI_TOKEN }}" >> "$GITHUB_OUTPUT"
+          echo "site=${{ secrets.SITE_URL }}" >> "$GITHUB_OUTPUT"
 
       - name: Select Dockerfile and image tag
         id: meta
@@ -107,10 +97,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/scp-action@v0.1.1
         with:
-          host: ${{ secrets.PROD_FRONTEND_HOST }}
-          username: ${{ secrets.PROD_FRONTEND_USER }}
-          key: ${{ secrets.PROD_FRONTEND_SSH_KEY }}
-          port: ${{ secrets.PROD_FRONTEND_PORT || '22' }}
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.FRONTEND_USER }}
+          key: ${{ secrets.FRONTEND_SSH_KEY }}
+          port: ${{ secrets.FRONTEND_PORT || '22' }}
           source: frontend/docker-compose.yml
           target: /opt/infinity/frontend/
 
@@ -118,16 +108,16 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.PROD_FRONTEND_HOST }}
-          username: ${{ secrets.PROD_FRONTEND_USER }}
-          key: ${{ secrets.PROD_FRONTEND_SSH_KEY }}
-          port: ${{ secrets.PROD_FRONTEND_PORT || '22' }}
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.FRONTEND_USER }}
+          key: ${{ secrets.FRONTEND_SSH_KEY }}
+          port: ${{ secrets.FRONTEND_PORT || '22' }}
           script: |
             set -euo pipefail
             cd /opt/infinity/frontend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<-'EOF' > main.env
-            ${{ secrets.PROD_FRONTEND_ENV_FILE }}
+            ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
             export IMAGE_TAG=main
             export ENV_FILE=main.env
@@ -141,10 +131,10 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/scp-action@v0.1.1
         with:
-          host: ${{ secrets.STAGING_FRONTEND_HOST }}
-          username: ${{ secrets.STAGING_FRONTEND_USER }}
-          key: ${{ secrets.STAGING_FRONTEND_SSH_KEY }}
-          port: ${{ secrets.STAGING_FRONTEND_PORT || '22' }}
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.FRONTEND_USER }}
+          key: ${{ secrets.FRONTEND_SSH_KEY }}
+          port: ${{ secrets.FRONTEND_PORT || '22' }}
           source: frontend/docker-compose.yml
           target: /opt/infinity/frontend/
 
@@ -152,16 +142,16 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.STAGING_FRONTEND_HOST }}
-          username: ${{ secrets.STAGING_FRONTEND_USER }}
-          key: ${{ secrets.STAGING_FRONTEND_SSH_KEY }}
-          port: ${{ secrets.STAGING_FRONTEND_PORT || '22' }}
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.FRONTEND_USER }}
+          key: ${{ secrets.FRONTEND_SSH_KEY }}
+          port: ${{ secrets.FRONTEND_PORT || '22' }}
           script: |
             set -euo pipefail
             cd /opt/infinity/frontend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<-'EOF' > dev.env
-            ${{ secrets.STAGING_FRONTEND_ENV_FILE }}
+            ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
@@ -175,10 +165,10 @@ jobs:
         if: github.ref == 'refs/heads/experimental'
         uses: appleboy/scp-action@v0.1.1
         with:
-          host: ${{ secrets.EXPERIMENTAL_FRONTEND_HOST }}
-          username: ${{ secrets.EXPERIMENTAL_FRONTEND_USER }}
-          key: ${{ secrets.EXPERIMENTAL_FRONTEND_SSH_KEY }}
-          port: ${{ secrets.EXPERIMENTAL_FRONTEND_PORT || '22' }}
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.FRONTEND_USER }}
+          key: ${{ secrets.FRONTEND_SSH_KEY }}
+          port: ${{ secrets.FRONTEND_PORT || '22' }}
           source: frontend/docker-compose.yml
           target: /opt/infinity/frontend/
 
@@ -186,16 +176,16 @@ jobs:
         if: github.ref == 'refs/heads/experimental'
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.EXPERIMENTAL_FRONTEND_HOST }}
-          username: ${{ secrets.EXPERIMENTAL_FRONTEND_USER }}
-          key: ${{ secrets.EXPERIMENTAL_FRONTEND_SSH_KEY }}
-          port: ${{ secrets.EXPERIMENTAL_FRONTEND_PORT || '22' }}
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.FRONTEND_USER }}
+          key: ${{ secrets.FRONTEND_SSH_KEY }}
+          port: ${{ secrets.FRONTEND_PORT || '22' }}
           script: |
             set -euo pipefail
             cd /opt/infinity/frontend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<-'EOF' > main.env
-            ${{ secrets.EXPERIMENTAL_FRONTEND_ENV_FILE }}
+            ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env

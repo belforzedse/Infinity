@@ -28,6 +28,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/dev' && 'staging' || 'experimental' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -169,10 +171,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/scp-action@v0.1.1
         with:
-          host: ${{ secrets.PROD_BACKEND_HOST }}
-          username: ${{ secrets.PROD_BACKEND_USER }}
-          key: ${{ secrets.PROD_BACKEND_SSH_KEY }}
-          port: ${{ secrets.PROD_BACKEND_PORT || '22' }}
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          port: ${{ secrets.BACKEND_PORT || '22' }}
           source: backend/docker-compose.yml
           target: /opt/infinity/backend/
 
@@ -180,16 +182,16 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.PROD_BACKEND_HOST }}
-          username: ${{ secrets.PROD_BACKEND_USER }}
-          key: ${{ secrets.PROD_BACKEND_SSH_KEY }}
-          port: ${{ secrets.PROD_BACKEND_PORT || '22' }}
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          port: ${{ secrets.BACKEND_PORT || '22' }}
           script: |
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<-'EOF' > main.env
-            ${{ secrets.PROD_BACKEND_ENV_FILE }}
+            ${{ secrets.BACKEND_ENV_FILE }}
             EOF
             export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
@@ -214,10 +216,10 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/scp-action@v0.1.1
         with:
-          host: ${{ secrets.STAGING_BACKEND_HOST }}
-          username: ${{ secrets.STAGING_BACKEND_USER }}
-          key: ${{ secrets.STAGING_BACKEND_SSH_KEY }}
-          port: ${{ secrets.STAGING_BACKEND_PORT || '22' }}
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          port: ${{ secrets.BACKEND_PORT || '22' }}
           source: backend/docker-compose.yml
           target: /opt/infinity/backend/
 
@@ -225,16 +227,16 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.STAGING_BACKEND_HOST }}
-          username: ${{ secrets.STAGING_BACKEND_USER }}
-          key: ${{ secrets.STAGING_BACKEND_SSH_KEY }}
-          port: ${{ secrets.STAGING_BACKEND_PORT || '22' }}
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          port: ${{ secrets.BACKEND_PORT || '22' }}
           script: |
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<-'EOF' > dev.env
-            ${{ secrets.STAGING_BACKEND_ENV_FILE }}
+            ${{ secrets.BACKEND_ENV_FILE }}
             EOF
             export DB_ENV_FILE=db.env
             export ENV_FILE=dev.env
@@ -259,10 +261,10 @@ jobs:
         if: github.ref == 'refs/heads/experimental'
         uses: appleboy/scp-action@v0.1.1
         with:
-          host: ${{ secrets.EXPERIMENTAL_BACKEND_HOST }}
-          username: ${{ secrets.EXPERIMENTAL_BACKEND_USER }}
-          key: ${{ secrets.EXPERIMENTAL_BACKEND_SSH_KEY }}
-          port: ${{ secrets.EXPERIMENTAL_BACKEND_PORT || '22' }}
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          port: ${{ secrets.BACKEND_PORT || '22' }}
           source: backend/docker-compose.yml
           target: /opt/infinity/backend/
 
@@ -270,16 +272,16 @@ jobs:
         if: github.ref == 'refs/heads/experimental'
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.EXPERIMENTAL_BACKEND_HOST }}
-          username: ${{ secrets.EXPERIMENTAL_BACKEND_USER }}
-          key: ${{ secrets.EXPERIMENTAL_BACKEND_SSH_KEY }}
-          port: ${{ secrets.EXPERIMENTAL_BACKEND_PORT || '22' }}
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          port: ${{ secrets.BACKEND_PORT || '22' }}
           script: |
             set -euo pipefail
             cd /opt/infinity/backend
             echo "${{ secrets.GHCR_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_DEPLOY_USER }} --password-stdin
             cat <<-'EOF' > main.env
-            ${{ secrets.EXPERIMENTAL_BACKEND_ENV_FILE }}
+            ${{ secrets.BACKEND_ENV_FILE }}
             EOF
             export DB_ENV_FILE=db.env
             export ENV_FILE=main.env
