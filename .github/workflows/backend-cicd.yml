@@ -29,7 +29,13 @@ jobs:
       contents: read
       packages: write
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/dev' && 'staging' || 'experimental' }}
+      name: ${{ (
+          (github.ref == 'refs/heads/main'
+            || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')) && 'production'
+        ) || (
+          (github.ref == 'refs/heads/dev'
+            || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'dev')) && 'staging'
+        ) || 'experimental' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -301,4 +307,3 @@ jobs:
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
             fi
-
