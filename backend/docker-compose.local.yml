@@ -1,7 +1,27 @@
 # Local Development Docker Compose
-# Only runs PostgreSQL and Redis - Strapi runs locally via npm run develop
+# Runs Strapi + PostgreSQL + Redis for local development
 
 services:
+  strapi:
+    container_name: infinity-strapi-local
+    build:
+      context: .
+      dockerfile: local.Dockerfile
+    env_file:
+      - ${ENV_FILE:-.env.local}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${STRAPI_PORT:-1337}:1337"
+    restart: unless-stopped
+    volumes:
+      - uploads-data:/app/public
+    networks:
+      - infinity-network
+
   infinity-postgres:
     container_name: infinity-postgres-local
     image: postgres:16-alpine
@@ -45,9 +65,8 @@ services:
 volumes:
   infinity-postgres-data:
   infinity-redis-data:
+  uploads-data:
 
 networks:
   infinity-network:
     driver: bridge
-
-

@@ -5,13 +5,25 @@ const axios = require("axios");
  * This script helps identify connection issues with the Beh Pardakht Mellat gateway
  */
 
-// Test credentials (replace with real ones)
+// Get credentials from environment variables or command-line arguments
 const MELLAT_CONFIG = {
-  terminalId: "MELLAT_TERMINAL_ID",
-  username: "MELLAT_TERMINAL_ID", 
-  password: "MELLAT_PASSWORD",
-  gatewayUrl: "https://bpm.shaparak.ir/pgwchannel/services/pgw"
+  terminalId: process.env.MELLAT_TERMINAL_ID || process.argv[2] || null,
+  username: process.env.MELLAT_USERNAME || process.argv[3] || null, 
+  password: process.env.MELLAT_PASSWORD || process.argv[4] || null,
+  gatewayUrl: process.env.MELLAT_GATEWAY_URL || "https://bpm.shaparak.ir/pgwchannel/services/pgw"
 };
+
+// Validate required credentials
+if (!MELLAT_CONFIG.terminalId || !MELLAT_CONFIG.username || !MELLAT_CONFIG.password) {
+  console.error("❌ Error: Mellat credentials are required");
+  console.error("   Set environment variables:");
+  console.error("   export MELLAT_TERMINAL_ID='your-terminal-id'");
+  console.error("   export MELLAT_USERNAME='your-username'");
+  console.error("   export MELLAT_PASSWORD='your-password'");
+  console.error("\n   Or pass as command-line arguments:");
+  console.error("   node debug-mellat.js <terminalId> <username> <password>");
+  process.exit(1);
+}
 
 class MellatDebugger {
   constructor() {

@@ -1,8 +1,16 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logAdminActivity, logAdminProductEdit } from "../../../../utils/adminActivity";
+import { generateUniqueProductSlug } from "../../../../utils/productSlug";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
+/**
+ * Compute the field-level differences between two record snapshots.
+ *
+ * @param previous - The prior state of the record (field name → value).
+ * @param current - The new state of the record (field name → value).
+ * @returns An object mapping each changed field name to an object with `from` (previous value) and `to` (current value). The fields `"updatedAt"`, `"createdAt"`, `"id"`, and `"documentId"` are ignored.
+ */
 function diffChanges(
   previous: Record<string, any>,
   current: Record<string, any>
@@ -30,6 +38,25 @@ function diffChanges(
 }
 
 export default {
+  async beforeCreate(event) {
+    const { data } = event.params;
+
+    // Auto-generate slug from Title if not provided
+    // This must run BEFORE Strapi's uid field auto-generation to preserve Persian characters
+    if (!data.Slug && data.Title) {
+      try {
+        data.Slug = await generateUniqueProductSlug(strapi, data.Title);
+        strapi.log.info(`[Product Lifecycle] Auto-generated Persian slug for new product: "${data.Title}" -> "${data.Slug}"`);
+      } catch (error) {
+        strapi.log.error("[Product Lifecycle] Failed to generate product slug:", error);
+        // Fallback to timestamp-based slug
+        data.Slug = `product-${Date.now()}`;
+      }
+    } else if (data.Slug) {
+      strapi.log.info(`[Product Lifecycle] Using provided slug: "${data.Slug}"`);
+    }
+  },
+
   async afterCreate(event) {
     const { result } = event;
     if (!result?.id) return;
@@ -71,12 +98,15 @@ export default {
     const id = (where && (where.id || where.documentId)) || null;
     if (!id) return;
 
+    const { data } = event.params;
+
     const previous = await strapi.entityService.findOne(
       "api::product.product",
       id,
       {
         fields: [
           "Title",
+          "Slug",
           "Status",
           "Description",
           "AverageRating",
@@ -87,6 +117,20 @@ export default {
         populate: { product_main_category: true, product_tags: true },
       }
     );
+
+    // Auto-generate slug if product doesn't have one and has a title
+    // Also regenerate if Title changed and we want to update the slug
+    if (!previous?.Slug && !data.Slug && (data.Title || previous?.Title)) {
+      try {
+        const title = data.Title || previous?.Title;
+        data.Slug = await generateUniqueProductSlug(strapi, title, id as number);
+        strapi.log.info(`[Product Lifecycle] Auto-generated Persian slug for product ${id}: "${title}" -> "${data.Slug}"`);
+      } catch (error) {
+        strapi.log.error(`[Product Lifecycle] Failed to generate slug for product ${id}:`, error);
+      }
+    } else if (data.Slug) {
+      strapi.log.info(`[Product Lifecycle] Using provided slug for product ${id}: "${data.Slug}"`);
+    }
 
     event.state = { ...(event.state || {}), previousProduct: previous };
   },

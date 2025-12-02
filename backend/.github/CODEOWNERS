@@ -1,0 +1,26 @@
+# CODEOWNERS - Infinity Store Backend
+# Auto-assigns reviewers for pull requests
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback - default owner for everything
+* @belforzedse
+
+# API endpoints and controllers
+/src/api/ @belforzedse
+
+# Payment gateway integrations (critical)
+/src/api/payment-gateway/ @belforzedse
+
+# Order and cart business logic
+/src/api/order/ @belforzedse
+/src/api/cart/ @belforzedse
+
+# Database schemas and migrations
+/database/ @belforzedse
+
+# Configuration files (critical)
+/config/ @belforzedse
+.env* @belforzedse
+*.config.js @belforzedse
+*.config.ts @belforzedse
+

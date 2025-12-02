@@ -40,10 +40,10 @@ const toArray = (value, fallback = []) => {
 module.exports = {
   // WooCommerce API Configuration
   woocommerce: {
-    baseUrl: "https://infinitycolor.co/wp-json/wc/v3",
+    baseUrl: process.env.WOOCOMMERCE_BASE_URL || "https://infinitycolor.co/wp-json/wc/v3",
     auth: {
-      consumerKey: "WOOCOMMERCE_CONSUMER_KEY",
-      consumerSecret: "WOOCOMMERCE_CONSUMER_SECRET",
+      consumerKey: requiredEnvVar("WOOCOMMERCE_CONSUMER_KEY"),
+      consumerSecret: requiredEnvVar("WOOCOMMERCE_CONSUMER_SECRET"),
     },
     // Rate limiting to avoid overwhelming the API
     rateLimiting: {
@@ -52,31 +52,41 @@ module.exports = {
     },
   },
 
+  // WordPress API Configuration (for blog import)
+  wordpress: {
+    baseUrl: process.env.WORDPRESS_BASE_URL || "https://infinitycolor.co/wp-json/wp/v2",
+    auth: {
+      username: process.env.WORDPRESS_BASIC_USER || "",
+      password: process.env.WORDPRESS_BASIC_PASSWORD || "",
+    },
+    // Rate limiting to keep the public WP API happy
+    rateLimiting: {
+      requestsPerSecond: toNumber(process.env.WORDPRESS_REQUESTS_PER_SECOND, 4),
+      delayBetweenRequests: toNumber(process.env.WORDPRESS_REQUEST_DELAY, 300),
+    },
+    useEmbeddedResponses: process.env.WORDPRESS_USE_EMBED !== "false",
+  },
+
   // Strapi API Configuration
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
-    baseUrl: "https://api.infinitycolor.org/api",
+    baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.org/api",
     auth: {
-      token:
-        "STRAPI_API_TOKEN_PRODUCTION",
+      token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: false }),
     },
     // Credential options for interactive selection
     credentials: {
       production: {
-        baseUrl: "https://api.infinitycolor.org/api",
-        token:
-          "STRAPI_API_TOKEN_PRODUCTION",
+        baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.org/api",
+        token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: false }),
       },
       staging: {
-        baseUrl: "https://api.staging.infinitycolor.org/api",
-        token:
-          "STRAPI_API_TOKEN_STAGING",
+        baseUrl: process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.org/api",
+        token: requiredEnvVar("STRAPI_API_TOKEN_STAGING", { optional: false }),
       },
       local: {
         baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
-        token:
-          process.env.STRAPI_IMPORT_LOCAL_TOKEN ||
-          "a38278a5e039887d0e2ae6fc562e5af2ba06bfc342ff788571fcc89189b02f86d517c840d5cd32e4ed6f03171d5b60ab4d415a3e18e4adbb93ab5dcb8c5477be880850eef6c0e6db23d558f199c030582f2d0a68546ac58c989d689f47c086a40e4720ecc820fff887888f54f63672c6719f9f2060febaeef10229360c169dfb",
+        token: requiredEnvVar("STRAPI_API_TOKEN_LOCAL", { optional: true, defaultValue: "" }),
       },
     },
     endpoints: {
@@ -93,6 +103,10 @@ module.exports = {
       users: "/users",
       userInfos: "/local-user-infos",
       userRoles: "/users-permissions/roles",
+      blogPosts: "/blog-posts",
+      blogCategories: "/blog-categories",
+      blogTags: "/blog-tags",
+      blogAuthors: "/blog-authors",
     },
   },
 
@@ -109,6 +123,7 @@ module.exports = {
       variations: toNumber(process.env.IMPORT_BATCH_VARIATIONS, 100),
       orders: toNumber(process.env.IMPORT_BATCH_ORDERS, 50),
       users: toNumber(process.env.IMPORT_BATCH_USERS, 50),
+      blogPosts: toNumber(process.env.IMPORT_BATCH_BLOG_POSTS, 20),
     },
 
     // Currency conversion (IRT to our internal format)
@@ -209,6 +224,12 @@ module.exports = {
       variations: process.env.IMPORT_TRACKING_VARIATIONS_FILE || "variation-mappings.json",
       orders: process.env.IMPORT_TRACKING_ORDERS_FILE || "order-mappings.json",
       users: process.env.IMPORT_TRACKING_USERS_FILE || "user-mappings.json",
+      blogPosts: process.env.IMPORT_TRACKING_BLOG_POSTS_FILE || "blog-post-mappings.json",
+      blogCategories:
+        process.env.IMPORT_TRACKING_BLOG_CATEGORIES_FILE || "blog-category-mappings.json",
+      blogTags: process.env.IMPORT_TRACKING_BLOG_TAGS_FILE || "blog-tag-mappings.json",
+      blogAuthors: process.env.IMPORT_TRACKING_BLOG_AUTHORS_FILE || "blog-author-mappings.json",
+      blogMedia: process.env.IMPORT_TRACKING_BLOG_MEDIA_FILE || "blog-media-mappings.json",
     },
     // Environment-specific directories
     environments: {

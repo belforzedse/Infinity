@@ -24,10 +24,20 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const requestId = `REQ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     try {
-      // Use environment variables for credentials with fallback to hardcoded values
-      const terminalId = process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID";
-      const username = process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID";
-      const password = process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD";
+      // Require environment variables for credentials (no fallbacks)
+      if (!process.env.MELLAT_TERMINAL_ID) {
+        throw new Error("MELLAT_TERMINAL_ID environment variable is required");
+      }
+      if (!process.env.MELLAT_USERNAME) {
+        throw new Error("MELLAT_USERNAME environment variable is required");
+      }
+      if (!process.env.MELLAT_PASSWORD) {
+        throw new Error("MELLAT_PASSWORD environment variable is required");
+      }
+
+      const terminalId = process.env.MELLAT_TERMINAL_ID;
+      const username = process.env.MELLAT_USERNAME;
+      const password = process.env.MELLAT_PASSWORD;
       const gatewayUrl = process.env.MELLAT_GATEWAY_URL || "https://bpm.shaparak.ir/pgwchannel/services/pgw";
       const defaultCallbackURL = "/orders/payment-callback";
 
@@ -268,9 +278,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const requestId = `VERIFY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     try {
-      const terminalId = process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID";
-      const username = process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID";
-      const password = process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD";
+      // Require environment variables for credentials (no fallbacks)
+      if (!process.env.MELLAT_TERMINAL_ID || !process.env.MELLAT_USERNAME || !process.env.MELLAT_PASSWORD) {
+        throw new Error("Mellat payment gateway credentials (MELLAT_TERMINAL_ID, MELLAT_USERNAME, MELLAT_PASSWORD) are required");
+      }
+
+      const terminalId = process.env.MELLAT_TERMINAL_ID;
+      const username = process.env.MELLAT_USERNAME;
+      const password = process.env.MELLAT_PASSWORD;
       const gatewayUrl = process.env.MELLAT_GATEWAY_URL || "https://bpm.shaparak.ir/pgwchannel/services/pgw";
 
       const { orderId, saleOrderId, saleReferenceId } = transactionParams;
@@ -366,9 +381,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const requestId = `SETTLE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     try {
-      const terminalId = process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID";
-      const username = process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID";
-      const password = process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD";
+      // Require environment variables for credentials (no fallbacks)
+      if (!process.env.MELLAT_TERMINAL_ID || !process.env.MELLAT_USERNAME || !process.env.MELLAT_PASSWORD) {
+        throw new Error("Mellat payment gateway credentials (MELLAT_TERMINAL_ID, MELLAT_USERNAME, MELLAT_PASSWORD) are required");
+      }
+
+      const terminalId = process.env.MELLAT_TERMINAL_ID;
+      const username = process.env.MELLAT_USERNAME;
+      const password = process.env.MELLAT_PASSWORD;
       const gatewayUrl = process.env.MELLAT_GATEWAY_URL || "https://bpm.shaparak.ir/pgwchannel/services/pgw";
 
       const { orderId, saleOrderId, saleReferenceId } = transactionParams;
