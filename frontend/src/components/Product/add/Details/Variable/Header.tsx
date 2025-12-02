@@ -1,6 +1,10 @@
 import React from "react";
 
-export const ProductVariableHeader: React.FC = () => {
+interface ProductVariableHeaderProps {
+  showDelete?: boolean;
+}
+
+export const ProductVariableHeader: React.FC<ProductVariableHeaderProps> = ({ showDelete = false }) => {
   return (
     <thead className="bg-slate-100">
       <tr>
@@ -20,6 +24,11 @@ export const ProductVariableHeader: React.FC = () => {
           وضعیت
         </th>
         <th className="text-sm p-4 text-right font-medium text-gray-900">عملیات</th>
+        {showDelete && (
+          <th className="text-sm border-r border-slate-100 p-4 text-right font-medium text-gray-900">
+            حذف
+          </th>
+        )}
       </tr>
     </thead>
   );

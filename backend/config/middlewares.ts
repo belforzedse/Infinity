@@ -10,4 +10,5 @@ export default [
   "strapi::favicon",
   "strapi::public",
   "global::audit-context",
+  "global::cache-headers",
 ];

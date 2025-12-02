@@ -13,12 +13,14 @@ export interface ProductCardProps {
   title: string;
   price: number;
   id: number;
+  slug?: string;
   seenCount: number;
   discount?: number;
   discountPrice?: number;
   colorsCount?: number;
   isAvailable?: boolean;
   priority?: boolean;
+  productCode?: string;
 }
 
 const ProductCard: FC<ProductCardProps> = ({
@@ -27,6 +29,7 @@ const ProductCard: FC<ProductCardProps> = ({
   title,
   price,
   id,
+  slug,
   seenCount,
   discount,
   discountPrice,
@@ -34,6 +37,8 @@ const ProductCard: FC<ProductCardProps> = ({
   isAvailable = true,
   priority = false,
 }) => {
+  // Use slug if available, otherwise fall back to ID for backwards compatibility
+  const productUrl = slug ? `/pdp/${slug}` : `/pdp/${id.toString()}`;
   const hasDiscount = Boolean(discountPrice && discountPrice > 0 && discountPrice < price);
   const { isLiked, isLoading, toggleLike } = useProductLike({
     productId: id.toString(),
@@ -57,7 +62,7 @@ const ProductCard: FC<ProductCardProps> = ({
   return (
     <div className="group relative">
       <Link
-        href={`/pdp/${id.toString()}`}
+        href={productUrl}
         className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">

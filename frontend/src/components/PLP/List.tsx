@@ -17,6 +17,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 import { SORT_LABELS } from "./sortOptions";
+import { computeDiscountForVariation } from "@/utils/discounts";
 
 const humanize = (value: string) =>
   value
@@ -119,8 +120,19 @@ export default function PLPList({
   const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
 
+  // Helper function to check if product has an image
+  const hasImage = (product: Product): boolean => {
+    return !!(
+      product.attributes?.CoverImage?.data?.attributes?.url ||
+      product.attributes?.CoverImage?.data
+    );
+  };
+
+  // Filter initial products to only include those with images
+  const filteredInitialProducts = initialProducts.filter(hasImage);
+
   // Local state for products and pagination
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>(filteredInitialProducts);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
@@ -180,6 +192,10 @@ export default function PLPList({
     queryParams.append("populate[2]", "product_variations");
     queryParams.append("populate[3]", "product_variations.product_stock");
     queryParams.append("populate[4]", "product_variations.general_discounts");
+    queryParams.append("fields[0]", "Title");
+    queryParams.append("fields[1]", "Slug");
+    queryParams.append("fields[2]", "Description");
+    queryParams.append("fields[3]", "Status");
 
     // Add pagination
     queryParams.append("pagination[page]", page);
@@ -232,8 +248,8 @@ export default function PLPList({
       queryParams.append("filters[product_variations][Usage][$eq]", usage);
     }
 
-    // Sorting
-    if (sort) {
+    // Sorting - only send to backend if not price sorting (price sorting done on frontend)
+    if (sort && sort !== "price:asc" && sort !== "price:desc") {
       queryParams.append("sort[0]", sort);
     }
 
@@ -244,7 +260,57 @@ export default function PLPList({
     apiClient
       .getPublic<any>(endpoint, { suppressAuthRedirect: true })
       .then((data) => {
-        setProducts(Array.isArray(data?.data) ? data.data : []);
+        let productsArray = Array.isArray(data?.data) ? data.data : [];
+
+        // Filter out products without images
+        productsArray = productsArray.filter(hasImage);
+
+        // Frontend price sorting
+        if (sort === "price:asc" || sort === "price:desc") {
+          const getMinVariationPrice = (product: any): number => {
+            const variations = product.attributes?.product_variations?.data || [];
+            let minPrice = Infinity;
+
+            for (const variation of variations) {
+              // Only consider published variations with stock
+              if (!variation.attributes?.IsPublished) continue;
+
+              const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
+              if (typeof stockCount === "number" && stockCount <= 0) continue;
+
+              // Compute final price with discounts
+              const discountResult = computeDiscountForVariation(variation);
+              const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes?.Price || "0");
+
+              if (finalPrice > 0 && finalPrice < minPrice) {
+                minPrice = finalPrice;
+              }
+            }
+
+            return minPrice === Infinity ? 0 : minPrice;
+          };
+
+          productsArray = [...productsArray].sort((a: any, b: any) => {
+            const priceA = getMinVariationPrice(a);
+            const priceB = getMinVariationPrice(b);
+            return sort === "price:asc" ? priceA - priceB : priceB - priceA;
+          });
+        }
+
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[PLP] Fetched products:", {
+            count: productsArray.length,
+            endpoint,
+            firstProduct: productsArray[0] ? {
+              id: productsArray[0].id,
+              title: productsArray[0].attributes?.Title,
+              slug: productsArray[0].attributes?.Slug,
+              hasVariations: !!productsArray[0].attributes?.product_variations?.data?.length,
+            } : null,
+          });
+        }
+
+        setProducts(productsArray);
         setPagination(
           data?.meta?.pagination || {
             page: parseInt(page) || 1,
@@ -255,7 +321,12 @@ export default function PLPList({
         );
       })
       .catch((error) => {
-        console.error("[PLP] Error fetching products:", error);
+        console.error("[PLP] Error fetching products:", {
+          error,
+          endpoint,
+          message: error?.message || "Unknown error",
+          status: (error as any)?.status,
+        });
         notify.error("خطا در بارگیری محصولات");
         setProducts([]);
         setPagination({
@@ -407,7 +478,7 @@ export default function PLPList({
               discount: discount,
               image: product.attributes.CoverImage?.data?.attributes?.url
                 ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-                : "/images/placeholders/product-placeholder.png",
+                : "", // Empty string will trigger BlurImage fallback SVG
             };
           } catch (error) {
             console.warn("Error creating sidebar product:", error, product);
@@ -763,7 +834,7 @@ export default function PLPList({
                           ? [
                               `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
                             ]
-                          : ["/images/placeholders/product-placeholder.png"]
+                          : [""] // Empty string will trigger BlurImage fallback SVG
                       }
                       category={
                         product.attributes.product_main_category?.data?.attributes?.Title || ""
@@ -830,7 +901,7 @@ export default function PLPList({
                       image={
                         product.attributes.CoverImage?.data?.attributes?.url
                           ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-                          : "/images/placeholders/product-placeholder.png"
+                          : "" // Empty string will trigger BlurImage fallback SVG
                       }
                       isAvailable={isAvailable}
                       priority={index < 3}

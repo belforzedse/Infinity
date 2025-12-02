@@ -78,7 +78,9 @@ export function useProductCategory(props?: UseProductCategoryProps) {
           console.log("fetchAllCategories: Response is PaginatedResponse, extracted data");
         }
       } else {
-        console.warn("fetchAllCategories: Unexpected response format:", response);
+        if (process.env.NODE_ENV === "development") {
+          console.warn("fetchAllCategories: Unexpected response format:", response);
+        }
         categories = [];
       }
 
@@ -96,7 +98,9 @@ export function useProductCategory(props?: UseProductCategoryProps) {
         console.log("fetchAllCategories: setCategoriesData called with", categories.length, "categories");
       }
     } catch (error) {
-      console.error("Failed to get product categories:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to get product categories:", error);
+      }
       setCategoriesData([]);
       // Don't throw error, just log it to prevent crashes
     } finally {
@@ -107,11 +111,16 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   const filteredTags =
     categorySearchQuery === ""
       ? categoryOptions
-      : categoryOptions.filter((category) =>
-          category.attributes.Title.replace(/\s/g, "")
-            .toLowerCase()
-            .includes(categorySearchQuery.replace(/\s/g, "").toLowerCase()),
-        );
+      : categoryOptions.filter((category) => {
+          const query = categorySearchQuery.trim().toLowerCase();
+          if (!query) return true;
+
+          const title = (category.attributes.Title || "").toLowerCase();
+          const slug = (category.attributes.Slug || "").toLowerCase();
+
+          // Search in both Title and Slug with fuzzy matching
+          return title.includes(query) || slug.includes(query);
+        });
 
   const handleSelectOtherCategory = (selectedCategory: categoryResponseType | null) => {
     if (!selectedCategory) {

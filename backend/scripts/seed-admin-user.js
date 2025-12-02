@@ -11,10 +11,13 @@
  *
  * Admin Details:
  * - Phone: 09100000000
- * - Password: ADMIN_PASSWORD (changeable)
+ * - Password: Set via ADMIN_PASSWORD env var or prompt (default: ADMIN_PASSWORD)
  * - Role: Admin (ID: 2)
  * - Verified: true
  * - Active: true
+ *
+ * Environment Variables:
+ * - ADMIN_PASSWORD: Admin password (optional, will prompt if not set)
  */
 
 const axios = require('axios');
@@ -99,10 +102,17 @@ async function seedAdmin() {
       if (resetChoice.toLowerCase() === 'y') {
         console.log('\n💾 Updating admin user...');
 
+        // Get password from environment or prompt
+        let adminPassword = process.env.ADMIN_PASSWORD;
+        if (!adminPassword) {
+          adminPassword = await prompt('🔐 Admin password (default: ADMIN_PASSWORD): ');
+          adminPassword = adminPassword || 'ADMIN_PASSWORD';
+        }
+
         try {
           const updateResponse = await apiClient.put(`/local-users/${existingUser.id}`, {
             data: {
-              Password: 'ADMIN_PASSWORD',
+              Password: adminPassword,
               IsVerified: true,
               IsActive: true,
               user_role: adminRoleId,
@@ -124,7 +134,15 @@ async function seedAdmin() {
     // Create new admin user
     console.log('\n📝 Creating admin user...');
     console.log(`   Phone: 09100000000`);
-    console.log(`   Password: ADMIN_PASSWORD`);
+    
+    // Get password from environment or prompt
+    let adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      adminPassword = await prompt('🔐 Admin password (default: ADMIN_PASSWORD): ');
+      adminPassword = adminPassword || 'ADMIN_PASSWORD';
+    }
+    
+    console.log(`   Password: ${adminPassword.replace(/./g, '*')}`); // Mask password in output
     console.log(`   Role: Admin`);
 
     try {
@@ -132,7 +150,7 @@ async function seedAdmin() {
       const userResponse = await apiClient.post('/local-users', {
         data: {
           Phone: '09100000000',
-          Password: 'ADMIN_PASSWORD',
+          Password: adminPassword,
           IsVerified: true,
           IsActive: true,
           user_role: adminRoleId,

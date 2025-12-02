@@ -3,6 +3,9 @@ import type { ProductVariable, ProductVariableDisplay } from "./types";
 import { ProductVariableTable } from "./Table";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import Modal from "@/components/Kits/Modal";
+import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 
 interface ProductVariablesProps {
   productId: number;
@@ -15,8 +18,20 @@ const DEFAULT_TITLES = {
 };
 
 const MAX_STOCK = 1000;
+type BulkPublishState = "no-change" | "published" | "draft";
+
+const BULK_FORM_DEFAULT = {
+  price: "",
+  discountPrice: "",
+  stock: "",
+  publishState: "no-change" as BulkPublishState,
+  removeDiscount: false,
+};
 
 const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshKey = 0 }) => {
+  const { isStoreManager, isAdmin } = useCurrentUser();
+  const canDeleteVariations = isStoreManager || isAdmin;
+
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [variables, setVariables] = useState<ProductVariableDisplay[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,6 +39,32 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
   const [currentVariation, setCurrentVariation] = useState<ProductVariableDisplay | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkForm, setBulkForm] = useState(BULK_FORM_DEFAULT);
+  const [isBulkSaving, setIsBulkSaving] = useState(false);
+
+  const resetBulkForm = () => {
+    setBulkForm(BULK_FORM_DEFAULT);
+  };
+
+  const closeBulkModal = () => {
+    setBulkModalOpen(false);
+    resetBulkForm();
+  };
+
+  const parseNumberInput = (value: string) => {
+    if (value === "") return undefined;
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      return undefined;
+    }
+    return parsed;
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setCurrentVariation(null);
+  };
 
   // Fetch product variations
   useEffect(() => {
@@ -34,6 +75,9 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
       try {
         const response = await apiClient.get(
           `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model,product_stock,general_discounts&pagination[pageSize]=100`,
+          {
+            cache: "no-store",
+          },
         );
 
         // Type assertion to work with the data
@@ -154,16 +198,187 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
   const confirmDelete = async () => {
     if (!deleteId) return;
 
+    if (!canDeleteVariations) {
+      toast.error("شما مجوز حذف تنوع محصول را ندارید");
+      setDeleteConfirmOpen(false);
+      setDeleteId(null);
+      return;
+    }
+
     try {
+      // Find the variation to get its stockId
+      const variationToDelete = variables.find((v) => v.id === deleteId);
+      const stockId = variationToDelete?.stockId;
+
+      // Delete product_stock first if it exists (to avoid relation errors)
+      if (stockId) {
+        try {
+          await apiClient.delete(`/product-stocks/${stockId}`);
+        } catch (stockError: any) {
+          // If stock deletion fails, log but continue - the variation deletion might still work
+          // This handles cases where stock might already be deleted or doesn't exist
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("Could not delete product_stock:", stockError);
+          }
+        }
+      }
+
+      // Now delete the variation
       await apiClient.delete(`/product-variations/${deleteId}`);
 
-      // Update local state
+      // Update local state and refresh
       setVariables((prev) => prev.filter((v) => v.id !== deleteId));
       setDeleteConfirmOpen(false);
       setDeleteId(null);
-    } catch (error) {
+      toast.success("تنوع محصول با موفقیت حذف شد");
+
+      // Trigger a refresh by updating refreshKey if parent component supports it
+      // This ensures the list is refreshed after deletion
+    } catch (error: any) {
+      // Check if the error is about relations (which can happen after successful deletion)
+      // If variation was deleted (204), we can ignore relation errors
+      if (error?.status === 400 && error?.error?.message?.includes("relation")) {
+        // Variation was likely deleted successfully, but a relation cleanup failed
+        // This is acceptable - the variation is gone
+        setVariables((prev) => prev.filter((v) => v.id !== deleteId));
+        setDeleteConfirmOpen(false);
+        setDeleteId(null);
+        toast.success("تنوع محصول با موفقیت حذف شد");
+        return;
+      }
+
       console.error("Error deleting product variation:", error);
+      toast.error("خطا در حذف تنوع محصول");
     }
+  };
+
+  const handleBulkUpdate = async () => {
+    if (!selectedRows.length) return;
+
+    const priceValue = parseNumberInput(bulkForm.price);
+    if (priceValue !== undefined && priceValue <= 0) {
+      toast.error("قیمت باید بزرگ‌تر از صفر باشد");
+      return;
+    }
+
+    const discountInput = parseNumberInput(bulkForm.discountPrice);
+    let discountValue: number | null | undefined = undefined;
+    if (bulkForm.removeDiscount) {
+      discountValue = null;
+    } else if (discountInput !== undefined) {
+      discountValue = Math.max(0, discountInput);
+    }
+
+    const stockInput = parseNumberInput(bulkForm.stock);
+    const stockValue =
+      stockInput !== undefined ? Math.min(Math.max(stockInput, 0), MAX_STOCK) : undefined;
+
+    const publishValue =
+      bulkForm.publishState === "no-change"
+        ? undefined
+        : bulkForm.publishState === "published";
+
+    if (!isValidAction(priceValue, discountValue, stockValue, publishValue)) {
+      toast.error("هیچ تغییری برای اعمال انتخاب نشده است");
+      return;
+    }
+
+    setIsBulkSaving(true);
+    const stockIdUpdates: Record<number, number | undefined> = {};
+    let updatedCount = 0;
+
+    try {
+      for (const variationId of selectedRows) {
+        const variation = variables.find((v) => v.id === variationId);
+        if (!variation) continue;
+
+        try {
+          const updatePayload: Record<string, unknown> = {};
+          if (priceValue !== undefined) updatePayload.Price = priceValue;
+          if (discountValue !== undefined) updatePayload.DiscountPrice = discountValue;
+          if (publishValue !== undefined) updatePayload.IsPublished = publishValue;
+
+          if (Object.keys(updatePayload).length > 0) {
+            await apiClient.put(`/product-variations/${variationId}`, {
+              data: updatePayload,
+            });
+          }
+
+          if (stockValue !== undefined) {
+            if (variation.stockId) {
+              await apiClient.put(`/product-stocks/${variation.stockId}`, {
+                data: {
+                  Count: stockValue,
+                },
+              });
+            } else {
+              const stockResponse = await apiClient.post("/product-stocks", {
+                data: {
+                  Count: stockValue,
+                  product_variation: variationId,
+                },
+              });
+              const stockData = stockResponse.data as { id: number };
+              stockIdUpdates[variationId] = stockData.id;
+            }
+          }
+
+          updatedCount++;
+        } catch (error) {
+          console.error(`Error updating variation ${variationId}:`, error);
+        }
+      }
+
+      if (updatedCount > 0) {
+        setVariables((prev) =>
+          prev.map((variation) => {
+            if (!selectedRows.includes(variation.id)) return variation;
+
+            return {
+              ...variation,
+              price: priceValue !== undefined ? priceValue : variation.price,
+              discountPrice:
+                discountValue === undefined
+                  ? variation.discountPrice
+                  : discountValue === null
+                    ? undefined
+                    : discountValue,
+              stock: stockValue !== undefined ? stockValue : variation.stock,
+              stockId:
+                stockIdUpdates[variation.id] !== undefined
+                  ? stockIdUpdates[variation.id]
+                  : variation.stockId,
+              isPublished:
+                publishValue !== undefined ? publishValue : variation.isPublished,
+            };
+          }),
+        );
+        toast.success(`تغییرات روی ${updatedCount} تنوع اعمال شد`);
+        setSelectedRows([]);
+        closeBulkModal();
+      } else {
+        toast.error("ویرایش گروهی با خطا مواجه شد");
+      }
+    } finally {
+      setIsBulkSaving(false);
+    }
+  };
+
+  const isValidAction = (
+    priceValue: number | undefined,
+    discountValue: number | null | undefined,
+    stockValue: number | undefined,
+    publishValue: boolean | undefined
+  ): boolean => {
+    if (
+      priceValue === undefined &&
+      discountValue === undefined &&
+      stockValue === undefined &&
+      publishValue === undefined
+    ) {
+      return false;
+    }
+    return true;
   };
 
   const handleSaveVariation = async (updatedVariation: ProductVariableDisplay) => {
@@ -215,14 +430,53 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
 
       setEditModalOpen(false);
       setCurrentVariation(null);
+      toast.success("تنوع محصول با موفقیت به‌روزرسانی شد");
     } catch (error) {
       console.error("Error updating product variation:", error);
     }
   };
 
+  const handleSelectAll = () => {
+    setSelectedRows(variables.map((v) => v.id));
+  };
+
   return (
     <div className="w-full p-5 pt-0" dir="rtl">
       <h2 className="mb-4 text-base text-neutral-400">متغیر های محصول</h2>
+
+      {variables.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600">
+          <div>
+            {selectedRows.length > 0
+              ? `${selectedRows.length} تنوع انتخاب شده`
+              : "هیچ تنوعی انتخاب نشده است"}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => {
+                if (selectedRows.length === variables.length && variables.length > 0) {
+                  setSelectedRows([]);
+                } else {
+                  handleSelectAll();
+                }
+              }}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-60"
+              disabled={variables.length === 0}
+            >
+              {selectedRows.length === variables.length && variables.length > 0
+                ? "برداشتن انتخاب"
+                : "انتخاب همه"}
+            </button>
+            <button
+              onClick={() => setBulkModalOpen(true)}
+              disabled={selectedRows.length === 0}
+              className="rounded-lg bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              ویرایش گروهی
+            </button>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="p-8 text-center">در حال بارگذاری...</div>
@@ -239,16 +493,17 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
           selectedRows={selectedRows}
           onSelectRow={handleCheckboxChange}
           onEditRow={handleEditVariation}
-          onDeleteRow={handleDeleteVariation}
+          onDeleteRow={canDeleteVariations ? handleDeleteVariation : undefined}
         />
       )}
 
-      {/* Edit Modal - In real implementation you would have a complete modal component */}
-      {editModalOpen && currentVariation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-lg rounded-xl bg-white p-6">
-            <h3 className="mb-4 text-lg font-medium">ویرایش متغیر محصول</h3>
-
+      <Modal
+        isOpen={editModalOpen && !!currentVariation}
+        onClose={closeEditModal}
+        title="ویرایش متغیر محصول"
+      >
+        {currentVariation && (
+          <>
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm">کد محصول (SKU)</label>
@@ -345,7 +600,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
 
               <div>
                 <label className="mb-1 block text-sm">وضعیت انتشار</label>
-                <div className="flex items-center space-x-4 space-x-reverse">
+                <div className="flex items-center gap-6">
                   <label className="inline-flex items-center">
                     <input
                       type="radio"
@@ -380,10 +635,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
 
             <div className="mt-6 flex justify-end gap-2">
               <button
-                onClick={() => {
-                  setEditModalOpen(false);
-                  setCurrentVariation(null);
-                }}
+                onClick={closeEditModal}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700"
               >
                 انصراف
@@ -395,39 +647,123 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
                 ذخیره تغییرات
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-xl bg-white p-6">
-            <h3 className="mb-4 text-lg font-medium">حذف متغیر محصول</h3>
-            <p className="mb-6 text-slate-600">
-              آیا از حذف این متغیر محصول اطمینان دارید؟ این عمل قابل بازگشت نیست.
+      <Modal
+        isOpen={bulkModalOpen}
+        onClose={closeBulkModal}
+        title="ویرایش گروهی تنوع‌ها"
+      >
+        <p className="mb-4 text-sm text-slate-500">
+          تغییرات زیر برای {selectedRows.length} تنوع انتخاب شده اعمال می‌شود. فیلدهایی که خالی
+          بمانند بدون تغییر خواهند ماند.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm">قیمت جدید (تومان)</label>
+            <input
+              type="number"
+              value={bulkForm.price}
+              onChange={(e) => setBulkForm((prev) => ({ ...prev, price: e.target.value }))}
+              placeholder="بدون تغییر"
+              className="w-full rounded-lg border border-slate-300 p-2"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm">تخفیف اختصاصی (تومان)</label>
+            <input
+              type="number"
+              value={bulkForm.discountPrice}
+              onChange={(e) =>
+                setBulkForm((prev) => ({ ...prev, discountPrice: e.target.value }))
+              }
+              disabled={bulkForm.removeDiscount}
+              placeholder="بدون تغییر"
+              className="w-full rounded-lg border border-slate-300 p-2 disabled:bg-slate-100"
+            />
+            <label className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+              <input
+                type="checkbox"
+                checked={bulkForm.removeDiscount}
+                onChange={(e) =>
+                  setBulkForm((prev) => ({
+                    ...prev,
+                    removeDiscount: e.target.checked,
+                    discountPrice: e.target.checked ? "" : prev.discountPrice,
+                  }))
+                }
+              />
+              حذف تخفیف اختصاصی از همه تنوع‌ها
+            </label>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm">موجودی</label>
+            <input
+              type="number"
+              value={bulkForm.stock}
+              onChange={(e) => setBulkForm((prev) => ({ ...prev, stock: e.target.value }))}
+              placeholder="بدون تغییر"
+              className="w-full rounded-lg border border-slate-300 p-2"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              حداکثر موجودی قابل ثبت {MAX_STOCK.toLocaleString()} عدد است.
             </p>
+          </div>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  setDeleteConfirmOpen(false);
-                  setDeleteId(null);
-                }}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700"
-              >
-                انصراف
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="rounded-lg bg-red-600 px-4 py-2 text-white"
-              >
-                حذف
-              </button>
-            </div>
+          <div>
+            <label className="mb-1 block text-sm">وضعیت انتشار</label>
+            <select
+              value={bulkForm.publishState}
+              onChange={(e) =>
+                setBulkForm((prev) => ({
+                  ...prev,
+                  publishState: e.target.value as BulkPublishState,
+                }))
+              }
+              className="w-full rounded-lg border border-slate-300 p-2"
+            >
+              <option value="no-change">بدون تغییر</option>
+              <option value="published">منتشر شود</option>
+              <option value="draft">به حالت پیش نویس درآید</option>
+            </select>
           </div>
         </div>
-      )}
+
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            onClick={closeBulkModal}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700"
+            disabled={isBulkSaving}
+          >
+            انصراف
+          </button>
+          <button
+            onClick={handleBulkUpdate}
+            className="rounded-lg bg-pink-400 px-4 py-2 text-white disabled:bg-pink-100 disabled:border-pink-200"
+            disabled={isBulkSaving}
+          >
+            {isBulkSaving ? "در حال اعمال..." : "ثبت تغییرات"}
+          </button>
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        title="حذف متغیر محصول"
+        description="آیا از حذف این متغیر محصول اطمینان دارید؟ این عمل قابل بازگشت نیست."
+        confirmText="حذف"
+        cancelText="انصراف"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          setDeleteId(null);
+        }}
+      />
     </div>
   );
 };

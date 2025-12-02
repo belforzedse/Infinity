@@ -69,6 +69,23 @@ const MAX_HERO_PRODUCTS = 6;
 
 const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations`;
 
+// Helper to ensure image URLs have proper format
+const formatImageUrl = (path?: string): string => {
+  if (!path) return "";
+
+  // If IMAGE_BASE_URL is empty and path exists, ensure path starts with /
+  if (!IMAGE_BASE_URL && path) {
+    return path.startsWith("/") ? path : `/${path}`;
+  }
+
+  const url = `${IMAGE_BASE_URL}${path}`;
+  // If URL doesn't start with http and doesn't start with /, add /
+  if (!url.startsWith("http") && !url.startsWith("/")) {
+    return `/${url}`;
+  }
+  return url;
+};
+
 const mapProduct = (product: ProductData): ProcessedProduct => {
   const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
     const price = variation.attributes.Price;
@@ -84,7 +101,7 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
       price: 0,
       discountedPrice: 0,
       discount: 0,
-      image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
+      image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
     };
   }
 
@@ -106,7 +123,7 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
     price,
     discountedPrice,
     discount,
-    image: `${IMAGE_BASE_URL}${product.attributes.CoverImage?.data?.attributes?.url}`,
+    image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
   };
 };
 
@@ -166,7 +183,10 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
           setTitle(categoryAttributes.Title);
 
           if (categoryAttributes.CoverImage?.data?.attributes?.url) {
-            setImageUrl(`${IMAGE_BASE_URL}${categoryAttributes.CoverImage?.data?.attributes?.url}`);
+            const formattedUrl = formatImageUrl(categoryAttributes.CoverImage?.data?.attributes?.url);
+            if (formattedUrl) {
+              setImageUrl(formattedUrl);
+            }
           }
         }
       } catch {
@@ -191,7 +211,9 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
     return () => mediaQuery.removeEventListener("change", updateColumns);
   }, []);
 
-  const visibleProducts = featuredProducts.slice(0, columnCount * 2);
+  const visibleProducts = featuredProducts
+    .filter((product) => product.image && product.image !== "")
+    .slice(0, columnCount * 2);
 
   return (
     <div className="w-full bg-slate-50 rounded-2xl py-4">
@@ -209,15 +231,17 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
 
           <Link href="/" className="flex-shrink-0">
             <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
-              <Image
-                src={imageUrl}
-                alt={title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 517px"
-                priority
-                loader={imageUrl.startsWith("http") ? imageLoader : undefined}
-              />
+              {imageUrl && (
+                <Image
+                  src={imageUrl}
+                  alt={title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 517px"
+                  priority
+                  loader={imageUrl.startsWith("http") ? imageLoader : undefined}
+                />
+              )}
             </div>
           </Link>
         </div>

@@ -4,18 +4,26 @@
  */
 // Base URLs
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:1337/api";
 export const STRAPI_TOKEN =
   process.env.NEXT_PUBLIC_STRAPI_TOKEN;
-export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
+export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:1337";
 // API Versions
 export const API_VERSION = "v1";
 
 
 // Request Timeout (in milliseconds)
-// Increased to 150s to accommodate Mellat WSDL initialization (60+ seconds)
-// and add buffer for slow networks
-export const REQUEST_TIMEOUT = 150000; // 150 seconds
+// Reduced to 30s with retry logic for better UX
+// Retries handle transient network issues
+export const REQUEST_TIMEOUT = 30000; // 30 seconds
+
+// Retry Configuration
+export const RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelay: 1000, // 1 second base delay
+  maxDelay: 10000, // 10 seconds max delay
+  retryableStatusCodes: [408, 429, 500, 502, 503, 504], // Retry on these status codes
+};
 
 // API Endpoints
 export const ENDPOINTS = {

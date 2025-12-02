@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 import Modal from "@/components/Kits/Modal";
 import Select from "@/components/Kits/Form/Select";
 import CirculePlusIcon from "../Icons/CirculePlusIcon";
@@ -11,14 +12,30 @@ import type { Province, City } from "@/services/location";
 import { getProvinces, getCities } from "@/services/location";
 import { toast } from "react-hot-toast";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { addressesAtom } from "@/atoms/addressesAtom";
+import { apiCache } from "@/lib/api-cache";
 
 
 interface Props {
   onAddressAdded?: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showButton?: boolean;
 }
 
-export default function AddAddress({ onAddressAdded }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onOpenChange, showButton = true }: Props) {
+  const [addresses, setAddresses] = useAtom(addressesAtom);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
   const [selectedProvince, setSelectedProvince] = useState<Option | null>(null);
   const [selectedCity, setSelectedCity] = useState<Option | null>(null);
   const [postalCode, setPostalCode] = useState("");
@@ -134,6 +151,20 @@ export default function AddAddress({ onAddressAdded }: Props) {
     try {
       setLoading(true);
       const newAddress = await UserService.addresses.add(addressData);
+
+      // Verify the address has the required structure for the dropdown
+      // If it doesn't have shipping_city.Title, we need to wait for the refetch
+      const hasFullStructure = newAddress?.shipping_city?.Title &&
+                                newAddress?.shipping_city?.shipping_province?.Title;
+
+      if (hasFullStructure) {
+        // Optimistically update the atom immediately for instant UI update
+        setAddresses([...addresses, newAddress]);
+      }
+
+      // Invalidate API cache for addresses endpoint
+      apiCache.clearByPattern(/local-user-addresses/);
+
       toast.success("آدرس با موفقیت اضافه شد");
 
       // Reset form fields
@@ -146,10 +177,14 @@ export default function AddAddress({ onAddressAdded }: Props) {
       // Close modal
       setIsOpen(false);
 
-      // Callback to refresh addresses list from backend
-      // This ensures the UI updates with the new address correctly
+      // Callback to refresh addresses list from backend for sync
+      // This ensures backend and UI are in sync and updates the atom with full data
       if (onAddressAdded) {
         await onAddressAdded();
+      } else if (!hasFullStructure) {
+        // If no callback provided and structure is incomplete, refetch addresses
+        const fetchedAddresses = await UserService.addresses.getAll();
+        setAddresses(fetchedAddresses);
       }
     } catch (error: any) {
       console.error("Failed to add address:", error);
@@ -161,13 +196,15 @@ export default function AddAddress({ onAddressAdded }: Props) {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
-      >
-        <span className="text-foreground-pink text-sm lg:text-base">افزودن آدرس</span>
-        <CirculePlusIcon className="h-5 w-5" />
-      </button>
+      {showButton && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
+        >
+          <span className="text-foreground-pink text-sm lg:text-base">افزودن آدرس</span>
+          <CirculePlusIcon className="h-5 w-5" />
+        </button>
+      )}
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <form onSubmit={handleSubmit} className="flex max-h-[80vh] flex-col gap-4 overflow-y-auto">

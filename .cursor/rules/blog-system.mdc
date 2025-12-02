@@ -1,0 +1,322 @@
+# Blog System - Cursor AI Rules
+
+This document outlines the blog system implementation in the Infinity Store application, providing guidelines for development and maintenance.
+
+## System Overview
+
+The blog system is a full-featured content management solution built with:
+- **Backend**: Strapi 4.25.21 (Headless CMS)
+- **Frontend**: Next.js 16 with App Router
+- **Rich Text**: Tiptap editor with comprehensive formatting
+- **SEO**: Complete metadata and Open Graph support
+- **Comments**: Authenticated user comments with moderation
+
+## Architecture
+
+### Backend Structure (Strapi)
+
+```
+backend/src/api/
+├── blog-post/           # Main blog posts
+├── blog-category/       # Post categories
+├── blog-tag/           # Post tags
+├── blog-author/        # Author profiles
+└── blog-comment/       # User comments
+```
+
+### Frontend Structure (Next.js)
+
+```
+frontend/src/
+├── app/(blog)/         # Public blog routes
+│   ├── blog/          # Blog listing (/blog)
+│   └── [slug]/        # Individual posts (/{slug})
+├── app/(super-admin)/super-admin/blog/  # Admin management
+├── components/Blog/    # Blog-specific components
+├── services/blog/      # API service layer
+└── utils/seo.ts       # SEO utilities
+```
+
+## Content Types
+
+### Blog Post (`blog-post`)
+- **Title**: String, required, unique
+- **Slug**: UID based on title, required, unique
+- **Content**: Rich text, required
+- **Excerpt**: Text, optional (for previews)
+- **FeaturedImage**: Media, optional
+- **Status**: Enum (Draft, Published, Scheduled)
+- **PublishedAt**: DateTime, auto-set on publish
+- **ViewCount**: Integer, auto-incremented
+- **SEO Fields**: MetaTitle, MetaDescription, Keywords
+- **Relations**: Category (many-to-one), Tags (many-to-many), Author (many-to-one), Comments (one-to-many)
+
+### Blog Category (`blog-category`)
+- **Name**: String, required, unique
+- **Slug**: UID based on name, required, unique
+- **Relations**: Posts (one-to-many)
+
+### Blog Tag (`blog-tag`)
+- **Name**: String, required, unique
+- **Slug**: UID based on name, required, unique
+- **Relations**: Posts (many-to-many)
+
+### Blog Author (`blog-author`)
+- **Name**: String, required, unique
+- **Bio**: Text, optional
+- **Avatar**: Media, optional
+- **Relations**: Posts (one-to-many)
+
+### Blog Comment (`blog-comment`)
+- **Content**: Text, required, max 2000 chars
+- **Status**: Enum (Pending, Approved, Rejected)
+- **Date**: DateTime, required
+- **Relations**: User (many-to-one), Post (many-to-one), Parent Comment (self-referencing for replies)
+
+## Role-Based Access Control
+
+### Editor Role
+- **Permissions**: Create, read, update, delete all blog content
+- **Purpose**: Content creators and blog managers
+- **Access**: Super Admin blog management pages
+
+### Superadmin Role
+- **Permissions**: Full access to all blog functionality
+- **Purpose**: System administrators
+- **Access**: All blog management and system settings
+
+### Public Users
+- **Permissions**: Read published posts, create comments (if authenticated)
+- **Access**: Public blog pages only
+
+## URL Structure
+
+### Public Routes
+- `/blog` - Blog listing page
+- `/{slug}` - Individual blog post (root-level URLs)
+- `/blog/category/{slug}` - Category-filtered posts
+- `/blog/tag/{slug}` - Tag-filtered posts
+
+### Admin Routes
+- `/super-admin/blog` - Blog dashboard
+- `/super-admin/blog/posts` - Posts management
+- `/super-admin/blog/categories` - Categories management
+- `/super-admin/blog/tags` - Tags management
+- `/super-admin/blog/authors` - Authors management
+- `/super-admin/blog/comments` - Comments moderation
+
+## Rich Text Editor (Tiptap)
+
+### Supported Features
+- **Text Formatting**: Bold, italic, underline
+- **Headings**: H1, H2, H3
+- **Lists**: Bullet lists, ordered lists
+- **Links**: URL linking
+- **Basic Blocks**: Paragraphs, line breaks
+
+### Integration
+- **Component**: `RichTextEditor` in `/components/RichTextEditor/`
+- **Field Type**: `richtext` in `FieldRenderer`
+- **Storage**: HTML content in Strapi rich text field
+
+## SEO Implementation
+
+### Metadata Generation
+- **Utility**: `generateBlogPostMetadata()` in `/utils/seo.ts`
+- **Features**: Title, description, keywords, Open Graph, Twitter Cards
+- **Structured Data**: JSON-LD for search engines
+
+### Open Graph Support
+- **Type**: Article for blog posts, website for listing
+- **Images**: Featured image or default fallback
+- **Properties**: Title, description, publish date, author, category
+
+### URL Optimization
+- **Slugs**: Auto-generated from titles, validated against reserved routes
+- **Canonical URLs**: Proper canonical tags for SEO
+- **Meta Tags**: Complete meta tag implementation
+
+## Comment System
+
+### Features
+- **Authentication**: Requires user login
+- **Moderation**: Three-state approval (Pending, Approved, Rejected)
+- **Threading**: Support for reply comments
+- **Real-time**: Comments load dynamically
+
+### Workflow
+1. User submits comment (authenticated)
+2. Comment status set to "Pending"
+3. Editor/Admin approves or rejects
+4. Approved comments appear publicly
+
+## Slug Validation
+
+### Reserved Slugs
+Protected routes that cannot be used as blog post slugs:
+- System routes: `admin`, `api`, `auth`, `super-admin`
+- App routes: `blog`, `categories`, `products`, `users`, `orders`
+- User routes: `account`, `addresses`, `favorites`, `wallet`
+- Common paths: `about`, `contact`, `privacy`, `terms`
+
+### Validation Process
+1. Check against reserved slug list
+2. Verify uniqueness within blog posts
+3. Auto-generate alternatives if conflicts exist
+4. Format validation (lowercase, hyphens only)
+
+## Development Guidelines
+
+### Adding New Blog Features
+
+1. **Backend Changes**:
+   ```bash
+   cd backend
+   # Add fields to content-type schema
+   # Update controllers if needed
+   # Add custom routes if required
+   npm run type:generate
+   ```
+
+2. **Frontend Changes**:
+   ```bash
+   cd frontend
+   # Update service interfaces
+   # Add/modify components
+   # Update form fields if needed
+   npm run validate
+   ```
+
+### Content Management
+
+1. **Creating Posts**:
+   - Use Super Admin interface
+   - Fill all SEO fields for best results
+   - Preview before publishing
+   - Set appropriate category and tags
+
+2. **Managing Comments**:
+   - Regular moderation through admin interface
+   - Approve legitimate comments promptly
+   - Reject spam or inappropriate content
+
+### SEO Best Practices
+
+1. **Content**:
+   - Write descriptive titles (50-60 characters)
+   - Create compelling meta descriptions (150-160 characters)
+   - Use relevant keywords naturally
+   - Add alt text to images
+
+2. **Technical**:
+   - Ensure fast loading times
+   - Optimize images before upload
+   - Use proper heading hierarchy
+   - Implement internal linking
+
+## API Endpoints
+
+### Public Endpoints
+- `GET /api/blog-posts` - List published posts
+- `GET /api/blog-posts/slug/{slug}` - Get post by slug
+- `GET /api/blog-categories` - List categories
+- `GET /api/blog-tags` - List tags
+- `GET /api/blog-authors` - List authors
+- `GET /api/blog-comments/post/{id}` - Get approved comments
+
+### Authenticated Endpoints
+- `POST /api/blog-comments` - Create comment
+- `PUT /api/blog-comments/{id}` - Update own comment
+
+### Admin Endpoints (Editor+ Role)
+- `POST /api/blog-posts` - Create post
+- `PUT /api/blog-posts/{id}` - Update post
+- `DELETE /api/blog-posts/{id}` - Delete post
+- `PUT /api/blog-comments/{id}/approve` - Approve comment
+- `PUT /api/blog-comments/{id}/reject` - Reject comment
+
+## Error Handling
+
+### Common Issues
+1. **Slug Conflicts**: Auto-generate alternative slugs
+2. **Image Upload**: Validate file types and sizes
+3. **Rich Text**: Sanitize HTML content
+4. **Comments**: Rate limiting and spam protection
+
+### Debugging
+- Check Strapi logs for backend issues
+- Use browser dev tools for frontend issues
+- Verify role permissions for access issues
+- Test API endpoints with proper authentication
+
+## Performance Considerations
+
+### Backend Optimization
+- Use proper Strapi population for relations
+- Implement pagination for large datasets
+- Cache frequently accessed content
+- Optimize database queries
+
+### Frontend Optimization
+- Implement lazy loading for images
+- Use Next.js Image component
+- Minimize bundle size with dynamic imports
+- Implement proper loading states
+
+## Security Measures
+
+### Content Security
+- Sanitize rich text content
+- Validate file uploads
+- Implement rate limiting
+- Use CSRF protection
+
+### Access Control
+- Verify user roles on all endpoints
+- Implement proper authentication
+- Validate input data
+- Use secure headers
+
+## Maintenance Tasks
+
+### Regular Tasks
+- Monitor comment moderation queue
+- Review and update SEO metadata
+- Check for broken links
+- Optimize images and content
+
+### Periodic Tasks
+- Update dependencies
+- Review and clean up unused content
+- Backup blog content
+- Analyze performance metrics
+
+## Troubleshooting
+
+### Common Problems
+
+1. **Posts Not Appearing**:
+   - Check post status (must be "Published")
+   - Verify user role permissions
+   - Check API endpoint responses
+
+2. **SEO Issues**:
+   - Verify metadata fields are filled
+   - Check Open Graph tags in browser
+   - Validate structured data
+
+3. **Comment Problems**:
+   - Ensure user authentication
+   - Check comment status
+   - Verify moderation settings
+
+4. **Rich Text Issues**:
+   - Check Tiptap editor initialization
+   - Verify content sanitization
+   - Test with different content types
+
+### Getting Help
+- Check Strapi documentation for backend issues
+- Review Next.js docs for frontend problems
+- Consult Tiptap docs for editor issues
+- Review this documentation for system-specific guidance

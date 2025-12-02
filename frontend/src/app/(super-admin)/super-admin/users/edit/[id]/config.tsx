@@ -143,23 +143,6 @@ export const config: UpsertPageConfigType<User> = {
               mobileColSpan: 12,
             },
             {
-              name: "gender",
-              type: "dropdown",
-              label: "جنسیت",
-              colSpan: 6,
-              mobileColSpan: 12,
-              options: [
-                {
-                  label: "مرد",
-                  value: "male",
-                },
-                {
-                  label: "زن",
-                  value: "female",
-                },
-              ],
-            },
-            {
               name: "bio",
               type: "multiline-text",
               label: "بیوگرافی",

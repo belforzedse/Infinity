@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import type {
   UseFormRegister,
   FieldErrors,
   Control,
   UseFormSetValue} from "react-hook-form";
 import {
-  Controller
+  Controller,
+  useWatch
 } from "react-hook-form";
+import { useAtom } from "jotai";
 import Input from "@/components/Kits/Form/Input";
 import type { Option } from "@/components/Kits/Form/Select";
 import Select from "@/components/Kits/Form/Select";
@@ -15,9 +17,10 @@ import type { FormData } from "./index";
 import CirculeInformationIcon from "../Icons/CirculeInformationIcon";
 import UserService from "@/services/user";
 import type { UserAddress } from "@/services/user/addresses";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
+import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms/addressesAtom";
+import AddAddress from "@/components/User/Address/AddAddress";
 
 interface Props {
   register: UseFormRegister<FormData>;
@@ -27,19 +30,20 @@ interface Props {
 }
 
 function ShoppingCartBillInformationForm({ register, errors, control, setValue }: Props) {
-  const [addresses, setAddresses] = useState<UserAddress[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Use global addresses atom for real-time updates
+  const [addresses, setAddresses] = useAtom(addressesAtom);
+  const [loading, setLoading] = useAtom(addressesLoadingAtom);
+  const [error, setError] = useAtom(addressesErrorAtom);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-  const router = useRouter();
+  const [isAddAddressModalOpen, setIsAddAddressModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
         setLoading(true);
         setError(null);
-        const addresses = await UserService.addresses.getAll();
-        setAddresses(addresses);
+        const fetchedAddresses = await UserService.addresses.getAll();
+        setAddresses(fetchedAddresses);
       } catch (err: any) {
         console.error("Failed to fetch addresses:", err);
         const rawErrorMessage = extractErrorMessage(err);
@@ -67,18 +71,73 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
       }
     };
 
+    // Fetch addresses on mount
     fetchAddresses();
     fetchUserInfo();
-  }, [setValue]);
 
-  // Convert addresses to select options
-  const addressOptions: Option[] = addresses.map((address) => ({
-    id: address.id,
-    name: `${address.FullAddress} - ${address.shipping_city.Title}, ${address.shipping_city.shipping_province.Title}`,
-  }));
+    // Refetch addresses when page becomes visible (user returns from another tab/page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchAddresses();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [setValue, setAddresses, setLoading, setError]);
+
+  // Watch the current address value from the form
+  const selectedAddress = useWatch({ control, name: "address" });
+
+  // Clear form value if selected address was deleted
+  useEffect(() => {
+    if (selectedAddress && selectedAddress.id) {
+      const addressExists = addresses.some((addr) => addr.id === selectedAddress.id);
+      if (!addressExists) {
+        // Selected address was deleted, clear the form value
+        setValue("address", null);
+      }
+    }
+  }, [addresses, selectedAddress, setValue]);
+
+  // Convert addresses to select options with useMemo to ensure reactivity
+  const addressOptions: Option[] = useMemo(() => {
+    return addresses
+      .filter((address) => {
+        // Only include addresses with complete data structure
+        return (
+          address?.shipping_city?.Title &&
+          address?.shipping_city?.shipping_province?.Title
+        );
+      })
+      .map((address) => ({
+        id: address.id,
+        name: `${address.FullAddress} - ${address.shipping_city.Title}, ${address.shipping_city.shipping_province.Title}`,
+      }));
+  }, [addresses]);
 
   const handleAddAddress = () => {
-    router.push("/addresses");
+    setIsAddAddressModalOpen(true);
+  };
+
+  const handleAddressAdded = async () => {
+    // Refetch addresses to ensure we have the latest data
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchedAddresses = await UserService.addresses.getAll();
+      setAddresses(fetchedAddresses);
+    } catch (err: any) {
+      console.error("Failed to fetch addresses:", err);
+      const rawErrorMessage = extractErrorMessage(err);
+      const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت آدرس‌ها");
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -121,6 +180,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           rules={{ required: "آدرس الزامی است" }}
           render={({ field: { onChange, value } }) => (
             <Select
+              key={`address-select-${addresses.length}-${addressOptions.length}`}
               label="آدرس"
               value={value}
               onChange={onChange}
@@ -141,6 +201,14 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           <CirculePlusIcon className="h-5 w-5" />
         </button>
       </div>
+
+      {/* Add Address Modal */}
+      <AddAddress
+        isOpen={isAddAddressModalOpen}
+        onOpenChange={setIsAddAddressModalOpen}
+        showButton={false}
+        onAddressAdded={handleAddressAdded}
+      />
 
       <div className="w-full">
         <label className="text-base mb-1 block text-right text-foreground-primary lg:text-lg lg:mb-2">

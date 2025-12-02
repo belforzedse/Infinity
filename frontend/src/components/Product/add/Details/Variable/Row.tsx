@@ -1,6 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import type { ProductVariableDisplay } from "./types";
+import DeleteIcon from "@/components/Product/Icons/DeleteIcon";
 
 interface ProductVariableRowProps {
   item: ProductVariableDisplay;
@@ -8,6 +9,7 @@ interface ProductVariableRowProps {
   isSelected: boolean;
   onSelect: (id: number) => void;
   onEdit: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
 export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
@@ -16,6 +18,7 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
   isSelected,
   onSelect,
   onEdit,
+  onDelete,
 }) => {
   return (
     <tr className={classNames("border-slate-100", !isLast && "border-b")}>
@@ -55,7 +58,7 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
           {item.isPublished ? "منتشر شده" : "پیش نویس"}
         </span>
       </td>
-      <td className="p-4">
+      <td className="border-r border-slate-100 p-4">
         <button
           onClick={() => onEdit(item.id)}
           className="rounded-lg bg-blue-50 p-2 text-blue-600 transition-colors hover:bg-blue-100"
@@ -63,6 +66,17 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
           ویرایش
         </button>
       </td>
+      {onDelete && (
+        <td className="p-4">
+          <button
+            onClick={() => onDelete(item.id)}
+            className="rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100"
+            title="حذف تنوع"
+          >
+            <DeleteIcon className="h-4 w-4" />
+          </button>
+        </td>
+      )}
     </tr>
   );
 };

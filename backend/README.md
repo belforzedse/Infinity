@@ -20,6 +20,7 @@ up and down and up and down and
 - **Secrets**:
   - Repository secrets per environment: `*_BACKEND_HOST`, `*_BACKEND_PORT`, `*_BACKEND_USER`, `*_BACKEND_SSH_KEY`, `*_BACKEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).
   - Shared registry credentials: `GHCR_DEPLOY_USER=belforzedse`, `GHCR_DEPLOY_TOKEN=<PAT with read:packages>`.
+  - **Important**: `main.env` and `dev.env` files are gitignored. Copy the entire file contents into the corresponding GitHub secret (e.g., `PROD_BACKEND_ENV_FILE`, `STAGING_BACKEND_ENV_FILE`).
 - **Compose variables**: `ENV_FILE` (defaults to `main.env`), `IMAGE_TAG` (`main` by default), `STRAPI_PORT`, `POSTGRES_PORT`, `REDIS_PORT`. Override locally, e.g. `ENV_FILE=dev.env STRAPI_PORT=1338 docker compose up`.
 - **Ports**: Strapi exposes `${STRAPI_PORT:-1337}`; Postgres/Redis still publish `5432/6379` for local development. Remove those `ports` lines on production if you do not want them reachable from the host network.
 
@@ -89,6 +90,38 @@ npm run build
 # or
 yarn build
 ```
+
+## 📝 Blog System
+
+The backend includes a comprehensive blog system with the following content types:
+
+### Content Types
+- **blog-post**: Main blog posts with rich text content, SEO metadata, and relations
+- **blog-category**: Post categories for organization
+- **blog-tag**: Post tags for flexible categorization
+- **blog-author**: Author profiles with bio and avatar
+- **blog-comment**: User comments with moderation support
+
+### Features
+- Rich text content with Strapi's built-in editor
+- SEO metadata fields (title, description, keywords)
+- Role-based access control (Editor role for content management)
+- Comment moderation system (Pending/Approved/Rejected)
+- Slug validation to prevent URL conflicts
+- View counting and analytics support
+
+### API Endpoints
+- Public endpoints for published content
+- Authenticated endpoints for comments
+- Admin endpoints for content management (Editor+ role required)
+
+### Role Management
+The system includes an "Editor" role with permissions to:
+- Create, read, update, and delete blog content
+- Moderate comments
+- Manage categories, tags, and authors
+
+For detailed documentation, see `BLOG_SYSTEM.md` in the project root.
 
 ## ⚙️ Deployment
 

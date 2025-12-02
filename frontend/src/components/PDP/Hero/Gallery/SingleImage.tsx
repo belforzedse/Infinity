@@ -247,12 +247,14 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                   fill
                   loader={imageLoader}
                   sizes="(max-width: 768px) 100vw, 640px"
-                  onLoadingComplete={() => setIsLoading(false)}
+                  onLoad={() => setIsLoading(false)}
                   onError={() => {
                     setBroken(true);
                     setIsLoading(false);
                   }}
                   priority={false}
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
                 />
               </div>
             </div>
@@ -267,18 +269,18 @@ export default function PDPHeroGallerySingleImage(props: Props) {
 
         {isLoading && thumb ? (
           <div
-            className="absolute inset-0 scale-105 blur-md transition-opacity duration-300"
+            className="absolute inset-0 z-0 scale-105 blur-xl transition-opacity duration-300"
             style={{
               backgroundImage: `url(${thumb})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
-              opacity: 0.9,
+              opacity: 0.6,
             }}
           />
         ) : null}
 
         {isLoading && !thumb ? (
-          <div className="absolute inset-0 animate-pulse bg-gray-100" />
+          <div className="absolute inset-0 z-0 animate-pulse bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100" />
         ) : null}
 
         <div className="absolute bottom-3 left-[50%] z-10 translate-x-[-50%]">

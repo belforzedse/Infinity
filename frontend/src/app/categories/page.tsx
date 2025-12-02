@@ -1,7 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from "next";
 import { categories } from "@/constants/categories";
 import PageContainer from "@/components/layout/PageContainer";
+import { SITE_NAME, SITE_URL } from "@/config/site";
+
+export const metadata: Metadata = {
+  title: "دسته‌بندی‌ها",
+  description: `مشاهده تمام دسته‌بندی‌های محصولات ${SITE_NAME}. سریع به دسته مورد نظر بروید و خرید خود را آغاز کنید.`,
+  alternates: {
+    canonical: `${SITE_URL}/categories`,
+  },
+  openGraph: {
+    title: `دسته‌بندی‌های ${SITE_NAME}`,
+    description: `مشاهده تمام دسته‌بندی‌های محصولات ${SITE_NAME}`,
+    url: `${SITE_URL}/categories`,
+    type: "website",
+  },
+};
 
 export default function CategoriesPage() {
   return (

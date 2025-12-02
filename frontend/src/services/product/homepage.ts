@@ -4,6 +4,14 @@ import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
 import logger from "@/utils/logger";
 
+// Common fields for product queries
+const PRODUCT_COMMON_FIELDS = [
+  "fields[0]=Title",
+  "fields[1]=Slug",
+  "fields[2]=Description",
+  "fields[3]=Status"
+].join("&");
+
 const productHasStock = (product: any): boolean => {
   const variations = product?.attributes?.product_variations?.data;
   if (!Array.isArray(variations)) return false;
@@ -31,6 +39,7 @@ export const getHomepageSections = async (): Promise<{
   favorites: ProductCardProps[];
 }> => {
   // Fetch a larger pool of products (60) to ensure we have enough for all sections after filtering
+  // Include Slug field for SEO-friendly URLs
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
@@ -39,6 +48,7 @@ export const getHomepageSections = async (): Promise<{
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
     `pagination[limit]=60`; // Fetch more to have enough after filtering
@@ -116,6 +126,7 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
     `pagination[limit]=20`;
@@ -187,6 +198,7 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
     `sort[0]=createdAt:desc&pagination[limit]=20`;
@@ -220,6 +232,7 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
     `sort[0]=AverageRating:desc&pagination[limit]=20`;
@@ -248,7 +261,7 @@ export const getRandomProducts = async (
   poolSize: number = 60,
   take: number = 20,
 ): Promise<ProductCardProps[]> => {
-  const endpoint = 
+  const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
       `filters[removedAt][$null]=true&` +
       `populate[0]=CoverImage&` +
@@ -256,6 +269,7 @@ export const getRandomProducts = async (
       `populate[2]=product_variations&` +
       `populate[3]=product_variations.product_stock&` +
       `populate[4]=product_variations.general_discounts&` +
+      `${PRODUCT_COMMON_FIELDS}&` +
       // Hide zero-price variations
       `filters[product_variations][Price][$gte]=1&` +
       `filters[product_variations][product_stock][Count][$gt]=0&` +

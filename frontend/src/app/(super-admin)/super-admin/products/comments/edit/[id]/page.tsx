@@ -4,9 +4,10 @@ import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/Content
 import { useEffect, useState } from "react";
 import type { Comment} from "./config";
 import { config } from "./config";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/services";
 import toast from "react-hot-toast";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 type CommentResponse = {
   id: string;
@@ -55,6 +56,8 @@ type Reaction = {
 };
 
 export default function Page() {
+  const router = useRouter();
+  const { roleName } = useCurrentUser();
   const [reactions, setReactions] = useState<Reaction[]>();
   const [comment, setComment] = useState<Comment>();
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +66,14 @@ export default function Page() {
   const [revalidate, setRevalidate] = useState<number>(0);
 
   const { id } = useParams();
+
+  // Redirect editors away from product pages
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
 
   useEffect(() => {
     apiClient

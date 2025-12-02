@@ -18,6 +18,7 @@
     "orders-all": "node index.js orders --all --batch-size 50",
     "users": "node index.js users",
     "users-all": "node index.js users --all --batch-size 50",
+    "blog-posts": "node index.js blog-posts",
     "all": "node index.js all",
     "dry-run": "node index.js categories --dry-run",
     "status": "node index.js status",

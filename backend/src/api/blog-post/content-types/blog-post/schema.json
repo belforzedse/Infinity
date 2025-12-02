@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "blog_posts",
+  "info": {
+    "singularName": "blog-post",
+    "pluralName": "blog-posts",
+    "displayName": "Blog Post",
+    "description": "Blog posts with rich content and SEO features"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "Slug": {
+      "type": "uid",
+      "targetField": "Title",
+      "required": true
+    },
+    "Content": {
+      "type": "richtext",
+      "required": true
+    },
+    "Excerpt": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "FeaturedImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "Status": {
+      "type": "enumeration",
+      "enum": [
+        "Draft",
+        "Published",
+        "Scheduled"
+      ],
+      "default": "Draft",
+      "required": true
+    },
+    "PublishedAt": {
+      "type": "datetime"
+    },
+    "ViewCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "MetaTitle": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "MetaDescription": {
+      "type": "text",
+      "maxLength": 160
+    },
+    "Keywords": {
+      "type": "text"
+    },
+    "blog_category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::blog-category.blog-category",
+      "inversedBy": "blog_posts"
+    },
+    "blog_tags": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::blog-tag.blog-tag",
+      "mappedBy": "blog_posts"
+    },
+    "blog_author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::blog-author.blog-author",
+      "inversedBy": "blog_posts"
+    },
+    "blog_comments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::blog-comment.blog-comment",
+      "mappedBy": "blog_post"
+    }
+  }
+}

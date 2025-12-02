@@ -92,6 +92,43 @@ export const routes: RouteInfo[] = [
     description: "Overview for discount management",
   },
 
+  // Blog Routes
+  {
+    name: "Super Admin - Blog Dashboard",
+    path: "/super-admin/blog",
+    description: "Blog management dashboard",
+  },
+  {
+    name: "Super Admin - Blog Posts",
+    path: "/super-admin/blog/posts",
+    description: "Manage blog posts",
+  },
+  {
+    name: "Super Admin - Blog Categories",
+    path: "/super-admin/blog/categories",
+    description: "Manage blog categories",
+  },
+  {
+    name: "Super Admin - Blog Tags",
+    path: "/super-admin/blog/tags",
+    description: "Manage blog tags",
+  },
+  {
+    name: "Super Admin - Blog Authors",
+    path: "/super-admin/blog/authors",
+    description: "Manage blog authors",
+  },
+  {
+    name: "Super Admin - Blog Comments",
+    path: "/super-admin/blog/comments",
+    description: "Manage blog comments",
+  },
+  {
+    name: "Blog Listing",
+    path: "/blog",
+    description: "Public blog listing page",
+  },
+
   // Product Routes
   {
     name: "Product Listing (PLP)",

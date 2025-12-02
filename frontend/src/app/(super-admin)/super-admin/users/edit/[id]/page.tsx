@@ -8,7 +8,7 @@ import { useState } from "react";
 import UserService from "@/services/user";
 import { apiClient } from "@/services";
 import { getUserActivities, UserActivity } from "@/services/user-activity";
-import Link from "next/link"; 
+import Link from "next/link";
 
 export type User = {
   id: string;
@@ -107,11 +107,29 @@ export default function Page() {
         config={config}
         data={userData}
         onSubmit={async (data) => {
+          // Format birthdate as YYYY-MM-DD string if provided
+          // Normalize birthDate by treating it as either a Date or a string/number
+          let birthDateString: string | undefined;
+          if (data.birthDate) {
+            // Create a Date object if not already a Date instance
+            const birthDate = data.birthDate instanceof Date 
+              ? data.birthDate 
+              : new Date(data.birthDate);
+            
+            // Check that the resulting Date is valid (not NaN)
+            if (!isNaN(birthDate.getTime())) {
+              const year = birthDate.getFullYear();
+              const month = String(birthDate.getMonth() + 1).padStart(2, "0");
+              const day = String(birthDate.getDate()).padStart(2, "0");
+              birthDateString = `${year}-${month}-${day}`;
+            }
+            // If invalid, birthDateString remains undefined so payload omits it
+          }
+
           const localPayload = {
             firstName: data.firstname,
             lastName: data.lastname,
-            birthDate: data.birthDate,
-            gender: data.gender === "male",
+            ...(birthDateString && { birthDate: birthDateString }),
             bio: data.bio,
             isActive: data.isActive,
             nationalCode: data.nationalCode,

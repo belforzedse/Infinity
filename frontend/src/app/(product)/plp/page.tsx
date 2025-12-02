@@ -3,16 +3,43 @@ export const revalidate = 30; // refresh product listing every 30 seconds
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import logger from "@/utils/logger";
 import type { Metadata } from "next";
+import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
+import { SITE_NAME, SITE_URL } from "@/config/site";
+import { computeDiscountForVariation } from "@/utils/discounts";
+
+interface ProductVariation {
+  attributes: {
+    SKU: string;
+    Price: string;
+    IsPublished: boolean;
+    DiscountPrice?: string;
+    product_stock?: {
+      data?: {
+        attributes: {
+          Count: number;
+        };
+      };
+    };
+    general_discounts?: {
+      data: Array<{
+        attributes: {
+          Amount: number;
+        };
+      }>;
+    };
+  };
+}
 
 interface Product {
   id: number;
   attributes: {
     Title: string;
+    Slug?: string;
     Description: string;
     Status: string;
     AverageRating: number | null;
@@ -33,28 +60,7 @@ interface Product {
       };
     };
     product_variations: {
-      data: Array<{
-        attributes: {
-          SKU: string;
-          Price: string;
-          IsPublished: boolean;
-          DiscountPrice?: string;
-          product_stock?: {
-            data?: {
-              attributes: {
-                Count: number;
-              };
-            };
-          };
-          general_discounts?: {
-            data: Array<{
-              attributes: {
-                Amount: number;
-              };
-            }>;
-          };
-        };
-      }>;
+      data: ProductVariation[];
     };
   };
 }
@@ -81,42 +87,83 @@ async function getProducts(
       // Use the search service
       const searchResults = await searchProducts(search, page, pageSize);
       return {
-        products: searchResults.data.map((item) => {
-          // Transform search API format to match product data format
-          return {
-            id: item.id,
-            attributes: {
-              Title: item.Title,
-              Description: item.Description,
-              Status: "Active",
-              CoverImage: {
-                data: {
-                  attributes: {
-                    url: item.CoverImage?.url,
+        products: searchResults.data
+          .filter((item) => {
+            // Filter out products without images
+            // CoverImage can be either ImageResponse (with url) or { data: ImageResponse | null }
+            const coverImage = item.CoverImage;
+            if (!coverImage) return false;
+
+            // Check if it's the direct format (ImageResponse with url)
+            if ('url' in coverImage && coverImage.url) return true;
+
+            // Check if it's the nested format ({ data: ImageResponse | null })
+            if ('data' in coverImage && coverImage.data?.url) return true;
+
+            return false;
+          })
+          .map((item) => {
+            // Transform search API format to match product data format
+            // Extract url from either ImageResponse or { data: ImageResponse | null } format
+            const coverImage = item.CoverImage;
+            const imageUrl = coverImage && 'url' in coverImage
+              ? coverImage.url
+              : coverImage && 'data' in coverImage
+                ? coverImage.data?.url
+                : undefined;
+
+            // Extract category title from either direct format or nested format
+            const category = item.product_main_category;
+            const categoryTitle = category && 'Title' in category
+              ? category.Title
+              : category && 'data' in category
+                ? category.data?.attributes?.Title || ""
+                : "";
+
+            return {
+              id: item.id,
+              attributes: {
+                Title: item.Title,
+                Slug: (item as { Slug?: string }).Slug || undefined,
+                Description: item.Description,
+                Status: "Active",
+                CoverImage: {
+                  data: {
+                    attributes: {
+                      url: imageUrl,
+                    },
                   },
                 },
-              },
-              product_main_category: {
-                data: {
-                  attributes: {
-                    Title: item.product_main_category?.Title || "",
-                    Slug: "",
+                product_main_category: {
+                  data: {
+                    attributes: {
+                      Title: categoryTitle,
+                      Slug: "",
+                    },
                   },
                 },
+                product_variations: {
+                  data: (item.product_variations && Array.isArray(item.product_variations)
+                    ? item.product_variations
+                    : item.product_variations && 'data' in item.product_variations
+                      ? item.product_variations.data
+                      : []
+                  ).map((variation) => {
+                    // Handle both direct variation and nested variation formats
+                    const variationData = 'attributes' in variation ? variation.attributes : variation;
+                    return {
+                      attributes: {
+                        SKU: "",
+                        Price: variationData.Price.toString(),
+                        DiscountPrice: variationData.DiscountPrice?.toString(),
+                        IsPublished: true,
+                      },
+                    };
+                  }),
+                },
               },
-              product_variations: {
-                data: item.product_variations.map((variation) => ({
-                  attributes: {
-                    SKU: "",
-                    Price: variation.Price.toString(),
-                    DiscountPrice: variation.DiscountPrice?.toString(),
-                    IsPublished: true,
-                  },
-                })),
-              },
-            },
-          };
-        }),
+            };
+          }),
         pagination: {
           ...searchResults.meta.pagination,
           total: searchResults.meta.pagination.total,
@@ -146,6 +193,10 @@ async function getProducts(
   queryParams.append("populate[2]", "product_variations");
   queryParams.append("populate[3]", "product_variations.product_stock");
   queryParams.append("populate[4]", "product_variations.general_discounts");
+  queryParams.append("fields[0]", "Title");
+  queryParams.append("fields[1]", "Slug");
+  queryParams.append("fields[2]", "Description");
+  queryParams.append("fields[3]", "Status");
 
   // Add pagination
   queryParams.append("pagination[page]", page.toString());
@@ -168,9 +219,9 @@ async function getProducts(
     queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
   }
 
-  // Availability filter
+  // Availability filter - check for actual stock (Count > 0) not just IsPublished
   if (showAvailableOnly) {
-    queryParams.append("filters[product_variations][IsPublished][$eq]", "true");
+    queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
   }
 
   // Size filter
@@ -198,8 +249,8 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
-  // Sorting
-  if (sort) {
+  // Sorting - only send to backend if not price sorting (price sorting done on frontend)
+  if (sort && sort !== "price:asc" && sort !== "price:desc") {
     queryParams.append("sort[0]", sort);
   }
 
@@ -213,8 +264,18 @@ async function getProducts(
     });
     const data = await response.json();
 
-    // Filter out products with zero price and check availability if needed
+    // Filter out products with zero price, no images, and check availability if needed
     let filteredProducts = data.data.filter((product: Product) => {
+      // Check if product has an image
+      const hasImage = !!(
+        product.attributes.CoverImage?.data?.attributes?.url ||
+        product.attributes.CoverImage?.data
+      );
+
+      if (!hasImage) {
+        return false;
+      }
+
       // Check if any variation has a valid price
       const hasValidPrice = product.attributes.product_variations?.data?.some((variation) => {
         const price = variation.attributes.Price;
@@ -252,6 +313,38 @@ async function getProducts(
           return discountPrice && discountPrice < price;
         }),
       );
+    }
+
+    // Frontend price sorting
+    if (sort === "price:asc" || sort === "price:desc") {
+      const getMinVariationPrice = (product: Product): number => {
+        const variations = product.attributes.product_variations?.data || [];
+        let minPrice = Infinity;
+
+        for (const variation of variations) {
+          // Only consider published variations with stock
+          if (!variation.attributes.IsPublished) continue;
+
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          if (typeof stockCount === "number" && stockCount <= 0) continue;
+
+          // Compute final price with discounts
+          const discountResult = computeDiscountForVariation(variation as any);
+          const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes.Price || "0");
+
+          if (finalPrice > 0 && finalPrice < minPrice) {
+            minPrice = finalPrice;
+          }
+        }
+
+        return minPrice === Infinity ? 0 : minPrice;
+      };
+
+      filteredProducts.sort((a: Product, b: Product) => {
+        const priceA = getMinVariationPrice(a);
+        const priceB = getMinVariationPrice(b);
+        return sort === "price:asc" ? priceA - priceB : priceB - priceA;
+      });
     }
 
     return {
@@ -317,8 +410,65 @@ export default async function PLPPage({
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+  const pageName = category
+    ? `خرید ${category}`
+    : search
+      ? `نتایج جستجو برای "${search}"`
+      : "فروشگاه";
+  const SITE_NAME = "فروشگاه پوشاک اینفینیتی";
+  const pageDescription = category
+    ? `خرید ${category} با بهترین قیمت و ارسال سریع از ${SITE_NAME}`
+    : search
+      ? `نتایج جستجو برای «${search}» در ${SITE_NAME}`
+      : `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}`;
+  const pageUrl = category
+    ? `${SITE_URL}/plp?category=${encodeURIComponent(category)}`
+    : search
+      ? `${SITE_URL}/plp?search=${encodeURIComponent(search)}`
+      : `${SITE_URL}/plp`;
+
+  // Map products to CollectionPageSchema format
+  const collectionItems = products.slice(0, 20).map((product: Product) => {
+    const variations = product.attributes.product_variations?.data || [];
+    const prices = variations
+      .map((v: ProductVariation) => {
+        const price = parseFloat(v.attributes.Price || "0");
+        const discountPrice = parseFloat(v.attributes.DiscountPrice || "0");
+        return discountPrice > 0 ? discountPrice : price;
+      })
+      .filter((p: number) => p > 0);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
+    const imageUrl = product.attributes.CoverImage?.data?.attributes?.url
+      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+      : undefined;
+
+    // Use slug if available, otherwise fall back to ID
+    const productSlug = product.attributes.Slug || product.id.toString();
+
+    return {
+      id: product.id,
+      title: product.attributes.Title,
+      url: `/pdp/${productSlug}`,
+      image: imageUrl,
+      price: minPrice,
+      currency: "IRR",
+    };
+  });
+
   return (
     <PageContainer variant="wide" className="space-y-6 pb-20 pt-6">
+      {/* CollectionPage Schema for SEO */}
+      {products.length > 0 && (
+        <CollectionPageSchema
+          name={pageName}
+          description={pageDescription}
+          url={pageUrl}
+          items={collectionItems}
+          itemCount={pagination.total}
+        />
+      )}
+
       {!isSearchResults && <PLPHeroBanner category={category} />}
 
       <PLPList
@@ -341,12 +491,13 @@ export async function generateMetadata({
   const search = typeof params.search === "string" ? params.search : undefined;
 
   const isSearch = !!search;
-  const baseTitle = "فروشگاه | اینفینیتی استور";
+  const baseTitle = `فروشگاه | ${SITE_NAME}`;
 
   if (isSearch) {
     const q = search?.slice(0, 60) || "";
-    const title = `نتایج جستجو برای "${q}" | اینفینیتی استور`;
-    const description = `مشاهده نتایج جستجو برای «${q}» در فروشگاه اینفینیتی استور. جدیدترین و محبوب‌ترین محصولات.`;
+    const title = `نتایج جستجو برای "${q}" | ${SITE_NAME}`;
+    const description = `مشاهده نتایج جستجو برای «${q}» در ${SITE_NAME}. جدیدترین و محبوب‌ترین محصولات.`;
+    const canonicalUrl = `${SITE_URL}/plp${q ? `?search=${encodeURIComponent(q)}` : ""}`;
     return {
       title,
       description,
@@ -354,17 +505,18 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
-        url: `/plp?search=${encodeURIComponent(q)}`,
+        url: canonicalUrl,
       },
       alternates: {
-        canonical: `/plp${q ? `?search=${encodeURIComponent(q)}` : ""}`,
+        canonical: canonicalUrl,
       },
     };
   }
 
   if (category) {
-    const title = `خرید ${category} | اینفینیتی استور`;
-    const description = `خرید ${category} با بهترین قیمت و ارسال سریع از اینفینیتی استور. جدیدترین محصولات ${category}.`;
+    const title = `خرید ${category} | ${SITE_NAME}`;
+    const description = `خرید ${category} با بهترین قیمت و ارسال سریع از ${SITE_NAME}. جدیدترین محصولات ${category}.`;
+    const canonicalUrl = `${SITE_URL}/plp?category=${encodeURIComponent(category)}`;
     return {
       title,
       description,
@@ -372,17 +524,17 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
-        url: `/plp?category=${encodeURIComponent(category)}`,
+        url: canonicalUrl,
       },
       alternates: {
-        canonical: `/plp?category=${encodeURIComponent(category)}`,
+        canonical: canonicalUrl,
       },
     };
   }
 
   return {
     title: baseTitle,
-    description: "مشاهده و خرید انواع محصولات با بهترین قیمت در اینفینیتی استور.",
-    alternates: { canonical: "/plp" },
+    description: `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}.`,
+    alternates: { canonical: `${SITE_URL}/plp` },
   };
 }

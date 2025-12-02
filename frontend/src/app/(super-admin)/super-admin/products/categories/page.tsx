@@ -7,10 +7,22 @@ import { ENDPOINTS } from "@/constants/api";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 import { useEffect, useMemo, useCallback, useState } from "react";
 import { useQueryState } from "nuqs";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function CategoriesPage() {
   useFreshDataOnPageLoad();
+  const router = useRouter();
+  const { roleName } = useCurrentUser();
   const [expandedParentIds, setExpandedParentIds] = useState<Set<string>>(new Set());
+
+  // Redirect editors away from product pages
+  useEffect(() => {
+    const normalizedRole = (roleName ?? "").toLowerCase().trim();
+    if (normalizedRole === "editor") {
+      router.replace("/super-admin/blog");
+    }
+  }, [roleName, router]);
 
   const toggleParentExpansion = useCallback((id: string) => {
     setExpandedParentIds((prev) => {

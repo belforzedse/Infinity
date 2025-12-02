@@ -2,6 +2,7 @@
 
 import Desktop from "./Desktop";
 import Mobile from "./Mobile";
+import Tablet from "./Tablet";
 
 type Props = {
   children: React.ReactNode;
@@ -26,11 +27,14 @@ type Props = {
 export default function ContentWrapper(props: Props) {
   return (
     <div className="w-full">
-      <div className="hidden md:block">
-        <Desktop {...props} />
-      </div>
       <div className="block md:hidden">
         <Mobile {...props} />
+      </div>
+      <div className="hidden md:block lg:hidden">
+        <Tablet {...props} />
+      </div>
+      <div className="hidden lg:block">
+        <Desktop {...props} />
       </div>
     </div>
   );

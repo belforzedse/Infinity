@@ -251,10 +251,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             ? Math.round(((basePrice - finalUnitPrice) / basePrice) * 100)
             : undefined;
 
+          // Use product Slug if available, otherwise fall back to ID
+          const productSlug = (product as { Slug?: string }).Slug || String(product.id);
+
           return {
             id: compositeId,
             cartItemId: String(item.id),
-            slug: `${variation.SKU || product.id}-${variation.id}`,
+            slug: productSlug,
             productId,
             variationId: String(variation.id),
             name: product.Title,

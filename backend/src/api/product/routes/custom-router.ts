@@ -10,5 +10,15 @@ export default {
         middlewares: [], // No authentication required for product search
       },
     },
+    {
+      method: "GET",
+      path: "/products/by-slug/:slug",
+      handler: "product.findBySlug",
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [], // No authentication required for product lookup by slug
+      },
+    },
   ],
 };
