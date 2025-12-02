@@ -1,0 +1,59 @@
+---
+description: This rule details the structure and components of the Product Detail Page (PDP). Use this rule when working on product display features, gallery implementations, product variation selectors, related product recommendations, or any aspect of the detailed product view.
+globs: 
+alwaysApply: false
+---
+# Product Detail Page (PDP) Layout
+
+**Description**: This rule details the structure and components of the Product Detail Page (PDP). Use this rule when working on product display features, gallery implementations, product variation selectors, related product recommendations, or any aspect of the detailed product view.
+
+The PDP displays comprehensive information about a specific product:
+
+## Main Structure
+- The main component is in [src/app/(product)/pdp/[slug]/page.tsx](mdc:src/app/(product)/pdp/[slug]/page.tsx)
+- Uses dynamic routing with the product slug as parameter
+- Organized as a vertical flex column with spacing between sections
+
+## Key Components
+1. **Breadcrumb** - Navigation path showing category hierarchy
+2. **Hero** - Main product showcase section
+3. **OffersList** - Related product recommendations
+4. **PDPComment** - Product reviews and ratings
+5. **PDPHeroInfoFAQItem** - SEO description and product information
+
+## Hero Section Layout
+- The main PDPHero component ([src/components/PDP/Hero/index.tsx](mdc:src/components/PDP/Hero/index.tsx)) contains:
+  - **PDPHeroGallery** - Image gallery with thumbnails and main view
+  - **PDPHeroInfo** - Product details and purchase options
+
+## Product Information Structure
+- Product title shown in different positions for mobile/desktop layouts
+- Product images and videos in a gallery with thumbnails
+- Product variations:
+  - Color options with swatches
+  - Size options with detailed measurements
+- Pricing information with original and discounted prices
+- Product description and specifications
+- Additional product meta-information (cleaning, returns)
+- Add to cart functionality
+
+## Related Products
+- Multiple "OffersList" sections with different themes:
+  - Style suggestions (e.g., "Winter Style")
+  - Related products ("You May Also Like")
+- Shows horizontal scrolling product cards
+
+## User Feedback Section
+- Rating summary with average score
+- Review count indicator
+- Comments/reviews from customers
+
+## Responsive Design
+- Mobile: Stacked layout with title at the top
+- Desktop: Side-by-side layout with gallery on left, info on right
+- Uses `flex-col md:flex-row` pattern for responsive layouts
+
+## SEO Elements
+- Structured data for product information
+- SEO optimized title and description section at bottom
+

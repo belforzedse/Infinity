@@ -1,0 +1,195 @@
+---
+description: This rule documents the patterns and utilities for interacting with the Strapi API in the Infinity Store application.
+globs: 
+alwaysApply: false
+---
+# API Integration and Strapi Communication
+
+This rule documents the patterns and utilities for interacting with the Strapi API in the Infinity Store application.
+
+## API Constants
+
+The [constants/api.ts](mdc:src/constants/api.ts) file defines all important constants for API communication:
+
+- `API_BASE_URL`: The base URL for all API requests
+- `STRAPI_TOKEN`: Authentication token for Strapi API access
+- `ENDPOINTS`: Object containing all API endpoint paths organized by feature
+- `HTTP_STATUS`: Standard HTTP status codes
+- `ERROR_MESSAGES`: Standard error messages for API responses
+
+## API Client
+
+The core API client is implemented in [services/index.ts](mdc:src/services/index.ts) as a singleton class that provides:
+
+- HTTP methods: `get()`, `post()`, `put()`, `delete()`
+- Authentication header management
+- Error handling and timeout management
+- Response formatting
+- Integrated authentication error handling
+
+## Authentication Flow
+
+1. All public API endpoints that need authentication should include the Strapi token:
+
+```typescript
+const response = await apiClient.get(endpoint, {
+  headers: {
+    Authorization: `Bearer ${STRAPI_TOKEN}`,
+  },
+});
+```
+
+2. For user-specific endpoints, the auth token is retrieved from localStorage:
+
+```typescript
+// This happens automatically in the ApiClient class
+private getAuthToken(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("accessToken");
+  }
+  return null;
+}
+```
+
+3. Authentication errors (401, 403) and non-admin access are handled automatically by the ApiClient with the centralized auth error handler. See [authentication-handling.mdc](mdc:.cursor/rules/authentication-handling.mdc) for details.
+
+## Data Fetching Patterns
+
+### Service Layer Pattern
+
+Most API interactions should follow the service layer pattern:
+
+1. Create a dedicated service file in the appropriate directory
+2. Import the API client and constants
+3. Define TypeScript interfaces for request/response data
+4. Export async functions that use the API client
+5. Handle errors and return properly typed responses
+
+Example:
+
+```typescript
+import { apiClient } from "@/services";
+import { ENDPOINTS, STRAPI_TOKEN } from "@/constants/api";
+import { ApiResponse } from "@/types/api";
+
+export const getData = async (id: string): Promise<ApiResponse<DataType>> => {
+  const endpoint = `${ENDPOINTS.FEATURE.ENDPOINT}/${id}`;
+  
+  const response = await apiClient.get<ApiResponse<DataType>>(endpoint, {
+    headers: {
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+  });
+  
+  return response.data;
+};
+```
+
+### Direct Fetch Pattern
+
+For simpler cases or when the service layer isn't needed:
+
+```typescript
+export async function getFooterData(): Promise<FooterData> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${STRAPI_TOKEN}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.data.attributes;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    // Return fallback/empty data
+  }
+}
+```
+
+## Strapi Content Type Population
+
+When fetching related data from Strapi, use the populate parameter:
+
+```typescript
+// For basic population
+const endpoint = `/products/${id}?populate=product_variations`;
+
+// For deep population with multiple fields
+const endpoint = `/footer?populate[0]=First.Links&populate[1]=Second.Links`;
+
+// For complex filtering and pagination
+const endpoint = `/products?populate=*&filters[Status][$eq]=Active&pagination[page]=1&pagination[pageSize]=10`;
+```
+
+## Error Handling
+
+Always implement proper error handling for API calls:
+
+```typescript
+try {
+  const data = await apiService.getData(id);
+  // Process successful response
+} catch (error) {
+  // Authentication errors are automatically handled by the centralized handler
+  // Other errors should be handled manually
+  if (error.status === 404) {
+    // Handle not found error
+  } else {
+    // Handle general error
+    console.error("API error:", error);
+  }
+}
+```
+
+For authentication-specific error handling, use the centralized utility:
+
+```typescript
+import { handleAuthErrors } from "@/utils/auth";
+
+try {
+  const data = await apiService.getData(id);
+  // Check isAdmin status if needed
+  handleAuthErrors(null, data.isAdmin);
+} catch (error) {
+  handleAuthErrors(error);
+  // Handle other errors
+}
+```
+
+## Usage in Components
+
+In React components, use the useEffect hook for data fetching:
+
+```typescript
+const [data, setData] = useState<DataType | null>(null);
+const [loading, setLoading] = useState<boolean>(true);
+const [error, setError] = useState<string | null>(null);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const result = await apiService.getData(id);
+      setData(result);
+    } catch (err) {
+      setError("Failed to fetch data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [id]);
+```
+

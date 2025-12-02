@@ -1,0 +1,79 @@
+---
+description: This rule documents the Product Detail Page (PDP) schema, component structure, and functionality in the Infinity Store application.
+globs: 
+alwaysApply: false
+---
+# PDP Schema and Structure
+
+This rule documents the Product Detail Page (PDP) schema, component structure, and functionality in the Infinity Store application.
+
+## PDP Route and Component Structure
+
+The main PDP component is at [src/app/(product)/pdp/[slug]/page.tsx](mdc:src/app/(product)/pdp/[slug]/page.tsx), which uses dynamic routing with the product slug parameter.
+
+The PDP is organized as a vertical flex column with spacing between sections:
+
+```
+PDP Page
+├── Breadcrumb - Navigation path showing category hierarchy
+├── Hero Section
+│   ├── PDPHeroGallery - Product images and video gallery
+│   └── PDPHeroInfo - Product details and purchase options
+├── OffersList (Multiple) - Related product recommendations
+├── PDPComment - Product reviews and ratings
+└── PDPHeroInfoFAQItem - SEO description and product information
+```
+
+## Hero Section Components
+
+The Hero section is the most complex part of the PDP, handled by [src/components/PDP/Hero/index.tsx](mdc:src/components/PDP/Hero/index.tsx).
+
+### Hero Gallery
+
+The [src/components/PDP/Hero/Gallery/index.tsx](mdc:src/components/PDP/Hero/Gallery/index.tsx) component displays product images and videos with:
+- Thumbnail gallery for quick selection
+- Main image/video view
+- Next/previous navigation
+- Support for both image and video content
+
+### Hero Info
+
+The [src/components/PDP/Hero/Info/index.tsx](mdc:src/components/PDP/Hero/Info/index.tsx) component shows product information:
+- Product title and category
+- Pricing with original and discounted prices
+- Color options with visual swatches
+- Size options with detailed measurements
+- Add to cart functionality
+- Product specifications and descriptions
+
+## Product Data Schema
+
+The product data model is defined in [src/services/product/product.ts](mdc:src/services/product/product.ts) and includes:
+
+```typescript
+interface ProductDetail {
+  id: number;
+  attributes: {
+    Title: string;
+    Description: string;
+    Status: 'Active' | 'InActive';
+    AverageRating?: number;
+    RatingCount?: number;
+    CleaningTips?: string;
+    ReturnConditions?: string;
+    CoverImage: { data: ProductMedia };
+    Media: { data: ProductMedia[] };
+    product_variations: { data: Array<ProductVariation> };
+    product_main_category: { data: ProductCategory | null };
+    // ... other fields
+  };
+}
+```
+
+## Responsive Design
+
+The PDP uses responsive design patterns:
+- Mobile: Stacked layout with title at the top
+- Desktop: Side-by-side layout with gallery on left, info on right
+- Uses `flex-col md:flex-row` pattern for responsive layouts
+

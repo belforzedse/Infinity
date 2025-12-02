@@ -1,0 +1,59 @@
+import { apiClient } from "@/services";
+import { Switch } from "@headlessui/react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+export default function SuperAdminTableCellSwitch({
+  status: initialStatus,
+  onChange,
+  disabled = false,
+  apiUrl,
+}: {
+  status: "active" | "inactive";
+  onChange?: (checked: boolean) => void;
+  apiUrl?: string;
+  disabled?: boolean;
+}) {
+  const [status, setStatus] = useState(initialStatus);
+
+  useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
+
+  return (
+    <div dir="ltr">
+      <Switch
+        checked={status === "active"}
+        onChange={
+          apiUrl
+            ? (checked) => {
+                apiClient
+                  .put(apiUrl, {
+                    data: {
+                      IsActive: checked,
+                    },
+                  })
+                  .then(() => {
+                    setStatus(checked ? "active" : "inactive");
+                    toast.success("وضعیت تغییر کرد");
+                  })
+                  .catch(() => {
+                    toast.error("مشکلی در تغییر وضعیت رخ داد");
+                  });
+              }
+            : onChange
+        }
+        disabled={disabled}
+        className={`group inline-flex h-4 w-6 items-center rounded-full transition md:h-6 md:w-11 ${
+          disabled ? "cursor-not-allowed bg-gray-300" : "bg-gray-200 data-[checked]:bg-green-500"
+        }`}
+      >
+        <span
+          className={`size-3 translate-x-0.5 rounded-full transition md:size-4 md:translate-x-1 ${
+            disabled ? "bg-gray-400" : "bg-white"
+          } group-data-[checked]:translate-x-2.5 md:group-data-[checked]:translate-x-6`}
+        />
+      </Switch>
+    </div>
+  );
+}

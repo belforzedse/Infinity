@@ -1,0 +1,45 @@
+---
+description: Strapi Custom API, containing Auth API, Cart API, Order API, Local User API, Product API from Strapi Backend
+globs: 
+alwaysApply: false
+---
+# Custom APIs
+
+## Authentication
+
+- [Auth API](mdc:src/api/auth/controllers/auth.ts) - Authentication functions
+  - OTP generation and verification
+  - Login and account management
+  - Password management
+  - User self-information
+
+## Shopping Cart
+
+- [Cart API](mdc:src/api/cart/controllers/cart.ts) - Shopping cart functionality
+  - Add/remove items from cart
+  - Update quantities
+  - Apply discounts
+  - Cart checkout process
+
+## Order Management
+
+- [Order API](mdc:src/api/order/controllers/order.ts) - Order management
+  - Order creation and processing
+  - Order status updates
+  - Payment processing
+  - Order history and tracking
+
+## User Management
+
+- [Local User API](mdc:src/api/local-user/controllers/local-user.ts) - User account management
+  - User registration and profile management
+  - Account settings and preferences
+  - Address book management
+
+## Product Management
+
+- [Product API](mdc:src/api/product/controllers/product.ts) - Product management
+  - Product search and filtering
+  - Product recommendations
+  - Product review management
+
