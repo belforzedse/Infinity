@@ -114,6 +114,7 @@ coverage
 ############################
 
 .env
+.env.local
 main.env
 dev.env
 license.txt
