@@ -1,0 +1,127 @@
+---
+description: On-demand revalidation setup for blog posts - instant cache invalidation when content changes
+globs: 
+alwaysApply: false
+---
+
+# On-Demand Revalidation for Blog Posts
+
+## Overview
+
+This system implements **on-demand revalidation** for blog posts, providing instant cache updates when content is published or modified. This is superior to time-based ISR because:
+
+✅ **Instant Updates** - New posts appear immediately when published  
+✅ **No Unnecessary Regeneration** - Only regenerates when content actually changes  
+✅ **Better Performance** - Avoids time-based regeneration cycles  
+✅ **Lower Server Load** - Regenerates only when needed  
+✅ **Better SEO** - Fresh content available immediately  
+
+## How It Works
+
+1. **Strapi Lifecycle Hook** (`backend/src/api/blog-post/content-types/blog-post/lifecycles.ts`)
+   - Triggers when blog posts are created, updated, or deleted
+   - Calls Next.js revalidation API endpoint
+
+2. **Next.js Revalidation API** (`frontend/src/app/api/revalidate/route.ts`)
+   - Protected by `REVALIDATION_SECRET` token
+   - Invalidates cache for specific blog post pages
+   - Also revalidates blog listing and sitemap
+
+3. **Blog Post Pages** (`frontend/src/app/(blog)/[slug]/page.tsx`)
+   - Uses 1-hour fallback revalidation (on-demand is primary)
+   - Pages are regenerated instantly when revalidation API is called
+
+## Setup
+
+### Backend Environment Variables
+
+Add to your Strapi `.env` file:
+
+```bash
+# Revalidation secret (must match frontend)
+REVALIDATION_SECRET=your-secure-random-token-here
+
+# Frontend URLs (optional - will auto-detect from NODE_ENV)
+NEXTJS_STAGING_URL=https://staging.infinitycolor.org
+NEXTJS_PRODUCTION_URL=https://infinitycolor.org
+NEXTJS_REVALIDATION_URL=https://staging.infinitycolor.org  # Primary URL
+```
+
+### Frontend Environment Variables
+
+Add to your Next.js `.env` file:
+
+```bash
+# Revalidation secret (must match backend)
+REVALIDATION_SECRET=your-secure-random-token-here
+```
+
+**Important**: Use the same secret in both backend and frontend!
+
+## Usage
+
+### Automatic (Recommended)
+
+The system works automatically:
+- When a blog post is **published** → Page is revalidated instantly
+- When a blog post is **updated** → Page is revalidated instantly  
+- When a blog post is **deleted** → Blog listing is revalidated
+
+### Manual Revalidation
+
+You can also trigger revalidation manually:
+
+```bash
+curl -X POST https://staging.infinitycolor.org/api/revalidate \
+  -H "Authorization: Bearer YOUR_REVALIDATION_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"path": "girls-cap-is-for-you-create-your-own-style", "type": "blog-post"}'
+```
+
+## Fallback Behavior
+
+- If revalidation API fails → Pages still work (1-hour ISR fallback)
+- If `REVALIDATION_SECRET` not configured → System logs warning but continues
+- If frontend URL unreachable → System logs error but doesn't break Strapi operations
+
+## Troubleshooting
+
+### Revalidation Not Working
+
+1. **Check environment variables**:
+   ```bash
+   # Backend
+   echo $REVALIDATION_SECRET
+   echo $NEXTJS_REVALIDATION_URL
+   
+   # Frontend  
+   echo $REVALIDATION_SECRET
+   ```
+
+2. **Check Strapi logs**:
+   - Look for `[Blog Post Lifecycle]` messages
+   - Should see "Revalidation triggered" on publish/update
+
+3. **Test API endpoint**:
+   ```bash
+   curl -X POST https://staging.infinitycolor.org/api/revalidate \
+     -H "Authorization: Bearer YOUR_SECRET" \
+     -H "Content-Type: application/json" \
+     -d '{"path": "test-slug", "type": "blog-post"}'
+   ```
+
+4. **Verify lifecycle hook is loaded**:
+   - Check Strapi startup logs
+   - Lifecycle hooks in `content-types/{type}/lifecycles.ts` are auto-loaded
+
+## Security
+
+- **Token-based authentication** - Only requests with valid `REVALIDATION_SECRET` can trigger revalidation
+- **No public access** - API route requires Bearer token
+- **Timeout protection** - 5-second timeout prevents hanging requests
+
+## Performance
+
+- **Non-blocking** - Revalidation happens asynchronously, doesn't slow down Strapi operations
+- **Multiple environments** - Supports staging and production simultaneously
+- **Error handling** - Failures are logged but don't break content operations

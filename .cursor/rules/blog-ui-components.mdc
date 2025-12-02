@@ -1,0 +1,262 @@
+# Blog UI Components - Cursor Rules
+
+## Overview
+
+This document provides guidelines for working with the blog UI components in the Infinity Store frontend application. These components follow the Figma design specifications and maintain consistency with the existing product card patterns.
+
+## Components
+
+### BlogCard (Default/Desktop)
+
+**File**: `frontend/src/components/Blog/BlogCard.tsx`
+
+**Purpose**: Default blog card component for desktop and larger screens.
+
+**Design Specifications**:
+- Width: 328px (max-width with responsive behavior)
+- Vertical layout with image on top
+- White background with pink/50 border
+- Rounded corners (24px)
+- Hover effects with shadow and border color change
+
+**Usage**:
+```tsx
+import { BlogCard } from "@/components/Blog";
+
+<BlogCard 
+  post={blogPost} 
+  priority={false} 
+  className="optional-classes" 
+/>
+```
+
+**Props**:
+- `post: BlogPost` - Blog post data from the API
+- `priority?: boolean` - For image loading optimization (default: false)
+- `className?: string` - Additional CSS classes
+
+### BlogCardMobile
+
+**File**: `frontend/src/components/Blog/BlogCardMobile.tsx`
+
+**Purpose**: Mobile variant of the blog card with horizontal layout.
+
+**Design Specifications**:
+- Width: 361px (max-width with responsive behavior)
+- Horizontal layout with image on the right
+- Smaller image size (110x110px)
+- Content area takes remaining space
+- Same styling as BlogCard but adapted for mobile
+
+**Usage**:
+```tsx
+import { BlogCardMobile } from "@/components/Blog";
+
+<BlogCardMobile 
+  post={blogPost} 
+  priority={false} 
+  className="optional-classes" 
+/>
+```
+
+### BlogCarousel
+
+**File**: `frontend/src/components/Blog/BlogCarousel.tsx`
+
+**Purpose**: Responsive carousel component for displaying multiple blog posts.
+
+**Design Specifications**:
+- Desktop: 2-4 cards per row with pagination navigation
+- Mobile: Vertical stack of 4 cards with "مشاهده همه" button
+- Uses existing PaginationDesktop component
+- Responsive breakpoints: md (768px) and lg (1024px)
+
+**Usage**:
+```tsx
+import { BlogCarousel } from "@/components/Blog";
+
+<BlogCarousel
+  posts={blogPosts}
+  title="اینفینیتی مگ"
+  viewAllHref="/blog"
+  className="optional-classes"
+/>
+```
+
+**Props**:
+- `posts: BlogPost[]` - Array of blog posts to display
+- `title: string` - Section title
+- `viewAllHref?: string` - Link for "view all" button (default: "/blog")
+- `className?: string` - Additional CSS classes
+
+## Design System Integration
+
+### Colors
+- Background: `bg-white`
+- Border: `border-pink-50` (normal), `border-pink-100` (hover)
+- Text: `text-neutral-700` (titles), `text-neutral-400` (metadata)
+- Links: `text-neutral-800` with `hover:text-pink-600`
+
+### Typography
+- Title: `text-base` (BlogCard), `text-sm` (BlogCardMobile)
+- Metadata: `text-xs`
+- Line heights follow Figma specifications: `leading-[2.17]`, `leading-[1.74]`, etc.
+
+### Spacing
+- Padding: `p-3` (BlogCard), `p-2` (BlogCardMobile)
+- Gaps: `gap-1`, `gap-2`, `gap-4` as appropriate
+- Margins: `mb-2`, `mb-3` for consistent spacing
+
+### Responsive Behavior
+- BlogCard: `max-w-[328px]` with `w-full` for flexibility
+- BlogCardMobile: `max-w-[361px]` with `w-full` for flexibility
+- BlogCarousel: `grid-cols-2 lg:grid-cols-4` on desktop, vertical stack on mobile
+- Breakpoints: `md:` (768px+), `lg:` (1024px+)
+
+## Integration Points
+
+### Home Page
+The BlogCarousel is integrated into the home page (`frontend/src/app/(product)/page.tsx`) in the blog section:
+
+```tsx
+{latestBlogPosts.length > 0 && (
+  <section>
+    <Reveal variant="fade-up" duration={700}>
+      <BlogCarousel
+        posts={latestBlogPosts}
+        title="اینفینیتی مگ"
+        viewAllHref="/blog"
+      />
+    </Reveal>
+  </section>
+)}
+```
+
+### Blog Listing Page
+The BlogCarousel is also used on the blog listing page (`frontend/src/app/(blog)/blog/page.tsx`) to showcase latest posts before the main blog list.
+
+## Data Requirements
+
+### BlogPost Interface
+```typescript
+interface BlogPost {
+  id: number;
+  Title: string;
+  Slug: string;
+  Excerpt?: string;
+  FeaturedImage?: {
+    url: string;
+    formats?: {
+      small?: { url: string };
+      medium?: { url: string };
+    };
+  };
+  blog_category?: {
+    Name: string;
+    Slug: string;
+  };
+  PublishedAt?: string;
+  createdAt: string;
+}
+```
+
+## Performance Considerations
+
+### Image Optimization
+- Uses `BlurImage` component for optimized loading
+- Proper `sizes` attribute for responsive images
+- `priority` prop for above-the-fold images
+- Custom `imageLoader` for CDN optimization
+
+### Responsive Images
+- BlogCard: `sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 328px"`
+- BlogCardMobile: `sizes="110px"`
+
+### Loading States
+- Components handle missing images gracefully
+- Proper fallbacks for missing data
+- Smooth transitions and hover effects
+
+## Accessibility
+
+### Keyboard Navigation
+- All interactive elements are focusable
+- Proper focus indicators with `focus-visible:ring-2`
+- Semantic HTML structure with `<article>` and proper headings
+
+### Screen Readers
+- Proper alt text for images
+- Semantic markup with appropriate ARIA labels
+- RTL text direction support
+
+### Color Contrast
+- All text meets WCAG contrast requirements
+- Focus indicators are clearly visible
+- Hover states provide clear feedback
+
+## RTL Support
+
+All components are designed with RTL (Right-to-Left) support:
+- Text alignment: `text-right`
+- Flex direction and justification appropriate for RTL
+- Icon positioning considers RTL layout
+- Proper gap and margin handling
+
+## Common Patterns
+
+### Error Handling
+```tsx
+if (!posts || posts.length === 0) {
+  return null;
+}
+```
+
+### Image URL Processing
+```tsx
+const getImageUrl = () => {
+  if (!post.FeaturedImage) return null;
+  const url = post.FeaturedImage.formats?.medium?.url || 
+              post.FeaturedImage.formats?.small?.url || 
+              post.FeaturedImage.url;
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${IMAGE_BASE_URL}${url}`;
+};
+```
+
+### Date Formatting
+```tsx
+{new Date(post.PublishedAt || post.createdAt).toLocaleDateString("fa-IR")}
+```
+
+## Testing Considerations
+
+### Responsive Testing
+- Test on mobile (< 768px), tablet (768px-1024px), and desktop (1024px+)
+- Verify carousel pagination works correctly
+- Check image loading and sizing
+
+### Content Testing
+- Test with various content lengths (long/short titles and excerpts)
+- Verify proper text truncation with `line-clamp-2`
+- Test with missing images or metadata
+
+### Performance Testing
+- Monitor image loading performance
+- Check carousel smooth transitions
+- Verify hover effects don't cause layout shifts
+
+## Future Enhancements
+
+### Potential Improvements
+1. **Skeleton Loading**: Add skeleton components for loading states
+2. **Infinite Scroll**: Implement infinite scrolling for blog listing
+3. **Search Integration**: Add search functionality to carousel
+4. **Animation Library**: Consider adding more sophisticated animations
+5. **Lazy Loading**: Implement intersection observer for better performance
+
+### Maintenance Notes
+- Keep components in sync with Figma design updates
+- Monitor performance metrics for image loading
+- Update responsive breakpoints as needed
+- Maintain consistency with product card patterns

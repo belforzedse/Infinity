@@ -6,6 +6,13 @@ on:
       - main
       - dev
       - experimental
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-cicd.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-cicd.yml'
   workflow_dispatch:
 
 env:
@@ -29,8 +36,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
+        working-directory: frontend
         run: npm ci --legacy-peer-deps
 
       - name: Resolve build environment
@@ -60,15 +69,15 @@ jobs:
           set -euo pipefail
           case "${GITHUB_REF_NAME}" in
             dev)
-              DOCKERFILE="dev.Dockerfile"
+              DOCKERFILE="frontend/dev.Dockerfile"
               RUNTIME_TAG="dev"
               ;;
             experimental)
-              DOCKERFILE="main.Dockerfile"
+              DOCKERFILE="frontend/main.Dockerfile"
               RUNTIME_TAG="experimental"
               ;;
             *)
-              DOCKERFILE="main.Dockerfile"
+              DOCKERFILE="frontend/main.Dockerfile"
               RUNTIME_TAG="main"
               ;;
           esac
@@ -88,7 +97,8 @@ jobs:
             --build-arg NEXT_PUBLIC_SITE_URL="${{ steps.env.outputs.site }}" \
             --build-arg GITHUB_SHA="${{ github.sha }}" \
             -f ${{ steps.meta.outputs.dockerfile }} \
-            -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} .
+            -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+            frontend
           docker tag $REGISTRY/$IMAGE_NAME:${{ github.sha }} $REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}
           docker push $REGISTRY/$IMAGE_NAME:${{ github.sha }}
           docker push $REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.runtime_tag }}
@@ -101,7 +111,7 @@ jobs:
           username: ${{ secrets.PROD_FRONTEND_USER }}
           key: ${{ secrets.PROD_FRONTEND_SSH_KEY }}
           port: ${{ secrets.PROD_FRONTEND_PORT || '22' }}
-          source: docker-compose.yml
+          source: frontend/docker-compose.yml
           target: /opt/infinity/frontend/
 
       - name: Deploy to production
@@ -135,7 +145,7 @@ jobs:
           username: ${{ secrets.STAGING_FRONTEND_USER }}
           key: ${{ secrets.STAGING_FRONTEND_SSH_KEY }}
           port: ${{ secrets.STAGING_FRONTEND_PORT || '22' }}
-          source: docker-compose.yml
+          source: frontend/docker-compose.yml
           target: /opt/infinity/frontend/
 
       - name: Deploy to staging
@@ -169,7 +179,7 @@ jobs:
           username: ${{ secrets.EXPERIMENTAL_FRONTEND_USER }}
           key: ${{ secrets.EXPERIMENTAL_FRONTEND_SSH_KEY }}
           port: ${{ secrets.EXPERIMENTAL_FRONTEND_PORT || '22' }}
-          source: docker-compose.yml
+          source: frontend/docker-compose.yml
           target: /opt/infinity/frontend/
 
       - name: Deploy to experimental
@@ -194,3 +204,4 @@ jobs:
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
             fi
+
