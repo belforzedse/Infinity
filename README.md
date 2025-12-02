@@ -73,10 +73,8 @@ See individual directories for detailed setup and deployment instructions.
 
 ## Contributing
 
-This is a private repository. All changes must go through Pull Requests for `main` and `dev` branches.
+All changes must go through Pull Requests for `main` and `dev` branches.
 
-## License
 
-Private - All Rights Reserved
 
 
