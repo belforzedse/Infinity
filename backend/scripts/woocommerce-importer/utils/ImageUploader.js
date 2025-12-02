@@ -305,24 +305,33 @@ class ImageUploader {
    * Generate a clean filename for the image (preserves original extension)
    */
   generateFileName(imageUrl, prefix) {
+    const sanitizeSegment = (value, fallback) => {
+      const cleaned = (value || "")
+        .toString()
+        .normalize("NFKD")
+        .replace(/[^\w-]+/g, "-") // keep alnum/underscore/hyphen
+        .replace(/-+/g, "-")
+        .replace(/^[-_]+|[-_]+$/g, "")
+        .toLowerCase()
+        .slice(0, 30);
+      return cleaned || fallback;
+    };
+
     try {
       const url = new URL(imageUrl);
       const originalName = path.basename(url.pathname);
-      const ext = path.extname(originalName) || '.jpg';
-      const baseName = path.basename(originalName, ext);
+      const ext = (path.extname(originalName) || ".jpg").toLowerCase();
 
-      // Clean the filename
-      const cleanBaseName = baseName
-        .replace(/[^a-zA-Z0-9\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF-_]/g, '-')
-        .replace(/--+/g, '-')
-        .replace(/^-|-$/g, '');
-
+      const safePrefix = sanitizeSegment(prefix, "blog-media");
       const timestamp = Date.now();
-      return `${prefix}-${cleanBaseName}-${timestamp}${ext}`;
+      const rand = Math.random().toString(36).slice(2, 8);
+
+      return `${safePrefix}-${timestamp}-${rand}${ext}`;
     } catch (error) {
-      // Fallback filename
       const timestamp = Date.now();
-      return `${prefix}-image-${timestamp}.jpg`;
+      const safePrefix = sanitizeSegment(prefix, "blog-media");
+      const rand = Math.random().toString(36).slice(2, 8);
+      return `${safePrefix}-${timestamp}-${rand}.jpg`;
     }
   }
 

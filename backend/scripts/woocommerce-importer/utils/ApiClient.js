@@ -17,12 +17,12 @@ class BaseApiClient {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
     const minDelay = this.config.rateLimiting?.delayBetweenRequests || 0;
-    
+
     if (timeSinceLastRequest < minDelay) {
       const delay = minDelay - timeSinceLastRequest;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
-    
+
     this.lastRequestTime = Date.now();
   }
 
@@ -31,22 +31,42 @@ class BaseApiClient {
    */
   async retryRequest(requestFn, maxRetries = 3, retryDelay = 2000) {
     let lastError;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await requestFn();
       } catch (error) {
         lastError = error;
-        
+
+        // Check if it's a DNS/network error
+        const isNetworkError =
+          error.code === "ENOTFOUND" ||
+          error.code === "ECONNREFUSED" ||
+          error.code === "ETIMEDOUT" ||
+          error.message?.includes("getaddrinfo ENOTFOUND");
+
+        if (isNetworkError && attempt === 1) {
+          this.logger.error(
+            `🌐 Network/DNS Error: Cannot resolve hostname. Please check:\n` +
+              `   1. Internet connectivity\n` +
+              `   2. DNS resolution (try: nslookup infinitycolor.co)\n` +
+              `   3. Firewall/VPN settings\n` +
+              `   4. Domain accessibility (try: curl https://infinitycolor.co)`,
+          );
+        }
+
         if (attempt === maxRetries) {
           break;
         }
-        
-        this.logger.warn(`🔄 Request failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms:`, error.message);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+        this.logger.warn(
+          `🔄 Request failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms:`,
+          error.message,
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
-    
+
     throw lastError;
   }
 }
@@ -57,7 +77,7 @@ class BaseApiClient {
 class WooCommerceClient extends BaseApiClient {
   constructor(config, logger) {
     super(config.woocommerce, logger);
-    
+
     this.consumerKey = config.woocommerce.auth.consumerKey;
     this.consumerSecret = config.woocommerce.auth.consumerSecret;
 
@@ -65,17 +85,19 @@ class WooCommerceClient extends BaseApiClient {
       baseURL: config.woocommerce.baseUrl,
       auth: {
         username: this.consumerKey,
-        password: this.consumerSecret
+        password: this.consumerSecret,
       },
       timeout: 60000, // Increased to 60 seconds for slow responses
       headers: {
-        'User-Agent': 'WooCommerce-Strapi-Importer/1.0'
-      }
+        "User-Agent": "WooCommerce-Strapi-Importer/1.0",
+      },
     });
 
     // Request interceptor for rate limiting
     this.client.interceptors.request.use(async (requestConfig) => {
-      this.logger.info(`🔄 Making WC API request: ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`);
+      this.logger.info(
+        `🔄 Making WC API request: ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
+      );
       await this.rateLimitDelay();
 
       // Some WooCommerce installations (including Infinity Store) block HTTP Basic auth
@@ -98,20 +120,26 @@ class WooCommerceClient extends BaseApiClient {
     // Response interceptor for logging
     this.client.interceptors.response.use(
       (response) => {
-        this.logger.info(`✅ WC API Response: ${response.config.method?.toUpperCase()} ${response.config.url} → ${response.status} (${response.data?.length || 'unknown'} items)`);
+        this.logger.info(
+          `✅ WC API Response: ${response.config.method?.toUpperCase()} ${response.config.url} → ${
+            response.status
+          } (${response.data?.length || "unknown"} items)`,
+        );
         return response;
       },
       (error) => {
         if (error.response) {
-          this.logger.error(`❌ WC API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`);
+          this.logger.error(
+            `❌ WC API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`,
+          );
           this.logger.error(`Error details: ${JSON.stringify(error.response.data)}`);
-        } else if (error.code === 'ECONNABORTED') {
+        } else if (error.code === "ECONNABORTED") {
           this.logger.error(`❌ WC API Timeout: ${error.message} - ${error.config?.url}`);
         } else {
           this.logger.error(`❌ WC API Error: ${error.message}`);
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -119,16 +147,16 @@ class WooCommerceClient extends BaseApiClient {
    * Get categories with pagination
    */
   async getCategories(page = 1, perPage = 50) {
-    const response = await this.retryRequest(() => 
-      this.client.get('/products/categories', {
-        params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
-      })
+    const response = await this.retryRequest(() =>
+      this.client.get("/products/categories", {
+        params: { page, per_page: perPage, orderby: "id", order: "asc" },
+      }),
     );
-    
+
     return {
       data: response.data,
-      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
-      totalItems: parseInt(response.headers['x-wp-total'] || '0')
+      totalPages: parseInt(response.headers["x-wp-totalpages"] || "1"),
+      totalItems: parseInt(response.headers["x-wp-total"] || "0"),
     };
   }
 
@@ -136,7 +164,7 @@ class WooCommerceClient extends BaseApiClient {
    * Get products with pagination and optional category filtering
    */
   async getProducts(page = 1, perPage = 20, categoryId = null, filters = {}) {
-    const params = { page, per_page: perPage, orderby: 'id', order: 'asc' };
+    const params = { page, per_page: perPage, orderby: "id", order: "asc" };
 
     // Add category filter if specified
     if (categoryId) {
@@ -159,14 +187,12 @@ class WooCommerceClient extends BaseApiClient {
       params.modified_before = filters.modifiedBefore;
     }
 
-    const response = await this.retryRequest(() =>
-      this.client.get('/products', { params })
-    );
+    const response = await this.retryRequest(() => this.client.get("/products", { params }));
 
     return {
       data: response.data,
-      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
-      totalItems: parseInt(response.headers['x-wp-total'] || '0')
+      totalPages: parseInt(response.headers["x-wp-totalpages"] || "1"),
+      totalItems: parseInt(response.headers["x-wp-total"] || "0"),
     };
   }
 
@@ -174,33 +200,70 @@ class WooCommerceClient extends BaseApiClient {
    * Get product variations
    */
   async getProductVariations(productId, page = 1, perPage = 100) {
-    const response = await this.retryRequest(() => 
+    const response = await this.retryRequest(() =>
       this.client.get(`/products/${productId}/variations`, {
-        params: { page, per_page: perPage }
-      })
+        params: { page, per_page: perPage },
+      }),
     );
-    
+
     return {
       data: response.data,
-      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
-      totalItems: parseInt(response.headers['x-wp-total'] || '0')
+      totalPages: parseInt(response.headers["x-wp-totalpages"] || "1"),
+      totalItems: parseInt(response.headers["x-wp-total"] || "0"),
     };
+  }
+
+  /**
+   * Get product by slug from WooCommerce
+   */
+  async getProductBySlug(slug) {
+    try {
+      // Decode slug in case it's URL-encoded
+      const decodedSlug = decodeURIComponent(slug);
+      const response = await this.retryRequest(() =>
+        this.client.get("/products", {
+          params: { slug: decodedSlug, per_page: 1 },
+        }),
+      );
+
+      if (response.data && response.data.length > 0) {
+        return response.data[0];
+      }
+
+      // If not found with decoded slug, try encoded
+      if (decodedSlug !== slug) {
+        const encodedResponse = await this.retryRequest(() =>
+          this.client.get("/products", {
+            params: { slug: slug, per_page: 1 },
+          }),
+        );
+
+        if (encodedResponse.data && encodedResponse.data.length > 0) {
+          return encodedResponse.data[0];
+        }
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to get product by slug "${slug}": ${error.message}`);
+      return null;
+    }
   }
 
   /**
    * Get orders with pagination
    */
   async getOrders(page = 1, perPage = 30) {
-    const response = await this.retryRequest(() => 
-      this.client.get('/orders', {
-        params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
-      })
+    const response = await this.retryRequest(() =>
+      this.client.get("/orders", {
+        params: { page, per_page: perPage, orderby: "id", order: "asc" },
+      }),
     );
-    
+
     return {
       data: response.data,
-      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
-      totalItems: parseInt(response.headers['x-wp-total'] || '0')
+      totalPages: parseInt(response.headers["x-wp-totalpages"] || "1"),
+      totalItems: parseInt(response.headers["x-wp-total"] || "0"),
     };
   }
 
@@ -208,17 +271,138 @@ class WooCommerceClient extends BaseApiClient {
    * Get customers with pagination
    */
   async getCustomers(page = 1, perPage = 50) {
-    const response = await this.retryRequest(() => 
-      this.client.get('/customers', {
-        params: { page, per_page: perPage, orderby: 'id', order: 'asc' }
-      })
+    const response = await this.retryRequest(() =>
+      this.client.get("/customers", {
+        params: { page, per_page: perPage, orderby: "id", order: "asc" },
+      }),
     );
-    
+
     return {
       data: response.data,
-      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1'),
-      totalItems: parseInt(response.headers['x-wp-total'] || '0')
+      totalPages: parseInt(response.headers["x-wp-totalpages"] || "1"),
+      totalItems: parseInt(response.headers["x-wp-total"] || "0"),
     };
+  }
+}
+
+/**
+ * WordPress API Client (posts, categories, tags, media, users)
+ */
+class WordPressClient extends BaseApiClient {
+  constructor(config, logger) {
+    super(config.wordpress, logger);
+
+    this.username = config.wordpress.auth.username;
+    this.password = config.wordpress.auth.password;
+    this.useEmbeddedResponses = config.wordpress.useEmbeddedResponses;
+
+    this.client = axios.create({
+      baseURL: config.wordpress.baseUrl,
+      timeout: 60000,
+      auth:
+        this.username && this.password
+          ? {
+              username: this.username,
+              password: this.password,
+            }
+          : undefined,
+      headers: {
+        "User-Agent": "WordPress-Strapi-Importer/1.0",
+      },
+    });
+
+    // Request interceptor for rate limiting
+    this.client.interceptors.request.use(async (requestConfig) => {
+      this.logger.info(
+        `🔄 Making WP API request: ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
+      );
+      await this.rateLimitDelay();
+
+      requestConfig.params = requestConfig.params || {};
+      if (this.useEmbeddedResponses && requestConfig.method?.toLowerCase() === "get") {
+        requestConfig.params._embed = 1;
+      }
+
+      return requestConfig;
+    });
+
+    this.client.interceptors.response.use(
+      (response) => {
+        this.logger.info(
+          `✅ WP API Response: ${response.config.method?.toUpperCase()} ${response.config.url} → ${
+            response.status
+          }`,
+        );
+        return response;
+      },
+      (error) => {
+        if (error.response) {
+          this.logger.error(
+            `❌ WP API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`,
+          );
+          if (error.response.data) {
+            this.logger.error(`Error details: ${JSON.stringify(error.response.data)}`);
+          }
+        } else {
+          this.logger.error(`❌ WP API Error: ${error.message}`);
+        }
+        return Promise.reject(error);
+      },
+    );
+  }
+
+  async getPosts(page = 1, perPage = 20, options = {}) {
+    const params = {
+      page,
+      per_page: perPage,
+      orderby: "date",
+      order: "desc",
+      status: options.status || "publish",
+    };
+
+    if (options.after) {
+      params.after = options.after;
+    }
+
+    if (options.search) {
+      params.search = options.search;
+    }
+
+    if (options.category) {
+      params.categories = options.category;
+    }
+
+    if (options.tag) {
+      params.tags = options.tag;
+    }
+
+    const response = await this.retryRequest(() => this.client.get("/posts", { params }));
+
+    return {
+      data: response.data,
+      totalPages: parseInt(response.headers["x-wp-totalpages"] || "1", 10),
+      totalItems: parseInt(response.headers["x-wp-total"] || "0", 10),
+    };
+  }
+
+  async getCategory(id) {
+    const response = await this.retryRequest(() => this.client.get(`/categories/${id}`));
+    return response.data;
+  }
+
+  async getTag(id) {
+    const response = await this.retryRequest(() => this.client.get(`/tags/${id}`));
+    return response.data;
+  }
+
+  async getUser(id) {
+    const response = await this.retryRequest(() => this.client.get(`/users/${id}`));
+    return response.data;
+  }
+
+  async getMedia(id) {
+    const response = await this.retryRequest(() => this.client.get(`/media/${id}`));
+    return response.data;
   }
 }
 
@@ -228,37 +412,45 @@ class WooCommerceClient extends BaseApiClient {
 class StrapiClient extends BaseApiClient {
   constructor(config, logger) {
     super(config.strapi, logger);
-    
+
     this.client = axios.create({
       baseURL: config.strapi.baseUrl,
       timeout: 30000,
       headers: {
-        'Authorization': `Bearer ${config.strapi.auth.token}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'WooCommerce-Strapi-Importer/1.0'
-      }
+        Authorization: `Bearer ${config.strapi.auth.token}`,
+        "Content-Type": "application/json",
+        "User-Agent": "WooCommerce-Strapi-Importer/1.0",
+      },
     });
 
     // Response interceptor for logging
     this.client.interceptors.response.use(
       (response) => {
-        this.logger.debug(`✅ Strapi API: ${response.config.method?.toUpperCase()} ${response.config.url} → ${response.status}`);
+        this.logger.debug(
+          `✅ Strapi API: ${response.config.method?.toUpperCase()} ${response.config.url} → ${
+            response.status
+          }`,
+        );
         return response;
       },
-      (error) => {
-        if (error.response) {
-          this.logger.error(`❌ Strapi API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`);
-          // Log error details at ERROR level, not DEBUG, so users can see what validation failed
-          if (error.response.data?.error) {
-            this.logger.error(`Error details: ${JSON.stringify(error.response.data.error, null, 2)}`);
-          } else if (error.response.data) {
-            this.logger.error(`Response: ${JSON.stringify(error.response.data, null, 2)}`);
+        (error) => {
+          if (error.response) {
+            this.logger.error(
+              `❌ Strapi API Error: ${error.response.status} ${error.response.statusText} - ${error.response.config.url}`,
+            );
+            // Log error details at ERROR level, not DEBUG, so users can see what validation failed
+            if (error.response.data?.error) {
+              this.logger.error(
+                `Error details: ${JSON.stringify(error.response.data.error, null, 2)}`,
+              );
+            } else if (error.response.data) {
+              this.logger.error(`Response: ${JSON.stringify(error.response.data, null, 2)}`);
+            }
+          } else {
+            this.logger.error(`❌ Strapi API Error: ${error.message}`);
           }
-        } else {
-          this.logger.error(`❌ Strapi API Error: ${error.message}`);
-        }
-        return Promise.reject(error);
-      }
+          return Promise.reject(error);
+        };,
     );
   }
 
@@ -266,8 +458,8 @@ class StrapiClient extends BaseApiClient {
    * Create a new category
    */
   async createCategory(categoryData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/product-categories', { data: categoryData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/product-categories", { data: categoryData }),
     );
     return response.data;
   }
@@ -276,8 +468,8 @@ class StrapiClient extends BaseApiClient {
    * Get existing categories
    */
   async getCategories(params = {}) {
-    const response = await this.retryRequest(() => 
-      this.client.get('/product-categories', { params })
+    const response = await this.retryRequest(() =>
+      this.client.get("/product-categories", { params }),
     );
     return response.data;
   }
@@ -286,18 +478,50 @@ class StrapiClient extends BaseApiClient {
    * Create a new product
    */
   async createProduct(productData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/products', { data: productData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/products", { data: productData }),
     );
     return response.data;
+  }
+
+  /**
+   * Get a product by ID
+   */
+  async getProductById(productId) {
+    const response = await this.retryRequest(() =>
+      this.client.get(`/products/${productId}`, {
+        params: {
+          "populate[0]": "CoverImage",
+          "populate[1]": "product_main_category",
+        },
+      }),
+    );
+    return response.data;
+  }
+
+  /**
+   * Get a product by slug
+   */
+  async getProductBySlug(slug) {
+    const response = await this.retryRequest(() =>
+      this.client.get("/products", {
+        params: {
+          "filters[Slug][$eq]": slug,
+          "populate[0]": "CoverImage",
+          "populate[1]": "product_main_category",
+          "pagination[pageSize]": 1,
+        },
+      }),
+    );
+    return this.extractFirstEntry(response.data ?? response);
   }
 
   /**
    * Update an existing product
    */
   async updateProduct(productId, updateData) {
-    const response = await this.retryRequest(() => 
-      this.client.put(`/products/${productId}`, { data: updateData })
+    const response = await this.retryRequest(() =>
+      this.client.put(`/products/${productId}`, { data: updateData }),
     );
     return response.data;
   }
@@ -307,9 +531,9 @@ class StrapiClient extends BaseApiClient {
    */
   async findProductSizeHelper(productId) {
     const response = await this.retryRequest(() =>
-      this.client.get('/product-size-helpers', {
+      this.client.get("/product-size-helpers", {
         params: {
-          'filters[product][id][$eq]': productId,
+          "filters[product][id][$eq]": productId,
         },
       }),
     );
@@ -347,7 +571,7 @@ class StrapiClient extends BaseApiClient {
     }
 
     const response = await this.retryRequest(() =>
-      this.client.post('/product-size-helpers', {
+      this.client.post("/product-size-helpers", {
         data: {
           Helper: helperMatrix,
           product: productId,
@@ -362,7 +586,7 @@ class StrapiClient extends BaseApiClient {
    */
   async updateProductVariation(variationId, updateData) {
     const response = await this.retryRequest(() =>
-      this.client.put(`/product-variations/${variationId}`, { data: updateData })
+      this.client.put(`/product-variations/${variationId}`, { data: updateData }),
     );
     return response.data;
   }
@@ -371,8 +595,8 @@ class StrapiClient extends BaseApiClient {
    * Create a new product variation
    */
   async createProductVariation(variationData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/product-variations', { data: variationData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/product-variations", { data: variationData }),
     );
     return response.data;
   }
@@ -382,69 +606,67 @@ class StrapiClient extends BaseApiClient {
    */
   async findShippingProvinceByTitle(title) {
     const response = await this.retryRequest(() =>
-      this.client.get('/shipping-provinces', {
+      this.client.get("/shipping-provinces", {
         params: {
-          'filters[Title][$eq]': title,
-          'pagination[pageSize]': 1
-        }
-      })
+          "filters[Title][$eq]": title,
+          "pagination[pageSize]": 1,
+        },
+      }),
     );
     return response.data?.data?.[0] || null;
   }
 
   async createShippingProvince(data) {
     const response = await this.retryRequest(() =>
-      this.client.post('/shipping-provinces', { data })
+      this.client.post("/shipping-provinces", { data }),
     );
     return response.data?.data;
   }
 
   async updateShippingProvince(id, data) {
     const response = await this.retryRequest(() =>
-      this.client.put(`/shipping-provinces/${id}`, { data })
+      this.client.put(`/shipping-provinces/${id}`, { data }),
     );
     return response.data?.data;
   }
 
   async findShippingCity(title, provinceId) {
     const response = await this.retryRequest(() =>
-      this.client.get('/shipping-cities', {
+      this.client.get("/shipping-cities", {
         params: {
-          'filters[Title][$eq]': title,
-          'filters[shipping_province][id][$eq]': provinceId,
-          'pagination[pageSize]': 1
-        }
-      })
+          "filters[Title][$eq]": title,
+          "filters[shipping_province][id][$eq]": provinceId,
+          "pagination[pageSize]": 1,
+        },
+      }),
     );
     return response.data?.data?.[0] || null;
   }
 
   async createShippingCity(data) {
-    const response = await this.retryRequest(() =>
-      this.client.post('/shipping-cities', { data })
-    );
+    const response = await this.retryRequest(() => this.client.post("/shipping-cities", { data }));
     return response.data?.data;
   }
 
   async updateShippingCity(id, data) {
     const response = await this.retryRequest(() =>
-      this.client.put(`/shipping-cities/${id}`, { data })
+      this.client.put(`/shipping-cities/${id}`, { data }),
     );
     return response.data?.data;
   }
 
-    /**
+  /**
    * Find or create variation color
    */
   async createVariationColor(colorData) {
     try {
       // First try to find existing color by Title
       const existingByTitle = await this.retryRequest(() =>
-        this.client.get('/product-variation-colors', {
+        this.client.get("/product-variation-colors", {
           params: {
-            'filters[Title][$eq]': colorData.Title
-          }
-        })
+            "filters[Title][$eq]": colorData.Title,
+          },
+        }),
       );
 
       if (existingByTitle.data?.data && existingByTitle.data.data.length > 0) {
@@ -454,11 +676,11 @@ class StrapiClient extends BaseApiClient {
 
       // Also check by ColorCode to avoid duplicates
       const existingByColor = await this.retryRequest(() =>
-        this.client.get('/product-variation-colors', {
+        this.client.get("/product-variation-colors", {
           params: {
-            'filters[ColorCode][$eq]': colorData.ColorCode
-          }
-        })
+            "filters[ColorCode][$eq]": colorData.ColorCode,
+          },
+        }),
       );
 
       if (existingByColor.data?.data && existingByColor.data.data.length > 0) {
@@ -468,20 +690,19 @@ class StrapiClient extends BaseApiClient {
 
       // If not found, create new one
       const response = await this.retryRequest(() =>
-        this.client.post('/product-variation-colors', { data: colorData })
+        this.client.post("/product-variation-colors", { data: colorData }),
       );
       return response.data;
     } catch (error) {
-      
       // If creation fails, try to find again (race condition handling)
       try {
         // Check by Title first
         const existingByTitle = await this.retryRequest(() =>
-          this.client.get('/product-variation-colors', {
+          this.client.get("/product-variation-colors", {
             params: {
-              'filters[Title][$eq]': colorData.Title
-            }
-          })
+              "filters[Title][$eq]": colorData.Title,
+            },
+          }),
         );
 
         if (existingByTitle.data?.data && existingByTitle.data.data.length > 0) {
@@ -490,13 +711,13 @@ class StrapiClient extends BaseApiClient {
 
         // Then check by ColorCode
         const existingByColor = await this.retryRequest(() =>
-          this.client.get('/product-variation-colors', {
+          this.client.get("/product-variation-colors", {
             params: {
-              'filters[ColorCode][$eq]': colorData.ColorCode
-            }
-          })
+              "filters[ColorCode][$eq]": colorData.ColorCode,
+            },
+          }),
         );
-        
+
         if (existingByColor.data?.data && existingByColor.data.data.length > 0) {
           return { data: existingByColor.data.data[0] };
         }
@@ -514,34 +735,42 @@ class StrapiClient extends BaseApiClient {
     try {
       // First try to find existing size by Title
       const existingResponse = await this.retryRequest(() =>
-        this.client.get('/product-variation-sizes', {
+        this.client.get("/product-variation-sizes", {
           params: {
-            'filters[Title][$eq]': sizeData.Title
-          }
-        })
+            "filters[Title][$eq]": sizeData.Title,
+          },
+        }),
       );
-      
-      if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+
+      if (
+        existingResponse.data &&
+        existingResponse.data.data &&
+        existingResponse.data.data.length > 0
+      ) {
         return { data: existingResponse.data.data[0] };
       }
-      
+
       // If not found, create new one
-      const response = await this.retryRequest(() => 
-        this.client.post('/product-variation-sizes', { data: sizeData })
+      const response = await this.retryRequest(() =>
+        this.client.post("/product-variation-sizes", { data: sizeData }),
       );
       return response.data;
     } catch (error) {
       // If creation fails, try to find again (race condition handling)
       try {
-                 const existingResponse = await this.retryRequest(() =>
-           this.client.get('/product-variation-sizes', {
-             params: {
-               'filters[Title][$eq]': sizeData.Title
-             }
-           })
-         );
-        
-        if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+        const existingResponse = await this.retryRequest(() =>
+          this.client.get("/product-variation-sizes", {
+            params: {
+              "filters[Title][$eq]": sizeData.Title,
+            },
+          }),
+        );
+
+        if (
+          existingResponse.data &&
+          existingResponse.data.data &&
+          existingResponse.data.data.length > 0
+        ) {
           return { data: existingResponse.data.data[0] };
         }
       } catch (findError) {
@@ -558,34 +787,42 @@ class StrapiClient extends BaseApiClient {
     try {
       // First try to find existing model by Title
       const existingResponse = await this.retryRequest(() =>
-        this.client.get('/product-variation-models', {
+        this.client.get("/product-variation-models", {
           params: {
-            'filters[Title][$eq]': modelData.Title
-          }
-        })
+            "filters[Title][$eq]": modelData.Title,
+          },
+        }),
       );
-      
-      if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+
+      if (
+        existingResponse.data &&
+        existingResponse.data.data &&
+        existingResponse.data.data.length > 0
+      ) {
         return { data: existingResponse.data.data[0] };
       }
-      
+
       // If not found, create new one
-      const response = await this.retryRequest(() => 
-        this.client.post('/product-variation-models', { data: modelData })
+      const response = await this.retryRequest(() =>
+        this.client.post("/product-variation-models", { data: modelData }),
       );
       return response.data;
     } catch (error) {
       // If creation fails, try to find again (race condition handling)
       try {
-                 const existingResponse = await this.retryRequest(() =>
-           this.client.get('/product-variation-models', {
-             params: {
-               'filters[Title][$eq]': modelData.Title
-             }
-           })
-         );
-        
-        if (existingResponse.data && existingResponse.data.data && existingResponse.data.data.length > 0) {
+        const existingResponse = await this.retryRequest(() =>
+          this.client.get("/product-variation-models", {
+            params: {
+              "filters[Title][$eq]": modelData.Title,
+            },
+          }),
+        );
+
+        if (
+          existingResponse.data &&
+          existingResponse.data.data &&
+          existingResponse.data.data.length > 0
+        ) {
           return { data: existingResponse.data.data[0] };
         }
       } catch (findError) {
@@ -599,8 +836,8 @@ class StrapiClient extends BaseApiClient {
    * Create product stock
    */
   async createProductStock(stockData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/product-stocks', { data: stockData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/product-stocks", { data: stockData }),
     );
     return response.data;
   }
@@ -610,7 +847,7 @@ class StrapiClient extends BaseApiClient {
    */
   async updateProductStock(stockId, stockData) {
     const response = await this.retryRequest(() =>
-      this.client.put(`/product-stocks/${stockId}`, { data: stockData })
+      this.client.put(`/product-stocks/${stockId}`, { data: stockData }),
     );
     return response.data;
   }
@@ -619,8 +856,8 @@ class StrapiClient extends BaseApiClient {
    * Create an order
    */
   async createOrder(orderData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/orders', { data: orderData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/orders", { data: orderData }),
     );
     return response.data;
   }
@@ -629,8 +866,8 @@ class StrapiClient extends BaseApiClient {
    * Create order item
    */
   async createOrderItem(orderItemData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/order-items', { data: orderItemData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/order-items", { data: orderItemData }),
     );
     return response.data;
   }
@@ -639,8 +876,8 @@ class StrapiClient extends BaseApiClient {
    * Create contract
    */
   async createContract(contractData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/contracts', { data: contractData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/contracts", { data: contractData }),
     );
     return response.data;
   }
@@ -650,12 +887,12 @@ class StrapiClient extends BaseApiClient {
    */
   async getAllPluginUsers(params = {}) {
     const response = await this.retryRequest(() =>
-      this.client.get('/users', {
+      this.client.get("/users", {
         params: {
           ...params,
-          'pagination[pageSize]': params['pagination[pageSize]'] || 1000,
+          "pagination[pageSize]": params["pagination[pageSize]"] || 1000,
         },
-      })
+      }),
     );
     return response.data ?? response;
   }
@@ -669,12 +906,12 @@ class StrapiClient extends BaseApiClient {
     }
 
     const response = await this.retryRequest(() =>
-      this.client.get('/users', {
+      this.client.get("/users", {
         params: {
-          'filters[external_id][$eq]': externalId,
-          'pagination[pageSize]': 1
-        }
-      })
+          "filters[external_id][$eq]": externalId,
+          "pagination[pageSize]": 1,
+        },
+      }),
     );
 
     return this.extractFirstEntry(response.data ?? response);
@@ -689,12 +926,32 @@ class StrapiClient extends BaseApiClient {
     }
 
     const response = await this.retryRequest(() =>
-      this.client.get('/users', {
+      this.client.get("/users", {
         params: {
-          'filters[phone][$eq]': phone,
-          'pagination[pageSize]': 1
-        }
-      })
+          "filters[phone][$eq]": phone,
+          "pagination[pageSize]": 1,
+        },
+      }),
+    );
+
+    return this.extractFirstEntry(response.data ?? response);
+  }
+
+  /**
+   * Find a plugin user by email
+   */
+  async findPluginUserByEmail(email) {
+    if (!email) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get("/users", {
+        params: {
+          "filters[email][$eq]": email,
+          "pagination[pageSize]": 1,
+        },
+      }),
     );
 
     return this.extractFirstEntry(response.data ?? response);
@@ -711,8 +968,8 @@ class StrapiClient extends BaseApiClient {
     const items = Array.isArray(responseData?.data)
       ? responseData.data
       : Array.isArray(responseData)
-        ? responseData
-        : [];
+      ? responseData
+      : [];
     if (items.length === 0) {
       return null;
     }
@@ -724,9 +981,7 @@ class StrapiClient extends BaseApiClient {
    * Create local user
    */
   async createPluginUser(userData) {
-    const response = await this.retryRequest(() =>
-      this.client.post('/users', userData)
-    );
+    const response = await this.retryRequest(() => this.client.post("/users", userData));
     return response.data ?? response;
   }
 
@@ -734,8 +989,8 @@ class StrapiClient extends BaseApiClient {
    * Create local user info (profile record linked to plugin user)
    */
   async createLocalUserInfo(userInfoData) {
-    const response = await this.retryRequest(() => 
-      this.client.post('/local-user-infos', { data: userInfoData })
+    const response = await this.retryRequest(() =>
+      this.client.post("/local-user-infos", { data: userInfoData }),
     );
     return response.data;
   }
@@ -744,22 +999,141 @@ class StrapiClient extends BaseApiClient {
    * Fetch plugin roles
    */
   async getPluginRoles() {
-    const response = await this.retryRequest(() =>
-      this.client.get('/users-permissions/roles')
-    );
+    const response = await this.retryRequest(() => this.client.get("/users-permissions/roles"));
     return response.data?.roles ?? response.data ?? response;
+  }
+
+  /**
+   * Blog helpers
+   */
+  async findBlogCategoryBySlug(slug) {
+    if (!slug) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get("/blog-categories", {
+        params: {
+          "filters[Slug][$eq]": slug,
+          "pagination[pageSize]": 1,
+        },
+      }),
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  async createBlogCategory(data) {
+    const response = await this.retryRequest(() => this.client.post("/blog-categories", { data }));
+    return response.data;
+  }
+
+  async findBlogTagBySlug(slug) {
+    if (!slug) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get("/blog-tags", {
+        params: {
+          "filters[Slug][$eq]": slug,
+          "pagination[pageSize]": 1,
+        },
+      }),
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  async createBlogTag(data) {
+    const response = await this.retryRequest(() => this.client.post("/blog-tags", { data }));
+    return response.data;
+  }
+
+  async findBlogAuthorByEmailOrName(email, name) {
+    if (email) {
+      const byEmail = await this.retryRequest(() =>
+        this.client.get("/blog-authors", {
+          params: {
+            "filters[Email][$eq]": email,
+            "pagination[pageSize]": 1,
+          },
+        }),
+      );
+      const emailMatch = this.extractFirstEntry(byEmail.data);
+      if (emailMatch) {
+        return emailMatch;
+      }
+    }
+
+    if (name) {
+      const byName = await this.retryRequest(() =>
+        this.client.get("/blog-authors", {
+          params: {
+            "filters[Name][$eq]": name,
+            "pagination[pageSize]": 1,
+          },
+        }),
+      );
+      const nameMatch = this.extractFirstEntry(byName.data);
+      if (nameMatch) {
+        return nameMatch;
+      }
+    }
+
+    return null;
+  }
+
+  async createBlogAuthor(data) {
+    const response = await this.retryRequest(() => this.client.post("/blog-authors", { data }));
+    return response.data;
+  }
+
+  async updateBlogAuthor(id, data) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/blog-authors/${id}`, { data }),
+    );
+    return response.data;
+  }
+
+  async findBlogPostBySlug(slug) {
+    if (!slug) {
+      return null;
+    }
+
+    const response = await this.retryRequest(() =>
+      this.client.get("/blog-posts", {
+        params: {
+          "filters[Slug][$eq]": slug,
+          "pagination[pageSize]": 1,
+          populate: "blog_author,blog_category,blog_tags,FeaturedImage",
+        },
+      }),
+    );
+
+    return this.extractFirstEntry(response.data);
+  }
+
+  async createBlogPost(data) {
+    const response = await this.retryRequest(() => this.client.post("/blog-posts", { data }));
+    return response.data;
+  }
+
+  async updateBlogPost(id, data) {
+    const response = await this.retryRequest(() => this.client.put(`/blog-posts/${id}`, { data }));
+    return response.data;
   }
 
   /**
    * Get existing items by external ID (stored in meta_data)
    */
   async findByExternalId(endpoint, externalId) {
-    const response = await this.retryRequest(() => 
+    const response = await this.retryRequest(() =>
       this.client.get(endpoint, {
         params: {
-          'filters[external_id][$eq]': externalId
-        }
-      })
+          "filters[external_id][$eq]": externalId,
+        },
+      }),
     );
     return response.data;
   }
@@ -768,9 +1142,15 @@ class StrapiClient extends BaseApiClient {
    * Generic create method
    */
   async create(endpoint, data) {
-    const response = await this.retryRequest(() => 
-      this.client.post(endpoint, { data })
-    );
+    const response = await this.retryRequest(() => this.client.post(endpoint, { data }));
+    return response.data;
+  }
+
+  /**
+   * Generic update method
+   */
+  async update(endpoint, id, data) {
+    const response = await this.retryRequest(() => this.client.put(`${endpoint}/${id}`, { data }));
     return response.data;
   }
 
@@ -778,14 +1158,13 @@ class StrapiClient extends BaseApiClient {
    * Generic get method
    */
   async get(endpoint, params = {}) {
-    const response = await this.retryRequest(() => 
-      this.client.get(endpoint, { params })
-    );
+    const response = await this.retryRequest(() => this.client.get(endpoint, { params }));
     return response.data;
   }
 }
 
 module.exports = {
   WooCommerceClient,
-  StrapiClient
-}; 
+  StrapiClient,
+  WordPressClient,
+};

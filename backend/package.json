@@ -26,6 +26,7 @@
     "import:dedup:categories": "node scripts/woocommerce-importer/dedup-categories.js",
     "retry:images": "node scripts/retry-failed-images.js",
     "seed:admin": "node scripts/seed-admin-user.js",
+    "regenerate:slugs": "node scripts/regenerate-product-slugs.js",
     "start": "strapi start",
     "start:prod": "NODE_ENV=production strapi start",
     "strapi": "strapi",
