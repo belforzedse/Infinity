@@ -168,7 +168,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         : selectedGateway === "wallet"
         ? "Wallet"
         : "Mellat";
-    const baseUrl = process.env.URL || "https://api.infinitycolor.org/";
+    const baseUrl = process.env.URL || "https://api.new.infinitycolor.co/";
     const serverBaseUrl = `${baseUrl.replace(/\/$/, "")}/api`;
     const absoluteCallback = `${serverBaseUrl}${
       (callbackURL || "/orders/payment-callback").startsWith("/") ? "" : "/"

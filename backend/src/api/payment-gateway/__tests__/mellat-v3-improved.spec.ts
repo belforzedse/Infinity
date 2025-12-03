@@ -35,7 +35,7 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
     process.env.MELLAT_PASSWORD = "MELLAT_PASSWORD";
     process.env.MELLAT_GATEWAY_URL =
       "https://bpm.shaparak.ir/pgwchannel/services/pgw";
-    process.env.URL = "https://api.infinitycolor.org";
+    process.env.URL = "https://api.new.infinitycolor.co";
 
     // Import the service factory after mocking
     mellatServiceFactory = require("../services/mellat-v3").default;
@@ -88,29 +88,29 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
     });
 
     it("should construct production URL from environment when no custom URL", () => {
-      process.env.URL = "https://api.infinitycolor.org/";
+      process.env.URL = "https://api.new.infinitycolor.co/";
       const result = mellatService.formatCallbackUrl();
 
       expect(result).toBe(
-        "https://api.infinitycolor.org/api/orders/payment-callback"
+        "https://api.new.infinitycolor.co/api/orders/payment-callback"
       );
     });
 
     it("should handle environment URL with trailing slash", () => {
-      process.env.URL = "https://api.infinitycolor.org/";
+      process.env.URL = "https://api.new.infinitycolor.co/";
       const result = mellatService.formatCallbackUrl();
 
       expect(result).toBe(
-        "https://api.infinitycolor.org/api/orders/payment-callback"
+        "https://api.new.infinitycolor.co/api/orders/payment-callback"
       );
     });
 
     it("should use environment URL for relative paths", () => {
-      process.env.URL = "https://api.infinitycolor.org";
+      process.env.URL = "https://api.new.infinitycolor.co";
       const result = mellatService.formatCallbackUrl("/custom/callback");
 
       expect(result).toBe(
-        "https://api.infinitycolor.org/api/orders/payment-callback"
+        "https://api.new.infinitycolor.co/api/orders/payment-callback"
       );
     });
   });

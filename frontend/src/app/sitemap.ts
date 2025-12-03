@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { API_BASE_URL, ENDPOINTS } from '@/constants/api'
 import logger from '@/utils/logger'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitycolor.org'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://new.infinitycolor.co'
 
 interface StrapiProduct {
   id: number

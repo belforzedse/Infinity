@@ -28,7 +28,7 @@ export function ProductSchema({ product, slug }: ProductSchemaProps) {
   const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
   const currentPrice = minPrice || maxPrice || 0;
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
 
   const schema: Record<string, any> = {
     "@context": "https://schema.org/",

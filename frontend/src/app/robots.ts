@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitycolor.org'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://new.infinitycolor.co'
 
 export default function robots(): MetadataRoute.Robots {
   return {

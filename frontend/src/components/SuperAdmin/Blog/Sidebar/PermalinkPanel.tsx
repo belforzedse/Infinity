@@ -19,7 +19,7 @@ export default function PermalinkPanel({
 }: PermalinkPanelProps) {
   const [copied, setCopied] = useState(false);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_BASE_URL || "https://infinitycolor.org";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_BASE_URL || "https://new.infinitycolor.co";
   const fullUrl = useMemo(() => {
     const trimmedBase = baseUrl.replace(/\/+$/, "");
     const cleanedSlug = slug.replace(/^\/+/, "");

@@ -8,7 +8,7 @@ interface BreadcrumbSchemaProps {
 }
 
 export function BreadcrumbSchema({ breadcrumbs }: BreadcrumbSchemaProps) {
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
 
   const schema = {
     "@context": "https://schema.org",

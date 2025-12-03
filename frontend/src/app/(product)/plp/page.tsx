@@ -410,7 +410,7 @@ export default async function PLPPage({
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
   const pageName = category
     ? `خرید ${category}`
     : search
