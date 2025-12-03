@@ -21,7 +21,7 @@ process.env.SNAPPAY_CLIENT_ID = 'infinity';
 process.env.SNAPPAY_CLIENT_SECRET = 'm7Z*e6RJp#DaWZQc';
 process.env.SNAPPAY_USERNAME = 'infinity-purchase';
 process.env.SNAPPAY_PASSWORD = 'J#FFlaz3*#eSpy5N';
-process.env.SNAPPAY_RETURN_URL = 'https://api.staging.infinitycolor.org/api/orders/payment-callback';
+process.env.SNAPPAY_RETURN_URL = 'https://api.new.infinitycolor.co/api/orders/payment-callback';
 
 process.env.IP_PANEL_API_URL = 'https://test-sms.example.com'; // Mock SMS gateway
 process.env.IP_PANEL_API_KEY = 'test-api-key';

@@ -77,7 +77,7 @@ export interface SEOConfig {
 
 const defaultSEOConfig: SEOConfig = {
   siteName: "فروشگاه اینفینیتی",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.org",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co",
   defaultImage: "/images/og-default.jpg",
   twitterHandle: "@infinitycolor",
 };

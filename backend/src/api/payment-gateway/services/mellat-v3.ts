@@ -65,7 +65,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   formatCallbackUrl(callbackURL?: string): string {
     // Get production callback URL from environment with fallback
     const baseUrl =
-      process.env.URL || "https://api.infinitycolor.org/";
+      process.env.URL || "https://api.new.infinitycolor.co/";
     const productionCallback = `${baseUrl.replace(/\/$/, "")}/api/orders/payment-callback`;
 
     // If a custom callback is provided and it's absolute, use it

@@ -6,7 +6,7 @@ import { factories } from "@strapi/strapi";
 import type { Strapi } from "@strapi/strapi";
 
 const FRONTEND_BASE =
-  process.env.FRONTEND_URL || "https://infinitycolor.org";
+  process.env.FRONTEND_URL || "https://new.infinitycolor.co";
 
 export default factories.createCoreController(
   "api::wallet-topup.wallet-topup",
@@ -40,11 +40,11 @@ export default factories.createCoreController(
 
         // Build absolute callback URL and avoid duplicate "/api" prefixes
         const configuredBase = String(
-          strapi.config.get("server.url", process.env.URL || "https://api.infinitycolor.org/"),
+          strapi.config.get("server.url", process.env.URL || "https://api.new.infinitycolor.co/"),
         );
         let baseUrl = configuredBase.trim();
         if (!/^https?:\/\//i.test(baseUrl)) {
-          baseUrl = process.env.URL || "https://api.infinitycolor.org/";
+          baseUrl = process.env.URL || "https://api.new.infinitycolor.co/";
         }
         baseUrl = baseUrl.replace(/\/$/, "").replace(/\/api$/i, "");
         const callbackURL = `${baseUrl}/api/wallet/payment-callback`;

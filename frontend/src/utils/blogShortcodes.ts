@@ -202,7 +202,7 @@ export function replaceShortcodesWithPlaceholders(
  * Extract product slug from URL
  * Supports both full URLs and relative paths
  * Examples:
- * - https://infinitycolor.org/pdp/product-slug → product-slug
+ * - https://new.infinitycolor.co/pdp/product-slug → product-slug
  * - /pdp/product-slug → product-slug
  * - pdp/product-slug → product-slug
  */

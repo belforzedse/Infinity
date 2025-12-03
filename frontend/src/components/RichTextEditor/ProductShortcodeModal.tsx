@@ -441,7 +441,7 @@ const ProductShortcodeModal: React.FC<ProductShortcodeModalProps> = ({
                 setUrlInput(e.target.value);
                 setUrlError(null);
               }}
-              placeholder="https://infinitycolor.org/pdp/product-slug&#10;یا&#10;/pdp/product-slug"
+              placeholder="https://new.infinitycolor.co/pdp/product-slug&#10;یا&#10;/pdp/product-slug"
               className="w-full rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-800 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
               rows={4}
               dir="ltr"

@@ -1,6 +1,6 @@
 import type { Strapi } from "@strapi/strapi";
 const getFrontendBaseUrl = () =>
-  (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://infinitycolor.org").replace(
+  (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://new.infinitycolor.co").replace(
     /\/$/,
     "",
   );

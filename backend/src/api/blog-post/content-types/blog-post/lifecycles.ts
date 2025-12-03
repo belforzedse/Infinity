@@ -12,7 +12,7 @@ async function triggerRevalidation(slug: string) {
   // Hardcoded for now (TODO: move to environment variables)
   const frontendUrls = [
     "https://staging.infinitycolor.org",
-    "https://infinitycolor.org",
+    "https://new.infinitycolor.co",
   ];
 
   // Get revalidation secret from environment variable
@@ -89,7 +89,7 @@ export default {
     // Revalidate blog listing when a post is deleted
     const frontendUrls = [
       "https://staging.infinitycolor.org",
-      "https://infinitycolor.org",
+      "https://new.infinitycolor.co",
     ];
     const revalidationSecret = process.env.REVALIDATION_SECRET;
     if (!revalidationSecret) {

@@ -90,7 +90,7 @@ describe("verifyPaymentHandler", () => {
       }),
     );
     expect(ctx.redirect).toHaveBeenCalledWith(
-      "https://infinitycolor.org/payment/cancelled?orderId=100&reason=user-cancelled",
+      "https://new.infinitycolor.co/payment/cancelled?orderId=100&reason=user-cancelled",
     );
   });
 
@@ -155,7 +155,7 @@ describe("verifyPaymentHandler", () => {
       }),
     );
     expect(ctx.redirect).toHaveBeenCalledWith(
-      "https://infinitycolor.org/payment/success?orderId=200",
+      "https://new.infinitycolor.co/payment/success?orderId=200",
     );
   });
 
@@ -270,7 +270,7 @@ describe("verifyPaymentHandler", () => {
       }),
     );
     expect(ctx.redirect).toHaveBeenCalledWith(
-      "https://infinitycolor.org/payment/success?orderId=700&transactionId=SN-OK",
+      "https://new.infinitycolor.co/payment/success?orderId=700&transactionId=SN-OK",
     );
   });
 });

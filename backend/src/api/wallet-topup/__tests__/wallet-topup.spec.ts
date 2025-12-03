@@ -61,7 +61,7 @@ describe("Wallet Topup Operations", () => {
       const paymentResponse = await samanService.requestPayment({
         orderId: topup.id,
         amount,
-        callbackURL: "https://api.infinitycolor.org/api/wallet/payment-callback",
+        callbackURL: "https://api.new.infinitycolor.co/api/wallet/payment-callback",
         resNum: `${Date.now()}123`,
       });
 
@@ -343,7 +343,7 @@ describe("Wallet Topup Operations", () => {
         );
 
         ctx.redirect(
-          `https://infinitycolor.org/wallet?status=failure&state=${encodeURIComponent(
+          `https://new.infinitycolor.co/wallet?status=failure&state=${encodeURIComponent(
             stateNormalized
           )}`
         );
@@ -412,7 +412,7 @@ describe("Wallet Topup Operations", () => {
         );
 
         ctx.redirect(
-          "https://infinitycolor.org/wallet?status=failure&reason=verify"
+          "https://new.infinitycolor.co/wallet?status=failure&reason=verify"
         );
       }
 
@@ -562,7 +562,7 @@ describe("Wallet Topup Operations", () => {
 
       if (!topups || topups.length === 0) {
         ctx.redirect(
-          "https://infinitycolor.org/wallet?status=failure&reason=not_found"
+          "https://new.infinitycolor.co/wallet?status=failure&reason=not_found"
         );
       }
 
