@@ -1,0 +1,288 @@
+# No Color Option in Color Creation Modal
+
+## Feature Overview
+Added an option in the color creation modals to select "No Color" which defaults to pure white (#FFFFFF) in the backend. This is useful for creating color variations that don't have a specific color display (e.g., "Standard", "Default", "Plain").
+
+### Key Features:
+1. **Auto-Detection**: When the color name contains " کد" (with space), the "No Color" checkbox is automatically checked
+2. **Hidden Controls**: When "No Color" is checked, all color selection controls are **hidden** and replaced with a gray overlay
+3. **Clear Messaging**: Gray overlay displays a stop symbol (🚫) and message: "برای تعیین رنگ گزینه بدون رنگ را خاموش کنید"
+4. **Clean Labels**: Uses "بدون رنگ" without additional descriptive text
+
+## Implementation Details
+
+### Files Modified
+
+#### 1. Main Color Management Page
+**File**: `frontend/src/app/(super-admin)/super-admin/products/colors/page.tsx`
+
+**Changes**:
+- Added `noColor: boolean` field to `ModalState` type
+- Updated `INITIAL_MODAL_STATE` to include `noColor: false`
+- Modified `openModal()` to detect if editing color is white and set `noColor` accordingly
+- Updated `handleSaveColor()` to use `#ffffff` when `noColor` is checked
+- Added checkbox UI to toggle "No Color" mode
+- Disabled color picker, HEX input, and color categories when "No Color" is checked
+- Updated preview to show "سفید خالص (بدون رنگ)" when no color is selected
+
+#### 2. Product Features Table Color Modal
+**File**: `frontend/src/components/Product/add/Details/Features/Table.tsx`
+
+**Changes**:
+- Added `noColor: false` to `colorModal` state
+- Updated `openColorModal()` to include `noColor: false`
+- Modified `handleSaveColor()` to use `#ffffff` when `noColor` is checked
+- Added checkbox UI in the color creation modal
+- Disabled color picker, HEX input, and color palette when "No Color" is checked
+- Updated helper text to show "سفید خالص (بدون رنگ) انتخاب شده است" when checked
+
+## User Interface
+
+### Checkbox UI
+```tsx
+<div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+  <input
+    type="checkbox"
+    id="noColorCheckbox"
+    checked={modalState.noColor}
+    onChange={(e) =>
+      setModalState((prev) => ({
+        ...prev,
+        noColor: e.target.checked,
+        colorCode: e.target.checked ? "#ffffff" : prev.colorCode
+      }))
+    }
+    className="h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
+  />
+  <label htmlFor="noColorCheckbox" className="text-sm text-neutral-700 cursor-pointer">
+    بدون رنگ (سفید خالص)
+  </label>
+</div>
+```
+
+### Behavior
+1. **Checkbox Checked**:
+   - All color selection controls are **hidden** (not just disabled)
+   - Gray overlay appears with stop symbol (🚫) and message
+   - Overlay text: "برای تعیین رنگ گزینه بدون رنگ را خاموش کنید"
+   - Preview shows white color with text "سفید خالص (بدون رنگ)"
+   - Backend receives `#ffffff` as ColorCode
+
+2. **Checkbox Unchecked**:
+   - All color selection controls are visible and enabled
+   - User can freely select any color from picker, HEX input, or palette
+   - Preview shows selected color
+   - Backend receives selected color code
+
+## Backend Integration
+
+When "No Color" is checked:
+- The color is saved with `ColorCode: "#ffffff"` (pure white)
+- This is indistinguishable from manually selecting white
+- Can be used for variations that don't need a visual color display
+
+## Use Cases
+
+### Example 1: Standard Product
+- **Color Name**: "استاندارد" (Standard)
+- **No Color**: ✅ Checked
+- **Result**: Color saved as white, suitable for products without color variations
+
+### Example 2: Default Option
+- **Color Name**: "پیش‌فرض" (Default)
+- **No Color**: ✅ Checked
+- **Result**: Creates a colorless option for products
+
+### Example 3: Transparent/Plain
+- **Color Name**: "ساده" (Plain)
+- **No Color**: ✅ Checked
+- **Result**: White color code, visually indicates no specific color
+
+## Technical Implementation
+
+### State Management
+```typescript
+type ModalState = {
+  open: boolean;
+  id: number | null;
+  title: string;
+  colorCode: string;
+  noColor: boolean;  // New field
+};
+```
+
+### Auto-Check Logic
+```typescript
+// In name/title input onChange handler
+onChange={(e) => {
+  const newTitle = e.target.value;
+  // Auto-check "No Color" if title contains " کد" or starts with "کد"
+  const shouldAutoCheck = newTitle.includes(" کد") || newTitle.startsWith("کد");
+  setModalState((prev) => ({
+    ...prev,
+    title: newTitle,
+    noColor: shouldAutoCheck ? true : prev.noColor,
+    colorCode: shouldAutoCheck ? "#ffffff" : prev.colorCode,
+  }));
+}}
+```
+
+**Detection Logic**:
+- Checks if name contains " کد" (space + "کد") OR starts with "کد"
+- If found: automatically sets `noColor: true` and `colorCode: "#ffffff"`
+- If not found: preserves previous `noColor` state
+- Examples that trigger auto-check:
+  - "کد" ✅ (starts with کد)
+  - "کد 123" ✅ (starts with کد)
+  - "کد 456" ✅ (starts with کد)
+  - "آبی کد" ✅ (contains " کد")
+  - "قرمز کد 123" ✅ (contains " کد")
+  - "آبیکد" ❌ (no space, doesn't start with کد)
+
+### Color Selection Logic
+```typescript
+const handleSaveColor = async () => {
+  // ... validation ...
+
+  // If "No Color" is checked, use pure white #FFFFFF
+  const colorToSave = modalState.noColor ? "#ffffff" : modalState.colorCode;
+
+  // ... save to backend ...
+};
+```
+
+### UI Hiding Pattern with Overlay
+```tsx
+// Show color controls OR overlay based on noColor state
+{!modalState.noColor ? (
+  <>
+    {/* Color picker and controls */}
+    <div>
+      <HexColorPicker color={modalState.colorCode} onChange={handleColorChange} />
+    </div>
+    <div>
+      <HexColorInput color={modalState.colorCode} onChange={handleColorChange} />
+    </div>
+  </>
+) : (
+  <div className="rounded-xl border border-slate-300 bg-slate-100 p-8">
+    <div className="flex flex-col items-center justify-center text-center">
+      <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
+        <svg className="h-8 w-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+        </svg>
+      </div>
+      <p className="text-sm font-medium text-slate-600">
+        برای تعیین رنگ گزینه بدون رنگ را خاموش کنید
+      </p>
+    </div>
+  </div>
+)}
+```
+
+### Overlay Design
+- **Gray background** (`bg-slate-100`)
+- **Centered icon**: Stop/ban symbol (diagonal cross)
+- **Message**: Clear Persian instruction
+- **Icon circle**: `bg-slate-200` with rounded-full
+- **Consistent styling**: Matches overall UI design system
+
+## Accessibility
+
+- Checkbox has proper `id` and `label` association
+- Disabled state is visually indicated with opacity
+- Preview always shows current color selection
+- Clear Persian labels explain the feature
+
+## User Experience Flow
+
+### Manual Flow
+1. User clicks "افزودن رنگ جدید" (Add New Color)
+2. Enters color name (e.g., "استاندارد")
+3. Manually checks "بدون رنگ" checkbox
+4. Color selection controls **disappear** and are replaced with gray overlay
+5. Overlay displays stop symbol (🚫) and message
+6. Preview shows white color with "بدون رنگ" label
+7. User can uncheck the checkbox to restore color selection controls
+8. Clicks "ذخیره" (Save)
+9. Color is created with `#ffffff` as color code
+
+### Auto-Check Flow (Smart Detection)
+1. User clicks "افزودن رنگ جدید" (Add New Color)
+2. Starts typing color name: "آبی کد" or "قرمز کد 123"
+3. **When " کد" is typed**, checkbox automatically checks itself
+4. Color selection controls immediately hide
+5. Overlay appears with stop symbol
+6. User can continue with no-color mode or uncheck to select a color
+7. Saves with `#ffffff` if kept checked
+
+### Visual Flow
+```
+[Checkbox Unchecked]
+┌─────────────────────────┐
+│ 🎨 Color Picker         │
+│ #FFFFFF Input           │
+│ 🎨 Color Categories     │
+└─────────────────────────┘
+
+      ⬇️ User checks "بدون رنگ"
+
+[Checkbox Checked]
+┌─────────────────────────┐
+│   ┌───────────────┐     │
+│   │  🚫 Stop Icon │     │
+│   │ برای تعیین... │     │
+│   └───────────────┘     │
+└─────────────────────────┘
+```
+
+## Testing Checklist
+
+### Functionality
+- [ ] Create new color with "No Color" checked → saves as `#ffffff`
+- [ ] Edit existing white color → checkbox automatically checked
+- [ ] Toggle checkbox → shows/hides color controls
+- [ ] Uncheck "No Color" → can select custom color
+- [ ] Color preview updates correctly
+- [ ] Validation still works (requires name)
+- [ ] Both modals work (main colors page + features table)
+- [ ] Backend receives correct color code (`#ffffff` when checked)
+
+### Auto-Check Feature
+- [ ] Type "کد" → checkbox auto-checks (starts with کد)
+- [ ] Type "کد 123" → checkbox auto-checks (starts with کد)
+- [ ] Type "کد 456" → checkbox auto-checks (starts with کد)
+- [ ] Type "آبی کد" → checkbox auto-checks (contains " کد")
+- [ ] Type "قرمز کد 123" → checkbox auto-checks (contains " کد")
+- [ ] Type "آبیکد" (no space, doesn't start with کد) → checkbox does NOT auto-check
+- [ ] Type "کد" then backspace all → checkbox stays checked (preserves state)
+- [ ] Auto-check immediately hides color controls
+- [ ] Can manually uncheck after auto-check triggers
+
+### UI/UX
+- [ ] Checkbox checked → color controls hidden (not visible)
+- [ ] Gray overlay appears with stop symbol
+- [ ] Overlay message displays: "برای تعیین رنگ گزینه بدون رنگ را خاموش کنید"
+- [ ] Stop icon (🚫) is centered and visible
+- [ ] Checkbox unchecked → color controls immediately visible
+- [ ] Transition between states is smooth
+- [ ] Preview section always visible (shows white when no color)
+- [ ] Color categories section also hidden/shown correctly
+- [ ] Checkbox label shows only "بدون رنگ" (no "سفید خالص")
+- [ ] Preview text shows "بدون رنگ" when checked (not "سفید خالص")
+- [ ] No instances of "سفید خالص" anywhere in the modals
+
+### Accessibility
+- [ ] Stop icon has proper SVG attributes
+- [ ] Message text is readable and clear
+- [ ] Checkbox is keyboard accessible
+- [ ] Tab navigation works correctly
+- [ ] Screen readers can understand the state
+
+## Future Enhancements
+
+Consider these potential improvements:
+1. Add "Transparent" option distinct from white
+2. Allow custom placeholder colors for "No Color" items
+3. Add visual indicator in color list for "No Color" items
+4. Bulk convert existing white colors to "No Color" flag

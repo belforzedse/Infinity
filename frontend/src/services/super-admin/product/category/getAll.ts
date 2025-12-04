@@ -22,7 +22,8 @@ export const getAllCategories = async (): Promise<PaginatedResponse<categoryResp
     // Use no-store cache for super-admin pages to ensure fresh data
     const response = await apiClient.get<PaginatedResponse<categoryResponseType>>(endpoint, {
       params: {
-        "pagination[pageSize]": 1000, // Fetch all categories (up to 1000, should be enough)
+        "pagination[limit]": -1, // Fetch ALL categories without pagination limit
+        sort: "createdAt:desc", // Sort by newest first so new categories appear at the top
       },
       cache: "no-store",
     });

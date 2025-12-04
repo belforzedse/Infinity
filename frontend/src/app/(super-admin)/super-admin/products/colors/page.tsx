@@ -26,6 +26,7 @@ type ModalState = {
   id: number | null;
   title: string;
   colorCode: string;
+  noColor: boolean;
 };
 
 const INITIAL_MODAL_STATE: ModalState = {
@@ -33,6 +34,7 @@ const INITIAL_MODAL_STATE: ModalState = {
   id: null,
   title: "",
   colorCode: "#000000",
+  noColor: false,
 };
 
 export default function ProductColorsPage() {
@@ -91,11 +93,13 @@ export default function ProductColorsPage() {
 
   const openModal = (color?: ApiColor) => {
     if (color) {
+      const colorCode = color.attributes?.ColorCode || "#000000";
       setModalState({
         open: true,
         id: color.id,
         title: color.attributes?.Title || "",
-        colorCode: color.attributes?.ColorCode || "#000000",
+        colorCode: colorCode,
+        noColor: colorCode.toLowerCase() === "#ffffff",
       });
       return;
     }
@@ -120,9 +124,12 @@ export default function ProductColorsPage() {
       return;
     }
 
-    const normalizedCode = (modalState.colorCode || "#000000").startsWith("#")
-      ? modalState.colorCode
-      : `#${modalState.colorCode}`;
+    // If "No Color" is checked, use pure white #FFFFFF
+    const colorToSave = modalState.noColor ? "#ffffff" : modalState.colorCode;
+
+    const normalizedCode = (colorToSave || "#000000").startsWith("#")
+      ? colorToSave
+      : `#${colorToSave}`;
 
     if (!/^#[0-9a-fA-F]{6}$/.test(normalizedCode)) {
       toast.error("کد رنگ معتبر نیست");
@@ -323,43 +330,100 @@ export default function ProductColorsPage() {
                         <input
                           type="text"
                           value={modalState.title}
-                          onChange={(e) =>
-                            setModalState((prev) => ({ ...prev, title: e.target.value }))
-                          }
+                          onChange={(e) => {
+                            const newTitle = e.target.value;
+                            // Auto-check "No Color" if title contains " کد" or starts with "کد"
+                            const shouldAutoCheck = newTitle.includes(" کد") || newTitle.startsWith("کد");
+
+                            if (process.env.NODE_ENV === "development") {
+                              console.log("Title changed:", newTitle, "| Should auto-check:", shouldAutoCheck);
+                            }
+
+                            setModalState((prev) => ({
+                              ...prev,
+                              title: newTitle,
+                              noColor: shouldAutoCheck ? true : prev.noColor,
+                              colorCode: shouldAutoCheck ? "#ffffff" : prev.colorCode,
+                            }));
+                          }}
                           className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
                           placeholder="مثلاً سرمه‌ای ملایم"
                         />
                       </div>
 
-                      <div>
-                        <label className="text-sm font-medium text-neutral-700">انتخاب از پالت</label>
-                        <div className="mt-3 rounded-xl border border-slate-200 p-4 bg-slate-50">
-                          <HexColorPicker color={modalState.colorCode} onChange={handleColorChange} />
-                        </div>
+                      {/* No Color Checkbox */}
+                      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <input
+                          type="checkbox"
+                          id="noColorCheckbox"
+                          checked={modalState.noColor}
+                          onChange={(e) =>
+                            setModalState((prev) => ({
+                              ...prev,
+                              noColor: e.target.checked,
+                              colorCode: e.target.checked ? "#ffffff" : prev.colorCode
+                            }))
+                          }
+                          className="h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
+                        />
+                        <label htmlFor="noColorCheckbox" className="text-sm text-neutral-700 cursor-pointer">
+                          بدون رنگ
+                        </label>
                       </div>
 
-                      <div>
-                        <label className="text-sm font-medium text-neutral-700">کد HEX</label>
-                        <HexColorInput
-                          prefixed
-                          color={modalState.colorCode}
-                          onChange={handleColorChange}
-                          aria-label="کد رنگ"
-                          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
-                        />
-                      </div>
+                      {!modalState.noColor ? (
+                        <>
+                          <div>
+                            <label className="text-sm font-medium text-neutral-700">انتخاب از پالت</label>
+                            <div className="mt-3 rounded-xl border border-slate-200 p-4 bg-slate-50">
+                              <HexColorPicker
+                                color={modalState.colorCode}
+                                onChange={handleColorChange}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium text-neutral-700">کد HEX</label>
+                            <HexColorInput
+                              prefixed
+                              color={modalState.colorCode}
+                              onChange={handleColorChange}
+                              aria-label="کد رنگ"
+                              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="mt-3 rounded-xl border border-slate-300 bg-slate-100 p-8">
+                          <div className="flex flex-col items-center justify-center text-center">
+                            <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
+                              <svg className="h-8 w-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                              </svg>
+                            </div>
+                            <p className="text-sm font-medium text-slate-600">
+                              برای تعیین رنگ گزینه بدون رنگ را خاموش کنید
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                         <p className="text-xs font-medium text-neutral-600 mb-3">پیش‌نمایش رنگ</p>
                         <div className="flex items-center gap-3">
                           <span
                             className="h-16 w-16 rounded-lg border-2 border-slate-300"
-                            style={{ backgroundColor: modalState.colorCode }}
+                            style={{ backgroundColor: modalState.noColor ? "#ffffff" : modalState.colorCode }}
                             aria-hidden="true"
                           />
                           <div className="text-sm">
-                            <p className="font-semibold text-neutral-800">{modalState.colorCode.toUpperCase()}</p>
-                            <p className="text-xs text-neutral-500 mt-1">رنگ انتخاب‌شده</p>
+                            <p className="font-semibold text-neutral-800">
+                              {modalState.noColor ? "#FFFFFF" : modalState.colorCode.toUpperCase()}
+                            </p>
+                            <p className="text-xs text-neutral-500 mt-1">
+                              {modalState.noColor ? "بدون رنگ" : "رنگ انتخاب‌شده"}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -368,30 +432,45 @@ export default function ProductColorsPage() {
                     {/* Right Column: Color Categories */}
                     <div className="space-y-4">
                       <p className="text-sm font-medium text-neutral-700">انتخاب از دسته‌بندی</p>
-                      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                        {Object.entries(COLOR_CATEGORIES).map(([key, category]) => (
-                          <div key={key}>
-                            <p className="text-xs font-semibold text-neutral-600 mb-2">{category.label}</p>
-                            <div className="grid grid-cols-10 gap-1.5">
-                              {category.colors.map((color) => (
-                                <button
-                                  type="button"
-                                  key={color}
-                                  onClick={() => handleColorChange(color)}
-                                  className={`h-8 w-8 rounded-lg border-2 transition-all ${
-                                    modalState.colorCode.toLowerCase() === color.toLowerCase()
-                                      ? "border-pink-500 ring-2 ring-pink-300 ring-offset-1"
-                                      : "border-slate-200 hover:border-slate-300"
-                                  }`}
-                                  style={{ backgroundColor: color }}
-                                  aria-label={`انتخاب رنگ ${color}`}
-                                  title={color}
-                                />
-                              ))}
+                      {!modalState.noColor ? (
+                        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                          {Object.entries(COLOR_CATEGORIES).map(([key, category]) => (
+                            <div key={key}>
+                              <p className="text-xs font-semibold text-neutral-600 mb-2">{category.label}</p>
+                              <div className="grid grid-cols-10 gap-1.5">
+                                {category.colors.map((color) => (
+                                  <button
+                                    type="button"
+                                    key={color}
+                                    onClick={() => handleColorChange(color)}
+                                    className={`h-8 w-8 rounded-lg border-2 transition-all ${
+                                      modalState.colorCode.toLowerCase() === color.toLowerCase()
+                                        ? "border-pink-500 ring-2 ring-pink-300 ring-offset-1"
+                                        : "border-slate-200 hover:border-slate-300"
+                                    }`}
+                                    style={{ backgroundColor: color }}
+                                    aria-label={`انتخاب رنگ ${color}`}
+                                    title={color}
+                                  />
+                                ))}
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-slate-300 bg-slate-100 p-8 h-[500px] flex items-center justify-center">
+                          <div className="flex flex-col items-center justify-center text-center">
+                            <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
+                              <svg className="h-8 w-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                              </svg>
+                            </div>
+                            <p className="text-sm font-medium text-slate-600">
+                              برای تعیین رنگ گزینه بدون رنگ را خاموش کنید
+                            </p>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
