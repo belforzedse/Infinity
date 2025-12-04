@@ -4,13 +4,8 @@ import type { Option } from "@/components/Kits/Form/Select";
 import Select from "@/components/Kits/Form/Select";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import type { CategoryData } from "@/services/super-admin/product/category/create";
-import { getAllCategories } from "@/services/super-admin/product/category/getAll";
-import {
-  productCategoryDataAtom,
-  productCategoryDataAtomPagination,
-} from "@/atoms/super-admin/products";
-import { useSetAtom } from "jotai";
 import classNames from "classnames";
+import toast from "react-hot-toast";
 
 interface CategoryFormData {
   name: string;
@@ -19,9 +14,12 @@ interface CategoryFormData {
 }
 
 const ImportCategorty = () => {
-  const { categoryOptions, createMainCategory, isCreateCategoryLoading } = useProductCategory();
-  const setCategoriesData = useSetAtom(productCategoryDataAtom);
-  const setCategoriesDataPagination = useSetAtom(productCategoryDataAtomPagination);
+  const {
+    categoryOptions,
+    createMainCategory,
+    isCreateCategoryLoading,
+    refreshCategoriesAfterCreate
+  } = useProductCategory();
 
   const [formData, setFormData] = useState<CategoryFormData>({
     name: "",
@@ -47,26 +45,34 @@ const ImportCategorty = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    // Validation
+    if (!formData.name.trim() || !formData.slug.trim()) {
+      toast.error("نام و نامک دسته‌بندی الزامی است");
+      return;
+    }
+
     const categoryData: CategoryData = {
-      Title: formData.name,
-      Slug: formData.slug,
+      Title: formData.name.trim(),
+      Slug: formData.slug.trim(),
     };
 
     if (formData.parent !== "") {
       categoryData.Parent = formData.parent;
     }
 
-    await createMainCategory(categoryData);
-    const response = await getAllCategories();
-    // getAllCategories returns PaginatedResponse<categoryResponseType>
-    // which has structure: { data: categoryResponseType[], meta: {...} }
-    setCategoriesData(response?.data || []);
-    setCategoriesDataPagination(response?.meta || {
-      currentPage: 1,
-      totalPages: 1,
-      totalItems: 0,
-      itemsPerPage: 25,
-    });
+    try {
+      // Create category
+      await createMainCategory(categoryData);
+
+      // Refresh the categories list
+      await refreshCategoriesAfterCreate();
+
+      // Reset form on success
+      setFormData({ name: "", slug: "", parent: "" });
+    } catch (error) {
+      // Error already logged and displayed by createMainCategory
+      console.error("Category creation failed:", error);
+    }
   };
 
   return (

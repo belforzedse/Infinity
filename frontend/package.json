@@ -20,8 +20,7 @@
     "test:coverage": "jest --coverage",
     "test:seo": "node scripts/test-seo.js",
     "clean": "rm -rf .next out node_modules/.cache",
-    "validate": "npm run type-check && npm run lint && npm run format:check",
-    "prepare": "cd .. && husky frontend/.husky || true"
+    "validate": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -107,7 +106,7 @@
     "eslint-plugin-tailwindcss": "^3.17.5",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.1.2",
-    "jsdom": "^26.1.0",
+    "jsdom": "^27.2.0",
     "postcss": "^8",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.14",
@@ -116,9 +115,9 @@
     "typescript": "^5"
   },
   "overrides": {
-    "jsdom": "^26.1.0",
+    "jsdom": "^27.2.0",
     "isomorphic-dompurify": {
-      "jsdom": "^26.1.0"
+      "jsdom": "^27.2.0"
     }
   }
 }

@@ -11,6 +11,8 @@ import type { CategoryData} from "@/services/super-admin/product/category/create
 import { createCategory } from "@/services/super-admin/product/category/create";
 import type { categoryResponseType } from "@/services/super-admin/product/category/getAll";
 import { usePathname } from "next/navigation";
+import toast from "react-hot-toast";
+import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 
 interface UseProductCategoryProps {
   isEditMode?: boolean;
@@ -147,11 +149,56 @@ export function useProductCategory(props?: UseProductCategoryProps) {
   const createMainCategory = async (category: CategoryData) => {
     try {
       setIsCreateCategoryLoading(true);
-      await createCategory(category);
+      const result = await createCategory(category);
+      toast.success("دسته‌بندی با موفقیت ایجاد شد");
+      return result;
+    } catch (error) {
+      const errorMessage = extractErrorMessage(error);
+      toast.error(translateErrorMessage(errorMessage, "خطا در ایجاد دسته‌بندی"));
+      throw error;
     } finally {
       setIsCreateCategoryLoading(false);
     }
   };
+
+  const refreshCategoriesAfterCreate = useCallback(async () => {
+    try {
+      setIsGetCategoriesLoading(true);
+
+      // Small delay to ensure DB consistency
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      const response = await getAllCategories();
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("refreshCategoriesAfterCreate: Response received:", response);
+      }
+
+      // Handle both response formats
+      if (Array.isArray(response)) {
+        setCategoriesData(response);
+        setCategoriesDataPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: response.length,
+          itemsPerPage: 25,
+        });
+      } else if (response?.data && Array.isArray(response.data)) {
+        setCategoriesData(response.data);
+        setCategoriesDataPagination(response.meta || {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: response.data.length,
+          itemsPerPage: 25,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to refresh categories:", error);
+      toast.error("خطا در بارگذاری مجدد دسته‌بندی‌ها");
+    } finally {
+      setIsGetCategoriesLoading(false);
+    }
+  }, [setCategoriesData, setCategoriesDataPagination]);
 
   const removeOtherCategory = (categoryToRemove: categoryResponseType) => {
     const updatedCategories = (productData as any).product_other_categories.filter(
@@ -178,5 +225,6 @@ export function useProductCategory(props?: UseProductCategoryProps) {
     isCreateCategoryLoading,
     fetchAllCategories,
     createMainCategory,
+    refreshCategoriesAfterCreate,
   };
 }
