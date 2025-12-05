@@ -11,6 +11,10 @@ interface AnimatedTableRowProps {
    */
   isNew?: boolean;
   /**
+   * Page transition mode: fade out old page rows / fade in new page rows without movement.
+   */
+  isPageTransitioning?: boolean;
+  /**
    * Kept for backward compatibility but not used internally.
    * Use this as the React `key` at the mapping site instead.
    *
@@ -41,6 +45,7 @@ interface AnimatedTableRowProps {
 export function AnimatedTableRow({
   children,
   isNew = false,
+  isPageTransitioning = false,
   rowKey, // unused, kept for compatibility
   draggable,
   onDragStart,
@@ -51,33 +56,39 @@ export function AnimatedTableRow({
   const isPresent = useIsPresent();
   const ease = cubicBezier(0.28, 0.84, 0.42, 1);
 
-  return (
-    <motion.tr
-      // Enable layout projection only for existing, present rows to keep movement smooth
-      layout={!isNew && isPresent ? "position" : false}
-      initial={
-        isNew
-          ? {
-              opacity: 0,
-            }
-          : false
+  const layoutMode = !isNew && isPresent && !isPageTransitioning ? "position" : false;
+  const initialState = isPageTransitioning
+    ? { opacity: 0 }
+    : isNew
+      ? { opacity: 0 }
+      : false;
+  const animateState = { opacity: 1 };
+  const exitState = isPageTransitioning
+    ? { opacity: 0 }
+    : { opacity: 0, x: 28, scale: 0.99 };
+
+  const transitionConfig = isPageTransitioning
+    ? {
+        type: "tween",
+        ease,
+        opacity: { duration: 0.18, ease },
       }
-      animate={{
-        opacity: 1,
-      }}
-      exit={{
-        opacity: 0,
-        x: 28, // slide out to the right on removal
-        scale: 0.99,
-      }}
-      transition={{
+    : {
         type: "tween",
         ease,
         layout: { duration: 0.22, ease, type: "tween" },
         opacity: { duration: isNew ? 0.26 : 0.2, ease },
         x: { duration: 0.24, ease },
         scale: { duration: 0.22, ease },
-      }}
+      };
+
+  return (
+    <motion.tr
+      layout={layoutMode}
+      initial={initialState}
+      animate={animateState}
+      exit={exitState}
+      transition={transitionConfig}
       draggable={draggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}

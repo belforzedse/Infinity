@@ -114,16 +114,19 @@ export function SuperAdminTable<TData, TValue>({
   const [internalLoading, setInternalLoading] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [refresh, setRefresh] = useAtom(refreshTable);
+  const [isPageTransitioning, setIsPageTransitioning] = useState(false);
   const [newlyAddedIds, setNewlyAddedIds] = useState<Set<string>>(new Set());
   const previousDataRef = useRef<TData[]>([]);
   const animationContextRef = useRef<string | null>(null);
   const newRowsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pageTransitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isFetchingRef = useRef(false);
   const fetchSeqRef = useRef(0);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const isPageVisibleRef = useRef(true);
+  const lastPageRef = useRef(page);
 
   const requestUrl = useMemo(() => {
     if (!url) return null;
@@ -238,6 +241,15 @@ export function SuperAdminTable<TData, TValue>({
           setTableData(newData);
           setHasLoadedOnce(true);
 
+          if (isPageTransitioning) {
+            if (pageTransitionTimeoutRef.current) {
+              clearTimeout(pageTransitionTimeoutRef.current);
+            }
+            pageTransitionTimeoutRef.current = setTimeout(() => {
+              setIsPageTransitioning(false);
+            }, 320);
+          }
+
           const total =
             (res as any)?.meta?.pagination?.total ??
             (Array.isArray(payload) ? payload.length : 0) ??
@@ -258,7 +270,7 @@ export function SuperAdminTable<TData, TValue>({
         }
       }
     },
-    [setTotalSize, hasLoadedOnce, updateAnimationState],
+    [setTotalSize, hasLoadedOnce, updateAnimationState, isPageTransitioning],
   );
 
   // Fetch on first mount and when the computed request URL changes
@@ -296,7 +308,8 @@ export function SuperAdminTable<TData, TValue>({
       isPageVisibleRef.current = !document.hidden;
       // Refresh data when page becomes visible (switched back from another tab)
       if (!document.hidden && requestUrl) {
-        runFetch(requestUrl, { force: true });
+        // Silent refresh to avoid visual skeleton; animations will handle diffs
+        runFetch(requestUrl, { force: true, silent: true });
       }
     };
 
@@ -305,6 +318,14 @@ export function SuperAdminTable<TData, TValue>({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [requestUrl, runFetch]);
+
+  // Track page transitions to swap animation style (fade only on page change)
+  useEffect(() => {
+    if (lastPageRef.current !== page) {
+      setIsPageTransitioning(true);
+      lastPageRef.current = page;
+    }
+  }, [page]);
 
   // Note: Automatic polling has been disabled on super admin pages to prevent
   // conflicts when admins are editing data. Data will update on manual refresh or
@@ -332,6 +353,9 @@ export function SuperAdminTable<TData, TValue>({
   useEffect(() => {
     return () => {
       clearNewRowsTimeout();
+      if (pageTransitionTimeoutRef.current) {
+        clearTimeout(pageTransitionTimeoutRef.current);
+      }
     };
   }, [clearNewRowsTimeout]);
 
@@ -388,6 +412,7 @@ export function SuperAdminTable<TData, TValue>({
   };
 
   const isLoading = loading ?? internalLoading;
+  const showSkeleton = isLoading && (isPageTransitioning || !hasLoadedOnce);
 
   return (
     <div className="w-full">
@@ -511,22 +536,23 @@ export function SuperAdminTable<TData, TValue>({
             </thead>
 
             <tbody>
-              {isLoading ? (
+              {showSkeleton ? (
                 <ReportTableSkeleton columns={columns.length} />
               ) : table.getRowModel().rows?.length ? (
                 <AnimatePresence mode="popLayout" initial={false}>
                   {table.getRowModel().rows.map((row) => {
                     const resolvedKey = resolveRowKey(row.original as TData);
-                    const rowKey = resolvedKey || String(row.id); // fallback avoids empty/unstable keys
-                    const isNew = rowKey ? newlyAddedIds.has(rowKey) : false;
+                  const rowKey = resolvedKey || String(row.id); // fallback avoids empty/unstable keys
+                  const isNew = rowKey ? newlyAddedIds.has(rowKey) : false;
 
-                    return (
-                      <AnimatedTableRow
-                        key={rowKey}
-                        rowKey={rowKey}
-                        isNew={isNew}
-                        draggable={draggable}
-                        onDragStart={() => handleDragStart(row)}
+                  return (
+                    <AnimatedTableRow
+                      key={rowKey}
+                      rowKey={rowKey}
+                      isNew={isNew}
+                      isPageTransitioning={isPageTransitioning}
+                      draggable={draggable}
+                      onDragStart={() => handleDragStart(row)}
                         onDragOver={(e) => handleDragOver(e, row)}
                         onDrop={(e) => handleDrop(e, row)}
                         className={twMerge(
