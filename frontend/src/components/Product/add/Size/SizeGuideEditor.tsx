@@ -5,6 +5,7 @@ interface SizeGuideEditorProps {
   initialData?: any[];
   columns: { key: string; title: string }[];
   onColumnTitleEdit: (columnKey: string, newTitle: string) => void;
+  onDataChange?: (data: any[], columns: { key: string; title: string }[]) => void;
 }
 
 const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
@@ -12,6 +13,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
   initialData = [],
   columns,
   onColumnTitleEdit,
+  onDataChange,
 }) => {
   const [data, setData] = useState<any[]>(initialData.length > 0 ? initialData : [{ size: "" }]);
   const [editingColumnTitle, setEditingColumnTitle] = useState<string | null>(null);
@@ -20,51 +22,57 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
   // Update local columns when props change
   React.useEffect(() => {
     setLocalColumns(columns);
-  }, [columns]);
+    setData(initialData.length > 0 ? initialData : [{ size: "" }]);
+  }, [columns, initialData]);
+
+  const syncData = (nextData: any[], nextCols = localColumns) => {
+    setData(nextData);
+    onDataChange?.(nextData, nextCols);
+  };
+
+  const syncColumns = (nextCols: { key: string; title: string }[]) => {
+    setLocalColumns(nextCols);
+    onDataChange?.(data, nextCols);
+  };
 
   const addRow = () => {
     const newRow: any = { size: "" };
     localColumns.forEach((col) => {
       newRow[col.key] = "";
     });
-    setData([...data, newRow]);
+    syncData([...data, newRow]);
   };
 
   const removeRow = (index: number) => {
-    setData(data.filter((_, i) => i !== index));
+    syncData(data.filter((_, i) => i !== index));
   };
 
   const addColumn = () => {
-    const columnName = prompt("نام ستون را وارد کنید:");
-    if (columnName) {
-      // Generate a unique key for the column
+    // Create an empty column that can be renamed inline
+    const key = `col-${Date.now()}`;
+    const newColumn = { key, title: "" };
 
-      // Create new column
-      const newColumn = { key: columnName, title: columnName };
+    const nextCols = [...localColumns, newColumn];
+    syncColumns(nextCols);
 
-      // Update local columns state
-      setLocalColumns([...localColumns, newColumn]);
+    const nextData = data.map((row) => ({ ...row, [key]: "" }));
+    syncData(nextData, nextCols);
 
-      // Update the data with the new column
-      setData(data.map((row) => ({ ...row, [columnName]: "" })));
-
-      // Notify parent component about the new column
-      onColumnTitleEdit(columnName, columnName);
-    }
+    setEditingColumnTitle(key);
   };
 
   const removeColumn = (columnKey: string) => {
     // Remove column from local columns state
-    setLocalColumns(localColumns.filter((col) => col.key !== columnKey));
+    const nextCols = localColumns.filter((col) => col.key !== columnKey);
+    syncColumns(nextCols);
 
     // Update the data by removing the column
-    setData(
-      data.map((row) => {
-        const newRow = { ...row };
-        delete newRow[columnKey];
-        return newRow;
-      }),
-    );
+    const nextData = data.map((row) => {
+      const newRow = { ...row };
+      delete newRow[columnKey];
+      return newRow;
+    });
+    syncData(nextData, nextCols);
 
     // Notify parent component about the removed column
     onColumnTitleEdit(columnKey, "");
@@ -73,7 +81,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
   const updateCell = (rowIndex: number, column: string, value: string) => {
     const newData = [...data];
     newData[rowIndex] = { ...newData[rowIndex], [column]: value };
-    setData(newData);
+    syncData(newData);
   };
 
   const handleSave = () => {
@@ -102,9 +110,10 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
     onColumnTitleEdit(columnKey, newTitle);
 
     // Update local columns state
-    setLocalColumns(
-      localColumns.map((col) => (col.key === columnKey ? { ...col, title: newTitle } : col)),
+    const nextCols = localColumns.map((col) =>
+      col.key === columnKey ? { ...col, title: newTitle } : col,
     );
+    syncColumns(nextCols);
 
     setEditingColumnTitle(null);
   };
@@ -176,7 +185,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                   className="group text-sm relative border-l border-slate-100 p-3 font-medium text-neutral-800"
                 >
                   <div className="flex items-center justify-between">
-                    {editingColumnTitle === column.key ? (
+                    {editingColumnTitle === column.key || !column.title ? (
                       <input
                         type="text"
                         defaultValue={column.title}
@@ -186,6 +195,7 @@ const SizeGuideEditor: React.FC<SizeGuideEditorProps> = ({
                             handleColumnTitleChange(column.key, e.currentTarget.value);
                           }
                         }}
+                        placeholder="نام ستون"
                         className="focus:ring-primary w-full rounded border border-slate-200 p-1 focus:outline-none focus:ring-1"
                         autoFocus
                       />

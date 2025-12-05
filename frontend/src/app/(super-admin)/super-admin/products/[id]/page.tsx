@@ -1,12 +1,12 @@
 "use client";
-import { use, useEffect, useMemo } from "react";
+import { use, useEffect, useMemo, useRef } from "react";
 import SetDetails from "@/components/Product/add/SetCategory/SetCategory";
 import Tabs from "@/components/Kits/Tabs";
 import type { TabItem } from "@/types/Tabs";
 import Overall from "@/components/Product/add/Overall";
 import IndexPhotoUploader from "@/components/Product/add/IndexPhotoUploader";
 import Variables from "@/components/Product/add/Variables";
-import Sizes from "@/components/Product/add/Size";
+import Sizes, { SizeGuideHandle } from "@/components/Product/add/Size";
 import { getProduct } from "@/services/super-admin/product/get";
 import { editProductDataAtom } from "@/atoms/super-admin/products";
 import { useAtom } from "jotai";
@@ -27,6 +27,7 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
   const { roleName } = useCurrentUser();
   const { fetchAllCategories } = useProductCategory();
   const { handleFetchTags } = useProductTag();
+  const sizeGuideRef = useRef<SizeGuideHandle | null>(null);
 
   // Redirect editors away from product pages
   useEffect(() => {
@@ -77,6 +78,9 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
         logger.info("productData2", { productData });
       }
 
+      const sizeSaveResult = await sizeGuideRef.current?.save?.();
+      if (sizeSaveResult === false) return;
+
       const result = await updateProduct(id, productData);
       if (result.success) {
         router.push("/super-admin/products");
@@ -125,7 +129,7 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
           {[
             <Overall key={"overall"} productData={productData} isEditMode />,
             <Variables key={"variables"} productId={Number(id)} />,
-            <Sizes key={"sizes"} productId={Number(id)} />,
+            <Sizes key={"sizes"} ref={sizeGuideRef} productId={Number(id)} />,
           ]}
         </Tabs>
       </div>
