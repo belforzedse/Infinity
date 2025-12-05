@@ -12,7 +12,7 @@ export default (config, { strapi }: { strapi: Strapi }) => {
   const limiter = RateLimit.middleware({
     skipFailedRequests: false, // Count failed attempts
     interval: { min: 10 }, // 10 minute window
-    max: 5, // Maximum 5 attempts per interval
+    max: 10, // Maximum 5 attempts per interval
     prefixKey: "login-rate-limit:", // Separate from OTP throttle
   });
 

@@ -10,7 +10,7 @@ export default (config, { strapi }: { strapi: Strapi }) => {
   const limiter = RateLimit.middleware({
     skipFailedRequests: true,
     interval: { min: 2 }, // Time window in minutes
-    max: 1, // Maximum number of requests per interval
+    max: 4, // Maximum number of requests per interval
   });
 
   return async (ctx, next) => {
