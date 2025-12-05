@@ -77,12 +77,15 @@ export default function SuperAdminLayoutContentWrapperMobile(props: Props) {
 
       <div className="mt-5">{children}</div>
       {hasPagination && (
-        <SuperAdminPagination
-          className="mt-4"
-          currentPage={currentPage}
-          totalPages={totalPages ?? 1}
-          onPageChange={handlePageChange}
-        />
+        <div className="sticky bottom-0 z-30 mt-4 flex justify-end">
+          <div className="rounded-xl border border-gray-200/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+            <SuperAdminPagination
+              currentPage={currentPage}
+              totalPages={totalPages ?? 1}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </div>
       )}
 
     </>

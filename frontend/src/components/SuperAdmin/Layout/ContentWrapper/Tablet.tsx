@@ -114,14 +114,16 @@ export default function SuperAdminLayoutContentWrapperTablet(props: Props) {
       )}
       <div className="card mt-2 p-4">{children}</div>
       {hasPagination && (
-        <SuperAdminPagination
-          className="mt-3"
-          currentPage={currentPage}
-          totalPages={totalPages ?? 1}
-          onPageChange={handlePageChange}
-        />
+        <div className="sticky bottom-0 z-30 mt-3 flex justify-end">
+          <div className="rounded-xl border border-gray-200/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur">
+            <SuperAdminPagination
+              currentPage={currentPage}
+              totalPages={totalPages ?? 1}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </div>
       )}
     </>
   );
 }
-

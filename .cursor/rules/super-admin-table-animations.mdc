@@ -1,0 +1,188 @@
+# Super Admin Table Animations
+
+This rule documents the animation system implemented for super-admin tables to provide smooth visual feedback when items are added or removed.
+
+## Overview
+
+The super-admin tables now use Framer Motion to animate row additions and deletions, replacing the previous optimistic delete pattern with direct API calls and visual animations.
+
+## Key Components
+
+### 1. AnimatedTableRow Component
+
+**Location:** `frontend/src/components/SuperAdmin/Table/AnimatedTableRow.tsx`
+
+A wrapper component that provides smooth animations for table rows:
+
+```typescript
+<AnimatedTableRow
+  rowKey={uniqueId}
+  isNew={boolean}
+  draggable={boolean}
+  onDragStart={handler}
+  onDragOver={handler}
+  onDrop={handler}
+  className={styles}
+>
+  {/* table cells */}
+</AnimatedTableRow>
+```
+
+**Animation Behaviors:**
+
+- **New Items**: Subtle scale-up with fade-in (`scale: 0.98 → 1`, `opacity: 0 → 1`)
+- **Removed Items**: Fade out then collapse height (`opacity: 1 → 0`, `height: auto → 0`)
+- **Existing Items**: Smooth repositioning with layout animations
+
+**Timing:**
+- Enter animation: 300ms (scale + fade)
+- Exit animation: 200ms fade + 200ms collapse (400ms total)
+- Layout shift: 300ms
+
+**Note:** The animation uses scale instead of vertical translation (y) to avoid creating overflow scrollbars in the table container.
+
+### 2. Table Component Updates
+
+**Location:** `frontend/src/components/SuperAdmin/Table/index.tsx`
+
+**Added State:**
+```typescript
+const [previousData, setPreviousData] = useState<TData[]>([]);
+const [newlyAddedIds, setNewlyAddedIds] = useState<Set<string>>(new Set());
+```
+
+**Key Changes:**
+
+1. **Track Previous Data**: Stores previous table data to compare with new data
+2. **Identify New Items**: Compares current vs previous data by ID to detect additions
+3. **Animate New Items**: Sets `isNew` prop for newly added rows
+4. **Auto-Clear Flag**: Removes "new" status after 500ms (animation completion)
+
+**Example Logic:**
+```typescript
+// In runFetch callback
+if (hasLoadedOnce && previousData.length > 0) {
+  const oldIds = new Set(previousData.map((item) => resolveRowKey(item)));
+  const addedIds = newData
+    .filter((item) => !oldIds.has(resolveRowKey(item)))
+    .map((item) => resolveRowKey(item));
+  
+  if (addedIds.length > 0) {
+    setNewlyAddedIds(new Set(addedIds));
+    setTimeout(() => setNewlyAddedIds(new Set()), 500);
+  }
+}
+```
+
+### 3. Remove Action Button Updates
+
+**Location:** `frontend/src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx`
+
+**Changes:**
+- **Removed**: `useOptimisticDelete` hook
+- **Added**: Direct API call with soft delete
+- **Behavior**: Shows simple success toast (no undo button)
+
+**Implementation:**
+```typescript
+const handleDelete = async () => {
+  try {
+    setIsDeleting(true);
+    const now = new Date().toISOString();
+    await apiClient.put(`${apiUrl}/${id}`, buildPayload(now));
+    setRefresh(true);
+    toast.success(`${itemName} با موفقیت حذف شد`);
+  } catch (error) {
+    toast.error(`خطا در حذف ${itemName}`);
+  } finally {
+    setIsDeleting(false);
+  }
+};
+```
+
+## Deleted/Unused Code
+
+The following files are no longer used but may exist for backward compatibility:
+
+- `frontend/src/hooks/useOptimisticDelete.tsx` - Optimistic delete hook (deprecated)
+- `frontend/src/lib/atoms/optimisticDelete.ts` - Optimistic delete atoms (deprecated)
+
+These can be safely removed if no other components reference them.
+
+## Usage Pattern
+
+### When Adding a New Item
+
+1. User creates a new item (e.g., product, user, category)
+2. API call succeeds and returns the new item
+3. `setRefresh(true)` is called to trigger table refresh
+4. Table fetches fresh data from server
+5. New item is detected by comparing IDs
+6. New item appears at top with slide-down animation
+7. Existing items smoothly reposition downward
+
+### When Deleting an Item
+
+1. User clicks delete button
+2. API call updates `removedAt` field (soft delete)
+3. `setRefresh(true)` is called
+4. Table fetches fresh data (filtered by `removedAt`)
+5. Removed item no longer in dataset
+6. AnimatePresence triggers exit animation
+7. Row fades out and collapses
+8. Other rows smoothly reposition upward
+
+## Animation Requirements
+
+**Dependencies:**
+- `framer-motion` (installed via npm)
+
+**Performance Considerations:**
+- Animations are GPU-accelerated (opacity, transform)
+- Large tables (50+ rows) tested and performant
+- Layout animations use `layout` prop for automatic FLIP animations
+
+## Example Usage
+
+```typescript
+// In a super-admin page component
+const handleCreateProduct = async () => {
+  const result = await createProduct(productData);
+  if (result.success) {
+    setRefresh(true); // Triggers table refresh with animations
+    router.push('/super-admin/products');
+  }
+};
+```
+
+## Testing Checklist
+
+- [x] Delete button works without optimistic UI
+- [x] Success toast shows after deletion
+- [x] New items appear at top with slide-in animation
+- [x] Deleted items fade out and collapse
+- [x] Other rows reposition smoothly
+- [x] No console errors related to atoms or optimistic delete
+
+## Styling Notes
+
+- Table must have visible overflow for animations to render
+- Animations respect RTL layout
+- Hover states maintained during animations
+- Drag-and-drop functionality preserved
+
+## Related Files
+
+- `frontend/src/components/SuperAdmin/Table/index.tsx` - Main table component
+- `frontend/src/components/SuperAdmin/Table/AnimatedTableRow.tsx` - Animation wrapper
+- `frontend/src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx` - Delete action
+- `frontend/src/app/(super-admin)/super-admin/products/add/page.tsx` - Example usage
+
+## Migration Notes
+
+If you have existing super-admin tables:
+
+1. Ensure `setRefresh(true)` is called after create/update/delete operations
+2. Remove any direct calls to `useOptimisticDelete` hook
+3. Remove optimistic delete imports from components
+4. Animations will work automatically with the updated table component
