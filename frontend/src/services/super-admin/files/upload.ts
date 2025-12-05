@@ -1,4 +1,5 @@
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import imageCompression from "browser-image-compression";
 import toast from "react-hot-toast";
 import { getAccessToken } from "@/utils/auth";
 
@@ -42,12 +43,37 @@ export type UploadedImage = {
 
 export type Response = UploadedImage[];
 
+const MAX_DIMENSION = 2560;
+const LARGE_FILE_THRESHOLD = 8 * 1024 * 1024; // compress only when it materially helps
+
+async function compressImageToWebP(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  if (file.size < LARGE_FILE_THRESHOLD && file.type === "image/webp") return file;
+
+  try {
+    const compressed = await imageCompression(file, {
+      maxSizeMB: 20,
+      maxWidthOrHeight: MAX_DIMENSION,
+      fileType: "image/webp",
+      initialQuality: 0.82,
+      useWebWorker: true,
+    });
+
+    const filename = file.name.replace(/\.[^.]+$/, "") + ".webp";
+    return new File([compressed], filename, { type: "image/webp", lastModified: Date.now() });
+  } catch (e) {
+    console.warn("Image compression failed, sending original", e);
+    return file;
+  }
+}
+
 export const uploadFile = async (file: File): Promise<Response | undefined> => {
   const endpoint = ENDPOINTS.FILE.UPLOAD;
 
   try {
     const formData = new FormData();
-    formData.append("files", file);
+    const processed = await compressImageToWebP(file);
+    formData.append("files", processed);
 
     const token = getAccessToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
