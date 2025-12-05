@@ -19,6 +19,7 @@ const PLPBottomNavigation = () => {
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const bottomPadding = `calc(${isStandalone ? "env(safe-area-inset-bottom)" : "0px"} + 8px)`;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -108,7 +109,7 @@ const PLPBottomNavigation = () => {
         data-bottom-nav
         className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white lg:hidden"
         style={{
-          paddingBottom: isStandalone ? "env(safe-area-inset-bottom)" : "0",
+          paddingBottom: bottomPadding,
         }}
       >
         <div className="flex items-center justify-between px-4 py-2.5">
