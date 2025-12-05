@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 // import SizeGuide from "./Guide";
 import SizeTable from "./Table";
 import SizeGuideEditor from "./SizeGuideEditor";
@@ -9,45 +9,63 @@ import {
 } from "@/services/super-admin/product/size-helper/create";
 import { toast } from "react-hot-toast";
 import { normalizeSizeGuideData, serializeSizeGuideMatrix } from "@/utils/sizeGuide";
+import { atom, useAtom } from "jotai";
 
 interface SizeProps {
   productId: number;
 }
 
-const Sizes: React.FC<SizeProps> = ({ productId }) => {
-  const [sizeData, setSizeData] = useState<any[]>([]);
-  const [columns, setColumns] = useState<{ key: string; title: string }[]>([]);
-  const [loading, setLoading] = useState(true);
+export interface SizeGuideHandle {
+  save: () => Promise<boolean>;
+}
+
+const sizeGuideDraftAtom = atom<
+  Record<number, { data: any[]; columns: { key: string; title: string }[]; helperId?: number | null }>
+>({});
+
+const Sizes = forwardRef<SizeGuideHandle, SizeProps>(({ productId }, ref) => {
+  const [drafts, setDrafts] = useAtom(sizeGuideDraftAtom);
+  const initialDraft = drafts[productId];
+
+  const [sizeData, setSizeData] = useState<any[]>(initialDraft?.data || []);
+  const [columns, setColumns] = useState<{ key: string; title: string }[]>(
+    initialDraft?.columns || [],
+  );
+  const [loading, setLoading] = useState(!initialDraft);
   const [editing, setEditing] = useState(false);
-  const [helperId, setHelperId] = useState<number | null>(null);
+  const [helperId, setHelperId] = useState<number | null>(initialDraft?.helperId ?? null);
+
+  const startEditing = () => {
+    // If there is no data loaded yet, seed a minimal editable grid
+    if (sizeData.length === 0 && columns.length === 0) {
+      const blankColumns = [
+        { key: "metric-1", title: "" },
+        { key: "metric-2", title: "" },
+      ];
+      setColumns(blankColumns);
+      setSizeData([{ size: "" }]);
+    }
+    setEditing(true);
+  };
 
   const fetchSizeHelper = useCallback(async () => {
+    if (loading === false && sizeData.length > 0) return;
+
     try {
       const response = await getProductSizeHelper(productId);
-      console.log("🔍 Size helper response:", response);
+      const helper = response.data?.[0];
 
-      if (response.data && response.data.length > 0) {
-        const helperData = response.data[0].attributes.Helper || [];
-        console.log("🔍 Helper data:", helperData);
-        setHelperId(response.data[0].id);
-
-        if (helperData && helperData.length > 0) {
-          const { rows, headers } = normalizeSizeGuideData(helperData);
-          console.log("🔍 Normalized rows:", rows);
-          console.log("🔍 Normalized headers:", headers);
-          setColumns(
-            headers.map((header) => ({
-              key: header,
-              title: header,
-            })),
-          );
+      if (helper) {
+        setHelperId(helper.id);
+        const helperData = helper.attributes.Helper || [];
+        const { rows, headers } = normalizeSizeGuideData(helperData);
+        if (rows.length > 0 || headers.length > 0) {
+          setColumns(headers.map((header) => ({ key: header, title: header })));
           setSizeData(rows);
         } else {
-          console.log("🔍 No helper data, setting defaults");
           setDefaultData();
         }
       } else {
-        console.log("🔍 No response data or empty array, setting defaults");
         setDefaultData();
       }
     } catch (error) {
@@ -57,31 +75,32 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
     } finally {
       setLoading(false);
     }
-  }, [productId]);
+  }, [loading, productId, sizeData.length]);
 
   useEffect(() => {
     fetchSizeHelper();
   }, [fetchSizeHelper]);
 
+  // Persist drafts so tab changes don't lose unsaved edits
+  useEffect(() => {
+    setDrafts((prev) => ({
+      ...prev,
+      [productId]: { data: sizeData, columns, helperId },
+    }));
+  }, [productId, sizeData, columns, helperId, setDrafts]);
+
   const setDefaultData = () => {
-    setColumns([
-      { key: "دور سینه", title: "دور سینه" },
-      { key: "دور کمر", title: "دور کمر" },
-      { key: "دور باسن", title: "دور باسن" },
-    ]);
-    setSizeData([
-      { size: "S", "دور سینه": "", "دور کمر": "", "دور باسن": "" },
-      { size: "M", "دور سینه": "", "دور کمر": "", "دور باسن": "" },
-      { size: "L", "دور سینه": "", "دور کمر": "", "دور باسن": "" },
-    ]);
+    // No default rows/columns on view; show empty state until user edits/creates
+    setColumns([]);
+    setSizeData([]);
   };
 
-  const handleSave = async (data: any[]) => {
+  const handleSave = useCallback(async (data: any[]) => {
     try {
       const helperMatrix = serializeSizeGuideMatrix(data, columns);
       if (!helperMatrix.length) {
         toast.error("لطفاً جدول راهنمای سایز را تکمیل کنید");
-        return;
+        return false;
       }
 
       const helperData = {
@@ -101,11 +120,13 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
       toast.success("راهنمای سایز با موفقیت ذخیره شد");
 
       // Don't call fetchSizeHelper() here as it would reset the column titles
+      return true;
     } catch (error) {
       console.error("Error saving size helper:", error);
       toast.error("خطا در ذخیره راهنمای سایز");
+      return false;
     }
-  };
+  }, [columns, helperId, productId]);
 
   const handleColumnTitleEdit = (columnKey: string, newTitle: string) => {
     // If newTitle is empty, it means the column is being removed
@@ -126,6 +147,17 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
     }
   };
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      save: async () => {
+        const payload = editing ? sizeData : sizeData;
+        return handleSave(payload);
+      },
+    }),
+    [editing, sizeData, handleSave],
+  );
+
   if (loading) {
     return <div>در حال بارگذاری راهنمای سایز...</div>;
   }
@@ -139,11 +171,15 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
           initialData={sizeData}
           columns={columns}
           onColumnTitleEdit={handleColumnTitleEdit}
+          onDataChange={(nextData, nextColumns) => {
+            setSizeData(nextData);
+            setColumns(nextColumns);
+          }}
         />
       ) : sizeData.length > 0 ? (
         <div className="relative">
           <button
-            onClick={() => setEditing(true)}
+            onClick={startEditing}
             className="text-sm absolute right-4 top-4 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-md transition-colors duration-200 hover:bg-blue-700"
           >
             ویرایش راهنما
@@ -163,6 +199,8 @@ const Sizes: React.FC<SizeProps> = ({ productId }) => {
       )}
     </div>
   );
-};
+});
+
+Sizes.displayName = "Sizes";
 
 export default Sizes;

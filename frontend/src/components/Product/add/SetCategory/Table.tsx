@@ -1,17 +1,20 @@
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
-import React from "react";
-import DeleteIcon from "../../Icons/DeleteIcon";
+import CheckIcon from "@/components/Kits/Icons/CheckIcon";
+import CloseIcon from "@/components/PLP/Icons/CloseIcon";
+import React, { useState } from "react";
 import {
   productCategoryDataAtom,
   productCategoryDataAtomPagination,
 } from "@/atoms/super-admin/products";
 import { useSetAtom } from "jotai";
-import { deleteCategory } from "@/services/super-admin/product/category/delete";
 import type {
   categoryResponseType} from "@/services/super-admin/product/category/getAll";
 import {
   getAllCategories,
 } from "@/services/super-admin/product/category/getAll";
+import { updateCategory } from "@/services/super-admin/product/category/update";
+import { toast } from "react-hot-toast";
+import { X, Check } from "lucide-react";
 
 interface SetCategoryTableProps {
   categories: categoryResponseType[];
@@ -20,9 +23,12 @@ interface SetCategoryTableProps {
 const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
   const setCategoriesData = useSetAtom(productCategoryDataAtom);
   const setCategoriesDataPagination = useSetAtom(productCategoryDataAtomPagination);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftTitle, setDraftTitle] = useState<string>("");
+  const [draftSlug, setDraftSlug] = useState<string>("");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    await deleteCategory(id);
+  const refreshCategories = async () => {
     const response = await getAllCategories();
     // getAllCategories returns PaginatedResponse<categoryResponseType>
     // which has structure: { data: categoryResponseType[], meta: {...} }
@@ -33,6 +39,35 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
       totalItems: 0,
       itemsPerPage: 25,
     });
+  };
+
+  const handleEditClick = (category: categoryResponseType) => {
+    setEditingId(category.id.toString());
+    setDraftTitle(category.attributes.Title || "");
+    setDraftSlug(category.attributes.Slug || "");
+  };
+
+  const handleSave = async (category: categoryResponseType) => {
+    if (!draftTitle.trim() || !draftSlug.trim()) {
+      toast.error("لطفاً نام و نامک را وارد کنید");
+      return;
+    }
+    try {
+      setSavingId(category.id.toString());
+      await updateCategory(category.id, {
+        Title: draftTitle.trim(),
+        Slug: draftSlug.trim(),
+        Parent: category.attributes.Parent || undefined,
+      });
+      toast.success("دسته‌بندی به‌روزرسانی شد");
+      setEditingId(null);
+      await refreshCategories();
+    } catch (error) {
+      console.error("Failed to update category", error);
+      toast.error("خطا در به‌روزرسانی دسته‌بندی");
+    } finally {
+      setSavingId(null);
+    }
   };
 
   // Split categories into two columns
@@ -60,28 +95,60 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
             {columnCategories.map((category) => (
               <tr key={`${keyPrefix}-${category.id}`} className="">
                 <td className="text-sm py-3 text-right text-neutral-800">
-                  {category.attributes.Title}
+                  {editingId === category.id.toString() ? (
+                    <input
+                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-pink-400 focus:outline-none"
+                      value={draftTitle}
+                      onChange={(e) => setDraftTitle(e.target.value)}
+                    />
+                  ) : (
+                    category.attributes.Title
+                  )}
                 </td>
                 <td className="text-sm py-3 text-right text-neutral-800">
-                  {category.attributes.Slug}
+                  {editingId === category.id.toString() ? (
+                    <input
+                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-pink-400 focus:outline-none"
+                      value={draftSlug}
+                      onChange={(e) => setDraftSlug(e.target.value)}
+                    />
+                  ) : (
+                    category.attributes.Slug
+                  )}
                 </td>
                 <td className="text-sm py-3 text-right text-neutral-800">
                   {category.attributes.Parent ? category.attributes.Parent : ""}
                 </td>
                 <td className="text-sm py-3 text-right text-neutral-800">
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => {}}
-                      className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
-                    >
-                      <EditIcon />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category.id.toString())}
-                      className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
-                    >
-                      <DeleteIcon className="h-5 w-5" />
-                    </button>
+                    {editingId === category.id.toString() ? (
+                      <>
+                        <button
+                          onClick={() => handleSave(category)}
+                          disabled={savingId === category.id.toString()}
+                          className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-green-600 disabled:opacity-60"
+                          title="ذخیره"
+                        >
+                          <Check className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          disabled={savingId === category.id.toString()}
+                          className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-red-600 disabled:opacity-60"
+                          title="انصراف"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleEditClick(category)}
+                        className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"
+                        title="ویرایش"
+                      >
+                        <EditIcon />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

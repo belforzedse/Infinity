@@ -1,6 +1,6 @@
 "use client";
 
-import { cubicBezier, motion, useIsPresent } from "framer-motion";
+import { cubicBezier, motion, type Transition, useIsPresent } from "framer-motion";
 import type { ReactNode, DragEvent } from "react";
 
 interface AnimatedTableRowProps {
@@ -67,7 +67,7 @@ export function AnimatedTableRow({
     ? { opacity: 0 }
     : { opacity: 0, x: 28, scale: 0.99 };
 
-  const transitionConfig = isPageTransitioning
+  const transitionConfig: Transition = isPageTransitioning
     ? {
         type: "tween",
         ease,

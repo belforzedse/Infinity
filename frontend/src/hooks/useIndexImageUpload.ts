@@ -96,12 +96,19 @@ const useIndexImageUpload = ({
   };
 
   const handlePreviewClick = async () => {
+    // If we have a local preview (e.g., just uploaded), open that first
+    if (imagePreview) {
+      window.open(imagePreview, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     try {
-      if (!productData.CoverImage?.data?.id) {
+      const fileId = productData.CoverImage?.data?.id;
+      if (!fileId) {
         toast.error("تصویری انتخاب نشده است");
         return;
       }
-      const response = await Download(productData.CoverImage.data.id.toString());
+      const response = await Download(fileId.toString());
       if (response?.url) {
         window.open(resolveAssetUrl(response.url), "_blank", "noopener,noreferrer");
       } else {
