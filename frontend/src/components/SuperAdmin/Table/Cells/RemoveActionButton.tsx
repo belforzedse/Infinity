@@ -6,7 +6,6 @@ import SuperAdminTableCellActionButton from "./ActionButton";
 import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { refreshTable } from "..";
-import { useOptimisticDelete } from "@/hooks/useOptimisticDelete";
 import { useState } from "react";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -22,7 +21,6 @@ type Props = {
 export default function RemoveActionButton(props: Props) {
   const { isRemoved, id, apiUrl, itemName = "محصول", payloadFormatter } = props;
   const [, setRefresh] = useAtom(refreshTable);
-  const { deleteItem } = useOptimisticDelete();
   const { isStoreManager } = useCurrentUser();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showActionDialog, setShowActionDialog] = useState(false);
@@ -70,16 +68,19 @@ export default function RemoveActionButton(props: Props) {
   };
 
   const handleDelete = async () => {
-    // Delete action with optimistic update (only when not removed)
-    setIsDeleting(true);
-    await deleteItem({
-      apiUrl,
-      itemId: id,
-      itemName,
-      payloadFormatter,
-      onSuccess: () => setIsDeleting(false),
-      onError: () => setIsDeleting(false),
-    });
+    // Soft delete action - directly call API
+    try {
+      setIsDeleting(true);
+      const now = new Date().toISOString();
+      await apiClient.put(`${apiUrl}/${id}`, buildPayload(now));
+      setRefresh(true);
+      toast.success(`${itemName} با موفقیت حذف شد`);
+    } catch (error) {
+      toast.error(`خطا در حذف ${itemName}`);
+      console.error("Failed to delete item:", error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handlePermanentDeleteClick = () => {
