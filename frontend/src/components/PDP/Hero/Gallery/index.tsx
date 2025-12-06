@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import ThumbnailList from "./ThumbnailList";
 import SingleImage from "./SingleImage";
+import { usePreloadOnIntersect } from "@/utils/imagePreloader";
 
 type Props = {
   assets: {
@@ -38,25 +39,49 @@ export default function PDPHeroGallery(props: Props) {
     setSelectedImage(assets[previousIndex].id);
   }
 
-  // Preload neighbors for smoother transitions
+  const galleryRef = useRef<HTMLDivElement>(null);
+
+  // Preload neighbors for smoother transitions using intersection observer
   useEffect(() => {
     if (!selectedImage) return;
     const index = assets.findIndex((a) => a.id === selectedImage);
     if (index === -1) return;
-    const preload = (src: string) => {
-      try {
-        const img = new Image();
-        img.src = src;
-      } catch {}
-    };
+
+    // Preload next and previous images
     const next = assets[(index + 1) % assets.length];
     const prev = assets[(index - 1 + assets.length) % assets.length];
-    if (next?.type === "image") preload(next.src);
-    if (prev?.type === "image") preload(prev.src);
+    const imagesToPreload: string[] = [];
+
+    if (next?.type === "image") imagesToPreload.push(next.src);
+    if (prev?.type === "image") imagesToPreload.push(prev.src);
+
+    // Use intersection observer for progressive loading
+    if (imagesToPreload.length > 0 && galleryRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Preload images when gallery enters viewport
+              imagesToPreload.forEach((src) => {
+                try {
+                  const img = new Image();
+                  img.src = src;
+                } catch {}
+              });
+              // Unobserve after preloading to prevent redundant work
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { rootMargin: "200px" },
+      );
+      observer.observe(galleryRef.current);
+      return () => observer.disconnect();
+    }
   }, [selectedImage, assets]);
 
   return (
-    <div className="top-2 flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row">
+    <div ref={galleryRef} className="top-2 flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row">
       <div className="hidden xl:block">
         <ThumbnailList
           assets={assets}
