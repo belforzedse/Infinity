@@ -16,14 +16,16 @@ import { Suspense } from "react";
 import { useFreshDataOnVisibility } from "@/hooks/useFreshDataOnVisibility";
 import { ConsentManager } from "@/components/Analytics/ConsentManager";
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
+import { SharedElementTransitionProvider } from "@/contexts/SharedElementTransitionContext";
 
 export default function Providers({ children }: { children: ReactNode }) {
   // Enable automatic data refresh on all pages when tab becomes visible (10 min debounce)
   useFreshDataOnVisibility();
   return (
     <Provider store={jotaiStore}>
-      {/* Consent Manager for GDPR/CCPA compliance */}
-      <ConsentManager />
+      <SharedElementTransitionProvider>
+        {/* Consent Manager for GDPR/CCPA compliance */}
+        <ConsentManager />
       {/*
        * Global UI helpers are registered here so that pages throughout the app
        * can rely on shared behavior without needing to include these components
@@ -46,6 +48,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       {children}
       <GlobalLoadingOverlay />
       <PWAInstallPrompt />
+      </SharedElementTransitionProvider>
     </Provider>
   );
 }
