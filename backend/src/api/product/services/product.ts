@@ -20,6 +20,7 @@ export default factories.createCoreService(
 
       // Create a search filter for product name, description, etc.
       // Exclude trashed products (removedAt should be null)
+      // Only include Active products (exclude draft/InActive products)
       const filters: any = {
         $and: [
           {
@@ -29,6 +30,7 @@ export default factories.createCoreService(
             ],
           },
           { removedAt: { $null: true } },
+          { Status: "Active" },
         ],
       };
 

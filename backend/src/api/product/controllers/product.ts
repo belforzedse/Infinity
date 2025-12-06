@@ -98,10 +98,12 @@ export default factories.createCoreController(
         strapi.log.info(`[Product.findBySlug] Looking up product with slug/ID: "${decodedSlug}" (original: "${slug}")`);
 
         // Find product by slug - try exact match first
+        // Only include Active products (exclude draft/InActive products)
         let products = await strapi.entityService.findMany("api::product.product", {
           filters: {
             Slug: decodedSlug,
             removedAt: { $null: true }, // Exclude trashed products
+            Status: "Active", // Only return active products
           },
           populate: PRODUCT_POPULATE,
           pagination: { limit: 1 },
@@ -117,12 +119,16 @@ export default factories.createCoreController(
             const rawProducts = await knex('products')
               .where('slug', decodedSlug)
               .whereNull('removed_at')
+              .where('status', 'Active') // Only return active products
               .limit(1);
 
             if (rawProducts.length > 0) {
               const productId = rawProducts[0].id;
               const foundProducts = await strapi.entityService.findMany("api::product.product", {
-                filters: { id: productId },
+                filters: { 
+                  id: productId,
+                  Status: "Active", // Only return active products
+                },
                 populate: PRODUCT_POPULATE,
                 pagination: { limit: 1 },
               });
@@ -149,6 +155,7 @@ export default factories.createCoreController(
               filters: {
                 id: productId,
                 removedAt: { $null: true }, // Exclude trashed products
+                Status: "Active", // Only return active products
               },
               populate: PRODUCT_POPULATE,
               pagination: { limit: 1 },
