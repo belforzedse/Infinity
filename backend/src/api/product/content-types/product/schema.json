@@ -34,7 +34,7 @@
       ]
     },
     "Description": {
-      "type": "text"
+      "type": "richtext"
     },
     "Status": {
       "type": "enumeration",

@@ -1,4 +1,5 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
+import DOMPurify from "isomorphic-dompurify";
 
 type Props = {
   title: string;
@@ -7,6 +8,12 @@ type Props = {
 
 export default function PDPHeroInfoFAQItem(props: Props) {
   const { title, content } = props;
+
+  // Check if content contains HTML tags
+  const hasHTML = /<[^>]+>/.test(content);
+  
+  // Sanitize HTML content if it contains HTML, otherwise use as plain text
+  const sanitizedContent = hasHTML ? DOMPurify.sanitize(content) : content;
 
   return (
     <Disclosure as="div" className="w-full">
@@ -24,7 +31,17 @@ export default function PDPHeroInfoFAQItem(props: Props) {
           transition
           className="origin-top text-neutral-500 transition duration-200 ease-out data-[closed]:-translate-y-6 data-[closed]:opacity-0"
         >
-          {content}
+          {hasHTML ? (
+            <div
+              className="prose prose-sm prose-neutral max-w-none prose-headings:font-semibold prose-p:text-neutral-500 prose-p:leading-relaxed prose-strong:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline"
+              dir="rtl"
+              dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+            />
+          ) : (
+            <div className="text-neutral-500" dir="rtl">
+              {content}
+            </div>
+          )}
         </DisclosurePanel>
       </div>
     </Disclosure>

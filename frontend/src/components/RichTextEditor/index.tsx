@@ -94,6 +94,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   readOnly?: boolean;
   className?: string;
+  simplified?: boolean;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -102,6 +103,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = "شروع به نوشتن کنید...",
   readOnly = false,
   className = "",
+  simplified = false,
 }) => {
   const [viewMode, setViewMode] = React.useState<"visual" | "code">("visual");
   const [codeValue, setCodeValue] = React.useState(content || "");
@@ -272,7 +274,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       )}
 
       <div className="relative">
-        {!readOnly && viewMode === "visual" && <RichTextToolbar editor={editor} />}
+        {!readOnly && viewMode === "visual" && <RichTextToolbar editor={editor} simplified={simplified} />}
 
         <div className="min-h-[200px] p-5">
         {viewMode === "visual" ? (

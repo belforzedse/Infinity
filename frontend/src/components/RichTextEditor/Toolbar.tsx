@@ -44,6 +44,7 @@ import ProductShortcodeModal from "./ProductShortcodeModal";
 
 interface ToolbarProps {
   editor: Editor;
+  simplified?: boolean;
 }
 
 const ToolbarButton: React.FC<{
@@ -75,7 +76,7 @@ const Divider: React.FC = () => (
   <div className="w-px h-6 bg-neutral-200 mx-1" />
 );
 
-const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
+const RichTextToolbar: React.FC<ToolbarProps> = ({ editor, simplified = false }) => {
   // Force re-render when editor state changes (cursor, selection, formatting)
   // This ensures toolbar buttons reflect the current editor state in real-time
   const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
@@ -211,8 +212,8 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
 
   return (
     <>
-      <div className="sticky top-4 z-30 mb-4 flex justify-center">
-        <div className="flex w-fit max-w-full flex-wrap items-center justify-center gap-1 rounded-3xl border border-slate-200 bg-white/10 px-4 py-2.5 shadow-lg backdrop-blur-lg transition-all">
+      <div className={`${simplified ? "" : "sticky top-4 z-30"} mb-4 flex ${simplified ? "justify-start border-b border-slate-200" : "justify-center"}`}>
+        <div className={`flex w-fit max-w-full flex-wrap items-center ${simplified ? "justify-end" : "justify-center"} gap-1 ${simplified ? "": "rounded-3xl border border-slate-200"} bg-white/10 px-4 py-2.5 ${simplified ? "" : "shadow-lg"} backdrop-blur-lg transition-all`}>
       {/* Headings */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -235,27 +236,31 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
       >
         <Heading3 size={16} />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-        isActive={editor.isActive("heading", { level: 4 })}
-        title="عنوان 4"
-      >
-        <Heading4 size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
-        isActive={editor.isActive("heading", { level: 5 })}
-        title="عنوان 5"
-      >
-        <Heading5 size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
-        isActive={editor.isActive("heading", { level: 6 })}
-        title="عنوان 6"
-      >
-        <Heading6 size={16} />
-      </ToolbarButton>
+      {!simplified && (
+        <>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+            isActive={editor.isActive("heading", { level: 4 })}
+            title="عنوان 4"
+          >
+            <Heading4 size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+            isActive={editor.isActive("heading", { level: 5 })}
+            title="عنوان 5"
+          >
+            <Heading5 size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
+            isActive={editor.isActive("heading", { level: 6 })}
+            title="عنوان 6"
+          >
+            <Heading6 size={16} />
+          </ToolbarButton>
+        </>
+      )}
 
       <Divider />
 
@@ -281,147 +286,151 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
       >
         <Underline size={16} />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        isActive={editor.isActive("strike")}
-        title="خط خورده"
-      >
-        <Strikethrough size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        isActive={editor.isActive("code")}
-        title="کد"
-      >
-        <Code size={16} />
-      </ToolbarButton>
-      <ToolbarButton onClick={openLinkDialog} isActive={editor.isActive("link")} title="افزودن لینک">
-        <Link2 size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().unsetLink().run()}
-        disabled={!editor.isActive("link")}
-        title="حذف لینک"
-      >
-        <Link2Off size={16} />
-      </ToolbarButton>
+      {!simplified && (
+        <>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            isActive={editor.isActive("strike")}
+            title="خط خورده"
+          >
+            <Strikethrough size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            isActive={editor.isActive("code")}
+            title="کد"
+          >
+            <Code size={16} />
+          </ToolbarButton>
+          <ToolbarButton onClick={openLinkDialog} isActive={editor.isActive("link")} title="افزودن لینک">
+            <Link2 size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().unsetLink().run()}
+            disabled={!editor.isActive("link")}
+            title="حذف لینک"
+          >
+            <Link2Off size={16} />
+          </ToolbarButton>
 
-      <Divider />
+          <Divider />
 
-      {/* Subscript/Superscript */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleSubscript().run()}
-        isActive={editor.isActive("subscript")}
-        title="زیرنویس"
-      >
-        <Subscript size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleSuperscript().run()}
-        isActive={editor.isActive("superscript")}
-        title="بالانویس"
-      >
-        <Superscript size={16} />
-      </ToolbarButton>
+          {/* Subscript/Superscript */}
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleSubscript().run()}
+            isActive={editor.isActive("subscript")}
+            title="زیرنویس"
+          >
+            <Subscript size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleSuperscript().run()}
+            isActive={editor.isActive("superscript")}
+            title="بالانویس"
+          >
+            <Superscript size={16} />
+          </ToolbarButton>
 
-      <Divider />
+          <Divider />
 
-      {/* Text Alignment */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        isActive={editor.isActive({ textAlign: "left" })}
-        title="چپ چین"
-      >
-        <AlignLeft size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        isActive={editor.isActive({ textAlign: "center" })}
-        title="وسط چین"
-      >
-        <AlignCenter size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        isActive={editor.isActive({ textAlign: "right" })}
-        title="راست چین"
-      >
-        <AlignRight size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-        isActive={editor.isActive({ textAlign: "justify" })}
-        title="تراز"
-      >
-        <AlignJustify size={16} />
-      </ToolbarButton>
+          {/* Text Alignment */}
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            isActive={editor.isActive({ textAlign: "left" })}
+            title="چپ چین"
+          >
+            <AlignLeft size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            isActive={editor.isActive({ textAlign: "center" })}
+            title="وسط چین"
+          >
+            <AlignCenter size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            isActive={editor.isActive({ textAlign: "right" })}
+            title="راست چین"
+          >
+            <AlignRight size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+            isActive={editor.isActive({ textAlign: "justify" })}
+            title="تراز"
+          >
+            <AlignJustify size={16} />
+          </ToolbarButton>
 
-      <Divider />
+          <Divider />
 
-      {/* Lists */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        isActive={editor.isActive("bulletList")}
-        title="لیست نقطه‌ای"
-      >
-        <List size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        isActive={editor.isActive("orderedList")}
-        title="لیست شماره‌دار"
-      >
-        <ListOrdered size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleTaskList().run()}
-        isActive={editor.isActive("taskList")}
-        title="لیست وظایف"
-      >
-        <CheckSquare size={16} />
-      </ToolbarButton>
+          {/* Lists */}
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            isActive={editor.isActive("bulletList")}
+            title="لیست نقطه‌ای"
+          >
+            <List size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            isActive={editor.isActive("orderedList")}
+            title="لیست شماره‌دار"
+          >
+            <ListOrdered size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+            isActive={editor.isActive("taskList")}
+            title="لیست وظایف"
+          >
+            <CheckSquare size={16} />
+          </ToolbarButton>
 
-      <Divider />
+          <Divider />
 
-      {/* Block Elements */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        isActive={editor.isActive("blockquote")}
-        title="نقل قول"
-      >
-        <Quote size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        isActive={editor.isActive("codeBlock")}
-        title="بلوک کد"
-      >
-        <Code2 size={16} />
-      </ToolbarButton>
+          {/* Block Elements */}
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            isActive={editor.isActive("blockquote")}
+            title="نقل قول"
+          >
+            <Quote size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            isActive={editor.isActive("codeBlock")}
+            title="بلوک کد"
+          >
+            <Code2 size={16} />
+          </ToolbarButton>
 
-      <Divider />
+          <Divider />
 
-      {/* Media & Elements */}
-      <ToolbarButton onClick={openImageDialog} title="افزودن تصویر">
-        <Image size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        title="خط افقی"
-      >
-        <Minus size={16} />
-      </ToolbarButton>
-      <ToolbarButton onClick={() => setShowTableBuilder(true)} title="افزودن جدول">
-        <Table size={16} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => setShowProductShortcodeModal(true)}
-        title="افزودن کاروسل محصولات"
-      >
-        <ShoppingBag size={16} />
-      </ToolbarButton>
+          {/* Media & Elements */}
+          <ToolbarButton onClick={openImageDialog} title="افزودن تصویر">
+            <Image size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            title="خط افقی"
+          >
+            <Minus size={16} />
+          </ToolbarButton>
+          <ToolbarButton onClick={() => setShowTableBuilder(true)} title="افزودن جدول">
+            <Table size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => setShowProductShortcodeModal(true)}
+            title="افزودن کاروسل محصولات"
+          >
+            <ShoppingBag size={16} />
+          </ToolbarButton>
 
-      <Divider />
+          <Divider />
+        </>
+      )}
 
       {/* Colors & Highlighting */}
       <div className="flex flex-wrap items-center gap-2">
@@ -435,13 +444,15 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor }) => {
             className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-200 transition-colors hover:border-pink-400"
             title="انتخاب رنگ دلخواه"
           />
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleHighlight().run()}
-            isActive={editor.isActive("highlight")}
-            title="هایلایت"
-          >
-            <Highlighter size={16} />
-          </ToolbarButton>
+          {!simplified && (
+            <ToolbarButton
+              onClick={() => editor.chain().focus().toggleHighlight().run()}
+              isActive={editor.isActive("highlight")}
+              title="هایلایت"
+            >
+              <Highlighter size={16} />
+            </ToolbarButton>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-1">
           <Palette size={16} className="text-neutral-500" />
