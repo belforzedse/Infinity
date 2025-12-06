@@ -8,6 +8,9 @@ import { useNavigation } from "@/hooks/api/useNavigation";
 import HomeIcon from "@/components/PLP/Icons/HomeIcon";
 import SidebarItem from "@/components/User/Sidebar/SidebarItem";
 import SearchIcon from "@/components/PLP/Icons/SearchIcon";
+import { useDrag } from "@use-gesture/react";
+import { hapticButton } from "@/utils/haptics";
+import React from "react";
 
 interface Props {
   isOpen: boolean;
@@ -24,6 +27,28 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
   const pathname = usePathname();
   // Only trigger the API fetch when the menu is open
   const { navigation, loading } = useNavigation(isOpen);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  // Swipe-to-close gesture for mobile
+  const bind = useDrag(
+    ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
+      if (!panelRef.current || typeof window === "undefined" || window.innerWidth >= 1024) return;
+
+      // Only handle right swipe (RTL: swipe right to close)
+      const swipeThreshold = 100;
+      const velocityThreshold = 0.5;
+
+      if (!active && (mx > swipeThreshold || (xDir > 0 && Math.abs(vx) > velocityThreshold))) {
+        hapticButton();
+        onClose();
+      }
+    },
+    {
+      axis: "x",
+      threshold: 10,
+      preventDefault: true,
+    },
+  );
 
   // Transform navigation items to MenuItem format
   const menuItems: MenuItem[] = [
@@ -60,9 +85,11 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel 
+              <Dialog.Panel
+                ref={panelRef}
                 className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all"
                 style={{ paddingTop: "max(1.25rem, calc(1.25rem + env(safe-area-inset-top) * 0.5))" }}
+                {...bind()}
               >
                 <nav className="p-5">
                   <button onClick={onClose} className="text-gray-400 hover:text-gray-500">

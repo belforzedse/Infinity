@@ -10,6 +10,8 @@ import {
   type MouseEvent,
   type WheelEvent,
 } from "react";
+import { useDrag } from "@use-gesture/react";
+import { hapticNavigation } from "@/utils/haptics";
 
 type Props = {
   type: "video" | "image";
@@ -199,6 +201,35 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [goToNextImage, goToPreviousImage]);
 
+  // Swipe gesture for mobile navigation
+  const bind = useDrag(
+    ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
+      // Only handle horizontal swipes on mobile
+      if (typeof window === "undefined" || window.innerWidth >= 1024) return;
+
+      // Determine swipe threshold (30px or high velocity)
+      const swipeThreshold = 30;
+      const velocityThreshold = 0.5;
+
+      if (!active && (Math.abs(mx) > swipeThreshold || Math.abs(vx) > velocityThreshold)) {
+        if (xDir > 0) {
+          // Swipe right (RTL: go to previous)
+          hapticNavigation();
+          goToPreviousImage();
+        } else if (xDir < 0) {
+          // Swipe left (RTL: go to next)
+          hapticNavigation();
+          goToNextImage();
+        }
+      }
+    },
+    {
+      axis: "x",
+      threshold: 10,
+      preventDefault: true,
+    },
+  );
+
   return (
     <div className="h-full flex-1">
       <div
@@ -210,6 +241,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
         onMouseEnter={handleMouseEnter}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        {...bind()}
       >
         {type === "video" ? (
           <video
