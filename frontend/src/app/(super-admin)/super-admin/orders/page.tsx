@@ -135,8 +135,9 @@ export default function OrdersPage() {
         bulkOptions={bulkOptions}
         onBulkAction={handleBulkAction}
         url={(() => {
+          // Fixed: Removed duplicate populate[3]=contract (was populating contract twice)
           const base =
-            "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract";
+            "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info";
 
           if (debouncedSearchQuery.trim()) {
             return (

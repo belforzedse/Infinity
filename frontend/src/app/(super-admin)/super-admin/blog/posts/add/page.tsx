@@ -6,8 +6,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import BlogSidebar from "@/components/SuperAdmin/Blog/Sidebar";
-import RichTextEditor from "@/components/RichTextEditor";
 import {
   blogService,
   BlogCategory,
@@ -15,6 +15,14 @@ import {
   CreateBlogPostData,
 } from "@/services/blog/blog.service";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+
+// Lazy load RichTextEditor to reduce initial bundle size
+const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[400px] w-full animate-pulse rounded-lg border border-gray-200 bg-gray-50" />
+  ),
+});
 
 interface BlogPostFormData {
   Title: string;

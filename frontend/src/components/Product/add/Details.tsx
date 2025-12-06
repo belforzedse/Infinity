@@ -3,7 +3,15 @@
 import { Input } from "@/components/ui/Input";
 import { useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
-import RichTextEditor from "@/components/RichTextEditor";
+import dynamic from "next/dynamic";
+
+// Lazy load RichTextEditor to reduce initial bundle size (saves ~150KB)
+const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[200px] w-full animate-pulse rounded-lg border border-gray-200 bg-gray-50" />
+  ),
+});
 
 interface DetailsProps {
   isEditMode?: boolean;

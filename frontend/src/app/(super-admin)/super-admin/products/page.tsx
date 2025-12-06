@@ -50,6 +50,10 @@ export default function ProductsPage() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [refresh, setRefresh] = useAtom(refreshTable);
 
+  // Cache key to prevent unnecessary index rebuilds
+  const indexCacheKeyRef = useRef<string>("");
+  const sortedIndexCacheRef = useRef<{ key: string; ids: number[] } | null>(null);
+
   // Debounce search input to avoid excessive API calls
   const debouncedSearch = useDebouncedCallback((query: string) => {
     setDebouncedSearchQuery(query);
@@ -121,7 +125,13 @@ export default function ProductsPage() {
         }))
         .sort((a: any, b: any) => a.stock - b.stock);
       const ids = byStock.map((x: any) => x.id);
-      setSortedProductIds(sort === "stock-asc" ? ids : ids.slice().reverse());
+      const sortedIds = sort === "stock-asc" ? ids : ids.slice().reverse();
+
+      // Cache the results
+      const cacheKey = `${sort}-${debouncedSearchQuery}-${isRecycleBinOpen}-${refresh}`;
+      sortedIndexCacheRef.current = { key: cacheKey, ids: sortedIds };
+
+      setSortedProductIds(sortedIds);
       setTotalSize(ids.length);
     } catch (error) {
       console.error("Error building stock index:", error);
@@ -135,6 +145,7 @@ export default function ProductsPage() {
     debouncedSearchQuery,
     setTotalSize,
     buildingIndex,
+    refresh,
   ]);
 
   const buildSalesIndex = useCallback(async () => {
@@ -173,25 +184,53 @@ export default function ProductsPage() {
       const ids = Object.entries(productSales)
         .sort((a, b) => Number(a[1]) - Number(b[1]))
         .map(([pid]) => Number(pid));
-      setSortedProductIds(sort === "sales-asc" ? ids : ids.slice().reverse());
+      const sortedIds = sort === "sales-asc" ? ids : ids.slice().reverse();
+
+      // Cache the results
+      const cacheKey = `${sort}-${debouncedSearchQuery}-${isRecycleBinOpen}-${refresh}`;
+      sortedIndexCacheRef.current = { key: cacheKey, ids: sortedIds };
+
+      setSortedProductIds(sortedIds);
       setTotalSize(ids.length);
     } catch (error) {
       console.error("Error building sales index:", error);
     } finally {
       setBuildingIndex(false);
     }
-  }, [sort, isRecycleBinOpen, setTotalSize, buildingIndex]);
+  }, [sort, isRecycleBinOpen, setTotalSize, buildingIndex, debouncedSearchQuery, refresh]);
 
-  // Build global sorted index for stock/sales
+  // Build global sorted index for stock/sales with smart caching
   useEffect(() => {
     // Prevent infinite loops by checking if already building
     if (buildingIndex) return;
 
-    // Reset state when dependencies change
+    // Only rebuild if we need custom sorting
+    const needsCustomSort = sort === "stock-asc" || sort === "stock-desc" || sort === "sales-asc" || sort === "sales-desc";
+
+    if (!needsCustomSort) {
+      // Clear custom sort data when switching to standard sorts
+      setSortedProductIds(null);
+      setCustomPageData(null);
+      indexCacheKeyRef.current = "";
+      return;
+    }
+
+    // Create cache key from current parameters
+    const cacheKey = `${sort}-${debouncedSearchQuery}-${isRecycleBinOpen}-${refresh}`;
+
+    // Check if we can use cached results
+    if (sortedIndexCacheRef.current && sortedIndexCacheRef.current.key === cacheKey) {
+      // Use cached index instead of rebuilding
+      setSortedProductIds(sortedIndexCacheRef.current.ids);
+      return;
+    }
+
+    // Cache key has changed, need to rebuild
+    indexCacheKeyRef.current = cacheKey;
     setSortedProductIds(null);
     setCustomPageData(null);
 
-    // Only rebuild if we need custom sorting
+    // Build the appropriate index
     if (sort === "stock-asc" || sort === "stock-desc") {
       buildStockIndex();
     } else if (sort === "sales-asc" || sort === "sales-desc") {
@@ -202,7 +241,8 @@ export default function ProductsPage() {
     if (refresh) {
       setRefresh(false);
     }
-  }, [buildSalesIndex, buildStockIndex, sort, debouncedSearchQuery, isRecycleBinOpen, buildingIndex, refresh, setRefresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sort, debouncedSearchQuery, isRecycleBinOpen, refresh]);
 
   // Fetch current page data when using custom index
   useEffect(() => {
@@ -253,23 +293,33 @@ export default function ProductsPage() {
       try {
         switch (actionId) {
           case "remove_stock":
-            // Remove stock from all selected products
-            let removedStockCount = 0;
-            for (const product of selectedProducts) {
-              for (const variation of product.attributes.product_variations.data) {
-                if (variation.attributes.product_stock?.data?.id) {
-                  try {
-                    await apiClient.put(`/product-stocks/${variation.attributes.product_stock.data.id}`, {
-                      data: { Count: 0 },
-                    });
-                    removedStockCount++;
-                  } catch (error) {
-                    console.error(`Failed to remove stock for variation ${variation.id}:`, error);
-                  }
-                }
+            // Remove stock from all selected products (optimized for parallel execution)
+            {
+              const stockUpdates = selectedProducts.flatMap(product =>
+                product.attributes.product_variations.data
+                  .filter(v => v.attributes.product_stock?.data?.id)
+                  .map(v => ({
+                    id: v.attributes.product_stock!.data!.id,
+                    variationId: v.id,
+                  }))
+              );
+
+              const results = await Promise.allSettled(
+                stockUpdates.map(({ id }) =>
+                  apiClient.put(`/product-stocks/${id}`, { data: { Count: 0 } })
+                )
+              );
+
+              const removedStockCount = results.filter(r => r.status === "fulfilled").length;
+              const failedCount = results.filter(r => r.status === "rejected").length;
+
+              if (removedStockCount > 0) {
+                toast.success(`موجودی ${removedStockCount} تنوع محصول با موفقیت حذف شد${failedCount > 0 ? ` (${failedCount} ناموفق)` : ""}`);
+              }
+              if (failedCount > 0) {
+                console.error(`Failed to remove stock for ${failedCount} variations`);
               }
             }
-            toast.success(`موجودی ${removedStockCount} تنوع محصول با موفقیت حذف شد`);
             break;
 
           case "soft_delete": {
@@ -409,39 +459,35 @@ export default function ProductsPage() {
             break;
 
           case "publish":
-            // Publish selected products
-            let publishedCount = 0;
-            for (const product of selectedProducts) {
-              for (const variation of product.attributes.product_variations.data) {
-                try {
-                  await apiClient.put(`/product-variations/${variation.id}`, {
-                    data: { IsPublished: true },
-                  });
-                  publishedCount++;
-                } catch (error) {
-                  console.error(`Failed to publish variation ${variation.id}:`, error);
-                }
-              }
+            // Publish selected products (optimized for parallel execution)
+            {
+              const variations = selectedProducts.flatMap(p => p.attributes.product_variations.data);
+              const results = await Promise.allSettled(
+                variations.map(v =>
+                  apiClient.put(`/product-variations/${v.id}`, { data: { IsPublished: true } })
+                )
+              );
+              const publishedCount = results.filter(r => r.status === "fulfilled").length;
+              const failedCount = results.filter(r => r.status === "rejected").length;
+
+              toast.success(`${publishedCount} تنوع محصول منتشر شد${failedCount > 0 ? ` (${failedCount} ناموفق)` : ""}`);
             }
-            toast.success(`${publishedCount} تنوع محصول منتشر شد`);
             break;
 
           case "unpublish":
-            // Unpublish selected products
-            let unpublishedCount = 0;
-            for (const product of selectedProducts) {
-              for (const variation of product.attributes.product_variations.data) {
-                try {
-                  await apiClient.put(`/product-variations/${variation.id}`, {
-                    data: { IsPublished: false },
-                  });
-                  unpublishedCount++;
-                } catch (error) {
-                  console.error(`Failed to unpublish variation ${variation.id}:`, error);
-                }
-              }
+            // Unpublish selected products (optimized for parallel execution)
+            {
+              const variations = selectedProducts.flatMap(p => p.attributes.product_variations.data);
+              const results = await Promise.allSettled(
+                variations.map(v =>
+                  apiClient.put(`/product-variations/${v.id}`, { data: { IsPublished: false } })
+                )
+              );
+              const unpublishedCount = results.filter(r => r.status === "fulfilled").length;
+              const failedCount = results.filter(r => r.status === "rejected").length;
+
+              toast.success(`${unpublishedCount} تنوع محصول از انتشار خارج شد${failedCount > 0 ? ` (${failedCount} ناموفق)` : ""}`);
             }
-            toast.success(`${unpublishedCount} تنوع محصول از انتشار خارج شد`);
             break;
 
           default:

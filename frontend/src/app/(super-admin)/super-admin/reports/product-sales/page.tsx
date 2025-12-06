@@ -8,49 +8,48 @@ import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
-const RechartsTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
-  ssr: false,
-});
-const Cell = dynamic(() => import("recharts").then((m) => m.Cell), {
-  ssr: false,
-});
-const Treemap = dynamic(() => import("recharts").then((m) => m.Treemap), {
-  ssr: false,
-});
-const BarChart = dynamic(() => import("recharts").then((m) => m.BarChart), {
-  ssr: false,
-});
-const Bar = dynamic(() => import("recharts").then((m) => m.Bar), {
-  ssr: false,
-});
-const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), {
-  ssr: false,
-});
-const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), {
-  ssr: false,
-});
-const CartesianGrid = dynamic(() => import("recharts").then((m) => m.CartesianGrid), {
-  ssr: false,
-});
-const PieChart = dynamic(() => import("recharts").then((m) => m.PieChart), {
-  ssr: false,
-});
-const Pie = dynamic(() => import("recharts").then((m) => m.Pie), {
-  ssr: false,
-});
-const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), {
-  ssr: false,
-});
-const Line = dynamic(() => import("recharts").then((m) => m.Line), {
-  ssr: false,
-});
-const AreaChart = dynamic(() => import("recharts").then((m) => m.AreaChart), {
-  ssr: false,
-});
-const Area = dynamic(() => import("recharts").then((m) => m.Area), {
-  ssr: false,
-});
+// Optimize: Import all Recharts components in one dynamic import instead of 15 separate ones
+// This reduces chunk creation and improves loading performance
+const Charts = dynamic(
+  () =>
+    import("recharts").then((mod) => ({
+      default: {
+        Tooltip: mod.Tooltip,
+        ResponsiveContainer: mod.ResponsiveContainer,
+        Cell: mod.Cell,
+        Treemap: mod.Treemap,
+        BarChart: mod.BarChart,
+        Bar: mod.Bar,
+        XAxis: mod.XAxis,
+        YAxis: mod.YAxis,
+        CartesianGrid: mod.CartesianGrid,
+        PieChart: mod.PieChart,
+        Pie: mod.Pie,
+        LineChart: mod.LineChart,
+        Line: mod.Line,
+        AreaChart: mod.AreaChart,
+        Area: mod.Area,
+      },
+    })),
+  { ssr: false }
+);
+
+// Create aliases for backward compatibility
+const RechartsTooltip = (props: any) => Charts ? <Charts.Tooltip {...props} /> : null;
+const ResponsiveContainer = (props: any) => Charts ? <Charts.ResponsiveContainer {...props} /> : null;
+const Cell = (props: any) => Charts ? <Charts.Cell {...props} /> : null;
+const Treemap = (props: any) => Charts ? <Charts.Treemap {...props} /> : null;
+const BarChart = (props: any) => Charts ? <Charts.BarChart {...props} /> : null;
+const Bar = (props: any) => Charts ? <Charts.Bar {...props} /> : null;
+const XAxis = (props: any) => Charts ? <Charts.XAxis {...props} /> : null;
+const YAxis = (props: any) => Charts ? <Charts.YAxis {...props} /> : null;
+const CartesianGrid = (props: any) => Charts ? <Charts.CartesianGrid {...props} /> : null;
+const PieChart = (props: any) => Charts ? <Charts.PieChart {...props} /> : null;
+const Pie = (props: any) => Charts ? <Charts.Pie {...props} /> : null;
+const LineChart = (props: any) => Charts ? <Charts.LineChart {...props} /> : null;
+const Line = (props: any) => Charts ? <Charts.Line {...props} /> : null;
+const AreaChart = (props: any) => Charts ? <Charts.AreaChart {...props} /> : null;
+const Area = (props: any) => Charts ? <Charts.Area {...props} /> : null;
 
 type ChartType = "treemap" | "bar" | "pie" | "line" | "area";
 

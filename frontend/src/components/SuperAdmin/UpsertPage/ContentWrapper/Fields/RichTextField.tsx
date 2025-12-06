@@ -1,7 +1,15 @@
 "use client";
 
 import React from "react";
-import RichTextEditor from "@/components/RichTextEditor";
+import dynamic from "next/dynamic";
+
+// Lazy load RichTextEditor to reduce initial bundle size
+const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[200px] w-full animate-pulse rounded-lg border border-gray-200 bg-gray-50" />
+  ),
+});
 
 interface RichTextFieldProps {
   value: string;

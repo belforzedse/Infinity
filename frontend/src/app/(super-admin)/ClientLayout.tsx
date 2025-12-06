@@ -137,21 +137,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount - use ref to prevent re-runs
 
-  // Background check on window focus (when user returns to tab)
-  useEffect(() => {
-    if (!isAuthorized) return; // Only check if already authorized
-
-    const handleFocus = () => {
-      checkAuthSilently();
-    };
-
-    window.addEventListener("focus", handleFocus);
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [isAuthorized, checkAuthSilently]);
-
   // Periodic background check (every 5 minutes)
+  // Note: Removed window focus check as it's redundant with periodic + route change checks
+  // This reduces unnecessary API calls while maintaining security
   useEffect(() => {
     if (!isAuthorized) return; // Only check if already authorized
 
@@ -194,24 +182,48 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     );
   }
 
+  // Determine which layout to use based on screen size
+  const [layoutType, setLayoutType] = useState<"mobile" | "tablet" | "desktop">("desktop");
+
+  useEffect(() => {
+    const updateLayout = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setLayoutType("mobile");
+      } else if (width < 1024) {
+        setLayoutType("tablet");
+      } else {
+        setLayoutType("desktop");
+      }
+    };
+
+    // Set initial layout
+    updateLayout();
+
+    // Update on resize
+    window.addEventListener("resize", updateLayout);
+    return () => window.removeEventListener("resize", updateLayout);
+  }, []);
+
   if (!isAuthorized) {
     return null;
+  }
+
+  // Conditionally render only the active layout (performance optimization)
+  // Previously all 3 layouts were rendered and CSS hid 2 of them
+  let layoutContent;
+  if (layoutType === "mobile") {
+    layoutContent = <Mobile>{children}</Mobile>;
+  } else if (layoutType === "tablet") {
+    layoutContent = <Tablet>{children}</Tablet>;
+  } else {
+    layoutContent = <Desktop>{children}</Desktop>;
   }
 
   return (
     <>
       <Suspense fallback={<div>Loading...</div>}>
-        <div className="block md:hidden">
-          <Mobile>{children}</Mobile>
-        </div>
-
-        <div className="hidden md:block lg:hidden">
-          <Tablet>{children}</Tablet>
-        </div>
-
-        <div className="hidden lg:block">
-          <Desktop>{children}</Desktop>
-        </div>
+        {layoutContent}
       </Suspense>
       <div className="[&_button]:!left-4 [&_button]:!right-auto">
         <ScrollToTop />
