@@ -313,7 +313,27 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       isStaging,
     });
 
-    const response = await blogService.getBlogPostBySlug(slug);
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    let response;
+    try {
+      response = await blogService.getBlogPostBySlug(slug);
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      // If it's a timeout or network error, return 404 instead of crashing
+      if (fetchError instanceof Error && (fetchError.name === 'AbortError' || fetchError.message.includes('timeout'))) {
+        logger.error(`[BlogPostPage] Request timeout for slug: ${slug}`, {
+          slug,
+          error: fetchError.message,
+        });
+        notFound();
+        return;
+      }
+      throw fetchError; // Re-throw other errors
+    }
 
     if (!response || !response.data) {
       logger.error(`[BlogPostPage] Invalid response structure for slug: ${slug}`, {
