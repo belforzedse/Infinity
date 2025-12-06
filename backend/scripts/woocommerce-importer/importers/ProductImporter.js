@@ -861,10 +861,24 @@ class ProductImporter {
 
   /**
    * Map WooCommerce product status to Strapi status
+   * Logs the mapping for verification and defaults to InActive for unknown statuses
    */
   mapProductStatus(wcStatus) {
     const mapping = this.config.import.statusMappings.product;
-    return mapping[wcStatus] || this.config.import.defaults.productStatus;
+    const mappedStatus = mapping[wcStatus];
+    
+    if (mappedStatus) {
+      this.logger.debug(`📋 Status mapping: WooCommerce "${wcStatus}" → Strapi "${mappedStatus}"`);
+      return mappedStatus;
+    }
+    
+    // Default to InActive for unknown statuses (safer than Active)
+    // This ensures draft/unknown products are not accidentally published
+    const fallbackStatus = "InActive";
+    this.logger.warn(
+      `⚠️ Unknown WooCommerce status "${wcStatus}", defaulting to "${fallbackStatus}" (not using config default "${this.config.import.defaults.productStatus}")`
+    );
+    return fallbackStatus;
   }
 
   /**
