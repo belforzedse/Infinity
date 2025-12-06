@@ -18,6 +18,8 @@ import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 import { SORT_LABELS } from "./sortOptions";
 import { computeDiscountForVariation } from "@/utils/discounts";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import VirtualizedList from "./List/VirtualizedList";
 
 const humanize = (value: string) =>
   value
@@ -139,6 +141,8 @@ export default function PLPList({
     STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
   );
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [useVirtualScrolling, setUseVirtualScrolling] = useState(false);
+  const [containerHeight, setContainerHeight] = useState(800);
 
   // Initialize category from prop
   const initializedCategoryRef = useRef(false);
@@ -422,6 +426,33 @@ export default function PLPList({
       }),
     [products, available, discountOnly],
   );
+
+  // Enable virtual scrolling for large lists
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Enable virtual scrolling if we have more than 20 products
+    setUseVirtualScrolling(validProducts.length > 20);
+  }, [validProducts.length]);
+
+  // Calculate container height based on viewport (only on resize)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateContainerHeight = () => {
+      const viewportHeight = window.innerHeight;
+      const headerHeight = 200; // Approximate header/filter height
+      const paginationHeight = 100;
+      const calculatedHeight = viewportHeight - headerHeight - paginationHeight;
+      setContainerHeight(Math.max(calculatedHeight, 400));
+    };
+
+    // Calculate initial height
+    updateContainerHeight();
+
+    // Update on window resize
+    window.addEventListener("resize", updateContainerHeight);
+    return () => window.removeEventListener("resize", updateContainerHeight);
+  }, []);
 
   // Memoize sidebar products
   const sidebarProducts = useMemo(
@@ -777,6 +808,20 @@ export default function PLPList({
             <ProductListSkeleton />
           ) : validProducts.length === 0 ? (
             <NoData category={category || initialCategory} />
+          ) : useVirtualScrolling ? (
+            <>
+              <VirtualizedList
+                products={validProducts as any}
+                checkStockAvailability={checkStockAvailability as any}
+                containerHeight={containerHeight}
+              />
+              {/* Pagination */}
+              <PLPPagination
+                currentPage={pagination.page}
+                totalPages={pagination.pageCount}
+                onPageChange={(page) => setPage(page.toString())}
+              />
+            </>
           ) : (
             <>
               {/* Desktop view - ProductCard */}
