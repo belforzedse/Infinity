@@ -119,7 +119,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle other API requests with cache-first strategy
+  // Handle other API requests with network-first strategy to avoid stale data
   if (url.pathname.includes("/api/")) {
     event.respondWith(handleAPIRequest(request));
     return;
@@ -131,7 +131,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle other requests with network-first strategy
+  // Handle other requests with network-first strategy + offline fallback
   event.respondWith(handleGenericRequest(request));
 });
 
@@ -169,15 +169,11 @@ async function handleCartRequest(request) {
   }
 }
 /**
- * Handle API requests (cache-first)
- * Use cache if available, fall back to network
+ * Handle API requests (network-first)
+ * Use network first to avoid stale data, fall back to cache when offline
  */
 async function handleAPIRequest(request) {
   const { API_CACHE } = getCacheNames();
-  const cached = await caches.match(request);
-  if (cached) {
-    return cached;
-  }
 
   try {
     const response = await fetch(request);
@@ -190,6 +186,12 @@ async function handleAPIRequest(request) {
 
     return response;
   } catch (error) {
+    // Network failed, try cache
+    const cached = await caches.match(request);
+    if (cached) {
+      return cached;
+    }
+
     // Return offline response
     return new Response(JSON.stringify({ error: "Offline", data: null }), {
       status: 503,
@@ -444,12 +446,6 @@ async function handleGenericRequest(request) {
 
   try {
     const response = await fetch(request);
-
-    // Cache successful responses
-    if (response.ok && request.method === "GET") {
-      const cache = await caches.open(RUNTIME_CACHE);
-      cache.put(request, response.clone());
-    }
 
     return response;
   } catch (error) {

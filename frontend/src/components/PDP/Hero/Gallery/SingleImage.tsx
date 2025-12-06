@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type MouseEvent,
+  type TouchEvent,
   type WheelEvent,
 } from "react";
 import { useDrag } from "@use-gesture/react";
@@ -39,6 +40,13 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   });
   const [zoomHintVisible, setZoomHintVisible] = useState(false);
   const hintTimerRef = useRef<number | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const lastTapRef = useRef<number>(0);
+  const pinchState = useRef<{ active: boolean; startDistance: number; startScale: number }>({
+    active: false,
+    startDistance: 0,
+    startScale: 1,
+  });
 
   const isDesktopZoom = () => {
     if (typeof window === "undefined") return false;
@@ -165,6 +173,20 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setPrefersReducedMotion(mq.matches);
+      const handler = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
+      if (mq.addEventListener) mq.addEventListener("change", handler);
+      else mq.addListener(handler);
+      return () => {
+        if (mq.removeEventListener) mq.removeEventListener("change", handler);
+        else mq.removeListener(handler);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (hintTimerRef.current) {
         window.clearTimeout(hintTimerRef.current);
@@ -204,6 +226,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   // Swipe gesture for mobile navigation
   const bind = useDrag(
     ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
+      if (pinchState.current.active) return;
       // Only handle horizontal swipes on mobile
       if (typeof window === "undefined" || window.innerWidth >= 1024) return;
 
@@ -230,6 +253,67 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     },
   );
 
+  const distanceBetweenTouches = (touches: TouchList) => {
+    const [a, b] = [touches[0], touches[1]];
+    const dx = a.clientX - b.clientX;
+    const dy = a.clientY - b.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    if (event.touches.length === 2) {
+      pinchState.current = {
+        active: true,
+        startDistance: distanceBetweenTouches(event.touches),
+        startScale: zoomScale,
+      };
+    }
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    if (pinchState.current.active && event.touches.length === 2) {
+      const newDistance = distanceBetweenTouches(event.touches);
+      const scaleFactor = newDistance / pinchState.current.startDistance;
+      const nextScale = clampScale(pinchState.current.startScale * scaleFactor);
+      setZoomScale(nextScale);
+
+      // Recenter on pinch midpoint
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const midX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+        const midY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+        updateOrigin(midX, midY);
+      }
+      event.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (pinchState.current.active && event.touches.length < 2) {
+      pinchState.current.active = false;
+    }
+
+    if (prefersReducedMotion) return;
+
+    // Double-tap to toggle zoom on mobile
+    if (event.touches.length === 0 && event.changedTouches.length === 1 && !isDesktopZoom()) {
+      const now = Date.now();
+      if (now - lastTapRef.current < 300) {
+        const touch = event.changedTouches[0];
+        updateOrigin(touch.clientX, touch.clientY);
+        const targetScale = zoomScale > 1 ? 1 : 2;
+        setZoomScale(targetScale);
+        if (targetScale === 1) {
+          setTranslate({ x: 0, y: 0 });
+        }
+        event.preventDefault();
+      }
+      lastTapRef.current = now;
+    }
+  };
+
   return (
     <div className="h-full flex-1">
       <div
@@ -241,6 +325,9 @@ export default function PDPHeroGallerySingleImage(props: Props) {
         onMouseEnter={handleMouseEnter}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         {...bind()}
       >
         {type === "video" ? (

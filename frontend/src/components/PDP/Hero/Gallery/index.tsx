@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import ThumbnailList from "./ThumbnailList";
 import SingleImage from "./SingleImage";
-import { usePreloadOnIntersect } from "@/utils/imagePreloader";
 
 type Props = {
   assets: {
@@ -79,6 +78,19 @@ export default function PDPHeroGallery(props: Props) {
       return () => observer.disconnect();
     }
   }, [selectedImage, assets]);
+
+  // Reset selection if assets change or are initially empty
+  useEffect(() => {
+    if (!assets.length) {
+      setSelectedImage("");
+      return;
+    }
+    setSelectedImage((prev) => (assets.some((a) => a.id === prev) ? prev : assets[0].id));
+  }, [assets]);
+
+  if (!assets.length) {
+    return null;
+  }
 
   return (
     <div ref={galleryRef} className="top-2 flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row">

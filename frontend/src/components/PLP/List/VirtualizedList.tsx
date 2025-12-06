@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { ListChildComponentProps } from "react-window";
 import ProductCard from "@/components/Product/Card";
 import ProductSmallCard from "@/components/Product/SmallCard";
@@ -166,22 +166,33 @@ export default function VirtualizedList({
     );
   };
 
-  // Calculate item heights based on viewport
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  // Track viewport width on client to avoid SSR flicker and respond to resize/orientation changes
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateWidth = () => setViewportWidth(window.innerWidth);
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    window.addEventListener("orientationchange", updateWidth);
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+      window.removeEventListener("orientationchange", updateWidth);
+    };
+  }, []);
+
+  const isMobile = (viewportWidth ?? Infinity) < 768;
   const DESKTOP_ITEM_HEIGHT = 420;
   const MOBILE_ITEM_HEIGHT = 140;
   const itemHeight = isMobile ? MOBILE_ITEM_HEIGHT : DESKTOP_ITEM_HEIGHT;
   const itemCount = processedProducts.length;
 
-  // Calculate grid columns for desktop
-  const getDesktopColumns = () => {
-    if (typeof window === "undefined") return 4;
-    if (window.innerWidth >= 1280) return 4; // xl
-    if (window.innerWidth >= 1024) return 3; // lg
+  // Calculate grid columns for desktop; default to 4 during SSR to avoid layout jump
+  const desktopColumns = useMemo(() => {
+    if (viewportWidth === null) return 4;
+    if (viewportWidth >= 1280) return 4; // xl
+    if (viewportWidth >= 1024) return 3; // lg
     return 2; // md
-  };
-
-  const desktopColumns = getDesktopColumns();
+  }, [viewportWidth]);
   const desktopItemWidth = `calc((100% - ${(desktopColumns - 1) * 16}px) / ${desktopColumns})`;
 
   if (itemCount === 0) return null;

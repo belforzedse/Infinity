@@ -35,8 +35,10 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
       if (!panelRef.current || typeof window === "undefined" || window.innerWidth >= 1024) return;
 
       // Only handle right swipe (RTL: swipe right to close)
-      const swipeThreshold = 100;
+      const baseThreshold = 90;
+      const fastSwipeThreshold = 45;
       const velocityThreshold = 0.5;
+      const swipeThreshold = Math.abs(vx) > velocityThreshold ? fastSwipeThreshold : baseThreshold;
 
       if (!active && (mx > swipeThreshold || (xDir > 0 && Math.abs(vx) > velocityThreshold))) {
         hapticButton();
@@ -58,6 +60,17 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
       href: `/plp?category=${item.slug}`,
     })),
   ];
+
+  // Lock body scroll when menu is open
+  React.useEffect(() => {
+    if (isOpen) {
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+  }, [isOpen]);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -88,7 +101,10 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
               <Dialog.Panel
                 ref={panelRef}
                 className="h-fit w-[216px] transform overflow-hidden rounded-bl-xl bg-white shadow-xl transition-all"
-                style={{ paddingTop: "max(1.25rem, calc(1.25rem + env(safe-area-inset-top) * 0.5))" }}
+                style={{
+                  paddingTop: "max(1.25rem, calc(1.25rem + env(safe-area-inset-top) * 0.5))",
+                  paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)",
+                }}
                 {...bind()}
               >
                 <nav className="p-5">
