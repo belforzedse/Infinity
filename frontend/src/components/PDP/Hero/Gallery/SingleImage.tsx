@@ -253,7 +253,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     },
   );
 
-  const distanceBetweenTouches = (touches: TouchList) => {
+  const distanceBetweenTouches = (touches: React.TouchList | TouchList) => {
     const [a, b] = [touches[0], touches[1]];
     const dx = a.clientX - b.clientX;
     const dy = a.clientY - b.clientY;
