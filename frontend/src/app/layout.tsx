@@ -101,10 +101,17 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
 
-        {/* Preload critical font */}
+        {/* Preload critical fonts - prioritize above-the-fold content */}
         <link
           rel="preload"
           href="/fonts/peyda-regular-fanum.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/peyda-bold-fanum.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
@@ -121,10 +128,17 @@ export default function RootLayout({
         <link rel="preconnect" href={API_BASE_DOMAIN} crossOrigin="anonymous" />
         <link rel="preconnect" href={IMAGE_BASE_URL || API_BASE_DOMAIN} crossOrigin="anonymous" />
 
-        {/* Prefetch likely next-page resources */}
-        <link rel="prefetch" href="/plp" />
+        {/* Prefetch likely next-page resources - lower priority */}
+        <link rel="prefetch" href="/plp" as="document" />
+        <link rel="prefetch" href="/blog" as="document" />
 
-        <link rel="prefetch" href="/blog" />
+        {/* Preload critical images for mobile performance */}
+        <link
+          rel="preload"
+          href="/images/og-default.jpg"
+          as="image"
+          type="image/jpeg"
+        />
 
         {/* OpenSearch descriptor for browser search integration */}
         <link

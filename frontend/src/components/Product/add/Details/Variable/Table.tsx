@@ -10,6 +10,7 @@ interface ProductVariableTableProps {
   onSelectRow: (id: number) => void;
   onEditRow: (id: number) => void;
   onDeleteRow?: (id: number) => void;
+  editingVariationId?: number | null;
 }
 
 export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
@@ -18,6 +19,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
   onSelectRow,
   onEditRow,
   onDeleteRow,
+  editingVariationId,
 }) => {
   return (
     <>
@@ -32,6 +34,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
                 item={item}
                 isLast={index === variables.length - 1}
                 isSelected={selectedRows.includes(item.id)}
+                isEditing={editingVariationId === item.id}
                 onSelect={onSelectRow}
                 onEdit={onEditRow}
                 onDelete={onDeleteRow}
@@ -47,6 +50,7 @@ export const ProductVariableTable: React.FC<ProductVariableTableProps> = ({
           <ProductVariableCard
             key={item.id}
             item={item}
+            isEditing={editingVariationId === item.id}
             onEdit={() => onEditRow(item.id)}
             onDelete={onDeleteRow ? () => onDeleteRow(item.id) : undefined}
           />

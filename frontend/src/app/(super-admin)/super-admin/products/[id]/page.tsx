@@ -7,6 +7,7 @@ import Overall from "@/components/Product/add/Overall";
 import IndexPhotoUploader from "@/components/Product/add/IndexPhotoUploader";
 import Variables from "@/components/Product/add/Variables";
 import Sizes, { SizeGuideHandle } from "@/components/Product/add/Size";
+import PublishAllVariations from "@/components/Product/add/PublishAllVariations";
 import { getProduct } from "@/services/super-admin/product/get";
 import { editProductDataAtom } from "@/atoms/super-admin/products";
 import { useAtom } from "jotai";
@@ -18,6 +19,7 @@ import { useProductCategory } from "@/hooks/product/useCategory";
 import { useProductTag } from "@/hooks/product/useTag";
 import logger from "@/utils/logger";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import toast from "react-hot-toast";
 
 export default function EditProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -73,19 +75,44 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
   }, [fetchAllCategories, handleFetchTags]);
 
   const handleUpdateProduct = async () => {
+    const loadingToast = toast.loading("در حال ذخیره...");
+
     try {
       if (process.env.NODE_ENV !== "production") {
         logger.info("productData2", { productData });
       }
 
       const sizeSaveResult = await sizeGuideRef.current?.save?.();
-      if (sizeSaveResult === false) return;
+      if (sizeSaveResult === false) {
+        toast.dismiss(loadingToast);
+        toast.error("خطا در ذخیره راهنمای سایز");
+        return;
+      }
 
       const result = await updateProduct(id, productData);
+
       if (result.success) {
-        router.push("/super-admin/products");
+        // Refresh product data to reflect changes (especially for image deletion)
+        try {
+          const refreshedResult = await getProduct(id, getProductParams);
+          setProductData(transformToProductData(refreshedResult.data.attributes));
+          toast.dismiss(loadingToast);
+          toast.success("محصول با موفقیت ذخیره شد");
+        } catch (refreshError) {
+          // Even if refresh fails, the update was successful
+          toast.dismiss(loadingToast);
+          toast.success("محصول با موفقیت ذخیره شد");
+          console.error("Error refreshing product data:", refreshError);
+        }
+      } else {
+        // Show error toast with the error message
+        toast.dismiss(loadingToast);
+        const errorMessage = result.errorMessage || "خطا در ذخیره محصول";
+        toast.error(errorMessage);
       }
     } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("خطا در ذخیره محصول");
       console.error("Error updating product:", error);
     }
   };
@@ -120,6 +147,7 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
     <div className="flex w-full grid-cols-3 flex-col gap-4 pb-32 lg:grid">
       <div className="order-2 flex flex-col gap-4 lg:order-1">
         <IndexPhotoUploader isEditMode />
+        <PublishAllVariations productId={Number(id)} />
         {/* <SetPrice />
         <SetStatus /> */}
         <SetDetails isEditMode />

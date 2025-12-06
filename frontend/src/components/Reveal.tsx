@@ -30,6 +30,15 @@ export default function Reveal({
     const el = ref.current;
     if (!el) return;
 
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // If reduced motion is preferred, show immediately without animation
+    if (prefersReducedMotion) {
+      setShown(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -64,6 +73,11 @@ export default function Reveal({
     "blur-up": "opacity-100 translate-y-0 blur-0",
   };
 
+  // Check for reduced motion preference
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   return (
     <div
       ref={ref}
@@ -73,8 +87,8 @@ export default function Reveal({
         shown ? shownByVariant[variant] : hiddenByVariant[variant],
       ].join(" ")}
       style={{
-        transitionDelay: `${delay}ms`,
-        transitionDuration: `${duration}ms`,
+        transitionDelay: prefersReducedMotion ? "0ms" : `${delay}ms`,
+        transitionDuration: prefersReducedMotion ? "0ms" : `${duration}ms`,
       }}
     >
       {children}

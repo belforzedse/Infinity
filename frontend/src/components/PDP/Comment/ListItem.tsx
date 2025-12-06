@@ -102,7 +102,7 @@ export default function PDPCommentListItem(props: Props) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg text-neutral-600">
-                    {reply.username || "پشتیبانی اینفینیتی"}
+                    {reply.username || ""}
                   </span>
                 </div>
 

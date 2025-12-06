@@ -7,6 +7,7 @@ export interface ProductData {
   CoverImage: CoverImageField | null;
   Description: string;
   Status: "Active";
+  Weight?: number;
   Media: string[];
   product_main_category: categoryResponseType | null;
   product_tags: TagResponseType[];
@@ -18,6 +19,7 @@ export interface EditProductData {
   CoverImage: CoverImageField | null;
   Description: string;
   Status: "Active";
+  Weight?: number;
   Media: MediaDataItem[];
   product_main_category: categoryResponseType | null;
   product_tags: TagResponseType[];

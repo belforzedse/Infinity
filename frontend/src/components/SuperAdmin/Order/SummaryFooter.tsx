@@ -79,13 +79,21 @@ export default function SuperAdminOrderSummaryFooter({
             }`}
           >
             <div className="flex items-center gap-2">
-              <Image
-                src={item.image || "/images/placeholder.png"}
-                alt={item.productName}
-                width={48}
-                height={48}
-                className="rounded-xl object-cover"
-              />
+              {item.image ? (
+                <Image
+                  src={item.image}
+                  alt={item.productName}
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
 
               <div className="flex flex-col gap-0.5">
                 <h3 className="text-sm text-foreground-primary">

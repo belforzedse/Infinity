@@ -18,6 +18,7 @@ import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 import { SORT_LABELS } from "./sortOptions";
 import { computeDiscountForVariation } from "@/utils/discounts";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 const humanize = (value: string) =>
   value
@@ -106,6 +107,7 @@ export default function PLPList({
   searchQuery,
 }: PLPListProps) {
   // URL state management with nuqs
+  // These hooks are safe to use in client components - the adapter is in root layout
   const [category, setCategory] = useQueryState("category");
   const [available, setAvailable] = useQueryState("available");
   const [minPrice, setMinPrice] = useQueryState("minPrice");
@@ -199,11 +201,16 @@ export default function PLPList({
 
     // Add pagination
     queryParams.append("pagination[page]", page);
-    queryParams.append("pagination[pageSize]", "20");
+    queryParams.append("pagination[pageSize]", "30"); // Match server-side pageSize
 
     // Add filters
     queryParams.append("filters[Status][$eq]", "Active");
     queryParams.append("filters[removedAt][$null]", "true");
+
+    // Filter for products with valid prices (Price > 0)
+    // Note: We can't filter for CoverImage at API level (relations don't support $notNull in REST API)
+    // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
+    queryParams.append("filters[product_variations][Price][$gt]", "0");
 
     // Category filter
     if (category) {
@@ -262,10 +269,43 @@ export default function PLPList({
       .then((data) => {
         let productsArray = Array.isArray(data?.data) ? data.data : [];
 
-        // Filter out products without images
+        // Filter out products without images (can't filter at API level for relations)
         productsArray = productsArray.filter(hasImage);
 
-        // Frontend price sorting
+        // CRITICAL: Sort products by stock availability FIRST, before any other operations
+        // This ensures in-stock products always appear before out-of-stock products
+        productsArray.sort((a: any, b: any) => {
+          // Helper function to check if product has available stock
+          // A product is "in stock" if it has at least one published variation with stock > 0
+          const hasStock = (product: any): boolean => {
+            if (!product.attributes?.product_variations?.data) return false;
+
+            return product.attributes.product_variations.data.some((variation: any) => {
+              // Must be published
+              if (!variation.attributes?.IsPublished) return false;
+
+              // Check stock count - handle various data structures
+              const stockData = variation.attributes?.product_stock;
+              if (!stockData) return false;
+
+              const stockCount = stockData?.data?.attributes?.Count;
+              // Check if stockCount exists and is a positive number
+              if (typeof stockCount !== "number" || stockCount <= 0) return false;
+
+              return true;
+            });
+          };
+
+          const aHasStock = hasStock(a);
+          const bHasStock = hasStock(b);
+
+          // Products with stock come first
+          if (aHasStock && !bHasStock) return -1;
+          if (!aHasStock && bHasStock) return 1;
+          return 0; // Keep original order if both have same stock status
+        });
+
+        // Frontend price sorting (applied after stock sorting)
         if (sort === "price:asc" || sort === "price:desc") {
           const getMinVariationPrice = (product: any): number => {
             const variations = product.attributes?.product_variations?.data || [];
@@ -290,7 +330,26 @@ export default function PLPList({
             return minPrice === Infinity ? 0 : minPrice;
           };
 
+          // Sort by price, but maintain stock priority (in-stock products first)
           productsArray = [...productsArray].sort((a: any, b: any) => {
+            // First, check stock status (maintain stock priority)
+            const aHasStock = a.attributes?.product_variations?.data?.some((v: any) =>
+              v.attributes?.IsPublished &&
+              typeof v.attributes?.product_stock?.data?.attributes?.Count === "number" &&
+              v.attributes.product_stock.data.attributes.Count > 0
+            ) || false;
+
+            const bHasStock = b.attributes?.product_variations?.data?.some((v: any) =>
+              v.attributes?.IsPublished &&
+              typeof v.attributes?.product_stock?.data?.attributes?.Count === "number" &&
+              v.attributes.product_stock.data.attributes.Count > 0
+            ) || false;
+
+            // If stock status differs, stock comes first
+            if (aHasStock && !bHasStock) return -1;
+            if (!aHasStock && bHasStock) return 1;
+
+            // If same stock status, sort by price
             const priceA = getMinVariationPrice(a);
             const priceB = getMinVariationPrice(b);
             return sort === "price:asc" ? priceA - priceB : priceB - priceA;
@@ -423,6 +482,7 @@ export default function PLPList({
     [products, available, discountOnly],
   );
 
+
   // Memoize sidebar products
   const sidebarProducts = useMemo(
     () =>
@@ -485,7 +545,7 @@ export default function PLPList({
             // Return a fallback product object
             return {
               id: product.id,
-              title: product.attributes?.Title || "محصول نامشخص",
+              title: product.attributes?.Title || "",
               category: "",
               likedCount: 0,
               price: 0,

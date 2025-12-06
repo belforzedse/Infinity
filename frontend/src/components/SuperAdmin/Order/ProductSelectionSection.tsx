@@ -52,7 +52,7 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
       quantity: 1,
       color: variation?.product_variation_color?.Title || "N/A",
       size: variation?.product_variation_size?.Title,
-      image: product.image || "/placeholder-product.png",
+      image: product.image || "",
     };
 
     onItemsChange([...selectedItems, newItem]);

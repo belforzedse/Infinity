@@ -191,7 +191,7 @@ export interface ProductDetail {
 
 // Get product by ID instead of slug since current API doesn't have slug field
 export const getProductById = async (id: string): Promise<ApiResponse<ProductDetail>> => {
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies&populate[15]=product_reviews.product_review_replies.user&populate[16]=product_reviews.product_review_replies.user.user_info`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -345,17 +345,7 @@ export const formatGalleryAssets = (product: ProductDetail) => {
     });
   }
 
-  // If no valid assets were found, add a default placeholder
-  if (assets.length === 0) {
-    assets.push({
-      id: "default",
-      type: "image" as const,
-      src: "/images/pdp/image-1.png",
-      thumbnail: "/images/pdp/image-1-th.png",
-      alt: product.attributes.Title || "Product Image",
-    });
-  }
-
+  // Return assets array - if empty, return empty array (no placeholder)
   return assets;
 };
 

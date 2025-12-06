@@ -15,6 +15,7 @@ export interface ProductVariable {
         id: number;
         attributes: {
           Title: string;
+          ColorCode?: string;
         };
       };
     };
@@ -69,6 +70,10 @@ export interface ProductVariableDisplay {
   colorId?: number;
   sizeId?: number;
   modelId?: number;
+  color?: string;
+  colorCode?: string;
+  size?: string;
+  model?: string;
   generalDiscounts?: Array<{
     id: number;
     attributes: {

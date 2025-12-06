@@ -36,10 +36,10 @@ export default function DetailsSection({
               <div className="text-sm flex flex-col items-start justify-between text-gray-500">
                 <div className="text-[10px] leading-3">{selectedImage.name}</div>
                 <div className="text-right text-[10px] leading-3 text-neutral-400">
-                  {selectedImage.date || "آبان ۹, ۱۴۰۳"}
+                  {selectedImage.date || ""}
                 </div>
                 <div className="text-[10px] leading-3 text-neutral-400">
-                  {selectedImage.size || "۱ مگابایت"}
+                  {selectedImage.size || ""}
                 </div>
                 <button
                   onClick={() => setSelectedImage(null)}

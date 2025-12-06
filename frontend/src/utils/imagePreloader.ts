@@ -1,6 +1,9 @@
 /**
  * Image preloader utility to preload images for better performance
+ * Enhanced with Intersection Observer for progressive loading
  */
+
+import { useEffect, RefObject } from "react";
 
 interface PreloadOptions {
   priority?: boolean;
@@ -67,4 +70,48 @@ export const preloadOnHover = (element: HTMLElement, imageSrc: string) => {
   };
 
   element.addEventListener("mouseenter", handleMouseEnter, { once: true });
+};
+
+/**
+ * Preload images when they enter the viewport using Intersection Observer
+ * @param ref - React ref to the element to observe
+ * @param imageSrc - Image source to preload
+ * @param options - Preload options
+ */
+export const usePreloadOnIntersect = (
+  ref: RefObject<HTMLElement>,
+  imageSrc: string | string[],
+  options: PreloadOptions & { rootMargin?: string } = {},
+) => {
+  useEffect(() => {
+    if (typeof window === "undefined" || !ref.current) return;
+
+    const sources = Array.isArray(imageSrc) ? imageSrc : [imageSrc];
+    const { rootMargin = "200px", ...preloadOptions } = options;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            sources.forEach((src) => {
+              preloadImage(src, preloadOptions);
+            });
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin,
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(ref.current);
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, [ref, imageSrc, options]);
 };

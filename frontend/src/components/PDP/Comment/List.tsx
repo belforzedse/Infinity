@@ -36,6 +36,22 @@ export type ProductReview = {
         attributes: {
           Content: string;
           createdAt: string;
+          user?: {
+            data: {
+              id: number;
+              attributes: {
+                Phone: string;
+                user_info?: {
+                  data: {
+                    attributes: {
+                      FirstName: string;
+                      LastName: string;
+                    };
+                  };
+                };
+              };
+            };
+          };
         };
       }>;
     };
@@ -178,6 +194,21 @@ export default function PDPCommentList({ reviews }: Props) {
 
             const hasReply = !!review.attributes.product_review_replies?.data?.length;
 
+            // Extract reply username from user data if available
+            let replyUsername = "";
+            if (hasReply) {
+              const reply = review.attributes.product_review_replies?.data[0];
+              const replyUserInfo = reply?.attributes?.user?.data?.attributes?.user_info?.data?.attributes;
+              if (replyUserInfo && replyUserInfo.FirstName && replyUserInfo.LastName) {
+                replyUsername = `${replyUserInfo.FirstName} ${replyUserInfo.LastName}`.trim();
+              } else if (reply?.attributes?.user?.data?.attributes?.Phone) {
+                // If no name but has phone, use formatted phone number
+                const phone = reply.attributes.user.data.attributes.Phone;
+                replyUsername = phone.length > 4 ? `${phone.slice(-4).padStart(phone.length, "*")}` : phone;
+              }
+              // If no user data available, replyUsername remains empty string (no placeholder)
+            }
+
             return (
               <PDPCommentListItem
                 key={review.id}
@@ -189,7 +220,7 @@ export default function PDPCommentList({ reviews }: Props) {
                 minusRating={review.attributes.DislikeCounts || 0}
                 {...(hasReply && {
                   reply: {
-                    username: "پشتیبانی اینفینیتی",
+                    username: replyUsername,
                     date: safeParseDate(
                       review.attributes.product_review_replies?.data[0]?.attributes.createdAt || "",
                     ),

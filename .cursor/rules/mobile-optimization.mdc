@@ -1,0 +1,149 @@
+# Mobile Optimization Guidelines
+
+This document outlines mobile optimization patterns, best practices, and implementation guidelines for the Infinity Store frontend.
+
+## Touch Gestures
+
+### Swipe Navigation
+- **Gallery Images**: Swipe left/right to navigate between product images
+- **Drawers**: Swipe to close cart drawer and mobile menu
+- **Implementation**: Uses `@use-gesture/react` library
+
+### Pull-to-Refresh
+- **Product Lists**: Pull down to refresh product listings on mobile
+- **Threshold**: 80px pull distance triggers refresh
+- **Visual Feedback**: Shows loading indicator and haptic feedback
+
+## Haptic Feedback
+
+### Usage
+Haptic feedback provides native-like tactile responses for key interactions:
+
+```typescript
+import { hapticButton, hapticSuccess, hapticError, hapticNavigation } from "@/utils/haptics";
+
+// Button clicks
+hapticButton();
+
+// Successful actions (e.g., add to cart)
+hapticSuccess();
+
+// Errors
+hapticError();
+
+// Navigation actions
+hapticNavigation();
+```
+
+### Integration Points
+- Bottom navigation taps
+- Cart actions (add/remove)
+- Navigation gestures
+- Pull-to-refresh completion
+
+## Image Loading
+
+### Progressive Loading
+- Uses Intersection Observer for viewport-based loading
+- Preloads adjacent images in galleries
+- Implements progressive enhancement with blur placeholders
+
+### Implementation
+```typescript
+import { usePreloadOnIntersect } from "@/utils/imagePreloader";
+
+const ref = useRef<HTMLDivElement>(null);
+usePreloadOnIntersect(ref, imageSrc, { rootMargin: "200px" });
+```
+
+## Animation Performance
+
+### Reduced Motion Support
+All animations respect `prefers-reduced-motion`:
+
+- **Reveal Component**: Skips animations when reduced motion is preferred
+- **Hero Animations**: Reduces distance, duration, and blur effects
+- **Mobile Optimizations**: Automatically reduces animation intensity on mobile devices
+
+### Mobile-Specific Optimizations
+- Reduced animation distances (70% of desktop)
+- Faster durations (80% of desktop)
+- Reduced blur effects (50% of desktop)
+
+## Resource Hints
+
+### Preconnect
+Critical API and image domains are preconnected for faster initial requests:
+- API base domain
+- Image CDN domain
+
+### Preload
+Critical resources are preloaded:
+- Primary fonts (Peyda regular and bold)
+- Critical images (OG image)
+
+### Prefetch
+Likely next-page resources are prefetched:
+- `/plp` (product listing page)
+- `/blog` (blog page)
+
+## Performance Targets
+
+- **LCP (Largest Contentful Paint)**: < 2.5s on mobile
+- **FID (First Input Delay)**: < 100ms
+- **CLS (Cumulative Layout Shift)**: < 0.1
+- **Time to Interactive**: < 3.5s on 4G
+
+## Request Optimization
+
+### Deduplication
+- Concurrent identical requests are automatically deduplicated
+- Implemented in `api-client.ts` using request cache
+
+### Caching
+- GET requests are cached with ETag support
+- Stale-while-revalidate pattern for background updates
+- Cache invalidation on mutations
+
+## Mobile-Specific Patterns
+
+### Bottom Navigation
+- Fixed bottom navigation on mobile (< 1024px)
+- Safe area insets support for notched devices
+- Haptic feedback on navigation taps
+
+### Drawers and Modals
+- Swipe-to-close gesture support
+- Smooth animations optimized for mobile
+- Touch-friendly hit areas (minimum 44x44px)
+
+### Forms
+- Mobile-optimized input types (tel, email, etc.)
+- Autocomplete attributes for better UX
+- Keyboard handling optimized for mobile
+
+## Testing Checklist
+
+- [ ] Test touch gestures on real devices (iOS Safari, Chrome Android)
+- [ ] Verify haptic feedback on supported devices
+- [ ] Test pull-to-refresh functionality
+- [ ] Verify reduced motion support
+- [ ] Test image loading performance
+- [ ] Verify resource hints in Network tab
+- [ ] Test offline scenarios
+- [ ] Performance profiling with Lighthouse
+
+## Browser Support
+
+- iOS Safari 12+
+- Chrome Android (latest)
+- Samsung Internet (latest)
+- Firefox Mobile (latest)
+
+## Related Files
+
+- `frontend/src/utils/haptics.ts` - Haptic feedback utility
+- `frontend/src/hooks/usePullToRefresh.ts` - Pull-to-refresh hook
+- `frontend/src/utils/imagePreloader.ts` - Image preloading utilities
+- `frontend/src/components/Reveal.tsx` - Animation component with reduced motion
+- `frontend/src/components/Hero/animations.ts` - Animation presets

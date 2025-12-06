@@ -1,12 +1,19 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { CartService } from "@/services";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import notify from "@/utils/notify";
 import { cartRequestQueue } from "@/utils/requestQueue";
 import { ACCESS_TOKEN_EVENT, ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
+import { hapticSuccess, hapticError } from "@/utils/haptics";
+import {
+  queueAction,
+  removeQueuedAction,
+  setupOfflineQueueListener,
+  isOnline,
+} from "@/utils/offlineQueue";
 
 export interface CartItem {
   id: string;
@@ -110,6 +117,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("cart", JSON.stringify(cartItems));
     }
   }, [cartItems, isLoggedIn]);
+
 
   // Fetch user's cart from API
   const fetchUserCart = async () => {
@@ -290,6 +298,57 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Memoize the offline queue processor to avoid stale closures
+  const processOfflineQueue = useCallback(
+    async (action: {
+      id: string;
+      type: "cart-add" | "cart-remove" | "cart-update";
+      payload: unknown;
+    }) => {
+      if (action.type === "cart-add" && typeof action.payload === "object" && action.payload) {
+        const payload = action.payload as { variationId: string; quantity: number };
+        try {
+          await CartService.addItemToCart(Number(payload.variationId), payload.quantity);
+          await fetchUserCart();
+          removeQueuedAction(action.id);
+        } catch (error) {
+          throw error; // Re-throw to trigger retry logic
+        }
+      } else if (action.type === "cart-remove" && typeof action.payload === "string") {
+        try {
+          await CartService.removeCartItem(Number(action.payload));
+          await fetchUserCart();
+          removeQueuedAction(action.id);
+        } catch (error) {
+          throw error;
+        }
+      } else if (
+        action.type === "cart-update" &&
+        typeof action.payload === "object" &&
+        action.payload
+      ) {
+        const payload = action.payload as { cartItemId: string; quantity: number };
+        try {
+          await CartService.updateCartItem(Number(payload.cartItemId), payload.quantity);
+          await fetchUserCart();
+          removeQueuedAction(action.id);
+        } catch (error) {
+          throw error;
+        }
+      }
+    },
+    [fetchUserCart],
+  );
+
+  // Setup offline queue listener for cart actions
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const cleanup = setupOfflineQueueListener(processOfflineQueue);
+
+    return cleanup;
+  }, [isLoggedIn, processOfflineQueue]);
+
   // Function to migrate local cart to API when user logs in
   const pendingRemovals = useRef<Set<string>>(new Set());
 
@@ -378,13 +437,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      // Queue API call in the background
+      // Queue API call in the background or add to offline queue
       try {
         setIsLoading(true);
+
+        if (!isOnline()) {
+          // Queue for offline processing
+          queueAction({
+            id: `add-${newItem.slug}-${Date.now()}`,
+            type: "cart-add",
+            payload: {
+              variationId: newItem.variationId,
+              quantity: newItem.quantity,
+            },
+          });
+          hapticSuccess();
+          notify.success("کالا به سبد خرید اضافه شد (در صف آفلاین)");
+          setIsLoading(false);
+          return;
+        }
+
         await cartRequestQueue.enqueue(async () => {
           await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
           // Refresh cart to ensure consistency with backend
           await fetchUserCart();
+          hapticSuccess();
         }, `add-${newItem.slug}`);
       } catch (error: any) {
         console.error("Failed to add item to cart:", error);
@@ -394,8 +471,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Check for the specific "Not enough stock" error
         if (error.message && error.message.includes("Not enough stock")) {
+          hapticError();
           notify.error("موجودی کالا به اندازه تعداد درخواستی شما نیست");
         } else {
+          hapticError();
           notify.error("افزودن کالا به سبد خرید با خطا مواجه شد");
         }
       } finally {
@@ -421,6 +500,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         return [...prev, newItem];
       });
+      hapticSuccess();
     }
   };
 

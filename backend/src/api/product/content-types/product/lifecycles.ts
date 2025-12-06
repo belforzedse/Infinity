@@ -5,6 +5,66 @@ import { generateUniqueProductSlug } from "../../../../utils/productSlug";
 type AuditAction = "Create" | "Update" | "Delete";
 
 /**
+ * Call Next.js revalidation API to invalidate cache for product pages
+ * Supports multiple frontend URLs (staging, production)
+ */
+async function triggerProductRevalidation(slug: string) {
+  // Hardcoded for now (TODO: move to environment variables)
+  const frontendUrls = [
+    "https://staging.infinitycolor.org",
+    "https://new.infinitycolor.co",
+  ];
+
+  // Get revalidation secret from environment variable
+  const revalidationSecret = process.env.REVALIDATION_SECRET;
+  if (!revalidationSecret) {
+    strapi.log.warn("[Product Lifecycle] REVALIDATION_SECRET not set, skipping revalidation");
+    return;
+  }
+
+  // Trigger revalidation for all configured frontend URLs
+  const revalidationPromises = frontendUrls.map(async (frontendUrl) => {
+    try {
+      const url = `${frontendUrl.replace(/\/$/, "")}/api/revalidate`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${revalidationSecret}`,
+        },
+        body: JSON.stringify({
+          path: slug, // Product slug
+          type: "product",
+        }),
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(5000), // 5 second timeout
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        strapi.log.error(`[Product Lifecycle] Revalidation failed for ${frontendUrl}: ${response.status} ${errorText}`);
+        return { url: frontendUrl, success: false };
+      }
+
+      const result = await response.json();
+      strapi.log.info(`[Product Lifecycle] Revalidation triggered for ${frontendUrl}/pdp/${slug}`, result);
+      return { url: frontendUrl, success: true };
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        strapi.log.warn(`[Product Lifecycle] Revalidation timeout for ${frontendUrl}`);
+      } else {
+        strapi.log.error(`[Product Lifecycle] Error triggering revalidation for ${frontendUrl}:`, error);
+      }
+      return { url: frontendUrl, success: false };
+    }
+  });
+
+  const results = await Promise.allSettled(revalidationPromises);
+  const successful = results.filter((r) => r.status === "fulfilled" && r.value?.success).length;
+  strapi.log.info(`[Product Lifecycle] Revalidation completed: ${successful}/${frontendUrls.length} successful`);
+}
+
+/**
  * Compute the field-level differences between two record snapshots.
  *
  * @param previous - The prior state of the record (field name → value).
@@ -91,6 +151,11 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    // Trigger revalidation if product has a slug and is active
+    if (result.Slug && result.Status === "Active") {
+      await triggerProductRevalidation(result.Slug);
+    }
   },
 
   async beforeUpdate(event) {
@@ -147,6 +212,7 @@ export default {
       {
         fields: [
           "Title",
+          "Slug",
           "Status",
           "Description",
           "AverageRating",
@@ -211,6 +277,15 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    // Trigger revalidation if product has a slug and is active
+    // Get the current slug (may have changed in the update)
+    // Use result.Slug first (updated value), then fallback to current.Slug
+    const currentSlug = result.Slug || current?.Slug;
+    const currentStatus = result.Status || current?.Status;
+    if (currentSlug && currentStatus === "Active") {
+      await triggerProductRevalidation(currentSlug);
+    }
   },
 
   async beforeDelete(event) {

@@ -36,6 +36,11 @@ export function luxurySlideFade(
   direction: "left" | "right" | "up" | "down",
   opts: LuxurySlideFadeOptions = {},
 ): Variants {
+  // Check for reduced motion preference
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const {
     distance,
     duration,
@@ -51,20 +56,30 @@ export function luxurySlideFade(
     delayOut,
   } = { ...defaultLuxurySlideFadeOptions, ...opts };
 
-  const getOffset = () => {
+  // Reduce animation intensity on mobile or when reduced motion is preferred
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const adjustedDistance = prefersReducedMotion ? 0 : isMobile ? distance * 0.7 : distance;
+  const adjustedDuration = prefersReducedMotion ? 0 : isMobile ? duration * 0.8 : duration;
+  const adjustedBlur = prefersReducedMotion ? 0 : isMobile ? blur * 0.5 : blur;
+
+  const getOffset = (dist: number) => {
     switch (direction) {
       case "left":
-        return { x: -distance, y: 0 };
+        return { x: -dist, y: 0 };
       case "right":
-        return { x: distance, y: 0 };
+        return { x: dist, y: 0 };
       case "up":
-        return { x: 0, y: -distance };
+        return { x: 0, y: -dist };
       case "down":
-        return { x: 0, y: distance };
+        return { x: 0, y: dist };
     }
   };
 
-  const offset = getOffset();
+  const offset = getOffset(adjustedDistance);
+  const adjustedOffset = {
+    x: prefersReducedMotion ? 0 : offset.x,
+    y: prefersReducedMotion ? 0 : offset.y,
+  };
 
   const transition: Transition = useSpring
     ? {
@@ -74,17 +89,17 @@ export function luxurySlideFade(
         mass: 1,
       }
     : {
-        duration,
+        duration: adjustedDuration,
         ease,
       };
 
   return {
     initial: {
-      opacity: 0,
-      x: offset.x,
-      y: offset.y,
-      scale,
-      filter: blur > 0 ? `blur(${blur}px)` : "blur(0px)",
+      opacity: prefersReducedMotion ? 1 : 0,
+      x: adjustedOffset.x,
+      y: adjustedOffset.y,
+      scale: prefersReducedMotion ? 1 : scale,
+      filter: adjustedBlur > 0 ? `blur(${adjustedBlur}px)` : "blur(0px)",
     },
     animate: {
       opacity: 1,
@@ -94,20 +109,20 @@ export function luxurySlideFade(
       filter: "blur(0px)",
       transition: {
         ...transition,
-        staggerChildren: stagger,
-        delay: (typeof delayIn === "number" ? delayIn : delay) || 0,
+        staggerChildren: prefersReducedMotion ? 0 : stagger,
+        delay: prefersReducedMotion ? 0 : (typeof delayIn === "number" ? delayIn : delay) || 0,
       },
     },
     exit: {
-      opacity: 0,
-      x: offset.x,
-      y: offset.y,
-      scale,
-      filter: blur > 0 ? `blur(${blur}px)` : "blur(0px)",
+      opacity: prefersReducedMotion ? 1 : 0,
+      x: adjustedOffset.x,
+      y: adjustedOffset.y,
+      scale: prefersReducedMotion ? 1 : scale,
+      filter: adjustedBlur > 0 ? `blur(${adjustedBlur}px)` : "blur(0px)",
       transition: {
         ...transition,
-        staggerChildren: stagger * 0.5,
-        delay: (typeof delayOut === "number" ? delayOut : delay) || 0,
+        staggerChildren: prefersReducedMotion ? 0 : stagger * 0.5,
+        delay: prefersReducedMotion ? 0 : (typeof delayOut === "number" ? delayOut : delay) || 0,
       },
     },
   };

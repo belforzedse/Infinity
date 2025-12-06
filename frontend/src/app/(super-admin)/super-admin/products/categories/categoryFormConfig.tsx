@@ -28,25 +28,58 @@ const createParentOptionsFetcher =
   > => {
     try {
       const response = await getAllCategories();
-      // Handle Strapi paginated response structure
+      
+      // Debug log in development
+      if (process.env.NODE_ENV === "development") {
+        console.log("getAllCategories raw response:", response);
+        console.log("Response type:", typeof response);
+        console.log("Is array?", Array.isArray(response));
+        console.log("Has data property?", response && typeof response === 'object' && 'data' in response);
+        if (response && typeof response === 'object' && 'data' in response) {
+          console.log("response.data:", (response as any).data);
+          console.log("response.data is array?", Array.isArray((response as any).data));
+        }
+      }
+      
       // getAllCategories returns PaginatedResponse<categoryResponseType>
-      // which has structure: { data: categoryResponseType[], meta: {...} }
-      const categories = response?.data as categoryResponseType[];
+      // which is { data: categoryResponseType[], meta: {...} }
+      // So response.data should be the array of categories
+      let categories: categoryResponseType[] = [];
+      
+      // Handle the response structure: response is { data: [...], meta: {...} }
+      if (response && typeof response === 'object') {
+        // Check if response has a 'data' property
+        if ('data' in response) {
+          const data = (response as any).data;
+          if (Array.isArray(data)) {
+            categories = data;
+          } else if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+            // Nested data structure: { data: { data: [...], meta: {...} } }
+            categories = data.data;
+          }
+        } else {
+          // Response might be the array directly (shouldn't happen but handle it)
+          console.warn("Response doesn't have 'data' property:", response);
+        }
+      } else if (Array.isArray(response)) {
+        // If response is directly an array, use it
+        categories = response;
+      }
 
       // Debug log in development
       if (process.env.NODE_ENV === "development") {
-        console.log("getAllCategories response:", response);
-        console.log("Categories array:", categories);
+        console.log("Categories array after parsing:", categories);
         console.log("Is array?", Array.isArray(categories));
+        console.log("Categories length:", categories.length);
+        if (categories.length > 0) {
+          console.log("First category:", categories[0]);
+        }
       }
 
-      if (!Array.isArray(categories)) {
-        console.warn("Categories is not an array:", categories, "Response:", response);
-        return [];
-      }
-
-      if (categories.length === 0) {
-        console.warn("Categories array is empty");
+      if (!Array.isArray(categories) || categories.length === 0) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Categories is not an array or is empty:", categories, "Response:", response);
+        }
         return [];
       }
 
@@ -54,6 +87,10 @@ const createParentOptionsFetcher =
         .filter((category) => {
           // Exclude the current category being edited
           if (excludeId && category.id === excludeId) {
+            return false;
+          }
+          // Only include categories that have a valid Title
+          if (!category.attributes?.Title) {
             return false;
           }
           return true;
@@ -69,7 +106,7 @@ const createParentOptionsFetcher =
 
           return { label, value };
         })
-        .filter((opt) => opt.label && opt.value); // Filter out invalid options
+        .filter((opt) => opt.label && opt.value && opt.label !== "-"); // Filter out invalid options
 
       // Debug log in development
       if (process.env.NODE_ENV === "development") {

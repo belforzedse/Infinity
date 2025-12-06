@@ -21,6 +21,7 @@ interface ProductAttributes {
   Title: string;
   Description?: string;
   Status?: string;
+  Weight?: number;
   CleaningTips?: string;
   ReturnConditions?: string;
   Files?: StrapiRelationList;
@@ -30,6 +31,7 @@ interface ProductAttributes {
   product_tags?: StrapiRelationList;
   product_other_categories?: StrapiRelationList;
   product_variations?: StrapiRelationList;
+  product_size_helper?: StrapiRelation;
 }
 
 // --- Main function ---
@@ -44,6 +46,7 @@ export const duplicateProduct = async (productId: string) => {
       product_tags: true,
       product_variations: true,
       product_other_categories: true,
+      product_size_helper: true,
     });
 
     // Normalize to our safer ProductAttributes shape
@@ -54,6 +57,7 @@ export const duplicateProduct = async (productId: string) => {
       Title: `${originalData.Title} - کپی`,
       Description: originalData.Description,
       Status: originalData.Status,
+      Weight: originalData.Weight ?? 100,
       CleaningTips: originalData.CleaningTips,
       ReturnConditions: originalData.ReturnConditions,
       Files: originalData.Files?.data?.map((file) => file.id) || [],
@@ -154,6 +158,35 @@ export const duplicateProduct = async (productId: string) => {
       // Log any variation errors but don't fail the entire operation
       if (variationErrors.length > 0) {
         console.warn(`Some variations failed to duplicate:`, variationErrors);
+      }
+    }
+
+    // Duplicate size guide if it exists
+    if (originalData.product_size_helper?.data) {
+      try {
+        const sizeHelperId = originalData.product_size_helper.data.id;
+        const sizeHelperResponse = await apiClient.get<any>(
+          `/product-size-helpers/${sizeHelperId}?populate=*`,
+        );
+
+        // apiClient.get returns response.data, which is { data: { id, attributes } } from Strapi
+        const sizeHelperItem = sizeHelperResponse.data || sizeHelperResponse;
+        const sizeHelperData = sizeHelperItem.attributes || sizeHelperItem;
+
+        if (sizeHelperData?.Helper) {
+          await apiClient.post<any>(
+            `/product-size-helpers`,
+            {
+              data: {
+                product: newProductId,
+                Helper: sizeHelperData.Helper,
+              },
+            },
+          );
+        }
+      } catch (sizeHelperError: any) {
+        // Log error but don't fail the entire operation
+        console.warn("Failed to duplicate size guide:", sizeHelperError);
       }
     }
 

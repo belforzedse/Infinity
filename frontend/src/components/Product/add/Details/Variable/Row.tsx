@@ -7,6 +7,7 @@ interface ProductVariableRowProps {
   item: ProductVariableDisplay;
   isLast: boolean;
   isSelected: boolean;
+  isEditing?: boolean;
   onSelect: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete?: (id: number) => void;
@@ -16,12 +17,19 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
   item,
   isLast,
   isSelected,
+  isEditing,
   onSelect,
   onEdit,
   onDelete,
 }) => {
   return (
-    <tr className={classNames("border-slate-100", !isLast && "border-b")}>
+    <tr
+      className={classNames(
+        "border-slate-100 transition-colors",
+        !isLast && "border-b",
+        isEditing && "bg-blue-50 border-blue-200"
+      )}
+    >
       <td className="p-4">
         <div className="flex items-center gap-1.5">
           <input

@@ -156,6 +156,47 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
+    accessorKey: "publicationStatus",
+    header: "وضعیت انتشار",
+    cell: ({ row }) => {
+      const variations = row.original?.attributes?.product_variations?.data || [];
+      const totalCount = variations.length;
+      const publishedCount = variations.filter(
+        (v) => v?.attributes?.IsPublished === true,
+      ).length;
+
+      if (totalCount === 0) {
+        return (
+          <span className="rounded-xl bg-gray-100 px-2 py-1 text-xs text-gray-700">
+            بدون تنوع
+          </span>
+        );
+      }
+
+      if (publishedCount === totalCount) {
+        return (
+          <span className="rounded-xl bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+            منتشر شده
+          </span>
+        );
+      }
+
+      if (publishedCount === 0) {
+        return (
+          <span className="rounded-xl bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+            پیش نویس
+          </span>
+        );
+      }
+
+      return (
+        <span className="rounded-xl bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+          {publishedCount} از تنوع {totalCount} منتشر شده
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "inventory",
     header: "موجودی",
     cell: ({ row }) => {
@@ -279,6 +320,25 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
         const sku = variations[0]?.attributes?.SKU || "";
         const imageUrl = getThumbnailUrl(row);
 
+        // Calculate publication status
+        const totalCount = variations.length;
+        const publishedCount = variations.filter(
+          (v) => v?.attributes?.IsPublished === true,
+        ).length;
+        const getPublicationStatus = () => {
+          if (totalCount === 0) {
+            return { text: "بدون تنوع", className: "bg-gray-100 text-gray-700" };
+          }
+          if (publishedCount === totalCount) {
+            return { text: "منتشر شده", className: "bg-green-100 text-green-700" };
+          }
+          if (publishedCount === 0) {
+            return { text: "پیش نویس", className: "bg-gray-100 text-gray-700" };
+          }
+          return { text: `${publishedCount}/${totalCount}`, className: "bg-amber-100 text-amber-700" };
+        };
+        const publicationStatus = getPublicationStatus();
+
         return (
           <div
             key={row?.id}
@@ -359,7 +419,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
               </div>
 
               <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
-                <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
                   <span className="text-xs text-neutral-400">
                     {row?.attributes?.product_main_category?.data?.attributes?.Title}
                   </span>
@@ -367,6 +427,10 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                   <span className="text-xs text-green-700">
                     {stockCount}
                     عدد در انبار
+                  </span>
+                  <span className="text-xs text-neutral-400">|</span>
+                  <span className={`text-xs rounded-lg px-1.5 py-0.5 font-medium ${publicationStatus.className}`}>
+                    {publicationStatus.text}
                   </span>
                 </div>
 

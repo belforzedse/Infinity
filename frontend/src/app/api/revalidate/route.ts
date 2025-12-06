@@ -73,6 +73,24 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (type === "product" && path) {
+      // Product PDP route is /pdp/[slug]
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+      const pdpPath = normalizedPath.startsWith("/pdp/") ? normalizedPath : `/pdp${normalizedPath}`;
+
+      // Revalidate the specific product PDP page
+      revalidatePath(pdpPath);
+      // Also revalidate PLP and sitemap
+      revalidatePath("/plp");
+      revalidatePath("/sitemap.xml");
+
+      return NextResponse.json({
+        revalidated: true,
+        now: Date.now(),
+        paths: [pdpPath, "/plp", "/sitemap.xml"],
+      });
+    }
+
     if (type === "blog-listing") {
       // Revalidate blog listing and sitemap
       revalidatePath("/blog");

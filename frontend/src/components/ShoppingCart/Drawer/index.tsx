@@ -8,10 +8,13 @@ import CartDrawerHeader from "./Header";
 import CartDrawerContent from "./Content";
 import CartDrawerFooter from "./Footer";
 import EmptyCartDrawer from "./Empty";
+import { useDrag } from "@use-gesture/react";
+import { hapticButton } from "@/utils/haptics";
 
 export default function CartDrawer() {
   const { isDrawerOpen, closeDrawer, cartItems } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
+  const panelRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -26,6 +29,27 @@ export default function CartDrawer() {
       closeDrawer();
     }, 300);
   };
+
+  // Swipe-to-close gesture for mobile
+  const bind = useDrag(
+    ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
+      if (!panelRef.current || typeof window === "undefined" || window.innerWidth >= 1024) return;
+
+      // Only handle left swipe (RTL: swipe left to close)
+      const swipeThreshold = 100;
+      const velocityThreshold = 0.5;
+
+      if (!active && (mx < -swipeThreshold || (xDir < 0 && Math.abs(vx) > velocityThreshold))) {
+        hapticButton();
+        handleClose();
+      }
+    },
+    {
+      axis: "x",
+      threshold: 10,
+      preventDefault: true,
+    },
+  );
 
   return (
     <Transition appear show={isAnimating} as={Fragment}>
@@ -53,7 +77,11 @@ export default function CartDrawer() {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="min-h-screen w-full max-w-md transform overflow-hidden bg-white shadow-xl transition-all">
+              <Dialog.Panel
+                ref={panelRef}
+                className="min-h-screen w-full max-w-md transform overflow-hidden bg-white shadow-xl transition-all"
+                {...bind()}
+              >
                 <div className="flex h-full flex-col">
                   <CartDrawerHeader onClose={handleClose} />
 

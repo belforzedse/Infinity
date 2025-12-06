@@ -1,7 +1,6 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS } from "@/constants/api";
 import type { EditProductData, ProductData } from "@/types/super-admin/products";
-import { toast } from "react-hot-toast";
 
 interface TransformedProductData
   extends Omit<
@@ -16,7 +15,7 @@ interface TransformedProductData
   product_main_category: number | null;
   product_tags: number[];
   product_other_categories: number[];
-  CoverImage?: number;
+  CoverImage?: number | null;
   Media?: number[];
   Files?: number[];
 }
@@ -34,10 +33,16 @@ function transformProductDataForApi(data: EditProductData): TransformedProductDa
     product_other_categories: data.product_other_categories.map((category) => category.id),
   };
 
-  // Only include CoverImage if it has a new value
-  if (CoverImage?.data?.id) {
+  // Handle CoverImage: include ID if exists, or null if explicitly deleted
+  // Check if CoverImage is explicitly set (either null or has data property)
+  if (CoverImage === null || (CoverImage && CoverImage.data === null)) {
+    // CoverImage is explicitly set to null or CoverImage.data is null (deleted)
+    transformedData.CoverImage = null;
+  } else if (CoverImage?.data?.id) {
+    // CoverImage has a valid ID
     transformedData.CoverImage = CoverImage.data.id;
   }
+  // If CoverImage is undefined, don't include it in the payload (no change)
 
   return transformedData;
 }
@@ -53,8 +58,11 @@ export const updateProduct = async (id: string, body: EditProductData) => {
 
     return { success: true, data: response.data };
   } catch (error: any) {
-    const errorMessage = error.response?.data?.error?.message || "ویرایش محصول با خطا مواجه شد";
-    toast.error(errorMessage);
-    return { success: false, error };
+    // Return error without showing toast - let the caller handle it
+    return {
+      success: false,
+      error,
+      errorMessage: error.response?.data?.error?.message || "ویرایش محصول با خطا مواجه شد"
+    };
   }
 };

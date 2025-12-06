@@ -8,8 +8,11 @@ import {
   useRef,
   useState,
   type MouseEvent,
+  type TouchEvent,
   type WheelEvent,
 } from "react";
+import { useDrag } from "@use-gesture/react";
+import { hapticNavigation } from "@/utils/haptics";
 
 type Props = {
   type: "video" | "image";
@@ -37,6 +40,13 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   });
   const [zoomHintVisible, setZoomHintVisible] = useState(false);
   const hintTimerRef = useRef<number | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const lastTapRef = useRef<number>(0);
+  const pinchState = useRef<{ active: boolean; startDistance: number; startScale: number }>({
+    active: false,
+    startDistance: 0,
+    startScale: 1,
+  });
 
   const isDesktopZoom = () => {
     if (typeof window === "undefined") return false;
@@ -163,6 +173,20 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setPrefersReducedMotion(mq.matches);
+      const handler = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
+      if (mq.addEventListener) mq.addEventListener("change", handler);
+      else mq.addListener(handler);
+      return () => {
+        if (mq.removeEventListener) mq.removeEventListener("change", handler);
+        else mq.removeListener(handler);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (hintTimerRef.current) {
         window.clearTimeout(hintTimerRef.current);
@@ -199,6 +223,97 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [goToNextImage, goToPreviousImage]);
 
+  // Swipe gesture for mobile navigation
+  const bind = useDrag(
+    ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
+      if (pinchState.current.active) return;
+      // Only handle horizontal swipes on mobile
+      if (typeof window === "undefined" || window.innerWidth >= 1024) return;
+
+      // Determine swipe threshold (30px or high velocity)
+      const swipeThreshold = 30;
+      const velocityThreshold = 0.5;
+
+      if (!active && (Math.abs(mx) > swipeThreshold || Math.abs(vx) > velocityThreshold)) {
+        if (xDir > 0) {
+          // Swipe right (RTL: go to previous)
+          hapticNavigation();
+          goToPreviousImage();
+        } else if (xDir < 0) {
+          // Swipe left (RTL: go to next)
+          hapticNavigation();
+          goToNextImage();
+        }
+      }
+    },
+    {
+      axis: "x",
+      threshold: 10,
+      preventDefault: true,
+    },
+  );
+
+  const distanceBetweenTouches = (touches: React.TouchList | TouchList) => {
+    const [a, b] = [touches[0], touches[1]];
+    const dx = a.clientX - b.clientX;
+    const dy = a.clientY - b.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    if (event.touches.length === 2) {
+      pinchState.current = {
+        active: true,
+        startDistance: distanceBetweenTouches(event.touches),
+        startScale: zoomScale,
+      };
+    }
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    if (pinchState.current.active && event.touches.length === 2) {
+      const newDistance = distanceBetweenTouches(event.touches);
+      const scaleFactor = newDistance / pinchState.current.startDistance;
+      const nextScale = clampScale(pinchState.current.startScale * scaleFactor);
+      setZoomScale(nextScale);
+
+      // Recenter on pinch midpoint
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const midX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+        const midY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+        updateOrigin(midX, midY);
+      }
+      event.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (pinchState.current.active && event.touches.length < 2) {
+      pinchState.current.active = false;
+    }
+
+    if (prefersReducedMotion) return;
+
+    // Double-tap to toggle zoom on mobile
+    if (event.touches.length === 0 && event.changedTouches.length === 1 && !isDesktopZoom()) {
+      const now = Date.now();
+      if (now - lastTapRef.current < 300) {
+        const touch = event.changedTouches[0];
+        updateOrigin(touch.clientX, touch.clientY);
+        const targetScale = zoomScale > 1 ? 1 : 2;
+        setZoomScale(targetScale);
+        if (targetScale === 1) {
+          setTranslate({ x: 0, y: 0 });
+        }
+        event.preventDefault();
+      }
+      lastTapRef.current = now;
+    }
+  };
+
   return (
     <div className="h-full flex-1">
       <div
@@ -210,6 +325,10 @@ export default function PDPHeroGallerySingleImage(props: Props) {
         onMouseEnter={handleMouseEnter}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        {...bind()}
       >
         {type === "video" ? (
           <video
@@ -238,24 +357,32 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                   transformOrigin,
                 }}
               >
-                <Image
-                  className={`h-full w-full object-cover transition-opacity duration-300 ease-out ${
-                    isLoading ? "opacity-0 blur-[2px]" : "opacity-100"
-                  }`}
-                  src={broken ? "/images/placeholders/image-placeholder.svg" : src}
-                  alt={alt || ""}
-                  fill
-                  loader={imageLoader}
-                  sizes="(max-width: 768px) 100vw, 640px"
-                  onLoad={() => setIsLoading(false)}
-                  onError={() => {
-                    setBroken(true);
-                    setIsLoading(false);
-                  }}
-                  priority={false}
-                  placeholder="blur"
-                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
-                />
+                {broken || !src ? (
+                  <div className="h-full w-full bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-24 h-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                ) : (
+                  <Image
+                    className={`h-full w-full object-cover transition-opacity duration-300 ease-out ${
+                      isLoading ? "opacity-0 blur-[2px]" : "opacity-100"
+                    }`}
+                    src={src}
+                    alt={alt || ""}
+                    fill
+                    loader={imageLoader}
+                    sizes="(max-width: 768px) 100vw, 640px"
+                    onLoad={() => setIsLoading(false)}
+                    onError={() => {
+                      setBroken(true);
+                      setIsLoading(false);
+                    }}
+                    priority={false}
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
+                  />
+                )}
               </div>
             </div>
           </div>
