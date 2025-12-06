@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     // Tag-based revalidation
     if (tag) {
-      revalidateTag(tag, "page");
+      revalidateTag(tag, "max");
       return NextResponse.json({
         revalidated: true,
         now: Date.now(),
