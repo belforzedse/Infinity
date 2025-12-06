@@ -10,6 +10,7 @@ import ProfileIcon from "./Icons/ProfileIcon";
 import { categories } from "@/constants/categories";
 import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
+import { hapticButton } from "@/utils/haptics";
 
 const PLPBottomNavigation = () => {
   const pathname = usePathname();
@@ -34,6 +35,7 @@ const PLPBottomNavigation = () => {
 
   const handleProfileClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    hapticButton();
     if (isAuthenticated) {
       router.push("/account");
     } else {
@@ -43,6 +45,7 @@ const PLPBottomNavigation = () => {
 
   const handleCategoriesClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    hapticButton();
     // Mount, then make visible to trigger enter animation
     setIsCategoriesMounted(true);
     requestAnimationFrame(() => setIsCategoriesVisible(true));
