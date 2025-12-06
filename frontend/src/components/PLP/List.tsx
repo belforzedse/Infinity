@@ -130,6 +130,28 @@ export default function PLPList({
     );
   };
 
+  const productHasDiscount = (product: Product): boolean => {
+    return product.attributes?.product_variations?.data?.some((variation) => {
+      const generalDiscounts = variation.attributes?.general_discounts?.data;
+      if (generalDiscounts && Array.isArray(generalDiscounts) && generalDiscounts.length > 0) {
+        return true;
+      }
+
+      const price = parseFloat(variation.attributes?.Price || "0");
+      const discountPrice = variation.attributes?.DiscountPrice
+        ? parseFloat(variation.attributes.DiscountPrice)
+        : undefined;
+
+      return !!(
+        typeof discountPrice === "number" &&
+        !isNaN(discountPrice) &&
+        !isNaN(price) &&
+        discountPrice > 0 &&
+        discountPrice < price
+      );
+    }) || false;
+  };
+
   // Filter initial products to only include those with images
   const filteredInitialProducts = initialProducts.filter(hasImage);
 
@@ -255,6 +277,17 @@ export default function PLPList({
       queryParams.append("filters[product_variations][Usage][$eq]", usage);
     }
 
+    if (discountOnly === "true") {
+      queryParams.append(
+        "filters[$or][0][product_variations][general_discounts][id][$notNull]",
+        "true",
+      );
+      queryParams.append(
+        "filters[$or][1][product_variations][DiscountPrice][$gt]",
+        "0",
+      );
+    }
+
     // Sorting - only send to backend if not price sorting (price sorting done on frontend)
     if (sort && sort !== "price:asc" && sort !== "price:desc") {
       queryParams.append("sort[0]", sort);
@@ -271,6 +304,10 @@ export default function PLPList({
 
         // Filter out products without images (can't filter at API level for relations)
         productsArray = productsArray.filter(hasImage);
+
+        if (discountOnly === "true") {
+          productsArray = productsArray.filter(productHasDiscount);
+        }
 
         // CRITICAL: Sort products by stock availability FIRST, before any other operations
         // This ensures in-stock products always appear before out-of-stock products
@@ -370,14 +407,26 @@ export default function PLPList({
         }
 
         setProducts(productsArray);
-        setPagination(
-          data?.meta?.pagination || {
-            page: parseInt(page) || 1,
-            pageSize: 20,
-            pageCount: 0,
-            total: 0,
-          },
-        );
+
+        const pageNumber = parseInt(page) || data?.meta?.pagination?.page || 1;
+        const pageSizeNumber = data?.meta?.pagination?.pageSize || 30;
+        const backendPagination = data?.meta?.pagination;
+
+        let totalItems = backendPagination?.total ?? productsArray.length;
+
+        if (discountOnly === "true") {
+          const observedTotal = (pageNumber - 1) * pageSizeNumber + productsArray.length;
+          totalItems = Math.min(totalItems, observedTotal);
+        }
+
+        const pageCount = Math.ceil(totalItems / pageSizeNumber) || 0;
+
+        setPagination({
+          page: pageNumber,
+          pageSize: pageSizeNumber,
+          pageCount,
+          total: totalItems,
+        });
       })
       .catch((error) => {
         console.error("[PLP] Error fetching products:", {
@@ -412,6 +461,7 @@ export default function PLPList({
     sort,
     searchQuery,
     discountOnly,
+    productHasDiscount,
   ]);
 
   // Fetch products when dependencies change
@@ -448,29 +498,7 @@ export default function PLPList({
 
           // Discount-only filter
           if (discountOnly === "true") {
-            const hasDiscount = product.attributes.product_variations.data.some((variation) => {
-              if (!variation?.attributes) return false;
-
-              // Check for general_discounts first
-              const generalDiscounts = variation.attributes.general_discounts?.data;
-              if (
-                generalDiscounts &&
-                Array.isArray(generalDiscounts) &&
-                generalDiscounts.length > 0
-              ) {
-                return true;
-              }
-
-              // Fallback to DiscountPrice field
-              const price = parseFloat(variation.attributes.Price || "0");
-              const discountPrice = variation.attributes.DiscountPrice
-                ? parseFloat(variation.attributes.DiscountPrice)
-                : null;
-              return (
-                discountPrice && !isNaN(discountPrice) && !isNaN(price) && discountPrice < price
-              );
-            });
-            if (!hasDiscount) return false;
+            if (!productHasDiscount(product)) return false;
           }
 
           return true;
@@ -479,7 +507,7 @@ export default function PLPList({
           return false;
         }
       }),
-    [products, available, discountOnly],
+    [products, available, discountOnly, productHasDiscount],
   );
 
 
