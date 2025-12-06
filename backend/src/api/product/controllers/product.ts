@@ -3,27 +3,38 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { roleIsAllowed, MANAGEMENT_ROLES } from "../../../utils/roles";
 
 /**
- * Check if the user is an admin (superadmin or store manager)
+ * Check if the user is an admin (superadmin, store manager, or editor)
+ * Supports both plugin::users-permissions.user roles and local-user roles
  * @param user - The user object from ctx.state.user
  * @returns true if user is an admin, false otherwise
  */
 function isAdminUser(user: any): boolean {
   if (!user) return false;
   
-  const requesterRoleType = user?.role?.type?.toLowerCase();
-  const requesterRoleName = user?.role?.name?.toLowerCase();
-  const userRoleId = user?.user_role?.id;
+  // Check explicit isAdmin flag (set by auth/self endpoint)
+  if (user?.isAdmin === true) {
+    return true;
+  }
   
-  return (
-    user?.isAdmin === true ||
-    userRoleId === 2 || // Admin role ID is 2
-    requesterRoleType === "superadmin" ||
-    requesterRoleType === "store-manager" ||
-    requesterRoleName === "superadmin" ||
-    requesterRoleName === "store manager"
-  );
+  // Check local-user role (role ID 2 is admin)
+  const userRoleId = user?.user_role?.id;
+  if (userRoleId === 2) {
+    return true;
+  }
+  
+  // Check plugin::users-permissions role using existing utilities
+  const roleName = user?.role?.name;
+  if (roleName) {
+    // Use existing role matching utility with MANAGEMENT_ROLES
+    if (roleIsAllowed(roleName, MANAGEMENT_ROLES)) {
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 const PRODUCT_POPULATE = {
