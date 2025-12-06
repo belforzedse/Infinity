@@ -1,9 +1,9 @@
 "use client";
 
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/textarea";
 import { useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface DetailsProps {
   isEditMode?: boolean;
@@ -12,15 +12,17 @@ interface DetailsProps {
 export default function ProductDetails({ isEditMode = false }: DetailsProps) {
   const [productAtom, setProductAtom] = useAtom(isEditMode ? editProductDataAtom : productDataAtom);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "name") {
       setProductAtom({ ...(productAtom as any), Title: value });
     } else if (name === "weight") {
       setProductAtom({ ...(productAtom as any), Weight: value ? Number(value) : 100 });
-    } else {
-      setProductAtom({ ...(productAtom as any), Description: value });
     }
+  };
+
+  const handleDescriptionChange = (content: string) => {
+    setProductAtom({ ...(productAtom as any), Description: content });
   };
 
   return (
@@ -52,12 +54,11 @@ export default function ProductDetails({ isEditMode = false }: DetailsProps) {
 
       <div className="flex flex-col gap-4">
         <label className="text-base text-gray-700">توضیحات محصول</label>
-        <Textarea
-          name="description"
-          value={productAtom.Description}
-          onChange={handleChange}
+        <RichTextEditor
+          content={productAtom.Description || ""}
+          onChange={handleDescriptionChange}
           placeholder="توضیحات محصول"
-          className="min-h-[150px] w-full resize-none pt-2 text-right text-neutral-800 placeholder:text-gray-400"
+          simplified={true}
         />
       </div>
     </div>

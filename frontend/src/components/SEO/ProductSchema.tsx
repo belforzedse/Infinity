@@ -7,9 +7,26 @@ interface ProductSchemaProps {
   slug: string;
 }
 
+// Strip HTML tags from description for SEO schema (schema.org expects plain text)
+function stripHTML(html: string): string {
+  if (!html) return "";
+  // Remove HTML tags and decode HTML entities
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function ProductSchema({ product, slug }: ProductSchemaProps) {
   const title = product?.attributes?.Title || "محصول";
-  const description = product?.attributes?.Description || title;
+  const rawDescription = product?.attributes?.Description || title;
+  const description = stripHTML(rawDescription);
   const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
     ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
     : undefined;
