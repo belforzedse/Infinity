@@ -126,8 +126,8 @@ export async function generateMetadata({
       });
     }
 
-    const titleRaw = product?.attributes?.Title || "محصول";
-    const descRaw = product?.attributes?.Description || titleRaw;
+    const titleRaw = product?.attributes?.Title || "";
+    const descRaw = product?.attributes?.Description || "";
     const description = String(descRaw).slice(0, 160);
     const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
       ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
@@ -422,7 +422,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       logger.info("[PDP] Attempting ID-based fallback", { decodedSlug });
       try {
         // Server-safe fetch with same populate parameters as getProductById
-        const fallbackEndpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${decodedSlug}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies`;
+        const fallbackEndpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${decodedSlug}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies&populate[15]=product_reviews.product_review_replies.user&populate[16]=product_reviews.product_review_replies.user.user_info`;
         const fallbackUrl = `${API_BASE_URL}${fallbackEndpoint}`;
 
         const fallbackResponse = await fetch(fallbackUrl, {
@@ -573,16 +573,16 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     );
   }
 
-  // Get category name from either Title or Name field (with proper null checks)
+  // Get category name from either Title or Name field (no fallback placeholder)
   const categoryName =
     productData.attributes.product_main_category?.data?.attributes?.Title ||
     productData.attributes.product_main_category?.data?.attributes?.Name ||
-    "دسته بندی";
+    "";
 
   const categorySlug =
-    productData.attributes.product_main_category?.data?.attributes?.Slug || "دسته-بندی";
+    productData.attributes.product_main_category?.data?.attributes?.Slug || "";
 
-  const productTitle = productData.attributes.Title || "محصول";
+  const productTitle = productData.attributes.Title || "";
 
   // Fetch related products
   const productId = productData.id?.toString() || "";
@@ -717,10 +717,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
 
       {/* <PDPHeroInfoFAQItem
         title="عنوان توضیحات سئو در این قسمت قرار می گیرد"
-        content={
-          productData.attributes.Description ||
-          "مانتو زنانه شیک و مجلسی با پارچه نخی درجه یک، مناسب برای استفاده روزمره و مهمانی"
-        }
+        content={productData.attributes.Description || ""}
       /> */}
     </PageContainer>
   );

@@ -89,7 +89,15 @@ export default function PDPHeroGallery(props: Props) {
   }, [assets]);
 
   if (!assets.length) {
-    return null;
+    return (
+      <div className="top-2 flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row">
+        <div className="flex h-full w-full items-center justify-center bg-gray-200 rounded-lg">
+          <svg className="w-24 h-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+          </svg>
+        </div>
+      </div>
+    );
   }
 
   return (

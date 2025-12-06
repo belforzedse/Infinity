@@ -64,6 +64,7 @@ export function transformToProductData(strapiProduct: ProductDataResponse): Edit
     CoverImage: coverImageUrl,
     Description: strapiProduct.Description,
     Status: "Active",
+    Weight: strapiProduct.Weight ?? 100,
     Media: mediaIds,
     product_main_category: mainCategory,
     product_tags: productTags,

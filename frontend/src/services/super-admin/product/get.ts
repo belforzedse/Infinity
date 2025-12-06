@@ -60,6 +60,7 @@ export interface ProductDataResponse {
   Title: string;
   Description: string;
   Status: string;
+  Weight?: number;
   AverageRating: number | null;
   RatingCount: number | null;
   createdAt: string;

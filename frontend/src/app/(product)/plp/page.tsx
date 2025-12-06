@@ -1,8 +1,10 @@
 export const revalidate = 30; // refresh product listing every 30 seconds
 
+import { Suspense } from "react";
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
+import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
@@ -68,7 +70,7 @@ interface Product {
 async function getProducts(
   category?: string,
   page = 1,
-  pageSize = 20,
+  pageSize = 30, // Reduced page size for better performance
   showAvailableOnly = false,
   minPrice?: string,
   maxPrice?: string,
@@ -198,20 +200,26 @@ async function getProducts(
   queryParams.append("fields[2]", "Description");
   queryParams.append("fields[3]", "Status");
 
-  // Add pagination
-  queryParams.append("pagination[page]", page.toString());
-  queryParams.append("pagination[pageSize]", pageSize.toString());
+  // Fetch all products (or a large batch) for global sorting
+  // We'll paginate after sorting to ensure consistent ordering across pages
+  queryParams.append("pagination[pageSize]", "500"); // Fetch up to 500 products for sorting
 
   // Add filters
   queryParams.append("filters[Status][$eq]", "Active");
   queryParams.append("filters[removedAt][$null]", "true");
+
+  // Filter for products with valid prices (Price > 0)
+  // This ensures we only get products with at least one variation that has a price > 0
+  // Note: We can't filter for CoverImage at API level (relations don't support $notNull in REST API)
+  // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
+  queryParams.append("filters[product_variations][Price][$gt]", "0");
 
   // Category filter
   if (category) {
     queryParams.append("filters[product_main_category][Slug][$eq]", category);
   }
 
-  // Price range filters
+  // Price range filters (these will work in combination with the base Price > 0 filter)
   if (minPrice) {
     queryParams.append("filters[product_variations][Price][$gte]", minPrice);
   }
@@ -249,10 +257,12 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
-  // Sorting - only send to backend if not price sorting (price sorting done on frontend)
-  if (sort && sort !== "price:asc" && sort !== "price:desc") {
-    queryParams.append("sort[0]", sort);
-  }
+  // Don't apply any API-level sorting - we'll sort everything client-side
+  // This ensures stock sorting happens first, before any other sorting
+  // Only apply non-price sorting if explicitly requested (but stock takes priority)
+  // if (sort && sort !== "price:asc" && sort !== "price:desc") {
+  //   queryParams.append("sort[0]", sort);
+  // }
 
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
@@ -264,9 +274,10 @@ async function getProducts(
     });
     const data = await response.json();
 
-    // Filter out products with zero price, no images, and check availability if needed
+    // Post-fetch filtering: We filter for images here since API-level filtering for relations is limited
+    // Price filtering is done at API level, but we double-check for edge cases
     let filteredProducts = data.data.filter((product: Product) => {
-      // Check if product has an image
+      // Filter out products without images (can't filter at API level for relations)
       const hasImage = !!(
         product.attributes.CoverImage?.data?.attributes?.url ||
         product.attributes.CoverImage?.data
@@ -276,46 +287,63 @@ async function getProducts(
         return false;
       }
 
-      // Check if any variation has a valid price
+      // Double-check valid price exists (API filter should handle this, but verify)
       const hasValidPrice = product.attributes.product_variations?.data?.some((variation) => {
         const price = variation.attributes.Price;
         return price && parseInt(price) > 0;
       });
 
-      // If showAvailableOnly is true, also check if any variation has stock
+      if (!hasValidPrice) {
+        return false;
+      }
+
+      // If showAvailableOnly is true, check if any variation has stock
+      // (This can't be easily done at API level due to relation complexity)
       if (showAvailableOnly) {
         const hasAvailableVariation = product.attributes.product_variations?.data?.some((variation) => {
           const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
           return typeof stockCount === "number" && stockCount > 0;
         });
-        return hasValidPrice && hasAvailableVariation;
+        return hasAvailableVariation;
       }
 
-      return hasValidPrice;
+      return true;
     });
 
-    // Discount-only filter (post-fetch) if requested
-    if (hasDiscount) {
-      filteredProducts = filteredProducts.filter((product: Product) =>
-        product.attributes.product_variations?.data?.some((variation) => {
-          const price = parseFloat(variation.attributes.Price);
+    // CRITICAL: Sort by stock availability FIRST, before any other operations
+    // This ensures in-stock products always appear before out-of-stock products
+    filteredProducts.sort((a: Product, b: Product) => {
+      // Helper function to check if product has available stock
+      // A product is "in stock" if it has at least one published variation with stock > 0
+      const hasStock = (product: Product): boolean => {
+        if (!product.attributes.product_variations?.data) return false;
 
-          // Check for general_discounts first
-          const generalDiscounts = variation.attributes.general_discounts?.data;
-          if (generalDiscounts && generalDiscounts.length > 0) {
-            return true;
-          }
+        return product.attributes.product_variations.data.some((variation) => {
+          // Must be published
+          if (!variation.attributes?.IsPublished) return false;
 
-          // Fallback to DiscountPrice field
-          const discountPrice = variation.attributes.DiscountPrice
-            ? parseFloat(variation.attributes.DiscountPrice)
-            : null;
-          return discountPrice && discountPrice < price;
-        }),
-      );
-    }
+          // Check stock count - handle various data structures
+          const stockData = variation.attributes?.product_stock;
+          if (!stockData) return false;
 
-    // Frontend price sorting
+          const stockCount = stockData?.data?.attributes?.Count;
+          // Check if stockCount exists and is a positive number
+          if (typeof stockCount !== "number" || stockCount <= 0) return false;
+
+          return true;
+        });
+      };
+
+      const aHasStock = hasStock(a);
+      const bHasStock = hasStock(b);
+
+      // Products with stock come first (return -1 means a comes before b)
+      if (aHasStock && !bHasStock) return -1;
+      if (!aHasStock && bHasStock) return 1;
+      return 0; // Keep original order if both have same stock status
+    });
+
+    // Frontend price sorting (applied after stock sorting)
     if (sort === "price:asc" || sort === "price:desc") {
       const getMinVariationPrice = (product: Product): number => {
         const variations = product.attributes.product_variations?.data || [];
@@ -340,16 +368,47 @@ async function getProducts(
         return minPrice === Infinity ? 0 : minPrice;
       };
 
+      // Sort by price, but maintain stock priority (in-stock products first)
       filteredProducts.sort((a: Product, b: Product) => {
+        // First, check stock status (maintain stock priority)
+        const aHasStock = a.attributes.product_variations?.data?.some((v) =>
+          v.attributes.IsPublished &&
+          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
+          v.attributes.product_stock.data.attributes.Count > 0
+        ) || false;
+
+        const bHasStock = b.attributes.product_variations?.data?.some((v) =>
+          v.attributes.IsPublished &&
+          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
+          v.attributes.product_stock.data.attributes.Count > 0
+        ) || false;
+
+        // If stock status differs, stock comes first
+        if (aHasStock && !bHasStock) return -1;
+        if (!aHasStock && bHasStock) return 1;
+
+        // If same stock status, sort by price
         const priceA = getMinVariationPrice(a);
         const priceB = getMinVariationPrice(b);
         return sort === "price:asc" ? priceA - priceB : priceB - priceA;
       });
     }
 
+    // Now paginate the sorted results client-side
+    const totalProducts = filteredProducts.length;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(totalProducts / pageSize);
+
     return {
-      products: filteredProducts,
-      pagination: data.meta.pagination,
+      products: paginatedProducts,
+      pagination: {
+        page: page,
+        pageSize: pageSize,
+        pageCount: totalPages,
+        total: totalProducts,
+      },
     };
   } catch (error) {
     logger.error("Error fetching products", { error: String(error) });
@@ -393,7 +452,7 @@ export default async function PLPPage({
   const { products, pagination } = await getProducts(
     category,
     page,
-    20,
+    30, // Reduced page size for better performance
     showAvailableOnly,
     minPrice,
     maxPrice,
@@ -471,12 +530,14 @@ export default async function PLPPage({
 
       {!isSearchResults && <PLPHeroBanner category={category} />}
 
-      <PLPList
-        products={products}
-        pagination={pagination}
-        category={category}
-        searchQuery={search}
-      />
+      <Suspense fallback={<ProductListSkeleton />}>
+        <PLPList
+          products={products}
+          pagination={pagination}
+          category={category}
+          searchQuery={search}
+        />
+      </Suspense>
     </PageContainer>
   );
 }

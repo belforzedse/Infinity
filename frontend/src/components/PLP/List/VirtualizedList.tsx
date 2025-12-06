@@ -7,10 +7,16 @@ import ProductSmallCard from "@/components/Product/SmallCard";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import dynamic from "next/dynamic";
 
-// Dynamically import react-window to avoid Turbopack build issues
+// Dynamically import react-window to avoid build/SSR issues
+// Using dynamic import with ssr: false since react-window is client-only
 const List = dynamic(
-  () => import("react-window").then((mod) => mod.FixedSizeList),
-  { ssr: false }
+  () => import("react-window").then((mod: any) => {
+    // react-window exports FixedSizeList as a named export
+    return mod.FixedSizeList || mod.default?.FixedSizeList || mod.default;
+  }) as Promise<React.ComponentType<any>>,
+  {
+    ssr: false, // Client-only component, no SSR needed
+  }
 );
 
 interface Product {
@@ -207,7 +213,7 @@ export default function VirtualizedList({
           itemSize={DESKTOP_ITEM_HEIGHT + 16}
           width="100%"
         >
-          {({ index, style }) => {
+          {({ index, style }: ListChildComponentProps) => {
             const rowStart = index * desktopColumns;
             const rowProducts = processedProducts.slice(rowStart, rowStart + desktopColumns);
 

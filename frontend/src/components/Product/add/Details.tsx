@@ -16,6 +16,8 @@ export default function ProductDetails({ isEditMode = false }: DetailsProps) {
     const { name, value } = e.target;
     if (name === "name") {
       setProductAtom({ ...(productAtom as any), Title: value });
+    } else if (name === "weight") {
+      setProductAtom({ ...(productAtom as any), Weight: value ? Number(value) : 100 });
     } else {
       setProductAtom({ ...(productAtom as any), Description: value });
     }
@@ -31,6 +33,19 @@ export default function ProductDetails({ isEditMode = false }: DetailsProps) {
           value={productAtom.Title}
           onChange={handleChange}
           placeholder="نام محصول"
+          className="w-full text-right text-neutral-800 placeholder:text-gray-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-3 lg:gap-4">
+        <label className="text-base text-gray-700">وزن محصول (گرم)</label>
+        <Input
+          type="number"
+          name="weight"
+          value={productAtom.Weight ?? 100}
+          onChange={handleChange}
+          placeholder="وزن محصول به گرم"
+          min="0"
           className="w-full text-right text-neutral-800 placeholder:text-gray-400"
         />
       </div>

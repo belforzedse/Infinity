@@ -6,16 +6,14 @@ import toast from "react-hot-toast";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import Modal from "@/components/Kits/Modal";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import { Ruler, Settings } from "lucide-react";
 
 interface ProductVariablesProps {
   productId: number;
   refreshKey?: number;
 }
 
-const DEFAULT_TITLES = {
-  sizes: "تک سایز",
-  models: "استاندارد",
-};
+// DEFAULT_TITLES removed - variations should only show actual size/model values, not defaults
 
 const MAX_STOCK = 1000;
 type BulkPublishState = "no-change" | "published" | "draft";
@@ -74,7 +72,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
       setLoading(true);
       try {
         const response = await apiClient.get(
-          `/product-variations?filters[product][id][$eq]=${productId}&populate=product_variation_color,product_variation_size,product_variation_model,product_stock,general_discounts&pagination[pageSize]=100`,
+          `/product-variations?filters[product][id][$eq]=${productId}&populate[0]=product_variation_color&populate[1]=product_variation_size&populate[2]=product_variation_model&populate[3]=product_stock&populate[4]=general_discounts&pagination[pageSize]=100`,
           {
             cache: "no-store",
           },
@@ -100,16 +98,24 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
 
         // Transform API data to display format
         const formattedVariations = variations.map((variation: ProductVariable) => {
-          // Extract color, size, model details
-          const color = variation.attributes.product_variation_color?.data?.attributes.Title || "";
-          const size =
-            variation.attributes.product_variation_size?.data?.attributes.Title ||
-            DEFAULT_TITLES.sizes;
-          const model =
-            variation.attributes.product_variation_model?.data?.attributes.Title ||
-            DEFAULT_TITLES.models;
+          // Extract color, size, model details - only use actual values, no defaults
+          const color = variation.attributes.product_variation_color?.data?.attributes?.Title;
+          const colorCode = variation.attributes.product_variation_color?.data?.attributes?.ColorCode;
+          const size = variation.attributes.product_variation_size?.data?.attributes?.Title;
+          const model = variation.attributes.product_variation_model?.data?.attributes?.Title;
 
-          // Create variable name from combinations
+          // Debug: Log color code extraction
+          if (process.env.NODE_ENV !== "production" && color) {
+            // eslint-disable-next-line no-console
+            console.log(`Color extraction for variation ${variation.id}:`, {
+              color,
+              colorCode,
+              colorData: variation.attributes.product_variation_color?.data,
+              fullAttributes: variation.attributes.product_variation_color?.data?.attributes,
+            });
+          }
+
+          // Create variable name from combinations - only include parts that exist
           const variableParts = [size, color, model].filter((part) => part !== "");
           const variableName = variableParts.join(" - ");
 
@@ -146,6 +152,10 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
             colorId: variation.attributes.product_variation_color?.data?.id,
             sizeId: variation.attributes.product_variation_size?.data?.id,
             modelId: variation.attributes.product_variation_model?.data?.id,
+            color: color && color.trim() ? color : undefined,
+            colorCode: colorCode ? colorCode : undefined,
+            size: size && size.trim() ? size : undefined,
+            model: model && model.trim() ? model : undefined,
             generalDiscounts: generalDiscounts,
           };
         });
@@ -494,6 +504,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
           onSelectRow={handleCheckboxChange}
           onEditRow={handleEditVariation}
           onDeleteRow={canDeleteVariations ? handleDeleteVariation : undefined}
+          editingVariationId={currentVariation?.id}
         />
       )}
 
@@ -504,6 +515,40 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
       >
         {currentVariation && (
           <>
+            {/* Variation Indicator */}
+            <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3 text-sm font-medium text-slate-700">تنوع در حال ویرایش:</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {currentVariation.color && currentVariation.color.trim() && (
+                  <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                    <span
+                      className="h-5 w-5 rounded-full border border-slate-200"
+                      style={{ backgroundColor: currentVariation.colorCode || "#f5f5f5" }}
+                      aria-label={`کد رنگ ${currentVariation.colorCode || "نامشخص"}`}
+                    />
+                    <span className="text-sm font-medium text-slate-700">{currentVariation.color}</span>
+                  </div>
+                )}
+                {currentVariation.size && currentVariation.size.trim() && (
+                  <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                    <Ruler className="h-5 w-5 text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700">سایز: {currentVariation.size}</span>
+                  </div>
+                )}
+                {currentVariation.model && currentVariation.model.trim() && (
+                  <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                    <Settings className="h-5 w-5 text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700">مدل: {currentVariation.model}</span>
+                  </div>
+                )}
+                {(!currentVariation.color || !currentVariation.color.trim()) &&
+                  (!currentVariation.size || !currentVariation.size.trim()) &&
+                  (!currentVariation.model || !currentVariation.model.trim()) && (
+                    <span className="text-sm text-slate-500">بدون ویژگی خاص</span>
+                  )}
+              </div>
+            </div>
+
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm">کد محصول (SKU)</label>

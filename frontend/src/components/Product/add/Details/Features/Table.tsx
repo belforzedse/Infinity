@@ -130,10 +130,7 @@ const ATTRIBUTE_ENDPOINTS = {
   models: "/product-variation-models",
 } as const;
 
-const DEFAULT_TITLES: Record<"sizes" | "models", string> = {
-  sizes: "تک سایز",
-  models: "استاندارد",
-};
+// DEFAULT_TITLES removed - sizes and models are now optional, no default values should be used
 
 export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTableProps) => {
   const [features, setFeatures] = useState<FeatureGroup>({
@@ -254,7 +251,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
     }
     // If "No Color" is checked, use pure white #FFFFFF
     const colorToSave = colorModal.noColor ? "#ffffff" : colorModal.colorCode;
-    
+
     const saved = await createAttributeOption("colors", {
       Title: colorModal.name.trim(),
       ColorCode: colorToSave,
@@ -280,10 +277,10 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
         apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-colors?pagination[pageSize]=1000&sort=Title:asc", {
           cache: "no-store",
         }),
-        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes", {
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-sizes?pagination[pageSize]=1000&sort=Title:asc", {
           cache: "no-store",
         }),
-        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models", {
+        apiClient.get<ApiResponse<ApiFeature[]>>("/product-variation-models?pagination[pageSize]=1000&sort=Title:asc", {
           cache: "no-store",
         }),
       ]);
@@ -363,7 +360,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
 
   // Generate combinations and calculate potential variations count
   useEffect(() => {
-    // Account for default values when sizes or models are empty
+    // Don't use default values - if sizes/models are empty, they won't be included
     const sizeCount = features.sizes.length > 0 ? features.sizes.length : 1;
     const modelCount = features.models.length > 0 ? features.models.length : 1;
     const potentialVariationsCount = features.colors.length * sizeCount * modelCount;
@@ -456,14 +453,8 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
       // Create all possible combinations
       const combinations = [];
       const colorList = features.colors;
-      const sizeOptions =
-        features.sizes.length > 0
-          ? features.sizes
-          : [{ id: "default-size", value: DEFAULT_TITLES.sizes }];
-      const modelOptions =
-        features.models.length > 0
-          ? features.models
-          : [{ id: "default-model", value: DEFAULT_TITLES.models }];
+      const sizeOptions = features.sizes; // No default - use empty array if none selected
+      const modelOptions = features.models; // No default - use empty array if none selected
 
       // Validate color IDs exist in available options
       const availableColorIds = new Set(availableOptions.colors.map((c) => String(c.id)));
@@ -485,26 +476,57 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
           return;
         }
 
-        for (const size of sizeOptions) {
+        // If no sizes or models, create variations with only colors
+        if (sizeOptions.length === 0 && modelOptions.length === 0) {
+          const sku = generateSKU(color.id, "no-size", "no-model");
+          combinations.push({
+            product: productId,
+            product_variation_color: colorId,
+            SKU: sku,
+            Price: 0,
+            DiscountPrice: null,
+          });
+        } else if (sizeOptions.length === 0) {
+          // Only models, no sizes
           for (const model of modelOptions) {
-            // Generate a unique SKU for this variation
-            const sku = generateSKU(
-              color.id,
-              size.id || "default-size",
-              model.id || "default-model",
-            );
-
+            const sku = generateSKU(color.id, "no-size", model.id || "no-model");
             combinations.push({
               product: productId,
               product_variation_color: colorId,
-              ...(features.sizes.length > 0 ? { product_variation_size: parseInt(size.id) } : {}),
-              ...(features.models.length > 0
-                ? { product_variation_model: parseInt(model.id) }
-                : {}),
+              product_variation_model: parseInt(model.id),
               SKU: sku,
-              Price: 0, // Default price is 0
-              DiscountPrice: null, // Default discount price is null
+              Price: 0,
+              DiscountPrice: null,
             });
+          }
+        } else if (modelOptions.length === 0) {
+          // Only sizes, no models
+          for (const size of sizeOptions) {
+            const sku = generateSKU(color.id, size.id || "no-size", "no-model");
+            combinations.push({
+              product: productId,
+              product_variation_color: colorId,
+              product_variation_size: parseInt(size.id),
+              SKU: sku,
+              Price: 0,
+              DiscountPrice: null,
+            });
+          }
+        } else {
+          // Both sizes and models
+          for (const size of sizeOptions) {
+            for (const model of modelOptions) {
+              const sku = generateSKU(color.id, size.id || "no-size", model.id || "no-model");
+              combinations.push({
+                product: productId,
+                product_variation_color: colorId,
+                product_variation_size: parseInt(size.id),
+                product_variation_model: parseInt(model.id),
+                SKU: sku,
+                Price: 0,
+                DiscountPrice: null,
+              });
+            }
           }
         }
       }
@@ -900,11 +922,11 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                           const newName = e.target.value;
                           // Auto-check "No Color" if name contains " کد" or starts with "کد"
                           const shouldAutoCheck = newName.includes(" کد") || newName.startsWith("کد");
-                          
+
                           if (process.env.NODE_ENV === "development") {
                             console.log("Color name changed:", newName, "| Should auto-check:", shouldAutoCheck);
                           }
-                          
+
                           setColorModal((prev) => ({
                             ...prev,
                             name: newName,
@@ -924,10 +946,10 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                         id="noColorCheckboxFeature"
                         checked={colorModal.noColor}
                         onChange={(e) =>
-                          setColorModal((prev) => ({ 
-                            ...prev, 
+                          setColorModal((prev) => ({
+                            ...prev,
                             noColor: e.target.checked,
-                            colorCode: e.target.checked ? "#ffffff" : prev.colorCode 
+                            colorCode: e.target.checked ? "#ffffff" : prev.colorCode
                           }))
                         }
                         className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"

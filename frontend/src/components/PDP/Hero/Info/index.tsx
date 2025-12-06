@@ -341,11 +341,11 @@ export default function PDPHeroInfo(props: Props) {
     if (availableVariations.length === 1) {
       const v = availableVariations[0];
       const colorId =
-        v.attributes.product_variation_color?.data?.id?.toString() || colors[0]?.id || "";
+        v.attributes.product_variation_color?.data?.id?.toString() || (colors.length > 0 ? colors[0].id : "") || "";
       const sizeId =
-        v.attributes.product_variation_size?.data?.id?.toString() || sizes[0]?.id || "";
+        v.attributes.product_variation_size?.data?.id?.toString() || (sizes.length > 0 ? sizes[0].id : "") || "";
       const modelId =
-        v.attributes.product_variation_model?.data?.id?.toString() || models[0]?.id || "";
+        v.attributes.product_variation_model?.data?.id?.toString() || (models.length > 0 ? models[0].id : "") || "";
 
       setSelectedColor(colorId);
       setSelectedSize(sizeId);
@@ -354,16 +354,20 @@ export default function PDPHeroInfo(props: Props) {
       return;
     }
 
-    // Otherwise use first non-disabled/defaults
-    const firstColor = colors.find((c) => !disabledColors.includes(c.id)) || colors[0];
-    const firstSize = sizes.find((s) => !disabledSizes.includes(s.id)) || sizes[0];
-    const firstModel = models.find((m) => !disabledModels.includes(m.id)) || models[0];
+    // Otherwise use first non-disabled/defaults - only if arrays are not empty
+    const firstColor = colors.length > 0 ? (colors.find((c) => !disabledColors.includes(c.id)) || colors[0]) : null;
+    const firstSize = sizes.length > 0 ? (sizes.find((s) => !disabledSizes.includes(s.id)) || sizes[0]) : null;
+    const firstModel = models.length > 0 ? (models.find((m) => !disabledModels.includes(m.id)) || models[0]) : null;
 
     if (firstColor && firstSize) {
       setSelectedColor(firstColor.id);
       setSelectedSize(firstSize.id);
       if (firstModel) setSelectedModel(firstModel.id);
       updateVariationDetails(firstColor.id, firstSize.id, firstModel ? firstModel.id : "");
+    } else if (firstColor) {
+      // If only color is available, set it
+      setSelectedColor(firstColor.id);
+      updateVariationDetails(firstColor.id, "", "");
     }
   }, [
     productData,

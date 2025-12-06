@@ -52,8 +52,14 @@ function DropdownField({
       });
     }
 
-    // Only fetch if we have fetchOptions, no static options, haven't fetched yet, and not currently loading
-    if (!fetchOptions || options.length > 0 || hasFetchedRef.current || isLoading) {
+    // Only fetch if we have fetchOptions, no static options, and not currently loading
+    // Allow fetch even if hasFetchedRef is true if localOptions is still empty (retry case)
+    if (!fetchOptions || options.length > 0 || isLoading) {
+      return;
+    }
+
+    // If we've already fetched and got empty results, prevent infinite retries
+    if (hasFetchedRef.current && localOptions.length === 0) {
       return;
     }
 
@@ -74,13 +80,16 @@ function DropdownField({
             console.log("DropdownField: First 3 options:", fetchedOptions.slice(0, 3));
           }
         }
-        if (Array.isArray(fetchedOptions) && fetchedOptions.length > 0) {
+        if (Array.isArray(fetchedOptions)) {
           setLocalOptions(fetchedOptions);
           if (process.env.NODE_ENV === "development") {
             console.log("DropdownField: Set localOptions to", fetchedOptions.length, "options");
           }
+          if (fetchedOptions.length === 0) {
+            console.warn("DropdownField: Fetched options array is empty");
+          }
         } else {
-          console.warn("DropdownField: Fetched options is not an array or is empty:", fetchedOptions);
+          console.warn("DropdownField: Fetched options is not an array:", fetchedOptions);
         }
         setIsLoading(false);
       })
@@ -89,7 +98,7 @@ function DropdownField({
         setIsLoading(false);
         hasFetchedRef.current = false; // Allow retry on error
       });
-  }, [fetchOptions, options.length, formData, isLoading]);
+  }, [fetchOptions, options.length, formData, isLoading, localOptions.length]);
 
   // Handle province selection
   const handleChange = (newValue: string) => {

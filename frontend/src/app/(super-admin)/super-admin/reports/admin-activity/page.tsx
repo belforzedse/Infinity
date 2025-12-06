@@ -1,23 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getAdminActivity, AdminActivityLog } from "@/services/super-admin/reports/adminActivity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { AnimatePresence, motion } from "framer-motion";
+import ChevronDownIcon from "@/components/SuperAdmin/Layout/Icons/ChevronDownIcon";
+import clsx from "clsx";
 
 // Translation helpers for Persian
 const actionTypeMap: Record<string, string> = {
   Create: "ایجاد",
   Update: "بروزرسانی",
-  Delete: "حذف",
+  Delete: "حذف کامل",
+  "Delete-Soft": "حذف نرم",
   Publish: "انتشار",
   Unpublish: "برداشتن انتشار",
   Adjust: "تنظیم",
   Other: "سایر",
 };
+
+// Helper to determine if a delete is soft or hard
+function isSoftDelete(activity: AdminActivityLog): boolean {
+  if (activity.Action !== "Delete") return false;
+  // Check Metadata for removedAt or check if Description indicates soft delete
+  if (activity.Metadata?.removedAt) return true;
+  // Check if the resource still exists (soft delete) vs hard delete
+  // For now, we'll check Metadata for any indication of soft delete
+  return !!activity.Metadata?.isSoftDelete;
+}
 
 const logTypeMap: Record<string, string> = {
   Order: "سفارش",
@@ -53,6 +67,16 @@ function translateDescription(description: string): string {
   return descriptionMap[description] || description;
 }
 
+interface CollapsedGroup {
+  id: string;
+  adminName: string;
+  adminRole: string;
+  startTime: Date;
+  endTime: Date;
+  activities: AdminActivityLog[];
+  isExpanded: boolean;
+}
+
 export default function AdminActivityReportPage() {
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
@@ -63,6 +87,7 @@ export default function AdminActivityReportPage() {
   const [selectedLogType, setSelectedLogType] = useState<string>("All");
   const [adminUsers, setAdminUsers] = useState<string[]>([]);
   const [showSystemActivities, setShowSystemActivities] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // Excel export function
   const exportToExcel = useCallback(async (data: AdminActivityLog[], startDate: Date, endDate: Date) => {
@@ -217,6 +242,86 @@ export default function AdminActivityReportPage() {
     [activities, showSystemActivities]
   );
 
+  // Collapse activities by user within 5-minute windows
+  const collapsedActivities = useMemo(() => {
+    const COLLAPSE_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+    const groups: CollapsedGroup[] = [];
+    const processed = new Set<number>();
+
+    filteredActivities.forEach((activity, index) => {
+      if (processed.has(activity.id)) return;
+
+      const adminName = getAdminName(activity) || "نامشخص";
+      const adminRole = activity.PerformedByRole || "-";
+      const activityTime = new Date(activity.createdAt || activity.timestamp || Date.now());
+
+      // Generate stable group ID based on admin name and time window
+      // This ensures the same logical group gets the same ID even when filters change
+      const timeWindowIndex = Math.floor(activityTime.getTime() / COLLAPSE_WINDOW_MS);
+      const stableGroupId = `group-${adminName}-${timeWindowIndex}`;
+
+      // Find or create a group for this user within the time window
+      let group = groups.find(
+        (g) =>
+          g.adminName === adminName &&
+          Math.abs(activityTime.getTime() - g.endTime.getTime()) <= COLLAPSE_WINDOW_MS
+      );
+
+      if (!group) {
+        group = {
+          id: stableGroupId,
+          adminName,
+          adminRole,
+          startTime: activityTime,
+          endTime: activityTime,
+          activities: [],
+          isExpanded: expandedGroups.has(stableGroupId),
+        };
+        groups.push(group);
+      }
+
+      group.activities.push(activity);
+      group.endTime = activityTime > group.endTime ? activityTime : group.endTime;
+      processed.add(activity.id);
+    });
+
+    return groups;
+  }, [filteredActivities, expandedGroups]);
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupId)) {
+        next.delete(groupId);
+      } else {
+        next.add(groupId);
+      }
+      return next;
+    });
+  };
+
+  const getActionDisplay = (activity: AdminActivityLog): string => {
+    if (activity.Action === "Delete") {
+      return isSoftDelete(activity) ? actionTypeMap["Delete-Soft"] : actionTypeMap["Delete"];
+    }
+    return actionTypeMap[activity.Action] || activity.Action;
+  };
+
+  const getActionBadgeClass = (activity: AdminActivityLog): string => {
+    if (activity.Action === "Delete") {
+      return isSoftDelete(activity)
+        ? "bg-orange-100 text-orange-700"
+        : "bg-red-100 text-red-700";
+    }
+    if (activity.Action === "Create") {
+      return "bg-green-100 text-green-700";
+    }
+    if (activity.Action === "Update") {
+      return "bg-yellow-100 text-yellow-700";
+    }
+    return "bg-gray-100 text-gray-700";
+  };
+
   const uniqueAdmins = new Set(
     filteredActivities.map((a) => getAdminName(a) || "Unknown")
   ).size;
@@ -229,6 +334,10 @@ export default function AdminActivityReportPage() {
   const deleteActions = filteredActivities.filter(
     (a) => a.Action === "Delete"
   ).length;
+  const softDeleteActions = filteredActivities.filter(
+    (a) => a.Action === "Delete" && isSoftDelete(a)
+  ).length;
+  const hardDeleteActions = deleteActions - softDeleteActions;
 
   const visibleCount = filteredActivities.length;
 
@@ -267,6 +376,7 @@ export default function AdminActivityReportPage() {
                   <option value="Create">{actionTypeMap["Create"]}</option>
                   <option value="Update">{actionTypeMap["Update"]}</option>
                   <option value="Delete">{actionTypeMap["Delete"]}</option>
+                  <option value="Delete-Soft">{actionTypeMap["Delete-Soft"]}</option>
                   <option value="Publish">{actionTypeMap["Publish"]}</option>
                   <option value="Unpublish">{actionTypeMap["Unpublish"]}</option>
                   <option value="Adjust">{actionTypeMap["Adjust"]}</option>
@@ -470,67 +580,184 @@ export default function AdminActivityReportPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredActivities.length === 0 ? (
+                    {collapsedActivities.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                           فعالیتی یافت نشد
                         </td>
                       </tr>
                     ) : (
-                      filteredActivities.map((activity) => {
-                        const adminName = getAdminName(activity) || "نامشخص";
-                        const adminRole = activity.PerformedByRole || activity.adminRole || "-";
-                        const title = activity.Title || translateDescription(activity.Description || "");
-                        const severity = activity.Severity || "info";
-                        const timestamp = activity.timestamp || activity.createdAt;
-                        const severityColors = {
-                          info: "bg-blue-100 text-blue-700",
-                          success: "bg-green-100 text-green-700",
-                          warning: "bg-yellow-100 text-yellow-700",
-                          error: "bg-red-100 text-red-700",
-                        };
+                      collapsedActivities.map((group) => {
+                        const shouldShowDetails = group.activities.length === 1 || expandedGroups.has(group.id);
+                        const actionCounts = group.activities.reduce((acc, a) => {
+                          const action = a.Action === "Delete" && isSoftDelete(a) ? "Delete-Soft" : a.Action;
+                          acc[action] = (acc[action] || 0) + 1;
+                          return acc;
+                        }, {} as Record<string, number>);
+
+                        const summaryText = group.activities.length > 1
+                          ? `${faNum(group.activities.length)} تا عملیات${Object.entries(actionCounts)
+                              .filter(([_, count]) => count > 0)
+                              .map(([action, count]) => {
+                                const actionName = action === "Delete-Soft" ? "حذف نرم" : actionTypeMap[action] || action;
+                                return `${faNum(count)} تا ${actionName}`;
+                              })
+                              .join("، ")}`
+                          : "";
+
+                        const isExpanded = expandedGroups.has(group.id);
+                        const shouldCollapse = group.activities.length > 1;
 
                         return (
-                          <tr key={activity.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                            <td className="px-6 py-3 text-sm text-neutral-600">
-                              {new Date(timestamp).toLocaleString("fa-IR")}
-                            </td>
-                            <td className="px-6 py-3 text-sm font-medium text-neutral-700">
-                              {adminName}
-                            </td>
-                            <td className="px-6 py-3 text-sm">
-                              <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-                                {adminRole}
-                              </span>
-                            </td>
-                            <td className="px-6 py-3 text-sm text-neutral-600">
-                              {logTypeMap[activity.ResourceType] || activity.ResourceType}
-                            </td>
-                            <td className="px-6 py-3 text-sm">
-                              <span
-                                className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                                  activity.Action === "Create"
-                                    ? "bg-green-100 text-green-700"
-                                    : activity.Action === "Update"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : "bg-red-100 text-red-700"
-                                }`}
-                              >
-                                {actionTypeMap[activity.Action] || activity.Action}
-                              </span>
-                            </td>
-                            <td className="px-6 py-3 text-sm text-neutral-600">
-                              <Link
-                                href={`/super-admin/reports/admin-activity/${activity.id}`}
-                                className="text-pink-600 hover:text-pink-700 hover:underline font-medium"
-                              >
-                                {title}
-                              </Link>
-                            </td>
-                            <td className="px-6 py-3 text-xs text-neutral-500">
-                              {activity.IP || "-"}
-                            </td>
-                          </tr>
+                          <React.Fragment key={group.id}>
+                            {shouldCollapse ? (
+                              <>
+                                {/* Collapsed group header */}
+                                <tr
+                                  className="border-b border-neutral-100 bg-neutral-50 cursor-pointer hover:bg-neutral-100 transition-colors"
+                                  onClick={() => toggleGroup(group.id)}
+                                >
+                                  <td className="px-6 py-3 text-sm text-neutral-600">
+                                    {new Date(group.startTime).toLocaleString("fa-IR")}
+                                    <span className="mr-2 text-xs text-neutral-400">
+                                      تا {new Date(group.endTime).toLocaleString("fa-IR", { hour: "2-digit", minute: "2-digit" })}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-3 text-sm font-medium text-neutral-700">
+                                    {group.adminName}
+                                  </td>
+                                  <td className="px-6 py-3 text-sm">
+                                    <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                                      {group.adminRole}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-3 text-sm text-neutral-600" colSpan={4}>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-neutral-700 font-medium">{summaryText}</span>
+                                      <div className={clsx("transition-transform duration-200", isExpanded && "rotate-180")}>
+                                        <ChevronDownIcon />
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+
+                                {/* Expanded activities with animation */}
+                                <AnimatePresence initial={false}>
+                                  {isExpanded && (
+                                    <tr key={`${group.id}-expanded`}>
+                                      <td colSpan={7} className="p-0">
+                                        <motion.div
+                                          initial={{ height: 0, opacity: 0 }}
+                                          animate={{ height: "auto", opacity: 1 }}
+                                          exit={{ height: 0, opacity: 0 }}
+                                          transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                                          className="overflow-hidden bg-neutral-50"
+                                        >
+                                          <div className="px-6 py-2">
+                                            <table className="w-full">
+                                              <tbody>
+                                                {group.activities.map((activity, index) => {
+                                                  const adminName = getAdminName(activity) || "نامشخص";
+                                                  const adminRole = activity.PerformedByRole || activity.adminRole || "-";
+                                                  const title = activity.Title || translateDescription(activity.Description || "");
+                                                  const timestamp = activity.timestamp || activity.createdAt;
+
+                                                  return (
+                                                    <motion.tr
+                                                      key={activity.id}
+                                                      initial={{ opacity: 0, y: -4 }}
+                                                      animate={{ opacity: 1, y: 0 }}
+                                                      exit={{ opacity: 0, y: -4 }}
+                                                      transition={{ duration: 0.15, delay: index * 0.03 }}
+                                                      className="border-b border-neutral-100 last:border-b-0 hover:bg-neutral-100"
+                                                    >
+                                                      <td className="px-4 py-3 text-sm text-neutral-600">
+                                                        {new Date(timestamp).toLocaleString("fa-IR")}
+                                                      </td>
+                                                      <td className="px-4 py-3 text-sm font-medium text-neutral-700">
+                                                        {adminName}
+                                                      </td>
+                                                      <td className="px-4 py-3 text-sm">
+                                                        <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                                                          {adminRole}
+                                                        </span>
+                                                      </td>
+                                                      <td className="px-4 py-3 text-sm text-neutral-600">
+                                                        {logTypeMap[activity.ResourceType] || activity.ResourceType}
+                                                      </td>
+                                                      <td className="px-4 py-3 text-sm">
+                                                        <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${getActionBadgeClass(activity)}`}>
+                                                          {getActionDisplay(activity)}
+                                                        </span>
+                                                      </td>
+                                                      <td className="px-4 py-3 text-sm text-neutral-600">
+                                                        <Link
+                                                          href={`/super-admin/reports/admin-activity/${activity.id}`}
+                                                          className="text-pink-600 hover:text-pink-700 hover:underline font-medium"
+                                                        >
+                                                          {title}
+                                                        </Link>
+                                                      </td>
+                                                      <td className="px-4 py-3 text-xs text-neutral-500">
+                                                        {activity.IP || "-"}
+                                                      </td>
+                                                    </motion.tr>
+                                                  );
+                                                })}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </motion.div>
+                                      </td>
+                                    </tr>
+                                  )}
+                                </AnimatePresence>
+                              </>
+                            ) : (
+                              // Single activity - show directly without collapse
+                              group.activities.map((activity) => {
+                                const adminName = getAdminName(activity) || "نامشخص";
+                                const adminRole = activity.PerformedByRole || activity.adminRole || "-";
+                                const title = activity.Title || translateDescription(activity.Description || "");
+                                const timestamp = activity.timestamp || activity.createdAt;
+
+                                return (
+                                  <tr key={activity.id} className="border-b border-neutral-100 hover:bg-neutral-50">
+                                    <td className="px-6 py-3 text-sm text-neutral-600">
+                                      {new Date(timestamp).toLocaleString("fa-IR")}
+                                    </td>
+                                    <td className="px-6 py-3 text-sm font-medium text-neutral-700">
+                                      {adminName}
+                                    </td>
+                                    <td className="px-6 py-3 text-sm">
+                                      <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                                        {adminRole}
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-3 text-sm text-neutral-600">
+                                      {logTypeMap[activity.ResourceType] || activity.ResourceType}
+                                    </td>
+                                    <td className="px-6 py-3 text-sm">
+                                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${getActionBadgeClass(activity)}`}>
+                                        {getActionDisplay(activity)}
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-3 text-sm text-neutral-600">
+                                      <Link
+                                        href={`/super-admin/reports/admin-activity/${activity.id}`}
+                                        className="text-pink-600 hover:text-pink-700 hover:underline font-medium"
+                                      >
+                                        {title}
+                                      </Link>
+                                    </td>
+                                    <td className="px-6 py-3 text-xs text-neutral-500">
+                                      {activity.IP || "-"}
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </React.Fragment>
                         );
                       })
                     )}

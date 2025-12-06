@@ -6,17 +6,24 @@ import type { ProductVariableDisplay } from "./types";
 
 interface ProductVariableCardProps {
   item: ProductVariableDisplay;
+  isEditing?: boolean;
   onEdit: () => void;
   onDelete?: () => void;
 }
 
 export const ProductVariableCard: React.FC<ProductVariableCardProps> = ({
   item,
+  isEditing,
   onEdit,
   onDelete,
 }) => {
   return (
-    <div className="flex flex-col gap-2 divide-y-[1px] divide-slate-100 rounded-lg border border-slate-100 bg-white p-2">
+    <div
+      className={clsx(
+        "flex flex-col gap-2 divide-y-[1px] divide-slate-100 rounded-lg border bg-white p-2 transition-colors",
+        isEditing ? "border-blue-300 bg-blue-50" : "border-slate-100"
+      )}
+    >
       {/* Variable Name */}
       <div className="text-sm flex flex-col gap-0.5">
         <span className="text-gray-500">متغیر</span>
