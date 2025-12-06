@@ -28,6 +28,32 @@ interface BlogPostPageProps {
   }>;
 }
 
+// Patterns that should NOT be handled as blog posts
+const EXCLUDED_PATTERNS = [
+  /\.(html|xml|json|txt|ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/i, // Static files
+  /^_next/, // Next.js internal routes
+  /^api\//, // API routes
+  /^offline/, // Service worker offline page
+  /^sw\.js/, // Service worker
+  /^manifest/, // Web app manifest
+  /^robots\.txt/, // Robots file
+  /^sitemap/, // Sitemap
+  /^favicon/, // Favicon
+  /^(login|register|auth|signin|signup|logout|forgot-password|reset-password)$/i, // Auth routes
+  /^super-admin/, // Admin routes
+  /^user\//, // User routes
+  /^orders/, // Order routes
+  /^cart/, // Cart routes
+  /^checkout/, // Checkout routes
+  /^products/, // Product listing routes
+  /^categories/, // Category routes
+  /^search/, // Search routes
+];
+
+function shouldExcludeSlug(slug: string): boolean {
+  return EXCLUDED_PATTERNS.some(pattern => pattern.test(slug));
+}
+
 /**
  * Generate static params for published blog posts
  * Pre-generates all published posts at build time for better SEO
@@ -204,6 +230,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
 
+  // Exclude non-blog routes early to prevent API calls
+  if (shouldExcludeSlug(slug)) {
+    return {
+      title: "صفحه یافت نشد | وبلاگ فروشگاه اینفینیتی",
+      description: "صفحه مورد نظر یافت نشد.",
+    };
+  }
+
   try {
     const { data: post } = await blogService.getBlogPostBySlug(slug);
 
@@ -228,22 +262,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 }
 
-// Patterns that should NOT be handled as blog posts
-const EXCLUDED_PATTERNS = [
-  /\.(html|xml|json|txt|ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/i, // Static files
-  /^_next/, // Next.js internal routes
-  /^api\//, // API routes
-  /^offline/, // Service worker offline page
-  /^sw\.js/, // Service worker
-  /^manifest/, // Web app manifest
-  /^robots\.txt/, // Robots file
-  /^sitemap/, // Sitemap
-  /^favicon/, // Favicon
-];
-
-function shouldExcludeSlug(slug: string): boolean {
-  return EXCLUDED_PATTERNS.some(pattern => pattern.test(slug));
-}
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
@@ -295,7 +313,27 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       isStaging,
     });
 
-    const response = await blogService.getBlogPostBySlug(slug);
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    let response;
+    try {
+      response = await blogService.getBlogPostBySlug(slug);
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      // If it's a timeout or network error, return 404 instead of crashing
+      if (fetchError instanceof Error && (fetchError.name === 'AbortError' || fetchError.message.includes('timeout'))) {
+        logger.error(`[BlogPostPage] Request timeout for slug: ${slug}`, {
+          slug,
+          error: fetchError.message,
+        });
+        notFound();
+        return;
+      }
+      throw fetchError; // Re-throw other errors
+    }
 
     if (!response || !response.data) {
       logger.error(`[BlogPostPage] Invalid response structure for slug: ${slug}`, {
