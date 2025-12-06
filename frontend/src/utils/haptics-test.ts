@@ -136,3 +136,4 @@ export const logHapticsStatus = (): void => {
   console.log("📊 Haptic Feedback Status:", status);
 };
 
+

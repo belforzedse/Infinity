@@ -200,3 +200,4 @@ export const setHapticsPreference = (enabled: boolean): void => {
   }
 };
 
+
