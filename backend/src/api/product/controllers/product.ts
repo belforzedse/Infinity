@@ -3,6 +3,39 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { roleIsAllowed, MANAGEMENT_ROLES } from "../../../utils/roles";
+
+/**
+ * Check if the user is an admin (superadmin, store manager, or editor)
+ * Supports both plugin::users-permissions.user roles and local-user roles
+ * @param user - The user object from ctx.state.user
+ * @returns true if user is an admin, false otherwise
+ */
+function isAdminUser(user: any): boolean {
+  if (!user) return false;
+  
+  // Check explicit isAdmin flag (set by auth/self endpoint)
+  if (user?.isAdmin === true) {
+    return true;
+  }
+  
+  // Check local-user role (role ID 2 is admin)
+  const userRoleId = user?.user_role?.id;
+  if (userRoleId === 2) {
+    return true;
+  }
+  
+  // Check plugin::users-permissions role using existing utilities
+  const roleName = user?.role?.name;
+  if (roleName) {
+    // Use existing role matching utility with MANAGEMENT_ROLES
+    if (roleIsAllowed(roleName, MANAGEMENT_ROLES)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
 
 const PRODUCT_POPULATE = {
   CoverImage: true,
@@ -55,10 +88,14 @@ export default factories.createCoreController(
           return ctx.badRequest("Search query (q) is required");
         }
 
-        // Call the search service with the query parameter
+        // Check if user is admin - admins can see all products including drafts
+        const user = ctx.state.user;
+        const isAdmin = isAdminUser(user);
+
+        // Call the search service with the query parameter and admin status
         const { results, pagination } = await strapi
           .service("api::product.product")
-          .search(q, ctx.query);
+          .search(q, { ...ctx.query, isAdmin });
 
         return {
           data: results,
@@ -97,12 +134,24 @@ export default factories.createCoreController(
         // Log for debugging
         strapi.log.info(`[Product.findBySlug] Looking up product with slug/ID: "${decodedSlug}" (original: "${slug}")`);
 
+        // Check if user is admin - admins can see all products including drafts
+        const user = ctx.state.user;
+        const isAdmin = isAdminUser(user);
+
+        // Build filters - exclude trashed products, conditionally filter by Status
+        const filters: any = {
+          Slug: decodedSlug,
+          removedAt: { $null: true }, // Exclude trashed products
+        };
+        
+        // Only filter by Active status for non-admin users
+        if (!isAdmin) {
+          filters.Status = "Active";
+        }
+
         // Find product by slug - try exact match first
         let products = await strapi.entityService.findMany("api::product.product", {
-          filters: {
-            Slug: decodedSlug,
-            removedAt: { $null: true }, // Exclude trashed products
-          },
+          filters,
           populate: PRODUCT_POPULATE,
           pagination: { limit: 1 },
         });
@@ -114,15 +163,28 @@ export default factories.createCoreController(
           strapi.log.info(`[Product.findBySlug] No exact match for slug: "${decodedSlug}", trying raw SQL query...`);
           try {
             const knex = strapi.db.connection;
-            const rawProducts = await knex('products')
+            let rawQuery = knex('products')
               .where('slug', decodedSlug)
-              .whereNull('removed_at')
-              .limit(1);
+              .whereNull('removed_at');
+            
+            // Only filter by Active status for non-admin users
+            if (!isAdmin) {
+              rawQuery = rawQuery.where('status', 'Active');
+            }
+            
+            const rawProducts = await rawQuery.limit(1);
 
             if (rawProducts.length > 0) {
               const productId = rawProducts[0].id;
+              const foundFilters: any = { id: productId };
+              
+              // Only filter by Active status for non-admin users
+              if (!isAdmin) {
+                foundFilters.Status = "Active";
+              }
+              
               const foundProducts = await strapi.entityService.findMany("api::product.product", {
-                filters: { id: productId },
+                filters: foundFilters,
                 populate: PRODUCT_POPULATE,
                 pagination: { limit: 1 },
               });
@@ -145,11 +207,20 @@ export default factories.createCoreController(
           if (idMatch) {
             const productId = parseInt(decodedSlug, 10);
             strapi.log.info(`[Product.findBySlug] Attempting ID-based lookup for product ID: ${productId}`);
+            
+            // Build filters for ID lookup
+            const idFilters: any = {
+              id: productId,
+              removedAt: { $null: true }, // Exclude trashed products
+            };
+            
+            // Only filter by Active status for non-admin users
+            if (!isAdmin) {
+              idFilters.Status = "Active";
+            }
+            
             const productsById = await strapi.entityService.findMany("api::product.product", {
-              filters: {
-                id: productId,
-                removedAt: { $null: true }, // Exclude trashed products
-              },
+              filters: idFilters,
               populate: PRODUCT_POPULATE,
               pagination: { limit: 1 },
             });
