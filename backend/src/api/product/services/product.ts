@@ -10,26 +10,35 @@ export default factories.createCoreService(
     /**
      * Search for products based on a query string
      * @param {string} query - The search query
-     * @param {Object} params - Additional query parameters
+     * @param {Object} params - Additional query parameters including isAdmin flag
      * @returns {Object} The search results and pagination
      */
-    async search(query, params: { page?: number; pageSize?: number } = {}) {
-      const { page = 1, pageSize = 10 } = params;
+    async search(query, params: { page?: number; pageSize?: number; isAdmin?: boolean } = {}) {
+      const { page = 1, pageSize = 10, isAdmin = false } = params;
       const start = (page - 1) * pageSize;
       const limit = parseInt(pageSize.toString());
 
       // Create a search filter for product name, description, etc.
       // Exclude trashed products (removedAt should be null)
+      // Only include Active products for non-admin users (exclude draft/InActive products)
+      const filterConditions: any[] = [
+        {
+          $or: [
+            { Title: { $containsi: query } },
+            { Description: { $containsi: query } },
+          ],
+        },
+        { removedAt: { $null: true } },
+      ];
+      
+      // Only filter by Active status for non-admin users
+      // Admins can see all products including drafts
+      if (!isAdmin) {
+        filterConditions.push({ Status: "Active" });
+      }
+      
       const filters: any = {
-        $and: [
-          {
-            $or: [
-              { Title: { $containsi: query } },
-              { Description: { $containsi: query } },
-            ],
-          },
-          { removedAt: { $null: true } },
-        ],
+        $and: filterConditions,
       };
 
       // Find products matching the search query with pagination

@@ -693,10 +693,23 @@ class ProductImporter {
     // Generate slug from WooCommerce slug or title
     const slug = this.generateProductSlug(wcProduct);
 
+    // Prepare description - use main description if available, otherwise use short_description
+    let descriptionContent = "";
+    if (wcProduct.description && wcProduct.description.trim()) {
+      descriptionContent = this.prepareRichtextContent(wcProduct.description);
+    } else if (wcProduct.short_description && wcProduct.short_description.trim()) {
+      // If main description is empty, use short_description as the main description
+      descriptionContent = this.prepareRichtextContent(wcProduct.short_description);
+      this.logger.debug(
+        `📝 Product ${wcProduct.id}: Using short_description as Description (main description was empty)`,
+      );
+    }
+
     const strapiProduct = {
       Title: wcProduct.name.trim(),
       Slug: slug,
-      Description: this.cleanHtmlContent(wcProduct.description),
+      // Description is richtext in Strapi, so preserve HTML
+      Description: descriptionContent,
       Status: this.mapProductStatus(wcProduct.status),
       AverageRating: wcProduct.average_rating ? parseFloat(wcProduct.average_rating) : null,
       RatingCount: wcProduct.rating_count || 0,
@@ -706,13 +719,24 @@ class ProductImporter {
     };
 
     // Handle short description as cleaning tips or return conditions
-    if (wcProduct.short_description && wcProduct.short_description.trim()) {
+    // Only use short_description for these fields if main description exists
+    // (Otherwise short_description was already used as Description above)
+    if (
+      wcProduct.description &&
+      wcProduct.description.trim() &&
+      wcProduct.short_description &&
+      wcProduct.short_description.trim()
+    ) {
+      // Preserve HTML for product details (short_description)
+      const shortDescHtml = this.prepareRichtextContent(wcProduct.short_description);
+      // Try to categorize the short description (check on cleaned version for logic)
       const cleanShortDesc = this.cleanHtmlContent(wcProduct.short_description);
-      // Try to categorize the short description
       if (this.isCleaningInstructions(cleanShortDesc)) {
-        strapiProduct.CleaningTips = cleanShortDesc;
+        // Store as HTML since it may be displayed with formatting
+        strapiProduct.CleaningTips = shortDescHtml;
       } else {
-        strapiProduct.ReturnConditions = cleanShortDesc;
+        // Store as HTML for product details
+        strapiProduct.ReturnConditions = shortDescHtml;
       }
     }
 
@@ -861,10 +885,24 @@ class ProductImporter {
 
   /**
    * Map WooCommerce product status to Strapi status
+   * Logs the mapping for verification and defaults to InActive for unknown statuses
    */
   mapProductStatus(wcStatus) {
     const mapping = this.config.import.statusMappings.product;
-    return mapping[wcStatus] || this.config.import.defaults.productStatus;
+    const mappedStatus = mapping[wcStatus];
+
+    if (mappedStatus) {
+      this.logger.debug(`📋 Status mapping: WooCommerce "${wcStatus}" → Strapi "${mappedStatus}"`);
+      return mappedStatus;
+    }
+
+    // Default to InActive for unknown statuses (safer than Active)
+    // This ensures draft/unknown products are not accidentally published
+    const fallbackStatus = "InActive";
+    this.logger.warn(
+      `⚠️ Unknown WooCommerce status "${wcStatus}", defaulting to "${fallbackStatus}" (not using config default "${this.config.import.defaults.productStatus}")`,
+    );
+    return fallbackStatus;
   }
 
   /**
@@ -932,6 +970,32 @@ class ProductImporter {
   }
 
   /**
+   * Prepare HTML content for richtext fields in Strapi
+   * Preserves HTML structure while cleaning up unsafe or problematic elements
+   */
+  prepareRichtextContent(htmlContent) {
+    if (!htmlContent || typeof htmlContent !== "string") {
+      return "";
+    }
+
+    // Trim whitespace
+    let content = htmlContent.trim();
+
+    if (!content) {
+      return "";
+    }
+
+    // Strapi richtext accepts HTML, so we preserve it
+    // Just do basic cleanup: normalize whitespace and ensure proper encoding
+    content = content
+      .replace(/\s+/g, " ") // Normalize multiple spaces
+      .replace(/\n\s*\n/g, "\n") // Normalize multiple newlines
+      .trim();
+
+    return content;
+  }
+
+  /**
    * Clean HTML content for plain text fields
    */
   cleanHtmlContent(htmlContent) {
@@ -952,9 +1016,20 @@ class ProductImporter {
 
   /**
    * Determine if content is cleaning instructions
+   * Note: "جنس" (material) is removed as it's a product detail, not cleaning instruction
    */
   isCleaningInstructions(content) {
-    const cleaningKeywords = ["شستشو", "پاک", "تمیز", "washing", "clean", "care", "جنس"];
+    const cleaningKeywords = [
+      "شستشو",
+      "پاک",
+      "تمیز",
+      "washing",
+      "clean",
+      "care",
+      "نگهداری",
+      "مراقبت",
+      "دستورالعمل شستشو",
+    ];
     return cleaningKeywords.some((keyword) =>
       content.toLowerCase().includes(keyword.toLowerCase()),
     );

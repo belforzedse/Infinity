@@ -42,8 +42,11 @@ module.exports = {
   woocommerce: {
     baseUrl: process.env.WOOCOMMERCE_BASE_URL || "https://infinitycolor.co/wp-json/wc/v3",
     auth: {
-      consumerKey: requiredEnvVar("WOOCOMMERCE_CONSUMER_KEY"),
-      consumerSecret: requiredEnvVar("WOOCOMMERCE_CONSUMER_SECRET"),
+      consumerKey: requiredEnvVar("WOOCOMMERCE_CONSUMER_KEY", { optional: true, defaultValue: "" }),
+      consumerSecret: requiredEnvVar("WOOCOMMERCE_CONSUMER_SECRET", {
+        optional: true,
+        defaultValue: "",
+      }),
     },
     // Rate limiting to avoid overwhelming the API
     rateLimiting: {
@@ -70,19 +73,20 @@ module.exports = {
   // Strapi API Configuration
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
-    baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.org/api",
+    baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.new.infinitycolor.co/api",
     auth: {
-      token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: false }),
+      token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: true, defaultValue: "" }),
     },
     // Credential options for interactive selection
     credentials: {
       production: {
-        baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.org/api",
-        token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: false }),
+        baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.new.infinitycolor.co/api",
+        token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: true, defaultValue: "" }),
       },
       staging: {
-        baseUrl: process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.org/api",
-        token: requiredEnvVar("STRAPI_API_TOKEN_STAGING", { optional: false }),
+        baseUrl:
+          process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.org/api",
+        token: requiredEnvVar("STRAPI_API_TOKEN_STAGING", { optional: true, defaultValue: "" }),
       },
       local: {
         baseUrl: process.env.STRAPI_IMPORT_LOCAL_URL || "http://localhost:1337/api",
@@ -150,6 +154,22 @@ module.exports = {
       uploadTimeout: toNumber(process.env.IMPORT_IMAGES_UPLOAD_TIMEOUT, 60000),
       delayBetweenUploads: toNumber(process.env.IMPORT_IMAGES_DELAY, 500),
       cacheImages: process.env.IMPORT_IMAGES_CACHE !== "false",
+      // Retry settings for image operations
+      retry: {
+        // Cover images are critical - more retries
+        coverImageDownloadRetries: toNumber(process.env.IMPORT_IMAGES_COVER_DOWNLOAD_RETRIES, 5),
+        coverImageUploadRetries: toNumber(process.env.IMPORT_IMAGES_COVER_UPLOAD_RETRIES, 5),
+        // Gallery images - fewer retries
+        galleryImageDownloadRetries: toNumber(
+          process.env.IMPORT_IMAGES_GALLERY_DOWNLOAD_RETRIES,
+          3,
+        ),
+        galleryImageUploadRetries: toNumber(process.env.IMPORT_IMAGES_GALLERY_UPLOAD_RETRIES, 3),
+        // Retry delay settings (exponential backoff)
+        initialRetryDelay: toNumber(process.env.IMPORT_IMAGES_RETRY_DELAY, 1000), // 1 second
+        maxRetryDelay: toNumber(process.env.IMPORT_IMAGES_MAX_RETRY_DELAY, 10000), // 10 seconds
+        retryMultiplier: toNumber(process.env.IMPORT_IMAGES_RETRY_MULTIPLIER, 2), // Exponential backoff multiplier
+      },
       conversion: {
         convertWebpToJpg: process.env.IMPORT_IMAGES_CONVERT_WEBP !== "false",
         jpegQuality: toNumber(process.env.IMPORT_IMAGES_JPEG_QUALITY, 90),

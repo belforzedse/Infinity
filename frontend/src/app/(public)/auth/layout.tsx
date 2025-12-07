@@ -52,7 +52,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="relative mx-auto max-w-[516px] px-2 py-4 md:py-6">
             <div className="mb-[4px] flex flex-col items-center gap-4 md:mb-[20px] md:gap-5">
               <div className="relative h-[56px] w-[90px] md:h-[68px] md:w-[110px]">
-                <Image src="/images/full-logo.png" alt="Logo" fill className="object-contain" />
+                <Image src="/images/logo_PDF.webp" alt="Logo" fill className="object-contain" />
               </div>
             </div>
 

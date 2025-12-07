@@ -1,5 +1,5 @@
 "use client";
-import Logo from "@/components/Kits/Logo";
+import Logo from "@/components/Kits/SuperAdminLogo";
 import superAdminSidebar, { getSidebarItemsForRole } from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
@@ -88,12 +88,12 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
           // Transform for mobile overlay only
           "transform md:transform-none",
           isOpen ? "translate-x-0" : "translate-x-full md:translate-x-0",
-          "flex flex-col gap-4 rounded-bl-xl rounded-tl-xl bg-white p-3",
+          "flex flex-col rounded-bl-xl rounded-tl-xl bg-white",
         )}
       >
         {/* Close button for mobile only */}
         <button
-          className="absolute left-4 top-4 rounded-full p-2 hover:bg-neutral-100 md:hidden"
+          className="absolute left-4 top-4 rounded-full p-2 hover:bg-neutral-100 md:hidden z-10"
           onClick={onClose}
         >
           <svg
@@ -116,7 +116,7 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
         {/* Toggle button for tablet (md-lg) */}
         {onToggleCollapse && (
           <button
-            className="absolute left-2 top-4 hidden rounded-full p-1.5 hover:bg-neutral-100 md:flex lg:hidden items-center justify-center"
+            className="absolute left-2 top-4 hidden rounded-full p-1.5 hover:bg-neutral-100 md:flex lg:hidden items-center justify-center z-10"
             onClick={onToggleCollapse}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -139,13 +139,25 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
           </button>
         )}
 
+        {/* Logo section - non-sticky, will scroll */}
         {!isCollapsed && (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center p-3 pb-4 flex-shrink-0">
             <Logo />
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
+        {/* Navigation section - sticky after logo scrolls away */}
+        <div className={clsx(
+          "flex flex-col gap-3 p-3 pt-0 flex-1",
+          // Make navigation sticky on desktop/tablet
+          // It will stick to top when logo scrolls out of view
+          "md:sticky md:top-0",
+          "lg:sticky lg:top-0",
+          // Ensure it has a background to cover content when sticky
+          "bg-white",
+          // Add min-height to ensure it takes available space
+          "min-h-0"
+        )}>
           <div className="flex flex-col gap-6">
             {sidebarItems.map((item) => {
               const hasChildren = item.children.length > 0;

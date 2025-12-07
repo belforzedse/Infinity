@@ -233,7 +233,7 @@ export function generateJSONLD(post: BlogPostSEO, config: SEOConfig = defaultSEO
       name: config.siteName,
       logo: {
         '@type': 'ImageObject',
-        url: `${config.siteUrl}/images/logo.png`,
+        url: `${config.siteUrl}/images/logo_PDF.webp`,
       },
     },
     mainEntityOfPage: {

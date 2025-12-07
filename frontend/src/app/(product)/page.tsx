@@ -202,7 +202,7 @@ export const metadata: Metadata = {
     locale: "fa_IR",
     images: [
       {
-        url: "https://api.new.infinitycolor.co/uploads/logo_5a5e2f8a4d.png",
+        url: `${SITE_URL}/images/logo_PDF.webp`,
         width: 1200,
         height: 630,
         alt: `${SITE_NAME} - فروشگاه پوشاک`,

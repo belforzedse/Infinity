@@ -1,98 +1,113 @@
 ---
-description: The footer section of the application is populated via the Strapi backend API. The endpoint provides a structured schema that defines the layout and content of the site footer.
+description: The footer section is now managed as a frontend component with hardcoded data. The backend structure exists but is no longer used.
 globs: 
 alwaysApply: false
 ---
 # Footer Schema Structure
 
-The footer section of the application is populated via the Strapi backend API. The endpoint provides a structured schema that defines the layout and content of the site footer.
+The footer section of the application is now managed as a **frontend component** with hardcoded data located in `frontend/src/constants/footer.ts`.
 
-## API Endpoint
+**Note:** The backend footer API structure remains intact in Strapi but is no longer used by the frontend.
 
+## Frontend Implementation
+
+### Constants File
+
+Footer data is defined in: `frontend/src/constants/footer.ts`
+
+The `FOOTER_DATA` constant contains all footer content:
+
+```typescript
+export interface FooterLink {
+  title: string;
+  url: string;
+}
+
+export interface FooterColumn {
+  header: string;
+  links: FooterLink[];
+}
+
+export interface ContactInfo {
+  phone: string;
+  whatsapp: string | null;
+  instagram: string | null;
+  telegram: string | null;
+}
+
+export interface FooterData {
+  customerSupport: string;
+  first: FooterColumn;
+  second: FooterColumn;
+  third: FooterColumn;
+  contactUs: ContactInfo;
+  storeLocations: string;
+}
 ```
-GET https://api.infinitycolor.co/api/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs
-```
 
-## Schema Structure
+### Schema Structure
 
-The footer schema consists of the following main sections:
+The footer consists of the following main sections:
 
-### Column Sections (First, Second, Third)
+#### Column Sections (First, Second, Third)
 
 Each column in the footer has:
-- `Header`: The title of the column
-- `Links`: An array of link objects containing:
-  - `Title`: Display text for the link
-  - `URL`: Target path for the link
+- `header`: The title of the column
+- `links`: An array of link objects containing:
+  - `title`: Display text for the link
+  - `url`: Target path for the link
 
-### Contact Us Section
+#### Contact Us Section
 
 Contains contact information:
-- `Phone`: Phone number for customer support
-- `Whatsapp`: WhatsApp contact (nullable)
-- `Instagram`: Instagram profile link (nullable)
-- `Telegram`: Telegram contact (nullable)
+- `phone`: Phone number for customer support
+- `whatsapp`: WhatsApp contact (nullable)
+- `instagram`: Instagram profile link (nullable)
+- `telegram`: Telegram contact (nullable)
 
-### Customer Support
+#### Customer Support
 
 Text describing customer support hours and availability.
 
-## Sample Implementation
+#### Store Locations
 
-When implementing the footer component, you should:
-1. Fetch the footer data from the API
-2. Parse the response into appropriate sections
-3. Render each section according to the design
-4. Handle proper loading states and error cases
+Text describing physical store locations.
 
-## Related Components
+## Component Structure
 
-- Footer component: Should consume this data structure
-- Layout components: Should integrate the footer
-- API service: Should include methods to fetch footer data
+- **Main Component**: `frontend/src/components/PLP/Footer/index.tsx` (Server Component)
+- **Sub-components**:
+  - `UserAccountSection.tsx` - First column (Account links)
+  - `QuickAccessSection.tsx` - Second column (Quick access links)
+  - `CustomerServiceSection.tsx` - Third column (Customer service links + support text)
+  - `StoresSection.tsx` - Store locations and contact info
+  - `LogoSection.tsx` - Logo display
 
-## Data Model Example
+All components are now server components (no client-side data fetching).
 
-```json
-{
-  "data": {
-    "attributes": {
-      "CustomerSupport": "شنبه تا پنج شنبه (غیر از روزهای تعطیل) از ساعت9 صبح الی 17 پاسخگوی شما هستیم.",
-      "First": {
-        "Header": "حساب کاربری",
-        "Links": [
-          {
-            "Title": "فروشگاه",
-            "URL": "/plp"
-          }
-        ]
-      },
-      "Second": {
-        "Header": "دسترسی سریع",
-        "Links": [
-          {
-            "Title": "خرید شلوار",
-            "URL": "/plp/pants"
-          }
-        ]
-      },
-      "Third": {
-        "Header": "خدمات مشتریان",
-        "Links": [
-          {
-            "Title": "سوالات متداول",
-            "URL": "/faq"
-          }
-        ]
-      },
-      "ContactUs": {
-        "Phone": "017-325-304-39",
-        "Whatsapp": null,
-        "Instagram": null,
-        "Telegram": null
-      }
-    }
-  }
-}
-```
+## Updating Footer Content
+
+To update the footer:
+
+1. Edit `frontend/src/constants/footer.ts`
+2. Modify the `FOOTER_DATA` constant
+3. Changes will be reflected immediately (no API calls needed)
+
+## Backend Structure (Unused)
+
+The backend footer API structure remains in Strapi but is not used:
+
+- **API Endpoint**: `GET /api/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs`
+- **Content Type**: `footer` (Single Type)
+- **Components**: `footer.footer-section`, `footer.contact-us`
+
+The Super Admin footer management pages have been disabled with notices directing developers to edit the constants file instead.
+
+## Benefits
+
+- No API calls on page load (better performance)
+- Footer renders immediately (no loading state)
+- Simpler component structure (no async data fetching)
+- Easier to maintain (data in one place)
+- Backend structure preserved for future use if needed
 

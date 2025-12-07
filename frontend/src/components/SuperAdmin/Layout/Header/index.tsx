@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Logo from "@/components/Kits/Logo";
+import Logo from "@/components/Kits/SuperAdminLogo";
 import MenuIcon from "@/components/PLP/Icons/MenuIcon";
 import { useMe } from "@/hooks/api/useMe";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
