@@ -367,5 +367,761 @@
     "type": "variable",
     "status": "publish",
     "rating": "0.00"
+  },
+  "1107502": {
+    "strapiId": 47,
+    "importedAt": "2025-12-07T10:31:00.617Z",
+    "name": "کلاه کاپیتانی بافت S00836",
+    "slug": "woven-captains-hat-s00836",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1109157": {
+    "strapiId": 46,
+    "importedAt": "2025-12-07T10:31:03.562Z",
+    "name": "گاردیگان قلبی L00376",
+    "slug": "%da%af%d8%a7%d8%b1%d8%af%db%8c%da%af%d8%a7%d9%86-%d9%82%d9%84%d8%a8%db%8c-l00376",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1109205": {
+    "strapiId": 49,
+    "importedAt": "2025-12-07T10:31:02.923Z",
+    "name": "بافت پاییزه جلو دکمه L00424",
+    "slug": "autumn-fabric-button-front-l00424",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1109605": {
+    "strapiId": 48,
+    "importedAt": "2025-12-07T10:31:02.163Z",
+    "name": "نیم تنه ورزشی (alo)000960",
+    "slug": "sports-bra-alo000960",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1109713": {
+    "strapiId": 50,
+    "importedAt": "2025-12-07T10:30:58.595Z",
+    "name": "بافت نگینی  L00431",
+    "slug": "jewel-texture-l00431",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1109724": {
+    "strapiId": 52,
+    "importedAt": "2025-12-07T10:31:20.166Z",
+    "name": "شلوار کمرکش P0096",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%da%a9%d9%85%d8%b1%da%a9%d8%b4-p0096",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1110856": {
+    "strapiId": 51,
+    "importedAt": "2025-12-07T10:31:18.990Z",
+    "name": "ژاکت طرح دکمه چوبی L00381",
+    "slug": "wooden-button-design-sweater-l00381",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1111007": {
+    "strapiId": 53,
+    "importedAt": "2025-12-07T10:31:23.981Z",
+    "name": "فوتر کیمونو مغزی دوزی L00442",
+    "slug": "%d9%81%d9%88%d8%aa%d8%b1-%da%a9%db%8c%d9%85%d9%88%d9%86%d9%88-%d9%85%d8%ba%d8%b2%db%8c-%d8%af%d9%88%d8%b2%db%8c-l00442",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112185": {
+    "strapiId": 54,
+    "importedAt": "2025-12-07T10:31:19.330Z",
+    "name": "بلوز بافت سرشانه نگین L00390",
+    "slug": "negin-shoulder-length-knit-blouse-l00390",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112242": {
+    "strapiId": 55,
+    "importedAt": "2025-12-07T10:31:25.974Z",
+    "name": "کت چرم بوفالو L00441",
+    "slug": "%da%a9%d8%aa-%da%86%d8%b1%d9%85-%d8%a8%d9%88%d9%81%d8%a7%d9%84%d9%88-l00441",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112255": {
+    "strapiId": 56,
+    "importedAt": "2025-12-07T10:31:47.954Z",
+    "name": "شومیز لینن راه راه OppsiL00353",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%d9%84%db%8c%d9%86%d9%86-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsil00353",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112443": {
+    "strapiId": 57,
+    "importedAt": "2025-12-07T10:31:39.986Z",
+    "name": "بلوز بافت آرشیلدا L00280",
+    "slug": "%d8%a8%d9%84%d9%88%d8%b2-%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d8%b1%d8%b4%db%8c%d9%84%d8%af%d8%a7-l00280",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112486": {
+    "strapiId": 58,
+    "importedAt": "2025-12-07T10:31:40.738Z",
+    "name": "کت فوتر تک دکمه  L00373",
+    "slug": "single-button-footer-coat-l00373",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112514": {
+    "strapiId": 60,
+    "importedAt": "2025-12-07T10:31:48.009Z",
+    "name": "کاپشن کلاهدارL00417",
+    "slug": "%da%a9%d8%a7%d9%be%d8%b4%d9%86-%da%a9%d9%84%d8%a7%d9%87%d8%af%d8%a7%d8%b1l00417",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1112630": {
+    "strapiId": 59,
+    "importedAt": "2025-12-07T10:31:43.320Z",
+    "name": "بلوز بافت L00395",
+    "slug": "knitted-blouse-l00395",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113373": {
+    "strapiId": 61,
+    "importedAt": "2025-12-07T10:32:17.979Z",
+    "name": "کت چرم OppsiL00383",
+    "slug": "%da%a9%d8%aa-%da%86%d8%b1%d9%85-oppsil00383",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113387": {
+    "strapiId": 62,
+    "importedAt": "2025-12-07T10:32:01.724Z",
+    "name": "کت بوفالو بلند L00459",
+    "slug": "%da%a9%d8%aa-%d8%a8%d9%88%d9%81%d8%a7%d9%84%d9%88-%d8%a8%d9%84%d9%86%d8%af-l00459",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113434": {
+    "strapiId": 64,
+    "importedAt": "2025-12-07T10:32:08.325Z",
+    "name": "سوییشرت رنگی L00446",
+    "slug": "%d8%b3%d9%88%db%8c%db%8c%d8%b4%d8%b1%d8%aa-l00446",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113450": {
+    "strapiId": 63,
+    "importedAt": "2025-12-07T10:31:59.684Z",
+    "name": "دورس رنگی ساده P00103",
+    "slug": "%d8%af%d9%88%d8%b1%d8%b3-%d8%b1%d9%86%da%af%db%8c-%d8%b3%d8%a7%d8%af%d9%87-p00103",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113483": {
+    "strapiId": 65,
+    "importedAt": "2025-12-07T10:32:14.612Z",
+    "name": "پلیور کراپ P00106",
+    "slug": "%d9%be%d9%84%db%8c%d9%88%d8%b1-%da%a9%d8%b1%d8%a7%d9%be-p00106",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113484": {
+    "strapiId": 67,
+    "importedAt": "2025-12-07T10:32:45.645Z",
+    "name": "پالتو بلند P0088",
+    "slug": "%d9%be%d8%a7%d9%84%d8%aa%d9%88-%d8%a8%d9%84%d9%86%d8%af-p0088",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1113512": {
+    "strapiId": 66,
+    "importedAt": "2025-12-07T10:32:33.270Z",
+    "name": "تاپ بافت زیر کتی P0072",
+    "slug": "knitted-top-under-a-coat-p0072",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1114143": {
+    "strapiId": 68,
+    "importedAt": "2025-12-07T10:32:23.693Z",
+    "name": "نیم تنه ورزشی 000965",
+    "slug": "sports-bra-000965",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1114291": {
+    "strapiId": 69,
+    "importedAt": "2025-12-07T10:32:50.365Z",
+    "name": "تاپ بافت راه راه L00284",
+    "slug": "%d8%aa%d8%a7%d9%be-%d8%a8%d8%a7%d9%81%d8%aa-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-l00284",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1114336": {
+    "strapiId": 70,
+    "importedAt": "2025-12-07T10:32:47.498Z",
+    "name": "آستین کوتاه قلاب بافی L00419",
+    "slug": "short-sleeve-crochet-l00419",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1114410": {
+    "strapiId": 71,
+    "importedAt": "2025-12-07T10:33:01.336Z",
+    "name": "پافر چرم L00252",
+    "slug": "leather-puffer-l00252",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1114498": {
+    "strapiId": 72,
+    "importedAt": "2025-12-07T10:34:01.437Z",
+    "name": "ژیله بافت L00262",
+    "slug": "woven-vest-l00262",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1114561": {
+    "strapiId": 74,
+    "importedAt": "2025-12-07T10:33:52.927Z",
+    "name": "دامن بافت آلیسL00226",
+    "slug": "%d8%af%d8%a7%d9%85%d9%86-%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d9%84%db%8c%d8%b3l00226",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1117431": {
+    "strapiId": 73,
+    "importedAt": "2025-12-07T10:33:43.289Z",
+    "name": "بافت آستین کوتاه ترمه L00450",
+    "slug": "short-sleeve-knit-l00450",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1117568": {
+    "strapiId": 75,
+    "importedAt": "2025-12-07T10:33:30.960Z",
+    "name": "کت کراپ فوتر OppsiP0063",
+    "slug": "%da%a9%d8%aa-%da%a9%d8%b1%d8%a7%d9%be-%d9%81%d9%88%d8%aa%d8%b1-oppsip0063",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1117599": {
+    "strapiId": 77,
+    "importedAt": "2025-12-07T10:34:17.351Z",
+    "name": "شلوار نیم بگ مخمل OppsiL00326",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d9%86%db%8c%d9%85-%d8%a8%da%af-%d9%85%d8%ae%d9%85%d9%84-oppsil00326",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118033": {
+    "strapiId": 76,
+    "importedAt": "2025-12-07T10:34:11.193Z",
+    "name": "ست پاپیونی گیپوری Oppsi000833",
+    "slug": "%d8%b3%d8%aa-%d9%be%d8%a7%d9%be%db%8c%d9%88%d9%86%db%8c-%da%af%db%8c%d9%be%d9%88%d8%b1%db%8c-oppsi000833",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118122": {
+    "strapiId": 78,
+    "importedAt": "2025-12-07T10:34:26.304Z",
+    "name": "کراپ کت ریرا L00443",
+    "slug": "round-neck-crop-jacket-l00443",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118239": {
+    "strapiId": 80,
+    "importedAt": "2025-12-07T10:34:23.195Z",
+    "name": "تاپ بافت L00467",
+    "slug": "woven-top-l00467",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1118378": {
+    "strapiId": 79,
+    "importedAt": "2025-12-07T10:34:18.794Z",
+    "name": "سوییشرت و شلوار اویشو L00375",
+    "slug": "oysho-sweatshirt-and-pants-set-l00375",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118508": {
+    "strapiId": 81,
+    "importedAt": "2025-12-07T10:34:26.545Z",
+    "name": "بافت یقه مرواریدی L00451",
+    "slug": "pearl-collar-texture-l00451",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1118602": {
+    "strapiId": 82,
+    "importedAt": "2025-12-07T10:34:50.875Z",
+    "name": "کاپشن  P00108",
+    "slug": "%da%a9%d8%a7%d9%be%d8%b4%d9%86-p00108",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118664": {
+    "strapiId": 84,
+    "importedAt": "2025-12-07T10:34:49.145Z",
+    "name": "هودی کلاهدار رنگی P00104",
+    "slug": "colorful-hooded-hoodie-p00104",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118705": {
+    "strapiId": 83,
+    "importedAt": "2025-12-07T10:34:48.240Z",
+    "name": "بافت آستین گلدوزی L00474",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d8%b3%d8%aa%db%8c%d9%86-%da%af%d9%84%d8%af%d9%88%d8%b2%db%8c-l00474",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1118807": {
+    "strapiId": 85,
+    "importedAt": "2025-12-07T10:35:06.499Z",
+    "name": "بافت شاینی پاپیونی L00249 (کپی)",
+    "slug": "",
+    "type": "simple",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1120011": {
+    "strapiId": 86,
+    "importedAt": "2025-12-07T10:35:20.643Z",
+    "name": "شورت طرحدار بکلس 000974",
+    "slug": "backless-patterned-shorts-000974",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1120884": {
+    "strapiId": 87,
+    "importedAt": "2025-12-07T10:35:29.757Z",
+    "name": "شال لوکس مادام OppsiS00800",
+    "slug": "%d8%b4%d8%a7%d9%84-%d9%84%d9%88%da%a9%d8%b3-%d9%85%d8%a7%d8%af%d8%a7%d9%85-oppsis00800",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1120912": {
+    "strapiId": 88,
+    "importedAt": "2025-12-07T10:35:11.952Z",
+    "name": "جوراب گلدوزی ساقدار 000801",
+    "slug": "embroidered-socks-with-anklets-000801",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1120997": {
+    "strapiId": 89,
+    "importedAt": "2025-12-07T10:35:21.121Z",
+    "name": "پیراهن دو تیکه ژیله دار L00234",
+    "slug": "two-piece-shirt-with-vest-l00234",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121029": {
+    "strapiId": 90,
+    "importedAt": "2025-12-07T10:35:12.930Z",
+    "name": "ترنچ کت سورین  L00488",
+    "slug": "%d8%aa%d8%b1%d9%86%da%86-%da%a9%d8%aa-%d8%b3%d9%88%d8%b1%db%8c%d9%86-l00488",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121621": {
+    "strapiId": 91,
+    "importedAt": "2025-12-07T10:35:30.029Z",
+    "name": "سویشرت دورس p00110",
+    "slug": "sweatshirt-dors-p00110",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1121666": {
+    "strapiId": 92,
+    "importedAt": "2025-12-07T10:35:55.020Z",
+    "name": "دورس نیم زیپ P00112",
+    "slug": "%d8%af%d9%88%d8%b1%d8%b3-%d9%86%db%8c%d9%85-%d8%b2%db%8c%d9%be-p00112",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121710": {
+    "strapiId": 94,
+    "importedAt": "2025-12-07T10:36:02.734Z",
+    "name": "کت فوتر یقه انگلیسی L00481",
+    "slug": "english-collar-footer-coat-l00481",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121737": {
+    "strapiId": 93,
+    "importedAt": "2025-12-07T10:35:59.652Z",
+    "name": "شال پاییزه چیارا OppsiS00821",
+    "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d8%a7%db%8c%db%8c%d8%b2%d9%87-%da%86%db%8c%d8%a7%d8%b1%d8%a7-oppsis00821",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121759": {
+    "strapiId": 95,
+    "importedAt": "2025-12-07T10:35:50.442Z",
+    "name": "تاپ یقه گیپوری L00434",
+    "slug": "guipure-collar-top-l00434",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121770": {
+    "strapiId": 96,
+    "importedAt": "2025-12-07T10:36:20.046Z",
+    "name": "بامبر جکت فوتر درسا L00484",
+    "slug": "",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1121846": {
+    "strapiId": 97,
+    "importedAt": "2025-12-07T10:36:07.045Z",
+    "name": "شلوار بگ پیله دار L0096",
+    "slug": "cocoon-baggy-pants-l0096",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1121876": {
+    "strapiId": 98,
+    "importedAt": "2025-12-07T10:36:21.270Z",
+    "name": "بافت آستین کوتاه گل برجسته l00473",
+    "slug": "short-sleeve-floral-print-fabric-l00473",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1121930": {
+    "strapiId": 99,
+    "importedAt": "2025-12-07T10:36:25.677Z",
+    "name": "بافت آستین کوتاه L00448",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d8%b3%d8%aa%db%8c%d9%86-%da%a9%d9%88%d8%aa%d8%a7%d9%87-l00448",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121938": {
+    "strapiId": 100,
+    "importedAt": "2025-12-07T10:36:19.887Z",
+    "name": "بافت بیسیک  L00480",
+    "slug": "basic-texture-l00480",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121957": {
+    "strapiId": 101,
+    "importedAt": "2025-12-07T10:37:06.708Z",
+    "name": "بافت جلو گلدوزی L00477",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%d8%ac%d9%84%d9%88-%da%af%d9%84%d8%af%d9%88%d8%b2%db%8c-l00477",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1121971": {
+    "strapiId": 102,
+    "importedAt": "2025-12-07T10:36:48.121Z",
+    "name": "دورس L00432",
+    "slug": "doors-l00432",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1122959": {
+    "strapiId": 103,
+    "importedAt": "2025-12-07T10:37:27.184Z",
+    "name": "پیراهن دو تیکه رزا OppsiC00176",
+    "slug": "%d9%be%db%8c%d8%b1%d8%a7%d9%87%d9%86-%d8%af%d9%88-%d8%aa%db%8c%da%a9%d9%87-%d8%b1%d8%b2%d8%a7-oppsic00176",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1122979": {
+    "strapiId": 104,
+    "importedAt": "2025-12-07T10:37:02.675Z",
+    "name": "کاپشن OppsiP0091",
+    "slug": "%da%a9%d8%a7%d9%be%d8%b4%d9%86-oppsip0091",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123086": {
+    "strapiId": 105,
+    "importedAt": "2025-12-07T10:36:52.656Z",
+    "name": "شال شاین دار کندال S00819",
+    "slug": "kendal-shiny-scarf-s00819",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123088": {
+    "strapiId": 106,
+    "importedAt": "2025-12-07T10:37:53.954Z",
+    "name": "پلیور گیپوری L00235",
+    "slug": "guipure-sweater-l00235",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123116": {
+    "strapiId": 110,
+    "importedAt": "2025-12-07T10:37:50.533Z",
+    "name": "شورت کبریتی بکلس 000978",
+    "slug": "backless-match-shorts-000978",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123124": {
+    "strapiId": 107,
+    "importedAt": "2025-12-07T10:37:49.609Z",
+    "name": "ژیله یقه هفت مرواریدی  L00263",
+    "slug": "seven-pearl-collar-vest-l00263",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123160": {
+    "strapiId": 108,
+    "importedAt": "2025-12-07T10:37:46.323Z",
+    "name": "شورت لیزری 000981",
+    "slug": "laser-shorts-000981",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123177": {
+    "strapiId": 109,
+    "importedAt": "2025-12-07T10:37:55.879Z",
+    "name": "شومیز کبریتی یقه توری  L00482",
+    "slug": "lace-collar-matchbook-l00482",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123217": {
+    "strapiId": 111,
+    "importedAt": "2025-12-07T10:38:10.161Z",
+    "name": "تاپ بافت L00483",
+    "slug": "woven-top-l00483",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1123248": {
+    "strapiId": 114,
+    "importedAt": "2025-12-07T10:38:12.591Z",
+    "name": "بافت یقه اسکی L00462",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%db%8c%d9%82%d9%87-%d8%a7%d8%b3%da%a9%db%8c-l00462",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123275": {
+    "strapiId": 113,
+    "importedAt": "2025-12-07T10:38:28.228Z",
+    "name": "پلیور توت فرنگی L00471",
+    "slug": "strawberry-sweater-l00471",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1123303": {
+    "strapiId": 112,
+    "importedAt": "2025-12-07T10:38:13.268Z",
+    "name": "شلوار نیم بگ P00116",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d9%86%db%8c%d9%85-%d8%a8%da%af-p00116",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1124698": {
+    "strapiId": 115,
+    "importedAt": "2025-12-07T10:38:08.690Z",
+    "name": "ست تنیسی (Nano)000979",
+    "slug": "sports-set-nano000979",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1124784": {
+    "strapiId": 116,
+    "importedAt": "2025-12-07T10:39:02.699Z",
+    "name": "شلوار مام فیت P00115",
+    "slug": "mom-fit-pants-p00115",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125007": {
+    "strapiId": 119,
+    "importedAt": "2025-12-07T10:38:56.025Z",
+    "name": "بلوز بافت مروارید OppsiL00282",
+    "slug": "%d8%a8%d9%84%d9%88%d8%b2-%d8%a8%d8%a7%d9%81%d8%aa-%d9%85%d8%b1%d9%88%d8%a7%d8%b1%db%8c%d8%af-oppsil00282",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125065": {
+    "strapiId": 117,
+    "importedAt": "2025-12-07T10:38:56.955Z",
+    "name": "دامن بافت L00492",
+    "slug": "",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1125109": {
+    "strapiId": 118,
+    "importedAt": "2025-12-07T10:39:03.504Z",
+    "name": "بافت آناشید L00470",
+    "slug": "",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1125142": {
+    "strapiId": 120,
+    "importedAt": "2025-12-07T10:38:53.098Z",
+    "name": "دورس نیم زیپ L00502",
+    "slug": "%d8%af%d9%88%d8%b1%d8%b3-%d9%86%db%8c%d9%85-%d8%b2%db%8c%d9%be-l00502",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125534": {
+    "strapiId": 122,
+    "importedAt": "2025-12-07T10:39:16.135Z",
+    "name": "بافت جلو مرواریدی L00452",
+    "slug": "pearl-front-weave-l00452",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125591": {
+    "strapiId": 121,
+    "importedAt": "2025-12-07T10:39:14.370Z",
+    "name": "شورت کبریتی (LOVE)000983",
+    "slug": "match-shorts-love000983",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125592": {
+    "strapiId": 125,
+    "importedAt": "2025-12-07T10:39:15.246Z",
+    "name": "بلوز یقه اسکی L00505",
+    "slug": "",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1125674": {
+    "strapiId": 124,
+    "importedAt": "2025-12-07T10:39:13.443Z",
+    "name": "پانچو فوتر پایین ریش L00476",
+    "slug": "footer-poncho-under-beard-l00476",
+    "type": "variable",
+    "status": "draft",
+    "rating": "0.00"
+  },
+  "1125675": {
+    "strapiId": 123,
+    "importedAt": "2025-12-07T10:39:16.360Z",
+    "name": "شومیز یقه هفت OppsiC00149",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%db%8c%d9%82%d9%87-%d9%87%d9%81%d8%aa-oppsic00149",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125691": {
+    "strapiId": 129,
+    "importedAt": "2025-12-07T10:39:26.009Z",
+    "name": "صندل لی زارا OppsiF0025",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d9%84%db%8c-%d8%b2%d8%a7%d8%b1%d8%a7-oppsif0025",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125712": {
+    "strapiId": 127,
+    "importedAt": "2025-12-07T10:39:18.537Z",
+    "name": "بافت آستین کوتاه OppsiL00448",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d8%b3%d8%aa%db%8c%d9%86-%da%a9%d9%88%d8%aa%d8%a7%d9%87-oppsil00448",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125736": {
+    "strapiId": 126,
+    "importedAt": "2025-12-07T10:39:27.284Z",
+    "name": "شلوار بگ OppsiL00325 ALO",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-oppsil00325-alo",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1125753": {
+    "strapiId": 128,
+    "importedAt": "2025-12-07T10:39:18.746Z",
+    "name": "دامن بافت آلیسOppsiL00226",
+    "slug": "%d8%af%d8%a7%d9%85%d9%86-%d8%a8%d8%a7%d9%81%d8%aa-%d8%a2%d9%84%db%8c%d8%b3oppsil00226",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
   }
 }

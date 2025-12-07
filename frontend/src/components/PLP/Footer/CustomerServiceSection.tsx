@@ -1,51 +1,21 @@
-"use client";
-
 import FooterLink from "./FooterLink";
-import { useEffect, useState } from "react";
-import type { FooterColumn } from "@/services/footer";
+import type { FooterLink as FooterLinkType } from "@/constants/footer";
 
 interface CustomerServiceSectionProps {
-  data?: FooterColumn;
-  customerSupport?: string;
+  header: string;
+  links: FooterLinkType[];
+  customerSupport: string;
 }
 
-const CustomerServiceSection = ({ data, customerSupport }: CustomerServiceSectionProps) => {
-  // Fallback data in case API data is not available
-  const [links, setLinks] = useState<{ title: string; url: string }[]>([
-    { title: "سوالات متداول", url: "https://infinitycolor.co/سوالات-متداول/" },
-    {
-      title: "شرایط و مقررات تعویض و مرجوع",
-      url: "https://infinitycolor.co/شرایط-و-مقررات-تعویض-و-مرجوع/",
-    },
-  ]);
-
-  const [title, setTitle] = useState<string>("خدمات مشتریان");
-  const [supportText, setSupportText] = useState<string>(
-    "شنبه تا پنج شنبه (غیر از روزهای تعطیل) از ساعت9 صبح الی 17 پاسخگوی شما هستیم.",
-  );
-
-  useEffect(() => {
-    if (data) {
-      setTitle(data.Header);
-      if (data.Links && data.Links.length > 0) {
-        setLinks(
-          data.Links.map((link) => ({
-            title: link.Title,
-            url: link.URL,
-          })),
-        );
-      }
-    }
-
-    if (customerSupport) {
-      setSupportText(customerSupport);
-    }
-  }, [data, customerSupport]);
-
+const CustomerServiceSection = ({
+  header,
+  links,
+  customerSupport,
+}: CustomerServiceSectionProps) => {
   return (
-    <div className="relative flex flex-col gap-6 border-b border-slate-200 pb-5 md:h-full md:min-h-[324px] md:border-b-[0px] md:border-r md:px-[65px]">
+    <div className="relative flex flex-col gap-6 border-b border-slate-200 pb-5 md:h-full md:min-h-[324px] md:border-b-[0px] md:border-r md:px-4 lg:px-6">
       <div className="flex flex-col gap-2 border-b border-slate-200 pb-6">
-        <h3 className="text-base text-neutral-900">{title}</h3>
+        <h3 className="text-base text-neutral-900">{header}</h3>
         <div className="flex flex-col items-start gap-2">
           {links.map((link, index) => (
             <FooterLink key={index} href={link.url}>
@@ -57,7 +27,7 @@ const CustomerServiceSection = ({ data, customerSupport }: CustomerServiceSectio
 
       <div className="flex flex-col gap-2">
         <h3 className="text-base text-neutral-900">پشتیبانی مشتریان</h3>
-        <p className="text-sm text-right text-neutral-500 md:max-w-[233px]">{supportText}</p>
+        <p className="text-sm text-right text-neutral-500 md:max-w-[280px]">{customerSupport}</p>
       </div>
     </div>
   );
