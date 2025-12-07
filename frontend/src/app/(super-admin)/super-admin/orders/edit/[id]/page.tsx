@@ -155,11 +155,23 @@ export default function EditOrderPage() {
     setLoading(true);
     // Add cache-busting timestamp to ensure fresh data
     const cacheBuster = `_t=${Date.now()}`;
-    const separator = "&";
+    const query = [
+      "populate[user][populate][user_info]=true",
+      "populate[contract][populate][contract_transactions][populate][payment_gateway]=true",
+      "populate[order_items][populate][product_variation][populate][product][populate][CoverImage]=true",
+      "populate[order_items][populate][product_variation][populate][product_variation_color]=true",
+      "populate[order_items][populate][product_variation][populate][product_variation_size]=true",
+      "populate[order_items][populate][product_variation][populate][product_variation_model]=true",
+      "populate[order_items][populate][product_color]=true",
+      "populate[order_items][populate][product_size]=true",
+      "populate[delivery_address][populate][shipping_city][populate][shipping_province]=true",
+      "populate[shipping]=true",
+    ]
+      .filter(Boolean)
+      .join("&");
+
     return apiClient
-      .get(
-        `/orders/${id}?populate[0]=user&populate[1]=contract&populate[2]=order_items&populate[3]=shipping&populate[4]=order_items.product_variation.product.CoverImage&populate[5]=order_items.product_color&populate[6]=order_items.product_size&populate[7]=user.user_info&populate[8]=delivery_address.shipping_city.shipping_province&populate[9]=contract.contract_transactions.payment_gateway${separator}${cacheBuster}`,
-      )
+      .get(`/orders/${id}?${query}&${cacheBuster}`)
       .then((res) => {
         const rawResponse = (res as any).data;
         const normalizedOrder = unwrapEntity(
@@ -180,10 +192,20 @@ export default function EditOrderPage() {
         const items: SuperAdminOrderItem[] = orderItemsRaw.map((rawItem: any) => {
           const item = unwrapEntity(rawItem);
           const productVariation = unwrapEntity(item?.product_variation);
+          const variationColor = unwrapEntity(
+            (productVariation as any)?.product_variation_color,
+          );
+          const variationSize = unwrapEntity(
+            (productVariation as any)?.product_variation_size,
+          );
+          const variationModel = unwrapEntity(
+            (productVariation as any)?.product_variation_model,
+          );
           const product = unwrapEntity(productVariation?.product);
           const coverImage = unwrapEntity(product?.CoverImage);
           const color = unwrapEntity(item?.product_color);
           const size = unwrapEntity(item?.product_size);
+          const model = unwrapEntity((item as any)?.product_variation_model);
           const thumbnailUrl =
             coverImage?.formats?.thumbnail?.url ??
             coverImage?.url ??
@@ -204,8 +226,9 @@ export default function EditOrderPage() {
             productCode: item?.ProductSKU ?? productVariation?.SKU ?? "",
             price: Number(item?.PerAmount ?? productVariation?.Price ?? 0),
             quantity: Number(item?.Count ?? 0),
-            color: color?.Title,
-            size: size?.Title,
+            color: color?.Title || variationColor?.Title,
+            size: size?.Title || variationSize?.Title,
+            model: model?.Title || variationModel?.Title,
             image: imageUrl,
           };
         });
@@ -276,7 +299,8 @@ export default function EditOrderPage() {
               normalizedOrder?.updated_at ??
               Date.now(),
           ),
-          description: normalizedOrder?.Description,
+          description: normalizedOrder?.Description || "",
+          note: normalizedOrder?.Note || undefined,
           orderDate: new Date(normalizedOrder?.Date ?? Date.now()),
           orderStatus: normalizedOrder?.Status,
           phoneNumber:
@@ -364,6 +388,7 @@ export default function EditOrderPage() {
               data: {
                 Status: data.orderStatus,
                 Description: data.description,
+                Note: data.note,
               },
             })
             .then((res) => {

@@ -61,3 +61,4 @@ build-final.log
 
 # Generated build files
 src/constants/build-version.json
+# Note: public/build-version.json is generated but should be included in builds

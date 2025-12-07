@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import classNames from "classnames";
-import ProductSearch from "./ProductSearch";
+import ProductSearch, { type Product, type ProductVariation } from "./ProductSearch";
 import SelectedProducts from "./SelectedProducts";
 
 type OrderItem = {
@@ -41,7 +41,7 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
     ProductViewEnum.SELECTED_PRODUCTS,
   ];
 
-  const handleProductSelect = (product: any, variation?: any) => {
+  const handleProductSelect = (product: Product, variation?: ProductVariation) => {
     const newItem: OrderItem = {
       id: Date.now(), // Temporary ID for UI
       productId: product.id,
@@ -73,16 +73,16 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
   return (
     <div className="flex flex-1 flex-col overflow-hidden rounded-lg bg-white">
       {/* View Selector */}
-      <div className="flex gap-8 border-b border-gray-200 px-5 py-4">
+      <div className="flex gap-8 border-b border-slate-200 px-5 py-4">
         {views.map((view) => (
           <button
             key={view}
             onClick={() => setActiveView(view)}
-            className={classNames(
+              className={classNames(
               "text-sm relative border-b-2 pb-2 transition-colors",
               view === activeView
                 ? "border-pink-500 text-pink-500"
-                : "border-transparent text-gray-500 hover:text-gray-700",
+                : "border-transparent text-slate-500 hover:text-slate-700",
             )}
           >
             {view}

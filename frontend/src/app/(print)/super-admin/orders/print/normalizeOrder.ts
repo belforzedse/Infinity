@@ -51,6 +51,9 @@ const normalizeOrderItems = (items: any) => {
         const product = unwrapEntity(pv?.product);
         const color = unwrapEntity(entity.product_color);
         const size = unwrapEntity(entity.product_size);
+        const model = unwrapEntity(entity.product_variation_model);
+        const originalPrice = pv ? Number(pv.Price ?? 0) : undefined;
+        const discountPrice = pv ? (pv.DiscountPrice ? Number(pv.DiscountPrice) : undefined) : undefined;
         return {
           id: String(entity.id ?? ""),
           attributes: {
@@ -58,6 +61,8 @@ const normalizeOrderItems = (items: any) => {
             PerAmount: Number(entity.PerAmount ?? entity.UnitPrice ?? 0),
             ProductSKU: entity.ProductSKU ?? pv?.SKU ?? "—",
             ProductTitle: entity.ProductTitle ?? product?.Title ?? "—",
+            OriginalPrice: originalPrice,
+            DiscountPrice: discountPrice,
             product_color: color
               ? {
                   data: {
@@ -71,6 +76,14 @@ const normalizeOrderItems = (items: any) => {
                   data: {
                     id: String(size.id ?? ""),
                     attributes: size,
+                  },
+                }
+              : undefined,
+            product_variation_model: model
+              ? {
+                  data: {
+                    id: String(model.id ?? ""),
+                    attributes: model,
                   },
                 }
               : undefined,
