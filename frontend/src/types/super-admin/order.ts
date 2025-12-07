@@ -9,6 +9,7 @@ export interface SuperAdminOrderItem {
   quantity: number;
   color?: string;
   size?: string;
+  model?: string;
   image?: string;
   coverImage?: ProductCoverImage;
 }
@@ -20,6 +21,7 @@ export interface SuperAdminOrderDetail {
   userId: string;
   userName?: string;
   description: string;
+  note?: string;
   phoneNumber: string;
   address?: string;
   postalCode?: string;

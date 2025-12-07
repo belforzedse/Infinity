@@ -181,8 +181,8 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900">
+    <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-slate-200">
+      <h3 className="text-lg font-semibold mb-4 text-slate-900">
         ویرایش اقلام سفارش
       </h3>
 
@@ -198,12 +198,12 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
             <div className="mt-3 rounded-md border border-yellow-300 bg-white/60 p-3 text-xs text-yellow-900">
               <div className="mb-2">
                 <span className="font-semibold">بارکد فعلی:</span>{" "}
-                <span className="ltr text-gray-800">{order.shippingBarcode}</span>
+                <span className="ltr text-slate-800">{order.shippingBarcode}</span>
               </div>
               {order.paymentToken ? (
                 <div className="mb-2">
                   <span className="font-semibold">توکن پرداخت SnappPay:</span>{" "}
-                  <span className="ltr text-gray-800">{order.paymentToken}</span>
+                  <span className="ltr text-slate-800">{order.paymentToken}</span>
                 </div>
               ) : null}
               <p className="mb-2">
@@ -243,7 +243,7 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
             {order.items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
+                className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg"
               >
                 <img
                   src={item.image}
@@ -251,13 +251,13 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                   className="w-16 h-16 object-cover rounded"
                 />
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{item.productName}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="font-medium text-slate-900">{item.productName}</p>
+                  <p className="text-sm text-slate-600">
                     قیمت: {item.price.toLocaleString("fa-IR")} تومان
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-700">تعداد:</label>
+                  <label className="text-sm text-slate-700">تعداد:</label>
                   <input
                     type="number"
                     min={0}
@@ -269,9 +269,9 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="w-20 px-3 py-1 border border-gray-300 rounded-md text-center"
+                    className="w-20 px-3 py-1 border border-slate-300 rounded-md text-center"
                   />
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-slate-500">
                     / {item.quantity.toLocaleString("fa-IR")}
                   </span>
                 </div>
@@ -351,14 +351,14 @@ export default function AdjustItemsPanel({ order, onSuccess }: Props) {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
               <div className="w-full max-w-md rounded-lg bg-white p-6">
                 <h3 className="mb-4 text-lg font-semibold">تأیید تغییرات</h3>
-                <p className="mb-6 text-gray-700">
+                <p className="mb-6 text-slate-700">
                   آیا از اعمال این تغییرات اطمینان دارید؟ این عملیات غیرقابل
                   برگشت است.
                 </p>
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={() => setShowConfirm(false)}
-                    className="rounded-md bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
+                    className="rounded-md bg-slate-200 px-4 py-2 text-slate-800 hover:bg-slate-300"
                   >
                     انصراف
                   </button>
