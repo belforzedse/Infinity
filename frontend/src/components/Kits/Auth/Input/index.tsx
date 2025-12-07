@@ -34,6 +34,7 @@ export default function AuthInput({
             error && "border-red-500",
             className,
           )}
+          style={{ fontSize: "16px" }}
           onChange={(e) => onEdit?.(e.target.value)}
           value={value}
           {...props}

@@ -298,6 +298,47 @@ let importOptions = {
 };
 
 /**
+ * Prompt the user for WooCommerce credentials if they're not set.
+ */
+async function promptWooCommerceCredentials() {
+  if (!config.woocommerce.auth.consumerKey || !config.woocommerce.auth.consumerSecret) {
+    console.clear();
+    console.log(`
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║              🔐 WooCommerce API Credentials Required                       ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+    `);
+
+    if (!config.woocommerce.auth.consumerKey) {
+      const consumerKey = await prompt("Enter WooCommerce Consumer Key: ");
+      if (consumerKey && consumerKey.trim()) {
+        config.woocommerce.auth.consumerKey = consumerKey.trim();
+      } else {
+        console.log("\n❌ Consumer Key is required!");
+        await prompt("Press Enter to continue...");
+        return false;
+      }
+    }
+
+    if (!config.woocommerce.auth.consumerSecret) {
+      const consumerSecret = await prompt("Enter WooCommerce Consumer Secret: ");
+      if (consumerSecret && consumerSecret.trim()) {
+        config.woocommerce.auth.consumerSecret = consumerSecret.trim();
+      } else {
+        console.log("\n❌ Consumer Secret is required!");
+        await prompt("Press Enter to continue...");
+        return false;
+      }
+    }
+
+    console.log("\n✅ WooCommerce credentials configured!\n");
+  }
+  return true;
+}
+
+/**
  * Prompt the user to choose a Strapi environment and apply its credentials.
  *
  * Updates global state and configuration to use the selected environment: sets
@@ -317,25 +358,65 @@ async function selectCredentials() {
 
   console.log("\n📋 Available Environments:\n");
   console.log("  1️⃣  Production");
-  console.log("     URL: https://api.infinitycolor.co/api\n");
+  console.log("     URL: https://api.new.infinitycolor.co/api\n");
   console.log("  2️⃣  Staging");
-  console.log("     URL: https://api.infinity.rgbgroup.ir/api\n");
+  console.log("     URL: https://api.staging.infinitycolor.org/api\n");
   console.log("  3️⃣  Local");
   console.log("     URL: http://localhost:1337/api\n");
+  console.log("  4️⃣  Custom");
+  console.log("     Enter custom URL and token\n");
 
-  const choice = await prompt("Select environment (1-3, default: 1): ");
+  const choice = await prompt("Select environment (1-4, default: 1): ");
 
   let selected = "production";
   if (choice === "2") {
     selected = "staging";
   } else if (choice === "3") {
     selected = "local";
+  } else if (choice === "4") {
+    selected = "custom";
   }
 
   selectedCredentialEnv = selected;
 
   // Apply selected credentials to config
-  const creds = config.strapi.credentials[selected];
+  let creds;
+  if (selected === "custom") {
+    // Prompt for custom credentials
+    const customUrl = await prompt(
+      "Enter Strapi API URL (e.g., https://api.new.infinitycolor.co/api): ",
+    );
+    const customToken = await prompt("Enter Strapi API Token: ");
+
+    if (!customUrl || !customToken) {
+      console.log("\n❌ URL and Token are required!");
+      await prompt("Press Enter to continue...");
+      return;
+    }
+
+    creds = {
+      baseUrl: customUrl.trim(),
+      token: customToken.trim(),
+    };
+  } else {
+    creds = config.strapi.credentials[selected];
+
+    // If token is not set, prompt for it
+    if (!creds.token || creds.token === "") {
+      console.log(
+        `\n⚠️  API Token not found in environment variables for ${selected.toUpperCase()}`,
+      );
+      const inputToken = await prompt(`Enter Strapi API Token for ${selected.toUpperCase()}: `);
+      if (inputToken && inputToken.trim()) {
+        creds.token = inputToken.trim();
+      } else {
+        console.log("\n❌ Token is required!");
+        await prompt("Press Enter to continue...");
+        return;
+      }
+    }
+  }
+
   config.strapi.baseUrl = creds.baseUrl;
   config.strapi.auth.token = creds.token;
 
@@ -356,7 +437,7 @@ async function selectCredentials() {
  *
  * Displays current Strapi environment, base URL, per-importer settings (enabled, limits, dry-run and type-specific options),
  * and a numbered list of actions for the user to select.
- * @returns {string} The user's menu choice as entered. 
+ * @returns {string} The user's menu choice as entered.
  */
 async function showMainMenu() {
   console.clear();
@@ -730,6 +811,12 @@ async function runAllImporters() {
         config.import.images.updateProductsWithExistingImages =
           opts.updateProductsWithExistingImages;
 
+        // Set retry to 3 for all images in interactive mode
+        config.import.images.retry.coverImageDownloadRetries = 3;
+        config.import.images.retry.coverImageUploadRetries = 3;
+        config.import.images.retry.galleryImageDownloadRetries = 3;
+        config.import.images.retry.galleryImageUploadRetries = 3;
+
         const importer = new ProductImporter(config, logger);
         stats[type] = await importer.import({
           limit: opts.limit,
@@ -876,6 +963,13 @@ async function clearMappings() {
  */
 async function main() {
   try {
+    // Prompt for WooCommerce credentials if not set
+    const wooCommerceOk = await promptWooCommerceCredentials();
+    if (!wooCommerceOk) {
+      console.log("\n❌ WooCommerce credentials are required to continue.");
+      process.exit(1);
+    }
+
     // Select credentials on startup
     await selectCredentials();
 
