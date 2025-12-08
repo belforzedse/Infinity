@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import type { Option } from "@/components/Kits/Form/Select";
+import type { Option } from "@/components/ui";
 import ShoppingCartBillInformationForm from "./InformationForm";
 import ShoppingCartBillDeliveryForm from "./DeliveryForm";
 import ShoppingCartBillDiscountCoupon from "./DiscountCoupon";

@@ -6,7 +6,7 @@ import HeartIcon from "../../Icons/HeartIcon";
 import ShareIcon from "../../Icons/ShareIcon";
 import BasketIcon from "../../Icons/BasketIcon";
 import { useState, useEffect, useRef } from "react";
-import Select from "@/components/Kits/Form/Select";
+import { Select } from "@/components/ui";
 import useProductLike from "@/hooks/useProductLike";
 import useAddToCart from "@/hooks/useAddToCart";
 import { hasStockForVariation, getAvailableStockCount } from "@/services/product/product";

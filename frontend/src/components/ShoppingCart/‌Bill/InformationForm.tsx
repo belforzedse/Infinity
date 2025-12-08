@@ -10,8 +10,7 @@ import {
 } from "react-hook-form";
 import { useAtom } from "jotai";
 import Input from "@/components/Kits/Form/Input";
-import type { Option } from "@/components/Kits/Form/Select";
-import Select from "@/components/Kits/Form/Select";
+import { Select, type Option } from "@/components/ui";
 import CirculePlusIcon from "@/components/User/Icons/CirculePlusIcon";
 import type { FormData } from "./index";
 import CirculeInformationIcon from "../Icons/CirculeInformationIcon";

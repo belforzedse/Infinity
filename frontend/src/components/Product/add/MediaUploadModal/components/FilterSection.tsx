@@ -1,5 +1,5 @@
 import SearchIcon from "@/components/Product/Icons/SearchIcon";
-import Select from "@/components/Kits/Form/Select";
+import { Select } from "@/components/ui";
 import React from "react";
 
 export const FilterSection: React.FC = () => {
