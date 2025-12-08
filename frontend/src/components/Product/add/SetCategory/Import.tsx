@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import PlusIcon from "../../Icons/PlusIcon";
-import type { Option } from "@/components/Kits/Form/Select";
-import Select from "@/components/Kits/Form/Select";
+import { Select, type Option } from "@/components/ui";
 import { useProductCategory } from "@/hooks/product/useCategory";
 import type { CategoryData } from "@/services/super-admin/product/category/create";
 import classNames from "classnames";

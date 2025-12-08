@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
 import AuthButton from "@/components/Kits/Auth/Button";
 import PhoneInput from "@/components/Kits/Auth/Input/Phone";
-import Checkbox from "@/components/Kits/Auth/Checkbox";
+import { Checkbox } from "@/components/ui";
 import LoginIcon from "@/components/Kits/Auth/Icons/LoginIcon";
 import Text from "@/components/Kits/Text";
 import { useCheckPhoneNumber } from "@/hooks/useCheckPhoneNumber";

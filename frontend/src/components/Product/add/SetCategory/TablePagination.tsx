@@ -1,6 +1,5 @@
 import { useState } from "react";
-import type { Option } from "@/components/Kits/Form/Select";
-import Select from "@/components/Kits/Form/Select";
+import { Select, type Option } from "@/components/ui";
 import { cn } from "@/utils/tailwind";
 import ChevronRightIcon from "../../Icons/ChevronRightIcon";
 import ChavronLeftIcon from "../../Icons/ChevronLeftIcon";

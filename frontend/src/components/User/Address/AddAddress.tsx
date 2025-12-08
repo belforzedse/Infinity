@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import Modal from "@/components/Kits/Modal";
-import Select from "@/components/Kits/Form/Select";
+import { Select, type Option } from "@/components/ui";
 import CirculePlusIcon from "../Icons/CirculePlusIcon";
-import type { Option } from "@/components/Kits/Form/Select";
 import SaveIcon from "../Icons/SaveIcon";
 import UserService from "@/services/user";
 import type { MeResponse } from "@/services/user/me";

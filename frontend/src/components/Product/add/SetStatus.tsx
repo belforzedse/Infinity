@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
 import ChevronUpIcon from "../Icons/ChevronUpIcon";
-import type { Option } from "@/components/Kits/Form/Select";
-import Select from "@/components/Kits/Form/Select";
+import { Select, type Option } from "@/components/ui";
 
 const statusOptions: Option[] = [
   { id: "1", name: "فعال" },
