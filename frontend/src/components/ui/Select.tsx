@@ -115,13 +115,13 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
 
           <SelectPrimitive.Portal>
             <SelectPrimitive.Content
-              className="relative z-[60] max-h-60 overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+              className="relative z-[100] max-h-60 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border border-slate-100 bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
               position="popper"
               sideOffset={4}
             >
-              <SelectPrimitive.Viewport className="py-1">
+              <SelectPrimitive.Viewport className="p-1">
                 {options.length === 0 ? (
-                  <div className="relative cursor-default select-none px-4 py-2 text-sm text-gray-500">
+                  <div className="relative cursor-default select-none px-2 py-1.5 text-sm text-gray-500">
                     {emptyMessage}
                   </div>
                 ) : (
@@ -129,7 +129,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                     <SelectPrimitive.Item
                       key={option.id}
                       value={String(option.id)}
-                      className="relative cursor-pointer select-none px-4 py-2 text-right text-sm text-gray-900 outline-none transition-colors hover:bg-pink-50 focus:bg-pink-50 data-[state=checked]:font-medium"
+                      className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-right text-sm text-gray-900 outline-none transition-colors hover:bg-pink-50 focus:bg-pink-50 data-[disabled]:pointer-events-none data-[state=checked]:bg-pink-50 data-[state=checked]:font-medium data-[disabled]:opacity-50"
                     >
                       <SelectPrimitive.ItemText>{option.name}</SelectPrimitive.ItemText>
                     </SelectPrimitive.Item>
