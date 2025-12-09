@@ -62,7 +62,7 @@ export default function FavoritesPage() {
     const product = favorite.product;
 
     const status =
-      product.Status ||
+      (product as any)?.Status ||
       (product as any)?.attributes?.Status;
     const removedAt =
       (product as any)?.removedAt ||
