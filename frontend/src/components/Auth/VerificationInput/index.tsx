@@ -88,6 +88,7 @@ export default function VerificationInput({ length = 6, onChange }: Verification
           style={{
             caretColor: "transparent",
             direction: "ltr",
+            fontSize: "max(16px, 1.5rem)",
           }}
         />
       ))}

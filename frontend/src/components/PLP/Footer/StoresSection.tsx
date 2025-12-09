@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import type { ContactInfo } from "@/services/footer";
+import type { ContactInfo } from "@/constants/footer";
 
 const socialIcons = [
   {
@@ -28,39 +25,17 @@ const socialIcons = [
 ];
 
 interface StoresSectionProps {
-  contactInfo?: ContactInfo;
+  contactInfo: ContactInfo;
+  storeLocations: string;
 }
 
-const StoresSection = ({ contactInfo }: StoresSectionProps) => {
-  const [phone, setPhone] = useState<string>("017-325-304-39");
-  const [whatsapp, setWhatsapp] = useState<string | null>("0901-655-25-30");
-  const [instagram, setInstagram] = useState<string | null>("infinity.color_boutique");
-  const [telegram, setTelegram] = useState<string | null>("InfinityColorShop");
-
-  useEffect(() => {
-    if (contactInfo) {
-      // Only override defaults when API provides a value
-      if (contactInfo.Phone && contactInfo.Phone.trim() !== "") {
-        setPhone(contactInfo.Phone);
-      }
-      if (typeof contactInfo.Whatsapp === "string" && contactInfo.Whatsapp.trim() !== "") {
-        setWhatsapp(contactInfo.Whatsapp);
-      }
-      if (typeof contactInfo.Instagram === "string" && contactInfo.Instagram.trim() !== "") {
-        setInstagram(contactInfo.Instagram);
-      }
-      if (typeof contactInfo.Telegram === "string" && contactInfo.Telegram.trim() !== "") {
-        setTelegram(contactInfo.Telegram);
-      }
-    }
-  }, [contactInfo]);
-
+const StoresSection = ({ contactInfo, storeLocations }: StoresSectionProps) => {
   return (
-    <div className="relative flex flex-col gap-4 border-slate-200 md:h-full md:min-h-[324px] md:border-r md:px-[65px]">
+    <div className="relative flex flex-col gap-4 border-slate-200 md:h-full md:min-h-[324px] md:border-r md:px-4 lg:px-6">
       <h3 className="text-base text-neutral-900">فروشگاه های حضوری</h3>
 
-      <p className="text-sm text-right text-neutral-500 md:max-w-[233px]">
-        گرگان، بلوار ناهارخوران نبش عدالت 68، گنبد کاووس، ابتدای بلوار دانشجو
+      <p className="text-sm text-right text-neutral-500 md:max-w-[280px]">
+        {storeLocations}
       </p>
       <div className="flex gap-2">
         {socialIcons.map((icon) => (
@@ -89,7 +64,7 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
       <div className="flex flex-col gap-2">
         <h3 className="text-base text-neutral-900">ارتباط با ما</h3>
         <div className="flex flex-col items-start gap-2">
-          {phone && (
+          {contactInfo.phone && (
             <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/phone.png"
@@ -99,10 +74,10 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 loading="lazy"
                 sizes="16px"
               />
-              <span className="text-sm text-neutral-600">{phone}</span>
+              <span className="text-sm text-neutral-600">{contactInfo.phone}</span>
             </div>
           )}
-          {whatsapp && (
+          {contactInfo.whatsapp && (
             <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/whatsapp.png"
@@ -112,10 +87,10 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 loading="lazy"
                 sizes="16px"
               />
-              <span className="text-sm text-neutral-600">{whatsapp}</span>
+              <span className="text-sm text-neutral-600">{contactInfo.whatsapp}</span>
             </div>
           )}
-          {instagram && (
+          {contactInfo.instagram && (
             <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/instagram.png"
@@ -125,10 +100,10 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 loading="lazy"
                 sizes="16px"
               />
-              <span className="text-sm text-neutral-600">{instagram}</span>
+              <span className="text-sm text-neutral-600">{contactInfo.instagram}</span>
             </div>
           )}
-          {telegram && (
+          {contactInfo.telegram && (
             <div className="flex items-center justify-end gap-1">
               <Image
                 src="/images/social/pinterest.png"
@@ -138,7 +113,7 @@ const StoresSection = ({ contactInfo }: StoresSectionProps) => {
                 loading="lazy"
                 sizes="16px"
               />
-              <span className="text-sm text-neutral-600">{telegram}</span>
+              <span className="text-sm text-neutral-600">{contactInfo.telegram}</span>
             </div>
           )}
         </div>

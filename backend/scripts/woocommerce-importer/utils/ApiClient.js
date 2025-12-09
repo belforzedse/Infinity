@@ -450,7 +450,7 @@ class StrapiClient extends BaseApiClient {
             this.logger.error(`❌ Strapi API Error: ${error.message}`);
           }
           return Promise.reject(error);
-        };,
+        },
     );
   }
 

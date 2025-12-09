@@ -1,132 +1,55 @@
-"use client";
+/*
+ * Footer Management Page - DISABLED
+ *
+ * The footer is now managed as a frontend component with hardcoded data.
+ * Footer data is located in: frontend/src/constants/footer.ts
+ *
+ * To update the footer, edit the FOOTER_DATA constant in that file.
+ *
+ * The backend footer API structure remains intact but is no longer used.
+ */
 
-import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { config } from "./config";
-import { toast } from "react-hot-toast";
-// removed unused import: useRouter from "next/navigation"
-import { useEffect, useState } from "react";
-import type { Footer } from "@/types/super-admin/footer";
-import { getFooter } from "@/services/super-admin/footer/get";
-import { updateFooter } from "@/services/super-admin/footer/update";
+// import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
+// import { config } from "./config";
+// import { toast } from "react-hot-toast";
+// import { useEffect, useState } from "react";
+// import type { Footer } from "@/types/super-admin/footer";
+// import { getFooter } from "@/services/super-admin/footer/get";
+// import { updateFooter } from "@/services/super-admin/footer/update";
 
-// Define the nested footer type for form handling
-type NestedFooter = {
-  "first.header": string;
-  "first.links": string;
-  "second.header": string;
-  "second.links": string;
-  "third.header": string;
-  "third.links": string;
-  "contactUs.phone": string;
-  "contactUs.whatsapp": string;
-  "contactUs.instagram": string;
-  "contactUs.telegram": string;
-  customerSupport: string;
-} & Footer;
+// type NestedFooter = {
+//   "first.header": string;
+//   "first.links": string;
+//   "second.header": string;
+//   "second.links": string;
+//   "third.header": string;
+//   "third.links": string;
+//   "contactUs.phone": string;
+//   "contactUs.whatsapp": string;
+//   "contactUs.instagram": string;
+//   "contactUs.telegram": string;
+//   customerSupport: string;
+// } & Footer;
 
 export default function FooterEditPage() {
-  // removed unused: router
-  const [data, setData] = useState<NestedFooter | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const footerData = await getFooter();
-
-        // Transform the footer data to a nested format for the form
-        const nestedData: NestedFooter = {
-          ...footerData,
-          "first.header": footerData.first.header,
-          "first.links": JSON.stringify(footerData.first.links),
-          "second.header": footerData.second.header,
-          "second.links": JSON.stringify(footerData.second.links),
-          "third.header": footerData.third.header,
-          "third.links": JSON.stringify(footerData.third.links),
-          "contactUs.phone": footerData.contactUs.phone,
-          "contactUs.whatsapp": footerData.contactUs.whatsapp || "",
-          "contactUs.instagram": footerData.contactUs.instagram || "",
-          "contactUs.telegram": footerData.contactUs.telegram || "",
-          customerSupport: footerData.customerSupport,
-        };
-
-        setData(nestedData);
-      } catch (error) {
-        toast.error("خطا در دریافت اطلاعات فوتر");
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return <div>در حال بارگذاری...</div>;
-  }
-
-  if (!data) {
-    return <div>اطلاعات فوتر یافت نشد</div>;
-  }
-
   return (
-    <UpsertPageContentWrapper<NestedFooter>
-      config={config}
-      data={data}
-      onSubmit={async (formData) => {
-        try {
-          // Transform the nested form data back to the Footer structure
-          const footerData: Footer = {
-            id: formData.id,
-            customerSupport: formData.customerSupport,
-            first: {
-              header: formData["first.header"],
-              links: JSON.parse(formData["first.links"]),
-            },
-            second: {
-              header: formData["second.header"],
-              links: JSON.parse(formData["second.links"]),
-            },
-            third: {
-              header: formData["third.header"],
-              links: JSON.parse(formData["third.links"]),
-            },
-            contactUs: {
-              phone: formData["contactUs.phone"],
-              whatsapp: formData["contactUs.whatsapp"] || null,
-              instagram: formData["contactUs.instagram"] || null,
-              telegram: formData["contactUs.telegram"] || null,
-            },
-            createdAt: formData.createdAt,
-            updatedAt: new Date(),
-          };
-
-          await updateFooter(footerData);
-          toast.success("فوتر با موفقیت بروزرسانی شد");
-
-          // Refresh data instead of redirecting
-          const updatedFooter = await getFooter();
-          const updatedNestedData: NestedFooter = {
-            ...updatedFooter,
-            "first.header": updatedFooter.first.header,
-            "first.links": JSON.stringify(updatedFooter.first.links),
-            "second.header": updatedFooter.second.header,
-            "second.links": JSON.stringify(updatedFooter.second.links),
-            "third.header": updatedFooter.third.header,
-            "third.links": JSON.stringify(updatedFooter.third.links),
-            "contactUs.phone": updatedFooter.contactUs.phone,
-            "contactUs.whatsapp": updatedFooter.contactUs.whatsapp || "",
-            "contactUs.instagram": updatedFooter.contactUs.instagram || "",
-            "contactUs.telegram": updatedFooter.contactUs.telegram || "",
-            customerSupport: updatedFooter.customerSupport,
-          };
-          setData(updatedNestedData);
-        } catch (error) {
-          toast.error("خطایی رخ داده است");
-          console.error(error);
-        }
-      }}
-    />
+    <div className="flex min-h-screen items-center justify-center p-8">
+      <div className="max-w-2xl rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+        <h1 className="mb-4 text-2xl font-bold text-gray-900">Footer Management Disabled</h1>
+        <p className="mb-4 text-gray-600">
+          The footer is now managed as a frontend component with hardcoded data.
+        </p>
+        <div className="rounded-md bg-gray-50 p-4">
+          <p className="mb-2 text-sm font-semibold text-gray-700">To update the footer:</p>
+          <p className="text-sm text-gray-600">
+            Edit the <code className="rounded bg-gray-200 px-1 py-0.5">FOOTER_DATA</code> constant
+            in <code className="rounded bg-gray-200 px-1 py-0.5">frontend/src/constants/footer.ts</code>
+          </p>
+        </div>
+        <p className="mt-4 text-sm text-gray-500">
+          The backend footer API structure remains intact but is no longer used.
+        </p>
+      </div>
+    </div>
   );
 }

@@ -159,7 +159,23 @@ export const searchProducts = async (
       q,
     )}&page=${page}&pageSize=${pageSize}`;
     const response = await apiClient.getPublic<ProductSearchResponse>(endpoint);
-    return response as unknown as ProductSearchResponse;
+
+    // Defensive client-side filter: require at least one published variation with stock
+    const hasPublishedStock = (item: any) =>
+      item?.attributes?.product_variations?.data?.some?.((v: any) => {
+        if (v?.attributes?.IsPublished !== true) return false;
+        const count = v?.attributes?.product_stock?.data?.attributes?.Count;
+        return typeof count === "number" && count > 0;
+      });
+
+    const filteredData = Array.isArray((response as any)?.data)
+      ? (response as any).data.filter(hasPublishedStock)
+      : [];
+
+    return {
+      ...(response as any),
+      data: filteredData,
+    } as ProductSearchResponse;
   } catch (error) {
     console.error("Error searching products:", JSON.stringify(error), error?.toString());
     throw error;

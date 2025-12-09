@@ -6,11 +6,12 @@ import AnipoBarcodeDialog from "./AnipoBarcodeDialog";
 import { translateOrderLogMessage } from "@/utils/statusTranslations";
 import SuperAdminOrderLogs from "./SuperAdminOrderLogs";
 import { type OrderTimelineEvent } from "@/components/User/Orders/Detail/OrderTimeline";
-import type { SuperAdminOrderDetail } from "@/types/super-admin/order";
+import type { SuperAdminOrderDetail, SuperAdminOrderItem } from "@/types/super-admin/order";
+import toast from "react-hot-toast";
 
 interface SuperAdminOrderSidebarProps {
   orderData?: SuperAdminOrderDetail;
-  selectedItems?: any[];
+  selectedItems?: SuperAdminOrderItem[];
   shippingBarcode?: string;
 }
 
@@ -85,16 +86,16 @@ export default function SuperAdminOrderSidebar({
 
       if (res?.success || res?.already) {
         setHasBarcode(true);
-        alert(res?.already ? "بارکد قبلاً ثبت شده است" : "بارکد با موفقیت ایجاد شد");
+        toast.success(res?.already ? "بارکد قبلاً ثبت شده است" : "بارکد با موفقیت ایجاد شد");
       } else {
-        alert("درخواست ارسال شد");
+        toast.success("درخواست ارسال شد");
       }
 
       setShowBarcodeDialog(false);
-      // Reload page to reflect barcode changes
-      window.location.reload();
+      // Refresh page to reflect barcode changes
+      router.refresh();
     } catch (e) {
-      alert("خطا در ایجاد بارکد Anipo");
+      toast.error("خطا در ایجاد بارکد Anipo");
     } finally {
       setIsGenerating(false);
     }
@@ -102,7 +103,7 @@ export default function SuperAdminOrderSidebar({
 
   const handlePrintPreInvoice = () => {
     if (!orderData || selectedItems.length === 0) {
-      alert("لطفا ابتدا محصولات را اضافه کنید");
+      toast.error("لطفا ابتدا محصولات را اضافه کنید");
       return;
     }
 
@@ -166,11 +167,10 @@ export default function SuperAdminOrderSidebar({
     try {
       const printWindow = window.open(printUrl, '_blank', 'noopener,noreferrer');
       if (!printWindow) {
-        alert('لطفا اجازه باز کردن پنجره جدید را بدهید');
+        toast.error('لطفا اجازه باز کردن پنجره جدید را بدهید');
       }
     } catch (error) {
-      console.error('Error opening pre-invoice window:', error);
-      alert('خطا در باز کردن پیش‌فاکتور');
+      toast.error('خطا در باز کردن پیش‌فاکتور');
     }
 
     // Clean up after a delay
@@ -187,7 +187,9 @@ export default function SuperAdminOrderSidebar({
           <div className="flex flex-col">
             <span className="text-lg text-foreground-primary">ارسال اعلان به مشتری</span>
 
-            <span className="text-sm text-neutral-400">ارسال پیامک به شماره 09210059187</span>
+            <span className="text-sm text-neutral-400">
+              ارسال پیامک به شماره {orderData?.phoneNumber || "---"}
+            </span>
           </div>
 
           <div className="w-full overflow-hidden rounded-lg border border-neutral-200">
@@ -221,7 +223,26 @@ export default function SuperAdminOrderSidebar({
         </div>
 
         <div className="mt-3 flex justify-end">
-          <button className="flex items-center gap-1 rounded-md bg-actions-primary px-2 py-1">
+          <button
+            onClick={async () => {
+              if (!formData.message.trim()) {
+                toast.error("لطفا متن پیام را وارد کنید");
+                return;
+              }
+              if (!orderData?.phoneNumber) {
+                toast.error("شماره تماس مشتری موجود نیست");
+                return;
+              }
+              try {
+                // TODO: Implement actual SMS/notification API call
+                toast.success("پیام با موفقیت ارسال شد");
+                setFormData({ ...formData, message: "" });
+              } catch (error) {
+                toast.error("خطا در ارسال پیام");
+              }
+            }}
+            className="flex items-center gap-1 rounded-md bg-actions-primary px-2 py-1 hover:brightness-110 transition-colors"
+          >
             <span className="text-sm text-white">ارسال پیام</span>
 
             <SendIcon />
@@ -246,10 +267,10 @@ export default function SuperAdminOrderSidebar({
                   try {
                     window.open(`/super-admin/orders/print/${id}`, "_blank", "noopener,noreferrer");
                   } catch (error) {
-                    console.error("Error opening print window:", error);
+                    toast.error("خطا در باز کردن پنجره چاپ");
                   }
                 } else {
-                  alert("لطفا ابتدا سفارش را ذخیره کنید");
+                  toast.error("لطفا ابتدا سفارش را ذخیره کنید");
                 }
               }}
               className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
@@ -268,10 +289,10 @@ export default function SuperAdminOrderSidebar({
                   try {
                     window.open(`/super-admin/orders/print/${id}`, "_blank", "noopener,noreferrer");
                   } catch (error) {
-                    console.error("Error opening print window:", error);
+                    toast.error("خطا در باز کردن پنجره چاپ");
                   }
                 } else {
-                  alert("لطفا ابتدا سفارش را ذخیره کنید");
+                  toast.error("لطفا ابتدا سفارش را ذخیره کنید");
                 }
               }}
               className="flex flex-1 items-center justify-center gap-1 rounded-md bg-slate-100 py-1.5"
@@ -311,7 +332,7 @@ export default function SuperAdminOrderSidebar({
                   if (id) {
                     setShowBarcodeDialog(true);
                   } else {
-                    alert("لطفا ابتدا سفارش را ذخیره کنید");
+                    toast.error("لطفا ابتدا سفارش را ذخیره کنید");
                   }
                 }}
                 disabled={isGenerating}

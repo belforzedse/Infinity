@@ -193,12 +193,24 @@ async function main() {
   const limitArg = args.find((arg) => arg.startsWith('--limit='));
   const limit = limitArg ? parseInt(limitArg.split('=')[1]) : 100;
 
-  const environment = await prompt('Select environment (1=Production, 2=Staging, default=1): ');
-  const env = environment === '2' ? 'staging' : 'production';
+  const environment = await prompt('Select environment (1=Production, 2=Staging, 3=Custom, default=1): ');
+  let env = environment === '2' ? 'staging' : 'production';
+  let customUrl = '';
+  let customToken = '';
+
+  if (environment === '3') {
+    customUrl = await prompt('Enter Strapi API URL (e.g., https://api.new.infinitycolor.co/api): ');
+    customToken = await prompt('Enter Strapi API Token: ');
+    if (!customUrl || !customToken) {
+      console.log('❌ URL and Token are required!');
+      process.exit(1);
+    }
+    env = 'custom';
+  }
 
   const config = {
     production: {
-      url: 'https://api.infinitycolor.co/api',
+      url: 'https://api.new.infinitycolor.co/api',
       token: process.env.STRAPI_TOKEN_PROD || '',
     },
     staging: {
@@ -207,11 +219,18 @@ async function main() {
     },
   };
 
-  const envConfig = config[env];
-
-  if (!envConfig.token) {
-    const token = await prompt(`Enter Strapi API token for ${env}: `);
-    envConfig.token = token;
+  let envConfig;
+  if (env === 'custom') {
+    envConfig = {
+      url: customUrl.trim(),
+      token: customToken.trim(),
+    };
+  } else {
+    envConfig = config[env];
+    if (!envConfig.token) {
+      const token = await prompt(`Enter Strapi API token for ${env}: `);
+      envConfig.token = token;
+    }
   }
 
   const cleanup = new ImageReferenceCleanup(envConfig.url, envConfig.token);

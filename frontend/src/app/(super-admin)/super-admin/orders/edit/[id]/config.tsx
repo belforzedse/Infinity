@@ -113,7 +113,7 @@ export const config: UpsertPageConfigType<SuperAdminOrderDetail> = {
         },
         {
           header: {
-            title: "صورت حساب",
+            title: "توضیحات و یادداشت",
             iconButton: (
               <button className="w-8 h-8 bg-slate-100 rounded-md flex justify-center items-center">
                 <EditIcon />
@@ -124,7 +124,16 @@ export const config: UpsertPageConfigType<SuperAdminOrderDetail> = {
             {
               name: "description",
               type: "multiline-text",
-              rows: 5,
+              label: "توضیحات سفارش",
+              rows: 3,
+              colSpan: 12,
+              mobileColSpan: 12,
+            },
+            {
+              name: "note",
+              type: "multiline-text",
+              label: "یادداشت",
+              rows: 3,
               colSpan: 12,
               mobileColSpan: 12,
             },

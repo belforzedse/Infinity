@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
 import { translatePluginRoleLabel } from "@/constants/roleLabels";
 
-type User = {
+export type User = {
   id: number;
   username: string;
   email: string;
@@ -171,21 +171,17 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
           baseUrl += `&filters[$or][${orIndex++}][phone][$containsi]=${encodedPhrase}`;
         }
 
-        console.log("User search URL:", baseUrl); // Debug log
-
         const response = await apiClient.get(baseUrl, {
           signal: controller.signal,
         });
 
         if (!mounted) return;
 
-        console.log("User search response:", response); // Debug log
         const users = response as unknown as User[];
         setSuggestions(users);
         setOpen(users.length > 0);
       } catch (error) {
         if (!mounted) return;
-        console.error("User search error:", error); // Debug log
         setSuggestions([]);
         setOpen(false);
       } finally {
@@ -282,8 +278,8 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <p className="text-sm text-gray-600">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm text-slate-600">
                 هیچ مشتری انتخاب نشده (اختیاری) - اطلاعات مشتری به صورت دستی وارد خواهد شد
               </p>
             </div>

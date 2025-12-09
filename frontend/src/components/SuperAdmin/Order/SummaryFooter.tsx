@@ -2,48 +2,13 @@ import { priceFormatter } from "@/utils/price";
 import Image from "next/image";
 import MobileOrderItem from "./MobileOrderItem";
 import { translateContractStatus } from "@/utils/statusTranslations";
-
-type Order = {
-  id: number;
-  orderDate: Date;
-  orderStatus: string;
-  userId: string;
-  description: string;
-  phoneNumber: string;
-  createdAt: Date;
-  updatedAt: Date;
-  items: OrderItem[];
-  shipping: number;
-  shippingMethod?: string;
-  subtotal: number;
-  discount?: number;
-  tax?: number;
-  contractStatus:
-    | "Not Ready"
-    | "Confirmed"
-    | "Finished"
-    | "Failed"
-    | "Cancelled";
-  total: number;
-  paymentToken?: string | null;
-};
-
-type OrderItem = {
-  id: number;
-  productId: number;
-  productName: string;
-  productCode: string;
-  price: number;
-  quantity: number;
-  color?: string;
-  image?: string;
-};
+import type { SuperAdminOrderDetail } from "@/types/super-admin/order";
 
 export default function SuperAdminOrderSummaryFooter({
   order,
   onReload,
 }: {
-  order: Order | undefined;
+  order: SuperAdminOrderDetail | undefined;
   onReload?: () => void;
 }) {
   if (!order) return null;
@@ -61,7 +26,7 @@ export default function SuperAdminOrderSummaryFooter({
         return "bg-red-500";
       case "cancelled":
       case "canceled":
-        return "bg-gray-500";
+        return "bg-slate-500";
       default:
         return "bg-slate-500";
     }
@@ -88,8 +53,8 @@ export default function SuperAdminOrderSummaryFooter({
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <div className="h-12 w-12 bg-slate-200 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -100,10 +65,12 @@ export default function SuperAdminOrderSummaryFooter({
                   {item.productName}
                 </h3>
 
+                <p className="text-xs text-neutral-500">شناسه متغیر: {item.productCode || "-"}</p>
                 <p className="text-xs text-neutral-500">
-                  شناسه متغیر: {item.productCode}
+                  {item.color ? `رنگ: ${item.color}` : "رنگ: -"}
+                  {item.model ? ` | مدل: ${item.model}` : ""}
+                  {item.size ? ` | سایز: ${item.size}` : ""}
                 </p>
-                <p className="text-xs text-neutral-500">رنگ: {item.color ?? "-"}</p>
               </div>
             </div>
 

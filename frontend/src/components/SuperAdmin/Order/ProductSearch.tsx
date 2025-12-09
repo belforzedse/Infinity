@@ -6,6 +6,25 @@ import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { motion } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
 
+export type ProductVariation = {
+  id: number;
+  Price: number;
+  DiscountPrice?: number;
+  ProductSKU?: string;
+  product_variation_color?: {
+    Title: string;
+  };
+  product_variation_size?: {
+    Title: string;
+  };
+  product_variation_model?: {
+    Title: string;
+  };
+  product_stock?: {
+    Count: number;
+  };
+};
+
 export type Product = {
   id: number;
   Title: string;
@@ -15,24 +34,7 @@ export type Product = {
   product_main_category?: {
     Title: string;
   };
-  product_variations?: Array<{
-    id: number;
-    Price: number;
-    DiscountPrice?: number;
-    ProductSKU?: string;
-    product_variation_color?: {
-      Title: string;
-    };
-    product_variation_size?: {
-      Title: string;
-    };
-    product_variation_model?: {
-      Title: string;
-    };
-    product_stock?: {
-      Count: number;
-    };
-  }>;
+  product_variations?: ProductVariation[];
   CoverImage?: any;
   image?: string;
 };
@@ -51,7 +53,7 @@ export type OrderItem = {
 };
 
 interface ProductSearchProps {
-  onProductSelect: (product: Product, variation?: any) => void;
+  onProductSelect: (product: Product, variation?: ProductVariation) => void;
   selectedItems: OrderItem[];
   enableVariationSelection?: boolean;
 }
@@ -95,9 +97,8 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
           const attrs = raw?.attributes ? raw.attributes : raw;
           const id = raw.id;
 
-          // Process image - Enhanced debugging
+          // Process image
           const img = attrs?.CoverImage;
-          console.log('Product image data:', { id, img }); // Debug log
 
           let imageUrl = undefined;
           if (img?.data?.attributes) {
@@ -113,8 +114,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             // Direct URL
             imageUrl = `${IMAGE_BASE_URL}${img.url}`;
           }
-
-          console.log('Final image URL:', imageUrl); // Debug log
 
           return {
             id,
@@ -164,7 +163,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     onProductSelect(product);
   };
 
-  const handleVariationSelect = (product: Product, variation: any) => {
+  const handleVariationSelect = (product: Product, variation: ProductVariation) => {
     onProductSelect(product, variation);
     setSelectedProduct(null);
   };
@@ -198,13 +197,13 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
       {/* Results */}
       <div className="space-y-2">
         {loading && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-slate-500">
             در حال جستجو...
           </div>
         )}
 
         {!loading && searchQuery.length >= 2 && products.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-slate-500">
             محصولی یافت نشد
           </div>
         )}
@@ -212,7 +211,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
         {!loading && products.map((product) => (
           <div
             key={product.id}
-            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+            className="border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 flex-shrink-0">
@@ -222,28 +221,27 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                     alt={product.Title}
                     className="w-16 h-16 object-cover rounded-md"
                     onError={(e) => {
-                      console.log('Image failed to load:', product.image);
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
                 ) : null}
-                <div className={`w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center ${product.image ? 'hidden' : ''}`}>
-                  <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <div className={`w-16 h-16 bg-slate-200 rounded-md flex items-center justify-center ${product.image ? 'hidden' : ''}`}>
+                  <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                   </svg>
                 </div>
               </div>
 
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{product.Title}</h4>
-                <p className="text-sm text-gray-600 line-clamp-2">{product.Description}</p>
+                <h4 className="font-medium text-slate-900">{product.Title}</h4>
+                <p className="text-sm text-slate-600 line-clamp-2">{product.Description}</p>
                 <div className="mt-2 flex items-center justify-between">
                   <span className="text-lg font-semibold text-green-600">
                     {formatPrice(product.Price)} تومان
                   </span>
                   {product.product_main_category && (
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
                       {product.product_main_category.Title}
                     </span>
                   )}
@@ -256,7 +254,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   disabled={isProductSelected(product.id)}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isProductSelected(product.id)
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      ? "bg-slate-200 text-slate-500 cursor-not-allowed"
                       : "bg-pink-500 text-white hover:bg-pink-600"
                   }`}
                 >
@@ -264,7 +262,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 </button>
 
                 {product.product_variations && product.product_variations.length > 0 && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-slate-500">
                     {product.product_variations.length} تنوع
                   </span>
                 )}
@@ -281,7 +279,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
               <h3 className="text-lg font-semibold">انتخاب تنوع محصول</h3>
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-slate-500 hover:text-slate-700"
               >
                 ×
               </button>
@@ -289,25 +287,25 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
 
             <div className="mb-4">
               <h4 className="font-medium">{selectedProduct.Title}</h4>
-              <p className="text-sm text-gray-600">{selectedProduct.Description}</p>
+              <p className="text-sm text-slate-600">{selectedProduct.Description}</p>
             </div>
 
             <div className="space-y-2">
               {selectedProduct.product_variations?.map((variation) => (
                 <div
                   key={variation.id}
-                  className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50"
+                  className="border border-slate-200 rounded-lg p-3 hover:bg-slate-50"
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         {variation.product_variation_color && (
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-slate-600">
                             رنگ: {variation.product_variation_color.Title}
                           </span>
                         )}
                         {variation.product_variation_size && (
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-slate-600">
                             سایز: {variation.product_variation_size.Title}
                           </span>
                         )}
@@ -317,7 +315,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           {formatPrice(variation.Price)} تومان
                         </span>
                         {variation.product_stock && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-slate-500">
                             موجودی: {variation.product_stock.Count}
                           </span>
                         )}
@@ -329,7 +327,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                       disabled={isProductSelected(selectedProduct.id, variation.id)}
                       className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                         isProductSelected(selectedProduct.id, variation.id)
-                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          ? "bg-slate-200 text-slate-500 cursor-not-allowed"
                           : "bg-pink-500 text-white hover:bg-pink-600"
                       }`}
                     >

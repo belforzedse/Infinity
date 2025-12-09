@@ -46,6 +46,9 @@ class VariationImporter {
     this.colorMappingCache = new Map();
     this.sizeMappingCache = new Map();
     this.modelMappingCache = new Map();
+
+    // Track unmapped colors to help improve mappings
+    this.unmappedColors = new Set();
   }
 
   shouldImportParentProduct(productName, nameFilter = DEFAULT_NAME_FILTER_KEYWORDS) {
@@ -581,6 +584,7 @@ class VariationImporter {
 
   /**
    * Add default attributes for types not present in WooCommerce data
+   * Note: Default size and model creation has been removed - only color defaults are added
    */
   async addDefaultAttributes(strapiVariation, presentAttributes, variationId) {
     const defaultAttrs = this.config.import.defaults.variationAttributes;
@@ -603,33 +607,7 @@ class VariationImporter {
       }
     }
 
-    if (!presentAttributes.has("size") && !strapiVariation.product_variation_size) {
-      try {
-        const defaultSizeId = await this.createOrGetAttribute("size", defaultAttrs.size.title);
-        if (defaultSizeId) {
-          strapiVariation.product_variation_size = defaultSizeId;
-          this.logger.info(
-            `🔍 Variation ${variationId}: Added default size "${defaultAttrs.size.title}" → ID: ${defaultSizeId}`,
-          );
-        }
-      } catch (error) {
-        this.logger.error("❌ Failed to create default size attribute:", error.message);
-      }
-    }
-
-    if (!presentAttributes.has("model") && !strapiVariation.product_variation_model) {
-      try {
-        const defaultModelId = await this.createOrGetAttribute("model", defaultAttrs.model.title);
-        if (defaultModelId) {
-          strapiVariation.product_variation_model = defaultModelId;
-          this.logger.info(
-            `ℹ️ Variation ${variationId}: Added default model "${defaultAttrs.model.title}" → ID: ${defaultModelId}`,
-          );
-        }
-      } catch (error) {
-        this.logger.error("❌ Failed to create default model attribute:", error.message);
-      }
-    }
+    // Default size and model creation removed - variations must have explicit size/model attributes
   }
 
   /**
@@ -663,9 +641,15 @@ class VariationImporter {
     if (type === "color") {
       resolvedColor = resolveColorMapping(normalizedValue);
       if (!resolvedColor.matched) {
-        this.logger.info(
-          `🎨 Color "${normalizedValue}" not found in mapping. Using fallback ${resolvedColor.colorCode}.`,
+        // Log unmapped colors to help increase mappings
+        this.logger.warn(
+          `🎨 UNMAPPED COLOR: "${normalizedValue}" (original: "${value}") - Using fallback ${resolvedColor.colorCode}. Add to color-mappings.json to improve accuracy.`,
         );
+        // Track unmapped colors for summary
+        if (!this.unmappedColors) {
+          this.unmappedColors = new Set();
+        }
+        this.unmappedColors.add(normalizedValue);
       }
       normalizedValue = resolvedColor.title;
     }
@@ -878,6 +862,24 @@ class VariationImporter {
     this.logger.info(
       `📊 Duplicate tracking: ${trackingStats.variations?.total || 0} variations tracked`,
     );
+
+    // Log unmapped colors summary
+    if (this.unmappedColors && this.unmappedColors.size > 0) {
+      this.logger.warn(
+        `\n${"─".repeat(80)}\n🎨 UNMAPPED COLORS SUMMARY (${
+          this.unmappedColors.size
+        } unique colors):`,
+      );
+      const sortedColors = Array.from(this.unmappedColors).sort();
+      sortedColors.forEach((color) => {
+        this.logger.warn(`   - "${color}"`);
+      });
+      this.logger.warn(
+        `\n💡 TIP: Add these colors to data/color-mappings.json to improve color mapping accuracy.\n${"─".repeat(
+          80,
+        )}\n`,
+      );
+    }
   }
 
   /**

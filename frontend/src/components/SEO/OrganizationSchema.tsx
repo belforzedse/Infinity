@@ -72,7 +72,7 @@ export function OrganizationSchema({
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/images/logo.png`,
+      url: `${SITE_URL}/images/logo_PDF.webp`,
       width: 400,
       height: 400,
     },

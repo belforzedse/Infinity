@@ -42,7 +42,7 @@ export default {
       path: "/orders/:id/anipo-barcode",
       handler: "order.generateAnipoBarcode",
       config: {
-        auth: false,
+        auth: { scope: [] },
       },
     },
     {

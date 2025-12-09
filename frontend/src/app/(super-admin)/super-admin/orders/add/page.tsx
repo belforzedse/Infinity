@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import logger from "@/utils/logger";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import UserSearchSection from "@/components/SuperAdmin/Order/UserSearchSection";
+import UserSearchSection, { type User } from "@/components/SuperAdmin/Order/UserSearchSection";
 import ProductSelectionSection from "@/components/SuperAdmin/Order/ProductSelectionSection";
 import Footer from "@/components/SuperAdmin/Order/SummaryFooter";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
@@ -55,7 +55,7 @@ type OrderItem = {
 
 export default function Page() {
   const router = useRouter();
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -137,7 +137,7 @@ export default function Page() {
     }
   };
 
-  const handleUserSelect = (user: any) => {
+  const handleUserSelect = (user: User | null) => {
     setSelectedUser(user);
 
     // Handle null user (when clearing selection)
@@ -165,22 +165,20 @@ export default function Page() {
       return;
     }
 
-    const legacyAttributes = user?.attributes || {};
-    const legacyUserInfo = legacyAttributes?.user_info?.data?.attributes;
-    const normalizedUserInfo = user.user_info || legacyUserInfo || null;
+    const normalizedUserInfo = user.user_info || null;
 
     const firstName = normalizedUserInfo?.FirstName || "";
     const lastName = normalizedUserInfo?.LastName || "";
-    const phone = user.phone || user.Phone || legacyAttributes?.Phone || "";
-    const email = user.email || user.Email || legacyAttributes?.Email || "";
-    const nameFallback = phone || user.username || legacyAttributes?.username || "";
+    const phone = user.phone || "";
+    const email = user.email || "";
+    const nameFallback = phone || user.username || "";
     const fullName = `${firstName} ${lastName}`.trim() || nameFallback;
 
     // Auto-fill user data
     logger.info("Setting order data for user", { userId: user.id });
     setOrderData((prev) => ({
       ...prev,
-      userId: user.id,
+      userId: String(user.id),
       userName: fullName,
       phoneNumber: phone,
       email: email,
@@ -484,8 +482,8 @@ export default function Page() {
       {/* Search Sections - Horizontal Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* User Search Section */}
-        <div className="rounded-lg bg-white p-4 shadow-sm">
-          <h3 className="mb-3 text-base font-semibold text-gray-900">انتخاب مشتری</h3>
+        <div className="rounded-2xl bg-white p-4 shadow-sm">
+          <h3 className="mb-3 text-base font-semibold text-slate-900">انتخاب مشتری</h3>
           <UserSearchSection
             selectedUser={selectedUser}
             onUserSelect={handleUserSelect}
@@ -493,27 +491,14 @@ export default function Page() {
         </div>
 
         {/* Product Selection Section */}
-        <div className="rounded-lg bg-white p-4 shadow-sm">
-          <h3 className="mb-3 text-base font-semibold text-gray-900">افزودن محصولات</h3>
+        <div className="rounded-2xl bg-white p-4 shadow-sm">
+          <h3 className="mb-3 text-base font-semibold text-slate-900">افزودن محصولات</h3>
           <ProductSelectionSection
             selectedItems={selectedItems}
             onItemsChange={handleItemsChange}
           />
         </div>
       </div>
-
-      {/* Debug Info */}
-      {selectedUser && (
-        <div className="rounded-lg bg-blue-50 p-4 text-sm">
-          <h4 className="font-semibold mb-2">Debug - Order Data:</h4>
-          <p>userName: {orderData.userName}</p>
-          <p>phoneNumber: {orderData.phoneNumber}</p>
-          <p>email: {orderData.email}</p>
-          <p>subtotal: {orderData.subtotal}</p>
-          <p>total: {orderData.total}</p>
-        </div>
-      )}
-
 
       {/* Order Form */}
       <UpsertPageContentWrapper<Order>

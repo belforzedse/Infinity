@@ -11,7 +11,7 @@ export default function PDPHeroInfoFAQItem(props: Props) {
 
   // Check if content contains HTML tags
   const hasHTML = /<[^>]+>/.test(content);
-  
+
   // Sanitize HTML content if it contains HTML, otherwise use as plain text
   const sanitizedContent = hasHTML ? DOMPurify.sanitize(content) : content;
 
@@ -33,7 +33,7 @@ export default function PDPHeroInfoFAQItem(props: Props) {
         >
           {hasHTML ? (
             <div
-              className="prose prose-sm prose-neutral max-w-none prose-headings:font-semibold prose-p:text-neutral-500 prose-p:leading-relaxed prose-strong:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline"
+              className="prose prose-sm prose-neutral max-w-none prose-headings:font-semibold prose-p:text-neutral-500 prose-p:leading-relaxed prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline"
               dir="rtl"
               dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />

@@ -42,8 +42,8 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   if (items.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-400 text-lg mb-2">هیچ محصولی انتخاب نشده</div>
-        <div className="text-gray-500 text-sm">
+        <div className="text-slate-400 text-lg mb-2">هیچ محصولی انتخاب نشده</div>
+        <div className="text-slate-500 text-sm">
           از تب "جستجو محصول" محصولات مورد نظر را اضافه کنید
         </div>
       </div>
@@ -60,7 +60,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="border border-gray-200 rounded-lg p-4"
+            className="border border-slate-200 rounded-lg p-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 flex-shrink-0">
@@ -70,32 +70,31 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                     alt={item.productName}
                     className="w-16 h-16 object-cover rounded-md"
                     onError={(e) => {
-                      console.log('Selected item image failed to load:', item.image);
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
                 ) : null}
-                <div className={`w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center ${item.image ? 'hidden' : ''}`}>
-                  <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <div className={`w-16 h-16 bg-slate-200 rounded-md flex items-center justify-center ${item.image ? 'hidden' : ''}`}>
+                  <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                   </svg>
                 </div>
               </div>
 
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{item.productName}</h4>
-                <p className="text-sm text-gray-600">کد: {item.productCode}</p>
+                <h4 className="font-medium text-slate-900">{item.productName}</h4>
+                <p className="text-sm text-slate-600">کد: {item.productCode}</p>
 
                 {(item.color || item.size) && (
                   <div className="mt-1 flex items-center gap-2">
                     {item.color && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                      <span className="text-xs bg-slate-100 px-2 py-1 rounded">
                         رنگ: {item.color}
                       </span>
                     )}
                     {item.size && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                      <span className="text-xs bg-slate-100 px-2 py-1 rounded">
                         سایز: {item.size}
                       </span>
                     )}
@@ -106,28 +105,28 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
               <div className="flex items-center gap-4">
                 {/* Price Input */}
                 <div className="flex flex-col items-center">
-                  <label className="text-xs text-gray-500 mb-1">قیمت واحد</label>
+                  <label className="text-xs text-slate-500 mb-1">قیمت واحد</label>
                   <input
                     type="number"
                     value={item.price}
                     onChange={(e) =>
                       onItemUpdate(item.id, { price: Number(e.target.value) || 0 })
                     }
-                    className="w-24 text-center border border-gray-200 rounded-md px-2 py-1 text-sm"
+                    className="w-24 text-center border border-slate-200 rounded-md px-2 py-1 text-sm"
                     min="0"
                   />
-                  <span className="text-xs text-gray-500 mt-1">تومان</span>
+                  <span className="text-xs text-slate-500 mt-1">تومان</span>
                 </div>
 
                 {/* Quantity Input */}
                 <div className="flex flex-col items-center">
-                  <label className="text-xs text-gray-500 mb-1">تعداد</label>
-                  <div className="flex items-center border border-gray-200 rounded-md">
+                  <label className="text-xs text-slate-500 mb-1">تعداد</label>
+                  <div className="flex items-center border border-slate-200 rounded-md">
                     <button
                       onClick={() =>
                         onItemUpdate(item.id, { quantity: Math.max(1, item.quantity - 1) })
                       }
-                      className="px-2 py-1 text-gray-500 hover:text-gray-700"
+                      className="px-2 py-1 text-slate-500 hover:text-slate-700"
                     >
                       -
                     </button>
@@ -144,7 +143,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                       onClick={() =>
                         onItemUpdate(item.id, { quantity: item.quantity + 1 })
                       }
-                      className="px-2 py-1 text-gray-500 hover:text-gray-700"
+                      className="px-2 py-1 text-slate-500 hover:text-slate-700"
                     >
                       +
                     </button>
@@ -153,11 +152,11 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
 
                 {/* Total */}
                 <div className="flex flex-col items-center">
-                  <label className="text-xs text-gray-500 mb-1">جمع</label>
+                  <label className="text-xs text-slate-500 mb-1">جمع</label>
                   <span className="font-semibold text-green-600">
                     {formatPrice(calculateItemTotal(item))}
                   </span>
-                  <span className="text-xs text-gray-500">تومان</span>
+                  <span className="text-xs text-slate-500">تومان</span>
                 </div>
 
                 {/* Remove Button */}
@@ -177,9 +176,9 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       </div>
 
       {/* Summary */}
-      <div className="border-t border-gray-200 pt-4">
+      <div className="border-t border-slate-200 pt-4">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-600">
             تعداد محصولات: {items.length}
           </div>
           <div className="text-lg font-semibold text-green-600">

@@ -20,6 +20,22 @@ import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 
+export const metadata: Metadata = {
+  title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
+  description:
+    "جدیدترین مانتو، شومیز، شال و روسری، پلیور و اکسسوری را با ارسال سریع از فروشگاه اینفینیتی خرید کنید.",
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
+    description:
+      "خرید آنلاین مانتو، شومیز، شال و روسری، پلیور و اکسسوری از فروشگاه پوشاک اینفینیتی با ارسال سریع.",
+    url: SITE_URL,
+    type: "website",
+  },
+};
+
 async function getLatestBlogPosts() {
   try {
     const response = await blogService.getBlogPosts({
@@ -185,34 +201,3 @@ export default async function Home() {
     </PageContainer>
   );
 }
-
-export const metadata: Metadata = {
-  title: `صفحه اصلی | ${SITE_NAME}`,
-  description:
-    `جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه ${SITE_NAME} را مشاهده کنید و آنلاین خرید کنید.`,
-  keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی"],
-  alternates: { canonical: SITE_URL },
-  openGraph: {
-    title: `صفحه اصلی | ${SITE_NAME}`,
-    description:
-      `جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه ${SITE_NAME} را مشاهده کنید و آنلاین خرید کنید.`,
-    type: "website",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    locale: "fa_IR",
-    images: [
-      {
-        url: "https://api.new.infinitycolor.co/uploads/logo_5a5e2f8a4d.png",
-        width: 1200,
-        height: 630,
-        alt: `${SITE_NAME} - فروشگاه پوشاک`,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `صفحه اصلی | ${SITE_NAME}`,
-    description:
-      `جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه ${SITE_NAME} را مشاهده کنید و آنلاین خرید کنید.`,
-  },
-};

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { BlogCarousel, BlogCategoryBanner, BlogCard } from "@/components/Blog";
 import { blogService, BlogPost, BlogCategory } from "@/services/blog/blog.service";
 import { generateBlogListingMetadata } from "@/utils/seo";
-
-export const metadata: Metadata = generateBlogListingMetadata();
+import { API_BASE_URL } from "@/constants/api";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 // Use on-demand revalidation (triggered by Strapi lifecycle hooks)
 // Fallback to 1 hour if revalidation API is not called
 export const revalidate = 3600; // 1 hour fallback (on-demand is primary)
@@ -269,7 +269,7 @@ export default async function BlogPage({
         {rowCategories.map((rowCategory, index) => {
           const posts = postsByCategory[rowCategory.Slug] || [];
           if (posts.length === 0) return null;
-          
+
           return (
             <React.Fragment key={`row-${rowCategory.Slug}-${index}`}>
               <BlogCarousel
@@ -297,4 +297,73 @@ export default async function BlogPage({
       </div>
     </div>
   );
+}
+
+/**
+ * Generate metadata for blog listing page
+ * Handles category filter to show proper category name in title
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const categoryFilter = typeof params.category === "string" ? params.category : undefined;
+
+  // If category filter is present, fetch category details for proper metadata
+  if (categoryFilter) {
+    try {
+      const endpoint = `${API_BASE_URL}/blog-categories?filters[Slug][$eq]=${encodeURIComponent(categoryFilter)}&fields[0]=Title&fields[1]=Slug`;
+      const response = await fetch(endpoint, {
+        next: { revalidate: 3600 }, // Cache for 1 hour
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const categoryData = data?.data?.[0];
+
+        if (categoryData) {
+          const categoryTitle = categoryData.attributes?.Title || categoryFilter;
+          const title = `${categoryTitle} | وبلاگ ${SITE_NAME}`;
+          const description = `مقالات دسته‌بندی ${categoryTitle} در ${SITE_NAME}. آخرین مطالب و آموزش‌ها.`;
+          const url = `${SITE_URL}/blog?category=${encodeURIComponent(categoryFilter)}`;
+
+          return {
+            title,
+            description,
+            openGraph: {
+              type: "website",
+              title,
+              description,
+              url,
+              siteName: SITE_NAME,
+              images: [
+                {
+                  url: `${SITE_URL}/images/og-default.jpg`,
+                  width: 1200,
+                  height: 630,
+                  alt: `${categoryTitle} | ${SITE_NAME}`,
+                },
+              ],
+            },
+            twitter: {
+              card: "summary_large_image",
+              title,
+              description,
+              images: [`${SITE_URL}/images/og-default.jpg`],
+            },
+            alternates: {
+              canonical: url,
+            },
+          };
+        }
+      }
+    } catch (error) {
+      console.error("[Blog Metadata] Error fetching category:", error);
+    }
+  }
+
+  // Default blog listing metadata (no category filter)
+  return generateBlogListingMetadata();
 }
