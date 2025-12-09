@@ -1,20 +1,19 @@
-"use client";
+import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "@/config/site";
+import CheckoutPageClient from "./CheckoutPageClient";
 
-import ShoppingCartBillForm from "@/components/ShoppingCart/‌Bill";
-import { motion } from "framer-motion";
-import React from "react";
-import PageContainer from "@/components/layout/PageContainer";
+export const metadata: Metadata = {
+  title: `تسویه حساب | ${SITE_NAME}`,
+  description: "اطلاعات ارسال و پرداخت خود را برای نهایی‌سازی سفارش تکمیل کنید.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+  alternates: {
+    canonical: `${SITE_URL}/checkout`,
+  },
+};
 
 export default function CheckoutPage() {
-  return (
-    <motion.section
-      initial={{ opacity: 0, x: 16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-    >
-      <PageContainer variant="wide" className="space-y-6 pb-16 pt-8">
-        <ShoppingCartBillForm />
-      </PageContainer>
-    </motion.section>
-  );
+  return <CheckoutPageClient />;
 }

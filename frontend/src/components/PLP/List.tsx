@@ -884,11 +884,13 @@ export default function PLPList({
                   }
 
                   const isAvailable = checkStockAvailability(product);
+                  const slug = (product as any)?.attributes?.Slug || product.id.toString();
 
                   return (
                     <ProductCard
                       key={product.id}
                       id={product.id}
+                      slug={slug}
                       images={
                         product.attributes.CoverImage?.data?.attributes?.url
                           ? [
@@ -945,11 +947,13 @@ export default function PLPList({
                   }
 
                   const isAvailable = checkStockAvailability(product);
+                  const slug = (product as any)?.attributes?.Slug || product.id.toString();
 
                   return (
                     <ProductSmallCard
                       key={product.id}
                       id={product.id}
+                      slug={slug}
                       title={product.attributes.Title}
                       category={
                         product.attributes.product_main_category?.data?.attributes?.Title || ""

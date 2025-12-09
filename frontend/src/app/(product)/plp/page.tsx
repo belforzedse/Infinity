@@ -1,6 +1,7 @@
 export const revalidate = 30; // refresh product listing every 30 seconds
 
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
@@ -13,6 +14,7 @@ import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { computeDiscountForVariation } from "@/utils/discounts";
+import { validateCategorySlug } from "@/utils/category-validation";
 
 interface ProductVariation {
   attributes: {
@@ -449,8 +451,24 @@ export default async function PLPPage({
   const hasDiscount =
     typeof params.hasDiscount === "string" ? params.hasDiscount === "true" : undefined;
 
+  // Validate category if provided - return 404 for invalid categories
+  // Use the validated category slug to ensure we use the canonical slug (no trailing slashes)
+  let validatedCategory = category;
+  let categoryTitle: string | undefined = undefined;
+  if (category && !search) {
+    const categoryData = await validateCategorySlug(category);
+    if (!categoryData) {
+      logger.warn(`[PLP] Invalid category requested: ${category}`);
+      notFound();
+    }
+    // Use the canonical slug from the validated category data
+    validatedCategory = categoryData.attributes.Slug;
+    // Store the category title for display
+    categoryTitle = categoryData.attributes.Title;
+  }
+
   const { products, pagination } = await getProducts(
-    category,
+    validatedCategory,
     page,
     30, // Reduced page size for better performance
     showAvailableOnly,
@@ -470,19 +488,21 @@ export default async function PLPPage({
   const isSearchResults = !!search;
 
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
-  const pageName = category
-    ? `خرید ${category}`
+  const SITE_NAME = "فروشگاه پوشاک اینفینیتی";
+  // Use category title if available, fallback to slug
+  const displayCategoryName = categoryTitle || validatedCategory;
+  const pageName = validatedCategory
+    ? `خرید ${displayCategoryName}`
     : search
       ? `نتایج جستجو برای "${search}"`
       : "فروشگاه";
-  const SITE_NAME = "فروشگاه پوشاک اینفینیتی";
-  const pageDescription = category
-    ? `خرید ${category} با بهترین قیمت و ارسال سریع از ${SITE_NAME}`
+  const pageDescription = validatedCategory
+    ? `خرید ${displayCategoryName} با بهترین قیمت و ارسال سریع از ${SITE_NAME}`
     : search
       ? `نتایج جستجو برای «${search}» در ${SITE_NAME}`
       : `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}`;
-  const pageUrl = category
-    ? `${SITE_URL}/plp?category=${encodeURIComponent(category)}`
+  const pageUrl = validatedCategory
+    ? `${SITE_URL}/plp?category=${encodeURIComponent(validatedCategory)}`
     : search
       ? `${SITE_URL}/plp?search=${encodeURIComponent(search)}`
       : `${SITE_URL}/plp`;
@@ -528,13 +548,13 @@ export default async function PLPPage({
         />
       )}
 
-      {!isSearchResults && <PLPHeroBanner category={category} />}
+      {!isSearchResults && <PLPHeroBanner category={validatedCategory} />}
 
       <Suspense fallback={<ProductListSkeleton />}>
         <PLPList
           products={products}
           pagination={pagination}
-          category={category}
+          category={validatedCategory}
           searchQuery={search}
         />
       </Suspense>
@@ -575,9 +595,28 @@ export async function generateMetadata({
   }
 
   if (category) {
-    const title = `خرید ${category} | ${SITE_NAME}`;
-    const description = `خرید ${category} با بهترین قیمت و ارسال سریع از ${SITE_NAME}. جدیدترین محصولات ${category}.`;
-    const canonicalUrl = `${SITE_URL}/plp?category=${encodeURIComponent(category)}`;
+    // Validate category - if invalid, return noindex metadata as defense-in-depth
+    const categoryData = await validateCategorySlug(category);
+
+    if (!categoryData) {
+      // Invalid category - return noindex metadata (though page should return 404)
+      logger.warn(`[Metadata] Invalid category in metadata generation: ${category}`);
+      return {
+        title: baseTitle,
+        description: `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}.`,
+        robots: {
+          index: false,
+          follow: false,
+        },
+        alternates: { canonical: `${SITE_URL}/plp` },
+      };
+    }
+
+    // Use the validated category title for better SEO
+    const categoryTitle = categoryData.attributes.Title || category;
+    const title = `خرید ${categoryTitle} | ${SITE_NAME}`;
+    const description = `خرید ${categoryTitle} با بهترین قیمت و ارسال سریع از ${SITE_NAME}. جدیدترین محصولات ${categoryTitle}.`;
+    const canonicalUrl = `${SITE_URL}/plp?category=${encodeURIComponent(categoryData.attributes.Slug)}`;
     return {
       title,
       description,

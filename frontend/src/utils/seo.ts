@@ -91,7 +91,7 @@ export function generateBlogPostMetadata(
     post.metaDescription ||
     post.excerpt ||
     `مطالعه «${post.title}» در ${config.siteName}`;
-  const url = `${config.siteUrl}/${post.slug}`;
+  const url = `${config.siteUrl}/blog/${post.slug}`;
   const imageUrl = post.featuredImage?.url
     ? buildImageUrl(post.featuredImage.url, config)
     : buildImageUrl(config.defaultImage, config);
@@ -221,7 +221,7 @@ export function generateJSONLD(post: BlogPostSEO, config: SEOConfig = defaultSEO
     headline: sanitizedTitle,
     description: sanitizedDescription,
     image: imageUrl,
-    url: `${config.siteUrl}/${post.slug}`,
+    url: `${config.siteUrl}/blog/${post.slug}`,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: sanitizedAuthorName ? {
@@ -238,7 +238,7 @@ export function generateJSONLD(post: BlogPostSEO, config: SEOConfig = defaultSEO
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${config.siteUrl}/${post.slug}`,
+      '@id': `${config.siteUrl}/blog/${post.slug}`,
     },
     articleSection: sanitizedCategoryName,
     keywords: sanitizedKeywords,

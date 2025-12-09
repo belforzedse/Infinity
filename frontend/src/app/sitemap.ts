@@ -178,6 +178,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAllBlogCategories(),
   ])
 
+  // Disallow-list for sitemap (must stay aligned with robots.txt)
+  const disallowedPaths = new Set([
+    '/cart',
+    '/checkout',
+    '/orders',
+    '/payment',
+    '/account',
+    '/admin',
+    '/super-admin',
+    '/_next',
+    '/api',
+  ])
+
   // Calculate total URL count
   const totalUrls = 1 + // Homepage
     1 + // PLP
@@ -185,8 +198,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     1 + // Blog listing
     products.length +
     blogPosts.length +
-    blogCategories.length +
-    1 // Cart
+    blogCategories.length
 
   // Note: If totalUrls exceeds 50,000, consider implementing sitemap index
   // Next.js 16 supports sitemap index by returning an array of sitemap objects
@@ -243,7 +255,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Blog post pages
     ...blogPosts.map((post) => ({
-      url: `${BASE_URL}/${post.Slug}`,
+      url: `${BASE_URL}/blog/${post.Slug}`,
       lastModified: post.PublishedAt ? new Date(post.PublishedAt) : new Date(post.updatedAt),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -256,15 +268,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     })),
-
-    // Other static pages (noindex pages excluded)
-    {
-      url: `${BASE_URL}/cart`,
-      lastModified: new Date(),
-      changeFrequency: 'never' as const,
-      priority: 0.5,
-    },
   ]
 
-  return sitemap
+  // Final defensive filter to drop disallowed paths (e.g., cart/checkout/account)
+  const filtered = sitemap.filter((entry) => {
+    try {
+      const urlObj = new URL(entry.url)
+      return !disallowedPaths.has(urlObj.pathname)
+    } catch {
+      // Drop malformed entries to avoid invalid sitemap rows
+      return false
+    }
+  })
+
+  return filtered
 }
