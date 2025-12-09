@@ -16,6 +16,7 @@ import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useEditorRedirect } from "@/hooks/useEditorRedirect";
+import { Select, type Option } from "@/components/ui";
 
 export default function ProductsPage() {
   useFreshDataOnPageLoad();
@@ -40,6 +41,21 @@ export default function ProductsPage() {
     parse: (value: string | undefined) => Number(value) || 0,
     serialize: (value: number) => String(value),
   });
+  const sortOptions: Option[] = useMemo(
+    () => [
+      { id: "newest", name: "جدیدترین" },
+      { id: "oldest", name: "قدیمی‌ترین" },
+      { id: "stock-desc", name: "موجودی: بیشترین" },
+      { id: "stock-asc", name: "موجودی: کمترین" },
+      { id: "sales-desc", name: "فروش: بیشترین" },
+      { id: "sales-asc", name: "فروش: کمترین" },
+    ],
+    [],
+  );
+  const selectedSortOption = useMemo(
+    () => sortOptions.find((o) => o.id === sort) || sortOptions[0],
+    [sortOptions, sort],
+  );
 
   // For global sort modes, we build an index of product IDs sorted server-assist
   const [sortedProductIds, setSortedProductIds] = useState<number[] | null>(null);
@@ -496,18 +512,13 @@ export default function ProductsPage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
-            <select
-              className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as any)}
-            >
-              <option value="newest">جدیدترین</option>
-              <option value="oldest">قدیمی‌ترین</option>
-              <option value="stock-desc">موجودی: بیشترین</option>
-              <option value="stock-asc">موجودی: کمترین</option>
-              <option value="sales-desc">فروش: بیشترین</option>
-              <option value="sales-asc">فروش: کمترین</option>
-            </select>
+            <Select
+              className="min-w-[180px]"
+              value={selectedSortOption}
+              onChange={(opt) => setSort(opt.id as typeof sort)}
+              options={sortOptions}
+              selectButtonClassName="text-sm"
+            />
           </div>
 
         </div>

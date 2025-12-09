@@ -7,6 +7,7 @@ import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { Select, type Option } from "@/components/ui";
 
 const RechartsTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
@@ -61,6 +62,19 @@ export default function ProductSalesReportPage() {
   const [loading, setLoading] = useState(false);
   const [chartType, setChartType] = useState<ChartType>("treemap");
   const [showTop, setShowTop] = useState<number>(20);
+  const showTopOptions: Option[] = useMemo(
+    () => [
+      { id: 10, name: "۱۰ محصول برتر" },
+      { id: 15, name: "۱۵ محصول برتر" },
+      { id: 20, name: "۲۰ محصول برتر" },
+      { id: rows.length || 0, name: rows.length ? `همه محصولات (${faNum(rows.length)})` : "همه محصولات" },
+    ],
+    [rows.length],
+  );
+  const selectedShowTopOption = useMemo(
+    () => showTopOptions.find((o) => Number(o.id) === Number(showTop)) || showTopOptions[0],
+    [showTopOptions, showTop],
+  );
 
   // Excel export function
   const exportToExcel = useCallback(async (data: any[], startDate: Date, endDate: Date) => {
@@ -350,16 +364,12 @@ export default function ProductSalesReportPage() {
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2">
                       <label className="text-sm font-medium text-neutral-600">نمایش:</label>
-                      <select
-                        value={showTop}
-                        onChange={(e) => setShowTop(Number(e.target.value))}
-                        className="text-sm rounded-lg border border-neutral-300 px-3 py-1 focus:border-transparent focus:ring-2 focus:ring-pink-500"
-                      >
-                        <option value={10}>۱۰ محصول برتر</option>
-                        <option value={15}>۱۵ محصول برتر</option>
-                        <option value={20}>۲۰ محصول برتر</option>
-                        <option value={rows.length}>همه محصولات</option>
-                      </select>
+                      <Select
+                        value={selectedShowTopOption}
+                        onChange={(opt) => setShowTop(Number(opt.id))}
+                        options={showTopOptions}
+                        selectButtonClassName="text-sm min-w-[180px]"
+                      />
                     </div>
 
                     {/* Export Button */}

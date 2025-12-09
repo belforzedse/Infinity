@@ -95,10 +95,8 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
               selectButtonClassName
             )}
           >
-            <SelectPrimitive.Value asChild>
-              <span className="block truncate text-neutral-600">
-                {isLoading ? "در حال بارگیری..." : value?.name || placeholder}
-              </span>
+            <SelectPrimitive.Value className="block truncate text-neutral-600">
+              {isLoading ? "در حال بارگیری..." : value?.name || placeholder}
             </SelectPrimitive.Value>
             <SelectPrimitive.Icon asChild>
               <span className="flex items-center">

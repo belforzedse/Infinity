@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -22,6 +22,7 @@ import {
 import { blogService, BlogComment } from "@/services/blog/blog.service";
 import { resolveBlogCommentUserDisplayName } from "@/utils/blogCommentAuthorName";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Select, type Option } from "@/components/ui";
 
 const statusConfig = {
   Pending: { label: "در انتظار", className: "bg-yellow-100 text-yellow-700", icon: Clock },
@@ -44,6 +45,17 @@ export default function BlogCommentsPage() {
   }, [isStoreManager, router]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [viewComment, setViewComment] = useState<BlogComment | null>(null);
+  const statusOptions: Option[] = useMemo(
+    () => [
+      { id: "all", name: "همه وضعیت‌ها" },
+      { id: "Pending", name: "در انتظار" },
+      { id: "Approved", name: "تایید شده" },
+      { id: "Rejected", name: "رد شده" },
+    ],
+    [],
+  );
+  const selectedStatusOption =
+    statusOptions.find((option) => option.id === statusFilter) || statusOptions[0];
 
   const fetchComments = useCallback(async () => {
     try {
@@ -96,7 +108,7 @@ export default function BlogCommentsPage() {
     const normalizedContent = (comment.Content || "").toLowerCase();
     const normalizedName = (comment.Name || "").toLowerCase();
     const normalizedUsername = (comment.user?.username || "").toLowerCase();
-    
+
     return (
       normalizedContent.includes(normalizedSearch) ||
       normalizedName.includes(normalizedSearch) ||
@@ -292,16 +304,12 @@ export default function BlogCommentsPage() {
             />
           </div>
           <div className="sm:w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-            >
-              <option value="all">همه وضعیت‌ها</option>
-              <option value="Pending">در انتظار</option>
-              <option value="Approved">تایید شده</option>
-              <option value="Rejected">رد شده</option>
-            </select>
+            <Select
+              value={selectedStatusOption}
+              onChange={(opt) => setStatusFilter(String(opt.id))}
+              options={statusOptions}
+              selectButtonClassName="w-full text-sm"
+            />
           </div>
         </div>
 

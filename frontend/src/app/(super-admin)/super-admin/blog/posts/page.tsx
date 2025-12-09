@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { blogService, BlogPost } from "@/services/blog/blog.service";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Select, type Option } from "@/components/ui";
 
 const statusConfig = {
   Draft: { label: "پیش‌نویس", className: "bg-slate-100 text-slate-700" },
@@ -39,6 +40,17 @@ export default function BlogPostsPage() {
   }, [isStoreManager, router]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const statusOptions: Option[] = useMemo(
+    () => [
+      { id: "all", name: "همه وضعیت‌ها" },
+      { id: "Draft", name: "پیش‌نویس" },
+      { id: "Published", name: "منتشر شده" },
+      { id: "Scheduled", name: "زمان‌بندی شده" },
+    ],
+    [],
+  );
+  const selectedStatusOption =
+    statusOptions.find((option) => option.id === statusFilter) || statusOptions[0];
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -93,7 +105,7 @@ export default function BlogPostsPage() {
       cell: ({ row }: { row: { original: BlogPost } }) => {
         const author = row.original.blog_author;
         const displayName = author?.Name || " - ";
-        
+
         return (
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-slate-400" />
@@ -204,16 +216,12 @@ export default function BlogPostsPage() {
           />
         </div>
         <div className="sm:w-48">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-          >
-            <option value="all">همه وضعیت‌ها</option>
-            <option value="Draft">پیش‌نویس</option>
-            <option value="Published">منتشر شده</option>
-            <option value="Scheduled">زمان‌بندی شده</option>
-          </select>
+          <Select
+            value={selectedStatusOption}
+            onChange={(opt) => setStatusFilter(String(opt.id))}
+            options={statusOptions}
+            selectButtonClassName="w-full text-sm"
+          />
         </div>
       </div>
 

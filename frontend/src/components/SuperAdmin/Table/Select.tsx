@@ -1,16 +1,11 @@
 "use client";
 
-import ChevronDownIcon from "@/components/Search/Icons/ChevronDownIcon";
-import { cn } from "@/utils/tailwind";
-import { useEffect, useState } from "react";
-
-interface Option {
-  id: string | number;
-  title: string;
-}
+import { useMemo } from "react";
+import { Select, type Option } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 interface Props {
-  options: Option[];
+  options: Array<{ id: string | number; title: string }>;
   className?: string;
   buttonClassName?: string;
   selectedOption?: string | number;
@@ -18,72 +13,59 @@ interface Props {
   onOptionSelect?: (optionId: string | number) => void;
 }
 
+/**
+ * Super Admin wrapper around the design-system Select.
+ * Keeps existing API (`title` field) while rendering the shared UI component.
+ */
 const SuperAdminTableSelect = ({
-  options: filterOptions,
+  options,
   onOptionSelect,
   className,
   buttonClassName,
-  iconClassName,
   selectedOption: selectedOptionId,
 }: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<Option>({
-    id: "",
-    title: "",
-  });
+  const selectOptions: Option[] = useMemo(() => {
+    const normalizeId = (id: string | number) => {
+      const str = String(id ?? "");
+      return str.length === 0 ? "__empty" : str;
+    };
+    return options.map((opt) => ({
+      id: normalizeId(opt.id),
+      name: opt.title,
+    }));
+  }, [options]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setSelectedOption(
-        filterOptions.find((option) => +option.id === +(selectedOptionId || -1)) ||
-          filterOptions.find((option) => option.id === selectedOptionId) ||
-          filterOptions[0] || {
-            id: "",
-            title: "",
-          },
-      );
-    }, 100);
-  }, [filterOptions, selectedOptionId]);
+  const valueToOriginal = useMemo(() => {
+    const normalizeId = (id: string | number) => {
+      const str = String(id ?? "");
+      return str.length === 0 ? "__empty" : str;
+    };
+    return options.reduce<Record<string, string | number>>((acc, opt) => {
+      acc[normalizeId(opt.id)] = opt.id;
+      return acc;
+    }, {});
+  }, [options]);
 
-  const handleOptionClick = (option: Option) => {
-    setSelectedOption(option);
-    onOptionSelect?.(option.id);
-    setIsOpen(false);
-  };
+  const selected = useMemo(() => {
+    const normalizeId = (id: string | number | undefined) => {
+      const str = String(id ?? "");
+      return str.length === 0 ? "__empty" : str;
+    };
+    return selectOptions.find((opt) => opt.id === normalizeId(selectedOptionId)) || null;
+  }, [selectOptions, selectedOptionId]);
 
   return (
-    <div className={cn("relative rounded-lg border border-slate-100", className)}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "flex w-full items-center justify-between rounded-xl bg-white px-3 py-2",
-          buttonClassName,
-        )}
-      >
-        <span className="text-xs text-gray-800">{selectedOption.title}</span>
-        <ChevronDownIcon
-          className={cn("h-6 w-6 transition-transform", iconClassName, isOpen ? "rotate-180" : "")}
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-fit rounded-xl bg-white p-3">
-          <ul className="w-fit space-y-2">
-            {filterOptions.map((option) => (
-              <li key={option.id} className="w-full">
-                <button
-                  onClick={() => handleOptionClick(option)}
-                  className={`text-xs w-full text-nowrap rounded-lg px-2 py-1.5 text-right transition-colors hover:bg-stone-50 ${
-                    selectedOption.id === option.id ? "text-primary bg-stone-50" : "text-gray-800"
-                  }`}
-                >
-                  {option.title}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+    <div className={cn("min-w-[180px]", className)}>
+      <Select
+        value={selected}
+        onChange={(opt) => {
+          const originalId = valueToOriginal[String(opt.id)];
+          onOptionSelect?.(originalId ?? opt.id);
+        }}
+        options={selectOptions}
+        selectButtonClassName={buttonClassName}
+        placeholder="انتخاب کنید"
+      />
     </div>
   );
 };

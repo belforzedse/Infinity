@@ -7,6 +7,7 @@ import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
+import { Select, type Option } from "@/components/ui";
 
 const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), {
   ssr: false,
@@ -36,6 +37,18 @@ export default function LiquidityReportPage() {
   const [interval, setInterval] = useState<LiquidityInterval>("day");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const intervalOptions: Option[] = useMemo(
+    () => [
+      { id: "day", name: "روزانه" },
+      { id: "week", name: "هفتگی" },
+      { id: "month", name: "ماهانه" },
+    ],
+    [],
+  );
+  const selectedIntervalOption = useMemo(
+    () => intervalOptions.find((opt) => opt.id === interval) || intervalOptions[0],
+    [intervalOptions, interval],
+  );
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
   const toISO = useCallback(
@@ -88,15 +101,12 @@ export default function LiquidityReportPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">بازه زمانی</label>
-                <select
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
-                  value={interval}
-                  onChange={(e) => setInterval(e.target.value as LiquidityInterval)}
-                >
-                  <option value="day">روزانه</option>
-                  <option value="week">هفتگی</option>
-                  <option value="month">ماهانه</option>
-                </select>
+                <Select
+                  value={selectedIntervalOption}
+                  onChange={(opt) => setInterval(opt.id as LiquidityInterval)}
+                  options={intervalOptions}
+                  selectButtonClassName="text-sm"
+                />
               </div>
             </div>
           </div>

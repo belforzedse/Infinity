@@ -10,6 +10,7 @@ import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 import { AnimatePresence, motion } from "framer-motion";
 import ChevronDownIcon from "@/components/SuperAdmin/Layout/Icons/ChevronDownIcon";
 import clsx from "clsx";
+import { Select, type Option } from "@/components/ui";
 
 // Translation helpers for Persian
 const actionTypeMap: Record<string, string> = {
@@ -88,6 +89,50 @@ export default function AdminActivityReportPage() {
   const [adminUsers, setAdminUsers] = useState<string[]>([]);
   const [showSystemActivities, setShowSystemActivities] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const actionTypeOptions: Option[] = useMemo(
+    () => [
+      { id: "", name: "همه" },
+      { id: "Create", name: actionTypeMap["Create"] },
+      { id: "Update", name: actionTypeMap["Update"] },
+      { id: "Delete", name: actionTypeMap["Delete"] },
+      { id: "Delete-Soft", name: actionTypeMap["Delete-Soft"] },
+      { id: "Publish", name: actionTypeMap["Publish"] },
+      { id: "Unpublish", name: actionTypeMap["Unpublish"] },
+      { id: "Adjust", name: actionTypeMap["Adjust"] },
+      { id: "Other", name: actionTypeMap["Other"] },
+    ],
+    [],
+  );
+  const logTypeOptions: Option[] = useMemo(
+    () => [
+      { id: "All", name: "همه" },
+      { id: "Order", name: logTypeMap["Order"] },
+      { id: "Product", name: logTypeMap["Product"] },
+      { id: "User", name: logTypeMap["User"] },
+      { id: "Contract", name: logTypeMap["Contract"] },
+      { id: "Discount", name: logTypeMap["Discount"] },
+      { id: "Stock", name: logTypeMap["Stock"] },
+      { id: "Admin", name: logTypeMap["Admin"] },
+      { id: "Other", name: logTypeMap["Other"] },
+    ],
+    [],
+  );
+  const adminUserOptions: Option[] = useMemo(
+    () => [{ id: "", name: "همه ادمین‌ها" }, ...adminUsers.map((user) => ({ id: user, name: user }))],
+    [adminUsers],
+  );
+  const selectedActionOption = useMemo(
+    () => actionTypeOptions.find((o) => o.id === selectedActionType) || actionTypeOptions[0],
+    [actionTypeOptions, selectedActionType],
+  );
+  const selectedLogOption = useMemo(
+    () => logTypeOptions.find((o) => o.id === selectedLogType) || logTypeOptions[0],
+    [logTypeOptions, selectedLogType],
+  );
+  const selectedAdminOption = useMemo(
+    () => adminUserOptions.find((o) => o.id === selectedUser) || adminUserOptions[0] || null,
+    [adminUserOptions, selectedUser],
+  );
 
   // Excel export function
   const exportToExcel = useCallback(async (data: AdminActivityLog[], startDate: Date, endDate: Date) => {
@@ -367,58 +412,34 @@ export default function AdminActivityReportPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">نوع فعالیت</label>
-                <select
-                  value={selectedActionType}
-                  onChange={(e) => setSelectedActionType(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                >
-                  <option value="">همه</option>
-                  <option value="Create">{actionTypeMap["Create"]}</option>
-                  <option value="Update">{actionTypeMap["Update"]}</option>
-                  <option value="Delete">{actionTypeMap["Delete"]}</option>
-                  <option value="Delete-Soft">{actionTypeMap["Delete-Soft"]}</option>
-                  <option value="Publish">{actionTypeMap["Publish"]}</option>
-                  <option value="Unpublish">{actionTypeMap["Unpublish"]}</option>
-                  <option value="Adjust">{actionTypeMap["Adjust"]}</option>
-                  <option value="Other">{actionTypeMap["Other"]}</option>
-                </select>
+                <Select
+                  value={selectedActionOption}
+                  onChange={(opt) => setSelectedActionType(String(opt.id))}
+                  options={actionTypeOptions}
+                  selectButtonClassName="text-sm"
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">نوع گزارش</label>
-                <select
-                  value={selectedLogType}
-                  onChange={(e) => setSelectedLogType(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                >
-                  <option value="All">همه</option>
-                  <option value="Order">{logTypeMap["Order"]}</option>
-                  <option value="Product">{logTypeMap["Product"]}</option>
-                  <option value="User">{logTypeMap["User"]}</option>
-                  <option value="Contract">{logTypeMap["Contract"]}</option>
-                  <option value="Discount">{logTypeMap["Discount"]}</option>
-                  <option value="Stock">{logTypeMap["Stock"]}</option>
-                  <option value="Admin">{logTypeMap["Admin"]}</option>
-                  <option value="Other">{logTypeMap["Other"]}</option>
-                </select>
+                <Select
+                  value={selectedLogOption}
+                  onChange={(opt) => setSelectedLogType(String(opt.id))}
+                  options={logTypeOptions}
+                  selectButtonClassName="text-sm"
+                />
               </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-neutral-600">نمایش</label>
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex flex-col">
-                  {adminUsers.length > 0 && (
-                    <select
-                      value={selectedUser}
-                      onChange={(e) => setSelectedUser(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                    >
-                      <option value="">همه ادمین‌ها</option>
-                      {adminUsers.map((user) => (
-                        <option key={user} value={user}>
-                          {user}
-                        </option>
-                      ))}
-                    </select>
+                  {adminUserOptions.length > 0 && (
+                    <Select
+                      value={selectedAdminOption}
+                      onChange={(opt) => setSelectedUser(String(opt.id))}
+                      options={adminUserOptions}
+                      selectButtonClassName="text-sm"
+                    />
                   )}
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm text-neutral-600">

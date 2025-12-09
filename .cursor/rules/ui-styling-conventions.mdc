@@ -1,0 +1,10 @@
+## UI Styling Conventions (frontend/src/components/ui)
+
+- **Baseline tokens**: use `rounded-lg`, `border-slate-100`, `bg-white`, `text-right`, `transition-colors`, `focus:ring-2 focus:ring-actions-primary/20`, and `disabled:opacity-75 disabled:cursor-not-allowed` on form controls.
+- **Labels**: place above controls with `text-base text-foreground-primary lg:text-lg`; wrap control + label in `flex flex-col gap-1` unless overridden.
+- **Errors**: switch border/focus to red (`border-red-500 focus:border-red-500 focus:ring-red-500/20`) and show helper text with `text-sm text-red-500` below the control.
+- **Variants**: prefer `class-variance-authority (cva)` for size/color variants; default sizes mirror dropdown (`default`, `sm`, `lg`).
+- **Checkbox**: base uses `rounded-md border-slate-200 bg-white` with checked state in `actions-primary`; wrapper is `flex items-center gap-2.5` and label text `text-sm text-foreground-primary lg:text-base`.
+- **Textarea**: mirrors dropdown padding and focus ring; keep RTL alignment and primary focus ring; expose `size`, `variant`, `wrapperClassName`, and `error` props for consistency.
+- **Accessibility**: keep Radix primitives where available (Select, Checkbox, etc.) for keyboard navigation and ARIA correctness.
+

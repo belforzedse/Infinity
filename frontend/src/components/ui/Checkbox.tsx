@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 const checkboxVariants = cva(
-  "peer h-5 w-5 shrink-0 rounded border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-actions-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+  "peer grid shrink-0 place-items-center rounded-md border bg-white transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-actions-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-75",
   {
     variants: {
       variant: {
         default:
-          "border-slate-400 data-[state=checked]:border-actions-primary data-[state=checked]:bg-actions-primary data-[state=checked]:text-white",
-        sky: "border-slate-400 data-[state=checked]:border-sky-600 data-[state=checked]:bg-sky-600 data-[state=checked]:text-white",
+          "border-slate-200 text-foreground-primary data-[state=checked]:border-actions-primary data-[state=checked]:bg-actions-primary data-[state=checked]:text-white",
+        sky: "border-slate-200 text-foreground-primary data-[state=checked]:border-sky-600 data-[state=checked]:bg-sky-600 data-[state=checked]:text-white",
       },
       size: {
         default: "h-5 w-5",
@@ -28,7 +28,7 @@ const checkboxVariants = cva(
   }
 );
 
-const checkboxLabelVariants = cva("cursor-pointer", {
+const checkboxLabelVariants = cva("flex items-center gap-2.5 cursor-pointer text-base text-foreground-primary", {
   variants: {
     disabled: {
       true: "cursor-not-allowed opacity-50",
@@ -47,6 +47,8 @@ export interface CheckboxProps
   onChange?: (checked: boolean) => void;
   label?: React.ReactNode;
   className?: string;
+  labelClassName?: string;
+  wrapperClassName?: string;
 }
 
 const Checkbox = React.forwardRef<
@@ -62,6 +64,8 @@ const Checkbox = React.forwardRef<
       variant,
       size,
       disabled = false,
+      labelClassName,
+      wrapperClassName,
       ...props
     },
     ref
@@ -89,12 +93,14 @@ const Checkbox = React.forwardRef<
       return (
         <label
           className={cn(
-            "flex items-center gap-2",
-            checkboxLabelVariants({ disabled })
+            checkboxLabelVariants({ disabled }),
+            wrapperClassName
           )}
         >
           {CheckboxElement}
-          {label}
+          <span className={cn("text-sm text-foreground-primary lg:text-base", labelClassName)}>
+            {label}
+          </span>
         </label>
       );
     }

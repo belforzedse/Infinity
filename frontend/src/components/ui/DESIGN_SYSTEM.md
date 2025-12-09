@@ -211,9 +211,60 @@ function MyComponent() {
 | `onChange` | `(checked: boolean) => void` | - | Callback when state changes |
 | `label` | `React.ReactNode` | - | Optional label text or element |
 | `className` | `string` | - | Additional CSS classes |
+| `labelClassName` | `string` | - | Custom classes for label text |
+| `wrapperClassName` | `string` | - | Custom classes for the clickable wrapper |
 | `disabled` | `boolean` | `false` | Disables the checkbox |
 | `variant` | `"default" \| "sky"` | `"default"` | Color variant |
 | `size` | `"default" \| "sm" \| "lg"` | `"default"` | Size variant |
+
+---
+
+### Textarea
+
+Textarea follows the same styling tokens as Select: light borders, rounded corners, RTL text alignment, and primary focus ring.
+
+#### Features
+
+- ✅ **Label Support** - Optional label with consistent typography
+- ✅ **Error State** - Red border + helper text
+- ✅ **Size Variants** - `sm`, `default`, `lg`
+- ✅ **Disabled State** - Reduced opacity and cursor lock
+- ✅ **RTL-friendly** - Right-aligned text and padding
+
+#### Basic Usage
+
+```tsx
+import { Textarea } from "@/components/ui";
+
+<Textarea
+  label="توضیحات"
+  placeholder="توضیحات سفارش را بنویسید"
+  value={notes}
+  onChange={(e) => setNotes(e.target.value)}
+/>;
+```
+
+#### With Error
+
+```tsx
+<Textarea
+  label="توضیحات"
+  error="پر کردن این فیلد ضروری است"
+  value={notes}
+  onChange={(e) => setNotes(e.target.value)}
+/>;
+```
+
+#### API Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | - | Optional label above the field |
+| `error` | `string` | - | Error message; also switches to red border |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Height and typography size |
+| `variant` | `"default" \| "error"` | `"default"` | Border and focus colors |
+| `wrapperClassName` | `string` | - | Wrapper customization |
+| `className` | `string` | - | Additional textarea classes |
 
 ---
 
