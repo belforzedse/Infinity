@@ -80,6 +80,10 @@ export default factories.createCoreController(
           strapi.db.query("api::product-like.product-like").findMany({
             where: {
               user: pluginUserId,
+              product: {
+                Status: "Active",
+                removedAt: null,
+              },
             },
             populate: {
               product: {
@@ -104,6 +108,10 @@ export default factories.createCoreController(
           strapi.db.query("api::product-like.product-like").count({
             where: {
               user: pluginUserId,
+              product: {
+                Status: "Active",
+                removedAt: null,
+              },
             },
           }),
         ]);

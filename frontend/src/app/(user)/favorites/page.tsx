@@ -61,6 +61,20 @@ export default function FavoritesPage() {
   const mapFavoriteToProps = (favorite: ProductLike) => {
     const product = favorite.product;
 
+    const status =
+      product.Status ||
+      (product as any)?.attributes?.Status;
+    const removedAt =
+      (product as any)?.removedAt ||
+      (product as any)?.attributes?.removedAt;
+
+    if (status && status !== "Active") {
+      return null;
+    }
+    if (removedAt) {
+      return null;
+    }
+
     const firstVariation = product.product_variations?.[0];
     const price = firstVariation?.Price || product.price || 0;
 
@@ -134,13 +148,17 @@ export default function FavoritesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {visibleFavorites.map((favorite) => (
-                  <ProductSmallCard
-                    key={favorite.id}
-                    {...mapFavoriteToProps(favorite)}
-                    className="h-full md:!w-full"
-                  />
-                ))}
+                {visibleFavorites.map((favorite) => {
+                  const mapped = mapFavoriteToProps(favorite);
+                  if (!mapped) return null;
+                  return (
+                    <ProductSmallCard
+                      key={favorite.id}
+                      {...mapped}
+                      className="h-full md:!w-full"
+                    />
+                  );
+                })}
               </div>
             )}
 

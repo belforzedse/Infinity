@@ -67,7 +67,7 @@ interface ProcessedProduct {
 
 const MAX_HERO_PRODUCTS = 6;
 
-const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations`;
+const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations`;
 
 // Helper to ensure image URLs have proper format
 const formatImageUrl = (path?: string): string => {
@@ -89,7 +89,8 @@ const formatImageUrl = (path?: string): string => {
 const mapProduct = (product: ProductData): ProcessedProduct => {
   const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
     const price = variation.attributes.Price;
-    return price && parseInt(price) > 0;
+    const isPublished = variation.attributes.IsPublished === true;
+    return isPublished && price && parseInt(price) > 0;
   });
 
   if (!firstValidVariation) {

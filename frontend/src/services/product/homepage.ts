@@ -17,6 +17,7 @@ const productHasStock = (product: any): boolean => {
   if (!Array.isArray(variations)) return false;
 
   return variations.some((variation: any) => {
+    if (variation?.attributes?.IsPublished !== true) return false;
     const stockCount = variation?.attributes?.product_stock?.data?.attributes?.Count;
     const numericStock =
       typeof stockCount === "number"
@@ -147,6 +148,7 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     const discounted = availableProducts.filter((product: any) => {
       // Check if product has any variation with stock AND discount
       const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
+        if (variation?.attributes?.IsPublished !== true) return false;
         // Check if variation has stock
         const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
         const hasStock = typeof stockCount === "number" && stockCount > 0;

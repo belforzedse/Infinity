@@ -197,7 +197,9 @@ export const getProductById = async (id: string): Promise<ApiResponse<ProductDet
     const response = await apiClient.get<any>(endpoint);
 
     // Check if product is trashed (removedAt is not null)
-    if (response.data?.attributes?.removedAt) {
+    const status = response.data?.attributes?.Status;
+    const removedAt = response.data?.attributes?.removedAt;
+    if (status !== "Active" || removedAt) {
       const error = new Error("Product not found");
       (error as any).status = 404;
       throw error;
@@ -224,7 +226,9 @@ export const getProductBySlug = async (slug: string): Promise<ApiResponse<Produc
     const response = await apiClient.get<any>(endpoint);
 
     // Check if product is trashed (removedAt is not null)
-    if (response.data?.attributes?.removedAt) {
+    const status = response.data?.attributes?.Status;
+    const removedAt = response.data?.attributes?.removedAt;
+    if (status !== "Active" || removedAt) {
       const error = new Error("Product not found");
       (error as Error & { status?: number }).status = 404;
       throw error;
@@ -667,6 +671,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 
       // Get first variation with price AND stock
       const variation = product.attributes.product_variations?.data?.find((v: any) => {
+        if (v.attributes.IsPublished !== true) return false;
         const hasPrice = v.attributes.Price && parseInt(v.attributes.Price) > 0;
         const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
         const hasStock = typeof stockCount === "number" && stockCount > 0;
@@ -698,6 +703,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 // Check if any variation has stock available
       const isAvailable =
         product.attributes.product_variations?.data?.some((v: any) => {
+          if (v.attributes.IsPublished !== true) return false;
           const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
           return typeof stockCount === "number" && stockCount > 0;
         }) || false;

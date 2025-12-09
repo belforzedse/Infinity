@@ -118,7 +118,13 @@ export async function generateMetadata({
 
     if (response.ok) {
       const data = await response.json();
-      product = data?.data as ProductDetail | undefined;
+      const candidate = data?.data as ProductDetail | undefined;
+
+      const status = candidate?.attributes?.Status;
+      const removedAt = candidate?.attributes?.removedAt;
+      if (status === "Active" && !removedAt) {
+        product = candidate;
+      }
     } else {
       logger.warn("[PDP Metadata] Failed to fetch product for metadata", {
         slug,
@@ -126,10 +132,19 @@ export async function generateMetadata({
       });
     }
 
-    const titleRaw = product?.attributes?.Title || "";
-    const descRaw = product?.attributes?.Description || "";
+    if (!product) {
+      const fallbackTitle = `مشاهده محصول | ${SITE_NAME}`;
+      return {
+        title: fallbackTitle,
+        description: `جزئیات و مشخصات کامل محصول در ${SITE_NAME}`,
+        alternates: { canonical: `${SITE_URL}/pdp/${slug}` },
+      };
+    }
+
+    const titleRaw = product.attributes?.Title || "";
+    const descRaw = product.attributes?.Description || "";
     const description = String(descRaw).slice(0, 160);
-    const imageUrl = product?.attributes?.CoverImage?.data?.attributes?.url
+    const imageUrl = product.attributes?.CoverImage?.data?.attributes?.url
       ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
@@ -383,13 +398,20 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       }
 
       // Check if product is trashed (removedAt is not null)
-      if (productData && productData.attributes?.removedAt) {
+      const status = productData?.attributes?.Status;
+      const removedAt = productData?.attributes?.removedAt;
+      if (productData && (status !== "Active" || removedAt)) {
         errorDetails = {
-          message: "Product has been removed",
+          message: "Product has been removed or is inactive",
           status: 404,
           endpoint: apiUrl,
         };
-        logger.warn("[PDP] Product is trashed", { slug, productId: productData?.id });
+        logger.warn("[PDP] Product is inactive or removed", {
+          slug,
+          productId: productData?.id,
+          status,
+          removedAt,
+        });
         throw new Error("Product not found");
       }
 
@@ -530,8 +552,10 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
           }
 
           // Check if product is trashed
-          if (productData && productData.attributes?.removedAt) {
-            throw new Error("Product has been removed");
+          const status = productData?.attributes?.Status;
+          const removedAt = productData?.attributes?.removedAt;
+          if (productData && (status !== "Active" || removedAt)) {
+            throw new Error("Product has been removed or is inactive");
           }
 
           logger.info("[PDP] Product found via ID fallback", { productId: productData?.id });
