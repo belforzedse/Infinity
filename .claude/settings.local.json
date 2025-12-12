@@ -20,11 +20,10 @@
       "Bash(find:*)",
       "Bash(rm:*)",
       "Bash(test:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx next lint:*)"
     ],
     "deny": [],
     "ask": []
   }
 }
-
-
