@@ -19,7 +19,11 @@ const heroBannerProducts = new Array(4).fill(null).map((_, index) => ({
 
 export default function PLPList() {
   return (
-    <div className="p-3 md:px-10 md:py-3" data-plp-top>
+    <div
+      className="p-3 md:px-10 md:py-3"
+      data-plp-top
+      style={{ scrollMarginTop: "var(--header-offset, 88px)" }}
+    >
       <div className="mx-auto max-w-[1440px]">
         <div className="flex flex-col gap-4 md:flex-row">
           <div className="hidden w-[269px] flex-col gap-7 md:flex">

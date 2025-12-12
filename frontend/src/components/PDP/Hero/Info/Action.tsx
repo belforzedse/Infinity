@@ -12,6 +12,7 @@ import useAddToCart from "@/hooks/useAddToCart";
 import { hasStockForVariation, getAvailableStockCount } from "@/services/product/product";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
+import { scrollIntoViewWithOffset } from "@/utils/scroll";
 
 const options = [
   { id: 1, name: "۱ عدد" },
@@ -209,27 +210,19 @@ export default function PDPHeroInfoAction({
    * Uses data attribute if available, falls back to class selector
    */
   const handleScrollToComments = () => {
-    // Find the comments section element
-    const commentsSection = document.querySelector("[data-comments-section]");
+    const commentsSection = document.querySelector<HTMLElement>("[data-comments-section]");
 
     if (commentsSection) {
-      // Scroll to the comments section with smooth behavior
-      commentsSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } else {
-      // If the element doesn't exist with the data attribute, try to find it by component name
-      const pdpCommentElement = document.querySelector(
-        ".flex.gap-4.flex-col-reverse.md\\:flex-row",
-      );
+      scrollIntoViewWithOffset(commentsSection);
+      return;
+    }
 
-      if (pdpCommentElement) {
-        pdpCommentElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
+    const pdpCommentElement = document.querySelector<HTMLElement>(
+      ".flex.gap-4.flex-col-reverse.md\\:flex-row",
+    );
+
+    if (pdpCommentElement) {
+      scrollIntoViewWithOffset(pdpCommentElement);
     }
   };
 

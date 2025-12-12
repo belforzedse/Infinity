@@ -12,13 +12,24 @@ export interface CategoryData {
 
 /**
  * Sanitizes a category slug by removing trailing slashes and trimming whitespace
+ * Also validates that the slug doesn't contain invalid characters or patterns
  */
 function sanitizeCategorySlug(slug: string | undefined): string | null {
   if (!slug) return null;
-  // Trim whites  pace and remove trailing slashes
+
+  // Trim whitespace and remove trailing slashes
   const sanitized = slug.trim().replace(/\/+$/, "");
-  // Return null if   empty after sanitization
+
+  // Return null if empty after sanitization
   if (!sanitized) return null;
+
+  // Reject slugs that look like gibberish or invalid (e.g., "قروشگاه" - misspelling of "فروشگاه")
+  // Reject very short slugs (less than 2 chars) as they're likely invalid
+  if (sanitized.length < 2) return null;
+
+  // Reject slugs that only contain special characters or numbers
+  if (/^[\d\W]+$/.test(sanitized)) return null;
+
   return sanitized;
 }
 

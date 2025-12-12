@@ -25,6 +25,15 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
   const [showHeader, setShowHeader] = React.useState(true);
   const pathname = usePathname();
   const lastScrollY = React.useRef(0);
+  const updateHeaderOffset = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    const header = document.querySelector<HTMLElement>("[data-main-header]");
+    const safeArea = document.querySelector<HTMLElement>("[data-safe-area-top]");
+    const headerHeight = header?.getBoundingClientRect().height ?? 0;
+    const safeAreaHeight = safeArea?.getBoundingClientRect().height ?? 0;
+    const offset = Math.max(0, Math.round(headerHeight + safeAreaHeight));
+    document.documentElement.style.setProperty("--header-offset", `${offset}px`);
+  }, []);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -47,6 +56,36 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  React.useEffect(() => {
+    updateHeaderOffset();
+    const header = typeof window !== "undefined"
+      ? document.querySelector<HTMLElement>("[data-main-header]")
+      : null;
+
+    const resizeObserver =
+      header && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => updateHeaderOffset())
+        : null;
+
+    if (header && resizeObserver) {
+      resizeObserver.observe(header);
+    }
+
+    const handleResize = () => updateHeaderOffset();
+    window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, [updateHeaderOffset]);
+
+  React.useEffect(() => {
+    updateHeaderOffset();
+  }, [showHeader, updateHeaderOffset]);
   const HeaderContent = () => (
     <>
       <div className="hidden lg:block">
@@ -114,6 +153,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
       {isStandalone && (
         <div
           className="fixed left-0 right-0 top-0 z-[60] bg-white"
+          data-safe-area-top
           style={{ height: "env(safe-area-inset-top)" }}
         />
       )}
@@ -129,6 +169,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         className={`allow-overflow sticky z-50 transform border-t-0 transition-all duration-200 ${
           scrolled ? "glass-panel shadow-sm" : "bg-white/80 supports-[backdrop-filter]:bg-white/60"
         } ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
+        data-main-header
         style={{
           ...headerStyle,
           top: isStandalone ? "env(safe-area-inset-top)" : "0",

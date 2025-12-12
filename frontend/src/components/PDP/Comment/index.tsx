@@ -13,7 +13,11 @@ export default function PDPComment(props: Props) {
   const { rating, rateCount, productReviews, productId } = props;
 
   return (
-    <div className="flex flex-col-reverse gap-4 md:flex-row" data-comments-section>
+    <div
+      className="flex flex-col-reverse gap-4 md:flex-row"
+      data-comments-section
+      style={{ scrollMarginTop: "var(--header-offset, 88px)" }}
+    >
       <div className="flex-1">
         <PDPCommentList reviews={productReviews} />
       </div>

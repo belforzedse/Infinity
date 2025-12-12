@@ -769,11 +769,18 @@ export default function PLPList({
   };
 
   return (
-    <div className="container mx-auto px-4" data-plp-top>
+    <div
+      className="container mx-auto px-4"
+      data-plp-top
+      style={{ scrollMarginTop: "var(--header-offset, 88px)" }}
+    >
       <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
         <div className="hidden md:flex md:w-[280px]">
-          <div className="sticky top-28 flex w-full flex-col gap-7">
+          <div
+            className="sticky flex w-full flex-col gap-7"
+            style={{ top: "calc(var(--header-offset, 88px) + 1.5rem)" }}
+          >
             <Filter
               showAvailableOnly={available === "true"}
               categories={categoryOptions}

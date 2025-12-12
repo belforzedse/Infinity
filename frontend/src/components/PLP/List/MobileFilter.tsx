@@ -57,7 +57,10 @@ export default function PLPListMobileFilter({
             isOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="sticky top-0 z-30 flex items-center justify-between bg-white pb-4 pt-8">
+          <div
+            className="sticky z-30 flex items-center justify-between bg-white pb-4 pt-8"
+            style={{ top: "var(--header-offset, 88px)" }}
+          >
             <span className="text-lg">همه فیلتر‌ها</span>
 
             <button

@@ -102,6 +102,18 @@ export async function generateMetadata({
       decodedSlug = slug;
     }
 
+    // If product accessed by numeric ID (not slug), add noindex to prevent duplicate indexing
+    const isNumericId = /^\d+$/.test(decodedSlug);
+    if (isNumericId) {
+      return {
+        title: "محصول",
+        robots: {
+          index: false,
+          follow: false,
+        },
+      };
+    }
+
     // Use server-safe fetch for metadata generation too
     const encodedSlug = encodeURIComponent(decodedSlug);
     const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;

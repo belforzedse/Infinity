@@ -19,6 +19,8 @@ export default function robots(): MetadataRoute.Robots {
           '/checkout',
           '/orders',
           '/payment',
+          '/pdp/*?*',           // Disallow PDP with query params (e.g., /pdp/slug?variant=123)
+          '/plp?*&*',           // Disallow PLP with multiple params (e.g., /plp?category=x&sort=y)
         ],
       },
       {
@@ -35,6 +37,8 @@ export default function robots(): MetadataRoute.Robots {
           '/checkout',
           '/orders',
           '/payment',
+          '/pdp/*?*',           // Disallow PDP with query params (e.g., /pdp/slug?variant=123)
+          '/plp?*&*',           // Disallow PLP with multiple params (e.g., /plp?category=x&sort=y)
         ],
       },
     ],

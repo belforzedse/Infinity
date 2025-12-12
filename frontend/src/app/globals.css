@@ -7,7 +7,12 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--header-offset, 88px);
   background-color: white; /* White background for web app */
+}
+
+:root {
+  --header-offset: 88px;
 }
 
 body {

@@ -456,9 +456,12 @@ export default async function PLPPage({
   let validatedCategory = category;
   let categoryTitle: string | undefined = undefined;
   if (category && !search) {
+    // First sanitize the category slug to reject obviously invalid ones
+    // This prevents database lookups for gibberish categories
     const categoryData = await validateCategorySlug(category);
     if (!categoryData) {
-      logger.warn(`[PLP] Invalid category requested: ${category}`);
+      logger.warn(`[PLP] Invalid or non-existent category requested: ${category}`);
+      // Return 404 for invalid categories to prevent indexing
       notFound();
     }
     // Use the canonical slug from the validated category data

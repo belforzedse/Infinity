@@ -241,17 +241,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
 
-    // Product Detail Pages (PDPs) - use slug when available, fallback to ID
-    ...products.map((product) => {
-      const slug = product.attributes?.slug || product.attributes?.Slug
-      const urlPath = slug ? `/pdp/${slug}` : `/pdp/${product.id}`
-      return {
-        url: `${BASE_URL}${urlPath}`,
-        lastModified: new Date(product.attributes.updatedAt),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }
-    }),
+    // Product Detail Pages (PDPs) - only include products with valid slugs
+    ...products
+      .filter((product) => {
+        // Only include products with valid slugs in sitemap (SEO best practice)
+        const slug = product.attributes?.slug || product.attributes?.Slug
+        if (!slug) {
+          logger.warn(`[Sitemap] Product ${product.id} missing slug, excluding from sitemap`)
+          return false
+        }
+        return true
+      })
+      .map((product) => {
+        const slug = product.attributes?.slug || product.attributes?.Slug
+        return {
+          url: `${BASE_URL}/pdp/${slug}`,
+          lastModified: new Date(product.attributes.updatedAt),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        }
+      }),
 
     // Blog post pages
     ...blogPosts.map((post) => ({
