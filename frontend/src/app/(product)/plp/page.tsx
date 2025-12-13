@@ -72,7 +72,7 @@ interface Product {
 async function getProducts(
   category?: string,
   page = 1,
-  pageSize = 30, // Reduced page size for better performance
+  pageSize = 30,
   showAvailableOnly = false,
   minPrice?: string,
   maxPrice?: string,
@@ -202,9 +202,9 @@ async function getProducts(
   queryParams.append("fields[2]", "Description");
   queryParams.append("fields[3]", "Status");
 
-  // Fetch all products (or a large batch) for global sorting
-  // We'll paginate after sorting to ensure consistent ordering across pages
-  queryParams.append("pagination[pageSize]", "500"); // Fetch up to 500 products for sorting
+  // Use API-level pagination to reduce payload size
+  queryParams.append("pagination[page]", String(page));
+  queryParams.append("pagination[pageSize]", String(pageSize));
 
   // Add filters
   queryParams.append("filters[Status][$eq]", "Active");
@@ -213,7 +213,7 @@ async function getProducts(
   // Filter for products with valid prices (Price > 0)
   // This ensures we only get products with at least one variation that has a price > 0
   // Note: We can't filter for CoverImage at API level (relations don't support $notNull in REST API)
-  // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
+  // So we still do a small post-fetch filter for images on the current page results
   queryParams.append("filters[product_variations][Price][$gt]", "0");
 
   // Category filter
@@ -259,12 +259,16 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
-  // Don't apply any API-level sorting - we'll sort everything client-side
-  // This ensures stock sorting happens first, before any other sorting
-  // Only apply non-price sorting if explicitly requested (but stock takes priority)
-  // if (sort && sort !== "price:asc" && sort !== "price:desc") {
-  //   queryParams.append("sort[0]", sort);
-  // }
+  // Apply API-level sorting when provided so pagination metadata stays accurate
+  if (sort) {
+    queryParams.append("sort[0]", sort);
+  }
+
+  // Apply discount filter when requested
+  if (hasDiscount) {
+    queryParams.append("filters[$or][0][product_variations][DiscountPrice][$gt]", "0");
+    queryParams.append("filters[$or][1][product_variations][general_discounts][Amount][$gt]", "0");
+  }
 
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
@@ -276,10 +280,26 @@ async function getProducts(
     });
     const data = await response.json();
 
+    const pagination = data?.meta?.pagination || {
+      page,
+      pageSize,
+      pageCount: 0,
+      total: 0,
+    };
+
+    const hasStock = (product: Product): boolean => {
+      if (!product.attributes.product_variations?.data) return false;
+
+      return product.attributes.product_variations.data.some((variation) => {
+        if (!variation.attributes?.IsPublished) return false;
+
+        const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
+        return typeof stockCount === "number" && stockCount > 0;
+      });
+    };
+
     // Post-fetch filtering: We filter for images here since API-level filtering for relations is limited
-    // Price filtering is done at API level, but we double-check for edge cases
-    let filteredProducts = data.data.filter((product: Product) => {
-      // Filter out products without images (can't filter at API level for relations)
+    const filteredProducts = (data?.data || []).filter((product: Product) => {
       const hasImage = !!(
         product.attributes.CoverImage?.data?.attributes?.url ||
         product.attributes.CoverImage?.data
@@ -295,70 +315,29 @@ async function getProducts(
         return price && parseInt(price) > 0;
       });
 
-      if (!hasValidPrice) {
-        return false;
-      }
-
-      // If showAvailableOnly is true, check if any variation has stock
-      // (This can't be easily done at API level due to relation complexity)
-      if (showAvailableOnly) {
-        const hasAvailableVariation = product.attributes.product_variations?.data?.some((variation) => {
-          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-          return typeof stockCount === "number" && stockCount > 0;
-        });
-        return hasAvailableVariation;
-      }
-
-      return true;
+      return hasValidPrice;
     });
 
-    // CRITICAL: Sort by stock availability FIRST, before any other operations
-    // This ensures in-stock products always appear before out-of-stock products
-    filteredProducts.sort((a: Product, b: Product) => {
-      // Helper function to check if product has available stock
-      // A product is "in stock" if it has at least one published variation with stock > 0
-      const hasStock = (product: Product): boolean => {
-        if (!product.attributes.product_variations?.data) return false;
-
-        return product.attributes.product_variations.data.some((variation) => {
-          // Must be published
-          if (!variation.attributes?.IsPublished) return false;
-
-          // Check stock count - handle various data structures
-          const stockData = variation.attributes?.product_stock;
-          if (!stockData) return false;
-
-          const stockCount = stockData?.data?.attributes?.Count;
-          // Check if stockCount exists and is a positive number
-          if (typeof stockCount !== "number" || stockCount <= 0) return false;
-
-          return true;
-        });
-      };
-
+    // Stock-priority sorting at the page level to avoid large payloads
+    const stockFirstSorted = [...filteredProducts].sort((a: Product, b: Product) => {
       const aHasStock = hasStock(a);
       const bHasStock = hasStock(b);
 
-      // Products with stock come first (return -1 means a comes before b)
       if (aHasStock && !bHasStock) return -1;
       if (!aHasStock && bHasStock) return 1;
-      return 0; // Keep original order if both have same stock status
+      return 0;
     });
 
-    // Frontend price sorting (applied after stock sorting)
+    // Frontend price sorting (applied after stock sorting on the current page)
+    let products = stockFirstSorted;
     if (sort === "price:asc" || sort === "price:desc") {
       const getMinVariationPrice = (product: Product): number => {
         const variations = product.attributes.product_variations?.data || [];
         let minPrice = Infinity;
 
         for (const variation of variations) {
-          // Only consider published variations with stock
           if (!variation.attributes.IsPublished) continue;
 
-          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-          if (typeof stockCount === "number" && stockCount <= 0) continue;
-
-          // Compute final price with discounts
           const discountResult = computeDiscountForVariation(variation as any);
           const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes.Price || "0");
 
@@ -370,47 +349,22 @@ async function getProducts(
         return minPrice === Infinity ? 0 : minPrice;
       };
 
-      // Sort by price, but maintain stock priority (in-stock products first)
-      filteredProducts.sort((a: Product, b: Product) => {
-        // First, check stock status (maintain stock priority)
-        const aHasStock = a.attributes.product_variations?.data?.some((v) =>
-          v.attributes.IsPublished &&
-          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
-          v.attributes.product_stock.data.attributes.Count > 0
-        ) || false;
+      products = [...stockFirstSorted].sort((a: Product, b: Product) => {
+        const aHasStock = hasStock(a);
+        const bHasStock = hasStock(b);
 
-        const bHasStock = b.attributes.product_variations?.data?.some((v) =>
-          v.attributes.IsPublished &&
-          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
-          v.attributes.product_stock.data.attributes.Count > 0
-        ) || false;
-
-        // If stock status differs, stock comes first
         if (aHasStock && !bHasStock) return -1;
         if (!aHasStock && bHasStock) return 1;
 
-        // If same stock status, sort by price
         const priceA = getMinVariationPrice(a);
         const priceB = getMinVariationPrice(b);
         return sort === "price:asc" ? priceA - priceB : priceB - priceA;
       });
     }
 
-    // Now paginate the sorted results client-side
-    const totalProducts = filteredProducts.length;
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(totalProducts / pageSize);
-
     return {
-      products: paginatedProducts,
-      pagination: {
-        page: page,
-        pageSize: pageSize,
-        pageCount: totalPages,
-        total: totalProducts,
-      },
+      products,
+      pagination,
     };
   } catch (error) {
     logger.error("Error fetching products", { error: String(error) });
@@ -437,6 +391,8 @@ export default async function PLPPage({
   // Extract parameters with default values
   const category = typeof params.category === "string" ? params.category : undefined;
   const page = typeof params.page === "string" ? parseInt(params.page) : 1;
+  const pageSize =
+    typeof params.pageSize === "string" ? parseInt(params.pageSize) : 30;
   const showAvailableOnly =
     typeof params.available === "string" ? params.available === "true" : false;
   const minPrice = typeof params.minPrice === "string" ? params.minPrice : undefined;
@@ -473,7 +429,7 @@ export default async function PLPPage({
   const { products, pagination } = await getProducts(
     validatedCategory,
     page,
-    30, // Reduced page size for better performance
+    pageSize,
     showAvailableOnly,
     minPrice,
     maxPrice,
