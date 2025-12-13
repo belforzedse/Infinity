@@ -85,92 +85,122 @@ async function getProducts(
   sort?: string,
   hasDiscount?: boolean,
 ) {
+  const variationHasDiscount = (variation: ProductVariation): boolean => {
+    const generalDiscounts = variation.attributes.general_discounts?.data;
+    if (generalDiscounts && Array.isArray(generalDiscounts) && generalDiscounts.length > 0) {
+      return true;
+    }
+
+    const price = parseFloat(variation.attributes.Price || "0");
+    const discountPrice = variation.attributes.DiscountPrice
+      ? parseFloat(variation.attributes.DiscountPrice)
+      : undefined;
+
+    return !!(
+      typeof discountPrice === "number" &&
+      !isNaN(discountPrice) &&
+      !isNaN(price) &&
+      discountPrice > 0 &&
+      discountPrice < price
+    );
+  };
+
+  const productHasDiscount = (product: Product): boolean => {
+    return product.attributes.product_variations?.data?.some(variationHasDiscount) || false;
+  };
+
   // Handle search queries differently
   if (search) {
     try {
       // Use the search service
       const searchResults = await searchProducts(search, page, pageSize);
-      return {
-        products: searchResults.data
-          .filter((item) => {
-            // Filter out products without images
-            // CoverImage can be either ImageResponse (with url) or { data: ImageResponse | null }
-            const coverImage = item.CoverImage;
-            if (!coverImage) return false;
+      const transformedProducts = searchResults.data
+        .filter((item) => {
+          // Filter out products without images
+          // CoverImage can be either ImageResponse (with url) or { data: ImageResponse | null }
+          const coverImage = item.CoverImage;
+          if (!coverImage) return false;
 
-            // Check if it's the direct format (ImageResponse with url)
-            if ('url' in coverImage && coverImage.url) return true;
+          // Check if it's the direct format (ImageResponse with url)
+          if ('url' in coverImage && coverImage.url) return true;
 
-            // Check if it's the nested format ({ data: ImageResponse | null })
-            if ('data' in coverImage && coverImage.data?.url) return true;
+          // Check if it's the nested format ({ data: ImageResponse | null })
+          if ('data' in coverImage && coverImage.data?.url) return true;
 
-            return false;
-          })
-          .map((item) => {
-            // Transform search API format to match product data format
-            // Extract url from either ImageResponse or { data: ImageResponse | null } format
-            const coverImage = item.CoverImage;
-            const imageUrl = coverImage && 'url' in coverImage
-              ? coverImage.url
-              : coverImage && 'data' in coverImage
-                ? coverImage.data?.url
-                : undefined;
+          return false;
+        })
+        .map((item) => {
+          // Transform search API format to match product data format
+          // Extract url from either ImageResponse or { data: ImageResponse | null } format
+          const coverImage = item.CoverImage;
+          const imageUrl = coverImage && 'url' in coverImage
+            ? coverImage.url
+            : coverImage && 'data' in coverImage
+              ? coverImage.data?.url
+              : undefined;
 
-            // Extract category title from either direct format or nested format
-            const category = item.product_main_category;
-            const categoryTitle = category && 'Title' in category
-              ? category.Title
-              : category && 'data' in category
-                ? category.data?.attributes?.Title || ""
-                : "";
+          // Extract category title from either direct format or nested format
+          const category = item.product_main_category;
+          const categoryTitle = category && 'Title' in category
+            ? category.Title
+            : category && 'data' in category
+              ? category.data?.attributes?.Title || ""
+              : "";
 
-            return {
-              id: item.id,
-              attributes: {
-                Title: item.Title,
-                Slug: (item as { Slug?: string }).Slug || undefined,
-                Description: item.Description,
-                Status: "Active",
-                CoverImage: {
-                  data: {
-                    attributes: {
-                      url: imageUrl,
-                    },
+          return {
+            id: item.id,
+            attributes: {
+              Title: item.Title,
+              Slug: (item as { Slug?: string }).Slug || undefined,
+              Description: item.Description,
+              Status: "Active",
+              CoverImage: {
+                data: {
+                  attributes: {
+                    url: imageUrl,
                   },
-                },
-                product_main_category: {
-                  data: {
-                    attributes: {
-                      Title: categoryTitle,
-                      Slug: "",
-                    },
-                  },
-                },
-                product_variations: {
-                  data: (item.product_variations && Array.isArray(item.product_variations)
-                    ? item.product_variations
-                    : item.product_variations && 'data' in item.product_variations
-                      ? item.product_variations.data
-                      : []
-                  ).map((variation) => {
-                    // Handle both direct variation and nested variation formats
-                    const variationData = 'attributes' in variation ? variation.attributes : variation;
-                    return {
-                      attributes: {
-                        SKU: "",
-                        Price: variationData.Price.toString(),
-                        DiscountPrice: variationData.DiscountPrice?.toString(),
-                        IsPublished: true,
-                      },
-                    };
-                  }),
                 },
               },
-            };
-          }),
+              product_main_category: {
+                data: {
+                  attributes: {
+                    Title: categoryTitle,
+                    Slug: "",
+                  },
+                },
+              },
+              product_variations: {
+                data: (item.product_variations && Array.isArray(item.product_variations)
+                  ? item.product_variations
+                  : item.product_variations && 'data' in item.product_variations
+                    ? item.product_variations.data
+                    : []
+                ).map((variation) => {
+                  // Handle both direct variation and nested variation formats
+                  const variationData = 'attributes' in variation ? variation.attributes : variation;
+                  return {
+                    attributes: {
+                      SKU: "",
+                      Price: variationData.Price.toString(),
+                      DiscountPrice: variationData.DiscountPrice?.toString(),
+                      IsPublished: true,
+                      general_discounts: variationData.general_discounts,
+                    },
+                  };
+                }),
+              },
+            },
+          };
+        })
+        .filter((product) => (hasDiscount ? productHasDiscount(product as any) : true));
+
+      const totalFiltered = transformedProducts.length;
+      return {
+        products: transformedProducts,
         pagination: {
           ...searchResults.meta.pagination,
-          total: searchResults.meta.pagination.total,
+          total: totalFiltered,
+          pageCount: Math.ceil(totalFiltered / pageSize) || 0,
         },
       };
     } catch (error) {
@@ -259,6 +289,17 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
+  if (hasDiscount) {
+    queryParams.append(
+      "filters[$or][0][product_variations][general_discounts][id][$notNull]",
+      "true",
+    );
+    queryParams.append(
+      "filters[$or][1][product_variations][DiscountPrice][$gt]",
+      "0",
+    );
+  }
+
   // Don't apply any API-level sorting - we'll sort everything client-side
   // This ensures stock sorting happens first, before any other sorting
   // Only apply non-price sorting if explicitly requested (but stock takes priority)
@@ -296,6 +337,10 @@ async function getProducts(
       });
 
       if (!hasValidPrice) {
+        return false;
+      }
+
+      if (hasDiscount && !productHasDiscount(product)) {
         return false;
       }
 
