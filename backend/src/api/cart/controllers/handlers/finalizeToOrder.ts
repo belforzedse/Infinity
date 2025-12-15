@@ -626,6 +626,10 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       userId: user?.id,
       requestBody: ctx.request.body,
     });
+    if (error?.status) {
+      // Preserve original structured errors thrown earlier
+      throw error;
+    }
     return ctx.badRequest(error.message, {
       data: {
         success: false,

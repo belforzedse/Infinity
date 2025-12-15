@@ -145,6 +145,8 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         userId: 5,
         callbackURL: "https://example.com/callback",
         contractId: 10,
+        amountInRial: true,
+        includePayerId: true,
       };
 
       const result = await mellatService.requestPayment(params);
@@ -152,9 +154,9 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
       expect(mockPaymentRequest).toHaveBeenCalledWith(
         expect.objectContaining({
           amount: 150_000,
-          orderId: "100",
+          orderId: 100,
           callbackUrl: "https://example.com/callback",
-          payerId: "5",
+          payerId: 5,
         })
       );
 
@@ -177,6 +179,8 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         amount: 100_000,
         userId: 10,
         callbackURL: "https://example.com/callback",
+        amountInRial: true,
+        includePayerId: true,
       };
 
       const result = await mellatService.requestPayment(params);
@@ -206,6 +210,8 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         amount: 200_000,
         userId: 15,
         callbackURL: "https://example.com/callback",
+        amountInRial: true,
+        includePayerId: true,
       };
 
       const result = await mellatService.requestPayment(params);
@@ -227,11 +233,13 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         amount: 150_000,
         userId: 20,
         callbackURL: "https://example.com/callback",
+        amountInRial: true,
+        includePayerId: true,
       };
 
       const result = await mellatService.requestPayment(params);
 
-      expect(mockPaymentRequest).toHaveBeenCalledTimes(2); // Max retries = 2
+      expect(mockPaymentRequest).toHaveBeenCalledTimes(3); // Max retries = 3
       expect(result).toMatchObject({
         success: false,
         error: expect.stringContaining("ETIMEDOUT"),
@@ -263,13 +271,14 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         amount: 100_000,
         userId: 30,
         callbackURL: "https://example.com/callback",
+        amountInRial: true,
       };
 
       await mellatService.requestPayment(params);
 
       expect(mockPaymentRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          orderId: "999", // Should be string
+          orderId: 999,
         })
       );
     });
@@ -290,8 +299,8 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
       const result = await mellatService.verifyTransaction(params);
 
       expect(mockVerifyPayment).toHaveBeenCalledWith({
-        orderId: "100",
-        saleOrderId: "100",
+        orderId: 100,
+        saleOrderId: 100,
         saleReferenceId: "REF-ABC",
       });
 
@@ -356,8 +365,8 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
       const result = await mellatService.settleTransaction(params);
 
       expect(mockSettlePayment).toHaveBeenCalledWith({
-        orderId: "100",
-        saleOrderId: "100",
+        orderId: 100,
+        saleOrderId: 100,
         saleReferenceId: "REF-SETTLE",
       });
 
@@ -377,6 +386,7 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         orderId: "200",
         saleOrderId: "200",
         saleReferenceId: "REF-ALREADY",
+        allowResCode45Success: true,
       };
 
       const result = await mellatService.settleTransaction(params);
@@ -467,6 +477,7 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         amount: 500_000,
         userId: 50,
         callbackURL: "https://example.com/callback",
+        amountInRial: true,
       });
 
       expect(paymentResult.success).toBe(true);
@@ -511,6 +522,7 @@ describe("Mellat v3 Payment Gateway (Improved)", () => {
         amount: 300_000,
         userId: 60,
         callbackURL: "https://example.com/callback",
+        amountInRial: true,
       });
 
       expect(paymentResult.success).toBe(true);
