@@ -55,6 +55,7 @@ export default factories.createCoreController(
           userId: pluginUserId,
           callbackURL,
           contractId: undefined,
+          amountInRial: true, // Amount is already in IRR
         });
 
         if (!response?.success) {
@@ -99,7 +100,7 @@ export default factories.createCoreController(
       try {
         const topups = (await strapi.entityService.findMany(
           "api::wallet-topup.wallet-topup",
-          { filters: { SaleOrderId: String(SaleOrderId) }, limit: 1 }
+          { filters: { SaleOrderId: String(SaleOrderId) }, limit: 1, populate: { user: true } }
         )) as any[];
         const topup = topups?.[0];
 
@@ -138,18 +139,102 @@ export default factories.createCoreController(
           );
         }
 
-        await paymentService?.verifyTransaction({
+        // Verify transaction - MUST succeed
+        const verifyResult = await paymentService.verifyTransaction({
           orderId: String(SaleOrderId || ""),
           saleOrderId: String(SaleOrderId || ""),
           saleReferenceId: String(SaleReferenceId || ""),
         });
 
-        await paymentService?.settleTransaction({
+        if (!verifyResult?.success) {
+          strapi.log.error("Wallet topup verify failed", {
+            topupId: topup.id,
+            saleOrderId: String(SaleOrderId || ""),
+            verifyResult,
+          });
+          try {
+            await strapi.entityService.update(
+              "api::wallet-topup.wallet-topup",
+              topup.id,
+              { data: { Status: "Failed" } }
+            );
+          } catch (e) {
+            strapi.log.error("Failed to mark topup as Failed after verify failure", {
+              topupId: topup.id,
+              error: (e as any)?.message || String(e),
+            });
+          }
+          return ctx.redirect(
+            `${FRONTEND_BASE}/wallet?status=failure&reason=verify`
+          );
+        }
+
+        // Settle transaction - MUST succeed
+        const settleResult = await paymentService.settleTransaction({
           orderId: String(SaleOrderId || ""),
           saleOrderId: String(SaleOrderId || ""),
           saleReferenceId: String(SaleReferenceId || ""),
         });
 
+        if (!settleResult?.success) {
+          strapi.log.error("Wallet topup settle failed", {
+            topupId: topup.id,
+            saleOrderId: String(SaleOrderId || ""),
+            settleResult,
+          });
+          try {
+            await strapi.entityService.update(
+              "api::wallet-topup.wallet-topup",
+              topup.id,
+              { data: { Status: "Failed" } }
+            );
+          } catch (e) {
+            strapi.log.error("Failed to mark topup as Failed after settle failure", {
+              topupId: topup.id,
+              error: (e as any)?.message || String(e),
+            });
+          }
+          return ctx.redirect(
+            `${FRONTEND_BASE}/wallet?status=failure&reason=settle`
+          );
+        }
+
+        // Fetch or create wallet
+        let wallet = await strapi.db
+          .query("api::local-user-wallet.local-user-wallet")
+          .findOne({ where: { user: topup.user.id } });
+
+        if (!wallet) {
+          wallet = await strapi.entityService.create(
+            "api::local-user-wallet.local-user-wallet",
+            { data: { user: topup.user.id, Balance: 0 } }
+          );
+        }
+
+        // Update wallet balance
+        const newBalance = (wallet.Balance || 0) + topup.Amount;
+        await strapi.entityService.update(
+          "api::local-user-wallet.local-user-wallet",
+          wallet.id,
+          { data: { Balance: newBalance, LastTransactionDate: new Date() } }
+        );
+
+        // Create transaction record
+        await strapi.entityService.create(
+          "api::local-user-wallet-transaction.local-user-wallet-transaction",
+          {
+            data: {
+              Amount: topup.Amount,
+              Type: "Add",
+              Date: new Date(),
+              Cause: "Wallet Topup",
+              ReferenceId: String(SaleReferenceId || ""),
+              user_wallet: wallet.id,
+            },
+          }
+        );
+
+        // Mark topup as Success
         try {
           await strapi.entityService.update(
             "api::wallet-topup.wallet-topup",

@@ -56,10 +56,20 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     strapi.log.info("[Mellat] Creating client with URL:", { apiUrl });
 
+    const terminalId = process.env.MELLAT_TERMINAL_ID;
+    const username = process.env.MELLAT_USERNAME;
+    const password = process.env.MELLAT_PASSWORD;
+
+    if (!terminalId || !username || !password) {
+      throw new Error(
+        "Mellat gateway credentials not configured: missing MELLAT_TERMINAL_ID, MELLAT_USERNAME, or MELLAT_PASSWORD"
+      );
+    }
+
     const config = {
-      terminalId: process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID",
-      username: process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID",
-      password: process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD",
+      terminalId,
+      username,
+      password,
       timeout: 120000, // 120 seconds timeout
       apiUrl,
     };
@@ -223,11 +233,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         const paymentRequest: Record<string, unknown> = {
           amount: amountRial,
           orderId: params.orderId,
-          callBackUrl: callbackUrl,
+          callbackUrl: callbackUrl,
         };
         if (params.includePayerId) {
           paymentRequest.payerId = params.userId;
-          paymentRequest.callbackUrl = callbackUrl;
         }
 
         strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] Sending payment request to Mellat...`, paymentRequest);
@@ -517,9 +526,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         saleReferenceId: normalizeNumericParam(params.saleReferenceId),
       };
 
-      const response = await (mellat as any).reversePayment
-        ? await (mellat as any).reversePayment(reverseRequest)
-        : await mellat.reversalRequest(reverseRequest);
+      const response = await mellat.reversePayment(reverseRequest);
 
       strapi.log.info(`[${requestId}] Reversal response:`, {
         resCode: response.ResCode ?? response.resCode,

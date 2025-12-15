@@ -42,6 +42,42 @@ describe('Mellat v3 Payment Gateway - Real Service', () => {
   });
 
   describe('createMellatClient - REAL client creation', () => {
+    it('should throw error when MELLAT_TERMINAL_ID is missing', () => {
+      const originalTerminalId = process.env.MELLAT_TERMINAL_ID;
+      delete process.env.MELLAT_TERMINAL_ID;
+
+      expect(() => service.createMellatClient()).toThrow(
+        'Mellat gateway credentials not configured'
+      );
+
+      // Restore
+      process.env.MELLAT_TERMINAL_ID = originalTerminalId;
+    });
+
+    it('should throw error when MELLAT_USERNAME is missing', () => {
+      const originalUsername = process.env.MELLAT_USERNAME;
+      delete process.env.MELLAT_USERNAME;
+
+      expect(() => service.createMellatClient()).toThrow(
+        'Mellat gateway credentials not configured'
+      );
+
+      // Restore
+      process.env.MELLAT_USERNAME = originalUsername;
+    });
+
+    it('should throw error when MELLAT_PASSWORD is missing', () => {
+      const originalPassword = process.env.MELLAT_PASSWORD;
+      delete process.env.MELLAT_PASSWORD;
+
+      expect(() => service.createMellatClient()).toThrow(
+        'Mellat gateway credentials not configured'
+      );
+
+      // Restore
+      process.env.MELLAT_PASSWORD = originalPassword;
+    });
+
     it('should create Mellat client with environment configuration', () => {
       // ✅ Call REAL method
       const client = service.createMellatClient();
@@ -167,7 +203,7 @@ describe('Mellat v3 Payment Gateway - Real Service', () => {
       expect(mockMellatPayment).toHaveBeenCalledWith({
         amount: 1500000, // ✅ Verify Toman → Rial conversion (× 10)
         orderId: 100,
-        callBackUrl: 'https://example.com/callback',
+        callbackUrl: 'https://example.com/callback', // lowercase b
       });
     });
 
