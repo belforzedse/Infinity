@@ -104,6 +104,13 @@ export interface FinalizeCartRequest {
   note?: string;
   callbackURL?: string;
   addressId?: number;
+  addressPayload?: {
+    shipping_city: number;
+    PostalCode: string;
+    FullAddress: string;
+    Description?: string;
+    save?: boolean;
+  };
   gateway?: "samankish" | "snappay" | "wallet" | "mellat";
   mobile?: string;
   discountCode?: string;

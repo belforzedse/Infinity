@@ -1,0 +1,18 @@
+## Checkout Inline Billing & Address Capture
+
+- Checkout accepts either a saved address (`addressId`) or an inline payload on finalize.
+- Inline payload shape (frontend `FinalizeCartRequest.addressPayload` / backend finalize handler):
+  - `shipping_city` (number, required)
+  - `PostalCode` (10-digit string, required)
+  - `FullAddress` (string, required)
+  - `Description` (string, optional)
+  - `save` (boolean, optional) — when `false`, the created address is marked `IsTemporary` and hidden from the address book.
+- Backend stores a new `IsTemporary` flag on `local-user-address`; `/local-user-addresses/me` filters `IsTemporary: false`.
+- Frontend checkout UI shows:
+  - Saved-address dropdown (autofills form)
+  - Inline province/city selects + postal code + full address fields
+  - “Save this address” toggle to persist to the address book
+- Validation:
+  - Requires either `addressId` or all inline fields
+  - Postal code must be 10 digits
+  - Phone is required; shipping method required

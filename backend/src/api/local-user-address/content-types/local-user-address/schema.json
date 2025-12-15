@@ -26,6 +26,10 @@
     "FullAddress": {
       "type": "text"
     },
+    "IsTemporary": {
+      "type": "boolean",
+      "default": false
+    },
     "user": {
       "type": "relation",
       "relation": "manyToOne",
