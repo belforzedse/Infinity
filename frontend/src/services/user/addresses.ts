@@ -26,6 +26,7 @@ export interface UserAddress {
   PostalCode: string;
   Description: string;
   FullAddress: string;
+  IsTemporary?: boolean;
   createdAt: string;
   shipping_city: ShippingCity;
 }
@@ -65,11 +66,14 @@ export const getUserAddresses = async (): Promise<UserAddress[]> => {
   }
 
   try {
-    const response = await apiClient.get("/local-user-addresses/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await apiClient.get(
+      "/local-user-addresses/me?pagination[page]=1&pagination[pageSize]=5000&sort=createdAt:desc",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     return response.data as UserAddress[];
   } catch (error) {

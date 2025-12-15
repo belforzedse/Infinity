@@ -15,6 +15,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     note,
     callbackURL,
     addressId,
+    addressPayload,
     gateway,
     mobile,
     discountCode,
@@ -32,8 +33,10 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       });
     }
 
-    // Validate address is provided and exists
-    if (!addressId) {
+    let resolvedAddressId = addressId;
+
+    // Validate address is provided (either saved id or inline payload)
+    if (!resolvedAddressId && !addressPayload) {
       return ctx.badRequest("آدرس تحویل الزامی است", {
         data: {
           success: false,
@@ -69,56 +72,124 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       });
     }
 
-    // Verify address exists and belongs to user
-    try {
-      const address = await strapi.entityService.findOne(
-        "api::local-user-address.local-user-address",
-        addressId,
-        { populate: { user: true, shipping_city: true } }
-      );
-      if (!address) {
-        return ctx.badRequest("آدرس انتخاب شده یافت نشد", {
+    // Handle inline address creation when provided
+    if (!resolvedAddressId && addressPayload) {
+      const { shipping_city, PostalCode, FullAddress, Description, save } = addressPayload;
+
+      if (!shipping_city || !PostalCode || !FullAddress) {
+        return ctx.badRequest("آدرس تحویل الزامی است", {
           data: {
             success: false,
-            errorCode: "ADDRESS_NOT_FOUND",
-            message: "آدرس انتخاب شده یافت نشد",
+            errorCode: "ADDRESS_REQUIRED",
+            message: "آدرس تحویل الزامی است",
           },
         });
       }
 
-      // Validate address ownership - critical security check
-      const addressUserId =
-        typeof address.user === "object" && address.user?.id
-          ? address.user.id
-          : typeof address.user === "number"
-          ? address.user
-          : null;
-
-      if (!addressUserId || Number(addressUserId) !== Number(user.id)) {
-        strapi.log.warn("Address ownership validation failed", {
-          userId: user.id,
-          addressId,
-          addressUserId,
-          attempt: "unauthorized_address_access",
-        });
-
-        return ctx.badRequest("آدرس انتخاب شده متعلق به شما نیست", {
+      if (!/^\d{10}$/.test(String(PostalCode))) {
+        return ctx.badRequest("کد پستی باید ۱۰ رقم باشد", {
           data: {
             success: false,
-            errorCode: "ADDRESS_UNAUTHORIZED",
-            message: "آدرس انتخاب شده متعلق به شما نیست",
+            errorCode: "INVALID_POSTAL_CODE",
+            message: "کد پستی باید ۱۰ رقم باشد",
           },
         });
       }
-    } catch (err) {
-      strapi.log.error("Failed to validate address:", err);
-      return ctx.badRequest("خطا در بررسی آدرس", {
-        data: {
-          success: false,
-          errorCode: "ADDRESS_VALIDATION_FAILED",
-          message: "خطا در بررسی آدرس",
-        },
+
+      // Validate city exists
+      const city = await strapi.entityService.findOne("api::shipping-city.shipping-city", shipping_city, {
+        populate: { shipping_province: true },
       });
+
+      if (!city) {
+        return ctx.badRequest("شهر انتخاب شده معتبر نیست", {
+          data: {
+            success: false,
+            errorCode: "INVALID_CITY",
+            message: "شهر انتخاب شده معتبر نیست",
+          },
+        });
+      }
+
+      const addressData = {
+        shipping_city,
+        PostalCode: String(PostalCode),
+        FullAddress: String(FullAddress),
+        Description: Description || undefined,
+        IsTemporary: !save,
+        user: user.id,
+      };
+
+      try {
+        const createdAddress = await strapi.entityService.create(
+          "api::local-user-address.local-user-address",
+          { data: addressData }
+        );
+        resolvedAddressId = createdAddress.id;
+      } catch (err) {
+        strapi.log.error("Failed to create inline address during finalize", err);
+        return ctx.badRequest("خطا در ثبت آدرس", {
+          data: {
+            success: false,
+            errorCode: "ADDRESS_CREATION_FAILED",
+            message: "خطا در ثبت آدرس",
+          },
+        });
+      }
+    }
+
+    // Verify address exists and belongs to user
+    if (resolvedAddressId) {
+      try {
+        const address = await strapi.entityService.findOne(
+          "api::local-user-address.local-user-address",
+          resolvedAddressId,
+          { populate: { user: true, shipping_city: true } }
+        );
+        if (!address) {
+          return ctx.badRequest("آدرس انتخاب شده یافت نشد", {
+            data: {
+              success: false,
+              errorCode: "ADDRESS_NOT_FOUND",
+              message: "آدرس انتخاب شده یافت نشد",
+            },
+          });
+        }
+
+        // Validate address ownership - critical security check
+        const addressUserId =
+          typeof address.user === "object" && address.user?.id
+            ? address.user.id
+            : typeof address.user === "number"
+            ? address.user
+            : null;
+
+        if (!addressUserId || Number(addressUserId) !== Number(user.id)) {
+          strapi.log.warn("Address ownership validation failed", {
+            userId: user.id,
+            addressId: resolvedAddressId,
+            addressUserId,
+            attempt: "unauthorized_address_access",
+          });
+
+          return ctx.badRequest("آدرس انتخاب شده متعلق به شما نیست", {
+            data: {
+              success: false,
+              errorCode: "ADDRESS_UNAUTHORIZED",
+              message: "آدرس انتخاب شده متعلق به شما نیست",
+            },
+          });
+        }
+      } catch (err) {
+        strapi.log.error("Failed to validate address:", err);
+        return ctx.badRequest("خطا در بررسی آدرس", {
+          data: {
+            success: false,
+            errorCode: "ADDRESS_VALIDATION_FAILED",
+            message: "خطا در بررسی آدرس",
+          },
+        });
+      }
     }
 
     const shippingData = {
@@ -126,7 +197,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       shippingCost,
       description,
       note,
-      addressId,
+      addressId: resolvedAddressId,
       discountCode,
     };
 

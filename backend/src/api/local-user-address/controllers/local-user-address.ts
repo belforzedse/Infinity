@@ -18,6 +18,11 @@ export default factories.createCoreController(
           .find({
             filters: {
               user: user.id,
+              IsTemporary: false,
+            },
+            pagination: {
+              page: 1,
+              pageSize: 5000,
             },
             populate: {
               shipping_city: {
@@ -83,6 +88,7 @@ export default factories.createCoreController(
               PostalCode,
               FullAddress,
               Description,
+              IsTemporary: false,
               user: user.id,
             },
             populate: {

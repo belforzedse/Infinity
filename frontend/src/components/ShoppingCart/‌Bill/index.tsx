@@ -23,6 +23,12 @@ export type FormData = {
   fullName: string;
   phoneNumber: string;
   address: Option | null;
+  province: Option | null;
+  city: Option | null;
+  postalCode: string;
+  fullAddress: string;
+  addressDescription?: string;
+  saveAddress: boolean;
   shippingMethod: ShippingMethod | null;
   notes?: string;
 };
@@ -66,10 +72,19 @@ function ShoppingCartBillForm({}: Props) {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      saveAddress: true,
+    },
+  });
 
   const watchShippingMethod = watch("shippingMethod");
   const watchAddress = watch("address");
+  const watchCity = watch("city");
+  const watchProvince = watch("province");
+  const watchPostalCode = watch("postalCode");
+  const watchFullAddress = watch("fullAddress");
+  const watchSaveAddress = watch("saveAddress");
   const shippingId = watchShippingMethod ? Number(watchShippingMethod.id) : undefined;
   const shippingCost = watchShippingMethod
     ? Number(watchShippingMethod.attributes?.Price || 0)
@@ -218,8 +233,12 @@ function ShoppingCartBillForm({}: Props) {
     setError(null);
 
     // Validate required fields
-    if (!data.address) {
-      setError("لطفا یک آدرس انتخاب کنید");
+    const selectedAddressId = data.address?.id ? Number(data.address.id) : undefined;
+    const inlineAddressFieldsFilled =
+      !!watchProvince && !!watchCity && !!watchPostalCode && !!watchFullAddress;
+
+    if (!selectedAddressId && !inlineAddressFieldsFilled) {
+      setError("لطفا یک آدرس ذخیره شده را انتخاب یا آدرس جدید وارد کنید");
       return;
     }
 
@@ -238,6 +257,25 @@ function ShoppingCartBillForm({}: Props) {
     if (cleanPhone.length < 10) {
       setError("شماره تماس وارد شده معتبر نیست");
       return;
+    }
+
+    if (!selectedAddressId) {
+      // Inline address validation
+      if (!watchProvince || !watchCity) {
+        setError("لطفا استان و شهر را انتخاب کنید");
+        return;
+      }
+
+      const postal = (watchPostalCode || "").replace(/\D/g, "");
+      if (postal.length !== 10) {
+        setError("کد پستی باید ۱۰ رقم باشد");
+        return;
+      }
+
+      if (!watchFullAddress || watchFullAddress.trim().length < 5) {
+        setError("لطفا آدرس دقیق را وارد کنید");
+        return;
+      }
     }
 
     // Validate total price is positive
@@ -269,12 +307,23 @@ function ShoppingCartBillForm({}: Props) {
         }
       }
 
+      const addressPayload = selectedAddressId
+        ? undefined
+        : {
+            shipping_city: Number(watchCity?.id),
+            PostalCode: (watchPostalCode || "").replace(/\D/g, ""),
+            FullAddress: (watchFullAddress || "").trim(),
+            Description: data.addressDescription?.trim() || undefined,
+            save: watchSaveAddress,
+          };
+
       const finalizeData = {
         shipping: Number(data.shippingMethod.id),
         shippingCost: Number(data.shippingMethod.attributes.Price),
         note: data.notes || undefined,
         callbackURL: "/orders/payment-callback",
-        addressId: Number((data.address as any)?.id),
+        addressId: selectedAddressId,
+        addressPayload,
         gateway: gateway,
         mobile: data.phoneNumber?.replace(/\D/g, ""),
         discountCode: discountCode || localStorage.getItem("discountCode") || undefined,

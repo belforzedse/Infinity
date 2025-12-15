@@ -1,7 +1,7 @@
 import React from "react";
 import CustomRadioGroup from "./CustomRadioGroup";
 import type { ShippingMethod } from "@/services/shipping";
-import type { Control, UseFormSetValue} from "react-hook-form";
+import type { Control, UseFormSetValue } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import type { FormData } from "./index";
 
@@ -14,24 +14,31 @@ interface Props {
 const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({ shippingMethods, control }) => {
   // Watch the selected address to get province and city info
   const selectedAddress = useWatch({ control, name: "address" });
+  const inlineProvince = useWatch({ control, name: "province" });
+  const inlineCity = useWatch({ control, name: "city" });
 
-  // Check if address is selected to determine if delivery options should be disabled
-  const isAddressSelected = selectedAddress && selectedAddress.id && selectedAddress.name;
+  // Check if address is selected (saved or inline) to determine if delivery options should be disabled
+  const hasSavedAddress = selectedAddress && selectedAddress.id && selectedAddress.name;
+  const hasInlineAddress = inlineProvince?.name && inlineCity?.name;
+  const isAddressSelected = !!(hasSavedAddress || hasInlineAddress);
   // Filter shipping methods based on location
   const getFilteredShippingMethods = () => {
-    if (!selectedAddress?.name) {
-      return shippingMethods;
-    }
+    const cityName = inlineCity?.name;
+    const provinceName = inlineProvince?.name;
 
-    // Extract province and city from address name
-    // Format: "Address - City, Province"
-    const addressParts = selectedAddress.name.split(" - ");
-    if (addressParts.length < 2) {
-      return shippingMethods;
-    }
+    // Prefer inline selections; fallback to saved-address name parsing
+    let city = cityName;
+    let province = provinceName;
 
-    const locationPart = addressParts[addressParts.length - 1]; // "City, Province"
-    const [city, province] = locationPart.split(", ");
+    if ((!city || !province) && selectedAddress?.name) {
+      const addressParts = selectedAddress.name.split(" - ");
+      if (addressParts.length >= 2) {
+        const locationPart = addressParts[addressParts.length - 1]; // "City, Province"
+        const [parsedCity, parsedProvince] = locationPart.split(", ");
+        city = city || parsedCity;
+        province = province || parsedProvince;
+      }
+    }
 
     // Check if province is "گلستان" and city is "گرگان"
     if (province?.trim() === "گلستان" && city?.trim() === "گرگان") {
