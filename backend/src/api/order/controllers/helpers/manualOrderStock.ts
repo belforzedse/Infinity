@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { decrementStockAtomic } from "../../../cart/services/lib/stock";
 
 /**
  * Decrement stock for manual orders
@@ -102,7 +103,6 @@ export async function decrementManualOrderStockHandler(strapi: Strapi, ctx: any)
       return;
     }
 
-    const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
 
     const stockErrors: any[] = [];
     const stockResults: any[] = [];
