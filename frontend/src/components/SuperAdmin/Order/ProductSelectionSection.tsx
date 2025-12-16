@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import classNames from "classnames";
+import toast from "react-hot-toast";
 import ProductSearch, { type Product, type ProductVariation } from "./ProductSearch";
 import SelectedProducts from "./SelectedProducts";
 
@@ -16,6 +17,10 @@ type OrderItem = {
   color: string;
   size?: string;
   image: string;
+  // IDs for backend relations
+  productColorId?: number;
+  productSizeId?: number;
+  productModelId?: number;
 };
 
 enum ProductViewEnum {
@@ -42,6 +47,29 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
   ];
 
   const handleProductSelect = (product: Product, variation?: ProductVariation) => {
+    // Validate stock for variations
+    if (variation) {
+      const stockCount = variation.product_stock?.data?.attributes?.Count
+        ?? variation.product_stock?.Count
+        ?? 0;
+
+      if (stockCount <= 0) {
+        toast.error("این تنوع موجودی ندارد و نمی‌تواند انتخاب شود");
+        return;
+      }
+    }
+
+    // Extract color, size, and model IDs from variation
+    const colorId = variation?.product_variation_color?.id
+      || variation?.product_variation_color?.data?.id
+      || undefined;
+    const sizeId = variation?.product_variation_size?.id
+      || variation?.product_variation_size?.data?.id
+      || undefined;
+    const modelId = variation?.product_variation_model?.id
+      || variation?.product_variation_model?.data?.id
+      || undefined;
+
     const newItem: OrderItem = {
       id: Date.now(), // Temporary ID for UI
       productId: product.id,
@@ -53,6 +81,10 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
       color: variation?.product_variation_color?.Title || "N/A",
       size: variation?.product_variation_size?.Title,
       image: product.image || "",
+      // Store IDs for backend
+      productColorId: colorId,
+      productSizeId: sizeId,
+      productModelId: modelId,
     };
 
     onItemsChange([...selectedItems, newItem]);

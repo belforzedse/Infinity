@@ -69,5 +69,13 @@ export default {
         auth: { scope: [] },
       },
     },
+    {
+      method: "POST",
+      path: "/orders/:id/decrement-stock-manual",
+      handler: "order.decrementStockManual",
+      config: {
+        auth: { scope: [] },
+      },
+    },
   ],
 };
