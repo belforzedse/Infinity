@@ -64,6 +64,38 @@ export const createOrderAndItems = async (
       console.error("=== VALIDATION ERROR: Missing product variation ===", { itemId: item.id });
       throw new Error(`INVALID_ITEM: Cart item ${item.id} missing product variation`);
     }
+
+    // Validate product is not soft-deleted
+    if (variation.product?.removedAt) {
+      strapi.log.error("=== VALIDATION ERROR: Product is soft-deleted ===", {
+        variationId: variation.id,
+        productId: variation.product?.id,
+        productTitle: variation.product?.Title,
+        removedAt: variation.product?.removedAt,
+      });
+      throw new Error(`PRODUCT_DELETED: Product "${variation.product?.Title || variation.id}" has been removed`);
+    }
+
+    // Validate product is active
+    if (variation.product?.Status === "InActive") {
+      strapi.log.error("=== VALIDATION ERROR: Product is inactive ===", {
+        variationId: variation.id,
+        productId: variation.product?.id,
+        productTitle: variation.product?.Title,
+        status: variation.product?.Status,
+      });
+      throw new Error(`PRODUCT_INACTIVE: Product "${variation.product?.Title || variation.id}" is currently unavailable`);
+    }
+
+    // Validate variation is published
+    if (variation.IsPublished === false) {
+      strapi.log.error("=== VALIDATION ERROR: Variation is unpublished ===", {
+        variationId: variation.id,
+        productTitle: variation.product?.Title,
+      });
+      throw new Error(`VARIATION_UNPUBLISHED: Product variation ${variation.id} is not available for purchase`);
+    }
+
     if (!variation.product?.Title) {
       const errorInfo = {
         variationId: variation.id,

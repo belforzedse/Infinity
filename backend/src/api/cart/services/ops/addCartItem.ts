@@ -19,6 +19,31 @@ export const addCartItemOp = async (
       populate: { product: true, product_stock: true },
     });
 
+  // Validate variation exists
+  if (!productVariation) {
+    return { success: false, message: "Product variation not found" };
+  }
+
+  // Validate variation is published
+  if (productVariation.IsPublished === false) {
+    return { success: false, message: "Product variation is not available" };
+  }
+
+  // Validate product exists and is not soft-deleted or inactive
+  const product = productVariation.product;
+  if (!product) {
+    return { success: false, message: "Product not found" };
+  }
+
+  if (product.removedAt) {
+    return { success: false, message: "Product is no longer available" };
+  }
+
+  if (product.Status === "InActive") {
+    return { success: false, message: "Product is currently unavailable" };
+  }
+
+  // Validate stock availability
   if (
     !productVariation?.product_stock ||
     productVariation.product_stock.Count < count

@@ -26,6 +26,7 @@ export interface UserAddress {
   PostalCode: string;
   Description: string;
   FullAddress: string;
+  IsTemporary?: boolean;
   createdAt: string;
   shipping_city: ShippingCity;
 }
@@ -58,18 +59,10 @@ export const invalidateAddressCache = (): void => {
 };
 
 export const getUserAddresses = async (): Promise<UserAddress[]> => {
-  const token = localStorage.getItem("accessToken");
-
-  if (!token) {
-    throw new Error("Authentication required");
-  }
-
   try {
-    const response = await apiClient.get("/local-user-addresses/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await apiClient.get(
+      "/local-user-addresses/me?pagination[page]=1&pagination[pageSize]=100&sort=createdAt:desc",
+    );
 
     return response.data as UserAddress[];
   } catch (error) {

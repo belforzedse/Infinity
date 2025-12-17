@@ -36,7 +36,7 @@ export default function Select({
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {label && <label className="text-base text-foreground-primary lg:text-lg">{label}</label>}
-      <Listbox value={value ?? null} onChange={onChange} disabled={isLoading}>
+      <Listbox value={value ?? null} onChange={onChange} disabled={isLoading} by="id">
         <div className="relative">
           <Listbox.Button
             className={classNames(

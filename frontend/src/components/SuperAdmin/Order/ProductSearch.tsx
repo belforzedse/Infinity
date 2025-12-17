@@ -12,16 +12,42 @@ export type ProductVariation = {
   DiscountPrice?: number;
   ProductSKU?: string;
   product_variation_color?: {
+    id?: number;
     Title: string;
+    data?: {
+      id?: number;
+      attributes?: {
+        Title: string;
+      };
+    };
   };
   product_variation_size?: {
+    id?: number;
     Title: string;
+    data?: {
+      id?: number;
+      attributes?: {
+        Title: string;
+      };
+    };
   };
   product_variation_model?: {
+    id?: number;
     Title: string;
+    data?: {
+      id?: number;
+      attributes?: {
+        Title: string;
+      };
+    };
   };
   product_stock?: {
     Count: number;
+    data?: {
+      attributes?: {
+        Count: number;
+      };
+    };
   };
 };
 
@@ -50,6 +76,10 @@ export type OrderItem = {
   color?: string;
   size?: string;
   image?: string;
+  // IDs for backend relations
+  productColorId?: number;
+  productSizeId?: number;
+  productModelId?: number;
 };
 
 interface ProductSearchProps {
@@ -115,14 +145,80 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             imageUrl = `${IMAGE_BASE_URL}${img.url}`;
           }
 
+          // Calculate price from variations and normalize variation structure
+          const rawVariations = attrs?.product_variations?.data || attrs?.product_variations || [];
+          const variations = Array.isArray(rawVariations) ? rawVariations.map((v: any) => {
+            // Normalize variation structure - handle both Strapi format and flattened format
+            const vAttrs = v?.attributes || v;
+            const variationId = v?.id || vAttrs?.id;
+
+            // Normalize stock structure
+            const stock = vAttrs?.product_stock?.data?.attributes
+              || vAttrs?.product_stock?.data
+              || vAttrs?.product_stock
+              || v?.product_stock;
+
+            // Normalize color, size, model structures - preserve IDs
+            const colorData = vAttrs?.product_variation_color?.data;
+            const colorAttrs = colorData?.attributes || colorData;
+            const colorRaw = vAttrs?.product_variation_color || v?.product_variation_color;
+            const color = colorAttrs || colorRaw;
+
+            const sizeData = vAttrs?.product_variation_size?.data;
+            const sizeAttrs = sizeData?.attributes || sizeData;
+            const sizeRaw = vAttrs?.product_variation_size || v?.product_variation_size;
+            const size = sizeAttrs || sizeRaw;
+
+            const modelData = vAttrs?.product_variation_model?.data;
+            const modelAttrs = modelData?.attributes || modelData;
+            const modelRaw = vAttrs?.product_variation_model || v?.product_variation_model;
+            const model = modelAttrs || modelRaw;
+
+            // Extract IDs - try multiple possible structures
+            const colorId = colorData?.id || colorRaw?.id || color?.id;
+            const sizeId = sizeData?.id || sizeRaw?.id || size?.id;
+            const modelId = modelData?.id || modelRaw?.id || model?.id;
+
+            return {
+              id: variationId,
+              Price: parseFloat(vAttrs?.Price || 0),
+              DiscountPrice: vAttrs?.DiscountPrice ? parseFloat(vAttrs.DiscountPrice) : undefined,
+              ProductSKU: vAttrs?.SKU || vAttrs?.ProductSKU,
+              product_variation_color: color ? {
+                ...color,
+                id: colorId || color.id,
+                Title: color.Title || colorAttrs?.Title || colorRaw?.Title,
+              } : undefined,
+              product_variation_size: size ? {
+                ...size,
+                id: sizeId || size.id,
+                Title: size.Title || sizeAttrs?.Title || sizeRaw?.Title,
+              } : undefined,
+              product_variation_model: model ? {
+                ...model,
+                id: modelId || model.id,
+                Title: model.Title || modelAttrs?.Title || modelRaw?.Title,
+              } : undefined,
+              product_stock: stock,
+            };
+          }) : [];
+
+          let computedPrice = 0;
+          if (variations.length > 0) {
+            const prices = variations
+              .map((v) => v.Price)
+              .filter((p) => !isNaN(p) && p > 0);
+            computedPrice = prices.length > 0 ? Math.min(...prices) : 0;
+          }
+
           return {
             id,
             Title: attrs?.Title || raw?.Title,
             Description: attrs?.Description || raw?.Description,
-            Price: attrs?.Price || raw?.Price || 0,
+            Price: computedPrice,
             ProductSKU: attrs?.ProductSKU || raw?.ProductSKU,
             product_main_category: attrs?.product_main_category || raw?.product_main_category,
-            product_variations: attrs?.product_variations || raw?.product_variations || [],
+            product_variations: variations,
             CoverImage: img,
             image: imageUrl,
           };
@@ -291,51 +387,65 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             </div>
 
             <div className="space-y-2">
-              {selectedProduct.product_variations?.map((variation) => (
-                <div
-                  key={variation.id}
-                  className="border border-slate-200 rounded-lg p-3 hover:bg-slate-50"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        {variation.product_variation_color && (
-                          <span className="text-sm text-slate-600">
-                            رنگ: {variation.product_variation_color.Title}
-                          </span>
-                        )}
-                        {variation.product_variation_size && (
-                          <span className="text-sm text-slate-600">
-                            سایز: {variation.product_variation_size.Title}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="font-semibold text-green-600">
-                          {formatPrice(variation.Price)} تومان
-                        </span>
-                        {variation.product_stock && (
-                          <span className="text-xs text-slate-500">
-                            موجودی: {variation.product_stock.Count}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+              {selectedProduct.product_variations?.map((variation) => {
+                // Extract stock count from different possible structures
+                const stockCount = variation.product_stock?.data?.attributes?.Count
+                  ?? variation.product_stock?.Count
+                  ?? 0;
+                const hasStock = stockCount > 0;
+                const isDisabled = !hasStock || isProductSelected(selectedProduct.id, variation.id);
 
-                    <button
-                      onClick={() => handleVariationSelect(selectedProduct, variation)}
-                      disabled={isProductSelected(selectedProduct.id, variation.id)}
-                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                        isProductSelected(selectedProduct.id, variation.id)
-                          ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-                          : "bg-pink-500 text-white hover:bg-pink-600"
-                      }`}
-                    >
-                      {isProductSelected(selectedProduct.id, variation.id) ? "انتخاب شده" : "انتخاب"}
-                    </button>
+                return (
+                  <div
+                    key={variation.id}
+                    className={`border rounded-lg p-3 ${
+                      hasStock ? "border-slate-200 hover:bg-slate-50" : "border-red-200 bg-red-50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          {variation.product_variation_color && (
+                            <span className="text-sm text-slate-600">
+                              رنگ: {variation.product_variation_color.Title}
+                            </span>
+                          )}
+                          {variation.product_variation_size && (
+                            <span className="text-sm text-slate-600">
+                              سایز: {variation.product_variation_size.Title}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="font-semibold text-green-600">
+                            {formatPrice(variation.Price)} تومان
+                          </span>
+                          <span className={`text-xs ${hasStock ? "text-slate-500" : "text-red-600 font-medium"}`}>
+                            موجودی: {stockCount}
+                          </span>
+                          {!hasStock && (
+                            <span className="text-xs text-red-600 font-medium">
+                              (ناموجود)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleVariationSelect(selectedProduct, variation)}
+                        disabled={isDisabled}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                          isDisabled
+                            ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                            : "bg-pink-500 text-white hover:bg-pink-600"
+                        }`}
+                      >
+                        {isProductSelected(selectedProduct.id, variation.id) ? "انتخاب شده" : "انتخاب"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

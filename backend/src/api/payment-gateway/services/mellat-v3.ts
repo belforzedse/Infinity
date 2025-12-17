@@ -12,12 +12,20 @@ interface MellatPaymentParams {
   userId: number;
   callbackURL: string;
   contractId?: number;
+  amountInRial?: boolean;
+  includePayerId?: boolean;
 }
+
+const normalizeNumericParam = (value: any): number | string => {
+  const num = Number(value);
+  return Number.isNaN(num) ? value : num;
+};
 
 interface MellatVerifyParams {
   orderId: string;
   saleOrderId: string;
   saleReferenceId: string;
+  allowResCode45Success?: boolean;
 }
 
 interface PaymentResponse {
@@ -48,10 +56,20 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     strapi.log.info("[Mellat] Creating client with URL:", { apiUrl });
 
+    const terminalId = process.env.MELLAT_TERMINAL_ID;
+    const username = process.env.MELLAT_USERNAME;
+    const password = process.env.MELLAT_PASSWORD;
+
+    if (!terminalId || !username || !password) {
+      throw new Error(
+        "Mellat gateway credentials not configured: missing MELLAT_TERMINAL_ID, MELLAT_USERNAME, or MELLAT_PASSWORD"
+      );
+    }
+
     const config = {
-      terminalId: process.env.MELLAT_TERMINAL_ID || "MELLAT_TERMINAL_ID",
-      username: process.env.MELLAT_USERNAME || "MELLAT_TERMINAL_ID",
-      password: process.env.MELLAT_PASSWORD || "MELLAT_PASSWORD",
+      terminalId,
+      username,
+      password,
       timeout: 120000, // 120 seconds timeout
       apiUrl,
     };
@@ -146,9 +164,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    */
   async requestPayment(params: MellatPaymentParams): Promise<PaymentResponse> {
     const requestId = this.generateRequestId();
-    const maxRetries = 2;
+    const maxRetries = 3; // allow 2 retries (total 3 attempts) to match spec
     let lastError: any = null;
     const startTime = Date.now();
+    const amountRial = Math.round(
+      params.amountInRial ? params.amount : params.amount * 10
+    ); // convert Toman → Rial unless flagged as IRR
 
     strapi.log.info(`[${requestId}] ========== MELLAT PAYMENT REQUEST START ==========`);
 
@@ -175,19 +196,25 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         });
         const initStartTime = Date.now();
 
+        let timeoutHandle: NodeJS.Timeout | undefined;
         try {
           strapi.log.debug(`[${requestId}] Calling mellat.initialize()...`);
 
           // Wrap initialize with explicit promise timeout to ensure it never exceeds our limit
           const initPromise = mellat.initialize();
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error(`WSDL initialization timeout exceeded 120s`)), 120000)
-          );
+          const timeoutPromise = new Promise((_, reject) => {
+            timeoutHandle = setTimeout(
+              () => reject(new Error(`WSDL initialization timeout exceeded 120s`)),
+              120000
+            );
+          });
 
           await Promise.race([initPromise, timeoutPromise]);
+          if (timeoutHandle) clearTimeout(timeoutHandle);
           const initDuration = Date.now() - initStartTime;
           strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] WSDL initialization successful (${initDuration}ms)`);
         } catch (initError) {
+          if (timeoutHandle) clearTimeout(timeoutHandle);
           const initDuration = Date.now() - initStartTime;
           strapi.log.error(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] WSDL initialization FAILED after ${initDuration}ms:`, {
             errorType: initError?.code || initError?.name,
@@ -203,12 +230,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         }
 
         // Request payment using mellat-checkout package
-        const paymentRequest = {
-          amount: params.amount,
-          orderId: params.orderId.toString(),
+        const paymentRequest: Record<string, unknown> = {
+          amount: amountRial,
+          orderId: params.orderId,
           callbackUrl: callbackUrl,
-          payerId: params.userId.toString(),
         };
+        if (params.includePayerId) {
+          paymentRequest.payerId = params.userId;
+        }
 
         strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] Sending payment request to Mellat...`, paymentRequest);
         const paymentStartTime = Date.now();
@@ -216,17 +245,20 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         const response = await mellat.paymentRequest(paymentRequest);
 
         const paymentDuration = Date.now() - paymentStartTime;
+        const resCode = response.ResCode ?? response.resCode;
+        const refId = response.RefId ?? response.refId;
+
         strapi.log.info(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] Payment response received in ${paymentDuration}ms:`, {
-          resCode: response.resCode,
-          refId: response.refId,
-          success: response.resCode === 0,
+          resCode,
+          refId,
+          success: resCode === 0,
         });
 
-        if (response.resCode === 0) {
+        if (resCode === 0 || (resCode === undefined && refId)) {
           // Success - create redirect URL (RefId will be sent via POST form by frontend, similar to wallet flow)
-          if (!response.refId || response.refId.trim() === "") {
+          if (!refId || refId.trim() === "") {
             strapi.log.error(`[${requestId}] RefId is missing from successful response`, {
-              resCode: response.resCode,
+              resCode,
               response: response,
             });
             throw new Error("RefId not received from Mellat gateway");
@@ -236,37 +268,45 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           const totalDuration = Date.now() - startTime;
 
           strapi.log.info(`[${requestId}] ========== PAYMENT REQUEST SUCCESSFUL (${totalDuration}ms) ==========`, {
-            refId: response.refId,
+            refId,
             redirectUrl,
-            resCode: response.resCode,
+            resCode,
           });
 
           return {
             success: true,
-            refId: response.refId,
+            refId,
             redirectUrl,
             requestId,
-            resCode: response.resCode,
+            resCode,
             message: "Payment request successful",
           };
         } else {
           // Error - log the error code
-          this.logMellatErrorCode(requestId, response.resCode);
+          this.logMellatErrorCode(requestId, resCode);
           const totalDuration = Date.now() - startTime;
 
-          strapi.log.error(`[${requestId}] ========== PAYMENT REQUEST FAILED: Gateway Error ${response.resCode} (${totalDuration}ms) ==========`);
+          strapi.log.error(`[${requestId}] ========== PAYMENT REQUEST FAILED: Gateway Error ${resCode} (${totalDuration}ms) ==========`);
 
           return {
             success: false,
-            error: `Gateway error: ${response.resCode}`,
+            error: `Gateway error: ${resCode}`,
             requestId,
-            resCode: response.resCode,
+            resCode,
           };
         }
       } catch (error) {
         lastError = error;
         const attemptDuration = Date.now() - startTime;
 
+        strapi.log.warn(
+          `[${requestId}] Mellat payment request attempt ${attempt} failed`,
+          {
+            message: error?.message,
+            code: error?.code,
+            errno: error?.errno,
+          }
+        );
         strapi.log.error(`[${requestId}] [ATTEMPT ${attempt}/${maxRetries}] EXCEPTION CAUGHT after ${attemptDuration}ms:`, {
           errorType: error?.code || error?.name || typeof error,
           message: error?.message,
@@ -339,32 +379,34 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
 
       const verifyRequest = {
-        orderId: params.orderId,
-        saleOrderId: params.saleOrderId,
-        saleReferenceId: params.saleReferenceId,
+        orderId: normalizeNumericParam(params.orderId),
+        saleOrderId: normalizeNumericParam(params.saleOrderId),
+        saleReferenceId: normalizeNumericParam(params.saleReferenceId),
       };
 
       const response = await mellat.verifyPayment(verifyRequest);
 
       strapi.log.info(`[${requestId}] Verification response:`, {
-        resCode: response.resCode,
-        success: response.resCode === 0,
+        resCode: response.ResCode ?? response.resCode,
+        success: (response.ResCode ?? response.resCode) === 0,
       });
 
-      if (response.resCode === 0) {
+      const resCode = response.ResCode ?? response.resCode;
+
+      if (resCode === 0) {
         return {
           success: true,
           message: "Transaction verified successfully",
-          resCode: response.resCode,
+          resCode,
           requestId,
         };
       } else {
-        this.logMellatErrorCode(requestId, response.resCode);
+        this.logMellatErrorCode(requestId, resCode);
 
         return {
           success: false,
-          error: `Verification failed with code: ${response.resCode}`,
-          resCode: response.resCode,
+          error: `Verification failed with code: ${resCode}`,
+          resCode,
           requestId,
         };
       }
@@ -400,39 +442,50 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
 
       const settleRequest = {
-        orderId: params.orderId,
-        saleOrderId: params.saleOrderId,
-        saleReferenceId: params.saleReferenceId,
+        orderId: normalizeNumericParam(params.orderId),
+        saleOrderId: normalizeNumericParam(params.saleOrderId),
+        saleReferenceId: normalizeNumericParam(params.saleReferenceId),
       };
 
       const response = await mellat.settlePayment(settleRequest);
 
       strapi.log.info(`[${requestId}] Settlement response:`, {
-        resCode: response.resCode,
-        success: response.resCode === 0 || response.resCode === 45,
+        resCode: response.ResCode ?? response.resCode,
+        success: (response.ResCode ?? response.resCode) === 0 || (response.ResCode ?? response.resCode) === 45,
       });
 
-      if (response.resCode === 0) {
+      const resCode = response.ResCode ?? response.resCode;
+
+      if (resCode === 0) {
         return {
           success: true,
           message: "Transaction settled successfully",
-          resCode: response.resCode,
+          resCode,
           requestId,
         };
-      } else if (response.resCode === 45) {
+      } else if (resCode === 45) {
+        if (params.allowResCode45Success) {
+          return {
+            success: true,
+            message: "Transaction already settled",
+            resCode,
+            requestId,
+          };
+        }
+        this.logMellatErrorCode(requestId, resCode);
         return {
-          success: true,
-          message: "Transaction already settled",
-          resCode: response.resCode,
+          success: false,
+          error: `Settlement failed with code: ${resCode}`,
+          resCode,
           requestId,
         };
       } else {
-        this.logMellatErrorCode(requestId, response.resCode);
+        this.logMellatErrorCode(requestId, resCode);
 
         return {
           success: false,
-          error: `Settlement failed with code: ${response.resCode}`,
-          resCode: response.resCode,
+          error: `Settlement failed with code: ${resCode}`,
+          resCode,
           requestId,
         };
       }
@@ -468,32 +521,34 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
 
       const reverseRequest = {
-        orderId: params.orderId,
-        saleOrderId: params.saleOrderId,
-        saleReferenceId: params.saleReferenceId,
+        orderId: normalizeNumericParam(params.orderId),
+        saleOrderId: normalizeNumericParam(params.saleOrderId),
+        saleReferenceId: normalizeNumericParam(params.saleReferenceId),
       };
 
-      const response = await mellat.reversalRequest(reverseRequest);
+      const response = await mellat.reversePayment(reverseRequest);
 
       strapi.log.info(`[${requestId}] Reversal response:`, {
-        resCode: response.resCode,
-        success: response.resCode === 0,
+        resCode: response.ResCode ?? response.resCode,
+        success: (response.ResCode ?? response.resCode) === 0,
       });
 
-      if (response.resCode === 0) {
+      const resCode = response.ResCode ?? response.resCode;
+
+      if (resCode === 0) {
         return {
           success: true,
           message: "Transaction reversed successfully",
-          resCode: response.resCode,
+          resCode,
           requestId,
         };
       } else {
-        this.logMellatErrorCode(requestId, response.resCode);
+        this.logMellatErrorCode(requestId, resCode);
 
         return {
           success: false,
-          error: `Reversal failed with code: ${response.resCode}`,
-          resCode: response.resCode,
+          error: `Reversal failed with code: ${resCode}`,
+          resCode,
           requestId,
         };
       }
@@ -529,9 +584,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
 
       const inquiryRequest = {
-        orderId: params.orderId,
-        saleOrderId: params.saleOrderId,
-        saleReferenceId: params.saleReferenceId,
+        orderId: normalizeNumericParam(params.orderId),
+        saleOrderId: normalizeNumericParam(params.saleOrderId),
+        saleReferenceId: normalizeNumericParam(params.saleReferenceId),
       };
 
       const response = await mellat.inquiryRequest(inquiryRequest);

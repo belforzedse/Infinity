@@ -51,6 +51,10 @@ type OrderItem = {
   color: string;
   size?: string;
   image: string;
+  // IDs for backend relations
+  productColorId?: number;
+  productSizeId?: number;
+  productModelId?: number;
 };
 
 export default function Page() {
@@ -258,6 +262,10 @@ export default function Page() {
             ProductSKU: item.productCode,
             order: orderId,
             product_variation: item.productVariationId || item.productId,
+            // Include variation detail relations for invoice printing
+            product_color: item.productColorId || null,
+            product_size: item.productSizeId || null,
+            product_variation_model: item.productModelId || null,
           },
         })
       );
@@ -300,6 +308,26 @@ export default function Page() {
             },
           });
         }
+      }
+
+      // Decrement stock for manual order (always, even if no contract)
+      try {
+        logger.info("Decrementing stock for manual order", { orderId });
+        const stockResponse = await apiClient.post(`/orders/${orderId}/decrement-stock-manual`);
+        logger.info("Stock decremented successfully", { 
+          orderId,
+          response: stockResponse,
+        });
+      } catch (stockError: any) {
+        const errorDetails = stockError?.response?.data || stockError?.message || "Unknown error";
+        logger.error("Failed to decrement stock for manual order", {
+          orderId,
+          error: errorDetails,
+          status: stockError?.response?.status,
+        });
+        // Show error to user since stock is critical
+        toast.error("هشدار: موجودی کاهش نیافت. لطفا به صورت دستی بررسی کنید.");
+        // Don't fail the order creation, but log the error prominently
       }
 
       try {

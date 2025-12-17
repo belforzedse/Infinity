@@ -13,7 +13,7 @@ export const getOrCreateUserCart = async (strapi: Strapi, userId: number) => {
               product_variation_size: true,
               product_variation_model: true,
               product: {
-                fields: ["id", "Title", "SKU", "Weight"],
+                fields: ["id", "Title", "SKU", "Weight", "Status", "removedAt"],
                 populate: {
                   CoverImage: true,
                   product_main_category: true,
@@ -40,12 +40,35 @@ export const getOrCreateUserCart = async (strapi: Strapi, userId: number) => {
     const validItems = cart.cart_items.filter((item: any) => {
       const hasValidVariation = item.product_variation && item.product_variation.id;
       const hasValidProduct = item.product_variation?.product && item.product_variation.product.id;
+      const product = item.product_variation?.product;
+      const variation = item.product_variation;
 
       if (!hasValidVariation || !hasValidProduct) {
         strapi.log.warn(`Filtering out invalid cart item ${item.id}: missing product_variation or product`);
+        return false;
       }
 
-      return hasValidVariation && hasValidProduct;
+      // Check if product is soft-deleted or inactive
+      const isProductAvailable = !product?.removedAt && product?.Status !== "InActive";
+      if (!isProductAvailable) {
+        strapi.log.warn(`Filtering out cart item ${item.id}: product is soft-deleted or inactive`, {
+          productId: product?.id,
+          removedAt: product?.removedAt,
+          status: product?.Status,
+        });
+        return false;
+      }
+
+      // Check if variation is unpublished
+      const isVariationPublished = variation?.IsPublished !== false;
+      if (!isVariationPublished) {
+        strapi.log.warn(`Filtering out cart item ${item.id}: variation is unpublished`, {
+          variationId: variation?.id,
+        });
+        return false;
+      }
+
+      return true;
     });
 
     cart.cart_items = validItems;
