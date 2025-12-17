@@ -1,0 +1,262 @@
+
+  it("should create inline address and finalize order successfully", async () => {
+    const { strapi, registerService } = createStrapiMock();
+
+    // Mock shipping and city
+    strapi.entityService.findOne = jest.fn((uid: string, id: number) => {
+      if (uid === "api::shipping.shipping") return { id: 1, Title: "Post", Price: 50000 };
+      if (uid === "api::shipping-city.shipping-city")
+        return { id: 10, shipping_province: { id: 20, Title: "Tehran" } };
+      if (uid === "api::local-user-address.local-user-address")
+        return { id: 100, user: 1, shipping_city: 10, PostalCode: "1234567890" };
+      return null;
+    }) as any;
+
+    // Mock address creation
+    strapi.entityService.create = jest.fn().mockResolvedValue({
+      id: 100,
+      shipping_city: 10,
+      PostalCode: "1234567890",
+      FullAddress: "Test Street 123",
+      IsTemporary: true,
+      user: 1,
+    });
+
+    // Mock cart service
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        order: { id: 500, TrackingCode: "ORD-500" },
+        paymentRedirectUrl: "https://payment.gateway/pay",
+      }),
+    });
+
+    const handler = finalizeToOrderHandler(strapi as any);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          shippingCost: 50000,
+          addressPayload: {
+            shipping_city: 10,
+            PostalCode: "1234567890",
+            FullAddress: "Test Street 123",
+            Description: "Near park",
+            save: false, // temporary address
+          },
+          gateway: "mellat",
+          mobile: "09123456789",
+        },
+      },
+      state: { user: { id: 1 } },
+    });
+
+    const result = await handler(ctx);
+
+    // Verify address was created
+    expect(strapi.entityService.create).toHaveBeenCalledWith(
+      "api::local-user-address.local-user-address",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          shipping_city: 10,
+          PostalCode: "1234567890",
+          FullAddress: "Test Street 123",
+          IsTemporary: true,
+          user: 1,
+        }),
+      })
+    );
+
+    // Verify order finalization was called
+    expect(strapi.service("api::cart.cart").finalizeCartToOrder).toHaveBeenCalled();
+  });
+
+  it("should save permanent address when save flag is true", async () => {
+    const { strapi, registerService } = createStrapiMock();
+
+    strapi.entityService.findOne = jest.fn((uid: string) => {
+      if (uid === "api::shipping.shipping") return { id: 1, Title: "Post" };
+      if (uid === "api::shipping-city.shipping-city")
+        return { id: 15, shipping_province: { id: 25, Title: "Isfahan" } };
+      if (uid === "api::local-user-address.local-user-address")
+        return { id: 200, user: 1, shipping_city: 15 };
+      return null;
+    }) as any;
+
+    strapi.entityService.create = jest.fn().mockResolvedValue({
+      id: 200,
+      IsTemporary: false,
+      user: 1,
+    });
+
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        order: { id: 600 },
+        paymentRedirectUrl: "https://payment.gateway/pay",
+      }),
+    });
+
+    const handler = finalizeToOrderHandler(strapi as any);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          shippingCost: 0,
+          addressPayload: {
+            shipping_city: 15,
+            PostalCode: "9876543210",
+            FullAddress: "Another Street 456",
+            save: true, // permanent address
+          },
+          mobile: "09121111111",
+        },
+      },
+      state: { user: { id: 1 } },
+    });
+
+    await handler(ctx);
+
+    expect(strapi.entityService.create).toHaveBeenCalledWith(
+      "api::local-user-address.local-user-address",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          IsTemporary: false,
+        }),
+      })
+    );
+  });
+
+  it("should reject when inline address has invalid city", async () => {
+    const { strapi, registerService } = createStrapiMock();
+
+    strapi.entityService.findOne = jest.fn((uid: string) => {
+      if (uid === "api::shipping.shipping") return { id: 1, Title: "Post" };
+      if (uid === "api::shipping-city.shipping-city") return null; // invalid city
+      return null;
+    }) as any;
+
+    registerService("api::cart.cart", { finalizeCartToOrder: jest.fn() });
+
+    const handler = finalizeToOrderHandler(strapi as any);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          shippingCost: 0,
+          addressPayload: {
+            shipping_city: 999,
+            PostalCode: "1234567890",
+            FullAddress: "Test",
+            save: false,
+          },
+        },
+      },
+      state: { user: { id: 1 } },
+    });
+
+    await expect(handler(ctx)).rejects.toMatchObject({
+      status: 400,
+      payload: expect.objectContaining({
+        data: expect.objectContaining({ errorCode: "INVALID_CITY" }),
+      }),
+    });
+  });
+
+  it("should reject when inline address missing required fields", async () => {
+    const { strapi } = createStrapiMock();
+    const handler = finalizeToOrderHandler(strapi as any);
+
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          shippingCost: 0,
+          addressPayload: {
+            shipping_city: 10,
+            // Missing PostalCode and FullAddress
+            save: false,
+          },
+        },
+      },
+      state: { user: { id: 1 } },
+    });
+
+    await expect(handler(ctx)).rejects.toMatchObject({
+      status: 400,
+      payload: expect.objectContaining({
+        data: expect.objectContaining({ errorCode: "ADDRESS_REQUIRED" }),
+      }),
+    });
+  });
+
+  it("should handle address creation failure gracefully", async () => {
+    const { strapi, registerService } = createStrapiMock();
+
+    strapi.entityService.findOne = jest.fn((uid: string) => {
+      if (uid === "api::shipping.shipping") return { id: 1 };
+      if (uid === "api::shipping-city.shipping-city") return { id: 10 };
+      return null;
+    }) as any;
+
+    strapi.entityService.create = jest.fn().mockRejectedValue(
+      new Error("Database error")
+    );
+
+    registerService("api::cart.cart", { finalizeCartToOrder: jest.fn() });
+
+    const handler = finalizeToOrderHandler(strapi as any);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          shippingCost: 0,
+          addressPayload: {
+            shipping_city: 10,
+            PostalCode: "1234567890",
+            FullAddress: "Test",
+            save: false,
+          },
+        },
+      },
+      state: { user: { id: 1 } },
+    });
+
+    await expect(handler(ctx)).rejects.toMatchObject({
+      status: 400,
+      payload: expect.objectContaining({
+        data: expect.objectContaining({ errorCode: "ADDRESS_CREATION_FAILED" }),
+      }),
+    });
+  });
+
+  it("should validate ownership of existing addressId", async () => {
+    const { strapi, registerService } = createStrapiMock();
+
+    strapi.entityService.findOne = jest.fn((uid: string, id: number) => {
+      if (uid === "api::shipping.shipping") return { id: 1 };
+      if (uid === "api::local-user-address.local-user-address")
+        return { id: 50, user: 999, shipping_city: 10 }; // Different user
+      return null;
+    }) as any;
+
+    registerService("api::cart.cart", { finalizeCartToOrder: jest.fn() });
+
+    const handler = finalizeToOrderHandler(strapi as any);
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 1,
+          shippingCost: 0,
+          addressId: 50, // Existing address
+        },
+      },
+      state: { user: { id: 1 } }, // Different user
+    });
+
+    await expect(handler(ctx)).rejects.toMatchObject({
+      status: 400,
+      payload: expect.objectContaining({
+        data: expect.objectContaining({ errorCode: "ADDRESS_UNAUTHORIZED" }),
+      }),
+    });
+  });
+});
