@@ -59,20 +59,9 @@ export const invalidateAddressCache = (): void => {
 };
 
 export const getUserAddresses = async (): Promise<UserAddress[]> => {
-  const token = localStorage.getItem("accessToken");
-
-  if (!token) {
-    throw new Error("Authentication required");
-  }
-
   try {
     const response = await apiClient.get(
-      "/local-user-addresses/me?pagination[page]=1&pagination[pageSize]=5000&sort=createdAt:desc",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
+      "/local-user-addresses/me?pagination[page]=1&pagination[pageSize]=100&sort=createdAt:desc",
     );
 
     return response.data as UserAddress[];

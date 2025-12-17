@@ -1,5 +1,6 @@
 import type { Strapi } from "@strapi/strapi";
 import { decrementStockAtomic } from "../../../cart/services/lib/stock";
+import { logManualActivity } from "../../../../utils/manualAdminActivity";
 
 /**
  * Decrement stock for manual orders
@@ -192,6 +193,49 @@ export async function decrementManualOrderStockHandler(strapi: Strapi, ctx: any)
       orderId,
       itemsProcessed: stockResults.length,
     });
+
+    // Log manual activity for audit trail
+    try {
+      const ip = ctx.request?.ip || ctx.ip || null;
+      const userAgent = ctx.request?.headers?.["user-agent"] || ctx.headers?.["user-agent"] || null;
+
+      // Build changes object from stock results
+      const changes: Record<string, { from?: any; to?: any }> = {};
+      stockResults.forEach((result, index) => {
+        changes[`Stock_${result.stockId}_Count`] = {
+          from: result.newCount + result.quantity,
+          to: result.newCount,
+        };
+      });
+
+      await logManualActivity(strapi, {
+        resourceType: "Stock",
+        resourceId: orderId,
+        action: "Adjust",
+        title: "کاهش موجودی دستی",
+        message: `کاهش موجودی برای سفارش دستی #${orderId}`,
+        messageEn: `Stock decremented for manual order #${orderId}`,
+        severity: "info",
+        changes,
+        metadata: {
+          orderId,
+          itemsProcessed: stockResults.length,
+          stockResults,
+        },
+        performedBy: {
+          id: fullUser.id,
+          role: roleName,
+        },
+        ip,
+        userAgent,
+      });
+    } catch (activityError) {
+      // Log error but don't prevent main operation from succeeding
+      strapi.log.error("Failed to log manual activity for stock decrement", {
+        orderId,
+        error: (activityError as Error).message,
+      });
+    }
 
     ctx.status = 200;
     ctx.body = {

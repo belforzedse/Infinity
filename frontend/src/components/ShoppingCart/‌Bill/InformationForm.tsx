@@ -137,7 +137,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
         return;
       }
 
-      if (lastProvinceId === provinceId && cities.length > 0) {
+      if (lastProvinceId === provinceId) {
         // Already loaded for this province
         return;
       }

@@ -174,6 +174,7 @@ export default factories.createCoreController(
           orderId: String(SaleOrderId || ""),
           saleOrderId: String(SaleOrderId || ""),
           saleReferenceId: String(SaleReferenceId || ""),
+          allowResCode45Success: true,
         });
 
         if (!settleResult?.success) {

@@ -627,8 +627,18 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       requestBody: ctx.request.body,
     });
     if (error?.status) {
-      // Preserve original structured errors thrown earlier
-      throw error;
+      // Convert structured errors to ctx.badRequest() format per payment error guideline
+      const errorCode = error.errorCode || error.code || "PAYMENT_ERROR";
+      const message = error.message || error.error || "خطا در پردازش درخواست";
+      return ctx.badRequest(message, {
+        data: {
+          success: false,
+          errorCode,
+          message,
+          timestamp: new Date().toISOString(),
+          userId: user?.id,
+        },
+      });
     }
     return ctx.badRequest(error.message, {
       data: {

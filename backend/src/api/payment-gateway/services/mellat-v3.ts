@@ -584,9 +584,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
 
       const inquiryRequest = {
-        orderId: params.orderId,
-        saleOrderId: params.saleOrderId,
-        saleReferenceId: params.saleReferenceId,
+        orderId: normalizeNumericParam(params.orderId),
+        saleOrderId: normalizeNumericParam(params.saleOrderId),
+        saleReferenceId: normalizeNumericParam(params.saleReferenceId),
       };
 
       const response = await mellat.inquiryRequest(inquiryRequest);
