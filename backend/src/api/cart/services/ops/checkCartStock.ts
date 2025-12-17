@@ -10,6 +10,36 @@ export const checkCartStockOp = async (strapi: Strapi, userId: number) => {
   const removals: any[] = [];
 
   for (const item of cart.cart_items) {
+    const variation = item.product_variation;
+    const product = variation?.product;
+
+    // Check if product is soft-deleted or inactive
+    if (product?.removedAt || product?.Status === "InActive") {
+      await strapi.service("api::cart.cart").removeCartItem(item.id);
+      removals.push({
+        cartItemId: item.id,
+        productVariationId: variation?.id,
+        productTitle: product?.Title,
+        message: "Product is no longer available, item removed from cart",
+        reason: product?.removedAt ? "soft_deleted" : "inactive",
+      });
+      continue;
+    }
+
+    // Check if variation is unpublished
+    if (variation?.IsPublished === false) {
+      await strapi.service("api::cart.cart").removeCartItem(item.id);
+      removals.push({
+        cartItemId: item.id,
+        productVariationId: variation?.id,
+        productTitle: product?.Title,
+        message:
+          "Product variation is no longer available, item removed from cart",
+        reason: "unpublished_variation",
+      });
+      continue;
+    }
+
     if (!item.product_variation?.product_stock) {
       await strapi.service("api::cart.cart").removeCartItem(item.id);
       removals.push({
