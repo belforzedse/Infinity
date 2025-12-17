@@ -42,6 +42,13 @@ export default () => ({
       },
     },
   },
+  "users-permissions": {
+    config: {
+      jwt: {
+        expiresIn: "7d", // JWT token expiry (changed from default 30d to 7d)
+      },
+    },
+  },
   upload: {
     config: {
       providerOptions: {

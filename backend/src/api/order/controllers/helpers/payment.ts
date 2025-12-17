@@ -142,11 +142,21 @@ async function incrementDiscountUsageCounter(
 }
 
 async function clearCartAfterPayment(strapi: Strapi, orderId?: number) {
-  if (!orderId) return;
+  if (!orderId) {
+    strapi.log.warn("clearCartAfterPayment called without orderId");
+    return;
+  }
+
   try {
     const order = await strapi.entityService.findOne("api::order.order", orderId, {
       populate: { user: true },
     });
+
+    if (!order) {
+      strapi.log.error("clearCartAfterPayment: Order not found", { orderId });
+      return;
+    }
+
     const userRelation: any = order?.user;
     const userId =
       typeof userRelation === "object" && userRelation
@@ -154,15 +164,30 @@ async function clearCartAfterPayment(strapi: Strapi, orderId?: number) {
         : typeof userRelation === "number"
         ? userRelation
         : undefined;
-    if (!userId) return;
+
+    if (!userId) {
+      strapi.log.error("clearCartAfterPayment: Could not extract userId from order", {
+        orderId,
+        userRelationType: typeof userRelation,
+        userRelation: userRelation,
+      });
+      return;
+    }
+
+    strapi.log.info("clearCartAfterPayment: Attempting to clear cart", { orderId, userId });
+
     const cartService: any = strapi.service("api::cart.cart");
     if (cartService?.clearCart) {
       await cartService.clearCart(userId);
+      strapi.log.info("clearCartAfterPayment: Cart cleared successfully", { orderId, userId });
+    } else {
+      strapi.log.error("clearCartAfterPayment: Cart service or clearCart method not available");
     }
   } catch (error: any) {
     strapi.log.error("Failed to clear cart after payment", {
       orderId,
       error: error?.message || error,
+      stack: error?.stack,
     });
   }
 }

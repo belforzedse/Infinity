@@ -96,7 +96,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Initialize cart based on authentication status
   useEffect(() => {
     if (isLoggedIn) {
-      fetchUserCart();
+      // First check and clean up the cart (removes soft-deleted, inactive, and out-of-stock items)
+      // checkCartStock() will call fetchUserCart() if items were removed/adjusted
+      // If cart is valid (no changes), we need to fetch it ourselves
+      const initializeCart = async () => {
+        try {
+          const isValid = await checkCartStock();
+          // If cart was valid (no changes), fetch it to display
+          // If invalid, checkCartStock already called fetchUserCart()
+          if (isValid) {
+            await fetchUserCart();
+          }
+        } catch (error) {
+          console.error("Failed to initialize cart:", error);
+          // Try to fetch cart anyway on error
+          try {
+            await fetchUserCart();
+          } catch (fetchError) {
+            console.error("Failed to fetch cart after error:", fetchError);
+          }
+        }
+      };
+      initializeCart();
     } else {
       // Load cart from localStorage for non-logged in users
       const storedCart = localStorage.getItem("cart");

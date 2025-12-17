@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
+import { useCart } from "@/contexts/CartContext";
 
 interface OrderDetails {
   id: number;
@@ -30,6 +31,7 @@ function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const { clearCart } = useCart();
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,11 +40,15 @@ function PaymentSuccessContent() {
   useEffect(() => {
     if (orderId) {
       fetchOrderDetails(orderId);
+      // Clear cart as safety net (backend should have already cleared it)
+      clearCart().catch((err) => {
+        console.warn("Failed to clear cart on success page:", err);
+      });
     } else {
       setLoading(false);
       setError("شناسه سفارش یافت نشد");
     }
-  }, [orderId]);
+  }, [orderId, clearCart]);
 
   const fetchOrderDetails = async (orderIdParam: string) => {
     try {
