@@ -78,7 +78,7 @@ function ShoppingCartBillPaymentGateway({
       <button
         onClick={() => !snappay.disabled && onChange(snappay.id)}
         className={classNames(
-          "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 transition-opacity duration-300 lg:gap-6 lg:p-2",
+          "flex w-full flex-row items-center hidden justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 transition-opacity duration-300 lg:gap-6 lg:p-2",
           selected === snappay.id && "!border-pink-600",
           snappay.disabled && "cursor-not-allowed opacity-50",
         )}
@@ -100,9 +100,10 @@ function ShoppingCartBillPaymentGateway({
           <span className="text-md lg:text-lg">{snappay.helper}</span>
         </div>
       </button>
+
       <div className="flex w-full flex-col gap-2">
         {/* Bottom row: Saman, Mellat, Wallet */}
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {/* Saman Kish Payment Gateway */}
           <button
             onClick={() => onChange(saman.id)}
@@ -124,7 +125,7 @@ function ShoppingCartBillPaymentGateway({
             <span className="text-sm lg:text-base">درگاه پرداخت {saman.name}</span>
           </button>
 
-          {/* Mellat Payment Gateway */}
+          {/* Mellat Payment Gateway
           <button
             onClick={() => onChange(mellat.id)}
             className={classNames(
@@ -143,7 +144,7 @@ function ShoppingCartBillPaymentGateway({
               />
             </div>
             <span className="text-sm lg:text-base">درگاه پرداخت {mellat.name}</span>
-          </button>
+          </button> */}
 
           {/* Wallet Payment Gateway */}
           <button
