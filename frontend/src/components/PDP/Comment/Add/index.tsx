@@ -34,7 +34,7 @@ export default function PDPCommentAdd(props: Props) {
   }, [onReviewSubmitted]);
 
   // Extract data for special offer card from productData
-  const attrs = productData?.attributes || {};
+  const attrs = productData?.attributes || ({} as any);
   const discountPrice = attrs.DiscountPrice;
   const price = attrs.Price;
   const discount = attrs.Discount;

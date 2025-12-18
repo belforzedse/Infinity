@@ -427,7 +427,6 @@ export default function ShareModal({
 
               <FacebookShareButton
                 url={shareUrl}
-                quote={shareText}
                 className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
                 disabled={!shareUrl}
                 onClick={closeSoon}

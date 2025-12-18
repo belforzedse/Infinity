@@ -83,6 +83,20 @@ export default function VirtualizedList({
   checkStockAvailability: checkStockAvailabilityProp,
   containerHeight = 800,
 }: VirtualizedListProps) {
+  // Track viewport width on client to avoid SSR flicker and respond to resize/orientation changes
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateWidth = () => setViewportWidth(window.innerWidth);
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    window.addEventListener("orientationchange", updateWidth);
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+      window.removeEventListener("orientationchange", updateWidth);
+    };
+  }, []);
+
   // Process products into a format suitable for rendering
   const processedProducts = useMemo(() => {
     const isMobileView = (viewportWidth ?? Infinity) < 768;
@@ -90,11 +104,11 @@ export default function VirtualizedList({
       const firstValidVariation = product.attributes.product_variations?.data?.find(
         (variation) => {
           const price = variation.attributes.Price;
-          return price && parseInt(price) > 0;
+          return price && parseInt(price.toString()) > 0;
         },
       );
 
-      const price = parseInt(firstValidVariation?.attributes?.Price || "0");
+      const price = parseInt(firstValidVariation?.attributes?.Price?.toString() || "0");
 
       const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
       let discountPrice = undefined;
@@ -105,7 +119,7 @@ export default function VirtualizedList({
         discount = discountAmount;
         discountPrice = Math.round(price * (1 - discountAmount / 100));
       } else if (firstValidVariation?.attributes?.DiscountPrice) {
-        discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+        discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice.toString());
         const hasDiscount = discountPrice && discountPrice < price;
         discount = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : undefined;
       }
@@ -134,7 +148,7 @@ export default function VirtualizedList({
             ? []
             : product.attributes.Media?.data
                 ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
-                ?.map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`) || []),
+                ?.map((m) => `${IMAGE_BASE_URL}${m.attributes?.url || ""}`) || []),
         ].filter(Boolean),
         isAvailable,
       };
@@ -192,20 +206,6 @@ export default function VirtualizedList({
       </div>
     );
   };
-
-  // Track viewport width on client to avoid SSR flicker and respond to resize/orientation changes
-  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
-
-  useEffect(() => {
-    const updateWidth = () => setViewportWidth(window.innerWidth);
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    window.addEventListener("orientationchange", updateWidth);
-    return () => {
-      window.removeEventListener("resize", updateWidth);
-      window.removeEventListener("orientationchange", updateWidth);
-    };
-  }, []);
 
   const isMobile = (viewportWidth ?? Infinity) < 768;
   const DESKTOP_ITEM_HEIGHT = 420;

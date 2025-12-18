@@ -164,7 +164,7 @@ async function getProducts(
                       : []
                   ).map((variation) => {
                     // Handle both direct variation and nested variation formats
-                    const variationData = 'attributes' in variation ? variation.attributes : variation;
+                    const variationData: any = 'attributes' in variation ? variation.attributes : variation;
                     return {
                       attributes: {
                         SKU: "",

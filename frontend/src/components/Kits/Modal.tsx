@@ -8,6 +8,9 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  title?: string;
+  titleClassName?: string;
+  closeIcon?: React.ReactNode;
   "aria-labelledby"?: string;
 }
 
@@ -16,6 +19,9 @@ export default function Modal({
   onClose,
   children,
   className = "",
+  title,
+  titleClassName = "",
+  closeIcon,
   "aria-labelledby": ariaLabelledby,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -66,28 +72,40 @@ export default function Modal({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="group absolute left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white active:scale-95"
-          aria-label="بستن"
-        >
-          <svg
-            className="h-6 w-6 text-gray-600 group-hover:text-gray-900"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          {title && (
+            <h3 className={`text-lg font-bold text-gray-900 ${titleClassName}`}>
+              {title}
+            </h3>
+          )}
+          
+          <button
+            onClick={onClose}
+            className="group flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 transition-all hover:bg-gray-100 active:scale-95"
+            aria-label="بستن"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            {closeIcon || (
+              <svg
+                className="h-6 w-6 text-gray-600 group-hover:text-gray-900"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
 
-        {children}
+        <div className="p-6">
+          {children}
+        </div>
       </div>
     </div>,
     document.body,
