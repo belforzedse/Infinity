@@ -38,7 +38,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
   }
 
   return (
-    <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-auto">
+    <div className="relative mx-auto h-[270px] w-[250px] overflow-hidden rounded-[21px]">
       <div
         className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         onScroll={handleScroll}
@@ -52,7 +52,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
               className={`select-none object-cover transition-all duration-300 ${
                 !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
               }`}
-              sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
+              sizes="(max-width: 768px) 250px, 250px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}
               loader={imageLoader}
@@ -66,19 +66,6 @@ const ImageSlider: FC<ImageSliderProps> = ({
           <div className="rounded-full bg-neutral-800/70 px-4 py-1.5 shadow-xl backdrop-blur-md ring-1 ring-white/20">
             <span className="text-sm font-bold text-white tracking-wider">ناموجود</span>
           </div>
-        </div>
-      )}
-
-      {validImages.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-0.5">
-          {validImages.map((_, index) => (
-            <div
-              key={index}
-              className={`h-0.5 rounded-full transition-all duration-300 ${
-                currentSlide === index ? "w-7 bg-foreground-primary" : "w-[9px] bg-white"
-              }`}
-            />
-          ))}
         </div>
       )}
     </div>
