@@ -2,6 +2,7 @@ export const PLUGIN_ROLE_LABELS: Record<string, string> = {
   Superadmin: "سوپر ادمین",
   "Store manager": "مدیر فروشگاه",
   Customer: "مشتری",
+  Editor: "ویرایشگر",
 };
 
 export const translatePluginRoleLabel = (roleName?: string | null) => {
