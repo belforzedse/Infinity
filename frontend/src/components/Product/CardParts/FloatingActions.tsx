@@ -10,7 +10,7 @@ interface FloatingActionsProps {
   isLikeLoading: boolean;
   onToggleLike: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onQuickView: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onCompare: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onShare: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
@@ -18,7 +18,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   isLikeLoading,
   onToggleLike,
   onQuickView,
-  onCompare,
+  onShare,
 }) => {
   const buttonBaseClass =
     "glass-chip flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-full ring-1 ring-white/60 transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] shadow-[0_0_10px_rgba(236,72,153,0.15)] touch-manipulation";
@@ -56,11 +56,11 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         <EyeIcon className="h-5 w-5 text-neutral-500 md:h-4 md:w-4" />
       </button>
 
-      {/* Compare Button */}
+      {/* Share Button */}
       <button
-        onClick={onCompare}
+        onClick={onShare}
         className={`${buttonBaseClass} z-10 opacity-100 md:-translate-y-20 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
-        aria-label="افزودن به لیست مقایسه"
+        aria-label="اشتراک‌گذاری"
       >
         <ShuffleIcon className="h-5 w-5 text-neutral-500 md:h-4 md:w-4" />
       </button>

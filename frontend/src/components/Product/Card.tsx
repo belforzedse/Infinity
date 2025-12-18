@@ -23,7 +23,7 @@ const QuickViewModal = dynamic(() => import("./QuickViewModal"), {
   loading: () => null,
 });
 
-const CompareModal = dynamic(() => import("./CompareModal"), {
+const ShareModal = dynamic(() => import("./ShareModal"), {
   ssr: false,
   loading: () => null,
 });
@@ -64,7 +64,7 @@ const ProductCard: FC<ProductCardProps> = ({
 }) => {
   // State
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // Hooks
   const {
@@ -107,10 +107,10 @@ const ProductCard: FC<ProductCardProps> = ({
     setIsQuickViewOpen(true);
   }, []);
 
-  const handleCompare = useCallback((e: React.MouseEvent) => {
+  const handleShare = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsCompareOpen(true);
+    setIsShareOpen(true);
   }, []);
 
   const handleToggleLike = useCallback(
@@ -193,7 +193,7 @@ const ProductCard: FC<ProductCardProps> = ({
           isLikeLoading={isLikeLoading}
           onToggleLike={handleToggleLike}
           onQuickView={handleQuickView}
-          onCompare={handleCompare}
+          onShare={handleShare}
         />
       </article>
 
@@ -206,13 +206,18 @@ const ProductCard: FC<ProductCardProps> = ({
         />
       )}
 
-      {isCompareOpen && (
-        <CompareModal
-          isOpen={isCompareOpen}
-          onClose={() => setIsCompareOpen(false)}
-          productId={id}
-        />
-      )}
+      <ShareModal
+        open={isShareOpen}
+        onOpenChange={setIsShareOpen}
+        product={{
+          id,
+          title,
+          slug,
+          imageUrl: images.find((img) => img && typeof img === "string" && img.trim() !== ""),
+          price,
+          discountPrice,
+        }}
+      />
     </>
   );
 };
