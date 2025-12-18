@@ -49,6 +49,18 @@ export default function PDPComment(props: Props) {
     }
   };
 
+  const handleLike = (id: number) => {
+    toast.success("از ثبت امتیاز شما سپاسگزاریم");
+  };
+
+  const handleDislike = (id: number) => {
+    toast.success("از ثبت امتیاز شما سپاسگزاریم");
+  };
+
+  const handleReply = (id: number) => {
+    toast.error("ثبت پاسخ بزودی فعال خواهد شد");
+  };
+
   return (
     <div
       className="flex flex-col-reverse gap-4 md:flex-row"
@@ -57,10 +69,13 @@ export default function PDPComment(props: Props) {
       style={{ scrollMarginTop: "var(--header-offset, 88px)" }}
     >
       <div className="flex-1">
-        <PDPCommentList 
-          reviews={reviews} 
+        <PDPCommentList
+          reviews={reviews}
           onStatusUpdate={handleStatusUpdate}
           onDelete={handleDelete}
+          onLike={handleLike}
+          onDislike={handleDislike}
+          onReply={handleReply}
         />
       </div>
 

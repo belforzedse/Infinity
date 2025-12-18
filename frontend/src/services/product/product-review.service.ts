@@ -1,7 +1,5 @@
 import { apiClient } from "@/services";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
-import { API_BASE_URL } from "@/constants/api";
-import logger from "@/utils/logger";
 
 export interface ProductReview {
   id: number;
@@ -21,6 +19,7 @@ export interface ProductReview {
   product?: {
     id: number;
     Title: string;
+    Slug?: string;
   };
   product_review_replies?: ProductReviewReply[];
   createdAt: string;
@@ -51,19 +50,6 @@ export interface ProductReviewListParams {
 }
 
 class ProductReviewService {
-  private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return headers;
-  }
-
   private unwrapRelation(rel: any): any {
     if (!rel?.data) return undefined;
     if (Array.isArray(rel.data)) {
@@ -76,7 +62,9 @@ class ProductReviewService {
   }
 
   private normalizeReview(entry: any): ProductReview {
-    if (!entry) return entry;
+    if (!entry) {
+      throw new Error("Cannot normalize empty review entry");
+    }
     const attrs = entry.attributes || entry;
 
     // Normalize user
@@ -120,128 +108,100 @@ class ProductReviewService {
 
   // Get approved reviews for a specific product
   async getProductReviews(productId: number | string, params: ProductReviewListParams = {}): Promise<PaginatedResponse<ProductReview>> {
-    const searchParams = new URLSearchParams();
-    searchParams.append("filters[product][id][$eq]", productId.toString());
-    searchParams.append("filters[Status][$eq]", "Accepted");
-    searchParams.append("filters[removedAt][$null]", "true");
+    const query: any = {
+      filters: {
+        product: { id: { $eq: productId.toString() } },
+        Status: { $eq: "Accepted" },
+        removedAt: { $null: "true" },
+      },
+      pagination: {
+        page: params.page || 1,
+        pageSize: params.pageSize || 10,
+      },
+      sort: params.sort || "createdAt:desc",
+      populate: {
+        user: { populate: ["user_info"] },
+        product_review_replies: { populate: { user: { populate: ["user_info"] } } },
+      },
+    };
 
-    searchParams.append("pagination[page]", (params.page || 1).toString());
-    searchParams.append("pagination[pageSize]", (params.pageSize || 10).toString());
-    searchParams.append("sort", params.sort || "createdAt:desc");
+    const response = await apiClient.get<any>("/product-reviews", { params: query });
 
-    searchParams.append("populate[user][populate][user_info]", "*");
-    searchParams.append("populate[product_review_replies][populate][user][populate][user_info]", "*");
-
-    const response = await fetch(`${API_BASE_URL}/product-reviews?${searchParams}`, {
-      headers: this.getHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch product reviews");
-    }
-
-    const json = await response.json();
     return {
-      data: (json.data || []).map((item: any) => this.normalizeReview(item)),
-      meta: json.meta,
+      data: (response.data || []).map((item: any) => this.normalizeReview(item)),
+      meta: response.meta,
     };
   }
 
   // Get all reviews for admin moderation
   async getAllReviews(params: ProductReviewListParams = {}): Promise<PaginatedResponse<ProductReview>> {
-    const searchParams = new URLSearchParams();
+    const query: any = {
+      filters: {
+        removedAt: { $null: "true" },
+      },
+      pagination: {
+        page: params.page || 1,
+        pageSize: params.pageSize || 20,
+      },
+      sort: params.sort || "createdAt:desc",
+      populate: {
+        user: { populate: ["user_info"] },
+        product: "*",
+      },
+    };
 
     if (params.status && params.status !== "all") {
-      searchParams.append("filters[Status][$eq]", params.status);
+      query.filters.Status = { $eq: params.status };
     }
 
     if (params.search) {
-      searchParams.append("filters[Content][$containsi]", params.search);
+      query.filters.Content = { $containsi: params.search };
     }
 
-    searchParams.append("pagination[page]", (params.page || 1).toString());
-    searchParams.append("pagination[pageSize]", (params.pageSize || 20).toString());
-    searchParams.append("sort", params.sort || "createdAt:desc");
+    const response = await apiClient.get<any>("/product-reviews", { params: query });
 
-    searchParams.append("populate[user][populate][user_info]", "*");
-    searchParams.append("populate[product]", "*");
-    searchParams.append("filters[removedAt][$null]", "true");
-
-    const response = await fetch(`${API_BASE_URL}/product-reviews?${searchParams}`, {
-      headers: this.getHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch all reviews");
-    }
-
-    const json = await response.json();
     return {
-      data: (json.data || []).map((item: any) => this.normalizeReview(item)),
-      meta: json.meta,
+      data: (response.data || []).map((item: any) => this.normalizeReview(item)),
+      meta: response.meta,
     };
   }
 
   // Submit a new review
   async submitReview(productId: number | string, rate: number, content: string): Promise<ApiResponse<ProductReview>> {
-    const response = await fetch(`${API_BASE_URL}/product-reviews`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify({
-        data: {
-          product: productId,
-          Rate: rate,
-          Content: content,
-          Date: new Date().toISOString(),
-          Status: "Need for Review",
-        },
-      }),
+    const response = await apiClient.post<any>("/product-reviews", {
+      data: {
+        product: productId,
+        Rate: rate,
+        Content: content,
+        Date: new Date().toISOString(),
+        Status: "Need for Review",
+      },
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || "Failed to submit review");
-    }
-
-    const json = await response.json();
-    return { data: this.normalizeReview(json.data), meta: json.meta };
+    return {
+      data: this.normalizeReview(response.data),
+      meta: response.meta,
+    };
   }
 
   // Update review status (Admin)
   async updateStatus(id: number | string, status: "Need for Review" | "Accepted" | "Rejected"): Promise<ApiResponse<ProductReview>> {
-    const response = await fetch(`${API_BASE_URL}/product-reviews/${id}`, {
-      method: "PUT",
-      headers: this.getHeaders(),
-      body: JSON.stringify({
-        data: { Status: status },
-      }),
+    const response = await apiClient.put<any>(`/product-reviews/${id}`, {
+      data: { Status: status },
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || "Failed to update review status");
-    }
-
-    const json = await response.json();
-    return { data: this.normalizeReview(json.data), meta: json.meta };
+    return {
+      data: this.normalizeReview(response.data),
+      meta: response.meta,
+    };
   }
 
   // Delete review (Admin - soft delete)
   async deleteReview(id: number | string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/product-reviews/${id}`, {
-      method: "PUT",
-      headers: this.getHeaders(),
-      body: JSON.stringify({
-        data: { removedAt: new Date().toISOString() },
-      }),
+    await apiClient.put(`/product-reviews/${id}`, {
+      data: { removedAt: new Date().toISOString() },
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || "Failed to delete review");
-    }
   }
 }
 
 export const productReviewService = new ProductReviewService();
-

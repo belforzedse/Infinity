@@ -6,9 +6,10 @@ import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import GridIcon from "@/components/Product/Icons/GridIcon";
 import LookBasketIcon from "../../Icons/LookBasketIcon";
+import { useRouter } from "next/navigation";
 
 type Props = {
-  endOfferDate: Date;
+  endOfferDate?: Date;
   imageSrc: string;
   category: string;
   title: string;
@@ -19,6 +20,7 @@ type Props = {
 
 export default function PDPCommentAddSpecialOffer(props: Props) {
   const { endOfferDate, imageSrc, category, title, discount, discountPrice, price } = props;
+  const router = useRouter();
 
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
@@ -27,6 +29,8 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
   });
 
   useEffect(() => {
+    if (!endOfferDate) return;
+
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const distance = endOfferDate.getTime() - now;
@@ -47,54 +51,55 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
   }, [endOfferDate]);
 
   return (
-    <div className="flex flex-col gap-3 bg-stone-50 rounded-3xl  p-4">
+    <div className="flex flex-col gap-3 bg-stone-50 rounded-3xl p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-3xl text-actions-primary">تخفیف ویژه</span>
-
           <DiscountIcon />
         </div>
 
-        <div className="flex flex-row-reverse items-center gap-1">
-          {/* hours */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
-            <span className="text-xs text-foreground-primary">
-              {timeLeft.hours.toString().padStart(2, "0")}
-            </span>
+        {endOfferDate && (
+          <div className="flex flex-row-reverse items-center gap-1">
+            {/* hours */}
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
+              <span className="text-xs text-foreground-primary">
+                {timeLeft.hours.toString().padStart(2, "0")}
+              </span>
+            </div>
+
+            <span className="text-xs text-foreground-primary">:</span>
+
+            {/* minutes */}
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
+              <span className="text-xs text-foreground-primary">
+                {timeLeft.minutes.toString().padStart(2, "0")}
+              </span>
+            </div>
+
+            <span className="text-xs text-foreground-primary">:</span>
+
+            {/* seconds */}
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
+              <span className="text-xs text-foreground-primary">
+                {timeLeft.seconds.toString().padStart(2, "0")}
+              </span>
+            </div>
           </div>
-
-          <span className="text-xs text-foreground-primary">:</span>
-
-          {/* minutes */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
-            <span className="text-xs text-foreground-primary">
-              {timeLeft.minutes.toString().padStart(2, "0")}
-            </span>
-          </div>
-
-          <span className="text-xs text-foreground-primary">:</span>
-
-          {/* seconds */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white">
-            <span className="text-xs text-foreground-primary">
-              {timeLeft.seconds.toString().padStart(2, "0")}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="h-[79px] w-[82px] overflow-hidden rounded-xl">
-          <Image width={82} height={79} src={imageSrc} alt="special offer" loader={imageLoader} />
+        <div className="h-[79px] w-[82px] overflow-hidden rounded-xl bg-white">
+          <Image width={82} height={79} src={imageSrc} alt="special offer" loader={imageLoader} className="object-cover h-full w-full" />
         </div>
 
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1">
-            <GridIcon className="text-neutral-400" />
-            <span className="text-xs text-neutral-400">{category}</span>
+          <div className="flex items-center gap-1 text-neutral-400">
+            <GridIcon />
+            <span className="text-xs">{category}</span>
           </div>
 
-          <span className="text-xl text-foreground-primary">{title}</span>
+          <span className="text-xl text-foreground-primary truncate max-w-[200px]">{title}</span>
         </div>
       </div>
 
@@ -106,24 +111,25 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
         </div>
 
         <div className="flex items-center gap-2 self-end">
-          {discountPrice && (
+          {discountPrice > 0 && (
             <span className="text-xl text-pink-600">
-              {(discountPrice || price).toLocaleString("fa-IR")}تومان
+              {discountPrice.toLocaleString("fa-IR")} تومان
             </span>
           )}
 
           <span
             className={`${
-              discountPrice
+              discountPrice > 0
                 ? "text-sm text-foreground-muted line-through"
                 : "text-xl text-neutral-700"
             }`}
           >
-            {price.toLocaleString("fa-IR")}تومان
+            {price.toLocaleString("fa-IR")} تومان
           </span>
         </div>
 
         <button
+          onClick={() => router.push("/cart")}
           className="flex h-[49px] w-full items-center justify-center gap-2 rounded-[12px] border border-slate-100 bg-white text-[16px] hover:bg-actions-primary hover:text-white font-medium text-[#DB2777] transition-all active:scale-[0.98]"
         >
           <LookBasketIcon />

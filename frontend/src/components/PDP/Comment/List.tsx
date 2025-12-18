@@ -11,9 +11,19 @@ type Props = {
   reviews: ProductReview[];
   onStatusUpdate?: (id: number, status: "Accepted" | "Rejected") => void;
   onDelete?: (id: number) => void;
+  onLike?: (id: number) => void;
+  onDislike?: (id: number) => void;
+  onReply?: (id: number) => void;
 };
 
-export default function PDPCommentList({ reviews, onStatusUpdate, onDelete }: Props) {
+export default function PDPCommentList({
+  reviews,
+  onStatusUpdate,
+  onDelete,
+  onLike,
+  onDislike,
+  onReply,
+}: Props) {
   const [sortOption, setSortOption] = useState<SortOption>("newest");
   const [showSortOptions, setShowSortOptions] = useState(false);
 
@@ -88,6 +98,9 @@ export default function PDPCommentList({ reviews, onStatusUpdate, onDelete }: Pr
               review={review}
               onStatusUpdate={onStatusUpdate}
               onDelete={onDelete}
+              onLike={onLike}
+              onDislike={onDislike}
+              onReply={onReply}
             />
           ))
         )}

@@ -658,40 +658,52 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     logger.error("Error fetching related products", { error: String(error) });
   }
 
-  // Format product reviews data for the component
-  const productReviews: ProductReview[] =
-    productData.attributes.product_reviews?.data?.map((review: any) => {
-      const attrs = review.attributes || {};
+      // Format product reviews data for the component
+      const productReviews: ProductReview[] =
+        productData.attributes.product_reviews?.data
+          ?.filter((review: any) => {
+            const attrs = review.attributes || {};
+            return attrs.Status === "Accepted" && !attrs.removedAt;
+          })
+          .map((review: any) => {
+            const attrs = review.attributes || {};
 
-      // Basic normalization to match ProductReview interface
-      return {
-        id: review.id,
-        Content: attrs.Content || "",
-        Status: attrs.Status || "Accepted",
-        Date: attrs.Date || attrs.createdAt,
-        Rate: attrs.Rate || 0,
-        LikeCounts: attrs.LikeCounts || 0,
-        DislikeCounts: attrs.DislikeCounts || 0,
-        user: attrs.user?.data ? {
-          id: attrs.user.data.id,
-          ...attrs.user.data.attributes,
-          user_info: attrs.user.data.attributes?.user_info?.data ? {
-            id: attrs.user.data.attributes.user_info.data.id,
-            ...attrs.user.data.attributes.user_info.data.attributes
-          } : attrs.user.data.attributes?.user_info
-        } : attrs.user,
-        product_review_replies: attrs.product_review_replies?.data?.map((reply: any) => ({
-          id: reply.id,
-          ...reply.attributes,
-          user: reply.attributes?.user?.data ? {
-            id: reply.attributes.user.data.id,
-            ...reply.attributes.user.data.attributes
-          } : reply.attributes?.user
-        })) || [],
-        createdAt: attrs.createdAt,
-        updatedAt: attrs.updatedAt,
-      };
-    }) || [];
+            // Basic normalization to match ProductReview interface
+            return {
+              id: review.id,
+              Content: attrs.Content || "",
+              Status: attrs.Status || "Accepted",
+              Date: attrs.Date || attrs.createdAt,
+              Rate: attrs.Rate || 0,
+              LikeCounts: attrs.LikeCounts || 0,
+              DislikeCounts: attrs.DislikeCounts || 0,
+              user: attrs.user?.data
+                ? {
+                    id: attrs.user.data.id,
+                    ...attrs.user.data.attributes,
+                    user_info: attrs.user.data.attributes?.user_info?.data
+                      ? {
+                          id: attrs.user.data.attributes.user_info.data.id,
+                          ...attrs.user.data.attributes.user_info.data.attributes,
+                        }
+                      : attrs.user.data.attributes?.user_info,
+                  }
+                : attrs.user,
+              product_review_replies:
+                attrs.product_review_replies?.data?.map((reply: any) => ({
+                  id: reply.id,
+                  ...reply.attributes,
+                  user: reply.attributes?.user?.data
+                    ? {
+                        id: reply.attributes.user.data.id,
+                        ...reply.attributes.user.data.attributes,
+                      }
+                    : reply.attributes?.user,
+                })) || [],
+              createdAt: attrs.createdAt,
+              updatedAt: attrs.updatedAt,
+            };
+          }) || [];
 
   const breadcrumbItems = [
     {
