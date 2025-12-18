@@ -159,7 +159,7 @@ const ProductCard: FC<ProductCardProps> = ({
                 <DiscountBadge discount={discount} />
                 {isLowStock && (
                   <div className="flex items-center gap-1 rounded-full bg-orange-500/90 px-2 py-1 backdrop-blur-sm">
-                    <span className="text-xs font-medium text-white">
+                    <span className="text-xs text-white">
                       {faNum(inventoryCount!)} عدد
                     </span>
                   </div>

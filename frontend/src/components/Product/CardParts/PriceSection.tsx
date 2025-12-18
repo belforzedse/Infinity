@@ -24,13 +24,13 @@ export const PriceSection: FC<PriceSectionProps> = ({
         )}
 
         {!isAvailable ? (
-          <span className="text-base font-medium text-red-600 md:text-lg md:group-hover:text-white">
+          <span className="text-base text-red-600 md:text-lg md:group-hover:text-white">
             ناموجود
           </span>
         ) : (
           <div className="flex flex-row flex-wrap items-center justify-start gap-3 text-left md:group-hover:justify-center md:group-hover:gap-4">
             {hasDiscount && discountPrice && (
-              <span className="whitespace-nowrap text-base font-semibold text-pink-600 md:text-lg md:group-hover:text-xl md:group-hover:text-white">
+              <span className="whitespace-nowrap text-base text-pink-600 md:text-lg md:group-hover:text-xl md:group-hover:text-white">
                 {faNum(discountPrice)} تومان
               </span>
             )}
@@ -39,7 +39,7 @@ export const PriceSection: FC<PriceSectionProps> = ({
               className={`${
                 hasDiscount
                   ? "text-xs text-neutral-400 line-through md:group-hover:text-sm md:group-hover:text-pink-100 md:group-hover:no-underline"
-                  : "whitespace-nowrap text-base font-semibold text-neutral-700 md:text-lg md:group-hover:text-xl md:group-hover:text-white"
+                  : "whitespace-nowrap text-base text-neutral-700 md:text-lg md:group-hover:text-xl md:group-hover:text-white"
               }`}
             >
               {faNum(price)} تومان

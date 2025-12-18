@@ -15,7 +15,7 @@ export const DiscountBadge: FC<DiscountBadgeProps> = ({ discount }) => {
       role="status"
       aria-label={`${discount} درصد تخفیف`}
     >
-      <span className="text-xs font-medium text-white">٪{discount} تخفیف</span>
+      <span className="text-xs text-white">٪{discount} تخفیف</span>
     </div>
   );
 };

@@ -22,7 +22,7 @@ export const ProductInfo: FC<ProductInfoProps> = ({ category, title, seenCount }
         </div>
       </div>
 
-      <h3 className="mt-0.5 line-clamp-1 text-sm font-medium text-neutral-800 md:text-base">
+      <h3 className="mt-0.5 line-clamp-1 text-sm text-neutral-800 md:text-base">
         {title}
       </h3>
 
