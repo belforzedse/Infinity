@@ -18,6 +18,7 @@ export interface ProductCardProps {
   discount?: number;
   discountPrice?: number;
   colorsCount?: number;
+  colorCodes?: string[];
   isAvailable?: boolean;
   priority?: boolean;
   productCode?: string;
@@ -34,6 +35,7 @@ const ProductCard: FC<ProductCardProps> = ({
   discount,
   discountPrice,
   colorsCount,
+  colorCodes,
   isAvailable = true,
   priority = false,
 }) => {
@@ -80,11 +82,29 @@ const ProductCard: FC<ProductCardProps> = ({
             </div>
 
             {colorsCount && colorsCount > 0 && (
-            <div className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-md">
-              <span className="text-xs text-neutral-800">{colorsCount > 3 ? `${colorsCount}+` : colorsCount}‌</span>
-              <div className="relative w-4">
-                <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
-                <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
+            <div className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-2xl bg-stone-50/90 px-2 py-1 shadow-md backdrop-blur-sm">
+              <span className="text-sm font-bold text-neutral-800">{colorsCount > 9 ? "9+" : colorsCount}‌</span>
+              <div className="flex items-center -space-x-2 rtl:space-x-reverse">
+                {colorCodes && colorCodes.length > 0 ? (
+                  colorCodes.slice(0, 3).map((code, index) => (
+                    <div
+                      key={index}
+                      className="relative h-5 w-5 rounded-full border-2 border-white shadow-sm overflow-hidden"
+                      style={{ backgroundColor: code, zIndex: 3 - index }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40" />
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="relative h-5 w-5 rounded-full border-2 border-white bg-gradient-to-r from-blue-600 to-blue-400 shadow-sm overflow-hidden" style={{ zIndex: 3 }}>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40" />
+                    </div>
+                    <div className="relative h-5 w-5 rounded-full border-2 border-white bg-gradient-to-r from-pink-600 to-pink-400 shadow-sm overflow-hidden" style={{ zIndex: 2 }}>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40" />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}

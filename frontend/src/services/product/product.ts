@@ -608,7 +608,7 @@ export const getRelatedProductsByMainCategory = async (
     return [];
   }
 
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -645,7 +645,7 @@ export const getRelatedProductsByOtherCategories = async (
       .map((id, index) => `filters[product_other_categories][id][$in][${index}]=${id}`)
       .join("&");
 
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
+    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
 
     const response = await apiClient.get<any>(endpoint);
     return formatProductsToCardProps((response as any).data);
@@ -656,6 +656,49 @@ export const getRelatedProductsByOtherCategories = async (
 };
 
 // Helper function to convert API product data to ProductCardProps format
+/**
+ * Calculate the count of unique colors among published variations
+ */
+export const calculateUniqueColorsCount = (variations: any[]): number => {
+  if (!variations || !Array.isArray(variations)) return 0;
+
+  const uniqueColors = new Set();
+  variations.forEach((v: any) => {
+    // Handle both nested Strapi format (v.attributes) and flattened format (v)
+    const attrs = v.attributes || v;
+    const colorData = attrs.product_variation_color?.data || attrs.product_variation_color;
+
+    // Only count color if variation is published (defaults to true if undefined)
+    if (attrs.IsPublished !== false && colorData?.id) {
+      uniqueColors.add(colorData.id);
+    }
+  });
+
+  return uniqueColors.size;
+};
+
+/**
+ * Get unique color codes among published variations
+ */
+export const getUniqueColorCodes = (variations: any[]): string[] => {
+  if (!variations || !Array.isArray(variations)) return [];
+
+  const colors = new Map<number, string>();
+  variations.forEach((v: any) => {
+    // Handle both nested Strapi format (v.attributes) and flattened format (v)
+    const attrs = v.attributes || v;
+    const colorData = attrs.product_variation_color?.data || attrs.product_variation_color;
+    const colorCode = colorData?.attributes?.ColorCode || colorData?.ColorCode;
+
+    // Only collect color if variation is published and has a color code
+    if (attrs.IsPublished !== false && colorData?.id && colorCode) {
+      colors.set(colorData.id, colorCode);
+    }
+  });
+
+  return Array.from(colors.values());
+};
+
 export const formatProductsToCardProps = (products: any[]): ProductCardProps[] => {
   // Check if products is undefined or empty
   if (!products || !Array.isArray(products) || products.length === 0) {
@@ -708,14 +751,10 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
           return typeof stockCount === "number" && stockCount > 0;
         }) || false;
 
-      // Calculate unique colors count
-      const uniqueColors = new Set();
-      product.attributes.product_variations?.data?.forEach((v: any) => {
-        if (v.attributes.IsPublished && v.attributes.product_variation_color?.data?.id) {
-          uniqueColors.add(v.attributes.product_variation_color.data.id);
-        }
-      });
-      const colorsCount = uniqueColors.size;
+      // Calculate unique colors count and codes
+      const variations = product.attributes.product_variations?.data || [];
+      const colorsCount = calculateUniqueColorsCount(variations);
+      const colorCodes = getUniqueColorCodes(variations);
 
       // Get first variation's SKU as product code
       const productCode = variation.attributes.SKU || undefined;
@@ -730,6 +769,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         seenCount: product.attributes.RatingCount || 0,
         isAvailable,
         colorsCount: colorsCount > 0 ? colorsCount : undefined,
+        colorCodes: colorCodes.length > 0 ? colorCodes : undefined,
         productCode,
       };
 
@@ -777,7 +817,7 @@ export const getProductsByIds = async (
 
   // Build filter for multiple IDs using $in operator
   const idFilter = `filters[id][$in]=${validIds.join(",")}`;
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validIds.length}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validIds.length}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -808,7 +848,7 @@ export const getProductsBySlugs = async (slugs: string[]): Promise<ProductCardPr
 
   // Build filter for multiple slugs using $in operator
   const slugFilter = `filters[Slug][$in]=${validSlugs.map((slug) => encodeURIComponent(slug)).join(",")}`;
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validSlugs.length}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validSlugs.length}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);

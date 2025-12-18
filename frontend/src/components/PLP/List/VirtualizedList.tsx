@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { ListChildComponentProps } from "react-window";
 import ProductCard from "@/components/Product/Card";
 import ProductSmallCard from "@/components/Product/SmallCard";
+import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import dynamic from "next/dynamic";
 
@@ -110,7 +111,8 @@ export default function VirtualizedList({
         discountPrice,
         discount,
         seenCount: product.attributes.RatingCount || 0,
-        colorsCount: product.attributes.product_variations?.data?.length || 0,
+        colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
+        colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
         image:
           product.attributes.CoverImage?.data?.attributes?.url
             ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
@@ -141,6 +143,7 @@ export default function VirtualizedList({
           discount={product.discount}
           discountPrice={product.discountPrice}
           colorsCount={product.colorsCount}
+          colorCodes={product.colorCodes}
           isAvailable={product.isAvailable}
           priority={index < 6}
         />
@@ -168,6 +171,7 @@ export default function VirtualizedList({
           isAvailable={product.isAvailable}
           priority={index < 3}
           colorsCount={product.colorsCount}
+          colorCodes={product.colorCodes}
         />
       </div>
     );

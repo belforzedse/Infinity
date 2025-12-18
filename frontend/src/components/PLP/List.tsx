@@ -1,6 +1,7 @@
 "use client";
 
 import { API_BASE_URL, ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
+import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import NoData from "./NoData";
 import dynamic from "next/dynamic";
 import { apiClient } from "@/services";
@@ -194,6 +195,7 @@ export default function PLPList({
     queryParams.append("populate[2]", "product_variations");
     queryParams.append("populate[3]", "product_variations.product_stock");
     queryParams.append("populate[4]", "product_variations.general_discounts");
+    queryParams.append("populate[5]", "product_variations.product_variation_color");
     queryParams.append("fields[0]", "Title");
     queryParams.append("fields[1]", "Slug");
     queryParams.append("fields[2]", "Description");
@@ -539,7 +541,8 @@ export default function PLPList({
               image: product.attributes.CoverImage?.data?.attributes?.url
                 ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
                 : "", // Empty string will trigger BlurImage fallback SVG
-              colorsCount: product.attributes.product_variations?.data?.length || 0,
+              colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
+              colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
             };
           } catch (error) {
             console.warn("Error creating sidebar product:", error, product);
@@ -911,10 +914,10 @@ export default function PLPList({
                       }
                       title={product.attributes.Title}
                       price={price}
-                      seenCount={product.attributes.RatingCount || 0}
                       discount={discount}
                       discountPrice={discountPrice}
-                      colorsCount={product.attributes.product_variations?.data?.length || 0}
+                      colorsCount={calculateUniqueColorsCount(product.attributes.product_variations?.data || [])}
+                      colorCodes={getUniqueColorCodes(product.attributes.product_variations?.data || [])}
                       isAvailable={isAvailable}
                       priority={index < 6}
                     />
@@ -977,7 +980,8 @@ export default function PLPList({
                       }
                       isAvailable={isAvailable}
                       priority={index < 3}
-                      colorsCount={product.attributes.product_variations?.data?.length || 0}
+                      colorsCount={calculateUniqueColorsCount(product.attributes.product_variations?.data || [])}
+                      colorCodes={getUniqueColorCodes(product.attributes.product_variations?.data || [])}
                     />
                   );
                 })}
