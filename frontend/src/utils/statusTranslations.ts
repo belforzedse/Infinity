@@ -62,6 +62,7 @@ const COMMENT_STATUS_MAP: Record<string, string> = {
   accepted: "تایید شده",
   rejected: "رد شده",
   pending: "در حال بررسی",
+  "need for review": "در انتظار تایید",
 };
 
 const ORDER_LOG_TRANSLATIONS: Array<{ key: string; label: string }> = [

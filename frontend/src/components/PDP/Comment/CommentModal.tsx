@@ -3,7 +3,7 @@ import { useState } from "react";
 import EmptyStarIcon from "../Icons/EmptyStarIcon";
 import StarIcon from "../Icons/StarIcon";
 import SendCommentIcon from "../Icons/SendCommentIcon";
-import { submitProductReview } from "@/services/product/reviews";
+import { productReviewService } from "@/services/product/product-review.service";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -51,7 +51,7 @@ export default function PDPCommentModal({ isOpen, onClose, commentCount, product
     setIsSubmitting(true);
 
     try {
-      await submitProductReview(productId, rating, comment.trim());
+      await productReviewService.submitReview(productId, rating, comment.trim());
 
       // Reset form and close modal on success
       resetForm();

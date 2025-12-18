@@ -6,7 +6,7 @@ import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
 import PageContainer from "@/components/layout/PageContainer";
-import type { ProductReview } from "@/components/PDP/Comment/List";
+import type { ProductReview } from "@/services/product/product-review.service";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL, API_BASE_URL, ENDPOINTS } from "@/constants/api";
@@ -658,33 +658,52 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     logger.error("Error fetching related products", { error: String(error) });
   }
 
-  // Format product reviews data for the component
-  const productReviews: ProductReview[] =
-    productData.attributes.product_reviews?.data?.map((review) => {
-      // Use a type assertion to treat the API response as having the correct fields
-      const reviewAttributes = review.attributes as unknown as {
-        Rate: number;
-        Content: string;
-        createdAt: string;
-        LikeCounts: number;
-        DislikeCounts: number;
-        user: typeof review.attributes.user;
-        product_review_replies: typeof review.attributes.product_review_replies;
-      };
+      // Format product reviews data for the component
+      const productReviews: ProductReview[] =
+        productData.attributes.product_reviews?.data
+          ?.filter((review: any) => {
+            const attrs = review.attributes || {};
+            return attrs.Status === "Accepted" && !attrs.removedAt;
+          })
+          .map((review: any) => {
+            const attrs = review.attributes || {};
 
-      return {
-        id: review.id,
-        attributes: {
-          Rate: reviewAttributes.Rate,
-          Content: reviewAttributes.Content,
-          createdAt: reviewAttributes.createdAt,
-          user: reviewAttributes.user,
-          LikeCounts: reviewAttributes.LikeCounts || 0,
-          DislikeCounts: reviewAttributes.DislikeCounts || 0,
-          product_review_replies: reviewAttributes.product_review_replies,
-        },
-      };
-    }) || [];
+            // Basic normalization to match ProductReview interface
+            return {
+              id: review.id,
+              Content: attrs.Content || "",
+              Status: attrs.Status || "Accepted",
+              Date: attrs.Date || attrs.createdAt,
+              Rate: attrs.Rate || 0,
+              LikeCounts: attrs.LikeCounts || 0,
+              DislikeCounts: attrs.DislikeCounts || 0,
+              user: attrs.user?.data
+                ? {
+                    id: attrs.user.data.id,
+                    ...attrs.user.data.attributes,
+                    user_info: attrs.user.data.attributes?.user_info?.data
+                      ? {
+                          id: attrs.user.data.attributes.user_info.data.id,
+                          ...attrs.user.data.attributes.user_info.data.attributes,
+                        }
+                      : attrs.user.data.attributes?.user_info,
+                  }
+                : attrs.user,
+              product_review_replies:
+                attrs.product_review_replies?.data?.map((reply: any) => ({
+                  id: reply.id,
+                  ...reply.attributes,
+                  user: reply.attributes?.user?.data
+                    ? {
+                        id: reply.attributes.user.data.id,
+                        ...reply.attributes.user.data.attributes,
+                      }
+                    : reply.attributes?.user,
+                })) || [],
+              createdAt: attrs.createdAt,
+              updatedAt: attrs.updatedAt,
+            };
+          }) || [];
 
   const breadcrumbItems = [
     {
@@ -745,10 +764,11 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       )}
 
       <PDPComment
+        productId={productId}
+        productReviews={productReviews}
         rating={productData.attributes.AverageRating || 0}
         rateCount={productData.attributes.RatingCount || 0}
-        productReviews={productReviews}
-        productId={productId}
+        productData={productData}
       />
 
       {/* <PDPHeroInfoFAQItem

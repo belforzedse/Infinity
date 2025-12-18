@@ -1,5 +1,6 @@
-import type { ProductReview } from "@/components/PDP/Comment/List";
+import type { ProductReview } from "@/services/product/product-review.service";
 import { safeJsonLd } from "@/utils/seo";
+import { resolveProductReviewUserDisplayName } from "@/utils/productReviewAuthorName";
 
 interface ReviewSchemaProps {
   productName: string;
@@ -20,15 +21,6 @@ export function ReviewSchema({
     return null;
   }
 
-  // Get author name from review
-  const getAuthorName = (review: ProductReview): string => {
-    const userInfo = review.attributes?.user?.data?.attributes?.user_info?.data?.attributes;
-    if (userInfo?.FirstName || userInfo?.LastName) {
-      return `${userInfo.FirstName || ""} ${userInfo.LastName || ""}`.trim();
-    }
-    return "کاربر مهمان";
-  };
-
   // Build aggregate rating
   const aggregateRating = {
     "@type": "AggregateRating",
@@ -42,9 +34,9 @@ export function ReviewSchema({
   const individualReviews = reviews
     .slice(0, 10)
     .map((review) => {
-      const authorName = getAuthorName(review);
-      const reviewDate = review.attributes?.createdAt
-        ? new Date(review.attributes.createdAt).toISOString()
+      const authorName = resolveProductReviewUserDisplayName(review.user, review.user?.Phone);
+      const reviewDate = review.createdAt
+        ? new Date(review.createdAt).toISOString()
         : undefined;
 
       return {
@@ -54,10 +46,10 @@ export function ReviewSchema({
           name: authorName,
         },
         datePublished: reviewDate,
-        reviewBody: review.attributes?.Content || "",
+        reviewBody: review.Content || "",
         reviewRating: {
           "@type": "Rating",
-          ratingValue: review.attributes?.Rate?.toString() || "0",
+          ratingValue: review.Rate?.toString() || "0",
           bestRating: "5",
           worstRating: "1",
         },
