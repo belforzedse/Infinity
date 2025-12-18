@@ -539,6 +539,7 @@ export default function PLPList({
               image: product.attributes.CoverImage?.data?.attributes?.url
                 ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
                 : "", // Empty string will trigger BlurImage fallback SVG
+              colorsCount: product.attributes.product_variations?.data?.length || 0,
             };
           } catch (error) {
             console.warn("Error creating sidebar product:", error, product);
@@ -976,6 +977,7 @@ export default function PLPList({
                       }
                       isAvailable={isAvailable}
                       priority={index < 3}
+                      colorsCount={product.attributes.product_variations?.data?.length || 0}
                     />
                   );
                 })}

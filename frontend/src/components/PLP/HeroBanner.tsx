@@ -103,6 +103,7 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
       discountedPrice: 0,
       discount: 0,
       image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
+      colorsCount: product.attributes.product_variations?.data?.length || 0,
     };
   }
 
@@ -125,6 +126,7 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
     discountedPrice,
     discount,
     image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
+    colorsCount: product.attributes.product_variations?.data?.length || 0,
   };
 };
 

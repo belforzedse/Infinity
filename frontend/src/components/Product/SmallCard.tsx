@@ -20,6 +20,7 @@ export interface ProductSmallCardProps {
   className?: string;
   isAvailable?: boolean;
   priority?: boolean;
+  colorsCount?: number;
 }
 
 const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
@@ -35,6 +36,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   className,
   isAvailable = true,
   priority = false,
+  colorsCount,
 }) => {
   const hasDiscount = Boolean(
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
@@ -61,13 +63,17 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
             priority={priority}
             loader={imageLoader}
           />
-          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-sm">
-            <span className="text-xxs text-neutral-800">3+</span>
-            <div className="relative w-4">
-              <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
-              <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
+          {colorsCount && colorsCount > 0 && (
+            <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-sm">
+              <span className="text-xxs text-neutral-800">
+                {colorsCount > 3 ? `${colorsCount}+` : colorsCount}
+              </span>
+              <div className="relative w-4">
+                <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
+                <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col justify-between py-0.5">

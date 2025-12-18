@@ -111,6 +111,7 @@ export default function FavoritesPage() {
       discountedPrice,
       discount: product.discount || 0,
       image: productImage,
+      colorsCount: product.product_variations?.length || 0,
     };
   };
 

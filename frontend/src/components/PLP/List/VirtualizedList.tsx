@@ -167,6 +167,7 @@ export default function VirtualizedList({
           image={product.image}
           isAvailable={product.isAvailable}
           priority={index < 3}
+          colorsCount={product.colorsCount}
         />
       </div>
     );
