@@ -69,7 +69,12 @@ const ProductCard: FC<ProductCardProps> = ({
       >
         <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">
           <div className="relative">
-            <ImageSlider images={images} title={title} priority={priority} />
+            <ImageSlider
+              images={images}
+              title={title}
+              priority={priority}
+              isAvailable={isAvailable}
+            />
 
             <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
               {discount ? (

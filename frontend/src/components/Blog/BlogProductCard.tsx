@@ -63,7 +63,9 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
                 src={image}
                 alt={title}
                 fill
-                className="object-cover"
+                className={`object-cover transition-all duration-300 ${
+                  !isAvailable ? "grayscale opacity-80 contrast-[0.8]" : ""
+                }`}
                 sizes="152px"
                 priority={priority}
                 loader={imageLoader}

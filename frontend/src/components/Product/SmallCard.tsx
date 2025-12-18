@@ -60,7 +60,9 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
             src={image}
             alt={title}
             fill
-            className="rounded-xl object-cover"
+            className={`rounded-xl object-cover transition-all duration-300 ${
+              !isAvailable ? "grayscale opacity-80 contrast-[0.8]" : ""
+            }`}
             sizes="96px"
             priority={priority}
             loader={imageLoader}

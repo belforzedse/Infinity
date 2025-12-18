@@ -9,9 +9,15 @@ interface ImageSliderProps {
   images: string[];
   title: string;
   priority?: boolean;
+  isAvailable?: boolean;
 }
 
-const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) => {
+const ImageSlider: FC<ImageSliderProps> = ({
+  images,
+  title,
+  priority = false,
+  isAvailable = true,
+}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -43,7 +49,9 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
-              className="select-none object-cover"
+              className={`select-none object-cover transition-all duration-300 ${
+                !isAvailable ? "grayscale opacity-80 contrast-[0.8]" : ""
+              }`}
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}
