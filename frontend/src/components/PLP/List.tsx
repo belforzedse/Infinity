@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { apiClient } from "@/services";
 import { categories as STATIC_CATEGORIES } from "@/constants/categories";
 import { faNum } from "@/utils/faNum";
+import type { ProductCardProps } from "@/components/Product/Card";
 import Filter from "./List/Filter";
 import PLPListMobileFilter from "./List/MobileFilter";
 import HeartIcon from "./Icons/HeartIcon";
@@ -99,6 +100,8 @@ interface PLPListProps {
   pagination: Pagination;
   category?: string;
   searchQuery?: string;
+  discountedSidebarProducts?: ProductCardProps[];
+  suggestedSidebarProducts?: ProductCardProps[];
 }
 
 export default function PLPList({
@@ -106,6 +109,8 @@ export default function PLPList({
   pagination: initialPagination,
   category: initialCategory,
   searchQuery,
+  discountedSidebarProducts = [],
+  suggestedSidebarProducts = [],
 }: PLPListProps) {
   // URL state management with nuqs
   // These hooks are safe to use in client components - the adapter is in root layout
@@ -145,6 +150,32 @@ export default function PLPList({
 
   // Initialize category from prop
   const initializedCategoryRef = useRef(false);
+
+  // Memoize stock availability check
+  const checkStockAvailability = useCallback((product: Product) => {
+    try {
+      if (!product?.attributes?.product_variations?.data) {
+        return false;
+      }
+
+      return product.attributes.product_variations.data.some((variation) => {
+        const attrs = variation?.attributes;
+        if (!attrs) {
+          return false;
+        }
+
+        const stockCount = attrs.product_stock?.data?.attributes?.Count;
+        if (typeof stockCount !== "number" || stockCount <= 0) {
+          return false;
+        }
+
+        return attrs.IsPublished === true;
+      });
+    } catch (error) {
+      console.warn("Error checking stock availability:", error);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     if (!initializedCategoryRef.current && initialCategory) {
@@ -489,6 +520,7 @@ export default function PLPList({
   const sidebarProducts = useMemo(
     () =>
       validProducts
+        .filter((product) => checkStockAvailability(product) && hasImage(product)) // Ensure only in-stock products with images in sidebar
         .slice(0, 3)
         .map((product) => {
           try {
@@ -563,31 +595,46 @@ export default function PLPList({
     [validProducts],
   ); // Filter out invalid products
 
-  // Memoize stock availability check
-  const checkStockAvailability = useCallback((product: Product) => {
-    try {
-      if (!product?.attributes?.product_variations?.data) {
-        return false;
-      }
+  // Mapping helper to convert ProductCardProps to ProductSmallCardProps
+  const mappedDiscountedSidebar = useMemo(() => {
+    return discountedSidebarProducts
+      .filter((p) => p.isAvailable && p.images && p.images[0] && p.images[0] !== "") // Ensure only in-stock products with images
+      .slice(0, 3)
+      .map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      category: p.category,
+      likedCount: p.seenCount || 0,
+      price: p.price,
+      discountedPrice: p.discountPrice,
+      discount: p.discount,
+      image: p.images[0] || "",
+      isAvailable: p.isAvailable,
+      colorsCount: p.colorsCount,
+      colorCodes: p.colorCodes,
+    }));
+  }, [discountedSidebarProducts]);
 
-      return product.attributes.product_variations.data.some((variation) => {
-        const attrs = variation?.attributes;
-        if (!attrs) {
-          return false;
-        }
-
-        const stockCount = attrs.product_stock?.data?.attributes?.Count;
-        if (typeof stockCount !== "number" || stockCount <= 0) {
-          return false;
-        }
-
-        return attrs.IsPublished === true;
-      });
-    } catch (error) {
-      console.warn("Error checking stock availability:", error);
-      return false;
-    }
-  }, []);
+  const mappedSuggestedSidebar = useMemo(() => {
+    return suggestedSidebarProducts
+      .filter((p) => p.isAvailable && p.images && p.images[0] && p.images[0] !== "") // Ensure only in-stock products with images
+      .slice(0, 3)
+      .map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      category: p.category,
+      likedCount: p.seenCount || 0,
+      price: p.price,
+      discountedPrice: p.discountPrice,
+      discount: p.discount,
+      image: p.images[0] || "",
+      isAvailable: p.isAvailable,
+      colorsCount: p.colorsCount,
+      colorCodes: p.colorCodes,
+    }));
+  }, [suggestedSidebarProducts]);
 
   const selectedCategoryTitle = useMemo(() => {
     if (!category) return null;
@@ -791,12 +838,16 @@ export default function PLPList({
               isLoadingCategories={isLoadingCategories}
             />
 
-            <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
+            <SidebarSuggestions
+              title="شاید بپسندید"
+              icon={<HeartIcon />}
+              items={mappedSuggestedSidebar.length > 0 ? mappedSuggestedSidebar : sidebarProducts}
+            />
 
             <SidebarSuggestions
               title="تخفیف های آخرماه"
               icon={<DiscountIcon />}
-              items={sidebarProducts}
+              items={mappedDiscountedSidebar.length > 0 ? mappedDiscountedSidebar : sidebarProducts}
             />
           </div>
         </div>
@@ -896,12 +947,14 @@ export default function PLPList({
 
                   const isAvailable = checkStockAvailability(product);
                   const slug = (product as any)?.attributes?.Slug || product.id.toString();
+                  const seenCount = product.attributes.RatingCount || 0;
 
                   return (
                     <ProductCard
                       key={product.id}
                       id={product.id}
                       slug={slug}
+                      seenCount={seenCount}
                       images={
                         product.attributes.CoverImage?.data?.attributes?.url
                           ? [
