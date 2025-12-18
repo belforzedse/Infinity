@@ -86,6 +86,7 @@ const BlogProductCarousel: React.FC<BlogProductCarouselProps> = ({
               image: product.images[0] || "",
               isAvailable: product.isAvailable,
               colorsCount: product.colorsCount,
+              colorCodes: product.colorCodes,
             };
             return blogCard;
           })

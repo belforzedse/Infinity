@@ -9,9 +9,15 @@ interface ImageSliderProps {
   images: string[];
   title: string;
   priority?: boolean;
+  isAvailable?: boolean;
 }
 
-const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) => {
+const ImageSlider: FC<ImageSliderProps> = ({
+  images,
+  title,
+  priority = false,
+  isAvailable = true,
+}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -43,7 +49,9 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
               src={image}
               alt={`${title} - ${index + 1}`}
               fill
-              className="select-none object-cover"
+              className={`select-none object-cover transition-all duration-300 ${
+                !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
+              }`}
               sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}
@@ -52,6 +60,14 @@ const ImageSlider: FC<ImageSliderProps> = ({ images, title, priority = false }) 
           </div>
         ))}
       </div>
+
+      {!isAvailable && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+          <div className="rounded-full bg-neutral-800/70 px-4 py-1.5 shadow-xl backdrop-blur-md ring-1 ring-white/20">
+            <span className="text-sm font-bold text-white tracking-wider">ناموجود</span>
+          </div>
+        </div>
+      )}
 
       {validImages.length > 1 && (
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-0.5">

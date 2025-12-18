@@ -71,6 +71,7 @@ export default function PDPOffersList(props: Props) {
               discountedPrice={product.discountPrice}
               image={product.images[0]}
               discount={product.discount}
+              colorsCount={product.colorsCount}
             />
           ))}
         </div>

@@ -36,6 +36,15 @@ interface ProductVariation {
         };
       }>;
     };
+    product_variation_color?: {
+      data?: {
+        id: number;
+        attributes: {
+          Title: string;
+          ColorCode: string;
+        };
+      };
+    };
   };
 }
 
@@ -161,6 +170,7 @@ async function getProducts(
                         Price: variationData.Price.toString(),
                         DiscountPrice: variationData.DiscountPrice?.toString(),
                         IsPublished: true,
+                        product_variation_color: variationData.product_variation_color,
                       },
                     };
                   }),
@@ -197,6 +207,7 @@ async function getProducts(
   queryParams.append("populate[2]", "product_variations");
   queryParams.append("populate[3]", "product_variations.product_stock");
   queryParams.append("populate[4]", "product_variations.general_discounts");
+  queryParams.append("populate[5]", "product_variations.product_variation_color");
   queryParams.append("fields[0]", "Title");
   queryParams.append("fields[1]", "Slug");
   queryParams.append("fields[2]", "Description");

@@ -4,6 +4,7 @@ import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import GridIcon from "@/components/Product/Icons/GridIcon";
 import HeartIcon from "@/components/Product/Icons/HeartIcon";
+import ColorSwatches from "@/components/Product/ColorSwatches";
 import useProductLike from "@/hooks/useProductLike";
 import clsx from "clsx";
 import { faNum } from "@/utils/faNum";
@@ -21,6 +22,7 @@ export interface BlogProductCardProps {
   isAvailable?: boolean;
   priority?: boolean;
   colorsCount?: number;
+  colorCodes?: string[];
 }
 
 const BlogProductCard: React.FC<BlogProductCardProps> = ({
@@ -36,6 +38,7 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
   isAvailable = true,
   priority = false,
   colorsCount,
+  colorCodes,
 }) => {
   const hasDiscount = Boolean(
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
@@ -61,11 +64,21 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
                 src={image}
                 alt={title}
                 fill
-                className="object-cover"
+                className={`object-cover transition-all duration-300 ${
+                  !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
+                }`}
                 sizes="152px"
                 priority={priority}
                 loader={imageLoader}
               />
+
+              {!isAvailable && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+                  <div className="rounded-full bg-neutral-800/70 px-3 py-1 shadow-md backdrop-blur-md ring-1 ring-white/10">
+                    <span className="text-[10px] font-bold text-white">ناموجود</span>
+                  </div>
+                </div>
+              )}
 
               {discount && discount > 0 && (
                 <div className="absolute left-1 top-1 flex items-center rounded-bl-xl rounded-tr-xl bg-rose-600 px-2 py-0.5">
@@ -73,17 +86,12 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
                 </div>
               )}
 
-              {colorsCount && colorsCount > 0 && (
-                <div className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-lg bg-stone-50 px-1.5 py-0.5 shadow-sm">
-                  <span className="text-[10px] text-neutral-800">
-                    {colorsCount > 3 ? `${colorsCount}+` : colorsCount}
-                  </span>
-                  <div className="relative w-3">
-                    <div className="absolute left-0 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
-                    <div className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
-                  </div>
-                </div>
-              )}
+              <ColorSwatches
+                colorCodes={colorCodes}
+                colorsCount={colorsCount}
+                size="sm"
+                className="absolute bottom-2 right-2"
+              />
             </div>
           </div>
 

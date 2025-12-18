@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useAtom } from "jotai";
 import ProductSmallCard from "@/components/Product/SmallCard";
+import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import type { ProductLike } from "@/services/product/product-like";
 import ProductLikeService from "@/services/product/product-like";
 import { IMAGE_BASE_URL } from "@/constants/api";
@@ -111,6 +112,8 @@ export default function FavoritesPage() {
       discountedPrice,
       discount: product.discount || 0,
       image: productImage,
+      colorsCount: calculateUniqueColorsCount(product.product_variations || []),
+      colorCodes: getUniqueColorCodes(product.product_variations || []),
     };
   };
 

@@ -5,6 +5,7 @@ import HeartIcon from "./Icons/HeartIcon";
 import GridIcon from "./Icons/GridIcon";
 import Link from "next/link";
 import ImageSlider from "./ImageSlider";
+import ColorSwatches from "./ColorSwatches";
 import useProductLike from "@/hooks/useProductLike";
 
 export interface ProductCardProps {
@@ -18,6 +19,7 @@ export interface ProductCardProps {
   discount?: number;
   discountPrice?: number;
   colorsCount?: number;
+  colorCodes?: string[];
   isAvailable?: boolean;
   priority?: boolean;
   productCode?: string;
@@ -34,6 +36,7 @@ const ProductCard: FC<ProductCardProps> = ({
   discount,
   discountPrice,
   colorsCount,
+  colorCodes,
   isAvailable = true,
   priority = false,
 }) => {
@@ -67,7 +70,12 @@ const ProductCard: FC<ProductCardProps> = ({
       >
         <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">
           <div className="relative">
-            <ImageSlider images={images} title={title} priority={priority} />
+            <ImageSlider
+              images={images}
+              title={title}
+              priority={priority}
+              isAvailable={isAvailable}
+            />
 
             <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
               {discount ? (
@@ -79,15 +87,11 @@ const ProductCard: FC<ProductCardProps> = ({
               )}
             </div>
 
-            {colorsCount && colorsCount > 0 && (
-            <div className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-md">
-              <span className="text-xs text-neutral-800">{colorsCount > 3 ? `${colorsCount}+` : colorsCount}‌</span>
-              <div className="relative w-4">
-                <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
-                <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
-              </div>
-            </div>
-          )}
+            <ColorSwatches
+              colorCodes={colorCodes}
+              colorsCount={colorsCount}
+              className="absolute bottom-2 right-2"
+            />
         </div>
 
         <div className="flex-grow px-1 py-3 md:py-4">

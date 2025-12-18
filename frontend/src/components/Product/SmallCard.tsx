@@ -5,6 +5,7 @@ import Link from "next/link";
 import GridIcon from "./Icons/GridIcon";
 import MoreIcon from "./Icons/MoreIcon";
 import HeartIcon from "./Icons/HeartIcon";
+import ColorSwatches from "./ColorSwatches";
 import clsx from "clsx";
 
 export interface ProductSmallCardProps {
@@ -20,6 +21,8 @@ export interface ProductSmallCardProps {
   className?: string;
   isAvailable?: boolean;
   priority?: boolean;
+  colorsCount?: number;
+  colorCodes?: string[];
 }
 
 const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
@@ -35,6 +38,8 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   className,
   isAvailable = true,
   priority = false,
+  colorsCount,
+  colorCodes,
 }) => {
   const hasDiscount = Boolean(
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
@@ -56,18 +61,26 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
             src={image}
             alt={title}
             fill
-            className="rounded-xl object-cover"
+            className={`rounded-xl object-cover transition-all duration-300 ${
+              !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
+            }`}
             sizes="96px"
             priority={priority}
             loader={imageLoader}
           />
-          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-sm">
-            <span className="text-xxs text-neutral-800">3+</span>
-            <div className="relative w-4">
-              <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
-              <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
+          {!isAvailable && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+              <div className="rounded-full bg-neutral-800/70 px-2.5 py-1 shadow-md backdrop-blur-md ring-1 ring-white/10">
+                <span className="text-[10px] font-bold text-white">ناموجود</span>
+              </div>
             </div>
-          </div>
+          )}
+          <ColorSwatches
+            colorCodes={colorCodes}
+            colorsCount={colorsCount}
+            size="sm"
+            className="absolute bottom-1 right-1"
+          />
         </div>
 
         <div className="flex flex-1 flex-col justify-between py-0.5">
