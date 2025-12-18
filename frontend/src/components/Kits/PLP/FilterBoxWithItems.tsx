@@ -107,13 +107,7 @@ const PLPFilterBoxWithItems = ({
                   </>
                 )}
                 <div
-                  className="scrollbar-thumb-primary max-h-[200px] overflow-y-auto px-2 scrollbar-thin scrollbar-track-slate-50"
-                  style={
-                    {
-                      scrollbarWidth: "thin",
-                      scrollbarColor: "#EC4899 #F8FAFC",
-                    } as React.CSSProperties
-                  }
+                  className="max-h-[200px] overflow-y-auto px-2"
                 >
                   <div className="flex flex-col py-2">
                     {filteredOptions.map((option, index) => (
