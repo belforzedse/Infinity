@@ -5,7 +5,6 @@ import DiscountIcon from "../../Icons/DiscountIcon";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import GridIcon from "@/components/Product/Icons/GridIcon";
-import PLPButton from "@/components/Kits/PLP/Button";
 import LookBasketIcon from "../../Icons/LookBasketIcon";
 
 type Props = {
@@ -48,7 +47,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
   }, [endOfferDate]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-3xl bg-background-secondary p-5">
+    <div className="flex flex-col gap-3 bg-stone-50 rounded-3xl  p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-3xl text-actions-primary">تخفیف ویژه</span>
@@ -124,11 +123,12 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
           </span>
         </div>
 
-        <PLPButton
-          text="مشاهده سبد خرید"
-          leftIcon={<LookBasketIcon />}
-          className="text-base flex items-center justify-center bg-white text-actions-primary"
-        />
+        <button
+          className="flex h-[49px] w-full items-center justify-center gap-2 rounded-[12px] border border-slate-100 bg-white text-[16px] hover:bg-actions-primary hover:text-white font-medium text-[#DB2777] transition-all active:scale-[0.98]"
+        >
+          <LookBasketIcon />
+          <span>مشاهده سبد خرید</span>
+        </button>
       </div>
     </div>
   );
