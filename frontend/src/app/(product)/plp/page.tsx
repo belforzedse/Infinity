@@ -9,6 +9,7 @@ import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
+import { getHomepageSections } from "@/services/product/homepage";
 import logger from "@/utils/logger";
 import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
@@ -498,6 +499,9 @@ export default async function PLPPage({
     hasDiscount,
   );
 
+  // Fetch sidebar products
+  const { discounted, favorites } = await getHomepageSections();
+
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
@@ -570,6 +574,8 @@ export default async function PLPPage({
           pagination={pagination}
           category={validatedCategory}
           searchQuery={search}
+          discountedSidebarProducts={discounted}
+          suggestedSidebarProducts={favorites}
         />
       </Suspense>
     </PageContainer>
