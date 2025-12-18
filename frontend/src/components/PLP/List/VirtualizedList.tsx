@@ -32,6 +32,14 @@ interface Product {
         };
       };
     };
+    Media?: {
+      data?: Array<{
+        attributes?: {
+          url: string;
+          mime: string;
+        };
+      }>;
+    };
     product_main_category?: {
       data?: {
         attributes?: {
@@ -117,9 +125,14 @@ export default function VirtualizedList({
           product.attributes.CoverImage?.data?.attributes?.url
             ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
             : "",
-        images: product.attributes.CoverImage?.data?.attributes?.url
-          ? [`${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`]
-          : [""],
+        images: [
+          product.attributes.CoverImage?.data?.attributes?.url
+            ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+            : "",
+          ...(product.attributes.Media?.data
+            ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
+            ?.map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`) || []),
+        ].filter(Boolean),
         isAvailable,
       };
     });

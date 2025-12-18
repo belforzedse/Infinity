@@ -608,7 +608,7 @@ export const getRelatedProductsByMainCategory = async (
     return [];
   }
 
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&populate[5]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -645,7 +645,7 @@ export const getRelatedProductsByOtherCategories = async (
       .map((id, index) => `filters[product_other_categories][id][$in][${index}]=${id}`)
       .join("&");
 
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
+    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&populate[5]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
 
     const response = await apiClient.get<any>(endpoint);
     return formatProductsToCardProps((response as any).data);
@@ -756,13 +756,22 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
       const colorsCount = calculateUniqueColorsCount(variations);
       const colorCodes = getUniqueColorCodes(variations);
 
+      // Extract additional images from Media
+      const additionalImages = (product.attributes.Media?.data || [])
+        .filter((m: any) => m.attributes?.mime?.startsWith("image/"))
+        .map((m: any) => resolveAssetUrl(m.attributes?.url))
+        .filter(Boolean);
+
       // Get first variation's SKU as product code
       const productCode = variation.attributes.SKU || undefined;
 
       const result: ProductCardProps = {
         id: parseInt(product.id),
         slug: product.attributes.Slug || undefined,
-        images: [resolveAssetUrl(product.attributes.CoverImage?.data?.attributes?.url)],
+        images: [
+          resolveAssetUrl(product.attributes.CoverImage?.data?.attributes?.url),
+          ...additionalImages,
+        ].filter(Boolean),
         category: product.attributes.product_main_category?.data?.attributes?.Title || "",
         title: product.attributes.Title,
         price,
@@ -817,7 +826,7 @@ export const getProductsByIds = async (
 
   // Build filter for multiple IDs using $in operator
   const idFilter = `filters[id][$in]=${validIds.join(",")}`;
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validIds.length}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&populate[6]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validIds.length}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -848,7 +857,7 @@ export const getProductsBySlugs = async (slugs: string[]): Promise<ProductCardPr
 
   // Build filter for multiple slugs using $in operator
   const slugFilter = `filters[Slug][$in]=${validSlugs.map((slug) => encodeURIComponent(slug)).join(",")}`;
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validSlugs.length}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&populate[6]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validSlugs.length}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);

@@ -53,6 +53,14 @@ interface Product {
         };
       };
     };
+    Media?: {
+      data: Array<{
+        attributes: {
+          url: string;
+          mime: string;
+        };
+      }>;
+    };
     product_main_category: {
       data: {
         attributes: {
@@ -227,6 +235,7 @@ export default function PLPList({
     queryParams.append("populate[3]", "product_variations.product_stock");
     queryParams.append("populate[4]", "product_variations.general_discounts");
     queryParams.append("populate[5]", "product_variations.product_variation_color");
+    queryParams.append("populate[6]", "Media");
     queryParams.append("fields[0]", "Title");
     queryParams.append("fields[1]", "Slug");
     queryParams.append("fields[2]", "Description");
@@ -949,19 +958,23 @@ export default function PLPList({
                   const slug = (product as any)?.attributes?.Slug || product.id.toString();
                   const seenCount = product.attributes.RatingCount || 0;
 
+                  // Construct full images array including Media
+                  const coverImageUrl = product.attributes.CoverImage?.data?.attributes?.url
+                    ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+                    : "";
+                  const mediaImages =
+                    product.attributes.Media?.data
+                      ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
+                      ?.map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`) || [];
+                  const allImages = [coverImageUrl, ...mediaImages].filter(Boolean);
+
                   return (
                     <ProductCard
                       key={product.id}
                       id={product.id}
                       slug={slug}
                       seenCount={seenCount}
-                      images={
-                        product.attributes.CoverImage?.data?.attributes?.url
-                          ? [
-                              `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
-                            ]
-                          : [""] // Empty string will trigger BlurImage fallback SVG
-                      }
+                      images={allImages.length > 0 ? allImages : [""]}
                       category={
                         product.attributes.product_main_category?.data?.attributes?.Title || ""
                       }
