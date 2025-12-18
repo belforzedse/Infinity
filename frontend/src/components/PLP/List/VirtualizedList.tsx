@@ -85,6 +85,7 @@ export default function VirtualizedList({
 }: VirtualizedListProps) {
   // Process products into a format suitable for rendering
   const processedProducts = useMemo(() => {
+    const isMobileView = (viewportWidth ?? Infinity) < 768;
     return products.map((product) => {
       const firstValidVariation = product.attributes.product_variations?.data?.find(
         (variation) => {
@@ -129,14 +130,16 @@ export default function VirtualizedList({
           product.attributes.CoverImage?.data?.attributes?.url
             ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
             : "",
-          ...(product.attributes.Media?.data
-            ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
-            ?.map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`) || []),
+          ...(isMobileView
+            ? []
+            : product.attributes.Media?.data
+                ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
+                ?.map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`) || []),
         ].filter(Boolean),
         isAvailable,
       };
     });
-  }, [products, checkStockAvailabilityProp]);
+  }, [products, checkStockAvailabilityProp, viewportWidth]);
 
   // Desktop row renderer
   const DesktopRow = ({ index, style }: ListChildComponentProps) => {

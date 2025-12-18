@@ -38,13 +38,16 @@ const ImageSlider: FC<ImageSliderProps> = ({
   }
 
   return (
-    <div className="relative mx-auto h-[270px] w-[250px] overflow-hidden rounded-[21px]">
+    <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[250px]">
       <div
-        className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
+        className="flex h-full overflow-hidden md:snap-x md:snap-mandatory md:overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         onScroll={handleScroll}
       >
         {validImages.map((image, index) => (
-          <div key={index} className="relative h-full w-full flex-none snap-start">
+          <div
+            key={index}
+            className={`relative h-full w-full flex-none snap-start ${index > 0 ? "hidden md:block" : ""}`}
+          >
             <BlurImage
               src={image}
               alt={`${title} - ${index + 1}`}
@@ -52,7 +55,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
               className={`select-none object-cover transition-all duration-300 ${
                 !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
               }`}
-              sizes="(max-width: 768px) 250px, 250px"
+              sizes="(max-width: 768px) 168px, 250px"
               priority={priority && index === 0}
               loading={priority && index === 0 ? "eager" : "lazy"}
               loader={imageLoader}

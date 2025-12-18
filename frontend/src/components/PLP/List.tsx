@@ -135,6 +135,14 @@ export default function PLPList({
   const [sort, setSort] = useQueryState("sort");
   const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
 
   // Helper function to check if product has an image
   const hasImage = (product: Product): boolean => {
@@ -235,7 +243,12 @@ export default function PLPList({
     queryParams.append("populate[3]", "product_variations.product_stock");
     queryParams.append("populate[4]", "product_variations.general_discounts");
     queryParams.append("populate[5]", "product_variations.product_variation_color");
-    queryParams.append("populate[6]", "Media");
+
+    // Only fetch additional media on desktop to save bandwidth
+    if (isDesktop) {
+      queryParams.append("populate[6]", "Media");
+    }
+
     queryParams.append("fields[0]", "Title");
     queryParams.append("fields[1]", "Slug");
     queryParams.append("fields[2]", "Description");
@@ -454,6 +467,7 @@ export default function PLPList({
     sort,
     searchQuery,
     discountOnly,
+    isDesktop,
   ]);
 
   // Fetch products when dependencies change
@@ -958,14 +972,16 @@ export default function PLPList({
                   const slug = (product as any)?.attributes?.Slug || product.id.toString();
                   const seenCount = product.attributes.RatingCount || 0;
 
-                  // Construct full images array including Media
+                  // Construct full images array including Media (only processed on desktop)
                   const coverImageUrl = product.attributes.CoverImage?.data?.attributes?.url
                     ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
                     : "";
                   const mediaImages =
-                    product.attributes.Media?.data
-                      ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
-                      ?.map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`) || [];
+                    isDesktop && product.attributes.Media?.data
+                      ? product.attributes.Media.data
+                          .filter((m) => m.attributes?.mime?.startsWith("image/"))
+                          .map((m) => `${IMAGE_BASE_URL}${m.attributes.url}`)
+                      : [];
                   const allImages = [coverImageUrl, ...mediaImages].filter(Boolean);
 
                   return (
