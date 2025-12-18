@@ -4,6 +4,7 @@ import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import GridIcon from "@/components/Product/Icons/GridIcon";
 import HeartIcon from "@/components/Product/Icons/HeartIcon";
+import ColorSwatches from "@/components/Product/ColorSwatches";
 import useProductLike from "@/hooks/useProductLike";
 import clsx from "clsx";
 import { faNum } from "@/utils/faNum";
@@ -85,35 +86,12 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
                 </div>
               )}
 
-              {colorsCount && colorsCount > 0 && (
-                <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg bg-stone-50/90 px-1.5 py-0.5 shadow-sm backdrop-blur-sm">
-                  <span className="text-xs font-bold text-neutral-800">
-                    {colorsCount > 9 ? "9+" : colorsCount}
-                  </span>
-                  <div className="flex items-center -space-x-1.5 rtl:space-x-reverse">
-                    {colorCodes && colorCodes.length > 0 ? (
-                      colorCodes.slice(0, 3).map((code, index) => (
-                        <div
-                          key={index}
-                          className="relative h-4 w-4 rounded-full border border-white shadow-xs overflow-hidden"
-                          style={{ backgroundColor: code, zIndex: 3 - index }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40" />
-                        </div>
-                      ))
-                    ) : (
-                      <>
-                        <div className="relative h-4 w-4 rounded-full border border-white bg-gradient-to-r from-blue-600 to-blue-400 shadow-xs overflow-hidden" style={{ zIndex: 3 }}>
-                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40" />
-                        </div>
-                        <div className="relative h-4 w-4 rounded-full border border-white bg-gradient-to-r from-pink-600 to-pink-400 shadow-xs overflow-hidden" style={{ zIndex: 2 }}>
-                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40" />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+              <ColorSwatches
+                colorCodes={colorCodes}
+                colorsCount={colorsCount}
+                size="sm"
+                className="absolute bottom-2 right-2"
+              />
             </div>
           </div>
 
