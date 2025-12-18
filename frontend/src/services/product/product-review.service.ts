@@ -49,6 +49,8 @@ export interface ProductReviewListParams {
   search?: string;
 }
 
+type ProductReviewQuery = Record<string, string | number | boolean | undefined>;
+
 class ProductReviewService {
   private unwrapRelation(rel: any): any {
     if (!rel?.data) return undefined;
@@ -108,10 +110,10 @@ class ProductReviewService {
 
   // Get approved reviews for a specific product
   async getProductReviews(productId: number | string, params: ProductReviewListParams = {}): Promise<PaginatedResponse<ProductReview>> {
-    const query: any = {
+    const query: ProductReviewQuery = {
       "filters[product][id][$eq]": productId.toString(),
       "filters[Status][$eq]": "Accepted",
-      "filters[removedAt][$null]": true,
+      "filters[removedAt][$null]": "true",
       "pagination[page]": params.page || 1,
       "pagination[pageSize]": params.pageSize || 10,
       "sort": params.sort || "createdAt:desc",
@@ -134,8 +136,8 @@ class ProductReviewService {
 
   // Get all reviews for admin moderation
   async getAllReviews(params: ProductReviewListParams = {}): Promise<PaginatedResponse<ProductReview>> {
-    const query: any = {
-      "filters[removedAt][$null]": true,
+    const query: ProductReviewQuery = {
+      "filters[removedAt][$null]": "true",
       "pagination[page]": params.page || 1,
       "pagination[pageSize]": params.pageSize || 20,
       "sort": params.sort || "createdAt:desc",

@@ -79,6 +79,26 @@ interface Product {
   };
 }
 
+interface VariationAttributes {
+  Price: number | string;
+  DiscountPrice?: number | string;
+  product_variation_color?: {
+    data?: {
+      id: number;
+      attributes: {
+        Title: string;
+        ColorCode: string;
+      };
+    };
+  };
+}
+
+interface VariationWithAttributes {
+  attributes: VariationAttributes;
+}
+
+type Variation = VariationWithAttributes | VariationAttributes;
+
 async function getProducts(
   category?: string,
   page = 1,
@@ -162,9 +182,9 @@ async function getProducts(
                     : item.product_variations && 'data' in item.product_variations
                       ? item.product_variations.data
                       : []
-                  ).map((variation) => {
+                  ).map((variation: Variation) => {
                     // Handle both direct variation and nested variation formats
-                    const variationData: any = 'attributes' in variation ? variation.attributes : variation;
+                    const variationData: VariationAttributes = 'attributes' in variation ? variation.attributes : variation;
                     return {
                       attributes: {
                         SKU: "",

@@ -21,12 +21,27 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
     try {
       // Get current compare list
       const storedList = localStorage.getItem(COMPARE_LIST_KEY);
-      const compareList: number[] = storedList ? JSON.parse(storedList) : [];
+      let compareList: number[] = [];
+
+      try {
+        const parsed = storedList ? JSON.parse(storedList) : [];
+        if (Array.isArray(parsed)) {
+          // Validate and clean the array
+          compareList = parsed
+            .map(item => Number(item))
+            .filter(item => Number.isFinite(item) && Number.isInteger(item));
+        }
+      } catch (e) {
+        console.warn("Invalid compare list data in localStorage, resetting.");
+        compareList = [];
+      }
 
       // Check if product is already in list
       if (compareList.includes(productId)) {
         setStatus("already-added");
         setCompareCount(compareList.length);
+        // Save cleaned list if it was different
+        localStorage.setItem(COMPARE_LIST_KEY, JSON.stringify(compareList));
         return;
       }
 
@@ -34,6 +49,8 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
       if (compareList.length >= MAX_COMPARE_PRODUCTS) {
         setStatus("error");
         setCompareCount(compareList.length);
+        // Save cleaned list if it was different
+        localStorage.setItem(COMPARE_LIST_KEY, JSON.stringify(compareList));
         return;
       }
 
@@ -98,6 +115,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -126,6 +144,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -152,6 +171,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -173,6 +193,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
               </p>
             </div>
             <button
+              type="button"
               onClick={onClose}
               className="mt-4 rounded-lg bg-pink-500 px-6 py-3 text-white transition-colors hover:bg-pink-600"
             >

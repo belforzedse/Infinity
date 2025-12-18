@@ -2,7 +2,7 @@ interface ShuffleIconProps {
   className?: string;
 }
 
-export default function ShuffleIcon({ className }: ShuffleIconProps) {
+export default function ShuffleIcon({ className }: ShuffleIconProps): React.JSX.Element {
   return (
     <svg
       width="20"

@@ -206,18 +206,20 @@ const ProductCard: FC<ProductCardProps> = ({
         />
       )}
 
-      <ShareModal
-        open={isShareOpen}
-        onOpenChange={setIsShareOpen}
-        product={{
-          id,
-          title,
-          slug,
-          imageUrl: images.find((img) => img && typeof img === "string" && img.trim() !== ""),
-          price,
-          discountPrice,
-        }}
-      />
+      {isShareOpen && (
+        <ShareModal
+          open={isShareOpen}
+          onOpenChange={setIsShareOpen}
+          product={{
+            id,
+            title,
+            slug,
+            imageUrl: images.find((img) => img && typeof img === "string" && img.trim() !== ""),
+            price,
+            discountPrice,
+          }}
+        />
+      )}
     </>
   );
 };

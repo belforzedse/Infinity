@@ -41,10 +41,13 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
   return (
     <div className="relative w-full md:w-auto">
       <button
+        type="button"
         className="text-sm flex w-full items-center justify-center gap-1 rounded-lg border border-slate-400 bg-white px-3 py-1 text-slate-700 md:w-auto"
         onClick={() => {
           setFilterIsOpen(!isFilterOpen);
         }}
+        aria-haspopup="true"
+        aria-expanded={isFilterOpen}
       >
         <FilterIcon />
         <span className="text-foreground-primary">فیلتر پیشرفته</span>
@@ -53,6 +56,13 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
       {isFilterOpen && (
         <div
           className="absolute left-0 top-full z-10 flex w-[368px] cursor-auto flex-col gap-3 rounded-lg border border-slate-100 bg-white p-3 shadow-lg"
+          role="menu"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setFilterIsOpen(false);
+            }
+          }}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

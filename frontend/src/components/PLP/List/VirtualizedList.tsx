@@ -6,6 +6,7 @@ import ProductCard from "@/components/Product/Card";
 import ProductSmallCard from "@/components/Product/SmallCard";
 import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { getProductImages } from "@/utils/product";
 import dynamic from "next/dynamic";
 
 // Dynamically import react-window to avoid build/SSR issues
@@ -140,16 +141,7 @@ export default function VirtualizedList({
           product.attributes.CoverImage?.data?.attributes?.url
             ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
             : "",
-        images: [
-          product.attributes.CoverImage?.data?.attributes?.url
-            ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-            : "",
-          ...(isMobileView
-            ? []
-            : product.attributes.Media?.data
-                ?.filter((m) => m.attributes?.mime?.startsWith("image/"))
-                ?.map((m) => `${IMAGE_BASE_URL}${m.attributes?.url || ""}`) || []),
-        ].filter(Boolean),
+        images: getProductImages(product, !isMobileView, IMAGE_BASE_URL),
         isAvailable,
       };
     });

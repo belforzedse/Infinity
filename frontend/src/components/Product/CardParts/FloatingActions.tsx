@@ -31,6 +31,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     >
       {/* Like Button */}
       <button
+        type="button"
         onClick={onToggleLike}
         className={`${buttonBaseClass} relative z-30 ${
           isLikeLoading ? "cursor-wait opacity-50" : "opacity-100"
@@ -49,6 +50,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
 
       {/* Quick View Button */}
       <button
+        type="button"
         onClick={onQuickView}
         className={`${buttonBaseClass} z-20 opacity-100 md:-translate-y-10 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
         aria-label="نمایش سریع محصول"
@@ -58,6 +60,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
 
       {/* Share Button */}
       <button
+        type="button"
         onClick={onShare}
         className={`${buttonBaseClass} z-10 opacity-100 md:-translate-y-20 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
         aria-label="اشتراک‌گذاری"
