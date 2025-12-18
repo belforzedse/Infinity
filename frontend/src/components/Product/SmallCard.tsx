@@ -61,12 +61,19 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
             alt={title}
             fill
             className={`rounded-xl object-cover transition-all duration-300 ${
-              !isAvailable ? "grayscale opacity-80 contrast-[0.8]" : ""
+              !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
             }`}
             sizes="96px"
             priority={priority}
             loader={imageLoader}
           />
+          {!isAvailable && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+              <div className="rounded-full bg-neutral-800/70 px-2.5 py-1 shadow-md backdrop-blur-md ring-1 ring-white/10">
+                <span className="text-[10px] font-bold text-white">ناموجود</span>
+              </div>
+            </div>
+          )}
           {colorsCount && colorsCount > 0 && (
             <div className="absolute bottom-1 right-1 flex items-center gap-1 rounded-xl bg-stone-50/90 px-1.5 py-0.5 shadow-sm backdrop-blur-sm">
               <span className="text-xs font-bold text-neutral-800">

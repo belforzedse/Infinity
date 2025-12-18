@@ -64,12 +64,20 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
                 alt={title}
                 fill
                 className={`object-cover transition-all duration-300 ${
-                  !isAvailable ? "grayscale opacity-80 contrast-[0.8]" : ""
+                  !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
                 }`}
                 sizes="152px"
                 priority={priority}
                 loader={imageLoader}
               />
+
+              {!isAvailable && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+                  <div className="rounded-full bg-neutral-800/70 px-3 py-1 shadow-md backdrop-blur-md ring-1 ring-white/10">
+                    <span className="text-[10px] font-bold text-white">ناموجود</span>
+                  </div>
+                </div>
+              )}
 
               {discount && discount > 0 && (
                 <div className="absolute left-1 top-1 flex items-center rounded-bl-xl rounded-tr-xl bg-rose-600 px-2 py-0.5">
