@@ -1,87 +1,145 @@
-import { Dialog, DialogPanel, DialogTitle, Transition } from "@headlessui/react";
-import type { ReactNode} from "react";
-import { Fragment } from "react";
-import DeleteIcon from "./Icons/DeleteIcon";
-import classNames from "classnames";
+'use client';
 
-interface Props {
+import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
+
+interface ModalProps {
   isOpen: boolean;
-  title?: string;
   onClose: () => void;
-  children: ReactNode;
+  children: React.ReactNode;
   className?: string;
-  closeIcon?: ReactNode;
+  title?: string;
   titleClassName?: string;
+  closeIcon?: React.ReactNode;
+  "aria-labelledby"?: string;
 }
 
 export default function Modal({
   isOpen,
-  title,
   onClose,
   children,
   className = "",
+  title,
+  titleClassName = "",
   closeIcon,
-  titleClassName,
-}: Props) {
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog onClose={onClose} as="div" className="relative z-[1200]">
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-150"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
-            aria-hidden="true"
-          />
-        </Transition.Child>
+  "aria-labelledby": ariaLabelledby,
+}: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95 translate-y-2"
-              enterTo="opacity-100 scale-100 translate-y-0"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95 translate-y-2"
-            >
-              <DialogPanel
-                className={`w-full max-w-2xl transform rounded-2xl bg-white p-5 shadow-xl transition-all lg:px-10 lg:py-7 ${className}`}
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape" || e.key === "Esc" || e.keyCode === 27) {
+      onClose();
+    }
+  }, [onClose]);
+
+  // Focus trap and management
+  useEffect(() => {
+    if (isOpen && typeof window !== "undefined") {
+      // Store previously focused element
+      previousActiveElement.current = document.activeElement as HTMLElement;
+
+      // Focus modal
+      modalRef.current?.focus();
+
+      // Lock body scroll
+      document.body.style.overflow = "hidden";
+
+      // Add Escape key listener
+      window.addEventListener("keydown", handleEscape);
+
+      return () => {
+        // Restore focus
+        if (previousActiveElement.current) {
+          previousActiveElement.current.focus();
+        }
+
+        // Unlock body scroll
+        document.body.style.overflow = "";
+
+        // Remove Escape key listener
+        window.removeEventListener("keydown", handleEscape);
+      };
+    }
+  }, [isOpen, handleEscape]);
+
+  // Handle click outside
+  const handleBackdropClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleBackdropKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      handleBackdropClick(e);
+    } else if (e.key === "Escape" || e.key === "Esc") {
+      onClose();
+    }
+  };
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm duration-200 animate-in fade-in"
+      onClick={handleBackdropClick}
+      onKeyDown={handleBackdropKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={ariaLabelledby}
+      tabIndex={-1}
+    >
+      <div
+        ref={modalRef}
+        className={`relative w-full max-w-7xl rounded-3xl bg-white shadow-2xl duration-200 animate-in zoom-in-95 ${className}`}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          {title && (
+            <h3 className={`text-lg font-bold text-gray-900 ${titleClassName}`}>
+              {title}
+            </h3>
+          )}
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="group flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 transition-all hover:bg-gray-100 active:scale-95"
+            aria-label="بستن"
+          >
+            {closeIcon || (
+              <svg
+                className="h-6 w-6 text-gray-600 group-hover:text-gray-900"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-labelledby="modal-close-icon-title"
               >
-                <DialogTitle
-                  className={classNames(
-                    "mb-3 flex items-center justify-between lg:mb-4",
-                    titleClassName,
-                  )}
-                >
-                  {title ? <span className="text-2xl text-neutral-700">{title}</span> : null}
-
-                  {closeIcon ? (
-                    <button onClick={onClose}>{closeIcon}</button>
-                  ) : (
-                    <button
-                      onClick={onClose}
-                      className="rounded-full border border-slate-200 p-1.5 text-neutral-800"
-                      aria-label="بستن"
-                    >
-                      <DeleteIcon />
-                    </button>
-                  )}
-                </DialogTitle>
-
-                {children}
-              </DialogPanel>
-            </Transition.Child>
-          </div>
+                <title id="modal-close-icon-title">بستن</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            )}
+          </button>
         </div>
-      </Dialog>
-    </Transition>
+
+        <div className="p-6">
+          {children}
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }

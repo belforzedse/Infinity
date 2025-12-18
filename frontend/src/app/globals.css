@@ -9,6 +9,7 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-offset, 88px);
   background-color: white; /* White background for web app */
+  scrollbar-gutter: stable;
 }
 
 :root {
@@ -60,23 +61,28 @@ textarea:focus-visible {
 /* Custom Scrollbar Styles */
 * {
   scrollbar-width: thin;
+  scrollbar-color: #ec4899 transparent;
 }
 
+/* Chrome, Edge, and Safari */
 ::-webkit-scrollbar {
-  width: 2px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f8fafc;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ec4899;
-  border-radius: 4px;
+  background-color: #ec4899;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ec4899;
+  background-color: #db2777;
 }
 
 :root {

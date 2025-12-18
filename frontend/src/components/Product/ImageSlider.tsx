@@ -3,7 +3,7 @@
 import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
 import type { FC} from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ImageSliderProps {
   images: string[];
@@ -19,6 +19,14 @@ const ImageSlider: FC<ImageSliderProps> = ({
   isAvailable = true,
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
@@ -38,27 +46,35 @@ const ImageSlider: FC<ImageSliderProps> = ({
   }
 
   return (
-    <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-auto">
+    <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[250px]">
       <div
-        className="flex h-full snap-x snap-mandatory overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
+        className="flex h-full overflow-hidden md:snap-x md:snap-mandatory md:overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         onScroll={handleScroll}
       >
-        {validImages.map((image, index) => (
-          <div key={index} className="relative h-full w-full flex-none snap-start">
-            <BlurImage
-              src={image}
-              alt={`${title} - ${index + 1}`}
-              fill
-              className={`select-none object-cover transition-all duration-300 ${
-                !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
-              }`}
-              sizes="(max-width: 768px) 260px, (max-width: 1024px) 300px, 350px"
-              priority={priority && index === 0}
-              loading={priority && index === 0 ? "eager" : "lazy"}
-              loader={imageLoader}
-            />
-          </div>
-        ))}
+        {validImages.map((image, index) => {
+          // On mobile, only render the first image
+          if (isMobile && index > 0) return null;
+
+          return (
+            <div
+              key={index}
+              className={`relative h-full w-full flex-none snap-start ${index > 0 ? "hidden md:block" : ""}`}
+            >
+              <BlurImage
+                src={image}
+                alt={`${title} - ${index + 1}`}
+                fill
+                className={`select-none object-cover transition-all duration-300 ${
+                  !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
+                }`}
+                sizes="(max-width: 768px) 168px, 250px"
+                priority={priority && index === 0}
+                loading={priority && index === 0 ? "eager" : "lazy"}
+                loader={imageLoader}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {!isAvailable && (
@@ -66,19 +82,6 @@ const ImageSlider: FC<ImageSliderProps> = ({
           <div className="rounded-full bg-neutral-800/70 px-4 py-1.5 shadow-xl backdrop-blur-md ring-1 ring-white/20">
             <span className="text-sm font-bold text-white tracking-wider">ناموجود</span>
           </div>
-        </div>
-      )}
-
-      {validImages.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-0.5">
-          {validImages.map((_, index) => (
-            <div
-              key={index}
-              className={`h-0.5 rounded-full transition-all duration-300 ${
-                currentSlide === index ? "w-7 bg-foreground-primary" : "w-[9px] bg-white"
-              }`}
-            />
-          ))}
         </div>
       )}
     </div>

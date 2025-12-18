@@ -11,6 +11,13 @@ import PDPCommentAddSpecialOffer from "./SpecialOffer";
 import { useRouter } from "next/navigation";
 import type { ProductDetail } from "@/services/product/product";
 
+interface CommentProductAttributes extends Partial<ProductDetail["attributes"]> {
+  Price?: string | number;
+  DiscountPrice?: string | number;
+  Discount?: number;
+  DiscountEndDate?: string;
+}
+
 type Props = {
   rating: number;
   rateCount: number;
@@ -34,14 +41,14 @@ export default function PDPCommentAdd(props: Props) {
   }, [onReviewSubmitted]);
 
   // Extract data for special offer card from productData
-  const attrs = productData?.attributes || {};
+  const attrs = (productData?.attributes ?? {}) as CommentProductAttributes;
   const discountPrice = attrs.DiscountPrice;
   const price = attrs.Price;
   const discount = attrs.Discount;
   const title = attrs.Title;
   const category = attrs.product_main_category?.data?.attributes?.Title || attrs.product_main_category?.data?.attributes?.Name || "";
   const imageSrc = attrs.CoverImage?.data?.attributes?.url || "/images/pdp/image-1.png";
-  const hasDiscount = (discount && discount > 0) || (discountPrice && price && discountPrice < price);
+  const hasDiscount = Boolean((discount && discount > 0) || (discountPrice && price && Number(discountPrice) < Number(price)));
 
   return (
     <>
@@ -49,7 +56,7 @@ export default function PDPCommentAdd(props: Props) {
         {/* Rating Summary Card */}
         <div className="rounded-[16px] bg-[#FAFAF9] p-5 flex flex-col gap-[7px] items-end">
           <h4 className="text-[30px] font-normal text-[#404040] leading-[1.238]">دیدگاه و امتیاز خریداران</h4>
-          
+
           <div className="flex items-center gap-1">
             <span className="text-[12px] text-[#262626]">از ۵</span>
             <span className="text-[20px] font-normal text-[#166534] leading-[1.238]">{rating.toFixed(1)}</span>
@@ -82,8 +89,8 @@ export default function PDPCommentAdd(props: Props) {
         {/* Special Offer - dynamic from productData */}
         {hasDiscount && (
           <PDPCommentAddSpecialOffer
-            discountPrice={discountPrice || 0}
-            price={price || 0}
+            discountPrice={Number(discountPrice || 0)}
+            price={Number(price || 0)}
             discount={discount || 0}
             endOfferDate={attrs.DiscountEndDate ? new Date(attrs.DiscountEndDate) : undefined}
             title={title || ""}

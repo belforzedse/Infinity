@@ -1,12 +1,32 @@
-import Image from "next/image";
-import { faNum } from "@/utils/faNum";
-import type { FC } from "react";
-import HeartIcon from "./Icons/HeartIcon";
-import GridIcon from "./Icons/GridIcon";
+"use client";
+
 import Link from "next/link";
+import { type FC, useState, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
+import { faNum } from "@/utils/faNum";
+import useProductLike from "@/hooks/useProductLike";
+
+// Components
 import ImageSlider from "./ImageSlider";
 import ColorSwatches from "./ColorSwatches";
-import useProductLike from "@/hooks/useProductLike";
+import {
+  DiscountBadge,
+  VariationOverlay,
+  ProductInfo,
+  PriceSection,
+  FloatingActions,
+} from "./CardParts";
+
+// Lazy load heavy modals
+const QuickViewModal = dynamic(() => import("./QuickViewModal"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ShareModal = dynamic(() => import("./ShareModal"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export interface ProductCardProps {
   images: string[];
@@ -23,6 +43,7 @@ export interface ProductCardProps {
   isAvailable?: boolean;
   priority?: boolean;
   productCode?: string;
+  inventoryCount?: number;
 }
 
 const ProductCard: FC<ProductCardProps> = ({
@@ -39,137 +60,167 @@ const ProductCard: FC<ProductCardProps> = ({
   colorCodes,
   isAvailable = true,
   priority = false,
+  inventoryCount,
 }) => {
-  // Use slug if available, otherwise fall back to ID for backwards compatibility
-  const productUrl = slug ? `/pdp/${slug}` : `/pdp/${id.toString()}`;
-  const hasDiscount = Boolean(discountPrice && discountPrice > 0 && discountPrice < price);
-  const { isLiked, isLoading, toggleLike } = useProductLike({
+  // State
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+
+  // Hooks
+  const {
+    isLiked,
+    isLoading: isLikeLoading,
+    toggleLike,
+  } = useProductLike({
     productId: id.toString(),
   });
 
-  // Debug: Log product card data
-  if (process.env.NODE_ENV !== "production") {
-    console.log(`ProductCard ${id} pricing:`, {
-      price,
-      discountPrice,
-      discount,
-      title: title.substring(0, 30),
-      hasDiscountLogic: !!(discountPrice && discountPrice > 0),
-    });
-  }
+  // Memoized values
+  const productUrl = useMemo(() => (slug ? `/pdp/${slug}` : `/pdp/${id.toString()}`), [slug, id]);
 
-  // Temporary test: Force discount for testing (REMOVE AFTER TESTING)
-  // const testDiscountPrice = id === 1 ? Math.floor(price * 0.8) : discountPrice;
-  // const testDiscount = id === 1 ? 20 : discount;
+  const hasDiscount = useMemo(
+    () => Boolean(discountPrice && discountPrice > 0 && discountPrice < price),
+    [discountPrice, price],
+  );
+
+  const validImages = useMemo(
+    () => images.filter((img) => img && typeof img === "string" && img.trim() !== ""),
+    [images],
+  );
+
+  const variationImages = useMemo(() => validImages.slice(1, 4), [validImages]);
+
+  const hasVariations = useMemo(
+    () => isAvailable && (validImages.length > 1 || (colorsCount && colorsCount > 1)),
+    [isAvailable, validImages.length, colorsCount],
+  );
+
+  const isLowStock = useMemo(
+    () => isAvailable && inventoryCount && inventoryCount > 0 && inventoryCount < 5,
+    [isAvailable, inventoryCount],
+  );
+
+  // Event handlers
+  const handleQuickView = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsQuickViewOpen(true);
+  }, []);
+
+  const handleShare = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsShareOpen(true);
+  }, []);
+
+  const handleToggleLike = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleLike(e);
+    },
+    [toggleLike],
+  );
 
   return (
-    <div className="group relative">
-      <Link
-        href={productUrl}
-        className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+    <>
+      <article
+        className={`${isAvailable ? "group" : ""} relative w-full md:mx-auto md:w-fit`}
+        aria-label={`محصول ${title}`}
       >
-        <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1">
-          <div className="relative">
-            <ImageSlider
-              images={images}
-              title={title}
-              priority={priority}
+        <Link
+          href={productUrl}
+          className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          aria-label={`مشاهده جزئیات ${title}`}
+        >
+          <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 md:w-[258px] md:group-hover:border-pink-100 md:group-hover:shadow-lg">
+            {/* Image Section */}
+            <div className="relative overflow-hidden rounded-[20px] md:h-[270px] md:w-[250px]">
+              <ImageSlider
+                images={images}
+                title={title}
+                priority={priority}
+                isAvailable={isAvailable}
+              />
+
+              {/* Variation Overlay - Desktop Only */}
+              {hasVariations && (
+                <VariationOverlay
+                  variationImages={variationImages}
+                  colorsCount={colorsCount}
+                  validImagesCount={validImages.length}
+                  colorCodes={colorCodes}
+                  title={title}
+                />
+              )}
+
+              {/* Badges */}
+              <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
+                <DiscountBadge discount={discount} />
+                {isLowStock && (
+                  <div className="flex items-center gap-1 rounded-full bg-orange-500/90 px-2 py-1 backdrop-blur-sm">
+                    <span className="text-xs text-white">
+                      {faNum(inventoryCount!)} عدد
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Color Swatches - Mobile */}
+              <ColorSwatches
+                colorCodes={colorCodes}
+                colorsCount={colorsCount}
+                className="absolute bottom-2 right-2 transition-opacity duration-300 md:group-hover:opacity-0"
+              />
+            </div>
+
+            {/* Product Info */}
+            <ProductInfo category={category} title={title} seenCount={seenCount} />
+
+            {/* Price Section */}
+            <PriceSection
+              price={price}
+              discountPrice={discountPrice}
+              hasDiscount={hasDiscount}
               isAvailable={isAvailable}
             />
-
-            <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
-              {discount ? (
-                <div className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1">
-                  <span className="text-xs text-white">٪{discount} تخفیف</span>
-                </div>
-              ) : (
-                <span />
-              )}
-            </div>
-
-            <ColorSwatches
-              colorCodes={colorCodes}
-              colorsCount={colorsCount}
-              className="absolute bottom-2 right-2"
-            />
-        </div>
-
-        <div className="flex-grow px-1 py-3 md:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <GridIcon className="text-neutral-400" />
-              <span className="text-xs text-neutral-400">{category}</span>
-            </div>
           </div>
+        </Link>
 
-          <h3 className="text-sm mt-0.5 line-clamp-1 text-neutral-800 md:text-base">{title}</h3>
+        {/* Floating Action Buttons */}
+        <FloatingActions
+          isLiked={isLiked}
+          isLikeLoading={isLikeLoading}
+          onToggleLike={handleToggleLike}
+          onQuickView={handleQuickView}
+          onShare={handleShare}
+        />
+      </article>
 
-          {seenCount > 0 && (
-            <div className="mt-1 flex items-center gap-0.5">
-              <Image
-                src="/images/eyes-emoji.png"
-                alt="نمایش‌ها"
-                width={8}
-                height={8}
-                className="h-2 w-2"
-              />
-              <span className="text-xs text-pink-800 md:text-sm">
-                {seenCount} نفر در ۲۴ ساعت گذشته آن را دیده‌اند!
-              </span>
-            </div>
-          )}
-        </div>
+      {/* Modals */}
+      {isQuickViewOpen && (
+        <QuickViewModal
+          isOpen={isQuickViewOpen}
+          onClose={() => setIsQuickViewOpen(false)}
+          productId={id}
+        />
+      )}
 
-        <div className="mt-auto rounded-2xl bg-stone-100 px-3 py-1.5 md:py-2">
-          <div className="flex items-center justify-between">
-            {!hasDiscount && <span className="text-sm text-stone-500">قیمت</span>}
-
-            {!isAvailable ? (
-              <span className="text-base font-medium text-red-600 md:text-lg">ناموجود</span>
-            ) : (
-              <div className="flex flex-row flex-wrap items-center justify-start gap-3 text-left">
-                {discountPrice && discountPrice > 0 && discountPrice < price && (
-                  <span className="text-base whitespace-nowrap text-pink-600 md:text-lg">
-                    {faNum(discountPrice)} تومان
-                  </span>
-                )}
-
-                <span
-                  className={`${
-                    discountPrice && discountPrice > 0 && discountPrice < price
-                      ? "text-xs text-foreground-muted line-through"
-                      : "text-base whitespace-nowrap text-neutral-700 md:text-lg"
-                  }`}
-                >
-                  {faNum(price)} تومان
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </Link>
-
-    {/* Like button outside Link for independent interaction */}
-    <button
-      onClick={(e) => {
-        toggleLike(e);
-      }}
-      className={`absolute top-3 left-3 glass-chip flex h-11 w-11 items-center justify-center rounded-full ${
-        isLoading ? "cursor-wait opacity-50" : "hover:brightness-[1.05]"
-      } z-20 transition-all ring-1 ring-white/60`}
-      disabled={isLoading}
-      aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
-      aria-pressed={isLiked}
-    >
-      <HeartIcon
-        className={`h-5 w-5 ${
-          isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500 text-neutral-500"
-        }`}
-        filled={isLiked}
-      />
-    </button>
-    </div>
+      {isShareOpen && (
+        <ShareModal
+          open={isShareOpen}
+          onOpenChange={setIsShareOpen}
+          product={{
+            id,
+            title,
+            slug,
+            imageUrl: images.find((img) => img && typeof img === "string" && img.trim() !== ""),
+            price,
+            discountPrice,
+          }}
+        />
+      )}
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
+import { getHomepageSections } from "@/services/product/homepage";
 import logger from "@/utils/logger";
 import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
@@ -77,6 +78,26 @@ interface Product {
     };
   };
 }
+
+interface VariationAttributes {
+  Price: number | string;
+  DiscountPrice?: number | string;
+  product_variation_color?: {
+    data?: {
+      id: number;
+      attributes: {
+        Title: string;
+        ColorCode: string;
+      };
+    };
+  };
+}
+
+interface VariationWithAttributes {
+  attributes: VariationAttributes;
+}
+
+type Variation = VariationWithAttributes | VariationAttributes;
 
 async function getProducts(
   category?: string,
@@ -161,9 +182,9 @@ async function getProducts(
                     : item.product_variations && 'data' in item.product_variations
                       ? item.product_variations.data
                       : []
-                  ).map((variation) => {
+                  ).map((variation: Variation) => {
                     // Handle both direct variation and nested variation formats
-                    const variationData = 'attributes' in variation ? variation.attributes : variation;
+                    const variationData: VariationAttributes = 'attributes' in variation ? variation.attributes : variation;
                     return {
                       attributes: {
                         SKU: "",
@@ -498,6 +519,9 @@ export default async function PLPPage({
     hasDiscount,
   );
 
+  // Fetch sidebar products
+  const { discounted, favorites } = await getHomepageSections();
+
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
@@ -570,6 +594,8 @@ export default async function PLPPage({
           pagination={pagination}
           category={validatedCategory}
           searchQuery={search}
+          discountedSidebarProducts={discounted}
+          suggestedSidebarProducts={favorites}
         />
       </Suspense>
     </PageContainer>

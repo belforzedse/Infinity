@@ -49,6 +49,8 @@ export interface ProductReviewListParams {
   search?: string;
 }
 
+type ProductReviewQuery = Record<string, string | number | boolean | undefined>;
+
 class ProductReviewService {
   private unwrapRelation(rel: any): any {
     if (!rel?.data) return undefined;
@@ -108,61 +110,59 @@ class ProductReviewService {
 
   // Get approved reviews for a specific product
   async getProductReviews(productId: number | string, params: ProductReviewListParams = {}): Promise<PaginatedResponse<ProductReview>> {
-    const query: any = {
-      filters: {
-        product: { id: { $eq: productId.toString() } },
-        Status: { $eq: "Accepted" },
-        removedAt: { $null: "true" },
-      },
-      pagination: {
-        page: params.page || 1,
-        pageSize: params.pageSize || 10,
-      },
-      sort: params.sort || "createdAt:desc",
-      populate: {
-        user: { populate: ["user_info"] },
-        product_review_replies: { populate: { user: { populate: ["user_info"] } } },
-      },
+    const query: ProductReviewQuery = {
+      "filters[product][id][$eq]": productId.toString(),
+      "filters[Status][$eq]": "Accepted",
+      "filters[removedAt][$null]": "true",
+      "pagination[page]": params.page || 1,
+      "pagination[pageSize]": params.pageSize || 10,
+      "sort": params.sort || "createdAt:desc",
+      "populate[user][populate][0]": "user_info",
+      "populate[product_review_replies][populate][user][populate][0]": "user_info",
     };
 
     const response = await apiClient.get<any>("/product-reviews", { params: query });
 
     return {
       data: (response.data || []).map((item: any) => this.normalizeReview(item)),
-      meta: response.meta,
+      meta: {
+        currentPage: response.meta?.pagination?.page || 1,
+        totalPages: response.meta?.pagination?.pageCount || 1,
+        totalItems: response.meta?.pagination?.total || 0,
+        itemsPerPage: response.meta?.pagination?.pageSize || 10,
+      },
     };
   }
 
   // Get all reviews for admin moderation
   async getAllReviews(params: ProductReviewListParams = {}): Promise<PaginatedResponse<ProductReview>> {
-    const query: any = {
-      filters: {
-        removedAt: { $null: "true" },
-      },
-      pagination: {
-        page: params.page || 1,
-        pageSize: params.pageSize || 20,
-      },
-      sort: params.sort || "createdAt:desc",
-      populate: {
-        user: { populate: ["user_info"] },
-        product: "*",
-      },
+    const query: ProductReviewQuery = {
+      "filters[removedAt][$null]": "true",
+      "pagination[page]": params.page || 1,
+      "pagination[pageSize]": params.pageSize || 20,
+      "sort": params.sort || "createdAt:desc",
+      "populate[user][populate][0]": "user_info",
+      "populate[product]": "*",
     };
 
     if (params.status && params.status !== "all") {
-      query.filters.Status = { $eq: params.status };
+      query["filters[Status][$eq]"] = params.status;
     }
 
     if (params.search) {
-      query.filters.Content = { $containsi: params.search };
+      query["filters[Content][$containsi]"] = params.search;
     }
 
     const response = await apiClient.get<any>("/product-reviews", { params: query });
 
     return {
       data: (response.data || []).map((item: any) => this.normalizeReview(item)),
-      meta: response.meta,
+      meta: {
+        currentPage: response.meta?.pagination?.page || 1,
+        totalPages: response.meta?.pagination?.pageCount || 1,
+        totalItems: response.meta?.pagination?.total || 0,
+        itemsPerPage: response.meta?.pagination?.pageSize || 10,
+      },
     };
   }
 
