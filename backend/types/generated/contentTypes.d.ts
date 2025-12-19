@@ -1022,6 +1022,7 @@ export interface ApiLocalUserAddressLocalUserAddress extends Schema.CollectionTy
       Attribute.Private;
     Description: Attribute.Text;
     FullAddress: Attribute.Text;
+    IsTemporary: Attribute.Boolean & Attribute.DefaultTo<false>;
     PostalCode: Attribute.String & Attribute.Required;
     shipping_city: Attribute.Relation<
       "api::local-user-address.local-user-address",
@@ -1566,6 +1567,9 @@ export interface ApiOrderOrder extends Schema.CollectionType {
       ["Unknown", "Wallet", "Mellat", "SnappPay", "SamanKish"]
     > &
       Attribute.DefaultTo<"Unknown">;
+    ReservationStatus: Attribute.Enumeration<["Reserved", "Released", "Consumed", "Expired"]> &
+      Attribute.DefaultTo<"Released">;
+    ReservedUntil: Attribute.DateTime;
     shipping: Attribute.Relation<"api::order.order", "manyToOne", "api::shipping.shipping">;
     ShippingBarcode: Attribute.String;
     ShippingBoxSizeId: Attribute.Integer &
@@ -2092,6 +2096,14 @@ export interface ApiProductStockProductStock extends Schema.CollectionType {
       "oneToOne",
       "api::product-variation.product-variation"
     >;
+    reservedCount: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::product-stock.product-stock", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -2359,7 +2371,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::product.product", "oneToOne", "admin::user"> &
       Attribute.Private;
-    Description: Attribute.Text;
+    Description: Attribute.RichText;
     discounts: Attribute.Relation<"api::product.product", "manyToMany", "api::discount.discount">;
     external_id: Attribute.String;
     external_source: Attribute.String;

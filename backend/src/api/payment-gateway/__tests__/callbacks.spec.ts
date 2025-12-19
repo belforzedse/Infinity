@@ -116,9 +116,10 @@ describe("verifyPaymentHandler", () => {
         },
       ],
     };
-    (strapi.entityService.findOne as jest.Mock).mockResolvedValueOnce(
-      orderWithItems,
-    );
+    (strapi.entityService.findOne as jest.Mock).mockImplementation(async (uid: string) => {
+      if (uid === "api::order.order") return orderWithItems;
+      return null;
+    });
 
     const ctx = createCtx({
       request: {

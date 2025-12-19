@@ -1,7 +1,9 @@
 import type { Strapi } from "@strapi/strapi";
 import { logAdminOrderCancel } from "../../../../utils/adminActivity";
+import { releaseReservedStockAtomic } from "../../../cart/services/lib/stock";
 
 const computePaidAmountToman = (order: any): number => {
+  if (String(order?.Status) === "Paying") return 0;
   const txList = order?.contract?.contract_transactions || [];
   let paidIrr = 0;
 
@@ -103,16 +105,37 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
       for (const item of order.order_items) {
         const stockId = item.product_variation?.product_stock?.id;
         if (stockId) {
-          const stock = await strapi.db
-            .query("api::product-stock.product-stock")
-            .findOne({ where: { id: stockId } });
-          if (stock) {
-            await strapi.db.query("api::product-stock.product-stock").update({
-              where: { id: stockId },
-              data: {
-                Count: Number(stock.Count || 0) + Number(item.Count || 0),
-              },
-            });
+          const qty = Number(item.Count || 0);
+          if (order.Status === "Started") {
+            const stock = await strapi.db
+              .query("api::product-stock.product-stock")
+              .findOne({ where: { id: stockId } });
+            if (stock) {
+              await strapi.db.query("api::product-stock.product-stock").update({
+                where: { id: stockId },
+                data: {
+                  Count: Number(stock.Count || 0) + qty,
+                },
+              });
+            }
+          } else if (order.Status === "Paying") {
+            // For unpaid orders, only release reservation (do NOT increment Count)
+            if (order.ReservationStatus === "Reserved") {
+              const releaseResult = await releaseReservedStockAtomic(
+                strapi as any,
+                Number(stockId),
+                qty
+              );
+              if (!releaseResult.success) {
+                strapi.log.error("Failed to release reserved stock during admin cancel", {
+                  orderId: orderIdNum,
+                  stockId,
+                  qty,
+                  error: releaseResult.error,
+                });
+                throw new Error(releaseResult.error || "RELEASE_RESERVED_STOCK_FAILED");
+              }
+            }
           }
         }
       }
@@ -172,44 +195,46 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           });
         }
 
-        const refundIrr = paidAmount * 10;
-        await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
-          where: { id: wallet.id },
-          data: {
-            Balance: Number(wallet.Balance || 0) + refundIrr,
-            LastTransactionDate: new Date(),
-          },
-        });
-
-        await strapi.db
-          .query("api::local-user-wallet-transaction.local-user-wallet-transaction")
-          .create({
+        if (paidAmount > 0) {
+          const refundIrr = paidAmount * 10;
+          await strapi.db.query("api::local-user-wallet.local-user-wallet").update({
+            where: { id: wallet.id },
             data: {
-              Amount: refundIrr,
-              Type: "Add",
-              Date: new Date(),
-              Cause: "Order Cancelled (Admin)",
-              ReferenceId: `order-${orderIdNum}-cancel-${Date.now()}`,
-              user_wallet: wallet.id,
+              Balance: Number(wallet.Balance || 0) + refundIrr,
+              LastTransactionDate: new Date(),
             },
           });
 
-        // Create contract-transaction Return record
-        const maxStep =
-          txList.length > 0 ? Math.max(...txList.map((t: any) => Number(t.Step || 0))) : 0;
+          await strapi.db
+            .query("api::local-user-wallet-transaction.local-user-wallet-transaction")
+            .create({
+              data: {
+                Amount: refundIrr,
+                Type: "Add",
+                Date: new Date(),
+                Cause: "Order Cancelled (Admin)",
+                ReferenceId: `order-${orderIdNum}-cancel-${Date.now()}`,
+                user_wallet: wallet.id,
+              },
+            });
 
-        if (Number.isFinite(contractIdNum)) {
-          await strapi.db.query("api::contract-transaction.contract-transaction").create({
-            data: {
-              Type: "Return",
-              Amount: refundIrr,
-              Step: maxStep + 1,
-              Status: "Success",
-              external_source: "System",
-              contract: contractIdNum,
-              Date: new Date(),
-            },
-          });
+          // Create contract-transaction Return record
+          const maxStep =
+            txList.length > 0 ? Math.max(...txList.map((t: any) => Number(t.Step || 0))) : 0;
+
+          if (Number.isFinite(contractIdNum)) {
+            await strapi.db.query("api::contract-transaction.contract-transaction").create({
+              data: {
+                Type: "Return",
+                Amount: refundIrr,
+                Step: maxStep + 1,
+                Status: "Success",
+                external_source: "System",
+                contract: contractIdNum,
+                Date: new Date(),
+              },
+            });
+          }
         }
       }
 

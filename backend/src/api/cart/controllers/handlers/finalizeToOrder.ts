@@ -1,5 +1,6 @@
 import { Strapi } from "@strapi/strapi";
 import {
+  cancelOrderAndRelease,
   ensurePaymentGateway,
   requestMellatPayment,
   requestSamanPayment,
@@ -283,6 +284,16 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           error: walletResult.error,
         });
 
+        // Cancel + release reservation (we haven't delivered anything yet)
+        await cancelOrderAndRelease(
+          strapi,
+          order.id,
+          contract.id,
+          user.id,
+          "wallet_payment_failed",
+          { createAuditLogs: true }
+        );
+
         return ctx.badRequest(walletResult.error || "Wallet balance is insufficient", {
           data: {
             success: false,
@@ -551,24 +562,32 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         await strapi.entityService.create("api::order-log.order-log", {
           data: {
             order: order.id,
+            performed_by: user.id,
             Action: "Update",
             Description: "Gateway payment request failed",
             Changes: {
               requestId: reqId,
               error: errMsg,
+              userId: user.id,
             },
           },
         });
       } catch (e) {
-        strapi.log.error("Failed to write order-log for gateway failure", e);
+        strapi.log.error("Failed to write order-log for gateway failure", {
+          orderId: order.id,
+          userId: user.id,
+          error: (e as Error)?.message || e,
+        });
       }
 
-      await strapi.entityService.update("api::order.order", order.id, {
-        data: { Status: "Cancelled" },
-      });
-      await strapi.entityService.update("api::contract.contract", contract.id, {
-        data: { Status: "Cancelled" },
-      });
+      await cancelOrderAndRelease(
+        strapi,
+        order.id,
+        contract.id,
+        user.id,
+        "payment_gateway_failure",
+        { createAuditLogs: true }
+      );
 
       return ctx.badRequest(errMsg, {
         data: {
@@ -628,8 +647,16 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     });
     if (error?.status) {
       // Convert structured errors to ctx.badRequest() format per payment error guideline
-      const errorCode = error.errorCode || error.code || "PAYMENT_ERROR";
-      const message = error.message || error.error || "خطا در پردازش درخواست";
+      const errorCode =
+        error?.payload?.data?.errorCode ||
+        error.errorCode ||
+        error.code ||
+        "PAYMENT_ERROR";
+      const message =
+        error?.payload?.data?.message ||
+        error.message ||
+        error.error ||
+        "خطا در پردازش درخواست";
       return ctx.badRequest(message, {
         data: {
           success: false,
