@@ -8,7 +8,14 @@ interface InfoCardProps {
   category: string;
   title: string;
   likedCount: number;
-  menuButtonRef: React.RefObject<HTMLButtonElement>;
+interface InfoCardProps {
+  category: string;
+  title: string;
+  likedCount: number;
+  menuButtonRef: React.RefObject<HTMLButtonElement | null>;
+  handleMenuToggle: (e: React.MouseEvent) => void;
+  isMenuOpen: boolean;
+}
   handleMenuToggle: (e: React.MouseEvent) => void;
   isMenuOpen: boolean;
 }
