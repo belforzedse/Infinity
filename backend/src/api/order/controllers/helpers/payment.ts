@@ -1,4 +1,6 @@
 import type { Strapi } from "@strapi/strapi";
+import { consumeOrderReservation, releaseOrderReservation } from "../../../../utils/stockReservations";
+import { logAdminActivity } from "../../../../utils/adminActivity";
 const getFrontendBaseUrl = () =>
   (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://new.infinitycolor.co").replace(
     /\/$/,
@@ -6,7 +8,7 @@ const getFrontendBaseUrl = () =>
   );
 
 const buildPaymentRedirectUrl = (
-  type: "success" | "failure" | "cancelled",
+  type: "success" | "failure" | "cancelled" | "issue",
   params?: Record<string, string | number | null | undefined>,
 ) => {
   const base = getFrontendBaseUrl();
@@ -189,6 +191,150 @@ async function clearCartAfterPayment(strapi: Strapi, orderId?: number) {
       error: error?.message || error,
       stack: error?.stack,
     });
+  }
+}
+
+/**
+ * Handles post-payment stock decrement with reservation awareness.
+ * For reserved orders, consumes the reservation atomically.
+ * For legacy orders, decrements stock directly.
+ * @param strapi - Strapi instance
+ * @param orderId - Order ID
+ * @param gateway - Gateway name for logging context (e.g., "Saman", "SnappPay", "Mellat")
+ * @returns Promise with success status, errors array, and optional expired flag
+ */
+async function handlePostPaymentStock(
+  strapi: Strapi,
+  orderId: number,
+  gateway: string,
+): Promise<{ success: boolean; errors?: any[]; expired?: boolean }> {
+  try {
+    // Load order with ReservationStatus field only (lightweight query)
+    const orderMeta: any = await strapi.entityService.findOne("api::order.order", orderId, {
+      fields: ["ReservationStatus"],
+    } as any);
+
+    if (orderMeta?.ReservationStatus === "Reserved") {
+      // Reserved orders: consume reservation (Count-- and ReservedCount--) atomically
+      const consumeRes = await strapi.db.transaction(async ({ trx }) =>
+        consumeOrderReservation(strapi as any, Number(orderId), trx),
+      );
+
+      if (consumeRes?.expired) {
+        strapi.log.error(`Reservation expired after ${gateway} settlement`, {
+          orderId,
+        });
+        return { success: false, expired: true, errors: [{ error: "Reservation expired" }] };
+      }
+
+      if (consumeRes?.success === false) {
+        strapi.log.error(`Failed to consume reservation after ${gateway} settlement`, {
+          orderId,
+          error: consumeRes?.error,
+        });
+        return {
+          success: false,
+          errors: [{ error: consumeRes?.error || "Failed to consume reservation" }],
+        };
+      }
+
+      return { success: true };
+    } else {
+      // Legacy path: decrement stock atomically
+      const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
+
+      // Load order with populated order_items
+      const orderWithItems = await strapi.entityService.findOne("api::order.order", orderId, {
+        populate: {
+          order_items: {
+            populate: {
+              product_variation: { populate: { product_stock: true } },
+            },
+          },
+        },
+      });
+
+      const stockErrors: any[] = [];
+
+      // Map order items to decrement promises with metadata
+      const decrementPromises = (orderWithItems?.order_items || []).map((it) => {
+        const v = it?.product_variation;
+        if (v?.product_stock?.id && typeof it?.Count === "number") {
+          const stockId = v.product_stock.id as number;
+          const quantity = Number(it.Count || 0);
+          const variationId = v.id;
+
+          return {
+            promise: decrementStockAtomic(strapi, stockId, quantity),
+            metadata: { stockId, quantity, variationId, orderId },
+          };
+        }
+        return null;
+      }).filter((item): item is { promise: Promise<{ success: boolean; newCount?: number; error?: string }>; metadata: { stockId: number; quantity: number; variationId: any; orderId: number } } => item !== null);
+
+      // Execute all decrement promises in parallel
+      const settledResults = await Promise.allSettled(
+        decrementPromises.map((item) => item.promise)
+      );
+
+      // Process settled results to collect errors
+      settledResults.forEach((result, index) => {
+        const { metadata } = decrementPromises[index];
+        const { stockId, quantity, variationId } = metadata;
+
+        if (result.status === "fulfilled") {
+          if (!result.value.success) {
+            stockErrors.push({
+              stockId,
+              quantity,
+              error: result.value.error,
+              variationId,
+            });
+            strapi.log.error(`Failed to decrement stock atomically (${gateway})`, {
+              orderId,
+              stockId,
+              quantity,
+              error: result.value.error,
+            });
+          }
+        } else {
+          // Handle rejected promise
+          const errorMessage = result.reason instanceof Error ? result.reason.message : String(result.reason);
+          stockErrors.push({
+            stockId,
+            quantity,
+            error: errorMessage,
+            variationId,
+          });
+          strapi.log.error(`Failed to decrement stock atomically (${gateway})`, {
+            orderId,
+            stockId,
+            quantity,
+            error: errorMessage,
+          });
+        }
+      });
+
+      if (stockErrors.length > 0) {
+        strapi.log.error(`Some stock decrements failed for ${gateway} payment`, {
+          orderId,
+          errors: stockErrors,
+        });
+      }
+
+      return { success: stockErrors.length === 0, errors: stockErrors.length > 0 ? stockErrors : undefined };
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    strapi.log.error(`Exception during stock handling after ${gateway} payment`, {
+      orderId,
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    return {
+      success: false,
+      errors: [{ error: errorMessage }],
+    };
   }
 }
 
@@ -431,6 +577,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         } catch (err) {
           strapi.log.error("Failed to mark order cancelled (Saman)", err);
         }
+        try {
+          await releaseOrderReservation(strapi as any, Number(orderId), "Released");
+        } catch {}
         if (contractId) {
           try {
             await strapi.entityService.update("api::contract.contract", contractId, {
@@ -511,45 +660,145 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       const detail = verifyResult.transactionDetail || verifyResult.TransactionDetail || {};
       const affectiveAmountIrr = Number(detail?.AffectiveAmount ?? detail?.OrginalAmount ?? 0);
 
-      // Decrement stock atomically for Saman payment
-      try {
-        const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
-
-        const stockErrors: any[] = [];
-        for (const it of orderEntity?.order_items || []) {
-          const variation = it?.product_variation;
-          if (variation?.product_stock?.id && typeof it?.Count === "number") {
-            const stockId = variation.product_stock.id as number;
-            const quantity = Number(it.Count || 0);
-
-            const result = await decrementStockAtomic(strapi, stockId, quantity);
-            if (!result.success) {
-              stockErrors.push({
-                stockId,
-                quantity,
-                error: result.error,
-                variationId: variation.id,
-              });
-              strapi.log.error("Failed to decrement stock atomically (Saman)", {
-                orderId,
-                stockId,
-                quantity,
-                error: result.error,
-              });
-            }
-          }
+      // If order is already expired/cancelled (reservation released), reverse and inform user.
+      if (
+        String(orderEntity?.Status) === "Cancelled" ||
+        (orderEntity?.ReservationStatus &&
+          !["Reserved", "Consumed"].includes(String(orderEntity.ReservationStatus)))
+      ) {
+        try {
+          await samanService.reverseTransaction({ refNum, terminalNumber });
+        } catch (reverseErr) {
+          strapi.log.error("Saman reverse attempt failed (invalid reservation)", reverseErr);
         }
-
-        if (stockErrors.length > 0) {
-          strapi.log.error("Some stock decrements failed for Saman payment", {
+        await markOrderCancelled("reservation_invalid");
+        return ctx.redirect(
+          buildPaymentRedirectUrl("issue", {
             orderId,
-            errors: stockErrors,
-          });
-        }
-      } catch (stockErr) {
-        strapi.log.error("Failed to decrement stock after Saman payment", stockErr);
+            code: "reservation_invalid_reversed",
+          }),
+        );
       }
 
+      // Stock handling:
+      // - Reserved orders: consume reservation (Count-- and ReservedCount--) atomically
+      // - Legacy orders: fallback to direct decrement
+      const stockResult = await handlePostPaymentStock(strapi, orderId, "Saman");
+
+      if (!stockResult.success) {
+        if (stockResult.expired) {
+          // Reservation expired -> reverse transaction (automatic refund) and inform user
+          try {
+            await releaseOrderReservation(strapi as any, Number(orderId), "Expired");
+          } catch {}
+          try {
+            await samanService.reverseTransaction({ refNum, terminalNumber });
+          } catch (reverseErr) {
+            strapi.log.error("Saman reverse attempt failed (expired reservation)", reverseErr);
+          }
+          await markOrderCancelled("reservation_expired");
+          return ctx.redirect(
+            buildPaymentRedirectUrl("issue", {
+              orderId,
+              code: "reservation_expired_reversed",
+            }),
+          );
+        } else {
+          // Consume failure -> reverse transaction and inform user
+          try {
+            await releaseOrderReservation(strapi as any, Number(orderId), "Expired");
+          } catch {}
+          try {
+            await samanService.reverseTransaction({ refNum, terminalNumber });
+          } catch (reverseErr) {
+            strapi.log.error("Saman reverse attempt failed (consume failure)", reverseErr);
+          }
+          await markOrderCancelled("reservation_consume_failed");
+          return ctx.redirect(
+            buildPaymentRedirectUrl("issue", {
+              orderId,
+              code: "reservation_consume_failed",
+            }),
+          );
+        }
+      } else if (stockResult.errors && stockResult.errors.length > 0) {
+        // CRITICAL: Halt order completion on stock errors to prevent overselling
+        const errorMessage = `Stock decrement failed for ${stockResult.errors.length} item(s). Order completion halted.`;
+        strapi.log.error("Stock decrements failed for Saman payment - halting order completion", {
+          orderId,
+          errors: stockResult.errors,
+          refNum,
+        });
+
+        // Create order-log entry for tracking and manual retry
+        try {
+          await strapi.entityService.create("api::order-log.order-log", {
+            data: {
+              order: orderId,
+              Action: "Update",
+              Description: "CRITICAL: Stock decrement failures - order completion halted",
+              Changes: {
+                stockErrors: JSON.parse(JSON.stringify(stockResult.errors)),
+                refNum,
+                haltedAt: new Date().toISOString(),
+                requiresManualRetry: true,
+              },
+            },
+          });
+        } catch (logErr) {
+          strapi.log.error("Failed to create order-log for stock errors", logErr);
+        }
+
+        // Send admin notification
+        try {
+          await logAdminActivity(strapi, {
+            resourceType: "Order",
+            resourceId: orderId,
+            action: "Update",
+            title: "Stock Decrement Failure - Order Halted",
+            message: `سفارش ${orderId} به دلیل خطا در کاهش موجودی متوقف شد. نیاز به بررسی دستی دارد.`,
+            messageEn: `Order ${orderId} halted due to stock decrement failures. Manual review required.`,
+            severity: "error",
+            description: errorMessage,
+            metadata: {
+              orderId,
+              refNum,
+              stockErrors: stockResult.errors,
+              paymentMethod: "SamanKish",
+              requiresRetry: true,
+            },
+            performedBy: {
+              name: "System",
+            },
+          });
+        } catch (notifErr) {
+          strapi.log.error("Failed to send admin notification for stock errors", notifErr);
+        }
+
+        // Keep order in "Paying" status (payment succeeded but stock failed)
+        // Don't transition to "Started" to prevent fulfillment of unavailable items
+        try {
+          await strapi.entityService.update("api::order.order", orderId, {
+            data: {
+              external_source: "SamanKish",
+              external_id: refNum,
+              // Status remains "Paying" - will require manual intervention
+            },
+          });
+        } catch (err) {
+          strapi.log.error("Failed to update order with gateway info after stock failure", err);
+        }
+
+        // Redirect to issue page with appropriate error code
+        return ctx.redirect(
+          buildPaymentRedirectUrl("issue", {
+            orderId,
+            code: "stock_decrement_failed",
+          }),
+        );
+      }
+
+      // Only proceed to "Started" if no stock errors occurred
       try {
         await strapi.entityService.update("api::order.order", orderId, {
           data: {
@@ -798,6 +1047,23 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           data: { Status: "Cancelled" },
         });
         try {
+          await releaseOrderReservation(strapi as any, Number(orderId), "Released");
+        } catch {}
+        try {
+          const orderForContract: any = await strapi.entityService.findOne("api::order.order", orderId, {
+            populate: { contract: true },
+          });
+          const contractId =
+            typeof orderForContract?.contract === "object" && orderForContract.contract
+              ? orderForContract.contract.id
+              : orderForContract?.contract;
+          if (contractId) {
+            await strapi.entityService.update("api::contract.contract", contractId, {
+              data: { Status: "Cancelled", external_source: "SnappPay" },
+            });
+          }
+        } catch {}
+        try {
           await strapi.entityService.create("api::order-log.order-log", {
             data: {
               order: orderId,
@@ -838,6 +1104,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           data: { Status: "Cancelled" },
         });
         try {
+          await releaseOrderReservation(strapi as any, Number(orderId), "Released");
+        } catch {}
+        try {
           await strapi.entityService.create("api::order-log.order-log", {
             data: {
               order: orderId,
@@ -853,6 +1122,64 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
             transactionId: transactionIdInput || "",
           }),
         );
+      }
+
+      // If reservation expired, revert before settlement and inform the user
+      try {
+        const orderForReservation: any = await strapi.entityService.findOne(
+          "api::order.order",
+          orderId,
+          { fields: ["Status", "ReservationStatus", "ReservedUntil"], populate: { contract: true } } as any,
+        );
+
+        const reservationStatus = orderForReservation?.ReservationStatus;
+        if (reservationStatus && reservationStatus !== "Consumed") {
+          const until = orderForReservation?.ReservedUntil
+            ? new Date(orderForReservation.ReservedUntil)
+            : null;
+          const orderCancelled = String(orderForReservation?.Status) === "Cancelled";
+          const invalidReservation =
+            reservationStatus !== "Reserved" || orderCancelled || !until || until.getTime() < Date.now();
+
+          if (invalidReservation) {
+            try {
+              await releaseOrderReservation(strapi as any, Number(orderId), "Expired");
+            } catch {}
+            try {
+              await snappay.revert(tokenForOps);
+            } catch (revertErr) {
+              strapi.log.error(
+                "SnappPay revert attempt failed (invalid/expired reservation)",
+                revertErr,
+              );
+            }
+            try {
+              await strapi.entityService.update("api::order.order", orderId, {
+                data: { Status: "Cancelled" },
+              });
+            } catch {}
+            const contractId =
+              typeof orderForReservation?.contract === "object" && orderForReservation.contract
+                ? orderForReservation.contract.id
+                : orderForReservation?.contract;
+            if (contractId) {
+              try {
+                await strapi.entityService.update("api::contract.contract", contractId, {
+                  data: { Status: "Cancelled", external_source: "SnappPay" },
+                });
+              } catch {}
+            }
+
+            return ctx.redirect(
+              buildPaymentRedirectUrl("issue", {
+                orderId,
+                code: "reservation_expired_reversed",
+              }),
+            );
+          }
+        }
+      } catch (reservationErr) {
+        strapi.log.error("Failed to validate reservation before SnappPay settlement", reservationErr);
       }
 
       // Auto-settle SnappPay transaction (like Mellat)
@@ -963,52 +1290,21 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       // If newly settled (including after retries), decrement stock atomically
       if (retryNewlySettled) {
-        try {
-          const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
-
-          const orderWithItems = await strapi.entityService.findOne("api::order.order", orderId, {
-            populate: {
-              order_items: {
-                populate: {
-                  product_variation: { populate: { product_stock: true } },
-                },
-              },
-            },
-          });
-
-          const stockErrors: any[] = [];
-          for (const it of orderWithItems?.order_items || []) {
-            const v = it?.product_variation;
-            if (v?.product_stock?.id && typeof it?.Count === "number") {
-              const stockId = v.product_stock.id as number;
-              const quantity = Number(it.Count || 0);
-
-              const result = await decrementStockAtomic(strapi, stockId, quantity);
-              if (!result.success) {
-                stockErrors.push({
-                  stockId,
-                  quantity,
-                  error: result.error,
-                  variationId: v.id,
-                });
-                strapi.log.error("Failed to decrement stock atomically (SnappPay)", {
-                  orderId,
-                  stockId,
-                  quantity,
-                  error: result.error,
-                });
-              }
-            }
-          }
-
-          if (stockErrors.length > 0) {
-            strapi.log.error("Some stock decrements failed for SnappPay payment", {
+        const stockResult = await handlePostPaymentStock(strapi, orderId, "SnappPay");
+        if (!stockResult.success) {
+          if (stockResult.expired) {
+            strapi.log.error("Reservation expired after SnappPay settlement", { orderId });
+          } else {
+            strapi.log.error("Failed to consume reservation after SnappPay settlement", {
               orderId,
-              errors: stockErrors,
+              errors: stockResult.errors,
             });
           }
-        } catch (e) {
-          strapi.log.error("Failed to decrement stock after settlement", e);
+        } else if (stockResult.errors && stockResult.errors.length > 0) {
+          strapi.log.error("Some stock decrements failed for SnappPay payment", {
+            orderId,
+            errors: stockResult.errors,
+          });
         }
 
         // Barcode generation now only occurs when triggered manually from the admin panel.
@@ -1109,6 +1405,9 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           await strapi.entityService.update("api::order.order", orderId, {
             data: { Status: "Cancelled" },
           });
+          try {
+            await releaseOrderReservation(strapi as any, Number(orderId), "Released");
+          } catch {}
           strapi.log.info(
             `Order ${orderId} marked as Cancelled due to payment failure/cancellation`,
           );
@@ -1208,6 +1507,77 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       }
 
       // Settle the transaction
+      // Reservation check BEFORE settlement: if reservation expired, reverse payment and inform user.
+      try {
+	        const orderForReservation: any = await strapi.entityService.findOne(
+	          "api::order.order",
+	          orderId,
+	          { fields: ["Status", "ReservationStatus", "ReservedUntil"], populate: { contract: true } } as any,
+	        );
+	        const reservationStatus = orderForReservation?.ReservationStatus;
+	        if (reservationStatus && reservationStatus !== "Consumed") {
+	          const until = orderForReservation?.ReservedUntil
+	            ? new Date(orderForReservation.ReservedUntil)
+	            : null;
+	          const orderCancelled = String(orderForReservation?.Status) === "Cancelled";
+	          const invalidReservation =
+	            reservationStatus !== "Reserved" || orderCancelled || !until || until.getTime() < Date.now();
+
+	          if (invalidReservation) {
+	            try {
+	              await releaseOrderReservation(strapi as any, Number(orderId), "Expired");
+	            } catch {}
+
+            try {
+              await paymentService.reverseTransaction({
+                orderId: OrderId || SaleOrderId,
+                saleOrderId: SaleOrderId,
+                saleReferenceId: SaleReferenceId,
+              });
+            } catch (reverseErr) {
+              strapi.log.error("Mellat reversal attempt failed (expired reservation)", reverseErr);
+            }
+
+            try {
+              await strapi.entityService.update("api::order.order", orderId, {
+                data: { Status: "Cancelled" },
+              });
+            } catch {}
+            const contractId =
+              typeof orderForReservation?.contract === "object" && orderForReservation.contract
+                ? orderForReservation.contract.id
+                : orderForReservation?.contract;
+            if (contractId) {
+              try {
+                await strapi.entityService.update("api::contract.contract", contractId, {
+                  data: { Status: "Cancelled", external_source: "Mellat" },
+                });
+              } catch {}
+            }
+
+            try {
+              await strapi.entityService.create("api::order-log.order-log", {
+                data: {
+                  order: orderId,
+                  Action: "Update",
+                  Description: "Reservation expired; Mellat payment reversed before settlement",
+                  Changes: { SaleOrderId, SaleReferenceId, ResCode, RefId },
+                },
+              });
+            } catch {}
+
+	            return ctx.redirect(
+	              buildPaymentRedirectUrl("issue", {
+	                orderId,
+	                code: "reservation_expired_reversed",
+	              }),
+	            );
+	          }
+	        }
+	      } catch (reservationErr) {
+	        strapi.log.error("Failed to validate reservation before Mellat settlement", reservationErr);
+	      }
+
       const settlementResult = await paymentService.settleTransaction({
         orderId: OrderId || SaleOrderId,
         saleOrderId: SaleOrderId,
@@ -1216,53 +1586,24 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
       if (settlementResult.success) {
         // Update order status to Started (Paid)
-        // Decrement stock atomically for each order item NOW (after settlement)
-        try {
-          const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
-
-          const orderWithItems = await strapi.entityService.findOne("api::order.order", orderId, {
-            populate: {
-              order_items: {
-                populate: {
-                  product_variation: { populate: { product_stock: true } },
-                },
-              },
-            },
-          });
-
-          const stockErrors: any[] = [];
-          for (const it of orderWithItems?.order_items || []) {
-            const v = it?.product_variation;
-            if (v?.product_stock?.id && typeof it?.Count === "number") {
-              const stockId = v.product_stock.id as number;
-              const quantity = Number(it.Count || 0);
-
-              const result = await decrementStockAtomic(strapi, stockId, quantity);
-              if (!result.success) {
-                stockErrors.push({
-                  stockId,
-                  quantity,
-                  error: result.error,
-                  variationId: v.id,
-                });
-                strapi.log.error("Failed to decrement stock atomically (Mellat)", {
-                  orderId,
-                  stockId,
-                  quantity,
-                  error: result.error,
-                });
-              }
-            }
-          }
-
-          if (stockErrors.length > 0) {
-            strapi.log.error("Some stock decrements failed for Mellat payment", {
+        // Stock handling:
+        // - Reserved orders: consume reservation (Count-- and ReservedCount--) atomically
+        // - Legacy orders: fallback to direct decrement
+        const stockResult = await handlePostPaymentStock(strapi, orderId, "Mellat");
+        if (!stockResult.success) {
+          if (stockResult.expired) {
+            strapi.log.error("Reservation expired after Mellat settlement", { orderId });
+          } else {
+            strapi.log.error("Failed to consume reservation after Mellat settlement", {
               orderId,
-              errors: stockErrors,
+              errors: stockResult.errors,
             });
           }
-        } catch (e) {
-          strapi.log.error("Failed to decrement stock after settlement", e);
+        } else if (stockResult.errors && stockResult.errors.length > 0) {
+          strapi.log.error("Some stock decrements failed for Mellat payment", {
+            orderId,
+            errors: stockResult.errors,
+          });
         }
 
         await strapi.entityService.update("api::order.order", orderId, {

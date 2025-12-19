@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { getAvailableStockCount } from "../lib/stock";
 
 export const checkCartStockOp = async (strapi: Strapi, userId: number) => {
   const cart = await strapi.service("api::cart.cart").getUserCart(userId);
@@ -50,7 +51,7 @@ export const checkCartStockOp = async (strapi: Strapi, userId: number) => {
       });
       continue;
     }
-    const available = item.product_variation.product_stock.Count;
+    const available = getAvailableStockCount(item.product_variation.product_stock);
     const requested = item.Count;
     if (available === 0) {
       await strapi.service("api::cart.cart").removeCartItem(item.id);

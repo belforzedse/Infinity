@@ -79,6 +79,13 @@ export const createStrapiMock = () => {
     query: jest.fn((uid: string) => queryMap[uid]),
     db: {
       query: jest.fn((uid: string) => queryMap[uid]),
+      transaction: jest.fn(async (cb: any) => {
+        const trx = { raw: jest.fn().mockResolvedValue({ rows: [] }) };
+        return await cb({ trx });
+      }),
+      connection: {
+        raw: jest.fn().mockResolvedValue({ rows: [] }),
+      },
     },
     config: {
       get: jest.fn((key: string, defaultValue?: string) => {

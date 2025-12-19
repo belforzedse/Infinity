@@ -2,6 +2,7 @@ import type { Strapi } from "@strapi/strapi";
 import { computeTotals } from "../../../cart/services/lib/financials";
 import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
 import { logAdminOrderEdit } from "../../../../utils/adminActivity";
+import { releaseReservedStockAtomic } from "../../../cart/services/lib/stock";
 
 type ItemAdjustment = {
   orderItemId: number;
@@ -26,6 +27,7 @@ function cleanupCache() {
 }
 
 const computePaidAmountToman = (order: any): number => {
+  if (String(order?.Status) === "Paying") return 0;
   const txList = order?.contract?.contract_transactions || [];
   let paidIrr = 0;
 
@@ -276,14 +278,25 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
         const item = orderItemsMap.get(change.orderItemId) as any;
         const stockId = item?.product_variation?.product_stock?.id;
         if (stockId && change.restockDelta > 0) {
-          const stock = await strapi.db
-            .query("api::product-stock.product-stock")
-            .findOne({ where: { id: stockId } });
-          if (stock) {
-            await strapi.db.query("api::product-stock.product-stock").update({
-              where: { id: stockId },
-              data: { Count: Number(stock.Count || 0) + change.restockDelta },
-            });
+          if (order.Status === "Started") {
+            const stock = await strapi.db
+              .query("api::product-stock.product-stock")
+              .findOne({ where: { id: stockId } });
+            if (stock) {
+              await strapi.db.query("api::product-stock.product-stock").update({
+                where: { id: stockId },
+                data: { Count: Number(stock.Count || 0) + change.restockDelta },
+              });
+            }
+          } else if (order.Status === "Paying") {
+            // For unpaid orders, only release reservation (do NOT increment Count)
+            if (order.ReservationStatus === "Reserved") {
+              await releaseReservedStockAtomic(
+                strapi as any,
+                Number(stockId),
+                change.restockDelta
+              );
+            }
           }
         }
       }

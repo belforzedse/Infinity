@@ -42,6 +42,19 @@
       ],
       "default": "Paying"
     },
+    "ReservationStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Reserved",
+        "Released",
+        "Consumed",
+        "Expired"
+      ],
+      "default": "Released"
+    },
+    "ReservedUntil": {
+      "type": "datetime"
+    },
     "Date": {
       "type": "datetime",
       "required": true

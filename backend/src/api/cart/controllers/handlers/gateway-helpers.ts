@@ -1,5 +1,6 @@
 import { Strapi } from "@strapi/strapi";
 import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
+import { releaseOrderReservation } from "../../../../utils/stockReservations";
 
 type FinancialSummary = {
   subtotal: number;
@@ -85,6 +86,52 @@ export const requestSnappPayment = async (
     absoluteCallback,
   } = params;
 
+  const cancelAndRelease = async (reason: string, details?: any) => {
+    try {
+      await strapi.entityService.update("api::order.order", order.id, {
+        data: { Status: "Cancelled" },
+      });
+    } catch (error) {
+      strapi.log.error("Failed to update order Status", {
+        orderId: order.id,
+        error: (error as Error).message,
+      });
+    }
+    try {
+      await strapi.entityService.update("api::contract.contract", contract.id, {
+        data: { Status: "Cancelled" },
+      });
+    } catch (error) {
+      strapi.log.error("Failed to update contract Status", {
+        contractId: contract.id,
+        error: (error as Error).message,
+      });
+    }
+    try {
+      await releaseOrderReservation(strapi as any, Number(order.id), "Released");
+    } catch (error) {
+      strapi.log.error("Failed to release order reservation", {
+        orderId: order.id,
+        error: (error as Error).message,
+      });
+    }
+    try {
+      await strapi.entityService.create("api::order-log.order-log", {
+        data: {
+          order: order.id,
+          Action: "Update",
+          Description: `SnappPay payment initiation cancelled: ${reason}`,
+          Changes: details || {},
+        },
+      });
+    } catch (error) {
+      strapi.log.error("Failed to create order-log", {
+        orderId: order.id,
+        error: (error as Error).message,
+      });
+    }
+  };
+
   const orderItems = await strapi.entityService.findMany(
     "api::order-item.order-item",
     {
@@ -106,6 +153,7 @@ export const requestSnappPayment = async (
 
   const customerMobile = normalizeIranMobile(mobile || userRecord?.Phone);
   if (!/^\+98\d{10}$/.test(customerMobile)) {
+    await cancelAndRelease("invalid_mobile_format", { mobile: customerMobile });
     return {
       response: ctx.badRequest(
         "Phone number is invalid for SnappPay (must be +98XXXXXXXXXX)",
@@ -228,6 +276,9 @@ export const requestSnappPayment = async (
       error: eligible?.errorData,
     });
     if (eligible?.successful === false) {
+      await cancelAndRelease("eligibility_check_failed", {
+        error: eligible?.errorData,
+      });
       return {
         response: ctx.badRequest("SnappPay eligibility check failed", {
           data: { success: false, error: eligible?.errorData },
@@ -239,6 +290,9 @@ export const requestSnappPayment = async (
       eligible.response &&
       eligible.response.eligible === false
     ) {
+      await cancelAndRelease("ineligible", {
+        title: eligible?.response?.title_message,
+      });
       return {
         response: ctx.badRequest("SnappPay not eligible for this amount", {
           data: { success: false, message: "SnappPay ineligible" },
@@ -261,15 +315,7 @@ export const requestSnappPayment = async (
   try {
     tokenResp = await snappay.requestPaymentToken(snappPayload);
   } catch (err: any) {
-    // Defensive: cancel order/contract on hard errors too
-    try {
-      await strapi.entityService.update("api::order.order", order.id, {
-        data: { Status: "Cancelled" },
-      });
-      await strapi.entityService.update("api::contract.contract", contract.id, {
-        data: { Status: "Cancelled" },
-      });
-    } catch {}
+    await cancelAndRelease("token_request_failed", { message: err?.message });
     return {
       response: ctx.badRequest("SnappPay token request failed", {
         data: { success: false, error: { message: err?.message } },
@@ -286,12 +332,7 @@ export const requestSnappPayment = async (
     !tokenResp.successful ||
     !tokenResp.response?.paymentPageUrl
   ) {
-    await strapi.entityService.update("api::order.order", order.id, {
-      data: { Status: "Cancelled" },
-    });
-    await strapi.entityService.update("api::contract.contract", contract.id, {
-      data: { Status: "Cancelled" },
-    });
+    await cancelAndRelease("token_response_invalid", { error: tokenResp?.errorData });
     return {
       response: ctx.badRequest(
         tokenResp?.errorData?.message || "SnappPay error",
