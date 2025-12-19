@@ -51,8 +51,9 @@ export default function PaymentOrderInfo({
         </p>
       </div>
 
-      {isValidOrderId ? (
-        <PaymentStatus orderId={parsedOrderId!} />
+      {isValidOrderId && parsedOrderId !== null ? (
+        <PaymentStatus orderId={parsedOrderId} />
+      ) : (
       ) : (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-700 text-right">
