@@ -121,7 +121,20 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
           } else if (order.Status === "Paying") {
             // For unpaid orders, only release reservation (do NOT increment Count)
             if (order.ReservationStatus === "Reserved") {
-              await releaseReservedStockAtomic(strapi as any, Number(stockId), qty);
+              const releaseResult = await releaseReservedStockAtomic(
+                strapi as any,
+                Number(stockId),
+                qty
+              );
+              if (!releaseResult.success) {
+                strapi.log.error("Failed to release reserved stock during admin cancel", {
+                  orderId: orderIdNum,
+                  stockId,
+                  qty,
+                  error: releaseResult.error,
+                });
+                throw new Error(releaseResult.error || "RELEASE_RESERVED_STOCK_FAILED");
+              }
             }
           }
         }

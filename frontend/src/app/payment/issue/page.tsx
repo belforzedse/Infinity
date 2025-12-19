@@ -19,22 +19,31 @@ function PaymentIssueContent(): React.ReactElement {
   const isValidOrderId = parsedOrderId !== null && Number.isFinite(parsedOrderId);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchOrderStatus = async () => {
       if (!isValidOrderId || !parsedOrderId) return;
 
       try {
         setStatusLoading(true);
-        const response = await OrderService.getOrderPaymentStatus(parsedOrderId);
+        const response = await OrderService.getOrderPaymentStatus(
+          parsedOrderId,
+          controller.signal
+        );
+        if (controller.signal.aborted) return;
         setOrderStatus(response.status);
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error("Error fetching order status:", err);
         // Keep orderStatus as null to show fallback
       } finally {
-        setStatusLoading(false);
+        if (!controller.signal.aborted) {
+          setStatusLoading(false);
+        }
       }
     };
 
     fetchOrderStatus();
+    return () => controller.abort();
   }, [isValidOrderId, parsedOrderId]);
 
   const handleBackToCart = () => router.push("/cart");
@@ -122,18 +131,21 @@ function PaymentIssueContent(): React.ReactElement {
 
           <div className="w-full max-w-md space-y-3">
             <button
+              type="button"
               onClick={handleBackToCart}
               className="w-full bg-pink-500 text-white py-3 px-6 rounded-lg text-center hover:bg-pink-600 transition-colors"
             >
               بازگشت به سبد خرید
             </button>
             <button
+              type="button"
               onClick={handleContactSupport}
               className="w-full bg-gray-100 text-gray-800 py-3 px-6 rounded-lg text-center hover:bg-gray-200 transition-colors"
             >
               تماس با پشتیبانی
             </button>
             <button
+              type="button"
               onClick={handleContinueShopping}
               className="w-full text-gray-700 py-3 px-6 rounded-lg text-center hover:bg-gray-50 transition-colors"
             >
@@ -163,4 +175,3 @@ export default function PaymentIssue(): React.ReactElement {
     </Suspense>
   );
 }
-

@@ -294,7 +294,8 @@ export const releaseReservedStockAtomic = async (
   strapi: Strapi,
   stockId: number,
   releaseBy: number,
-  trx?: any
+  trx?: any,
+  context?: { userId?: number | string }
 ): Promise<{ success: boolean; newReservedCount?: number; error?: string }> => {
   try {
     const quantity = Number(releaseBy);
@@ -349,6 +350,7 @@ export const releaseReservedStockAtomic = async (
     strapi.log.error("Failed to release reserved stock atomically", {
       stockId,
       releaseBy,
+      userId: context?.userId,
       error: (error as Error).message,
     });
     return {

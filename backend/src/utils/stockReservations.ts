@@ -169,11 +169,12 @@ export async function releaseOrderReservation(
   strapi: Strapi,
   orderId: number,
   reason: "Released" | "Expired",
-  trx?: any
+  trx?: any,
+  context?: { userId?: number | string }
 ): Promise<{ success: boolean; skipped?: boolean; error?: string }> {
   if (!trx) {
     return strapi.db.transaction(async ({ trx }) =>
-      releaseOrderReservation(strapi, orderId, reason, trx)
+      releaseOrderReservation(strapi, orderId, reason, trx, context)
     );
   }
 
@@ -198,7 +199,8 @@ export async function releaseOrderReservation(
         strapi,
         Number(stockId),
         qty,
-        trx
+        trx,
+        context
       );
       if (!result.success) {
         throw new Error(result.error || "release_reserved_failed");
@@ -210,6 +212,7 @@ export async function releaseOrderReservation(
     strapi.log.error("releaseOrderReservation failed", {
       orderId,
       reason,
+      userId: context?.userId,
       error: e?.message || e,
     });
     return { success: false, error: e?.message || String(e) };

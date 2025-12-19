@@ -291,11 +291,20 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
           } else if (order.Status === "Paying") {
             // For unpaid orders, only release reservation (do NOT increment Count)
             if (order.ReservationStatus === "Reserved") {
-              await releaseReservedStockAtomic(
+              const releaseResult = await releaseReservedStockAtomic(
                 strapi as any,
                 Number(stockId),
                 change.restockDelta
               );
+              if (!releaseResult.success) {
+                strapi.log.error("Failed to release reserved stock during admin adjust", {
+                  orderId: orderIdNum,
+                  stockId,
+                  restockDelta: change.restockDelta,
+                  error: releaseResult.error,
+                });
+                throw new Error(releaseResult.error || "RELEASE_RESERVED_STOCK_FAILED");
+              }
             }
           }
         }

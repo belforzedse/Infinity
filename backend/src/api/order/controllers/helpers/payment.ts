@@ -338,6 +338,94 @@ async function handlePostPaymentStock(
   }
 }
 
+async function handleStockDecrementFailure(
+  strapi: Strapi,
+  ctx: any,
+  params: {
+    orderId: number;
+    stockErrors: any[];
+    refNum?: string | number;
+    paymentMethod: string;
+    externalSource: string;
+    externalId?: string | number;
+  },
+) {
+  const { orderId, stockErrors, refNum, paymentMethod, externalSource, externalId } = params;
+  const errorMessage = `Stock decrement failed for ${stockErrors.length} item(s). Order completion halted.`;
+  strapi.log.error(`Stock decrements failed for ${paymentMethod} payment - halting order completion`, {
+    orderId,
+    errors: stockErrors,
+    refNum,
+  });
+
+  // Create order-log entry for tracking and manual retry
+  try {
+    await strapi.entityService.create("api::order-log.order-log", {
+      data: {
+        order: orderId,
+        Action: "Update",
+        Description: "CRITICAL: Stock decrement failures - order completion halted",
+        Changes: {
+          stockErrors: JSON.parse(JSON.stringify(stockErrors)),
+          refNum,
+          haltedAt: new Date().toISOString(),
+          requiresManualRetry: true,
+        },
+      },
+    });
+  } catch (logErr) {
+    strapi.log.error("Failed to create order-log for stock errors", logErr);
+  }
+
+  // Send admin notification
+  try {
+    await logAdminActivity(strapi, {
+      resourceType: "Order",
+      resourceId: orderId,
+      action: "Update",
+      title: "Stock Decrement Failure - Order Halted",
+      message: `سفارش ${orderId} به دلیل خطا در کاهش موجودی متوقف شد. نیاز به بررسی دستی دارد.`,
+      messageEn: `Order ${orderId} halted due to stock decrement failures. Manual review required.`,
+      severity: "error",
+      description: errorMessage,
+      metadata: {
+        orderId,
+        refNum,
+        stockErrors,
+        paymentMethod,
+        requiresRetry: true,
+      },
+      performedBy: {
+        name: "System",
+      },
+    });
+  } catch (notifErr) {
+    strapi.log.error("Failed to send admin notification for stock errors", notifErr);
+  }
+
+  // Keep order in "Paying" status (payment succeeded but stock failed)
+  // Don't transition to "Started" to prevent fulfillment of unavailable items
+  try {
+    await strapi.entityService.update("api::order.order", orderId, {
+      data: {
+        external_source: externalSource,
+        external_id: externalId ?? refNum,
+        // Status remains "Paying" - will require manual intervention
+      },
+    });
+  } catch (err) {
+    strapi.log.error("Failed to update order with gateway info after stock failure", err);
+  }
+
+  // Redirect to issue page with appropriate error code
+  return ctx.redirect(
+    buildPaymentRedirectUrl("issue", {
+      orderId,
+      code: "stock_decrement_failed",
+    }),
+  );
+}
+
 export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Mellat returns: ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId
   const { ResCode, SaleOrderId, SaleReferenceId, RefId, OrderId } = (ctx.request as any).body || {};
@@ -722,80 +810,14 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
           );
         }
       } else if (stockResult.errors && stockResult.errors.length > 0) {
-        // CRITICAL: Halt order completion on stock errors to prevent overselling
-        const errorMessage = `Stock decrement failed for ${stockResult.errors.length} item(s). Order completion halted.`;
-        strapi.log.error("Stock decrements failed for Saman payment - halting order completion", {
+        return handleStockDecrementFailure(strapi, ctx, {
           orderId,
-          errors: stockResult.errors,
+          stockErrors: stockResult.errors,
           refNum,
+          paymentMethod: "SamanKish",
+          externalSource: "SamanKish",
+          externalId: refNum,
         });
-
-        // Create order-log entry for tracking and manual retry
-        try {
-          await strapi.entityService.create("api::order-log.order-log", {
-            data: {
-              order: orderId,
-              Action: "Update",
-              Description: "CRITICAL: Stock decrement failures - order completion halted",
-              Changes: {
-                stockErrors: JSON.parse(JSON.stringify(stockResult.errors)),
-                refNum,
-                haltedAt: new Date().toISOString(),
-                requiresManualRetry: true,
-              },
-            },
-          });
-        } catch (logErr) {
-          strapi.log.error("Failed to create order-log for stock errors", logErr);
-        }
-
-        // Send admin notification
-        try {
-          await logAdminActivity(strapi, {
-            resourceType: "Order",
-            resourceId: orderId,
-            action: "Update",
-            title: "Stock Decrement Failure - Order Halted",
-            message: `سفارش ${orderId} به دلیل خطا در کاهش موجودی متوقف شد. نیاز به بررسی دستی دارد.`,
-            messageEn: `Order ${orderId} halted due to stock decrement failures. Manual review required.`,
-            severity: "error",
-            description: errorMessage,
-            metadata: {
-              orderId,
-              refNum,
-              stockErrors: stockResult.errors,
-              paymentMethod: "SamanKish",
-              requiresRetry: true,
-            },
-            performedBy: {
-              name: "System",
-            },
-          });
-        } catch (notifErr) {
-          strapi.log.error("Failed to send admin notification for stock errors", notifErr);
-        }
-
-        // Keep order in "Paying" status (payment succeeded but stock failed)
-        // Don't transition to "Started" to prevent fulfillment of unavailable items
-        try {
-          await strapi.entityService.update("api::order.order", orderId, {
-            data: {
-              external_source: "SamanKish",
-              external_id: refNum,
-              // Status remains "Paying" - will require manual intervention
-            },
-          });
-        } catch (err) {
-          strapi.log.error("Failed to update order with gateway info after stock failure", err);
-        }
-
-        // Redirect to issue page with appropriate error code
-        return ctx.redirect(
-          buildPaymentRedirectUrl("issue", {
-            orderId,
-            code: "stock_decrement_failed",
-          }),
-        );
       }
 
       // Only proceed to "Started" if no stock errors occurred
@@ -1291,19 +1313,31 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       // If newly settled (including after retries), decrement stock atomically
       if (retryNewlySettled) {
         const stockResult = await handlePostPaymentStock(strapi, orderId, "SnappPay");
-        if (!stockResult.success) {
-          if (stockResult.expired) {
-            strapi.log.error("Reservation expired after SnappPay settlement", { orderId });
-          } else {
-            strapi.log.error("Failed to consume reservation after SnappPay settlement", {
-              orderId,
-              errors: stockResult.errors,
-            });
-          }
-        } else if (stockResult.errors && stockResult.errors.length > 0) {
-          strapi.log.error("Some stock decrements failed for SnappPay payment", {
+        const stockErrors =
+          stockResult.errors && stockResult.errors.length > 0
+            ? stockResult.errors
+            : stockResult.success
+            ? []
+            : [
+                {
+                  error: stockResult.expired
+                    ? "Reservation expired"
+                    : "Stock decrement failed",
+                },
+              ];
+
+        if (!stockResult.success || stockErrors.length > 0) {
+          const referenceId =
+            transactionIdInput ||
+            statusAfterSettle?.response?.transactionId ||
+            tokenForOps;
+          return handleStockDecrementFailure(strapi, ctx, {
             orderId,
-            errors: stockResult.errors,
+            stockErrors,
+            refNum: referenceId,
+            paymentMethod: "SnappPay",
+            externalSource: "SnappPay",
+            externalId: referenceId,
           });
         }
 

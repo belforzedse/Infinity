@@ -226,11 +226,17 @@ export const getOrderStatus = async (orderId: number): Promise<OrderStatusRespon
  */
 export const getOrderPaymentStatus = async (
   orderId: number,
+  signal?: AbortSignal,
 ): Promise<OrderPaymentStatusResponse> => {
   try {
-    const response = await apiClient.get<OrderPaymentStatusResponse>(
-      `/orders/${orderId}/payment-status`,
-    );
+    const response = signal
+      ? await apiClient.get<OrderPaymentStatusResponse>(
+          `/orders/${orderId}/payment-status`,
+          { signal },
+        )
+      : await apiClient.get<OrderPaymentStatusResponse>(
+          `/orders/${orderId}/payment-status`,
+        );
     return response.data;
   } catch (error: any) {
     console.error("Error checking order payment status:", error);

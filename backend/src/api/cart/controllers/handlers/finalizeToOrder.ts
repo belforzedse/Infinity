@@ -6,7 +6,6 @@ import {
   requestSamanPayment,
   requestSnappPayment,
 } from "./gateway-helpers";
-import { releaseOrderReservation } from "../../../../utils/stockReservations";
 
 export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
   const { user } = ctx.state;
@@ -290,7 +289,9 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           strapi,
           order.id,
           contract.id,
-          "wallet_payment_failed"
+          user.id,
+          "wallet_payment_failed",
+          { createAuditLogs: true }
         );
 
         return ctx.badRequest(walletResult.error || "Wallet balance is insufficient", {
@@ -579,141 +580,14 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         });
       }
 
-      try {
-        // Get current order status before updating
-        let orderFromStatus: string | undefined;
-        try {
-          const currentOrder = await strapi.entityService.findOne(
-            "api::order.order",
-            order.id,
-            { fields: ["Status"] }
-          );
-          orderFromStatus = currentOrder?.Status;
-        } catch (err) {
-          strapi.log.error("Failed to fetch current order status", {
-            orderId: order.id,
-            userId: user.id,
-            error: (err as Error)?.message || err,
-          });
-        }
-
-        try {
-          await strapi.entityService.update("api::order.order", order.id, {
-            data: { Status: "Cancelled" },
-          });
-
-          // Create order-log entry for order status change
-          try {
-            await strapi.entityService.create("api::order-log.order-log", {
-              data: {
-                order: order.id,
-                performed_by: user.id,
-                Action: "Update",
-                Description: "Order status changed to Cancelled due to payment gateway failure",
-                Changes: {
-                  fromStatus: orderFromStatus,
-                  toStatus: "Cancelled",
-                  orderId: order.id,
-                  userId: user.id,
-                  timestamp: new Date().toISOString(),
-                },
-              },
-            });
-            strapi.log.info("Order status changed to Cancelled", {
-              orderId: order.id,
-              userId: user.id,
-              fromStatus: orderFromStatus,
-              toStatus: "Cancelled",
-            });
-          } catch (logErr) {
-            strapi.log.error("Failed to create order-log for order status change", {
-              orderId: order.id,
-              userId: user.id,
-              error: (logErr as Error)?.message || logErr,
-            });
-          }
-        } catch (error) {
-          strapi.log.error("Failed to update order Status", {
-            orderId: order.id,
-            userId: user.id,
-            error: (error as Error).message,
-          });
-        }
-
-        // Get current contract status before updating
-        let contractFromStatus: string | undefined;
-        try {
-          const currentContract = await strapi.entityService.findOne(
-            "api::contract.contract",
-            contract.id,
-            { fields: ["Status"] }
-          );
-          contractFromStatus = currentContract?.Status;
-        } catch (err) {
-          strapi.log.error("Failed to fetch current contract status", {
-            contractId: contract.id,
-            userId: user.id,
-            error: (err as Error)?.message || err,
-          });
-        }
-
-        try {
-          await strapi.entityService.update("api::contract.contract", contract.id, {
-            data: { Status: "Cancelled" },
-          });
-
-          // Create order-log entry for contract status change
-          try {
-            await strapi.entityService.create("api::order-log.order-log", {
-              data: {
-                order: order.id,
-                performed_by: user.id,
-                Action: "Update",
-                Description: "Contract status changed to Cancelled due to payment gateway failure",
-                Changes: {
-                  fromStatus: contractFromStatus,
-                  toStatus: "Cancelled",
-                  orderId: order.id,
-                  contractId: contract.id,
-                  userId: user.id,
-                  timestamp: new Date().toISOString(),
-                },
-              },
-            });
-            strapi.log.info("Contract status changed to Cancelled", {
-              orderId: order.id,
-              contractId: contract.id,
-              userId: user.id,
-              fromStatus: contractFromStatus,
-              toStatus: "Cancelled",
-            });
-          } catch (logErr) {
-            strapi.log.error("Failed to create order-log for contract status change", {
-              orderId: order.id,
-              contractId: contract.id,
-              userId: user.id,
-              error: (logErr as Error)?.message || logErr,
-            });
-          }
-        } catch (error) {
-          strapi.log.error("Failed to update contract Status", {
-            contractId: contract.id,
-            userId: user.id,
-            error: (error as Error).message,
-          });
-        }
-      } finally {
-        // Ensure reservation release happens even if cancellation throws
-        try {
-          await releaseOrderReservation(strapi as any, Number(order.id), "Released");
-        } catch (error) {
-          strapi.log.error("Failed to release order reservation", {
-            orderId: order.id,
-            userId: user.id,
-            error: (error as Error).message,
-          });
-        }
-      }
+      await cancelOrderAndRelease(
+        strapi,
+        order.id,
+        contract.id,
+        user.id,
+        "payment_gateway_failure",
+        { createAuditLogs: true }
+      );
 
       return ctx.badRequest(errMsg, {
         data: {

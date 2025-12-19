@@ -1,6 +1,31 @@
 import type { Strapi } from "@strapi/strapi";
 import { releaseOrderReservation } from "../utils/stockReservations";
 
+const MAX_CONSECUTIVE_FAILURES = 5;
+let consecutiveFailures = 0;
+
+const incrementMetric = (
+  strapi: Strapi,
+  name: string
+) => {
+  const metrics = (strapi as any).metrics;
+  if (!metrics) return;
+  if (typeof metrics.increment === "function") {
+    metrics.increment(name);
+    return;
+  }
+  if (typeof metrics.counter === "function") {
+    const counter = metrics.counter(name);
+    if (counter?.inc) {
+      counter.inc();
+      return;
+    }
+  }
+  if (metrics?.counter?.inc) {
+    metrics.counter.inc();
+  }
+};
+
 export function startExpireStockReservationsJob(strapi: Strapi) {
   const enabled =
     String(process.env.ENABLE_STOCK_RESERVATION_EXPIRY_JOB || "true").toLowerCase() !== "false";
@@ -85,8 +110,21 @@ export function startExpireStockReservationsJob(strapi: Strapi) {
           }
         });
       }
+      consecutiveFailures = 0;
     } catch (e) {
-      strapi.log.error("expireStockReservations job failed", e);
+      consecutiveFailures += 1;
+      incrementMetric(strapi, "expire_stock_reservations_failures_total");
+      strapi.log.error("expireStockReservations job failed", {
+        error: e,
+        consecutiveFailures,
+      });
+      if (consecutiveFailures === MAX_CONSECUTIVE_FAILURES) {
+        incrementMetric(strapi, "expire_stock_reservations_failure_threshold_total");
+        strapi.log.warn("expireStockReservations consecutive failure threshold exceeded", {
+          consecutiveFailures,
+          threshold: MAX_CONSECUTIVE_FAILURES,
+        });
+      }
     } finally {
       running = false;
     }
@@ -96,4 +134,3 @@ export function startExpireStockReservationsJob(strapi: Strapi) {
   setTimeout(() => tick().catch(() => {}), 10_000);
   setInterval(() => tick().catch(() => {}), intervalMs);
 }
-
