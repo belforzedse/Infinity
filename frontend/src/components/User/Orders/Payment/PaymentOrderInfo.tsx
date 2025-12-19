@@ -54,7 +54,6 @@ export default function PaymentOrderInfo({
       {isValidOrderId && parsedOrderId !== null ? (
         <PaymentStatus orderId={parsedOrderId} />
       ) : (
-      ) : (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-700 text-right">
             شماره سفارش نامعتبر است. لطفاً با پشتیبانی تماس بگیرید.
