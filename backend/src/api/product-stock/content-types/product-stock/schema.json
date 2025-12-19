@@ -16,6 +16,11 @@
       "default": 0,
       "min": 0
     },
+    "reservedCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
     "product_stock_logs": {
       "type": "relation",
       "relation": "oneToMany",

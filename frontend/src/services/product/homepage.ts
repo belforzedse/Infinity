@@ -49,6 +49,8 @@ export const getHomepageSections = async (): Promise<{
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `populate[5]=product_variations.product_variation_color&` +
+    `populate[6]=Media&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
@@ -127,6 +129,8 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `populate[5]=product_variations.product_variation_color&` +
+    `populate[6]=Media&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
@@ -200,6 +204,8 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `populate[5]=product_variations.product_variation_color&` +
+    `populate[6]=Media&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
@@ -234,6 +240,8 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
     `populate[2]=product_variations&` +
     `populate[3]=product_variations.product_stock&` +
     `populate[4]=product_variations.general_discounts&` +
+    `populate[5]=product_variations.product_variation_color&` +
+    `populate[6]=Media&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +

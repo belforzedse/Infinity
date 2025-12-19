@@ -1,7 +1,7 @@
 "use client";
 
 import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/ContentWrapper/index";
-import { type Order } from "./page";
+import { type OrderFormData } from "./page";
 import EditIcon from "@/components/SuperAdmin/UpsertPage/Icons/EditIcon";
 import EditableFieldLabel from "@/components/SuperAdmin/Order/EditableFieldLabel";
 
@@ -21,7 +21,7 @@ type FieldStates = {
 export const createConfig = (
   fieldStates: FieldStates,
   toggleFieldEdit: (fieldName: keyof FieldStates) => void
-): UpsertPageConfigType<Order> => ({
+): UpsertPageConfigType<OrderFormData> => ({
   headTitle: "ساخت سفارش جدید",
   actionButtons: (props) => (
     <>

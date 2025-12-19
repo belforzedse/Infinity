@@ -11,6 +11,7 @@ import {
 } from "./lib/discounts";
 import { computeTotals } from "./lib/financials";
 import { createContract } from "./lib/contract";
+import { reserveStockAtomic } from "./lib/stock";
 import { addCartItemOp } from "./ops/addCartItem";
 import { updateCartItemOp } from "./ops/updateCartItem";
 import { removeCartItemOp } from "./ops/removeCartItem";
@@ -128,6 +129,20 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           | "Cancelled";
         type ContractType = "Cash" | "Credit";
 
+        const reservationTtlMinutes = Number(
+          process.env.STOCK_RESERVATION_TTL_MINUTES || 15
+        );
+        const reservationTtlMs = Number.isFinite(reservationTtlMinutes)
+          ? Math.max(1, reservationTtlMinutes) * 60 * 1000
+          : 15 * 60 * 1000;
+        const reservedUntil = new Date(Date.now() + reservationTtlMs);
+
+        // Validate reservation date is in the future
+        const reservation = { status: "Reserved" as const, until: reservedUntil };
+        if (reservation.until <= new Date()) {
+          throw new Error("INVALID_RESERVATION: Reservation date must be in the future");
+        }
+
         // Resolve base shipping cost (will be replaced by Anipo for non-4)
         let finalShippingCost = await resolveShippingCost(
           strapi as any,
@@ -158,6 +173,7 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           shippingData.description,
           shippingData.note,
           shippingData.addressId,
+          reservation,
           trx
         );
 
@@ -166,6 +182,45 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           itemsCreated: createdItems.length,
           subtotal,
         });
+
+        // Reserve stock for all items (high-load safe; rolls back if any reservation fails)
+        // Aggregate quantities by stockId to avoid redundant reserveStockAtomic calls
+        const stockQuantityMap = new Map<number, number>();
+
+        for (const item of cart.cart_items || []) {
+          const stockId = item?.product_variation?.product_stock?.id;
+          const quantity = Number(item?.Count || 0);
+
+          if (
+            Number.isFinite(stockId) &&
+            stockId > 0 &&
+            Number.isFinite(quantity) &&
+            quantity > 0
+          ) {
+            const numericStockId = Number(stockId);
+            const currentQuantity = stockQuantityMap.get(numericStockId) || 0;
+            stockQuantityMap.set(numericStockId, currentQuantity + quantity);
+          }
+        }
+
+        // Sort by stockId for deadlock-safe ordering, then reserve aggregated quantities
+        const aggregatedReservations = Array.from(stockQuantityMap.entries())
+          .map(([stockId, quantity]) => ({ stockId, quantity }))
+          .sort((a, b) => a.stockId - b.stockId);
+
+        for (const r of aggregatedReservations) {
+          const reserveRes = await reserveStockAtomic(
+            strapi as any,
+            r.stockId,
+            r.quantity,
+            trx
+          );
+          if (!reserveRes.success) {
+            throw new Error(
+              `STOCK_RESERVATION_FAILED: ${reserveRes.error || "reserve_failed"}`
+            );
+          }
+        }
 
         // Always compute and persist order shipping weight from items (in grams)
         let totalWeight = 0;
@@ -385,12 +440,20 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
             userMessage = "خطا در ایجاد قرارداد";
             details = { detail: errorDetail };
             break;
+          case "STOCK_RESERVATION_FAILED":
+            userMessage =
+              "موجودی برخی از کالاها تغییر کرده است. لطفاً سبد خرید را بروزرسانی کرده و دوباره تلاش کنید";
+            details = { detail: errorDetail };
+            break;
           case "INVALID_AMOUNT":
             userMessage = "مبلغ سفارش نامعتبر است";
             break;
           case "INVALID_TAX_PERCENT":
             userMessage = "درصد مالیات نامعتبر است";
             break;
+case "INVALID_RESERVATION":
+           userMessage = "خطا در رزرو موجودی. لطفاً مجدداً تلاش کنید";
+           break;
           default:
             userMessage = "خطا در ثبت سفارش. لطفاً مجدداً تلاش کنید";
         }

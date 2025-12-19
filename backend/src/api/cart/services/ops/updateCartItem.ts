@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { getAvailableStockCount } from "../lib/stock";
 
 export const updateCartItemOp = async (
   strapi: Strapi,
@@ -14,10 +15,20 @@ export const updateCartItemOp = async (
     return { success: false, message: "Cart item not found" };
   }
 
-  if (
-    !cartItem.product_variation?.product_stock ||
-    cartItem.product_variation.product_stock.Count < count
-  ) {
+  let available = 0;
+  try {
+    available = cartItem.product_variation?.product_stock
+      ? getAvailableStockCount(cartItem.product_variation.product_stock)
+      : 0;
+  } catch (error) {
+    strapi.log.error("Failed to get available stock count", {
+      cartItemId,
+      error: (error as Error).message,
+    });
+    return { success: false, message: "Unable to verify stock" };
+  }
+
+  if (!cartItem.product_variation?.product_stock || available < count) {
     return { success: false, message: "Insufficient stock" };
   }
 

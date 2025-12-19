@@ -1,24 +1,27 @@
 "use client";
 
-import { API_BASE_URL, ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import NoData from "./NoData";
-import dynamic from "next/dynamic";
 import { apiClient } from "@/services";
 import { categories as STATIC_CATEGORIES } from "@/constants/categories";
 import { faNum } from "@/utils/faNum";
+import type { ProductCardProps } from "@/components/Product/Card";
 import Filter from "./List/Filter";
 import PLPListMobileFilter from "./List/MobileFilter";
 import HeartIcon from "./Icons/HeartIcon";
 import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
-import PLPPagination from "./Pagination";
+import Pagination from "./Pagination";
 import { useQueryState } from "nuqs";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 import { SORT_LABELS } from "./sortOptions";
-import { computeDiscountForVariation } from "@/utils/discounts";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { getMinInStockVariationPrice, hasAvailableStock } from "@/utils/product";
+import { useSidebarProducts } from "@/hooks/useSidebarProducts";
+import PLPDesktopList from "./List/PLPDesktopList";
+import PLPMobileList from "./List/PLPMobileList";
+import type { PLPProduct, PLPPagination } from "./types";
 
 const humanize = (value: string) =>
   value
@@ -27,77 +30,13 @@ const humanize = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-
-// Lazy load heavy components
-const ProductCard = dynamic(() => import("@/components/Product/Card"), {
-  loading: () => <div className="h-48 animate-pulse rounded-lg bg-gray-200" />,
-});
-const ProductSmallCard = dynamic(() => import("@/components/Product/SmallCard"), {
-  loading: () => <div className="h-24 animate-pulse rounded-lg bg-gray-200" />,
-});
-
-interface Product {
-  id: number;
-  attributes: {
-    Title: string;
-    Description: string;
-    Status: string;
-    AverageRating: number | null;
-    RatingCount: number | null;
-    CoverImage: {
-      data: {
-        attributes: {
-          url: string;
-        };
-      };
-    };
-    product_main_category: {
-      data: {
-        attributes: {
-          Title: string;
-          Slug: string;
-        };
-      };
-    };
-    product_variations: {
-      data: Array<{
-        attributes: {
-          SKU: string;
-          Price: string;
-          IsPublished: boolean;
-          DiscountPrice?: string;
-          general_discounts?: {
-            data: Array<{
-              attributes: {
-                Amount: number;
-              };
-            }>;
-          };
-          product_stock?: {
-            data?: {
-              attributes?: {
-                Count?: number;
-              };
-            };
-          };
-        };
-      }>;
-    };
-  };
-}
-
-interface Pagination {
-  page: number;
-  pageSize: number;
-  pageCount: number;
-  total: number;
-}
-
 interface PLPListProps {
-  products: Product[];
-  pagination: Pagination;
+  products: PLPProduct[];
+  pagination: PLPPagination;
   category?: string;
   searchQuery?: string;
+  discountedSidebarProducts?: ProductCardProps[];
+  suggestedSidebarProducts?: ProductCardProps[];
 }
 
 export default function PLPList({
@@ -105,6 +44,8 @@ export default function PLPList({
   pagination: initialPagination,
   category: initialCategory,
   searchQuery,
+  discountedSidebarProducts = [],
+  suggestedSidebarProducts = [],
 }: PLPListProps) {
   // URL state management with nuqs
   // These hooks are safe to use in client components - the adapter is in root layout
@@ -121,9 +62,24 @@ export default function PLPList({
   const [sort, setSort] = useQueryState("sort");
   const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
+  const [isDesktop, setIsDesktop] = useState(false);
+  const isDesktopForFetchRef = useRef(false);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      const isD = window.innerWidth >= 768;
+      setIsDesktop(isD);
+      if (!isDesktopForFetchRef.current && isD) {
+        isDesktopForFetchRef.current = true;
+      }
+    };
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
 
   // Helper function to check if product has an image
-  const hasImage = (product: Product): boolean => {
+  const hasImage = (product: PLPProduct): boolean => {
     return !!(
       product.attributes?.CoverImage?.data?.attributes?.url ||
       product.attributes?.CoverImage?.data
@@ -134,8 +90,8 @@ export default function PLPList({
   const filteredInitialProducts = initialProducts.filter(hasImage);
 
   // Local state for products and pagination
-  const [products, setProducts] = useState<Product[]>(filteredInitialProducts);
-  const [pagination, setPagination] = useState<Pagination>(initialPagination);
+  const [products, setProducts] = useState<PLPProduct[]>(filteredInitialProducts);
+  const [pagination, setPagination] = useState<PLPPagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
     STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
@@ -194,6 +150,13 @@ export default function PLPList({
     queryParams.append("populate[2]", "product_variations");
     queryParams.append("populate[3]", "product_variations.product_stock");
     queryParams.append("populate[4]", "product_variations.general_discounts");
+    queryParams.append("populate[5]", "product_variations.product_variation_color");
+
+    // Only fetch additional media on desktop to save bandwidth
+    if (isDesktopForFetchRef.current) {
+      queryParams.append("populate[6]", "Media");
+    }
+
     queryParams.append("fields[0]", "Title");
     queryParams.append("fields[1]", "Slug");
     queryParams.append("fields[2]", "Description");
@@ -275,83 +238,25 @@ export default function PLPList({
         // CRITICAL: Sort products by stock availability FIRST, before any other operations
         // This ensures in-stock products always appear before out-of-stock products
         productsArray.sort((a: any, b: any) => {
-          // Helper function to check if product has available stock
-          // A product is "in stock" if it has at least one published variation with stock > 0
-          const hasStock = (product: any): boolean => {
-            if (!product.attributes?.product_variations?.data) return false;
+          const aHasStock = hasAvailableStock(a);
+          const bHasStock = hasAvailableStock(b);
 
-            return product.attributes.product_variations.data.some((variation: any) => {
-              // Must be published
-              if (!variation.attributes?.IsPublished) return false;
-
-              // Check stock count - handle various data structures
-              const stockData = variation.attributes?.product_stock;
-              if (!stockData) return false;
-
-              const stockCount = stockData?.data?.attributes?.Count;
-              // Check if stockCount exists and is a positive number
-              if (typeof stockCount !== "number" || stockCount <= 0) return false;
-
-              return true;
-            });
-          };
-
-          const aHasStock = hasStock(a);
-          const bHasStock = hasStock(b);
-
-          // Products with stock come first
           if (aHasStock && !bHasStock) return -1;
           if (!aHasStock && bHasStock) return 1;
-          return 0; // Keep original order if both have same stock status
+          return 0;
         });
 
         // Frontend price sorting (applied after stock sorting)
         if (sort === "price:asc" || sort === "price:desc") {
-          const getMinVariationPrice = (product: any): number => {
-            const variations = product.attributes?.product_variations?.data || [];
-            let minPrice = Infinity;
-
-            for (const variation of variations) {
-              // Only consider published variations with stock
-              if (!variation.attributes?.IsPublished) continue;
-
-              const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
-              if (typeof stockCount === "number" && stockCount <= 0) continue;
-
-              // Compute final price with discounts
-              const discountResult = computeDiscountForVariation(variation);
-              const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes?.Price || "0");
-
-              if (finalPrice > 0 && finalPrice < minPrice) {
-                minPrice = finalPrice;
-              }
-            }
-
-            return minPrice === Infinity ? 0 : minPrice;
-          };
-
-          // Sort by price, but maintain stock priority (in-stock products first)
           productsArray = [...productsArray].sort((a: any, b: any) => {
-            // First, check stock status (maintain stock priority)
-            const aHasStock = a.attributes?.product_variations?.data?.some((v: any) =>
-              v.attributes?.IsPublished &&
-              typeof v.attributes?.product_stock?.data?.attributes?.Count === "number" &&
-              v.attributes.product_stock.data.attributes.Count > 0
-            ) || false;
+            const aHasStock = hasAvailableStock(a);
+            const bHasStock = hasAvailableStock(b);
 
-            const bHasStock = b.attributes?.product_variations?.data?.some((v: any) =>
-              v.attributes?.IsPublished &&
-              typeof v.attributes?.product_stock?.data?.attributes?.Count === "number" &&
-              v.attributes.product_stock.data.attributes.Count > 0
-            ) || false;
-
-            // If stock status differs, stock comes first
             if (aHasStock && !bHasStock) return -1;
             if (!aHasStock && bHasStock) return 1;
 
-            // If same stock status, sort by price
-            const priceA = getMinVariationPrice(a);
-            const priceB = getMinVariationPrice(b);
+            const priceA = getMinInStockVariationPrice(a);
+            const priceB = getMinInStockVariationPrice(b);
             return sort === "price:asc" ? priceA - priceB : priceB - priceA;
           });
         }
@@ -440,7 +345,7 @@ export default function PLPList({
 
           // If showAvailableOnly is true, check if any variation is published AND has stock
           if (available === "true") {
-            const hasInStockVariation = checkStockAvailability(product);
+            const hasInStockVariation = hasAvailableStock(product);
             if (!(hasValidPrice && hasInStockVariation)) return false;
           } else if (!hasValidPrice) {
             return false;
@@ -482,108 +387,11 @@ export default function PLPList({
     [products, available, discountOnly],
   );
 
-
-  // Memoize sidebar products
-  const sidebarProducts = useMemo(
-    () =>
-      validProducts
-        .slice(0, 3)
-        .map((product) => {
-          try {
-            const firstValidVariation = product.attributes.product_variations?.data?.find(
-              (variation) => {
-                if (!variation?.attributes?.Price) return false;
-                const price = parseInt(variation.attributes.Price);
-                return !isNaN(price) && price > 0;
-              },
-            );
-
-            const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-            if (isNaN(price) || price <= 0) {
-              throw new Error("Invalid price for sidebar product");
-            }
-
-            // Check for general_discounts relationship first
-            const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
-            let discountPrice = undefined;
-            let discount = undefined;
-
-            if (
-              generalDiscounts &&
-              Array.isArray(generalDiscounts) &&
-              generalDiscounts.length > 0
-            ) {
-              // Use general_discounts relationship
-              const discountAmount = generalDiscounts[0]?.attributes?.Amount;
-              if (typeof discountAmount === "number" && discountAmount > 0) {
-                discount = discountAmount;
-                discountPrice = Math.round(price * (1 - discountAmount / 100));
-              }
-            } else if (firstValidVariation?.attributes?.DiscountPrice) {
-              // Fallback to DiscountPrice field (if it exists)
-              const parsedDiscountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
-              if (!isNaN(parsedDiscountPrice) && parsedDiscountPrice < price) {
-                discountPrice = parsedDiscountPrice;
-                discount = Math.round(((price - discountPrice) / price) * 100);
-              }
-            }
-
-            return {
-              id: product.id,
-              title: product.attributes.Title || "",
-              category: product.attributes.product_main_category?.data?.attributes?.Title || "",
-              likedCount: product.attributes.RatingCount || 0,
-              price: price,
-              discountedPrice: discountPrice,
-              discount: discount,
-              image: product.attributes.CoverImage?.data?.attributes?.url
-                ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-                : "", // Empty string will trigger BlurImage fallback SVG
-            };
-          } catch (error) {
-            console.warn("Error creating sidebar product:", error, product);
-            // Return a fallback product object
-            return {
-              id: product.id,
-              title: product.attributes?.Title || "",
-              category: "",
-              likedCount: 0,
-              price: 0,
-              discountedPrice: undefined,
-              discount: undefined,
-              image: "",
-            };
-          }
-        })
-        .filter((product) => product.price > 0),
-    [validProducts],
-  ); // Filter out invalid products
-
-  // Memoize stock availability check
-  const checkStockAvailability = useCallback((product: Product) => {
-    try {
-      if (!product?.attributes?.product_variations?.data) {
-        return false;
-      }
-
-      return product.attributes.product_variations.data.some((variation) => {
-        const attrs = variation?.attributes;
-        if (!attrs) {
-          return false;
-        }
-
-        const stockCount = attrs.product_stock?.data?.attributes?.Count;
-        if (typeof stockCount !== "number" || stockCount <= 0) {
-          return false;
-        }
-
-        return attrs.IsPublished === true;
-      });
-    } catch (error) {
-      console.warn("Error checking stock availability:", error);
-      return false;
-    }
-  }, []);
+  const { sidebarProducts, mappedDiscountedSidebar, mappedSuggestedSidebar } = useSidebarProducts({
+    validProducts,
+    discountedSidebarProducts,
+    suggestedSidebarProducts,
+  });
 
   const selectedCategoryTitle = useMemo(() => {
     if (!category) return null;
@@ -787,12 +595,16 @@ export default function PLPList({
               isLoadingCategories={isLoadingCategories}
             />
 
-            <SidebarSuggestions title="شاید بپسندید" icon={<HeartIcon />} items={sidebarProducts} />
+            <SidebarSuggestions
+              title="شاید بپسندید"
+              icon={<HeartIcon />}
+              items={mappedSuggestedSidebar.length > 0 ? mappedSuggestedSidebar : sidebarProducts}
+            />
 
             <SidebarSuggestions
               title="تخفیف های آخرماه"
               icon={<DiscountIcon />}
-              items={sidebarProducts}
+              items={mappedDiscountedSidebar.length > 0 ? mappedDiscountedSidebar : sidebarProducts}
             />
           </div>
         </div>
@@ -846,143 +658,11 @@ export default function PLPList({
             <NoData category={category || initialCategory} />
           ) : (
             <>
-              {/* Desktop view - ProductCard */}
-              <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {validProducts.map((product, index) => {
-                  // Find the first variation with a valid price
-                  const firstValidVariation = product.attributes.product_variations?.data?.find(
-                    (variation) => {
-                      const price = variation.attributes.Price;
-                      return price && parseInt(price) > 0;
-                    },
-                  );
-
-                  const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-
-                  // Check for general_discounts relationship first
-                  const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
-                  let discountPrice = undefined;
-                  let discount = undefined;
-
-                  if (generalDiscounts && generalDiscounts.length > 0) {
-                    // Use general_discounts relationship
-                    const discountAmount = generalDiscounts[0].attributes.Amount;
-                    discount = discountAmount;
-                    discountPrice = Math.round(price * (1 - discountAmount / 100));
-                  } else if (firstValidVariation?.attributes?.DiscountPrice) {
-                    // Fallback to DiscountPrice field (if it exists)
-                    discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
-                    const hasDiscount = discountPrice && discountPrice < price;
-                    discount = hasDiscount
-                      ? Math.round(((price - discountPrice) / price) * 100)
-                      : undefined;
-                  }
-
-                  // Debug: Log pricing calculations for PLP desktop view
-                  if (process.env.NODE_ENV !== "production" && (discount || discountPrice)) {
-                    console.log(`PLP Desktop - Product ${product.id}:`, {
-                      title: product.attributes.Title.substring(0, 30),
-                      originalPrice: price,
-                      discountPrice,
-                      discount,
-                      generalDiscounts: generalDiscounts,
-                      variationData: firstValidVariation?.attributes,
-                    });
-                  }
-
-                  const isAvailable = checkStockAvailability(product);
-                  const slug = (product as any)?.attributes?.Slug || product.id.toString();
-
-                  return (
-                    <ProductCard
-                      key={product.id}
-                      id={product.id}
-                      slug={slug}
-                      images={
-                        product.attributes.CoverImage?.data?.attributes?.url
-                          ? [
-                              `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`,
-                            ]
-                          : [""] // Empty string will trigger BlurImage fallback SVG
-                      }
-                      category={
-                        product.attributes.product_main_category?.data?.attributes?.Title || ""
-                      }
-                      title={product.attributes.Title}
-                      price={price}
-                      seenCount={product.attributes.RatingCount || 0}
-                      discount={discount}
-                      discountPrice={discountPrice}
-                      colorsCount={product.attributes.product_variations?.data?.length || 0}
-                      isAvailable={isAvailable}
-                      priority={index < 6}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Mobile view - ProductSmallCard */}
-              <div className="flex flex-col gap-3 md:hidden">
-                {validProducts.map((product, index) => {
-                  // Find the first variation with a valid price
-                  const firstValidVariation = product.attributes.product_variations?.data?.find(
-                    (variation) => {
-                      const price = variation.attributes.Price;
-                      return price && parseInt(price) > 0;
-                    },
-                  );
-
-                  const price = parseInt(firstValidVariation?.attributes?.Price || "0");
-
-                  // Check for general_discounts relationship first
-                  const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
-                  let discountPrice = undefined;
-                  let discount = undefined;
-
-                  if (generalDiscounts && generalDiscounts.length > 0) {
-                    // Use general_discounts relationship
-                    const discountAmount = generalDiscounts[0].attributes.Amount;
-                    discount = discountAmount;
-                    discountPrice = Math.round(price * (1 - discountAmount / 100));
-                  } else if (firstValidVariation?.attributes?.DiscountPrice) {
-                    // Fallback to DiscountPrice field (if it exists)
-                    discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
-                    const hasDiscount = discountPrice && discountPrice < price;
-                    discount = hasDiscount
-                      ? Math.round(((price - discountPrice) / price) * 100)
-                      : undefined;
-                  }
-
-                  const isAvailable = checkStockAvailability(product);
-                  const slug = (product as any)?.attributes?.Slug || product.id.toString();
-
-                  return (
-                    <ProductSmallCard
-                      key={product.id}
-                      id={product.id}
-                      slug={slug}
-                      title={product.attributes.Title}
-                      category={
-                        product.attributes.product_main_category?.data?.attributes?.Title || ""
-                      }
-                      likedCount={product.attributes.RatingCount || 0}
-                      price={price}
-                      discountedPrice={discountPrice}
-                      discount={discount}
-                      image={
-                        product.attributes.CoverImage?.data?.attributes?.url
-                          ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-                          : "" // Empty string will trigger BlurImage fallback SVG
-                      }
-                      isAvailable={isAvailable}
-                      priority={index < 3}
-                    />
-                  );
-                })}
-              </div>
+              <PLPDesktopList products={validProducts} includeMedia={isDesktop} />
+              <PLPMobileList products={validProducts} />
 
               {/* Pagination */}
-              <PLPPagination
+              <Pagination
                 currentPage={pagination.page}
                 totalPages={pagination.pageCount}
                 onPageChange={(page) => setPage(page.toString())}

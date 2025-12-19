@@ -14,9 +14,9 @@ type OrderItem = {
   productCode: string;
   price: number;
   quantity: number;
-  color: string;
+  color?: string;
   size?: string;
-  image: string;
+  image?: string;
   // IDs for backend relations
   productColorId?: number;
   productSizeId?: number;
@@ -78,9 +78,9 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
       productCode: variation?.ProductSKU || product.ProductSKU || `PRD-${product.id}`,
       price: variation?.Price || product.Price || 0,
       quantity: 1,
-      color: variation?.product_variation_color?.Title || "N/A",
+      color: variation?.product_variation_color?.Title,
       size: variation?.product_variation_size?.Title,
-      image: product.image || "",
+      image: product.image,
       // Store IDs for backend
       productColorId: colorId,
       productSizeId: sizeId,

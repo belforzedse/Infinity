@@ -2,11 +2,13 @@
 
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import Image from "next/image";
+import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import PageContainer from "@/components/layout/PageContainer";
+import type { ProductStatus } from "@/components/PLP/types";
 
 interface PLPHeroBannerProps {
   category?: string;
@@ -17,7 +19,7 @@ interface ProductData {
   attributes: {
     Title: string;
     Description: string;
-    Status: string;
+    Status: ProductStatus;
     AverageRating: number | null;
     RatingCount: number | null;
     CoverImage: {
@@ -63,11 +65,13 @@ interface ProcessedProduct {
   discountedPrice: number;
   discount: number;
   image: string;
+  colorsCount: number;
+  colorCodes: string[];
 }
 
 const MAX_HERO_PRODUCTS = 6;
 
-const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations`;
+const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color`;
 
 // Helper to ensure image URLs have proper format
 const formatImageUrl = (path?: string): string => {
@@ -103,6 +107,8 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
       discountedPrice: 0,
       discount: 0,
       image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
+      colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
+      colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
     };
   }
 
@@ -125,6 +131,8 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
     discountedPrice,
     discount,
     image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
+    colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
+    colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
   };
 };
 

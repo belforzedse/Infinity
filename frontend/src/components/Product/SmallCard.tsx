@@ -1,11 +1,26 @@
-import React from "react";
-import BlurImage from "@/components/ui/BlurImage";
+"use client";
+
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
-import GridIcon from "./Icons/GridIcon";
-import MoreIcon from "./Icons/MoreIcon";
+import dynamic from "next/dynamic";
 import HeartIcon from "./Icons/HeartIcon";
+import EyeIcon from "./Icons/EyeIcon";
+import ShuffleIcon from "@/components/PDP/Icons/ShuffleIcon";
+import useProductLike from "@/hooks/useProductLike";
 import clsx from "clsx";
+import { ImageCard, InfoCard, PriceCard } from "./CardParts";
+
+// Lazy load heavy modals
+const QuickViewModal = dynamic(() => import("./QuickViewModal"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ShareModal = dynamic(() => import("./ShareModal"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export interface ProductSmallCardProps {
   id: number;
@@ -20,6 +35,8 @@ export interface ProductSmallCardProps {
   className?: string;
   isAvailable?: boolean;
   priority?: boolean;
+  colorsCount?: number;
+  colorCodes?: string[];
 }
 
 const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
@@ -35,98 +52,210 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   className,
   isAvailable = true,
   priority = false,
+  colorsCount,
+  colorCodes,
 }) => {
+  // State management
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+
+  // Refs
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Hooks
+  const {
+    isLiked,
+    isLoading: isLikeLoading,
+    toggleLike,
+  } = useProductLike({
+    productId: id.toString(),
+  });
+
   const hasDiscount = Boolean(
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
   );
 
-  // Use slug if available, otherwise fall back to ID for backwards compatibility
-  const productUrl = slug ? `/pdp/${slug}` : `/pdp/${id}`;
+  // Use slug if available, otherwise fall back to ID for backwards compatibility.
+  const productUrl = slug ? `/pdp/${encodeURIComponent(slug)}` : `/pdp/${id}`;
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // Event handlers
+  const handleMenuToggle = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleQuickView = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    setIsQuickViewOpen(true);
+  }, []);
+
+  const handleShare = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    setIsShareOpen(true);
+  }, []);
+
+  const handleToggleLike = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsMenuOpen(false);
+      toggleLike(e);
+    },
+    [toggleLike],
+  );
 
   return (
-    <Link href={productUrl} className={clsx("w-full md:w-[269px]", className)}>
-      <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
-        <div className="relative h-[100px] w-24">
-          {discount && discount > 0 && (
-            <div className="text-xs absolute left-0 top-0 z-10 rounded-br-xl rounded-tl-xl bg-rose-600 px-2 py-0.5 text-white">
-              ٪{discount}
-            </div>
-          )}
-          <BlurImage
-            src={image}
-            alt={title}
-            fill
-            className="rounded-xl object-cover"
-            sizes="96px"
-            priority={priority}
-            loader={imageLoader}
-          />
-          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-xl bg-stone-50 px-2 py-1 shadow-sm">
-            <span className="text-xxs text-neutral-800">3+</span>
-            <div className="relative w-4">
-              <div className="absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400" />
-              <div className="absolute left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-pink-600 to-pink-400" />
-            </div>
+    <>
+      <article className={clsx("relative w-full md:w-[269px]", className)}>
+        <Link
+          href={productUrl}
+          className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          aria-label={`مشاهده جزئیات ${title}`}
+        >
+          <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
+            <ImageCard
+              image={image}
+              title={title}
+              discount={discount}
+              isAvailable={isAvailable}
+              priority={priority}
+              imageLoader={imageLoader}
+              colorCodes={colorCodes}
+              colorsCount={colorsCount}
+            />
+
+            <InfoCard
+              category={category}
+              title={title}
+              likedCount={likedCount}
+              menuButtonRef={menuButtonRef}
+              handleMenuToggle={handleMenuToggle}
+              isMenuOpen={isMenuOpen}
+            >
+              <PriceCard
+                isAvailable={isAvailable}
+                price={price}
+                discountedPrice={discountedPrice}
+              />
+            </InfoCard>
           </div>
-        </div>
+        </Link>
 
-        <div className="flex flex-1 flex-col justify-between py-0.5">
-          <div className="flex items-center justify-between gap-1">
-            <div className="flex items-center gap-1">
-              <GridIcon className="h-4 w-4 text-neutral-400" />
-              <span className="text-xs text-neutral-400">{category}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <button>
-                <MoreIcon className="h-6 w-6 text-pink-500" />
-              </button>
-            </div>
+        {/* Dropdown Menu */}
+        {isMenuOpen && (
+          <div
+            ref={menuRef}
+            className="absolute left-2 top-12 z-50 min-w-[180px] rounded-xl bg-white p-2 shadow-lg ring-1 ring-slate-200"
+            role="menu"
+            aria-label="منوی عملیات محصول"
+          >
+            <ul className="space-y-1">
+              {/* Like/Unlike */}
+              <li>
+                <button
+                  type="button"
+                  onClick={handleToggleLike}
+                  disabled={isLikeLoading}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600 disabled:cursor-wait disabled:opacity-50"
+                  role="menuitem"
+                  aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+                >
+                  <HeartIcon
+                    className={clsx(
+                      "h-4 w-4 transition-colors",
+                      isLiked ? "fill-pink-600 text-pink-600" : "text-neutral-400",
+                    )}
+                    filled={isLiked}
+                  />
+                  <span>{isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}</span>
+                </button>
+              </li>
+
+              {/* Quick View */}
+              <li>
+                <button
+                  type="button"
+                  onClick={handleQuickView}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600"
+                  role="menuitem"
+                  aria-label="نمایش سریع"
+                >
+                  <EyeIcon className="h-4 w-4 text-neutral-400" />
+                  <span>نمایش سریع</span>
+                </button>
+              </li>
+
+              {/* Share */}
+              <li>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600"
+                  role="menuitem"
+                  aria-label="اشتراک‌گذاری"
+                >
+                  <ShuffleIcon className="h-4 w-4 text-neutral-400" />
+                  <span>اشتراک‌گذاری</span>
+                </button>
+              </li>
+            </ul>
           </div>
+        )}
+      </article>
 
-          <div className="flex flex-col gap-0.5">
-            <h3 className="text-xs line-clamp-1 text-neutral-800">{title}</h3>
-            <div className="flex items-center gap-0.5">
-              <HeartIcon className="h-2 w-2 text-pink-600" />
-              <span className="text-[10px] text-pink-600">
-                {likedCount} نفر این محصول را پسندیدند!
-              </span>
-            </div>
-          </div>
+      {/* Modals */}
+      {isQuickViewOpen && (
+        <QuickViewModal
+          isOpen={isQuickViewOpen}
+          onClose={() => setIsQuickViewOpen(false)}
+          productId={id}
+        />
+      )}
 
-          <div className="rounded-lg bg-stone-100 px-3 py-1 md:p-1">
-            <div className="flex justify-between md:justify-center">
-              <div className="text-xs text-neutral-500 md:hidden">قیمت</div>
-
-              {!isAvailable ? (
-                <span className="text-xs font-medium text-red-600">ناموجود</span>
-              ) : (
-                <div className="flex items-center justify-end gap-1 md:justify-center">
-                  <span
-                    className={`text-xs ${
-                      discountedPrice && discountedPrice > 0 && discountedPrice < price
-                        ? "text-pink-600"
-                        : "text-neutral-800"
-                    } font-medium`}
-                  >
-                    {(discountedPrice && discountedPrice > 0 && discountedPrice < price
-                      ? discountedPrice
-                      : price
-                    )?.toLocaleString()}{" "}
-                    تومان
-                  </span>
-
-                  {discountedPrice && discountedPrice > 0 && discountedPrice < price && (
-                    <span className="text-[10px] text-neutral-400 line-through">
-                      {price?.toLocaleString()} تومان
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Link>
+      {isShareOpen && (
+        <ShareModal
+          open={isShareOpen}
+          onOpenChange={setIsShareOpen}
+          product={{
+            id,
+            title,
+            slug,
+            imageUrl: image,
+            price,
+            discountPrice: discountedPrice,
+          }}
+        />
+      )}
+    </>
   );
 };
 

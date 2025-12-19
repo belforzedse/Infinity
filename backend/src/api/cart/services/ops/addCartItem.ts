@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { getAvailableStockCount } from "../lib/stock";
 
 export const addCartItemOp = async (
   strapi: Strapi,
@@ -44,10 +45,10 @@ export const addCartItemOp = async (
   }
 
   // Validate stock availability
-  if (
-    !productVariation?.product_stock ||
-    productVariation.product_stock.Count < count
-  ) {
+  const available = productVariation?.product_stock
+    ? getAvailableStockCount(productVariation.product_stock)
+    : 0;
+  if (!productVariation?.product_stock || available < count) {
     return { success: false, message: "Insufficient stock" };
   }
 
@@ -55,7 +56,7 @@ export const addCartItemOp = async (
 
   if (existingItem) {
     const newCount = existingItem.Count + count;
-    if (productVariation.product_stock.Count < newCount) {
+    if (available < newCount) {
       return {
         success: false,
         message: "Insufficient stock for requested quantity",

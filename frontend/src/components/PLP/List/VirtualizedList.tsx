@@ -4,7 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { ListChildComponentProps } from "react-window";
 import ProductCard from "@/components/Product/Card";
 import ProductSmallCard from "@/components/Product/SmallCard";
+import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import { getProductImages } from "@/utils/product";
 import dynamic from "next/dynamic";
 
 // Dynamically import react-window to avoid build/SSR issues
@@ -31,6 +33,14 @@ interface Product {
         };
       };
     };
+    Media?: {
+      data?: Array<{
+        attributes?: {
+          url: string;
+          mime: string;
+        };
+      }>;
+    };
     product_main_category?: {
       data?: {
         attributes?: {
@@ -43,6 +53,15 @@ interface Product {
         attributes: {
           Price: string;
           DiscountPrice?: string;
+          IsPublished?: boolean;
+          product_variation_color?: {
+            data?: {
+              id?: number;
+              attributes?: {
+                ColorCode?: string;
+              };
+            } | null;
+          };
           general_discounts?: {
             data: Array<{
               attributes: {
@@ -74,17 +93,32 @@ export default function VirtualizedList({
   checkStockAvailability: checkStockAvailabilityProp,
   containerHeight = 800,
 }: VirtualizedListProps) {
+  // Track viewport width on client to avoid SSR flicker and respond to resize/orientation changes
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateWidth = () => setViewportWidth(window.innerWidth);
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    window.addEventListener("orientationchange", updateWidth);
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+      window.removeEventListener("orientationchange", updateWidth);
+    };
+  }, []);
+
   // Process products into a format suitable for rendering
   const processedProducts = useMemo(() => {
+    const isMobileView = (viewportWidth ?? Infinity) < 768;
     return products.map((product) => {
       const firstValidVariation = product.attributes.product_variations?.data?.find(
         (variation) => {
           const price = variation.attributes.Price;
-          return price && parseInt(price) > 0;
+          return price && parseInt(price.toString()) > 0;
         },
       );
 
-      const price = parseInt(firstValidVariation?.attributes?.Price || "0");
+      const price = parseInt(firstValidVariation?.attributes?.Price?.toString() || "0");
 
       const generalDiscounts = firstValidVariation?.attributes?.general_discounts?.data;
       let discountPrice = undefined;
@@ -95,7 +129,7 @@ export default function VirtualizedList({
         discount = discountAmount;
         discountPrice = Math.round(price * (1 - discountAmount / 100));
       } else if (firstValidVariation?.attributes?.DiscountPrice) {
-        discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice);
+        discountPrice = parseInt(firstValidVariation.attributes.DiscountPrice.toString());
         const hasDiscount = discountPrice && discountPrice < price;
         discount = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : undefined;
       }
@@ -110,18 +144,17 @@ export default function VirtualizedList({
         discountPrice,
         discount,
         seenCount: product.attributes.RatingCount || 0,
-        colorsCount: product.attributes.product_variations?.data?.length || 0,
+        colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
+        colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
         image:
           product.attributes.CoverImage?.data?.attributes?.url
             ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
             : "",
-        images: product.attributes.CoverImage?.data?.attributes?.url
-          ? [`${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`]
-          : [""],
+        images: getProductImages(product, !isMobileView, IMAGE_BASE_URL),
         isAvailable,
       };
     });
-  }, [products, checkStockAvailabilityProp]);
+  }, [products, checkStockAvailabilityProp, viewportWidth]);
 
   // Desktop row renderer
   const DesktopRow = ({ index, style }: ListChildComponentProps) => {
@@ -141,6 +174,7 @@ export default function VirtualizedList({
           discount={product.discount}
           discountPrice={product.discountPrice}
           colorsCount={product.colorsCount}
+          colorCodes={product.colorCodes}
           isAvailable={product.isAvailable}
           priority={index < 6}
         />
@@ -167,24 +201,12 @@ export default function VirtualizedList({
           image={product.image}
           isAvailable={product.isAvailable}
           priority={index < 3}
+          colorsCount={product.colorsCount}
+          colorCodes={product.colorCodes}
         />
       </div>
     );
   };
-
-  // Track viewport width on client to avoid SSR flicker and respond to resize/orientation changes
-  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
-
-  useEffect(() => {
-    const updateWidth = () => setViewportWidth(window.innerWidth);
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    window.addEventListener("orientationchange", updateWidth);
-    return () => {
-      window.removeEventListener("resize", updateWidth);
-      window.removeEventListener("orientationchange", updateWidth);
-    };
-  }, []);
 
   const isMobile = (viewportWidth ?? Infinity) < 768;
   const DESKTOP_ITEM_HEIGHT = 420;

@@ -35,6 +35,7 @@ export const createOrderAndItems = async (
   description?: string,
   note?: string,
   deliveryAddressId?: number,
+  reservation?: { status: "Reserved"; until: Date },
   trx?: any
 ) => {
   // Validate cart items before proceeding
@@ -127,10 +128,21 @@ export const createOrderAndItems = async (
   }
 
   console.log("[Order Validation] ✓ All cart items validated successfully");
-
+if (reservation) {
+   if (reservation.until <= new Date()) {
+     strapi.log.error("=== VALIDATION ERROR: Invalid reservation date ===", {
+       reservedUntil: reservation.until,
+       currentTime: new Date(),
+       userId: userId,
+     });
+     throw new Error("INVALID_RESERVATION: Reservation date must be in the future");
+   }
+ }
   const orderData = {
     user: userId,
     Status: "Paying" as OrderStatus,
+    ReservationStatus: reservation?.status,
+    ReservedUntil: reservation?.until,
     Date: new Date(),
     Type: "Automatic" as OrderType,
     shipping: shippingId,

@@ -1,0 +1,90 @@
+# Stock Type Validation
+
+## Overview
+
+The `Stock` interface in `backend/src/api/cart/services/lib/stock.ts` allows `Count` and `ReservedCount` to be `number | string` to handle cases where values come from database/API responses as strings. However, this can hide type bugs. To ensure type safety, we use a runtime validator that normalizes Stock objects.
+
+## Key Components
+
+### Stock Interface
+```typescript
+export interface Stock {
+  Count?: number | string;
+  ReservedCount?: number | string;
+}
+```
+
+### NormalizedStock Interface
+```typescript
+export interface NormalizedStock {
+  Count: number;
+  ReservedCount: number;
+}
+```
+
+### validateAndNormalizeStock Function
+
+**Location**: `backend/src/api/cart/services/lib/stock.ts`
+
+**Purpose**: Validates and normalizes Stock objects, converting numeric strings to numbers and ensuring all values are valid non-negative numbers.
+
+**Usage**:
+```typescript
+import { validateAndNormalizeStock } from '../lib/stock';
+
+const result = validateAndNormalizeStock(stockFromDatabase);
+if (!result.isValid) {
+  throw new Error(result.error);
+}
+const normalized = result.stock; // NormalizedStock with guaranteed number types
+```
+
+**Behavior**:
+- Converts numeric strings to numbers
+- Validates that values are non-negative finite numbers
+- Returns `{ isValid: false, error: string }` for invalid values
+- Returns `{ isValid: true, stock: NormalizedStock }` for valid values
+- Handles `null`, `undefined`, and empty strings (defaults to 0)
+
+## When to Use
+
+Use `validateAndNormalizeStock` whenever:
+1. A Stock object is created from database/API responses
+2. A Stock object is consumed in calculations or comparisons
+3. You need guaranteed numeric types for type safety
+
+## Current Usage
+
+The validator is already integrated in:
+- `getAvailableStockCount()` - Uses validator to ensure type safety
+- `decrementStockAtomic()` - Validates stock before error messages
+- `releaseReservedStockAtomic()` - Validates stock before error messages
+- `consumeReservedStockAtomic()` - Validates stock before error messages
+
+## Best Practices
+
+1. **Always validate** Stock objects from external sources (database, API)
+2. **Use NormalizedStock** type after validation for type-safe operations
+3. **Handle validation errors** appropriately (log, throw, or return safe defaults)
+4. **Don't bypass validation** - even if you "know" the data is correct
+
+## Example: Safe Stock Usage
+
+```typescript
+// ❌ BAD - No validation, potential type bugs
+const available = Number(stock?.Count || 0) - Number(stock?.ReservedCount || 0);
+
+// ✅ GOOD - Validated and type-safe
+const validation = validateAndNormalizeStock(stock);
+if (!validation.isValid) {
+  strapi.log.error('Invalid stock data', { error: validation.error });
+  return 0; // Safe default
+}
+const { Count, ReservedCount } = validation.stock;
+const available = Math.max(0, Count - ReservedCount);
+```
+
+## Related Files
+
+- `backend/src/api/cart/services/lib/stock.ts` - Main implementation
+- `backend/src/api/product-stock/content-types/product-stock/schema.json` - Database schema (defines as integers)
