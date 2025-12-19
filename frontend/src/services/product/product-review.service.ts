@@ -24,7 +24,7 @@ export const isUserInfo = (value: unknown): value is UserInfo => {
 
 export const normalizeUserInfo = (rawUserInfo: unknown): UserInfo | undefined => {
   if (!rawUserInfo) return undefined;
-  
+
   // Three-level fallback normalization:
   // 1. Check data.attributes
   // 2. Check attributes
@@ -40,7 +40,7 @@ export const normalizeUserInfo = (rawUserInfo: unknown): UserInfo | undefined =>
   if (isUserInfo(rawUserInfo)) {
     return rawUserInfo;
   }
-  
+
   return undefined;
 };
 
