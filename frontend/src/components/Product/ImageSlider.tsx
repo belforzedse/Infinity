@@ -40,6 +40,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
   return (
     <div 
       className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[250px]"
+      role="img"
       aria-label={!isAvailable ? `محصول ${title} ناموجود است` : undefined}
     >
       <div
