@@ -81,6 +81,7 @@ export const useSidebarProducts = ({
               product.attributes.product_variations?.data || [],
             ),
             colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
+            isAvailable: true,
           };
         } catch (error) {
           return null;
