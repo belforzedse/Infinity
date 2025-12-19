@@ -175,12 +175,14 @@ function QuickViewError({ message, onRetry, onClose }: QuickViewErrorProps) {
       <p className="mb-6 text-gray-600">{message}</p>
       <div className="flex gap-3">
         <button
+          type="button"
           onClick={onRetry}
           className="rounded-lg bg-pink-500 px-6 py-3 text-white transition-colors hover:bg-pink-600"
         >
           تلاش مجدد
         </button>
         <button
+          type="button"
           onClick={onClose}
           className="rounded-lg bg-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-300"
         >

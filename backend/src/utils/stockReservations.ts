@@ -123,8 +123,7 @@ const rawSql = async (
 
 const loadOrderItemsWithStocks = async (
   strapi: Strapi,
-  orderId: number,
-  trx?: any
+  orderId: number
 ): Promise<OrderWithItems | null> => {
   return strapi.db.query("api::order.order").findOne({
     where: { id: orderId },
@@ -135,7 +134,6 @@ const loadOrderItemsWithStocks = async (
         },
       },
     },
-    ...(trx ? { transacting: trx } : {}),
   });
 };
 
@@ -187,7 +185,7 @@ export async function releaseOrderReservation(
     );
     if (!transitioned) return { success: true, skipped: true };
 
-    const order = await loadOrderItemsWithStocks(strapi, orderId, trx);
+    const order = await loadOrderItemsWithStocks(strapi, orderId);
     const items = order?.order_items || [];
 
     for (const it of items) {
@@ -267,7 +265,7 @@ export async function consumeOrderReservation(
       return { success: true, skipped: true, expired: !!expired };
     }
 
-    const order = await loadOrderItemsWithStocks(strapi, orderId, trx);
+    const order = await loadOrderItemsWithStocks(strapi, orderId);
     const items = order?.order_items || [];
 
     for (const it of items) {

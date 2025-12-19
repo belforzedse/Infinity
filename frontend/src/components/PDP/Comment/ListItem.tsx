@@ -85,6 +85,7 @@ export default function PDPCommentListItem({
           <div className="flex items-center gap-3">
             {!isReply && (
               <button
+                type="button"
                 onClick={() => onReply?.(review.id)}
                 className="text-[#94A3B8] hover:text-[#DB2777] transition-colors"
               >
@@ -96,6 +97,7 @@ export default function PDPCommentListItem({
                 {review.DislikeCounts || 0}
               </span>
               <button
+                type="button"
                 onClick={() => onDislike?.(review.id)}
                 className="hover:text-red-500 transition-colors flex items-center justify-center"
               >
@@ -107,6 +109,7 @@ export default function PDPCommentListItem({
                 {review.LikeCounts || 0}
               </span>
               <button
+                type="button"
                 onClick={() => onLike?.(review.id)}
                 className="hover:text-green-500 transition-colors flex items-center justify-center"
               >
@@ -130,6 +133,7 @@ export default function PDPCommentListItem({
               {onStatusUpdate && (
                 <>
                   <button
+                    type="button"
                     onClick={() => onStatusUpdate(review.id, "Accepted")}
                     className="rounded-lg bg-green-50 p-1 text-green-600 hover:bg-green-100"
                     title="تایید"
@@ -137,6 +141,7 @@ export default function PDPCommentListItem({
                     <CheckCircle className="h-3.5 w-3.5" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => onStatusUpdate(review.id, "Rejected")}
                     className="rounded-lg bg-red-50 p-1 text-red-600 hover:bg-red-100"
                     title="رد"
@@ -147,6 +152,7 @@ export default function PDPCommentListItem({
               )}
               {onDelete && (
                 <button
+                  type="button"
                   onClick={() => onDelete(review.id)}
                   className="rounded-lg bg-slate-100 p-1 text-slate-600 hover:bg-slate-200"
                   title="حذف"

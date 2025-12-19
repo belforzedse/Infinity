@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 
 interface ModalProps {
@@ -27,6 +27,9 @@ export default function Modal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
+  const generatedTitleId = useId();
+  const titleId = title ? generatedTitleId : undefined;
+  const labelledById = title ? generatedTitleId : ariaLabelledby;
 
   useEffect(() => {
     setMounted(true);
@@ -44,14 +47,74 @@ export default function Modal({
       // Store previously focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
 
-      // Focus modal
-      modalRef.current?.focus();
+      const getFocusableElements = () => {
+        if (!modalRef.current) return [];
+        const selectors = [
+          "a[href]",
+          "area[href]",
+          "input:not([disabled]):not([type='hidden'])",
+          "select:not([disabled])",
+          "textarea:not([disabled])",
+          "button:not([disabled])",
+          "iframe",
+          "object",
+          "embed",
+          "[contenteditable]",
+          "[tabindex]:not([tabindex='-1'])",
+        ].join(",");
+
+        return Array.from(
+          modalRef.current.querySelectorAll<HTMLElement>(selectors),
+        ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
+      };
+
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+      } else {
+        modalRef.current?.focus();
+      }
 
       // Lock body scroll
       document.body.style.overflow = "hidden";
 
       // Add Escape key listener
       window.addEventListener("keydown", handleEscape);
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key !== "Tab") return;
+        const focusables = getFocusableElements();
+        if (focusables.length === 0) {
+          e.preventDefault();
+          modalRef.current?.focus();
+          return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const activeElement = document.activeElement as HTMLElement | null;
+        const isWithinModal =
+          !!activeElement && !!modalRef.current?.contains(activeElement);
+
+        if (!isWithinModal) {
+          e.preventDefault();
+          (e.shiftKey ? last : first).focus();
+          return;
+        }
+
+        if (e.shiftKey) {
+          if (activeElement === first || activeElement === modalRef.current) {
+            e.preventDefault();
+            last.focus();
+          }
+          return;
+        }
+
+        if (activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+      document.addEventListener("keydown", handleTabKey);
 
       return () => {
         // Restore focus
@@ -64,6 +127,7 @@ export default function Modal({
 
         // Remove Escape key listener
         window.removeEventListener("keydown", handleEscape);
+        document.removeEventListener("keydown", handleTabKey);
       };
     }
   }, [isOpen, handleEscape]);
@@ -75,24 +139,12 @@ export default function Modal({
     }
   };
 
-  const handleBackdropKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      handleBackdropClick(e);
-    } else if (e.key === "Escape" || e.key === "Esc") {
-      onClose();
-    }
-  };
-
   if (!isOpen || !mounted) return null;
 
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm duration-200 animate-in fade-in"
       onClick={handleBackdropClick}
-      onKeyDown={handleBackdropKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={ariaLabelledby}
       tabIndex={-1}
     >
       <div
@@ -100,11 +152,17 @@ export default function Modal({
         className={`relative w-full max-w-7xl rounded-3xl bg-white shadow-2xl duration-200 animate-in zoom-in-95 ${className}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledById}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           {title && (
-            <h3 className={`text-lg font-bold text-gray-900 ${titleClassName}`}>
+            <h3
+              id={titleId}
+              className={`text-lg font-bold text-gray-900 ${titleClassName}`}
+            >
               {title}
             </h3>
           )}
@@ -121,9 +179,8 @@ export default function Modal({
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                aria-labelledby="modal-close-icon-title"
+                aria-hidden="true"
               >
-                <title id="modal-close-icon-title">بستن</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

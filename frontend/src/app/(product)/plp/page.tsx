@@ -11,43 +11,12 @@ import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import { getHomepageSections } from "@/services/product/homepage";
 import logger from "@/utils/logger";
+import type { Variation } from "@/types/Product";
 import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { computeDiscountForVariation } from "@/utils/discounts";
 import { validateCategorySlug } from "@/utils/category-validation";
-
-interface ProductVariation {
-  attributes: {
-    SKU: string;
-    Price: string;
-    IsPublished: boolean;
-    DiscountPrice?: string;
-    product_stock?: {
-      data?: {
-        attributes: {
-          Count: number;
-        };
-      };
-    };
-    general_discounts?: {
-      data: Array<{
-        attributes: {
-          Amount: number;
-        };
-      }>;
-    };
-    product_variation_color?: {
-      data?: {
-        id: number;
-        attributes: {
-          Title: string;
-          ColorCode: string;
-        };
-      };
-    };
-  };
-}
 
 interface Product {
   id: number;
@@ -74,30 +43,10 @@ interface Product {
       };
     };
     product_variations: {
-      data: ProductVariation[];
+      data: Variation[];
     };
   };
 }
-
-interface VariationAttributes {
-  Price: number | string;
-  DiscountPrice?: number | string;
-  product_variation_color?: {
-    data?: {
-      id: number;
-      attributes: {
-        Title: string;
-        ColorCode: string;
-      };
-    };
-  };
-}
-
-interface VariationWithAttributes {
-  attributes: VariationAttributes;
-}
-
-type Variation = VariationWithAttributes | VariationAttributes;
 
 async function getProducts(
   category?: string,
@@ -182,13 +131,25 @@ async function getProducts(
                     : item.product_variations && 'data' in item.product_variations
                       ? item.product_variations.data
                       : []
-                  ).map((variation: Variation) => {
+                  ).map((variation: Variation | Variation["attributes"], index: number) => {
+                    const hasAttributes = (
+                      input: Variation | Variation["attributes"]
+                    ): input is Variation =>
+                      (input as Variation).attributes !== null &&
+                      typeof (input as Variation).attributes === "object";
                     // Handle both direct variation and nested variation formats
-                    const variationData: VariationAttributes = 'attributes' in variation ? variation.attributes : variation;
+                    const isWrappedVariation = hasAttributes(variation);
+                    const variationData: Variation["attributes"] = isWrappedVariation
+                      ? variation.attributes
+                      : variation;
+                    const variationId =
+                      typeof (variation as { id?: number }).id === "number"
+                        ? (variation as { id?: number }).id
+                        : index;
                     return {
+                      id: variationId,
                       attributes: {
-                        SKU: "",
-                        Price: variationData.Price.toString(),
+                        Price: (variationData.Price ?? 0).toString(),
                         DiscountPrice: variationData.DiscountPrice?.toString(),
                         IsPublished: true,
                         product_variation_color: variationData.product_variation_color,
@@ -324,7 +285,7 @@ async function getProducts(
       // Double-check valid price exists (API filter should handle this, but verify)
       const hasValidPrice = product.attributes.product_variations?.data?.some((variation) => {
         const price = variation.attributes.Price;
-        return price && parseInt(price) > 0;
+        return price && Number(price) > 0;
       });
 
       if (!hasValidPrice) {
@@ -390,9 +351,8 @@ async function getProducts(
           const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
           if (typeof stockCount === "number" && stockCount <= 0) continue;
 
-          // Compute final price with discounts
-          const discountResult = computeDiscountForVariation(variation as any);
-          const finalPrice = discountResult?.finalPrice || parseFloat(variation.attributes.Price || "0");
+          const discountResult = computeDiscountForVariation(variation.attributes);
+          const finalPrice = discountResult?.finalPrice || Number(variation.attributes.Price) || 0;
 
           if (finalPrice > 0 && finalPrice < minPrice) {
             minPrice = finalPrice;
@@ -549,9 +509,9 @@ export default async function PLPPage({
   const collectionItems = products.slice(0, 20).map((product: Product) => {
     const variations = product.attributes.product_variations?.data || [];
     const prices = variations
-      .map((v: ProductVariation) => {
-        const price = parseFloat(v.attributes.Price || "0");
-        const discountPrice = parseFloat(v.attributes.DiscountPrice || "0");
+      .map((v: Variation) => {
+        const price = parseFloat(String(v.attributes.Price || "0"));
+        const discountPrice = parseFloat(String(v.attributes.DiscountPrice || "0"));
         return discountPrice > 0 ? discountPrice : price;
       })
       .filter((p: number) => p > 0);

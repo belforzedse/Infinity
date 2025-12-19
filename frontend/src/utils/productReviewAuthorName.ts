@@ -1,3 +1,4 @@
+import { isUserInfo } from "@/services/product/product-review.service";
 import type { ProductReview } from "@/services/product/product-review.service";
 
 function extractUserInfo(user?: ProductReview["user"]) {
@@ -5,16 +6,7 @@ function extractUserInfo(user?: ProductReview["user"]) {
   if (!candidate) {
     return null;
   }
-
-  if (candidate.data?.attributes) {
-    return candidate.data.attributes;
-  }
-
-  if (candidate.attributes) {
-    return candidate.attributes;
-  }
-
-  return candidate;
+  return isUserInfo(candidate) ? candidate : null;
 }
 
 export function resolveProductReviewUserDisplayName(

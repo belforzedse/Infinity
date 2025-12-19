@@ -78,6 +78,7 @@ export default function PDPCommentAdd(props: Props) {
           <p className="text-[12px] text-[#737373] text-right w-full px-2">شما هم از تجربه خریدتون برامون بنویسین!</p>
 
           <button
+            type="button"
             onClick={() => (user ? setIsModalOpen(true) : router.push("/auth"))}
             className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#DB2777] py-1 px-3 h-[49px] text-[16px] font-normal text-white transition-all hover:bg-[#DB2777]/90 active:scale-[0.98]"
           >

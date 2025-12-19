@@ -8,6 +8,7 @@ import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import PageContainer from "@/components/layout/PageContainer";
+import type { ProductStatus } from "@/components/PLP/types";
 
 interface PLPHeroBannerProps {
   category?: string;
@@ -18,7 +19,7 @@ interface ProductData {
   attributes: {
     Title: string;
     Description: string;
-    Status: string;
+    Status: ProductStatus;
     AverageRating: number | null;
     RatingCount: number | null;
     CoverImage: {

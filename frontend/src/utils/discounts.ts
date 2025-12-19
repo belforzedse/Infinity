@@ -30,6 +30,8 @@ type VariationLike = {
   [key: string]: unknown;
 };
 
+export type DiscountVariationInput = VariationLike;
+
 const isValidDate = (value: unknown): value is Date => {
   return value instanceof Date && !Number.isNaN(value.getTime());
 };
@@ -183,7 +185,7 @@ const evaluateListedDiscountPrice = (
 };
 
 export const computeDiscountForVariation = (
-  variation: VariationLike,
+  variation: DiscountVariationInput,
   options: { now?: Date } = {},
 ): DiscountComputationResult | null => {
   const basePrice = parseNumber(variation?.Price);
@@ -232,7 +234,10 @@ export const computeDiscountForVariation = (
   };
 };
 
-export const hasActiveDiscount = (variation: VariationLike, now: Date = new Date()): boolean => {
+export const hasActiveDiscount = (
+  variation: DiscountVariationInput,
+  now: Date = new Date(),
+): boolean => {
   const result = computeDiscountForVariation(variation, { now });
   return !!result && result.discountAmount > 0 && result.finalPrice < result.basePrice;
 };

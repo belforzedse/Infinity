@@ -108,7 +108,7 @@ export default function QuickViewContent({
       return okColor && okSize;
     });
 
-    return matches[0] ?? variations[0];
+    return matches[0];
   }, [variations, effectiveColorCode, effectiveSizeTitle]);
 
   const hasDiscount = useMemo(() => {
@@ -197,7 +197,7 @@ export default function QuickViewContent({
         </div>
 
         {/* Price and Actions */}
-        {currentVariation && (
+        {currentVariation ? (
           <QuickViewPricing
             price={currentVariation.price}
             discountPrice={currentVariation.discountPrice}
@@ -205,6 +205,33 @@ export default function QuickViewContent({
             onViewFullDetails={onViewFullDetails}
             onClose={onClose}
           />
+        ) : (
+          <div className="flex flex-col gap-5">
+            <div className="rounded-3xl bg-amber-50 p-4 ring-1 ring-amber-200">
+              <p className="text-sm text-amber-800">
+                ترکیب انتخاب‌شده موجود نیست. لطفاً رنگ یا سایز دیگری انتخاب کنید.
+              </p>
+            </div>
+
+            <div className="sticky bottom-0 -mx-4 mt-auto border-t border-black/5 bg-white/80 p-4 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={onViewFullDetails}
+                  className="flex-1 rounded-2xl bg-pink-500 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                >
+                  مشاهده جزئیات کامل
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-gray-700 ring-1 ring-black/10 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2"
+                >
+                  بستن
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Variations */}

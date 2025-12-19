@@ -5,6 +5,7 @@ import TrashIcon from "../../Icons/TrashIcon";
 import WhitePlusIcon from "../../Icons/WhitePlusIcon";
 import { Input } from "@/components/ui/Input";
 import { useQueryState } from "nuqs";
+import { useEffect, useRef } from "react";
 
 type FilterItem = {
   value: string;
@@ -25,6 +26,9 @@ type Props = {
 
 export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props) {
   const { isFilterOpen, setFilterIsOpen, options } = props;
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const wasOpenRef = useRef(false);
 
   const [filter, setFilter] = useQueryState<
     {
@@ -38,15 +42,33 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
     serialize: (value) => encodeURIComponent(JSON.stringify(value || [])),
   });
 
+  useEffect(() => {
+    if (isFilterOpen) {
+      requestAnimationFrame(() => {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusable = dialog.querySelector<HTMLElement>(
+          "button:not([disabled]), [href], input:not([disabled]):not([type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
+        );
+        (focusable ?? dialog).focus();
+      });
+    } else if (wasOpenRef.current) {
+      triggerRef.current?.focus();
+    }
+
+    wasOpenRef.current = isFilterOpen;
+  }, [isFilterOpen]);
+
   return (
     <div className="relative w-full md:w-auto">
       <button
+        ref={triggerRef}
         type="button"
         className="text-sm flex w-full items-center justify-center gap-1 rounded-lg border border-slate-400 bg-white px-3 py-1 text-slate-700 md:w-auto"
         onClick={() => {
           setFilterIsOpen(!isFilterOpen);
         }}
-        aria-haspopup="true"
+        aria-haspopup="dialog"
         aria-expanded={isFilterOpen}
       >
         <FilterIcon />
@@ -55,9 +77,11 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
 
       {isFilterOpen && (
         <div
+          ref={dialogRef}
           className="absolute left-0 top-full z-10 flex w-[368px] cursor-auto flex-col gap-3 rounded-lg border border-slate-100 bg-white p-3 shadow-lg"
-          role="menu"
-          tabIndex={0}
+          role="dialog"
+          aria-label="فیلتر پیشرفته"
+          tabIndex={-1}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               setFilterIsOpen(false);
@@ -69,7 +93,6 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
           }}
         >
           <div className="flex flex-col gap-1.5">
-            {/* ... rest of the filter content ... */}
             {/* <div className="flex gap-2 items-center">
               <Input
                 placeholder="کلمه مدنظرتو سرچ کن"

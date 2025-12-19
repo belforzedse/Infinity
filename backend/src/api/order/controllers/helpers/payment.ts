@@ -1,6 +1,7 @@
 import type { Strapi } from "@strapi/strapi";
 import { consumeOrderReservation, releaseOrderReservation } from "../../../../utils/stockReservations";
 import { logAdminActivity } from "../../../../utils/adminActivity";
+import { decrementStockAtomic } from "../../../cart/services/lib/stock";
 const getFrontendBaseUrl = () =>
   (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://new.infinitycolor.co").replace(
     /\/$/,
@@ -241,8 +242,6 @@ async function handlePostPaymentStock(
       return { success: true };
     } else {
       // Legacy path: decrement stock atomically
-      const { decrementStockAtomic } = await import("../../../cart/services/lib/stock");
-
       // Load order with populated order_items
       const orderWithItems = await strapi.entityService.findOne("api::order.order", orderId, {
         populate: {
@@ -1624,19 +1623,28 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         // - Reserved orders: consume reservation (Count-- and ReservedCount--) atomically
         // - Legacy orders: fallback to direct decrement
         const stockResult = await handlePostPaymentStock(strapi, orderId, "Mellat");
-        if (!stockResult.success) {
-          if (stockResult.expired) {
-            strapi.log.error("Reservation expired after Mellat settlement", { orderId });
-          } else {
-            strapi.log.error("Failed to consume reservation after Mellat settlement", {
-              orderId,
-              errors: stockResult.errors,
-            });
-          }
-        } else if (stockResult.errors && stockResult.errors.length > 0) {
-          strapi.log.error("Some stock decrements failed for Mellat payment", {
+        const stockErrors =
+          stockResult.errors && stockResult.errors.length > 0
+            ? stockResult.errors
+            : stockResult.success
+            ? []
+            : [
+                {
+                  error: stockResult.expired
+                    ? "Reservation expired"
+                    : "Stock decrement failed",
+                },
+              ];
+
+        if (!stockResult.success || stockErrors.length > 0) {
+          const referenceId = SaleReferenceId || RefId || OrderId || SaleOrderId;
+          return handleStockDecrementFailure(strapi, ctx, {
             orderId,
-            errors: stockResult.errors,
+            stockErrors,
+            refNum: referenceId,
+            paymentMethod: "Mellat",
+            externalSource: "Mellat",
+            externalId: SaleReferenceId || referenceId,
           });
         }
 

@@ -101,6 +101,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
     let snappayToken: string | undefined;
 
     return await strapi.db.transaction(async () => {
+      let reservationReleased = false;
       // Restock all items
       for (const item of order.order_items) {
         const stockId = item.product_variation?.product_stock?.id;
@@ -135,15 +136,20 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
                 });
                 throw new Error(releaseResult.error || "RELEASE_RESERVED_STOCK_FAILED");
               }
+              reservationReleased = true;
             }
           }
         }
       }
 
       // Update order and contract
+      const orderUpdateData: Record<string, unknown> = { Status: "Cancelled" };
+      if (reservationReleased) {
+        orderUpdateData.ReservationStatus = "Released";
+      }
       await strapi.db.query("api::order.order").update({
         where: { id: orderIdNum },
-        data: { Status: "Cancelled" },
+        data: orderUpdateData,
       });
 
       if (Number.isFinite(contractIdNum)) {

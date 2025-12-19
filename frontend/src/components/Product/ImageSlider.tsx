@@ -2,8 +2,8 @@
 
 import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
-import type { FC} from "react";
-import { useState, useEffect } from "react";
+import type { FC } from "react";
+import { useState } from "react";
 
 interface ImageSliderProps {
   images: string[];
@@ -19,14 +19,6 @@ const ImageSlider: FC<ImageSliderProps> = ({
   isAvailable = true,
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(true);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
@@ -52,9 +44,6 @@ const ImageSlider: FC<ImageSliderProps> = ({
         onScroll={handleScroll}
       >
         {validImages.map((image, index) => {
-          // On mobile, only render the first image
-          if (isMobile && index > 0) return null;
-
           return (
             <div
               key={index}

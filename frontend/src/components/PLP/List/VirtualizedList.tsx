@@ -53,6 +53,15 @@ interface Product {
         attributes: {
           Price: string;
           DiscountPrice?: string;
+          IsPublished?: boolean;
+          product_variation_color?: {
+            data?: {
+              id?: number;
+              attributes?: {
+                ColorCode?: string;
+              };
+            } | null;
+          };
           general_discounts?: {
             data: Array<{
               attributes: {

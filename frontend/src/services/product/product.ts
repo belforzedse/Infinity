@@ -189,6 +189,59 @@ export interface ProductDetail {
   };
 }
 
+interface VariationColorAttributes {
+  ColorCode?: string;
+}
+
+interface VariationColorRelation {
+  id?: number;
+  attributes?: VariationColorAttributes;
+  ColorCode?: string;
+}
+
+interface VariationColorWrapper {
+  data?: VariationColorRelation | null;
+}
+
+type VariationColorInput = VariationColorWrapper | VariationColorRelation | null | undefined;
+
+export interface VariationInput {
+  id?: number;
+  attributes?: {
+    IsPublished?: boolean;
+    product_variation_color?: VariationColorInput;
+  };
+  IsPublished?: boolean;
+  product_variation_color?: VariationColorInput;
+}
+
+type VariationAttributesInput = NonNullable<VariationInput["attributes"]> & {
+  IsPublished?: boolean;
+  product_variation_color?: VariationColorInput;
+};
+
+/**
+ * Extracts variation attributes, handling both nested Strapi format (with .attributes)
+ * and flattened format (direct properties).
+ */
+const getVariationAttributes = (
+  variation: VariationInput
+): VariationInput | VariationAttributesInput => variation.attributes ?? variation;
+
+/**
+ * Resolves color data from various input formats:
+ * - VariationColorWrapper: { data: { id, attributes: { ColorCode } } }
+ * - VariationColorRelation: { id, attributes: { ColorCode }, ColorCode }
+ */
+const resolveColorData = (
+  input: VariationColorInput
+): VariationColorRelation | undefined => {
+  if (!input || typeof input !== "object") return undefined;
+  if ("data" in input) {
+    return input.data ?? undefined;
+  }
+  return input as VariationColorRelation;
+};
 // Get product by ID instead of slug since current API doesn't have slug field
 export const getProductById = async (id: string): Promise<ApiResponse<ProductDetail>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies&populate[15]=product_reviews.product_review_replies.user&populate[16]=product_reviews.product_review_replies.user.user_info`;
@@ -659,14 +712,14 @@ export const getRelatedProductsByOtherCategories = async (
 /**
  * Calculate the count of unique colors among published variations
  */
-export const calculateUniqueColorsCount = (variations: any[]): number => {
+export const calculateUniqueColorsCount = (variations: VariationInput[]): number => {
   if (!variations || !Array.isArray(variations)) return 0;
 
-  const uniqueColors = new Set();
-  variations.forEach((v: any) => {
+  const uniqueColors = new Set<number>();
+  variations.forEach((variation: VariationInput) => {
     // Handle both nested Strapi format (v.attributes) and flattened format (v)
-    const attrs = v.attributes || v;
-    const colorData = attrs.product_variation_color?.data || attrs.product_variation_color;
+    const attrs = getVariationAttributes(variation);
+    const colorData = resolveColorData(attrs.product_variation_color);
 
     // Only count color if variation is published (defaults to true if undefined)
     if (attrs.IsPublished !== false && colorData?.id) {
@@ -680,15 +733,15 @@ export const calculateUniqueColorsCount = (variations: any[]): number => {
 /**
  * Get unique color codes among published variations
  */
-export const getUniqueColorCodes = (variations: any[]): string[] => {
+export const getUniqueColorCodes = (variations: VariationInput[]): string[] => {
   if (!variations || !Array.isArray(variations)) return [];
 
   const colors = new Map<number, string>();
-  variations.forEach((v: any) => {
+  variations.forEach((variation: VariationInput) => {
     // Handle both nested Strapi format (v.attributes) and flattened format (v)
-    const attrs = v.attributes || v;
-    const colorData = attrs.product_variation_color?.data || attrs.product_variation_color;
-    const colorCode = colorData?.attributes?.ColorCode || colorData?.ColorCode;
+    const attrs = getVariationAttributes(variation);
+    const colorData = resolveColorData(attrs.product_variation_color);
+    const colorCode = colorData?.attributes?.ColorCode ?? colorData?.ColorCode;
 
     // Only collect color if variation is published and has a color code
     if (attrs.IsPublished !== false && colorData?.id && colorCode) {

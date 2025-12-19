@@ -44,7 +44,7 @@ function PaymentIssueContent(): React.ReactElement {
 
     fetchOrderStatus();
     return () => controller.abort();
-  }, [isValidOrderId, parsedOrderId]);
+  }, [orderIdParam]);
 
   const handleBackToCart = () => router.push("/cart");
   const handleContinueShopping = () => router.push("/");

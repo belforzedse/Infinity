@@ -40,11 +40,15 @@ export default function PDPCommentList({
     return [...reviews].sort((a, b) => {
       const dateA = new Date(a.Date || a.createdAt).getTime();
       const dateB = new Date(b.Date || b.createdAt).getTime();
+      const safeDateA = Number.isNaN(dateA) ? 0 : dateA;
+      const safeDateB = Number.isNaN(dateB) ? 0 : dateB;
+      const rateA = Number(a.Rate) || 0;
+      const rateB = Number(b.Rate) || 0;
 
-      if (sortOption === "newest") return dateB - dateA;
-      if (sortOption === "oldest") return dateA - dateB;
-      if (sortOption === "highestRating") return b.Rate - a.Rate;
-      if (sortOption === "lowestRating") return a.Rate - b.Rate;
+      if (sortOption === "newest") return safeDateB - safeDateA;
+      if (sortOption === "oldest") return safeDateA - safeDateB;
+      if (sortOption === "highestRating") return rateB - rateA;
+      if (sortOption === "lowestRating") return rateA - rateB;
       return 0;
     });
   }, [reviews, sortOption]);
@@ -58,6 +62,7 @@ export default function PDPCommentList({
 
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowSortOptions(!showSortOptions)}
             className="flex items-center gap-1 rounded-[8px] bg-[#FAFAF9] px-4 py-1 text-[12px] text-[#333333] transition-all hover:bg-slate-100"
           >
@@ -70,6 +75,7 @@ export default function PDPCommentList({
               {(Object.keys(sortLabels) as SortOption[]).map((option) => (
                 <button
                   key={option}
+                  type="button"
                   onClick={() => {
                     setSortOption(option as SortOption);
                     setShowSortOptions(false);

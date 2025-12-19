@@ -26,9 +26,9 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { translateCommentStatus } from "@/utils/statusTranslations";
 
 const statusConfig = {
-  "Need for Review": { label: "در انتظار", className: "bg-yellow-100 text-yellow-700", icon: Clock },
-  Accepted: { label: "تایید شده", className: "bg-green-100 text-green-700", icon: CheckCircle },
-  Rejected: { label: "رد شده", className: "bg-red-100 text-red-700", icon: XCircle },
+  "Need for Review": { className: "bg-yellow-100 text-yellow-700", icon: Clock },
+  Accepted: { className: "bg-green-100 text-green-700", icon: CheckCircle },
+  Rejected: { className: "bg-red-100 text-red-700", icon: XCircle },
 };
 
 export default function ProductsCommentsPage() {
@@ -174,7 +174,7 @@ export default function ProductsCommentsPage() {
         return (
           <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${config.className}`}>
             <Icon className="h-3 w-3" />
-            {config.label}
+            {translateCommentStatus(row.original.Status)}
           </span>
         );
       },
@@ -379,7 +379,7 @@ export default function ProductsCommentsPage() {
               <div className="flex items-center gap-3">
                 <span className="text-xs text-neutral-400">وضعیت فعلی:</span>
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${statusConfig[viewReview.Status]?.className || statusConfig["Need for Review"].className}`}>
-                  {statusConfig[viewReview.Status]?.label || translateCommentStatus(viewReview.Status)}
+                  {translateCommentStatus(viewReview.Status)}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -393,6 +393,7 @@ export default function ProductsCommentsPage() {
                   تایید
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     handleStatusChange(viewReview.id, "Rejected");
                     setViewReview(null);

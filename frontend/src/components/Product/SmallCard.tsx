@@ -81,8 +81,8 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
   );
 
-  // Use slug if available, otherwise fall back to ID for backwards compatibility
-  const productUrl = slug ? `/pdp/${slug}` : `/pdp/${id}`;
+  // Use slug if available, otherwise fall back to ID for backwards compatibility.
+  const productUrl = slug ? `/pdp/${encodeURIComponent(slug)}` : `/pdp/${id}`;
 
   // Close menu when clicking outside
   useEffect(() => {

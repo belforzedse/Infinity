@@ -12,8 +12,11 @@ interface CompareModalProps {
 
 const MAX_COMPARE_PRODUCTS = 4;
 const COMPARE_LIST_KEY = "compareList";
+const COMPARE_MODAL_TITLE_ID = "compare-modal-title";
 
-export default function CompareModal({ isOpen, onClose, productId }: CompareModalProps) {
+export default function CompareModal(
+  { isOpen, onClose, productId }: CompareModalProps
+) {
   const [status, setStatus] = useState<"adding" | "success" | "error" | "already-added">("adding");
   const [compareCount, setCompareCount] = useState(0);
 
@@ -71,7 +74,8 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
       setStatus("adding");
       addToCompareList();
     }
-  }, [isOpen, addToCompareList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Auto-close after 2 seconds on success
   useEffect(() => {
@@ -97,7 +101,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
       isOpen={isOpen}
       onClose={onClose}
       className="max-w-md"
-      aria-labelledby="compare-modal-title"
+      aria-labelledby={COMPARE_MODAL_TITLE_ID}
     >
       <div className="p-6 text-center">
         {status === "adding" && (
@@ -126,7 +130,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
               </svg>
             </div>
             <div>
-              <h3 id="compare-modal-title" className="mb-2 text-xl font-bold text-gray-900">
+              <h3 id={COMPARE_MODAL_TITLE_ID} className="mb-2 text-xl font-bold text-gray-900">
                 با موفقیت اضافه شد!
               </h3>
               <p className="text-gray-600">
@@ -155,7 +159,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
               </svg>
             </div>
             <div>
-              <h3 id="compare-modal-title" className="mb-2 text-xl font-bold text-gray-900">
+              <h3 id={COMPARE_MODAL_TITLE_ID} className="mb-2 text-xl font-bold text-gray-900">
                 قبلاً اضافه شده
               </h3>
               <p className="text-gray-600">این محصول قبلاً در لیست مقایسه شما وجود دارد.</p>
@@ -182,7 +186,7 @@ export default function CompareModal({ isOpen, onClose, productId }: CompareModa
               </svg>
             </div>
             <div>
-              <h3 id="compare-modal-title" className="mb-2 text-xl font-bold text-gray-900">
+              <h3 id={COMPARE_MODAL_TITLE_ID} className="mb-2 text-xl font-bold text-gray-900">
                 خطا
               </h3>
               <p className="text-gray-600">

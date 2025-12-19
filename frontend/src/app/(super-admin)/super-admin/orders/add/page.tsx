@@ -11,60 +11,30 @@ import ProductSelectionSection from "@/components/SuperAdmin/Order/ProductSelect
 import Footer from "@/components/SuperAdmin/Order/SummaryFooter";
 import Sidebar from "@/components/SuperAdmin/Order/Sidebar";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
+import type { SuperAdminOrderDetail, SuperAdminOrderItem } from "@/types/super-admin/order";
 
-export type Order = {
-  id: number;
-  orderDate: Date;
-  orderStatus: string;
-  userId: string;
-  userName?: string;
-  description: string;
-  phoneNumber: string;
-  email?: string;
-  address?: string;
-  postalCode?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  items: OrderItem[];
-  shipping: number;
-  subtotal: number;
-  discount?: number;
-  tax?: number;
-  contractStatus:
-    | "Not Ready"
-    | "Confirmed"
-    | "Finished"
-    | "Failed"
-    | "Cancelled";
-  total: number;
-  paymentToken?: string | null;
-};
-
-type OrderItem = {
-  id: number;
-  productId: number;
+// Extended OrderItem type for form submission (includes backend relation IDs)
+type OrderFormItem = SuperAdminOrderItem & {
   productVariationId?: number;
-  productName: string;
-  productCode: string;
-  price: number;
-  quantity: number;
-  color: string;
-  size?: string;
-  image: string;
   // IDs for backend relations
   productColorId?: number;
   productSizeId?: number;
   productModelId?: number;
 };
 
+// Extended Order type for form (includes email field not in SuperAdminOrderDetail)
+export type OrderFormData = SuperAdminOrderDetail & {
+  email?: string;
+};
+
 export default function Page() {
   const router = useRouter();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<OrderFormItem[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const [pendingSubmitData, setPendingSubmitData] = useState<Order | null>(null);
-  const [orderData, setOrderData] = useState<Order>({
+  const [pendingSubmitData, setPendingSubmitData] = useState<OrderFormData | null>(null);
+  const [orderData, setOrderData] = useState<OrderFormData>({
     id: 0, // New order
     orderDate: new Date(),
     orderStatus: "Started",
@@ -101,7 +71,7 @@ export default function Page() {
     shipping: { isAutoFilled: false, isEditable: true },
   });
 
-  const calculateTotals = (items: OrderItem[], shipping: number = 0) => {
+  const calculateTotals = (items: OrderFormItem[], shipping: number = 0) => {
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const discount = orderData.discount || 0;
     const taxPercent = 0; // Tax disabled
@@ -112,7 +82,7 @@ export default function Page() {
     return { subtotal, tax, total };
   };
 
-  const handleItemsChange = (items: OrderItem[]) => {
+  const handleItemsChange = (items: OrderFormItem[]) => {
     setSelectedItems(items);
     const { subtotal, tax, total } = calculateTotals(items, orderData.shipping || 0);
     setOrderData(prev => ({
@@ -209,7 +179,7 @@ export default function Page() {
     }));
   };
 
-  const submitOrder = async (data: Order) => {
+  const submitOrder = async (data: OrderFormData) => {
     try {
       logger.info("Creating order", {
         Status: data.orderStatus,
@@ -529,10 +499,10 @@ export default function Page() {
       </div>
 
       {/* Order Form */}
-      <UpsertPageContentWrapper<Order>
-        key={`${selectedUser?.id || 'no-user'}-${selectedItems.length}-${JSON.stringify(fieldStates)}-${orderData.userName}-${orderData.phoneNumber}-${orderData.email}`}
+      <UpsertPageContentWrapper<OrderFormData>
+        key={`${selectedUser?.id || "no-user"}-${selectedItems.length}`}
         config={createConfig(fieldStates, toggleFieldEdit)}
-        data={orderData as Order}
+        data={orderData}
         onSubmit={async (data) => {
           logger.info("Order form submit", {
             itemsCount: selectedItems.length,
@@ -554,7 +524,7 @@ export default function Page() {
 
           await submitOrder(data);
         }}
-        footer={<Footer order={orderData as Order} onReload={() => {}} />}
+        footer={<Footer order={orderData} onReload={() => {}} />}
         customSidebar={<Sidebar orderData={orderData} selectedItems={selectedItems} />}
       />
 

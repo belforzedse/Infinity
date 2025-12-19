@@ -7,7 +7,7 @@ interface DiscountBadgeProps {
 }
 
 export const DiscountBadge: FC<DiscountBadgeProps> = ({ discount }) => {
-  if (!discount) return <span />;
+  if (!discount) return null;
 
   return (
     <div

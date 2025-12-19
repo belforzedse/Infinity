@@ -1,5 +1,3 @@
-import { faNum } from "@/utils/faNum";
-
 interface QuickViewVariationSelectorProps {
   colors: Array<{ title: string; colorCode: string }>;
   sizes: Array<{ title: string }>;

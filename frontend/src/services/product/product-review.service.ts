@@ -1,6 +1,43 @@
 import { apiClient } from "@/services";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
 
+export interface UserInfo {
+  FirstName?: string | null;
+  LastName?: string | null;
+  Phone?: string | null;
+}
+
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+export const isUserInfo = (value: unknown): value is UserInfo => {
+  if (!isRecord(value)) return false;
+  const firstName = value.FirstName;
+  const lastName = value.LastName;
+  const phone = value.Phone;
+
+  const isMaybeString = (field: unknown) =>
+    field === undefined || field === null || typeof field === "string";
+
+  return isMaybeString(firstName) && isMaybeString(lastName) && isMaybeString(phone);
+};
+
+const normalizeUserInfo = (value: unknown): UserInfo | undefined => {
+  if (!value) return undefined;
+  if (isUserInfo(value)) return value;
+  if (!isRecord(value)) return undefined;
+
+  const data = value.data;
+  if (isRecord(data)) {
+    if (isUserInfo(data.attributes)) return data.attributes;
+    if (isUserInfo(data)) return data;
+  }
+
+  if (isUserInfo(value.attributes)) return value.attributes;
+
+  return undefined;
+};
+
 export interface ProductReview {
   id: number;
   Content: string;
@@ -13,7 +50,7 @@ export interface ProductReview {
     id: number;
     username?: string;
     email?: string;
-    user_info?: any;
+    user_info?: UserInfo;
     Phone?: string;
   };
   product?: {
@@ -34,7 +71,7 @@ export interface ProductReviewReply {
     id: number;
     username?: string;
     Phone?: string;
-    user_info?: any;
+    user_info?: UserInfo;
   };
   createdAt: string;
   updatedAt: string;
@@ -72,7 +109,7 @@ class ProductReviewService {
     // Normalize user
     let normalizedUser = this.unwrapRelation(attrs.user);
     if (normalizedUser) {
-      const userInfo = this.unwrapRelation(normalizedUser.user_info) || normalizedUser.user_info;
+      const userInfo = normalizeUserInfo(normalizedUser.user_info);
       normalizedUser = {
         ...normalizedUser,
         user_info: userInfo,
@@ -88,7 +125,7 @@ class ProductReviewService {
       ? rawReplies.map((reply: any) => {
           let replyUser = this.unwrapRelation(reply.user);
           if (replyUser) {
-            const replyUserInfo = this.unwrapRelation(replyUser.user_info) || replyUser.user_info;
+            const replyUserInfo = normalizeUserInfo(replyUser.user_info);
             replyUser = { ...replyUser, user_info: replyUserInfo };
           }
           return {
