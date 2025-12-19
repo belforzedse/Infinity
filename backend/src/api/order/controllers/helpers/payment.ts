@@ -409,7 +409,7 @@ async function handleStockDecrementFailure(
     await strapi.entityService.update("api::order.order", orderId, {
       data: {
         external_source: externalSource,
-        external_id: externalId ?? refNum,
+        external_id: (externalId ?? refNum) != null ? String(externalId ?? refNum) : undefined,
         // Status remains "Paying" - will require manual intervention
       },
     });
