@@ -10,6 +10,7 @@ interface CheckoutProgressProps {
 /**
  * Shows visual progress bar for checkout
  * Example: Step 1 of 3: Information [████░░░░░]
+ * Unusued as of 12/19/2025
  */
 export function CheckoutProgress({ currentStep }: CheckoutProgressProps) {
   // Map enum values to step numbers for progress calculation
