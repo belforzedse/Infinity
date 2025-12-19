@@ -45,6 +45,46 @@ const normalizeCellForSaman = (rawPhone?: string): string | undefined => {
   return undefined;
 };
 
+export const cancelOrderAndRelease = async (
+  strapi: Strapi,
+  orderId: number,
+  contractId: number,
+  reason?: string
+) => {
+  const reasonContext = reason ? { reason } : {};
+  try {
+    await strapi.entityService.update("api::order.order", orderId, {
+      data: { Status: "Cancelled" },
+    });
+  } catch (error) {
+    strapi.log.error("Failed to update order Status", {
+      orderId,
+      error: (error as Error).message,
+      ...reasonContext,
+    });
+  }
+  try {
+    await strapi.entityService.update("api::contract.contract", contractId, {
+      data: { Status: "Cancelled" },
+    });
+  } catch (error) {
+    strapi.log.error("Failed to update contract Status", {
+      contractId,
+      error: (error as Error).message,
+      ...reasonContext,
+    });
+  }
+  try {
+    await releaseOrderReservation(strapi as any, Number(orderId), "Released");
+  } catch (error) {
+    strapi.log.error("Failed to release order reservation", {
+      orderId,
+      error: (error as Error).message,
+      ...reasonContext,
+    });
+  }
+};
+
 export const ensurePaymentGateway = async (
   strapi: Strapi,
   title: string,
@@ -87,34 +127,7 @@ export const requestSnappPayment = async (
   } = params;
 
   const cancelAndRelease = async (reason: string, details?: any) => {
-    try {
-      await strapi.entityService.update("api::order.order", order.id, {
-        data: { Status: "Cancelled" },
-      });
-    } catch (error) {
-      strapi.log.error("Failed to update order Status", {
-        orderId: order.id,
-        error: (error as Error).message,
-      });
-    }
-    try {
-      await strapi.entityService.update("api::contract.contract", contract.id, {
-        data: { Status: "Cancelled" },
-      });
-    } catch (error) {
-      strapi.log.error("Failed to update contract Status", {
-        contractId: contract.id,
-        error: (error as Error).message,
-      });
-    }
-    try {
-      await releaseOrderReservation(strapi as any, Number(order.id), "Released");
-    } catch (error) {
-      strapi.log.error("Failed to release order reservation", {
-        orderId: order.id,
-        error: (error as Error).message,
-      });
-    }
+    await cancelOrderAndRelease(strapi, order.id, contract.id, reason);
     try {
       await strapi.entityService.create("api::order-log.order-log", {
         data: {
