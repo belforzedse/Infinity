@@ -38,10 +38,14 @@ const ImageSlider: FC<ImageSliderProps> = ({
   }
 
   return (
-    <div className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[250px]">
+    <div 
+      className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[250px]"
+      aria-label={!isAvailable ? `محصول ${title} ناموجود است` : undefined}
+    >
       <div
         className="flex h-full overflow-hidden md:snap-x md:snap-mandatory md:overflow-x-auto scrollbar-none [overscroll-behavior-x:contain] [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         onScroll={handleScroll}
+        aria-hidden={!isAvailable}
       >
         {validImages.map((image, index) => {
           return (
@@ -54,7 +58,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
                 alt={`${title} - ${index + 1}`}
                 fill
                 className={`select-none object-cover transition-all duration-300 ${
-                  !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
+                  !isAvailable ? "opacity-60 saturate-[0.4] blur-sm" : ""
                 }`}
                 sizes="(max-width: 768px) 168px, 250px"
                 priority={priority && index === 0}
@@ -67,7 +71,12 @@ const ImageSlider: FC<ImageSliderProps> = ({
       </div>
 
       {!isAvailable && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+        <div 
+          className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-sm"
+          role="status"
+          aria-live="polite"
+          aria-label="محصول ناموجود است"
+        >
           <div className="rounded-full bg-neutral-800/70 px-4 py-1.5 shadow-xl backdrop-blur-md ring-1 ring-white/20">
             <span className="text-sm font-bold text-white tracking-wider">ناموجود</span>
           </div>

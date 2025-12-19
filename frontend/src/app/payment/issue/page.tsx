@@ -2,9 +2,9 @@
 
 import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 import { OrderService } from "@/services";
-import { translateOrderStatus } from "@/utils/statusTranslations";
+import PaymentOrderInfo from "@/components/User/Orders/Payment/PaymentOrderInfo";
+import PaymentActions from "@/components/User/Orders/Payment/PaymentActions";
 
 function PaymentIssueContent(): React.ReactElement {
   const router = useRouter();
@@ -60,7 +60,7 @@ function PaymentIssueContent(): React.ReactElement {
     "در صورت کسر وجه، مبلغ به صورت خودکار توسط درگاه پرداخت بازگشت داده می‌شود. در صورت عدم بازگشت وجه تا پایان روز، با پشتیبانی تماس بگیرید.";
 
   return (
-    <div className="container mx-auto px-4 py-10" dir="rtl">
+    <div className="container mx-auto px-4 md:px-8 lg:px-16 py-10" dir="rtl">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
         <div className="flex flex-col items-center text-center">
           <div className="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center mb-6">
@@ -87,71 +87,20 @@ function PaymentIssueContent(): React.ReactElement {
           <p className="text-gray-700 mb-4 text-lg">{message}</p>
           <p className="text-gray-600 mb-6 text-sm">{hint}</p>
 
-          {orderIdParam && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6 w-full">
-              <h3 className="text-lg font-semibold text-orange-800 mb-3">
-                اطلاعات سفارش
-              </h3>
-              <div className="space-y-2 text-right">
-                <p className="text-gray-700">
-                  <span className="font-medium">شماره سفارش:</span>
-                  <span className="mr-2 font-semibold text-orange-700">
-                    #{orderIdParam}
-                  </span>
-                </p>
-                {code && (
-                  <p className="text-gray-700">
-                    <span className="font-medium">کد خطا:</span>
-                    <span className="mr-2 font-semibold text-orange-700 break-all">
-                      {code}
-                    </span>
-                  </p>
-                )}
-                <p className="text-gray-700">
-                  <span className="font-medium">وضعیت:</span>
-                  <span className="mr-2 text-orange-700">
-                    {statusLoading
-                      ? "در حال بارگذاری..."
-                      : translateOrderStatus(orderStatus) || "نیاز به بررسی"}
-                  </span>
-                </p>
-              </div>
+          <PaymentOrderInfo
+            orderIdParam={orderIdParam}
+            code={code}
+            statusLoading={statusLoading}
+            orderStatus={orderStatus}
+            isValidOrderId={isValidOrderId}
+            parsedOrderId={parsedOrderId}
+          />
 
-              {isValidOrderId ? (
-                <PaymentStatus orderId={parsedOrderId!} />
-              ) : (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700 text-right">
-                    شماره سفارش نامعتبر است. لطفاً با پشتیبانی تماس بگیرید.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="w-full max-w-md space-y-3">
-            <button
-              type="button"
-              onClick={handleBackToCart}
-              className="w-full bg-pink-500 text-white py-3 px-6 rounded-lg text-center hover:bg-pink-600 transition-colors"
-            >
-              بازگشت به سبد خرید
-            </button>
-            <button
-              type="button"
-              onClick={handleContactSupport}
-              className="w-full bg-gray-100 text-gray-800 py-3 px-6 rounded-lg text-center hover:bg-gray-200 transition-colors"
-            >
-              تماس با پشتیبانی
-            </button>
-            <button
-              type="button"
-              onClick={handleContinueShopping}
-              className="w-full text-gray-700 py-3 px-6 rounded-lg text-center hover:bg-gray-50 transition-colors"
-            >
-              ادامه خرید
-            </button>
-          </div>
+          <PaymentActions
+            handleBackToCart={handleBackToCart}
+            handleContactSupport={handleContactSupport}
+            handleContinueShopping={handleContinueShopping}
+          />
         </div>
       </div>
     </div>

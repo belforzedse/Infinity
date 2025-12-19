@@ -1,19 +1,15 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import BlurImage from "@/components/ui/BlurImage";
 import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import GridIcon from "./Icons/GridIcon";
-import MoreIcon from "./Icons/MoreIcon";
 import HeartIcon from "./Icons/HeartIcon";
 import EyeIcon from "./Icons/EyeIcon";
 import ShuffleIcon from "@/components/PDP/Icons/ShuffleIcon";
-import ColorSwatches from "./ColorSwatches";
 import useProductLike from "@/hooks/useProductLike";
-import { faNum } from "@/utils/faNum";
 import clsx from "clsx";
+import { ImageCard, InfoCard, PriceCard } from "./CardParts";
 
 // Lazy load heavy modals
 const QuickViewModal = dynamic(() => import("./QuickViewModal"), {
@@ -146,102 +142,31 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
           aria-label={`مشاهده جزئیات ${title}`}
         >
           <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
-            <div className="relative h-[100px] w-24">
-              {discount && discount > 0 && (
-                <div className="text-xs absolute left-0 top-0 z-10 rounded-br-xl rounded-tl-xl bg-rose-600 px-2 py-0.5 text-white">
-                  ٪{discount}
-                </div>
-              )}
-              <BlurImage
-                src={image}
-                alt={title}
-                fill
-                className={`rounded-xl object-cover transition-all duration-300 ${
-                  !isAvailable ? "opacity-60 saturate-[0.4] blur-[0.5px]" : ""
-                }`}
-                sizes="96px"
-                priority={priority}
-                loader={imageLoader}
+            <ImageCard
+              image={image}
+              title={title}
+              discount={discount}
+              isAvailable={isAvailable}
+              priority={priority}
+              imageLoader={imageLoader}
+              colorCodes={colorCodes}
+              colorsCount={colorsCount}
+            />
+
+            <InfoCard
+              category={category}
+              title={title}
+              likedCount={likedCount}
+              menuButtonRef={menuButtonRef}
+              handleMenuToggle={handleMenuToggle}
+              isMenuOpen={isMenuOpen}
+            >
+              <PriceCard
+                isAvailable={isAvailable}
+                price={price}
+                discountedPrice={discountedPrice}
               />
-              {!isAvailable && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
-                  <div className="rounded-full bg-neutral-800/70 px-2.5 py-1 shadow-md backdrop-blur-md ring-1 ring-white/10">
-                    <span className="text-[10px] font-bold text-white">ناموجود</span>
-                  </div>
-                </div>
-              )}
-              <ColorSwatches
-                colorCodes={colorCodes}
-                colorsCount={colorsCount}
-                size="sm"
-                className="absolute bottom-1 right-1"
-              />
-            </div>
-
-            <div className="flex flex-1 flex-col justify-between py-0.5">
-              <div className="flex items-center justify-between gap-1">
-                <div className="flex items-center gap-1">
-                  <GridIcon className="h-4 w-4 text-neutral-400" />
-                  <span className="text-xs text-neutral-400">{category}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <button
-                    ref={menuButtonRef}
-                    onClick={handleMenuToggle}
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    aria-label="منوی عملیات"
-                    aria-expanded={isMenuOpen}
-                    type="button"
-                  >
-                    <MoreIcon className="h-6 w-6 text-pink-500" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-0.5">
-                <h3 className="text-xs line-clamp-1 text-neutral-800">{title}</h3>
-                {likedCount > 100 && (
-                  <div className="flex items-center gap-0.5">
-                    <HeartIcon className="h-2 w-2 text-pink-600" />
-                    <span className="text-[10px] text-pink-600">
-                      {faNum(likedCount)} نفر این محصول را پسندیدند!
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-lg bg-stone-100 px-3 py-1 md:p-1">
-                <div className="flex justify-between md:justify-center">
-                  <div className="text-xs text-neutral-500 md:hidden">قیمت</div>
-
-                  {!isAvailable ? (
-                    <span className="text-xs font-medium text-red-600">ناموجود</span>
-                  ) : (
-                    <div className="flex items-center justify-end gap-1 md:justify-center">
-                      <span
-                        className={`text-xs ${
-                          discountedPrice && discountedPrice > 0 && discountedPrice < price
-                            ? "text-pink-600"
-                            : "text-neutral-800"
-                        } font-medium`}
-                      >
-                        {(discountedPrice && discountedPrice > 0 && discountedPrice < price
-                          ? discountedPrice
-                          : price
-                        )?.toLocaleString()}{" "}
-                        تومان
-                      </span>
-
-                      {discountedPrice && discountedPrice > 0 && discountedPrice < price && (
-                        <span className="text-[10px] text-neutral-400 line-through">
-                          {price?.toLocaleString()} تومان
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            </InfoCard>
           </div>
         </Link>
 

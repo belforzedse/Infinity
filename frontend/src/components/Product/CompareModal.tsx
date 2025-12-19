@@ -20,7 +20,7 @@ export default function CompareModal(
   const [status, setStatus] = useState<"adding" | "success" | "error" | "already-added">("adding");
   const [compareCount, setCompareCount] = useState(0);
 
-  const addToCompareList = useCallback(() => {
+  const addToCompareList = useCallback((): void => {
     try {
       // Get current compare list
       const storedList = localStorage.getItem(COMPARE_LIST_KEY);

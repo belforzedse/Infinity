@@ -56,7 +56,7 @@ export const useSidebarProducts = ({
     return validProducts
       .filter((product) => hasAvailableStock(product) && hasImage(product))
       .slice(0, 3)
-      .map((product) => {
+      .map((product): ProductSmallCardProps | null => {
         try {
           const { price, discount, discountPrice } = getProductPrimaryPricing(product, {
             requirePositiveGeneralDiscount: true,
@@ -83,21 +83,10 @@ export const useSidebarProducts = ({
             colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
           };
         } catch (error) {
-          return {
-            id: product.id,
-            title: product.attributes?.Title || "",
-            category: "",
-            likedCount: 0,
-            price: 0,
-            discountedPrice: undefined,
-            discount: undefined,
-            image: "",
-            colorsCount: 0,
-            colorCodes: [],
-          };
+          return null;
         }
       })
-      .filter((product) => product.price > 0);
+      .filter((product): product is ProductSmallCardProps => product !== null);
   }, [validProducts]);
 
   const mappedDiscountedSidebar = useMemo(() => {

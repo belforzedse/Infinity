@@ -49,14 +49,11 @@ export default function ShareModalProductPreview({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-gray-900">{title}</p>
 
-        {(() => {
-          const label = variantLabel?.trim();
-          return label ? (
-            <p className="mt-0.5 truncate text-xs text-gray-600">
-              {label}
-            </p>
-          ) : null;
-        })()}
+        {variantLabel?.trim() && (
+          <p className="mt-0.5 truncate text-xs text-gray-600">
+            {variantLabel.trim()}
+          </p>
+        )}
 
         {typeof displayPrice === "number" && (
           <div className="mt-1 flex flex-wrap items-center gap-2">

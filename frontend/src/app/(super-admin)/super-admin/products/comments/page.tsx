@@ -384,6 +384,7 @@ export default function ProductsCommentsPage() {
               </div>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => {
                     handleStatusChange(viewReview.id, "Accepted");
                     setViewReview(null);

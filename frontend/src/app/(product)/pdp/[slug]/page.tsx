@@ -6,7 +6,7 @@ import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import FavoriteIcon from "@/components/PDP/Icons/FavoriteIcon";
 import PDPComment from "@/components/PDP/Comment";
 import PageContainer from "@/components/layout/PageContainer";
-import { isUserInfo, type ProductReview } from "@/services/product/product-review.service";
+import { normalizeUserInfo, type ProductReview } from "@/services/product/product-review.service";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { IMAGE_BASE_URL, API_BASE_URL, ENDPOINTS } from "@/constants/api";
@@ -668,14 +668,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
           .map((review: any) => {
             const attrs = review.attributes || {};
             const rawUserInfo = attrs.user?.data?.attributes?.user_info;
-            const normalizedUserInfo =
-              isUserInfo(rawUserInfo?.data?.attributes)
-                ? rawUserInfo.data.attributes
-                : isUserInfo(rawUserInfo?.attributes)
-                  ? rawUserInfo.attributes
-                  : isUserInfo(rawUserInfo)
-                    ? rawUserInfo
-                    : undefined;
+            const normalizedUserInfo = normalizeUserInfo(rawUserInfo);
 
             // Basic normalization to match ProductReview interface
             return {

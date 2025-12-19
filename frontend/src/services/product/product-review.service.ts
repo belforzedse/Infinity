@@ -22,19 +22,25 @@ export const isUserInfo = (value: unknown): value is UserInfo => {
   return isMaybeString(firstName) && isMaybeString(lastName) && isMaybeString(phone);
 };
 
-const normalizeUserInfo = (value: unknown): UserInfo | undefined => {
-  if (!value) return undefined;
-  if (isUserInfo(value)) return value;
-  if (!isRecord(value)) return undefined;
-
-  const data = value.data;
-  if (isRecord(data)) {
-    if (isUserInfo(data.attributes)) return data.attributes;
-    if (isUserInfo(data)) return data;
+export const normalizeUserInfo = (rawUserInfo: unknown): UserInfo | undefined => {
+  if (!rawUserInfo) return undefined;
+  
+  // Three-level fallback normalization:
+  // 1. Check data.attributes
+  // 2. Check attributes
+  // 3. Check direct value
+  if (isRecord(rawUserInfo)) {
+    if (isRecord(rawUserInfo.data) && isUserInfo(rawUserInfo.data.attributes)) {
+      return rawUserInfo.data.attributes;
+    }
+    if (isUserInfo(rawUserInfo.attributes)) {
+      return rawUserInfo.attributes;
+    }
   }
-
-  if (isUserInfo(value.attributes)) return value.attributes;
-
+  if (isUserInfo(rawUserInfo)) {
+    return rawUserInfo;
+  }
+  
   return undefined;
 };
 

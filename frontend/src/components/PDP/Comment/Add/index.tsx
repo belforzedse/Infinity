@@ -11,12 +11,15 @@ import PDPCommentAddSpecialOffer from "./SpecialOffer";
 import { useRouter } from "next/navigation";
 import type { ProductDetail } from "@/services/product/product";
 
-interface CommentProductAttributes extends Partial<ProductDetail["attributes"]> {
+type CommentProductAttributes = Omit<
+  Partial<ProductDetail["attributes"]>,
+  "Price" | "DiscountPrice" | "Discount" | "DiscountEndDate"
+> & {
   Price?: string | number;
   DiscountPrice?: string | number;
   Discount?: number;
   DiscountEndDate?: string;
-}
+};
 
 type Props = {
   rating: number;

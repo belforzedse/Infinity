@@ -25,7 +25,7 @@ export default function PLPMobileList({ products }: PLPMobileListProps) {
         const firstValidVariation = getFirstValidVariation(product);
         const { price, discount, discountPrice } = firstValidVariation
           ? getVariationPriceDetails(firstValidVariation)
-          : { price: 0, discount: 0, discountPrice: 0 };
+          : { price: 0, discount: undefined, discountPrice: undefined };
         const isAvailable = hasAvailableStock(product);
         const slug = product.attributes?.Slug;
 

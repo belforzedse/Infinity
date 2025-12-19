@@ -31,6 +31,7 @@ export default function PDPComment(props: Props) {
       setReviews(response.data || []);
     } catch (error) {
       console.error("Error fetching reviews:", error);
+      toast.error("خطا در دریافت دیدگاه‌ها. لطفاً دوباره تلاش کنید.");
     }
   }, [productId]);
 
@@ -39,7 +40,7 @@ export default function PDPComment(props: Props) {
       await productReviewService.updateStatus(id, status);
       toast.success(status === "Accepted" ? "دیدگاه تایید شد" : "دیدگاه رد شد");
       await fetchReviews();
-    } catch (error) {
+    } catch (_error) {
       toast.error("خطا در تغییر وضعیت دیدگاه");
     }
   };
@@ -51,7 +52,7 @@ export default function PDPComment(props: Props) {
       toast.success("دیدگاه حذف شد");
       await fetchReviews();
       return true;
-    } catch (error) {
+    } catch (_error) {
       toast.error("خطا در حذف دیدگاه");
       return false;
     } finally {

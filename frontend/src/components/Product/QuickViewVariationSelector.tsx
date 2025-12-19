@@ -80,7 +80,11 @@ export default function QuickViewVariationSelector({
                 <button
                   key={size.title}
                   type="button"
-                  onClick={() => onSelectSize(size.title)}
+                  onClick={() => {
+                    if (!disabled) {
+                      onSelectSize(size.title);
+                    }
+                  }}
                   aria-pressed={active}
                   disabled={disabled}
                   className={[

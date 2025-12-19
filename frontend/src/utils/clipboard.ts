@@ -27,8 +27,8 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   } catch {
     return false;
   } finally {
-    if (textarea && textarea.parentNode) {
-      textarea.parentNode.removeChild(textarea);
+    if (textarea) {
+      textarea.remove();
     }
   }
 }
