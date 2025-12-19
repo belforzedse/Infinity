@@ -1,6 +1,6 @@
 import React from "react";
 import BlurImage from "@/components/ui/BlurImage";
-import ColorSwatches from "../ColorSwatches";
+import ColorSwatches from "@/components/Product/ColorSwatches";
 import type { ImageLoaderProps } from "next/image";
 
 interface ImageCardProps {
