@@ -1,6 +1,17 @@
 import BlurImage from "@/components/ui/BlurImage";
 import { priceFormatter } from "@/utils/price";
 
+/**
+ * Props for ShareModalProductPreview component
+ * @property title - Product title to display
+ * @property imageUrl - Optional product image URL
+ * @property variantLabel - Optional variant description
+ * @property displayPrice - Optional current/display price
+ * @property originalPrice - Optional original price (shown when discounted)
+ * @property hasDiscount - Whether product has an active discount
+ * @property shareUrl - Share URL for the product
+ * @property onOpenLink - Callback when "باز کردن" button is clicked
+ */
 interface ShareModalProductPreviewProps {
   title: string;
   imageUrl?: string;
