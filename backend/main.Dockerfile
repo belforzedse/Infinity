@@ -11,8 +11,11 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
+# Configure npm to use legacy peer deps
+RUN echo "legacy-peer-deps=true" > /root/.npmrc
+
 COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY . .
 RUN npm run build
