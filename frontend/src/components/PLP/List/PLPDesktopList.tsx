@@ -22,7 +22,7 @@ interface PLPDesktopListProps {
 
 export default function PLPDesktopList({ products, includeMedia }: PLPDesktopListProps) {
   return (
-    <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product, index) => {
         const firstValidVariation = getFirstValidVariation(product);
         const { price, discount, discountPrice } = getVariationPriceDetails(firstValidVariation);

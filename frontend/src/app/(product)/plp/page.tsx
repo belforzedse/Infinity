@@ -51,7 +51,7 @@ interface Product {
 async function getProducts(
   category?: string,
   page = 1,
-  pageSize = 30, // Reduced page size for better performance
+  pageSize = 24, // Maximum 24 products per page
   showAvailableOnly = false,
   minPrice?: string,
   maxPrice?: string,
@@ -465,7 +465,7 @@ export default async function PLPPage({
   const { products, pagination } = await getProducts(
     validatedCategory,
     page,
-    30, // Reduced page size for better performance
+    24, // Maximum 24 products per page
     showAvailableOnly,
     minPrice,
     maxPrice,

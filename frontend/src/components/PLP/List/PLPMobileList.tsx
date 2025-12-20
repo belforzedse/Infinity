@@ -20,7 +20,7 @@ interface PLPMobileListProps {
 
 export default function PLPMobileList({ products }: PLPMobileListProps) {
   return (
-    <div className="flex flex-col gap-3 md:hidden">
+    <div className="flex flex-col gap-4 md:hidden">
       {products.map((product, index) => {
         const firstValidVariation = getFirstValidVariation(product);
         const { price, discount, discountPrice } = firstValidVariation

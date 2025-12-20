@@ -135,7 +135,7 @@ const ProductCard: FC<ProductCardProps> = ({
         >
           <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 md:w-[258px] md:group-hover:border-pink-100 md:group-hover:shadow-lg">
             {/* Image Section */}
-            <div className="relative overflow-hidden rounded-[20px] md:h-[270px] md:w-[250px]">
+            <div className="relative overflow-hidden rounded-[20px] h-auto w-auto">
               <ImageSlider
                 images={images}
                 title={title}

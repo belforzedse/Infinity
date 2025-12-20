@@ -225,14 +225,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
 
-    // Categories page
-    {
-      url: `${BASE_URL}/categories`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-
     // Blog listing page
     {
       url: `${BASE_URL}/blog`,

@@ -95,6 +95,7 @@ export default async function Home() {
               <Link
                 key={category.id}
                 href={`/plp?category=${category.slug}`}
+                rel="nofollow"
                 className="flex flex-col items-center text-center"
               >
               <Reveal
