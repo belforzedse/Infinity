@@ -10,7 +10,7 @@
   "scripts": {
     "add:variations": "node scripts/add-product-variations.js",
     "build": "strapi build",
-    "build:prod": "NODE_ENV=production strapi build",
+    "build:prod": "cross-env NODE_ENV=production strapi build",
     "debug:mellat": "node scripts/debug-mellat.js",
     "test:mellat-v2": "node scripts/test-mellat-v2.js",
     "test:mellat-v3": "node scripts/test-mellat-v3.js",
@@ -66,6 +66,7 @@
     "@types/jest": "^29.5.0",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^18.19.0",
+    "cross-env": "^10.1.0",
     "jest": "^29.5.0",
     "jest-mock-extended": "^3.0.4",
     "ts-jest": "^29.1.0",
