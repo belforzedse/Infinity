@@ -28,7 +28,7 @@
     "seed:admin": "node scripts/seed-admin-user.js",
     "regenerate:slugs": "node scripts/regenerate-product-slugs.js",
     "start": "strapi start",
-    "start:prod": "cross-env NODE_ENV=production strapi start",
+    "start:prod": " NODE_ENV=production strapi start",
     "strapi": "strapi",
     "test:api": "node scripts/test-api-connection.js",
     "test": "jest --detectOpenHandles",
