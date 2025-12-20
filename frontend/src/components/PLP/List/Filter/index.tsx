@@ -7,7 +7,6 @@ import PLPFilterBox from "@/components/Kits/PLP/FilterBox";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
-import { categories as staticCategories } from "@/constants/categories";
 import { SORT_OPTIONS } from "@/components/PLP/sortOptions";
 
 interface Category {
@@ -65,22 +64,12 @@ export default function Filter({
           );
         } else {
           if (!isMounted) return;
-          setLocalCategories(
-            staticCategories.map((cat) => ({
-              id: cat.slug,
-              title: cat.name,
-            })),
-          );
+          setLocalCategories([]);
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
         if (!isMounted) return;
-        setLocalCategories(
-          staticCategories.map((cat) => ({
-            id: cat.slug,
-            title: cat.name,
-          })),
-        );
+        setLocalCategories([]);
       } finally {
         if (!isMounted) return;
         setIsFetchingCategories(false);

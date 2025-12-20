@@ -7,10 +7,15 @@ import HomeIcon from "./Icons/HomeIcon";
 import CategoryIcon from "./Icons/CategoryIcon";
 import BasketIcon from "./Icons/BasketIcon";
 import ProfileIcon from "./Icons/ProfileIcon";
-import { categories } from "@/constants/categories";
-import Image from "next/image";
+import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { useCart } from "@/contexts/CartContext";
 import { hapticButton } from "@/utils/haptics";
+
+interface Category {
+  id: number;
+  title: string;
+  slug: string;
+}
 
 const PLPBottomNavigation = () => {
   const pathname = usePathname();
@@ -20,6 +25,8 @@ const PLPBottomNavigation = () => {
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const bottomPadding = `calc(${isStandalone ? "env(safe-area-inset-bottom)" : "0px"} + 8px)`;
 
   useEffect(() => {
@@ -50,6 +57,42 @@ const PLPBottomNavigation = () => {
     setIsCategoriesMounted(true);
     requestAnimationFrame(() => setIsCategoriesVisible(true));
   };
+
+  // Fetch categories when sheet is mounted
+  useEffect(() => {
+    if (!isCategoriesMounted) return;
+
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?pagination[limit]=-1`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+
+        const data = await response.json();
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          setCategories(
+            data.data
+              .slice(0, 6)
+              .map((cat: any) => ({
+                id: cat.id,
+                title: cat.attributes.Title,
+                slug: cat.attributes.Slug || cat.id.toString(),
+              })),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, [isCategoriesMounted]);
 
   const closeCategories = () => {
     // Start exit animation, then unmount after duration
@@ -161,29 +204,30 @@ const PLPBottomNavigation = () => {
             </div>
 
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pb-2">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/plp?category=${category.slug}`}
-                  onClick={closeCategories}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div
-                    className="relative h-20 w-20 overflow-hidden rounded-full"
-                    style={{ backgroundColor: category.backgroundColor }}
+              {isLoadingCategories ? (
+                <>
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="flex flex-col items-center gap-2">
+                      <div className="h-20 w-20 animate-pulse rounded-full bg-gray-200" />
+                      <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
+                    </div>
+                  ))}
+                </>
+              ) : (
+                categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/plp?category=${category.slug}`}
+                    onClick={closeCategories}
+                    className="flex flex-col items-center gap-2"
                   >
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-contain p-4"
-                      sizes="80px"
-                      loading="lazy"
-                    />
-                  </div>
-                  <span className="text-xs">{category.name}</span>
-                </Link>
-              ))}
+                    <div className="relative h-20 w-20 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center">
+                      <span className="text-2xl">📦</span>
+                    </div>
+                    <span className="text-xs text-center">{category.title}</span>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
         </div>

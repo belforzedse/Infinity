@@ -1,10 +1,18 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
-import { categories } from "@/constants/categories";
+import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+
+interface Category {
+  id: number;
+  title: string;
+  slug: string;
+}
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -12,6 +20,44 @@ interface CategoriesModalProps {
 }
 
 export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?pagination[limit]=-1`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+
+        const data = await response.json();
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          setCategories(
+            data.data
+              .slice(0, 6)
+              .map((cat: any) => ({
+                id: cat.id,
+                title: cat.attributes.Title,
+                slug: cat.attributes.Slug || cat.id.toString(),
+              })),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [isOpen]);
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
@@ -46,30 +92,32 @@ export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProp
                   </button>
                 </Dialog.Title>
 
-                <div className="grid grid-cols-3 gap-4">
-                  {categories.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={category.href}
-                      onClick={onClose}
-                      className="flex flex-col items-center gap-2"
-                    >
-                      <div
-                        className="flex h-20 w-20 items-center justify-center rounded-full p-4"
-                        style={{ backgroundColor: category.backgroundColor }}
-                      >
-                        <Image
-                          src={category.image}
-                          alt={category.name}
-                          width={48}
-                          height={48}
-                          className="h-12 w-12 object-contain"
-                        />
+                {isLoading ? (
+                  <div className="grid grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="flex flex-col items-center gap-2">
+                        <div className="h-20 w-20 animate-pulse rounded-full bg-gray-200" />
+                        <div className="h-4 w-16 animate-pulse rounded bg-gray-200" />
                       </div>
-                      <span className="text-sm text-gray-800">{category.name}</span>
-                    </Link>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    {categories.map((category) => (
+                      <Link
+                        key={category.id}
+                        href={`/plp?category=${category.slug}`}
+                        onClick={onClose}
+                        className="flex flex-col items-center gap-2"
+                      >
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 p-4">
+                          <span className="text-2xl">📦</span>
+                        </div>
+                        <span className="text-sm text-gray-800">{category.title}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>

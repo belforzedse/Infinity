@@ -94,7 +94,7 @@ export default async function Home() {
             {categories.map((category, index) => (
               <Link
                 key={category.id}
-                href={category.href}
+                href={`/plp?category=${category.slug}`}
                 className="flex flex-col items-center text-center"
               >
               <Reveal

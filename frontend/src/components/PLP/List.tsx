@@ -3,7 +3,6 @@
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import NoData from "./NoData";
 import { apiClient } from "@/services";
-import { categories as STATIC_CATEGORIES } from "@/constants/categories";
 import { faNum } from "@/utils/faNum";
 import type { ProductCardProps } from "@/components/Product/Card";
 import Filter from "./List/Filter";
@@ -93,9 +92,7 @@ export default function PLPList({
   const [products, setProducts] = useState<PLPProduct[]>(filteredInitialProducts);
   const [pagination, setPagination] = useState<PLPPagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
-  const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
-    STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
-  );
+  const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   // Initialize category from prop
