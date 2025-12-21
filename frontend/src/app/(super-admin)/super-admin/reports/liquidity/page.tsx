@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { LiquidityInterval } from "@/services/super-admin/reports/liquidity";
+import type {
+  LiquidityInterval,
+  LiquidityPayload,
+} from "@/services/super-admin/reports/liquidity";
 import { getLiquidity } from "@/services/super-admin/reports/liquidity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
@@ -34,8 +37,27 @@ export default function LiquidityReportPage() {
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [interval, setInterval] = useState<LiquidityInterval>("day");
-  const [data, setData] = useState<any>(null);
+  const [activePreset, setActivePreset] = useState<number>(30);
+  const [data, setData] = useState<LiquidityPayload | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const applyPreset = (days: number) => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - days);
+    setStart(startDate);
+    setEnd(endDate);
+    setActivePreset(days);
+  };
+
+  const presetOptions = useMemo(
+    () => [
+      { label: "۷ روز اخیر", days: 7 },
+      { label: "۳۰ روز اخیر", days: 30 },
+      { label: "۹۰ روز اخیر", days: 90 },
+    ],
+    [],
+  );
 
   const isValid = (d: Date) => d instanceof Date && !isNaN(d.getTime());
   const toISO = useCallback(
@@ -55,10 +77,31 @@ export default function LiquidityReportPage() {
     return isValid(nd) ? nd : prev;
   };
 
+  const summary = data?.summary;
+  const peakDate = summary?.peakBucket
+    ? new Date(summary.peakBucket).toLocaleDateString("fa-IR")
+    : "—";
+  const deltaPctLabel =
+    summary?.deltaPct === null || summary?.deltaPct === undefined
+      ? "—"
+      : `${faNum(summary.deltaPct.toFixed(1))}%`;
+  const deltaTone:
+    | "positive"
+    | "negative"
+    | "neutral" =
+    summary?.deltaPct === null || summary?.deltaPct === undefined
+      ? "neutral"
+      : summary.deltaPct >= 0
+      ? "positive"
+      : "negative";
+  const deltaAbsLabel = summary
+    ? `${faNum(summary.deltaAbs || 0)} اختلاف نسبت به دوره قبل`
+    : "";
+
   useEffect(() => {
     setLoading(true);
     getLiquidity({ start: startISO, end: endISO, interval })
-      .then(setData)
+      .then((res) => setData(res.data))
       .finally(() => setLoading(false));
   }, [startISO, endISO, interval]);
 
@@ -75,7 +118,10 @@ export default function LiquidityReportPage() {
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={start}
-                  onChange={(d: any) => setStart(normalizeDateInput(d, start))}
+                  onChange={(d: any) => {
+                    setStart(normalizeDateInput(d, start));
+                    setActivePreset(NaN);
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -83,7 +129,10 @@ export default function LiquidityReportPage() {
                 <DatePicker
                   inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                   defaultValue={end}
-                  onChange={(d: any) => setEnd(normalizeDateInput(d, end))}
+                  onChange={(d: any) => {
+                    setEnd(normalizeDateInput(d, end));
+                    setActivePreset(NaN);
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -99,6 +148,22 @@ export default function LiquidityReportPage() {
                 </select>
               </div>
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {presetOptions.map((preset) => (
+                <button
+                  key={preset.days}
+                  onClick={() => applyPreset(preset.days)}
+                  className={`rounded-full border px-3 py-1 text-sm transition-all ${
+                    activePreset === preset.days
+                      ? "border-pink-500 bg-pink-50 text-pink-600"
+                      : "border-neutral-200 text-neutral-600 hover:border-pink-200 hover:bg-pink-50"
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+              <span className="text-xs text-neutral-400">بازه‌های پیش‌فرض برای مقایسه سریع</span>
+            </div>
           </div>
         </div>
 
@@ -113,31 +178,31 @@ export default function LiquidityReportPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Summary Card */}
-              <div className="rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع نقدینگی</h3>
-                    <p className="text-3xl font-bold text-pink-600">
-                      {faNum(data?.total || 0)} تومان
-                    </p>
-                  </div>
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pink-100">
-                    <svg
-                      className="h-8 w-8 text-pink-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                      />
-                    </svg>
-                  </div>
-                </div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard
+                  title="مجموع نقدینگی"
+                  value={`${faNum(data?.total || 0)} تومان`}
+                  trendLabel={deltaAbsLabel}
+                  highlight
+                />
+                <StatCard
+                  title="تغییر دوره قبل"
+                  value={deltaPctLabel}
+                  trendLabel={
+                    deltaTone === "neutral" ? "بدون تغییر محسوس" : deltaTone === "positive" ? "رشد" : "کاهش"
+                  }
+                  trendTone={deltaTone}
+                />
+                <StatCard
+                  title="میانگین هر بازه"
+                  value={`${faNum(Math.round(summary?.averagePerBucket || 0))} تومان`}
+                  trendLabel={`${faNum(summary?.bucketCount || 0)} بازه انتخاب شده`}
+                />
+                <StatCard
+                  title="بیشترین نقطه"
+                  value={`${faNum(summary?.peakValue || 0)} تومان`}
+                  trendLabel={`در ${peakDate}`}
+                />
               </div>
 
               {/* Chart Section */}
@@ -150,6 +215,45 @@ export default function LiquidityReportPage() {
         </div>
       </div>
     </ContentWrapper>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  trendLabel,
+  trendTone = "neutral",
+  highlight = false,
+}: {
+  title: string;
+  value: string;
+  trendLabel?: string;
+  trendTone?: "positive" | "negative" | "neutral";
+  highlight?: boolean;
+}) {
+  const trendColor =
+    trendTone === "positive"
+      ? "text-emerald-600"
+      : trendTone === "negative"
+      ? "text-rose-600"
+      : "text-neutral-500";
+
+  return (
+    <div
+      className={`rounded-xl border p-5 shadow-sm transition-all ${
+        highlight
+          ? "border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50"
+          : "border-neutral-100 bg-white"
+      }`}
+    >
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium text-neutral-600">{title}</span>
+        <span className="text-2xl font-bold text-neutral-900">{value}</span>
+        {trendLabel ? (
+          <span className={`text-xs ${trendColor}`}>{trendLabel}</span>
+        ) : null}
+      </div>
+    </div>
   );
 }
 

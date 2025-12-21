@@ -40,6 +40,11 @@ export interface AdminActivityResponse {
       total: number;
     };
   };
+  summary?: {
+    total?: number;
+    severityCounts?: Record<string, number>;
+    actionCounts?: Record<string, number>;
+  };
 }
 
 /**
@@ -66,6 +71,7 @@ export async function getAdminActivity(params: {
   const res = await apiClient.get(`/reports/admin-activity${query}` as any);
   const responseData = (res as any)?.data || [];
   const pagination = (res as any)?.meta?.pagination || undefined;
+  const summary = (res as any)?.summary;
   return {
     data: responseData,
     meta: pagination
@@ -73,6 +79,7 @@ export async function getAdminActivity(params: {
           pagination,
         }
       : undefined,
+    summary,
   };
 }
 
