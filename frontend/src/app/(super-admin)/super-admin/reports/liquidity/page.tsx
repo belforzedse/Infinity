@@ -10,6 +10,8 @@ import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), {
   ssr: false,
@@ -34,6 +36,9 @@ const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.Respo
 });
 
 export default function LiquidityReportPage() {
+  const router = useRouter();
+  const { roleName, isLoading } = useCurrentUser();
+  const normalizedRole = (roleName ?? "").toLowerCase().trim();
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [interval, setInterval] = useState<LiquidityInterval>("day");
@@ -99,11 +104,25 @@ export default function LiquidityReportPage() {
     : "";
 
   useEffect(() => {
+    if (!isLoading && normalizedRole !== "superadmin") {
+      router.replace("/super-admin");
+    }
+  }, [isLoading, normalizedRole, router]);
+
+  useEffect(() => {
+    if (isLoading || normalizedRole !== "superadmin") {
+      return;
+    }
+
     setLoading(true);
     getLiquidity({ start: startISO, end: endISO, interval })
       .then((res) => setData(res.data))
       .finally(() => setLoading(false));
-  }, [startISO, endISO, interval]);
+  }, [startISO, endISO, interval, isLoading, normalizedRole]);
+
+  if (!isLoading && normalizedRole !== "superadmin") {
+    return null;
+  }
 
   return (
     <ContentWrapper title="گزارش مجموع نقدینگی">
@@ -242,7 +261,7 @@ function StatCard({
     <div
       className={`rounded-xl border p-5 shadow-sm transition-all ${
         highlight
-          ? "border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50"
+          ? "border-pink-200 bg-white"
           : "border-neutral-100 bg-white"
       }`}
     >
@@ -351,7 +370,7 @@ function LiquidityChart({ series }: { series: Array<{ bucket: string; total: num
       {/* Chart legend/info - RTL layout */}
       <div className="text-sm mt-4 flex items-center justify-between text-neutral-600" dir="rtl">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500"></div>
+          <div className="h-3 w-3 rounded-full bg-pink-500"></div>
           <span>روند نقدینگی</span>
         </div>
         <div className="text-xs text-neutral-500">{series.length} نقطه داده</div>

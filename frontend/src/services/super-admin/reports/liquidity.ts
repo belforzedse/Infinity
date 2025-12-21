@@ -38,5 +38,5 @@ export async function getLiquidity(params: {
 }): Promise<LiquidityResponse> {
   const query = formatQueryParams(params as any);
   const res = await apiClient.get<LiquidityResponse>(`/reports/liquidity${query}`);
-  return res as LiquidityResponse;
+  return res.data as LiquidityResponse;
 }

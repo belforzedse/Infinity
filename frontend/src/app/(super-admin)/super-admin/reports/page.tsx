@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import { getLiquidity } from "@/services/super-admin/reports/liquidity";
 import { getProductSales } from "@/services/super-admin/reports/productSales";
 import { getGatewayLiquidity } from "@/services/super-admin/reports/gatewayLiquidity";
 import { getAdminActivity } from "@/services/super-admin/reports/adminActivity";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface OverviewState {
   liquidityTotal: number;
@@ -20,6 +22,9 @@ interface OverviewState {
 }
 
 export default function ReportsIndexPage() {
+  const router = useRouter();
+  const { roleName, isLoading } = useCurrentUser();
+  const normalizedRole = (roleName ?? "").toLowerCase().trim();
   const [overview, setOverview] = useState<OverviewState | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,6 +36,17 @@ export default function ReportsIndexPage() {
   }, []);
 
   useEffect(() => {
+    if (!isLoading && normalizedRole !== "superadmin") {
+      router.replace("/super-admin");
+      return;
+    }
+  }, [isLoading, normalizedRole, router]);
+
+  useEffect(() => {
+    if (isLoading || normalizedRole !== "superadmin") {
+      return;
+    }
+
     const fetchOverview = async () => {
       try {
         setLoading(true);
@@ -71,7 +87,11 @@ export default function ReportsIndexPage() {
     };
 
     fetchOverview();
-  }, [range.end, range.start]);
+  }, [range.end, range.start, isLoading, normalizedRole]);
+
+  if (!isLoading && normalizedRole !== "superadmin") {
+    return null;
+  }
 
   return (
     <ContentWrapper title="داشبورد گزارش‌ها">
@@ -168,7 +188,7 @@ function OverviewCard({
   return (
     <Link
       href={href}
-      className="group block rounded-xl border border-neutral-200 bg-gradient-to-r from-white via-white to-pink-50 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-pink-200"
+      className="group block rounded-xl border border-neutral-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-pink-200 hover:bg-neutral-50"
     >
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
@@ -196,7 +216,7 @@ function ReportLinkCard({
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col justify-between rounded-xl border border-neutral-200 p-4 transition-all hover:-translate-y-1 hover:border-pink-200 hover:bg-pink-50"
+      className="group flex h-full flex-col justify-between rounded-xl border border-neutral-200 p-4 transition-all hover:-translate-y-1 hover:border-pink-200 hover:bg-neutral-50"
     >
       <div className="space-y-2">
         <h4 className="text-base font-semibold text-neutral-800">{title}</h4>

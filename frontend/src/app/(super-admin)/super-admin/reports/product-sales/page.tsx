@@ -7,6 +7,8 @@ import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import dynamic from "next/dynamic";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const RechartsTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
@@ -55,6 +57,9 @@ const Area = dynamic(() => import("recharts").then((m) => m.Area), {
 type ChartType = "treemap" | "bar" | "pie" | "line" | "area";
 
 export default function ProductSalesReportPage() {
+  const router = useRouter();
+  const { roleName, isLoading } = useCurrentUser();
+  const normalizedRole = (roleName ?? "").toLowerCase().trim();
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [rows, setRows] = useState<any[]>([]);
@@ -188,11 +193,25 @@ export default function ProductSalesReportPage() {
   };
 
   useEffect(() => {
+    if (!isLoading && normalizedRole !== "superadmin") {
+      router.replace("/super-admin");
+    }
+  }, [isLoading, normalizedRole, router]);
+
+  useEffect(() => {
+    if (isLoading || normalizedRole !== "superadmin") {
+      return;
+    }
+
     setLoading(true);
     getProductSales({ start: startISO, end: endISO })
       .then(setRows)
       .finally(() => setLoading(false));
-  }, [startISO, endISO]);
+  }, [startISO, endISO, isLoading, normalizedRole]);
+
+  if (!isLoading && normalizedRole !== "superadmin") {
+    return null;
+  }
 
   const totalRevenue = rows.reduce((sum, row) => sum + Number(row.totalRevenue || 0), 0);
   const totalCount = rows.reduce((sum, row) => sum + Number(row.totalCount || 0), 0);
@@ -239,7 +258,7 @@ export default function ProductSalesReportPage() {
             <div className="space-y-6">
               {/* Enhanced Summary Cards */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50 p-6">
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع فروش</h3>
@@ -265,7 +284,7 @@ export default function ProductSalesReportPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
+                <div className="rounded-xl border border-green-100 bg-green-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">تعداد فروش</h3>
@@ -289,7 +308,7 @@ export default function ProductSalesReportPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-purple-100 bg-gradient-to-r from-purple-50 to-violet-50 p-6">
+                <div className="rounded-xl border border-purple-100 bg-purple-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">متوسط درآمد</h3>
@@ -315,7 +334,7 @@ export default function ProductSalesReportPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50 p-6">
+                <div className="rounded-xl border border-orange-100 bg-orange-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">تعداد محصولات</h3>

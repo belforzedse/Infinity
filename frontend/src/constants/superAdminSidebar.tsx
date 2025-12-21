@@ -232,12 +232,23 @@ const superAdminSidebar: SidebarItem[] = [
   {
     id: "reports",
     label: "گزارشات و تحلیل ها",
+    href: "/super-admin/reports",
     icon: <ChartIcon />,
     children: [
+      {
+        id: "liquidity",
+        label: "گزارش نقدینگی",
+        href: "/super-admin/reports/liquidity",
+      },
       {
         id: "product-sales",
         label:" فروش هر محصول",
         href: "/super-admin/reports/product-sales",
+      },
+      {
+        id: "gateway-liquidity",
+        label: "گزارش درگاه‌ها",
+        href: "/super-admin/reports/gateway-liquidity",
       },
       {
         id: "admin-activity",
@@ -363,8 +374,13 @@ export const getSidebarItemsForRole = (roleName?: string | null): SidebarItem[] 
     return editorSidebar;
   }
 
+  const hiddenParentIds = new Set(STORE_MANAGER_HIDDEN_PARENT_IDS);
+  if (normalizedRole !== "superadmin") {
+    hiddenParentIds.add("reports");
+  }
+
   return superAdminSidebar
-    .filter((item) => !STORE_MANAGER_HIDDEN_PARENT_IDS.has(item.id))
+    .filter((item) => !hiddenParentIds.has(item.id))
     .map((item) => cloneWithFilteredChildren(item));
 };
 
