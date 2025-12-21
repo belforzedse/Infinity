@@ -94,7 +94,7 @@ export default async function Home() {
             {categories.map((category, index) => (
               <Link
                 key={category.id}
-                href={`/plp?category=${category.slug}`}
+                href={`/plp?category=${encodeURIComponent(category.slug)}`}
                 rel="nofollow"
                 className="flex flex-col items-center text-center"
               >

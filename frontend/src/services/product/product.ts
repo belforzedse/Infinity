@@ -5,6 +5,7 @@ import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
 import { computeDiscountForVariation, parseNumber } from "@/utils/discounts";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import { getAvailableStockCountFromRelation } from "@/utils/stock";
 
 export interface ProductMedia {
   id: number;
@@ -87,6 +88,8 @@ export interface ProductDetail {
               id: number;
               attributes: {
                 Count: number;
+                reservedCount?: number;
+                ReservedCount?: number;
               };
             };
           };
@@ -419,9 +422,8 @@ export const getDefaultProductVariation = (product: ProductDetail) => {
       return false;
     }
 
-    // Check if it has stock data and quantity > 0
-    const stock = variation.attributes.product_stock?.data?.attributes;
-    return stock && typeof stock.Count === "number" && stock.Count > 0;
+    // Check if it has available stock
+    return getAvailableStockCountFromRelation(variation.attributes.product_stock) > 0;
   });
 
   if (publishedWithStock) {
@@ -570,14 +572,7 @@ export const getProductModels = (product: ProductDetail) => {
 export const getAvailableStockCount = (
   variation: ProductDetail["attributes"]["product_variations"]["data"][0],
 ): number => {
-  if (!variation?.attributes?.product_stock?.data?.attributes) {
-    return 0;
-  }
-
-  const stockData = variation.attributes.product_stock.data.attributes;
-  const stockQuantity = stockData.Count;
-
-  return typeof stockQuantity === "number" ? stockQuantity : 0;
+  return getAvailableStockCountFromRelation(variation?.attributes?.product_stock);
 };
 
 // Helper function to check if a variation has sufficient stock
@@ -597,14 +592,14 @@ export const hasStockForVariation = (
     });
   }
 
-  if (!variation?.attributes?.product_stock?.data?.attributes) {
+  const stockData = variation?.attributes?.product_stock?.data?.attributes;
+  if (!stockData) {
     if (process.env.NODE_ENV !== "production") {
       logger.info("No stock data found - returning false");
     }
     return false;
   }
 
-  const stockData = variation.attributes.product_stock.data.attributes;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Stock data object", { stockData });
     logger.info("Available keys in stock data", {
@@ -612,14 +607,14 @@ export const hasStockForVariation = (
     });
   }
 
-  const stockQuantity = stockData.Count;
+  const availableStock = getAvailableStockCountFromRelation(variation.attributes.product_stock);
   if (process.env.NODE_ENV !== "production") {
-    logger.info("Stock Count value", { stockQuantity });
+    logger.info("Available stock count", { availableStock });
     logger.info("Requested quantity", { requestedQuantity });
   }
 
   // Updated validation: Check if stock is sufficient for the requested quantity
-  const hasStock = typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
+  const hasStock = availableStock >= requestedQuantity;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Has sufficient stock", { hasStock });
     logger.info("=== END STOCK CHECK ===");
@@ -769,8 +764,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
       const variation = product.attributes.product_variations?.data?.find((v: any) => {
         if (v.attributes.IsPublished !== true) return false;
         const hasPrice = v.attributes.Price && parseInt(v.attributes.Price) > 0;
-        const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
-        const hasStock = typeof stockCount === "number" && stockCount > 0;
+        const hasStock = getAvailableStockCountFromRelation(v.attributes.product_stock) > 0;
         return hasPrice && hasStock;
       });
 
@@ -800,8 +794,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
       const isAvailable =
         product.attributes.product_variations?.data?.some((v: any) => {
           if (v.attributes.IsPublished !== true) return false;
-          const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
-          return typeof stockCount === "number" && stockCount > 0;
+          return getAvailableStockCountFromRelation(v.attributes.product_stock) > 0;
         }) || false;
 
       // Calculate unique colors count and codes

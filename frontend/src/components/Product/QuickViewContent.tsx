@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { getAvailableStockCount } from "@/services/product/product";
 import type { ProductDetail } from "@/services/product/product";
 import { faNum } from "@/utils/faNum";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
@@ -67,12 +68,11 @@ export default function QuickViewContent({
         const {
           Price,
           DiscountPrice,
-          product_stock,
           product_variation_color,
           product_variation_size,
         } = variation.attributes;
 
-        const stock = product_stock?.data?.attributes?.Count ?? 0;
+        const stock = getAvailableStockCount(variation);
         const color = product_variation_color?.data?.attributes;
         const size = product_variation_size?.data?.attributes;
 

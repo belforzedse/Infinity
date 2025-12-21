@@ -5,7 +5,9 @@ export type Variation = {
     IsPublished?: boolean;
     Price?: string | number;
     DiscountPrice?: string | number;
-    product_stock?: { data?: { attributes?: { Count?: number } } } | null;
+    product_stock?: {
+      data?: { attributes?: { Count?: number; reservedCount?: number; ReservedCount?: number } };
+    } | null;
     product_variation_color?: { data?: { id: number; attributes?: any } } | null;
     product_variation_size?: { data?: { id: number; attributes?: any } } | null;
     product_variation_model?: { data?: { id: number; attributes?: any } } | null;

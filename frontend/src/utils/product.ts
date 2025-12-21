@@ -1,5 +1,6 @@
 import { computeDiscountForVariation } from "@/utils/discounts";
 import type { DiscountVariationInput } from "@/utils/discounts";
+import { getAvailableStockCountFromRelation } from "@/utils/stock";
 
 interface ImageAttributes {
   url?: string;
@@ -34,6 +35,8 @@ interface Product {
 
 interface StockAttributes {
   Count?: number;
+  reservedCount?: number;
+  ReservedCount?: number;
 }
 
 interface ProductStock {
@@ -82,8 +85,7 @@ const getVariations = (product: ProductWithVariations): ProductVariation[] => {
 const isVariationInStock = (variation?: ProductVariation): boolean => {
   const attrs = variation?.attributes;
   if (!attrs?.IsPublished) return false;
-  const stockCount = attrs.product_stock?.data?.attributes?.Count;
-  return typeof stockCount === "number" && stockCount > 0;
+  return getAvailableStockCountFromRelation(attrs.product_stock) > 0;
 };
 
 /**

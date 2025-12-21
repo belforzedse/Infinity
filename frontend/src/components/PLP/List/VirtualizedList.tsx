@@ -73,6 +73,8 @@ interface Product {
             data?: {
               attributes?: {
                 Count?: number;
+                reservedCount?: number;
+                ReservedCount?: number;
               };
             };
           };

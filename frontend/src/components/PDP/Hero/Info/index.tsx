@@ -8,7 +8,11 @@ import Main from "./Main";
 import Model from "./Model";
 import Price from "./Price";
 import Size from "./Size";
-import { findProductVariation, hasStockForVariation } from "@/services/product/product";
+import {
+  findProductVariation,
+  getAvailableStockCount,
+  hasStockForVariation,
+} from "@/services/product/product";
 import logger from "@/utils/logger";
 import type { ProductData } from "@/types/Product";
 
@@ -198,9 +202,9 @@ export default function PDPHeroInfo(props: Props) {
             return false;
           }
           // Check if it has stock data and count > 0
-          const stock = variation.attributes.product_stock?.data?.attributes;
-          debugLog("Variation stock data:", stock);
-          return stock && typeof stock.Count === "number" && stock.Count > 0;
+          const availableStock = getAvailableStockCount(variation as any);
+          debugLog("Variation available stock:", availableStock);
+          return availableStock > 0;
         },
       );
 

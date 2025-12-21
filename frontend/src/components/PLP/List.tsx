@@ -177,7 +177,7 @@ export default function PLPList({
       queryParams.append("filters[product_main_category][Slug][$eq]", category);
     }
 
-    // Availability filter - check for actual stock (Count > 0) not just IsPublished
+    // Availability filter - check for available stock (Count - reservedCount > 0)
     if (available === "true") {
       queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
     }
@@ -231,6 +231,11 @@ export default function PLPList({
 
         // Filter out products without images (can't filter at API level for relations)
         productsArray = productsArray.filter(hasImage);
+
+        // Client-side availability filter (Count - reservedCount)
+        if (available === "true") {
+          productsArray = productsArray.filter((product: any) => hasAvailableStock(product));
+        }
 
         // CRITICAL: Sort products by stock availability FIRST, before any other operations
         // This ensures in-stock products always appear before out-of-stock products

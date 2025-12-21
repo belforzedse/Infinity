@@ -4,6 +4,20 @@ import PageContainer from "@/components/layout/PageContainer";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 
+interface Category {
+  Id: number;
+  Title: string;
+  Slug: string;
+}
+
+interface StrapiCategoryEntry {
+  id: number;
+  attributes: {
+    Title: string;
+    Slug?: string | null;
+  };
+}
+
 export const metadata: Metadata = {
   title: "دسته‌بندی‌ها",
   description: `مشاهده تمام دسته‌بندی‌های محصولات ${SITE_NAME}. سریع به دسته مورد نظر بروید و خرید خود را آغاز کنید.`,
@@ -30,12 +44,13 @@ async function getCategories() {
 
     const data = await response.json();
     if (Array.isArray(data.data) && data.data.length > 0) {
-      return data.data
+      const categoryEntries = data.data as StrapiCategoryEntry[];
+      return categoryEntries
         .slice(0, 6)
-        .map((cat: any) => ({
-          id: cat.id,
-          title: cat.attributes.Title,
-          slug: cat.attributes.Slug || cat.id.toString(),
+        .map((cat: StrapiCategoryEntry): Category => ({
+          Id: cat.id,
+          Title: cat.attributes.Title,
+          Slug: cat.attributes.Slug || cat.id.toString(),
         }));
     }
     return [];
@@ -66,15 +81,15 @@ export default async function CategoriesPage() {
           <div className="grid grid-cols-3 gap-4 md:grid-cols-5 lg:grid-cols-6">
             {categories.map((category) => (
               <Link
-                key={category.id}
-                href={`/plp?category=${category.slug}`}
+                key={category.Id}
+                href={`/plp?category=${category.Slug}`}
                 className="flex flex-col items-center gap-2 rounded-2xl border border-slate-100 bg-white p-4 text-center transition-transform hover:-translate-y-0.5"
               >
                 <div className="relative h-20 w-20 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
                   <span className="text-3xl">📦</span>
                 </div>
                 <span className="text-sm font-medium text-foreground-primary md:text-base">
-                  {category.title}
+                  {category.Title}
                 </span>
               </Link>
             ))}

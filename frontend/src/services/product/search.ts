@@ -1,6 +1,7 @@
 import { ENDPOINTS } from "@/constants/api";
 import { apiClient } from "@/services";
 import type { ImageResponse } from "../cart";
+import { getAvailableStockCountFromRelation } from "@/utils/stock";
 
 /**
  * Product search response interface matching the API specification
@@ -72,6 +73,8 @@ export interface ProductSearchItem {
               id: number;
               attributes: {
                 Count: number;
+                reservedCount?: number;
+                ReservedCount?: number;
               };
             } | null;
           };
@@ -166,8 +169,7 @@ export const searchProducts = async (
     const hasPublishedStock = (item: any) =>
       item?.attributes?.product_variations?.data?.some?.((v: any) => {
         if (v?.attributes?.IsPublished !== true) return false;
-        const count = v?.attributes?.product_stock?.data?.attributes?.Count;
-        return typeof count === "number" && count > 0;
+        return getAvailableStockCountFromRelation(v?.attributes?.product_stock) > 0;
       });
 
     const filteredData = Array.isArray((response as any)?.data)

@@ -3,6 +3,7 @@ import { ENDPOINTS, API_BASE_URL } from "@/constants/api";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
 import logger from "@/utils/logger";
+import { getAvailableStockCountFromRelation } from "@/utils/stock";
 
 // Common fields for product queries
 const PRODUCT_COMMON_FIELDS = [
@@ -18,14 +19,7 @@ const productHasStock = (product: any): boolean => {
 
   return variations.some((variation: any) => {
     if (variation?.attributes?.IsPublished !== true) return false;
-    const stockCount = variation?.attributes?.product_stock?.data?.attributes?.Count;
-    const numericStock =
-      typeof stockCount === "number"
-        ? stockCount
-        : stockCount !== undefined && stockCount !== null
-          ? Number(stockCount)
-          : 0;
-    return Number.isFinite(numericStock) && numericStock > 0;
+    return getAvailableStockCountFromRelation(variation?.attributes?.product_stock) > 0;
   });
 };
 
@@ -72,8 +66,8 @@ export const getHomepageSections = async (): Promise<{
     // Filter for discounted products
     const discountedProducts = availableProducts.filter((product: any) => {
       const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
-        const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-        const hasStock = typeof stockCount === "number" && stockCount > 0;
+        const hasStock =
+          getAvailableStockCountFromRelation(variation.attributes.product_stock) > 0;
         if (!hasStock) return false;
 
         const price = parseFloat(variation.attributes.Price);
@@ -154,8 +148,8 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
       const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
         if (variation?.attributes?.IsPublished !== true) return false;
         // Check if variation has stock
-        const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-        const hasStock = typeof stockCount === "number" && stockCount > 0;
+        const hasStock =
+          getAvailableStockCountFromRelation(variation.attributes.product_stock) > 0;
 
         if (!hasStock) return false;
 

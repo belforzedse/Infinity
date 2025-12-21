@@ -17,6 +17,7 @@ import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { computeDiscountForVariation } from "@/utils/discounts";
 import { validateCategorySlug } from "@/utils/category-validation";
+import { getAvailableStockCountFromRelation } from "@/utils/stock";
 
 interface Product {
   id: number;
@@ -222,7 +223,7 @@ async function getProducts(
     queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
   }
 
-  // Availability filter - check for actual stock (Count > 0) not just IsPublished
+  // Availability filter - coarse filter for Count > 0 (refined post-fetch with available stock calculation)
   if (showAvailableOnly) {
     queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
   }
@@ -296,8 +297,7 @@ async function getProducts(
       // (This can't be easily done at API level due to relation complexity)
       if (showAvailableOnly) {
         const hasAvailableVariation = product.attributes.product_variations?.data?.some((variation) => {
-          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-          return typeof stockCount === "number" && stockCount > 0;
+          return getAvailableStockCountFromRelation(variation.attributes.product_stock) > 0;
         });
         return hasAvailableVariation;
       }
@@ -309,7 +309,7 @@ async function getProducts(
     // This ensures in-stock products always appear before out-of-stock products
     filteredProducts.sort((a: Product, b: Product) => {
       // Helper function to check if product has available stock
-      // A product is "in stock" if it has at least one published variation with stock > 0
+      // A product is "in stock" if it has at least one published variation with available stock
       const hasStock = (product: Product): boolean => {
         if (!product.attributes.product_variations?.data) return false;
 
@@ -318,21 +318,14 @@ async function getProducts(
           if (!variation.attributes?.IsPublished) return false;
 
           // Check stock count - handle various data structures
-          const stockData = variation.attributes?.product_stock;
-          if (!stockData) return false;
-
-          const stockCount = stockData?.data?.attributes?.Count;
-          // Check if stockCount exists and is a positive number
-          if (typeof stockCount !== "number" || stockCount <= 0) return false;
-
-          return true;
+          return getAvailableStockCountFromRelation(variation.attributes?.product_stock) > 0;
         });
       };
 
       const aHasStock = hasStock(a);
       const bHasStock = hasStock(b);
 
-      // Products with stock come first (return -1 means a comes before b)
+      // Products with available stock come first (return -1 means a comes before b)
       if (aHasStock && !bHasStock) return -1;
       if (!aHasStock && bHasStock) return 1;
       return 0; // Keep original order if both have same stock status
@@ -345,11 +338,10 @@ async function getProducts(
         let minPrice = Infinity;
 
         for (const variation of variations) {
-          // Only consider published variations with stock
+          // Only consider published variations with available stock
           if (!variation.attributes.IsPublished) continue;
 
-          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-          if (typeof stockCount === "number" && stockCount <= 0) continue;
+          if (getAvailableStockCountFromRelation(variation.attributes.product_stock) <= 0) continue;
 
           const discountResult = computeDiscountForVariation(variation.attributes);
           const finalPrice = discountResult?.finalPrice || Number(variation.attributes.Price) || 0;
@@ -365,16 +357,16 @@ async function getProducts(
       // Sort by price, but maintain stock priority (in-stock products first)
       filteredProducts.sort((a: Product, b: Product) => {
         // First, check stock status (maintain stock priority)
-        const aHasStock = a.attributes.product_variations?.data?.some((v) =>
-          v.attributes.IsPublished &&
-          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
-          v.attributes.product_stock.data.attributes.Count > 0
+        const aHasStock = a.attributes.product_variations?.data?.some(
+          (v) =>
+            v.attributes.IsPublished &&
+            getAvailableStockCountFromRelation(v.attributes.product_stock) > 0,
         ) || false;
 
-        const bHasStock = b.attributes.product_variations?.data?.some((v) =>
-          v.attributes.IsPublished &&
-          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
-          v.attributes.product_stock.data.attributes.Count > 0
+        const bHasStock = b.attributes.product_variations?.data?.some(
+          (v) =>
+            v.attributes.IsPublished &&
+            getAvailableStockCountFromRelation(v.attributes.product_stock) > 0,
         ) || false;
 
         // If stock status differs, stock comes first
