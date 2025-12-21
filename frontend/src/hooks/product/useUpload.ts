@@ -36,11 +36,15 @@ const imagesAtom = atom<FileWithPreview[]>([]);
 const videosAtom = atom<FileWithPreview[]>([]);
 const filesAtom = atom<FileWithPreview[]>([]);
 
+const revokePreview = (preview?: string) => {
+  if (preview?.startsWith("blob:")) {
+    URL.revokeObjectURL(preview);
+  }
+};
+
 const cleanupObjectURLs = (items: FileWithPreview[]) => {
   items.forEach((item) => {
-    if (item?.preview?.startsWith("blob:")) {
-      URL.revokeObjectURL(item.preview);
-    }
+    revokePreview(item?.preview);
   });
 };
 
@@ -67,6 +71,29 @@ export function useUpload({
   const previousImageKeyRef = useRef<string | null>(null);
   const previousVideoKeyRef = useRef<string | null>(null);
   const previousFileKeyRef = useRef<string | null>(null);
+  const latestImagesRef = useRef<FileWithPreview[]>([]);
+  const latestVideosRef = useRef<FileWithPreview[]>([]);
+  const latestFilesRef = useRef<FileWithPreview[]>([]);
+
+  useEffect(() => {
+    latestImagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => {
+    latestVideosRef.current = videos;
+  }, [videos]);
+
+  useEffect(() => {
+    latestFilesRef.current = files;
+  }, [files]);
+
+  useEffect(() => {
+    return () => {
+      cleanupObjectURLs(latestImagesRef.current);
+      cleanupObjectURLs(latestVideosRef.current);
+      cleanupObjectURLs(latestFilesRef.current);
+    };
+  }, []);
 
   // Synchronize global atoms with incoming initial values.
   useEffect(() => {
@@ -163,7 +190,6 @@ export function useUpload({
             continue;
           }
 
-          const previewUrl = createPreview(file);
           let uploadSource: File = file;
 
           if (detectedFileType === "image") {
@@ -177,6 +203,7 @@ export function useUpload({
           const response = await uploadFile(uploadSource);
 
           if (response) {
+            const previewUrl = createPreview(file);
             // Update Media or Files array in productData based on file type
             if (process.env.NODE_ENV !== "production") {
               logger.info("response", { response });
@@ -275,7 +302,7 @@ export function useUpload({
   const removeFile = (index: number, type: "image" | "video" | "other") => {
     switch (type) {
       case "image":
-        URL.revokeObjectURL(images[index].preview);
+        revokePreview(images[index]?.preview);
         setImages((prevImages) => prevImages.filter((_, i) => i !== index));
         setProductData({
           ...(productData as any), // TODO: Strongly type productData
@@ -283,7 +310,7 @@ export function useUpload({
         });
         break;
       case "video":
-        URL.revokeObjectURL(videos[index].preview);
+        revokePreview(videos[index]?.preview);
         setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
         setProductData({
           ...(productData as any), // TODO: Strongly type productData
@@ -291,7 +318,7 @@ export function useUpload({
         });
         break;
       case "other":
-        URL.revokeObjectURL(files[index].preview);
+        revokePreview(files[index]?.preview);
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
         setProductData({
           ...(productData as any), // TODO: Strongly type productData
