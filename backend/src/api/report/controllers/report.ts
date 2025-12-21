@@ -31,18 +31,22 @@ function logReportEvent(
   extra: Record<string, unknown> = {},
   level: "info" | "error" = "info",
 ) {
-  const user = ctx.state?.user;
-  const logPayload = {
-    report,
-    message,
-    userId: user?.id,
-    role: user?.role?.name,
-    timestamp: new Date().toISOString(),
-    ...extra,
-  };
+  try {
+    const user = ctx.state?.user;
+    const logPayload = {
+      report,
+      message,
+      userId: user?.id,
+      role: user?.role?.name,
+      timestamp: new Date().toISOString(),
+      ...extra,
+    };
 
-  const logger = (strapi.log as any)?.[level] || console.log;
-  logger(`[report:${report}] ${JSON.stringify(logPayload)}`);
+    const logger = (strapi.log as any)?.[level] || console.log;
+    logger(`[report:${report}] ${JSON.stringify(logPayload)}`);
+  } catch (err) {
+    console.warn(`[logReportEvent] Failed to log report event: ${err}`);
+  }
 }
 
 async function ensureRoleAccess(

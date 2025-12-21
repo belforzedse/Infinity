@@ -42,7 +42,7 @@ export default function LiquidityReportPage() {
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [interval, setInterval] = useState<LiquidityInterval>("day");
-  const [activePreset, setActivePreset] = useState<number>(30);
+  const [activePreset, setActivePreset] = useState<number | null>(null);
   const [data, setData] = useState<LiquidityPayload | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -139,7 +139,7 @@ export default function LiquidityReportPage() {
                   defaultValue={start}
                   onChange={(d: any) => {
                     setStart(normalizeDateInput(d, start));
-                    setActivePreset(NaN);
+                    setActivePreset(null);
                   }}
                 />
               </div>
@@ -150,7 +150,7 @@ export default function LiquidityReportPage() {
                   defaultValue={end}
                   onChange={(d: any) => {
                     setEnd(normalizeDateInput(d, end));
-                    setActivePreset(NaN);
+                    setActivePreset(null);
                   }}
                 />
               </div>
