@@ -727,9 +727,14 @@ export default {
       const allowedRoles = [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER];
       filters.PerformedByRole = { $in: allowedRoles };
 
-      const manualActivities = await strapi.entityService.findMany(
-        "api::manual-admin-activity.manual-admin-activity" as any,
-        {
+      const activityUid =
+        "api::manual-admin-activity.manual-admin-activity" as any;
+
+      type ActivitySummaryRow = { Severity?: string | null; Action?: string | null };
+      type CountMap = Record<string, number>;
+
+      const [manualActivities, totalCount, summaryRows] = await Promise.all([
+        strapi.entityService.findMany(activityUid, {
           filters,
           sort: { createdAt: "desc" },
           populate: ["performed_by"],
@@ -737,13 +742,13 @@ export default {
             page,
             pageSize,
           },
-        },
-      );
-
-      const totalCount = await strapi.entityService.count(
-        "api::manual-admin-activity.manual-admin-activity" as any,
-        { filters },
-      );
+        }),
+        strapi.entityService.count(activityUid, { filters }),
+        strapi.db.query(activityUid).findMany<ActivitySummaryRow>({
+          select: ["Severity", "Action"],
+          where: filters,
+        }),
+      ]);
 
       const data = (Array.isArray(manualActivities) ? manualActivities : []).map(
         (log: any) => {
@@ -779,13 +784,13 @@ export default {
         },
       );
 
-      const severityCounts = data.reduce((acc: any, row) => {
+      const severityCounts = summaryRows.reduce<CountMap>((acc, row) => {
         const sev = row.Severity || "unknown";
         acc[sev] = (acc[sev] || 0) + 1;
         return acc;
       }, {});
 
-      const actionCounts = data.reduce((acc: any, row) => {
+      const actionCounts = summaryRows.reduce<CountMap>((acc, row) => {
         const act = row.Action || "unknown";
         acc[act] = (acc[act] || 0) + 1;
         return acc;
