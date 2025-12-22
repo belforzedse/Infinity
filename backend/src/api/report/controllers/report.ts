@@ -17,6 +17,38 @@ function parseDate(value?: string, fallbackDays = 30): Date {
   return isNaN(d.getTime()) ? new Date() : d;
 }
 
+function computeComparisonWindow(start: Date, end: Date) {
+  const durationMs = Math.max(end.getTime() - start.getTime(), 24 * 60 * 60 * 1000);
+  const previousEnd = new Date(start.getTime());
+  const previousStart = new Date(start.getTime() - durationMs);
+  return { previousStart, previousEnd, durationMs };
+}
+
+function logReportEvent(
+  ctx: any,
+  report: string,
+  message: string,
+  extra: Record<string, unknown> = {},
+  level: "info" | "error" = "info",
+) {
+  try {
+    const user = ctx.state?.user;
+    const logPayload = {
+      report,
+      message,
+      userId: user?.id,
+      role: user?.role?.name,
+      timestamp: new Date().toISOString(),
+      ...extra,
+    };
+
+    const logger = (strapi.log as any)?.[level] || console.log;
+    logger(`[report:${report}] ${JSON.stringify(logPayload)}`);
+  } catch (err) {
+    console.warn(`[logReportEvent] Failed to log report event: ${err}`);
+  }
+}
+
 async function ensureRoleAccess(
   ctx: any,
   allowedRoles: RoleName[],
@@ -42,8 +74,13 @@ export default {
       );
       if (!user) return;
 
-      const start = parseDate(ctx.query.start as string);
-      const end = parseDate(ctx.query.end as string, 0);
+      const start = parseDate(
+        (ctx.query.start as string) || (ctx.query.startDate as string),
+      );
+      const end = parseDate(
+        (ctx.query.end as string) || (ctx.query.endDate as string),
+        0,
+      );
       const interval = (ctx.query.interval as Interval) || "day";
 
       const allowed: Interval[] = ["day", "week", "month"];
@@ -66,26 +103,58 @@ export default {
         WHERE ct.status = 'Success' AND ct.date BETWEEN ? AND ?
       `;
 
-      const [seriesRes, totalRes] = await Promise.all([
+      const { previousStart, previousEnd } = computeComparisonWindow(start, end);
+
+      const [seriesRes, totalRes, previousTotalRes] = await Promise.all([
         knex.raw(seriesQuery, [bucket, start, end]),
         knex.raw(totalQuery, [start, end]),
+        knex.raw(totalQuery, [previousStart, previousEnd]),
       ]);
 
       const seriesRows = seriesRes.rows || seriesRes[0];
       const totalRow = (totalRes.rows || totalRes[0])[0];
+      const previousTotalRow = (previousTotalRes.rows || previousTotalRes[0])[0];
+
+      const series = (seriesRows || []).map((r: any) => ({
+        bucket: r.bucket,
+        total: Number(r.total || 0),
+      }));
+      const total = Number(totalRow?.total || 0);
+      const previousTotal = Number(previousTotalRow?.total || 0);
+      const peak = series.reduce(
+        (acc, row) => (row.total > acc.total ? row : acc),
+        { bucket: null, total: 0 },
+      );
+      const deltaAbs = total - previousTotal;
+      const deltaPct = previousTotal ? (deltaAbs / previousTotal) * 100 : null;
 
       ctx.body = {
         data: {
           interval: bucket,
           start,
           end,
-          total: Number(totalRow?.total || 0),
-          series: (seriesRows || []).map((r: any) => ({
-            bucket: r.bucket,
-            total: Number(r.total || 0),
-          })),
+          total,
+          series,
+          summary: {
+            previousTotal,
+            deltaAbs,
+            deltaPct,
+            bucketCount: series.length,
+            averagePerBucket: series.length ? total / series.length : 0,
+            peakBucket: peak.bucket,
+            peakValue: peak.total,
+          },
         },
       };
+
+      logReportEvent(ctx, "liquidity", "report_fetched", {
+        interval: bucket,
+        start,
+        end,
+        total,
+        previousTotal,
+        deltaPct,
+      });
     } catch (error) {
       ctx.badRequest(error.message, { data: { success: false } });
     }
@@ -100,8 +169,13 @@ export default {
       );
       if (!user) return;
 
-      const start = parseDate(ctx.query.start as string);
-      const end = parseDate(ctx.query.end as string, 0);
+      const start = parseDate(
+        (ctx.query.start as string) || (ctx.query.startDate as string),
+      );
+      const end = parseDate(
+        (ctx.query.end as string) || (ctx.query.endDate as string),
+        0,
+      );
 
       const knex = strapi.db.connection;
 
@@ -464,7 +538,27 @@ export default {
         return;
       }
 
-      ctx.body = { data: payload };
+      const summary = {
+        totalRevenue: payload.reduce((sum, row) => sum + Number(row.totalRevenue || 0), 0),
+        totalUnits: payload.reduce((sum, row) => sum + Number(row.totalCount || 0), 0),
+        topPerformer: payload[0]
+          ? {
+              title: payload[0].productTitle,
+              sku: payload[0].productSKU,
+              revenue: payload[0].totalRevenue,
+              units: payload[0].totalCount,
+            }
+          : null,
+      };
+
+      ctx.body = { data: payload, summary };
+
+      logReportEvent(ctx, "product_sales", "report_fetched", {
+        start,
+        end,
+        totalRevenue: summary.totalRevenue,
+        totalUnits: summary.totalUnits,
+      });
     } catch (error) {
       ctx.badRequest(error.message, { data: { success: false } });
     }
@@ -479,8 +573,13 @@ export default {
       );
       if (!user) return;
 
-      const start = parseDate(ctx.query.start as string);
-      const end = parseDate(ctx.query.end as string, 0);
+      const start = parseDate(
+        (ctx.query.start as string) || (ctx.query.startDate as string),
+      );
+      const end = parseDate(
+        (ctx.query.end as string) || (ctx.query.endDate as string),
+        0,
+      );
 
       const knex = strapi.db.connection;
 
@@ -536,13 +635,50 @@ export default {
       const res = await knex.raw(query, [start, end]);
       const rows = res.rows || res[0];
 
+      const previousWindow = computeComparisonWindow(start, end);
+      const prevRes = await knex.raw(query, [
+        previousWindow.previousStart,
+        previousWindow.previousEnd,
+      ]);
+      const previousRows = prevRes.rows || prevRes[0] || [];
+
+      const data = rows.map((r: any) => ({
+        gatewayId: r.gateway_id,
+        gatewayTitle: r.title,
+        total: Number(r.total || 0),
+      }));
+
+      const total = data.reduce((sum, row) => sum + Number(row.total || 0), 0);
+      const previousTotal = (previousRows || []).reduce(
+        (sum: number, row: any) => sum + Number(row.total || 0),
+        0,
+      );
+      const deltaAbs = total - previousTotal;
+      const deltaPct = previousTotal ? (deltaAbs / previousTotal) * 100 : null;
+      const topGateway = data[0]
+        ? { title: data[0].gatewayTitle, total: data[0].total }
+        : null;
+
       ctx.body = {
-        data: rows.map((r: any) => ({
-          gatewayId: r.gateway_id,
-          gatewayTitle: r.title,
-          total: Number(r.total || 0),
-        })),
+        data,
+        summary: {
+          total,
+          previousTotal,
+          deltaAbs,
+          deltaPct,
+          topGateway,
+          gatewayCount: data.length,
+        },
       };
+
+      logReportEvent(ctx, "gateway_liquidity", "report_fetched", {
+        start,
+        end,
+        total,
+        previousTotal,
+        deltaPct,
+        topGateway: topGateway?.title,
+      });
     } catch (error) {
       ctx.badRequest(error.message, { data: { success: false } });
     }
@@ -557,8 +693,13 @@ export default {
       );
       if (!user) return;
 
-      const start = parseDate(ctx.query.start as string);
-      const end = parseDate(ctx.query.end as string, 0);
+      const start = parseDate(
+        (ctx.query.start as string) || (ctx.query.startDate as string),
+      );
+      const end = parseDate(
+        (ctx.query.end as string) || (ctx.query.endDate as string),
+        0,
+      );
       const actionType = (ctx.query.action_type as string) || "";
       const logType = (ctx.query.log_type as string) || "All";
       const page = Math.max(Number(ctx.query.page || 1), 1);
@@ -586,9 +727,14 @@ export default {
       const allowedRoles = [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER];
       filters.PerformedByRole = { $in: allowedRoles };
 
-      const manualActivities = await strapi.entityService.findMany(
-        "api::manual-admin-activity.manual-admin-activity" as any,
-        {
+      const activityUid =
+        "api::manual-admin-activity.manual-admin-activity" as any;
+
+      type ActivitySummaryRow = { Severity?: string | null; Action?: string | null };
+      type CountMap = Record<string, number>;
+
+      const [manualActivities, totalCount, summaryRows] = await Promise.all([
+        strapi.entityService.findMany(activityUid, {
           filters,
           sort: { createdAt: "desc" },
           populate: ["performed_by"],
@@ -596,13 +742,13 @@ export default {
             page,
             pageSize,
           },
-        },
-      );
-
-      const totalCount = await strapi.entityService.count(
-        "api::manual-admin-activity.manual-admin-activity" as any,
-        { filters },
-      );
+        }),
+        strapi.entityService.count(activityUid, { filters }),
+        strapi.db.query(activityUid).findMany<ActivitySummaryRow>({
+          select: ["Severity", "Action"],
+          where: filters,
+        }),
+      ]);
 
       const data = (Array.isArray(manualActivities) ? manualActivities : []).map(
         (log: any) => {
@@ -638,6 +784,18 @@ export default {
         },
       );
 
+      const severityCounts = summaryRows.reduce<CountMap>((acc, row) => {
+        const sev = row.Severity || "unknown";
+        acc[sev] = (acc[sev] || 0) + 1;
+        return acc;
+      }, {});
+
+      const actionCounts = summaryRows.reduce<CountMap>((acc, row) => {
+        const act = row.Action || "unknown";
+        acc[act] = (acc[act] || 0) + 1;
+        return acc;
+      }, {});
+
       ctx.body = {
         data,
         meta: {
@@ -648,7 +806,19 @@ export default {
             pageCount: Math.ceil(totalCount / pageSize) || 1,
           },
         },
+        summary: {
+          total: totalCount,
+          severityCounts,
+          actionCounts,
+        },
       };
+
+      logReportEvent(ctx, "admin_activity", "report_fetched", {
+        start,
+        end,
+        total: totalCount,
+        actionTypes: Object.keys(actionCounts).length,
+      });
     } catch (error) {
       ctx.badRequest(error.message, { data: { success: false } });
     }

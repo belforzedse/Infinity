@@ -68,7 +68,8 @@ export default {
       userAgent: actor.userAgent,
     });
 
-    if (actor.userId) {
+    const isManualOrder = result.Type === "Manual";
+    if (actor.userId && isManualOrder) {
       await logManualActivity(strapi, {
         resourceType: "Order",
         resourceId: result.id,
@@ -238,7 +239,8 @@ export default {
       userAgent: actor.userAgent,
     });
 
-    if (actor.userId) {
+    const isManualOrder = current?.Type === "Manual";
+    if (actor.userId && isManualOrder) {
       await logManualActivity(strapi, {
         resourceType: "Order",
         resourceId: result.id,

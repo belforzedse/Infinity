@@ -6,6 +6,8 @@ import { getGatewayLiquidity } from "@/services/super-admin/reports/gatewayLiqui
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const PieChart = dynamic(() => import("recharts").then((m) => m.PieChart), {
   ssr: false,
@@ -24,6 +26,9 @@ const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
 });
 
 export default function GatewayLiquidityReportPage() {
+  const router = useRouter();
+  const { roleName, isLoading } = useCurrentUser();
+  const normalizedRole = (roleName ?? "").toLowerCase().trim();
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [rows, setRows] = useState<any[]>([]);
@@ -48,11 +53,25 @@ export default function GatewayLiquidityReportPage() {
   };
 
   useEffect(() => {
+    if (!isLoading && normalizedRole !== "superadmin") {
+      router.replace("/super-admin");
+    }
+  }, [isLoading, normalizedRole, router]);
+
+  useEffect(() => {
+    if (isLoading || normalizedRole !== "superadmin") {
+      return;
+    }
+
     setLoading(true);
     getGatewayLiquidity({ start: startISO, end: endISO })
       .then(setRows)
       .finally(() => setLoading(false));
-  }, [startISO, endISO]);
+  }, [startISO, endISO, isLoading, normalizedRole]);
+
+  if (!isLoading && normalizedRole !== "superadmin") {
+    return null;
+  }
 
   const totalLiquidity = rows.reduce((sum, row) => sum + Number(row.total || 0), 0);
   const activeGateways = rows.filter((row) => Number(row.total || 0) > 0).length;
@@ -98,7 +117,7 @@ export default function GatewayLiquidityReportPage() {
             <div className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50 p-6">
+                <div className="rounded-xl border border-purple-100 bg-purple-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع نقدینگی</h3>
@@ -123,7 +142,7 @@ export default function GatewayLiquidityReportPage() {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-red-50 p-6">
+                <div className="rounded-xl border border-orange-100 bg-orange-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">درگاه‌های فعال</h3>
@@ -319,7 +338,7 @@ function GatewayLiquidityChart({ rows }: { rows: Array<{ gatewayTitle: string; t
           </div>
 
           {/* Chart summary - RTL */}
-          <div className="mt-6 rounded-lg bg-gradient-to-r from-neutral-50 to-neutral-100 p-4">
+          <div className="mt-6 rounded-lg bg-neutral-50 p-4">
             <div className="text-sm flex items-center justify-between" dir="rtl">
               <span className="text-neutral-600">تعداد درگاه‌ها:</span>
               <span className="font-medium text-neutral-800">{faNum(rows.length)} درگاه</span>

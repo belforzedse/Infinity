@@ -31,6 +31,27 @@ export default function Modal({
   const titleId = title ? generatedTitleId : undefined;
   const labelledById = title ? generatedTitleId : ariaLabelledby;
 
+  const getFocusableElements = useCallback(() => {
+    if (!modalRef.current) return [];
+    const selectors = [
+      "a[href]",
+      "area[href]",
+      "input:not([disabled]):not([type='hidden'])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      "button:not([disabled])",
+      "iframe",
+      "object",
+      "embed",
+      "[contenteditable]",
+      "[tabindex]:not([tabindex='-1'])",
+    ].join(",");
+
+    return Array.from(
+      modalRef.current.querySelectorAll<HTMLElement>(selectors),
+    ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
+  }, []);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -47,27 +68,6 @@ export default function Modal({
       // Store previously focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
 
-      const getFocusableElements = () => {
-        if (!modalRef.current) return [];
-        const selectors = [
-          "a[href]",
-          "area[href]",
-          "input:not([disabled]):not([type='hidden'])",
-          "select:not([disabled])",
-          "textarea:not([disabled])",
-          "button:not([disabled])",
-          "iframe",
-          "object",
-          "embed",
-          "[contenteditable]",
-          "[tabindex]:not([tabindex='-1'])",
-        ].join(",");
-
-        return Array.from(
-          modalRef.current.querySelectorAll<HTMLElement>(selectors),
-        ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
-      };
-
       const focusableElements = getFocusableElements();
       if (focusableElements.length > 0) {
         focusableElements[0].focus();
@@ -80,41 +80,6 @@ export default function Modal({
 
       // Add Escape key listener
       window.addEventListener("keydown", handleEscape);
-      const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key !== "Tab") return;
-        const focusables = getFocusableElements();
-        if (focusables.length === 0) {
-          e.preventDefault();
-          modalRef.current?.focus();
-          return;
-        }
-
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        const activeElement = document.activeElement as HTMLElement | null;
-        const isWithinModal =
-          !!activeElement && !!modalRef.current?.contains(activeElement);
-
-        if (!isWithinModal) {
-          e.preventDefault();
-          (e.shiftKey ? last : first).focus();
-          return;
-        }
-
-        if (e.shiftKey) {
-          if (activeElement === first || activeElement === modalRef.current) {
-            e.preventDefault();
-            last.focus();
-          }
-          return;
-        }
-
-        if (activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      };
-      document.addEventListener("keydown", handleTabKey);
 
       return () => {
         // Restore focus
@@ -127,15 +92,49 @@ export default function Modal({
 
         // Remove Escape key listener
         window.removeEventListener("keydown", handleEscape);
-        document.removeEventListener("keydown", handleTabKey);
       };
     }
-  }, [isOpen, handleEscape]);
+  }, [isOpen, handleEscape, getFocusableElements]);
 
   // Handle click outside
-  const handleBackdropClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+  const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "Tab") return;
+    const focusables = getFocusableElements();
+    if (focusables.length === 0) {
+      e.preventDefault();
+      modalRef.current?.focus();
+      return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const activeElement = document.activeElement as HTMLElement | null;
+    const isWithinModal =
+      !!activeElement && !!modalRef.current?.contains(activeElement);
+
+    if (!isWithinModal) {
+      e.preventDefault();
+      (e.shiftKey ? last : first).focus();
+      return;
+    }
+
+    if (e.shiftKey) {
+      if (activeElement === first || activeElement === modalRef.current) {
+        e.preventDefault();
+        last.focus();
+      }
+      return;
+    }
+
+    if (activeElement === last) {
+      e.preventDefault();
+      first.focus();
     }
   };
 
@@ -149,9 +148,10 @@ export default function Modal({
     >
       <div
         ref={modalRef}
-        className={`relative w-full max-w-7xl rounded-3xl bg-white shadow-2xl duration-200 animate-in zoom-in-95 ${className}`}
+        className={`relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl duration-200 animate-in zoom-in-95 ${className}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledById}

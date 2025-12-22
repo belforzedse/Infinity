@@ -7,6 +7,7 @@ import { getAdminActivityById, AdminActivityLog } from "@/services/super-admin/r
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 import { faNum } from "@/utils/faNum";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const actionTypeMap: Record<string, string> = {
   Create: "ایجاد",
@@ -39,11 +40,21 @@ const severityMap: Record<string, { label: string; color: string }> = {
 export default function AdminActivityDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { roleName, isLoading } = useCurrentUser();
+  const normalizedRole = (roleName ?? "").toLowerCase().trim();
   const id = params?.id ? Number(params.id) : null;
   const [activity, setActivity] = useState<AdminActivityLog | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+    if (normalizedRole !== "superadmin") {
+      router.replace("/super-admin");
+      return;
+    }
+
     if (!id) {
       router.push("/super-admin/reports/admin-activity");
       return;
@@ -61,7 +72,11 @@ export default function AdminActivityDetailPage() {
         router.push("/super-admin/reports/admin-activity");
       })
       .finally(() => setLoading(false));
-  }, [id, router]);
+  }, [id, router, isLoading, normalizedRole]);
+
+  if (!isLoading && normalizedRole !== "superadmin") {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -253,6 +268,5 @@ export default function AdminActivityDetailPage() {
     </ContentWrapper>
   );
 }
-
 
 

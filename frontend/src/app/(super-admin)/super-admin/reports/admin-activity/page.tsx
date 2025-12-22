@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getAdminActivity, AdminActivityLog } from "@/services/super-admin/reports/adminActivity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
@@ -10,6 +11,7 @@ import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 import { AnimatePresence, motion } from "framer-motion";
 import ChevronDownIcon from "@/components/SuperAdmin/Layout/Icons/ChevronDownIcon";
 import clsx from "clsx";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // Translation helpers for Persian
 const actionTypeMap: Record<string, string> = {
@@ -78,6 +80,9 @@ interface CollapsedGroup {
 }
 
 export default function AdminActivityReportPage() {
+  const router = useRouter();
+  const { roleName, isLoading } = useCurrentUser();
+  const normalizedRole = (roleName ?? "").toLowerCase().trim();
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
   const [activities, setActivities] = useState<AdminActivityLog[]>([]);
@@ -193,6 +198,16 @@ export default function AdminActivityReportPage() {
 
   // Fetch data
   useEffect(() => {
+    if (!isLoading && normalizedRole !== "superadmin") {
+      router.replace("/super-admin");
+    }
+  }, [isLoading, normalizedRole, router]);
+
+  useEffect(() => {
+    if (isLoading || normalizedRole !== "superadmin") {
+      return;
+    }
+
     setLoading(true);
     getAdminActivity({
       startDate: startISO,
@@ -221,7 +236,11 @@ export default function AdminActivityReportPage() {
         alert(`خطا در بارگذاری گزارش: ${friendlyError}`);
       })
       .finally(() => setLoading(false));
-  }, [startISO, endISO, selectedUser, selectedActionType, selectedLogType]);
+  }, [startISO, endISO, selectedUser, selectedActionType, selectedLogType, isLoading, normalizedRole]);
+
+  if (!isLoading && normalizedRole !== "superadmin") {
+    return null;
+  }
 
   const getAdminName = (activity: any) =>
     activity.PerformedByName ||
@@ -448,7 +467,7 @@ export default function AdminActivityReportPage() {
             <div className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50 p-6">
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">کل فعالیت‌ها</h3>
@@ -472,7 +491,7 @@ export default function AdminActivityReportPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
+                <div className="rounded-xl border border-green-100 bg-green-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">ادمین‌های فعال</h3>
@@ -496,7 +515,7 @@ export default function AdminActivityReportPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-purple-100 bg-gradient-to-r from-purple-50 to-violet-50 p-6">
+                <div className="rounded-xl border border-purple-100 bg-purple-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">ایجادها</h3>
@@ -520,7 +539,7 @@ export default function AdminActivityReportPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50 p-6">
+                <div className="rounded-xl border border-orange-100 bg-orange-50 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg mb-2 font-medium text-neutral-700">تغییرات</h3>
