@@ -41,33 +41,34 @@ export default function Modal({
     }
   }, [onClose]);
 
-  // Focus trap and management
+  const getFocusableElements = useCallback(() => {
+    if (!modalRef.current) return [];
+    const selectors = [
+      "a[href]",
+      "area[href]",
+      "input:not([disabled]):not([type='hidden'])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      "button:not([disabled])",
+      "iframe",
+      "object",
+      "embed",
+      "[contenteditable]",
+      "[tabindex]:not([tabindex='-1'])",
+    ].join(",");
+
+    return Array.from(
+      modalRef.current.querySelectorAll<HTMLElement>(selectors),
+    ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
+  }, []);
+
+  // Body scroll lock and initial focus
   useEffect(() => {
     if (isOpen && typeof window !== "undefined") {
       // Store previously focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
 
-      const getFocusableElements = () => {
-        if (!modalRef.current) return [];
-        const selectors = [
-          "a[href]",
-          "area[href]",
-          "input:not([disabled]):not([type='hidden'])",
-          "select:not([disabled])",
-          "textarea:not([disabled])",
-          "button:not([disabled])",
-          "iframe",
-          "object",
-          "embed",
-          "[contenteditable]",
-          "[tabindex]:not([tabindex='-1'])",
-        ].join(",");
-
-        return Array.from(
-          modalRef.current.querySelectorAll<HTMLElement>(selectors),
-        ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
-      };
-
+      // Initial focus
       const focusableElements = getFocusableElements();
       if (focusableElements.length > 0) {
         focusableElements[0].focus();
@@ -78,8 +79,24 @@ export default function Modal({
       // Lock body scroll
       document.body.style.overflow = "hidden";
 
+      return () => {
+        // Restore focus
+        if (previousActiveElement.current) {
+          previousActiveElement.current.focus();
+        }
+
+        // Unlock body scroll
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen, getFocusableElements]);
+
+  // Event listeners (Escape and Tab)
+  useEffect(() => {
+    if (isOpen && typeof window !== "undefined") {
       // Add Escape key listener
       window.addEventListener("keydown", handleEscape);
+
       const handleTabKey = (e: KeyboardEvent) => {
         if (e.key !== "Tab") return;
         const focusables = getFocusableElements();
@@ -114,23 +131,16 @@ export default function Modal({
           first.focus();
         }
       };
+
       document.addEventListener("keydown", handleTabKey);
 
       return () => {
-        // Restore focus
-        if (previousActiveElement.current) {
-          previousActiveElement.current.focus();
-        }
-
-        // Unlock body scroll
-        document.body.style.overflow = "";
-
-        // Remove Escape key listener
+        // Remove listeners
         window.removeEventListener("keydown", handleEscape);
         document.removeEventListener("keydown", handleTabKey);
       };
     }
-  }, [isOpen, handleEscape]);
+  }, [isOpen, handleEscape, getFocusableElements]);
 
   // Handle click outside
   const handleBackdropClick = (e: React.MouseEvent | React.KeyboardEvent) => {
