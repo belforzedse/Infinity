@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM registry.cyandm.com/bel4/mirror/node:20-alpine AS builder
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -22,7 +22,7 @@ ENV GITHUB_SHA=${GITHUB_SHA}
 
 RUN NODE_ENV=production npm run build
 
-FROM node:20-alpine AS runner
+FROM registry.cyandm.com/bel4/mirror/node:20-alpine AS runner
 WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1 \
