@@ -8,6 +8,11 @@ workflow:
     - if: $CI_COMMIT_BRANCH
 
 variables:
+  # ... your existing vars
+
+  DEPLOY_PORT: "3031"
+  DEPLOY_USER: "deploy"
+
   REGISTRY: "registry.cyandm.com"
   REGISTRY_IMAGE: "registry.cyandm.com/bel4/infinity"
 
