@@ -55,14 +55,30 @@ variables:
   tags:
     - deploy
   before_script:
-    - set -euo pipefail
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - : "${DEPLOY_HOST:?DEPLOY_HOST is required}"
-    - : "${DEPLOY_PORT:=3031}"
-    - ssh-keyscan -T 10 -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+    - |
+        set -euo pipefail
+
+        # Defaults
+        DEPLOY_USER="${DEPLOY_USER:-deploy}"
+        DEPLOY_PORT="${DEPLOY_PORT:-3031}"
+
+        # Required
+        if [ -z "${DEPLOY_HOST:-}" ]; then
+          echo "DEPLOY_HOST is required (check rules/variables)"
+          exit 1
+        fi
+
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+
+        # DEPLOY_SSH_KEY is base64 -> decode to PEM
+        echo "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+        # Quick validity check (does not reveal key)
+        ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null
+
+        ssh-keyscan -T 10 -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
 
 # -------------------------
