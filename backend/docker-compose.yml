@@ -1,7 +1,7 @@
 services:
   strapi:
     container_name: infinity-strapi
-    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    image: registry.cyandm.com/bel4/infinity/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
     depends_on:
