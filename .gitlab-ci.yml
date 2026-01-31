@@ -25,20 +25,19 @@ variables:
 # -------------------------
 .docker_job:
   image:
-    name: docker:27
+    name: registry.cyandm.com/bel4/mirror/docker:27
     pull_policy: if-not-present
   services:
-    - name: docker:27-dind
+    - name: registry.cyandm.com/bel4/mirror/docker:27-dind
       alias: docker
       pull_policy: if-not-present
       command:
-        # Use a mirror (helps with DockerHub + buildkit pulls)
-        - "--registry-mirror=https://focker.ir"
-        # Stabilize DNS inside dind (often fixes npm/docker random timeouts)
+        # Stabilize DNS inside dind (often fixes random timeouts)
         - "--dns=1.1.1.1"
         - "--dns=8.8.8.8"
         # MTU issues can cause stalls/timeouts even without a VPN
         - "--mtu=1400"
+
   tags:
     - docker
   variables:
