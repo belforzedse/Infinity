@@ -79,11 +79,38 @@ build_frontend:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes: [ "frontend/**/*" ]
-    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
+      variables:
+        FRONTEND_API_BASE_URL: $STAGING_FRONTEND_API_BASE_URL
+        FRONTEND_IMAGE_BASE_URL: $STAGING_FRONTEND_IMAGE_BASE_URL
+        FRONTEND_STRAPI_TOKEN: $STAGING_FRONTEND_STRAPI_TOKEN
+        SITE_URL: $STAGING_SITE_URL
+
+    - if: $CI_COMMIT_REF_NAME == "main"
       changes: [ "frontend/**/*" ]
+      variables:
+        FRONTEND_API_BASE_URL: $PROD_FRONTEND_API_BASE_URL
+        FRONTEND_IMAGE_BASE_URL: $PROD_FRONTEND_IMAGE_BASE_URL
+        FRONTEND_STRAPI_TOKEN: $PROD_FRONTEND_STRAPI_TOKEN
+        SITE_URL: $PROD_SITE_URL
+
+    - if: $CI_COMMIT_REF_NAME == "dev"
+      changes: [ "frontend/**/*" ]
+      variables:
+        FRONTEND_API_BASE_URL: $STAGING_FRONTEND_API_BASE_URL
+        FRONTEND_IMAGE_BASE_URL: $STAGING_FRONTEND_IMAGE_BASE_URL
+        FRONTEND_STRAPI_TOKEN: $STAGING_FRONTEND_STRAPI_TOKEN
+        SITE_URL: $STAGING_SITE_URL
+
+    - when: never
+
   script:
     - |
       set -euo pipefail
+
+      : "${FRONTEND_API_BASE_URL?missing}"
+      : "${FRONTEND_IMAGE_BASE_URL?missing}"
+      : "${FRONTEND_STRAPI_TOKEN?missing}"
+      : "${SITE_URL?missing}"
 
       case "$CI_COMMIT_REF_NAME" in
         main) RUNTIME_TAG="main" ;;
@@ -92,41 +119,8 @@ build_frontend:
         *) RUNTIME_TAG="$CI_COMMIT_REF_SLUG" ;;
       esac
 
-      case "$CI_COMMIT_REF_NAME" in
-        dev) DOCKERFILE="frontend/dev.Dockerfile" ;;
-        *) DOCKERFILE="frontend/main.Dockerfile" ;;
-      esac
-
-      # -------- Option 2: branch -> build args --------
-      case "$CI_COMMIT_REF_NAME" in
-        main)
-          FRONTEND_API_BASE_URL="${PROD_FRONTEND_API_BASE_URL:-}"
-          FRONTEND_IMAGE_BASE_URL="${PROD_FRONTEND_IMAGE_BASE_URL:-}"
-          FRONTEND_STRAPI_TOKEN="${PROD_FRONTEND_STRAPI_TOKEN:-}"
-          SITE_URL="${PROD_SITE_URL:-}"
-          ;;
-        dev)
-          FRONTEND_API_BASE_URL="${STAGING_FRONTEND_API_BASE_URL:-}"
-          FRONTEND_IMAGE_BASE_URL="${STAGING_FRONTEND_IMAGE_BASE_URL:-}"
-          FRONTEND_STRAPI_TOKEN="${STAGING_FRONTEND_STRAPI_TOKEN:-}"
-          SITE_URL="${STAGING_SITE_URL:-}"
-          ;;
-        experimental)
-          FRONTEND_API_BASE_URL="${EXPERIMENTAL_FRONTEND_API_BASE_URL:-}"
-          FRONTEND_IMAGE_BASE_URL="${EXPERIMENTAL_FRONTEND_IMAGE_BASE_URL:-}"
-          FRONTEND_STRAPI_TOKEN="${EXPERIMENTAL_FRONTEND_STRAPI_TOKEN:-}"
-          SITE_URL="${EXPERIMENTAL_SITE_URL:-}"
-          ;;
-        *)
-          echo "No env mapping for branch: $CI_COMMIT_REF_NAME"
-          exit 1
-          ;;
-      esac
-
-      : "${FRONTEND_API_BASE_URL:?missing env var mapping}"
-      : "${FRONTEND_IMAGE_BASE_URL:?missing env var mapping}"
-      : "${FRONTEND_STRAPI_TOKEN:?missing env var mapping}"
-      : "${SITE_URL:?missing env var mapping}"
+      DOCKERFILE="frontend/main.Dockerfile"
+      [ "$CI_COMMIT_REF_NAME" = "dev" ] && DOCKERFILE="frontend/dev.Dockerfile"
 
       docker build \
         --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONTEND_API_BASE_URL}" \
