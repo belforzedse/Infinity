@@ -5,7 +5,7 @@ import { useAtom } from "jotai";
 import { refreshTable } from "@/components/SuperAdmin/Table";
 
 /**
- * Hook that refreshes data when account/user pages become visible after being in the background.
+ * Hook that refreshes data when account/user pages become visible after being in the background. :3
  *
  * Includes a moderate debounce (15 seconds) to ensure account data is reasonably fresh
  * while still preventing excessive API calls.
