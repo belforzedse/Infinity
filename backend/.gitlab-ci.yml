@@ -1,4 +1,0 @@
-include:
-  - project: 'infinity/devops'
-    ref: main
-    file: 'infinity-backend-cicd.yml'
