@@ -15,6 +15,8 @@ variables:
 
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
+  DOCKER_BUILDKIT: "1"
+  BUILDKIT_PROGRESS: "plain"
 
   STRAPI_DISABLE_SOURCEMAPS: "true"
   STRAPI_TELEMETRY_DISABLED: "true"
@@ -138,6 +140,8 @@ build_frontend:
         --build-arg NEXT_PUBLIC_STRAPI_TOKEN="${FRONTEND_STRAPI_TOKEN}" \
         --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL}" \
         --build-arg GIT_SHA="${CI_COMMIT_SHA}" \
+        --cache-from type=registry,ref="$FRONTEND_IMAGE:buildcache" \
+        --cache-to type=registry,ref="$FRONTEND_IMAGE:buildcache,mode=max" \
         -f "$DOCKERFILE" \
         -t "$FRONTEND_IMAGE:${CI_COMMIT_SHA}" \
         -t "$FRONTEND_IMAGE:${RUNTIME_TAG}" \
@@ -191,6 +195,8 @@ build_backend:
 
       docker build \
         -f "$DOCKERFILE" \
+        --cache-from type=registry,ref="$BACKEND_IMAGE:buildcache" \
+        --cache-to type=registry,ref="$BACKEND_IMAGE:buildcache,mode=max" \
         -t "$BACKEND_IMAGE:${CI_COMMIT_SHA}" \
         -t "$BACKEND_IMAGE:${RUNTIME_TAG}" \
         --build-arg STRAPI_DISABLE_SOURCEMAPS="${STRAPI_DISABLE_SOURCEMAPS}" \

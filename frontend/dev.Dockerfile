@@ -1,10 +1,12 @@
+# syntax=docker/dockerfile:1.7
 FROM registry.cyandm.com/bel4/mirror/node:20-alpine AS builder
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps
 
 COPY . .
 
