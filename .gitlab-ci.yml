@@ -25,12 +25,13 @@ variables:
 # Anchors (lint-friendly)
 # -------------------------
 .docker_job:
-  image: docker:27
+  image:
+    name: docker:27
+    pull_policy: if-not-present
   services:
     - name: docker:27-dind
       alias: docker
-      command: ["--registry-mirror=https://focker.ir"]
-
+      pull_policy: if-not-present
   tags:
     - docker
   variables:
@@ -41,19 +42,18 @@ variables:
     - echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY" -u "$REGISTRY_USER" --password-stdin
 
 
+
 .ssh_job:
-  image: alpine:3.20
+  image:
+    name: registry.cyandm.com/bel4/infinity/deploy-tools:alpine3.20
+    pull_policy: if-not-present
   tags:
     - deploy
   before_script:
-    - apk add --no-cache openssh-client bash coreutils
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-
-    # decode base64 → real private key file
-    - echo "$DEPLOY_SSH_KEY_B64" | base64 -d > ~/.ssh/id_rsa
+    - echo "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-
     - ssh-keyscan -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
 
 
