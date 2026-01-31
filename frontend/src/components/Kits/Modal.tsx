@@ -78,6 +78,21 @@ export default function Modal({
       // Lock body scroll
       document.body.style.overflow = "hidden";
 
+      return () => {
+        // Restore focus
+        if (previousActiveElement.current) {
+          previousActiveElement.current.focus();
+        }
+
+        // Unlock body scroll
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen, getFocusableElements]);
+
+  // Event listeners (Escape and Tab)
+  useEffect(() => {
+    if (isOpen && typeof window !== "undefined") {
       // Add Escape key listener
       window.addEventListener("keydown", handleEscape);
 

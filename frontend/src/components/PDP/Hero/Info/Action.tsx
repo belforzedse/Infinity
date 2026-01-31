@@ -310,30 +310,22 @@ export default function PDPHeroInfoAction({
             text="ناموجود"
             disabled={true}
           />
-        ) : !isInCart ? (
-          <Button
-            className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100 ${
-              isAdding ? "cursor-wait opacity-50" : ""
-            }`}
-            text="افزودن به سبد خرید"
-            variant="primary"
-            leftIcon={<BasketIcon />}
-            onClick={
-              isAdding
-                ? undefined
-                : () => {
-                    handleAddToCart(1); // Pass 1 as initial quantity
-                  }
-            }
-          />
         ) : (
           <>
             <Button
-              className="text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100"
-              text="افزودن"
+              className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100 ${
+                isAdding ? "cursor-wait opacity-50" : ""
+              }`}
+              text={isInCart ? "افزودن" : "افزودن به سبد خرید"}
               variant="primary"
               leftIcon={<BasketIcon />}
-              onClick={() => handleAddToCart(quantity)}
+              onClick={
+                isAdding
+                  ? undefined
+                  : () => {
+                      handleAddToCart(quantity || 1);
+                    }
+              }
             />
             <Select
               className="w-[126px]"

@@ -1,0 +1,270 @@
+stages:
+  - build
+  - deploy
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+variables:
+  REGISTRY: "registry.cyandm.com"
+  REGISTRY_IMAGE: "registry.cyandm.com/bel4/infinity"
+
+  FRONTEND_IMAGE: "registry.cyandm.com/bel4/infinity/infinity-frontend"
+  BACKEND_IMAGE: "registry.cyandm.com/bel4/infinity/infinity-backend"
+
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
+
+  STRAPI_DISABLE_SOURCEMAPS: "true"
+  STRAPI_TELEMETRY_DISABLED: "true"
+  ENABLE_LARGE_HEAP: "false"
+
+# -------------------------
+# Anchors (lint-friendly)
+# -------------------------
+.docker_job:
+  image: docker:27
+  services:
+    - name: docker:27-dind
+  tags:
+    - docker
+  before_script:
+    - docker info
+    - echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY" -u "$REGISTRY_USER" --password-stdin
+
+.ssh_job:
+  image: alpine:3.20
+  tags:
+    - deploy
+  before_script:
+    - apk add --no-cache openssh-client bash coreutils
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    # decode base64 → real private key file
+    - echo "$DEPLOY_SSH_KEY_B64" | base64 -d > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+
+    - ssh-keyscan -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
+
+
+# -------------------------
+# BUILD: Frontend
+# -------------------------
+build_frontend:
+  extends: .docker_job
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - frontend/**/*
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
+      changes:
+        - frontend/**/*
+  script:
+    - |
+      set -euo pipefail
+
+      case "$CI_COMMIT_REF_NAME" in
+        main) RUNTIME_TAG="main" ;;
+        dev) RUNTIME_TAG="dev" ;;
+        experimental) RUNTIME_TAG="experimental" ;;
+        *) RUNTIME_TAG="$CI_COMMIT_REF_SLUG" ;;
+      esac
+
+      case "$CI_COMMIT_REF_NAME" in
+        dev) DOCKERFILE="frontend/dev.Dockerfile" ;;
+        experimental) DOCKERFILE="frontend/main.Dockerfile" ;;
+        *) DOCKERFILE="frontend/main.Dockerfile" ;;
+      esac
+
+      docker build \
+        --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONTEND_API_BASE_URL}" \
+        --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="${FRONTEND_IMAGE_BASE_URL}" \
+        --build-arg NEXT_PUBLIC_STRAPI_TOKEN="${FRONTEND_STRAPI_TOKEN}" \
+        --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL}" \
+        --build-arg GIT_SHA="${CI_COMMIT_SHA}" \
+        -f "$DOCKERFILE" \
+        -t "$FRONTEND_IMAGE:${CI_COMMIT_SHA}" \
+        -t "$FRONTEND_IMAGE:${RUNTIME_TAG}" \
+        frontend
+
+      docker push "$FRONTEND_IMAGE:${CI_COMMIT_SHA}"
+      docker push "$FRONTEND_IMAGE:${RUNTIME_TAG}"
+
+# -------------------------
+# BUILD: Backend
+# -------------------------
+build_backend:
+  extends: .docker_job
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - backend/**/*
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
+      changes:
+        - backend/**/*
+  script:
+    - |
+      set -euo pipefail
+
+      case "$CI_COMMIT_REF_NAME" in
+        main) RUNTIME_TAG="main" ;;
+        dev) RUNTIME_TAG="dev" ;;
+        experimental) RUNTIME_TAG="experimental" ;;
+        *) RUNTIME_TAG="$CI_COMMIT_REF_SLUG" ;;
+      esac
+
+      if [ -f backend/package.json ]; then
+        BUILD_CONTEXT="backend"
+        MAIN_DOCKERFILE="backend/main.Dockerfile"
+        DEV_DOCKERFILE="backend/dev.Dockerfile"
+      else
+        BUILD_CONTEXT="."
+        MAIN_DOCKERFILE="main.Dockerfile"
+        DEV_DOCKERFILE="dev.Dockerfile"
+      fi
+
+      case "$CI_COMMIT_REF_NAME" in
+        dev) DOCKERFILE="$DEV_DOCKERFILE" ;;
+        experimental) DOCKERFILE="$MAIN_DOCKERFILE" ;;
+        *) DOCKERFILE="$MAIN_DOCKERFILE" ;;
+      esac
+
+      if [ "$ENABLE_LARGE_HEAP" = "true" ]; then
+        NODE_OPTIONS="--max-old-space-size=4096"
+      else
+        NODE_OPTIONS=""
+      fi
+
+      docker build \
+        -f "$DOCKERFILE" \
+        -t "$BACKEND_IMAGE:${CI_COMMIT_SHA}" \
+        -t "$BACKEND_IMAGE:${RUNTIME_TAG}" \
+        --build-arg STRAPI_DISABLE_SOURCEMAPS="${STRAPI_DISABLE_SOURCEMAPS}" \
+        --build-arg STRAPI_TELEMETRY_DISABLED="${STRAPI_TELEMETRY_DISABLED}" \
+        --build-arg NODE_OPTIONS="${NODE_OPTIONS}" \
+        "$BUILD_CONTEXT"
+
+      docker push "$BACKEND_IMAGE:${CI_COMMIT_SHA}"
+      docker push "$BACKEND_IMAGE:${RUNTIME_TAG}"
+
+# -------------------------
+# DEPLOY: Frontend
+# -------------------------
+deploy_frontend:
+  extends: .ssh_job
+  stage: deploy
+  needs:
+    - job: build_frontend
+      optional: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_REF_NAME == "main"
+      variables:
+        DEPLOY_HOST: $FRONTEND_HOST_PROD
+        IMAGE_TAG: "main"
+        ENV_FILENAME: "main.env"
+    - if: $CI_COMMIT_REF_NAME == "dev"
+      variables:
+        DEPLOY_HOST: $FRONTEND_HOST_STAGING
+        IMAGE_TAG: "dev"
+        ENV_FILENAME: "dev.env"
+    - if: $CI_COMMIT_REF_NAME == "experimental"
+      variables:
+        DEPLOY_HOST: $FRONTEND_HOST_EXPERIMENTAL
+        IMAGE_TAG: "experimental"
+        ENV_FILENAME: "exp.env"
+    - when: never
+  script:
+    - |
+      set -euo pipefail
+
+      scp -P "${DEPLOY_PORT}" -i ~/.ssh/id_rsa frontend/docker-compose.yml \
+        "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/docker-compose.yml"
+
+      # write env file via stdin (no YAML multiline injection)
+      printf "%s" "$FRONTEND_ENV_FILE" | ssh -p "${DEPLOY_PORT}" -i ~/.ssh/id_rsa "${DEPLOY_USER}@${DEPLOY_HOST}" \
+        "cat > /opt/infinity/frontend/${ENV_FILENAME}"
+
+      ssh -p "${DEPLOY_PORT}" -i ~/.ssh/id_rsa "${DEPLOY_USER}@${DEPLOY_HOST}" "
+        set -euo pipefail
+        cd /opt/infinity/frontend
+        echo '${REGISTRY_PASSWORD}' | docker login '${REGISTRY}' -u '${REGISTRY_USER}' --password-stdin
+        export IMAGE_TAG='${IMAGE_TAG}'
+        export ENV_FILE='${ENV_FILENAME}'
+        docker compose pull
+        docker compose up -d --remove-orphans
+        docker image prune -f || true
+      "
+
+
+# -------------------------
+# DEPLOY: Backend
+# -------------------------
+deploy_backend:
+  extends: .ssh_job
+  stage: deploy
+  needs:
+  - job: build_backend
+    optional: true
+
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_REF_NAME == "main"
+      variables:
+        DEPLOY_HOST: $BACKEND_HOST_PROD
+        IMAGE_TAG: "main"
+        ENV_FILENAME: "main.env"
+    - if: $CI_COMMIT_REF_NAME == "dev"
+      variables:
+        DEPLOY_HOST: $BACKEND_HOST_STAGING
+        IMAGE_TAG: "dev"
+        ENV_FILENAME: "dev.env"
+    - if: $CI_COMMIT_REF_NAME == "experimental"
+      variables:
+        DEPLOY_HOST: $BACKEND_HOST_EXPERIMENTAL
+        IMAGE_TAG: "experimental"
+        ENV_FILENAME: "exp.env"
+    - when: never
+  script:
+    - |
+      set -euo pipefail
+
+      scp -P "${DEPLOY_PORT}" -i ~/.ssh/id_rsa backend/docker-compose.yml \
+        "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/docker-compose.yml"
+
+      ssh -p "${DEPLOY_PORT}" -i ~/.ssh/id_rsa "${DEPLOY_USER}@${DEPLOY_HOST}" "
+        set -euo pipefail
+        cd /opt/infinity/backend
+        echo '${REGISTRY_PASSWORD}' | docker login '${REGISTRY}' -u '${REGISTRY_USER}' --password-stdin
+
+        cat > '${ENV_FILENAME}' <<'EOF'
+      ${BACKEND_ENV_FILE}
+      EOF
+
+        export ENV_FILE='${ENV_FILENAME}'
+        export DB_ENV_FILE='db.env'
+        mkdir -p public/uploads
+
+        DB_USER=\$(grep -E '^DATABASE_USERNAME=' \"\$ENV_FILE\" | tail -1 | cut -d= -f2-)
+        DB_PASS=\$(grep -E '^DATABASE_PASSWORD=' \"\$ENV_FILE\" | tail -1 | cut -d= -f2-)
+        DB_NAME=\$(grep -E '^DATABASE_NAME=' \"\$ENV_FILE\" | tail -1 | cut -d= -f2-)
+
+        cat > \"\$DB_ENV_FILE\" <<EOF
+      POSTGRES_USER=\${DB_USER}
+      POSTGRES_PASSWORD=\${DB_PASS}
+      POSTGRES_DB=\${DB_NAME}
+      EOF
+
+        export IMAGE_TAG='${IMAGE_TAG}'
+        docker compose --env-file \"\$ENV_FILE\" pull
+        docker compose --env-file \"\$ENV_FILE\" up -d infinity-postgres infinity-redis
+        docker compose --env-file \"\$ENV_FILE\" up -d --remove-orphans
+        docker image prune -f || true
+      "

@@ -64,9 +64,23 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({ shippingMethods, con
     );
   }
 
+  // Sort shipping methods: "ارسال با پیک" should be at the top
+  const sortedShippingMethods = [...filteredShippingMethods].sort((a, b) => {
+    const aTitle = a.attributes.Title || "";
+    const bTitle = b.attributes.Title || "";
+    const aHasPik = aTitle.includes("پیک");
+    const bHasPik = bTitle.includes("پیک");
+
+    // If one has "پیک" and the other doesn't, prioritize the one with "پیک"
+    if (aHasPik && !bHasPik) return -1;
+    if (!aHasPik && bHasPik) return 1;
+    // If both have or both don't have "پیک", maintain original order
+    return 0;
+  });
+
   // Map filtered shipping methods to radio options
   // Map filtered shipping methods to radio options
-  const deliveryOptions = filteredShippingMethods.map((method) => ({
+  const deliveryOptions = sortedShippingMethods.map((method) => ({
     id: method.id.toString(),
     value: method.id.toString(),
     method: method,
@@ -99,7 +113,7 @@ const ShoppingCartBillDeliveryOptions: React.FC<Props> = ({ shippingMethods, con
             name="delivery-method"
             disabled={!isAddressSelected}
             onChange={(selectedValue) => {
-              const selected = filteredShippingMethods.find(
+              const selected = sortedShippingMethods.find(
                 (method) => method.id.toString() === selectedValue,
               );
               if (selected) {
