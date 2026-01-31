@@ -1,5 +1,5 @@
 /**
- * admin-activity service
+ * admin-activity service HII
  */
 
 import { factories } from "@strapi/strapi";
