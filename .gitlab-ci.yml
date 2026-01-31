@@ -56,18 +56,12 @@ variables:
     - deploy
   before_script:
     - set -euo pipefail
-    - : "${DEPLOY_HOST:?DEPLOY_HOST is required (check your rules + variables)}"
-    - : "${DEPLOY_USER:=deploy}"
-    - : "${DEPLOY_PORT:=3031}"
-    - echo "DEPLOY_HOST=$DEPLOY_HOST"
-    - echo "DEPLOY_PORT=$DEPLOY_PORT"
-    - echo "DEPLOY_USER=$DEPLOY_USER"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - echo "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - echo "Testing TCP connectivity..."
-    - timeout 5 sh -lc "cat </dev/null >/dev/tcp/$DEPLOY_HOST/$DEPLOY_PORT" && echo "TCP OK" || (echo "TCP FAIL"; exit 1)
+    - : "${DEPLOY_HOST:?DEPLOY_HOST is required}"
+    - : "${DEPLOY_PORT:=3031}"
     - ssh-keyscan -T 10 -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
 
