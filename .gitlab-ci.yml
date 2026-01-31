@@ -31,6 +31,14 @@ variables:
     - name: docker:27-dind
       alias: docker
       pull_policy: if-not-present
+      command:
+        # Use a mirror (helps with DockerHub + buildkit pulls)
+        - "--registry-mirror=https://focker.ir"
+        # Stabilize DNS inside dind (often fixes npm/docker random timeouts)
+        - "--dns=1.1.1.1"
+        - "--dns=8.8.8.8"
+        # MTU issues can cause stalls/timeouts even without a VPN
+        - "--mtu=1400"
   tags:
     - docker
   variables:
@@ -77,6 +85,7 @@ build_frontend:
   extends: .docker_job
   stage: build
   rules:
+    # MR pipelines => use staging vars
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes: [ "frontend/**/*" ]
       variables:
@@ -85,6 +94,7 @@ build_frontend:
         FRONTEND_STRAPI_TOKEN: $STAGING_FRONTEND_STRAPI_TOKEN
         SITE_URL: $STAGING_SITE_URL
 
+    # main => prod vars
     - if: $CI_COMMIT_REF_NAME == "main"
       changes: [ "frontend/**/*" ]
       variables:
@@ -93,6 +103,7 @@ build_frontend:
         FRONTEND_STRAPI_TOKEN: $PROD_FRONTEND_STRAPI_TOKEN
         SITE_URL: $PROD_SITE_URL
 
+    # dev => staging vars
     - if: $CI_COMMIT_REF_NAME == "dev"
       changes: [ "frontend/**/*" ]
       variables:
@@ -223,6 +234,7 @@ deploy_frontend:
         FRONTEND_ENV_FILE: $FRONTEND_ENV_STAGING
 
     - when: never
+
   script:
     - |
       set -euo pipefail
@@ -277,6 +289,7 @@ deploy_backend:
         BACKEND_ENV_FILE: $BACKEND_ENV_STAGING
 
     - when: never
+
   script:
     - |
       set -euo pipefail
