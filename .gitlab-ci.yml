@@ -29,6 +29,8 @@ variables:
   services:
     - name: docker:27-dind
       alias: docker
+      command: ["--registry-mirror=https://focker.ir"]
+
   tags:
     - docker
   variables:
