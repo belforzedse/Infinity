@@ -28,11 +28,16 @@ variables:
   image: docker:27
   services:
     - name: docker:27-dind
+      alias: docker
   tags:
     - docker
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_TLS_CERTDIR: ""
   before_script:
     - docker info
     - echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY" -u "$REGISTRY_USER" --password-stdin
+
 
 .ssh_job:
   image: alpine:3.20
