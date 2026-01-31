@@ -154,7 +154,9 @@ build_backend:
 deploy_frontend:
   extends: .ssh_job
   stage: deploy
-  needs: ["build_frontend"]
+  needs:
+    - job: build_frontend
+      optional: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
@@ -203,7 +205,10 @@ deploy_frontend:
 deploy_backend:
   extends: .ssh_job
   stage: deploy
-  needs: ["build_backend"]
+  needs:
+  - job: build_backend
+    optional: true
+
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
