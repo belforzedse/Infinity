@@ -142,6 +142,7 @@ PRODUCTS:
 - **Limit** - Number of products to import (default: 50)
 - **Page** - Starting page (default: 1)
 - **Categories** - Filter by WooCommerce category IDs (optional)
+- **In-Stock Only** - Import only products that are currently in stock (variable products require at least one in-stock variation)
 - **Dry Run** - Preview mode (default: Yes)
 
 ### Variations Import

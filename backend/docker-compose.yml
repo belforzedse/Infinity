@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
     volumes:
-      - uploads-data:/app/public
+      - backend_uploads-data:/app/public
     networks:
       - infinity-network
 
@@ -29,7 +29,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-infinity_local}
     volumes:
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
-      - infinity-postgres-data:/var/lib/postgresql/data
+      - backend_infinity-postgres-data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     healthcheck:
@@ -50,7 +50,7 @@ services:
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     volumes:
-      - infinity-redis-data:/data
+      - backend_infinity-redis-data:/data
     ports:
       - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     healthcheck:
@@ -62,9 +62,15 @@ services:
       - infinity-network
 
 volumes:
-  infinity-postgres-data:
-  infinity-redis-data:
-  uploads-data:
+  backend_infinity-postgres-data:
+    external: true
+    name: backend_infinity-postgres-data
+  backend_infinity-redis-data:
+    external: true
+    name: backend_infinity-redis-data
+  backend_uploads-data:
+    external: true
+    name: backend_uploads-data
 
 networks:
   infinity-network:
