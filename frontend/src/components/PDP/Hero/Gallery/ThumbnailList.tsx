@@ -123,9 +123,15 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
               setSelectedImage(asset.id);
             }}
             onMouseEnter={() => preloadSrc(asset.src)}
-            className="relative h-[70px] w-[84px] flex-shrink-0 md:pt-2 xl:pt-0 cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
+            className={`relative h-[70px] w-[84px] flex-shrink-0 md:pt-2 xl:pt-0 cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px] ${
+              asset.id === selectedImage
+                ? "ring-2 ring-pink-500 shadow-lg"
+                : "ring-1 ring-black/10"
+            }`}
           >
-            <div className={asset.id === selectedImage ? "opacity-50" : ""}>
+            <div className={`relative h-full w-full ${
+              asset.id === selectedImage ? "opacity-60" : "opacity-100"
+            }`}>
               <Image
                 fill
                 src={asset.thumbnail}
@@ -135,13 +141,27 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
                 loading="lazy"
                 placeholder="blur"
                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTM5IiBoZWlnaHQ9IjEzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
+                className="object-cover"
               />
+              {/* Gradient overlay for videos */}
+              {asset.type === "video" && (
+                <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-transparent" />
+              )}
             </div>
 
             {asset.type === "video" && (
-              <button className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
-                <Image width={24} height={24} src="/images/pdp/play-icon.png" alt="close" />
-              </button>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="group/video-thumb flex items-center justify-center transition-all duration-300">
+                  <div className="absolute h-12 w-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg ring-2 ring-pink-200/50 transition-all duration-300 group-hover/video-thumb:scale-110 group-hover/video-thumb:ring-pink-400/70 group-hover/video-thumb:shadow-xl" />
+                  <svg
+                    className="relative h-5 w-5 text-pink-600 transition-transform duration-300 group-hover/video-thumb:scale-110"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
             )}
           </div>
         ))}

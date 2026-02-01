@@ -1,5 +1,6 @@
 import Details from "@/components/Product/add/Details";
 import PhotoUploader from "@/components/Product/add/PhotoUploader";
+import VideoUploader from "@/components/Product/add/VideoUploader";
 import FileUploader from "./FileUploader";
 import type { EditProductData } from "@/types/super-admin/products";
 import logger from "@/utils/logger";
@@ -36,16 +37,10 @@ export default function Overall({ productData, isEditMode = false }: OverallProp
 
       <PhotoUploader initialImages={images} isEditMode={isEditMode} />
 
+      <VideoUploader initialVideos={videos} isEditMode={isEditMode} />
+
       {showMediaUploaders && (
         <>
-          <FileUploader
-            title="ویدیوها"
-            fileType="video"
-            iconSrc="/images/video-icon.png"
-            initialFiles={videos}
-            isEditMode={isEditMode}
-          />
-
           <FileUploader
             title="فایل‌ها"
             fileType="other"

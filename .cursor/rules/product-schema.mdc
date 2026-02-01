@@ -11,6 +11,8 @@ The product system consists of several related models:
 
 - @Product - The main product model
   - Has attributes like Title, Description, CoverImage, Media, Status
+  - CoverImage supports both images and videos (allowedTypes: ["images", "videos"])
+  - Media field supports both images and videos (allowedTypes: ["images", "videos"])
   - Related to categories, variations, reviews, tags, FAQs
   
 - @Product Variation - Represents different variants of a product

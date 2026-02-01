@@ -2,7 +2,7 @@ import React from "react";
 import PhotoUploaderImagePreview from "./ImagePreview";
 export interface ImageGridProps {
   previews: string[];
-  onRemoveFile: (index: number, type: "image" | "video" | "other") => void;
+  onRemoveFile: (index: number) => void;
 }
 
 const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFile }) => (
@@ -13,7 +13,7 @@ const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFi
           key={index}
           preview={preview}
           index={index}
-          onRemove={() => onRemoveFile(index, "image")}
+          onRemove={() => onRemoveFile(index)}
         />
       ))}
     </div>

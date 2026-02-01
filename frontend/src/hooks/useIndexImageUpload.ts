@@ -50,11 +50,17 @@ const useIndexImageUpload = ({
           if (!pathname.endsWith("/add")) {
             setImagePreview(resolveAssetUrl(response[0].url));
           } else {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            // Handle both images and videos for preview
+            if (file.type.startsWith("video/")) {
+              const videoUrl = URL.createObjectURL(file);
+              setImagePreview(videoUrl);
+            } else {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+              };
+              reader.readAsDataURL(file);
+            }
           }
 
           setProductData({
@@ -68,11 +74,12 @@ const useIndexImageUpload = ({
             },
           });
           onImageUpload?.(file);
-          toast.success("تصویر شاخص با موفقیت آپلود شد");
+          const isVideo = file.type.startsWith("video/");
+          toast.success(isVideo ? "ویدیوی شاخص با موفقیت آپلود شد" : "تصویر شاخص با موفقیت آپلود شد");
         }
       } catch (error: any) {
         // TODO: Define a proper error type instead of using `any`
-        toast.error("خطا در آپلود تصویر شاخص");
+        toast.error("خطا در آپلود تصویر/ویدیوی شاخص");
         console.error("Error uploading index image:", error);
         handleDelete();
       } finally {

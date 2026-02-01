@@ -44,13 +44,22 @@ export default function QuickViewContent({
   const allImages = useMemo(() => {
     const images: string[] = [];
 
+    // Add cover image/video if it exists
     if (CoverImage?.data?.attributes?.url) {
-      images.push(resolveAssetUrl(CoverImage.data.attributes.url));
+      const coverMime = CoverImage.data.attributes.mime;
+      // Only include images in QuickView for performance (videos can be viewed in full PDP)
+      if (coverMime?.startsWith("image/")) {
+        images.push(resolveAssetUrl(CoverImage.data.attributes.url));
+      }
     }
 
+    // Add media gallery images (exclude videos for QuickView performance)
     if (Media?.data) {
       for (const media of Media.data) {
-        if (media.attributes?.url) images.push(resolveAssetUrl(media.attributes.url));
+        const mediaMime = media.attributes?.mime;
+        if (media.attributes?.url && mediaMime?.startsWith("image/")) {
+          images.push(resolveAssetUrl(media.attributes.url));
+        }
       }
     }
 

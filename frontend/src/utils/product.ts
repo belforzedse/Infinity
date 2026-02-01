@@ -3,6 +3,7 @@ import type { DiscountVariationInput } from "@/utils/discounts";
 
 interface ImageAttributes {
   url?: string;
+  mime?: string; // Added for video support
 }
 
 interface MediaAttributes extends ImageAttributes {
@@ -88,19 +89,23 @@ const isVariationInStock = (variation?: ProductVariation): boolean => {
 
 /**
  * Formats product image URLs from Strapi attributes
+ * Filters out videos to maintain performance in product listings
  * @param product Product object with attributes
  * @param includeMedia Whether to include additional media images (usually for desktop)
  * @param baseUrl Base URL for images
- * @returns Array of filtered image URLs
+ * @returns Array of filtered image URLs (videos excluded for performance)
  */
 export function getProductImages(
   product: Product,
   includeMedia: boolean,
   baseUrl: string
 ): string[] {
-  const coverImageUrl = product.attributes?.CoverImage?.data?.attributes?.url
-    ? `${baseUrl}${product.attributes.CoverImage.data.attributes.url}`
-    : "";
+  // Only include CoverImage if it's an image (exclude videos for PLP performance)
+  const coverImage = product.attributes?.CoverImage?.data?.attributes;
+  const coverImageUrl =
+    coverImage?.url && coverImage?.mime?.startsWith("image/")
+      ? `${baseUrl}${coverImage.url}`
+      : "";
 
   const mediaImages =
     includeMedia && product.attributes?.Media?.data

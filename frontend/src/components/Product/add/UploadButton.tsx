@@ -9,6 +9,7 @@ interface UploadButtonProps {
   className?: string;
   fileType?: FileType;
   multiple?: boolean;
+  accept?: string;
 }
 
 const UploadButton: React.FC<UploadButtonProps> = ({
@@ -16,9 +17,10 @@ const UploadButton: React.FC<UploadButtonProps> = ({
   className,
   fileType = "image",
   multiple = true,
+  accept,
 }) => {
   const { uploadingState } = useUpload();
-  const isLoading = uploadingState[fileType];
+  const isLoading = uploadingState[fileType] || uploadingState.video;
 
   return (
     <label
@@ -33,6 +35,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
       <input
         type="file"
         multiple={multiple}
+        accept={accept}
         onChange={(e) => onUpload(e)}
         className="hidden"
         disabled={isLoading}

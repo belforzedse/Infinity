@@ -32,9 +32,12 @@ The Hero section is the most complex part of the PDP, handled by [src/components
 
 The [src/components/PDP/Hero/Gallery/index.tsx](mdc:src/components/PDP/Hero/Gallery/index.tsx) component displays product images and videos with:
 - Thumbnail gallery for quick selection
-- Main image/video view
+- Main image/video view with appropriate player controls for videos
 - Next/previous navigation
 - Support for both image and video content
+- Videos can be set as CoverImage or included in Media gallery
+- Video thumbnails show play icon indicator
+- Videos use HTML5 video player with controls, loop, and poster (thumbnail) support
 
 ### Hero Info
 
@@ -61,14 +64,30 @@ interface ProductDetail {
     RatingCount?: number;
     CleaningTips?: string;
     ReturnConditions?: string;
-    CoverImage: { data: ProductMedia };
-    Media: { data: ProductMedia[] };
+    CoverImage: { data: ProductMedia }; // Can be image or video (mime: "image/*" or "video/*")
+    Media: { data: ProductMedia[] }; // Can contain images and videos
     product_variations: { data: Array<ProductVariation> };
     product_main_category: { data: ProductCategory | null };
     // ... other fields
   };
 }
 ```
+
+## Video Support
+
+The product system supports videos in both CoverImage and Media fields:
+
+- **CoverImage**: Can be set to a video file (mp4, webm, etc.)
+- **Media Gallery**: Can contain a mix of images and videos
+- **Video Detection**: Uses `mime` field to detect video content (`mime.startsWith("video/")`)
+- **Video Display**: 
+  - PDP gallery uses HTML5 video player with controls
+  - Thumbnails show play icon for videos
+  - Videos use poster (thumbnail) for preview
+- **Performance**: 
+  - PLP product cards show images only (videos excluded for performance)
+  - Quick View shows images only (videos accessible in full PDP)
+  - Full video playback available in PDP detail view
 
 ## Responsive Design
 
