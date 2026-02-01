@@ -39,6 +39,7 @@ export interface ProductMedia {
     mime: string;
     url: string;
     ext: string;
+    previewUrl?: string; // Optional preview URL for videos
   };
 }
 
