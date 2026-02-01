@@ -190,6 +190,17 @@ export default {
       themeKey: "scrollbar",
     }),
     require("tailwindcss-animate"),
-    require("@tailwindcss/typography")
+    require("@tailwindcss/typography"),
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        "@keyframes shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        ".animate-shimmer": {
+          animation: "shimmer 2s infinite",
+        },
+      });
+    }),
 ],
 } satisfies Config;

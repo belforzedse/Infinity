@@ -353,14 +353,26 @@ export const formatGalleryAssets = (product: ProductDetail) => {
 
     // Only add valid image or video types
     if (isVideo || isImage) {
-      // Get thumbnail URL or use a placeholder
+      // Get thumbnail URL - for videos, try previewUrl or generate from video
       let thumbnailUrl = "";
-      if (coverImage.attributes.formats?.thumbnail?.url) {
-        thumbnailUrl = resolveAssetUrl(coverImage.attributes.formats.thumbnail.url);
+      if (isVideo) {
+        // For videos, try previewUrl first (Strapi may generate this)
+        if (coverImage.attributes.previewUrl) {
+          thumbnailUrl = resolveAssetUrl(coverImage.attributes.previewUrl);
+        } else if (coverImage.attributes.formats?.thumbnail?.url) {
+          thumbnailUrl = resolveAssetUrl(coverImage.attributes.formats.thumbnail.url);
+        } else {
+          // Use the video URL itself - browser will show first frame as poster
+          thumbnailUrl = resolveAssetUrl(coverImage.attributes.url);
+        }
       } else {
-        // Create a placeholder image based on type
-        const placeholder = getPlaceholderImage(coverImage.attributes.mime);
-        thumbnailUrl = placeholder.url;
+        // For images, use thumbnail format
+        if (coverImage.attributes.formats?.thumbnail?.url) {
+          thumbnailUrl = resolveAssetUrl(coverImage.attributes.formats.thumbnail.url);
+        } else {
+          // Fallback to full image URL
+          thumbnailUrl = resolveAssetUrl(coverImage.attributes.url);
+        }
       }
 
       assets.push({
@@ -381,14 +393,26 @@ export const formatGalleryAssets = (product: ProductDetail) => {
 
       // Only add valid image or video types
       if (isImage || isVideo) {
-        // Get thumbnail URL or use a placeholder
+        // Get thumbnail URL - for videos, try previewUrl or generate from video
         let thumbnailUrl = "";
-        if (media.attributes.formats?.thumbnail?.url) {
-          thumbnailUrl = resolveAssetUrl(media.attributes.formats.thumbnail.url);
+        if (isVideo) {
+          // For videos, try previewUrl first (Strapi may generate this)
+          if (media.attributes.previewUrl) {
+            thumbnailUrl = resolveAssetUrl(media.attributes.previewUrl);
+          } else if (media.attributes.formats?.thumbnail?.url) {
+            thumbnailUrl = resolveAssetUrl(media.attributes.formats.thumbnail.url);
+          } else {
+            // Use the video URL itself - browser will show first frame as poster
+            thumbnailUrl = resolveAssetUrl(media.attributes.url);
+          }
         } else {
-          // Create a placeholder image based on type
-          const placeholder = getPlaceholderImage(media.attributes.mime);
-          thumbnailUrl = placeholder.url;
+          // For images, use thumbnail format
+          if (media.attributes.formats?.thumbnail?.url) {
+            thumbnailUrl = resolveAssetUrl(media.attributes.formats.thumbnail.url);
+          } else {
+            // Fallback to full image URL
+            thumbnailUrl = resolveAssetUrl(media.attributes.url);
+          }
         }
 
         assets.push({
