@@ -270,6 +270,7 @@ let importOptions = {
     dryRun: false,
     categoryIds: [],
     useNameFilter: false,
+    onlyInStock: false,
     createdAfter: null,
     createdBefore: null,
     publishedAfter: null, // Only import products uploaded/published after this timestamp
@@ -474,6 +475,9 @@ async function showMainMenu() {
         `     Update Existing Images: ${opts.updateProductsWithExistingImages ? "Yes" : "No"}`,
       );
       console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? "On" : "Off"}`);
+      console.log(
+        `     In-Stock Only (variation-aware): ${opts.onlyInStock ? "Yes" : "No"}`,
+      );
       if (opts.createdAfter) {
         console.log(`     Created After: ${formatDateDisplay(opts.createdAfter)}`);
       }
@@ -630,6 +634,17 @@ async function configureImporter(type) {
       if (opts.categoryIds.length > 0) {
         console.log(`✅ Filtering by categories: [${opts.categoryIds.join(", ")}]`);
       }
+    }
+
+    const stockFilterInput = await prompt(
+      `Only import products that are in stock? (y/n, default: n): `,
+    );
+    if (stockFilterInput.trim()) {
+      opts.onlyInStock = stockFilterInput.toLowerCase() === "y";
+      const status = opts.onlyInStock ? "✅ ENABLED" : "⭕ DISABLED";
+      console.log(
+        `${status} - Variable products must have at least one in-stock variation`,
+      );
     }
 
     // Image configuration options
@@ -824,6 +839,7 @@ async function runAllImporters() {
           dryRun: opts.dryRun,
           categoryIds: opts.categoryIds,
           nameFilter: opts.useNameFilter ? undefined : null,
+          onlyInStock: opts.onlyInStock,
           createdAfter: opts.createdAfter,
           createdBefore: opts.createdBefore,
           publishedAfter: opts.publishedAfter,
