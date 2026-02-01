@@ -27,6 +27,26 @@ const toNumber = (value, fallback) => {
   return Number.isNaN(asNumber) ? fallback : asNumber;
 };
 
+const toBoolean = (value, fallback) => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "true") {
+    return true;
+  }
+  if (normalized === "false") {
+    return false;
+  }
+
+  return fallback;
+};
+
 const toArray = (value, fallback = []) => {
   if (typeof value !== "string" || value.trim() === "") {
     return fallback;
@@ -119,6 +139,8 @@ module.exports = {
     filters: {
       // Optional list of WooCommerce category IDs to restrict imports
       categoryIds: toArray(process.env.IMPORT_FILTER_CATEGORY_IDS),
+      // Only import products that are in stock
+      inStockOnly: toBoolean(process.env.IMPORT_FILTER_IN_STOCK_ONLY, true),
     },
     // Batch sizes for different entities
     batchSizes: {

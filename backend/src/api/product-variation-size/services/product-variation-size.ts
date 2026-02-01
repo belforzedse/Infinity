@@ -1,5 +1,5 @@
 /**
- * product-variation-size service
+ * product-variation-size service E
  */
 
 import { factories } from '@strapi/strapi';

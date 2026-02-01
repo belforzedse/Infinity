@@ -61,6 +61,101 @@ class VariationImporter {
   }
 
   /**
+   * Determine if a WooCommerce variation is in stock.
+   */
+  isVariationInStock(wcVariation) {
+    if (!wcVariation) {
+      return false;
+    }
+
+    const stockStatus = (wcVariation.stock_status || "").toString().toLowerCase();
+    if (stockStatus) {
+      return stockStatus === "instock";
+    }
+
+    if (typeof wcVariation.in_stock === "boolean") {
+      return wcVariation.in_stock;
+    }
+
+    if (typeof wcVariation.stock_quantity === "number") {
+      return wcVariation.stock_quantity > 0;
+    }
+
+    if (wcVariation.manage_stock && wcVariation.stock_quantity !== null) {
+      return Number(wcVariation.stock_quantity) > 0;
+    }
+
+    return true;
+  }
+
+  /**
+   * Determine if a WooCommerce product is in stock.
+   */
+  isProductInStock(wcProduct) {
+    if (!wcProduct) {
+      return false;
+    }
+
+    const stockStatus = (wcProduct.stock_status || "").toString().toLowerCase();
+    if (stockStatus) {
+      return stockStatus === "instock";
+    }
+
+    if (typeof wcProduct.in_stock === "boolean") {
+      return wcProduct.in_stock;
+    }
+
+    if (typeof wcProduct.stock_quantity === "number") {
+      return wcProduct.stock_quantity > 0;
+    }
+
+    if (wcProduct.manage_stock && wcProduct.stock_quantity !== null) {
+      return Number(wcProduct.stock_quantity) > 0;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if a variable product has at least one in-stock variation.
+   */
+  async hasInStockVariations(wcProduct) {
+    if (!wcProduct || !Array.isArray(wcProduct.variations) || wcProduct.variations.length === 0) {
+      return false;
+    }
+
+    const perPage = this.config?.import?.batchSizes?.variations || 100;
+    let page = 1;
+
+    try {
+      while (true) {
+        const result = await this.wooClient.getProductVariations(wcProduct.id, page, perPage);
+        const variations = Array.isArray(result.data) ? result.data : [];
+
+        if (variations.length === 0) {
+          return false;
+        }
+
+        if (variations.some((variation) => this.isVariationInStock(variation))) {
+          return true;
+        }
+
+        const totalPages = Number.parseInt(result.totalPages || "1", 10);
+        if (page >= totalPages) {
+          return false;
+        }
+
+        page += 1;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `⚠️ Failed to check variation stock for product ${wcProduct.id} (${wcProduct.name}): ${error.message}`,
+      );
+      return this.isProductInStock(wcProduct);
+    }
+  }
+
+  /**
    * Main import method - Optimized for incremental processing
    */
   async import(options = {}) {
@@ -73,6 +168,8 @@ class VariationImporter {
       nameFilter = DEFAULT_NAME_FILTER_KEYWORDS,
       logParentNames = true,
     } = options;
+
+    const inStockOnly = this.config?.import?.filters?.inStockOnly !== false;
 
     const effectiveNameFilter =
       nameFilter === null
@@ -186,6 +283,27 @@ class VariationImporter {
               } products without imported parents`,
             );
           }
+        }
+
+        if (inStockOnly) {
+          const filteredProducts = [];
+          for (const product of variableProducts) {
+            const hasInStock = await this.hasInStockVariations(product);
+            if (hasInStock) {
+              filteredProducts.push(product);
+            } else {
+              const variationCount = Array.isArray(product.variations)
+                ? product.variations.length
+                : 0;
+              this.logger.debug(
+                `⏩ Skipping variations for product ${product.id} (${product.name}) - no variations in stock`,
+              );
+              if (variationCount > 0) {
+                this.stats.skipped += variationCount;
+              }
+            }
+          }
+          variableProducts = filteredProducts;
         }
 
         if (variableProducts.length === 0) {
