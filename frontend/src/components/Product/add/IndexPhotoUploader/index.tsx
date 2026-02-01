@@ -34,7 +34,7 @@ const IndexPhotoUploader: React.FC<IndexPhotoUploaderProps> = ({
         type="file"
         ref={fileInputRef}
         className="hidden"
-        accept="image/*"
+        accept="image/*,video/*"
         onChange={handleImageUpload}
       />
 
@@ -45,7 +45,7 @@ const IndexPhotoUploader: React.FC<IndexPhotoUploaderProps> = ({
       />
 
       <span className="text-xs mt-3 text-neutral-400">
-        اینجا تصویر اصلی محصول را بارگذاری کنید.
+        اینجا تصویر یا ویدیوی اصلی محصول را بارگذاری کنید.
       </span>
     </div>
   );

@@ -31,10 +31,10 @@ export type ProductCoverImage = {
       name: string;
       alternativeText: string | null;
       caption: string | null;
-      width: number;
-      height: number;
+      width: number | null; // Can be null for videos
+      height: number | null; // Can be null for videos
       formats: {
-        small: {
+        small?: {
           ext: string;
           url: string;
           hash: string;
@@ -46,7 +46,7 @@ export type ProductCoverImage = {
           height: number;
           sizeInBytes: number;
         };
-        thumbnail: {
+        thumbnail?: {
           ext: string;
           url: string;
           hash: string;
@@ -58,10 +58,10 @@ export type ProductCoverImage = {
           height: number;
           sizeInBytes: number;
         };
-      };
+      } | null; // Can be null for videos
       hash: string;
       ext: string;
-      mime: string;
+      mime: string; // Can be "video/*" or "image/*"
       size: number;
       url: string;
       previewUrl: string | null;

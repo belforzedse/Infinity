@@ -13,6 +13,7 @@ import {
 } from "react";
 import { useDrag } from "@use-gesture/react";
 import { hapticNavigation } from "@/utils/haptics";
+import { useInView } from "react-intersection-observer";
 
 type Props = {
   type: "video" | "image";
@@ -46,6 +47,12 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     active: false,
     startDistance: 0,
     startScale: 1,
+  });
+
+  // Use intersection observer for video lazy loading
+  const { ref: videoRef, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
   });
 
   const isDesktopZoom = () => {
@@ -332,12 +339,15 @@ export default function PDPHeroGallerySingleImage(props: Props) {
       >
         {type === "video" ? (
           <video
+            ref={videoRef}
             className={`h-full w-full object-contain transition-opacity duration-300 ${
               isLoading ? "opacity-0" : "opacity-100"
             }`}
-            src={src}
+            src={inView ? src : undefined}
             controls
             loop
+            playsInline
+            preload={inView ? "metadata" : "none"}
             onCanPlay={() => setIsLoading(false)}
             onError={() => setIsLoading(false)}
             poster={thumb}
