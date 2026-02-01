@@ -48,6 +48,13 @@ variables:
   before_script:
     - set -euo pipefail
     - docker info
+      docker run --rm alpine:3.20 sh -lc '
+        apk add --no-cache curl bind-tools ca-certificates >/dev/null
+        echo "DNS:"; nslookup registry.npmjs.org || true
+        echo "NPM:"; curl -I --max-time 15 https://registry.npmjs.org/ | head -n 1 || true
+        echo "GITHUB:"; curl -I --max-time 15 https://codeload.github.com/ | head -n 1 || true
+      '
+
     - echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY" -u "$REGISTRY_USER" --password-stdin
 
 .ssh_job:

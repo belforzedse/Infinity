@@ -92,6 +92,101 @@ class ProductImporter {
     // Check if any keyword appears in the name
     return nameFilter.some((keyword) => name.includes(keyword.toLowerCase()));
   }
+
+  /**
+   * Determine if a WooCommerce product is in stock.
+   */
+  isProductInStock(wcProduct) {
+    if (!wcProduct) {
+      return false;
+    }
+
+    const stockStatus = (wcProduct.stock_status || "").toString().toLowerCase();
+    if (stockStatus) {
+      return stockStatus === "instock";
+    }
+
+    if (typeof wcProduct.in_stock === "boolean") {
+      return wcProduct.in_stock;
+    }
+
+    if (typeof wcProduct.stock_quantity === "number") {
+      return wcProduct.stock_quantity > 0;
+    }
+
+    if (wcProduct.manage_stock && wcProduct.stock_quantity !== null) {
+      return Number(wcProduct.stock_quantity) > 0;
+    }
+
+    return true;
+  }
+
+  /**
+   * Determine if a WooCommerce variation is in stock.
+   */
+  isVariationInStock(wcVariation) {
+    if (!wcVariation) {
+      return false;
+    }
+
+    const stockStatus = (wcVariation.stock_status || "").toString().toLowerCase();
+    if (stockStatus) {
+      return stockStatus === "instock";
+    }
+
+    if (typeof wcVariation.in_stock === "boolean") {
+      return wcVariation.in_stock;
+    }
+
+    if (typeof wcVariation.stock_quantity === "number") {
+      return wcVariation.stock_quantity > 0;
+    }
+
+    if (wcVariation.manage_stock && wcVariation.stock_quantity !== null) {
+      return Number(wcVariation.stock_quantity) > 0;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if a variable product has at least one in-stock variation.
+   */
+  async hasInStockVariations(wcProduct) {
+    if (!wcProduct || !Array.isArray(wcProduct.variations) || wcProduct.variations.length === 0) {
+      return false;
+    }
+
+    const perPage = this.config?.import?.batchSizes?.variations || 100;
+    let page = 1;
+
+    try {
+      while (true) {
+        const result = await this.wooClient.getProductVariations(wcProduct.id, page, perPage);
+        const variations = Array.isArray(result.data) ? result.data : [];
+
+        if (variations.length === 0) {
+          return false;
+        }
+
+        if (variations.some((variation) => this.isVariationInStock(variation))) {
+          return true;
+        }
+
+        const totalPages = Number.parseInt(result.totalPages || "1", 10);
+        if (page >= totalPages) {
+          return false;
+        }
+
+        page += 1;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `⚠️ Failed to check variation stock for product ${wcProduct.id} (${wcProduct.name}): ${error.message}`,
+      );
+      return this.isProductInStock(wcProduct);
+    }
+  }
   /**
    * Main import method - Optimized for incremental processing
    * Supports optional category filtering
@@ -108,6 +203,7 @@ class ProductImporter {
       createdAfter,
       createdBefore,
       publishedAfter,
+      inStockOnly = this.config?.import?.filters?.inStockOnly !== false,
     } = options;
 
     this.stats.startTime = Date.now();
@@ -140,7 +236,7 @@ class ProductImporter {
           normalizedPublishedAfter
             ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}`
             : ""
-        })`,
+        }${inStockOnly ? ", inStockOnly=true" : ""})`,
       );
     } else {
       this.logger.info(
@@ -150,7 +246,7 @@ class ProductImporter {
           normalizedPublishedAfter
             ? `, publishedAfter=${this.formatDateForLog(normalizedPublishedAfter)}`
             : ""
-        })`,
+        }${inStockOnly ? ", inStockOnly=true" : ""})`,
       );
     }
 
@@ -237,6 +333,19 @@ class ProductImporter {
                   return { status: "skipped", reason: "filter" };
                 }
 
+                if (inStockOnly && !this.isProductInStock(wcProduct)) {
+                  const stockStatus = wcProduct.stock_status || "unknown";
+                  const stockQty =
+                    wcProduct.stock_quantity === null || wcProduct.stock_quantity === undefined
+                      ? "n/a"
+                      : wcProduct.stock_quantity;
+                  this.logger.debug(
+                    `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - out of stock (status: ${stockStatus}, qty: ${stockQty})`,
+                  );
+                  this.stats.skipped++;
+                  return { status: "skipped", reason: "out_of_stock" };
+                }
+
                 // Check publishedAfter filter - only import products that were uploaded/published after timestamp
                 if (normalizedPublishedAfter) {
                   const publishedAt = wcProduct.date_created || wcProduct.date_modified;
@@ -252,6 +361,34 @@ class ProductImporter {
                     );
                     this.stats.skipped++;
                     return { status: "skipped", reason: "publishedAfter" };
+                  }
+                }
+
+                if (inStockOnly) {
+                  const isVariable =
+                    wcProduct.type === "variable" ||
+                    (Array.isArray(wcProduct.variations) && wcProduct.variations.length > 0);
+
+                  if (isVariable) {
+                    const hasInStock = await this.hasInStockVariations(wcProduct);
+                    if (!hasInStock) {
+                      this.logger.debug(
+                        `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - no variations in stock`,
+                      );
+                      this.stats.skipped++;
+                      return { status: "skipped", reason: "no_in_stock_variations" };
+                    }
+                  } else if (!this.isProductInStock(wcProduct)) {
+                    const stockStatus = wcProduct.stock_status || "unknown";
+                    const stockQty =
+                      wcProduct.stock_quantity === null || wcProduct.stock_quantity === undefined
+                        ? "n/a"
+                        : wcProduct.stock_quantity;
+                    this.logger.debug(
+                      `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - out of stock (status: ${stockStatus}, qty: ${stockQty})`,
+                    );
+                    this.stats.skipped++;
+                    return { status: "skipped", reason: "out_of_stock" };
                   }
                 }
 
