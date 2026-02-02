@@ -49,41 +49,6 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const HeaderContent = () => (
-    <>
-      <div className="hidden lg:block">
-        <div className="px-10 py-3">
-          <div className="mx-auto max-w-[1440px]">
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-              <div className="justify-self-start">
-                <DesktopHeaderActions />
-              </div>
-              <div className="justify-self-center">
-                <Link href="/">
-                  <Image
-                    alt="logo"
-                    width={210}
-                    height={72}
-                    src="/images/full-logo.png"
-                    className="h-[48px] w-[150px] object-contain md:h-[72px] md:w-[210px]"
-                    priority
-                  />
-                </Link>
-              </div>
-              <div className="justify-self-end">
-                <DesktopSearch />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:hidden">
-        <MobileHeader />
-      </div>
-    </>
-  );
-
   const headerStyle = !showHeader
     ? { borderBottomWidth: 0, borderBottomColor: "transparent", boxShadow: "none" }
     : undefined;
@@ -160,7 +125,36 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
               style={{ width: "100%", height: "100%" }}
             />
           )}
-          <HeaderContent />
+          <div className="hidden lg:block">
+            <div className="px-10 py-3">
+              <div className="mx-auto max-w-[1440px]">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+                  <div className="justify-self-start">
+                    <DesktopHeaderActions />
+                  </div>
+                  <div className="justify-self-center">
+                    <Link href="/">
+                      <Image
+                        alt="logo"
+                        width={210}
+                        height={72}
+                        src="/images/full-logo.png"
+                        className="h-[48px] w-[150px] object-contain md:h-[72px] md:w-[210px]"
+                        priority
+                      />
+                    </Link>
+                  </div>
+                  <div className="justify-self-end">
+                    <DesktopSearch />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:hidden">
+            <MobileHeader />
+          </div>
         </div>
       </header>
 

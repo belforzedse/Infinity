@@ -1,6 +1,6 @@
 /**
  * Load environment variables from custom env files (dev.env or main.env)
- * This script runs before Next.js starts to inject env vars into process.env
+ * This script runs before Next.js starts to inject env vars into process.env RISE UP
  */
 
 const fs = require('fs');

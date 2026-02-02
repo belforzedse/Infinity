@@ -357,7 +357,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 animate-pulse" />
               </div>
             )}
-            
+
             {/* Video player with luxury styling */}
             <div className="relative h-full w-full overflow-hidden rounded-3xl group/video-container">
               <video
@@ -382,7 +382,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                 onPause={() => setIsVideoPlaying(false)}
                 poster={thumb || src}
               />
-              
+
               {/* Luxury play overlay - functional play button */}
               {!isVideoPlaying && (
                 <button

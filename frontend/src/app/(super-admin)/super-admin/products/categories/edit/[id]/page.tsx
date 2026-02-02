@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import {
-  createEmptyCategoryFormData,
   getCategoryFormConfig,
   type ProductCategoryForm,
 } from "../../categoryFormConfig";
@@ -14,6 +13,9 @@ import { getCategoryById } from "@/services/super-admin/product/category/get";
 import { updateCategory } from "@/services/super-admin/product/category/update";
 import type { CategoryData } from "@/services/super-admin/product/category/create";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import CategoryAppearancePanel, {
+  type CategoryImageValue,
+} from "../../CategoryAppearancePanel";
 
 export default function EditCategoryPage() {
   const router = useRouter();
@@ -33,6 +35,8 @@ export default function EditCategoryPage() {
   const [initialData, setInitialData] = useState<ProductCategoryForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [categoryImage, setCategoryImage] = useState<CategoryImageValue | undefined>();
+  const [categoryColor, setCategoryColor] = useState("");
 
   useEffect(() => {
     if (!categoryId) return;
@@ -100,6 +104,18 @@ export default function EditCategoryPage() {
             ? new Date(payload.attributes.updatedAt)
             : new Date(),
         });
+
+        const imageData = payload.attributes?.Image?.data;
+        const imageAttributes = imageData?.attributes;
+        const imageUrl =
+          imageAttributes?.formats?.medium?.url ||
+          imageAttributes?.formats?.small?.url ||
+          imageAttributes?.formats?.thumbnail?.url ||
+          imageAttributes?.url;
+        setCategoryImage(
+          imageUrl && imageData?.id ? { id: imageData.id, url: imageUrl } : undefined,
+        );
+        setCategoryColor(payload.attributes?.Color ?? "");
       } catch (error: any) {
         if (!isMounted) return;
 
@@ -144,6 +160,8 @@ export default function EditCategoryPage() {
     const payload: CategoryData = {
       Title: title,
       Slug: slug,
+      Color: categoryColor.trim() || null,
+      Image: categoryImage?.id ?? null,
     };
 
     if (formData.Parent) {
@@ -190,6 +208,14 @@ export default function EditCategoryPage() {
       })}
       data={initialData}
       onSubmit={handleSubmit}
+      customSidebar={
+        <CategoryAppearancePanel
+          image={categoryImage}
+          onImageChange={setCategoryImage}
+          color={categoryColor}
+          onColorChange={setCategoryColor}
+        />
+      }
     />
   );
 }
