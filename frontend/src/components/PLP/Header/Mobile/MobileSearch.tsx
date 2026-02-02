@@ -40,7 +40,9 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     if (event.target !== event.currentTarget) return;
     backdropPointerDownRef.current = true;
   };
-  const closeModal = () => {
+  const closeModal = (options?: { force?: boolean }) => {
+    const isIOSDevice = isIOS || (typeof window !== "undefined" && getDeviceInfo().isIOS);
+    if (isIOSDevice && !options?.force) return;
     onClose();
   };
 
@@ -94,7 +96,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     if (!searchQuery.trim()) return;
 
     // Close the search modal
-    closeModal();
+    closeModal({ force: true });
 
     // Redirect to search results page with the query
     router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -287,7 +289,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                         image={s.image}
                         isAvailable={s.isAvailable}
                         onClick={() => {
-                          closeModal();
+                          closeModal({ force: true });
                           router.push(`/pdp/${s.slug || s.id}`);
                         }}
                         index={idx}
@@ -296,7 +298,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                     <motion.button
                       type="button"
                       onClick={() => {
-                        closeModal();
+                        closeModal({ force: true });
                         router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
                       }}
                       className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
@@ -317,7 +319,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               <button
                 type="button"
                 className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
-                onClick={closeModal}
+                onClick={() => closeModal({ force: true })}
               >
                 بستن
               </button>
