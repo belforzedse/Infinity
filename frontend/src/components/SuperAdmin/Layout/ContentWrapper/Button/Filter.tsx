@@ -88,7 +88,6 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
             }
           }}
           onClick={(e) => {
-            e.preventDefault();
             e.stopPropagation();
           }}
         >

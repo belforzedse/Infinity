@@ -200,6 +200,7 @@ class ProductImporter {
       dryRun = false,
       categoryIds = [],
       nameFilter = defaultKeywords,
+      onlyInStock = false,
       createdAfter,
       createdBefore,
       publishedAfter,
@@ -333,17 +334,15 @@ class ProductImporter {
                   return { status: "skipped", reason: "filter" };
                 }
 
-                if (inStockOnly && !this.isProductInStock(wcProduct)) {
-                  const stockStatus = wcProduct.stock_status || "unknown";
-                  const stockQty =
-                    wcProduct.stock_quantity === null || wcProduct.stock_quantity === undefined
-                      ? "n/a"
-                      : wcProduct.stock_quantity;
-                  this.logger.debug(
-                    `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - out of stock (status: ${stockStatus}, qty: ${stockQty})`,
-                  );
-                  this.stats.skipped++;
-                  return { status: "skipped", reason: "out_of_stock" };
+                if (onlyInStock) {
+                  const inStock = await this.isProductInStock(wcProduct);
+                  if (!inStock) {
+                    this.logger.debug(
+                      `⏩ Skipping product ${wcProduct.id} (${wcProduct.name}) - not in stock`,
+                    );
+                    this.stats.skipped++;
+                    return { status: "skipped", reason: "out_of_stock" };
+                  }
                 }
 
                 // Check publishedAfter filter - only import products that were uploaded/published after timestamp
@@ -469,6 +468,78 @@ class ProductImporter {
     }
 
     return this.stats;
+  }
+
+  /**
+   * Determine whether a WooCommerce product should be treated as "in stock".
+   *
+   * - For variable products: return true if ANY variation is in stock.
+   * - For simple/other products: use stock_status/in_stock/stock_quantity fields.
+   */
+  async isProductInStock(wcProduct) {
+    if (!wcProduct) {
+      return false;
+    }
+
+    const productType = (wcProduct.type || "").toLowerCase();
+    if (productType === "variable") {
+      return this.hasInStockVariation(wcProduct.id);
+    }
+
+    return this.isEntityInStock(wcProduct);
+  }
+
+  /**
+   * Check if any variation of the given product is in stock.
+   */
+  async hasInStockVariation(productId) {
+    if (!productId) {
+      return false;
+    }
+
+    const perPage = this.config.import.batchSizes.variations || 100;
+    let page = 1;
+
+    while (true) {
+      const result = await this.wooClient.getProductVariations(productId, page, perPage);
+      const variations = result?.data || [];
+
+      if (variations.length === 0) {
+        return false;
+      }
+
+      const anyInStock = variations.some((variation) => this.isEntityInStock(variation));
+      if (anyInStock) {
+        return true;
+      }
+
+      if (result.totalPages && page >= result.totalPages) {
+        return false;
+      }
+
+      page += 1;
+    }
+  }
+
+  /**
+   * Determine "in stock" for a WooCommerce entity using available fields.
+   */
+  isEntityInStock(entity) {
+    const stockStatus = (entity?.stock_status || "").toLowerCase();
+    if (stockStatus) {
+      return stockStatus === "instock";
+    }
+
+    if (typeof entity?.in_stock === "boolean") {
+      return entity.in_stock;
+    }
+
+    if (entity?.manage_stock) {
+      const quantity = Number(entity?.stock_quantity ?? 0);
+      return Number.isFinite(quantity) && quantity > 0;
+    }
+
+    return false;
   }
 
   /**

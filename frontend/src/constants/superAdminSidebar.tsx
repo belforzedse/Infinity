@@ -8,6 +8,7 @@ import PercentIcon from "@/components/SuperAdmin/Layout/Icons/PercentIcon";
 import DashboardIcon from "@/components/SuperAdmin/Layout/Icons/DashboardIcon";
 import PaymentIcon from "@/components/SuperAdmin/Layout/Icons/PaymentIcon";
 import BlogIcon from "@/components/SuperAdmin/Layout/Icons/BlogIcon";
+import FAQIcon from "@/components/SuperAdmin/Layout/Icons/FAQIcon";
 import {
   //FiLayout,
   FiMenu,
@@ -132,6 +133,24 @@ const superAdminSidebar: SidebarItem[] = [
         id: "blog-comments",
         label: "مدیریت نظرات",
         href: "/super-admin/blog/comments",
+      },
+    ],
+  },
+  {
+    id: "faq",
+    label: "سوالات متداول",
+    href: "",
+    icon: <FAQIcon />,
+    children: [
+      {
+        id: "faq-categories",
+        label: "دسته‌بندی‌ها",
+        href: "/super-admin/faq/categories",
+      },
+      {
+        id: "faq-questions",
+        label: "سوالات",
+        href: "/super-admin/faq/questions",
       },
     ],
   },

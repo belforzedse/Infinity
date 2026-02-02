@@ -31,37 +31,57 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   }, []);
 
   const scrollToImage = (index: number) => {
-    if (scrollContainerRef.current) {
-      const thumbnailWidth = 84; // Width of each thumbnail on mobile
-      const thumbnailHeight = 132; // Height of each thumbnail on desktop
-      const gap = 8; // Gap between thumbnails
-      const containerWidth = scrollContainerRef.current.clientWidth;
-      const containerHeight = scrollContainerRef.current.clientHeight;
+    if (!scrollContainerRef.current) return;
+    
+    const container = scrollContainerRef.current;
+    const isMobile = window.innerWidth < 900;
 
-      // Check if we're in mobile view (scrolling horizontally)
-      const isMobile = window.innerWidth < 900;
+    // Find the actual DOM element for the thumbnail at this index
+    const thumbnailElements = container.querySelectorAll('[data-thumbnail-index]');
+    const targetElement = thumbnailElements[index] as HTMLElement;
+    
+    if (targetElement) {
+      // Use scrollIntoView which handles RTL automatically
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: isMobile ? "nearest" : "center",
+        inline: isMobile ? "center" : "nearest",
+      });
+    } else {
+      // Fallback to manual calculation if elements not found
+      const thumbnailWidth = 84;
+      const thumbnailHeight = 132;
+      const gap = 8;
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
 
       if (isMobile) {
-        const scrollPosition = index * (thumbnailWidth + gap);
-        // Center the selected thumbnail horizontally
+        const itemWidth = thumbnailWidth + gap;
+        const scrollPosition = index * itemWidth;
         const centerOffset = (containerWidth - thumbnailWidth) / 2;
-        const targetScroll = Math.max(0, scrollPosition - centerOffset);
+        let targetScroll = scrollPosition - centerOffset;
+        const maxScroll = Math.max(0, container.scrollWidth - containerWidth);
+        targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
 
-        scrollContainerRef.current.scrollTo({
-          left: targetScroll,
-          behavior: "smooth",
-        });
+        const currentScroll = container.scrollLeft;
+        if (Math.abs(currentScroll - targetScroll) > 10) {
+          container.scrollTo({
+            left: targetScroll,
+            behavior: "smooth",
+          });
+        }
       } else {
-        // Desktop view (scrolling vertically)
         const scrollPosition = index * (thumbnailHeight + gap);
-        // Center the selected thumbnail vertically
         const centerOffset = (containerHeight - thumbnailHeight) / 2;
         const targetScroll = Math.max(0, scrollPosition - centerOffset);
 
-        scrollContainerRef.current.scrollTo({
-          top: targetScroll,
-          behavior: "smooth",
-        });
+        const currentScroll = container.scrollTop;
+        if (Math.abs(currentScroll - targetScroll) > 10) {
+          container.scrollTo({
+            top: targetScroll,
+            behavior: "smooth",
+          });
+        }
       }
     }
   };
@@ -105,27 +125,37 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   // Add effect to handle selectedImage changes
   useEffect(() => {
     const selectedIndex = assets.findIndex((asset) => asset.id === selectedImage);
-    if (selectedIndex !== -1) {
-      scrollToImage(selectedIndex);
+    if (selectedIndex !== -1 && scrollContainerRef.current) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        scrollToImage(selectedIndex);
+      });
     }
   }, [selectedImage, assets]);
 
   return (
     <div
       ref={scrollContainerRef}
-      className="relative h-auto w-full overflow-x-auto xl:h-[473px] xl:w-[139px] xl:overflow-y-auto xl:overflow-x-hidden"
+      className="relative h-auto w-full overflow-x-auto xl:h-[473px] xl:w-[139px] xl:overflow-y-auto xl:overflow-x-hidden [-webkit-overflow-scrolling:touch] [overscroll-behavior-x:contain]"
     >
-      <div className="flex w-full flex-row-reverse flex-nowrap xl:flex-wrap gap-2 xl:w-full xl:flex-col">
-        {assets.map((asset) => (
+      <div className="flex min-w-max flex-row-reverse flex-nowrap xl:flex-wrap gap-2 xl:w-full xl:flex-col xl:min-w-0">
+        {assets.map((asset, index) => (
           <div
             key={asset.id}
+            data-thumbnail-index={index}
             onClick={() => {
               setSelectedImage(asset.id);
             }}
             onMouseEnter={() => preloadSrc(asset.src)}
-            className="relative h-[70px] w-[84px] flex-shrink-0 md:pt-2 xl:pt-0 cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px]"
+            className={`relative h-[70px] w-[84px] flex-shrink-0 md:pt-2 xl:pt-0 cursor-pointer overflow-hidden rounded-2xl md:h-[132px] md:w-[139px] ${
+              asset.id === selectedImage
+                ? "ring-2 ring-pink-500 shadow-lg"
+                : "ring-1 ring-black/10"
+            }`}
           >
-            <div className={asset.id === selectedImage ? "opacity-50" : ""}>
+            <div className={`relative h-full w-full ${
+              asset.id === selectedImage ? "opacity-60" : "opacity-100"
+            }`}>
               <Image
                 fill
                 src={asset.thumbnail}
@@ -135,13 +165,27 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
                 loading="lazy"
                 placeholder="blur"
                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTM5IiBoZWlnaHQ9IjEzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
+                className="object-cover"
               />
+              {/* Gradient overlay for videos */}
+              {asset.type === "video" && (
+                <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-transparent" />
+              )}
             </div>
 
             {asset.type === "video" && (
-              <button className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
-                <Image width={24} height={24} src="/images/pdp/play-icon.png" alt="close" />
-              </button>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="group/video-thumb flex items-center justify-center transition-all duration-300">
+                  <div className="absolute h-12 w-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg ring-2 ring-pink-200/50 transition-all duration-300 group-hover/video-thumb:scale-110 group-hover/video-thumb:ring-pink-400/70 group-hover/video-thumb:shadow-xl" />
+                  <svg
+                    className="relative h-5 w-5 text-pink-600 transition-transform duration-300 group-hover/video-thumb:scale-110"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
             )}
           </div>
         ))}

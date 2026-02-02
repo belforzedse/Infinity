@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
+import pdpImageLoader from "@/utils/pdpImageLoader";
 import NavigationButtons from "../../NavigationButtons";
 import {
   useEffect,
@@ -13,6 +14,7 @@ import {
 } from "react";
 import { useDrag } from "@use-gesture/react";
 import { hapticNavigation } from "@/utils/haptics";
+import { useInView } from "react-intersection-observer";
 
 type Props = {
   type: "video" | "image";
@@ -48,10 +50,19 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     startScale: 1,
   });
 
+  // Use intersection observer for video lazy loading
+  const { ref: videoIntersectionRef, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
   const isDesktopZoom = () => {
     if (typeof window === "undefined") return false;
     return window.innerWidth >= 1024;
   };
+
 
   const clampScale = (value: number) => Math.min(Math.max(1, value), 2.75);
   const clampTranslate = (value: number, max: number) => Math.max(Math.min(value, max), -max);
@@ -209,6 +220,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     setBroken(false);
   }, [src, type]);
 
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
@@ -331,17 +343,70 @@ export default function PDPHeroGallerySingleImage(props: Props) {
         {...bind()}
       >
         {type === "video" ? (
-          <video
-            className={`h-full w-full object-contain transition-opacity duration-300 ${
-              isLoading ? "opacity-0" : "opacity-100"
-            }`}
-            src={src}
-            controls
-            loop
-            onCanPlay={() => setIsLoading(false)}
-            onError={() => setIsLoading(false)}
-            poster={thumb}
-          />
+          <>
+            {/* Luxury loading overlay with shimmer effect */}
+            {isLoading && thumb && (
+              <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+                <Image
+                  src={thumb}
+                  alt={alt || "Video thumbnail"}
+                  fill
+                  className="object-contain transition-opacity duration-500"
+                  loader={imageLoader}
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 animate-pulse" />
+              </div>
+            )}
+            
+            {/* Video player with luxury styling */}
+            <div className="relative h-full w-full overflow-hidden rounded-3xl group/video-container">
+              <video
+                ref={(node) => {
+                  videoRef.current = node;
+                  if (node) {
+                    videoIntersectionRef(node);
+                  }
+                }}
+                className={`h-full w-full object-contain ${
+                  isLoading ? "opacity-0" : "opacity-100"
+                }`}
+                src={inView ? src : undefined}
+                controls
+                loop
+                playsInline
+                preload={inView ? "metadata" : "none"}
+                onLoadedData={() => setIsLoading(false)}
+                onCanPlay={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
+                onPlay={() => setIsVideoPlaying(true)}
+                onPause={() => setIsVideoPlaying(false)}
+                poster={thumb || src}
+              />
+              
+              {/* Luxury play overlay - functional play button */}
+              {!isVideoPlaying && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    videoRef.current?.play();
+                  }}
+                  className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto opacity-0 transition-opacity duration-300 group-hover/video-container:opacity-100"
+                  aria-label="Play video"
+                >
+                  <div className="group/video-play flex items-center justify-center">
+                    <div className="absolute h-20 w-20 rounded-full bg-white/95 backdrop-blur-md shadow-2xl ring-4 ring-pink-200/30 transition-all duration-300 group-hover/video-play:scale-110 group-hover/video-play:bg-white group-hover/video-play:ring-pink-400/50" />
+                    <svg
+                      className="relative left-1 h-10 w-10 text-pink-600 transition-transform duration-300 group-hover/video-play:scale-110"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </button>
+              )}
+            </div>
+          </>
         ) : (
           <div className="absolute inset-0">
             <div
@@ -364,24 +429,42 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                     </svg>
                   </div>
                 ) : (
-                  <Image
-                    className={`h-full w-full object-cover transition-opacity duration-300 ease-out ${
-                      isLoading ? "opacity-0 blur-[2px]" : "opacity-100"
-                    }`}
-                    src={src}
-                    alt={alt || ""}
-                    fill
-                    loader={imageLoader}
-                    sizes="(max-width: 768px) 100vw, 640px"
-                    onLoad={() => setIsLoading(false)}
-                    onError={() => {
-                      setBroken(true);
-                      setIsLoading(false);
-                    }}
-                    priority={false}
-                    placeholder="blur"
-                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
-                  />
+                  <>
+                    <div
+                      aria-hidden="true"
+                      className={`absolute inset-0 z-0 transition-opacity duration-300 ${
+                        isLoading ? "opacity-100" : "opacity-0"
+                      }`}
+                      style={
+                        thumb
+                          ? {
+                              backgroundImage: `url(${thumb})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              filter: "blur(18px)",
+                              transform: "scale(1.05)",
+                            }
+                          : { backgroundColor: "#f3f4f6" }
+                      }
+                    />
+                    <Image
+                      className={`h-full w-full object-contain transition-opacity duration-300 ${
+                        isLoading ? "opacity-0" : "opacity-100"
+                      }`}
+                      src={src}
+                      alt={alt || ""}
+                      fill
+                      loader={pdpImageLoader}
+                      sizes="(max-width: 768px) 100vw, 1200px"
+                      quality={95}
+                      onLoad={() => setIsLoading(false)}
+                      onError={() => {
+                        setBroken(true);
+                        setIsLoading(false);
+                      }}
+                      priority={false}
+                    />
+                  </>
                 )}
               </div>
             </div>
@@ -394,20 +477,24 @@ export default function PDPHeroGallerySingleImage(props: Props) {
           </div>
         )}
 
-        {isLoading && thumb ? (
+        {/* Luxury loading shimmer effect for videos */}
+        {isLoading && thumb && type === "video" ? (
           <div
-            className="absolute inset-0 z-0 scale-105 blur-xl transition-opacity duration-300"
+            className="absolute inset-0 z-0 scale-110 blur-2xl transition-opacity duration-500"
             style={{
               backgroundImage: `url(${thumb})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
-              opacity: 0.6,
+              opacity: 0.4,
             }}
           />
         ) : null}
 
-        {isLoading && !thumb ? (
-          <div className="absolute inset-0 z-0 animate-pulse bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100" />
+        {isLoading && !thumb && type === "video" ? (
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+            <div className="h-full w-full animate-pulse bg-gradient-to-br from-gray-100 via-pink-50/30 to-gray-100" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          </div>
         ) : null}
 
         <div className="absolute bottom-3 left-[50%] z-10 translate-x-[-50%]">

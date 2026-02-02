@@ -10,10 +10,13 @@
 
 ### 1. Start Database & Redis Services
 
+You have two options:
+
+**Option A: Use Docker Compose (Recommended)**
 Open **Terminal 1** and run:
 
 ```bash
-docker-compose -f docker-compose.local.yml up -d
+docker-compose up infinity-postgres infinity-redis -d
 ```
 
 This will start:
@@ -22,10 +25,15 @@ This will start:
 
 Verify they're running:
 ```bash
-docker-compose -f docker-compose.local.yml ps
+docker-compose ps
 ```
 
 You should see both services as "healthy" after ~10 seconds.
+
+**Option B: Install PostgreSQL and Redis Locally**
+If you have PostgreSQL and Redis installed locally, make sure they're running and configured with:
+- PostgreSQL: user `infinity`, password `infinity123`, database `infinity_local`
+- Redis: password `2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=`
 
 ### 2. Install Dependencies & Run Strapi
 
@@ -33,10 +41,12 @@ Open **Terminal 2** and run:
 
 ```bash
 npm install
-npm run develop
+npm run dev
 ```
 
 Strapi will start on `http://localhost:1337` with hot-reload enabled.
+
+**Note:** You can now run Strapi directly with `npm run dev` - no need to use Docker Compose for the Strapi service itself!
 
 **First time setup:**
 - Access admin panel: `http://localhost:1337/admin`
@@ -46,10 +56,12 @@ Strapi will start on `http://localhost:1337` with hot-reload enabled.
 ## Environment Files
 
 ### `.env` - Strapi Configuration
-Already configured for local dev:
+Already configured for local dev (using `localhost` instead of Docker service names):
 - Database: `localhost:5432` (PostgreSQL)
 - Redis: `localhost:6379` (with password)
 - Server: `http://localhost:1337`
+
+**Note:** The `.env` file is now configured to connect to `localhost` so you can run Strapi directly with `npm run dev` without needing Docker Compose for the Strapi service itself.
 
 ### `db.env` - Docker Services Credentials
 Contains database and Redis passwords for Docker containers:
@@ -63,17 +75,17 @@ Contains database and Redis passwords for Docker containers:
 ### Start/Stop Services
 
 ```bash
-# Start PostgreSQL and Redis
-docker-compose -f docker-compose.local.yml up -d
+# Start PostgreSQL and Redis only (Strapi runs locally)
+docker-compose up infinity-postgres infinity-redis -d
 
 # Stop services
-docker-compose -f docker-compose.local.yml down
+docker-compose down
 
 # Stop and remove all data (fresh start)
-docker-compose -f docker-compose.local.yml down -v
+docker-compose down -v
 
 # View logs
-docker-compose -f docker-compose.local.yml logs -f
+docker-compose logs -f infinity-postgres infinity-redis
 ```
 
 ### Strapi Development
@@ -99,13 +111,13 @@ npm run start
 psql -h localhost -U infinity -d infinity_local
 
 # Or use Docker
-docker-compose -f docker-compose.local.yml exec infinity-postgres psql -U infinity -d infinity_local
+docker-compose exec infinity-postgres psql -U infinity -d infinity_local
 
 # Connect to Redis (if redis-cli is installed)
 redis-cli -h localhost -p 6379 -a 2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
 
 # Or use Docker
-docker-compose -f docker-compose.local.yml exec infinity-redis redis-cli -a 2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
+docker-compose exec infinity-redis redis-cli -a 2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
 ```
 
 ## Troubleshooting
@@ -210,13 +222,13 @@ npm run lint -- --fix
 1. **Start services:**
    ```bash
    # Terminal 1
-   docker-compose -f docker-compose.local.yml up -d
+   docker-compose up infinity-postgres infinity-redis -d
    ```
 
 2. **Start Strapi:**
    ```bash
    # Terminal 2
-   npm run develop
+   npm run dev
    ```
 
 3. **Make code changes** - Strapi will auto-reload
@@ -232,7 +244,7 @@ npm run lint -- --fix
    ```bash
    # Stop Strapi (Ctrl+C in Terminal 2)
    # Stop Docker services
-   docker-compose -f docker-compose.local.yml down
+   docker-compose down
    ```
 
 ### Running Migrations

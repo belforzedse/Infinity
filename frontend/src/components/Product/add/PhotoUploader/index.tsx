@@ -21,11 +21,11 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     <div className="w-full rounded-xl bg-white p-5">
       <div className="mb-4 flex items-center justify-between">
         <span className="text-base text-neutral-600">تصاویر</span>
-        <UploadButton onUpload={(e) => handleFileUpload(e, "image")} />
+        <UploadButton onUpload={(e) => handleFileUpload(e, "image")} accept="image/*" />
       </div>
       <PhotoUploaderImageGrid
         previews={images.map((image) => image.preview)}
-        onRemoveFile={removeFile}
+        onRemoveFile={(index) => removeFile(index, "image")}
       />
     </div>
   );

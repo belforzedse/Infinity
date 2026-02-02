@@ -899,5 +899,12 @@
     "name": "جشنواره",
     "slug": "%d8%ac%d8%b4%d9%86%d9%88%d8%a7%d8%b1%d9%87",
     "parentId": 0
+  },
+  "2910": {
+    "strapiId": 134,
+    "importedAt": "2026-02-01T18:39:40.934Z",
+    "name": "کلیپس",
+    "slug": "%da%a9%d9%84%db%8c%d9%be%d8%b3",
+    "parentId": 1392
   }
 }
