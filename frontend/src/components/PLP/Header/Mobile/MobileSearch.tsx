@@ -29,6 +29,15 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isOpen]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -49,6 +58,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     const q = searchQuery.trim();
     if (q.length < 2) {
       setSuggestions([]);
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -138,7 +148,9 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="text-sm w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
+                      inputMode="search"
+                      enterKeyHint="search"
+                      className="text-base w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
                       placeholder="دنبال چی میگردی؟"
                       dir="rtl"
                     />
