@@ -924,78 +924,6 @@ export interface ApiEventLogEventLog extends Schema.CollectionType {
   };
 }
 
-export interface ApiFaqCategoryFaqCategory extends Schema.CollectionType {
-  collectionName: "faq_categories";
-  info: {
-    description: "Categories for organizing FAQ questions";
-    displayName: "FAQ Category";
-    pluralName: "faq-categories";
-    singularName: "faq-category";
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    createdAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<"api::faq-category.faq-category", "oneToOne", "admin::user"> &
-      Attribute.Private;
-    Description: Attribute.Text &
-      Attribute.SetMinMaxLength<{
-        maxLength: 500;
-      }>;
-    faq_questions: Attribute.Relation<
-      "api::faq-category.faq-category",
-      "oneToMany",
-      "api::faq-question.faq-question"
-    >;
-    Order: Attribute.Integer & Attribute.DefaultTo<0>;
-    Slug: Attribute.String &
-      Attribute.Required &
-      Attribute.Unique &
-      Attribute.SetMinMaxLength<{
-        maxLength: 150;
-      }>;
-    Title: Attribute.String &
-      Attribute.Required &
-      Attribute.SetMinMaxLength<{
-        maxLength: 100;
-      }>;
-    updatedAt: Attribute.DateTime;
-    updatedBy: Attribute.Relation<"api::faq-category.faq-category", "oneToOne", "admin::user"> &
-      Attribute.Private;
-  };
-}
-
-export interface ApiFaqQuestionFaqQuestion extends Schema.CollectionType {
-  collectionName: "faq_questions";
-  info: {
-    description: "FAQ questions with answers";
-    displayName: "FAQ Question";
-    pluralName: "faq-questions";
-    singularName: "faq-question";
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    Answer: Attribute.RichText & Attribute.Required;
-    createdAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<"api::faq-question.faq-question", "oneToOne", "admin::user"> &
-      Attribute.Private;
-    faq_category: Attribute.Relation<
-      "api::faq-question.faq-question",
-      "manyToOne",
-      "api::faq-category.faq-category"
-    >;
-    IsActive: Attribute.Boolean & Attribute.Required & Attribute.DefaultTo<true>;
-    Order: Attribute.Integer & Attribute.DefaultTo<0>;
-    Question: Attribute.Text & Attribute.Required;
-    updatedAt: Attribute.DateTime;
-    updatedBy: Attribute.Relation<"api::faq-question.faq-question", "oneToOne", "admin::user"> &
-      Attribute.Private;
-  };
-}
-
 export interface ApiFooterFooter extends Schema.SingleType {
   collectionName: "footers";
   info: {
@@ -1791,7 +1719,6 @@ export interface ApiProductCategoryProductCategory extends Schema.CollectionType
       "oneToMany",
       "api::product-category.product-category"
     >;
-    Color: Attribute.String;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       "api::product-category.product-category",
@@ -1801,7 +1728,6 @@ export interface ApiProductCategoryProductCategory extends Schema.CollectionType
       Attribute.Private;
     external_id: Attribute.String;
     external_source: Attribute.String;
-    Image: Attribute.Media<"images">;
     parent: Attribute.Relation<
       "api::product-category.product-category",
       "manyToOne",
@@ -2441,7 +2367,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
   attributes: {
     AverageRating: Attribute.Decimal;
     CleaningTips: Attribute.Text;
-    CoverImage: Attribute.Media<"images" | "videos">;
+    CoverImage: Attribute.Media<"images">;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::product.product", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -3104,8 +3030,6 @@ declare module "@strapi/types" {
       "api::contract.contract": ApiContractContract;
       "api::discount.discount": ApiDiscountDiscount;
       "api::event-log.event-log": ApiEventLogEventLog;
-      "api::faq-category.faq-category": ApiFaqCategoryFaqCategory;
-      "api::faq-question.faq-question": ApiFaqQuestionFaqQuestion;
       "api::footer.footer": ApiFooterFooter;
       "api::general-discount.general-discount": ApiGeneralDiscountGeneralDiscount;
       "api::local-user-address.local-user-address": ApiLocalUserAddressLocalUserAddress;
