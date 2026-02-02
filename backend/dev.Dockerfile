@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM registry.cyandm.com/bel4/mirror/node:20-alpine AS builder
+FROM node:20-alpine AS builder
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true
@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.npm \
 COPY . .
 RUN npm run build
 
-FROM registry.cyandm.com/bel4/mirror/node:20-alpine AS runner
+FROM node:20-alpine AS runner
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true

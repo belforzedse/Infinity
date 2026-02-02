@@ -1,6 +1,7 @@
 const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
 const DuplicateTracker = require('../utils/DuplicateTracker');
 const ImageUploader = require('../utils/ImageUploader');
+const VariationImporter = require('./VariationImporter');
 
 // Import the central Unicode slug utility to ensure consistent slug behavior
 let generateUnicodeSlug;
@@ -59,6 +60,7 @@ class ProductImporter {
     this.strapiClient = new StrapiClient(config, logger);
     this.duplicateTracker = new DuplicateTracker(config, logger);
     this.imageUploader = new ImageUploader(config, logger);
+    this.variationImporter = new VariationImporter(config, logger);
 
     // Import statistics
     this.stats = {
@@ -70,6 +72,8 @@ class ProductImporter {
       errors: 0,
       startTime: null,
       endTime: null,
+      variationsImported: 0,
+      variationsFailed: 0,
     };
 
     // Cache for category mappings to avoid repeated lookups
@@ -669,6 +673,98 @@ class ProductImporter {
   }
 
   /**
+   * Import all variations for a product
+   * Fetches all variations from WooCommerce and imports them using VariationImporter
+   */
+  async importProductVariations(wcProduct, strapiProductId, dryRun = false) {
+    // Check if product has variations
+    if (!wcProduct.variations || !Array.isArray(wcProduct.variations) || wcProduct.variations.length === 0) {
+      return { imported: 0, failed: 0 };
+    }
+
+    // Ensure VariationImporter caches are loaded (for attribute lookups)
+    if (!this.variationImporter.productMappingCache || this.variationImporter.productMappingCache.size === 0) {
+      await this.variationImporter.loadMappingCaches();
+    }
+
+    this.logger.info(
+      `🔄 Importing ${wcProduct.variations.length} variation(s) for product: ${wcProduct.name}`,
+    );
+
+    const perPage = this.config?.import?.batchSizes?.variations || 100;
+    let page = 1;
+    let totalImported = 0;
+    let totalFailed = 0;
+    let hasMorePages = true;
+
+    try {
+      while (hasMorePages) {
+        const result = await this.wooClient.getProductVariations(wcProduct.id, page, perPage);
+        const variations = Array.isArray(result.data) ? result.data : [];
+
+        if (variations.length === 0) {
+          hasMorePages = false;
+          break;
+        }
+
+        // Import each variation
+        for (const variation of variations) {
+          // Attach parent product reference for VariationImporter
+          variation._parentProduct = wcProduct;
+
+          try {
+            await this.variationImporter.importSingleVariation(
+              variation,
+              strapiProductId,
+              dryRun,
+            );
+            totalImported++;
+            this.stats.variationsImported++;
+          } catch (error) {
+            totalFailed++;
+            this.stats.variationsFailed++;
+            this.logger.error(
+              `❌ Failed to import variation ${variation.id} for product ${wcProduct.name}:`,
+              error.message,
+            );
+            // Continue with next variation even if one fails
+            if (!this.config.errorHandling.continueOnError) {
+              throw error;
+            }
+          }
+        }
+
+        // Check if there are more pages
+        const totalPages = Number.parseInt(result.totalPages || "1", 10);
+        if (page >= totalPages) {
+          hasMorePages = false;
+        } else {
+          page += 1;
+        }
+      }
+
+      if (totalImported > 0) {
+        this.logger.success(
+          `✅ Imported ${totalImported} variation(s) for product: ${wcProduct.name}`,
+        );
+      }
+      if (totalFailed > 0) {
+        this.logger.warn(
+          `⚠️ Failed to import ${totalFailed} variation(s) for product: ${wcProduct.name}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `❌ Error importing variations for product ${wcProduct.name}:`,
+        error.message,
+      );
+      // Don't throw - allow product import to succeed even if variation import fails
+    }
+
+    return { imported: totalImported, failed: totalFailed };
+  }
+
+  /**
    * Import a single product
    */
   async importSingleProduct(wcProduct, dryRun = false) {
@@ -805,6 +901,19 @@ class ProductImporter {
           status: wcProduct.status,
           rating: wcProduct.average_rating, // Track rating to detect changes
         });
+
+        // Import variations if product has them
+        if (wcProduct.variations && Array.isArray(wcProduct.variations) && wcProduct.variations.length > 0) {
+          try {
+            await this.importProductVariations(wcProduct, productId, dryRun);
+          } catch (variationError) {
+            // Log error but don't fail product import
+            this.logger.warn(
+              `⚠️ Variation import failed for product ${wcProduct.name}, but product import succeeded:`,
+              variationError.message,
+            );
+          }
+        }
       }
 
       this.stats.success++;
@@ -1249,6 +1358,15 @@ class ProductImporter {
   logFinalStats() {
     this.logger.success(`🎉 Product import completed!`);
     this.logger.logStats(this.stats);
+
+    // Log variation import stats
+    if (this.stats.variationsImported > 0 || this.stats.variationsFailed > 0) {
+      this.logger.info(`📊 Variation import stats:`);
+      this.logger.info(`   Variations imported: ${this.stats.variationsImported}`);
+      if (this.stats.variationsFailed > 0) {
+        this.logger.warn(`   Variations failed: ${this.stats.variationsFailed}`);
+      }
+    }
 
     // Log duplicate tracking stats
     const trackingStats = this.duplicateTracker.getStats();
