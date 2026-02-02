@@ -16,14 +16,6 @@ import { useDrag } from "@use-gesture/react";
 import { hapticNavigation } from "@/utils/haptics";
 import { useInView } from "react-intersection-observer";
 
-type Asset = {
-  id: string;
-  type: "video" | "image";
-  src: string;
-  thumbnail: string;
-  alt: string;
-};
-
 type Props = {
   type: "video" | "image";
   src: string;
