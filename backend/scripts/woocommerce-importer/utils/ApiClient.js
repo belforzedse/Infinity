@@ -187,6 +187,12 @@ class WooCommerceClient extends BaseApiClient {
       params.modified_before = filters.modifiedBefore;
     }
 
+    if (filters.stockStatus) {
+      params.stock_status = filters.stockStatus;
+    } else if (filters.inStockOnly) {
+      params.stock_status = "instock";
+    }
+
     const response = await this.retryRequest(() => this.client.get("/products", { params }));
 
     return {

@@ -1,7 +1,7 @@
 services:
   strapi:
     container_name: infinity-strapi
-    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    image: registry.cyandm.com/bel4/infinity/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
     depends_on:
@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
     volumes:
-      - backend_uploads-data:/app/public/uploads
+      - backend_uploads-data:/app/public
     networks:
       - infinity-network
 
