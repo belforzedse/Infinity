@@ -87,7 +87,10 @@ export default function PLPList({
   };
 
   // Filter initial products to only include those with images
-  const filteredInitialProducts = initialProducts.filter(hasImage);
+  const filteredInitialProducts = useMemo(
+    () => initialProducts.filter(hasImage),
+    [initialProducts],
+  );
 
   // Local state for products and pagination
   const [products, setProducts] = useState<PLPProduct[]>(filteredInitialProducts);
@@ -97,6 +100,11 @@ export default function PLPList({
     STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
   );
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+
+  useEffect(() => {
+    setProducts(filteredInitialProducts);
+    setPagination(initialPagination);
+  }, [filteredInitialProducts, initialPagination]);
 
   // Initialize category from prop
   const initializedCategoryRef = useRef(false);

@@ -98,20 +98,18 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
     "Category image";
 
   return (
-    <div className="interactive-card pressable flex h-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 hover:border-pink-100 hover:shadow-md">
-      <div className="flex h-full flex-col rounded-[20px] bg-white p-3">
-        <div className="relative overflow-hidden rounded-[18px] bg-slate-50">
-          <div className="aspect-[4/5] w-full">
-            <img
-              src={imageSrc}
-              alt={imageAlt}
-                className="h-full w-full object-contain p-4"
-              loading="lazy"
-            />
-          </div>
-          <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] text-slate-500 shadow-sm">
+    <article className="relative w-full">
+      <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 transition-all duration-300 hover:border-pink-100 hover:shadow-md">
+        <div className="relative h-[100px] w-24 overflow-hidden rounded-xl bg-slate-50">
+          <img
+            src={imageSrc}
+            alt={imageAlt}
+            className="h-full w-full object-contain p-2"
+            loading="lazy"
+          />
+          <div className="absolute bottom-1 right-1 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] text-slate-500 shadow-sm">
             <span
-              className={`h-3 w-3 rounded-full border ${colorValue ? "border-slate-200" : "border-dashed border-slate-300"}`}
+              className={`h-2.5 w-2.5 rounded-full border ${colorValue ? "border-slate-200" : "border-dashed border-slate-300"}`}
               style={{ backgroundColor: colorValue || "transparent" }}
               aria-hidden="true"
             />
@@ -119,27 +117,39 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
           </div>
         </div>
 
-        <div className="mt-3 text-right">
-          <p className="text-xs text-slate-500 font-mono truncate">
-            {child.attributes?.Slug || "بدون نامک"}
-          </p>
-          <h4 className="mt-1 text-sm font-semibold text-slate-900 truncate">
-            {child.attributes?.Title || "Unnamed"}
-          </h4>
-        </div>
+        <div className="flex flex-1 flex-col justify-between py-0.5 text-right">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] text-slate-400 font-mono truncate">
+              {child.attributes?.Slug || "بدون نامک"}
+            </p>
+            <Link
+              href={`/super-admin/products/categories/edit/${child.id}`}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+              aria-label="ویرایش دسته‌بندی فرزند"
+            >
+              <EditIcon />
+            </Link>
+          </div>
 
-        <div className="mt-3 flex items-center justify-between rounded-full bg-slate-50 px-3 py-2">
-          <span className="text-xs text-slate-500">فرزند</span>
-          <Link
-            href={`/super-admin/products/categories/edit/${child.id}`}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
-            aria-label="ویرایش دسته‌بندی فرزند"
-          >
-            <EditIcon />
-          </Link>
+          <div className="min-w-0">
+            <h4 className="text-xs font-semibold text-slate-900 truncate">
+              {child.attributes?.Title || "Unnamed"}
+            </h4>
+            <span className="text-[10px] text-slate-400">فرزند دسته‌بندی</span>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg bg-stone-100 px-2 py-1">
+            <span className="text-[10px] text-slate-500">ویرایش سریع</span>
+            <Link
+              href={`/super-admin/products/categories/edit/${child.id}`}
+              className="text-[10px] font-semibold text-pink-600"
+            >
+              ویرایش
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
@@ -231,7 +241,7 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
         className="max-w-4xl"
       >
         {hasChildren ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {childCategories.map((child) => (
               <ChildCategoryCard key={child.id} child={child} />
             ))}

@@ -8,7 +8,7 @@ export default factories.createCoreService(
   "api::product.product",
   ({ strapi }) => ({
     /**
-     * Check if a product has at least one published variation with stock > 0
+     * Check if a product has at least one published variation
      */
     hasPublishedStockedVariation(product: any): boolean {
       const variations =
@@ -20,14 +20,8 @@ export default factories.createCoreService(
 
       return variations.some((variation: any) => {
         const attrs = variation?.attributes || variation;
-        if (attrs?.IsPublished !== true) return false;
-
-        const stock =
-          attrs?.product_stock?.data?.attributes?.Count ??
-          attrs?.product_stock?.Count ??
-          attrs?.product_stock?.count;
-
-        return typeof stock === "number" && stock > 0;
+        if (attrs?.IsPublished === false) return false;
+        return true;
       });
     },
 

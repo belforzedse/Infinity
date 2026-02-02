@@ -163,20 +163,14 @@ export default factories.createCoreController(
           .service("api::product.product")
           .search(q, { ...ctx.query, isAdmin });
 
+        const productService: any = strapi.service("api::product.product");
         return {
-          // Defensive filter to ensure only products with published & stocked variations
-          data: (results as any[] || []).filter((p: any) => {
-            const variations = p?.attributes?.product_variations?.data || p?.product_variations || [];
-            return Array.isArray(variations) && variations.some((v: any) => {
-              const attrs = v?.attributes || v;
-              if (attrs?.IsPublished !== true) return false;
-              const count =
-                attrs?.product_stock?.data?.attributes?.Count ??
-                attrs?.product_stock?.Count ??
-                attrs?.product_stock?.count;
-              return typeof count === "number" && count > 0;
-            });
-          }),
+          // Defensive filter to align with service-level publish rules
+          data: (results as any[] || []).filter((p: any) =>
+            productService.hasPublishedStockedVariation(
+              p?.attributes ? { product_variations: p.attributes.product_variations?.data } : p
+            )
+          ),
           meta: { pagination },
         };
       } catch (error) {

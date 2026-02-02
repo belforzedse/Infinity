@@ -2,6 +2,7 @@
 
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { createCategory, type CategoryData } from "@/services/super-admin/product/category/create";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
@@ -11,12 +12,18 @@ import {
   type ProductCategoryForm,
 } from "../categoryFormConfig";
 import { useEditorRedirect } from "@/hooks/useEditorRedirect";
+import CategoryAppearancePanel, {
+  type CategoryImageValue,
+} from "../CategoryAppearancePanel";
 
 export default function AddCategoryPage() {
   const router = useRouter();
 
   // Redirect editors away from product pages
   useEditorRedirect();
+
+  const [categoryImage, setCategoryImage] = useState<CategoryImageValue | undefined>();
+  const [categoryColor, setCategoryColor] = useState("");
 
   const handleSubmit = async (formData: ProductCategoryForm) => {
     const title = formData.Title?.trim();
@@ -30,6 +37,8 @@ export default function AddCategoryPage() {
     const payload: CategoryData = {
       Title: title,
       Slug: slug,
+      Color: categoryColor.trim() || null,
+      Image: categoryImage?.id ?? null,
     };
 
     if (formData.Parent) {
@@ -53,6 +62,14 @@ export default function AddCategoryPage() {
       config={getCategoryFormConfig({ mode: "create" })}
       data={createEmptyCategoryFormData()}
       onSubmit={handleSubmit}
+      customSidebar={
+        <CategoryAppearancePanel
+          image={categoryImage}
+          onImageChange={setCategoryImage}
+          color={categoryColor}
+          onColorChange={setCategoryColor}
+        />
+      }
     />
   );
 }

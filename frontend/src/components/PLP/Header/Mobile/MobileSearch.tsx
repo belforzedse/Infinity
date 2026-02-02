@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
+import { getDeviceInfo } from "@/utils/device-detection";
 
 interface Props {
   isOpen: boolean;
@@ -29,14 +30,23 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [canClose, setCanClose] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const backdropPointerDownRef = useRef(false);
+  const ignoreBackdropUntilRef = useRef(0);
+  const markBackdropPointerDown = (event: SyntheticEvent<HTMLDivElement>) => {
+    if (isIOS) return;
+    if (event.target !== event.currentTarget) return;
+    backdropPointerDownRef.current = true;
+  };
   const closeModal = () => {
     onClose();
   };
 
   useEffect(() => {
     setMounted(true);
+    setIsIOS(getDeviceInfo().isIOS);
   }, []);
 
   useEffect(() => {
@@ -51,17 +61,20 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   useEffect(() => {
     if (!isOpen) {
       setCanClose(false);
+      backdropPointerDownRef.current = false;
       return;
     }
-    const id = window.setTimeout(() => setCanClose(true), 200);
+    const delay = isIOS ? 600 : 200;
+    const id = window.setTimeout(() => setCanClose(true), delay);
     return () => window.clearTimeout(id);
-  }, [isOpen]);
+  }, [isOpen, isIOS]);
 
   useEffect(() => {
     if (!isOpen) return;
+    if (isIOS) return;
     const id = window.setTimeout(() => inputRef.current?.focus(), 50);
     return () => window.clearTimeout(id);
-  }, [isOpen]);
+  }, [isOpen, isIOS]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -153,8 +166,24 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     <div className="fixed inset-0 z-[1200]">
       <div
         className="absolute inset-0 bg-black bg-opacity-25"
-        onClick={() => {
-          if (!canClose) return;
+        onPointerDown={markBackdropPointerDown}
+        onTouchStart={markBackdropPointerDown}
+        onPointerCancel={() => {
+          backdropPointerDownRef.current = false;
+        }}
+        onTouchCancel={() => {
+          backdropPointerDownRef.current = false;
+        }}
+        onClick={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (isIOS) return;
+          if (ignoreBackdropUntilRef.current > Date.now()) {
+            backdropPointerDownRef.current = false;
+            return;
+          }
+          const shouldClose = canClose && backdropPointerDownRef.current;
+          backdropPointerDownRef.current = false;
+          if (!shouldClose) return;
           closeModal();
         }}
         aria-hidden="true"
@@ -177,6 +206,10 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (!isIOS) return;
+                    ignoreBackdropUntilRef.current = Date.now() + 700;
+                  }}
                   inputMode="search"
                   enterKeyHint="search"
                   className="text-[16px] leading-6 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
