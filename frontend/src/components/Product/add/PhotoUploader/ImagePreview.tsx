@@ -83,17 +83,10 @@ const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({ preview, onRem
 
     <button
       onClick={onRemove}
-      className="absolute right-1 top-1 hidden rounded-full bg-pink-500 p-1 text-white transition-colors hover:bg-pink-600 lg:flex"
+      aria-label="حذف رسانه"
+      className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-pink-500 text-white shadow-sm transition-opacity hover:bg-pink-600 lg:h-8 lg:w-8 lg:opacity-0 lg:group-hover:opacity-100"
     >
       <DeleteIcon className="h-4 w-4" />
-    </button>
-
-    <button
-      onClick={onRemove}
-      className="absolute -bottom-5 right-1/2 z-50 flex translate-x-1/2 items-center gap-1"
-    >
-      <span className="text-sm whitespace-nowrap text-actions-primary">حذف</span>
-      <DeleteIcon className="h-4 w-4 text-actions-primary" />
     </button>
     </div>
 

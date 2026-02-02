@@ -31,37 +31,57 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   }, []);
 
   const scrollToImage = (index: number) => {
-    if (scrollContainerRef.current) {
-      const thumbnailWidth = 84; // Width of each thumbnail on mobile
-      const thumbnailHeight = 132; // Height of each thumbnail on desktop
-      const gap = 8; // Gap between thumbnails
-      const containerWidth = scrollContainerRef.current.clientWidth;
-      const containerHeight = scrollContainerRef.current.clientHeight;
+    if (!scrollContainerRef.current) return;
+    
+    const container = scrollContainerRef.current;
+    const isMobile = window.innerWidth < 900;
 
-      // Check if we're in mobile view (scrolling horizontally)
-      const isMobile = window.innerWidth < 900;
+    // Find the actual DOM element for the thumbnail at this index
+    const thumbnailElements = container.querySelectorAll('[data-thumbnail-index]');
+    const targetElement = thumbnailElements[index] as HTMLElement;
+    
+    if (targetElement) {
+      // Use scrollIntoView which handles RTL automatically
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: isMobile ? "nearest" : "center",
+        inline: isMobile ? "center" : "nearest",
+      });
+    } else {
+      // Fallback to manual calculation if elements not found
+      const thumbnailWidth = 84;
+      const thumbnailHeight = 132;
+      const gap = 8;
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
 
       if (isMobile) {
-        const scrollPosition = index * (thumbnailWidth + gap);
-        // Center the selected thumbnail horizontally
+        const itemWidth = thumbnailWidth + gap;
+        const scrollPosition = index * itemWidth;
         const centerOffset = (containerWidth - thumbnailWidth) / 2;
-        const targetScroll = Math.max(0, scrollPosition - centerOffset);
+        let targetScroll = scrollPosition - centerOffset;
+        const maxScroll = Math.max(0, container.scrollWidth - containerWidth);
+        targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
 
-        scrollContainerRef.current.scrollTo({
-          left: targetScroll,
-          behavior: "smooth",
-        });
+        const currentScroll = container.scrollLeft;
+        if (Math.abs(currentScroll - targetScroll) > 10) {
+          container.scrollTo({
+            left: targetScroll,
+            behavior: "smooth",
+          });
+        }
       } else {
-        // Desktop view (scrolling vertically)
         const scrollPosition = index * (thumbnailHeight + gap);
-        // Center the selected thumbnail vertically
         const centerOffset = (containerHeight - thumbnailHeight) / 2;
         const targetScroll = Math.max(0, scrollPosition - centerOffset);
 
-        scrollContainerRef.current.scrollTo({
-          top: targetScroll,
-          behavior: "smooth",
-        });
+        const currentScroll = container.scrollTop;
+        if (Math.abs(currentScroll - targetScroll) > 10) {
+          container.scrollTo({
+            top: targetScroll,
+            behavior: "smooth",
+          });
+        }
       }
     }
   };
@@ -105,20 +125,24 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   // Add effect to handle selectedImage changes
   useEffect(() => {
     const selectedIndex = assets.findIndex((asset) => asset.id === selectedImage);
-    if (selectedIndex !== -1) {
-      scrollToImage(selectedIndex);
+    if (selectedIndex !== -1 && scrollContainerRef.current) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        scrollToImage(selectedIndex);
+      });
     }
   }, [selectedImage, assets]);
 
   return (
     <div
       ref={scrollContainerRef}
-      className="relative h-auto w-full overflow-x-auto xl:h-[473px] xl:w-[139px] xl:overflow-y-auto xl:overflow-x-hidden"
+      className="relative h-auto w-full overflow-x-auto xl:h-[473px] xl:w-[139px] xl:overflow-y-auto xl:overflow-x-hidden [-webkit-overflow-scrolling:touch] [overscroll-behavior-x:contain]"
     >
-      <div className="flex w-full flex-row-reverse flex-nowrap xl:flex-wrap gap-2 xl:w-full xl:flex-col">
-        {assets.map((asset) => (
+      <div className="flex min-w-max flex-row-reverse flex-nowrap xl:flex-wrap gap-2 xl:w-full xl:flex-col xl:min-w-0">
+        {assets.map((asset, index) => (
           <div
             key={asset.id}
+            data-thumbnail-index={index}
             onClick={() => {
               setSelectedImage(asset.id);
             }}

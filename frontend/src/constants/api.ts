@@ -58,6 +58,10 @@ export const ENDPOINTS = {
     TOGGLE: "/product-likes/toggle",
     USER_LIKES: "/product-likes/user/me",
   },
+  FAQ: {
+    CATEGORY: "/faq-categories",
+    QUESTION: "/faq-questions",
+  },
   FILE: {
     UPLOAD: "/upload",
     DOWNLOAD: "/upload/files",

@@ -59,11 +59,13 @@ export const FOOTER_DATA: FooterData = {
   third: {
     header: "خدمات مشتریان",
     links: [
-      { title: "سوالات متداول", url: "https://infinitycolor.co/سوالات-متداول/" },
-      {
-        title: "شرایط و مقررات تعویض و مرجوع",
-        url: "https://infinitycolor.co/شرایط-و-مقررات-تعویض-و-مرجوع/",
-      },
+      { title: "درباره ما", url: "/about" },
+      { title: "تماس با ما", url: "/contact" },
+      { title: "سوالات متداول", url: "/faq" },
+      // {
+      //   title: "شرایط و مقررات تعویض و مرجوع",
+      //   url: "https://infinitycolor.co/شرایط-و-مقررات-تعویض-و-مرجوع/",
+      // },
     ],
   },
   contactUs: {

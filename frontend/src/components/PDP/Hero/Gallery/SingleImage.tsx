@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
+import pdpImageLoader from "@/utils/pdpImageLoader";
 import NavigationButtons from "../../NavigationButtons";
 import {
   useEffect,
@@ -14,6 +15,14 @@ import {
 import { useDrag } from "@use-gesture/react";
 import { hapticNavigation } from "@/utils/haptics";
 import { useInView } from "react-intersection-observer";
+
+type Asset = {
+  id: string;
+  type: "video" | "image";
+  src: string;
+  thumbnail: string;
+  alt: string;
+};
 
 type Props = {
   type: "video" | "image";
@@ -61,6 +70,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     if (typeof window === "undefined") return false;
     return window.innerWidth >= 1024;
   };
+
 
   const clampScale = (value: number) => Math.min(Math.max(1, value), 2.75);
   const clampTranslate = (value: number, max: number) => Math.max(Math.min(value, max), -max);
@@ -217,6 +227,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
     setIsLoading(true);
     setBroken(false);
   }, [src, type]);
+
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -445,14 +456,15 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                       }
                     />
                     <Image
-                      className={`h-full w-full object-cover transition-opacity duration-300 ${
+                      className={`h-full w-full object-contain transition-opacity duration-300 ${
                         isLoading ? "opacity-0" : "opacity-100"
                       }`}
                       src={src}
                       alt={alt || ""}
                       fill
-                      loader={imageLoader}
-                      sizes="(max-width: 768px) 100vw, 640px"
+                      loader={pdpImageLoader}
+                      sizes="(max-width: 768px) 100vw, 1200px"
+                      quality={95}
                       onLoad={() => setIsLoading(false)}
                       onError={() => {
                         setBroken(true);

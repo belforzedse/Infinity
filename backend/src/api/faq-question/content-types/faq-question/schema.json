@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "faq_questions",
+  "info": {
+    "singularName": "faq-question",
+    "pluralName": "faq-questions",
+    "displayName": "FAQ Question",
+    "description": "FAQ questions with answers"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Question": {
+      "type": "text",
+      "required": true
+    },
+    "Answer": {
+      "type": "richtext",
+      "required": true
+    },
+    "Order": {
+      "type": "integer",
+      "default": 0
+    },
+    "IsActive": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "faq_category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::faq-category.faq-category",
+      "inversedBy": "faq_questions"
+    }
+  }
+}

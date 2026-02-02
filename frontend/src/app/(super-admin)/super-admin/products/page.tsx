@@ -521,6 +521,11 @@ export default function ProductsPage() {
               className="text-sm w-64 rounded-lg border border-neutral-300 px-3 py-1 pr-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              inputMode="search"
+              enterKeyHint="search"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
             />
             {searchQuery !== debouncedSearchQuery && (
               <div className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">

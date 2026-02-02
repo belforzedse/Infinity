@@ -82,6 +82,16 @@ export const routes: RouteInfo[] = [
     description: "Manage coupons",
   },
   {
+    name: "Super Admin - FAQ Categories",
+    path: "/super-admin/faq/categories",
+    description: "Manage FAQ categories",
+  },
+  {
+    name: "Super Admin - FAQ Questions",
+    path: "/super-admin/faq/questions",
+    description: "Manage FAQ questions",
+  },
+  {
     name: "Super Admin - General Discounts",
     path: "/super-admin/general-discounts",
     description: "Manage general discounts",
@@ -139,6 +149,16 @@ export const routes: RouteInfo[] = [
     name: "Categories",
     path: "/categories",
     description: "Browse product categories",
+  },
+  {
+    name: "About Us",
+    path: "/about",
+    description: "About Infinity Store",
+  },
+  {
+    name: "Contact",
+    path: "/contact",
+    description: "Contact us page",
   },
   {
     name: "Product Details (PDP)",
@@ -218,6 +238,13 @@ export const routes: RouteInfo[] = [
     name: "Register Info",
     path: "/auth/register/info",
     description: "Register info page",
+  },
+
+  // FAQ Routes
+  {
+    name: "FAQ",
+    path: "/faq",
+    description: "Frequently Asked Questions",
   },
 ];
 

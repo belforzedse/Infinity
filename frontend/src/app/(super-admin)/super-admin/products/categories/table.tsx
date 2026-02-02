@@ -1,11 +1,34 @@
 "use client";
 
-import ChevronDownIcon from "@/components/SuperAdmin/Layout/Icons/ChevronDownIcon";
 import ChevronRightIcon from "@/components/SuperAdmin/Layout/Icons/ChevronRightIcon";
 import EditIcon from "@/components/SuperAdmin/Layout/Icons/EditIcon";
-import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
+import Modal from "@/components/Kits/Modal";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 import Link from "next/link";
+import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+
+const CATEGORY_IMAGE_PLACEHOLDER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='24' fill='%23f1f5f9'/%3E%3Cpath d='M35 45h50v35H35z' fill='%23e2e8f0'/%3E%3Cpath d='M45 70l10-12 8 9 7-6 12 15H45z' fill='%23cbd5f5'/%3E%3Ccircle cx='50' cy='55' r='5' fill='%2394a3b8'/%3E%3C/svg%3E";
+
+type CategoryImageFormats = {
+  thumbnail?: { url?: string };
+  small?: { url?: string };
+  medium?: { url?: string };
+  large?: { url?: string };
+};
+
+type CategoryImageAttributes = {
+  url?: string;
+  alternativeText?: string | null;
+  formats?: CategoryImageFormats | null;
+};
+
+type CategoryImageField = {
+  data?: {
+    attributes?: CategoryImageAttributes;
+  } | null;
+};
 
 type CategoryChild = {
   id: number;
@@ -13,6 +36,8 @@ type CategoryChild = {
     Title?: string;
     Slug?: string;
     Parent?: string | null;
+    Color?: string | null;
+    Image?: CategoryImageField;
     parent?: {
       data: {
         id: number;
@@ -34,6 +59,8 @@ export type Category = {
     Title?: string;
     Slug?: string;
     Parent?: string | null;
+    Color?: string | null;
+    Image?: CategoryImageField;
     parent?: {
       data: {
         id: number;
@@ -49,133 +76,183 @@ export type Category = {
   };
 };
 
-type CategoryColumnsConfig = {
-  expandedParentIds: Set<string>;
-  toggleParentExpansion: (id: string) => void;
-};
-
 const getChildCategories = (category?: Category) =>
   category?.attributes?.children?.data ?? [];
 
-// Child categories list with improved layout
-const ChildCategoriesList = ({
-  categories,
-}: {
-  categories?: CategoryChild[];
-}) => {
-  const childCategories = categories ?? [];
-  if (!childCategories.length) return null;
+const resolveCategoryImageSrc = (image?: CategoryImageField | null) => {
+  const imageAttributes = image?.data?.attributes;
+  const imageUrl =
+    imageAttributes?.formats?.thumbnail?.url ||
+    imageAttributes?.formats?.small?.url ||
+    imageAttributes?.url;
+
+  return imageUrl ? resolveAssetUrl(imageUrl) : CATEGORY_IMAGE_PLACEHOLDER;
+};
+
+const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
+  const colorValue = (child.attributes?.Color || "").trim();
+  const imageSrc = resolveCategoryImageSrc(child.attributes?.Image);
+  const imageAlt =
+    child.attributes?.Image?.data?.attributes?.alternativeText ||
+    child.attributes?.Title ||
+    "Category image";
 
   return (
-    <div className="flex flex-col gap-2 mt-3 pl-4 border-l-2 border-blue-300">
-      {childCategories.map((child) => (
-        <Link
-          key={child.id}
-          href={`/super-admin/products/categories/edit/${child.id}`}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 bg-blue-50/50 hover:bg-blue-100/70 transition-colors duration-150 border border-blue-200/40"
-        >
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">
-              {child.attributes?.Title || "Unnamed"}
-            </p>
-            {child.attributes?.Slug && (
-              <p className="text-xs text-slate-500 font-mono truncate">
-                {child.attributes.Slug}
-              </p>
-            )}
+    <div className="interactive-card pressable flex h-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 hover:border-pink-100 hover:shadow-md">
+      <div className="flex h-full flex-col rounded-[20px] bg-white p-3">
+        <div className="relative overflow-hidden rounded-[18px] bg-slate-50">
+          <div className="aspect-[4/5] w-full">
+            <img
+              src={imageSrc}
+              alt={imageAlt}
+                className="h-full w-full object-contain p-4"
+              loading="lazy"
+            />
           </div>
-          <EditIcon className="h-4 w-4 text-slate-400 flex-shrink-0" />
-        </Link>
-      ))}
+          <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] text-slate-500 shadow-sm">
+            <span
+              className={`h-3 w-3 rounded-full border ${colorValue ? "border-slate-200" : "border-dashed border-slate-300"}`}
+              style={{ backgroundColor: colorValue || "transparent" }}
+              aria-hidden="true"
+            />
+            <span className="font-mono">{colorValue || "بدون رنگ"}</span>
+          </div>
+        </div>
+
+        <div className="mt-3 text-right">
+          <p className="text-xs text-slate-500 font-mono truncate">
+            {child.attributes?.Slug || "بدون نامک"}
+          </p>
+          <h4 className="mt-1 text-sm font-semibold text-slate-900 truncate">
+            {child.attributes?.Title || "Unnamed"}
+          </h4>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between rounded-full bg-slate-50 px-3 py-2">
+          <span className="text-xs text-slate-500">فرزند</span>
+          <Link
+            href={`/super-admin/products/categories/edit/${child.id}`}
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+            aria-label="ویرایش دسته‌بندی فرزند"
+          >
+            <EditIcon />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
 
-export const getCategoryColumns = ({
-  expandedParentIds,
-  toggleParentExpansion,
-}: CategoryColumnsConfig): ColumnDef<Category>[] => [
-  {
-    accessorKey: "attributes.Title",
-    header: "نام",
-    cell: ({ row }) => {
-      const childCategories = getChildCategories(row.original);
-      const isExpanded = expandedParentIds.has(row.original.id);
+const ParentCategoryCard = ({ category }: { category: Category }) => {
+  const [isChildrenModalOpen, setIsChildrenModalOpen] = useState(false);
+  const childCategories = getChildCategories(category);
+  const hasChildren = childCategories.length > 0;
+  const colorValue = (category.attributes?.Color || "").trim();
+  const imageSrc = resolveCategoryImageSrc(category.attributes?.Image);
+  const imageAlt =
+    category.attributes?.Image?.data?.attributes?.alternativeText ||
+    category.attributes?.Title ||
+    "Category image";
 
-      return (
-        <div className="flex flex-col gap-0">
-          <div className="flex items-start gap-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-slate-900 truncate">
-                {row.original?.attributes?.Title || "Unnamed"}
-              </h3>
-              {row.original?.attributes?.Slug && (
-                <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">
-                  {row.original.attributes.Slug}
-                </p>
-              )}
+  return (
+    <>
+      <div className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 hover:border-pink-100 hover:shadow-lg md:w-[258px] md:mx-auto">
+        <div className="flex h-full flex-col rounded-[20px] bg-white p-3">
+          <div className="relative overflow-hidden rounded-[20px] bg-slate-50 aspect-[4/5] md:aspect-auto md:h-[270px]">
+            <div className="h-full w-full">
+              <img
+                src={imageSrc}
+                alt={imageAlt}
+                className="h-full w-full object-contain p-4"
+                loading="lazy"
+              />
+            </div>
+
+            {hasChildren && (
+              <span className="absolute left-2 top-2 rounded-full bg-pink-50 px-2 py-1 text-[11px] font-semibold text-pink-700 shadow-sm">
+                {childCategories.length} فرزند
+              </span>
+            )}
+
+            <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[11px] text-slate-500 shadow-sm">
+              <span
+                className={`h-3.5 w-3.5 rounded-full border ${colorValue ? "border-slate-200" : "border-dashed border-slate-300"}`}
+                style={{ backgroundColor: colorValue || "transparent" }}
+                aria-hidden="true"
+              />
+              <span className="font-mono">{colorValue || "بدون رنگ"}</span>
             </div>
           </div>
 
-          {/* Child categories - shown when expanded */}
-          {childCategories.length > 0 && isExpanded && (
-            <ChildCategoriesList categories={childCategories} />
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "childCount",
-    header: "فرزندان",
-    cell: ({ row }) => {
-      const childCategories = getChildCategories(row.original);
-      if (!childCategories.length) return null;
+          <div className="mt-4 text-right">
+            <p className="text-xs text-slate-500 font-mono truncate">
+              {category.attributes?.Slug || "بدون نامک"}
+            </p>
+            <h3 className="mt-1 text-base font-semibold text-slate-900 truncate">
+              {category.attributes?.Title || "Unnamed"}
+            </h3>
+          </div>
 
-      return (
-        <div className="flex items-center justify-center">
-          <span className="inline-flex items-center justify-center px-2.5 py-1.5 bg-blue-100/70 text-blue-700 text-xs font-bold rounded-full">
-            {childCategories.length}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "actions",
-    header: "عملیات",
-    meta: {
-      headerClassName: "text-center",
-      cellClassName: "text-center",
-    },
-    cell: ({ row }) => {
-      const childCategories = getChildCategories(row.original);
-      const hasChildren = childCategories.length > 0;
-      const isExpanded = expandedParentIds.has(row.original.id);
-
-      return (
-        <div className="flex items-center justify-center gap-2">
-          {/* Expand/collapse button */}
-          {hasChildren && (
+          <div className="mt-4 flex items-center justify-between rounded-full bg-slate-50 px-3 py-2">
             <button
               type="button"
-              onClick={() => toggleParentExpansion(row.original.id)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-150"
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? "بستن فرزندان" : "نمایش فرزندان"}
+              onClick={() => setIsChildrenModalOpen(true)}
+              disabled={!hasChildren}
+              className={`text-xs font-semibold ${hasChildren ? "text-pink-700" : "text-slate-400"}`}
             >
-              {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+              {hasChildren ? "مشاهده فرزندان" : "بدون فرزند"}
             </button>
-          )}
-
-          {/* Edit button */}
-          <SuperAdminTableCellActionButton
-            variant="secondary"
-            icon={<EditIcon />}
-            path={`/super-admin/products/categories/edit/${row.original.id}`}
-          />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsChildrenModalOpen(true)}
+                disabled={!hasChildren}
+                className={`flex h-8 w-8 items-center justify-center rounded-xl border transition ${hasChildren ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-50" : "border-slate-100 bg-white text-slate-300 cursor-not-allowed"}`}
+                aria-label={hasChildren ? "نمایش فرزندان" : "بدون فرزند"}
+              >
+                <ChevronRightIcon />
+              </button>
+              <Link
+                href={`/super-admin/products/categories/edit/${category.id}`}
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+                aria-label="ویرایش دسته‌بندی"
+              >
+                <EditIcon />
+              </Link>
+            </div>
+          </div>
         </div>
-      );
+      </div>
+
+      <Modal
+        isOpen={isChildrenModalOpen}
+        onClose={() => setIsChildrenModalOpen(false)}
+        title={`فرزندان ${category.attributes?.Title || "دسته‌بندی"}`}
+        className="max-w-4xl"
+      >
+        {hasChildren ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {childCategories.map((child) => (
+              <ChildCategoryCard key={child.id} child={child} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-sm text-slate-500">فرزندی برای نمایش وجود ندارد.</div>
+        )}
+      </Modal>
+    </>
+  );
+};
+
+export const getCategoryColumns = (): ColumnDef<Category>[] => [
+  {
+    accessorKey: "attributes.Title",
+    header: "دسته‌بندی",
+    meta: {
+      cellClassName: "p-0",
+    },
+    cell: ({ row }) => {
+      return <ParentCategoryCard category={row.original} />;
     },
   },
 ];
@@ -184,103 +261,11 @@ type Props = {
   data: Category[] | undefined;
 };
 
-type MobileTableProps = Props & {
-  expandedParentIds: Set<string>;
-  toggleParentExpansion: (id: string) => void;
-};
-
-export const MobileTable = ({
-  data,
-  expandedParentIds,
-  toggleParentExpansion,
-}: MobileTableProps) => {
+export const MobileTable = ({ data }: Props) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {data?.map((row) => {
-        const childCategories = row.attributes?.children?.data ?? [];
-        const hasChildren = childCategories.length > 0;
-        const isExpanded = expandedParentIds.has(row.id);
-
-        return (
-          <div
-            key={row.id}
-            className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
-          >
-            {/* Parent category header */}
-            <div className="flex items-start gap-3">
-              {/* Expand toggle */}
-              <div className="flex-shrink-0 pt-0.5">
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleParentExpansion(row.id)}
-                    className="flex h-6 w-6 items-center justify-center text-slate-500 hover:text-slate-700 transition-colors"
-                    aria-expanded={isExpanded}
-                    aria-label={isExpanded ? "بستن فرزندان" : "نمایش فرزندان"}
-                  >
-                    {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                  </button>
-                ) : (
-                  <div className="w-6" />
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-slate-900 truncate">
-                  {row.attributes?.Title || "Unnamed"}
-                </h3>
-                {row.attributes?.Slug && (
-                  <p className="text-xs text-slate-500 font-mono mt-1 truncate">
-                    {row.attributes.Slug}
-                  </p>
-                )}
-              </div>
-
-              {/* Count badge + Edit button */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {hasChildren && (
-                  <div className="flex items-center justify-center px-2 py-1 bg-blue-100/70 rounded-full">
-                    <span className="text-xs font-bold text-blue-700">
-                      {childCategories.length}
-                    </span>
-                  </div>
-                )}
-                <Link
-                  href={`/super-admin/products/categories/edit/${row.id}`}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-150"
-                >
-                  <EditIcon />
-                </Link>
-              </div>
-            </div>
-
-            {/* Expanded children */}
-            {hasChildren && isExpanded && (
-              <div className="mt-4 space-y-2">
-                {childCategories.map((child) => (
-                  <Link
-                    key={child.id}
-                    href={`/super-admin/products/categories/edit/${child.id}`}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 bg-blue-50/60 hover:bg-blue-100/70 transition-colors border border-blue-200/40"
-                  >
-                    <div className="flex-1 min-w-0 pl-2 border-l-2 border-blue-300">
-                      <p className="text-sm font-medium text-slate-900 truncate">
-                        {child.attributes?.Title || "Unnamed"}
-                      </p>
-                      {child.attributes?.Slug && (
-                        <p className="text-xs text-slate-500 font-mono truncate">
-                          {child.attributes.Slug}
-                        </p>
-                      )}
-                    </div>
-                    <EditIcon className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        );
+        return <ParentCategoryCard key={row.id} category={row} />;
       })}
     </div>
   );

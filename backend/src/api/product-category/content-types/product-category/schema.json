@@ -21,6 +21,17 @@
       "required": true,
       "unique": true
     },
+    "Image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "Color": {
+      "type": "string"
+    },
     "parent": {
       "type": "relation",
       "relation": "manyToOne",
