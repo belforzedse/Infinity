@@ -426,24 +426,41 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                     </svg>
                   </div>
                 ) : (
-                  <Image
-                    className={`h-full w-full object-cover ${
-                      isLoading ? "opacity-0" : "opacity-100"
-                    }`}
-                    src={src}
-                    alt={alt || ""}
-                    fill
-                    loader={imageLoader}
-                    sizes="(max-width: 768px) 100vw, 640px"
-                    onLoad={() => setIsLoading(false)}
-                    onError={() => {
-                      setBroken(true);
-                      setIsLoading(false);
-                    }}
-                    priority={false}
-                    placeholder="blur"
-                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
-                  />
+                  <>
+                    <div
+                      aria-hidden="true"
+                      className={`absolute inset-0 z-0 transition-opacity duration-300 ${
+                        isLoading ? "opacity-100" : "opacity-0"
+                      }`}
+                      style={
+                        thumb
+                          ? {
+                              backgroundImage: `url(${thumb})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              filter: "blur(18px)",
+                              transform: "scale(1.05)",
+                            }
+                          : { backgroundColor: "#f3f4f6" }
+                      }
+                    />
+                    <Image
+                      className={`h-full w-full object-cover transition-opacity duration-300 ${
+                        isLoading ? "opacity-0" : "opacity-100"
+                      }`}
+                      src={src}
+                      alt={alt || ""}
+                      fill
+                      loader={imageLoader}
+                      sizes="(max-width: 768px) 100vw, 640px"
+                      onLoad={() => setIsLoading(false)}
+                      onError={() => {
+                        setBroken(true);
+                        setIsLoading(false);
+                      }}
+                      priority={false}
+                    />
+                  </>
                 )}
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
@@ -28,15 +28,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   >([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const lastInsideInteractionRef = useRef<number | null>(null);
-
-  const markInsideInteraction = () => {
-    lastInsideInteractionRef.current = Date.now();
-  };
-
-  const handleClose = () => {
-    const lastInside = lastInsideInteractionRef.current;
-    if (lastInside && Date.now() - lastInside < 500) return;
+  const closeModal = () => {
     onClose();
   };
 
@@ -56,7 +48,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     if (!searchQuery.trim()) return;
 
     // Close the search modal
-    onClose();
+    closeModal();
 
     // Redirect to search results page with the query
     router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -124,7 +116,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[1200]" onClose={handleClose}>
+      <Dialog as="div" className="relative z-[1200]" onClose={() => {}}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -134,7 +126,12 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div
+            className="fixed inset-0 bg-black bg-opacity-25"
+            onClick={closeModal}
+            onTouchStart={closeModal}
+            aria-hidden="true"
+          />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -150,9 +147,6 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
             >
               <Dialog.Panel
                 className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all"
-                onMouseDownCapture={markInsideInteraction}
-                onTouchStartCapture={markInsideInteraction}
-                onFocusCapture={markInsideInteraction}
               >
                 <Dialog.Title as="h3" className="text-lg mb-4 font-medium leading-6 text-gray-900">
                   جستجو
@@ -242,7 +236,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                             image={s.image}
                             isAvailable={s.isAvailable}
                             onClick={() => {
-                              onClose();
+                              closeModal();
                               router.push(`/pdp/${s.slug || s.id}`);
                             }}
                             index={idx}
@@ -251,7 +245,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                         <motion.button
                           type="button"
                           onClick={() => {
-                            onClose();
+                            closeModal();
                             router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
                           }}
                           className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
@@ -272,7 +266,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                   <button
                     type="button"
                     className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
-                    onClick={onClose}
+                    onClick={closeModal}
                   >
                     بستن
                   </button>

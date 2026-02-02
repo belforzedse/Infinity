@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
     volumes:
-      - backend_uploads-data:/app/public
+      - backend_uploads-data:/app/public/uploads
     networks:
       - infinity-network
 
