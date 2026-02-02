@@ -1,6 +1,6 @@
 "use client";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
@@ -28,6 +28,17 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   >([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const lastInsideInteractionRef = useRef<number | null>(null);
+
+  const markInsideInteraction = () => {
+    lastInsideInteractionRef.current = Date.now();
+  };
+
+  const handleClose = () => {
+    const lastInside = lastInsideInteractionRef.current;
+    if (lastInside && Date.now() - lastInside < 500) return;
+    onClose();
+  };
 
   useEffect(() => {
     if (!isOpen || typeof document === "undefined") return;
@@ -113,7 +124,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
+      <Dialog as="div" className="relative z-[1200]" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -137,7 +148,12 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
+              <Dialog.Panel
+                className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all"
+                onMouseDownCapture={markInsideInteraction}
+                onTouchStartCapture={markInsideInteraction}
+                onFocusCapture={markInsideInteraction}
+              >
                 <Dialog.Title as="h3" className="text-lg mb-4 font-medium leading-6 text-gray-900">
                   جستجو
                 </Dialog.Title>
