@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "faq_categories",
+  "info": {
+    "singularName": "faq-category",
+    "pluralName": "faq-categories",
+    "displayName": "FAQ Category",
+    "description": "Categories for organizing FAQ questions"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "Slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 150
+    },
+    "Description": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "Order": {
+      "type": "integer",
+      "default": 0
+    },
+    "faq_questions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::faq-question.faq-question",
+      "mappedBy": "faq_category"
+    }
+  }
+}

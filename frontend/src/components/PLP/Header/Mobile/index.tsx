@@ -18,6 +18,15 @@ export default function PLPMobileHeader({}: Props) {
   const { totalItems, openDrawer } = useCart();
   const [isStandalone, setIsStandalone] = useState(false);
 
+  const openSearch = (event?: React.SyntheticEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    // Delay opening to avoid mobile ghost-click closing the dialog immediately
+    window.setTimeout(() => setIsSearchOpen(true), 0);
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined" && "matchMedia" in window) {
       const mq = window.matchMedia("(display-mode: standalone)");
@@ -71,7 +80,7 @@ export default function PLPMobileHeader({}: Props) {
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setIsSearchOpen(true)}
+            onClick={openSearch}
             className="hidden 440:flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white"
             aria-label="جستجو"
           >
@@ -104,7 +113,7 @@ export default function PLPMobileHeader({}: Props) {
       <MobileMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        onSearchClick={() => setIsSearchOpen(true)}
+        onSearchClick={openSearch}
       />
 
       {/* Mobile Search Modal */}

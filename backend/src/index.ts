@@ -106,6 +106,12 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::blog-comment": {
         "blog-comment": READ_ACTIONS,
       },
+      "api::faq-category": {
+        "faq-category": READ_ACTIONS,
+      },
+      "api::faq-question": {
+        "faq-question": READ_ACTIONS,
+      },
     },
   },
   customer: {

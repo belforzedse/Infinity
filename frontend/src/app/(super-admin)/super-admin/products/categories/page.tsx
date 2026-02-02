@@ -5,7 +5,7 @@ import { SuperAdminTable } from "@/components/SuperAdmin/Table";
 import { MobileTable, getCategoryColumns } from "./table";
 import { ENDPOINTS } from "@/constants/api";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -14,8 +14,6 @@ export default function CategoriesPage() {
   useFreshDataOnPageLoad();
   const router = useRouter();
   const { roleName } = useCurrentUser();
-  const [expandedParentIds, setExpandedParentIds] = useState<Set<string>>(new Set());
-
   // Redirect editors away from product pages
   useEffect(() => {
     const normalizedRole = (roleName ?? "").toLowerCase().trim();
@@ -24,23 +22,7 @@ export default function CategoriesPage() {
     }
   }, [roleName, router]);
 
-  const toggleParentExpansion = useCallback((id: string) => {
-    setExpandedParentIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const columns = useMemo(
-    () =>
-      getCategoryColumns({
-        expandedParentIds,
-        toggleParentExpansion,
-      }),
-    [expandedParentIds, toggleParentExpansion],
-  );
+  const columns = useMemo(() => getCategoryColumns(), []);
   const [filterValue, setFilter] = useQueryState("filter", {
     defaultValue: [],
     parse: (value) => JSON.parse(decodeURIComponent(value || "[]")),
@@ -68,14 +50,9 @@ export default function CategoriesPage() {
       <SuperAdminTable
         _removeActions
         columns={columns}
-        url={`${ENDPOINTS.PRODUCT.CATEGORY}?populate[children]=*&filters[parent][id][$null]=true`}
-        mobileTable={(data) => (
-          <MobileTable
-            data={data}
-            expandedParentIds={expandedParentIds}
-            toggleParentExpansion={toggleParentExpansion}
-          />
-        )}
+        className="w-full [&_thead]:hidden [&_tbody]:grid [&_tbody]:grid-cols-1 sm:[&_tbody]:grid-cols-2 lg:[&_tbody]:grid-cols-3 [&_tbody]:gap-5 [&_tbody_tr]:border-0 [&_tbody_tr]:bg-transparent [&_tbody_tr]:hover:bg-transparent [&_tbody_tr]:shadow-none [&_tbody_tr_td]:p-0"
+        url={`${ENDPOINTS.PRODUCT.CATEGORY}?populate[children]=*&populate[Image]=*&filters[parent][id][$null]=true`}
+        mobileTable={(data) => <MobileTable data={data} />}
       />
     </ContentWrapper>
   );

@@ -1,6 +1,6 @@
 "use client";
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
@@ -27,7 +27,52 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     }>
   >([]);
   const [loading, setLoading] = useState(false);
+  const [canClose, setCanClose] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const closeModal = () => {
+    onClose();
+  };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCanClose(false);
+      return;
+    }
+    const id = window.setTimeout(() => setCanClose(true), 200);
+    return () => window.clearTimeout(id);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const id = window.setTimeout(() => inputRef.current?.focus(), 50);
+    return () => window.clearTimeout(id);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && canClose) {
+        closeModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [isOpen, canClose]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +81,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     if (!searchQuery.trim()) return;
 
     // Close the search modal
-    onClose();
+    closeModal();
 
     // Redirect to search results page with the query
     router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -49,6 +94,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     const q = searchQuery.trim();
     if (q.length < 2) {
       setSuggestions([]);
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -101,159 +147,152 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     };
   }, [searchQuery]);
 
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
-        </Transition.Child>
+  if (!isOpen || !mounted) return null;
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="text-lg mb-4 font-medium leading-6 text-gray-900">
-                  جستجو
-                </Dialog.Title>
+  return createPortal(
+    <div className="fixed inset-0 z-[1200]">
+      <div
+        className="absolute inset-0 bg-black bg-opacity-25"
+        onClick={() => {
+          if (!canClose) return;
+          closeModal();
+        }}
+        aria-hidden="true"
+      />
 
-                <div className="mt-2">
-                  <form onSubmit={handleSearch} className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="text-sm w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
-                      placeholder="دنبال چی میگردی؟"
-                      dir="rtl"
-                    />
-                    <button type="submit" className="absolute left-2 top-1/2 -translate-y-1/2">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M11.7647 11.7647L14.6667 14.6667"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8.33333 12.0833C10.3584 12.0833 11.9999 10.4417 11.9999 8.41667C11.9999 6.39162 10.3584 4.75 8.33333 4.75C6.30828 4.75 4.66666 6.39162 4.66666 8.41667C4.66666 10.4417 6.30828 12.0833 8.33333 12.0833Z"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </form>
-                </div>
+      <div className="absolute inset-0 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div
+            className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all"
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-lg mb-4 font-medium leading-6 text-gray-900">جستجو</h3>
 
-                {/* Suggestions */}
-                <motion.div
-                  className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white"
+            <div className="mt-2">
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  inputMode="search"
+                  enterKeyHint="search"
+                  className="text-[16px] leading-6 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
+                  placeholder="دنبال چی میگردی؟"
                   dir="rtl"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <AnimatePresence mode="wait">
-                    {loading && (
-                      <motion.div
-                        className="text-xs px-3 py-2 text-gray-500"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        در حال جستجو…
-                      </motion.div>
-                    )}
-                    {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
-                      <motion.div
-                        className="text-xs px-3 py-2 text-gray-500"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        موردی یافت نشد
-                      </motion.div>
-                    )}
-                    {!loading && suggestions.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        {suggestions.map((s, idx) => (
-                          <SearchSuggestionCard
-                            key={s.id}
-                            id={s.id}
-                            title={s.Title}
-                            price={s.Price}
-                            discountPrice={s.DiscountPrice}
-                            discount={s.Discount}
-                            category={s.category}
-                            image={s.image}
-                            isAvailable={s.isAvailable}
-                            onClick={() => {
-                              onClose();
-                              router.push(`/pdp/${s.slug || s.id}`);
-                            }}
-                            index={idx}
-                          />
-                        ))}
-                        <motion.button
-                          type="button"
-                          onClick={() => {
-                            onClose();
-                            router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
-                          }}
-                          className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: suggestions.length * 0.03 }}
-                          whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          مشاهده همه نتایج
-                        </motion.button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
-                    onClick={onClose}
+                />
+                <button type="submit" className="absolute left-2 top-1/2 -translate-y-1/2">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    بستن
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
+                    <path
+                      d="M11.7647 11.7647L14.6667 14.6667"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8.33333 12.0833C10.3584 12.0833 11.9999 10.4417 11.9999 8.41667C11.9999 6.39162 10.3584 4.75 8.33333 4.75C6.30828 4.75 4.66666 6.39162 4.66666 8.41667C4.66666 10.4417 6.30828 12.0833 8.33333 12.0833Z"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </form>
+            </div>
+
+            <motion.div
+              className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white"
+              dir="rtl"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AnimatePresence mode="wait">
+                {loading && (
+                  <motion.div
+                    className="text-xs px-3 py-2 text-gray-500"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    در حال جستجو…
+                  </motion.div>
+                )}
+                {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
+                  <motion.div
+                    className="text-xs px-3 py-2 text-gray-500"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    موردی یافت نشد
+                  </motion.div>
+                )}
+                {!loading && suggestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {suggestions.map((s, idx) => (
+                      <SearchSuggestionCard
+                        key={s.id}
+                        id={s.id}
+                        title={s.Title}
+                        price={s.Price}
+                        discountPrice={s.DiscountPrice}
+                        discount={s.Discount}
+                        category={s.category}
+                        image={s.image}
+                        isAvailable={s.isAvailable}
+                        onClick={() => {
+                          closeModal();
+                          router.push(`/pdp/${s.slug || s.id}`);
+                        }}
+                        index={idx}
+                      />
+                    ))}
+                    <motion.button
+                      type="button"
+                      onClick={() => {
+                        closeModal();
+                        router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                      }}
+                      className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: suggestions.length * 0.03 }}
+                      whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      مشاهده همه نتایج
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            <div className="mt-4">
+              <button
+                type="button"
+                className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                onClick={closeModal}
+              >
+                بستن
+              </button>
+            </div>
           </div>
         </div>
-      </Dialog>
-    </Transition>
+      </div>
+    </div>,
+    document.body,
   );
 }
