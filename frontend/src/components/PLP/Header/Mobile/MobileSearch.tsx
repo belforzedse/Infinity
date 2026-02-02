@@ -150,7 +150,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       inputMode="search"
                       enterKeyHint="search"
-                      className="text-base w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
+                      className="text-[16px] leading-6 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
                       placeholder="دنبال چی میگردی؟"
                       dir="rtl"
                     />
