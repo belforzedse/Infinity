@@ -9,6 +9,7 @@ export interface PLPProduct {
     Status?: ProductStatus;
     AverageRating?: number | null;
     RatingCount?: number | null;
+    SeenCount?: number | null;
     CoverImage?: {
       data?: {
         attributes?: {

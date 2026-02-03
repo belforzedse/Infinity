@@ -1,10 +1,13 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
-import { categories } from "@/constants/categories";
+import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
+import { useProductCategories } from "@/hooks/useProductCategories";
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -12,6 +15,8 @@ interface CategoriesModalProps {
 }
 
 export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProps) {
+  const { categories, isLoading } = useProductCategories({ parentOnly: true });
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[1200]" onClose={onClose}>
@@ -47,28 +52,45 @@ export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProp
                 </Dialog.Title>
 
                 <div className="grid grid-cols-3 gap-4">
-                  {categories.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={category.href}
-                      onClick={onClose}
-                      className="flex flex-col items-center gap-2"
-                    >
-                      <div
-                        className="flex h-20 w-20 items-center justify-center rounded-full p-4"
-                        style={{ backgroundColor: category.backgroundColor }}
-                      >
-                        <Image
-                          src={category.image}
-                          alt={category.name}
-                          width={48}
-                          height={48}
-                          className="h-12 w-12 object-contain"
-                        />
-                      </div>
-                      <span className="text-sm text-gray-800">{category.name}</span>
-                    </Link>
-                  ))}
+                  {isLoading && (
+                    <div className="col-span-3 text-center text-xs text-neutral-500">
+                      در حال بارگذاری...
+                    </div>
+                  )}
+                  {!isLoading && categories.length === 0 && (
+                    <div className="col-span-3 text-center text-xs text-neutral-500">
+                      دسته‌بندی برای نمایش وجود ندارد.
+                    </div>
+                  )}
+                  {!isLoading &&
+                    categories.map((category) => {
+                      const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
+                      const label = category.name || category.slug;
+                      const bgColor = category.color?.trim() || "#f8fafc";
+
+                      return (
+                        <Link
+                          key={category.id}
+                          href={{ pathname: "/plp", query: { category: category.slug } }}
+                          onClick={onClose}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <div
+                            className="flex h-20 w-20 items-center justify-center rounded-full p-4"
+                            style={{ backgroundColor: bgColor }}
+                          >
+                            <Image
+                              src={imageSrc}
+                              alt={category.imageAlt || label}
+                              width={48}
+                              height={48}
+                              className="h-12 w-12 object-contain"
+                            />
+                          </div>
+                          <span className="text-sm text-gray-800">{label}</span>
+                        </Link>
+                      );
+                    })}
                 </div>
               </Dialog.Panel>
             </Transition.Child>

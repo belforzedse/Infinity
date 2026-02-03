@@ -4,7 +4,7 @@ import type { UpsertPageConfigType } from "@/components/SuperAdmin/UpsertPage/Co
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 export const config: UpsertPageConfigType<SuperAdminSettings> = {
-  headTitle: "تنظیمات سایت",
+  headTitle: "تنظیمات عمومی",
   showTimestamp: true,
   actionButtons: (props) => (
     <>

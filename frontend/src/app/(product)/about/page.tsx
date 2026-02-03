@@ -9,6 +9,7 @@ import WhyChooseSection from "@/components/About/WhyChooseSection";
 import TrustSection from "@/components/About/TrustSection";
 import CategoryShowcase from "@/components/About/CategoryShowcase";
 import { SITE_NAME, SITE_URL } from "@/config/site";
+import { getProductCategories } from "@/services/product/categories";
 
 export const metadata: Metadata = {
   title: `درباره ما | ${SITE_NAME}`,
@@ -31,7 +32,9 @@ const breadcrumbItems = [
   { label: "درباره ما", href: "/about" },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const categories = await getProductCategories({ parentOnly: true, sort: "Title:asc" });
+
   return (
     <>
       <BreadcrumbSchema breadcrumbs={breadcrumbItems} />
@@ -71,7 +74,7 @@ export default function AboutPage() {
 
         {/* Category Showcase */}
         <Reveal variant="fade-up" duration={700} delay={300}>
-          <CategoryShowcase />
+          <CategoryShowcase categories={categories} />
         </Reveal>
 
         {/* Why Choose Infinity Section */}

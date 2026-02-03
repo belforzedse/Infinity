@@ -36,7 +36,7 @@ export default function PLPMobileList({ products }: PLPMobileListProps) {
             slug={slug}
             title={product.attributes.Title}
             category={product.attributes.product_main_category?.data?.attributes?.Title || ""}
-            likedCount={product.attributes.RatingCount || 0}
+            likedCount={product.attributes.SeenCount || 0}
             price={price}
             discountedPrice={discountPrice}
             discount={discount}

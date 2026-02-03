@@ -2427,6 +2427,33 @@ export interface ApiProductVariationProductVariation extends Schema.CollectionTy
   };
 }
 
+export interface ApiProductViewProductView extends Schema.CollectionType {
+  collectionName: "product_views";
+  info: {
+    description: "Tracks individual product views with timestamps for 24-hour window calculation";
+    displayName: "ProductView";
+    pluralName: "product-views";
+    singularName: "product-view";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::product-view.product-view", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    product: Attribute.Relation<
+      "api::product-view.product-view",
+      "manyToOne",
+      "api::product.product"
+    >;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::product-view.product-view", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    viewedAt: Attribute.DateTime & Attribute.Required;
+  };
+}
+
 export interface ApiProductProduct extends Schema.CollectionType {
   collectionName: "products";
   info: {
@@ -2486,9 +2513,22 @@ export interface ApiProductProduct extends Schema.CollectionType {
       "oneToMany",
       "api::product-variation.product-variation"
     >;
+    product_views: Attribute.Relation<
+      "api::product.product",
+      "oneToMany",
+      "api::product-view.product-view"
+    >;
     RatingCount: Attribute.Integer;
     removedAt: Attribute.DateTime;
     ReturnConditions: Attribute.Text;
+    SeenCount: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
     Slug: Attribute.String & Attribute.Unique;
     Status: Attribute.Enumeration<["Active", "InActive"]>;
     Title: Attribute.String & Attribute.Required;
@@ -2496,6 +2536,39 @@ export interface ApiProductProduct extends Schema.CollectionType {
     updatedBy: Attribute.Relation<"api::product.product", "oneToOne", "admin::user"> &
       Attribute.Private;
     Weight: Attribute.Integer & Attribute.DefaultTo<100>;
+  };
+}
+
+export interface ApiSettingsSettings extends Schema.SingleType {
+  collectionName: "site_settings";
+  info: {
+    displayName: "Site Settings";
+    pluralName: "site-settings";
+    singularName: "settings";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    filterPublicProductsByTitle: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeBannerOneButtonColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneButtonHref: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerOneButtonText: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerOneTitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoButtonColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoButtonHref: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerTwoButtonText: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerTwoTitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
+      Attribute.Private;
   };
 }
 
@@ -3139,7 +3212,9 @@ declare module "@strapi/types" {
       "api::product-variation-model.product-variation-model": ApiProductVariationModelProductVariationModel;
       "api::product-variation-size.product-variation-size": ApiProductVariationSizeProductVariationSize;
       "api::product-variation.product-variation": ApiProductVariationProductVariation;
+      "api::product-view.product-view": ApiProductViewProductView;
       "api::product.product": ApiProductProduct;
+      "api::settings.settings": ApiSettingsSettings;
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;
       "api::shipping.shipping": ApiShippingShipping;

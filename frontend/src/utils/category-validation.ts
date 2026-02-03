@@ -27,8 +27,9 @@ function sanitizeCategorySlug(slug: string | undefined): string | null {
   // Reject very short slugs (less than 2 chars) as they're likely invalid
   if (sanitized.length < 2) return null;
 
-  // Reject slugs that only contain special characters or numbers
-  if (/^[\d\W]+$/.test(sanitized)) return null;
+  // Reject slugs that contain no letters/numbers (Unicode-aware)
+  // This allows Persian/Arabic slugs like "جشنواره-2880".
+  if (!/[\p{L}\p{N}]/u.test(sanitized)) return null;
 
   return sanitized;
 }
@@ -86,4 +87,3 @@ export async function validateCategorySlug(
     return null;
   }
 }
-

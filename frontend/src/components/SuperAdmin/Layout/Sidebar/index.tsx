@@ -7,7 +7,6 @@ import React, { useState, Fragment, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
-import SettingsIcon from "../Icons/SettingsIcon";
 import { usePathname, useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { performLogout } from "@/utils/logout";
@@ -366,17 +365,6 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
           </div>
 
           <div className="h-[1px] w-full bg-neutral-100" />
-
-          {!isStoreManager && !isEditor && (
-            <div className={clsx("flex cursor-pointer items-center px-2 py-1.5", isCollapsed && "md:justify-center md:px-2")}>
-              <Link href={"/super-admin/settings"} className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")} title={isCollapsed ? "تنظیمات سایت" : undefined}>
-                <div className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")}>
-                  <SettingsIcon />
-                  {!isCollapsed && <span className="text-sm font-medium text-neutral-600">تنظیمات سایت</span>}
-                </div>
-              </Link>
-            </div>
-          )}
 
           <div className={clsx("flex cursor-pointer items-center px-2 py-1.5", isCollapsed && "md:justify-center md:px-2")}>
             <button type="button" onClick={openConfirm} className={clsx("flex items-center gap-2", isCollapsed && "md:justify-center md:gap-0")} title={isCollapsed ? "خروج" : undefined}>

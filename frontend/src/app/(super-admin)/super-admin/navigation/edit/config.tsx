@@ -5,7 +5,7 @@ import type { Navigation, NavigationCategory } from "@/types/super-admin/navigat
 import { getProductCategories } from "@/services/super-admin/navigation/getProductCategories";
 
 // Form data interface that handles both string and array types for product_categories
-interface NavigationFormData extends Omit<Navigation, "product_categories"> {
+export interface NavigationFormData extends Omit<Navigation, "product_categories"> {
   product_categories: NavigationCategory[] | string;
 }
 

@@ -138,6 +138,19 @@ export default factories.createCoreController(
         return ctx.notFound("Product not found");
       }
 
+      // Increment view count for non-admin users viewing Active products
+      const user = ctx.state.user;
+      const isAdmin = isAdminUser(user);
+      if (!isAdmin && status === "Active" && product?.id) {
+        try {
+          const productViewService = strapi.service("api::product-view.product-view");
+          await productViewService.incrementProductView(product.id);
+        } catch (viewError) {
+          // Log error but don't fail the request
+          strapi.log.warn("[Product.findOne] Failed to increment view count:", viewError);
+        }
+      }
+
       return response;
     },
 
@@ -315,8 +328,20 @@ export default factories.createCoreController(
           return ctx.notFound("Product not found");
         }
 
-        const productData = product as { id: number; Title?: string };
+        const productData = product as { id: number; Title?: string; attributes?: { Status?: string } };
         strapi.log.info(`[Product.findBySlug] Successfully found product: ${productData.id} (${productData.Title || 'N/A'})`);
+
+        // Increment view count for non-admin users viewing Active products
+        if (!isAdmin && productData.attributes?.Status === "Active") {
+          try {
+            const productViewService = strapi.service("api::product-view.product-view");
+            await productViewService.incrementProductView(productData.id);
+          } catch (viewError) {
+            // Log error but don't fail the request
+            strapi.log.warn("[Product.findBySlug] Failed to increment view count:", viewError);
+          }
+        }
+
         return {
           data: product,
         };

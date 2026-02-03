@@ -59,6 +59,11 @@
     "RatingCount": {
       "type": "integer"
     },
+    "SeenCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
     "product_main_category": {
       "type": "relation",
       "relation": "manyToOne",
@@ -130,6 +135,12 @@
     },
     "external_source": {
       "type": "string"
+    },
+    "product_views": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-view.product-view",
+      "mappedBy": "product"
     }
   }
 }

@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_views",
+  "info": {
+    "singularName": "product-view",
+    "pluralName": "product-views",
+    "displayName": "ProductView",
+    "description": "Tracks individual product views with timestamps for 24-hour window calculation"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "product_views"
+    },
+    "viewedAt": {
+      "type": "datetime",
+      "required": true
+    }
+  }
+}

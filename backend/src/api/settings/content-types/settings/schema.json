@@ -1,0 +1,67 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "settings",
+    "pluralName": "site-settings",
+    "displayName": "Site Settings"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "filterPublicProductsByTitle": {
+      "type": "boolean",
+      "default": false
+    },
+    "homeBannerOneImage": {
+      "type": "text",
+      "default": ""
+    },
+    "homeBannerOneTitle": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerOneTitleColor": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerOneButtonText": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerOneButtonColor": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerOneButtonHref": {
+      "type": "text",
+      "default": ""
+    },
+    "homeBannerTwoImage": {
+      "type": "text",
+      "default": ""
+    },
+    "homeBannerTwoTitle": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerTwoTitleColor": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerTwoButtonText": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerTwoButtonColor": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerTwoButtonHref": {
+      "type": "text",
+      "default": ""
+    }
+  }
+}

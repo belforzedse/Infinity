@@ -5,11 +5,9 @@ export const revalidate = 30; // 30 seconds
 import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
-import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
-import { categories } from "@/constants/categories";
 import { getHomepageSections } from "@/services/product/homepage";
+import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
 import { BlogCarousel } from "@/components/Blog";
 import DesktopSlider from "@/components/Hero/desktopSlider";
@@ -19,6 +17,7 @@ import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
+import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
@@ -53,10 +52,12 @@ async function getLatestBlogPosts() {
 export default async function Home() {
   const [
     { discounted: discountedProducts, new: newProducts, favorites: favoriteProducts },
-    latestBlogPosts
+    latestBlogPosts,
+    parentCategories,
   ] = await Promise.all([
     getHomepageSections(),
-    getLatestBlogPosts()
+    getLatestBlogPosts(),
+    getProductCategories({ parentOnly: true, sort: "Title:asc" }),
   ]);
 
   return (
@@ -88,69 +89,11 @@ export default async function Home() {
         </section>
       )}
 
-      <section className="space-y-6">
-        <div className="flex justify-center">
-          <div className="grid grid-cols-3 gap-4 md:grid-cols-4 md:gap-6 lg:grid-cols-6 lg:gap-0">
-            {categories.map((category, index) => (
-              <Link
-                key={category.id}
-                href={category.href}
-                className="flex flex-col items-center text-center"
-              >
-              <Reveal
-                delay={index * 80}
-                className="hidden w-full lg:block"
-                variant="fade-up"
-                duration={600}
-              >
-                <div className="relative h-[340px] w-full overflow-hidden border border-slate-100 transition-transform duration-300 hover:-translate-y-0.5">
-                  <div
-                    className="flex h-full w-full items-center justify-center"
-                    style={{ backgroundColor: category.backgroundColor }}
-                  >
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      width={category.width}
-                      height={category.height}
-                      className="max-h-[240px] w-auto object-contain drop-shadow-md"
-                      loading="lazy"
-                      sizes="227px 317px"
-                    />
-                  </div>
-                  <span className="text-base absolute bottom-3 left-1/2 -translate-x-1/2 rounded-xl bg-white px-3 py-1.5 font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
-                    {category.name}
-                  </span>
-                </div>
-              </Reveal>
-
-              <Reveal
-                delay={index * 80}
-                className="flex w-full flex-col items-center lg:hidden"
-                variant="fade-up"
-                duration={600}
-              >
-                <div
-                  className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform hover:scale-105 md:h-28 md:w-28"
-                  style={{ backgroundColor: category.backgroundColor }}
-                >
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    width={80}
-                    height={80}
-                    className="h-16 w-auto md:h-20"
-                    loading="lazy"
-                    sizes="80px"
-                  />
-                </div>
-                <span className="mt-2 text-center text-sm font-medium md:text-base">{category.name}</span>
-              </Reveal>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {parentCategories.length > 0 && (
+        <section className="space-y-6">
+          <CategoryCarousel categories={parentCategories} />
+        </section>
+      )}
 
       <section className="space-y-10">
         <div className="hidden space-y-10 md:block">
