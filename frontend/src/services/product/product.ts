@@ -64,6 +64,7 @@ export interface ProductDetail {
     Status: "Active" | "InActive";
     AverageRating?: number;
     RatingCount?: number;
+    SeenCount?: number;
     CleaningTips?: string;
     ReturnConditions?: string;
     createdAt: string;
@@ -853,7 +854,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         category: product.attributes.product_main_category?.data?.attributes?.Title || "",
         title: product.attributes.Title,
         price,
-        seenCount: product.attributes.RatingCount || 0,
+        seenCount: product.attributes.SeenCount || 0,
         isAvailable,
         colorsCount: colorsCount > 0 ? colorsCount : undefined,
         colorCodes: colorCodes.length > 0 ? colorCodes : undefined,

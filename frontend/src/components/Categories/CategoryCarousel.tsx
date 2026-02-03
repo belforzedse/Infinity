@@ -204,10 +204,10 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
               style={{ scrollSnapStop: "always" }}
             >
               <Reveal
-                delay={index * 80}
+                delay={index * 50}
                 className="hidden w-full lg:block"
                 variant="fade-up"
-                duration={600}
+                duration={300}
               >
                 <div className="relative h-[340px] w-full overflow-hidden border border-slate-100 transition-transform duration-300 group-hover:-translate-y-0.5">
                   <div
@@ -231,10 +231,10 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
               </Reveal>
 
               <Reveal
-                delay={index * 60}
+                delay={index * 30}
                 className="flex w-full flex-col items-center lg:hidden"
                 variant="fade-up"
-                duration={600}
+                duration={400}
               >
                 <div
                   className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform group-hover:scale-105 md:h-28 md:w-28"

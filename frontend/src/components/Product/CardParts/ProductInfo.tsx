@@ -25,7 +25,7 @@ export const ProductInfo: FC<ProductInfoProps> = ({ category, title, seenCount }
         {title}
       </h3>
 
-      {seenCount > 0 && (
+      {seenCount > 100 && (
         <div className="relative mt-1.5 h-6 overflow-hidden">
           <div className="flex items-center gap-0.5 transition-all duration-300 md:group-hover:-translate-y-full">
             <Image

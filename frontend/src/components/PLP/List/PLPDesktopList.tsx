@@ -41,7 +41,7 @@ export default function PLPDesktopList({ products, includeMedia }: PLPDesktopLis
 
         const isAvailable = hasAvailableStock(product);
         const slug = product.attributes?.Slug || product.id.toString();
-        const seenCount = product.attributes.RatingCount || 0;
+        const seenCount = product.attributes.SeenCount || 0;
         const allImages = getProductImages(product, includeMedia, IMAGE_BASE_URL);
 
         return (

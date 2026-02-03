@@ -59,6 +59,11 @@
     "RatingCount": {
       "type": "integer"
     },
+    "SeenCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
     "product_main_category": {
       "type": "relation",
       "relation": "manyToOne",

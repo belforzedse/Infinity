@@ -143,7 +143,7 @@ export default function VirtualizedList({
         price,
         discountPrice,
         discount,
-        seenCount: product.attributes.RatingCount || 0,
+        seenCount: product.attributes.SeenCount || 0,
         colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
         colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
         image:

@@ -9,6 +9,7 @@ import DashboardIcon from "@/components/SuperAdmin/Layout/Icons/DashboardIcon";
 import PaymentIcon from "@/components/SuperAdmin/Layout/Icons/PaymentIcon";
 import BlogIcon from "@/components/SuperAdmin/Layout/Icons/BlogIcon";
 import FAQIcon from "@/components/SuperAdmin/Layout/Icons/FAQIcon";
+import SettingsIcon from "@/components/SuperAdmin/Layout/Icons/SettingsIcon";
 import {
   //FiLayout,
   FiMenu,
@@ -262,6 +263,24 @@ const superAdminSidebar: SidebarItem[] = [
         id: "admin-activity",
         label: "گزارش فعالیت پشتیبانان",
         href: "/super-admin/reports/admin-activity",
+      },
+    ],
+  },
+  {
+    id: "settings",
+    label: "تنظیمات",
+    href: "/super-admin/settings",
+    icon: <SettingsIcon />,
+    children: [
+      {
+        id: "settings-general",
+        label: "تنظیمات عمومی",
+        href: "/super-admin/settings/general",
+      },
+      {
+        id: "settings-navbar",
+        label: "سفارشی‌سازی منو",
+        href: "/super-admin/settings/customization/navbar",
       },
     ],
   },
