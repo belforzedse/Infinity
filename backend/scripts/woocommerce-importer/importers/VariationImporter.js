@@ -167,9 +167,12 @@ class VariationImporter {
       force = false,
       nameFilter = DEFAULT_NAME_FILTER_KEYWORDS,
       logParentNames = true,
+      scanImportedProducts = false,
+      missingOnly = false,
     } = options;
 
     const inStockOnly = this.config?.import?.filters?.inStockOnly !== false;
+    const effectiveOnlyImported = scanImportedProducts ? true : onlyImported;
 
     const effectiveNameFilter =
       nameFilter === null
@@ -182,7 +185,7 @@ class VariationImporter {
 
     this.stats.startTime = Date.now();
     this.logger.info(
-      `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${onlyImported}, force: ${force})`,
+      `🔄 Starting variation import (limit: ${limit}, page: ${page}, dryRun: ${dryRun}, onlyImported: ${effectiveOnlyImported}, force: ${force}, scanImportedProducts: ${scanImportedProducts}, missingOnly: ${missingOnly})`,
     );
     if (effectiveNameFilter.length > 0) {
       this.logger.info(
@@ -199,49 +202,61 @@ class VariationImporter {
       await this.loadMappingCaches();
       this.lastCacheRefreshTime = Date.now();
 
-      // If force flag is set, ignore progress state and start from page 1
-      const progressState = force
-        ? { lastCompletedPage: 0, totalProcessed: 0 }
-        : this.loadProgressState();
+      if (scanImportedProducts) {
+        await this.importFromImportedProducts({
+          limit,
+          page,
+          dryRun,
+          force,
+          nameFilter: effectiveNameFilter,
+          logParentNames,
+          inStockOnly,
+          missingOnly,
+        });
+      } else {
+        // If force flag is set, ignore progress state and start from page 1
+        const progressState = force
+          ? { lastCompletedPage: 0, totalProcessed: 0 }
+          : this.loadProgressState();
 
-      if (force && (progressState.lastCompletedPage > 0 || progressState.totalProcessed > 0)) {
-        this.logger.warn(
-          `⚠️ FORCE MODE: Ignoring previous progress state (was at page ${progressState.lastCompletedPage}, ${progressState.totalProcessed} processed)`,
-        );
-      }
-
-      let currentPage = Math.max(page, (progressState.lastCompletedPage || 0) + 1);
-      let totalProcessed = progressState.totalProcessed || 0;
-
-      this.logger.info(
-        `📊 Resuming from page ${currentPage} (${totalProcessed} variations already processed)`,
-      );
-
-      const productBatchSize = this.config.import.batchSizes.products || 50;
-      const variationBatchSize =
-        this.config.import.batchSizes.variations || productBatchSize || 100;
-
-      let hasMorePages = true;
-      let processedInThisSession = 0;
-
-      while (hasMorePages && processedInThisSession < limit) {
-        // Refresh cache every 5 minutes during long imports to avoid staleness
-        const cacheAge = Date.now() - this.lastCacheRefreshTime;
-        const CACHE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-        if (cacheAge > CACHE_REFRESH_INTERVAL) {
-          this.logger.info(
-            `🔄 Refreshing mapping caches (last refresh: ${Math.round(cacheAge / 1000)}s ago)`,
+        if (force && (progressState.lastCompletedPage > 0 || progressState.totalProcessed > 0)) {
+          this.logger.warn(
+            `⚠️ FORCE MODE: Ignoring previous progress state (was at page ${progressState.lastCompletedPage}, ${progressState.totalProcessed} processed)`,
           );
-          await this.loadMappingCaches();
-          this.lastCacheRefreshTime = Date.now();
         }
 
-        const remainingLimit = limit - processedInThisSession;
-        const perPage = Math.min(productBatchSize, remainingLimit);
+        let currentPage = Math.max(page, (progressState.lastCompletedPage || 0) + 1);
+        let totalProcessed = progressState.totalProcessed || 0;
 
-        this.logger.info(`📂 Processing product page ${currentPage} (requesting ${perPage} items)`);
+        this.logger.info(
+          `📊 Resuming from page ${currentPage} (${totalProcessed} variations already processed)`,
+        );
 
-        const result = await this.wooClient.getProducts(currentPage, perPage);
+        const productBatchSize = this.config.import.batchSizes.products || 50;
+        const variationBatchSize =
+          this.config.import.batchSizes.variations || productBatchSize || 100;
+
+        let hasMorePages = true;
+        let processedInThisSession = 0;
+
+        while (hasMorePages && processedInThisSession < limit) {
+          // Refresh cache every 5 minutes during long imports to avoid staleness
+          const cacheAge = Date.now() - this.lastCacheRefreshTime;
+          const CACHE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+          if (cacheAge > CACHE_REFRESH_INTERVAL) {
+            this.logger.info(
+              `🔄 Refreshing mapping caches (last refresh: ${Math.round(cacheAge / 1000)}s ago)`,
+            );
+            await this.loadMappingCaches();
+            this.lastCacheRefreshTime = Date.now();
+          }
+
+          const remainingLimit = limit - processedInThisSession;
+          const perPage = Math.min(productBatchSize, remainingLimit);
+
+          this.logger.info(`📂 Processing product page ${currentPage} (requesting ${perPage} items)`);
+
+          const result = await this.wooClient.getProducts(currentPage, perPage);
 
         if (!Array.isArray(result.data) || result.data.length === 0) {
           this.logger.info(`📂 No more products found on page ${currentPage}`);
@@ -430,6 +445,7 @@ class VariationImporter {
       this.logger.success(
         `🎉 Import session completed: ${processedInThisSession} variations processed in this session`,
       );
+      }
     } catch (error) {
       this.stats.errors += 1;
       this.logger.error("❌ Variation import failed:", error);
@@ -441,6 +457,299 @@ class VariationImporter {
     }
 
     return this.stats;
+  }
+
+  /**
+   * Import variations by scanning imported product mappings
+   * Useful for backfilling missing variations without paging all WooCommerce products
+   */
+  async importFromImportedProducts({
+    limit,
+    page,
+    dryRun,
+    force,
+    nameFilter,
+    logParentNames,
+    inStockOnly,
+    missingOnly,
+  }) {
+    const progressKey = missingOnly
+      ? "variation-import-missing-progress.json"
+      : "variation-import-imported-progress.json";
+    const activeNameFilter = Array.isArray(nameFilter) ? nameFilter : [];
+
+    const productIds = Array.from(this.productMappingCache.keys())
+      .map((id) => Number.parseInt(id, 10))
+      .filter((id) => Number.isFinite(id))
+      .sort((a, b) => a - b);
+
+    if (productIds.length === 0) {
+      this.logger.info(`📂 No imported products found in mapping cache`);
+      return;
+    }
+
+    const progressState = force
+      ? { lastCompletedIndex: -1, totalProcessed: 0 }
+      : this.loadProgressState(progressKey);
+
+    const hasProgress =
+      (Number.isFinite(progressState.lastCompletedIndex) &&
+        progressState.lastCompletedIndex >= 0) ||
+      (progressState.lastCompletedProductId !== undefined &&
+        progressState.lastCompletedProductId !== null) ||
+      (progressState.totalProcessed || 0) > 0;
+
+    if (force && hasProgress) {
+      this.logger.warn(
+        `⚠️ FORCE MODE: Ignoring previous progress state (${progressKey})`,
+      );
+    }
+
+    const productBatchSize = this.config.import.batchSizes.products || 50;
+    const variationBatchSize =
+      this.config.import.batchSizes.variations || productBatchSize || 100;
+
+    const pageStartIndex = Math.max(0, (page - 1) * productBatchSize);
+
+    let progressIndex = -1;
+    if (Number.isFinite(progressState.lastCompletedIndex)) {
+      progressIndex = progressState.lastCompletedIndex;
+    }
+
+    if (
+      progressState.lastCompletedProductId !== undefined &&
+      progressState.lastCompletedProductId !== null
+    ) {
+      const lastProductId = Number.parseInt(progressState.lastCompletedProductId, 10);
+      const foundIndex = productIds.indexOf(lastProductId);
+      if (foundIndex >= 0) {
+        progressIndex = Math.max(progressIndex, foundIndex);
+      }
+    }
+
+    let currentIndex = Math.max(pageStartIndex, progressIndex + 1);
+    let totalProcessed = progressState.totalProcessed || 0;
+
+    if (currentIndex >= productIds.length) {
+      this.logger.info(
+        `📂 Start index ${currentIndex + 1} exceeds imported product count (${productIds.length}); nothing to process`,
+      );
+      return;
+    }
+
+    this.logger.info(
+      `📊 Resuming imported-products scan from index ${currentIndex + 1}/${
+        productIds.length
+      } (${totalProcessed} variations already processed)`,
+    );
+
+    if (missingOnly) {
+      this.logger.info(`🧩 Missing-only mode enabled (skipping already imported variations)`);
+    }
+
+    let processedInThisSession = 0;
+
+    const markProductComplete = (index) => {
+      this.saveProgressState(
+        {
+          lastCompletedIndex: index,
+          lastCompletedProductId: productIds[index],
+          totalProcessed,
+          lastProcessedAt: new Date().toISOString(),
+        },
+        progressKey,
+      );
+    };
+
+    const markProductInProgress = (index) => {
+      const previousIndex = index - 1;
+      this.saveProgressState(
+        {
+          lastCompletedIndex: previousIndex,
+          lastCompletedProductId: previousIndex >= 0 ? productIds[previousIndex] : null,
+          totalProcessed,
+          lastProcessedAt: new Date().toISOString(),
+        },
+        progressKey,
+      );
+    };
+
+    for (let index = currentIndex; index < productIds.length; index += 1) {
+      if (processedInThisSession >= limit) {
+        this.logger.info(`📊 Reached session limit of ${limit} variations`);
+        break;
+      }
+
+      const productId = productIds[index];
+      const parentStrapiId = this.productMappingCache.get(productId);
+
+      if (!parentStrapiId) {
+        this.logger.warn(`⚠️ Skipping product ${productId} - no Strapi mapping found`);
+        markProductComplete(index);
+        continue;
+      }
+
+      let product;
+      try {
+        product = await this.wooClient.getProductById(productId);
+      } catch (error) {
+        this.stats.errors += 1;
+        this.logger.error(`❌ Failed to fetch product ${productId}:`, error.message || error);
+        if (!this.config.errorHandling.continueOnError) {
+          throw error;
+        }
+        markProductComplete(index);
+        continue;
+      }
+
+      if (!product) {
+        this.logger.warn(`⚠️ WooCommerce product ${productId} not found, skipping`);
+        markProductComplete(index);
+        continue;
+      }
+
+      const productName = product.name || "Untitled Product";
+
+      if (
+        activeNameFilter.length > 0 &&
+        !this.shouldImportParentProduct(productName, activeNameFilter)
+      ) {
+        this.logger.debug(
+          `🎯 Skipping product ${productId} (${productName}) - does not match name filter`,
+        );
+        markProductComplete(index);
+        continue;
+      }
+
+      const hasVariations =
+        product.type === "variable" &&
+        Array.isArray(product.variations) &&
+        product.variations.length > 0;
+
+      if (!hasVariations) {
+        this.logger.debug(
+          `📂 Skipping product ${productId} (${productName}) - no variations found`,
+        );
+        markProductComplete(index);
+        continue;
+      }
+
+      if (inStockOnly) {
+        const hasInStock = await this.hasInStockVariations(product);
+        if (!hasInStock) {
+          this.logger.debug(
+            `⏩ Skipping variations for product ${productId} (${productName}) - no variations in stock`,
+          );
+          this.stats.skipped += product.variations.length;
+          markProductComplete(index);
+          continue;
+        }
+      }
+
+      if (missingOnly) {
+        const missingIds = product.variations.filter(
+          (variationId) => !this.duplicateTracker.isImported("variations", variationId),
+        );
+
+        if (missingIds.length === 0) {
+          this.logger.debug(
+            `✅ All variations already imported for product ${productId} (${productName})`,
+          );
+          this.stats.skipped += product.variations.length;
+          markProductComplete(index);
+          continue;
+        }
+      }
+
+      if (logParentNames && !dryRun) {
+        this.logger.info(
+          `🧵 Importing variations for parent product: ${productName} (Woo ID: ${productId})`,
+        );
+      }
+
+      let variationPage = 1;
+      let hasMoreVariations = true;
+
+      while (hasMoreVariations && processedInThisSession < limit) {
+        const variationRemainingLimit = limit - processedInThisSession;
+        const perVariationPage = Math.min(variationBatchSize, variationRemainingLimit);
+
+        const variationResult = await this.wooClient.getProductVariations(
+          productId,
+          variationPage,
+          perVariationPage,
+        );
+
+        const variations = Array.isArray(variationResult.data) ? variationResult.data : [];
+
+        if (variations.length === 0) {
+          hasMoreVariations = false;
+          break;
+        }
+
+        for (const variation of variations) {
+          if (missingOnly && this.duplicateTracker.isImported("variations", variation.id)) {
+            this.stats.skipped += 1;
+            continue;
+          }
+
+          variation._parentProduct = product;
+
+          try {
+            await this.importSingleVariation(variation, parentStrapiId, dryRun);
+            totalProcessed += 1;
+            processedInThisSession += 1;
+            this.stats.total = totalProcessed;
+
+            // Mark previous product as complete while current one is in progress
+            markProductInProgress(index);
+
+            if (totalProcessed % this.config.logging.progressInterval === 0) {
+              this.logger.info(
+                `📈 Progress: ${totalProcessed} variations processed, current index: ${
+                  index + 1
+                }/${productIds.length}`,
+              );
+            }
+          } catch (error) {
+            this.stats.errors += 1;
+            this.logger.error(
+              `❌ Failed to import variation ${variation.id}:`,
+              error.message || error,
+            );
+
+            if (!this.config.errorHandling.continueOnError) {
+              throw error;
+            }
+          }
+
+          if (processedInThisSession >= limit) {
+            break;
+          }
+        }
+
+        if (processedInThisSession >= limit) {
+          break;
+        }
+
+        variationPage += 1;
+        const totalVariationPages = Number.parseInt(variationResult.totalPages || "1", 10);
+        if (variationPage > totalVariationPages) {
+          hasMoreVariations = false;
+        }
+      }
+
+      if (processedInThisSession >= limit) {
+        this.logger.info(`📊 Reached session limit of ${limit} variations`);
+        break;
+      }
+
+      markProductComplete(index);
+    }
+
+    this.logger.success(
+      `🎉 Imported-products scan completed: ${processedInThisSession} variations processed in this session`,
+    );
   }
 
   /**
@@ -460,17 +769,20 @@ class VariationImporter {
   /**
    * Load progress state from file
    */
-  loadProgressState() {
-    const progressFile = path.join(
-      this.config.duplicateTracking.storageDir,
-      "variation-import-progress.json",
-    );
+  loadProgressState(progressKey = "variation-import-progress.json") {
+    const progressFile = path.join(this.config.duplicateTracking.storageDir, progressKey);
 
     try {
       if (fs.existsSync(progressFile)) {
         const data = JSON.parse(fs.readFileSync(progressFile, "utf8"));
+        const locationLabel =
+          data.lastCompletedPage !== undefined
+            ? `page ${data.lastCompletedPage}`
+            : data.lastCompletedIndex !== undefined
+            ? `index ${data.lastCompletedIndex}`
+            : "unknown position";
         this.logger.debug(
-          `📂 Loaded progress state: page ${data.lastCompletedPage}, ${data.totalProcessed} processed`,
+          `📂 Loaded progress state (${progressKey}): ${locationLabel}, ${data.totalProcessed} processed`,
         );
         return data;
       }
@@ -482,17 +794,16 @@ class VariationImporter {
       lastCompletedPage: 0,
       totalProcessed: 0,
       lastProcessedAt: null,
+      lastCompletedIndex: -1,
+      lastCompletedProductId: null,
     };
   }
 
   /**
    * Save progress state to file
    */
-  saveProgressState(state) {
-    const progressFile = path.join(
-      this.config.duplicateTracking.storageDir,
-      "variation-import-progress.json",
-    );
+  saveProgressState(state, progressKey = "variation-import-progress.json") {
+    const progressFile = path.join(this.config.duplicateTracking.storageDir, progressKey);
 
     try {
       fs.writeFileSync(progressFile, JSON.stringify(state, null, 2));
@@ -504,20 +815,34 @@ class VariationImporter {
   /**
    * Reset progress state (useful for starting fresh)
    */
-  resetProgressState() {
-    const progressFile = path.join(
-      this.config.duplicateTracking.storageDir,
-      "variation-import-progress.json",
-    );
+  resetProgressState(progressKey = null) {
+    const progressKeys = progressKey
+      ? [progressKey]
+      : [
+          "variation-import-progress.json",
+          "variation-import-imported-progress.json",
+          "variation-import-missing-progress.json",
+        ];
 
-    try {
-      if (fs.existsSync(progressFile)) {
-        fs.unlinkSync(progressFile);
-      } else {
-        this.logger.info(`📂 No existing variation progress state to reset`);
+    let removedAny = false;
+
+    for (const key of progressKeys) {
+      const progressFile = path.join(this.config.duplicateTracking.storageDir, key);
+
+      try {
+        if (fs.existsSync(progressFile)) {
+          fs.unlinkSync(progressFile);
+          removedAny = true;
+        }
+      } catch (error) {
+        this.logger.error(`❌ Failed to reset progress state (${key}): ${error.message}`);
       }
-    } catch (error) {
-      this.logger.error(`❌ Failed to reset progress state: ${error.message}`);
+    }
+
+    if (removedAny) {
+      this.logger.info(`🧹 Reset variation progress state`);
+    } else {
+      this.logger.info(`📂 No existing variation progress state to reset`);
     }
   }
 
@@ -529,10 +854,37 @@ class VariationImporter {
       `🔄 Processing variation: ${wcVariation.id} - ${wcVariation._parentProduct.name}`,
     );
 
-    const existingMapping = this.duplicateTracker.getStrapiId("variations", wcVariation.id);
-    const existingStrapiId = existingMapping?.strapiId;
+    let existingMapping = this.duplicateTracker.getStrapiId("variations", wcVariation.id);
+    let existingStrapiId = existingMapping?.strapiId;
 
     try {
+      if (!existingStrapiId) {
+        try {
+          const existingByExternal = await this.strapiClient.findByExternalId(
+            "/product-variations",
+            wcVariation.id.toString(),
+          );
+          const existingItems = Array.isArray(existingByExternal?.data)
+            ? existingByExternal.data
+            : [];
+
+          if (existingItems.length > 0) {
+            existingStrapiId = existingItems[0].id;
+            existingMapping = { strapiId: existingStrapiId };
+            this.duplicateTracker.recordMapping("variations", wcVariation.id, existingStrapiId, {
+              recovered: true,
+            });
+            this.logger.warn(
+              `⚠️ Recovered missing variation mapping for WC ${wcVariation.id} → Strapi ${existingStrapiId}`,
+            );
+          }
+        } catch (lookupError) {
+          this.logger.warn(
+            `⚠️ Failed to lookup existing variation ${wcVariation.id} by external_id: ${lookupError.message}`,
+          );
+        }
+      }
+
       // Validate parent product exists
       if (!parentProductStrapiId || typeof parentProductStrapiId !== "number") {
         const errorMsg = `Variation ${wcVariation.id}: Invalid parent product ID: ${parentProductStrapiId}`;

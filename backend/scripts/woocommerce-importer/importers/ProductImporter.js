@@ -683,7 +683,8 @@ class ProductImporter {
     }
 
     // Ensure VariationImporter caches are loaded (for attribute lookups)
-    if (!this.variationImporter.productMappingCache || this.variationImporter.productMappingCache.size === 0) {
+    // Only load if cache is empty - we'll update productMappingCache directly when products are imported
+    if (this.variationImporter.productMappingCache.size === 0) {
       await this.variationImporter.loadMappingCaches();
     }
 
@@ -804,11 +805,13 @@ class ProductImporter {
           await this.strapiClient.updateProduct(existingStrapiId, payload);
           mode = "update";
           this.logger.success(`✅ Updated product: ${wcProduct.name} → ID: ${existingStrapiId}`);
+          productId = existingStrapiId;
         } else {
-          // Product hasn't changed, skip update
-          this.logger.info(`⏭️ No changes detected, skipping: ${wcProduct.name}`);
+          // Product hasn't changed, skip update but still use existing ID for variation import
+          this.logger.info(`⏭️ No changes detected, skipping product update: ${wcProduct.name}`);
           this.stats.skipped++;
-          return { mode: "skipped", strapiId: existingStrapiId };
+          productId = existingStrapiId;
+          mode = "skipped";
         }
       } else {
         const result = await this.strapiClient.createProduct(payload);
@@ -901,6 +904,10 @@ class ProductImporter {
           status: wcProduct.status,
           rating: wcProduct.average_rating, // Track rating to detect changes
         });
+
+        // Update VariationImporter's product mapping cache with the newly imported product
+        // This ensures variation import can find the parent product
+        this.variationImporter.productMappingCache.set(wcProduct.id, productId);
 
         // Import variations if product has them
         if (wcProduct.variations && Array.isArray(wcProduct.variations) && wcProduct.variations.length > 0) {

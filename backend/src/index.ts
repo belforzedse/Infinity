@@ -176,6 +176,16 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
   superadmin: { mode: "all" },
 };
 
+// Optional escape hatch to allow full Content API access for selected roles.
+// WARNING: Enabling this in production will expose write access to the Content API.
+const CONTENT_API_ALLOW_ALL = process.env.STRAPI_CONTENT_API_ALLOW_ALL === "true";
+if (CONTENT_API_ALLOW_ALL) {
+  const allowRoles = ["public", "customer"];
+  allowRoles.forEach((role) => {
+    ROLE_PERMISSION_SPECS[role] = { mode: "all" };
+  });
+}
+
 type RestrictedController = {
   typeKey: string;
   controller: string;

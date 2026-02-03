@@ -88,5 +88,1796 @@
     "type": "variable",
     "status": "publish",
     "rating": "0.00"
+  },
+  "721975": {
+    "strapiId": 1155,
+    "importedAt": "2026-02-02T11:53:27.012Z",
+    "name": "کراپ بافت رنگی H0030",
+    "slug": "colored-texture-crop-h0030",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "729805": {
+    "strapiId": 1154,
+    "importedAt": "2026-02-02T11:48:05.552Z",
+    "name": "کراپ یقه اسکی H0097",
+    "slug": "cropped-turtleneck-h0097",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "734430": {
+    "strapiId": 1156,
+    "importedAt": "2026-02-02T11:52:22.554Z",
+    "name": "شلوار بگ کشمیر E0029",
+    "slug": "shalwar-big-kashmir-e0029",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "744648": {
+    "strapiId": 1158,
+    "importedAt": "2026-02-02T11:54:22.124Z",
+    "name": "تونیک رنگی OppsiR00545",
+    "slug": "color-tonic-oppsir00545",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "746216": {
+    "strapiId": 1160,
+    "importedAt": "2026-02-02T11:54:42.490Z",
+    "name": "شلوار مام استایل کشمیر E0028",
+    "slug": "mom-fit-cashmere-pants-e0028",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "866402": {
+    "strapiId": 1169,
+    "importedAt": "2026-02-02T12:31:17.717Z",
+    "name": "شومیز ساتن آلما OppsiC0060",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%d8%b3%d8%a7%d8%aa%d9%86-%d8%a2%d9%84%d9%85%d8%a7-oppsic0060",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "866518": {
+    "strapiId": 1168,
+    "importedAt": "2026-02-02T12:30:24.046Z",
+    "name": "تونیک جلو دکمه OppsiA0093",
+    "slug": "%d8%aa%d9%88%d9%86%db%8c%da%a9-%d8%ac%d9%84%d9%88-%d8%af%da%a9%d9%85%d9%87-oppsia0093",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "866525": {
+    "strapiId": 1170,
+    "importedAt": "2026-02-02T12:31:07.309Z",
+    "name": "تونیک راه راه OppsiR00474",
+    "slug": "%d8%aa%d9%88%d9%86%db%8c%da%a9-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsir00474",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "866668": {
+    "strapiId": 1171,
+    "importedAt": "2026-02-02T12:31:09.705Z",
+    "name": "شومیز نیلا OppsiC0054",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%d9%86%db%8c%d9%84%d8%a7-oppsic0054",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "867599": {
+    "strapiId": 1172,
+    "importedAt": "2026-02-02T12:31:59.118Z",
+    "name": "دامن کتان بنددار C0027",
+    "slug": "strappy-skirt-c0027",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "867719": {
+    "strapiId": 1173,
+    "importedAt": "2026-02-02T12:31:57.116Z",
+    "name": "شلوار راسته کلاسیک C0068",
+    "slug": "classic-straight-pants-c0068-2",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "868048": {
+    "strapiId": 1174,
+    "importedAt": "2026-02-02T12:32:45.385Z",
+    "name": "شلوار کلاسیک بغل زیپ C0085",
+    "slug": "classic-pants-with-zipper-c0085",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "868093": {
+    "strapiId": 1175,
+    "importedAt": "2026-02-02T12:32:43.234Z",
+    "name": "شلوار دمپا عروسکی C0081",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%af%d9%85%d9%be%d8%a7-%d8%b9%d8%b1%d9%88%d8%b3%da%a9%db%8c-c0081",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "870032": {
+    "strapiId": 1176,
+    "importedAt": "2026-02-02T12:33:29.039Z",
+    "name": "شلوار کلاسیک بغل چاک C0082",
+    "slug": "chuck-classic-pants-c0082",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "870146": {
+    "strapiId": 1177,
+    "importedAt": "2026-02-02T12:33:39.469Z",
+    "name": "شلوار بگ ریما C0090",
+    "slug": "bag-rima-pants-c0090",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "871976": {
+    "strapiId": 1178,
+    "importedAt": "2026-02-02T12:34:01.571Z",
+    "name": "شلوار بگ کمربندی C0099",
+    "slug": "c0099",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "871992": {
+    "strapiId": 1179,
+    "importedAt": "2026-02-02T12:34:46.893Z",
+    "name": "شلوار تک پیل پاکتی C0070",
+    "slug": "c0070-single-pocket-pants",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "872062": {
+    "strapiId": 1180,
+    "importedAt": "2026-02-02T12:34:48.106Z",
+    "name": "تونیک راه راه OppsiR00404",
+    "slug": "%d8%aa%d9%88%d9%86%db%8c%da%a9-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsir00404",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "872323": {
+    "strapiId": 1181,
+    "importedAt": "2026-02-02T12:34:55.586Z",
+    "name": "دامن جلو چاک D002",
+    "slug": "chuck-front-skirt-d002",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "873135": {
+    "strapiId": 1182,
+    "importedAt": "2026-02-02T12:34:57.925Z",
+    "name": "شلوار کلاسیک بغل زیپ C0083",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%da%a9%d9%84%d8%a7%d8%b3%db%8c%da%a9-%d8%a8%d8%ba%d9%84-%d8%b2%db%8c%d9%be-c0083",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "874006": {
+    "strapiId": 1183,
+    "importedAt": "2026-02-02T12:35:38.108Z",
+    "name": "شلوار کلاسیک جلو خط c0084",
+    "slug": "classic-front-lined-pants-c0084",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "874616": {
+    "strapiId": 1184,
+    "importedAt": "2026-02-02T12:36:22.248Z",
+    "name": "شومیز یقه مرواریدی C0050",
+    "slug": "pearl-collar-paper-c0050",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "874802": {
+    "strapiId": 1185,
+    "importedAt": "2026-02-02T12:37:39.670Z",
+    "name": "شال حریر نخ راه راه OppsiS00513",
+    "slug": "%d8%b4%d8%a7%d9%84-%d8%ad%d8%b1%db%8c%d8%b1-%d9%86%d8%ae-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsis00513",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "874962": {
+    "strapiId": 1186,
+    "importedAt": "2026-02-02T12:36:11.159Z",
+    "name": "شلوار بگ کرپ سان جلو پیله C00127",
+    "slug": "c00127-bag-crepe-sun-front-cocoon-pants",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "875297": {
+    "strapiId": 1188,
+    "importedAt": "2026-02-02T12:38:52.217Z",
+    "name": "شال دور زیپ S00518",
+    "slug": "shawl-round-zipper-s00518",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "875395": {
+    "strapiId": 1187,
+    "importedAt": "2026-02-02T12:38:09.846Z",
+    "name": "کمربند  MK00108",
+    "slug": "mk00108-belt",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "875712": {
+    "strapiId": 1189,
+    "importedAt": "2026-02-02T12:38:28.808Z",
+    "name": "کت توریا D0044",
+    "slug": "turia-coat-d0044",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "876017": {
+    "strapiId": 1190,
+    "importedAt": "2026-02-02T12:39:38.294Z",
+    "name": "شلوار بگ لینن OppsiR00357",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d9%84%db%8c%d9%86%d9%86-oppsir00357",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "876131": {
+    "strapiId": 1191,
+    "importedAt": "2026-02-02T12:39:09.564Z",
+    "name": "شلوار تک پیل C0066",
+    "slug": "single-pile-pants-c0066",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "876158": {
+    "strapiId": 1192,
+    "importedAt": "2026-02-02T12:40:10.987Z",
+    "name": "دامن پشت زیپ D004",
+    "slug": "back-zipper-skirt-d004",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "876606": {
+    "strapiId": 1193,
+    "importedAt": "2026-02-02T12:41:15.292Z",
+    "name": "شال ماهی S00521",
+    "slug": "fish-shawl-s00521",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "877943": {
+    "strapiId": 1194,
+    "importedAt": "2026-02-02T12:41:18.676Z",
+    "name": "شال سزار OppsiS00539",
+    "slug": "%d8%b4%d8%a7%d9%84-%d8%b3%d8%b2%d8%a7%d8%b1-oppsis00539",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "879336": {
+    "strapiId": 1195,
+    "importedAt": "2026-02-02T12:41:47.567Z",
+    "name": "تیشرت OppsiR00328 facetune",
+    "slug": "%d8%aa%db%8c%d8%b4%d8%b1%d8%aa-oppsir00328-facetune",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "879511": {
+    "strapiId": 1197,
+    "importedAt": "2026-02-02T12:42:07.176Z",
+    "name": "شلوار نیم بگ C00136",
+    "slug": "c00136-half-bag-pants-on-the-back",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "880165": {
+    "strapiId": 1196,
+    "importedAt": "2026-02-02T12:41:53.176Z",
+    "name": "شورت لیزری پلنگی 000264",
+    "slug": "leopard-laser-shorts-000264",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "880325": {
+    "strapiId": 1199,
+    "importedAt": "2026-02-02T12:43:05.074Z",
+    "name": "شلوار مام دو پیل OppsiR00236",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d9%85%d8%a7%d9%85-%d8%af%d9%88-%d9%be%db%8c%d9%84-oppsir00236",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "880600": {
+    "strapiId": 1198,
+    "importedAt": "2026-02-02T12:43:16.585Z",
+    "name": "تونیک راه راه OppsiR00384",
+    "slug": "%d8%aa%d9%88%d9%86%db%8c%da%a9-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsir00384",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "881161": {
+    "strapiId": 1200,
+    "importedAt": "2026-02-02T12:43:20.521Z",
+    "name": "شال کنفی زخمی S00531",
+    "slug": "hemp-shawl-wounded-s00531",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "881564": {
+    "strapiId": 1201,
+    "importedAt": "2026-02-02T12:42:43.328Z",
+    "name": "شلوار نیم بگ ماهلین C00134",
+    "slug": "bag-mahlin-pants-c00134",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "881815": {
+    "strapiId": 1202,
+    "importedAt": "2026-02-02T12:44:05.140Z",
+    "name": "شومیز سنگ دوزی OppsiR00800",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%d8%b3%d9%86%da%af-%d8%af%d9%88%d8%b2%db%8c-oppsir00800",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "881917": {
+    "strapiId": 1204,
+    "importedAt": "2026-02-02T12:44:10.786Z",
+    "name": "دامن جلو چاک C00133",
+    "slug": "chuck-front-skirt-c00133",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "882715": {
+    "strapiId": 1203,
+    "importedAt": "2026-02-02T12:43:58.710Z",
+    "name": "شلوار بگ دوپیل مازراتی C00112",
+    "slug": "maserati-c00112-double-breasted-pants",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "882835": {
+    "strapiId": 1205,
+    "importedAt": "2026-02-02T12:43:54.948Z",
+    "name": "شلوار کلاسیک سه دکمه C00135",
+    "slug": "three-button-classic-pants-c00135",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "883512": {
+    "strapiId": 1206,
+    "importedAt": "2026-02-02T12:44:51.444Z",
+    "name": "پیراهن دوتیکه‌ مادام C00150",
+    "slug": "vest-shirt-c00150",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "885108": {
+    "strapiId": 1207,
+    "importedAt": "2026-02-02T12:45:19.145Z",
+    "name": "شومیز راه راه C00208",
+    "slug": "corrugated-paper-c00208",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "885981": {
+    "strapiId": 1208,
+    "importedAt": "2026-02-02T12:45:37.116Z",
+    "name": "کت جین گلدوزی OppsiH004",
+    "slug": "%da%a9%d8%aa-%d8%ac%db%8c%d9%86-%da%af%d9%84%d8%af%d9%88%d8%b2%db%8c-oppsih004",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886170": {
+    "strapiId": 1209,
+    "importedAt": "2026-02-02T12:46:24.876Z",
+    "name": "شورت ماهگون 000289",
+    "slug": "mahogany-shorts-000289",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886314": {
+    "strapiId": 1211,
+    "importedAt": "2026-02-02T12:46:41.045Z",
+    "name": "کیف گلایور B00264",
+    "slug": "gulliver-bag-b00264",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "886346": {
+    "strapiId": 1210,
+    "importedAt": "2026-02-02T12:46:21.781Z",
+    "name": "کمربند CK 00142",
+    "slug": "belt-ck-00142",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "887514": {
+    "strapiId": 1212,
+    "importedAt": "2026-02-02T12:47:12.405Z",
+    "name": "شال برشکا OppsiS00532",
+    "slug": "%d8%b4%d8%a7%d9%84-%d8%a8%d8%b1%d8%b4%da%a9%d8%a7-oppsis00532",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "888253": {
+    "strapiId": 1213,
+    "importedAt": "2026-02-02T12:46:34.642Z",
+    "name": "شلوار کلاسیک زارا D0090",
+    "slug": "pants-d0090",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "888471": {
+    "strapiId": 1214,
+    "importedAt": "2026-02-02T12:47:56.837Z",
+    "name": "شلوار منگو C00212",
+    "slug": "mango-pants-c00212",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "888761": {
+    "strapiId": 1216,
+    "importedAt": "2026-02-02T12:48:13.381Z",
+    "name": "کت تیارا D006",
+    "slug": "%da%a9%d8%aa-%d8%aa%db%8c%d8%a7%d8%b1%d8%a7-d006",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "889003": {
+    "strapiId": 1215,
+    "importedAt": "2026-02-02T12:48:10.464Z",
+    "name": "شلوار کمر دوبل D0091",
+    "slug": "pants-d0091",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "891004": {
+    "strapiId": 1217,
+    "importedAt": "2026-02-02T12:49:04.384Z",
+    "name": "پبراهن اسپرت C00205",
+    "slug": "tunic-with-collar-c00205",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "891258": {
+    "strapiId": 1218,
+    "importedAt": "2026-02-02T12:49:14.896Z",
+    "name": "کت کنف دوزی مهرسا D0012",
+    "slug": "embroidered-hemp-jacket-d0012",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "892285": {
+    "strapiId": 1219,
+    "importedAt": "2026-02-02T12:49:49.021Z",
+    "name": "شلوار میو‌ میو C00146",
+    "slug": "c00146",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1032012": {
+    "strapiId": 1220,
+    "importedAt": "2026-02-02T13:01:13.694Z",
+    "name": "شلوار بگ نقابدار C00633",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d9%86%d9%82%d8%a7%d8%a8%d8%af%d8%a7%d8%b1-c00633",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1032039": {
+    "strapiId": 1222,
+    "importedAt": "2026-02-02T13:01:37.726Z",
+    "name": "شومیز بیسیک OppsiC0015",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%d8%a8%db%8c%d8%b3%db%8c%da%a9-oppsic0015",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1032190": {
+    "strapiId": 1221,
+    "importedAt": "2026-02-02T13:01:27.361Z",
+    "name": "شلوار بگ سایه C00634",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d8%b3%d8%a7%db%8c%d9%87-c00634",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1032954": {
+    "strapiId": 1223,
+    "importedAt": "2026-02-02T13:01:33.653Z",
+    "name": "شلوار مام لینن C00635",
+    "slug": "mom-lane-pants-c00635",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1033144": {
+    "strapiId": 1224,
+    "importedAt": "2026-02-02T13:01:31.249Z",
+    "name": "شلوار بگ ویرو C00636",
+    "slug": "bag-viro-pants-c00636",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1033713": {
+    "strapiId": 1225,
+    "importedAt": "2026-02-02T13:02:39.159Z",
+    "name": "شلوار مام لینن C00638",
+    "slug": "linen-mom-pants-c00638",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1033959": {
+    "strapiId": 1227,
+    "importedAt": "2026-02-02T13:02:50.662Z",
+    "name": "شلوار OppsiEmma C00624",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-oppsiemma-c00624",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1034970": {
+    "strapiId": 1226,
+    "importedAt": "2026-02-02T13:02:28.513Z",
+    "name": "صندل سگک طلایی OppsiF0060",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%b3%da%af%da%a9-%d8%b7%d9%84%d8%a7%db%8c%db%8c-oppsif0060",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1035033": {
+    "strapiId": 1228,
+    "importedAt": "2026-02-02T13:03:41.958Z",
+    "name": "شلوار مام اروس C00639",
+    "slug": "mom-eros-pants-c00639",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1035171": {
+    "strapiId": 1231,
+    "importedAt": "2026-02-02T13:03:45.341Z",
+    "name": "شلوار بگ ماهلینOppsiC00134 SH",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d9%85%d8%a7%d9%87%d9%84%db%8c%d9%86oppsic00134-sh",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1036036": {
+    "strapiId": 1229,
+    "importedAt": "2026-02-02T13:03:24.126Z",
+    "name": "نیم تنه ورزشی 000726",
+    "slug": "sports-bra-000726",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1036093": {
+    "strapiId": 1230,
+    "importedAt": "2026-02-02T13:03:30.646Z",
+    "name": "جوراب مچی خالخالی 000713",
+    "slug": "polka-dot-ankle-socks-000713",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1036173": {
+    "strapiId": 1232,
+    "importedAt": "2026-02-02T13:04:43.803Z",
+    "name": "شال حریر مجلسی لبه ریش OppsiS00545",
+    "slug": "%d8%b4%d8%a7%d9%84-%d8%ad%d8%b1%db%8c%d8%b1-%d9%85%d8%ac%d9%84%d8%b3%db%8c-%d9%84%d8%a8%d9%87-%d8%b1%db%8c%d8%b4-oppsis00545",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1036494": {
+    "strapiId": 1233,
+    "importedAt": "2026-02-02T13:04:31.067Z",
+    "name": "جوراب راه راه 000718",
+    "slug": "striped-socks-000718",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1036731": {
+    "strapiId": 1234,
+    "importedAt": "2026-02-02T13:04:51.486Z",
+    "name": "شلوار راه راه و ساده OppsiC00253",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-%d9%88-%d8%b3%d8%a7%d8%af%d9%87-oppsic00253",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1036786": {
+    "strapiId": 1235,
+    "importedAt": "2026-02-02T13:05:05.642Z",
+    "name": "صندل هرمس OppsiD00200",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d9%87%d8%b1%d9%85%d8%b3-oppsid00200",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1047098": {
+    "strapiId": 1236,
+    "importedAt": "2026-02-02T13:06:25.733Z",
+    "name": "سوتین ابری لب تور 000763",
+    "slug": "cloudy-lace-bra-000763",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1047122": {
+    "strapiId": 1237,
+    "importedAt": "2026-02-02T13:06:31.102Z",
+    "name": "ست (Sexy LADY ) 000767",
+    "slug": "set-sexy-lady-000767",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1047275": {
+    "strapiId": 1238,
+    "importedAt": "2026-02-02T13:06:33.227Z",
+    "name": "ترنچ کت دیبا P0014",
+    "slug": "short-raincoat-diba-p0014",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1047418": {
+    "strapiId": 1239,
+    "importedAt": "2026-02-02T13:07:07.676Z",
+    "name": "کلاه فرانسویی (ceoceo)S00731",
+    "slug": "french-hat-ceoceos00731",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1047494": {
+    "strapiId": 1240,
+    "importedAt": "2026-02-02T13:07:18.275Z",
+    "name": "شال لوکس پاییزه پوشکین S00717",
+    "slug": "pushkin-autumn-luxury-shawl-s00717",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1047554": {
+    "strapiId": 1242,
+    "importedAt": "2026-02-02T13:08:16.448Z",
+    "name": "صندل رونیکا OppsiF0017",
+    "slug": "%d8%b5%d9%86%d8%af%d9%84-%d8%b1%d9%88%d9%86%db%8c%da%a9%d8%a7-oppsif0017",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1049958": {
+    "strapiId": 1241,
+    "importedAt": "2026-02-02T13:07:26.920Z",
+    "name": "بافت گیپوری مرواریدی OppsiL0030",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%da%af%db%8c%d9%be%d9%88%d8%b1%db%8c-%d9%85%d8%b1%d9%88%d8%a7%d8%b1%db%8c%d8%af%db%8c-oppsil0030",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1050115": {
+    "strapiId": 1244,
+    "importedAt": "2026-02-02T13:08:45.926Z",
+    "name": "سوتین آذین 000804",
+    "slug": "azin-bra-000804",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1050203": {
+    "strapiId": 1243,
+    "importedAt": "2026-02-02T13:08:46.139Z",
+    "name": "جوراب عطری ساقدار 000776",
+    "slug": "sagedar-perfumed-socks-00776",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1050439": {
+    "strapiId": 1247,
+    "importedAt": "2026-02-02T13:09:20.246Z",
+    "name": "جوراب عطری کبریتی 000777",
+    "slug": "matcha-scented-socks-000777",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1050449": {
+    "strapiId": 1245,
+    "importedAt": "2026-02-02T13:09:14.910Z",
+    "name": "جوراب گلدوزی000796",
+    "slug": "embroidered-socks-000796",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1050458": {
+    "strapiId": 1246,
+    "importedAt": "2026-02-02T13:09:18.079Z",
+    "name": "جوراب گلدوزی (RABBIT )000798",
+    "slug": "embroidered-socks-rabbit-000798",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1050555": {
+    "strapiId": 1248,
+    "importedAt": "2026-02-02T13:09:43.714Z",
+    "name": "شلوار بگ ساتن Oppsic00627",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d8%b3%d8%a7%d8%aa%d9%86-oppsic00627",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1051231": {
+    "strapiId": 1249,
+    "importedAt": "2026-02-02T13:10:43.510Z",
+    "name": "آگ پشت بندی F0070",
+    "slug": "fire-protection-f0070",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1051417": {
+    "strapiId": 1250,
+    "importedAt": "2026-02-02T13:10:04.910Z",
+    "name": "جوراب ساقدار 000781",
+    "slug": "stockings-000781",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1051440": {
+    "strapiId": 1251,
+    "importedAt": "2026-02-02T13:10:08.591Z",
+    "name": "جوراب کبریتی 000785",
+    "slug": "match-socks-000785",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1051446": {
+    "strapiId": 1252,
+    "importedAt": "2026-02-02T13:10:08.487Z",
+    "name": "جوراب کبریتی ساقدار 000786",
+    "slug": "match-socks-with-leg-warmers-000786",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1052712": {
+    "strapiId": 1253,
+    "importedAt": "2026-02-02T13:11:40.226Z",
+    "name": "کت فوتر کراپ p007",
+    "slug": "cropped-footer-coat-p007",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1052714": {
+    "strapiId": 1254,
+    "importedAt": "2026-02-02T13:11:40.230Z",
+    "name": "کت ببعی P0019",
+    "slug": "baby-coat-p0019",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1052846": {
+    "strapiId": 1255,
+    "importedAt": "2026-02-02T13:11:43.308Z",
+    "name": "کتونی مانا F0069",
+    "slug": "mana-f0069-ketone",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1054058": {
+    "strapiId": 1256,
+    "importedAt": "2026-02-02T13:12:20.150Z",
+    "name": "جوراب کبریتی 000788",
+    "slug": "match-socks-000788",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055171": {
+    "strapiId": 1257,
+    "importedAt": "2026-02-02T13:12:51.948Z",
+    "name": "کلاه بره مارک S00724",
+    "slug": "beret-hat-brand-s00724",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055192": {
+    "strapiId": 1258,
+    "importedAt": "2026-02-02T13:13:35.976Z",
+    "name": "شال مارک  (CK)S00720",
+    "slug": "shawl-mark-cks00720",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055194": {
+    "strapiId": 1261,
+    "importedAt": "2026-02-02T13:13:41.139Z",
+    "name": "بارونی جلو زیپ P0010",
+    "slug": "%d8%a8%d8%a7%d8%b1%d9%88%d9%86%db%8c-%d8%ac%d9%84%d9%88-%d8%b2%db%8c%d9%88",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055466": {
+    "strapiId": 1260,
+    "importedAt": "2026-02-02T13:13:49.511Z",
+    "name": "شلوار جین پایین کات L00124",
+    "slug": "low-cut-jeans-l00124",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055557": {
+    "strapiId": 1259,
+    "importedAt": "2026-02-02T13:13:20.010Z",
+    "name": "ترنچ کت ژیله دار سانتانا L00119",
+    "slug": "%d8%aa%d8%b1%d9%86%da%86-%da%a9%d8%aa-%da%98%db%8c%d9%84%d9%87-%d8%af%d8%a7%d8%b1-%d8%b3%d8%a7%d9%86%d8%aa%d8%a7%d9%86%d8%a7-l00119",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055621": {
+    "strapiId": 1263,
+    "importedAt": "2026-02-02T13:14:22.281Z",
+    "name": "جوراب ساقدار 000787",
+    "slug": "stockings-000787",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055629": {
+    "strapiId": 1262,
+    "importedAt": "2026-02-02T13:14:32.139Z",
+    "name": "جوراب لب تور 000789",
+    "slug": "lace-socks-000789",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1055661": {
+    "strapiId": 1264,
+    "importedAt": "2026-02-02T13:14:15.564Z",
+    "name": "دامن بافت L00114",
+    "slug": "woven-skirt-l00114",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1056420": {
+    "strapiId": 1265,
+    "importedAt": "2026-02-02T13:14:55.004Z",
+    "name": "نیم بوت آگ تک دکمه F0073",
+    "slug": "ag-tech-f0073-half-boot-button",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1056701": {
+    "strapiId": 1266,
+    "importedAt": "2026-02-02T13:15:25.094Z",
+    "name": "جوراب گلدوزی 000802",
+    "slug": "embroidered-socks-000802",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1056902": {
+    "strapiId": 1267,
+    "importedAt": "2026-02-02T13:15:31.634Z",
+    "name": "اسلیپر جلو بسته  F0074",
+    "slug": "unisa-f0074-closed-front-spoiler",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1056961": {
+    "strapiId": 1268,
+    "importedAt": "2026-02-02T13:16:27.866Z",
+    "name": "اسلیپر یونیسا F0076",
+    "slug": "unisa-f0076-spoiler",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1059469": {
+    "strapiId": 1270,
+    "importedAt": "2026-02-02T13:16:52.709Z",
+    "name": "ژاکت گل برجسته OppsiL0093",
+    "slug": "%da%98%d8%a7%da%a9%d8%aa-%da%af%d9%84-%d8%a8%d8%b1%d8%ac%d8%b3%d8%aa%d9%87-oppsil0093",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1059489": {
+    "strapiId": 1269,
+    "importedAt": "2026-02-02T13:16:14.475Z",
+    "name": "شلوار کرپ سیلک L0076",
+    "slug": "silk-crepe-pants-l0076",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1059684": {
+    "strapiId": 1271,
+    "importedAt": "2026-02-02T13:17:44.520Z",
+    "name": "شال پاییزه S00770",
+    "slug": "autumn-scarf-s00770",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1059772": {
+    "strapiId": 1273,
+    "importedAt": "2026-02-02T13:18:09.668Z",
+    "name": "ترنچ کت ماوی L0057",
+    "slug": "%d8%aa%d8%b1%d9%86%da%86-%da%a9%d8%aa-%d9%85%d8%a7%d9%88%db%8c-l0057",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1060401": {
+    "strapiId": 1272,
+    "importedAt": "2026-02-02T13:17:45.660Z",
+    "name": "کلاه bereton اعلا S00740",
+    "slug": "simple-sports-hat-s00740",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1060428": {
+    "strapiId": 1274,
+    "importedAt": "2026-02-02T13:19:10.170Z",
+    "name": "شال موهر بافت S00766",
+    "slug": "autumn-mohair-shawl-s00766",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1060563": {
+    "strapiId": 1275,
+    "importedAt": "2026-02-02T13:19:04.728Z",
+    "name": "دامن کتان L00142",
+    "slug": "linen-skirt-l00142",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1060806": {
+    "strapiId": 1276,
+    "importedAt": "2026-02-02T13:19:04.966Z",
+    "name": "شلوار بگ روژان توئیت L0059",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d8%b1%d9%88%da%98%d8%a7%d9%86-%d8%aa%d9%88%d8%a6%db%8c%d8%aa-l0059",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1065710": {
+    "strapiId": 1277,
+    "importedAt": "2026-02-02T13:20:25.636Z",
+    "name": "جوراب کبریتی لب تور 000791",
+    "slug": "lace-trimmed-socks-000791",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1065724": {
+    "strapiId": 1279,
+    "importedAt": "2026-02-02T13:20:44.498Z",
+    "name": "جوراب کبریتی ساقدار 000778",
+    "slug": "match-socks-with-leg-warmers-000778",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1065802": {
+    "strapiId": 1278,
+    "importedAt": "2026-02-02T13:20:37.065Z",
+    "name": "ترنچ کت لارا P0021",
+    "slug": "lara-trench-coat-p0021",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1065891": {
+    "strapiId": 1281,
+    "importedAt": "2026-02-02T13:21:11.753Z",
+    "name": "شلوار نیم بگ دیپلمات P0036",
+    "slug": "diplomat-half-bag-pants-p0036",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1067821": {
+    "strapiId": 1280,
+    "importedAt": "2026-02-02T13:21:01.740Z",
+    "name": "ست کیتی (VIP)000842",
+    "slug": "kitty-set-vip000842",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1068697": {
+    "strapiId": 1283,
+    "importedAt": "2026-02-02T13:22:04.480Z",
+    "name": "کت فوتر السا P0051",
+    "slug": "elsa-coat-p0051",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1068736": {
+    "strapiId": 1282,
+    "importedAt": "2026-02-02T13:22:13.098Z",
+    "name": "شال کنفی راه راه S00754",
+    "slug": "striped-hemp-scarf-s00754",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1068834": {
+    "strapiId": 1284,
+    "importedAt": "2026-02-02T13:22:39.520Z",
+    "name": "ست گیپوری فنردار 000843",
+    "slug": "spring-guipure-set-000843",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1068851": {
+    "strapiId": 1285,
+    "importedAt": "2026-02-02T13:23:13.770Z",
+    "name": "تاپ یقه مرواریدی L00100",
+    "slug": "pearl-collar-top-l00100",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1069348": {
+    "strapiId": 1286,
+    "importedAt": "2026-02-02T13:22:32.076Z",
+    "name": "نیم تنه لیزری دکلته 000845",
+    "slug": "laser-bust-with-cleavage-000845",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1069397": {
+    "strapiId": 1287,
+    "importedAt": "2026-02-02T13:24:12.319Z",
+    "name": "کیف سن لورن B00329",
+    "slug": "saint-laurent-bag-b00329",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1069408": {
+    "strapiId": 1289,
+    "importedAt": "2026-02-02T13:24:03.758Z",
+    "name": "شلوار بگ مژده L00158",
+    "slug": "mozhdeh-baggy-pants-l00158",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1069518": {
+    "strapiId": 1288,
+    "importedAt": "2026-02-02T13:24:11.805Z",
+    "name": "ترنچ کت ژیله دار L00189",
+    "slug": "raincoat-with-vest-l00189",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1070375": {
+    "strapiId": 1292,
+    "importedAt": "2026-02-02T13:24:47.780Z",
+    "name": "لگ (NANO)000849",
+    "slug": "log-nano000849",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1070415": {
+    "strapiId": 1291,
+    "importedAt": "2026-02-02T13:24:36.471Z",
+    "name": "نیم تنه فلامنت ورزشی 000852",
+    "slug": "sports-filament-torso-000852",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1070687": {
+    "strapiId": 1290,
+    "importedAt": "2026-02-02T13:25:39.249Z",
+    "name": "شال پاییزه S00765",
+    "slug": "autumn-scarf-s00765",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1070746": {
+    "strapiId": 1293,
+    "importedAt": "2026-02-02T13:25:48.734Z",
+    "name": "..............................",
+    "slug": "1070746",
+    "type": "simple",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1070758": {
+    "strapiId": 1294,
+    "importedAt": "2026-02-02T13:26:22.074Z",
+    "name": "کت L00156 paris",
+    "slug": "%da%a9%d8%aal00156-paris",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1070783": {
+    "strapiId": 1295,
+    "importedAt": "2026-02-02T13:26:42.405Z",
+    "name": "شلوار بگ اروس توئیت L0067",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d8%a7%d8%b1%d9%88%d8%b3-%d8%aa%d9%88%d8%a6%db%8c%d8%aa-l0067",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1071014": {
+    "strapiId": 1296,
+    "importedAt": "2026-02-02T13:27:30.499Z",
+    "name": "دامن بافت L00179",
+    "slug": "woven-skirt-l00179",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1071801": {
+    "strapiId": 1297,
+    "importedAt": "2026-02-02T13:28:19.904Z",
+    "name": "کلاه بره بافت لوزی S00775",
+    "slug": "diamond-beret-hat-s00775",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1071817": {
+    "strapiId": 1299,
+    "importedAt": "2026-02-02T13:28:27.168Z",
+    "name": "شال چهارخونه موهر S00784",
+    "slug": "mohair-square-shawl-s00784",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1071843": {
+    "strapiId": 1300,
+    "importedAt": "2026-02-02T13:28:32.455Z",
+    "name": "بامبر جکت فوتر L00191",
+    "slug": "footer-bomber-jacket-l00191",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1071869": {
+    "strapiId": 1298,
+    "importedAt": "2026-02-02T13:28:26.908Z",
+    "name": "بارونی برشکا L00196",
+    "slug": "%d8%a8%d8%a7%d8%b1%d9%88%d9%86%db%8c-%d8%a8%d8%b1%d8%b4%da%a9%d8%a7-l00196",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1071914": {
+    "strapiId": 1301,
+    "importedAt": "2026-02-02T13:29:50.913Z",
+    "name": "شلوار جین نیم بگ P0053",
+    "slug": "half-bag-jeans-p0053",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1072713": {
+    "strapiId": 1305,
+    "importedAt": "2026-02-02T13:29:31.998Z",
+    "name": "سوتین زبرا اسفنجی 000856",
+    "slug": "zebra-sponge-bra-000856",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1072738": {
+    "strapiId": 1304,
+    "importedAt": "2026-02-02T13:29:29.913Z",
+    "name": "نیم تنه امواج 000972",
+    "slug": "waves-bust-000972",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1072751": {
+    "strapiId": 1303,
+    "importedAt": "2026-02-02T13:29:39.789Z",
+    "name": "ست ورزشی رنگین کمان 000862",
+    "slug": "rainbow-sports-set-000862",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1072785": {
+    "strapiId": 1302,
+    "importedAt": "2026-02-02T13:29:18.208Z",
+    "name": "نیم تنه ورزشی 000860",
+    "slug": "sports-bra-000860",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1072865": {
+    "strapiId": 1306,
+    "importedAt": "2026-02-02T13:30:45.848Z",
+    "name": "شلوار بگ فوتر P0046",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-%d9%81%d9%88%d8%aa%d8%b1-p0046",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1072899": {
+    "strapiId": 1307,
+    "importedAt": "2026-02-02T13:30:59.409Z",
+    "name": "بارونی پایین گت دار L00187",
+    "slug": "raincoat-with-gusset-l00187",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1073086": {
+    "strapiId": 1309,
+    "importedAt": "2026-02-02T13:32:07.614Z",
+    "name": "کلاه برت ساده S00776",
+    "slug": "simple-beret-hat-s00776",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1073252": {
+    "strapiId": 1308,
+    "importedAt": "2026-02-02T13:31:40.868Z",
+    "name": "کاپشن چرم L00205",
+    "slug": "leather-jacket-l00205",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1073273": {
+    "strapiId": 1310,
+    "importedAt": "2026-02-02T13:32:55.178Z",
+    "name": "شلوار جین بگ P0055",
+    "slug": "jeans-bag-p0055",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1074686": {
+    "strapiId": 1311,
+    "importedAt": "2026-02-02T13:32:31.485Z",
+    "name": "شورت کبریتی بیسیک 000863",
+    "slug": "basic-match-shorts-000863",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1090860": {
+    "strapiId": 1312,
+    "importedAt": "2026-02-02T13:42:07.851Z",
+    "name": "شال ck کشمیر  S00811",
+    "slug": "italian-cashmere-double-face-scarf-s00811",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1090881": {
+    "strapiId": 1313,
+    "importedAt": "2026-02-02T13:42:11.118Z",
+    "name": "آگ گلدوزی F0084",
+    "slug": "embroidery-thread-f0084",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1091878": {
+    "strapiId": 1314,
+    "importedAt": "2026-02-02T13:42:32.416Z",
+    "name": "جوراب کبریتی نود 000893",
+    "slug": "nude-match-socks-000893",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092149": {
+    "strapiId": 1316,
+    "importedAt": "2026-02-02T13:44:15.247Z",
+    "name": "جوراب نایک ساقدار 000827",
+    "slug": "nike-socks-000827",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092281": {
+    "strapiId": 1315,
+    "importedAt": "2026-02-02T13:49:59.235Z",
+    "name": "شلوار فوتر مام فیت L00305",
+    "slug": "mom-fit-footer-pants-l00305",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092282": {
+    "strapiId": 1317,
+    "importedAt": "2026-02-02T13:52:47.086Z",
+    "name": "جوراب کبریتی زیرقوزکی 000903",
+    "slug": "ankle-length-socks-000903",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092305": {
+    "strapiId": 1320,
+    "importedAt": "2026-02-02T13:51:55.600Z",
+    "name": "جوراب مچی سفید 000904",
+    "slug": "white-ankle-socks-000904",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092324": {
+    "strapiId": 1318,
+    "importedAt": "2026-02-02T13:52:39.729Z",
+    "name": "جوراب زیرقوزکی میکس 000895",
+    "slug": "mixed-ankle-socks-000895",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092852": {
+    "strapiId": 1319,
+    "importedAt": "2026-02-02T14:01:26.768Z",
+    "name": "شلوار بگ رز کشمیر L00316",
+    "slug": "baggy-pants-rose-kashmir-l00316",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092929": {
+    "strapiId": 1321,
+    "importedAt": "2026-02-02T14:01:53.789Z",
+    "name": "شلوار پایین چسب OppsiC00625",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d9%be%d8%a7%db%8c%db%8c%d9%86-%da%86%d8%b3%d8%a8-oppsic00625",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1092982": {
+    "strapiId": 1323,
+    "importedAt": "2026-02-02T14:02:32.492Z",
+    "name": "کت کراپ فوتر P0063",
+    "slug": "%da%a9%d8%aa-%da%a9%d8%b1%d8%a7%d9%be-%d9%81%d9%88%d8%aa%d8%b1-p0063",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093009": {
+    "strapiId": 1322,
+    "importedAt": "2026-02-02T14:02:09.317Z",
+    "name": "تاپ بافت یقه گرد P0059",
+    "slug": "round-neck-knit-top-p0059",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093092": {
+    "strapiId": 1324,
+    "importedAt": "2026-02-02T14:02:58.264Z",
+    "name": "جوراب مچی پاستلی 000905",
+    "slug": "pastel-ankle-socks-000905",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093132": {
+    "strapiId": 1328,
+    "importedAt": "2026-02-02T14:02:55.948Z",
+    "name": "جوراب مچی پلنگی 000907",
+    "slug": "leopard-ankle-socks-000907",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093144": {
+    "strapiId": 1326,
+    "importedAt": "2026-02-02T14:03:00.420Z",
+    "name": "جوراب مچی میکی 000908",
+    "slug": "mickey-socks-000908",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093155": {
+    "strapiId": 1327,
+    "importedAt": "2026-02-02T14:02:59.915Z",
+    "name": "جوراب کبریتی مچی 000909",
+    "slug": "ankle-match-socks-000909",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093168": {
+    "strapiId": 1325,
+    "importedAt": "2026-02-02T14:02:57.718Z",
+    "name": "جوراب مچی خالخالی 000910",
+    "slug": "polka-dot-ankle-socks-000910",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093187": {
+    "strapiId": 1329,
+    "importedAt": "2026-02-02T14:03:26.093Z",
+    "name": "جوراب مچی میکس 000911",
+    "slug": "mixed-ankle-socks-000911",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093553": {
+    "strapiId": 1331,
+    "importedAt": "2026-02-02T14:03:46.535Z",
+    "name": "شلوار بگ L00325 ALO",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%a8%da%af-l00325",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093600": {
+    "strapiId": 1330,
+    "importedAt": "2026-02-02T14:03:59.079Z",
+    "name": "ترنچ کت ماوی L00324",
+    "slug": "%d8%aa%d8%b1%d9%86%da%86-%da%a9%d8%aa-%d9%85%d8%a7%d9%88%db%8c-l00324",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093752": {
+    "strapiId": 1333,
+    "importedAt": "2026-02-02T14:04:25.780Z",
+    "name": "نیم تنه پشت ضربدری 000921",
+    "slug": "cross-backed-torso-000921",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1093886": {
+    "strapiId": 1334,
+    "importedAt": "2026-02-02T14:04:34.041Z",
+    "name": "شومیز یقه گل بندی OppsiC00313",
+    "slug": "%d8%b4%d9%88%d9%85%db%8c%d8%b2-%db%8c%d9%82%d9%87-%da%af%d9%84-%d8%a8%d9%86%d8%af%db%8c-oppsic00313",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1095469": {
+    "strapiId": 1332,
+    "importedAt": "2026-02-02T14:04:34.872Z",
+    "name": "بلوز بافت گلدوزی L00320",
+    "slug": "embroidered-knit-blouse-l00320",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1095677": {
+    "strapiId": 1337,
+    "importedAt": "2026-02-02T14:05:11.390Z",
+    "name": "دورس جلو تدی L00334",
+    "slug": "%d8%af%d9%88%d8%b1%d8%b3-%d8%ac%d9%84%d9%88-%d8%aa%d8%af%db%8c-l00334",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096281": {
+    "strapiId": 1336,
+    "importedAt": "2026-02-02T14:04:59.499Z",
+    "name": "نیم تنه دکلته لیزری 000922",
+    "slug": "laser-cut-bust-000922",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096297": {
+    "strapiId": 1335,
+    "importedAt": "2026-02-02T14:04:48.280Z",
+    "name": "جوراب مچی 000923",
+    "slug": "ankle-socks-000923",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096311": {
+    "strapiId": 1338,
+    "importedAt": "2026-02-02T14:05:36.775Z",
+    "name": "شورت لیزری 000929",
+    "slug": "laser-shorts-000929",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096326": {
+    "strapiId": 1340,
+    "importedAt": "2026-02-02T14:05:40.018Z",
+    "name": "گن فنردار اسپچ 000933",
+    "slug": "spec-spring-gun-000933",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096452": {
+    "strapiId": 1339,
+    "importedAt": "2026-02-02T14:05:25.968Z",
+    "name": "پافر جیب دار P0083",
+    "slug": "pocket-puffer-p0083",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096484": {
+    "strapiId": 1341,
+    "importedAt": "2026-02-02T14:06:01.034Z",
+    "name": "کت کراپ جلو زیپ P0075",
+    "slug": "zip-front-crop-jacket-p0075",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096534": {
+    "strapiId": 1345,
+    "importedAt": "2026-02-02T14:06:41.370Z",
+    "name": "شلوار نیلا p0081",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d9%86%db%8c%d9%84%d8%a7-p0081",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096667": {
+    "strapiId": 1344,
+    "importedAt": "2026-02-02T14:07:17.940Z",
+    "name": "ست بلوز شلوار بافت P0071",
+    "slug": "knitted-blouse-and-pants-set-p0071",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1096717": {
+    "strapiId": 1342,
+    "importedAt": "2026-02-02T14:06:54.915Z",
+    "name": "ترنچ کت برشکا L00318",
+    "slug": "bershka-l00318-bergamot-coat",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1097337": {
+    "strapiId": 1343,
+    "importedAt": "2026-02-02T14:06:29.728Z",
+    "name": "جوراب مچی میکس 000924",
+    "slug": "mixed-ankle-socks-000924",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1097352": {
+    "strapiId": 1346,
+    "importedAt": "2026-02-02T14:07:38.512Z",
+    "name": "شورت لیزری 000931",
+    "slug": "laser-shorts-000931",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1097370": {
+    "strapiId": 1349,
+    "importedAt": "2026-02-02T14:07:37.443Z",
+    "name": "سوتین لیزری 000935",
+    "slug": "laser-bra-000935",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1097493": {
+    "strapiId": 1348,
+    "importedAt": "2026-02-02T14:08:01.407Z",
+    "name": "سوئیشرت مدادرنگی L00364",
+    "slug": "%d8%b3%d9%88%d8%a6%db%8c%d8%b4%d8%b1%d8%aa-%d8%a8%d9%84%d9%86%d8%af-l00364",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1097562": {
+    "strapiId": 1347,
+    "importedAt": "2026-02-02T14:07:45.874Z",
+    "name": "کراپ پشت پروانه Oppsi000758",
+    "slug": "%da%a9%d8%b1%d8%a7%d9%be-%d9%be%d8%b4%d8%aa-%d9%be%d8%b1%d9%88%d8%a7%d9%86%d9%87-oppsi000758",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1097947": {
+    "strapiId": 1350,
+    "importedAt": "2026-02-02T14:08:44.833Z",
+    "name": "شلوار بوت کات گاباردین L00352",
+    "slug": "bootcut-pants-l00352",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1101577": {
+    "strapiId": 1351,
+    "importedAt": "2026-02-02T14:10:26.944Z",
+    "name": "کلاه cap پولو S00827",
+    "slug": "piercing-cap-s00827",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1103203": {
+    "strapiId": 1352,
+    "importedAt": "2026-02-02T14:10:00.193Z",
+    "name": "ست گیپوری 000942",
+    "slug": "guipure-set-000942",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1127268": {
+    "strapiId": 1353,
+    "importedAt": "2026-02-02T14:14:52.144Z",
+    "name": "ست ورزشی رنگین کمان Oppsi000862",
+    "slug": "%d8%b3%d8%aa-%d9%88%d8%b1%d8%b2%d8%b4%db%8c-%d8%b1%d9%86%da%af%db%8c%d9%86-%da%a9%d9%85%d8%a7%d9%86-oppsi000862",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1127752": {
+    "strapiId": 1355,
+    "importedAt": "2026-02-02T14:15:27.860Z",
+    "name": "کت کراپ بوفالو L00507",
+    "slug": "%da%a9%d8%aa-%da%a9%d8%b1%d8%a7%d9%be-%d8%a8%d9%88%d9%81%d8%a7%d9%84%d9%88-l00507",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1127827": {
+    "strapiId": 1354,
+    "importedAt": "2026-02-02T14:15:48.228Z",
+    "name": "هودی کراپ نیم زیپ L00479",
+    "slug": "%d9%87%d9%88%d8%af%db%8c-%da%a9%d8%b1%d8%a7%d9%be-%d9%86%db%8c%d9%85-%d8%b2%db%8c%d9%be-l00479",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1128072": {
+    "strapiId": 1356,
+    "importedAt": "2026-02-02T14:15:52.795Z",
+    "name": "دورسL00427 H.M",
+    "slug": "doorsl00427-h-m",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156349": {
+    "strapiId": 1357,
+    "importedAt": "2026-02-02T14:31:23.950Z",
+    "name": "کاردیگان جلو چین OppsiL00429",
+    "slug": "%da%a9%d8%a7%d8%b1%d8%af%db%8c%da%af%d8%a7%d9%86-%d8%ac%d9%84%d9%88-%da%86%db%8c%d9%86-oppsil00429",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156355": {
+    "strapiId": 1360,
+    "importedAt": "2026-02-02T14:41:20.184Z",
+    "name": "بلوز بافت راه راه OppsiL0011",
+    "slug": "%d8%a8%d9%84%d9%88%d8%b2-%d8%a8%d8%a7%d9%81%d8%aa-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsil0011",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156368": {
+    "strapiId": 1361,
+    "importedAt": "2026-02-02T14:42:22.511Z",
+    "name": "هودی مینیمال OppsiL00384",
+    "slug": "%d9%87%d9%88%d8%af%db%8c-%d9%85%db%8c%d9%86%db%8c%d9%85%d8%a7%d9%84-oppsil00384",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156392": {
+    "strapiId": 1359,
+    "importedAt": "2026-02-02T14:34:37.747Z",
+    "name": "کت فوتر بغل چاک L00141",
+    "slug": "%da%a9%d8%aa-%d9%81%d9%88%d8%aa%d8%b1-%d8%a8%d8%ba%d9%84-%da%86%d8%a7%da%a9-l00141",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156421": {
+    "strapiId": 1358,
+    "importedAt": "2026-02-02T14:42:29.042Z",
+    "name": "کیف مینی OppsiB00358",
+    "slug": "%da%a9%db%8c%d9%81-%d9%85%db%8c%d9%86%db%8c-oppsib00358",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
   }
 }

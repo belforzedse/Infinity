@@ -271,6 +271,53 @@ program
   });
 
 program
+  .command('variations-missing')
+  .description('Import missing variations for products that are already imported')
+  .option('-l, --limit <number>', 'Limit number of items to import', '100')
+  .option('-p, --page <number>', 'Start from specific page', '1')
+  .option('-b, --batch-size <number>', 'Items per page (max 100)', '100')
+  .option('-n, --name-filter <keywords...>', 'Comma-separated keywords to match parent product names (use "all" to disable)', '')
+  .option('--no-parent-log', 'Disable logging parent product names during variation import')
+  .option('--disable-name-filter', 'Import variations for all parent products regardless of keywords', false)
+  .option('--dry-run', 'Run without actually importing data', false)
+  .option('--force', 'Force re-import by ignoring progress state (start from page 1)', false)
+  .action(async (options) => {
+    try {
+      logger.info('🎨 Starting missing variation import for imported products...');
+
+      if (options.batchSize) {
+        const parsedBatchSize = Number.parseInt(options.batchSize, 10);
+        const batchSize = Math.min(Number.isNaN(parsedBatchSize) ? 100 : parsedBatchSize, 100);
+
+        config.import.batchSizes.variations = batchSize;
+        config.import.batchSizes.products = batchSize;
+      }
+
+      const nameFilter = resolveNameFilterOption(
+        options.nameFilter,
+        options.disableNameFilter
+      );
+
+      const importer = new VariationImporter(config, logger);
+      await importer.import({
+        limit: parseInt(options.limit),
+        page: parseInt(options.page),
+        dryRun: options.dryRun,
+        onlyImported: true,
+        force: options.force,
+        nameFilter,
+        logParentNames: options.parentLog,
+        scanImportedProducts: true,
+        missingOnly: true
+      });
+      logger.success('✅ Missing variation import completed!');
+    } catch (error) {
+      logger.error('❌ Variation import failed:', error);
+      process.exit(1);
+    }
+  });
+
+program
   .command('orders')
   .description('Import orders')
   .option('-l, --limit <number>', 'Limit number of items to import', '50')
