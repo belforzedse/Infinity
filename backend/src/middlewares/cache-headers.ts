@@ -55,6 +55,7 @@ const ENDPOINT_PATTERNS = {
     /^\/api\/shipping-provinces/i,
     /^\/api\/footers/i,
     /^\/api\/navigations/i,
+    /^\/api\/site-settings/i,
   ],
 
   // Product data (semi-dynamic, short cache)
@@ -237,4 +238,3 @@ export default (_config: any, { strapi }: { strapi: Strapi }) => {
     }
   };
 };
-

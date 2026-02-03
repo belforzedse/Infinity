@@ -76,6 +76,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::footer": {
         footer: ["find"],
       },
+      "api::settings": {
+        settings: ["find"],
+      },
       "api::shipping": {
         shipping: READ_ACTIONS,
       },
@@ -218,6 +221,8 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::blog-tag", controller: "blog-tag", allowActions: READ_ACTIONS },
   { typeKey: "api::blog-author", controller: "blog-author", allowActions: READ_ACTIONS },
   { typeKey: "api::blog-comment", controller: "blog-comment", allowActions: READ_ACTIONS },
+  // Restrict settings management for store managers (read-only)
+  { typeKey: "api::settings", controller: "settings", allowActions: ["find"] },
 ];
 
 /**
@@ -326,9 +331,11 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
     if (roleType === "store-manager") {
       applyRestrictedControllers(tree, STORE_MANAGER_RESTRICTED_CONTROLLERS, strapi);
     } else if (roleType === "editor") {
-      // Editors get store-manager restrictions EXCEPT blog restrictions (they need full CRUD for blog)
+      // Editors get store-manager restrictions EXCEPT blog + settings (content editors manage these)
       const editorRestrictions = STORE_MANAGER_RESTRICTED_CONTROLLERS.filter(
-        (restriction) => !restriction.typeKey.startsWith("api::blog-")
+        (restriction) =>
+          !restriction.typeKey.startsWith("api::blog-") &&
+          restriction.typeKey !== "api::settings"
       );
       applyRestrictedControllers(tree, editorRestrictions, strapi);
     }
@@ -612,6 +619,37 @@ export default {
         }
       } catch (error) {
         strapi.log.error("Failed to assign permissions for public role", {
+          error: (error as any)?.message,
+        });
+      }
+    })();
+
+    // Ensure settings single type exists (idempotent)
+    (async function ensureSettings() {
+      try {
+        const existing = await strapi.db.query("api::settings.settings").findOne();
+        if (!existing) {
+          await strapi.entityService.create("api::settings.settings", {
+            data: {
+              filterPublicProductsByTitle: false,
+              homeBannerOneImage: "",
+              homeBannerOneTitle: "",
+              homeBannerOneTitleColor: "",
+              homeBannerOneButtonText: "",
+              homeBannerOneButtonColor: "",
+              homeBannerOneButtonHref: "",
+              homeBannerTwoImage: "",
+              homeBannerTwoTitle: "",
+              homeBannerTwoTitleColor: "",
+              homeBannerTwoButtonText: "",
+              homeBannerTwoButtonColor: "",
+              homeBannerTwoButtonHref: "",
+            },
+          });
+          strapi.log.info("✓ Created default settings entry");
+        }
+      } catch (error) {
+        strapi.log.error("Failed to ensure settings entry", {
           error: (error as any)?.message,
         });
       }

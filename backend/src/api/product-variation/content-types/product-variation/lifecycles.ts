@@ -187,13 +187,13 @@ export default {
       "api::product-variation-log.product-variation-log" as any,
       {
         data: {
-          product_variation: id,
+          // Avoid referencing a deleted relation; keep the id in the description instead.
           performed_by: actor.userId,
           PerformedBy: actor.label || undefined,
           IP: actor.ip || undefined,
           UserAgent: actor.userAgent || undefined,
           Action: "Delete" as AuditAction,
-          Description: "Product variation deleted",
+          Description: `Product variation deleted (id: ${id})`,
         },
       }
     );

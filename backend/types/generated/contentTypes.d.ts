@@ -2539,6 +2539,39 @@ export interface ApiProductProduct extends Schema.CollectionType {
   };
 }
 
+export interface ApiSettingsSettings extends Schema.SingleType {
+  collectionName: "site_settings";
+  info: {
+    displayName: "Site Settings";
+    pluralName: "site-settings";
+    singularName: "settings";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    filterPublicProductsByTitle: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeBannerOneButtonColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneButtonHref: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerOneButtonText: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerOneTitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoButtonColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoButtonHref: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerTwoButtonText: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerTwoTitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiShippingCityShippingCity extends Schema.CollectionType {
   collectionName: "shipping_cities";
   info: {
@@ -3181,6 +3214,7 @@ declare module "@strapi/types" {
       "api::product-variation.product-variation": ApiProductVariationProductVariation;
       "api::product-view.product-view": ApiProductViewProductView;
       "api::product.product": ApiProductProduct;
+      "api::settings.settings": ApiSettingsSettings;
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;
       "api::shipping.shipping": ApiShippingShipping;
