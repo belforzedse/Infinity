@@ -7,7 +7,10 @@ const normalizeHex = (value: string) => {
   const trimmed = value.trim();
   if (!HEX_COLOR_REGEX.test(trimmed)) return trimmed;
   if (trimmed.length === 4) {
-    const [, r, g, b] = trimmed;
+    const chars = trimmed.split('');
+    const r = chars[1];
+    const g = chars[2];
+    const b = chars[3];
     return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
   }
   return trimmed.toLowerCase();

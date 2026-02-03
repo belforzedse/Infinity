@@ -524,8 +524,8 @@ export default function Page() {
 
           await submitOrder(data);
         }}
-        footer={<Footer order={orderData} onReload={() => {}} />}
-        customSidebar={<Sidebar orderData={orderData} selectedItems={selectedItems} />}
+        footer={<Footer order={orderData as SuperAdminOrderDetail} onReload={() => {}} />}
+        customSidebar={<Sidebar orderData={orderData as SuperAdminOrderDetail} selectedItems={selectedItems} />}
       />
 
       {/* Confirmation Dialog */}

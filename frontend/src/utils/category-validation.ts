@@ -29,7 +29,9 @@ function sanitizeCategorySlug(slug: string | undefined): string | null {
 
   // Reject slugs that contain no letters/numbers (Unicode-aware)
   // This allows Persian/Arabic slugs like "جشنواره-2880".
-  if (!/[\p{L}\p{N}]/u.test(sanitized)) return null;
+  // Using a workaround for ES5 compatibility (Unicode flag not available)
+  const hasAlphanumeric = /[a-zA-Z0-9\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(sanitized);
+  if (!hasAlphanumeric) return null;
 
   return sanitized;
 }
