@@ -14,6 +14,8 @@ import {
   TermsField,
   ProvinceCityField,
   CategoriesListField,
+  ColorField,
+  ImageUploadField,
 } from "./Fields";
 import RichTextField from "./Fields/RichTextField";
 import type {
@@ -52,6 +54,30 @@ export default function FieldRenderer<T>({
           value={formData[field.name] as string}
           onChange={(value) => updateFormData(field.name, value)}
           readOnly={isReadOnly}
+        />
+      );
+    },
+    color: () => {
+      if (!isStandardField(field) || field.type !== "color") return null;
+      return (
+        <ColorField
+          value={formData[field.name] as string}
+          onChange={(value) => updateFormData(field.name, value)}
+          readOnly={isReadOnly}
+          placeholder={field.placeholder}
+          helper={field.helper ? field.helper(data ?? ({} as T)) : undefined}
+        />
+      );
+    },
+    image: () => {
+      if (!isStandardField(field) || field.type !== "image") return null;
+      return (
+        <ImageUploadField
+          value={formData[field.name] as string}
+          onChange={(value) => updateFormData(field.name, value)}
+          readOnly={isReadOnly}
+          placeholder={field.placeholder}
+          helper={field.helper ? field.helper(data ?? ({} as T)) : undefined}
         />
       );
     },

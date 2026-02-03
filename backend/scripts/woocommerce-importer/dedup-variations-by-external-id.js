@@ -23,6 +23,7 @@ const argList = process.argv.slice(2);
 const toBoolean = (value) => value === true || value === "true";
 const dryRun = argList.includes("--dry-run");
 const ignoreForbidden = argList.includes("--ignore-forbidden");
+const disableDuplicates = argList.includes("--disable-duplicates");
 const skipRelationsArg = argList.find((arg) => arg.startsWith("--skip-relations="));
 
 function parseSkipRelations(args) {
@@ -149,6 +150,23 @@ async function updateRelated(endpoint, id, field, newId, options = {}) {
   }
 }
 
+async function updateEntity(endpoint, id, data, options = {}) {
+  try {
+    if (options.useDirectWrite) {
+      await strapiClient.client.put(`${endpoint}/${id}`, { data });
+    } else {
+      await strapiClient.update(endpoint, id, data);
+    }
+    return { blocked: false };
+  } catch (error) {
+    if (error?.response?.status === 403) {
+      console.warn(`⚠️  Forbidden updating ${endpoint}/${id}; skipping update.`);
+      return { blocked: true };
+    }
+    throw error;
+  }
+}
+
 async function deleteVariation(variationId, options = {}) {
   if (options.useDirectWrite) {
     await strapiClient.client.delete(`/product-variations/${variationId}`);
@@ -157,18 +175,44 @@ async function deleteVariation(variationId, options = {}) {
   await strapiClient.client.delete(`/product-variations/${variationId}`);
 }
 
+async function updateVariation(variationId, data, options = {}) {
+  try {
+    if (options.useDirectWrite) {
+      await strapiClient.client.put(`/product-variations/${variationId}`, { data });
+    } else {
+      await strapiClient.update("/product-variations", variationId, data);
+    }
+    return { blocked: false };
+  } catch (error) {
+    if (error?.response?.status === 403) {
+      console.warn(`⚠️  Forbidden updating /product-variations/${variationId}; skipping update.`);
+      return { blocked: true };
+    }
+    throw error;
+  }
+}
+
 async function dedup(options = {}) {
   const runDry = options?.dryRun !== undefined ? toBoolean(options.dryRun) : dryRun;
   const allowForbiddenDeletes =
     options?.ignoreForbidden !== undefined ? toBoolean(options.ignoreForbidden) : ignoreForbidden;
+  const shouldDisable =
+    options?.disableDuplicates !== undefined
+      ? toBoolean(options.disableDuplicates)
+      : disableDuplicates;
   const skipList = Array.isArray(options?.skipRelations) ? options.skipRelations : skipRelations;
   const skipSet = new Set(skipList);
   const blockedEndpoints = new Set();
   const useDirectWrite = allowForbiddenDeletes;
   console.log(`🧹 Starting variation deduplication by external_id`);
   console.log(`🔎 Dry run: ${runDry ? "Yes" : "No"}`);
+  if (shouldDisable) {
+    console.log("🛑 Disable mode: duplicates will be unpublished and zeroed (no deletes)");
+  }
   if (allowForbiddenDeletes) {
-    console.log("⚠️  Ignoring forbidden relation endpoints (will still delete duplicates)");
+    console.log(
+      `⚠️  Ignoring forbidden relation endpoints${shouldDisable ? "" : " (will still delete duplicates)"}`,
+    );
   }
   if (skipSet.size > 0) {
     console.log(`🚫 Skipping relations: ${Array.from(skipSet).join(", ")}`);
@@ -220,6 +264,46 @@ async function dedup(options = {}) {
     console.log(`\n🔁 external_id "${externalId}" → keep ID ${canonical.id}`);
 
     for (const duplicate of toDelete) {
+      if (shouldDisable) {
+        const newExternalId = `${externalId}-dup-${duplicate.id}`;
+        console.log(
+          `   🛑 Disabling duplicate ID ${duplicate.id} (external_id → ${newExternalId})`,
+        );
+
+        if (!runDry) {
+          await updateVariation(
+            duplicate.id,
+            {
+              IsPublished: false,
+              Price: 0,
+              DiscountPrice: null,
+              external_id: newExternalId,
+            },
+            { useDirectWrite },
+          );
+
+          if (!skipSet.has("product-stocks") && !skipSet.has("/product-stocks")) {
+            const { items: stocks, blocked } = await fetchRelated(
+              "/product-stocks",
+              "product_variation",
+              duplicate.id,
+            );
+            if (!blocked) {
+              for (const stock of stocks) {
+                await updateEntity(
+                  "/product-stocks",
+                  stock.id,
+                  { Count: 0 },
+                  { useDirectWrite },
+                );
+              }
+            }
+          }
+        }
+
+        continue;
+      }
+
       console.log(`   ↪️ Rewiring duplicate ID ${duplicate.id}`);
 
       let hasForbidden = false;

@@ -18,6 +18,8 @@ import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import CategoryCarousel from "@/components/Categories/CategoryCarousel";
+import HomePromoBanners from "@/components/Home/PromoBanners";
+import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
@@ -54,11 +56,38 @@ export default async function Home() {
     { discounted: discountedProducts, new: newProducts, favorites: favoriteProducts },
     latestBlogPosts,
     parentCategories,
+    homepageSettings,
   ] = await Promise.all([
     getHomepageSections(),
     getLatestBlogPosts(),
     getProductCategories({ parentOnly: true, sort: "Title:asc" }),
+    getPublicSuperAdminSettings(),
   ]);
+
+  const promoBanners = [
+    {
+      id: "home-banner-one",
+      imageUrl: homepageSettings.homeBannerOneImage,
+      title: homepageSettings.homeBannerOneTitle,
+      titleColor: homepageSettings.homeBannerOneTitleColor,
+      buttonText: homepageSettings.homeBannerOneButtonText,
+      buttonColor: homepageSettings.homeBannerOneButtonColor,
+      buttonHref: homepageSettings.homeBannerOneButtonHref,
+    },
+    {
+      id: "home-banner-two",
+      imageUrl: homepageSettings.homeBannerTwoImage,
+      title: homepageSettings.homeBannerTwoTitle,
+      titleColor: homepageSettings.homeBannerTwoTitleColor,
+      buttonText: homepageSettings.homeBannerTwoButtonText,
+      buttonColor: homepageSettings.homeBannerTwoButtonColor,
+      buttonHref: homepageSettings.homeBannerTwoButtonHref,
+    },
+  ];
+
+  const hasPromoBanners = promoBanners.some(
+    (banner) => banner.imageUrl?.trim() && banner.title?.trim(),
+  );
 
   return (
     <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
@@ -128,6 +157,18 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {hasPromoBanners && (
+        <section>
+          <Reveal variant="fade-up" duration={700}>
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <div className="px-2 sm:px-4 lg:px-6">
+                <HomePromoBanners banners={promoBanners} />
+              </div>
+            </div>
+          </Reveal>
+        </section>
+      )}
 
       {/* Blog Section */}
       {latestBlogPosts.length > 0 && (

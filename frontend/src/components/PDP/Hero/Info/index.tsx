@@ -508,7 +508,7 @@ export default function PDPHeroInfo(props: Props) {
         <CommentsInfo
           commentCount={productData?.attributes?.product_reviews?.data?.length || 0}
           rateCount={productData?.attributes?.RatingCount || 0}
-          last24hoursSeenCount={productData?.attributes?.last24hoursViews || 856}
+          last24hoursSeenCount={productData?.attributes?.SeenCount || 0}
         />
 
         {productData?.attributes?.Description && (

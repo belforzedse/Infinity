@@ -1,4 +1,6 @@
 export { default as TextField } from "./TextField";
+export { default as ColorField } from "./ColorField";
+export { default as ImageUploadField } from "./ImageUploadField";
 export { default as DropdownField } from "./DropdownField";
 export { default as MultilineTextField } from "./MultilineTextField";
 export { default as PasswordWithBtn } from "./PasswordWithBtn";
