@@ -1,9 +1,8 @@
 "use client";
 
-import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import NoData from "./NoData";
 import { apiClient } from "@/services";
-import { categories as STATIC_CATEGORIES } from "@/constants/categories";
+import { getProductCategories } from "@/services/product/categories";
 import { faNum } from "@/utils/faNum";
 import type { ProductCardProps } from "@/components/Product/Card";
 import Filter from "./List/Filter";
@@ -97,7 +96,7 @@ export default function PLPList({
   const [pagination, setPagination] = useState<PLPPagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
-    STATIC_CATEGORIES.map((cat) => ({ id: cat.slug, title: cat.name })),
+    [],
   );
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
@@ -120,18 +119,19 @@ export default function PLPList({
     const fetchCategories = async () => {
       try {
         setIsLoadingCategories(true);
-        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}`);
-        if (!response.ok) throw new Error("Failed to fetch categories");
-        const data = await response.json();
-        if (Array.isArray(data?.data) && data.data.length > 0) {
-          const mapped = data.data.map((cat: any) => ({
-            id: cat.attributes?.Slug || String(cat.id),
-            title: cat.attributes?.Title || cat.attributes?.Slug || String(cat.id),
-          }));
-          setCategoryOptions(mapped);
+        const categories = await getProductCategories({ sort: "Title:asc" });
+        if (!categories || categories.length === 0) {
+          setCategoryOptions([]);
+          return;
         }
+        const mapped = categories.map((cat) => ({
+          id: cat.slug || String(cat.id),
+          title: cat.name || cat.slug || String(cat.id),
+        }));
+        setCategoryOptions(mapped);
       } catch (error) {
         console.error("[PLP] Error fetching categories:", error);
+        setCategoryOptions([]);
       } finally {
         setIsLoadingCategories(false);
       }

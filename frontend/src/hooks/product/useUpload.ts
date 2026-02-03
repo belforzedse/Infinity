@@ -50,6 +50,22 @@ const mapUrlsToFileWithPreview = (urls: string[], placeholderName: string) =>
     preview: url,
   }));
 
+const resolveMediaRemovalIndex = (
+  media: any[],
+  filteredIndex: number,
+  mimePrefix: "image/" | "video/",
+) => {
+  const indexedMedia = media
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => item?.attributes?.mime?.startsWith(mimePrefix));
+
+  if (indexedMedia.length > 0) {
+    return indexedMedia[filteredIndex]?.index ?? null;
+  }
+
+  return filteredIndex;
+};
+
 export function useUpload({
   initialImages,
   initialVideos,
@@ -275,28 +291,52 @@ export function useUpload({
   const removeFile = (index: number, type: "image" | "video" | "other") => {
     switch (type) {
       case "image":
-        URL.revokeObjectURL(images[index].preview);
+        if (images[index]?.preview?.startsWith("blob:")) {
+          URL.revokeObjectURL(images[index].preview);
+        }
         setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-        setProductData({
-          ...(productData as any), // TODO: Strongly type productData
-          Media: (productData as any).Media.filter((_: any, i: number) => i !== index),
-        });
+        if (productData) {
+          const media = ((productData as any).Media || []) as any[];
+          const removalIndex = isEditMode
+            ? resolveMediaRemovalIndex(media, index, "image/")
+            : index;
+          if (removalIndex !== null) {
+            setProductData({
+              ...(productData as any), // TODO: Strongly type productData
+              Media: media.filter((_: any, i: number) => i !== removalIndex),
+            });
+          }
+        }
         break;
       case "video":
-        URL.revokeObjectURL(videos[index].preview);
+        if (videos[index]?.preview?.startsWith("blob:")) {
+          URL.revokeObjectURL(videos[index].preview);
+        }
         setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
-        setProductData({
-          ...(productData as any), // TODO: Strongly type productData
-          Media: (productData as any).Media.filter((_: any, i: number) => i !== index),
-        });
+        if (productData) {
+          const media = ((productData as any).Media || []) as any[];
+          const removalIndex = isEditMode
+            ? resolveMediaRemovalIndex(media, index, "video/")
+            : index;
+          if (removalIndex !== null) {
+            setProductData({
+              ...(productData as any), // TODO: Strongly type productData
+              Media: media.filter((_: any, i: number) => i !== removalIndex),
+            });
+          }
+        }
         break;
       case "other":
-        URL.revokeObjectURL(files[index].preview);
+        if (files[index]?.preview?.startsWith("blob:")) {
+          URL.revokeObjectURL(files[index].preview);
+        }
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-        setProductData({
-          ...(productData as any), // TODO: Strongly type productData
-          Files: (productData as any).Files.filter((_: any, i: number) => i !== index),
-        });
+        if (productData) {
+          setProductData({
+            ...(productData as any), // TODO: Strongly type productData
+            Files: ((productData as any).Files || []).filter((_: any, i: number) => i !== index),
+          });
+        }
         break;
     }
   };

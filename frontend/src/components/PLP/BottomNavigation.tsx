@@ -7,15 +7,17 @@ import HomeIcon from "./Icons/HomeIcon";
 import CategoryIcon from "./Icons/CategoryIcon";
 import BasketIcon from "./Icons/BasketIcon";
 import ProfileIcon from "./Icons/ProfileIcon";
-import { categories } from "@/constants/categories";
 import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
 import { hapticButton } from "@/utils/haptics";
+import { useProductCategories } from "@/hooks/useProductCategories";
+import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
 
 const PLPBottomNavigation = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
+  const { categories, isLoading: isLoadingCategories } = useProductCategories({ parentOnly: true });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);
@@ -161,29 +163,46 @@ const PLPBottomNavigation = () => {
             </div>
 
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pb-2">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/plp?category=${category.slug}`}
-                  onClick={closeCategories}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div
-                    className="relative h-20 w-20 overflow-hidden rounded-full"
-                    style={{ backgroundColor: category.backgroundColor }}
-                  >
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-contain p-4"
-                      sizes="80px"
-                      loading="lazy"
-                    />
-                  </div>
-                  <span className="text-xs">{category.name}</span>
-                </Link>
-              ))}
+              {isLoadingCategories && (
+                <div className="col-span-3 text-center text-xs text-neutral-500">
+                  در حال بارگذاری...
+                </div>
+              )}
+              {!isLoadingCategories && categories.length === 0 && (
+                <div className="col-span-3 text-center text-xs text-neutral-500">
+                  دسته‌بندی برای نمایش وجود ندارد.
+                </div>
+              )}
+              {!isLoadingCategories &&
+                categories.map((category) => {
+                  const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
+                  const label = category.name || category.slug;
+                  const bgColor = category.color?.trim() || "#f8fafc";
+
+                  return (
+                    <Link
+                      key={category.id}
+                      href={{ pathname: "/plp", query: { category: category.slug } }}
+                      onClick={closeCategories}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <div
+                        className="relative h-20 w-20 overflow-hidden rounded-full"
+                        style={{ backgroundColor: bgColor }}
+                      >
+                        <Image
+                          src={imageSrc}
+                          alt={category.imageAlt || label}
+                          fill
+                          className="object-contain p-4"
+                          sizes="80px"
+                          loading="lazy"
+                        />
+                      </div>
+                      <span className="text-xs">{label}</span>
+                    </Link>
+                  );
+                })}
             </div>
           </div>
         </div>
