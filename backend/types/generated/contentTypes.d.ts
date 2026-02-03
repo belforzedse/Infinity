@@ -2427,6 +2427,33 @@ export interface ApiProductVariationProductVariation extends Schema.CollectionTy
   };
 }
 
+export interface ApiProductViewProductView extends Schema.CollectionType {
+  collectionName: "product_views";
+  info: {
+    description: "Tracks individual product views with timestamps for 24-hour window calculation";
+    displayName: "ProductView";
+    pluralName: "product-views";
+    singularName: "product-view";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::product-view.product-view", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    product: Attribute.Relation<
+      "api::product-view.product-view",
+      "manyToOne",
+      "api::product.product"
+    >;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::product-view.product-view", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    viewedAt: Attribute.DateTime & Attribute.Required;
+  };
+}
+
 export interface ApiProductProduct extends Schema.CollectionType {
   collectionName: "products";
   info: {
@@ -2486,9 +2513,22 @@ export interface ApiProductProduct extends Schema.CollectionType {
       "oneToMany",
       "api::product-variation.product-variation"
     >;
+    product_views: Attribute.Relation<
+      "api::product.product",
+      "oneToMany",
+      "api::product-view.product-view"
+    >;
     RatingCount: Attribute.Integer;
     removedAt: Attribute.DateTime;
     ReturnConditions: Attribute.Text;
+    SeenCount: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
     Slug: Attribute.String & Attribute.Unique;
     Status: Attribute.Enumeration<["Active", "InActive"]>;
     Title: Attribute.String & Attribute.Required;
@@ -3139,6 +3179,7 @@ declare module "@strapi/types" {
       "api::product-variation-model.product-variation-model": ApiProductVariationModelProductVariationModel;
       "api::product-variation-size.product-variation-size": ApiProductVariationSizeProductVariationSize;
       "api::product-variation.product-variation": ApiProductVariationProductVariation;
+      "api::product-view.product-view": ApiProductViewProductView;
       "api::product.product": ApiProductProduct;
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;

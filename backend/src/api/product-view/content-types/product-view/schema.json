@@ -16,7 +16,7 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::product.product",
-      "inversedBy": null
+      "inversedBy": "product_views"
     },
     "viewedAt": {
       "type": "datetime",

@@ -135,6 +135,12 @@
     },
     "external_source": {
       "type": "string"
+    },
+    "product_views": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-view.product-view",
+      "mappedBy": "product"
     }
   }
 }

@@ -22,6 +22,7 @@ interface ProductData {
     Status: ProductStatus;
     AverageRating: number | null;
     RatingCount: number | null;
+    SeenCount?: number | null;
     CoverImage: {
       data: {
         attributes: {
@@ -102,7 +103,7 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
       id: product.id,
       title: product.attributes.Title,
       category: product.attributes.product_main_category?.data?.attributes?.Title,
-      likedCount: product.attributes.RatingCount || 0,
+      likedCount: product.attributes.SeenCount || 0,
       price: 0,
       discountedPrice: 0,
       discount: 0,
@@ -126,7 +127,7 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
     id: product.id,
     title: product.attributes.Title,
     category: product.attributes.product_main_category?.data?.attributes?.Title,
-    likedCount: product.attributes.RatingCount || 0,
+      likedCount: product.attributes.SeenCount || 0,
     price,
     discountedPrice,
     discount,

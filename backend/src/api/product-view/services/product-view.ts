@@ -28,7 +28,9 @@ export default factories.createCoreService("api::product-view.product-view", ({ 
       // Count views in last 24 hours
       const count = await strapi.entityService.count("api::product-view.product-view", {
         filters: {
-          product: productId,
+          product: {
+            id: productId,
+          },
           viewedAt: {
             $gte: twentyFourHoursAgo.toISOString(),
           },
