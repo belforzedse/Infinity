@@ -14,6 +14,7 @@ const VariationImporter = require("./importers/VariationImporter");
 const OrderImporter = require("./importers/OrderImporter");
 const UserImporter = require("./importers/UserImporter");
 const BlogPostImporter = require("./importers/BlogPostImporter");
+const { dedup: dedupVariations } = require("./dedup-variations-by-external-id");
 const DuplicateTracker = require("./utils/DuplicateTracker");
 const { syncShippingLocations } = require("./utils/ShippingSeeder");
 const Logger = require("./utils/Logger");
@@ -284,6 +285,7 @@ let importOptions = {
     page: 1,
     dryRun: false,
     onlyImported: true,
+    onlyMissing: false,
     useNameFilter: false,
   },
   orders: { enabled: false, limit: 50, page: 1, dryRun: false },
@@ -491,6 +493,7 @@ async function showMainMenu() {
     // Show variations filter
     if (type === "variations") {
       console.log(`     Only Imported Parents: ${opts.onlyImported ? "Yes" : "No"}`);
+      console.log(`     Missing Only: ${opts.onlyMissing ? "Yes" : "No"}`);
       console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? "On" : "Off"}`);
     }
     if (type === "blogPosts") {
@@ -515,9 +518,10 @@ async function showMainMenu() {
   console.log("  9️⃣  View Import Status & Mappings");
   console.log("  🔟  Clear All Mappings (Reset Progress)");
   console.log("  1️⃣1️⃣ Sync Shipping Provinces & Cities");
-  console.log("  1️⃣2️⃣ Exit\n");
+  console.log("  1️⃣2️⃣ Deduplicate Variations (by external_id)");
+  console.log("  1️⃣3️⃣ Exit\n");
 
-  const choice = await prompt("Enter your choice (1-12): ");
+  const choice = await prompt("Enter your choice (1-13): ");
   return choice;
 }
 
@@ -575,6 +579,17 @@ async function configureImporter(type) {
       console.log(
         `${status} - Will ${opts.onlyImported ? "" : "NOT "}filter by imported parent products`,
       );
+    }
+
+    const onlyMissingInput = await prompt(
+      `Only import missing variations for already-imported products? (y/n, default: n): `,
+    );
+    if (onlyMissingInput.trim()) {
+      opts.onlyMissing = onlyMissingInput.toLowerCase() === "y";
+      if (opts.onlyMissing) {
+        opts.onlyImported = true;
+        console.log(`✅ Missing-only mode enabled (forcing imported-only mode)`);
+      }
     }
 
     const variationNameFilterInput = await prompt(
@@ -851,6 +866,8 @@ async function runAllImporters() {
           page: opts.page,
           dryRun: opts.dryRun,
           onlyImported: opts.onlyImported,
+          missingOnly: opts.onlyMissing,
+          scanImportedProducts: opts.onlyMissing,
           nameFilter: opts.useNameFilter ? undefined : null,
         });
       } else if (type === "orders") {
@@ -970,6 +987,61 @@ async function clearMappings() {
 }
 
 /**
+ * Deduplicate product variations by external_id in Strapi.
+ */
+async function runVariationDedup() {
+  console.clear();
+  console.log(`\n🧹 Deduplicate Product Variations (external_id)\n`);
+  console.log("This will merge duplicate variations and rewire related records.");
+  console.log("A dry run is recommended first.\n");
+
+  const dryRunInput = await prompt("Run in dry-run mode? (y/n, default: y): ");
+  const dryRun = dryRunInput.trim() ? dryRunInput.toLowerCase() !== "n" : true;
+  const ignoreForbiddenInput = await prompt(
+    "Ignore forbidden relation endpoints and continue deletes? (y/n, default: n): ",
+  );
+  const ignoreForbidden = ignoreForbiddenInput.trim()
+    ? ignoreForbiddenInput.toLowerCase() === "y"
+    : false;
+  let skipRelations = [];
+  if (ignoreForbidden) {
+    const skipInput = await prompt(
+      "Skip order-items/product-variation-logs checks entirely? (y/n, default: y): ",
+    );
+    const shouldSkip = skipInput.trim() ? skipInput.toLowerCase() !== "n" : true;
+    if (shouldSkip) {
+      skipRelations = ["order-items", "product-variation-logs"];
+    }
+    const skipStocksInput = await prompt(
+      "Skip product-stocks rewiring entirely? (y/n, default: n): ",
+    );
+    const skipStocks = skipStocksInput.trim()
+      ? skipStocksInput.toLowerCase() === "y"
+      : false;
+    if (skipStocks) {
+      skipRelations = [...new Set([...skipRelations, "product-stocks"])];
+    }
+  }
+
+  if (!dryRun) {
+    const confirm = await prompt('Type "dedup" to confirm running live: ');
+    if (confirm !== "dedup") {
+      console.log("\n❌ Deduplication cancelled\n");
+      await prompt("Press Enter to continue...");
+      return;
+    }
+  }
+
+  try {
+    await dedupVariations({ dryRun, ignoreForbidden, skipRelations });
+  } catch (error) {
+    console.log(`\n❌ Deduplication failed: ${error.message}\n`);
+  }
+
+  await prompt("Press Enter to continue...");
+}
+
+/**
  * Run the interactive main loop for the WooCommerce → Strapi importer CLI.
  *
  * Starts by selecting credentials, then repeatedly shows the main menu and dispatches
@@ -1034,6 +1106,9 @@ async function main() {
           await prompt("Press Enter to continue...");
           break;
         case "12":
+          await runVariationDedup();
+          break;
+        case "13":
           console.log("\n👋 Goodbye!\n");
           running = false;
           break;

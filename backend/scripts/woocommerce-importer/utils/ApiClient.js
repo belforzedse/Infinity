@@ -203,6 +203,23 @@ class WooCommerceClient extends BaseApiClient {
   }
 
   /**
+   * Get product by ID
+   */
+  async getProductById(productId) {
+    if (!productId) {
+      return null;
+    }
+
+    try {
+      const response = await this.retryRequest(() => this.client.get(`/products/${productId}`));
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to get product ${productId}: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
    * Get product variations
    */
   async getProductVariations(productId, page = 1, perPage = 100) {

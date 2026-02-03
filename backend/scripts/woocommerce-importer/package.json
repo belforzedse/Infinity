@@ -14,6 +14,8 @@
     "variations": "node index.js variations",
     "variations-all": "node index.js variations --all --batch-size 100",
     "variations-imported": "node index.js variations-imported",
+    "variations-missing": "node index.js variations-missing",
+    "variations-dedup": "node dedup-variations-by-external-id.js",
     "orders": "node index.js orders",
     "orders-all": "node index.js orders --all --batch-size 50",
     "users": "node index.js users",
