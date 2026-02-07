@@ -1,9 +1,11 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logManualActivity } from "../../../../utils/manualAdminActivity";
+import { asEntityId, touchProductByVariation } from "../../../../utils/lastEdited";
 
 export default {
   async afterCreate(event) {
     const { result } = event;
+    await touchProductByVariation(result?.product_variation);
 
     // Log initial stock if non-zero
     const initialCount = result?.Count ?? 0;
@@ -31,12 +33,16 @@ export default {
     const existing = await strapi.entityService.findOne(
       "api::product-stock.product-stock",
       id,
-      { fields: ["Count"] }
+      {
+        fields: ["Count"],
+        populate: { product_variation: true },
+      }
     );
 
     event.state = {
       ...(event.state || {}),
       previousCount: existing?.Count ?? 0,
+      productVariationId: asEntityId((existing as any)?.product_variation),
     };
   },
 
@@ -79,5 +85,30 @@ export default {
         userAgent: actor.userAgent,
       });
     }
+
+    await touchProductByVariation(state?.productVariationId || result?.product_variation);
+  },
+
+  async beforeDelete(event) {
+    const where = event?.params?.where || {};
+    const id = (where && (where.id || where.documentId)) || null;
+    if (!id) return;
+
+    const existing = await strapi.entityService.findOne(
+      "api::product-stock.product-stock",
+      id,
+      {
+        populate: { product_variation: true },
+      }
+    );
+
+    event.state = {
+      ...(event.state || {}),
+      deletingProductVariationId: asEntityId((existing as any)?.product_variation),
+    };
+  },
+
+  async afterDelete(event) {
+    await touchProductByVariation((event as any)?.state?.deletingProductVariationId);
   },
 };

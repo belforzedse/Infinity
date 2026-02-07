@@ -1,5 +1,10 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logAdminActivity } from "../../../../utils/adminActivity";
+import {
+  asEntityId,
+  touchOrderByContract,
+  touchOrderLastEdited,
+} from "../../../../utils/lastEdited";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -67,6 +72,8 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    await touchOrderByContract(result.id);
   },
 
   async beforeUpdate(event) {
@@ -135,13 +142,25 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    await touchOrderByContract(result.id);
   },
 
   async beforeDelete(event) {
     const where = event?.params?.where || {};
     const id = (where && (where.id || where.documentId)) || null;
     if (!id) return;
-    event.state = { ...(event.state || {}), deletingContractId: id };
+
+    const existing = await strapi.db.query("api::contract.contract").findOne({
+      where: { id },
+      populate: { order: true },
+    });
+
+    event.state = {
+      ...(event.state || {}),
+      deletingContractId: id,
+      deletingOrderId: asEntityId((existing as any)?.order),
+    };
   },
 
   async afterDelete(event) {
@@ -178,5 +197,7 @@ export default {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+    await touchOrderLastEdited((event as any)?.state?.deletingOrderId);
   },
 };

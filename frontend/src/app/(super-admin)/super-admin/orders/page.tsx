@@ -19,6 +19,7 @@ import {
 export default function OrdersPage() {
   useFreshDataOnPageLoad();
   const [, setRefresh] = useAtom(refreshTable);
+  const [sort, setSort] = useState<"last-edited" | "newest" | "oldest">("last-edited");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
@@ -95,7 +96,19 @@ export default function OrdersPage() {
       hasFilterButton
       hasPagination
     >
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
+          <select
+            className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as "last-edited" | "newest" | "oldest")}
+          >
+            <option value="last-edited">آخرین ویرایش</option>
+            <option value="newest">جدیدترین</option>
+            <option value="oldest">قدیمی‌ترین</option>
+          </select>
+        </div>
         <label className="text-sm text-neutral-600">جستجوی شماره تراکنش:</label>
         <div className="relative">
           <input
@@ -135,8 +148,14 @@ export default function OrdersPage() {
         bulkOptions={bulkOptions}
         onBulkAction={handleBulkAction}
         url={(() => {
+          const sortQuery =
+            sort === "last-edited"
+              ? "updatedAt:desc"
+              : sort === "newest"
+                ? "createdAt:desc"
+                : "createdAt:asc";
           const base =
-            "/orders?sort[0]=createdAt:desc&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract";
+            `/orders?sort[0]=${sortQuery}&populate[0]=user&populate[1]=contract&populate[2]=user.user_info&populate[3]=contract`;
 
           if (debouncedSearchQuery.trim()) {
             return (

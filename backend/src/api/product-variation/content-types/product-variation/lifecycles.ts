@@ -1,5 +1,9 @@
 import { resolveAuditActor } from "../../../../utils/audit";
 import { logManualActivity } from "../../../../utils/manualAdminActivity";
+import {
+  asEntityId,
+  touchProductLastEdited,
+} from "../../../../utils/lastEdited";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -76,6 +80,8 @@ export default {
         userAgent: actor.userAgent,
       });
     }
+
+    await touchProductLastEdited(result?.product);
   },
 
   async beforeUpdate(event) {
@@ -169,13 +175,26 @@ export default {
         userAgent: actor.userAgent,
       });
     }
+
+    await touchProductLastEdited(result?.product || current?.product);
   },
 
   async beforeDelete(event) {
     const where = event?.params?.where || {};
     const id = (where && (where.id || where.documentId)) || null;
     if (!id) return;
-    event.state = { ...(event.state || {}), deletingProductVariationId: id };
+    const existing = await strapi.db
+      .query("api::product-variation.product-variation")
+      .findOne({
+        where: { id },
+        populate: { product: true },
+      });
+
+    event.state = {
+      ...(event.state || {}),
+      deletingProductVariationId: id,
+      deletingProductId: asEntityId((existing as any)?.product),
+    };
   },
 
   async afterDelete(event) {
@@ -213,5 +232,7 @@ export default {
         userAgent: actor.userAgent,
       });
     }
+
+    await touchProductLastEdited((event as any)?.state?.deletingProductId);
   },
 };

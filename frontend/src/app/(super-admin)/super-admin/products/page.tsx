@@ -31,8 +31,8 @@ export default function ProductsPage() {
     selectedProducts: Product[];
   } | null>(null);
   const [sort, setSort] = useState<
-    "newest" | "oldest" | "stock-asc" | "stock-desc" | "sales-asc" | "sales-desc"
-  >("newest");
+    "last-edited" | "newest" | "oldest" | "stock-asc" | "stock-desc" | "sales-asc" | "sales-desc"
+  >("last-edited");
   const [page] = useQueryState("page", { defaultValue: "1" });
   const [pageSize] = useQueryState("pageSize", { defaultValue: "25" });
   const [, setTotalSize] = useQueryState<number>("totalSize", {
@@ -501,6 +501,7 @@ export default function ProductsPage() {
               value={sort}
               onChange={(e) => setSort(e.target.value as any)}
             >
+              <option value="last-edited">آخرین ویرایش</option>
               <option value="newest">جدیدترین</option>
               <option value="oldest">قدیمی‌ترین</option>
               <option value="stock-desc">موجودی: بیشترین</option>
@@ -551,7 +552,7 @@ export default function ProductsPage() {
           )}
         </div>
       </div>
-      {sort === "newest" || sort === "oldest" ? (
+      {sort === "last-edited" || sort === "newest" || sort === "oldest" ? (
         <SuperAdminTable
           columns={columns}
           url={(() => {
@@ -564,6 +565,7 @@ export default function ProductsPage() {
               sortedBase += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
             }
 
+            if (sort === "last-edited") return sortedBase + "&sort[0]=updatedAt:desc";
             if (sort === "newest") return sortedBase + "&sort[0]=createdAt:desc";
             return sortedBase + "&sort[0]=createdAt:asc";
           })()}
