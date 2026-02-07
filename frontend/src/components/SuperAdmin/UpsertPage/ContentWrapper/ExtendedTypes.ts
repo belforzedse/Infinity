@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 type StandardFieldType =
   | "text"
+  | "color"
+  | "image"
   | "dropdown"
   | "multiline-text"
   | "password-with-btn"

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 export type StandardFieldType =
   | "text"
+  | "color"
+  | "image"
   | "dropdown"
   | "multiline-text"
   | "password-with-btn"

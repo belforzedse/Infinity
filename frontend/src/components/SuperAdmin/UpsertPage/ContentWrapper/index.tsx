@@ -295,7 +295,7 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
 
       <div className="mt-9 grid grid-cols-12">
         <div className="col-span-12 md:col-span-9">
-          {typeof footer === "function" ? footer(data ?? ({} as T)) : footer}
+          {typeof footer === "function" ? footer(formData) : footer}
         </div>
       </div>
     </div>

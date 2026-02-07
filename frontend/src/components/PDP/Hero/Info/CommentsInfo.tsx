@@ -33,7 +33,7 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
         )}
       </div>
 
-      {last24hoursSeenCount > 0 && (
+      {last24hoursSeenCount > 100 && (
         <div className="mt-2 flex items-center gap-1 md:mt-0">
           <Image width={16} height={16} alt="eye icon" src="/images/icons/eye.png" />
 

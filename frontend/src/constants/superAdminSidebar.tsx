@@ -282,6 +282,11 @@ const superAdminSidebar: SidebarItem[] = [
         label: "سفارشی‌سازی منو",
         href: "/super-admin/settings/customization/navbar",
       },
+      {
+        id: "settings-home-banners",
+        label: "بنرهای صفحه اصلی",
+        href: "/super-admin/settings/customization/home-banners",
+      },
     ],
   },
   // {

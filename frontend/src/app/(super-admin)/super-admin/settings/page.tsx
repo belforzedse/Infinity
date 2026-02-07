@@ -2,7 +2,7 @@
 
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import Link from "next/link";
-import { FiMenu, FiSettings, FiSliders } from "react-icons/fi";
+import { FiImage, FiMenu, FiSettings, FiSliders } from "react-icons/fi";
 
 const quickTiles = [
   {
@@ -18,6 +18,13 @@ const quickTiles = [
     href: "/super-admin/settings/customization/navbar",
     icon: <FiMenu className="h-5 w-5" />,
     tone: "from-pink-50 to-slate-50",
+  },
+  {
+    title: "بنرهای صفحه اصلی",
+    description: "دو بنر تبلیغاتی قبل از بخش بلاگ را تنظیم کنید.",
+    href: "/super-admin/settings/customization/home-banners",
+    icon: <FiImage className="h-5 w-5" />,
+    tone: "from-amber-50 to-slate-50",
   },
   {
     title: "سفارشی‌سازی",

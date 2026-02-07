@@ -2,7 +2,7 @@
 
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import Link from "next/link";
-import { FiMenu } from "react-icons/fi";
+import { FiImage, FiMenu } from "react-icons/fi";
 
 const tiles = [
   {
@@ -10,6 +10,12 @@ const tiles = [
     description: "مدیریت ترتیب و نمایش دسته‌بندی‌ها در منوی سایت.",
     href: "/super-admin/settings/customization/navbar",
     icon: <FiMenu className="h-5 w-5" />,
+  },
+  {
+    title: "بنرهای صفحه اصلی",
+    description: "دو بنر تبلیغاتی قبل از بخش بلاگ را مدیریت کنید.",
+    href: "/super-admin/settings/customization/home-banners",
+    icon: <FiImage className="h-5 w-5" />,
   },
 ];
 
