@@ -54,18 +54,28 @@ export default function HomePromoBanners({ banners }: HomePromoBannersProps) {
               {banner.title}
             </h3>
 
-            {banner.buttonText && banner.buttonHref && (
-              <Link
-                href={banner.buttonHref}
-                className="inline-flex items-center text-sm font-medium transition hover:opacity-80 md:text-lg"
-                style={{
-                  color: banner.buttonColor,
-                }}
-              >
-                {banner.buttonText}
-                <span className="ml-1 text-xl">←</span>
-              </Link>
-            )}
+            {banner.buttonText &&
+              (banner.buttonHref ? (
+                <Link
+                  href={banner.buttonHref}
+                  className="inline-flex items-center text-sm font-medium transition hover:opacity-80 md:text-lg"
+                  style={{
+                    color: banner.buttonColor,
+                  }}
+                >
+                  {banner.buttonText}
+                  <span className="ml-1 text-xl">←</span>
+                </Link>
+              ) : (
+                <span
+                  className="inline-flex items-center text-sm font-medium md:text-lg"
+                  style={{
+                    color: banner.buttonColor,
+                  }}
+                >
+                  {banner.buttonText}
+                </span>
+              ))}
           </div>
         </div>
       ))}

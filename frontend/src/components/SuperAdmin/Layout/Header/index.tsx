@@ -12,10 +12,12 @@ interface SuperAdminLayoutHeaderProps {
 
 export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayoutHeaderProps) {
   const { data: me, error } = useMe();
-  const userFacingError = error ? getUserFacingErrorMessage(error, "خطا در دریافت اطلاعات کاربر") : null;
+  const userFacingError = error
+    ? getUserFacingErrorMessage(error, "خطا در دریافت اطلاعات کاربر")
+    : null;
 
   return (
-    <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 md:h-[60px] lg:h-[76px] md:bg-white md:px-4 lg:px-6">
+    <header className="flex h-fit w-full items-center justify-between rounded-2xl border-b border-neutral-100 md:h-[60px] md:bg-white md:px-4 lg:h-[76px] lg:px-6">
       {/* Mobile Menu Button - only show on mobile, not tablets */}
       <button
         onClick={onMenuClick}
@@ -57,7 +59,6 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
                 height={36}
                 className="object-cover"
                 unoptimized
-                loader={({ src }) => src}
               />
             </div>
             <div className="hidden flex-col gap-1 lg:flex">

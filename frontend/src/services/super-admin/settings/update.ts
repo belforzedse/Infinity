@@ -10,8 +10,10 @@ export async function updateSuperAdminSettings(
     data.filterPublicProductsByTitle = settings.filterPublicProductsByTitle;
   }
 
-  if (settings.homeBannerOneImage !== undefined) data.homeBannerOneImage = settings.homeBannerOneImage;
-  if (settings.homeBannerOneTitle !== undefined) data.homeBannerOneTitle = settings.homeBannerOneTitle;
+  if (settings.homeBannerOneImage !== undefined)
+    data.homeBannerOneImage = settings.homeBannerOneImage;
+  if (settings.homeBannerOneTitle !== undefined)
+    data.homeBannerOneTitle = settings.homeBannerOneTitle;
   if (settings.homeBannerOneTitleColor !== undefined) {
     data.homeBannerOneTitleColor = settings.homeBannerOneTitleColor;
   }
@@ -25,8 +27,10 @@ export async function updateSuperAdminSettings(
     data.homeBannerOneButtonHref = settings.homeBannerOneButtonHref;
   }
 
-  if (settings.homeBannerTwoImage !== undefined) data.homeBannerTwoImage = settings.homeBannerTwoImage;
-  if (settings.homeBannerTwoTitle !== undefined) data.homeBannerTwoTitle = settings.homeBannerTwoTitle;
+  if (settings.homeBannerTwoImage !== undefined)
+    data.homeBannerTwoImage = settings.homeBannerTwoImage;
+  if (settings.homeBannerTwoTitle !== undefined)
+    data.homeBannerTwoTitle = settings.homeBannerTwoTitle;
   if (settings.homeBannerTwoTitleColor !== undefined) {
     data.homeBannerTwoTitleColor = settings.homeBannerTwoTitleColor;
   }
@@ -42,8 +46,8 @@ export async function updateSuperAdminSettings(
 
   if (Object.keys(data).length === 0) return;
 
-  // PUT to /site-settings with data object
-  await apiClient.put(`/site-settings`, {
+  // PUT to /settings with data object
+  await apiClient.put(`/settings`, {
     data,
   });
 }

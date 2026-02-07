@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
 import "../styles/components.css";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
@@ -86,7 +87,7 @@ export default function RootLayout({
 }>) {
   // Extract base domain for prefetch (API_BASE_URL in constants includes /api suffix)
   const API_BASE_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL
-    ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api$/, '')
+    ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api$/, "")
     : "http://localhost:1337";
 
   return (
@@ -132,14 +133,6 @@ export default function RootLayout({
         <link rel="prefetch" href="/plp" as="document" />
         <link rel="prefetch" href="/blog" as="document" />
 
-        {/* Preload critical images for mobile performance */}
-        <link
-          rel="preload"
-          href="/images/og-default.jpg"
-          as="image"
-          type="image/jpeg"
-        />
-
         {/* OpenSearch descriptor for browser search integration */}
         <link
           rel="search"
@@ -177,7 +170,9 @@ export default function RootLayout({
         <CartProvider>
           <NuqsAdapter>
             <Providers>
-              <div id="main-content">{children}</div>
+              <Suspense fallback={null}>
+                <div id="main-content">{children}</div>
+              </Suspense>
             </Providers>
           </NuqsAdapter>
         </CartProvider>

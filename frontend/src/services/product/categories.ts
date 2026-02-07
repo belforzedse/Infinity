@@ -36,6 +36,11 @@ interface RawProductCategory {
     Image?: CategoryImageField | null;
     parent?: CategoryRelation | null;
   };
+  Title?: string;
+  Slug?: string;
+  Color?: string | null;
+  Image?: CategoryImageField | null;
+  parent?: CategoryRelation | null;
 }
 
 export interface ProductCategorySummary {
@@ -79,6 +84,14 @@ const resolveCategoryImage = (image?: CategoryImageField | null) => {
     width: attrs.width ?? null,
     height: attrs.height ?? null,
   };
+};
+
+const normalizeHexColor = (value?: string | null): string | null => {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return trimmed;
+  if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return `#${trimmed}`;
+  return trimmed;
 };
 
 export async function getProductCategories(
@@ -138,10 +151,10 @@ export async function getProductCategories(
 
     const mapped = items
       .map((item) => {
-        const attrs = item.attributes || {};
+        const attrs = item.attributes || item;
         const name = attrs.Title || attrs.Slug || String(item.id);
         const slug = attrs.Slug || String(item.id);
-        const color = attrs.Color ? String(attrs.Color).trim() : null;
+        const color = normalizeHexColor(attrs.Color);
         const parentId = attrs.parent?.data?.id ?? null;
         const image = resolveCategoryImage(attrs.Image);
 
