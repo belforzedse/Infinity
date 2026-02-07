@@ -93,9 +93,6 @@ function HomeBannersPreview({ data }: { data: SuperAdminSettings }) {
                     {buttonText}
                     <span className="ml-1 text-xl">←</span>
                   </a>
-                  <span className="max-w-full truncate text-xs text-white/90" dir="ltr">
-                    {banner.buttonHref || "لینک دکمه تنظیم نشده"}
-                  </span>
                 </div>
               </div>
             </div>
