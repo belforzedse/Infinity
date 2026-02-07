@@ -26,6 +26,7 @@ interface Product {
   attributes: {
     Title: string;
     RatingCount: number | null;
+    SeenCount?: number | null;
     CoverImage?: {
       data?: {
         attributes?: {
