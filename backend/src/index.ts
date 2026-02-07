@@ -221,8 +221,8 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::blog-tag", controller: "blog-tag", allowActions: READ_ACTIONS },
   { typeKey: "api::blog-author", controller: "blog-author", allowActions: READ_ACTIONS },
   { typeKey: "api::blog-comment", controller: "blog-comment", allowActions: READ_ACTIONS },
-  // Restrict settings management for store managers (read-only)
-  { typeKey: "api::settings", controller: "settings", allowActions: ["find"] },
+  // Allow store managers to update site settings used by the super-admin customization pages.
+  { typeKey: "api::settings", controller: "settings", allowActions: ["find", "update"] },
 ];
 
 /**
