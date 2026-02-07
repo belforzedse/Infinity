@@ -5,7 +5,7 @@ import logger from "@/utils/logger";
 
 export async function getPublicSuperAdminSettings(): Promise<SuperAdminSettings> {
   try {
-    const response = await fetch(`${API_BASE_URL}/settings?populate=*`, {
+    const response = await fetch(`${API_BASE_URL}/site-settings?populate=*`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",

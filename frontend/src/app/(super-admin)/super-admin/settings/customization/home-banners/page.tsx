@@ -61,7 +61,6 @@ function HomeBannersPreview({ data }: { data: SuperAdminSettings }) {
             : "linear-gradient(135deg, #fdf2f8 0%, #f1f5f9 100%)";
           const titleText = banner.title || "عنوان بنر اینجا قرار می‌گیرد";
           const buttonText = banner.buttonText || "مشاهده بیشتر";
-          const buttonHref = banner.buttonHref || "#";
 
           return (
             <div
@@ -85,14 +84,14 @@ function HomeBannersPreview({ data }: { data: SuperAdminSettings }) {
                   {titleText}
                 </h3>
                 <div className="flex flex-col items-center gap-1.5">
-                  <a
-                    href={buttonHref}
+                  <button
+                    type="button"
                     className="inline-flex items-center text-sm font-medium transition hover:opacity-80 md:text-lg"
                     style={{ color: banner.buttonColor }}
                   >
                     {buttonText}
                     <span className="ml-1 text-xl">←</span>
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
