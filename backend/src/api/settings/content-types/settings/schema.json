@@ -62,6 +62,14 @@
     "homeBannerTwoButtonHref": {
       "type": "text",
       "default": ""
+    },
+    "homeFeaturedCategorySlug": {
+      "type": "string",
+      "default": ""
+    },
+    "homeFeaturedCategoryBannerImage": {
+      "type": "text",
+      "default": ""
     }
   }
 }

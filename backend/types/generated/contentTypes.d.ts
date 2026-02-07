@@ -2566,6 +2566,8 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     homeBannerTwoImage: Attribute.Text & Attribute.DefaultTo<"">;
     homeBannerTwoTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerTwoTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeFeaturedCategoryBannerImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeFeaturedCategorySlug: Attribute.String & Attribute.DefaultTo<"">;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
       Attribute.Private;

@@ -2,7 +2,7 @@
 
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import Link from "next/link";
-import { FiImage, FiMenu } from "react-icons/fi";
+import { FiGrid, FiImage, FiMenu } from "react-icons/fi";
 
 const tiles = [
   {
@@ -16,6 +16,12 @@ const tiles = [
     description: "دو بنر تبلیغاتی قبل از بخش بلاگ را مدیریت کنید.",
     href: "/super-admin/settings/customization/home-banners",
     icon: <FiImage className="h-5 w-5" />,
+  },
+  {
+    title: "دسته‌بندی ویژه صفحه اصلی",
+    description: "بنر و محصولات بخش «شاید بپسندید» را تنظیم کنید.",
+    href: "/super-admin/settings/customization/featured-category",
+    icon: <FiGrid className="h-5 w-5" />,
   },
 ];
 

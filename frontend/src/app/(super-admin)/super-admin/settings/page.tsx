@@ -2,7 +2,7 @@
 
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import Link from "next/link";
-import { FiImage, FiMenu, FiSettings, FiSliders } from "react-icons/fi";
+import { FiGrid, FiImage, FiMenu, FiSettings, FiSliders } from "react-icons/fi";
 
 const quickTiles = [
   {
@@ -25,6 +25,13 @@ const quickTiles = [
     href: "/super-admin/settings/customization/home-banners",
     icon: <FiImage className="h-5 w-5" />,
     tone: "from-amber-50 to-slate-50",
+  },
+  {
+    title: "دسته‌بندی ویژه",
+    description: "بخش «شاید بپسندید» را با بنر و دسته‌بندی تنظیم کنید.",
+    href: "/super-admin/settings/customization/featured-category",
+    icon: <FiGrid className="h-5 w-5" />,
+    tone: "from-sky-50 to-slate-50",
   },
   {
     title: "سفارشی‌سازی",

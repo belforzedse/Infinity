@@ -644,6 +644,8 @@ export default {
               homeBannerTwoButtonText: "",
               homeBannerTwoButtonColor: "",
               homeBannerTwoButtonHref: "",
+              homeFeaturedCategorySlug: "",
+              homeFeaturedCategoryBannerImage: "",
             },
           });
           strapi.log.info("✓ Created default settings entry");

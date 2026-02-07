@@ -39,6 +39,12 @@ export async function updateSuperAdminSettings(
   if (settings.homeBannerTwoButtonHref !== undefined) {
     data.homeBannerTwoButtonHref = settings.homeBannerTwoButtonHref;
   }
+  if (settings.homeFeaturedCategorySlug !== undefined) {
+    data.homeFeaturedCategorySlug = settings.homeFeaturedCategorySlug;
+  }
+  if (settings.homeFeaturedCategoryBannerImage !== undefined) {
+    data.homeFeaturedCategoryBannerImage = settings.homeFeaturedCategoryBannerImage;
+  }
 
   if (Object.keys(data).length === 0) return;
 

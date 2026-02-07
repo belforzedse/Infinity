@@ -13,6 +13,8 @@ export type SuperAdminSettings = {
   homeBannerTwoButtonText: string;
   homeBannerTwoButtonColor: string;
   homeBannerTwoButtonHref: string;
+  homeFeaturedCategorySlug: string;
+  homeFeaturedCategoryBannerImage: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -32,6 +34,8 @@ export const defaultSettings = (): SuperAdminSettings => ({
   homeBannerTwoButtonText: "",
   homeBannerTwoButtonColor: "",
   homeBannerTwoButtonHref: "",
+  homeFeaturedCategorySlug: "",
+  homeFeaturedCategoryBannerImage: "",
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -62,6 +66,12 @@ export const normalizeSuperAdminSettings = (
     typeof data?.homeBannerTwoButtonColor === "string" ? data.homeBannerTwoButtonColor : "",
   homeBannerTwoButtonHref:
     typeof data?.homeBannerTwoButtonHref === "string" ? data.homeBannerTwoButtonHref : "",
+  homeFeaturedCategorySlug:
+    typeof data?.homeFeaturedCategorySlug === "string" ? data.homeFeaturedCategorySlug : "",
+  homeFeaturedCategoryBannerImage:
+    typeof data?.homeFeaturedCategoryBannerImage === "string"
+      ? data.homeFeaturedCategoryBannerImage
+      : "",
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });
