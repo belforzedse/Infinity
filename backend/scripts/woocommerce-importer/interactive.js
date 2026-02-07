@@ -997,12 +997,6 @@ async function runVariationDedup() {
 
   const dryRunInput = await prompt("Run in dry-run mode? (y/n, default: y): ");
   const dryRun = dryRunInput.trim() ? dryRunInput.toLowerCase() !== "n" : true;
-  const disableInput = await prompt(
-    "Disable duplicates instead of deleting them? (y/n, default: y): ",
-  );
-  const disableDuplicates = disableInput.trim()
-    ? disableInput.toLowerCase() !== "n"
-    : true;
   const ignoreForbiddenInput = await prompt(
     "Ignore forbidden relation endpoints and continue deletes? (y/n, default: n): ",
   );
@@ -1039,12 +1033,7 @@ async function runVariationDedup() {
   }
 
   try {
-    await dedupVariations({
-      dryRun,
-      ignoreForbidden,
-      skipRelations,
-      disableDuplicates,
-    });
+    await dedupVariations({ dryRun, ignoreForbidden, skipRelations });
   } catch (error) {
     console.log(`\n❌ Deduplication failed: ${error.message}\n`);
   }
