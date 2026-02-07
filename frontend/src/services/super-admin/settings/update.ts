@@ -42,8 +42,8 @@ export async function updateSuperAdminSettings(
 
   if (Object.keys(data).length === 0) return;
 
-  // PUT to /site-settings with data object
-  await apiClient.put(`/site-settings`, {
+  // PUT to /settings with data object
+  await apiClient.put(`/settings`, {
     data,
   });
 }

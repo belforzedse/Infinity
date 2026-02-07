@@ -4,7 +4,7 @@ import { defaultSettings, normalizeSuperAdminSettings } from "@/types/super-admi
 
 export async function getSuperAdminSettings(): Promise<SuperAdminSettings> {
   try {
-    const res = await apiClient.get("/site-settings?populate=*");
+    const res = await apiClient.get("/settings?populate=*");
     const data = (res as any)?.data?.attributes;
     if (!data) return defaultSettings();
 

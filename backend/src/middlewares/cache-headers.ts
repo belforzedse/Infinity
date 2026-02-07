@@ -55,6 +55,7 @@ const ENDPOINT_PATTERNS = {
     /^\/api\/shipping-provinces/i,
     /^\/api\/footers/i,
     /^\/api\/navigations/i,
+    /^\/api\/settings/i,
     /^\/api\/site-settings/i,
   ],
 
