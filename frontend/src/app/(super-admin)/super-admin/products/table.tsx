@@ -4,11 +4,13 @@ import ShowMoreIcon from "@/components/SuperAdmin/Layout/Icons/ShowMoreIcon";
 import SuperAdminTableCellActionButton from "@/components/SuperAdmin/Table/Cells/ActionButton";
 import RemoveActionButton from "@/components/SuperAdmin/Table/Cells/RemoveActionButton";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
+import SuperAdminTableCellFullDateTime from "@/components/SuperAdmin/Table/Cells/FullDateTime";
 import type { ProductCoverImage } from "@/types/Product";
 import { priceFormatter } from "@/utils/price";
 import type { ColumnDef } from "@tanstack/react-table";
 import { duplicateProduct } from "@/services/super-admin/product/duplicate";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import { formatFaRelativeDateTime } from "@/utils/formatFaRelativeDateTime";
 import { useRouter } from "next/navigation";
 
 export type Product = {
@@ -216,6 +218,15 @@ export const columns: ColumnDef<Product>[] = [
           {sum} عدد در انبار
         </span>
       );
+    },
+  },
+  {
+    accessorKey: "attributes.updatedAt",
+    header: "آخرین ویرایش",
+    cell: ({ row }) => {
+      const updatedAt = row.original?.attributes?.updatedAt;
+      if (!updatedAt) return "-";
+      return <SuperAdminTableCellFullDateTime date={new Date(updatedAt)} />;
     },
   },
   {
@@ -449,6 +460,10 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                   </span>
                 </div>
               </div>
+
+              <span className="text-[11px] text-neutral-400">
+                آخرین ویرایش: {formatFaRelativeDateTime(row?.attributes?.updatedAt)}
+              </span>
             </div>
           </div>
         );

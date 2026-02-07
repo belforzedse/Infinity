@@ -29,16 +29,22 @@ export default function Reveal({
 
   React.useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const legacyMediaQuery = mediaQuery as MediaQueryList & {
+      addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+      removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+    };
     const applyPreference = () => {
       setPrefersReducedMotion(mediaQuery.matches);
     };
+    const handleMediaChange = () => applyPreference();
     const subscribe = () => {
       if ("addEventListener" in mediaQuery) {
-        mediaQuery.addEventListener("change", applyPreference);
-        return () => mediaQuery.removeEventListener("change", applyPreference);
+        mediaQuery.addEventListener("change", handleMediaChange);
+        return () => mediaQuery.removeEventListener("change", handleMediaChange);
       }
-      mediaQuery.addListener(applyPreference);
-      return () => mediaQuery.removeListener(applyPreference);
+      legacyMediaQuery.addListener?.(handleMediaChange as (event: MediaQueryListEvent) => void);
+      return () =>
+        legacyMediaQuery.removeListener?.(handleMediaChange as (event: MediaQueryListEvent) => void);
     };
     applyPreference();
     const unsubscribe = subscribe();
