@@ -13,7 +13,25 @@ interface CategoryCarouselProps {
   categories: ProductCategorySummary[];
 }
 
-const getCategoryColor = (color?: string | null) => (color && color.trim() ? color.trim() : "#f8fafc");
+const normalizeHexColor = (value?: string | null) => {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return trimmed;
+  if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return `#${trimmed}`;
+  return trimmed;
+};
+
+const getCategoryColor = (color?: string | null) => {
+  const normalized = normalizeHexColor(color);
+  return normalized || "#f8fafc";
+};
+const isLocalImageUrl = (src: string) =>
+  src.startsWith("http://localhost") ||
+  src.startsWith("https://localhost") ||
+  src.startsWith("http://127.0.0.1") ||
+  src.startsWith("https://127.0.0.1") ||
+  src.startsWith("http://[::1]") ||
+  src.startsWith("https://[::1]");
 
 type RtlScrollType = "default" | "negative" | "reverse";
 
@@ -31,7 +49,7 @@ const getRtlScrollType = (): RtlScrollType => {
   div.style.visibility = "hidden";
   div.style.position = "absolute";
   div.style.top = "-9999px";
-  div.innerHTML = "<div style=\"width:8px;height:4px;\"></div>";
+  div.innerHTML = '<div style="width:8px;height:4px;"></div>';
 
   document.body.appendChild(div);
 
@@ -159,25 +177,23 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
     scrollToNormalized(el, clamped, "smooth");
   };
 
-  const handlePointerDown = (direction: "left" | "right") => (
-    event: React.PointerEvent<HTMLButtonElement>,
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
-    pointerHandledRef.current = true;
-    scrollByAmount(direction);
-  };
+  const handlePointerDown =
+    (direction: "left" | "right") => (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      pointerHandledRef.current = true;
+      scrollByAmount(direction);
+    };
 
-  const handleClick = (direction: "left" | "right") => (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    if (pointerHandledRef.current) {
-      pointerHandledRef.current = false;
-      return;
-    }
-    event.preventDefault();
-    scrollByAmount(direction);
-  };
+  const handleClick =
+    (direction: "left" | "right") => (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (pointerHandledRef.current) {
+        pointerHandledRef.current = false;
+        return;
+      }
+      event.preventDefault();
+      scrollByAmount(direction);
+    };
 
   if (!categories || categories.length === 0) {
     return null;
@@ -187,18 +203,19 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
     <div className="relative">
       <div
         ref={scrollRef}
-        className="grid grid-flow-col auto-cols-[calc(100%/3)] items-stretch gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth snap-x snap-mandatory md:auto-cols-[calc(100%/4)] md:gap-6 lg:auto-cols-[calc(100%/6)] lg:gap-0"
+        className="scrollbar-hide grid snap-x snap-mandatory auto-cols-[calc(100%/3)] grid-flow-col items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 md:auto-cols-[calc(100%/4)] md:gap-6 lg:auto-cols-[calc(100%/6)] lg:gap-0"
       >
         {categories.map((category, index) => {
           const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
           const label = category.name || category.slug;
           const bgColor = getCategoryColor(category.color);
+          const useUnoptimizedImage = isLocalImageUrl(imageSrc);
 
           return (
             <Link
               key={category.id}
               href={{ pathname: "/plp", query: { category: category.slug } }}
-              className="group flex w-full flex-shrink-0 flex-col items-center text-center snap-start"
+              className="group flex w-full flex-shrink-0 snap-start flex-col items-center text-center"
               aria-label={label}
               data-carousel-item
               style={{ scrollSnapStop: "always" }}
@@ -219,6 +236,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
                       alt={category.imageAlt || label}
                       width={category.imageWidth || 220}
                       height={category.imageHeight || 260}
+                      unoptimized={useUnoptimizedImage}
                       className="max-h-[230px] w-auto object-contain drop-shadow-md"
                       loading="lazy"
                       sizes="(min-width: 1024px) calc(100vw/6), (min-width: 768px) calc(100vw/4), calc(100vw/3)"
@@ -245,6 +263,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
                     alt={category.imageAlt || label}
                     width={80}
                     height={80}
+                    unoptimized={useUnoptimizedImage}
                     className="h-16 w-auto md:h-20"
                     loading="lazy"
                     sizes="80px"
@@ -263,7 +282,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
           aria-label="View previous categories"
           onPointerDown={handlePointerDown("left")}
           onClick={handleClick("left")}
-          className="hidden md:flex items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 shadow-sm transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white absolute left-2 top-1/2 -translate-y-1/2 h-9 w-9 z-10"
+          className="absolute left-2 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 shadow-sm transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:flex"
         >
           <ChevronLeftIcon />
         </button>
@@ -275,7 +294,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
           aria-label="View next categories"
           onPointerDown={handlePointerDown("right")}
           onClick={handleClick("right")}
-          className="hidden md:flex items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 shadow-sm transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 z-10"
+          className="absolute right-2 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 shadow-sm transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:flex"
         >
           <ChevronRightIcon />
         </button>

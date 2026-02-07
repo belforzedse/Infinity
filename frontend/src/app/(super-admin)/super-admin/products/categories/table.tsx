@@ -76,8 +76,7 @@ export type Category = {
   };
 };
 
-const getChildCategories = (category?: Category) =>
-  category?.attributes?.children?.data ?? [];
+const getChildCategories = (category?: Category) => category?.attributes?.children?.data ?? [];
 
 const resolveCategoryImageSrc = (image?: CategoryImageField | null) => {
   const imageAttributes = image?.data?.attributes;
@@ -89,8 +88,32 @@ const resolveCategoryImageSrc = (image?: CategoryImageField | null) => {
   return imageUrl ? resolveAssetUrl(imageUrl) : CATEGORY_IMAGE_PLACEHOLDER;
 };
 
+const normalizeHexColor = (value?: string | null): string | null => {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return trimmed;
+  if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return `#${trimmed}`;
+  return null;
+};
+
+const hexToRgba = (hex: string, alpha: number) => {
+  const safeHex = hex.replace("#", "");
+  const normalized =
+    safeHex.length === 3
+      ? safeHex
+          .split("")
+          .map((c) => `${c}${c}`)
+          .join("")
+      : safeHex;
+  const num = Number.parseInt(normalized, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
-  const colorValue = (child.attributes?.Color || "").trim();
+  const colorValue = normalizeHexColor(child.attributes?.Color);
   const imageSrc = resolveCategoryImageSrc(child.attributes?.Image);
   const imageAlt =
     child.attributes?.Image?.data?.attributes?.alternativeText ||
@@ -100,7 +123,10 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
   return (
     <article className="relative w-full">
       <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 transition-all duration-300 hover:border-pink-100 hover:shadow-md">
-        <div className="relative h-[100px] w-24 overflow-hidden rounded-xl bg-slate-50">
+        <div
+          className="relative h-[100px] w-24 overflow-hidden rounded-xl"
+          style={{ backgroundColor: colorValue ? hexToRgba(colorValue, 0.16) : "#f8fafc" }}
+        >
           <img
             src={imageSrc}
             alt={imageAlt}
@@ -119,7 +145,7 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
 
         <div className="flex flex-1 flex-col justify-between py-0.5 text-right">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] text-slate-400 font-mono truncate">
+            <p className="truncate font-mono text-[10px] text-slate-400">
               {child.attributes?.Slug || "بدون نامک"}
             </p>
             <Link
@@ -132,7 +158,7 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-xs font-semibold text-slate-900 truncate">
+            <h4 className="truncate text-xs font-semibold text-slate-900">
               {child.attributes?.Title || "Unnamed"}
             </h4>
             <span className="text-[10px] text-slate-400">فرزند دسته‌بندی</span>
@@ -157,7 +183,7 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
   const [isChildrenModalOpen, setIsChildrenModalOpen] = useState(false);
   const childCategories = getChildCategories(category);
   const hasChildren = childCategories.length > 0;
-  const colorValue = (category.attributes?.Color || "").trim();
+  const colorValue = normalizeHexColor(category.attributes?.Color);
   const imageSrc = resolveCategoryImageSrc(category.attributes?.Image);
   const imageAlt =
     category.attributes?.Image?.data?.attributes?.alternativeText ||
@@ -166,9 +192,12 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
 
   return (
     <>
-      <div className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 hover:border-pink-100 hover:shadow-lg md:w-[258px] md:mx-auto">
+      <div className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 hover:border-pink-100 hover:shadow-lg md:mx-auto md:w-[258px]">
         <div className="flex h-full flex-col rounded-[20px] bg-white p-3">
-          <div className="relative overflow-hidden rounded-[20px] bg-slate-50 aspect-[4/5] md:aspect-auto md:h-[270px]">
+          <div
+            className="relative aspect-[4/5] overflow-hidden rounded-[20px] md:aspect-auto md:h-[270px]"
+            style={{ backgroundColor: colorValue ? hexToRgba(colorValue, 0.16) : "#f8fafc" }}
+          >
             <div className="h-full w-full">
               <img
                 src={imageSrc}
@@ -195,10 +224,10 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
           </div>
 
           <div className="mt-4 text-right">
-            <p className="text-xs text-slate-500 font-mono truncate">
+            <p className="truncate font-mono text-xs text-slate-500">
               {category.attributes?.Slug || "بدون نامک"}
             </p>
-            <h3 className="mt-1 text-base font-semibold text-slate-900 truncate">
+            <h3 className="mt-1 truncate text-base font-semibold text-slate-900">
               {category.attributes?.Title || "Unnamed"}
             </h3>
           </div>
@@ -217,7 +246,7 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
                 type="button"
                 onClick={() => setIsChildrenModalOpen(true)}
                 disabled={!hasChildren}
-                className={`flex h-8 w-8 items-center justify-center rounded-xl border transition ${hasChildren ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-50" : "border-slate-100 bg-white text-slate-300 cursor-not-allowed"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-xl border transition ${hasChildren ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-50" : "cursor-not-allowed border-slate-100 bg-white text-slate-300"}`}
                 aria-label={hasChildren ? "نمایش فرزندان" : "بدون فرزند"}
               >
                 <ChevronRightIcon />

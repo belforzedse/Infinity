@@ -1,4 +1,5 @@
 import SuperAdminTableCellFullDate from "@/components/SuperAdmin/Table/Cells/FullDate";
+import SuperAdminTableCellFullDateTime from "@/components/SuperAdmin/Table/Cells/FullDateTime";
 import { priceFormatter } from "@/utils/price";
 import SuperAdminTableCellSimplePrice from "@/components/SuperAdmin/Table/Cells/SimplePrice";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -6,6 +7,7 @@ import { twMerge } from "tailwind-merge";
 import MobileTableRowBox from "@/components/SuperAdmin/Table/Mobile/Row/Box";
 import OrderRowActions from "@/components/SuperAdmin/Order/OrderRowActions";
 import { getOrderStatusMeta, translateOrderStatus } from "@/utils/statusTranslations";
+import { formatFaRelativeDateTime } from "@/utils/formatFaRelativeDateTime";
 const getStatusClassName = (status?: string) => {
   const tone = getOrderStatusMeta(status).tone;
   switch (tone) {
@@ -19,7 +21,6 @@ const getStatusClassName = (status?: string) => {
       return "text-blue-600";
   }
 };
-
 
 export type Order = {
   id: string;
@@ -110,6 +111,15 @@ export const columns: ColumnDef<Order>[] = [
       const date = new Date(row.original?.attributes?.Date);
 
       return <DateAgo date={date} />;
+    },
+  },
+  {
+    accessorKey: "attributes.updatedAt",
+    header: "آخرین ویرایش",
+    cell: ({ row }) => {
+      const updatedAt = row.original?.attributes?.updatedAt;
+      if (!updatedAt) return "-";
+      return <SuperAdminTableCellFullDateTime date={new Date(updatedAt)} />;
     },
   },
   {
@@ -239,6 +249,10 @@ export const MobileTable = ({ data }: Props) => {
                 </span>
                 <span className="text-xs text-neutral-400">|</span>
                 <DateAgo date={new Date(row?.attributes?.Date)} />
+                <span className="text-xs text-neutral-400">|</span>
+                <span className="text-xs text-neutral-400">
+                  ویرایش: {formatFaRelativeDateTime(row?.attributes?.updatedAt)}
+                </span>
                 <span className="text-xs text-neutral-400">|</span>
                 <div className={twMerge("text-xs", getStatusClassName(row?.attributes?.Status))}>
                   <span className="text-xs">

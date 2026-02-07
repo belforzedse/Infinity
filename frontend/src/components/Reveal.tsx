@@ -25,18 +25,38 @@ export default function Reveal({
 }: RevealProps) {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = React.useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
   React.useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const legacyMediaQuery = mediaQuery as MediaQueryList & {
+      addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+      removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+    };
+    const applyPreference = () => {
+      setPrefersReducedMotion(mediaQuery.matches);
+    };
+    const handleMediaChange = () => applyPreference();
+    const subscribe = () => {
+      if ("addEventListener" in mediaQuery) {
+        mediaQuery.addEventListener("change", handleMediaChange);
+        return () => mediaQuery.removeEventListener("change", handleMediaChange);
+      }
+      legacyMediaQuery.addListener?.(handleMediaChange as (event: MediaQueryListEvent) => void);
+      return () =>
+        legacyMediaQuery.removeListener?.(handleMediaChange as (event: MediaQueryListEvent) => void);
+    };
+    applyPreference();
+    const unsubscribe = subscribe();
+
     const el = ref.current;
-    if (!el) return;
+    if (!el) {
+      return unsubscribe;
+    }
 
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // If reduced motion is preferred, show immediately without animation
-    if (prefersReducedMotion) {
+    if (mediaQuery.matches) {
       setShown(true);
-      return;
+      return unsubscribe;
     }
 
     const observer = new IntersectionObserver(
@@ -52,7 +72,10 @@ export default function Reveal({
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      unsubscribe();
+    };
   }, [amount, once]);
 
   const hiddenByVariant: Record<Variant, string> = {
@@ -72,11 +95,6 @@ export default function Reveal({
     "zoom-in": "opacity-100 scale-100",
     "blur-up": "opacity-100 translate-y-0 blur-0",
   };
-
-  // Check for reduced motion preference
-  const prefersReducedMotion =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
     <div
