@@ -207,8 +207,10 @@ function parseTopCurrentPages(lastVisits: unknown): Array<{ url: string; visits:
 
   visits.forEach((visit) => {
     const actions = Array.isArray(visit?.actionDetails) ? visit.actionDetails : [];
-    const firstPageAction = actions.find((action: any) => action?.type === "action");
-    const url = String(firstPageAction?.url || firstPageAction?.pageUrl || "").trim();
+    // Use the latest page action in each visit to better represent "active pages now".
+    const pageActions = actions.filter((action: any) => action?.type === "action");
+    const latestPageAction = pageActions.length ? pageActions[pageActions.length - 1] : null;
+    const url = String(latestPageAction?.url || latestPageAction?.pageUrl || "").trim();
     if (!url) return;
     counters.set(url, (counters.get(url) || 0) + 1);
   });

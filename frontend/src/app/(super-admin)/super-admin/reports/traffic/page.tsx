@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DatePicker } from "zaman";
 import dynamic from "next/dynamic";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
@@ -34,6 +34,42 @@ function formatPercent(value: number) {
   return `${faNum(value.toFixed(2))}%`;
 }
 
+function toFaDigits(value: string | number) {
+  return String(value).replace(/\d/g, (digit) => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)] || digit);
+}
+
+function formatDurationSeconds(totalSeconds: number) {
+  const normalized = Math.max(0, Math.round(totalSeconds || 0));
+  const hours = Math.floor(normalized / 3600);
+  const minutes = Math.floor((normalized % 3600) / 60);
+  const seconds = normalized % 60;
+
+  if (hours > 0) {
+    return `${toFaDigits(hours)}:${toFaDigits(String(minutes).padStart(2, "0"))}:${toFaDigits(String(seconds).padStart(2, "0"))}`;
+  }
+
+  return `${toFaDigits(minutes)}:${toFaDigits(String(seconds).padStart(2, "0"))}`;
+}
+
+function formatSecondsSince(value?: string) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  const seconds = Math.max(0, Math.floor((Date.now() - parsed.getTime()) / 1000));
+  return seconds;
+}
+
+function formatFunnelStep(step: TrafficDashboard["funnel"][number]["step"]): string {
+  const labelMap: Record<TrafficDashboard["funnel"][number]["step"], string> = {
+    view_item: "مشاهده محصول",
+    add_to_cart: "افزودن به سبد",
+    begin_checkout: "شروع تسویه",
+    purchase: "خرید نهایی",
+  };
+
+  return labelMap[step] || step;
+}
+
 export default function TrafficReportPage() {
   const [start, setStart] = useState<Date>(new Date(Date.now() - 30 * 86400000));
   const [end, setEnd] = useState<Date>(new Date());
@@ -41,7 +77,13 @@ export default function TrafficReportPage() {
   const [realtime, setRealtime] = useState<TrafficRealtime | null>(null);
   const [loading, setLoading] = useState(false);
   const [realtimeLoading, setRealtimeLoading] = useState(false);
+  const [refreshingNow, setRefreshingNow] = useState(false);
+  const [realtimeError, setRealtimeError] = useState<string | null>(null);
+  const [autoRefreshSeconds, setAutoRefreshSeconds] = useState<number>(15);
+  const [clockTick, setClockTick] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const previousRealtimeRef = useRef<TrafficRealtime | null>(null);
+  const realtimeInFlightRef = useRef(false);
 
   const isValid = (value: Date) => value instanceof Date && !Number.isNaN(value.getTime());
   const toIso = useCallback(
@@ -61,31 +103,50 @@ export default function TrafficReportPage() {
     return isValid(parsed) ? parsed : previous;
   };
 
-  const loadDashboard = useCallback(async () => {
-    setLoading(true);
+  const loadDashboard = useCallback(async (options?: { fresh?: boolean; silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setError(null);
     try {
-      const payload = await getTrafficDashboard({
-        startDate,
-        endDate,
-      });
+      const payload = await getTrafficDashboard(
+        {
+          startDate,
+          endDate,
+        },
+        { fresh: options?.fresh === true },
+      );
       setDashboard(payload);
     } catch (err) {
       setError(getUserFacingErrorMessage(err, "خطا در بارگذاری گزارش ترافیک"));
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   }, [startDate, endDate]);
 
-  const loadRealtime = useCallback(async () => {
-    setRealtimeLoading(true);
+  const loadRealtime = useCallback(async (options?: { fresh?: boolean; silent?: boolean }) => {
+    if (realtimeInFlightRef.current) return;
+    realtimeInFlightRef.current = true;
+    if (!options?.silent) {
+      setRealtimeLoading(true);
+    }
+
     try {
-      const payload = await getTrafficRealtime();
-      setRealtime(payload);
+      const payload = await getTrafficRealtime({ fresh: options?.fresh === true });
+      setRealtimeError(null);
+      setRealtime((previous) => {
+        previousRealtimeRef.current = previous;
+        return payload;
+      });
     } catch (err) {
-      console.error("Failed to load realtime traffic:", err);
+      setRealtimeError(getUserFacingErrorMessage(err, "خطا در بروزرسانی لحظه‌ای ترافیک"));
     } finally {
-      setRealtimeLoading(false);
+      if (!options?.silent) {
+        setRealtimeLoading(false);
+      }
+      realtimeInFlightRef.current = false;
     }
   }, []);
 
@@ -95,24 +156,112 @@ export default function TrafficReportPage() {
 
   useEffect(() => {
     loadRealtime();
-    const interval = setInterval(() => {
-      loadRealtime();
-    }, 30_000);
-    return () => clearInterval(interval);
   }, [loadRealtime]);
+
+  useEffect(() => {
+    if (autoRefreshSeconds <= 0) return;
+
+    const runSilentRefresh = () => {
+      if (document.hidden) return;
+      loadRealtime({ silent: true });
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        runSilentRefresh();
+      }
+    };
+
+    const interval = setInterval(runSilentRefresh, autoRefreshSeconds * 1000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [autoRefreshSeconds, loadRealtime]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setClockTick((previous) => previous + 1);
+    }, 1_000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleManualRefresh = useCallback(async () => {
+    setRefreshingNow(true);
+    try {
+      await Promise.all([
+        loadDashboard({ fresh: true, silent: true }),
+        loadRealtime({ fresh: true }),
+      ]);
+    } finally {
+      setRefreshingNow(false);
+    }
+  }, [loadDashboard, loadRealtime]);
 
   const effectiveRealtime = realtime || dashboard?.realtime || null;
   const lastUpdated = realtime?.updatedAt || dashboard?.updatedAt;
+  const secondsSinceUpdate = useMemo(
+    () => formatSecondsSince(lastUpdated),
+    [lastUpdated, clockTick],
+  );
 
   const trendSeries = dashboard?.series || [];
   const funnelData = dashboard?.funnel || [];
+  const funnelChartData = useMemo(
+    () =>
+      funnelData.map((row) => ({
+        ...row,
+        stepLabel: formatFunnelStep(row.step),
+      })),
+    [funnelData],
+  );
+  const active5Delta =
+    realtime && previousRealtimeRef.current
+      ? realtime.activeVisitorsLast5Min - previousRealtimeRef.current.activeVisitorsLast5Min
+      : 0;
+  const active30Delta =
+    realtime && previousRealtimeRef.current
+      ? realtime.activeVisitorsLast30Min - previousRealtimeRef.current.activeVisitorsLast30Min
+      : 0;
 
   return (
     <ContentWrapper title="گزارش ترافیک و تحلیل رفتار کاربران">
       <div className="space-y-6">
         <div className="rounded-2xl bg-white p-5">
           <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-medium text-neutral-700">بازه گزارش</h3>
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+              <h3 className="text-lg font-medium text-neutral-700">بازه گزارش</h3>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:min-w-[450px]">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-neutral-500">بروزرسانی لحظه‌ای</label>
+                  <select
+                    value={String(autoRefreshSeconds)}
+                    onChange={(event) => setAutoRefreshSeconds(Number(event.target.value))}
+                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                  >
+                    <option value="5">هر ۵ ثانیه</option>
+                    <option value="15">هر ۱۵ ثانیه</option>
+                    <option value="30">هر ۳۰ ثانیه</option>
+                    <option value="60">هر ۶۰ ثانیه</option>
+                    <option value="0">خاموش</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleManualRefresh}
+                  disabled={refreshingNow}
+                  className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:bg-pink-300"
+                >
+                  {refreshingNow ? "در حال بروزرسانی..." : "بروزرسانی فوری"}
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
@@ -131,6 +280,25 @@ export default function TrafficReportPage() {
                 />
               </div>
             </div>
+
+            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+              <span className="font-medium text-neutral-700">
+                {autoRefreshSeconds > 0 ? "وضعیت: زنده" : "وضعیت: بروزرسانی خودکار خاموش"}
+              </span>
+              <span>•</span>
+              <span>
+                آخرین داده:
+                {" "}
+                {secondsSinceUpdate !== null ? `${faNum(secondsSinceUpdate)} ثانیه پیش` : "نامشخص"}
+              </span>
+              <span>•</span>
+              <span>آخرین بروزرسانی: {formatDateTime(lastUpdated)}</span>
+            </div>
+            {realtimeError ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                {realtimeError}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -142,7 +310,7 @@ export default function TrafficReportPage() {
           <div className="rounded-2xl bg-white p-8 text-center text-neutral-500">در حال بارگذاری...</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
               <MetricCard title="بازدیدها" value={dashboard?.summary.visits || 0} tone="blue" />
               <MetricCard title="کاربران یکتا" value={dashboard?.summary.visitors || 0} tone="green" />
               <MetricCard title="نمایش صفحات" value={dashboard?.summary.pageviews || 0} tone="purple" />
@@ -153,9 +321,25 @@ export default function TrafficReportPage() {
                 tone="orange"
               />
               <MetricCard
+                title="میانگین حضور"
+                value={formatDurationSeconds(dashboard?.summary.avgVisitDuration || 0)}
+                tone="blue"
+              />
+              <MetricCard
+                title="میانگین اکشن/بازدید"
+                value={dashboard?.summary.avgActionsPerVisit || 0}
+                tone="purple"
+              />
+              <MetricCard
                 title="تعداد سفارش موفق"
                 value={dashboard?.ecommerce.orders || 0}
                 tone="emerald"
+              />
+              <MetricCard
+                title="نرخ تبدیل"
+                value={dashboard?.ecommerce.conversionRate || 0}
+                suffix="%"
+                tone="orange"
               />
               <MetricCard
                 title="درآمد (تومان)"
@@ -194,23 +378,27 @@ export default function TrafficReportPage() {
                   <RealtimeMetric
                     label="کاربران فعال ۵ دقیقه اخیر"
                     value={effectiveRealtime?.activeVisitorsLast5Min || 0}
+                    delta={active5Delta}
                   />
                   <RealtimeMetric
                     label="کاربران فعال ۳۰ دقیقه اخیر"
                     value={effectiveRealtime?.activeVisitorsLast30Min || 0}
+                    delta={active30Delta}
                   />
                   <div className="text-xs text-neutral-500">
-                    {realtimeLoading ? "در حال بروزرسانی لحظه‌ای..." : `آخرین بروزرسانی: ${formatDateTime(lastUpdated)}`}
+                    {realtimeLoading
+                      ? "در حال بروزرسانی لحظه‌ای..."
+                      : `آخرین بروزرسانی: ${formatDateTime(lastUpdated)}`}
                   </div>
                 </div>
                 <h4 className="text-sm mt-5 font-medium text-neutral-700">صفحات فعال الان</h4>
                 <div className="mt-3 space-y-2">
-                  {(effectiveRealtime?.topPagesNow || []).slice(0, 5).map((row) => (
+                  {(effectiveRealtime?.topPagesNow || []).slice(0, 5).map((row, index) => (
                     <div
                       key={row.url}
                       className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 text-xs"
                     >
-                      <span className="line-clamp-1">{row.url}</span>
+                      <span className="line-clamp-1">{`${faNum(index + 1)}. ${row.url}`}</span>
                       <span className="font-medium text-neutral-700">{faNum(row.visits)}</span>
                     </div>
                   ))}
@@ -281,9 +469,9 @@ export default function TrafficReportPage() {
                   <div className="space-y-3">
                     <div className="h-[240px]" dir="ltr">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={funnelData}>
+                        <BarChart data={funnelChartData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="step" />
+                          <XAxis dataKey="stepLabel" />
                           <YAxis />
                           <Tooltip />
                           <Bar dataKey="count" fill="#ec4899" />
@@ -296,7 +484,7 @@ export default function TrafficReportPage() {
                           key={row.step}
                           className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 text-sm"
                         >
-                          <span>{row.step}</span>
+                          <span>{formatFunnelStep(row.step)}</span>
                           <span className="font-medium text-neutral-700">
                             {faNum(row.count)}
                             {row.conversionFromPrevious !== null
@@ -344,7 +532,7 @@ function MetricCard({
   tone,
 }: {
   title: string;
-  value: number;
+  value: number | string;
   suffix?: string;
   tone: "blue" | "green" | "purple" | "orange" | "emerald" | "pink";
 }) {
@@ -361,18 +549,42 @@ function MetricCard({
     <div className={`rounded-2xl bg-gradient-to-r p-5 ${toneClass[tone]}`}>
       <p className="text-sm mb-2 font-medium text-neutral-700">{title}</p>
       <p className="text-2xl font-bold">
-        {faNum(value)}
+        {typeof value === "number" ? faNum(value) : value}
         {suffix ? ` ${suffix}` : ""}
       </p>
     </div>
   );
 }
 
-function RealtimeMetric({ label, value }: { label: string; value: number }) {
+function RealtimeMetric({
+  label,
+  value,
+  delta = 0,
+}: {
+  label: string;
+  value: number;
+  delta?: number;
+}) {
+  const deltaText =
+    delta === 0 ? null : `${delta > 0 ? "+" : ""}${faNum(Math.abs(delta))}`;
+  const deltaClassName =
+    delta > 0
+      ? "bg-emerald-100 text-emerald-700"
+      : delta < 0
+        ? "bg-red-100 text-red-700"
+        : "bg-neutral-100 text-neutral-600";
+
   return (
     <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2">
       <span className="text-sm text-neutral-600">{label}</span>
-      <span className="text-lg font-semibold text-pink-600">{faNum(value)}</span>
+      <div className="flex items-center gap-2">
+        {deltaText ? (
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${deltaClassName}`}>
+            {deltaText}
+          </span>
+        ) : null}
+        <span className="text-lg font-semibold text-pink-600">{faNum(value)}</span>
+      </div>
     </div>
   );
 }

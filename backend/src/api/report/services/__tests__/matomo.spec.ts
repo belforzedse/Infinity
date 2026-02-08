@@ -138,4 +138,37 @@ describe("Matomo report service", () => {
     expect(payload.deviceBreakdown[0].device).toBe("Desktop");
     expect(payload.geoBreakdown[0].country).toBe("Iran");
   });
+
+  it("uses latest page action per visit for realtime top pages", async () => {
+    jest.spyOn(global, "fetch" as any).mockImplementation(async (url: string) => {
+      const requestUrl = new URL(url);
+      const method = requestUrl.searchParams.get("method");
+
+      switch (method) {
+        case "Live.getCounters":
+          return mockJsonResponse({ visits: 1 }) as any;
+        case "Live.getLastVisitsDetails":
+          return mockJsonResponse([
+            {
+              actionDetails: [
+                { type: "action", url: "/plp" },
+                { type: "action", url: "/pdp/1" },
+              ],
+            },
+            {
+              actionDetails: [
+                { type: "action", url: "/pdp/1" },
+                { type: "action", url: "/checkout" },
+              ],
+            },
+          ]) as any;
+        default:
+          return mockJsonResponse({}) as any;
+      }
+    });
+
+    const payload = await getMatomoRealtimePayload();
+    expect(payload.topPagesNow[0]).toEqual({ url: "/pdp/1", visits: 1 });
+    expect(payload.topPagesNow[1]).toEqual({ url: "/checkout", visits: 1 });
+  });
 });

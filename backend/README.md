@@ -28,6 +28,8 @@ up and down and up and down and
   - `MATOMO_SITE_ID`
   - `MATOMO_API_TOKEN`
   - `MATOMO_TIMEOUT_MS` (default `8000`)
+  - `TRAFFIC_DASHBOARD_CACHE_TTL_MS` (default `30000`)
+  - `TRAFFIC_REALTIME_CACHE_TTL_MS` (default `10000`)
 
 ### Development
 

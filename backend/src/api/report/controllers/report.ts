@@ -11,7 +11,25 @@ import {
 } from "../services/matomo";
 
 type Interval = "day" | "week" | "month";
-const TRAFFIC_CACHE_TTL_MS = 30_000;
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function isForceFresh(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes";
+}
+
+const TRAFFIC_DASHBOARD_CACHE_TTL_MS = parsePositiveInt(
+  process.env.TRAFFIC_DASHBOARD_CACHE_TTL_MS,
+  30_000,
+);
+const TRAFFIC_REALTIME_CACHE_TTL_MS = parsePositiveInt(
+  process.env.TRAFFIC_REALTIME_CACHE_TTL_MS,
+  10_000,
+);
 const trafficCache = new Map<string, { expiresAt: number; payload: any }>();
 
 function parseDate(value?: string, fallbackDays = 30): Date {
@@ -55,9 +73,9 @@ function getFromTrafficCache(key: string): any | null {
   return cached.payload;
 }
 
-function setTrafficCache(key: string, payload: any) {
+function setTrafficCache(key: string, payload: any, ttlMs: number) {
   trafficCache.set(key, {
-    expiresAt: Date.now() + TRAFFIC_CACHE_TTL_MS,
+    expiresAt: Date.now() + ttlMs,
     payload,
   });
 }
@@ -640,12 +658,15 @@ export default {
         (ctx.query.startDate as string) || (ctx.query.start as string),
         (ctx.query.endDate as string) || (ctx.query.end as string),
       );
+      const forceFresh = isForceFresh(ctx.query.fresh);
 
       const cacheKey = getTrafficCacheKey("dashboard", normalizedRange);
-      const cached = getFromTrafficCache(cacheKey);
-      if (cached) {
-        ctx.body = { data: cached };
-        return;
+      if (!forceFresh) {
+        const cached = getFromTrafficCache(cacheKey);
+        if (cached) {
+          ctx.body = { data: cached };
+          return;
+        }
       }
 
       const startDate = new Date(normalizedRange.startDate);
@@ -672,7 +693,7 @@ export default {
         updatedAt: new Date().toISOString(),
       };
 
-      setTrafficCache(cacheKey, payload);
+      setTrafficCache(cacheKey, payload, TRAFFIC_DASHBOARD_CACHE_TTL_MS);
       ctx.body = { data: payload };
     } catch (error: any) {
       if (error?.message === "INVALID_DATE_RANGE") {
@@ -692,11 +713,14 @@ export default {
       );
       if (!user) return;
 
+      const forceFresh = isForceFresh(ctx.query.fresh);
       const cacheKey = "realtime";
-      const cached = getFromTrafficCache(cacheKey);
-      if (cached) {
-        ctx.body = { data: cached };
-        return;
+      if (!forceFresh) {
+        const cached = getFromTrafficCache(cacheKey);
+        if (cached) {
+          ctx.body = { data: cached };
+          return;
+        }
       }
 
       const realtime = await getMatomoRealtimePayload();
@@ -705,7 +729,7 @@ export default {
         updatedAt: new Date().toISOString(),
       };
 
-      setTrafficCache(cacheKey, payload);
+      setTrafficCache(cacheKey, payload, TRAFFIC_REALTIME_CACHE_TTL_MS);
       ctx.body = { data: payload };
     } catch (error: any) {
       ctx.badRequest(error.message, { data: { success: false } });

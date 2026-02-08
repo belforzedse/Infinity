@@ -15,8 +15,18 @@ function normalizeString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-export async function getTrafficDashboard(params?: TrafficDashboardParams): Promise<TrafficDashboard> {
-  const query = formatQueryParams(params as any);
+type TrafficRequestOptions = {
+  fresh?: boolean;
+};
+
+export async function getTrafficDashboard(
+  params?: TrafficDashboardParams,
+  options?: TrafficRequestOptions,
+): Promise<TrafficDashboard> {
+  const query = formatQueryParams({
+    ...(params || {}),
+    ...(options?.fresh ? { fresh: 1 } : {}),
+  } as any);
   const response = await apiClient.get(`/reports/traffic/dashboard${query}`);
   const payload = (response as any)?.data || {};
 
@@ -122,8 +132,9 @@ export async function getTrafficDashboard(params?: TrafficDashboardParams): Prom
   };
 }
 
-export async function getTrafficRealtime(): Promise<TrafficRealtime> {
-  const response = await apiClient.get("/reports/traffic/realtime");
+export async function getTrafficRealtime(options?: TrafficRequestOptions): Promise<TrafficRealtime> {
+  const query = formatQueryParams(options?.fresh ? ({ fresh: 1 } as any) : ({} as any));
+  const response = await apiClient.get(`/reports/traffic/realtime${query}`);
   const payload = (response as any)?.data || {};
   return {
     activeVisitorsLast5Min: normalizeNumber(payload?.activeVisitorsLast5Min),

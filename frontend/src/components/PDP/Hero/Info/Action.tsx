@@ -13,6 +13,7 @@ import { hasStockForVariation, getAvailableStockCount } from "@/services/product
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
 import { scrollIntoViewWithOffset } from "@/utils/scroll";
+import { trackMatomoEvent } from "@/lib/analytics/matomo";
 
 const options = [
   { id: 1, name: "۱ عدد" },
@@ -171,6 +172,12 @@ export default function PDPHeroInfoAction({
     }
 
     // Call the original add to cart function
+    trackMatomoEvent({
+      category: "engagement",
+      action: "click_add_to_cart",
+      name: `${productId}:${variationId || "no-variation"}`,
+      value: requestedQuantity,
+    });
     addToCart(requestedQuantity);
   };
 
@@ -186,6 +193,11 @@ export default function PDPHeroInfoAction({
     navigator.clipboard
       .writeText(currentUrl)
       .then(() => {
+        trackMatomoEvent({
+          category: "engagement",
+          action: "share_product",
+          name: `${productId}:${name}`,
+        });
         // Show toast message
         setShowShareToast(true);
 
@@ -210,6 +222,12 @@ export default function PDPHeroInfoAction({
    * Uses data attribute if available, falls back to class selector
    */
   const handleScrollToComments = () => {
+    trackMatomoEvent({
+      category: "engagement",
+      action: "open_comments",
+      name: `${productId}:${name}`,
+      onceKey: `open-comments:${productId}`,
+    });
     const commentsSection = document.querySelector<HTMLElement>("[data-comments-section]");
 
     if (commentsSection) {
@@ -251,6 +269,15 @@ export default function PDPHeroInfoAction({
     }
 
     setQuantity(newQuantity);
+  };
+
+  const handleToggleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    trackMatomoEvent({
+      category: "engagement",
+      action: isLiked ? "remove_from_wishlist" : "add_to_wishlist",
+      name: `${productId}:${name}`,
+    });
+    await toggleLike(e);
   };
 
   // Generate options based on available stock (limit to max 5 or available stock)
@@ -295,7 +322,7 @@ export default function PDPHeroInfoAction({
           className={`flex h-12 flex-1 items-center justify-center rounded-xl shadow-md md:w-12 md:flex-auto ${
             isLoading ? "cursor-wait opacity-50" : ""
           }`}
-          onClick={toggleLike}
+          onClick={handleToggleLike}
           disabled={isLoading}
           aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
         >
