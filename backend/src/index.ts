@@ -644,6 +644,16 @@ export default {
               homeBannerTwoButtonText: "",
               homeBannerTwoButtonColor: "",
               homeBannerTwoButtonHref: "",
+              homeFeaturedCategorySlug: "",
+              homeFeaturedCategoryBannerImage: "",
+              blogDefaultBannerImage: "",
+              blogDefaultBannerTitle: "",
+              blogDefaultBannerSubtitle: "",
+              blogDefaultBannerTitleColor: "",
+              blogDefaultBannerSubtitleColor: "",
+              blogDefaultBannerLinkText: "",
+              blogDefaultBannerLinkColor: "",
+              blogCategoryBannerOrder: [],
             },
           });
           strapi.log.info("✓ Created default settings entry");

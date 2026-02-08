@@ -23,6 +23,11 @@ up and down and up and down and
   - **Important**: `main.env` and `dev.env` files are gitignored. Copy the entire file contents into the corresponding GitHub secret (e.g., `PROD_BACKEND_ENV_FILE`, `STAGING_BACKEND_ENV_FILE`).
 - **Compose variables**: `ENV_FILE` (defaults to `main.env`), `IMAGE_TAG` (`main` by default), `STRAPI_PORT`, `POSTGRES_PORT`, `REDIS_PORT`. Override locally, e.g. `ENV_FILE=dev.env STRAPI_PORT=1338 docker compose up`.
 - **Ports**: Strapi exposes `${STRAPI_PORT:-1337}`; Postgres/Redis still publish `5432/6379` for local development. Remove those `ports` lines on production if you do not want them reachable from the host network.
+- **Matomo integration**: backend traffic report endpoints can read metrics from an external Matomo instance. Configure:
+  - `MATOMO_BASE_URL` (for backend report API calls)
+  - `MATOMO_SITE_ID`
+  - `MATOMO_API_TOKEN`
+  - `MATOMO_TIMEOUT_MS` (default `8000`)
 
 ### Development
 

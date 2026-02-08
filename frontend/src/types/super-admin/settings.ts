@@ -1,3 +1,32 @@
+export type BlogCategoryBannerOrderItem = {
+  id: number;
+  title: string;
+  slug: string;
+};
+
+export const normalizeBlogCategoryBannerOrder = (value: unknown): BlogCategoryBannerOrderItem[] => {
+  if (!Array.isArray(value)) return [];
+
+  const seenSlugs = new Set<string>();
+  const result: BlogCategoryBannerOrderItem[] = [];
+
+  for (const item of value) {
+    const id = Number((item as any)?.id);
+    const slug = typeof (item as any)?.slug === "string" ? (item as any).slug.trim() : "";
+    const title = typeof (item as any)?.title === "string" ? (item as any).title : "";
+
+    if (!Number.isFinite(id) || id <= 0 || !slug) continue;
+
+    const normalizedSlug = slug.toLowerCase();
+    if (seenSlugs.has(normalizedSlug)) continue;
+    seenSlugs.add(normalizedSlug);
+
+    result.push({ id, title, slug });
+  }
+
+  return result;
+};
+
 export type SuperAdminSettings = {
   id: number;
   filterPublicProductsByTitle: boolean;
@@ -13,6 +42,16 @@ export type SuperAdminSettings = {
   homeBannerTwoButtonText: string;
   homeBannerTwoButtonColor: string;
   homeBannerTwoButtonHref: string;
+  homeFeaturedCategorySlug: string;
+  homeFeaturedCategoryBannerImage: string;
+  blogDefaultBannerImage: string;
+  blogDefaultBannerTitle: string;
+  blogDefaultBannerSubtitle: string;
+  blogDefaultBannerTitleColor: string;
+  blogDefaultBannerSubtitleColor: string;
+  blogDefaultBannerLinkText: string;
+  blogDefaultBannerLinkColor: string;
+  blogCategoryBannerOrder: BlogCategoryBannerOrderItem[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -32,6 +71,16 @@ export const defaultSettings = (): SuperAdminSettings => ({
   homeBannerTwoButtonText: "",
   homeBannerTwoButtonColor: "",
   homeBannerTwoButtonHref: "",
+  homeFeaturedCategorySlug: "",
+  homeFeaturedCategoryBannerImage: "",
+  blogDefaultBannerImage: "",
+  blogDefaultBannerTitle: "",
+  blogDefaultBannerSubtitle: "",
+  blogDefaultBannerTitleColor: "",
+  blogDefaultBannerSubtitleColor: "",
+  blogDefaultBannerLinkText: "",
+  blogDefaultBannerLinkColor: "",
+  blogCategoryBannerOrder: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -62,6 +111,29 @@ export const normalizeSuperAdminSettings = (
     typeof data?.homeBannerTwoButtonColor === "string" ? data.homeBannerTwoButtonColor : "",
   homeBannerTwoButtonHref:
     typeof data?.homeBannerTwoButtonHref === "string" ? data.homeBannerTwoButtonHref : "",
+  homeFeaturedCategorySlug:
+    typeof data?.homeFeaturedCategorySlug === "string" ? data.homeFeaturedCategorySlug : "",
+  homeFeaturedCategoryBannerImage:
+    typeof data?.homeFeaturedCategoryBannerImage === "string"
+      ? data.homeFeaturedCategoryBannerImage
+      : "",
+  blogDefaultBannerImage:
+    typeof data?.blogDefaultBannerImage === "string" ? data.blogDefaultBannerImage : "",
+  blogDefaultBannerTitle:
+    typeof data?.blogDefaultBannerTitle === "string" ? data.blogDefaultBannerTitle : "",
+  blogDefaultBannerSubtitle:
+    typeof data?.blogDefaultBannerSubtitle === "string" ? data.blogDefaultBannerSubtitle : "",
+  blogDefaultBannerTitleColor:
+    typeof data?.blogDefaultBannerTitleColor === "string" ? data.blogDefaultBannerTitleColor : "",
+  blogDefaultBannerSubtitleColor:
+    typeof data?.blogDefaultBannerSubtitleColor === "string"
+      ? data.blogDefaultBannerSubtitleColor
+      : "",
+  blogDefaultBannerLinkText:
+    typeof data?.blogDefaultBannerLinkText === "string" ? data.blogDefaultBannerLinkText : "",
+  blogDefaultBannerLinkColor:
+    typeof data?.blogDefaultBannerLinkColor === "string" ? data.blogDefaultBannerLinkColor : "",
+  blogCategoryBannerOrder: normalizeBlogCategoryBannerOrder(data?.blogCategoryBannerOrder),
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });

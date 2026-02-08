@@ -71,7 +71,6 @@ volumes:
   backend_uploads-data:
     external: true
     name: backend_uploads-data
-
 networks:
   infinity-network:
     driver: bridge

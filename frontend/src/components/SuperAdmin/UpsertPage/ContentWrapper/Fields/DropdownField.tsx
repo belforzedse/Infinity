@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback, useRef } from "react";
+import React, { useState, useEffect, memo, useRef } from "react";
 import { useAtom } from "jotai";
 import { selectedProvinceAtom } from "@/atoms/provinceAtom";
 
@@ -53,18 +53,18 @@ function DropdownField({
     }
 
     // Only fetch if we have fetchOptions, no static options, and not currently loading
-    // Allow fetch even if hasFetchedRef is true if localOptions is still empty (retry case)
     if (!fetchOptions || options.length > 0 || isLoading) {
       return;
     }
 
-    // If we've already fetched and got empty results, prevent infinite retries
-    if (hasFetchedRef.current && localOptions.length === 0) {
+    // If we've already fetched once successfully, avoid refetch loops.
+    if (hasFetchedRef.current) {
       return;
     }
 
     hasFetchedRef.current = true;
     setIsLoading(true);
+    let isMounted = true;
 
     if (process.env.NODE_ENV === "development") {
       console.log("DropdownField: Starting fetch");
@@ -72,6 +72,7 @@ function DropdownField({
 
     fetchOptions("", formData)
       .then((fetchedOptions) => {
+        if (!isMounted) return;
         if (process.env.NODE_ENV === "development") {
           console.log("DropdownField: Fetched options:", fetchedOptions);
           console.log("DropdownField: Is array?", Array.isArray(fetchedOptions));
@@ -94,11 +95,16 @@ function DropdownField({
         setIsLoading(false);
       })
       .catch((error) => {
+        if (!isMounted) return;
         console.error("Failed to fetch dropdown options:", error);
         setIsLoading(false);
-        hasFetchedRef.current = false; // Allow retry on error
+        hasFetchedRef.current = true; // Prevent infinite retry loop on persistent errors
       });
-  }, [fetchOptions, options.length, formData, isLoading, localOptions.length]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchOptions, options.length, formData, isLoading]);
 
   // Handle province selection
   const handleChange = (newValue: string) => {

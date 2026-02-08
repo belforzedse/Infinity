@@ -4,8 +4,15 @@
 
 import type { RoleName } from "../../../utils/roles";
 import { ROLE_NAMES, roleIsAllowed, fetchUserWithRole } from "../../../utils/roles";
+import {
+  getMatomoRealtimePayload,
+  getMatomoTrafficDashboardPayload,
+  normalizeRange,
+} from "../services/matomo";
 
 type Interval = "day" | "week" | "month";
+const TRAFFIC_CACHE_TTL_MS = 30_000;
+const trafficCache = new Map<string, { expiresAt: number; payload: any }>();
 
 function parseDate(value?: string, fallbackDays = 30): Date {
   if (!value) {
@@ -30,6 +37,78 @@ async function ensureRoleAccess(
   }
 
   return user;
+}
+
+function getTrafficCacheKey(prefix: string, params: Record<string, string>) {
+  const entries = Object.entries(params).sort(([a], [b]) => a.localeCompare(b));
+  return `${prefix}:${entries.map(([k, v]) => `${k}=${v}`).join("&")}`;
+}
+
+function getFromTrafficCache(key: string): any | null {
+  const now = Date.now();
+  const cached = trafficCache.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt <= now) {
+    trafficCache.delete(key);
+    return null;
+  }
+  return cached.payload;
+}
+
+function setTrafficCache(key: string, payload: any) {
+  trafficCache.set(key, {
+    expiresAt: Date.now() + TRAFFIC_CACHE_TTL_MS,
+    payload,
+  });
+}
+
+async function getOrderStats(start: Date, end: Date) {
+  const knex = strapi.db.connection;
+
+  // Strapi usually maps attributes to snake_case lower-case columns.
+  try {
+    const primaryRes = await knex.raw(
+      `SELECT
+         COUNT(*)::bigint AS total_orders,
+         COUNT(*) FILTER (WHERE o.status = 'Done')::bigint AS paid_orders
+       FROM orders o
+       WHERE o.date BETWEEN ? AND ?`,
+      [start, end],
+    );
+    const row = (primaryRes.rows || primaryRes[0] || [])[0] || {};
+    return {
+      totalOrders: Number(row.total_orders || 0),
+      paidOrders: Number(row.paid_orders || 0),
+    };
+  } catch {
+    // Some DBs may preserve legacy quoted column names.
+    const fallbackRes = await knex.raw(
+      `SELECT
+         COUNT(*)::bigint AS total_orders,
+         COUNT(*) FILTER (WHERE o."Status" = 'Done')::bigint AS paid_orders
+       FROM orders o
+       WHERE o."Date" BETWEEN ? AND ?`,
+      [start, end],
+    );
+    const row = (fallbackRes.rows || fallbackRes[0] || [])[0] || {};
+    return {
+      totalOrders: Number(row.total_orders || 0),
+      paidOrders: Number(row.paid_orders || 0),
+    };
+  }
+}
+
+async function getRevenueToman(start: Date, end: Date) {
+  const knex = strapi.db.connection;
+  const revenueRes = await knex.raw(
+    `SELECT
+       COALESCE(SUM(CASE WHEN ct.type = 'Return' THEN -ct.amount ELSE ct.amount END), 0)::bigint AS total_irr
+     FROM contract_transactions ct
+     WHERE ct.status = 'Success' AND ct.date BETWEEN ? AND ?`,
+    [start, end],
+  );
+  const row = (revenueRes.rows || revenueRes[0] || [])[0] || {};
+  return Number(row.total_irr || 0) / 10;
 }
 
 export default {
@@ -544,6 +623,91 @@ export default {
         })),
       };
     } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async trafficDashboard(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN],
+        "Access denied - Superadmin role required",
+      );
+      if (!user) return;
+
+      const normalizedRange = normalizeRange(
+        (ctx.query.startDate as string) || (ctx.query.start as string),
+        (ctx.query.endDate as string) || (ctx.query.end as string),
+      );
+
+      const cacheKey = getTrafficCacheKey("dashboard", normalizedRange);
+      const cached = getFromTrafficCache(cacheKey);
+      if (cached) {
+        ctx.body = { data: cached };
+        return;
+      }
+
+      const startDate = new Date(normalizedRange.startDate);
+      const endDate = new Date(normalizedRange.endDate);
+      const [matomoPayload, orderStats, revenueToman] = await Promise.all([
+        getMatomoTrafficDashboardPayload(normalizedRange),
+        getOrderStats(startDate, endDate),
+        getRevenueToman(startDate, endDate),
+      ]);
+
+      const conversionRate =
+        matomoPayload.summary.visits > 0
+          ? Number(((orderStats.paidOrders / matomoPayload.summary.visits) * 100).toFixed(2))
+          : 0;
+
+      const payload = {
+        ...matomoPayload,
+        ecommerce: {
+          orders: orderStats.paidOrders,
+          totalOrders: orderStats.totalOrders,
+          revenue: revenueToman,
+          conversionRate,
+        },
+        updatedAt: new Date().toISOString(),
+      };
+
+      setTrafficCache(cacheKey, payload);
+      ctx.body = { data: payload };
+    } catch (error: any) {
+      if (error?.message === "INVALID_DATE_RANGE") {
+        ctx.badRequest("Invalid date range", { data: { success: false } });
+        return;
+      }
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async trafficRealtime(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN],
+        "Access denied - Superadmin role required",
+      );
+      if (!user) return;
+
+      const cacheKey = "realtime";
+      const cached = getFromTrafficCache(cacheKey);
+      if (cached) {
+        ctx.body = { data: cached };
+        return;
+      }
+
+      const realtime = await getMatomoRealtimePayload();
+      const payload = {
+        ...realtime,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setTrafficCache(cacheKey, payload);
+      ctx.body = { data: payload };
+    } catch (error: any) {
       ctx.badRequest(error.message, { data: { success: false } });
     }
   },

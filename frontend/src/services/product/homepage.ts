@@ -118,6 +118,54 @@ export const getHomepageSections = async (): Promise<{
 };
 
 /**
+ * Fetch top-rated products for a specific category on homepage.
+ */
+export const getFeaturedCategoryProductsByRating = async (
+  categorySlug: string,
+  limit: number = 6,
+): Promise<ProductCardProps[]> => {
+  const normalizedSlug = categorySlug.trim();
+  if (!normalizedSlug) return [];
+
+  const params = new URLSearchParams();
+  params.append("filters[Status][$eq]", "Active");
+  params.append("filters[removedAt][$null]", "true");
+  params.append("filters[product_main_category][Slug][$eq]", normalizedSlug);
+  params.append("filters[product_variations][Price][$gte]", "1");
+  params.append("filters[product_variations][product_stock][Count][$gt]", "0");
+  params.append("sort[0]", "AverageRating:desc");
+  params.append("pagination[limit]", String(limit));
+  params.append("populate[0]", "CoverImage");
+  params.append("populate[1]", "product_main_category");
+  params.append("populate[2]", "product_variations");
+  params.append("populate[3]", "product_variations.product_stock");
+  params.append("populate[4]", "product_variations.general_discounts");
+  params.append("populate[5]", "product_variations.product_variation_color");
+  params.append("populate[6]", "Media");
+  params.append("fields[0]", "Title");
+  params.append("fields[1]", "Slug");
+
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      next: { revalidate: 60 },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    }).then((res) => res.json());
+
+    const allProducts = (response as any)?.data || [];
+    const availableProducts = allProducts.filter(productHasStock);
+    return formatProductsToCardProps(availableProducts).slice(0, limit);
+  } catch (error) {
+    logger.error("[Homepage] Error fetching featured category products:", error as any);
+    return [];
+  }
+};
+
+/**
  * Fetch products that have active discounts.
  */
 export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {

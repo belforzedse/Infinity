@@ -15,6 +15,7 @@ import AuthInitializer from "@/components/ui/AuthInitializer";
 import { Suspense } from "react";
 import { useFreshDataOnVisibility } from "@/hooks/useFreshDataOnVisibility";
 import { ConsentManager } from "@/components/Analytics/ConsentManager";
+import { MatomoTracker } from "@/components/Analytics/MatomoTracker";
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import { SharedElementTransitionProvider } from "@/contexts/SharedElementTransitionContext";
 
@@ -26,6 +27,9 @@ export default function Providers({ children }: { children: ReactNode }) {
       <SharedElementTransitionProvider>
         {/* Consent Manager for GDPR/CCPA compliance */}
         <ConsentManager />
+        <Suspense fallback={null}>
+          <MatomoTracker />
+        </Suspense>
       {/*
        * Global UI helpers are registered here so that pages throughout the app
        * can rely on shared behavior without needing to include these components

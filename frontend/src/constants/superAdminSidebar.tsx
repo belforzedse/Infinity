@@ -121,6 +121,11 @@ const superAdminSidebar: SidebarItem[] = [
         href: "/super-admin/blog/categories",
       },
       {
+        id: "blog-category-banners",
+        label: "بنر دسته‌بندی‌ها",
+        href: "/super-admin/blog/categories/banners",
+      },
+      {
         id: "blog-tags",
         label: "برچسب‌ها",
         href: "/super-admin/blog/tags",
@@ -255,6 +260,11 @@ const superAdminSidebar: SidebarItem[] = [
     icon: <ChartIcon />,
     children: [
       {
+        id: "traffic-analytics",
+        label: "تحلیل ترافیک",
+        href: "/super-admin/reports/traffic",
+      },
+      {
         id: "product-sales",
         label:" فروش هر محصول",
         href: "/super-admin/reports/product-sales",
@@ -378,6 +388,13 @@ export const getSidebarItemsForRole = (roleName?: string | null): SidebarItem[] 
         label: "دسته‌بندی‌ها",
         href: "/super-admin/blog/categories",
         icon: <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        children: [],
+      },
+      {
+        id: "blog-category-banners",
+        label: "بنر دسته‌بندی‌ها",
+        href: "/super-admin/blog/categories/banners",
+        icon: <FiEdit3 className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
         children: [],
       },
       {

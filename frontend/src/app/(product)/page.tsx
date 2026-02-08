@@ -6,7 +6,10 @@ import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import type { Metadata } from "next";
-import { getHomepageSections } from "@/services/product/homepage";
+import {
+  getFeaturedCategoryProductsByRating,
+  getHomepageSections,
+} from "@/services/product/homepage";
 import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
 import { BlogCarousel } from "@/components/Blog";
@@ -19,7 +22,9 @@ import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import HomePromoBanners from "@/components/Home/PromoBanners";
+import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
+import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
@@ -88,6 +93,35 @@ export default async function Home() {
   const hasPromoBanners = promoBanners.some(
     (banner) => banner.imageUrl?.trim() && banner.title?.trim(),
   );
+  const featuredCategorySlug = homepageSettings.homeFeaturedCategorySlug?.trim() || "";
+  const featuredCategoryBannerImage =
+    homepageSettings.homeFeaturedCategoryBannerImage?.trim() || "";
+  const featuredCategoryProducts = featuredCategorySlug && featuredCategoryBannerImage
+    ? await getFeaturedCategoryProductsByRating(featuredCategorySlug, 6)
+    : [];
+
+  const featuredCategorySmallProducts: ProductSmallCardProps[] = featuredCategoryProducts
+    .filter((product) => Boolean(product.images?.[0]))
+    .slice(0, 6)
+    .map((product) => ({
+      id: product.id,
+      slug: product.slug,
+      title: product.title,
+      category: product.category,
+      likedCount: product.seenCount || 0,
+      price: product.price,
+      discountedPrice: product.discountPrice,
+      discount: product.discount,
+      image: product.images[0] || "",
+      isAvailable: product.isAvailable,
+      colorsCount: product.colorsCount,
+      colorCodes: product.colorCodes,
+    }));
+
+  const hasFeaturedCategorySection =
+    Boolean(featuredCategorySlug) &&
+    Boolean(featuredCategoryBannerImage) &&
+    featuredCategorySmallProducts.length > 0;
 
   return (
     <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
@@ -166,6 +200,18 @@ export default async function Home() {
                 <HomePromoBanners banners={promoBanners} />
               </div>
             </div>
+          </Reveal>
+        </section>
+      )}
+
+      {hasFeaturedCategorySection && (
+        <section>
+          <Reveal variant="fade-up" duration={700}>
+            <FeaturedCategorySection
+              bannerImageUrl={featuredCategoryBannerImage}
+              categorySlug={featuredCategorySlug}
+              products={featuredCategorySmallProducts}
+            />
           </Reveal>
         </section>
       )}

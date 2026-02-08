@@ -404,6 +404,12 @@ export interface ApiBlogCategoryBlogCategory extends Schema.CollectionType {
     draftAndPublish: false;
   };
   attributes: {
+    BannerLinkColor: Attribute.String & Attribute.DefaultTo<"">;
+    BannerLinkText: Attribute.String & Attribute.DefaultTo<"">;
+    BannerSubtitle: Attribute.Text & Attribute.DefaultTo<"">;
+    BannerSubtitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    BannerTitle: Attribute.String & Attribute.DefaultTo<"">;
+    BannerTitleColor: Attribute.String & Attribute.DefaultTo<"">;
     blog_posts: Attribute.Relation<
       "api::blog-category.blog-category",
       "oneToMany",
@@ -2550,6 +2556,14 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     draftAndPublish: false;
   };
   attributes: {
+    blogCategoryBannerOrder: Attribute.JSON & Attribute.DefaultTo<[]>;
+    blogDefaultBannerImage: Attribute.Text & Attribute.DefaultTo<"">;
+    blogDefaultBannerLinkColor: Attribute.String & Attribute.DefaultTo<"">;
+    blogDefaultBannerLinkText: Attribute.String & Attribute.DefaultTo<"">;
+    blogDefaultBannerSubtitle: Attribute.Text & Attribute.DefaultTo<"">;
+    blogDefaultBannerSubtitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    blogDefaultBannerTitle: Attribute.String & Attribute.DefaultTo<"">;
+    blogDefaultBannerTitleColor: Attribute.String & Attribute.DefaultTo<"">;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -2566,6 +2580,8 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     homeBannerTwoImage: Attribute.Text & Attribute.DefaultTo<"">;
     homeBannerTwoTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerTwoTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeFeaturedCategoryBannerImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeFeaturedCategorySlug: Attribute.String & Attribute.DefaultTo<"">;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
       Attribute.Private;

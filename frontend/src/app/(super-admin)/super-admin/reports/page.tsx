@@ -5,6 +5,11 @@ export default function ReportsIndexPage() {
       <h1 className="text-xl font-bold">گزارش‌ها</h1>
       <ul className="list-disc space-y-2 pr-6">
         <li>
+          <Link className="text-pink-600" href="/super-admin/reports/traffic">
+            گزارش ترافیک و رفتار کاربران
+          </Link>
+        </li>
+        <li>
           <Link className="text-pink-600" href="/super-admin/reports/liquidity">
             گزارش مجموع نقدینگی در بازه
           </Link>

@@ -12,6 +12,7 @@ import {
   FolderOpen,
   Calendar,
   Plus,
+  ImageIcon,
   X,
   Check,
 } from "lucide-react";
@@ -206,14 +207,24 @@ export default function BlogCategoriesPage() {
     <ContentWrapper
       title="مدیریت دسته‌بندی‌ها"
       titleSuffixComponent={
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
-        >
-          <Plus className="h-4 w-4" />
-          دسته‌بندی جدید
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => router.push("/super-admin/blog/categories/banners")}
+            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <ImageIcon className="h-4 w-4" />
+            تنظیم بنرها
+          </button>
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+          >
+            <Plus className="h-4 w-4" />
+            دسته‌بندی جدید
+          </button>
+        </div>
       }
     >
       <Modal

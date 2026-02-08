@@ -82,7 +82,6 @@ volumes:
   infinity-postgres-data:
   infinity-redis-data:
   uploads-data:
-
 networks:
   infinity-network:
     driver: bridge

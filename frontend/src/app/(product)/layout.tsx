@@ -9,7 +9,7 @@ import MobileHeader from "@/components/PLP/Header/Mobile";
 import BottomNavigation from "@/components/PLP/BottomNavigation";
 import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
-import React from "react";
+import React, { Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -197,7 +197,9 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
 
       {/* Desktop categories/navigation (not sticky) */}
       <div className="hidden lg:block">
-        <HeaderDesktopNav />
+        <Suspense fallback={<div className="h-12 bg-stone-50" />}>
+          <HeaderDesktopNav />
+        </Suspense>
       </div>
 
       <motion.section

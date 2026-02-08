@@ -39,6 +39,36 @@ export async function updateSuperAdminSettings(
   if (settings.homeBannerTwoButtonHref !== undefined) {
     data.homeBannerTwoButtonHref = settings.homeBannerTwoButtonHref;
   }
+  if (settings.homeFeaturedCategorySlug !== undefined) {
+    data.homeFeaturedCategorySlug = settings.homeFeaturedCategorySlug;
+  }
+  if (settings.homeFeaturedCategoryBannerImage !== undefined) {
+    data.homeFeaturedCategoryBannerImage = settings.homeFeaturedCategoryBannerImage;
+  }
+  if (settings.blogDefaultBannerImage !== undefined) {
+    data.blogDefaultBannerImage = settings.blogDefaultBannerImage;
+  }
+  if (settings.blogDefaultBannerTitle !== undefined) {
+    data.blogDefaultBannerTitle = settings.blogDefaultBannerTitle;
+  }
+  if (settings.blogDefaultBannerSubtitle !== undefined) {
+    data.blogDefaultBannerSubtitle = settings.blogDefaultBannerSubtitle;
+  }
+  if (settings.blogDefaultBannerTitleColor !== undefined) {
+    data.blogDefaultBannerTitleColor = settings.blogDefaultBannerTitleColor;
+  }
+  if (settings.blogDefaultBannerSubtitleColor !== undefined) {
+    data.blogDefaultBannerSubtitleColor = settings.blogDefaultBannerSubtitleColor;
+  }
+  if (settings.blogDefaultBannerLinkText !== undefined) {
+    data.blogDefaultBannerLinkText = settings.blogDefaultBannerLinkText;
+  }
+  if (settings.blogDefaultBannerLinkColor !== undefined) {
+    data.blogDefaultBannerLinkColor = settings.blogDefaultBannerLinkColor;
+  }
+  if (settings.blogCategoryBannerOrder !== undefined) {
+    data.blogCategoryBannerOrder = settings.blogCategoryBannerOrder;
+  }
 
   if (Object.keys(data).length === 0) return;
 

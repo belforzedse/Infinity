@@ -14,6 +14,7 @@ import {
   setupOfflineQueueListener,
   isOnline,
 } from "@/utils/offlineQueue";
+import { trackFunnelStep, trackMatomoEvent } from "@/lib/analytics/matomo";
 
 export interface CartItem {
   id: string;
@@ -472,6 +473,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               quantity: newItem.quantity,
             },
           });
+          trackFunnelStep("add_to_cart", {
+            label: newItem.name,
+            value: newItem.price * newItem.quantity,
+          });
           hapticSuccess();
           notify.success("کالا به سبد خرید اضافه شد (در صف آفلاین)");
           setIsLoading(false);
@@ -482,6 +487,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           await CartService.addItemToCart(Number(newItem.variationId), newItem.quantity);
           // Refresh cart to ensure consistency with backend
           await fetchUserCart();
+          trackFunnelStep("add_to_cart", {
+            label: newItem.name,
+            value: newItem.price * newItem.quantity,
+          });
           hapticSuccess();
         }, `add-${newItem.slug}`);
       } catch (error: any) {
@@ -521,6 +530,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         return [...prev, newItem];
       });
+      trackFunnelStep("add_to_cart", {
+        label: newItem.name,
+        value: newItem.price * newItem.quantity,
+      });
       hapticSuccess();
     }
   };
@@ -540,6 +553,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // Remove item optimistically
       setCartItems((prev) => prev.filter((item) => item.id !== id && item.cartItemId !== id));
+      trackMatomoEvent({
+        category: "ecommerce",
+        action: "remove_from_cart",
+        name: item.name,
+        value: item.price * item.quantity,
+      });
 
       // Queue API call in the background
       try {
@@ -566,7 +585,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } else {
       // Local storage implementation (no queue needed for guest users)
+      const existing = cartItems.find((item) => item.id === id);
       setCartItems((prev) => prev.filter((item) => item.id !== id));
+      if (existing) {
+        trackMatomoEvent({
+          category: "ecommerce",
+          action: "remove_from_cart",
+          name: existing.name,
+          value: existing.price * existing.quantity,
+        });
+      }
     }
   };
 
@@ -590,6 +618,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           cartItem.id === id || cartItem.cartItemId === id ? { ...cartItem, quantity } : cartItem,
         ),
       );
+      trackMatomoEvent({
+        category: "ecommerce",
+        action: "update_quantity",
+        name: item.name,
+        value: quantity,
+      });
 
       // Queue API call in the background
       try {
@@ -624,6 +658,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Local storage implementation (no queue needed for guest users)
       setCartItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
+      const existing = cartItems.find((item) => item.id === id);
+      if (existing) {
+        trackMatomoEvent({
+          category: "ecommerce",
+          action: "update_quantity",
+          name: existing.name,
+          value: quantity,
+        });
+      }
     }
   };
 

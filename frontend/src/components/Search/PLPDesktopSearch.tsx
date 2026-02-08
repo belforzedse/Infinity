@@ -6,6 +6,7 @@ import SearchIcon from "./Icons/SearchIcon";
 import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchSuggestionCard from "./SearchSuggestionCard";
+import { trackSearch } from "@/lib/analytics/matomo";
 
 type Suggestion = {
   id: number;
@@ -65,12 +66,14 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     e.preventDefault();
 
     // Don't search if query is empty
-    if (!searchQuery.trim()) return;
+    const trimmed = searchQuery.trim();
+    if (!trimmed) return;
 
     persistRecent(searchQuery);
+    trackSearch(trimmed, "desktop");
 
     // Redirect to search results page with the query
-    router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+    router.push(`/plp?search=${encodeURIComponent(trimmed)}`);
   };
 
   // Debounced live search suggestions (native fetch to avoid global overlays)
@@ -265,6 +268,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                           onClick={() => {
                             setSearchQuery(term);
                             setOpen(false);
+                            trackSearch(term, "desktop_recent");
                             router.push(`/plp?search=${encodeURIComponent(term)}`);
                           }}
                           className="text-xs rounded-full border border-slate-200 px-3 py-1 text-pink-600 hover:border-pink-300 hover:bg-pink-50"
@@ -285,6 +289,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                         onClick={() => {
                           setSearchQuery(term);
                           setOpen(false);
+                          trackSearch(term, "desktop_popular");
                           router.push(`/plp?search=${encodeURIComponent(term)}`);
                         }}
                         className="text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-pink-300 hover:bg-pink-50"
@@ -337,6 +342,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                     type="button"
                     onClick={() => {
                       persistRecent(searchQuery);
+                      trackSearch(searchQuery.trim(), "desktop_view_all");
                       router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
                     }}
                     className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
