@@ -8,6 +8,9 @@ import {
   syncMatomoConsentState,
 } from "@/lib/analytics/matomo";
 
+const DEFAULT_MATOMO_URL = "https://analytics.infinitycolor.org";
+const DEFAULT_MATOMO_SITE_ID = "1";
+
 function trimTrailingSlash(value: string) {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
@@ -17,8 +20,10 @@ export function MatomoTracker() {
   const searchParams = useSearchParams();
   const lastTrackedPathRef = useRef<string>("");
 
-  const baseUrl = trimTrailingSlash(process.env.NEXT_PUBLIC_MATOMO_URL || "https://analytics.infinitycolor.org");
-  const siteId = process.env.NEXT_PUBLIC_MATOMO_SITE_ID || "";
+  const baseUrl = trimTrailingSlash(
+    (process.env.NEXT_PUBLIC_MATOMO_URL || DEFAULT_MATOMO_URL).trim(),
+  );
+  const siteId = (process.env.NEXT_PUBLIC_MATOMO_SITE_ID || DEFAULT_MATOMO_SITE_ID).trim();
   const isConfigured = Boolean(baseUrl && siteId);
 
   const currentPath = useMemo(() => {
@@ -32,6 +37,7 @@ export function MatomoTracker() {
 
     if (!win.__matomoInitialized) {
       win._paq = win._paq || [];
+      // Matomo SPA pattern: initialize tracker once, then send page views on route changes.
       win._paq.push(["setTrackerUrl", `${baseUrl}/matomo.php`]);
       win._paq.push(["setSiteId", siteId]);
       win._paq.push(["enableLinkTracking"]);
