@@ -100,6 +100,8 @@ Key variables:
 - `NEXT_PUBLIC_API_BASE_URL`: Base URL for backend API
 - `NEXT_PUBLIC_IMAGE_BASE_URL`: Base host for media/CDN
 - `NEXT_PUBLIC_STRAPI_TOKEN`: Public token for Strapi endpoints
+- `NEXT_PUBLIC_MATOMO_URL`: Matomo base URL (for example `https://analytics.example.com`)
+- `NEXT_PUBLIC_MATOMO_SITE_ID`: Matomo site ID used by frontend tracker
 - `REVALIDATION_SECRET`: Secret for blog post cache invalidation (must match backend)
 
 **Important**: `main.env` and `dev.env` files are gitignored. For GitHub Actions, copy the entire file contents into the corresponding GitHub secret:
@@ -113,7 +115,17 @@ To override locally, create `.env.local`:
 # .env.local (gitignored)
 NEXT_PUBLIC_API_BASE_URL=http://localhost:1337/api
 NEXT_PUBLIC_IMAGE_BASE_URL=http://localhost:1337/
+NEXT_PUBLIC_MATOMO_URL=http://localhost:8081
+NEXT_PUBLIC_MATOMO_SITE_ID=1
 ```
+
+## Traffic Analytics (Matomo)
+
+- Frontend tracking is integrated through `src/components/Analytics/MatomoTracker.tsx` and consent-aware helpers in `src/lib/analytics/matomo.ts`.
+- Key commerce events are emitted for PDP/search/cart/checkout/purchase flows.
+- Super-admin traffic dashboard is available at `/super-admin/reports/traffic` and consumes backend endpoints:
+  - `/reports/traffic/dashboard`
+  - `/reports/traffic/realtime`
 
 ## Scripts
 
@@ -133,6 +145,8 @@ docker build \
   --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.example.com/api \
   --build-arg NEXT_PUBLIC_IMAGE_BASE_URL=https://api.example.com \
   --build-arg NEXT_PUBLIC_STRAPI_TOKEN=token \
+  --build-arg NEXT_PUBLIC_MATOMO_URL=https://analytics.example.com \
+  --build-arg NEXT_PUBLIC_MATOMO_SITE_ID=1 \
   -f main.Dockerfile \
   -t infinity-frontend:prod .
 
@@ -165,6 +179,7 @@ Compose will forward the env values as both build args and runtime vars so the c
   2. SSH in with the `deploy` user (key stored as `*_FRONTEND_SSH_KEY` secret).
   3. Rewrite the env file with the GitHub secrets and run `docker compose pull && docker compose up -d --remove-orphans`, then prune dangling images.
 - Required repository secrets (per environment prefix `PROD_`, `STAGING_`, `EXPERIMENTAL_`): `*_FRONTEND_HOST`, `*_FRONTEND_PORT`, `*_FRONTEND_USER`, `*_FRONTEND_SSH_KEY`, `*_FRONTEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).
+- Required workflow secrets for analytics build-time config: `FRONTEND_MATOMO_URL`, `FRONTEND_MATOMO_SITE_ID`.
 - Shared registry secrets: `GHCR_DEPLOY_USER` (GitHub username used for pulls) and `GHCR_DEPLOY_TOKEN` (PAT with `read:packages`) so the VMs can `docker login ghcr.io` before pulling.
 - Each VM must have Docker Engine + Compose v2 installed, `deploy` added to the `docker` group, and `/opt/infinity/frontend` owned by `deploy`.***
 

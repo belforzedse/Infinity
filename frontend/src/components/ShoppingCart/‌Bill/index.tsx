@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";
 import { useCart } from "@/contexts/CartContext";
 import { currentUserAtom } from "@/lib/atoms/auth";
+import { trackFunnelStep, trackMatomoEvent } from "@/lib/analytics/matomo";
 
 export type FormData = {
   fullName: string;
@@ -508,6 +509,35 @@ function ShoppingCartBillForm({}: Props) {
 
   const requiredAmountIrr = totalToman * 10;
   const submitOrderStep = useAtomValue(submitOrderStepAtom);
+
+  useEffect(() => {
+    if (!currentUser || totalItems <= 0 || totalPrice <= 0) return;
+    trackFunnelStep("begin_checkout", {
+      value: totalPrice,
+      onceKey: `begin-checkout:${Math.round(totalPrice)}:${totalItems}`,
+    });
+  }, [currentUser, totalItems, totalPrice]);
+
+  useEffect(() => {
+    if (!shippingId) return;
+    trackMatomoEvent({
+      category: "funnel",
+      action: "add_shipping_info",
+      name: String(shippingId),
+      value: shippingCost || 0,
+      onceKey: `shipping-info:${shippingId}:${addressId || "new"}`,
+    });
+  }, [shippingId, shippingCost, addressId]);
+
+  useEffect(() => {
+    if (!gateway) return;
+    trackMatomoEvent({
+      category: "funnel",
+      action: "add_payment_info",
+      name: gateway,
+      onceKey: `payment-info:${gateway}:${shippingId || "none"}`,
+    });
+  }, [gateway, shippingId]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

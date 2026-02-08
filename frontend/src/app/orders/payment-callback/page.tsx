@@ -12,6 +12,7 @@ import {
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useCart } from "@/contexts/CartContext";
+import { trackFunnelStep } from "@/lib/analytics/matomo";
 
 function PaymentCallbackContent() {
   const [loading, setLoading] = useState(true);
@@ -24,11 +25,17 @@ function PaymentCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const navigateToSuccess = useCallback(async () => {
+  const navigateToSuccess = useCallback(async (completedOrderId?: number) => {
     try {
       await clearCart();
     } catch (error) {
       console.error("[PaymentCallback] Failed to refresh cart after payment:", error);
+    }
+    if (completedOrderId) {
+      trackFunnelStep("purchase", {
+        label: String(completedOrderId),
+        onceKey: `purchase:${completedOrderId}`,
+      });
     }
     setSubmitOrderStep(SubmitOrderStep.Success);
     router.push("/orders/success");
@@ -91,7 +98,7 @@ function PaymentCallbackContent() {
 
           // Set step based on payment status from direct API check
           if (paymentStatus.isPaid) {
-            await navigateToSuccess();
+            await navigateToSuccess(verificationResult.orderId);
             return;
           }
         } catch {
@@ -100,7 +107,7 @@ function PaymentCallbackContent() {
 
         // If we couldn't check or payment is not verified, use the verification result
         if (verificationResult.success) {
-          await navigateToSuccess();
+          await navigateToSuccess(verificationResult.orderId);
         } else {
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");

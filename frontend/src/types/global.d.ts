@@ -24,3 +24,8 @@ declare module "jalaliday" {
   const plugin: any;
   export default plugin;
 }
+
+interface Window {
+  _paq?: Array<[string, ...any[]]>;
+  __matomoInitialized?: boolean;
+}

@@ -260,6 +260,11 @@ const superAdminSidebar: SidebarItem[] = [
     icon: <ChartIcon />,
     children: [
       {
+        id: "traffic-analytics",
+        label: "تحلیل ترافیک",
+        href: "/super-admin/reports/traffic",
+      },
+      {
         id: "product-sales",
         label:" فروش هر محصول",
         href: "/super-admin/reports/product-sales",

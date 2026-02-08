@@ -15,6 +15,7 @@ import logger from "@/utils/logger";
 import { ProductSchema } from "@/components/SEO/ProductSchema";
 import { BreadcrumbSchema } from "@/components/SEO/BreadcrumbSchema";
 import { ReviewSchema } from "@/components/SEO/ReviewSchema";
+import ViewItemTracker from "@/components/Analytics/ViewItemTracker";
 import type {
   ProductDetail} from "@/services/product/product";
 import {
@@ -720,10 +721,18 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
   const productUrl = `${SITE_URL}/pdp/${slug}`;
   const averageRating = productData.attributes.AverageRating || 0;
   const reviewCount = productData.attributes.RatingCount || productReviews.length;
+  const variationPrices = productData.attributes.product_variations?.data
+    ?.map((variation: any) => {
+      const price = Number(variation?.attributes?.DiscountPrice || variation?.attributes?.Price || 0);
+      return Number.isFinite(price) ? price : 0;
+    })
+    .filter((price) => price > 0) || [];
+  const minVisiblePrice = variationPrices.length > 0 ? Math.min(...variationPrices) : 0;
 
   return (
     <PageContainer variant="wide" className="flex flex-col gap-10 pb-16 pt-6">
       {/* JSON-LD Schemas for SEO */}
+      <ViewItemTracker productId={productId} title={productTitle} price={minVisiblePrice} />
       {productData && <ProductSchema product={productData} slug={slug} />}
       {productReviews.length > 0 && (
         <ReviewSchema

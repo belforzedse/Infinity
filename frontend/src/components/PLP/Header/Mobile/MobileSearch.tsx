@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
 import { getDeviceInfo } from "@/utils/device-detection";
+import { trackSearch } from "@/lib/analytics/matomo";
 
 interface Props {
   isOpen: boolean;
@@ -93,13 +94,15 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     e.preventDefault();
 
     // Don't search if query is empty
-    if (!searchQuery.trim()) return;
+    const trimmed = searchQuery.trim();
+    if (!trimmed) return;
 
     // Close the search modal
     closeModal({ force: true });
+    trackSearch(trimmed, "mobile");
 
     // Redirect to search results page with the query
-    router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+    router.push(`/plp?search=${encodeURIComponent(trimmed)}`);
   };
 
   // Debounced suggestions (native fetch to avoid global overlays)
@@ -297,10 +300,11 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                     ))}
                     <motion.button
                       type="button"
-                      onClick={() => {
-                        closeModal({ force: true });
-                        router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
-                      }}
+                        onClick={() => {
+                          closeModal({ force: true });
+                          trackSearch(searchQuery.trim(), "mobile_view_all");
+                          router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                        }}
                       className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
