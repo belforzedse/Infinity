@@ -36,5 +36,21 @@ export default {
         auth: { scope: [] },
       },
     },
+    {
+      method: "GET",
+      path: "/reports/traffic/dashboard",
+      handler: "report.trafficDashboard",
+      config: {
+        auth: { scope: [] },
+      },
+    },
+    {
+      method: "GET",
+      path: "/reports/traffic/realtime",
+      handler: "report.trafficRealtime",
+      config: {
+        auth: { scope: [] },
+      },
+    },
   ],
 };
