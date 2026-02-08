@@ -17,7 +17,7 @@ export function MatomoTracker() {
   const searchParams = useSearchParams();
   const lastTrackedPathRef = useRef<string>("");
 
-  const baseUrl = trimTrailingSlash(process.env.NEXT_PUBLIC_MATOMO_URL || "");
+  const baseUrl = trimTrailingSlash(process.env.NEXT_PUBLIC_MATOMO_URL || "https://analytics.infinitycolor.org");
   const siteId = process.env.NEXT_PUBLIC_MATOMO_SITE_ID || "";
   const isConfigured = Boolean(baseUrl && siteId);
 
