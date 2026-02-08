@@ -27,7 +27,9 @@ export default function Providers({ children }: { children: ReactNode }) {
       <SharedElementTransitionProvider>
         {/* Consent Manager for GDPR/CCPA compliance */}
         <ConsentManager />
-        <MatomoTracker />
+        <Suspense fallback={null}>
+          <MatomoTracker />
+        </Suspense>
       {/*
        * Global UI helpers are registered here so that pages throughout the app
        * can rely on shared behavior without needing to include these components

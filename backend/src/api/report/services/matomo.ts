@@ -143,9 +143,9 @@ async function fetchMatomo(
       throw new Error(`MATOMO_HTTP_${response.status}`);
     }
 
-    const payload = await response.json();
-    if (payload?.result === "error") {
-      const message = String(payload?.message || "MATOMO_API_ERROR");
+    const payload: any = await response.json();
+    if (payload && typeof payload === "object" && payload.result === "error") {
+      const message = String(payload.message || "MATOMO_API_ERROR");
       if (message.toLowerCase().includes("token")) {
         throw new Error("MATOMO_AUTH_FAILED");
       }

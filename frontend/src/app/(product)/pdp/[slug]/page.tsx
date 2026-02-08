@@ -732,7 +732,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
   return (
     <PageContainer variant="wide" className="flex flex-col gap-10 pb-16 pt-6">
       {/* JSON-LD Schemas for SEO */}
-      <ViewItemTracker productId={productId} title={productTitle} price={minVisiblePrice} />
+      <ViewItemTracker productId={productData.id || 0} title={productTitle} price={minVisiblePrice} />
       {productData && <ProductSchema product={productData} slug={slug} />}
       {productReviews.length > 0 && (
         <ReviewSchema
