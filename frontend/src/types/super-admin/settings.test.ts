@@ -6,6 +6,14 @@ describe("super-admin settings type helpers", () => {
 
     expect(settings.homeFeaturedCategorySlug).toBe("");
     expect(settings.homeFeaturedCategoryBannerImage).toBe("");
+    expect(settings.blogDefaultBannerImage).toBe("");
+    expect(settings.blogDefaultBannerTitle).toBe("");
+    expect(settings.blogDefaultBannerSubtitle).toBe("");
+    expect(settings.blogDefaultBannerTitleColor).toBe("");
+    expect(settings.blogDefaultBannerSubtitleColor).toBe("");
+    expect(settings.blogDefaultBannerLinkText).toBe("");
+    expect(settings.blogDefaultBannerLinkColor).toBe("");
+    expect(settings.blogCategoryBannerOrder).toEqual([]);
   });
 
   it("should normalize featured category fields from API payload", () => {
@@ -13,6 +21,17 @@ describe("super-admin settings type helpers", () => {
       {
         homeFeaturedCategorySlug: "summer-collection",
         homeFeaturedCategoryBannerImage: "/uploads/banner.jpg",
+        blogDefaultBannerImage: "/uploads/blog-default.jpg",
+        blogDefaultBannerTitle: "همه مقالات",
+        blogDefaultBannerSubtitle: "مرور مقالات",
+        blogDefaultBannerTitleColor: "#ffffff",
+        blogDefaultBannerSubtitleColor: "#e5e7eb",
+        blogDefaultBannerLinkText: "مشاهده همه",
+        blogDefaultBannerLinkColor: "#ffffff",
+        blogCategoryBannerOrder: [
+          { id: 12, title: "Beauty", slug: "beauty" },
+          { id: 11, title: "Cooking", slug: "cooking" },
+        ],
       },
       2,
     );
@@ -20,15 +39,50 @@ describe("super-admin settings type helpers", () => {
     expect(settings.id).toBe(2);
     expect(settings.homeFeaturedCategorySlug).toBe("summer-collection");
     expect(settings.homeFeaturedCategoryBannerImage).toBe("/uploads/banner.jpg");
+    expect(settings.blogDefaultBannerImage).toBe("/uploads/blog-default.jpg");
+    expect(settings.blogDefaultBannerTitle).toBe("همه مقالات");
+    expect(settings.blogDefaultBannerSubtitle).toBe("مرور مقالات");
+    expect(settings.blogDefaultBannerTitleColor).toBe("#ffffff");
+    expect(settings.blogDefaultBannerSubtitleColor).toBe("#e5e7eb");
+    expect(settings.blogDefaultBannerLinkText).toBe("مشاهده همه");
+    expect(settings.blogDefaultBannerLinkColor).toBe("#ffffff");
+    expect(settings.blogCategoryBannerOrder).toEqual([
+      { id: 12, title: "Beauty", slug: "beauty" },
+      { id: 11, title: "Cooking", slug: "cooking" },
+    ]);
   });
 
   it("should fallback featured category fields to empty string when payload is invalid", () => {
     const settings = normalizeSuperAdminSettings({
       homeFeaturedCategorySlug: null,
       homeFeaturedCategoryBannerImage: 12345,
+      blogDefaultBannerImage: null,
+      blogDefaultBannerTitle: 999,
+      blogDefaultBannerSubtitle: false,
+      blogDefaultBannerTitleColor: null,
+      blogDefaultBannerSubtitleColor: {},
+      blogDefaultBannerLinkText: [],
+      blogDefaultBannerLinkColor: 123,
+      blogCategoryBannerOrder: [
+        { id: 1, title: "One", slug: "one" },
+        { id: "2", title: "Two", slug: "two" },
+        { id: 3, title: "Duplicate", slug: "one" },
+        { id: "bad", title: "Bad", slug: "bad" },
+      ],
     });
 
     expect(settings.homeFeaturedCategorySlug).toBe("");
     expect(settings.homeFeaturedCategoryBannerImage).toBe("");
+    expect(settings.blogDefaultBannerImage).toBe("");
+    expect(settings.blogDefaultBannerTitle).toBe("");
+    expect(settings.blogDefaultBannerSubtitle).toBe("");
+    expect(settings.blogDefaultBannerTitleColor).toBe("");
+    expect(settings.blogDefaultBannerSubtitleColor).toBe("");
+    expect(settings.blogDefaultBannerLinkText).toBe("");
+    expect(settings.blogDefaultBannerLinkColor).toBe("");
+    expect(settings.blogCategoryBannerOrder).toEqual([
+      { id: 1, title: "One", slug: "one" },
+      { id: 2, title: "Two", slug: "two" },
+    ]);
   });
 });

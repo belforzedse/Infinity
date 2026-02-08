@@ -43,6 +43,25 @@ export interface BlogCategory {
   Title?: string;
   Slug: string;
   Description?: string;
+  BannerTitle?: string;
+  BannerSubtitle?: string;
+  BannerTitleColor?: string;
+  BannerSubtitleColor?: string;
+  BannerLinkText?: string;
+  BannerLinkColor?: string;
+  FeaturedImage?: {
+    id: number;
+    url: string;
+    alternativeText?: string;
+    width?: number;
+    height?: number;
+    formats?: {
+      large?: { url: string };
+      medium?: { url: string };
+      small?: { url: string };
+      thumbnail?: { url: string };
+    };
+  };
   parent_category?: BlogCategory;
   createdAt: string;
   updatedAt: string;
@@ -136,6 +155,13 @@ export interface CreateBlogCategoryData {
   Title?: string;
   Slug?: string;
   Description?: string;
+  BannerTitle?: string;
+  BannerSubtitle?: string;
+  BannerTitleColor?: string;
+  BannerSubtitleColor?: string;
+  BannerLinkText?: string;
+  BannerLinkColor?: string;
+  FeaturedImage?: number | null;
   parent_category?: number;
 }
 
@@ -180,6 +206,32 @@ class BlogService {
   private unwrapRelation(rel: any): { id: number; [key: string]: any } | undefined {
     if (!rel?.data) return undefined;
     return { id: rel.data.id, ...(rel.data.attributes || {}) };
+  }
+
+  private normalizeMediaImage(entry: any): BlogCategory["FeaturedImage"] | undefined {
+    if (!entry) return undefined;
+
+    const mediaData = entry?.data;
+    const media = mediaData ? { id: mediaData.id, ...(mediaData.attributes || {}) } : entry;
+    if (!media) return undefined;
+
+    const mediaUrl =
+      media.formats?.medium?.url ||
+      media.formats?.small?.url ||
+      media.formats?.large?.url ||
+      media.formats?.thumbnail?.url ||
+      media.url;
+
+    if (!mediaUrl) return undefined;
+
+    return {
+      id: media.id,
+      url: mediaUrl,
+      alternativeText: media.alternativeText,
+      width: media.width,
+      height: media.height,
+      formats: media.formats,
+    };
   }
 
   private normalizeBlogCommentUser(userEntry: any): BlogComment["user"] | undefined {
@@ -336,6 +388,13 @@ class BlogService {
       Title: normalizedTitle,
       Slug: source.Slug || source.slug || "",
       Description: source.Description || source.description || "",
+      BannerTitle: source.BannerTitle || source.bannerTitle || "",
+      BannerSubtitle: source.BannerSubtitle || source.bannerSubtitle || "",
+      BannerTitleColor: source.BannerTitleColor || source.bannerTitleColor || "",
+      BannerSubtitleColor: source.BannerSubtitleColor || source.bannerSubtitleColor || "",
+      BannerLinkText: source.BannerLinkText || source.bannerLinkText || "",
+      BannerLinkColor: source.BannerLinkColor || source.bannerLinkColor || "",
+      FeaturedImage: this.normalizeMediaImage(source.FeaturedImage),
       parent_category: source.parent_category
         ? this.normalizeCategoryReference(source.parent_category)
         : undefined,
@@ -644,6 +703,7 @@ class BlogService {
     const searchParams = new URLSearchParams();
     searchParams.append("sort", "Title:asc");
     searchParams.append("pagination[pageSize]", "100");
+    searchParams.append("populate[FeaturedImage]", "*");
 
     const baseUrl = this.getBaseUrl();
     const response = await fetch(`${baseUrl}/blog-categories?${searchParams}`, {
