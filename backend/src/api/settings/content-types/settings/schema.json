@@ -70,6 +70,38 @@
     "homeFeaturedCategoryBannerImage": {
       "type": "text",
       "default": ""
+    },
+    "blogDefaultBannerImage": {
+      "type": "text",
+      "default": ""
+    },
+    "blogDefaultBannerTitle": {
+      "type": "string",
+      "default": ""
+    },
+    "blogDefaultBannerSubtitle": {
+      "type": "text",
+      "default": ""
+    },
+    "blogDefaultBannerTitleColor": {
+      "type": "string",
+      "default": ""
+    },
+    "blogDefaultBannerSubtitleColor": {
+      "type": "string",
+      "default": ""
+    },
+    "blogDefaultBannerLinkText": {
+      "type": "string",
+      "default": ""
+    },
+    "blogDefaultBannerLinkColor": {
+      "type": "string",
+      "default": ""
+    },
+    "blogCategoryBannerOrder": {
+      "type": "json",
+      "default": []
     }
   }
 }

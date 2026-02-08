@@ -27,6 +27,30 @@
       "type": "text",
       "maxLength": 500
     },
+    "BannerTitle": {
+      "type": "string",
+      "default": ""
+    },
+    "BannerSubtitle": {
+      "type": "text",
+      "default": ""
+    },
+    "BannerTitleColor": {
+      "type": "string",
+      "default": ""
+    },
+    "BannerSubtitleColor": {
+      "type": "string",
+      "default": ""
+    },
+    "BannerLinkText": {
+      "type": "string",
+      "default": ""
+    },
+    "BannerLinkColor": {
+      "type": "string",
+      "default": ""
+    },
     "FeaturedImage": {
       "type": "media",
       "multiple": false,
