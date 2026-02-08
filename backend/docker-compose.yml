@@ -17,53 +17,6 @@ services:
     networks:
       - infinity-network
 
-  infinity-matomo-db:
-    container_name: infinity-matomo-db
-    image: mariadb:11
-    restart: unless-stopped
-    env_file:
-      - ${ENV_FILE:-main.env}
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MATOMO_DB_ROOT_PASSWORD:-matomo-root}
-      MYSQL_DATABASE: ${MATOMO_DB_NAME:-matomo}
-      MYSQL_USER: ${MATOMO_DB_USER:-matomo}
-      MYSQL_PASSWORD: ${MATOMO_DB_PASSWORD:-matomo-password}
-    volumes:
-      - backend_matomo-db-data:/var/lib/mysql
-    ports:
-      - "127.0.0.1:${MATOMO_DB_PORT:-3307}:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - infinity-network
-
-  infinity-matomo:
-    container_name: infinity-matomo
-    image: matomo:5-apache
-    restart: unless-stopped
-    env_file:
-      - ${ENV_FILE:-main.env}
-    depends_on:
-      infinity-matomo-db:
-        condition: service_healthy
-    environment:
-      MATOMO_DATABASE_HOST: infinity-matomo-db
-      MATOMO_DATABASE_ADAPTER: mysql
-      MATOMO_DATABASE_TABLES_PREFIX: matomo_
-      MATOMO_DATABASE_USERNAME: ${MATOMO_DB_USER:-matomo}
-      MATOMO_DATABASE_PASSWORD: ${MATOMO_DB_PASSWORD:-matomo-password}
-      MATOMO_DATABASE_DBNAME: ${MATOMO_DB_NAME:-matomo}
-      MATOMO_GENERAL_TRUSTED_HOSTS: ${MATOMO_TRUSTED_HOSTS:-localhost}
-    volumes:
-      - backend_matomo-data:/var/www/html
-    ports:
-      - "127.0.0.1:${MATOMO_PORT:-8081}:80"
-    networks:
-      - infinity-network
-
   infinity-postgres:
     container_name: infinity-postgres
     image: postgres:16-alpine
@@ -118,13 +71,6 @@ volumes:
   backend_uploads-data:
     external: true
     name: backend_uploads-data
-  backend_matomo-db-data:
-    external: true
-    name: backend_matomo-db-data
-  backend_matomo-data:
-    external: true
-    name: backend_matomo-data
-
 networks:
   infinity-network:
     driver: bridge
