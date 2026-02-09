@@ -168,7 +168,7 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
         "wallet-topup": ["chargeIntent"],
       },
       "api::payment-gateway": {
-        "payment-gateway": ["snappEligible"],
+        "payment-gateway": ["snappEligible", "availableGateways"],
       },
     },
   },

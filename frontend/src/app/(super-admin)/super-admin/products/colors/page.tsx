@@ -11,6 +11,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
 import { COLOR_CATEGORIES, QUICK_COLORS } from "@/lib/colorPalettes";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { apiCache } from "@/lib/api-cache";
 
 type ApiColor = {
   id: number;
@@ -50,6 +51,11 @@ export default function ProductColorsPage() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const invalidateColorCaches = useCallback(() => {
+    apiCache.clearByPattern(/product-variation-colors/i);
+    apiCache.clearByPattern(/product-variations/i);
+  }, []);
+
   // Redirect editors away from product pages
   useEffect(() => {
     const normalizedRole = (roleName ?? "").toLowerCase().trim();
@@ -63,6 +69,9 @@ export default function ProductColorsPage() {
     try {
       const response = await apiClient.get<{ data: ApiColor[] }>(
         `${ENDPOINTS.PRODUCT.COLORS}?pagination[pageSize]=400&sort=Title:asc`,
+        {
+          cache: "no-store",
+        },
       );
       const data = ((response as any)?.data ?? []) as ApiColor[];
       setColors(data);
@@ -150,6 +159,7 @@ export default function ProductColorsPage() {
         toast.success("رنگ جدید ثبت شد");
       }
 
+      invalidateColorCaches();
       closeModal();
       fetchColors();
     } catch (error: any) {
@@ -184,6 +194,7 @@ export default function ProductColorsPage() {
     try {
       await apiClient.delete(`${ENDPOINTS.PRODUCT.COLORS}/${deleteId}`);
 
+      invalidateColorCaches();
       // Update local state
       setColors((prev) => prev.filter((c) => c.id !== deleteId));
       setDeleteConfirmOpen(false);

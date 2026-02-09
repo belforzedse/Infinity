@@ -1,11 +1,12 @@
 import { getUserCart } from "./base";
 import { addItemToCart, updateCartItem, removeCartItem, finalizeCart } from "./mutations";
-import { checkCartStock, getSnappEligible, getShippingPreview } from "./queries";
+import { checkCartStock, getAvailableGateways, getSnappEligible, getShippingPreview } from "./queries";
 import { applyDiscount } from "./discount";
 import type {
   CartResponse,
   CartItemResponse,
   CartStockCheckResponse,
+  CheckoutGatewayCode,
   FinalizeCartRequest,
   FinalizeCartResponse,
 } from "./types/cart";
@@ -62,6 +63,7 @@ export interface ProductCategory {
 
 // Re-export the interface that's already defined in types/cart
 export type { CartItemResponse, CartResponse, CartStockCheckResponse };
+export type { CheckoutGatewayCode };
 
 export interface AddItemRequest {
   productVariationId: number;
@@ -83,6 +85,7 @@ export {
   updateCartItem,
   removeCartItem,
   checkCartStock,
+  getAvailableGateways,
   finalizeCart,
   getSnappEligible,
   getShippingPreview,
@@ -96,6 +99,7 @@ const CartService = {
   updateCartItem,
   removeCartItem,
   checkCartStock,
+  getAvailableGateways,
   finalizeCart,
   getSnappEligible,
   getShippingPreview,

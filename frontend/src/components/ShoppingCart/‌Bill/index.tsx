@@ -14,6 +14,10 @@ import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
 import type { ShippingMethod } from "@/services/shipping";
 import { CartService } from "@/services";
+import {
+  DEFAULT_CHECKOUT_GATEWAYS,
+  type CheckoutGatewayCode,
+} from "@/services/cart/types/cart";
 import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";
 import { useCart } from "@/contexts/CartContext";
@@ -93,7 +97,10 @@ function ShoppingCartBillForm({}: Props) {
   const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet" | "mellat">("samankish");
+  const [gateway, setGateway] = useState<CheckoutGatewayCode>("samankish");
+  const [availableGateways, setAvailableGateways] = useState<CheckoutGatewayCode[]>([
+    ...DEFAULT_CHECKOUT_GATEWAYS,
+  ]);
   const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
   const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
   const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
@@ -129,6 +136,32 @@ function ShoppingCartBillForm({}: Props) {
       else localStorage.removeItem("discountCode");
     } catch {}
   }, [discountCode]);
+
+  useEffect(() => {
+    const loadAvailableGateways = async () => {
+      try {
+        const gateways = await CartService.getAvailableGateways();
+        setAvailableGateways(gateways);
+      } catch {
+        setAvailableGateways([...DEFAULT_CHECKOUT_GATEWAYS]);
+      }
+    };
+
+    loadAvailableGateways();
+  }, []);
+
+  useEffect(() => {
+    if (availableGateways.length === 0) {
+      setError("در حال حاضر هیچ درگاه پرداختی فعال نیست");
+      return;
+    }
+
+    setError((prev) => (prev === "در حال حاضر هیچ درگاه پرداختی فعال نیست" ? null : prev));
+
+    if (!availableGateways.includes(gateway)) {
+      setGateway(availableGateways[0]);
+    }
+  }, [availableGateways, gateway]);
 
   // Refresh discount preview when code or shipping changes (stable deps)
   useEffect(() => {
@@ -290,6 +323,11 @@ function ShoppingCartBillForm({}: Props) {
     // Validate total price is positive
     if (totalPrice <= 0) {
       setError("مبلغ سفارش باید بیشتر از صفر باشد");
+      return;
+    }
+
+    if (availableGateways.length === 0 || !availableGateways.includes(gateway)) {
+      setError("درگاه پرداخت انتخاب شده در دسترس نیست");
       return;
     }
 
@@ -626,6 +664,7 @@ function ShoppingCartBillForm({}: Props) {
           <ShoppingCartBillPaymentGateway
             selected={gateway}
             onChange={setGateway}
+            availableGateways={availableGateways}
             snappEligible={snappEligible}
             snappTitle={snappTitle}
             snappDescription={snappDescription}
