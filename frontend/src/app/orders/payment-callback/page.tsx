@@ -12,7 +12,15 @@ import {
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useCart } from "@/contexts/CartContext";
-import { trackFunnelStep } from "@/lib/analytics/matomo";
+import { trackFunnelStep, trackMatomoEvent } from "@/lib/analytics/matomo";
+
+function getPaymentCallbackErrorCode(error: unknown): string {
+  const message = String((error as any)?.message || "").toLowerCase();
+  if (message.includes("ناقص")) return "MISSING_PARAMS";
+  if (message.includes("network")) return "NETWORK_ERROR";
+  if (message.includes("timeout")) return "TIMEOUT";
+  return "UNKNOWN_ERROR";
+}
 
 function PaymentCallbackContent() {
   const [loading, setLoading] = useState(true);
@@ -35,6 +43,12 @@ function PaymentCallbackContent() {
       trackFunnelStep("purchase", {
         label: String(completedOrderId),
         onceKey: `purchase:${completedOrderId}`,
+      });
+      trackMatomoEvent({
+        category: "checkout",
+        action: "payment_callback_success",
+        name: "verified",
+        onceKey: `payment-callback-success:${completedOrderId}`,
       });
     }
     setSubmitOrderStep(SubmitOrderStep.Success);
@@ -109,10 +123,22 @@ function PaymentCallbackContent() {
         if (verificationResult.success) {
           await navigateToSuccess(verificationResult.orderId);
         } else {
+          trackMatomoEvent({
+            category: "checkout",
+            action: "payment_callback_failed",
+            name: "verification_failed",
+            onceKey: `payment-callback-failed:${verificationResult.orderId || orderIdToVerify}`,
+          });
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }
       } catch (err: any) {
+        trackMatomoEvent({
+          category: "checkout",
+          action: "payment_callback_error",
+          name: getPaymentCallbackErrorCode(err),
+          onceKey: `payment-callback-error:${getPaymentCallbackErrorCode(err)}`,
+        });
         setError(err.message || "خطا در بررسی وضعیت پرداخت");
         setSubmitOrderStep(SubmitOrderStep.Failure);
         setTransactionId(null);

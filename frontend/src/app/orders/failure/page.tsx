@@ -1,15 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useAtom } from "jotai";
 import { orderIdAtom, orderNumberAtom, transactionIdAtom } from "@/atoms/Order";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
+import { trackMatomoEvent } from "@/lib/analytics/matomo";
 
 export default function OrderFailure() {
   const [orderId] = useAtom(orderIdAtom);
   const [orderNumber] = useAtom(orderNumberAtom);
   const [transactionId] = useAtom(transactionIdAtom);
+
+  useEffect(() => {
+    trackMatomoEvent({
+      category: "checkout",
+      action: "order_failure_page_view",
+      onceKey: `order-failure-page:${orderId || "unknown"}`,
+    });
+  }, [orderId]);
 
   return (
     <div className="container mx-auto px-4 py-10">

@@ -100,6 +100,35 @@ describe("report traffic endpoints", () => {
     expect(ctxSecond.badRequest).not.toHaveBeenCalled();
   });
 
+  it("bypasses realtime cache when fresh=1 is requested", async () => {
+    fetchUserWithRoleMock.mockResolvedValue({ role: { name: "Superadmin" } });
+    roleIsAllowedMock.mockReturnValue(true);
+    getMatomoRealtimePayloadMock
+      .mockResolvedValueOnce({
+        activeVisitorsLast5Min: 2,
+        activeVisitorsLast30Min: 9,
+        topPagesNow: [{ url: "/pdp/item-1", visits: 4 }],
+      })
+      .mockResolvedValueOnce({
+        activeVisitorsLast5Min: 5,
+        activeVisitorsLast30Min: 12,
+        topPagesNow: [{ url: "/pdp/item-2", visits: 8 }],
+      });
+
+    const controller = loadController();
+
+    const ctxFirst = createCtx();
+    await controller.trafficRealtime(ctxFirst);
+
+    const ctxFresh = createCtx({
+      query: { fresh: "1" },
+    });
+    await controller.trafficRealtime(ctxFresh);
+
+    expect(getMatomoRealtimePayloadMock).toHaveBeenCalledTimes(2);
+    expect(ctxFresh.body.data.activeVisitorsLast5Min).toBe(5);
+  });
+
   it("returns a stable dashboard contract payload", async () => {
     fetchUserWithRoleMock.mockResolvedValue({ role: { name: "Superadmin" } });
     roleIsAllowedMock.mockReturnValue(true);

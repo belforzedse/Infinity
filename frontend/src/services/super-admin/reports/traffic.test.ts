@@ -35,6 +35,14 @@ describe("traffic report service", () => {
     expect(payload.ecommerce.revenue).toBe(1500000);
   });
 
+  it("supports forcing fresh dashboard data", async () => {
+    getMock.mockResolvedValueOnce({ data: {} });
+
+    await getTrafficDashboard(undefined, { fresh: true });
+
+    expect(getMock).toHaveBeenCalledWith("/reports/traffic/dashboard?fresh=1");
+  });
+
   it("normalizes realtime payload shape", async () => {
     getMock.mockResolvedValueOnce({
       data: {
@@ -50,5 +58,13 @@ describe("traffic report service", () => {
     expect(payload.activeVisitorsLast5Min).toBe(3);
     expect(payload.activeVisitorsLast30Min).toBe(11);
     expect(payload.topPagesNow[0]).toEqual({ url: "/pdp/123", visits: 4 });
+  });
+
+  it("supports forcing fresh realtime data", async () => {
+    getMock.mockResolvedValueOnce({ data: {} });
+
+    await getTrafficRealtime({ fresh: true });
+
+    expect(getMock).toHaveBeenCalledWith("/reports/traffic/realtime?fresh=1");
   });
 });

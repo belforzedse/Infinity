@@ -1,16 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAtom } from "jotai";
 import { orderIdAtom, orderNumberAtom, transactionIdAtom } from "@/atoms/Order";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
+import { trackMatomoEvent } from "@/lib/analytics/matomo";
 
 export default function OrderSuccess() {
   const [orderId] = useAtom(orderIdAtom);
   const [orderNumber] = useAtom(orderNumberAtom);
   const [transactionId] = useAtom(transactionIdAtom);
+
+  useEffect(() => {
+    if (!orderId) return;
+    trackMatomoEvent({
+      category: "checkout",
+      action: "order_success_page_view",
+      onceKey: `order-success-page:${orderId}`,
+    });
+  }, [orderId]);
 
   return (
     <div className="container mx-auto px-4 py-10">

@@ -13,6 +13,7 @@ import { getRandomProducts } from "@/services/product/homepage";
 import HeartIcon from "@/components/PDP/Icons/HeartIcon";
 import PageContainer from "@/components/layout/PageContainer";
 import OrderSummaryCard from "@/components/ShoppingCart/OrderSummaryCard";
+import { trackMatomoEvent } from "@/lib/analytics/matomo";
 
 // Lazy load offers section - not critical for initial render
 const OffersListHomePage = dynamic(() => import("@/components/PDP/OffersListHomePage"), {
@@ -49,6 +50,18 @@ export default function CartPageClient() {
       clearTimeout(timer);
     };
   }, [isLoading, cartItems.length]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (cartItems.length <= 0) return;
+    const totalValue = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    trackMatomoEvent({
+      category: "ecommerce",
+      action: "view_cart",
+      value: totalValue,
+      onceKey: `view-cart:${cartItems.length}:${Math.round(totalValue)}`,
+    });
+  }, [isLoading, cartItems]);
 
   if (isLoading) return <CartSkeleton />;
   if (cartItems.length === 0) {
@@ -94,4 +107,3 @@ export default function CartPageClient() {
     </motion.section>
   );
 }
-

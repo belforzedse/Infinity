@@ -229,6 +229,14 @@ function ShoppingCartBillForm({}: Props) {
     }
   };
 
+  const trackCheckoutError = (errorCode?: string) => {
+    trackMatomoEvent({
+      category: "checkout",
+      action: "error",
+      name: (errorCode || "UNKNOWN_ERROR").slice(0, 64),
+    });
+  };
+
   const onSubmit = async (data: FormData) => {
     // Clear previous errors
     setError(null);
@@ -294,6 +302,12 @@ function ShoppingCartBillForm({}: Props) {
     try {
       submitInProgressRef.current = true;
       setIsSubmitting(true);
+      trackMatomoEvent({
+        category: "checkout",
+        action: "place_order_attempt",
+        name: gateway,
+        value: totalPrice,
+      });
 
       const stockValid = await CartService.checkCartStock();
 
@@ -344,6 +358,7 @@ function ShoppingCartBillForm({}: Props) {
         let displayError = "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.";
 
         if (errorCode) {
+          trackCheckoutError(String(errorCode));
           switch (errorCode) {
             case "CART_EMPTY":
               displayError = "سبد خرید شما خالی است";
@@ -388,7 +403,10 @@ function ShoppingCartBillForm({}: Props) {
               }
           }
         } else if (errorMessage && typeof errorMessage === "string") {
+          trackCheckoutError("BACKEND_MESSAGE");
           displayError = errorMessage;
+        } else {
+          trackCheckoutError("FINALIZE_FAILED");
         }
 
         // Log error details for debugging
@@ -404,6 +422,12 @@ function ShoppingCartBillForm({}: Props) {
       setOrderNumber(cartResponse.orderId.toString());
 
       if (cartResponse.redirectUrl && cartResponse.redirectUrl.trim() !== "") {
+        trackMatomoEvent({
+          category: "checkout",
+          action: "payment_redirect",
+          name: gateway,
+          value: totalPrice,
+        });
         toast.success("در حال انتقال به درگاه پرداخت...");
         localStorage.setItem("pendingOrderId", cartResponse.orderId.toString());
         localStorage.setItem("pendingRefId", cartResponse.refId || "");
@@ -426,12 +450,24 @@ function ShoppingCartBillForm({}: Props) {
           // SnappPay and Samankish use GET redirect with token in URL
           window.location.href = cartResponse.redirectUrl!;
         } else if (gateway === "wallet") {
+          trackMatomoEvent({
+            category: "checkout",
+            action: "payment_completed",
+            name: "wallet",
+            value: totalPrice,
+          });
           // Wallet flow returns no redirect; just move to success
           await clearCartSafely();
           setSubmitOrderStep(SubmitOrderStep.Success);
           router.push("/orders/success");
         }
       } else {
+        trackMatomoEvent({
+          category: "checkout",
+          action: "payment_completed",
+          name: "direct",
+          value: totalPrice,
+        });
         await clearCartSafely();
         setSubmitOrderStep(SubmitOrderStep.Success);
         router.push("/orders/success");
@@ -450,6 +486,7 @@ function ShoppingCartBillForm({}: Props) {
         const errorMessage = responseData.message;
 
         if (errorCode) {
+          trackCheckoutError(String(errorCode));
           switch (errorCode) {
             case "CART_EMPTY":
               displayError = "سبد خرید شما خالی است";
@@ -478,15 +515,20 @@ function ShoppingCartBillForm({}: Props) {
               }
           }
         } else if (errorMessage && typeof errorMessage === "string") {
+          trackCheckoutError("BACKEND_MESSAGE");
           displayError = errorMessage;
         }
       } else if (err.message) {
+        const normalizedError = String(err.message).toLowerCase();
+        trackCheckoutError(normalizedError.includes("network") ? "NETWORK_ERROR" : "UNKNOWN_ERROR");
         // Network or other errors
         if (err.message.includes("Network")) {
           displayError = "خطا در اتصال به سرور. لطفاً اتصال اینترنت خود را بررسی کنید";
         } else {
           displayError = err.message;
         }
+      } else {
+        trackCheckoutError("UNKNOWN_ERROR");
       }
 
       setError(displayError);
@@ -521,7 +563,7 @@ function ShoppingCartBillForm({}: Props) {
   useEffect(() => {
     if (!shippingId) return;
     trackMatomoEvent({
-      category: "funnel",
+      category: "checkout",
       action: "add_shipping_info",
       name: String(shippingId),
       value: shippingCost || 0,
@@ -532,7 +574,7 @@ function ShoppingCartBillForm({}: Props) {
   useEffect(() => {
     if (!gateway) return;
     trackMatomoEvent({
-      category: "funnel",
+      category: "checkout",
       action: "add_payment_info",
       name: gateway,
       onceKey: `payment-info:${gateway}:${shippingId || "none"}`,
