@@ -1144,7 +1144,10 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
 
         if (verifyFailStatus === "VERIFY") {
           verified = true;
-        } else if (verifyFailStatus === "PENDING") {
+        } else if (
+          verifyFailStatus === "PENDING" ||
+          verifyFailStatus.endsWith("_PENDING")
+        ) {
           retryVerifyResult = await snappay.verify(tokenForOps);
           try {
             strapi.log.info("SnappPay verify retry result", {
