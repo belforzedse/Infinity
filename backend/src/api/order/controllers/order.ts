@@ -164,6 +164,13 @@ export default factories.createCoreController(
       try {
         const order = await strapi.db.query("api::order.order").findOne({
           where: { id, user: { id: user.id } },
+          populate: {
+            contract: {
+              populate: {
+                contract_transactions: true,
+              },
+            },
+          },
         });
 
         if (!order) {
@@ -178,6 +185,29 @@ export default factories.createCoreController(
           );
         }
 
+        let transactionId: string | undefined;
+        if (order.PaymentGateway === "SnappPay") {
+          const contract = order.contract as any;
+          if (contract && typeof contract === "object") {
+            transactionId =
+              (contract.external_id ? String(contract.external_id) : undefined) ||
+              undefined;
+
+            if (!transactionId) {
+              const txList = Array.isArray(contract.contract_transactions)
+                ? contract.contract_transactions
+                : [];
+              const snappTx = [...txList].reverse().find((tx: any) => {
+                const source = tx?.external_source || contract?.external_source;
+                return source === "SnappPay";
+              });
+              if (snappTx?.external_id) {
+                transactionId = String(snappTx.external_id);
+              }
+            }
+          }
+        }
+
         return {
           data: {
             success: true,
@@ -185,6 +215,7 @@ export default factories.createCoreController(
             status: order.Status,
             isPaid: ["Started", "Shipment", "Done"].includes(order.Status),
             paymentGateway: order.PaymentGateway || "Unknown",
+            transactionId,
           },
         };
       } catch (error) {

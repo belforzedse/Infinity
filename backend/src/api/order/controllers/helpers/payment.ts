@@ -1113,14 +1113,70 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
         });
       } catch {}
 
-      const verifyResult = await snappay.verify(tokenForOps);
+      let verifyResult = await snappay.verify(tokenForOps);
       try {
         strapi.log.info("SnappPay verify result", {
           successful: verifyResult?.successful,
           error: verifyResult?.errorData,
         });
       } catch {}
-      if (!verifyResult?.successful) {
+
+      let verified = !!verifyResult?.successful;
+      let statusAfterVerifyFail: any = null;
+      let retryVerifyResult: any = null;
+      let statusAfterRetry: any = null;
+
+      if (!verified) {
+        // SnapPay guidance: on verify failure/timeout, check status before deciding failure.
+        statusAfterVerifyFail = await snappay.status(tokenForOps);
+        const verifyFailStatus = String(
+          statusAfterVerifyFail?.response?.status || ""
+        ).toUpperCase();
+
+        try {
+          strapi.log.warn("SnappPay verify fallback status", {
+            successful: statusAfterVerifyFail?.successful,
+            status: statusAfterVerifyFail?.response?.status,
+            transactionId: statusAfterVerifyFail?.response?.transactionId,
+            error: statusAfterVerifyFail?.errorData,
+          });
+        } catch {}
+
+        if (verifyFailStatus === "VERIFY") {
+          verified = true;
+        } else if (verifyFailStatus === "PENDING") {
+          retryVerifyResult = await snappay.verify(tokenForOps);
+          try {
+            strapi.log.info("SnappPay verify retry result", {
+              successful: retryVerifyResult?.successful,
+              error: retryVerifyResult?.errorData,
+            });
+          } catch {}
+
+          if (retryVerifyResult?.successful) {
+            verifyResult = retryVerifyResult;
+            verified = true;
+          } else {
+            statusAfterRetry = await snappay.status(tokenForOps);
+            const retryStatus = String(
+              statusAfterRetry?.response?.status || ""
+            ).toUpperCase();
+            try {
+              strapi.log.warn("SnappPay verify retry fallback status", {
+                successful: statusAfterRetry?.successful,
+                status: statusAfterRetry?.response?.status,
+                transactionId: statusAfterRetry?.response?.transactionId,
+                error: statusAfterRetry?.errorData,
+              });
+            } catch {}
+            if (retryStatus === "VERIFY") {
+              verified = true;
+            }
+          }
+        }
+      }
+
+      if (!verified) {
         await strapi.entityService.update("api::order.order", orderId, {
           data: { Status: "Cancelled" },
         });
@@ -1133,7 +1189,12 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
               order: orderId,
               Action: "Update",
               Description: "SnappPay verify failed",
-              Changes: { verifyResult },
+              Changes: {
+                verifyResult,
+                statusAfterVerifyFail,
+                retryVerifyResult,
+                statusAfterRetry,
+              },
             },
           });
         } catch {}

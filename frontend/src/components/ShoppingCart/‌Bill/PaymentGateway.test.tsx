@@ -35,7 +35,7 @@ describe("ShoppingCartBillPaymentGateway", () => {
     expect(screen.queryByText(/اسنپ/)).not.toBeInTheDocument();
   });
 
-  it("keeps SnappPay visible but disabled when user is not eligible", () => {
+  it("hides SnappPay when user is not eligible", () => {
     render(
       <ShoppingCartBillPaymentGateway
         selected="samankish"
@@ -45,9 +45,6 @@ describe("ShoppingCartBillPaymentGateway", () => {
       />,
     );
 
-    const snappLabel = screen.getByText(/اسنپ/);
-    const snappButton = snappLabel.closest("button");
-    expect(snappButton).toBeInTheDocument();
-    expect(snappButton).toHaveClass("opacity-50");
+    expect(screen.queryByText(/اسنپ/)).not.toBeInTheDocument();
   });
 });

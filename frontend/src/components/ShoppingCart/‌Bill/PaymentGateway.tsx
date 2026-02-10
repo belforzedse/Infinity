@@ -71,12 +71,12 @@ function ShoppingCartBillPaymentGateway({
     name: "پرداخت اقساطی اسنپ‌پی",
     img: "/images/cart/snappay.svg",
     helper: snappHelper,
-    disabled: !snappEligible,
+    disabled: false,
   };
 
   const showSaman = availableGateways.includes("samankish");
   const showMellat = availableGateways.includes("mellat");
-  const showSnappay = availableGateways.includes("snappay");
+  const showSnappay = availableGateways.includes("snappay") && snappEligible;
   const showWallet = availableGateways.includes("wallet");
 
   return (
@@ -84,11 +84,10 @@ function ShoppingCartBillPaymentGateway({
       <span className="text-2xl text-neutral-800 lg:text-xl">درگاه پرداخت خود را انتخاب کنید</span>
       {showSnappay && (
         <button
-          onClick={() => !snappay.disabled && onChange(snappay.id)}
+          onClick={() => onChange(snappay.id)}
           className={classNames(
             "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 transition-opacity duration-300 lg:gap-6 lg:p-2",
             selected === snappay.id && "!border-pink-600",
-            snappay.disabled && "cursor-not-allowed opacity-50",
           )}
           type="button"
         >

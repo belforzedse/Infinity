@@ -199,15 +199,11 @@ function ShoppingCartBillForm({}: Props) {
           return;
         }
 
-        // Calculate the final amount (قابل پرداخت) to send to Snappay eligible
+        // Tax is disabled: payable amount must be subtotal - discount + shipping.
         const shippingToman = shippingCost ?? 0;
         const discountToman = discountPreview?.discount ?? 0;
         const subtotalToman = totalPrice;
-        const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
-        const finalAmount = Math.max(
-          0,
-          Math.round(subtotalToman - discountToman + taxToman + shippingToman),
-        );
+        const finalAmount = Math.max(0, Math.round(subtotalToman - discountToman + shippingToman));
 
         const res = await CartService.getSnappEligible({
           amount: finalAmount,
@@ -581,11 +577,7 @@ function ShoppingCartBillForm({}: Props) {
   const shippingToman = shippingCost ?? 0;
   const discountToman = discountPreview?.discount ?? 0;
   const subtotalToman = totalPrice;
-  const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
-  const totalToman = Math.max(
-    0,
-    Math.round(subtotalToman - discountToman + taxToman + shippingToman),
-  );
+  const totalToman = Math.max(0, Math.round(subtotalToman - discountToman + shippingToman));
 
   const requiredAmountIrr = totalToman * 10;
   const submitOrderStep = useAtomValue(submitOrderStepAtom);
