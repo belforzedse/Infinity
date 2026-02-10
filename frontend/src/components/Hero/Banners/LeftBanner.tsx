@@ -11,6 +11,12 @@ interface LeftBannerProps {
 
 export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const { background, foregroundImage } = spec;
+  const objectPosition =
+    (typeof foregroundImage.focalX === "number" && typeof foregroundImage.focalY === "number")
+      ? `${foregroundImage.focalX}% ${foregroundImage.focalY}%`
+      : (foregroundImage.objectPosition || "center");
+  const objectFit = foregroundImage.objectFit || "contain";
+  const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
 
   // Determine background styling
   const backgroundStyle =
@@ -68,7 +74,9 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
         loading={foregroundImage.loading}
         className={`absolute inset-0 lg:h-full lg:w-full ${foregroundImage.className || "object-contain"}`}
         style={{
-          objectPosition: foregroundImage.objectPosition || "center",
+          objectPosition,
+          objectFit,
+          transform: zoom !== 1 ? `scale(${zoom})` : undefined,
           zIndex: 10,
         }}
       />

@@ -20,7 +20,11 @@ export default function TextBanner({
   colors,
   typography,
 }: TextBannerProps) {
-  const containerClass = `${className} ${colors?.background || ""}`.trim();
+  const backgroundValue = colors?.background || "";
+  const hasInlineBackground =
+    /^#([0-9a-f]{3,8})$/i.test(backgroundValue) ||
+    /^(rgba?|hsla?)\(/i.test(backgroundValue);
+  const containerClass = `${className} ${hasInlineBackground ? "" : backgroundValue}`.trim();
 
   const titleClass = [
     titleClassName,
@@ -43,7 +47,10 @@ export default function TextBanner({
   ].filter(Boolean).join(" ").trim();
 
   return (
-    <div className={containerClass}>
+    <div
+      className={containerClass}
+      style={hasInlineBackground ? { backgroundColor: backgroundValue } : undefined}
+    >
       <h1 className={titleClass}>{title}</h1>
       {subtitle ? <p className={subtitleClass}>{subtitle}</p> : null}
     </div>

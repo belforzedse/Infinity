@@ -297,6 +297,11 @@ const superAdminSidebar: SidebarItem[] = [
         label: "بنرهای صفحه اصلی",
         href: "/super-admin/settings/customization/home-banners",
       },
+      {
+        id: "settings-hero-slider",
+        label: "اسلایدر هیرو",
+        href: "/super-admin/settings/customization/hero-slider",
+      },
     ],
   },
   // {

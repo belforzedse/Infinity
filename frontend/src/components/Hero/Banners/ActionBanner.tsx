@@ -30,6 +30,12 @@ export function ActionBanner({ spec }: ActionBannerProps) {
         ? "justify-end"
         : "justify-center";
   const spacingClass = spec.paddingClassName ?? "px-4 py-4 pr-8";
+  const objectPosition =
+    (typeof image.focalX === "number" && typeof image.focalY === "number")
+      ? `${image.focalX}% ${image.focalY}%`
+      : (image.objectPosition || "center");
+  const objectFit = image.objectFit || "contain";
+  const zoom = typeof image.zoom === "number" ? image.zoom : 1;
 
   // Determine background styling
   const bgStyle = background
@@ -120,7 +126,9 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           loading={image.loading}
           className={`absolute ${image.className || "object-contain"}`}
           style={{
-            objectPosition: image.objectPosition || "center",
+            objectPosition,
+            objectFit,
+            transform: zoom !== 1 ? `scale(${zoom})` : undefined,
             zIndex: 10,
             width: (image as any).customWidth || '100%',
             height: (image as any).customHeight || '100%',
@@ -164,7 +172,9 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           loading={image.loading}
           className={`h-full w-full ${image.className || "object-contain"}`}
           style={{
-            objectPosition: image.objectPosition || "center left",
+            objectPosition: image.objectPosition || objectPosition || "center left",
+            objectFit,
+            transform: zoom !== 1 ? `scale(${zoom})` : undefined,
           }}
         />
       </div>

@@ -1,3 +1,11 @@
+import {
+  createDefaultHeroSliderPayload,
+  normalizeHeroSliderMeta,
+  normalizeHeroSliderPayload,
+  type HeroSliderMeta,
+  type HeroSliderPayload,
+} from "./heroSlider";
+
 export type BlogCategoryBannerOrderItem = {
   id: number;
   title: string;
@@ -52,6 +60,9 @@ export type SuperAdminSettings = {
   blogDefaultBannerLinkText: string;
   blogDefaultBannerLinkColor: string;
   blogCategoryBannerOrder: BlogCategoryBannerOrderItem[];
+  homeHeroSliderDraft: HeroSliderPayload;
+  homeHeroSliderPublished: HeroSliderPayload;
+  homeHeroSliderMeta: HeroSliderMeta | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -81,6 +92,9 @@ export const defaultSettings = (): SuperAdminSettings => ({
   blogDefaultBannerLinkText: "",
   blogDefaultBannerLinkColor: "",
   blogCategoryBannerOrder: [],
+  homeHeroSliderDraft: createDefaultHeroSliderPayload(),
+  homeHeroSliderPublished: createDefaultHeroSliderPayload(),
+  homeHeroSliderMeta: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -134,6 +148,9 @@ export const normalizeSuperAdminSettings = (
   blogDefaultBannerLinkColor:
     typeof data?.blogDefaultBannerLinkColor === "string" ? data.blogDefaultBannerLinkColor : "",
   blogCategoryBannerOrder: normalizeBlogCategoryBannerOrder(data?.blogCategoryBannerOrder),
+  homeHeroSliderDraft: normalizeHeroSliderPayload(data?.homeHeroSliderDraft),
+  homeHeroSliderPublished: normalizeHeroSliderPayload(data?.homeHeroSliderPublished),
+  homeHeroSliderMeta: normalizeHeroSliderMeta(data?.homeHeroSliderMeta),
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });

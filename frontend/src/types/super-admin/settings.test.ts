@@ -1,4 +1,5 @@
 import { defaultSettings, normalizeSuperAdminSettings } from "./settings";
+import { HERO_SLIDER_VERSION } from "./heroSlider";
 
 describe("super-admin settings type helpers", () => {
   it("should include featured category defaults", () => {
@@ -14,6 +15,10 @@ describe("super-admin settings type helpers", () => {
     expect(settings.blogDefaultBannerLinkText).toBe("");
     expect(settings.blogDefaultBannerLinkColor).toBe("");
     expect(settings.blogCategoryBannerOrder).toEqual([]);
+    expect(settings.homeHeroSliderDraft.version).toBe(HERO_SLIDER_VERSION);
+    expect(settings.homeHeroSliderDraft.slides).toEqual([]);
+    expect(settings.homeHeroSliderPublished.slides).toEqual([]);
+    expect(settings.homeHeroSliderMeta).toBeNull();
   });
 
   it("should normalize featured category fields from API payload", () => {
@@ -50,6 +55,8 @@ describe("super-admin settings type helpers", () => {
       { id: 12, title: "Beauty", slug: "beauty" },
       { id: 11, title: "Cooking", slug: "cooking" },
     ]);
+    expect(settings.homeHeroSliderDraft.version).toBe(HERO_SLIDER_VERSION);
+    expect(settings.homeHeroSliderPublished.version).toBe(HERO_SLIDER_VERSION);
   });
 
   it("should fallback featured category fields to empty string when payload is invalid", () => {
@@ -84,5 +91,7 @@ describe("super-admin settings type helpers", () => {
       { id: 1, title: "One", slug: "one" },
       { id: 2, title: "Two", slug: "two" },
     ]);
+    expect(settings.homeHeroSliderDraft.slides).toEqual([]);
+    expect(settings.homeHeroSliderPublished.slides).toEqual([]);
   });
 });

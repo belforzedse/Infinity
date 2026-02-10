@@ -9,6 +9,10 @@ export type BannerImageSpec = {
   loading?: "eager" | "lazy";
   priority?: boolean;
   objectPosition?: string;
+  objectFit?: "cover" | "contain";
+  zoom?: number;
+  focalX?: number;
+  focalY?: number;
   customWidth?: string; // e.g., "300px", "50%", "100%" - overrides width display
   customHeight?: string; // e.g., "300px", "50%", "100%" - overrides height display
 };
