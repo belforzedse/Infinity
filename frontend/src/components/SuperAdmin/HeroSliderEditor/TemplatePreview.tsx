@@ -49,7 +49,7 @@ type Props = {
 };
 
 const FALLBACK_IMAGE_SRC = "/images/placeholders/image-placeholder.svg";
-const HERO_MAIN_PLACEHOLDER = "/images/placeholders/HeroEditorMainVisualSlot.pngimage.png";
+const HERO_MAIN_PLACEHOLDER = "/images/placeholders/HeroEditorMainVisualSlot.png";
 const HERO_CARD_PLACEHOLDER = "/images/placeholders/HeroEditorCardSlot.png";
 
 const slotLabelMap: Record<string, string> = {
