@@ -134,6 +134,15 @@
     "status": "publish",
     "rating": "0.00"
   },
+  "797829": {
+    "strapiId": 1419,
+    "importedAt": "2026-02-10T07:41:32.407Z",
+    "name": "کیف پول  cute bearB00130",
+    "slug": "cute-bear-bag-b00130",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
   "866402": {
     "strapiId": 1169,
     "importedAt": "2026-02-02T12:31:17.717Z",
@@ -802,7 +811,7 @@
   },
   "1049958": {
     "strapiId": 1241,
-    "importedAt": "2026-02-02T13:07:26.920Z",
+    "importedAt": "2026-02-10T07:45:53.450Z",
     "name": "بافت گیپوری مرواریدی OppsiL0030",
     "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%da%af%db%8c%d9%be%d9%88%d8%b1%db%8c-%d9%85%d8%b1%d9%88%d8%a7%d8%b1%db%8c%d8%af%db%8c-oppsil0030",
     "type": "variable",
@@ -1846,7 +1855,7 @@
   },
   "1156355": {
     "strapiId": 1360,
-    "importedAt": "2026-02-02T14:41:20.184Z",
+    "importedAt": "2026-02-10T07:47:04.124Z",
     "name": "بلوز بافت راه راه OppsiL0011",
     "slug": "%d8%a8%d9%84%d9%88%d8%b2-%d8%a8%d8%a7%d9%81%d8%aa-%d8%b1%d8%a7%d9%87-%d8%b1%d8%a7%d9%87-oppsil0011",
     "type": "variable",
@@ -1873,9 +1882,54 @@
   },
   "1156421": {
     "strapiId": 1358,
-    "importedAt": "2026-02-02T14:42:29.042Z",
+    "importedAt": "2026-02-10T07:47:25.738Z",
     "name": "کیف مینی OppsiB00358",
     "slug": "%da%a9%db%8c%d9%81-%d9%85%db%8c%d9%86%db%8c-oppsib00358",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156906": {
+    "strapiId": 1426,
+    "importedAt": "2026-02-10T07:49:44.217Z",
+    "name": "شلوار جین بگ OppsiP0097",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%ac%db%8c%d9%86-%d8%a8%da%af-oppsip0097",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1156972": {
+    "strapiId": 1422,
+    "importedAt": "2026-02-10T07:49:00.083Z",
+    "name": "بافت پاپیونی OppsiL00223",
+    "slug": "%d8%a8%d8%a7%d9%81%d8%aa-%d9%be%d8%a7%d9%be%db%8c%d9%88%d9%86%db%8c-oppsil00223",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1157856": {
+    "strapiId": 1424,
+    "importedAt": "2026-02-10T07:48:23.491Z",
+    "name": "سوتین اسفنجی بیسیک Oppsi000593",
+    "slug": "%d8%b3%d9%88%d8%aa%db%8c%d9%86-%d8%a7%d8%b3%d9%81%d9%86%d8%ac%db%8c-%d8%a8%db%8c%d8%b3%db%8c%da%a9-oppsi000593",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1157902": {
+    "strapiId": 1423,
+    "importedAt": "2026-02-10T07:49:20.472Z",
+    "name": "شال شاین دار کندال OppsiS00819",
+    "slug": "%d8%b4%d8%a7%d9%84-%d8%b4%d8%a7%db%8c%d9%86-%d8%af%d8%a7%d8%b1-%da%a9%d9%86%d8%af%d8%a7%d9%84-oppsis00819",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "1157918": {
+    "strapiId": 1425,
+    "importedAt": "2026-02-10T07:49:07.042Z",
+    "name": "شلوار زارا OppsiC00583",
+    "slug": "%d8%b4%d9%84%d9%88%d8%a7%d8%b1-%d8%b2%d8%a7%d8%b1%d8%a7-oppsic00583",
     "type": "variable",
     "status": "publish",
     "rating": "0.00"

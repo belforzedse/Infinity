@@ -9,6 +9,10 @@ export type BannerImageSpec = {
   loading?: "eager" | "lazy";
   priority?: boolean;
   objectPosition?: string;
+  objectFit?: "cover" | "contain";
+  zoom?: number;
+  focalX?: number;
+  focalY?: number;
   customWidth?: string; // e.g., "300px", "50%", "100%" - overrides width display
   customHeight?: string; // e.g., "300px", "50%", "100%" - overrides height display
 };
@@ -35,6 +39,7 @@ export type Typography = {
 export type TextBannerSpec = {
   title: string;
   subtitle?: string;
+  marginBottomPx?: number;
   className?: string;
   titleClassName?: string;
   subtitleClassName?: string;
@@ -112,6 +117,7 @@ export type ActionBannerButtonSpec = {
   className?: string;
   showArrow?: boolean; // Show arrow icon after label
   arrowClassName?: string; // Custom classes for arrow icon
+  style?: Record<string, string | number>;
 };
 
 export type ActionBannerSpec = {

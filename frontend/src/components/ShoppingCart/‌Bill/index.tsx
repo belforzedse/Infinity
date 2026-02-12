@@ -121,6 +121,9 @@ function ShoppingCartBillForm({}: Props) {
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
   const { totalPrice, totalItems, clearCart } = useCart();
+  const selectableGateways = availableGateways.filter(
+    (gw) => gw !== "snappay" || snappEligible,
+  );
 
   // Persist/restore discount code
   useEffect(() => {
@@ -151,17 +154,17 @@ function ShoppingCartBillForm({}: Props) {
   }, []);
 
   useEffect(() => {
-    if (availableGateways.length === 0) {
+    if (selectableGateways.length === 0) {
       setError("در حال حاضر هیچ درگاه پرداختی فعال نیست");
       return;
     }
 
     setError((prev) => (prev === "در حال حاضر هیچ درگاه پرداختی فعال نیست" ? null : prev));
 
-    if (!availableGateways.includes(gateway)) {
-      setGateway(availableGateways[0]);
+    if (!selectableGateways.includes(gateway)) {
+      setGateway(selectableGateways[0]);
     }
-  }, [availableGateways, gateway]);
+  }, [selectableGateways, gateway]);
 
   // Refresh discount preview when code or shipping changes (stable deps)
   useEffect(() => {
@@ -322,7 +325,7 @@ function ShoppingCartBillForm({}: Props) {
       return;
     }
 
-    if (availableGateways.length === 0 || !availableGateways.includes(gateway)) {
+    if (selectableGateways.length === 0 || !selectableGateways.includes(gateway)) {
       setError("درگاه پرداخت انتخاب شده در دسترس نیست");
       return;
     }

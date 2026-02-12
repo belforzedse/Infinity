@@ -72,6 +72,7 @@ export default function TabletHero({ layout, slideKey = 0 }: Props) {
               <TextBanner
                 title={layout.primaryBanner.title}
                 subtitle={layout.primaryBanner.subtitle}
+                marginBottomPx={layout.primaryBanner.marginBottomPx}
                 className={layout.primaryBanner.className}
                 titleClassName={layout.primaryBanner.titleClassName}
                 subtitleClassName={layout.primaryBanner.subtitleClassName}

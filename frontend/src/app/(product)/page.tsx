@@ -16,6 +16,7 @@ import { BlogCarousel } from "@/components/Blog";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
 import TabletSlider from "@/components/Hero/tabletSlider";
+import { mapCmsHeroSliderToLayouts } from "@/components/Hero/config/fromCms";
 import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
@@ -122,23 +123,39 @@ export default async function Home() {
     Boolean(featuredCategorySlug) &&
     Boolean(featuredCategoryBannerImage) &&
     featuredCategorySmallProducts.length > 0;
+  const heroFromCms = mapCmsHeroSliderToLayouts(homepageSettings.homeHeroSliderPublished);
+  const hasHeroSlides = heroFromCms.desktopSlides.length > 0;
 
   return (
     <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
       {/* JSON-LD Organization Schema for SEO */}
       <OrganizationSchema />
 
-      <section className="space-y-6">
-        <Reveal variant="zoom-in" duration={650}>
-          <MobileSlider />
-        </Reveal>
-        <Reveal delay={50} variant="zoom-in" duration={650}>
-          <TabletSlider />
-        </Reveal>
-        <Reveal delay={100} variant="zoom-in" duration={650}>
-          <DesktopSlider />
-        </Reveal>
-      </section>
+      {hasHeroSlides && (
+        <section className="space-y-6">
+          <Reveal variant="zoom-in" duration={650}>
+            <MobileSlider
+              slides={heroFromCms.mobileSlides}
+              autoplayInterval={heroFromCms.autoplayIntervalMs}
+              autoplayEligibility={heroFromCms.autoplayEligibility}
+            />
+          </Reveal>
+          <Reveal delay={50} variant="zoom-in" duration={650}>
+            <TabletSlider
+              slides={heroFromCms.tabletSlides}
+              autoplayInterval={heroFromCms.autoplayIntervalMs}
+              autoplayEligibility={heroFromCms.autoplayEligibility}
+            />
+          </Reveal>
+          <Reveal delay={100} variant="zoom-in" duration={650}>
+            <DesktopSlider
+              slides={heroFromCms.desktopSlides}
+              autoplayInterval={heroFromCms.autoplayIntervalMs}
+              autoplayEligibility={heroFromCms.autoplayEligibility}
+            />
+          </Reveal>
+        </section>
+      )}
 
       {discountedProducts.length > 0 && (
         <section>

@@ -102,6 +102,18 @@
     "blogCategoryBannerOrder": {
       "type": "json",
       "default": []
+    },
+    "homeHeroSliderDraft": {
+      "type": "json",
+      "default": {}
+    },
+    "homeHeroSliderPublished": {
+      "type": "json",
+      "default": {}
+    },
+    "homeHeroSliderMeta": {
+      "type": "json",
+      "default": {}
     }
   }
 }

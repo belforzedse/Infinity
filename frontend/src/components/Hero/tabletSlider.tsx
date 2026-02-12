@@ -7,24 +7,75 @@ import PaginationMobile from "./PaginationMobile";
 interface TabletSliderProps {
   slides?: TabletLayout[];
   autoplayInterval?: number;
+  autoplayEligibility?: boolean[];
 }
 
 export default function TabletSlider({
   slides: customSlides,
   autoplayInterval = defaultSliderConfig.autoplayInterval,
+  autoplayEligibility,
 }: TabletSliderProps = {}) {
   const slides = useMemo(() => customSlides ?? defaultSliderConfig.tablet, [customSlides]);
   const [index, setIndex] = useState(0);
   const [playKey, setPlayKey] = useState(0);
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const normalizedInterval =
+    typeof autoplayInterval === "number" && autoplayInterval >= 3000
+      ? autoplayInterval
+      : (defaultSliderConfig.autoplayInterval ?? 600000);
+
+  const hasEligibleAutoplaySlides = useMemo(() => {
+    if (!autoplayEligibility || autoplayEligibility.length === 0) return slides.length > 1;
+    return autoplayEligibility.some(Boolean);
+  }, [autoplayEligibility, slides.length]);
+
+  const findNextAutoplayIndex = (current: number) => {
+    if (!autoplayEligibility || autoplayEligibility.length !== slides.length) {
+      return (current + 1) % slides.length;
+    }
+
+    for (let step = 1; step <= slides.length; step += 1) {
+      const candidate = (current + step) % slides.length;
+      if (autoplayEligibility[candidate]) {
+        return candidate;
+      }
+    }
+
+    return current;
+  };
 
   useEffect(() => {
+    if (slides.length === 0) {
+      setIndex(0);
+      return;
+    }
+
+    if (index >= slides.length) {
+      setIndex(0);
+      return;
+    }
+
+    if (autoplayEligibility && autoplayEligibility.length === slides.length && !autoplayEligibility[index]) {
+      const firstEligible = autoplayEligibility.findIndex(Boolean);
+      if (firstEligible >= 0) {
+        setIndex(firstEligible);
+        setPlayKey((k) => k + 1);
+      }
+    }
+  }, [autoplayEligibility, index, slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1 || !hasEligibleAutoplaySlides) return;
     const id = setInterval(() => {
-      setIndex((i) => (i + 1) % slides.length);
+      setIndex((i) => findNextAutoplayIndex(i));
       setPlayKey((k) => k + 1);
-    }, autoplayInterval);
+    }, normalizedInterval);
     return () => clearInterval(id);
-  }, [slides.length, autoplayInterval]);
+  }, [slides.length, normalizedInterval, hasEligibleAutoplaySlides, autoplayEligibility]);
+
+  if (slides.length === 0) {
+    return null;
+  }
 
   const next = () => {
     setIndex((i) => (i + 1) % slides.length);
