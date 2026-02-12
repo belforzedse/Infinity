@@ -1,14 +1,9 @@
 const DEFAULT_AUTOPLAY_INTERVAL_MS = 600000;
 const MIN_AUTOPLAY_INTERVAL_MS = 3000;
 const MAX_AUTOPLAY_INTERVAL_MS = 3600000;
+const MIN_HEADLINE_BOTTOM_MARGIN_PX = 0;
+const MAX_HEADLINE_BOTTOM_MARGIN_PX = 160;
 const MAX_TEXT_LENGTH = 280;
-
-const ALLOWED_FIT = new Set(["cover", "contain"] as const);
-const ALLOWED_LINK_TYPES = new Set(["internal", "external"] as const);
-const ALLOWED_RADIUS_TOKENS = new Set(["none", "sm", "md", "lg", "xl", "full"] as const);
-const ALLOWED_OVERLAY_TOKENS = new Set(["none", "soft", "medium", "strong"] as const);
-const ALLOWED_PADDING_TOKENS = new Set(["none", "sm", "md", "lg"] as const);
-const ALLOWED_SHADOW_TOKENS = new Set(["none", "sm", "md", "lg"] as const);
 
 const DESKTOP_SLOT_KEYS = [
   "topLeftTextBanner",
@@ -31,36 +26,77 @@ const MOBILE_SLOT_KEYS = [
   "heroBanner",
 ] as const;
 
+const ALLOWED_LINK_TYPES = new Set(["internal", "external"] as const);
+const ALLOWED_CONTENT_ALIGNMENTS = new Set(["top", "center", "bottom"] as const);
+const ALLOWED_BACKGROUND_TYPES = new Set(["color", "image"] as const);
+const ALLOWED_FONT_FAMILIES = new Set([
+  "font-kaghaz",
+  "font-rokh",
+  "font-peyda",
+  "font-peyda-fanum",
+] as const);
+const ALLOWED_FONT_SIZES = new Set([
+  "text-xs",
+  "text-sm",
+  "text-base",
+  "text-[26px]",
+  "text-lg",
+  "text-lg sm:text-2xl",
+  "text-xl",
+  "text-xs sm:text-sm",
+  "text-2xl",
+  "text-3xl",
+  "sl:text-[65px] text-[40px]",
+  "sl:text-[40px] text-xl",
+  "lg:text-[24px] 2xl:text-[28px]",
+  "lg:text-[40px] 2xl:text-[48px]",
+  "lg:text-[44px] 2xl:text-[54px]",
+  "text-xl sm:text-2xl md:text-3xl",
+  "text-sm sm:text-base md:text-lg",
+  "lg:text-[30px] 2xl:text-[34px]",
+  "lg:text-[48px] 2xl:text-[50px]",
+  "lg:text-[26px] 2xl:text-[30px]",
+  "text-[30px]",
+  "text-[20px]",
+] as const);
+const ALLOWED_FONT_WEIGHTS = new Set([
+  "font-normal",
+  "font-medium",
+  "font-semibold",
+  "font-bold",
+  "font-extrabold",
+] as const);
+const ALLOWED_LINE_HEIGHTS = new Set([
+  "leading-tight",
+  "leading-snug",
+  "leading-normal",
+  "leading-relaxed",
+  "leading-[110%]",
+  "leading-[150%]",
+] as const);
+const ALLOWED_LETTER_SPACINGS = new Set([
+  "tracking-tight",
+  "tracking-normal",
+  "tracking-wide",
+] as const);
+
 type DesktopSlotKey = (typeof DESKTOP_SLOT_KEYS)[number];
 type TabletSlotKey = (typeof TABLET_SLOT_KEYS)[number];
 type MobileSlotKey = (typeof MOBILE_SLOT_KEYS)[number];
 
-type HeroSlotKey = DesktopSlotKey | TabletSlotKey | MobileSlotKey;
+type HeroFontFamilyToken = (typeof ALLOWED_FONT_FAMILIES extends Set<infer T> ? T : never);
+type HeroFontSizeToken = (typeof ALLOWED_FONT_SIZES extends Set<infer T> ? T : never);
+type HeroFontWeightToken = (typeof ALLOWED_FONT_WEIGHTS extends Set<infer T> ? T : never);
+type HeroLineHeightToken = (typeof ALLOWED_LINE_HEIGHTS extends Set<infer T> ? T : never);
+type HeroLetterSpacingToken =
+  (typeof ALLOWED_LETTER_SPACINGS extends Set<infer T> ? T : never);
 
 export type HeroSlotLink = {
   type: "internal" | "external";
   href: string;
 };
-
-export type HeroSlotMedia = {
-  type: "image";
-  imageUrl: string;
-  alt: string;
-  fit: "cover" | "contain";
-  objectPosition: string;
-  focalX: number;
-  focalY: number;
-  zoom: number;
-};
-
-export type HeroSlotStyle = {
-  backgroundColor: string;
-  backgroundImageUrl: string;
-  radiusToken: "none" | "sm" | "md" | "lg" | "xl" | "full";
-  overlayToken: "none" | "soft" | "medium" | "strong";
-  paddingToken: "none" | "sm" | "md" | "lg";
-  shadowToken: "none" | "sm" | "md" | "lg";
-};
+export type HeroContentAlignment = "top" | "center" | "bottom";
+export type HeroBackgroundType = "color" | "image";
 
 export type HeroTracking = {
   campaign: string;
@@ -70,12 +106,81 @@ export type HeroTracking = {
   custom: Record<string, string>;
 };
 
-export type HeroSlotConfig = {
+export type HeroTextStyle = {
+  color: string;
+  fontFamily: HeroFontFamilyToken;
+  fontSize: HeroFontSizeToken;
+  fontWeight: HeroFontWeightToken;
+  lineHeight: HeroLineHeightToken;
+  letterSpacing: HeroLetterSpacingToken;
+};
+
+export type HeroHeadlineSlot = {
+  kind: "headline";
   title: string;
   subtitle: string;
-  label: string;
-  media: HeroSlotMedia;
-  style: HeroSlotStyle;
+  backgroundColor: string;
+  bottomMarginPx: number;
+  className: string;
+  titleClassName: string;
+  subtitleClassName: string;
+  titleStyle: HeroTextStyle;
+  subtitleStyle: HeroTextStyle;
+  link: HeroSlotLink | null;
+  tracking: HeroTracking;
+};
+
+export type HeroMainVisualSlot = {
+  kind: "mainVisual";
+  backgroundColor: string;
+  backgroundType: HeroBackgroundType;
+  backgroundImageUrl: string;
+  backgroundWidth: string;
+  backgroundHeight: string;
+  backgroundPosition: string;
+  backgroundSize: string;
+  backgroundClassName: string;
+  foregroundImageUrl: string;
+  foregroundAlt: string;
+  foregroundClassName: string;
+  foregroundObjectPosition: string;
+  foregroundCustomWidth: string;
+  foregroundCustomHeight: string;
+  link: HeroSlotLink | null;
+  tracking: HeroTracking;
+};
+
+export type HeroCardSlot = {
+  kind: "card";
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  imageAlt: string;
+  imageHref: string;
+  imageClassName: string;
+  imageObjectPosition: string;
+  imageCustomWidth: string;
+  imageCustomHeight: string;
+  buttonLabel: string;
+  buttonHref: string;
+  buttonClassName: string;
+  buttonShowArrow: boolean;
+  buttonArrowClassName: string;
+  backgroundColor: string;
+  backgroundType: HeroBackgroundType;
+  backgroundImageUrl: string;
+  backgroundWidth: string;
+  backgroundHeight: string;
+  backgroundPosition: string;
+  backgroundSize: string;
+  backgroundClassName: string;
+  className: string;
+  titleClassName: string;
+  subtitleClassName: string;
+  contentAlignment: HeroContentAlignment;
+  paddingClassName: string;
+  titleStyle: HeroTextStyle;
+  buttonStyle: HeroTextStyle;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
@@ -88,13 +193,28 @@ export type HeroSlideSchedule = {
 
 export type HeroSlideDevices = {
   desktop: {
-    slots: Record<DesktopSlotKey, HeroSlotConfig>;
+    slots: {
+      topLeftTextBanner: HeroHeadlineSlot;
+      bottomActionBannerLeft: HeroCardSlot;
+      bottomActionBannerRight: HeroCardSlot;
+      rightBanner: HeroMainVisualSlot;
+    };
   };
   tablet: {
-    slots: Record<TabletSlotKey, HeroSlotConfig>;
+    slots: {
+      primaryBanner: HeroHeadlineSlot;
+      bottomActionBannerLeft: HeroCardSlot;
+      bottomActionBannerRight: HeroCardSlot;
+      heroBanner: HeroMainVisualSlot;
+    };
   };
   mobile: {
-    slots: Record<MobileSlotKey, HeroSlotConfig>;
+    slots: {
+      primaryBanner: HeroHeadlineSlot;
+      bottomActionBannerLeft: HeroCardSlot;
+      bottomActionBannerRight: HeroCardSlot;
+      heroBanner: HeroMainVisualSlot;
+    };
   };
 };
 
@@ -125,6 +245,116 @@ export type HeroSliderSanitizationResult = {
   errors: string[];
 };
 
+const DEFAULT_TOP_HEADLINE_TITLE_STYLE: HeroTextStyle = {
+  color: "#94B5D2",
+  fontFamily: "font-kaghaz",
+  fontSize: "lg:text-[48px] 2xl:text-[50px]",
+  fontWeight: "font-bold",
+  lineHeight: "leading-tight",
+  letterSpacing: "tracking-tight",
+};
+
+const DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE: HeroTextStyle = {
+  color: "text-gray-600",
+  fontFamily: "font-kaghaz",
+  fontSize: "lg:text-[26px] 2xl:text-[30px]",
+  fontWeight: "font-semibold",
+  lineHeight: "leading-relaxed",
+  letterSpacing: "tracking-normal",
+};
+
+const DEFAULT_PRIMARY_TITLE_STYLE: HeroTextStyle = {
+  color: "text-gray-900",
+  fontFamily: "font-kaghaz",
+  fontSize: "text-xl sm:text-2xl md:text-3xl",
+  fontWeight: "font-bold",
+  lineHeight: "leading-tight",
+  letterSpacing: "tracking-normal",
+};
+
+const DEFAULT_PRIMARY_SUBTITLE_STYLE: HeroTextStyle = {
+  color: "text-gray-600",
+  fontFamily: "font-kaghaz",
+  fontSize: "text-sm sm:text-base md:text-lg",
+  fontWeight: "font-medium",
+  lineHeight: "leading-relaxed",
+  letterSpacing: "tracking-normal",
+};
+
+const DEFAULT_CARD_TITLE_STYLE: HeroTextStyle = {
+  color: "text-gray-900",
+  fontFamily: "font-peyda-fanum",
+  fontSize: "text-lg",
+  fontWeight: "font-bold",
+  lineHeight: "leading-tight",
+  letterSpacing: "tracking-normal",
+};
+
+const DEFAULT_CARD_BUTTON_STYLE: HeroTextStyle = {
+  color: "text-white",
+  fontFamily: "font-peyda-fanum",
+  fontSize: "text-sm",
+  fontWeight: "font-medium",
+  lineHeight: "leading-normal",
+  letterSpacing: "tracking-normal",
+};
+
+const DEFAULT_DESKTOP_HEADLINE_CLASSNAME =
+  "w-full gap-[8px] pb-[68px] mb-[10px] rounded-3xl px-[36px] pt-[30px]";
+const DEFAULT_TABLET_HEADLINE_CLASSNAME =
+  "w-full gap-[8px] rounded-3xl px-[24px] pb-[40px] pt-[20px]";
+const DEFAULT_MOBILE_HEADLINE_CLASSNAME =
+  "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]";
+
+const DEFAULT_DESKTOP_CARD_LEFT_CLASSNAME = "h-[80%]";
+const DEFAULT_DESKTOP_CARD_RIGHT_CLASSNAME = "h-[80%]";
+const DEFAULT_DESKTOP_CARD_LEFT_IMAGE_CLASSNAME =
+  "h-full w-full rounded-lg mb-2 -translate-y-4 object-contain";
+const DEFAULT_DESKTOP_CARD_RIGHT_IMAGE_CLASSNAME =
+  "h-full w-full rounded-lg pl-2 object-contain";
+const DEFAULT_CARD_BACKGROUND_CLASSNAME = "rounded-3xl";
+const DEFAULT_CARD_BUTTON_CLASSNAME = "text-white text-[20px] font-normal rounded-lg";
+const DEFAULT_CARD_PADDING_CLASSNAME = "px-4 py-4 pr-8";
+
+const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_WIDTH = "520px";
+const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_HEIGHT = "427px";
+const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
+const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
+const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-3xl";
+
+const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
+const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
+const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
+const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
+const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
+const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME =
+  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
+const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
+
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
+const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME =
+  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
+const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
+
+const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
+const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
+const DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME =
+  "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain";
+const DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME =
+  "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain";
+
+const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "rounded-lg";
+const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "rounded-lg";
+const DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME =
+  "h-full w-full rounded-lg mb-2 scale-150 -translate-y-4 object-contain";
+const DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME =
+  "h-full w-full rounded-lg scale-125 pl-2 object-contain";
+const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-4 pr-3";
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -142,19 +372,27 @@ function sanitizeString(value: unknown, maxLength = MAX_TEXT_LENGTH): string {
   return value.trim().slice(0, maxLength);
 }
 
-function sanitizeColor(value: unknown): string {
-  const normalized = sanitizeString(value, 32);
+function sanitizeColorOrClass(value: unknown): string {
+  const normalized = sanitizeString(value, 120);
   if (!normalized) return "";
 
   if (/^#[0-9a-fA-F]{3,8}$/.test(normalized)) {
     return normalized;
   }
 
-  if (/^(rgba?|hsla?)\([^)]*\)$/.test(normalized)) {
+  if (/^(rgba?|hsla?)\([^)]*\)$/i.test(normalized)) {
+    return normalized;
+  }
+
+  if (/^(text|bg)-[a-z0-9:/\-[\].]+$/i.test(normalized)) {
     return normalized;
   }
 
   return "";
+}
+
+function sanitizeClassName(value: unknown, maxLength = 280): string {
+  return sanitizeString(value, maxLength);
 }
 
 function sanitizeImageUrl(value: unknown): string {
@@ -170,11 +408,6 @@ function sanitizeImageUrl(value: unknown): string {
   }
 
   return "";
-}
-
-function sanitizeObjectPosition(value: unknown): string {
-  const normalized = sanitizeString(value, 64);
-  return normalized || "center";
 }
 
 function sanitizeTracking(value: unknown): HeroTracking {
@@ -250,6 +483,24 @@ function sanitizeLink(value: unknown, errors: string[], path: string): HeroSlotL
   return { type, href };
 }
 
+function sanitizeButtonHref(value: unknown, errors: string[], path: string): string {
+  const href = sanitizeString(value, 2048);
+  if (!href) return "";
+  if (href.startsWith("/")) return href;
+
+  try {
+    const parsed = new URL(href);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return href;
+    }
+  } catch {
+    // no-op
+  }
+
+  errors.push(`${path} must be an internal route or http/https URL`);
+  return "";
+}
+
 function normalizeTehranToUtc(value: string): string | null {
   const normalized = value.trim();
   if (!normalized) return null;
@@ -311,7 +562,7 @@ function sanitizeToken<T extends string>(
   errors: string[],
   path: string,
 ): T {
-  const normalized = sanitizeString(value, 32);
+  const normalized = sanitizeString(value, 120);
   if (!normalized) {
     return fallback;
   }
@@ -324,123 +575,327 @@ function sanitizeToken<T extends string>(
   return normalized as T;
 }
 
-function createDefaultSlotConfig(): HeroSlotConfig {
+function sanitizeTextStyle(
+  value: unknown,
+  defaults: HeroTextStyle,
+  errors: string[],
+  path: string,
+  legacyColor?: unknown,
+  legacyTypography?: Record<string, unknown> | null,
+  fieldPrefix?: "title" | "subtitle",
+): HeroTextStyle {
+  const raw = isRecord(value) ? value : {};
+  const legacyFont = fieldPrefix ? legacyTypography?.[`${fieldPrefix}Font`] : undefined;
+  const legacySize = fieldPrefix ? legacyTypography?.[`${fieldPrefix}Size`] : undefined;
+  const legacyWeight = fieldPrefix ? legacyTypography?.[`${fieldPrefix}Weight`] : undefined;
+  const legacyLineHeight = fieldPrefix ? legacyTypography?.[`${fieldPrefix}Leading`] : undefined;
+  const legacyTracking = fieldPrefix ? legacyTypography?.[`${fieldPrefix}Tracking`] : undefined;
+
   return {
-    title: "",
-    subtitle: "",
-    label: "",
-    media: {
-      type: "image",
-      imageUrl: "",
-      alt: "",
-      fit: "contain",
-      objectPosition: "center",
-      focalX: 50,
-      focalY: 50,
-      zoom: 1,
-    },
-    style: {
-      backgroundColor: "",
-      backgroundImageUrl: "",
-      radiusToken: "md",
-      overlayToken: "none",
-      paddingToken: "md",
-      shadowToken: "none",
-    },
-    link: null,
-    tracking: {
-      campaign: "",
-      source: "",
-      medium: "",
-      content: "",
-      custom: {},
-    },
+    color: sanitizeColorOrClass(raw.color ?? legacyColor) || defaults.color,
+    fontFamily: sanitizeToken(
+      raw.fontFamily ?? legacyFont,
+      ALLOWED_FONT_FAMILIES,
+      defaults.fontFamily,
+      errors,
+      `${path}.fontFamily`,
+    ),
+    fontSize: sanitizeToken(
+      raw.fontSize ?? legacySize,
+      ALLOWED_FONT_SIZES,
+      defaults.fontSize,
+      errors,
+      `${path}.fontSize`,
+    ),
+    fontWeight: sanitizeToken(
+      raw.fontWeight ?? legacyWeight,
+      ALLOWED_FONT_WEIGHTS,
+      defaults.fontWeight,
+      errors,
+      `${path}.fontWeight`,
+    ),
+    lineHeight: sanitizeToken(
+      raw.lineHeight ?? legacyLineHeight,
+      ALLOWED_LINE_HEIGHTS,
+      defaults.lineHeight,
+      errors,
+      `${path}.lineHeight`,
+    ),
+    letterSpacing: sanitizeToken(
+      raw.letterSpacing ?? legacyTracking,
+      ALLOWED_LETTER_SPACINGS,
+      defaults.letterSpacing,
+      errors,
+      `${path}.letterSpacing`,
+    ),
   };
 }
 
-function sanitizeSlotConfig(
+function sanitizeHeadlineSlot(
   value: unknown,
   errors: string[],
   path: string,
-): HeroSlotConfig {
-  const slotRaw = isRecord(value) ? value : {};
-  const slot = createDefaultSlotConfig();
+  defaults: {
+    titleStyle: HeroTextStyle;
+    subtitleStyle: HeroTextStyle;
+    backgroundColor: string;
+    bottomMarginPx: number;
+    className: string;
+    titleClassName: string;
+    subtitleClassName: string;
+  },
+): HeroHeadlineSlot {
+  const raw = isRecord(value) ? value : {};
+  const style = isRecord(raw.style) ? raw.style : {};
+  const colors = isRecord(raw.colors) ? raw.colors : {};
+  const typography = isRecord(raw.typography) ? raw.typography : null;
 
-  slot.title = sanitizeString(slotRaw.title);
-  slot.subtitle = sanitizeString(slotRaw.subtitle);
-  slot.label = sanitizeString(slotRaw.label);
-
-  const mediaRaw = isRecord(slotRaw.media) ? slotRaw.media : {};
-  const fitToken = sanitizeString(mediaRaw.fit, 16);
-  if (fitToken && !ALLOWED_FIT.has(fitToken as HeroSlotMedia["fit"])) {
-    errors.push(`${path}.media.fit must be cover or contain`);
-  }
-
-  slot.media = {
-    type: "image",
-    imageUrl: sanitizeImageUrl(mediaRaw.imageUrl),
-    alt: sanitizeString(mediaRaw.alt, 140),
-    fit: ALLOWED_FIT.has(fitToken as HeroSlotMedia["fit"])
-      ? (fitToken as HeroSlotMedia["fit"])
-      : "contain",
-    objectPosition: sanitizeObjectPosition(mediaRaw.objectPosition),
-    focalX: clampNumber(mediaRaw.focalX, 0, 100, 50),
-    focalY: clampNumber(mediaRaw.focalY, 0, 100, 50),
-    zoom: clampNumber(mediaRaw.zoom, 1, 2.5, 1),
+  return {
+    kind: "headline",
+    title: sanitizeString(raw.title),
+    subtitle: sanitizeString(raw.subtitle),
+    backgroundColor:
+      sanitizeColorOrClass(raw.backgroundColor ?? style.backgroundColor ?? colors.background) ||
+      defaults.backgroundColor,
+    bottomMarginPx: clampNumber(
+      raw.bottomMarginPx ?? style.bottomMarginPx,
+      MIN_HEADLINE_BOTTOM_MARGIN_PX,
+      MAX_HEADLINE_BOTTOM_MARGIN_PX,
+      defaults.bottomMarginPx,
+    ),
+    className: sanitizeClassName(raw.className ?? style.className) || defaults.className,
+    titleClassName: sanitizeClassName(raw.titleClassName ?? style.titleClassName) || defaults.titleClassName,
+    subtitleClassName:
+      sanitizeClassName(raw.subtitleClassName ?? style.subtitleClassName) || defaults.subtitleClassName,
+    titleStyle: sanitizeTextStyle(
+      raw.titleStyle,
+      defaults.titleStyle,
+      errors,
+      `${path}.titleStyle`,
+      colors.titleColor,
+      typography,
+      "title",
+    ),
+    subtitleStyle: sanitizeTextStyle(
+      raw.subtitleStyle,
+      defaults.subtitleStyle,
+      errors,
+      `${path}.subtitleStyle`,
+      colors.subtitleColor,
+      typography,
+      "subtitle",
+    ),
+    link: sanitizeLink(raw.link, errors, `${path}.link`),
+    tracking: sanitizeTracking(raw.tracking),
   };
-
-  const styleRaw = isRecord(slotRaw.style) ? slotRaw.style : {};
-  slot.style = {
-    backgroundColor: sanitizeColor(styleRaw.backgroundColor),
-    backgroundImageUrl: sanitizeImageUrl(styleRaw.backgroundImageUrl),
-    radiusToken: sanitizeToken(
-      styleRaw.radiusToken,
-      ALLOWED_RADIUS_TOKENS,
-      "md",
-      errors,
-      `${path}.style.radiusToken`,
-    ),
-    overlayToken: sanitizeToken(
-      styleRaw.overlayToken,
-      ALLOWED_OVERLAY_TOKENS,
-      "none",
-      errors,
-      `${path}.style.overlayToken`,
-    ),
-    paddingToken: sanitizeToken(
-      styleRaw.paddingToken,
-      ALLOWED_PADDING_TOKENS,
-      "md",
-      errors,
-      `${path}.style.paddingToken`,
-    ),
-    shadowToken: sanitizeToken(
-      styleRaw.shadowToken,
-      ALLOWED_SHADOW_TOKENS,
-      "none",
-      errors,
-      `${path}.style.shadowToken`,
-    ),
-  };
-
-  slot.link = sanitizeLink(slotRaw.link, errors, `${path}.link`);
-  slot.tracking = sanitizeTracking(slotRaw.tracking);
-
-  return slot;
 }
 
-function sanitizeSlotsByKeys<T extends readonly HeroSlotKey[]>(
+function sanitizeMainVisualSlot(
   value: unknown,
-  allowedKeys: T,
   errors: string[],
   path: string,
-): Record<T[number], HeroSlotConfig> {
-  const rawSlots = isRecord(value) ? value : {};
+  defaults?: {
+    backgroundImageUrl?: string;
+    backgroundWidth?: string;
+    backgroundHeight?: string;
+    backgroundPosition?: string;
+    backgroundSize?: string;
+    backgroundClassName?: string;
+    foregroundImageUrl?: string;
+    foregroundClassName?: string;
+    foregroundObjectPosition?: string;
+  },
+): HeroMainVisualSlot {
+  const raw = isRecord(value) ? value : {};
+  const style = isRecord(raw.style) ? raw.style : {};
+  const media = isRecord(raw.media) ? raw.media : {};
+  const backgroundImageUrl =
+    sanitizeImageUrl(raw.backgroundImageUrl ?? style.backgroundImageUrl) ||
+    defaults?.backgroundImageUrl ||
+    "";
+  const backgroundColor = sanitizeColorOrClass(raw.backgroundColor ?? style.backgroundColor);
 
-  return allowedKeys.reduce<Record<T[number], HeroSlotConfig>>((acc, slotKey) => {
-    acc[slotKey] = sanitizeSlotConfig(rawSlots[slotKey], errors, `${path}.${slotKey}`);
-    return acc;
-  }, {} as Record<T[number], HeroSlotConfig>);
+  return {
+    kind: "mainVisual",
+    backgroundColor,
+    backgroundType: sanitizeToken(
+      raw.backgroundType ?? style.backgroundType,
+      ALLOWED_BACKGROUND_TYPES,
+      backgroundImageUrl ? "image" : "color",
+      errors,
+      `${path}.backgroundType`,
+    ),
+    backgroundImageUrl,
+    backgroundWidth: sanitizeClassName(raw.backgroundWidth ?? style.backgroundWidth, 80) || defaults?.backgroundWidth || "",
+    backgroundHeight:
+      sanitizeClassName(raw.backgroundHeight ?? style.backgroundHeight, 80) || defaults?.backgroundHeight || "",
+    backgroundPosition:
+      sanitizeClassName(raw.backgroundPosition ?? style.backgroundPosition, 80) ||
+      defaults?.backgroundPosition ||
+      "center",
+    backgroundSize:
+      sanitizeClassName(raw.backgroundSize ?? style.backgroundSize, 80) ||
+      defaults?.backgroundSize ||
+      "cover",
+    backgroundClassName:
+      sanitizeClassName(raw.backgroundClassName ?? style.backgroundClassName, 180) ||
+      defaults?.backgroundClassName ||
+      "",
+    foregroundImageUrl:
+      sanitizeImageUrl(raw.foregroundImageUrl ?? media.imageUrl) ||
+      defaults?.foregroundImageUrl ||
+      "",
+    foregroundAlt: sanitizeString(raw.foregroundAlt ?? media.alt, 140),
+    foregroundClassName:
+      sanitizeClassName(raw.foregroundClassName ?? media.className, 180) || defaults?.foregroundClassName || "",
+    foregroundObjectPosition:
+      sanitizeClassName(raw.foregroundObjectPosition ?? media.objectPosition, 80) ||
+      defaults?.foregroundObjectPosition ||
+      "",
+    foregroundCustomWidth: sanitizeClassName(raw.foregroundCustomWidth ?? media.customWidth, 80),
+    foregroundCustomHeight: sanitizeClassName(raw.foregroundCustomHeight ?? media.customHeight, 80),
+    link: sanitizeLink(raw.link, errors, `${path}.link`),
+    tracking: sanitizeTracking(raw.tracking),
+  };
+}
+
+function sanitizeCardSlot(
+  value: unknown,
+  errors: string[],
+  path: string,
+  defaults?: {
+    imageUrl?: string;
+    imageAlt?: string;
+    className?: string;
+    titleClassName?: string;
+    subtitleClassName?: string;
+    imageClassName?: string;
+    imageObjectPosition?: string;
+    backgroundColor?: string;
+    backgroundHeight?: string;
+    backgroundWidth?: string;
+    backgroundPosition?: string;
+    backgroundSize?: string;
+    backgroundClassName?: string;
+    buttonClassName?: string;
+    buttonShowArrow?: boolean;
+    contentAlignment?: HeroContentAlignment;
+    paddingClassName?: string;
+    titleStyle?: HeroTextStyle;
+    buttonStyle?: HeroTextStyle;
+  },
+): HeroCardSlot {
+  const raw = isRecord(value) ? value : {};
+  const style = isRecord(raw.style) ? raw.style : {};
+  const media = isRecord(raw.media) ? raw.media : {};
+  const colors = isRecord(raw.colors) ? raw.colors : {};
+  const typography = isRecord(raw.typography) ? raw.typography : null;
+
+  const linkObj = isRecord(raw.link) ? raw.link : null;
+  const linkHref = linkObj && typeof linkObj.href === "string" ? linkObj.href : undefined;
+  const buttonObj = isRecord(raw.button) ? raw.button : null;
+  const backgroundImageUrl = sanitizeImageUrl(raw.backgroundImageUrl ?? style.backgroundImageUrl);
+  const backgroundColor =
+    sanitizeColorOrClass(raw.backgroundColor ?? style.backgroundColor ?? colors.background);
+
+  return {
+    kind: "card",
+    title: sanitizeString(raw.title),
+    subtitle: sanitizeString(raw.subtitle),
+    imageUrl: sanitizeImageUrl(raw.imageUrl ?? media.imageUrl) || defaults?.imageUrl || "",
+    imageAlt: sanitizeString(raw.imageAlt ?? media.alt, 140) || defaults?.imageAlt || "",
+    imageHref: sanitizeButtonHref(raw.imageHref ?? media.href, errors, `${path}.imageHref`),
+    imageClassName: sanitizeClassName(raw.imageClassName ?? media.className, 180) || defaults?.imageClassName || "",
+    imageObjectPosition:
+      sanitizeClassName(raw.imageObjectPosition ?? media.objectPosition, 80) ||
+      defaults?.imageObjectPosition ||
+      "",
+    imageCustomWidth: sanitizeClassName(raw.imageCustomWidth ?? media.customWidth, 80),
+    imageCustomHeight: sanitizeClassName(raw.imageCustomHeight ?? media.customHeight, 80),
+    buttonLabel: sanitizeString(raw.buttonLabel ?? raw.label, 120),
+    buttonHref: sanitizeButtonHref(raw.buttonHref ?? linkHref, errors, `${path}.buttonHref`),
+    buttonClassName:
+      sanitizeClassName(
+        raw.buttonClassName ?? (buttonObj && typeof buttonObj.className === "string" ? buttonObj.className : undefined),
+        220,
+      ) ||
+      defaults?.buttonClassName ||
+      "",
+    buttonShowArrow:
+      typeof raw.buttonShowArrow === "boolean"
+        ? raw.buttonShowArrow
+        : buttonObj && typeof buttonObj.showArrow === "boolean"
+          ? buttonObj.showArrow
+          : (defaults?.buttonShowArrow ?? true),
+    buttonArrowClassName: sanitizeClassName(
+      raw.buttonArrowClassName ??
+        (buttonObj && typeof buttonObj.arrowClassName === "string" ? buttonObj.arrowClassName : undefined),
+      180,
+    ),
+    backgroundColor: backgroundColor || defaults?.backgroundColor || "",
+    backgroundType: sanitizeToken(
+      raw.backgroundType ?? style.backgroundType,
+      ALLOWED_BACKGROUND_TYPES,
+      backgroundImageUrl ? "image" : "color",
+      errors,
+      `${path}.backgroundType`,
+    ),
+    backgroundImageUrl,
+    backgroundWidth: sanitizeClassName(raw.backgroundWidth ?? style.backgroundWidth, 80) || defaults?.backgroundWidth || "",
+    backgroundHeight:
+      sanitizeClassName(raw.backgroundHeight ?? style.backgroundHeight, 80) ||
+      defaults?.backgroundHeight ||
+      "",
+    backgroundPosition:
+      sanitizeClassName(raw.backgroundPosition ?? style.backgroundPosition, 80) ||
+      defaults?.backgroundPosition ||
+      "center",
+    backgroundSize:
+      sanitizeClassName(raw.backgroundSize ?? style.backgroundSize, 80) ||
+      defaults?.backgroundSize ||
+      "cover",
+    backgroundClassName:
+      sanitizeClassName(raw.backgroundClassName ?? style.backgroundClassName, 180) ||
+      defaults?.backgroundClassName ||
+      "",
+    className: sanitizeClassName(raw.className ?? style.className, 220) || defaults?.className || "",
+    titleClassName:
+      sanitizeClassName(raw.titleClassName ?? style.titleClassName, 180) ||
+      defaults?.titleClassName ||
+      "",
+    subtitleClassName:
+      sanitizeClassName(raw.subtitleClassName ?? style.subtitleClassName, 180) ||
+      defaults?.subtitleClassName ||
+      "",
+    contentAlignment: sanitizeToken(
+      raw.contentAlignment ?? style.contentAlignment,
+      ALLOWED_CONTENT_ALIGNMENTS,
+      defaults?.contentAlignment || "center",
+      errors,
+      `${path}.contentAlignment`,
+    ),
+    paddingClassName:
+      sanitizeClassName(raw.paddingClassName ?? style.paddingClassName, 220) ||
+      defaults?.paddingClassName ||
+      DEFAULT_CARD_PADDING_CLASSNAME,
+    titleStyle: sanitizeTextStyle(
+      raw.titleStyle,
+      defaults?.titleStyle || DEFAULT_CARD_TITLE_STYLE,
+      errors,
+      `${path}.titleStyle`,
+      colors.titleColor,
+      typography,
+      "title",
+    ),
+    buttonStyle: sanitizeTextStyle(
+      raw.buttonStyle,
+      defaults?.buttonStyle || DEFAULT_CARD_BUTTON_STYLE,
+      errors,
+      `${path}.buttonStyle`,
+    ),
+    link: sanitizeLink(raw.link, errors, `${path}.link`),
+    tracking: sanitizeTracking(raw.tracking),
+  };
 }
 
 function sanitizeSlide(
@@ -462,6 +917,9 @@ function sanitizeSlide(
   const desktopRaw = isRecord(devicesRaw.desktop) ? devicesRaw.desktop : {};
   const tabletRaw = isRecord(devicesRaw.tablet) ? devicesRaw.tablet : {};
   const mobileRaw = isRecord(devicesRaw.mobile) ? devicesRaw.mobile : {};
+  const desktopSlots = isRecord(desktopRaw.slots) ? desktopRaw.slots : {};
+  const tabletSlots = isRecord(tabletRaw.slots) ? tabletRaw.slots : {};
+  const mobileSlots = isRecord(mobileRaw.slots) ? mobileRaw.slots : {};
 
   return {
     id,
@@ -472,28 +930,191 @@ function sanitizeSlide(
     tracking: sanitizeTracking(slideRaw.tracking),
     devices: {
       desktop: {
-        slots: sanitizeSlotsByKeys(
-          desktopRaw.slots,
-          DESKTOP_SLOT_KEYS,
-          errors,
-          `${slidePath}.devices.desktop.slots`,
-        ),
+        slots: {
+          topLeftTextBanner: sanitizeHeadlineSlot(
+            desktopSlots.topLeftTextBanner,
+            errors,
+            `${slidePath}.devices.desktop.slots.topLeftTextBanner`,
+            {
+              titleStyle: DEFAULT_TOP_HEADLINE_TITLE_STYLE,
+              subtitleStyle: DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE,
+              backgroundColor: "bg-stone-50",
+              bottomMarginPx: 10,
+              className: DEFAULT_DESKTOP_HEADLINE_CLASSNAME,
+              titleClassName: "",
+              subtitleClassName: "",
+            },
+          ),
+          bottomActionBannerLeft: sanitizeCardSlot(
+            desktopSlots.bottomActionBannerLeft,
+            errors,
+            `${slidePath}.devices.desktop.slots.bottomActionBannerLeft`,
+            {
+              className: DEFAULT_DESKTOP_CARD_LEFT_CLASSNAME,
+              titleClassName: "text-[30px] font-medium",
+              imageClassName: DEFAULT_DESKTOP_CARD_LEFT_IMAGE_CLASSNAME,
+              imageObjectPosition: "top left",
+              backgroundWidth: "100%",
+              backgroundHeight: "80%",
+              backgroundPosition: "bottom center",
+              backgroundSize: "cover",
+              backgroundClassName: DEFAULT_CARD_BACKGROUND_CLASSNAME,
+              buttonClassName: DEFAULT_CARD_BUTTON_CLASSNAME,
+              buttonShowArrow: true,
+              contentAlignment: "center",
+              paddingClassName: DEFAULT_CARD_PADDING_CLASSNAME,
+            },
+          ),
+          bottomActionBannerRight: sanitizeCardSlot(
+            desktopSlots.bottomActionBannerRight,
+            errors,
+            `${slidePath}.devices.desktop.slots.bottomActionBannerRight`,
+            {
+              className: DEFAULT_DESKTOP_CARD_RIGHT_CLASSNAME,
+              titleClassName: "text-[30px] font-medium",
+              imageClassName: DEFAULT_DESKTOP_CARD_RIGHT_IMAGE_CLASSNAME,
+              imageObjectPosition: "left",
+              backgroundWidth: "100%",
+              backgroundHeight: "80%",
+              backgroundPosition: "bottom center",
+              backgroundSize: "cover",
+              backgroundClassName: DEFAULT_CARD_BACKGROUND_CLASSNAME,
+              buttonClassName: DEFAULT_CARD_BUTTON_CLASSNAME,
+              buttonShowArrow: true,
+              contentAlignment: "center",
+              paddingClassName: DEFAULT_CARD_PADDING_CLASSNAME,
+            },
+          ),
+          rightBanner: sanitizeMainVisualSlot(
+            desktopSlots.rightBanner,
+            errors,
+            `${slidePath}.devices.desktop.slots.rightBanner`,
+            {
+              backgroundWidth: DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_WIDTH,
+              backgroundHeight: DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_HEIGHT,
+              backgroundPosition: DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_POSITION,
+              backgroundSize: DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_SIZE,
+              backgroundClassName: DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+              foregroundClassName: "",
+            },
+          ),
+        },
       },
       tablet: {
-        slots: sanitizeSlotsByKeys(
-          tabletRaw.slots,
-          TABLET_SLOT_KEYS,
-          errors,
-          `${slidePath}.devices.tablet.slots`,
-        ),
+        slots: {
+          primaryBanner: sanitizeHeadlineSlot(
+            tabletSlots.primaryBanner,
+            errors,
+            `${slidePath}.devices.tablet.slots.primaryBanner`,
+            {
+              titleStyle: {
+                ...DEFAULT_PRIMARY_TITLE_STYLE,
+                fontSize: "lg:text-[40px] 2xl:text-[48px]",
+              },
+              subtitleStyle: {
+                ...DEFAULT_PRIMARY_SUBTITLE_STYLE,
+                fontSize: "lg:text-[24px] 2xl:text-[28px]",
+              },
+              backgroundColor: "bg-stone-50",
+              bottomMarginPx: 0,
+              className: DEFAULT_TABLET_HEADLINE_CLASSNAME,
+              titleClassName: "",
+              subtitleClassName: "",
+            },
+          ),
+          bottomActionBannerLeft: sanitizeCardSlot(
+            tabletSlots.bottomActionBannerLeft,
+            errors,
+            `${slidePath}.devices.tablet.slots.bottomActionBannerLeft`,
+            {
+              className: DEFAULT_TABLET_CARD_LEFT_CLASSNAME,
+              imageClassName: DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME,
+              imageObjectPosition: "",
+              contentAlignment: "center",
+            },
+          ),
+          bottomActionBannerRight: sanitizeCardSlot(
+            tabletSlots.bottomActionBannerRight,
+            errors,
+            `${slidePath}.devices.tablet.slots.bottomActionBannerRight`,
+            {
+              className: DEFAULT_TABLET_CARD_RIGHT_CLASSNAME,
+              imageClassName: DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME,
+              imageObjectPosition: "left",
+              contentAlignment: "bottom",
+            },
+          ),
+          heroBanner: sanitizeMainVisualSlot(
+            tabletSlots.heroBanner,
+            errors,
+            `${slidePath}.devices.tablet.slots.heroBanner`,
+            {
+              backgroundWidth: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH,
+              backgroundHeight: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT,
+              backgroundPosition: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION,
+              backgroundSize: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE,
+              backgroundClassName: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+              foregroundClassName: DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME,
+              foregroundObjectPosition: DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION,
+            },
+          ),
+        },
       },
       mobile: {
-        slots: sanitizeSlotsByKeys(
-          mobileRaw.slots,
-          MOBILE_SLOT_KEYS,
-          errors,
-          `${slidePath}.devices.mobile.slots`,
-        ),
+        slots: {
+          primaryBanner: sanitizeHeadlineSlot(
+            mobileSlots.primaryBanner,
+            errors,
+            `${slidePath}.devices.mobile.slots.primaryBanner`,
+            {
+              titleStyle: DEFAULT_PRIMARY_TITLE_STYLE,
+              subtitleStyle: DEFAULT_PRIMARY_SUBTITLE_STYLE,
+              backgroundColor: "bg-stone-50",
+              bottomMarginPx: 0,
+              className: DEFAULT_MOBILE_HEADLINE_CLASSNAME,
+              titleClassName: "",
+              subtitleClassName: "",
+            },
+          ),
+          bottomActionBannerLeft: sanitizeCardSlot(
+            mobileSlots.bottomActionBannerLeft,
+            errors,
+            `${slidePath}.devices.mobile.slots.bottomActionBannerLeft`,
+            {
+              className: DEFAULT_MOBILE_CARD_LEFT_CLASSNAME,
+              imageClassName: DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
+              imageObjectPosition: "bottom left",
+              contentAlignment: "center",
+              paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+            },
+          ),
+          bottomActionBannerRight: sanitizeCardSlot(
+            mobileSlots.bottomActionBannerRight,
+            errors,
+            `${slidePath}.devices.mobile.slots.bottomActionBannerRight`,
+            {
+              className: DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME,
+              imageClassName: DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
+              imageObjectPosition: "left",
+              contentAlignment: "center",
+              paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+            },
+          ),
+          heroBanner: sanitizeMainVisualSlot(
+            mobileSlots.heroBanner,
+            errors,
+            `${slidePath}.devices.mobile.slots.heroBanner`,
+            {
+              backgroundWidth: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH,
+              backgroundHeight: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT,
+              backgroundPosition: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION,
+              backgroundSize: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE,
+              backgroundClassName: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+              foregroundClassName: DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME,
+              foregroundObjectPosition: DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION,
+            },
+          ),
+        },
       },
     },
   };

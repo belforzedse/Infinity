@@ -7,7 +7,6 @@ import {
   PublishBar,
   SchedulePanel,
   SlideList,
-  SlotPanel,
   TemplatePreview,
   getDefaultSlotKeyByDevice,
   getSlotKeysByDevice,
@@ -15,9 +14,15 @@ import {
 import {
   createDefaultHeroSliderPayload,
   normalizeHeroSliderPayload,
+  type HeroDesktopSlotKey,
+  type HeroMobileSlotKey,
   type HeroSlideConfig,
+  type HeroSlotConfig,
+  type HeroSlotLink,
   type HeroSliderMeta,
   type HeroSliderPayload,
+  type HeroTabletSlotKey,
+  type HeroTracking,
 } from "@/types/super-admin/heroSlider";
 import {
   getHeroSliderDraftAndPublished,
@@ -26,6 +31,13 @@ import {
 } from "@/services/super-admin/settings/hero-slider";
 
 type DeviceMode = "desktop" | "tablet" | "mobile";
+const EMPTY_TRACKING: HeroTracking = {
+  campaign: "",
+  source: "",
+  medium: "",
+  content: "",
+  custom: {},
+};
 
 function createEmptySlide(order: number): HeroSlideConfig {
   const id = `slide-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -41,6 +53,22 @@ function normalizeSlideOrder(slides: HeroSlideConfig[]): HeroSlideConfig[] {
     ...slide,
     order: index,
   }));
+}
+
+function getSelectedSlot(
+  slide: HeroSlideConfig | null,
+  device: DeviceMode,
+  slotKey: string,
+): HeroSlotConfig | null {
+  if (!slide) return null;
+
+  if (device === "desktop") {
+    return slide.devices.desktop.slots[slotKey as HeroDesktopSlotKey] || null;
+  }
+  if (device === "tablet") {
+    return slide.devices.tablet.slots[slotKey as HeroTabletSlotKey] || null;
+  }
+  return slide.devices.mobile.slots[slotKey as HeroMobileSlotKey] || null;
 }
 
 export default function HeroSliderCustomizationPage() {
@@ -70,7 +98,7 @@ export default function HeroSliderCustomizationPage() {
         }
       } catch (error) {
         console.error(error);
-        toast.error("Failed to load hero slider settings");
+        toast.error("بارگذاری تنظیمات اسلایدر هیرو ناموفق بود");
       } finally {
         setIsLoading(false);
       }
@@ -102,11 +130,10 @@ export default function HeroSliderCustomizationPage() {
     return draft.slides.find((slide) => slide.id === selectedSlideId) || null;
   }, [draft.slides, selectedSlideId]);
 
-  const selectedSlot = useMemo(() => {
-    if (!selectedSlide) return null;
-    const deviceData = selectedSlide.devices[selectedDevice] as any;
-    return deviceData?.slots?.[selectedSlotKey] || null;
-  }, [selectedDevice, selectedSlotKey, selectedSlide]);
+  const selectedSlot = useMemo(
+    () => getSelectedSlot(selectedSlide, selectedDevice, selectedSlotKey),
+    [selectedDevice, selectedSlide, selectedSlotKey],
+  );
 
   const updateSlides = (slides: HeroSlideConfig[]) => {
     setDraft((prev) => ({
@@ -164,7 +191,7 @@ export default function HeroSliderCustomizationPage() {
     });
   };
 
-  const updateSelectedSlot = (nextSlot: any) => {
+  const updateSelectedSlot = (nextSlot: HeroSlotConfig) => {
     if (!selectedSlideId) return;
 
     setDraft((prev) => ({
@@ -172,16 +199,47 @@ export default function HeroSliderCustomizationPage() {
       slides: prev.slides.map((slide) => {
         if (slide.id !== selectedSlideId) return slide;
 
-        const deviceData = slide.devices[selectedDevice] as any;
+        if (selectedDevice === "desktop") {
+          return {
+            ...slide,
+            devices: {
+              ...slide.devices,
+              desktop: {
+                ...slide.devices.desktop,
+                slots: {
+                  ...slide.devices.desktop.slots,
+                  [selectedSlotKey as HeroDesktopSlotKey]: nextSlot as any,
+                },
+              },
+            },
+          };
+        }
+
+        if (selectedDevice === "tablet") {
+          return {
+            ...slide,
+            devices: {
+              ...slide.devices,
+              tablet: {
+                ...slide.devices.tablet,
+                slots: {
+                  ...slide.devices.tablet.slots,
+                  [selectedSlotKey as HeroTabletSlotKey]: nextSlot as any,
+                },
+              },
+            },
+          };
+        }
+
         return {
           ...slide,
           devices: {
             ...slide.devices,
-            [selectedDevice]: {
-              ...deviceData,
+            mobile: {
+              ...slide.devices.mobile,
               slots: {
-                ...deviceData.slots,
-                [selectedSlotKey]: nextSlot,
+                ...slide.devices.mobile.slots,
+                [selectedSlotKey as HeroMobileSlotKey]: nextSlot as any,
               },
             },
           },
@@ -204,10 +262,10 @@ export default function HeroSliderCustomizationPage() {
       setIsSavingDraft(true);
       const savedDraft = await updateHeroSliderDraft(draft);
       setDraft(savedDraft);
-      toast.success("Hero draft saved");
+      toast.success("پیش‌نویس هیرو ذخیره شد");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save hero draft");
+      toast.error("ذخیره پیش‌نویس ناموفق بود");
     } finally {
       setIsSavingDraft(false);
     }
@@ -219,21 +277,46 @@ export default function HeroSliderCustomizationPage() {
       const result = await publishHeroSliderDraft();
       setPublished(result.published);
       setMeta(result.meta);
-      toast.success("Hero slider published");
+      toast.success("اسلایدر هیرو منتشر شد");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to publish hero slider");
+      toast.error("انتشار اسلایدر ناموفق بود");
     } finally {
       setIsPublishing(false);
     }
   };
 
+  const handleSelectedSlotLinkChange = (link: HeroSlotLink | null) => {
+    if (!selectedSlot) return;
+    if (selectedSlot.kind === "card") {
+      updateSelectedSlot({
+        ...selectedSlot,
+        link,
+        buttonHref: link?.href || selectedSlot.buttonHref,
+      });
+      return;
+    }
+
+    updateSelectedSlot({
+      ...selectedSlot,
+      link,
+    });
+  };
+
+  const handleSelectedSlotTrackingChange = (tracking: HeroTracking) => {
+    if (!selectedSlot) return;
+    updateSelectedSlot({
+      ...selectedSlot,
+      tracking,
+    });
+  };
+
   if (isLoading) {
-    return <div>Loading hero slider settings...</div>;
+    return <div>در حال بارگذاری تنظیمات اسلایدر هیرو...</div>;
   }
 
   return (
-    <ContentWrapper title="Hero Slider Customization">
+    <ContentWrapper title="سفارشی‌سازی اسلایدر هیرو">
       <div className="space-y-4">
         <PublishBar
           draft={draft}
@@ -246,48 +329,46 @@ export default function HeroSliderCustomizationPage() {
           onAddSlide={addSlide}
         />
 
+        <section className="rounded-2xl border border-slate-200 bg-white p-3">
+          <div className="flex items-center gap-2">
+            {(["desktop", "tablet", "mobile"] as DeviceMode[]).map((device) => (
+              <button
+                key={device}
+                type="button"
+                onClick={() => setSelectedDevice(device)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  selectedDevice === device
+                    ? "bg-pink-500 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {device === "desktop" ? "دسکتاپ" : device === "tablet" ? "تبلت" : "موبایل"}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <TemplatePreview
+          slide={selectedSlide}
+          device={selectedDevice}
+          selectedSlotKey={selectedSlotKey}
+          onSelectSlot={(slotKey) => setSelectedSlotKey(slotKey)}
+          onChangeSelectedSlot={updateSelectedSlot}
+        />
+
+        <SlideList
+          slides={draft.slides}
+          selectedSlideId={selectedSlideId}
+          onSelectSlide={setSelectedSlideId}
+          onAddSlide={addSlide}
+          onDuplicateSlide={duplicateSlide}
+          onDeleteSlide={deleteSlide}
+          onReorderSlides={updateSlides}
+          orientation="horizontal"
+        />
+
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-12 xl:col-span-3">
-            <SlideList
-              slides={draft.slides}
-              selectedSlideId={selectedSlideId}
-              onSelectSlide={setSelectedSlideId}
-              onAddSlide={addSlide}
-              onDuplicateSlide={duplicateSlide}
-              onDeleteSlide={deleteSlide}
-              onReorderSlides={updateSlides}
-            />
-          </div>
-
-          <div className="col-span-12 space-y-4 xl:col-span-5">
-            <section className="rounded-2xl border border-slate-200 bg-white p-3">
-              <div className="flex items-center gap-2">
-                {(["desktop", "tablet", "mobile"] as DeviceMode[]).map((device) => (
-                  <button
-                    key={device}
-                    type="button"
-                    onClick={() => setSelectedDevice(device)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                      selectedDevice === device
-                        ? "bg-pink-500 text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {device}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <TemplatePreview
-              slide={selectedSlide}
-              device={selectedDevice}
-              selectedSlotKey={selectedSlotKey}
-              onSelectSlot={(slotKey) => setSelectedSlotKey(slotKey)}
-            />
-          </div>
-
-          <div className="col-span-12 space-y-4 xl:col-span-4">
+          <div className="col-span-12">
             <SchedulePanel
               schedule={selectedSlide?.schedule || { timezone: "Asia/Tehran" }}
               onChange={(schedule) =>
@@ -317,12 +398,18 @@ export default function HeroSliderCustomizationPage() {
                   order: value,
                 }))
               }
-            />
-
-            <SlotPanel
-              slotKey={selectedSlotKey}
-              slot={selectedSlot}
-              onChange={updateSelectedSlot}
+              globalAutoplayIntervalMs={draft.autoplayIntervalMs}
+              onGlobalAutoplayIntervalChange={(value) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  autoplayIntervalMs: value,
+                }))
+              }
+              selectedSlotKey={selectedSlide ? selectedSlotKey : null}
+              slotLink={selectedSlot?.link || null}
+              onSlotLinkChange={handleSelectedSlotLinkChange}
+              slotTracking={selectedSlot?.tracking || EMPTY_TRACKING}
+              onSlotTrackingChange={handleSelectedSlotTrackingChange}
             />
           </div>
         </div>

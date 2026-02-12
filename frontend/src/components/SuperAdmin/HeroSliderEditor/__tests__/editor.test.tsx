@@ -85,16 +85,17 @@ describe("Hero slider editor", () => {
     jest.clearAllMocks();
   });
 
-  it("updates slot panel when a slot is selected from template preview", async () => {
+  it("switches inline editor target when a slot is selected from template preview", async () => {
     render(<HeroSliderCustomizationPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Slot: topLeftTextBanner")).toBeInTheDocument();
+      expect(screen.getByText(/اسلات در حال ویرایش:/)).toBeInTheDocument();
+      expect(screen.getByText("تیتر")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Main Visual/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ویرایش تصویر اصلی/i }));
 
-    expect(screen.getByText("Slot: rightBanner")).toBeInTheDocument();
+    expect(screen.getByText("تصویر اصلی")).toBeInTheDocument();
   });
 
   it("reorders slides when move controls are used", () => {
@@ -127,7 +128,7 @@ describe("Hero slider editor", () => {
 
     expect(screen.getByTestId("first-slide-id")).toHaveTextContent("slide-a");
 
-    const moveDownButtons = screen.getAllByRole("button", { name: "Move slide down" });
+    const moveDownButtons = screen.getAllByRole("button", { name: "انتقال اسلاید به پایین" });
     fireEvent.click(moveDownButtons[0]);
 
     expect(screen.getByTestId("first-slide-id")).toHaveTextContent("slide-b");
@@ -137,14 +138,14 @@ describe("Hero slider editor", () => {
     render(<HeroSliderCustomizationPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Published slides: 0/)).toBeInTheDocument();
+      expect(screen.getByText(/تعداد اسلاید منتشرشده: 0/)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+    fireEvent.click(screen.getByRole("button", { name: "انتشار" }));
 
     await waitFor(() => {
       expect(publishHeroSliderDraftMock).toHaveBeenCalledTimes(1);
-      expect(screen.getByText(/Published slides: 1/)).toBeInTheDocument();
+      expect(screen.getByText(/تعداد اسلاید منتشرشده: 1/)).toBeInTheDocument();
     });
   });
 });

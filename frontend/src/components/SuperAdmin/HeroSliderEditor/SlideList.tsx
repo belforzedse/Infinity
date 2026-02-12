@@ -4,11 +4,12 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from 
 import {
   SortableContext,
   arrayMove,
+  horizontalListSortingStrategy,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Copy, Plus, Trash2, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
+import { Copy, Plus, Trash2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, GripVertical } from "lucide-react";
 import type { HeroSlideConfig } from "@/types/super-admin/heroSlider";
 
 type SlideListProps = {
@@ -19,6 +20,7 @@ type SlideListProps = {
   onDuplicateSlide: (slideId: string) => void;
   onDeleteSlide: (slideId: string) => void;
   onReorderSlides: (slides: HeroSlideConfig[]) => void;
+  orientation?: "vertical" | "horizontal";
 };
 
 type SlideRowProps = {
@@ -31,6 +33,7 @@ type SlideRowProps = {
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  orientation: "vertical" | "horizontal";
 };
 
 function SortableSlideRow({
@@ -43,6 +46,7 @@ function SortableSlideRow({
   onDelete,
   onMoveUp,
   onMoveDown,
+  orientation,
 }: SlideRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: slide.id,
@@ -58,6 +62,8 @@ function SortableSlideRow({
       ref={setNodeRef}
       style={style}
       className={`rounded-xl border p-3 ${
+        orientation === "horizontal" ? "min-w-[250px] max-w-[250px] shrink-0" : ""
+      } ${
         isSelected ? "border-pink-400 bg-pink-50" : "border-slate-200 bg-white"
       }`}
     >
@@ -75,14 +81,14 @@ function SortableSlideRow({
             {index + 1}
           </span>
           <span className="truncate text-sm font-medium text-slate-800">
-            {slide.id || `Slide ${index + 1}`}
+            {slide.id || `اسلاید ${index + 1}`}
           </span>
         </button>
 
         <button
           type="button"
           className="rounded-md p-1 text-slate-400 hover:bg-slate-100"
-          aria-label="Drag slide"
+          aria-label="جابجایی اسلاید"
           {...attributes}
           {...listeners}
         >
@@ -96,24 +102,28 @@ function SortableSlideRow({
           onClick={onMoveUp}
           disabled={index === 0}
           className="rounded-md p-1 text-slate-600 hover:bg-slate-100 disabled:opacity-40"
-          aria-label="Move slide up"
+          aria-label={orientation === "horizontal" ? "انتقال اسلاید به چپ" : "انتقال اسلاید به بالا"}
         >
-          <ArrowUp className="h-4 w-4" />
+          {orientation === "horizontal" ? <ArrowLeft className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
         </button>
         <button
           type="button"
           onClick={onMoveDown}
           disabled={index === total - 1}
           className="rounded-md p-1 text-slate-600 hover:bg-slate-100 disabled:opacity-40"
-          aria-label="Move slide down"
+          aria-label={orientation === "horizontal" ? "انتقال اسلاید به راست" : "انتقال اسلاید به پایین"}
         >
-          <ArrowDown className="h-4 w-4" />
+          {orientation === "horizontal" ? (
+            <ArrowRight className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )}
         </button>
         <button
           type="button"
           onClick={onDuplicate}
           className="rounded-md p-1 text-slate-600 hover:bg-slate-100"
-          aria-label="Duplicate slide"
+          aria-label="تکثیر اسلاید"
         >
           <Copy className="h-4 w-4" />
         </button>
@@ -121,7 +131,7 @@ function SortableSlideRow({
           type="button"
           onClick={onDelete}
           className="rounded-md p-1 text-rose-600 hover:bg-rose-50"
-          aria-label="Delete slide"
+          aria-label="حذف اسلاید"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -138,6 +148,7 @@ export default function SlideList({
   onDuplicateSlide,
   onDeleteSlide,
   onReorderSlides,
+  orientation = "vertical",
 }: SlideListProps) {
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -172,25 +183,30 @@ export default function SlideList({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-800">Slides</h2>
+        <h2 className="text-sm font-semibold text-slate-800">
+          {orientation === "horizontal" ? "نوار اسلایدها" : "اسلایدها"}
+        </h2>
         <button
           type="button"
           onClick={onAddSlide}
           className="inline-flex items-center gap-1 rounded-lg bg-pink-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-pink-600"
         >
           <Plus className="h-3.5 w-3.5" />
-          Add Slide
+          افزودن اسلاید
         </button>
       </div>
 
       {slides.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs text-slate-500">
-          No slides yet. Add your first slide.
+          هنوز اسلایدی ثبت نشده است. اولین اسلاید را اضافه کنید.
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={slides.map((slide) => slide.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
+          <SortableContext
+            items={slides.map((slide) => slide.id)}
+            strategy={orientation === "horizontal" ? horizontalListSortingStrategy : verticalListSortingStrategy}
+          >
+            <div className={orientation === "horizontal" ? "flex gap-2 overflow-x-auto pb-1" : "space-y-2"}>
               {slides.map((slide, index) => (
                 <SortableSlideRow
                   key={slide.id}
@@ -203,6 +219,7 @@ export default function SlideList({
                   onDelete={() => onDeleteSlide(slide.id)}
                   onMoveUp={() => handleMove(index, -1)}
                   onMoveDown={() => handleMove(index, 1)}
+                  orientation={orientation}
                 />
               ))}
             </div>

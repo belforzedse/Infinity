@@ -5,6 +5,7 @@ import type {
   MobileLayout,
   TabletLayout,
   TextBannerSpec,
+  Typography,
 } from "../types";
 import {
   DesktopSlideBuilder,
@@ -12,10 +13,11 @@ import {
   TabletSlideBuilder,
 } from "./slideFactory";
 import type {
-  HeroRadiusToken,
-  HeroShadowToken,
-  HeroSlotConfig,
+  HeroCardSlot,
+  HeroHeadlineSlot,
+  HeroMainVisualSlot,
   HeroSliderPayload,
+  HeroTextStyle,
 } from "@/types/super-admin/heroSlider";
 import {
   isHeroSlideVisible,
@@ -32,143 +34,172 @@ type CmsHeroMappingResult = {
   autoplayEligibility: boolean[];
 };
 
-function mapRadiusTokenToClass(token: HeroRadiusToken): string {
-  switch (token) {
-    case "none":
-      return "rounded-none";
-    case "sm":
-      return "rounded-lg";
-    case "md":
-      return "rounded-xl";
-    case "lg":
-      return "rounded-2xl";
-    case "xl":
-      return "rounded-3xl";
-    case "full":
-      return "rounded-full";
-    default:
-      return "rounded-xl";
-  }
-}
-
-function mapShadowTokenToClass(token: HeroShadowToken): string {
-  switch (token) {
-    case "none":
-      return "shadow-none";
-    case "sm":
-      return "shadow-sm";
-    case "md":
-      return "shadow";
-    case "lg":
-      return "shadow-lg";
-    default:
-      return "shadow-none";
-  }
-}
+export type CmsHeroEditorLayouts = {
+  desktop: DesktopLayout;
+  tablet: TabletLayout;
+  mobile: MobileLayout;
+};
 
 function mergeClassNames(...values: Array<string | undefined | null>): string {
   return values.filter(Boolean).join(" ").trim();
 }
 
-function deriveObjectPosition(slot: HeroSlotConfig): string {
-  if (slot.media.objectPosition.trim()) {
-    return slot.media.objectPosition;
-  }
-
-  return `${slot.media.focalX}% ${slot.media.focalY}%`;
+function isInlineColor(value?: string): boolean {
+  if (!value) return false;
+  return /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value) || /^(rgba?|hsla?)\(/i.test(value);
 }
 
-function applyTextSlot(base: TextBannerSpec, slot: HeroSlotConfig): TextBannerSpec {
+function textStyleToTypography(style: HeroTextStyle, base: Typography | undefined): Typography {
+  return {
+    ...base,
+    titleFont: style.fontFamily,
+    titleSize: style.fontSize,
+    titleWeight: style.fontWeight,
+    titleLeading: style.lineHeight,
+    titleTracking: style.letterSpacing,
+  };
+}
+
+function textStyleToSubtitleTypography(style: HeroTextStyle, base: Typography | undefined): Typography {
+  return {
+    ...base,
+    subtitleFont: style.fontFamily,
+    subtitleSize: style.fontSize,
+    subtitleWeight: style.fontWeight,
+    subtitleLeading: style.lineHeight,
+    subtitleTracking: style.letterSpacing,
+  };
+}
+
+function applyHeadlineSlot(base: TextBannerSpec, slot: HeroHeadlineSlot): TextBannerSpec {
   return {
     ...base,
     title: slot.title || base.title,
     subtitle: slot.subtitle || base.subtitle,
-    className: mergeClassNames(base.className, mapRadiusTokenToClass(slot.style.radiusToken)),
+    marginBottomPx: slot.bottomMarginPx,
+    className: slot.className || base.className,
+    titleClassName: mergeClassNames(base.titleClassName, slot.titleClassName),
+    subtitleClassName: mergeClassNames(base.subtitleClassName, slot.subtitleClassName),
     colors: {
       ...base.colors,
-      background: slot.style.backgroundColor || base.colors?.background,
+      background: slot.backgroundColor || base.colors?.background,
+      titleColor: slot.titleStyle.color || base.colors?.titleColor,
+      subtitleColor: slot.subtitleStyle.color || base.colors?.subtitleColor,
     },
+    typography: textStyleToSubtitleTypography(
+      slot.subtitleStyle,
+      textStyleToTypography(slot.titleStyle, base.typography),
+    ),
   };
 }
 
-function applyActionSlot(base: ActionBannerSpec, slot: HeroSlotConfig): ActionBannerSpec {
-  const href = slot.link?.href || base.image.href || "";
+function buildButtonClass(slot: HeroCardSlot, baseClassName?: string): string {
+  const colorClass = isInlineColor(slot.buttonStyle.color) ? "" : slot.buttonStyle.color;
+
+  return mergeClassNames(
+    baseClassName || "inline-flex items-center rounded-lg px-4 py-2 transition",
+    colorClass,
+    slot.buttonStyle.fontFamily,
+    slot.buttonStyle.fontSize,
+    slot.buttonStyle.fontWeight,
+    slot.buttonStyle.lineHeight,
+    slot.buttonStyle.letterSpacing,
+  );
+}
+
+function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBannerSpec {
+  const href = slot.buttonHref || slot.link?.href || base.button?.href || "";
+  const imageHref = slot.imageHref || href || base.image.href || undefined;
+  const backgroundValue =
+    slot.backgroundType === "image" && slot.backgroundImageUrl
+      ? slot.backgroundImageUrl
+      : slot.backgroundColor || "#f8fafc";
 
   return {
     ...base,
     title: slot.title || base.title,
-    subtitle: slot.subtitle || base.subtitle,
-    className: mergeClassNames(
-      base.className,
-      mapRadiusTokenToClass(slot.style.radiusToken),
-      mapShadowTokenToClass(slot.style.shadowToken),
-    ),
+    subtitle: slot.subtitle || base.subtitle || "",
+    className: slot.className || base.className,
+    titleClassName: mergeClassNames(base.titleClassName, slot.titleClassName),
+    subtitleClassName: mergeClassNames(base.subtitleClassName, slot.subtitleClassName),
     image: {
       ...base.image,
-      src: slot.media.imageUrl || base.image.src,
-      alt: slot.media.alt || base.image.alt,
-      href: href || undefined,
-      objectPosition: deriveObjectPosition(slot),
-      zoom: slot.media.zoom,
-      focalX: slot.media.focalX,
-      focalY: slot.media.focalY,
-      objectFit: slot.media.fit,
+      src: slot.imageUrl || base.image.src,
+      alt: slot.imageAlt || base.image.alt,
+      href: imageHref,
+      objectFit: "contain",
+      zoom: 1,
+      objectPosition: slot.imageObjectPosition || base.image.objectPosition,
+      className: slot.imageClassName || base.image.className,
+      customWidth: slot.imageCustomWidth || base.image.customWidth,
+      customHeight: slot.imageCustomHeight || base.image.customHeight,
     },
-    background: slot.style.backgroundImageUrl || slot.style.backgroundColor
-      ? {
-          type: slot.style.backgroundImageUrl ? "image" : "color",
-          value: slot.style.backgroundImageUrl || slot.style.backgroundColor,
-          alt: slot.media.alt || base.background?.alt,
-          width: base.background?.width || "100%",
-          height: base.background?.height || "100%",
-          position: base.background?.position || "center",
-          backgroundSize: slot.media.fit,
-          className: mergeClassNames(
-            mapRadiusTokenToClass(slot.style.radiusToken),
-            mapShadowTokenToClass(slot.style.shadowToken),
-          ),
-        }
-      : base.background,
+    colors: {
+      ...base.colors,
+      background: slot.backgroundColor || base.colors?.background,
+      titleColor: slot.titleStyle.color || base.colors?.titleColor,
+    },
+    typography: {
+      ...base.typography,
+      titleFont: slot.titleStyle.fontFamily,
+      titleSize: slot.titleStyle.fontSize,
+      titleWeight: slot.titleStyle.fontWeight,
+      titleLeading: slot.titleStyle.lineHeight,
+      titleTracking: slot.titleStyle.letterSpacing,
+    },
+    background: {
+      type: slot.backgroundType,
+      value: backgroundValue,
+      width: slot.backgroundWidth || base.background?.width || "100%",
+      height: slot.backgroundHeight || base.background?.height || "100%",
+      position: slot.backgroundPosition || base.background?.position || "center",
+      backgroundSize: slot.backgroundSize || base.background?.backgroundSize || "cover",
+      className: slot.backgroundClassName || base.background?.className,
+    },
+    contentAlignment: slot.contentAlignment || base.contentAlignment,
+    paddingClassName: slot.paddingClassName || base.paddingClassName,
     button: href
       ? {
-          label: slot.label || base.button?.label || "مشاهده",
+          label: slot.buttonLabel || base.button?.label || "مشاهده",
           href,
-          className: base.button?.className,
-          showArrow: base.button?.showArrow ?? true,
-          arrowClassName: base.button?.arrowClassName,
+          className: slot.buttonClassName || buildButtonClass(slot, base.button?.className),
+          showArrow: slot.buttonShowArrow,
+          arrowClassName: slot.buttonArrowClassName || base.button?.arrowClassName,
+          style: isInlineColor(slot.buttonStyle.color)
+            ? { color: slot.buttonStyle.color }
+            : undefined,
         }
-      : base.button,
+      : undefined,
   };
 }
 
-function applyHeroSlot(base: LeftBannerSpec, slot: HeroSlotConfig): LeftBannerSpec {
+function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): LeftBannerSpec {
+  const hasBackgroundImage = slot.backgroundType === "image" && Boolean(slot.backgroundImageUrl);
   return {
     ...base,
     background: {
       ...base.background,
-      type: slot.style.backgroundImageUrl ? "image" : "color",
-      value:
-        slot.style.backgroundImageUrl ||
-        slot.style.backgroundColor ||
-        base.background.value,
-      className: mergeClassNames(
-        base.background.className,
-        mapRadiusTokenToClass(slot.style.radiusToken),
-        mapShadowTokenToClass(slot.style.shadowToken),
-      ),
-      backgroundSize: slot.media.fit,
-      position: deriveObjectPosition(slot),
+      type: hasBackgroundImage ? "image" : "color",
+      value: hasBackgroundImage
+        ? slot.backgroundImageUrl
+        : slot.backgroundColor || base.background.value,
+      backgroundSize: slot.backgroundSize || "cover",
+      position: slot.backgroundPosition || base.background.position || "center",
+      width: slot.backgroundWidth || base.background.width,
+      height: slot.backgroundHeight || base.background.height,
+      className: slot.backgroundClassName || base.background.className,
     },
     foregroundImage: {
       ...base.foregroundImage,
-      src: slot.media.imageUrl || base.foregroundImage.src,
-      alt: slot.media.alt || base.foregroundImage.alt,
+      src: slot.foregroundImageUrl || base.foregroundImage.src,
+      alt: slot.foregroundAlt || base.foregroundImage.alt,
       href: slot.link?.href || base.foregroundImage.href,
-      objectPosition: deriveObjectPosition(slot),
-      zoom: slot.media.zoom,
-      focalX: slot.media.focalX,
-      focalY: slot.media.focalY,
-      objectFit: slot.media.fit,
+      objectFit: "contain",
+      zoom: 1,
+      className: slot.foregroundClassName || base.foregroundImage.className,
+      objectPosition: slot.foregroundObjectPosition || base.foregroundImage.objectPosition,
+      customWidth: slot.foregroundCustomWidth || base.foregroundImage.customWidth,
+      customHeight: slot.foregroundCustomHeight || base.foregroundImage.customHeight,
     },
   };
 }
@@ -179,10 +210,10 @@ function createDesktopLayout(slide: HeroSliderPayload["slides"][number]): Deskto
 
   return {
     ...base,
-    topLeftTextBanner: applyTextSlot(base.topLeftTextBanner, slots.topLeftTextBanner),
-    bottomActionBannerLeft: applyActionSlot(base.bottomActionBannerLeft, slots.bottomActionBannerLeft),
-    bottomActionBannerRight: applyActionSlot(base.bottomActionBannerRight, slots.bottomActionBannerRight),
-    rightBanner: applyHeroSlot(base.rightBanner, slots.rightBanner),
+    topLeftTextBanner: applyHeadlineSlot(base.topLeftTextBanner, slots.topLeftTextBanner),
+    bottomActionBannerLeft: applyCardSlot(base.bottomActionBannerLeft, slots.bottomActionBannerLeft),
+    bottomActionBannerRight: applyCardSlot(base.bottomActionBannerRight, slots.bottomActionBannerRight),
+    rightBanner: applyMainVisualSlot(base.rightBanner, slots.rightBanner),
   };
 }
 
@@ -192,10 +223,10 @@ function createTabletLayout(slide: HeroSliderPayload["slides"][number]): TabletL
 
   return {
     ...base,
-    primaryBanner: applyTextSlot(base.primaryBanner, slots.primaryBanner),
-    bottomActionBannerLeft: applyActionSlot(base.bottomActionBannerLeft, slots.bottomActionBannerLeft),
-    bottomActionBannerRight: applyActionSlot(base.bottomActionBannerRight, slots.bottomActionBannerRight),
-    heroBanner: applyHeroSlot(base.heroBanner, slots.heroBanner),
+    primaryBanner: applyHeadlineSlot(base.primaryBanner, slots.primaryBanner),
+    bottomActionBannerLeft: applyCardSlot(base.bottomActionBannerLeft, slots.bottomActionBannerLeft),
+    bottomActionBannerRight: applyCardSlot(base.bottomActionBannerRight, slots.bottomActionBannerRight),
+    heroBanner: applyMainVisualSlot(base.heroBanner, slots.heroBanner),
   };
 }
 
@@ -205,10 +236,20 @@ function createMobileLayout(slide: HeroSliderPayload["slides"][number]): MobileL
 
   return {
     ...base,
-    primaryBanner: applyTextSlot(base.primaryBanner, slots.primaryBanner),
-    bottomActionBannerLeft: applyActionSlot(base.bottomActionBannerLeft, slots.bottomActionBannerLeft),
-    bottomActionBannerRight: applyActionSlot(base.bottomActionBannerRight, slots.bottomActionBannerRight),
-    heroBanner: applyHeroSlot(base.heroBanner, slots.heroBanner),
+    primaryBanner: applyHeadlineSlot(base.primaryBanner, slots.primaryBanner),
+    bottomActionBannerLeft: applyCardSlot(base.bottomActionBannerLeft, slots.bottomActionBannerLeft),
+    bottomActionBannerRight: applyCardSlot(base.bottomActionBannerRight, slots.bottomActionBannerRight),
+    heroBanner: applyMainVisualSlot(base.heroBanner, slots.heroBanner),
+  };
+}
+
+export function mapHeroSlideToLayoutsForEditor(
+  slide: HeroSliderPayload["slides"][number],
+): CmsHeroEditorLayouts {
+  return {
+    desktop: createDesktopLayout(slide),
+    tablet: createTabletLayout(slide),
+    mobile: createMobileLayout(slide),
   };
 }
 

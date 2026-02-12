@@ -27,16 +27,17 @@ export default function PublishBar({
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-slate-800">Draft & Publish</h2>
+          <h2 className="text-sm font-semibold text-slate-800">پیش‌نویس و انتشار</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Draft slides: {draft.slides.length} | Published slides: {published.slides.length}
+            تعداد اسلاید پیش‌نویس: {draft.slides.length} | تعداد اسلاید منتشرشده:{" "}
+            {published.slides.length}
           </p>
           {meta?.publishedAt ? (
             <p className="text-xs text-slate-500">
-              Last published: {new Date(meta.publishedAt).toLocaleString("fa-IR")}
+              آخرین انتشار: {new Date(meta.publishedAt).toLocaleString("fa-IR")}
             </p>
           ) : (
-            <p className="text-xs text-amber-600">No published hero payload yet.</p>
+            <p className="text-xs text-amber-600">هنوز اسلایدر هیرو منتشر نشده است.</p>
           )}
         </div>
 
@@ -46,7 +47,7 @@ export default function PublishBar({
             onClick={onAddSlide}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
-            Add Slide
+            افزودن اسلاید
           </button>
           <button
             type="button"
@@ -54,7 +55,7 @@ export default function PublishBar({
             disabled={isSavingDraft || isPublishing}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
-            {isSavingDraft ? "Saving..." : "Save Draft"}
+            {isSavingDraft ? "در حال ذخیره..." : "ذخیره پیش‌نویس"}
           </button>
           <button
             type="button"
@@ -62,7 +63,7 @@ export default function PublishBar({
             disabled={isPublishing || isSavingDraft}
             className="rounded-lg bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 disabled:opacity-60"
           >
-            {isPublishing ? "Publishing..." : "Publish"}
+            {isPublishing ? "در حال انتشار..." : "انتشار"}
           </button>
         </div>
       </div>
