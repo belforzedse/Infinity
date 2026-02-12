@@ -686,6 +686,8 @@ function normalizeCardSlot(
   const media = isRecord(raw.media) ? raw.media : {};
   const colors = isRecord(raw.colors) ? raw.colors : {};
   const typography = isRecord(raw.typography) ? raw.typography : null;
+  const link = isRecord(raw.link) ? raw.link : undefined;
+  const button = isRecord(raw.button) ? raw.button : undefined;
   const backgroundImageUrl = sanitizeImageUrl(raw.backgroundImageUrl ?? style.backgroundImageUrl);
   const backgroundColor =
     sanitizeColorOrClass(raw.backgroundColor ?? style.backgroundColor ?? colors.background);
@@ -705,18 +707,18 @@ function normalizeCardSlot(
     imageCustomWidth: sanitizeClassName(raw.imageCustomWidth ?? media.customWidth, 80),
     imageCustomHeight: sanitizeClassName(raw.imageCustomHeight ?? media.customHeight, 80),
     buttonLabel: sanitizeString(raw.buttonLabel ?? raw.label, 120),
-    buttonHref: sanitizeHref(raw.buttonHref ?? raw.link?.href),
+    buttonHref: sanitizeHref(raw.buttonHref ?? link?.href),
     buttonClassName:
-      sanitizeClassName(raw.buttonClassName ?? raw.button?.className, 220) ||
+      sanitizeClassName(raw.buttonClassName ?? button?.className, 220) ||
       defaults?.buttonClassName ||
       "",
     buttonShowArrow:
       typeof raw.buttonShowArrow === "boolean"
         ? raw.buttonShowArrow
-        : typeof raw.button?.showArrow === "boolean"
-          ? raw.button.showArrow
+        : typeof button?.showArrow === "boolean"
+          ? button.showArrow
           : (defaults?.buttonShowArrow ?? true),
-    buttonArrowClassName: sanitizeClassName(raw.buttonArrowClassName ?? raw.button?.arrowClassName, 180),
+    buttonArrowClassName: sanitizeClassName(raw.buttonArrowClassName ?? button?.arrowClassName, 180),
     backgroundColor: backgroundColor || defaults?.backgroundColor || "",
     backgroundType: sanitizeToken(
       raw.backgroundType ?? style.backgroundType,
