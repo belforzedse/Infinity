@@ -58,9 +58,9 @@ function normalizeSlideOrder(slides: HeroSlideConfig[]): HeroSlideConfig[] {
 function getSelectedSlot(
   slide: HeroSlideConfig | null,
   device: DeviceMode,
-  slotKey: string,
+  slotKey: string | null,
 ): HeroSlotConfig | null {
-  if (!slide) return null;
+  if (!slide || slotKey === null) return null;
 
   if (device === "desktop") {
     return slide.devices.desktop.slots[slotKey as HeroDesktopSlotKey] || null;
@@ -82,7 +82,9 @@ export default function HeroSliderCustomizationPage() {
 
   const [selectedSlideId, setSelectedSlideId] = useState<string | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<DeviceMode>("desktop");
-  const [selectedSlotKey, setSelectedSlotKey] = useState(getDefaultSlotKeyByDevice("desktop"));
+  const [selectedSlotKey, setSelectedSlotKey] = useState<HeroDesktopSlotKey | HeroTabletSlotKey | HeroMobileSlotKey | null>(
+    getDefaultSlotKeyByDevice("desktop"),
+  );
 
   useEffect(() => {
     const run = async () => {
@@ -108,6 +110,7 @@ export default function HeroSliderCustomizationPage() {
   }, []);
 
   useEffect(() => {
+    if (selectedSlotKey === null) return;
     const keys = getSlotKeysByDevice(selectedDevice);
     if (!keys.includes(selectedSlotKey)) {
       setSelectedSlotKey(getDefaultSlotKeyByDevice(selectedDevice));
@@ -329,31 +332,14 @@ export default function HeroSliderCustomizationPage() {
           onAddSlide={addSlide}
         />
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-3">
-          <div className="flex items-center gap-2">
-            {(["desktop", "tablet", "mobile"] as DeviceMode[]).map((device) => (
-              <button
-                key={device}
-                type="button"
-                onClick={() => setSelectedDevice(device)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                  selectedDevice === device
-                    ? "bg-pink-500 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                {device === "desktop" ? "دسکتاپ" : device === "tablet" ? "تبلت" : "موبایل"}
-              </button>
-            ))}
-          </div>
-        </section>
-
         <TemplatePreview
           slide={selectedSlide}
           device={selectedDevice}
           selectedSlotKey={selectedSlotKey}
           onSelectSlot={(slotKey) => setSelectedSlotKey(slotKey)}
+          onDeselectSlot={() => setSelectedSlotKey(null)}
           onChangeSelectedSlot={updateSelectedSlot}
+          onDeviceChange={setSelectedDevice}
         />
 
         <SlideList
@@ -406,6 +392,7 @@ export default function HeroSliderCustomizationPage() {
                 }))
               }
               selectedSlotKey={selectedSlide ? selectedSlotKey : null}
+              selectedSlot={selectedSlot}
               slotLink={selectedSlot?.link || null}
               onSlotLinkChange={handleSelectedSlotLinkChange}
               slotTracking={selectedSlot?.tracking || EMPTY_TRACKING}

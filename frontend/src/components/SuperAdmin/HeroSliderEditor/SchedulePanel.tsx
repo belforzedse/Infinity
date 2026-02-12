@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   HERO_SCHEDULE_TIMEZONE,
+  type HeroSlotConfig,
   type HeroSlotLink,
   type HeroSlideSchedule,
   type HeroTracking,
@@ -20,6 +22,7 @@ type Props = {
   globalAutoplayIntervalMs: number;
   onGlobalAutoplayIntervalChange: (value: number) => void;
   selectedSlotKey: string | null;
+  selectedSlot: HeroSlotConfig | null;
   slotLink: HeroSlotLink | null;
   onSlotLinkChange: (value: HeroSlotLink | null) => void;
   slotTracking: HeroTracking;
@@ -83,6 +86,7 @@ export default function SchedulePanel({
   globalAutoplayIntervalMs,
   onGlobalAutoplayIntervalChange,
   selectedSlotKey,
+  selectedSlot,
   slotLink,
   onSlotLinkChange,
   slotTracking,
@@ -90,7 +94,10 @@ export default function SchedulePanel({
 }: Props) {
   const [trackingCustomJson, setTrackingCustomJson] = useState("{}");
   const [trackingJsonError, setTrackingJsonError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const slotDisabled = isSlotDisabled(selectedSlotKey);
+  const hideLinkInAdvanced =
+    selectedSlot?.kind === "card" && (selectedSlot.buttonLabel?.trim() ?? "") !== "";
   const selectedSlotLabel = selectedSlotKey
     ? SLOT_LABELS[selectedSlotKey] || selectedSlotKey
     : "بدون اسلات";
@@ -102,15 +109,15 @@ export default function SchedulePanel({
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
-      <h2 className="text-sm font-semibold text-slate-800">تنظیمات فنی</h2>
-      <p className="mt-1 text-xs text-slate-500">کنترل‌های سطح اسلاید و تنظیمات غیر بصری.</p>
+      <h2 className="text-sm font-semibold text-slate-800">تنظیمات اسلاید</h2>
+      <p className="mt-1 text-xs text-slate-500">کنترل نمایش و رفتار اسلاید.</p>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="mt-4 space-y-4">
         <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">کنترل اسلاید</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">تنظیمات اصلی</h3>
 
           <label className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-            <span>فعال</span>
+            <span>نمایش این اسلاید</span>
             <input
               type="checkbox"
               checked={isActive}
@@ -155,6 +162,21 @@ export default function SchedulePanel({
           </label>
         </div>
 
+        <div className="rounded-xl border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setAdvancedOpen((prev) => !prev)}
+            className="flex w-full items-center justify-between px-4 py-3 text-right text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <span>تنظیمات پیشرفته</span>
+            {advancedOpen ? (
+              <ChevronUp className="h-4 w-4 text-slate-500" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-slate-500" />
+            )}
+          </button>
+          {advancedOpen && (
+            <div className="grid gap-4 border-t border-slate-200 p-4 xl:grid-cols-2">
         <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">زمان‌بندی</h3>
           <p className="text-xs text-slate-500">منطقه زمانی: {HERO_SCHEDULE_TIMEZONE}</p>
@@ -209,53 +231,57 @@ export default function SchedulePanel({
             تنظیمات غیر بصری اسلات ({selectedSlotLabel})
           </h3>
 
-          <label className="text-xs text-slate-600">
-            نوع لینک
-            <select
-              disabled={slotDisabled}
-              value={slotLink?.type || "internal"}
-              onChange={(event) =>
-                onSlotLinkChange({
-                  type: event.target.value === "external" ? "external" : "internal",
-                  href: slotLink?.href || "/",
-                })
-              }
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-100"
-            >
-              <option value="internal">داخلی</option>
-              <option value="external">خارجی</option>
-            </select>
-          </label>
+          {!hideLinkInAdvanced ? (
+            <>
+              <label className="text-xs text-slate-600">
+                نوع لینک
+                <select
+                  disabled={slotDisabled}
+                  value={slotLink?.type || "internal"}
+                  onChange={(event) =>
+                    onSlotLinkChange({
+                      type: event.target.value === "external" ? "external" : "internal",
+                      href: slotLink?.href || "/",
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-100"
+                >
+                  <option value="internal">داخلی</option>
+                  <option value="external">خارجی</option>
+                </select>
+              </label>
 
-          <label className="text-xs text-slate-600">
-            آدرس لینک
-            <input
-              disabled={slotDisabled}
-              type="text"
-              placeholder="/route یا https://..."
-              value={slotLink?.href || ""}
-              onChange={(event) =>
-                onSlotLinkChange(
-                  event.target.value.trim()
-                    ? {
-                        type: slotLink?.type || "internal",
-                        href: event.target.value,
-                      }
-                    : null,
-                )
-              }
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-100"
-            />
-          </label>
+              <label className="text-xs text-slate-600">
+                آدرس لینک
+                <input
+                  disabled={slotDisabled}
+                  type="text"
+                  placeholder="/route یا https://..."
+                  value={slotLink?.href || ""}
+                  onChange={(event) =>
+                    onSlotLinkChange(
+                      event.target.value.trim()
+                        ? {
+                            type: slotLink?.type || "internal",
+                            href: event.target.value,
+                          }
+                        : null,
+                    )
+                  }
+                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-100"
+                />
+              </label>
 
-          <button
-            type="button"
-            disabled={slotDisabled}
-            onClick={() => onSlotLinkChange(null)}
-            className="text-xs text-slate-500 underline disabled:opacity-50"
-          >
-            حذف لینک
-          </button>
+              <button
+                type="button"
+                disabled={slotDisabled}
+                onClick={() => onSlotLinkChange(null)}
+                className="text-xs text-slate-500 underline disabled:opacity-50"
+              >
+                حذف لینک
+              </button>
+            </>
+          ) : null}
 
           <label className="text-xs text-slate-600">
             کمپین رهگیری
@@ -356,6 +382,9 @@ export default function SchedulePanel({
             />
           </label>
           {trackingJsonError ? <p className="text-xs text-rose-600">{trackingJsonError}</p> : null}
+        </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

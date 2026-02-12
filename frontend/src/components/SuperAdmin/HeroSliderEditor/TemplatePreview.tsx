@@ -1,11 +1,13 @@
 "use client";
 
-import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { Pencil, PanelLeftClose, PanelRight } from "lucide-react";
 import { ActionBanner } from "@/components/Hero/Banners/ActionBanner";
 import { LeftBanner } from "@/components/Hero/Banners/LeftBanner";
 import TextBanner from "@/components/Hero/Banners/TextBanner";
 import { mapHeroSlideToLayoutsForEditor, type CmsHeroEditorLayouts } from "@/components/Hero/config/fromCms";
+import type { BannerImageSpec } from "@/components/Hero/types";
 import ImageUploadField from "@/components/SuperAdmin/UpsertPage/ContentWrapper/Fields/ImageUploadField";
 import {
   HERO_DESKTOP_SLOT_KEYS,
@@ -38,17 +40,17 @@ export type SlotKey = HeroDesktopSlotKey | HeroTabletSlotKey | HeroMobileSlotKey
 type Props = {
   slide: HeroSlideConfig | null;
   device: DeviceMode;
-  selectedSlotKey: SlotKey;
+  selectedSlotKey: SlotKey | null;
   onSelectSlot: (slotKey: SlotKey) => void;
+  onDeselectSlot?: () => void;
   onChangeSelectedSlot: (next: HeroSlotConfig) => void;
-};
-
-type PopoverPosition = {
-  top: number;
-  left: number;
+  onDeviceChange?: (device: DeviceMode) => void;
+  useSidePanel?: boolean;
 };
 
 const FALLBACK_IMAGE_SRC = "/images/placeholders/image-placeholder.svg";
+const HERO_MAIN_PLACEHOLDER = "/images/placeholders/HeroEditorMainVisualSlot.pngimage.png";
+const HERO_CARD_PLACEHOLDER = "/images/placeholders/HeroEditorCardSlot.png";
 
 const slotLabelMap: Record<string, string> = {
   topLeftTextBanner: "تیتر",
@@ -59,45 +61,50 @@ const slotLabelMap: Record<string, string> = {
   bottomActionBannerRight: "کارت ۲",
 };
 
-const POPOVER_WIDTH = 340;
-const POPOVER_GAP = 10;
-const VIEWPORT_PADDING = 12;
-
 function getFrameByDevice(device: DeviceMode): { width: number; height: number } {
-  if (device === "desktop") return { width: 1220, height: 560 };
-  if (device === "tablet") return { width: 980, height: 760 };
+  if (device === "desktop") return { width: 1358, height: 480 };
+  if (device === "tablet") return { width: 960, height: 820 };
   return { width: 430, height: 920 };
 }
 
-function safeImageSrc(src?: string): string {
-  if (typeof src !== "string") return FALLBACK_IMAGE_SRC;
+function safeImageSrc(src?: string, fallback = FALLBACK_IMAGE_SRC): string {
+  if (typeof src !== "string") return fallback;
   const normalized = src.trim();
-  return normalized ? normalized : FALLBACK_IMAGE_SRC;
+  return normalized ? normalized : fallback;
 }
 
+const HERO_CARD_PLACEHOLDER_ZOOM = 0.7;
+
 function makeLayoutsSafe(layouts: CmsHeroEditorLayouts): CmsHeroEditorLayouts {
+  const cardImageWithPlaceholder = (img: BannerImageSpec): BannerImageSpec => {
+    const src = safeImageSrc(img.src, HERO_CARD_PLACEHOLDER);
+    const isPlaceholder = !(typeof img.src === "string" && img.src.trim());
+    return {
+      ...img,
+      src,
+      ...(isPlaceholder && { zoom: HERO_CARD_PLACEHOLDER_ZOOM }),
+    };
+  };
+
   return {
     desktop: {
       ...layouts.desktop,
       bottomActionBannerLeft: {
         ...layouts.desktop.bottomActionBannerLeft,
-        image: {
-          ...layouts.desktop.bottomActionBannerLeft.image,
-          src: safeImageSrc(layouts.desktop.bottomActionBannerLeft.image.src),
-        },
+        image: cardImageWithPlaceholder(layouts.desktop.bottomActionBannerLeft.image),
       },
       bottomActionBannerRight: {
         ...layouts.desktop.bottomActionBannerRight,
-        image: {
-          ...layouts.desktop.bottomActionBannerRight.image,
-          src: safeImageSrc(layouts.desktop.bottomActionBannerRight.image.src),
-        },
+        image: cardImageWithPlaceholder(layouts.desktop.bottomActionBannerRight.image),
       },
       rightBanner: {
         ...layouts.desktop.rightBanner,
         foregroundImage: {
           ...layouts.desktop.rightBanner.foregroundImage,
-          src: safeImageSrc(layouts.desktop.rightBanner.foregroundImage.src),
+          src: safeImageSrc(
+            layouts.desktop.rightBanner.foregroundImage.src,
+            HERO_MAIN_PLACEHOLDER,
+          ),
         },
       },
     },
@@ -105,23 +112,20 @@ function makeLayoutsSafe(layouts: CmsHeroEditorLayouts): CmsHeroEditorLayouts {
       ...layouts.tablet,
       bottomActionBannerLeft: {
         ...layouts.tablet.bottomActionBannerLeft,
-        image: {
-          ...layouts.tablet.bottomActionBannerLeft.image,
-          src: safeImageSrc(layouts.tablet.bottomActionBannerLeft.image.src),
-        },
+        image: cardImageWithPlaceholder(layouts.tablet.bottomActionBannerLeft.image),
       },
       bottomActionBannerRight: {
         ...layouts.tablet.bottomActionBannerRight,
-        image: {
-          ...layouts.tablet.bottomActionBannerRight.image,
-          src: safeImageSrc(layouts.tablet.bottomActionBannerRight.image.src),
-        },
+        image: cardImageWithPlaceholder(layouts.tablet.bottomActionBannerRight.image),
       },
       heroBanner: {
         ...layouts.tablet.heroBanner,
         foregroundImage: {
           ...layouts.tablet.heroBanner.foregroundImage,
-          src: safeImageSrc(layouts.tablet.heroBanner.foregroundImage.src),
+          src: safeImageSrc(
+            layouts.tablet.heroBanner.foregroundImage.src,
+            HERO_MAIN_PLACEHOLDER,
+          ),
         },
       },
     },
@@ -129,52 +133,24 @@ function makeLayoutsSafe(layouts: CmsHeroEditorLayouts): CmsHeroEditorLayouts {
       ...layouts.mobile,
       bottomActionBannerLeft: {
         ...layouts.mobile.bottomActionBannerLeft,
-        image: {
-          ...layouts.mobile.bottomActionBannerLeft.image,
-          src: safeImageSrc(layouts.mobile.bottomActionBannerLeft.image.src),
-        },
+        image: cardImageWithPlaceholder(layouts.mobile.bottomActionBannerLeft.image),
       },
       bottomActionBannerRight: {
         ...layouts.mobile.bottomActionBannerRight,
-        image: {
-          ...layouts.mobile.bottomActionBannerRight.image,
-          src: safeImageSrc(layouts.mobile.bottomActionBannerRight.image.src),
-        },
+        image: cardImageWithPlaceholder(layouts.mobile.bottomActionBannerRight.image),
       },
       heroBanner: {
         ...layouts.mobile.heroBanner,
         foregroundImage: {
           ...layouts.mobile.heroBanner.foregroundImage,
-          src: safeImageSrc(layouts.mobile.heroBanner.foregroundImage.src),
+          src: safeImageSrc(
+            layouts.mobile.heroBanner.foregroundImage.src,
+            HERO_MAIN_PLACEHOLDER,
+          ),
         },
       },
     },
   };
-}
-
-function getPopoverPosition(anchorRect: DOMRect, popoverHeight: number): PopoverPosition {
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const safeHeight = Math.max(popoverHeight, 320);
-
-  let left = anchorRect.left;
-  if (left + POPOVER_WIDTH > viewportWidth - VIEWPORT_PADDING) {
-    left = viewportWidth - POPOVER_WIDTH - VIEWPORT_PADDING;
-  }
-  left = Math.max(VIEWPORT_PADDING, left);
-
-  const spaceBelow = viewportHeight - anchorRect.bottom - VIEWPORT_PADDING;
-  const spaceAbove = anchorRect.top - VIEWPORT_PADDING;
-  const shouldOpenAbove = spaceBelow < safeHeight && spaceAbove > spaceBelow;
-
-  let top = shouldOpenAbove
-    ? anchorRect.top - safeHeight - POPOVER_GAP
-    : anchorRect.bottom + POPOVER_GAP;
-
-  top = Math.max(VIEWPORT_PADDING, top);
-  top = Math.min(top, viewportHeight - safeHeight - VIEWPORT_PADDING);
-
-  return { top, left };
 }
 
 function resolveColorForInput(value: string, fallback = "#111827"): string {
@@ -656,6 +632,62 @@ function CardEditor({
         />
       </label>
 
+      {slot.buttonLabel.trim() !== "" ? (
+        <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/50 p-3">
+          <p className="text-xs font-medium text-slate-600">لینک دکمه</p>
+          <label className="text-xs text-slate-600">
+            نوع لینک
+            <select
+              value={slot.link?.type ?? "internal"}
+              onChange={(event) => {
+                const type = event.target.value === "external" ? "external" : "internal";
+                const href = slot.buttonHref || slot.link?.href || "/";
+                onChange({
+                  ...slot,
+                  buttonHref: href,
+                  link: href ? { type, href } : null,
+                });
+              }}
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              <option value="internal">داخلی</option>
+              <option value="external">خارجی</option>
+            </select>
+          </label>
+          <label className="text-xs text-slate-600">
+            آدرس لینک
+            <input
+              type="text"
+              placeholder="/route یا https://..."
+              value={slot.buttonHref || slot.link?.href || ""}
+              onChange={(event) => {
+                const href = event.target.value.trim();
+                const type = slot.link?.type ?? "internal";
+                onChange({
+                  ...slot,
+                  buttonHref: href,
+                  link: href ? { type, href } : null,
+                });
+              }}
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                ...slot,
+                buttonHref: "",
+                link: null,
+              })
+            }
+            className="text-xs text-slate-500 underline hover:text-slate-700"
+          >
+            حذف لینک
+          </button>
+        </div>
+      ) : null}
+
       <label className="text-xs text-slate-600">
         رنگ پس‌زمینه
         <input
@@ -898,28 +930,19 @@ function CardEditor({
   );
 }
 
-function SlotPopover({
+function SlotEditorContent({
   slot,
   onChange,
   onClose,
-  position,
-  popoverRef,
 }: {
   slot: HeroSlotConfig;
   onChange: (next: HeroSlotConfig) => void;
   onClose: () => void;
-  position: PopoverPosition;
-  popoverRef: RefObject<HTMLDivElement | null>;
 }) {
-  return createPortal(
-    <div
-      ref={popoverRef}
-      className="fixed z-[1200] w-[340px] max-h-[min(70vh,680px)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-2xl"
-      style={position}
-      onClick={(event) => event.stopPropagation()}
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">ویرایش درجا</span>
+  return (
+    <div className="flex h-full flex-col">
+      <div className="mb-3 flex shrink-0 items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">ویرایش اسلات</span>
         <button
           type="button"
           onClick={onClose}
@@ -928,12 +951,12 @@ function SlotPopover({
           بستن
         </button>
       </div>
-
-      {slot.kind === "headline" ? <HeadlineEditor slot={slot} onChange={onChange} /> : null}
-      {slot.kind === "mainVisual" ? <MainVisualEditor slot={slot} onChange={onChange} /> : null}
-      {slot.kind === "card" ? <CardEditor slot={slot} onChange={onChange} /> : null}
-    </div>,
-    document.body,
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {slot.kind === "headline" ? <HeadlineEditor slot={slot} onChange={onChange} /> : null}
+        {slot.kind === "mainVisual" ? <MainVisualEditor slot={slot} onChange={onChange} /> : null}
+        {slot.kind === "card" ? <CardEditor slot={slot} onChange={onChange} /> : null}
+      </div>
+    </div>
   );
 }
 
@@ -950,23 +973,42 @@ function EditableSlot({
   className?: string;
   children: ReactNode;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const label = slotLabelMap[slotKey] || slotKey;
+
   return (
-    <div className={`relative overflow-visible ${className || ""}`} data-slot={slotKey}>
+    <div
+      className={`group relative overflow-visible ${className || ""}`}
+      data-slot={slotKey}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {children}
 
       <button
         type="button"
         onClick={(event) => onSelect(event.currentTarget)}
-        className={`absolute inset-0 z-20 rounded-lg transition ${
+        className={`absolute inset-0 z-20 rounded-lg transition-all duration-200 ring-inset ${
           selected
-            ? "ring-2 ring-pink-500 ring-offset-2 ring-offset-white"
-            : "ring-1 ring-transparent hover:ring-pink-300"
+            ? "ring-2 ring-pink-500"
+            : "ring-1 ring-transparent hover:ring-2 hover:ring-pink-400/60"
         }`}
-        aria-label={`ویرایش ${slotLabelMap[slotKey] || slotKey}`}
+        aria-label={`ویرایش ${label}`}
+        title="برای ویرایش کلیک کنید"
       />
 
-      <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-full bg-white/90 px-2 py-1 text-[10px] font-semibold tracking-wide text-slate-600 shadow-sm">
-        {slotLabelMap[slotKey] || slotKey}
+      {/* Hover overlay with edit hint */}
+      {isHovered && !selected && (
+        <div className="pointer-events-none absolute inset-0 z-[21] flex items-center justify-center rounded-lg bg-black/5">
+          <span className="rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-md">
+            کلیک برای ویرایش
+          </span>
+        </div>
+      )}
+
+      <div className="pointer-events-none absolute left-2 top-2 z-30 flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-slate-600 shadow-sm">
+        <Pencil className="h-3 w-3 text-slate-500" aria-hidden />
+        {label}
       </div>
     </div>
   );
@@ -984,59 +1026,64 @@ function DesktopCanvas({
   const layout = layouts.desktop;
 
   return (
-    <div className="h-[480px] w-[1200px] overflow-visible px-4">
+    <div className="h-[480px] w-full max-w-[1358px] overflow-hidden mx-auto">
       <div className="relative h-full w-full">
-        <div className="flex h-full items-stretch gap-2 lg:gap-0">
-          <div className="mt-[50px] h-full w-7/12 flex-none overflow-visible">
-            <div className="flex h-full flex-col">
-              <EditableSlot
-                slotKey="topLeftTextBanner"
-                selected={selectedSlotKey === "topLeftTextBanner"}
-                onSelect={(anchorEl) => onSelectSlot("topLeftTextBanner", anchorEl)}
-              >
-                <TextBanner
-                  title={layout.topLeftTextBanner.title}
-                  subtitle={layout.topLeftTextBanner.subtitle}
-                  marginBottomPx={layout.topLeftTextBanner.marginBottomPx}
-                  className={layout.topLeftTextBanner.className}
-                  titleClassName={layout.topLeftTextBanner.titleClassName}
-                  subtitleClassName={layout.topLeftTextBanner.subtitleClassName}
-                  colors={layout.topLeftTextBanner.colors}
-                  typography={layout.topLeftTextBanner.typography}
-                />
-              </EditableSlot>
-
-              <div className="grid flex-1 grid-cols-2 items-end gap-3">
+        <div className="flex h-full items-stretch gap-0">
+          <div className="w-7/12 mt-[50px] flex-none overflow-hidden h-full">
+            <div className="flex flex-col h-full">
+              <div>
                 <EditableSlot
-                  slotKey="bottomActionBannerLeft"
-                  selected={selectedSlotKey === "bottomActionBannerLeft"}
-                  onSelect={(anchorEl) => onSelectSlot("bottomActionBannerLeft", anchorEl)}
-                  className="h-full rounded-lg"
+                  slotKey="topLeftTextBanner"
+                  selected={selectedSlotKey === "topLeftTextBanner"}
+                  onSelect={(anchorEl) => onSelectSlot("topLeftTextBanner", anchorEl)}
                 >
-                  <ActionBanner spec={layout.bottomActionBannerLeft} />
+                  <TextBanner
+                    title={layout.topLeftTextBanner.title}
+                    subtitle={layout.topLeftTextBanner.subtitle}
+                    marginBottomPx={layout.topLeftTextBanner.marginBottomPx}
+                    className={layout.topLeftTextBanner.className}
+                    titleClassName={layout.topLeftTextBanner.titleClassName}
+                    subtitleClassName={layout.topLeftTextBanner.subtitleClassName}
+                    colors={layout.topLeftTextBanner.colors}
+                    typography={layout.topLeftTextBanner.typography}
+                  />
                 </EditableSlot>
-
-                <EditableSlot
-                  slotKey="bottomActionBannerRight"
-                  selected={selectedSlotKey === "bottomActionBannerRight"}
-                  onSelect={(anchorEl) => onSelectSlot("bottomActionBannerRight", anchorEl)}
-                  className="h-full rounded-lg"
-                >
-                  <ActionBanner spec={layout.bottomActionBannerRight} />
-                </EditableSlot>
+              </div>
+              <div className="flex-1 grid grid-cols-2 gap-3 items-end">
+                <div className="h-full overflow-hidden rounded-lg">
+                  <EditableSlot
+                    slotKey="bottomActionBannerLeft"
+                    selected={selectedSlotKey === "bottomActionBannerLeft"}
+                    onSelect={(anchorEl) => onSelectSlot("bottomActionBannerLeft", anchorEl)}
+                    className="h-full w-full block"
+                  >
+                    <ActionBanner spec={layout.bottomActionBannerLeft} />
+                  </EditableSlot>
+                </div>
+                <div className="h-full overflow-hidden rounded-lg">
+                  <EditableSlot
+                    slotKey="bottomActionBannerRight"
+                    selected={selectedSlotKey === "bottomActionBannerRight"}
+                    onSelect={(anchorEl) => onSelectSlot("bottomActionBannerRight", anchorEl)}
+                    className="h-full w-full block"
+                  >
+                    <ActionBanner spec={layout.bottomActionBannerRight} />
+                  </EditableSlot>
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="w-5/12 flex-none">
-            <EditableSlot
-              slotKey="rightBanner"
-              selected={selectedSlotKey === "rightBanner"}
-              onSelect={(anchorEl) => onSelectSlot("rightBanner", anchorEl)}
-              className="h-full rounded-lg"
-            >
-              <LeftBanner spec={layout.rightBanner} className="h-full w-full" />
-            </EditableSlot>
+          <div className="w-5/12 flex-none overflow-hidden">
+            <div className="h-full w-full overflow-hidden rounded-lg">
+              <EditableSlot
+                slotKey="rightBanner"
+                selected={selectedSlotKey === "rightBanner"}
+                onSelect={(anchorEl) => onSelectSlot("rightBanner", anchorEl)}
+                className="h-full w-full block"
+              >
+                <LeftBanner spec={layout.rightBanner} className="h-full w-full" />
+              </EditableSlot>
+            </div>
           </div>
         </div>
       </div>
@@ -1056,55 +1103,63 @@ function TabletCanvas({
   const layout = layouts.tablet;
 
   return (
-    <div className="w-[960px] px-4">
+    <div className="h-auto w-full max-w-full overflow-hidden">
       <div className="grid grid-cols-1 gap-6">
-        <EditableSlot
-          slotKey="primaryBanner"
-          selected={selectedSlotKey === "primaryBanner"}
-          onSelect={(anchorEl) => onSelectSlot("primaryBanner", anchorEl)}
-          className="overflow-visible rounded-3xl"
-        >
-          <TextBanner
-            title={layout.primaryBanner.title}
-            subtitle={layout.primaryBanner.subtitle}
-            marginBottomPx={layout.primaryBanner.marginBottomPx}
-            className={layout.primaryBanner.className}
-            titleClassName={layout.primaryBanner.titleClassName}
-            subtitleClassName={layout.primaryBanner.subtitleClassName}
-            colors={layout.primaryBanner.colors}
-            typography={layout.primaryBanner.typography}
-          />
-        </EditableSlot>
-
-        <div className="grid gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:[direction:ltr]">
-          <div className="flex flex-col gap-6 md:h-full md:justify-end" dir="rtl">
+        <div className="overflow-hidden rounded-3xl">
+          <EditableSlot
+            slotKey="primaryBanner"
+            selected={selectedSlotKey === "primaryBanner"}
+            onSelect={(anchorEl) => onSelectSlot("primaryBanner", anchorEl)}
+            className="block"
+          >
+            <TextBanner
+              title={layout.primaryBanner.title}
+              subtitle={layout.primaryBanner.subtitle}
+              marginBottomPx={layout.primaryBanner.marginBottomPx}
+              className={layout.primaryBanner.className}
+              titleClassName={layout.primaryBanner.titleClassName}
+              subtitleClassName={layout.primaryBanner.subtitleClassName}
+              colors={layout.primaryBanner.colors}
+              typography={layout.primaryBanner.typography}
+            />
+          </EditableSlot>
+        </div>
+        <div className="grid gap-6 grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] [direction:ltr]">
+          <div className="flex flex-col gap-6 h-full justify-end" dir="rtl">
+            <div className="relative rounded-lg overflow-visible">
+              <EditableSlot
+                slotKey="bottomActionBannerLeft"
+                selected={selectedSlotKey === "bottomActionBannerLeft"}
+                onSelect={(anchorEl) => onSelectSlot("bottomActionBannerLeft", anchorEl)}
+                className="h-full w-full block"
+              >
+                <ActionBanner spec={layout.bottomActionBannerLeft} />
+              </EditableSlot>
+            </div>
+            <div className="relative rounded-lg overflow-visible">
+              <EditableSlot
+                slotKey="bottomActionBannerRight"
+                selected={selectedSlotKey === "bottomActionBannerRight"}
+                onSelect={(anchorEl) => onSelectSlot("bottomActionBannerRight", anchorEl)}
+                className="h-full w-full block"
+              >
+                <ActionBanner spec={layout.bottomActionBannerRight} />
+              </EditableSlot>
+            </div>
+          </div>
+          <div
+            className="relative aspect-square overflow-hidden rounded-lg"
+            dir="rtl"
+          >
             <EditableSlot
-              slotKey="bottomActionBannerLeft"
-              selected={selectedSlotKey === "bottomActionBannerLeft"}
-              onSelect={(anchorEl) => onSelectSlot("bottomActionBannerLeft", anchorEl)}
-              className="rounded-lg"
+              slotKey="heroBanner"
+              selected={selectedSlotKey === "heroBanner"}
+              onSelect={(anchorEl) => onSelectSlot("heroBanner", anchorEl)}
+              className="h-full w-full block"
             >
-              <ActionBanner spec={layout.bottomActionBannerLeft} />
-            </EditableSlot>
-
-            <EditableSlot
-              slotKey="bottomActionBannerRight"
-              selected={selectedSlotKey === "bottomActionBannerRight"}
-              onSelect={(anchorEl) => onSelectSlot("bottomActionBannerRight", anchorEl)}
-              className="rounded-lg"
-            >
-              <ActionBanner spec={layout.bottomActionBannerRight} />
+              <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
             </EditableSlot>
           </div>
-
-          <EditableSlot
-            slotKey="heroBanner"
-            selected={selectedSlotKey === "heroBanner"}
-            onSelect={(anchorEl) => onSelectSlot("heroBanner", anchorEl)}
-            className="relative aspect-square overflow-visible rounded-lg"
-          >
-            <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
-          </EditableSlot>
         </div>
       </div>
     </div>
@@ -1123,53 +1178,58 @@ function MobileCanvas({
   const layout = layouts.mobile;
 
   return (
-    <div className="w-[410px] px-2" dir="rtl">
+    <div className="h-auto w-full max-w-full overflow-hidden" dir="rtl">
       <div className="flex flex-col gap-4">
-        <EditableSlot
-          slotKey="primaryBanner"
-          selected={selectedSlotKey === "primaryBanner"}
-          onSelect={(anchorEl) => onSelectSlot("primaryBanner", anchorEl)}
-          className="overflow-visible rounded-3xl"
-        >
-          <TextBanner
-            title={layout.primaryBanner.title}
-            subtitle={layout.primaryBanner.subtitle}
-            marginBottomPx={layout.primaryBanner.marginBottomPx}
-            className={layout.primaryBanner.className}
-            titleClassName={layout.primaryBanner.titleClassName}
-            subtitleClassName={layout.primaryBanner.subtitleClassName}
-            colors={layout.primaryBanner.colors}
-            typography={layout.primaryBanner.typography}
-          />
-        </EditableSlot>
-
-        <EditableSlot
-          slotKey="heroBanner"
-          selected={selectedSlotKey === "heroBanner"}
-          onSelect={(anchorEl) => onSelectSlot("heroBanner", anchorEl)}
-          className="relative h-[360px] w-full overflow-visible rounded-3xl"
-        >
-          <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
-        </EditableSlot>
-
+        <div className="overflow-hidden rounded-3xl">
+          <EditableSlot
+            slotKey="primaryBanner"
+            selected={selectedSlotKey === "primaryBanner"}
+            onSelect={(anchorEl) => onSelectSlot("primaryBanner", anchorEl)}
+            className="block"
+          >
+            <TextBanner
+              title={layout.primaryBanner.title}
+              subtitle={layout.primaryBanner.subtitle}
+              marginBottomPx={layout.primaryBanner.marginBottomPx}
+              className={layout.primaryBanner.className}
+              titleClassName={layout.primaryBanner.titleClassName}
+              subtitleClassName={layout.primaryBanner.subtitleClassName}
+              colors={layout.primaryBanner.colors}
+              typography={layout.primaryBanner.typography}
+            />
+          </EditableSlot>
+        </div>
+        <div className="relative h-[360px] w-full overflow-hidden rounded-3xl">
+          <EditableSlot
+            slotKey="heroBanner"
+            selected={selectedSlotKey === "heroBanner"}
+            onSelect={(anchorEl) => onSelectSlot("heroBanner", anchorEl)}
+            className="h-full w-full overflow-hidden block"
+          >
+            <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
+          </EditableSlot>
+        </div>
         <div className="grid grid-cols-2 gap-3">
-          <EditableSlot
-            slotKey="bottomActionBannerLeft"
-            selected={selectedSlotKey === "bottomActionBannerLeft"}
-            onSelect={(anchorEl) => onSelectSlot("bottomActionBannerLeft", anchorEl)}
-            className="rounded-xl"
-          >
-            <ActionBanner spec={layout.bottomActionBannerLeft} />
-          </EditableSlot>
-
-          <EditableSlot
-            slotKey="bottomActionBannerRight"
-            selected={selectedSlotKey === "bottomActionBannerRight"}
-            onSelect={(anchorEl) => onSelectSlot("bottomActionBannerRight", anchorEl)}
-            className="rounded-xl"
-          >
-            <ActionBanner spec={layout.bottomActionBannerRight} />
-          </EditableSlot>
+          <div className="relative overflow-visible rounded-xl">
+            <EditableSlot
+              slotKey="bottomActionBannerLeft"
+              selected={selectedSlotKey === "bottomActionBannerLeft"}
+              onSelect={(anchorEl) => onSelectSlot("bottomActionBannerLeft", anchorEl)}
+              className="h-full w-full block"
+            >
+              <ActionBanner spec={layout.bottomActionBannerLeft} />
+            </EditableSlot>
+          </div>
+          <div className="relative overflow-visible rounded-xl">
+            <EditableSlot
+              slotKey="bottomActionBannerRight"
+              selected={selectedSlotKey === "bottomActionBannerRight"}
+              onSelect={(anchorEl) => onSelectSlot("bottomActionBannerRight", anchorEl)}
+              className="h-full w-full block"
+            >
+              <ActionBanner spec={layout.bottomActionBannerRight} />
+            </EditableSlot>
+          </div>
         </div>
       </div>
     </div>
@@ -1181,21 +1241,23 @@ export default function TemplatePreview({
   device,
   selectedSlotKey,
   onSelectSlot,
+  onDeselectSlot,
   onChangeSelectedSlot,
+  onDeviceChange,
+  useSidePanel = true,
 }: Props) {
   const previewRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const popoverRef = useRef<HTMLDivElement | null>(null);
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<HTMLElement | null>(null);
-  const [popoverPosition, setPopoverPosition] = useState<PopoverPosition>({ top: 0, left: 0 });
   const [viewportWidth, setViewportWidth] = useState(0);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const frame = useMemo(() => getFrameByDevice(device), [device]);
+  const panelOpenScaleFactor = useSidePanel && !isPanelCollapsed ? 0.9 : 1;
   const scale = useMemo(() => {
     if (!viewportWidth) return 1;
-    return Math.min(1, viewportWidth / frame.width);
-  }, [frame.width, viewportWidth]);
+    const fitScale = Math.min(1, viewportWidth / frame.width);
+    return fitScale * panelOpenScaleFactor;
+  }, [frame.width, viewportWidth, panelOpenScaleFactor]);
 
   useEffect(() => {
     const target = viewportRef.current;
@@ -1211,156 +1273,192 @@ export default function TemplatePreview({
     return () => resizeObserver.disconnect();
   }, []);
 
-  useEffect(() => {
-    setPopoverOpen(false);
-    setPopoverAnchorEl(null);
-  }, [device, slide?.id]);
-
-  useEffect(() => {
-    if (!popoverOpen) return;
-
-    const onDocumentPointerDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (!previewRef.current?.contains(target) && !popoverRef.current?.contains(target)) {
-        setPopoverOpen(false);
-      }
-    };
-
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setPopoverOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", onDocumentPointerDown);
-    document.addEventListener("keydown", onEscape);
-    return () => {
-      document.removeEventListener("mousedown", onDocumentPointerDown);
-      document.removeEventListener("keydown", onEscape);
-    };
-  }, [popoverOpen]);
-
   const layouts = useMemo(() => {
     if (!slide) return null;
     return makeLayoutsSafe(mapHeroSlideToLayoutsForEditor(slide));
   }, [slide]);
 
   const selectedSlot = useMemo(() => {
-    if (!slide) return null;
+    if (!slide || selectedSlotKey === null) return null;
     if (device === "desktop") return slide.devices.desktop.slots[selectedSlotKey as HeroDesktopSlotKey] || null;
     if (device === "tablet") return slide.devices.tablet.slots[selectedSlotKey as HeroTabletSlotKey] || null;
     return slide.devices.mobile.slots[selectedSlotKey as HeroMobileSlotKey] || null;
   }, [device, selectedSlotKey, slide]);
 
-  useEffect(() => {
-    if (!popoverOpen || !popoverAnchorEl) return;
-
-    const updatePosition = () => {
-      const anchorRect = popoverAnchorEl.getBoundingClientRect();
-      if (anchorRect.width === 0 && anchorRect.height === 0) return;
-      const popoverHeight = popoverRef.current?.offsetHeight ?? 460;
-      setPopoverPosition(getPopoverPosition(anchorRect, popoverHeight));
-    };
-
-    updatePosition();
-    let resizeObserver: ResizeObserver | null = null;
-    if (popoverRef.current) {
-      resizeObserver = new ResizeObserver(() => updatePosition());
-      resizeObserver.observe(popoverRef.current);
-    }
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
-    return () => {
-      resizeObserver?.disconnect();
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
-    };
-  }, [popoverOpen, popoverAnchorEl, selectedSlot]);
-
-  const handleSlotSelect = (slotKey: SlotKey, anchorEl: HTMLElement) => {
+  const handleSlotSelect = (slotKey: SlotKey) => {
     onSelectSlot(slotKey);
-    setPopoverAnchorEl(anchorEl);
-    setPopoverOpen(true);
   };
+
+  const deviceLabel = device === "desktop" ? "دسکتاپ" : device === "tablet" ? "تبلت" : "موبایل";
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-slate-800">پیش‌نمایش قالب</h2>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
-          {device === "desktop" ? "دسکتاپ" : device === "tablet" ? "تبلت" : "موبایل"}
-        </span>
+        <div className="flex items-center gap-2">
+          {onDeviceChange ? (
+            (["desktop", "tablet", "mobile"] as DeviceMode[]).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => onDeviceChange(d)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  device === d
+                    ? "bg-pink-500 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {d === "desktop" ? "دسکتاپ" : d === "tablet" ? "تبلت" : "موبایل"}
+              </button>
+            ))
+          ) : (
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+              {deviceLabel}
+            </span>
+          )}
+          {slide && layouts && selectedSlotKey !== null && (
+            <span className="rounded-lg bg-pink-50 px-2.5 py-1 text-[11px] font-medium text-pink-700">
+              در حال ویرایش: {slotLabelMap[selectedSlotKey] ?? "اسلات"}
+            </span>
+          )}
+          {useSidePanel && (
+            <button
+              type="button"
+              onClick={() => setIsPanelCollapsed((prev) => !prev)}
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+              title={isPanelCollapsed ? "نمایش پنل ویرایش" : "بستن پنل ویرایش"}
+              aria-label={isPanelCollapsed ? "نمایش پنل ویرایش" : "بستن پنل ویرایش"}
+            >
+              {isPanelCollapsed ? (
+                <PanelRight className="h-4 w-4" aria-hidden />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" aria-hidden />
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {!slide || !layouts ? (
-        <div className="rounded-lg border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-          یک اسلاید را انتخاب یا ایجاد کنید.
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50 py-16 px-6 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+            <Pencil className="h-8 w-8 text-slate-400" aria-hidden />
+          </div>
+          <p className="mb-2 text-sm font-medium text-slate-700">هنوز اسلایدی وجود ندارد</p>
+          <p className="max-w-sm text-xs text-slate-500">
+            برای شروع، از دکمه «افزودن اسلاید» در بالا یک اسلاید جدید اضافه کنید.
+          </p>
         </div>
       ) : (
-        <div ref={previewRef} className="space-y-3">
-          <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-            اسلات در حال ویرایش:{" "}
-            <span className="font-semibold text-slate-800">
-              {slotLabelMap[selectedSlotKey] || "اسلات"}
-            </span>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-500">
-            افزودن فونت جدید برای انتخابگر فونت: <code>frontend/public/fonts</code> سپس ثبت در{" "}
-            <code>frontend/src/styles/fonts.ts</code> و <code>frontend/tailwind.config.ts</code>
-          </div>
+        <div
+          ref={previewRef}
+          className={`flex flex-col gap-4 overflow-x-hidden ${useSidePanel ? "xl:flex-row" : ""}`}
+        >
+          <div className="min-w-0 flex-1 space-y-3">
+            <p className="text-sm font-medium text-slate-600">
+              پیش‌نمایش زنده — روی هر بخش کلیک کنید تا ویرایش شود
+            </p>
 
-          <div ref={viewportRef} className="w-full overflow-visible">
-            <div className="mx-auto" style={{ width: frame.width * scale, height: frame.height * scale }}>
-              <div
-                style={{
-                  width: frame.width,
-                  height: frame.height,
-                  transform: `scale(${scale})`,
-                  transformOrigin: "top left",
-                }}
-                onClickCapture={(event) => {
-                  const target = event.target as HTMLElement;
-                  if (target.closest("a")) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }
-                }}
-              >
-                {device === "desktop" ? (
-                  <DesktopCanvas
-                    layouts={layouts}
-                    selectedSlotKey={selectedSlotKey}
-                    onSelectSlot={handleSlotSelect}
-                  />
-                ) : null}
+            <div
+              ref={viewportRef}
+              className="w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-3"
+            >
+              <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2">
+                  <div className="flex gap-1.5">
+                    <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                  </div>
+                  <div className="flex-1 rounded-md bg-white px-3 py-1.5 text-[11px] text-slate-400">
+                    infinitycolor.co
+                  </div>
+                </div>
+                <div className="flex min-h-0 flex-1 justify-center overflow-hidden">
+                  <div
+                    className="shrink-0 overflow-hidden transition-[width,height] duration-300 ease-out"
+                  style={{
+                    width: frame.width * scale,
+                    height: frame.height * scale,
+                  }}
+                >
+                  <div
+                    className="transition-transform duration-300 ease-out"
+                    style={{
+                      width: frame.width,
+                      height: frame.height,
+                      transform: `scale(${scale})`,
+                      transformOrigin: "top left",
+                    }}
+                    onClickCapture={(event) => {
+                      const target = event.target as HTMLElement;
+                      if (target.closest("a")) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }
+                    }}
+                  >
+                    {device === "desktop" ? (
+                      <DesktopCanvas
+                        layouts={layouts}
+                        selectedSlotKey={selectedSlotKey ?? HERO_DESKTOP_SLOT_KEYS[0]}
+                        onSelectSlot={handleSlotSelect}
+                      />
+                    ) : null}
 
-                {device === "tablet" ? (
-                  <TabletCanvas
-                    layouts={layouts}
-                    selectedSlotKey={selectedSlotKey}
-                    onSelectSlot={handleSlotSelect}
-                  />
-                ) : null}
+                    {device === "tablet" ? (
+                      <TabletCanvas
+                        layouts={layouts}
+                        selectedSlotKey={selectedSlotKey ?? HERO_TABLET_SLOT_KEYS[0]}
+                        onSelectSlot={handleSlotSelect}
+                      />
+                    ) : null}
 
-                {device === "mobile" ? (
-                  <MobileCanvas
-                    layouts={layouts}
-                    selectedSlotKey={selectedSlotKey}
-                    onSelectSlot={handleSlotSelect}
-                  />
-                ) : null}
+                    {device === "mobile" ? (
+                      <MobileCanvas
+                        layouts={layouts}
+                        selectedSlotKey={selectedSlotKey ?? HERO_MOBILE_SLOT_KEYS[0]}
+                        onSelectSlot={handleSlotSelect}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {selectedSlot && popoverOpen && popoverAnchorEl ? (
-            <SlotPopover
-              slot={selectedSlot}
-              onChange={onChangeSelectedSlot}
-              onClose={() => setPopoverOpen(false)}
-              position={popoverPosition}
-              popoverRef={popoverRef}
-            />
+          {useSidePanel ? (
+            <motion.div
+              className="flex flex-shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white xl:min-h-[400px]"
+              initial={false}
+              animate={{
+                width: isPanelCollapsed ? 0 : 320,
+                opacity: isPanelCollapsed ? 0 : 1,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 35,
+              }}
+              style={{ minWidth: 0 }}
+            >
+              <div className="w-[320px] shrink-0">
+                {selectedSlot && onDeselectSlot ? (
+                  <div className="flex h-full min-h-[320px] flex-col overflow-hidden p-3 xl:max-h-[min(70vh,680px)]">
+                    <SlotEditorContent
+                      slot={selectedSlot}
+                      onChange={onChangeSelectedSlot}
+                      onClose={onDeselectSlot}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+                    <p className="text-sm text-slate-500">یک بخش را برای ویرایش انتخاب کنید</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           ) : null}
         </div>
       )}

@@ -1,0 +1,55 @@
+---
+description: Hero slider customization in super-admin: slot structure, CMS mapping, and font configuration. Use when modifying the hero editor, adding slots, or configuring typography.
+globs: 
+alwaysApply: false
+---
+# Hero Slider Customization
+
+**Description**: This rule documents the hero slider customization system in the super-admin panel. Use it when modifying the hero editor, adding new slots, or configuring fonts.
+
+## Slot Structure
+
+### Desktop
+- `topLeftTextBanner` — Headline (title, subtitle, typography)
+- `rightBanner` — Main visual (background + foreground image; 1:1 aspect ratio recommended)
+- `bottomActionBannerLeft` — Card 1 (image, title, button; product/category image)
+- `bottomActionBannerRight` — Card 2 (image, title, button; product/category image)
+
+### Tablet
+- `primaryBanner` — Headline
+- `heroBanner` — Main visual
+- `bottomActionBannerLeft` — Card 1
+- `bottomActionBannerRight` — Card 2
+
+### Mobile
+- Same slot keys as tablet
+
+## CMS Mapping
+
+- Editor payload (`HeroSliderPayload`) is stored via `/settings/hero-slider/draft` (PUT) and published via `/settings/hero-slider/publish` (POST).
+- `mapHeroSlideToLayoutsForEditor` in [frontend/src/components/Hero/config/fromCms.ts](frontend/src/components/Hero/config/fromCms.ts) maps `HeroSlideConfig` to `CmsHeroEditorLayouts` (desktop, tablet, mobile).
+- Layout specs are applied to Hero components: `TextBanner`, `ActionBanner`, `LeftBanner`.
+
+## Placeholders
+
+When image URLs are empty, the editor uses slot-specific placeholders:
+- **Main visual** (`rightBanner` / `heroBanner`): `hero-main-placeholder.svg` — "تصویر اصلی - نسبت ۱:۱ توصیه می‌شود"
+- **Cards** (`bottomActionBannerLeft` / `bottomActionBannerRight`): `hero-card-placeholder.svg` — "کارت - تصویر محصول یا دسته‌بندی"
+
+Files: [frontend/public/images/placeholders/](frontend/public/images/placeholders/)
+
+## Font Configuration
+
+To add new fonts for the hero font selector:
+
+1. Add font files to `frontend/public/fonts/`
+2. Register in `frontend/src/styles/fonts.ts` (e.g. `@font-face` and export)
+3. Add the font to Tailwind in `frontend/tailwind.config.ts` under `fontFamily`
+4. Add the option to `HERO_FONT_FAMILY_OPTIONS` in [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts)
+
+## Key Files
+
+- [frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page
+- [frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Preview + in-place editing
+- [frontend/src/components/Hero/config/fromCms.ts](frontend/src/components/Hero/config/fromCms.ts) — CMS → layout mapping
+- [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) — Types and defaults
