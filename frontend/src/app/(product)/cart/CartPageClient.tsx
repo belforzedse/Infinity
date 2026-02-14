@@ -65,7 +65,7 @@ export default function CartPageClient() {
       value: totalValue,
       onceKey: `view-cart:${cartItems.length}:${Math.round(totalValue)}`,
     });
-  }, [isLoading, cartItems.length, Math.round(totalValue)]);
+  }, [isLoading, cartItems.length, totalValue]);
 
   if (isLoading) return <CartSkeleton />;
   if (cartItems.length === 0) {

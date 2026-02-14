@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeftBannerSpec } from '../types';
@@ -11,6 +12,8 @@ interface LeftBannerProps {
   spec: LeftBannerSpec;
   className?: string;
 }
+
+const HERO_IMAGE_PLACEHOLDER_SRC = "/images/placeholders/image-placeholder.svg";
 
 export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const { background, foregroundImage } = spec;
