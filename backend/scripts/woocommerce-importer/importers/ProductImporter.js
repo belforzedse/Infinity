@@ -1014,8 +1014,8 @@ class ProductImporter {
       throw new Error(`Product ${wcProduct.id}: Missing product name/title`);
     }
 
-    // Generate slug from WooCommerce slug or title
-    const slug = this.generateProductSlug(wcProduct);
+    const normalizedName = this.normalizeProductName(wcProduct.name);
+    const slug = this.generateSlugFromTitle(normalizedName);
 
     // Prepare description - use main description if available, otherwise use short_description
     let descriptionContent = "";
@@ -1030,7 +1030,7 @@ class ProductImporter {
     }
 
     const strapiProduct = {
-      Title: wcProduct.name.trim(),
+      Title: normalizedName,
       Slug: slug,
       // Description is richtext in Strapi, so preserve HTML
       Description: descriptionContent,
@@ -1265,6 +1265,21 @@ class ProductImporter {
 
     // Last resort: use WooCommerce ID
     return `product-${wcProduct.id}`;
+  }
+
+  /**
+   * Normalize product name: trim, collapse consecutive whitespace, insert space at letter-digit boundary.
+   * @param {string} name - Raw product name
+   * @returns {string} - Normalized name
+   */
+  normalizeProductName(name) {
+    if (!name || typeof name !== "string") return "";
+    let normalized = name.trim().replace(/\s+/g, " ");
+    // Insert space at letter-to-digit boundary (e.g. bearB00130 -> bear B00130)
+    normalized = normalized.replace(/([a-zA-Z\u0600-\u06FF])(\d)/g, "$1 $2");
+    // Insert space at digit-to-letter boundary (e.g. 00130B -> 00130 B)
+    normalized = normalized.replace(/(\d)([a-zA-Z\u0600-\u06FF])/g, "$1 $2");
+    return normalized.trim();
   }
 
   /**

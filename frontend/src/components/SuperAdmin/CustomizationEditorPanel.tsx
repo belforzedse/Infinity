@@ -36,7 +36,7 @@ export default function CustomizationEditorPanel({
       }}
       style={{ minWidth: 0 }}
     >
-      <div className="h-full w-[320px] shrink-0 overflow-hidden">
+      <div className="h-full shrink-0 overflow-hidden" style={{ width: `${PANEL_WIDTH}px` }}>
         {children != null ? (
           <div className="scrollbar-neutral flex h-full min-h-[320px] min-w-0 flex-col overflow-x-hidden overflow-y-auto p-3 xl:max-h-[min(70vh,680px)]">
             {children}

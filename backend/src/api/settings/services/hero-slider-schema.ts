@@ -146,6 +146,8 @@ export type HeroMainVisualSlot = {
   foregroundObjectPosition: string;
   foregroundCustomWidth: string;
   foregroundCustomHeight: string;
+  /** Foreground image zoom (0.5–2). Default 1. */
+  foregroundZoom?: number;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
@@ -376,7 +378,7 @@ function sanitizeColorOrClass(value: unknown): string {
   const normalized = sanitizeString(value, 120);
   if (!normalized) return "";
 
-  if (/^#[0-9a-fA-F]{3,8}$/.test(normalized)) {
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(normalized)) {
     return normalized;
   }
 
@@ -754,6 +756,7 @@ function sanitizeMainVisualSlot(
       "",
     foregroundCustomWidth: sanitizeClassName(raw.foregroundCustomWidth ?? media.customWidth, 80),
     foregroundCustomHeight: sanitizeClassName(raw.foregroundCustomHeight ?? media.customHeight, 80),
+    foregroundZoom: clampNumber(raw.foregroundZoom, 0.5, 2, 1),
     link: sanitizeLink(raw.link, errors, `${path}.link`),
     tracking: sanitizeTracking(raw.tracking),
   };

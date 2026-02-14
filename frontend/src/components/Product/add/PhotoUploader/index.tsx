@@ -26,7 +26,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       <PhotoUploaderImageGrid
         previews={images.map((image) => image.preview)}
         onRemoveFile={(index) => removeFile(index, "image")}
-        onReorder={(oldIndex, newIndex) => reorderImages(oldIndex, newIndex)}
+        onReorder={reorderImages}
       />
     </div>
   );

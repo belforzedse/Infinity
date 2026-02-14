@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import PhotoUploaderImagePreview from "./ImagePreview";
+import PhotoUploaderImagePreview from "@/components/Product/add/PhotoUploader/ImagePreview";
 import {
   DndContext,
   closestCenter,

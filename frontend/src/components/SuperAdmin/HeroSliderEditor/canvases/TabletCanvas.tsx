@@ -4,8 +4,8 @@ import { ActionBanner } from "@/components/Hero/Banners/ActionBanner";
 import { LeftBanner } from "@/components/Hero/Banners/LeftBanner";
 import TextBanner from "@/components/Hero/Banners/TextBanner";
 import type { CmsHeroEditorLayouts } from "@/components/Hero/config/fromCms";
-import { EditableSlot } from "../EditableSlot";
-import type { SlotKey } from "../utils";
+import { EditableSlot } from "@/components/SuperAdmin/HeroSliderEditor/EditableSlot";
+import type { SlotKey } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
 type TabletCanvasProps = {
   layouts: CmsHeroEditorLayouts;

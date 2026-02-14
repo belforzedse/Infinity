@@ -47,4 +47,13 @@ describe("ShoppingCartBillPaymentGateway", () => {
 
     expect(screen.queryByText(/اسنپ/)).not.toBeInTheDocument();
   });
+
+  it("renders without availableGateways and shows default gateways (no throw)", () => {
+    expect(() => {
+      render(
+        <ShoppingCartBillPaymentGateway selected="samankish" onChange={onChange} />,
+      );
+    }).not.toThrow();
+    expect(screen.getByText(/سامان‌کیش/)).toBeInTheDocument();
+  });
 });

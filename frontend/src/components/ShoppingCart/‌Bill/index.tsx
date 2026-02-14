@@ -125,6 +125,11 @@ function ShoppingCartBillForm({}: Props) {
     (gw) => gw !== "snappay" || snappEligible,
   );
 
+  const shippingToman = shippingCost ?? 0;
+  const discountToman = discountPreview?.discount ?? 0;
+  const subtotalToman = totalPrice;
+  const totalToman = Math.max(0, Math.round(subtotalToman - discountToman + shippingToman));
+
   // Persist/restore discount code
   useEffect(() => {
     try {
@@ -202,14 +207,8 @@ function ShoppingCartBillForm({}: Props) {
           return;
         }
 
-        // Tax is disabled: payable amount must be subtotal - discount + shipping.
-        const shippingToman = shippingCost ?? 0;
-        const discountToman = discountPreview?.discount ?? 0;
-        const subtotalToman = totalPrice;
-        const finalAmount = Math.max(0, Math.round(subtotalToman - discountToman + shippingToman));
-
         const res = await CartService.getSnappEligible({
-          amount: finalAmount,
+          amount: totalToman,
         });
         // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
@@ -223,7 +222,7 @@ function ShoppingCartBillForm({}: Props) {
       }
     };
     run();
-  }, [shippingId, shippingCost, discountCode, discountPreview, totalPrice]);
+  }, [shippingId, totalToman]);
 
   // Load wallet balance once
   useEffect(() => {
@@ -574,13 +573,6 @@ function ShoppingCartBillForm({}: Props) {
       setIsSubmitting(false);
     }
   };
-
-  // Compute required amount (toman -> IRR) for wallet enablement, independent of discountPreview presence
-  // Fallbacks: subtotal + tax + shipping when no discount is applied
-  const shippingToman = shippingCost ?? 0;
-  const discountToman = discountPreview?.discount ?? 0;
-  const subtotalToman = totalPrice;
-  const totalToman = Math.max(0, Math.round(subtotalToman - discountToman + shippingToman));
 
   const requiredAmountIrr = totalToman * 10;
   const submitOrderStep = useAtomValue(submitOrderStepAtom);

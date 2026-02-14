@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import PhotoUploaderImageGrid from "./ImageGrid";
+import PhotoUploaderImageGrid from "@/components/Product/add/PhotoUploader/ImageGrid";
 
-jest.mock("./ImagePreview", () => ({
+jest.mock("@/components/Product/add/PhotoUploader/ImagePreview", () => ({
   __esModule: true,
   default: ({ preview, index, onRemove }: { preview: string; index: number; onRemove: () => void }) => (
     <button type="button" data-testid={`remove-${index}`} onClick={onRemove}>

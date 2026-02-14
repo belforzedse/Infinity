@@ -20,10 +20,14 @@ export function EditableSlot({
   children,
 }: EditableSlotProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const label = slotLabelMap[slotKey] || slotKey;
+  const showOverlay = (isHovered || isFocused) && !selected;
 
   return (
     <div
+      role="group"
+      aria-label={label}
       className={`group relative overflow-visible ${className || ""}`}
       data-slot={slotKey}
       onMouseEnter={() => setIsHovered(true)}
@@ -34,6 +38,8 @@ export function EditableSlot({
       <button
         type="button"
         onClick={(event) => onSelect(event.currentTarget)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         className={`absolute inset-0 z-20 rounded-lg transition-all duration-200 ring-inset ${
           selected
             ? "ring-2 ring-pink-500"
@@ -43,7 +49,7 @@ export function EditableSlot({
         title="برای ویرایش کلیک کنید"
       />
 
-      {isHovered && !selected && (
+      {showOverlay && (
         <div className="pointer-events-none absolute inset-0 z-[21] flex items-center justify-center rounded-lg bg-black/5">
           <span className="rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-md">
             کلیک برای ویرایش

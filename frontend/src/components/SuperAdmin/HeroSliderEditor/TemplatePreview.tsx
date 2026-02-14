@@ -91,10 +91,6 @@ export default function TemplatePreview({
     return slide.devices.mobile.slots[selectedSlotKey as HeroMobileSlotKey] || null;
   }, [device, selectedSlotKey, slide]);
 
-  const handleSlotSelect = (slotKey: SlotKey) => {
-    onSelectSlot(slotKey);
-  };
-
   const deviceLabel =
     device === "desktop" ? "دسکتاپ" : device === "tablet" ? "تبلت" : "موبایل";
 
@@ -207,7 +203,7 @@ export default function TemplatePreview({
                         <DesktopCanvas
                           layouts={layouts}
                           selectedSlotKey={selectedSlotKey ?? HERO_DESKTOP_SLOT_KEYS[0]}
-                          onSelectSlot={handleSlotSelect}
+                          onSelectSlot={onSelectSlot}
                         />
                       ) : null}
 
@@ -215,7 +211,7 @@ export default function TemplatePreview({
                         <TabletCanvas
                           layouts={layouts}
                           selectedSlotKey={selectedSlotKey ?? HERO_TABLET_SLOT_KEYS[0]}
-                          onSelectSlot={handleSlotSelect}
+                          onSelectSlot={onSelectSlot}
                         />
                       ) : null}
 
@@ -223,7 +219,7 @@ export default function TemplatePreview({
                         <MobileCanvas
                           layouts={layouts}
                           selectedSlotKey={selectedSlotKey ?? HERO_MOBILE_SLOT_KEYS[0]}
-                          onSelectSlot={handleSlotSelect}
+                          onSelectSlot={onSelectSlot}
                         />
                       ) : null}
                     </div>

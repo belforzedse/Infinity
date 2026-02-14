@@ -94,7 +94,7 @@ export const getAvailableGateways = async (): Promise<CheckoutGatewayCode[]> => 
           code === "samankish" || code === "mellat" || code === "snappay" || code === "wallet",
       );
 
-    return gatewayCodes.length > 0 ? gatewayCodes : [...DEFAULT_CHECKOUT_GATEWAYS];
+    return gatewayCodes;
   } catch {
     return [...DEFAULT_CHECKOUT_GATEWAYS];
   }
