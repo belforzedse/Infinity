@@ -285,9 +285,17 @@ export const getMyOrders = async (
       }
     }
 
-    const metaFromResponse =
-      (raw && typeof raw === "object" && !Array.isArray(raw) && "meta" in raw && (raw as { meta: OrdersResponse["meta"] }).meta) ??
-      (raw && typeof raw === "object" && raw.data && typeof raw.data === "object" && !Array.isArray(raw.data) && "meta" in raw.data && (raw.data as { meta: OrdersResponse["meta"] }).meta);
+    type Meta = OrdersResponse["meta"];
+    const rawObj = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as { data?: unknown; meta?: Meta }) : null;
+    let metaFromResponse: Meta | undefined;
+    if (rawObj && "meta" in rawObj && rawObj.meta && typeof rawObj.meta === "object" && "pagination" in rawObj.meta) {
+      metaFromResponse = rawObj.meta as Meta;
+    } else if (rawObj?.data && typeof rawObj.data === "object" && !Array.isArray(rawObj.data) && "meta" in rawObj.data) {
+      const inner = rawObj.data as { meta?: Meta };
+      if (inner.meta && typeof inner.meta === "object" && "pagination" in inner.meta) {
+        metaFromResponse = inner.meta;
+      }
+    }
 
     if (!ordersArray.length && !metaFromResponse) {
       return {

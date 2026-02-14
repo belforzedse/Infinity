@@ -10,7 +10,7 @@ export const getActiveReserve = async (): Promise<ActiveReserveResponse> => {
   // API returns { data: null } or { data: { reserveGroupId, reserveExpiresAt, orders, orderCount } }.
   // Return that shape so callers (e.g. Bill) can use result.data.
   if (response != null && typeof response === "object" && "data" in response) {
-    return response as ActiveReserveResponse;
+    return response as unknown as ActiveReserveResponse;
   }
   // If response was unwrapped (payload only), normalize to { data: payload } or { data: null }
   if (response != null && typeof response === "object" && "reserveGroupId" in response) {
