@@ -14,6 +14,52 @@ import {
   ALLOWED_LINE_HEIGHTS,
   ALLOWED_LETTER_SPACINGS,
 } from "./hero-slider-defaults";
+import {
+  DEFAULT_TOP_HEADLINE_TITLE_STYLE,
+  DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE,
+  DEFAULT_PRIMARY_TITLE_STYLE,
+  DEFAULT_PRIMARY_SUBTITLE_STYLE,
+  DEFAULT_CARD_TITLE_STYLE,
+  DEFAULT_CARD_BUTTON_STYLE,
+  DEFAULT_DESKTOP_HEADLINE_CLASSNAME,
+  DEFAULT_TABLET_HEADLINE_CLASSNAME,
+  DEFAULT_MOBILE_HEADLINE_CLASSNAME,
+  DEFAULT_DESKTOP_CARD_LEFT_CLASSNAME,
+  DEFAULT_DESKTOP_CARD_RIGHT_CLASSNAME,
+  DEFAULT_DESKTOP_CARD_LEFT_IMAGE_CLASSNAME,
+  DEFAULT_DESKTOP_CARD_RIGHT_IMAGE_CLASSNAME,
+  DEFAULT_CARD_BACKGROUND_CLASSNAME,
+  DEFAULT_CARD_BUTTON_CLASSNAME,
+  DEFAULT_CARD_PADDING_CLASSNAME,
+  DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_WIDTH,
+  DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_HEIGHT,
+  DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_POSITION,
+  DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_SIZE,
+  DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+  DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH,
+  DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT,
+  DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION,
+  DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE,
+  DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+  DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME,
+  DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION,
+  DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH,
+  DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT,
+  DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION,
+  DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE,
+  DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+  DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME,
+  DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION,
+  DEFAULT_TABLET_CARD_LEFT_CLASSNAME,
+  DEFAULT_TABLET_CARD_RIGHT_CLASSNAME,
+  DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME,
+  DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME,
+  DEFAULT_MOBILE_CARD_LEFT_CLASSNAME,
+  DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME,
+  DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
+  DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
+  DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+} from "./hero-slider-default-styles";
 import type {
   HeroSlotLink,
   HeroTracking,
@@ -32,115 +78,12 @@ import type {
 const MAX_CUSTOM_ENTRIES = 20;
 const MAX_SLIDES = 50;
 
-const DEFAULT_TOP_HEADLINE_TITLE_STYLE: HeroTextStyle = {
-  color: "#94B5D2",
-  fontFamily: "font-kaghaz",
-  fontSize: "lg:text-[48px] 2xl:text-[50px]",
-  fontWeight: "font-bold",
-  lineHeight: "leading-tight",
-  letterSpacing: "tracking-tight",
-};
-
-const DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE: HeroTextStyle = {
-  color: "text-gray-600",
-  fontFamily: "font-kaghaz",
-  fontSize: "lg:text-[26px] 2xl:text-[30px]",
-  fontWeight: "font-semibold",
-  lineHeight: "leading-relaxed",
-  letterSpacing: "tracking-normal",
-};
-
-const DEFAULT_PRIMARY_TITLE_STYLE: HeroTextStyle = {
-  color: "text-gray-900",
-  fontFamily: "font-kaghaz",
-  fontSize: "text-xl sm:text-2xl md:text-3xl",
-  fontWeight: "font-bold",
-  lineHeight: "leading-tight",
-  letterSpacing: "tracking-normal",
-};
-
-const DEFAULT_PRIMARY_SUBTITLE_STYLE: HeroTextStyle = {
-  color: "text-gray-600",
-  fontFamily: "font-kaghaz",
-  fontSize: "text-sm sm:text-base md:text-lg",
-  fontWeight: "font-medium",
-  lineHeight: "leading-relaxed",
-  letterSpacing: "tracking-normal",
-};
-
-const DEFAULT_CARD_TITLE_STYLE: HeroTextStyle = {
-  color: "text-gray-900",
-  fontFamily: "font-peyda-fanum",
-  fontSize: "text-lg",
-  fontWeight: "font-bold",
-  lineHeight: "leading-tight",
-  letterSpacing: "tracking-normal",
-};
-
-const DEFAULT_CARD_BUTTON_STYLE: HeroTextStyle = {
-  color: "text-white",
-  fontFamily: "font-peyda-fanum",
-  fontSize: "text-sm",
-  fontWeight: "font-medium",
-  lineHeight: "leading-normal",
-  letterSpacing: "tracking-normal",
-};
-
-const DEFAULT_DESKTOP_HEADLINE_CLASSNAME =
-  "w-full gap-[8px] pb-[68px] mb-[10px] rounded-3xl px-[36px] pt-[30px]";
-const DEFAULT_TABLET_HEADLINE_CLASSNAME =
-  "w-full gap-[8px] rounded-3xl px-[24px] pb-[40px] pt-[20px]";
-const DEFAULT_MOBILE_HEADLINE_CLASSNAME =
-  "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]";
-
-const DEFAULT_DESKTOP_CARD_LEFT_CLASSNAME = "h-[80%]";
-const DEFAULT_DESKTOP_CARD_RIGHT_CLASSNAME = "h-[80%]";
-const DEFAULT_DESKTOP_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 -translate-y-4 object-contain";
-const DEFAULT_DESKTOP_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg pl-2 object-contain";
-const DEFAULT_CARD_BACKGROUND_CLASSNAME = "rounded-3xl";
-const DEFAULT_CARD_BUTTON_CLASSNAME = "text-white text-[20px] font-normal rounded-lg";
-const DEFAULT_CARD_PADDING_CLASSNAME = "px-4 py-4 pr-8";
-
-const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_WIDTH = "520px";
-const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_HEIGHT = "427px";
-const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
-const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-const DEFAULT_DESKTOP_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-3xl";
-
-const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
-const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
-const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
-const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
-const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
-const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
-
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
-const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
-const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
-
-const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
-const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
-const DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain";
-const DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain";
-
-const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "rounded-lg";
-const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "rounded-lg";
-const DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 scale-150 -translate-y-4 object-contain";
-const DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg scale-125 pl-2 object-contain";
-const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-4 pr-3";
+/** Stricter pattern: rgb/rgba allow only numbers, commas, spaces, optional alpha 0–1. */
+const RGB_RGBA_PATTERN =
+  /^rgba?\s*\(\s*\d+(?:\.\d+)?\s*,\s*\d+(?:\.\d+)?\s*,\s*\d+(?:\.\d+)?\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)$/i;
+/** Stricter pattern: hsl/hsla allow numbers, optional %, optional deg/rad/turn, commas, spaces, optional alpha. */
+const HSL_HSLA_PATTERN =
+  /^hsla?\s*\(\s*\d+(?:\.\d+)?(?:deg|rad|turn)?\s*,\s*\d+(?:\.\d+)?%\s*,\s*\d+(?:\.\d+)?%\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)$/i;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -167,7 +110,7 @@ function sanitizeColorOrClass(value: unknown): string {
     return normalized;
   }
 
-  if (/^(rgba?|hsla?)\([^)]*\)$/i.test(normalized)) {
+  if (RGB_RGBA_PATTERN.test(normalized) || HSL_HSLA_PATTERN.test(normalized)) {
     return normalized;
   }
 

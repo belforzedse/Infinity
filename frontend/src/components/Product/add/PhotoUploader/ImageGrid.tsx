@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import PhotoUploaderImagePreview from "@/components/Product/add/PhotoUploader/ImagePreview";
 import {
   DndContext,
@@ -70,7 +70,17 @@ const SortablePreviewItem: React.FC<SortablePreviewItemProps> = ({
 };
 
 function generateStableId(): string {
-  return `image-${crypto.randomUUID()}`;
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `image-${crypto.randomUUID()}`;
+  }
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  return `image-${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-${["8", "9", "a", "b"][Math.floor(Math.random() * 4)]}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
 }
 
 const KEYBOARD_SENSOR_OPTIONS = { coordinateGetter: sortableKeyboardCoordinates };
@@ -102,19 +112,22 @@ const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFi
     }));
   }, [previews]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    if (!onReorder) return;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      if (!onReorder) return;
 
-    const { active, over } = event;
-    if (!active?.id || !over?.id || active.id === over.id) return;
+      const { active, over } = event;
+      if (!active?.id || !over?.id || active.id === over.id) return;
 
-    const oldIndex = sortableItems.findIndex((item) => item.id === String(active.id));
-    const newIndex = sortableItems.findIndex((item) => item.id === String(over.id));
+      const oldIndex = sortableItems.findIndex((item) => item.id === String(active.id));
+      const newIndex = sortableItems.findIndex((item) => item.id === String(over.id));
 
-    if (oldIndex < 0 || newIndex < 0) return;
+      if (oldIndex < 0 || newIndex < 0) return;
 
-    onReorder(oldIndex, newIndex);
-  };
+      onReorder(oldIndex, newIndex);
+    },
+    [onReorder, sortableItems],
+  );
 
   const grid = (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

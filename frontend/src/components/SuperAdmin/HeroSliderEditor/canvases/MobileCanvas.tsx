@@ -9,7 +9,7 @@ import type { SlotKey } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
 type MobileCanvasProps = {
   layouts: CmsHeroEditorLayouts;
-  selectedSlotKey: SlotKey;
+  selectedSlotKey: SlotKey | null;
   onSelectSlot: (slotKey: SlotKey, anchorEl: HTMLElement) => void;
 };
 

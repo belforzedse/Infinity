@@ -13,6 +13,12 @@ type DesktopSlotKey = (typeof DESKTOP_SLOT_KEYS)[number];
 type TabletSlotKey = (typeof TABLET_SLOT_KEYS)[number];
 type MobileSlotKey = (typeof MOBILE_SLOT_KEYS)[number];
 
+/**
+ * Token type aliases use the conditional "typeof ALLOWED_... extends Set<infer T> ? T : never"
+ * to extract the element type from each Set of allowed values, so the token becomes the union
+ * of that Set's entries. Corresponding constants: ALLOWED_FONT_FAMILIES, ALLOWED_FONT_SIZES,
+ * ALLOWED_FONT_WEIGHTS, ALLOWED_LINE_HEIGHTS, ALLOWED_LETTER_SPACINGS.
+ */
 type HeroFontFamilyToken = (typeof ALLOWED_FONT_FAMILIES extends Set<infer T> ? T : never);
 type HeroFontSizeToken = (typeof ALLOWED_FONT_SIZES extends Set<infer T> ? T : never);
 type HeroFontWeightToken = (typeof ALLOWED_FONT_WEIGHTS extends Set<infer T> ? T : never);

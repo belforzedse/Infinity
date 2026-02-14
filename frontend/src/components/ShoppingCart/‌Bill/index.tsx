@@ -158,11 +158,11 @@ function ShoppingCartBillForm({}: Props) {
 
   useEffect(() => {
     if (selectableGateways.length === 0) {
-      setError("در حال حاضر هیچ درگاه پرداختی فعال نیست");
+      setError(EMPTY_GATEWAYS_ERROR);
       return;
     }
 
-    setError((prev) => (prev === "در حال حاضر هیچ درگاه پرداختی فعال نیست" ? null : prev));
+    setError((prev) => (prev === EMPTY_GATEWAYS_ERROR ? null : prev));
 
     if (!selectableGateways.includes(gateway)) {
       setGateway(selectableGateways[0]);
@@ -234,6 +234,7 @@ function ShoppingCartBillForm({}: Props) {
   }, []);
 
   // Validate cart has items and total price on mount
+  const EMPTY_GATEWAYS_ERROR = "در حال حاضر هیچ درگاه پرداختی فعال نیست";
   const EMPTY_CART_ERROR = "سبد خرید شما خالی است یا مبلغ نامعتبر است";
   useEffect(() => {
     if (!currentUser) {

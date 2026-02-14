@@ -48,6 +48,7 @@ export function useAutoplaySlider({
 
   const findNextAutoplayIndex = useMemo(() => {
     return (current: number) => {
+      if (slidesLength === 0) return current;
       if (!autoplayEligibility || autoplayEligibility.length !== slidesLength) {
         return (current + 1) % slidesLength;
       }
@@ -91,7 +92,7 @@ export function useAutoplaySlider({
       setPlayKey((k) => k + 1);
     }, normalizedInterval);
     return () => clearInterval(id);
-  }, [slidesLength, normalizedInterval, hasEligibleAutoplaySlides, findNextAutoplayIndex]);
+  }, [slidesLength, normalizedInterval, hasEligibleAutoplaySlides, findNextAutoplayIndex, playKey]);
 
   const next = useCallback(() => {
     if (slidesLength === 0) return;

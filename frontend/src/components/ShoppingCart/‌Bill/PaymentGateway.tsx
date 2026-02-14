@@ -22,7 +22,7 @@ function ShoppingCartBillPaymentGateway({
   selected,
   onChange,
   availableGateways = DEFAULT_CHECKOUT_GATEWAYS,
-  snappEligible = true,
+  snappEligible = false,
   snappTitle,
   snappDescription,
   walletBalanceIrr = 0,

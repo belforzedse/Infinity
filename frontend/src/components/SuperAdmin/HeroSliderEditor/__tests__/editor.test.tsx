@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import HeroSliderCustomizationPage from "@/app/(super-admin)/super-admin/settings/customization/hero-slider/page";
 import SlideList from "@/components/SuperAdmin/HeroSliderEditor/SlideList";
+import type { HeroSliderPayload } from "@/types/super-admin/heroSlider";
 import { normalizeHeroSliderPayload } from "@/types/super-admin/heroSlider";
 import {
   getHeroSliderDraftAndPublished,
@@ -68,7 +69,7 @@ describe("Hero slider editor", () => {
     const initial = createHeroState();
 
     getHeroSliderDraftAndPublishedMock.mockResolvedValue(initial);
-    updateHeroSliderDraftMock.mockImplementation(async (payload: any) => payload);
+    updateHeroSliderDraftMock.mockImplementation(async (payload: HeroSliderPayload) => payload);
     publishHeroSliderDraftMock.mockResolvedValue({
       published: normalizeHeroSliderPayload({
         slides: [{ id: "published-slide", order: 0, isActive: true, autoplayEligible: true }],

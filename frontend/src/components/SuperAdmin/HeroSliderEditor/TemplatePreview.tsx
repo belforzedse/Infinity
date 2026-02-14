@@ -24,6 +24,12 @@ import {
   type SlotKey,
 } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
+const DEVICE_LABELS: Record<DeviceMode, string> = {
+  desktop: "دسکتاپ",
+  tablet: "تبلت",
+  mobile: "موبایل",
+};
+
 export type { DeviceMode, SlotKey };
 
 type Props = {
@@ -96,8 +102,7 @@ export default function TemplatePreview({
     return slide.devices.mobile.slots[selectedSlotKey as HeroMobileSlotKey] || null;
   }, [device, selectedSlotKey, slide]);
 
-  const deviceLabel =
-    device === "desktop" ? "دسکتاپ" : device === "tablet" ? "تبلت" : "موبایل";
+  const deviceLabel = DEVICE_LABELS[device];
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -116,7 +121,7 @@ export default function TemplatePreview({
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
-                {d === "desktop" ? "دسکتاپ" : d === "tablet" ? "تبلت" : "موبایل"}
+                {DEVICE_LABELS[d]}
               </button>
             ))
           ) : (
@@ -207,7 +212,7 @@ export default function TemplatePreview({
                       {device === "desktop" ? (
                         <DesktopCanvas
                           layouts={layouts}
-                          selectedSlotKey={selectedSlotKey ?? HERO_DESKTOP_SLOT_KEYS[0]}
+                          selectedSlotKey={selectedSlotKey}
                           onSelectSlot={onSelectSlot}
                         />
                       ) : null}
@@ -215,7 +220,7 @@ export default function TemplatePreview({
                       {device === "tablet" ? (
                         <TabletCanvas
                           layouts={layouts}
-                          selectedSlotKey={selectedSlotKey ?? HERO_TABLET_SLOT_KEYS[0]}
+                          selectedSlotKey={selectedSlotKey}
                           onSelectSlot={onSelectSlot}
                         />
                       ) : null}
@@ -223,7 +228,7 @@ export default function TemplatePreview({
                       {device === "mobile" ? (
                         <MobileCanvas
                           layouts={layouts}
-                          selectedSlotKey={selectedSlotKey ?? HERO_MOBILE_SLOT_KEYS[0]}
+                          selectedSlotKey={selectedSlotKey}
                           onSelectSlot={onSelectSlot}
                         />
                       ) : null}
@@ -250,7 +255,7 @@ export default function TemplatePreview({
               style={{ minWidth: 0 }}
             >
               <div className="w-[320px] shrink-0">
-                {selectedSlot && onDeselectSlot ? (
+                {selectedSlot ? (
                   <div className="flex h-full min-h-[320px] flex-col overflow-hidden p-3 xl:max-h-[min(70vh,680px)]">
                     <SlotEditorContent
                       slot={selectedSlot}

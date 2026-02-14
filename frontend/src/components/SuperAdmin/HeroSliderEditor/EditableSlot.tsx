@@ -18,7 +18,7 @@ export function EditableSlot({
   onSelect,
   className,
   children,
-}: EditableSlotProps) {
+}: EditableSlotProps): JSX.Element {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const label = slotLabelMap[slotKey] || slotKey;
