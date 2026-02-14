@@ -289,13 +289,25 @@ function Tablet({ children }: { children: React.ReactNode }) {
 }
 
 function Desktop({ children }: { children: React.ReactNode }) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   return (
     <div className="flex min-h-screen gap-5 bg-neutral-50 pl-6 lg:pl-10">
-      <div className="sticky top-0 h-screen w-[250px] overflow-y-auto">
-        <Sidebar isOpen={true} onClose={() => {}} />
+      <div
+        className={clsx(
+          "sticky top-0 h-screen overflow-y-auto transition-all duration-300 z-10 flex-shrink-0",
+          isSidebarCollapsed ? "w-[80px]" : "w-[250px]"
+        )}
+      >
+        <Sidebar
+          isOpen={true}
+          onClose={() => {}}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
       </div>
-      <div className="flex w-full flex-1 flex-col gap-4 p-4 lg:gap-7">
-        <div className="w-full max-w-screen-3xl space-y-4 lg:space-y-7 mx-auto">
+      <div className="flex w-full min-w-0 flex-1 flex-col gap-4 p-4 lg:gap-7">
+        <div className="w-full max-w-screen-3xl min-w-0 space-y-4 lg:space-y-7 mx-auto">
           <Header onMenuClick={() => {}} />
           {children}
         </div>

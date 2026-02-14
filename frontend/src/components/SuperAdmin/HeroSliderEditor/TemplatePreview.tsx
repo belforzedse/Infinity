@@ -58,14 +58,23 @@ export default function TemplatePreview({
     const target = viewportRef.current;
     if (!target) return;
 
+    let debounceId: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
-      setViewportWidth(entry.contentRect.width);
+      const w = entry.contentRect.width;
+      if (debounceId) clearTimeout(debounceId);
+      debounceId = setTimeout(() => {
+        debounceId = null;
+        setViewportWidth(w);
+      }, 80);
     });
 
     resizeObserver.observe(target);
-    return () => resizeObserver.disconnect();
+    return () => {
+      if (debounceId) clearTimeout(debounceId);
+      resizeObserver.disconnect();
+    };
   }, []);
 
   const layouts = useMemo(() => {
@@ -171,11 +180,10 @@ export default function TemplatePreview({
                     infinitycolor.co
                   </div>
                 </div>
-                <div className="flex min-h-0 flex-1 justify-center overflow-hidden">
+                <div className="flex min-h-0 flex-1 overflow-hidden">
                   <div
-                    className="shrink-0 overflow-hidden transition-[width,height] duration-300 ease-out"
+                    className="w-full overflow-hidden transition-[height] duration-300 ease-out"
                     style={{
-                      width: frame.width * scale,
                       height: frame.height * scale,
                     }}
                   >
@@ -185,7 +193,7 @@ export default function TemplatePreview({
                         width: frame.width,
                         height: frame.height,
                         transform: `scale(${scale})`,
-                        transformOrigin: "top left",
+                        transformOrigin: "top right",
                       }}
                       onClickCapture={(event) => {
                         const target = event.target as HTMLElement;
