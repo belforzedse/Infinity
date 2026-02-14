@@ -1,14 +1,14 @@
 ---
-description: On-demand revalidation setup for blog posts - instant cache invalidation when content changes
+description: On-demand revalidation setup for blog posts and hero slider - instant cache invalidation when content changes
 globs: 
 alwaysApply: false
 ---
 
-# On-Demand Revalidation for Blog Posts
+# On-Demand Revalidation (Blog & Hero Slider)
 
 ## Overview
 
-This system implements **on-demand revalidation** for blog posts, providing instant cache updates when content is published or modified. This is superior to time-based ISR because:
+This system implements **on-demand revalidation** for blog posts and the home-page hero slider, providing instant cache updates when content is published or modified. This is superior to time-based ISR because:
 
 ✅ **Instant Updates** - New posts appear immediately when published  
 ✅ **No Unnecessary Regeneration** - Only regenerates when content actually changes  
@@ -24,10 +24,14 @@ This system implements **on-demand revalidation** for blog posts, providing inst
 
 2. **Next.js Revalidation API** (`frontend/src/app/api/revalidate/route.ts`)
    - Protected by `REVALIDATION_SECRET` token
-   - Invalidates cache for specific blog post pages
-   - Also revalidates blog listing and sitemap
+   - Supports `type`: `blog-post`, `blog-listing`, `hero-slider`, plus generic `path` and `tag`
+   - `hero-slider` → revalidates `/` (home page)
 
-3. **Blog Post Pages** (`frontend/src/app/(blog)/[slug]/page.tsx`)
+3. **Hero Slider** (home page)
+   - Triggered from **Settings controller** when hero is published: `publishHeroSliderDraft` in `backend/src/api/settings/controllers/settings.ts` calls `triggerHeroSliderRevalidation(strapi)` after updating `homeHeroSliderPublished`.
+   - Home page uses ISR (`revalidate = 30`); on publish the root is revalidated on demand so the new hero appears immediately.
+
+4. **Blog Post Pages** (`frontend/src/app/(blog)/[slug]/page.tsx`)
    - Uses 1-hour fallback revalidation (on-demand is primary)
    - Pages are regenerated instantly when revalidation API is called
 
@@ -66,16 +70,24 @@ The system works automatically:
 - When a blog post is **published** → Page is revalidated instantly
 - When a blog post is **updated** → Page is revalidated instantly  
 - When a blog post is **deleted** → Blog listing is revalidated
+- When the **hero slider is published** (Super Admin) → Home page (`/`) is revalidated instantly
 
 ### Manual Revalidation
 
 You can also trigger revalidation manually:
 
 ```bash
+# Blog post page
 curl -X POST https://staging.infinitycolor.org/api/revalidate \
   -H "Authorization: Bearer YOUR_REVALIDATION_SECRET" \
   -H "Content-Type: application/json" \
   -d '{"path": "girls-cap-is-for-you-create-your-own-style", "type": "blog-post"}'
+
+# Hero slider (home page)
+curl -X POST https://staging.infinitycolor.org/api/revalidate \
+  -H "Authorization: Bearer YOUR_REVALIDATION_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"type": "hero-slider"}'
 ```
 
 ## Fallback Behavior

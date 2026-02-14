@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { LeftBannerSpec } from '../types';
 import imageLoader from "@/utils/imageLoader";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 interface LeftBannerProps {
   spec: LeftBannerSpec;
@@ -39,6 +40,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const resolvedBackgroundValue =
     typeof background.value === "string" ? background.value.trim() : "";
   const shouldUseImageBackground = background.type === "image" && Boolean(resolvedBackgroundValue);
+  const backgroundImageUrl = shouldUseImageBackground ? resolveAssetUrl(resolvedBackgroundValue) : "";
   const objectPosition =
     (typeof foregroundImage.focalX === "number" && typeof foregroundImage.focalY === "number")
       ? `${foregroundImage.focalX}% ${foregroundImage.focalY}%`
@@ -46,14 +48,15 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const objectFit = foregroundImage.objectFit || "contain";
   const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
 
-  // Determine background styling
+  // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
   const backgroundStyle =
     !shouldUseImageBackground
       ? { backgroundColor: resolvedBackgroundValue || "#f8fafc" }
       : background.type === 'color'
       ? { backgroundColor: background.value }
       : {
-          backgroundImage: `url(${resolvedBackgroundValue})`,
+          backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
+          backgroundColor: !backgroundImageUrl ? "#f8fafc" : undefined,
           backgroundSize: background.backgroundSize || 'cover',
           backgroundPosition: background.position || 'center'
         };

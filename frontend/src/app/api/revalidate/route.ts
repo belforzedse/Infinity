@@ -103,6 +103,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (type === "hero-slider") {
+      // Hero slider is shown on the home page; revalidate root
+      revalidatePath("/");
+
+      return NextResponse.json({
+        revalidated: true,
+        now: Date.now(),
+        paths: ["/"],
+      });
+    }
+
     // Generic path revalidation
     if (path) {
       revalidatePath(path);

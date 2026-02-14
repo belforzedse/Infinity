@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ActionBannerSpec } from '../types';
 import imageLoader from "@/utils/imageLoader";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 interface ActionBannerProps {
   spec: ActionBannerSpec;
@@ -67,12 +68,16 @@ export function ActionBanner({ spec }: ActionBannerProps) {
     /^#([0-9a-f]{3,8})$/i.test(colors?.subtitleColor || "") ||
     /^(rgba?|hsla?)\(/i.test(colors?.subtitleColor || "");
 
-  // Determine background styling
+  // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
+  const resolvedBgImageUrl = background?.type === 'image' && background?.value
+    ? resolveAssetUrl(background.value)
+    : "";
   const bgStyle = background
     ? background.type === 'color'
       ? { backgroundColor: background.value }
       : {
-          backgroundImage: `url(${background.value})`,
+          backgroundImage: resolvedBgImageUrl ? `url(${resolvedBgImageUrl})` : undefined,
+          backgroundColor: !resolvedBgImageUrl ? (colors?.background || '#f8fafc') : undefined,
           backgroundSize: background.backgroundSize || 'cover',
           backgroundPosition: background.position || 'center'
         }

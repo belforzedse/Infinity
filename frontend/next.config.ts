@@ -27,6 +27,8 @@ process.env.NEXT_PUBLIC_BUILD_VERSION = BUILD_VERSION;
 const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  // Allow sitemap and other static generation to run longer during build (default 60s)
+  staticPageGenerationTimeout: 180,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

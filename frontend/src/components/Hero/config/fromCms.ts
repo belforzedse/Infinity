@@ -195,7 +195,10 @@ function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): Le
       alt: slot.foregroundAlt || base.foregroundImage.alt,
       href: slot.link?.href || base.foregroundImage.href,
       objectFit: "contain",
-      zoom: 1,
+      zoom:
+        typeof slot.foregroundZoom === "number" && Number.isFinite(slot.foregroundZoom)
+          ? Math.min(2, Math.max(0.5, slot.foregroundZoom))
+          : 1,
       className: slot.foregroundClassName || base.foregroundImage.className,
       objectPosition: slot.foregroundObjectPosition || base.foregroundImage.objectPosition,
       customWidth: slot.foregroundCustomWidth || base.foregroundImage.customWidth,

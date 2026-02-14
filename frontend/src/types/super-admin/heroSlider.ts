@@ -62,6 +62,47 @@ export const HERO_FONT_SIZE_OPTIONS = [
   { value: "text-[20px]", label: "دکمه سفارشی" },
 ] as const;
 
+/** Human-friendly size labels (xs → 3xl) for font size dropdown. Keys are HeroFontSizeToken values. */
+export const HERO_FONT_SIZE_DISPLAY_LABELS: Record<string, string> = {
+  "text-xs": "xs — خیلی کوچک",
+  "text-sm": "sm — کوچک",
+  "text-base": "md — متوسط",
+  "text-lg": "lg — بزرگ",
+  "text-xl": "xl — خیلی بزرگ",
+  "text-2xl": "2xl — درشت",
+  "text-3xl": "3xl — نمایشی",
+  "text-[26px]": "۲۶px",
+  "text-lg sm:text-2xl": "کارت واکنش‌گرا",
+  "text-xs sm:text-sm": "ریز واکنش‌گرا",
+  "sl:text-[65px] text-[40px]": "تیتر ویژه تبلت",
+  "sl:text-[40px] text-xl": "زیرتیتر ویژه تبلت",
+  "lg:text-[24px] 2xl:text-[28px]": "نمایشی تبلت",
+  "lg:text-[40px] 2xl:text-[48px]": "تیتر تبلت",
+  "lg:text-[44px] 2xl:text-[54px]": "تیتر دسکتاپ",
+  "text-xl sm:text-2xl md:text-3xl": "تیتر موبایل",
+  "text-sm sm:text-base md:text-lg": "زیرتیتر موبایل",
+  "lg:text-[30px] 2xl:text-[34px]": "زیرتیتر دسکتاپ",
+  "lg:text-[48px] 2xl:text-[50px]": "تیتر سفارشی دسکتاپ",
+  "lg:text-[26px] 2xl:text-[30px]": "زیرتیتر سفارشی دسکتاپ",
+  "text-[30px]": "تیتر کارت سفارشی",
+  "text-[20px]": "دکمه سفارشی",
+};
+
+/** Basic size options (xs–3xl) for primary dropdown; responsive options in "پیشرفته" group. */
+export const HERO_FONT_SIZE_BASIC_OPTIONS = [
+  { value: "text-xs", label: "xs — خیلی کوچک" },
+  { value: "text-sm", label: "sm — کوچک" },
+  { value: "text-base", label: "md — متوسط" },
+  { value: "text-lg", label: "lg — بزرگ" },
+  { value: "text-xl", label: "xl — خیلی بزرگ" },
+  { value: "text-2xl", label: "2xl — درشت" },
+  { value: "text-3xl", label: "3xl — نمایشی" },
+] as const;
+
+export function getFontSizeDisplayLabel(token: string): string {
+  return HERO_FONT_SIZE_DISPLAY_LABELS[token] ?? token;
+}
+
 export const HERO_FONT_WEIGHT_OPTIONS = [
   { value: "font-normal", label: "معمولی" },
   { value: "font-medium", label: "متوسط" },
@@ -144,9 +185,32 @@ export type HeroMainVisualSlot = {
   foregroundObjectPosition: string;
   foregroundCustomWidth: string;
   foregroundCustomHeight: string;
+  /** Foreground image zoom (0.5–2). Default 1. */
+  foregroundZoom?: number;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
+
+/** Preset options for background size (main visual and cards). */
+export const HERO_BACKGROUND_SIZE_PRESETS = [
+  { value: "cover", label: "پوشش (Cover)" },
+  { value: "contain", label: "دربرگیر (Contain)" },
+  { value: "100% 100%", label: "کشیده" },
+  { value: "auto", label: "خودکار" },
+] as const;
+
+/** Preset options for background position (main visual and cards). */
+export const HERO_BACKGROUND_POSITION_PRESETS = [
+  { value: "center", label: "وسط" },
+  { value: "bottom center", label: "پایین وسط" },
+  { value: "top center", label: "بالا وسط" },
+  { value: "top left", label: "بالا چپ" },
+  { value: "top right", label: "بالا راست" },
+  { value: "bottom left", label: "پایین چپ" },
+  { value: "bottom right", label: "پایین راست" },
+  { value: "center left", label: "وسط چپ" },
+  { value: "center right", label: "وسط راست" },
+] as const;
 
 export type HeroCardSlot = {
   kind: "card";
@@ -652,6 +716,10 @@ function normalizeMainVisualSlot(
       "",
     foregroundCustomWidth: sanitizeClassName(raw.foregroundCustomWidth ?? media.customWidth, 80),
     foregroundCustomHeight: sanitizeClassName(raw.foregroundCustomHeight ?? media.customHeight, 80),
+    foregroundZoom:
+      typeof raw.foregroundZoom === "number" && Number.isFinite(raw.foregroundZoom)
+        ? Math.min(2, Math.max(0.5, raw.foregroundZoom))
+        : undefined,
     link: sanitizeSlotLink(raw.link),
     tracking: normalizeHeroTracking(raw.tracking),
   };
@@ -785,7 +853,7 @@ function normalizeDesktopSlots(rawSlots: unknown): HeroDesktopSlots {
       titleStyle: DEFAULT_TOP_HEADLINE_TITLE_STYLE,
       subtitleStyle: DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE,
       backgroundColor: "bg-stone-50",
-      bottomMarginPx: 10,
+      bottomMarginPx: 0,
       className: DEFAULT_DESKTOP_HEADLINE_CLASSNAME,
       titleClassName: "",
       subtitleClassName: "",

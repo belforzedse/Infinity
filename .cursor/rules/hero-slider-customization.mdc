@@ -47,9 +47,32 @@ To add new fonts for the hero font selector:
 3. Add the font to Tailwind in `frontend/tailwind.config.ts` under `fontFamily`
 4. Add the option to `HERO_FONT_FAMILY_OPTIONS` in [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts)
 
+## Background Image URLs
+
+Strapi stores image paths like `/uploads/...`. At **render time**, `LeftBanner` and `ActionBanner` resolve these to absolute URLs using [frontend/src/utils/resolveAssetUrl.ts](frontend/src/utils/resolveAssetUrl.ts) (and `NEXT_PUBLIC_IMAGE_BASE_URL`) so background images load correctly. Stored payloads remain path-only; resolution is not persisted.
+
+## Hero Editor File Layout
+
+- **TemplatePreview.tsx** — Main preview + device switcher + side panel; imports from editors, canvases, utils.
+- **utils.ts** — `getFrameByDevice`, `slotLabelMap`, `makeLayoutsSafe`, `resolveColorForInput`, `safeImageSrc`; exports `DeviceMode`, `SlotKey`.
+- **EditableSlot.tsx** — Wrapper for click-to-edit slots in the preview.
+- **editors/** — Slot editors: `TextStyleEditor`, `HeadlineEditor`, `MainVisualEditor`, `CardEditor`, `SlotEditorContent` (index re-exports).
+- **canvases/** — Device-specific preview canvases: `DesktopCanvas`, `TabletCanvas`, `MobileCanvas`.
+
+## Style Packages (Presets)
+
+Headline and card slots support **پکیج استایل** (Apply preset). Presets are defined in [frontend/src/types/super-admin/heroSliderPackages.ts](frontend/src/types/super-admin/heroSliderPackages.ts): `HERO_HEADLINE_STYLE_PRESETS` and `HERO_CARD_STYLE_PRESETS` (e.g. مینیمال, بولد, الگنت). Selecting a preset merges its `titleStyle` / `subtitleStyle` or `titleStyle` / `buttonStyle` into the current slot.
+
+## Font Size Labels (xl, 2xl, 3xl)
+
+Font size dropdowns show human-friendly labels via `getFontSizeDisplayLabel()` and [HERO_FONT_SIZE_DISPLAY_LABELS](frontend/src/types/super-admin/heroSlider.ts) (e.g. xs, sm, md, lg, xl, 2xl, 3xl). Stored values remain Tailwind tokens; only the UI labels changed.
+
 ## Key Files
 
 - [frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Preview + in-place editing
+- [frontend/src/components/SuperAdmin/HeroSliderEditor/editors/](frontend/src/components/SuperAdmin/HeroSliderEditor/editors/) — Slot editors
+- [frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/](frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/) — Device canvases
 - [frontend/src/components/Hero/config/fromCms.ts](frontend/src/components/Hero/config/fromCms.ts) — CMS → layout mapping
 - [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) — Types and defaults
+- [frontend/src/types/super-admin/heroSliderPackages.ts](frontend/src/types/super-admin/heroSliderPackages.ts) — Style presets
