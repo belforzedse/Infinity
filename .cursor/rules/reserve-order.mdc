@@ -1,0 +1,77 @@
+---
+description: Reserve Order feature - delayed shipping with order merging within 48h window
+globs: 
+  - backend/src/api/order/**/*
+  - backend/src/api/cart/**/*
+  - frontend/src/components/ShoppingCart/**/*
+  - frontend/src/components/User/Orders/**/*
+  - frontend/src/services/order/**/*
+  - frontend/src/services/cart/**/*
+---
+
+# Reserve Order Feature
+
+## Overview
+
+Users can "reserve" shipping at checkout, delaying delivery by 48 hours. During this window, they can place additional orders and merge them into the existing reserve—paying only for new items (no extra shipping). All linked orders ship together in one package.
+
+## Backend
+
+### Order Schema Fields
+
+- `IsReserveOrder` (boolean, default: false) — marks order as part of a reserve group
+- `ReserveExpiresAt` (datetime, nullable) — when the 48h window ends
+- `ReserveGroupId` (string, nullable) — UUID linking all orders in a reserve group
+
+### API Endpoints
+
+- `GET /orders/active-reserve` — Returns user's active reserve (reserveGroupId, reserveExpiresAt, orders, orderCount)
+- `POST /orders/:id/release-reserve` — Manually end reserve window ("Ship Now")
+
+### Finalize Flow
+
+- `reserveShipping=true` + no `reserveGroupId`: Create new reserve order with ReserveGroupId (UUID), ReserveExpiresAt = now + 48h
+- `reserveGroupId` provided: Merge into existing reserve—copy address/shipping from parent, ShippingCost = 0
+
+### Env Vars
+
+- `RESERVE_ORDER_WINDOW_HOURS` (default: 48) — Reserve window duration
+- `ENABLE_RESERVE_ORDER_EXPIRY_JOB` (default: true) — Toggle cron job
+- `RESERVE_ORDER_EXPIRY_JOB_INTERVAL_MINUTES` (default: 5) — Cron interval
+
+### Cron Job
+
+`backend/src/jobs/expireReserveOrders.ts` — Clears IsReserveOrder on orders where ReserveExpiresAt has passed.
+
+## Frontend
+
+### Checkout
+
+- Reserve toggle in `ReserveShipping.tsx`
+- If user has active reserve: banner to "Add to existing" or "Create new"
+- Merge mode: minimal form (address/shipping from parent), shipping cost = 0
+
+### User Orders
+
+- Reserve badge with countdown on `OrderCard` and `OrderRow`
+- "ارسال الان" (Ship Now) button calls `OrderService.releaseReserve(orderId)`
+- Order detail shows `ReserveInfoCard` when IsReserveOrder
+
+### Types
+
+- `FinalizeCartRequest`: reserveShipping?, reserveGroupId?
+- `FinalizeCartResponse`: reserveGroupId?, reserveExpiresAt?
+- `Order`: IsReserveOrder?, ReserveExpiresAt?, ReserveGroupId?
+
+## Key Files
+
+- `backend/src/api/order/content-types/order/schema.json` — Order schema
+- `backend/src/api/order/controllers/handlers/getActiveReserve.ts`
+- `backend/src/api/order/controllers/handlers/releaseReserve.ts`
+- `backend/src/api/cart/controllers/handlers/finalizeToOrder.ts` — Reserve merge logic
+- `backend/src/api/cart/services/cart.ts` — Reserve fields in finalizeCartToOrder
+- `backend/src/jobs/expireReserveOrders.ts`
+- `frontend/src/components/ShoppingCart/Bill/ReserveShipping.tsx`
+- `frontend/src/components/ShoppingCart/Bill/index.tsx` — Merge flow
+- `frontend/src/services/order/reserve.ts` — getActiveReserve, releaseReserve
+- `frontend/src/components/User/Orders/Detail/ReserveInfoCard.tsx`

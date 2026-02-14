@@ -10,6 +10,7 @@ import PaymentSummaryCard from "./PaymentSummaryCard";
 import ShippingInfoCard from "./ShippingInfoCard";
 import OrderItemsList from "./OrderItemsList";
 import SupportActions from "./SupportActions";
+import ReserveInfoCard from "./ReserveInfoCard";
 
 interface OrderDetailPageClientProps {
   orderId: string;
@@ -170,6 +171,15 @@ export default function OrderDetailPageClient({ orderId }: OrderDetailPageClient
               {warning}
             </div>
           ) : null}
+
+          {order.IsReserveOrder && (
+            <ReserveInfoCard
+              order={order}
+              onReleased={() => {
+                OrderService.getOrderDetail(order.id).then(setOrder);
+              }}
+            />
+          )}
 
           <div className="grid gap-4 lg:grid-cols-2">
             <OrderTimeline order={order} />

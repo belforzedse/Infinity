@@ -12,6 +12,7 @@ import type { Order } from "@/services/order";
 import OrderService from "@/services/order";
 import { faNum } from "@/utils/faNum";
 import { Search, RefreshCcw } from "lucide-react";
+import toast from "react-hot-toast";
 import OrderDetailsDrawer from "./OrderDetailsDrawer";
 
 export default function OrdersTabs() {
@@ -21,6 +22,7 @@ export default function OrdersTabs() {
   const [pageCount, setPageCount] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [releasingOrderId, setReleasingOrderId] = useState<number | null>(null);
   const pageSize = 20; // Fetch more orders for tabs
 
   const loadOrders = useCallback(async (targetPage: number) => {
@@ -46,6 +48,23 @@ export default function OrdersTabs() {
   };
 
   const clearSearch = () => setSearchTerm("");
+
+  const handleReleaseReserve = useCallback(
+    async (orderId: number) => {
+      try {
+        setReleasingOrderId(orderId);
+        await OrderService.releaseReserve(orderId);
+        toast.success("سفارش شما برای ارسال آماده شد");
+        await loadOrders(page);
+      } catch (err: unknown) {
+        console.error("Failed to release reserve:", err);
+        toast.error("خطا در به‌روزرسانی. لطفاً دوباره تلاش کنید.");
+      } finally {
+        setReleasingOrderId(null);
+      }
+    },
+    [loadOrders, page],
+  );
 
   const matchesSearch = useCallback(
     (order: Order) => {
@@ -115,7 +134,7 @@ export default function OrdersTabs() {
   };
 
   // Map API order to the component props format
-  const mapOrderToProps = (order: Order) => {
+  const mapOrderToProps = (order: Order, allOrders: Order[]) => {
     const firstItem = order.order_items[0];
     // Use actual product image, fallback to simple gray placeholder
     const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
@@ -150,6 +169,13 @@ export default function OrdersTabs() {
       status = PersianOrderStatus.CANCELLED;
     }
 
+    const reserveGroupOrderCount =
+      order.ReserveGroupId && order.IsReserveOrder
+        ? allOrders.filter(
+            (o) => o.ReserveGroupId === order.ReserveGroupId && o.IsReserveOrder,
+          ).length
+        : undefined;
+
     return {
       id: order.id.toString(),
       title: `سفارش شماره #${order.id}`,
@@ -163,6 +189,11 @@ export default function OrdersTabs() {
       shippingBarcode: order.ShippingBarcode,
       detailHref: `/orders/${order.id}`,
       rawOrder: order,
+      isReserveOrder: order.IsReserveOrder,
+      reserveExpiresAt: order.ReserveExpiresAt,
+      reserveGroupOrderCount,
+      onReleaseReserve: handleReleaseReserve,
+      isReleasingReserve: releasingOrderId === order.id,
     };
   };
 
@@ -180,7 +211,7 @@ export default function OrdersTabs() {
 
   const tabContent = ORDER_STATUS.map(({ value }) => {
     const statusOrders = ordersByStatus[value as keyof typeof ordersByStatus] || [];
-    const mappedOrders = statusOrders.map(mapOrderToProps);
+    const mappedOrders = statusOrders.map((o) => mapOrderToProps(o, orders));
 
     return (
       <div key={value} className="w-full">

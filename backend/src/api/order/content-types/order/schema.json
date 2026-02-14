@@ -141,6 +141,16 @@
         "SamanKish"
       ],
       "default": "Unknown"
+    },
+    "IsReserveOrder": {
+      "type": "boolean",
+      "default": false
+    },
+    "ReserveExpiresAt": {
+      "type": "datetime"
+    },
+    "ReserveGroupId": {
+      "type": "string"
     }
   }
 }

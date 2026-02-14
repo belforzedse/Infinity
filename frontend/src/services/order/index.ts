@@ -1,4 +1,5 @@
 import { apiClient } from "../index";
+import { getActiveReserve, releaseReserve } from "./reserve";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
 // Simple cache implementation for orders
@@ -100,13 +101,15 @@ export interface OrderItem {
 }
 
 export interface Order {
-
   id: number;
   Status: string;
   Date: string;
   Type: string;
   ShippingCost: number;
   ShippingBarcode?: string;
+  IsReserveOrder?: boolean;
+  ReserveExpiresAt?: string | null;
+  ReserveGroupId?: string | null;
   Description?: string;
   Note?: string;
   createdAt: string;
@@ -359,6 +362,8 @@ const OrderService = {
   getOrderPaymentStatus,
   getMyOrders,
   getOrderDetail,
+  getActiveReserve,
+  releaseReserve,
   async generateAnipoBarcode(orderId: number, weight?: number, boxSizeId?: number): Promise<any> {
     try {
       const body: any = {};

@@ -6,7 +6,7 @@ import { PersianOrderStatus } from "@/constants/enums";
 import clsx from "clsx";
 import PaymentStatusButton from "./PaymentStatusButton";
 import ShowFactorButton from "./ShowFactorButton";
-import { Eye } from "lucide-react";
+import { Eye, Clock } from "lucide-react";
 
 interface Props {
   image: string;
@@ -21,6 +21,20 @@ interface Props {
   detailHref: string;
   onViewDetails: () => void;
   onOpenFullDetails?: () => void;
+  isReserveOrder?: boolean;
+  reserveExpiresAt?: string | null;
+  reserveGroupOrderCount?: number;
+  onReleaseReserve?: (orderId: number) => void;
+  isReleasingReserve?: boolean;
+}
+
+function formatCountdown(expiresAt: string): string {
+  const end = new Date(expiresAt).getTime();
+  const now = Date.now();
+  const diff = Math.max(0, end - now);
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}س ${minutes}د`;
 }
 
 export default function OrderRow({
@@ -36,6 +50,11 @@ export default function OrderRow({
   detailHref,
   onViewDetails,
   onOpenFullDetails,
+  isReserveOrder,
+  reserveExpiresAt,
+  reserveGroupOrderCount,
+  onReleaseReserve,
+  isReleasingReserve,
 }: Props) {
   return (
     <tr className="hover:bg-gray-50">
@@ -80,7 +99,26 @@ export default function OrderRow({
         </div>
       </td>
       <td className="w-fit py-3 text-left">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {isReserveOrder && reserveExpiresAt && (
+            <span className="flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs text-amber-800">
+              <Clock className="h-3.5 w-3.5" />
+              ارسال رزروی ({formatCountdown(reserveExpiresAt)})
+              {reserveGroupOrderCount && reserveGroupOrderCount > 1 && (
+                <span> • {reserveGroupOrderCount} سفارش</span>
+              )}
+            </span>
+          )}
+          {isReserveOrder && orderId && onReleaseReserve && (
+            <button
+              type="button"
+              onClick={() => onReleaseReserve(orderId)}
+              disabled={isReleasingReserve}
+              className="text-xs rounded-lg border border-pink-200 px-2 py-1 text-pink-600 transition hover:bg-pink-50 disabled:opacity-50"
+            >
+              {isReleasingReserve ? "در حال پردازش..." : "ارسال الان"}
+            </button>
+          )}
           {orderId && <PaymentStatusButton orderId={orderId} />}
           {shippingBarcode ? (
             <a

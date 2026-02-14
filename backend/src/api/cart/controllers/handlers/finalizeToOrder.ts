@@ -24,11 +24,51 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
     gateway,
     mobile,
     discountCode,
+    reserveShipping,
+    reserveGroupId,
   } = ctx.request.body;
 
   try {
-    // Validate required shipping information
-    if (!shipping) {
+    let resolvedAddressId = addressId;
+    let resolvedShippingId = shipping;
+    let resolvedShippingCost = shippingCost;
+    let reserveOrderData: {
+      reserveGroupId: string;
+      reserveExpiresAt: Date;
+      isMerge: true;
+    } | null = null;
+
+    // When merging into existing reserve: get address/shipping from parent order
+    if (reserveGroupId && typeof reserveGroupId === "string" && reserveGroupId.trim()) {
+      const now = new Date();
+      const parentOrders = await strapi.db.query("api::order.order").findMany({
+        where: {
+          user: { id: user.id },
+          ReserveGroupId: reserveGroupId.trim(),
+          IsReserveOrder: true,
+          ReserveExpiresAt: { $gt: now.toISOString() },
+        },
+        populate: { delivery_address: true, shipping: true },
+        orderBy: { Date: "asc" },
+      });
+      if (parentOrders.length === 0) {
+        return ctx.badRequest("سفارش رزروی معتبر یافت نشد یا منقضی شده است", {
+          data: { success: false, errorCode: "RESERVE_NOT_FOUND", message: "سفارش رزروی معتبر یافت نشد یا منقضی شده است" },
+        });
+      }
+      const parent = parentOrders[0];
+      resolvedAddressId = parent.delivery_address?.id ?? parent.delivery_address;
+      resolvedShippingId = parent.shipping?.id ?? parent.shipping;
+      resolvedShippingCost = 0;
+      reserveOrderData = {
+        reserveGroupId: parent.ReserveGroupId,
+        reserveExpiresAt: new Date(parent.ReserveExpiresAt),
+        isMerge: true,
+      };
+    }
+
+    // Validate required shipping information (skip when merging - we have it from parent)
+    if (!reserveOrderData && !resolvedShippingId) {
       return ctx.badRequest("روش ارسال الزامی است", {
         data: {
           success: false,
@@ -38,10 +78,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       });
     }
 
-    let resolvedAddressId = addressId;
-
-    // Validate address is provided (either saved id or inline payload)
-    if (!resolvedAddressId && !addressPayload) {
+    // Validate address is provided (skip when merging - we have it from parent)
+    if (!reserveOrderData && !resolvedAddressId && !addressPayload) {
       return ctx.badRequest("آدرس تحویل الزامی است", {
         data: {
           success: false,
@@ -51,34 +89,36 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       });
     }
 
-    // Verify shipping method exists and is valid
-    try {
-      const shippingMethod = await strapi.entityService.findOne(
-        "api::shipping.shipping",
-        shipping
-      );
-      if (!shippingMethod) {
-        return ctx.badRequest("روش ارسال انتخاب شده معتبر نیست", {
+    // Verify shipping method exists and is valid (skip when merging)
+    if (!reserveOrderData) {
+      try {
+        const shippingMethod = await strapi.entityService.findOne(
+          "api::shipping.shipping",
+          resolvedShippingId
+        );
+        if (!shippingMethod) {
+          return ctx.badRequest("روش ارسال انتخاب شده معتبر نیست", {
+            data: {
+              success: false,
+              errorCode: "INVALID_SHIPPING",
+              message: "روش ارسال انتخاب شده معتبر نیست",
+            },
+          });
+        }
+      } catch (err) {
+        strapi.log.error("Failed to validate shipping method:", err);
+        return ctx.badRequest("خطا در بررسی روش ارسال", {
           data: {
             success: false,
-            errorCode: "INVALID_SHIPPING",
-            message: "روش ارسال انتخاب شده معتبر نیست",
+            errorCode: "SHIPPING_VALIDATION_FAILED",
+            message: "خطا در بررسی روش ارسال",
           },
         });
       }
-    } catch (err) {
-      strapi.log.error("Failed to validate shipping method:", err);
-      return ctx.badRequest("خطا در بررسی روش ارسال", {
-        data: {
-          success: false,
-          errorCode: "SHIPPING_VALIDATION_FAILED",
-          message: "خطا در بررسی روش ارسال",
-        },
-      });
     }
 
-    // Handle inline address creation when provided
-    if (!resolvedAddressId && addressPayload) {
+    // Handle inline address creation when provided (skip when merging)
+    if (!reserveOrderData && !resolvedAddressId && addressPayload) {
       const { shipping_city, PostalCode, FullAddress, Description, save } = addressPayload;
 
       if (!shipping_city || !PostalCode || !FullAddress) {
@@ -143,8 +183,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       }
     }
 
-    // Verify address exists and belongs to user
-    if (resolvedAddressId) {
+    // Verify address exists and belongs to user (skip when merging - parent address already validated)
+    if (!reserveOrderData && resolvedAddressId) {
       try {
         const address = await strapi.entityService.findOne(
           "api::local-user-address.local-user-address",
@@ -197,14 +237,19 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       }
     }
 
-    const shippingData = {
-      shippingId: shipping,
-      shippingCost,
+    const shippingData: Record<string, unknown> = {
+      shippingId: resolvedShippingId,
+      shippingCost: resolvedShippingCost,
       description,
       note,
       addressId: resolvedAddressId,
       discountCode,
+      reserveShipping: !!reserveShipping,
+      reserveGroupId: reserveGroupId || undefined,
     };
+    if (reserveOrderData) {
+      shippingData.reserveOrderData = reserveOrderData;
+    }
 
     const cartService = strapi.service("api::cart.cart");
     const result = await cartService.finalizeCartToOrder(user.id, shippingData);
@@ -524,6 +569,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           refId: "",
           financialSummary: financialSummary,
           requestId: "wallet",
+          ...(order.ReserveGroupId && { reserveGroupId: order.ReserveGroupId }),
+          ...(order.ReserveExpiresAt && { reserveExpiresAt: order.ReserveExpiresAt }),
         },
       };
     }
@@ -654,6 +701,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         refId: paymentResult.refId,
         financialSummary: financialSummary,
         requestId: paymentResult.requestId,
+        ...(order.ReserveGroupId && { reserveGroupId: order.ReserveGroupId }),
+        ...(order.ReserveExpiresAt && { reserveExpiresAt: order.ReserveExpiresAt }),
       },
     };
   } catch (error: any) {

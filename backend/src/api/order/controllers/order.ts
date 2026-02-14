@@ -10,6 +10,8 @@ import { adminAdjustItemsHandler } from "./helpers/adminAdjustItems";
 import { adminCancelOrderHandler } from "./helpers/adminCancel";
 import { adminVoidBarcodeHandler } from "./helpers/adminVoidBarcode";
 import { decrementManualOrderStockHandler } from "./helpers/manualOrderStock";
+import { getActiveReserveHandler } from "./handlers/getActiveReserve";
+import { releaseReserveHandler } from "./handlers/releaseReserve";
 
 export default factories.createCoreController(
   "api::order.order",
@@ -226,6 +228,14 @@ export default factories.createCoreController(
           },
         });
       }
+    },
+
+    async getActiveReserve(ctx) {
+      return getActiveReserveHandler(strapi as Strapi, ctx);
+    },
+
+    async releaseReserve(ctx) {
+      return releaseReserveHandler(strapi as Strapi, ctx);
     },
 
     async getMyOrders(ctx) {
