@@ -221,12 +221,19 @@ function ShoppingCartBillForm({}: Props) {
     run();
   }, [discountCode, shippingId, shippingCost]);
 
-  // Re-check SnappPay eligibility when shipping or discount changes (stable deps)
+  // Re-check SnappPay eligibility when shipping, discount, or merge choice changes
+  // In merge mode we don't have shippingId (shipping comes from parent order), so allow eligibility check by amount only
   useEffect(() => {
     const run = async () => {
       try {
-        if (!shippingId) {
-          // Don't show SnappPay if no shipping selected
+        const isMergeMode = mergeChoice === "merge";
+        if (!isMergeMode && !shippingId) {
+          setSnappEligible(false);
+          setSnappTitle(undefined);
+          setSnappDescription(undefined);
+          return;
+        }
+        if (totalToman <= 0) {
           setSnappEligible(false);
           setSnappTitle(undefined);
           setSnappDescription(undefined);
@@ -236,19 +243,17 @@ function ShoppingCartBillForm({}: Props) {
         const res = await CartService.getSnappEligible({
           amount: totalToman,
         });
-        // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
         setSnappTitle(res.title);
         setSnappDescription(res.description);
-      } catch (error) {
-        // On error, hide SnappPay (don't show it by default)
+      } catch {
         setSnappEligible(false);
         setSnappTitle(undefined);
         setSnappDescription(undefined);
       }
     };
     run();
-  }, [shippingId, totalToman]);
+  }, [shippingId, totalToman, mergeChoice]);
 
   // Load wallet balance once
   useEffect(() => {

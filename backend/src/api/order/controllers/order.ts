@@ -240,10 +240,15 @@ export default factories.createCoreController(
 
     async getMyOrders(ctx) {
       const { user } = ctx.state;
-      const { page = 1, pageSize = 10 } = ctx.query;
+      const { page = 1, pageSize = 10, reserveGroupId } = ctx.query;
 
       try {
-        const filters = { user: { id: user.id } };
+        const filters: { user: { id: number }; ReserveGroupId?: string } = {
+          user: { id: user.id },
+        };
+        if (reserveGroupId && typeof reserveGroupId === "string") {
+          filters.ReserveGroupId = reserveGroupId;
+        }
         const totalOrders = await strapi.db
           .query("api::order.order")
           .count({ where: filters });

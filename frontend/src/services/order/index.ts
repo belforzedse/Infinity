@@ -247,28 +247,39 @@ export const getOrderPaymentStatus = async (
   }
 };
 
+export interface GetMyOrdersOptions {
+  reserveGroupId?: string;
+}
+
 /**
  * Get the list of orders for the current user
  * @param page Page number for pagination
  * @param pageSize Number of orders per page
+ * @param options Optional filters (e.g. reserveGroupId for reserve group page)
  * @returns List of user orders with pagination metadata
  */
 export const getMyOrders = async (
   page: number = 1,
   pageSize: number = 10,
+  options?: GetMyOrdersOptions,
 ): Promise<OrdersResponse> => {
-  const cacheKey = `orders_${page}_${pageSize}`;
+  const reserveGroupId = options?.reserveGroupId;
+  const cacheKey = reserveGroupId
+    ? `orders_${page}_${pageSize}_reserve_${reserveGroupId}`
+    : `orders_${page}_${pageSize}`;
 
-  // Check cache first
   const shouldUseCache = process.env.NODE_ENV !== "test";
   const cachedData = shouldUseCache ? orderCache.get(cacheKey) : null;
   if (cachedData) {
     return cachedData;
   }
 
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (reserveGroupId) params.set("reserveGroupId", reserveGroupId);
+
   try {
     const response = await apiClient.get<{ data?: Order[]; meta?: OrdersResponse["meta"] }>(
-      `/orders/my-orders?page=${page}&pageSize=${pageSize}`,
+      `/orders/my-orders?${params.toString()}`,
     );
 
     // Support multiple response shapes: direct array, { data, meta }, or { data: { data, meta } }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Tabs from "@/components/Kits/Tabs";
 import { PersianOrderStatus } from "@/constants/enums";
 import OrderRow from "./OrderRow";
@@ -15,7 +16,36 @@ import { Search, RefreshCcw } from "lucide-react";
 import toast from "react-hot-toast";
 import OrderDetailsDrawer from "./OrderDetailsDrawer";
 
+type OrderRowProps = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  price: string;
+  status: PersianOrderStatus;
+  image: string;
+  category: string;
+  orderId?: number;
+  shippingBarcode?: string;
+  detailHref: string;
+  onViewDetails: () => void;
+  onOpenFullDetails?: () => void;
+  isReserveOrder?: boolean;
+  reserveExpiresAt?: string | null;
+  reserveGroupOrderCount?: number;
+  onReleaseReserve?: (orderId: number) => void;
+  isReleasingReserve?: boolean;
+  rawOrder?: Order | null;
+  isGroupRow?: boolean;
+  sortDate?: string;
+};
+
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.new.infinitycolor.co/";
+const placeholderImage =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
+
 export default function OrdersTabs() {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -88,31 +118,68 @@ export default function OrdersTabs() {
   const ordersByStatus = useMemo(() => {
     const filtered = orders.filter(matchesSearch);
     return {
-      "همه سفارش‌ها": filtered, // All orders
+      "همه سفارش‌ها": filtered,
       [PersianOrderStatus.INPROGRESS]: filtered.filter(
         (order) =>
-          order.Status === "Paying" || // Waiting for payment
+          order.Status === "Paying" ||
           order.Status === "Started" ||
           order.Status === "Processing" ||
           order.Status === "Shipment" ||
           order.Status === "PROCESSING" ||
           order.Status === "SHIPPED" ||
-          order.Status === "جاری", // Persian status
+          order.Status === "جاری",
       ),
       [PersianOrderStatus.DELIVERED]: filtered.filter(
         (order) =>
           order.Status === "Done" ||
           order.Status === "DELIVERED" ||
-          order.Status === "تحویل داده شده", // Persian status
+          order.Status === "تحویل داده شده",
       ),
       [PersianOrderStatus.CANCELLED]: filtered.filter(
         (order) =>
           order.Status === "Cancelled" ||
           order.Status === "CANCELLED" ||
-          order.Status === "لغو شده", // Persian status
+          order.Status === "لغو شده",
       ),
     };
   }, [orders, matchesSearch]);
+
+  // Reserve groups: one row per ReserveGroupId (orders that have ReserveGroupId)
+  const reserveGroupMap = useMemo(() => {
+    const map = new Map<string, Order[]>();
+    for (const order of orders) {
+      const gid = order.ReserveGroupId;
+      if (gid) {
+        const list = map.get(gid) ?? [];
+        list.push(order);
+        map.set(gid, list);
+      }
+    }
+    // Sort orders within each group by date desc
+    map.forEach((list) => list.sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime()));
+    return map;
+  }, [orders]);
+
+  const nonReserveOrders = useMemo(
+    () => orders.filter((o) => !o.ReserveGroupId),
+    [orders],
+  );
+
+  const orderStatusCategory = useCallback((order: Order): PersianOrderStatus => {
+    if (
+      order.Status === "Done" ||
+      order.Status === "DELIVERED" ||
+      order.Status === "تحویل داده شده"
+    )
+      return PersianOrderStatus.DELIVERED;
+    if (
+      order.Status === "Cancelled" ||
+      order.Status === "CANCELLED" ||
+      order.Status === "لغو شده"
+    )
+      return PersianOrderStatus.CANCELLED;
+    return PersianOrderStatus.INPROGRESS;
+  }, []);
 
   // Helper function to format date to Persian
   const formatDate = (dateString: string): string => {
@@ -132,6 +199,53 @@ export default function OrdersTabs() {
       minute: "2-digit",
     }).format(date);
   };
+
+  const mapReserveGroupToProps = useCallback(
+    (reserveGroupId: string, groupOrders: Order[]): OrderRowProps => {
+      const first = groupOrders[0];
+      const firstItem = first?.order_items?.[0];
+      const product = firstItem?.product_variation?.product as
+        | { cover_image?: { url?: string }; CoverImage?: { url?: string } }
+        | null
+        | undefined;
+      const coverImage = product?.cover_image ?? product?.CoverImage;
+      const image = coverImage?.url ? `${imageBaseUrl}${coverImage.url}` : placeholderImage;
+      const totalPrice = groupOrders.reduce(
+        (sum, o) =>
+          sum +
+          (o.order_items?.reduce((s, i) => s + i.Count * i.PerAmount, 0) ?? 0) +
+          (o.ShippingCost ?? 0),
+        0,
+      );
+      const statuses = groupOrders.map(orderStatusCategory);
+      const status = statuses.some((s) => s === PersianOrderStatus.INPROGRESS)
+        ? PersianOrderStatus.INPROGRESS
+        : statuses.some((s) => s === PersianOrderStatus.DELIVERED)
+          ? PersianOrderStatus.DELIVERED
+          : PersianOrderStatus.CANCELLED;
+      const groupDetailHref = `/orders/reserve/${reserveGroupId}`;
+      return {
+        id: `reserve-${reserveGroupId}`,
+        title: `سفارش رزروی (${faNum(groupOrders.length)} سفارش)`,
+        date: first ? formatDate(first.createdAt) : "",
+        time: first ? formatTime(first.createdAt) : "",
+        price: faNum(totalPrice),
+        status,
+        image,
+        category: "سفارش رزروی",
+        detailHref: groupDetailHref,
+        onViewDetails: () => router.push(groupDetailHref),
+        onOpenFullDetails: () => router.push(groupDetailHref),
+        isReserveOrder: true,
+        reserveExpiresAt: first?.ReserveExpiresAt ?? null,
+        reserveGroupOrderCount: groupOrders.length,
+        rawOrder: null,
+        isGroupRow: true,
+        sortDate: first?.createdAt,
+      };
+    },
+    [formatDate, formatTime, orderStatusCategory, router],
+  );
 
   // Map API order to the component props format
   const mapOrderToProps = (order: Order, allOrders: Order[]) => {
@@ -189,11 +303,15 @@ export default function OrdersTabs() {
       shippingBarcode: order.ShippingBarcode,
       detailHref: `/orders/${order.id}`,
       rawOrder: order,
+      isGroupRow: false,
+      sortDate: order.createdAt,
       isReserveOrder: order.IsReserveOrder,
       reserveExpiresAt: order.ReserveExpiresAt,
       reserveGroupOrderCount,
       onReleaseReserve: handleReleaseReserve,
       isReleasingReserve: releasingOrderId === order.id,
+      onViewDetails: () => setSelectedOrder(order),
+      onOpenFullDetails: () => persistOrderSnapshot(order),
     };
   };
 
@@ -211,11 +329,24 @@ export default function OrdersTabs() {
 
   const tabContent = ORDER_STATUS.map(({ value }) => {
     const statusOrders = ordersByStatus[value as keyof typeof ordersByStatus] || [];
-    const mappedOrders = statusOrders.map((o) => mapOrderToProps(o, orders));
+    const reserveGroupIdsInTab = new Set(
+      statusOrders.filter((o) => o.ReserveGroupId).map((o) => o.ReserveGroupId as string),
+    );
+    const groupRows: OrderRowProps[] = Array.from(reserveGroupIdsInTab).map((gid) =>
+      mapReserveGroupToProps(gid, reserveGroupMap.get(gid) ?? []),
+    );
+    const orderRows = statusOrders
+      .filter((o) => !o.ReserveGroupId)
+      .map((o) => mapOrderToProps(o, orders));
+    const combined = [...groupRows, ...orderRows].sort((a, b) => {
+      const tA = new Date(a.sortDate ?? 0).getTime();
+      const tB = new Date(b.sortDate ?? 0).getTime();
+      return tB - tA;
+    });
 
     return (
       <div key={value} className="w-full">
-        {loading && mappedOrders.length === 0 ? (
+        {loading && combined.length === 0 ? (
           <>
             <div className="lg:hidden">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -232,32 +363,38 @@ export default function OrdersTabs() {
               </table>
             </div>
           </>
-        ) : mappedOrders.length === 0 ? (
+        ) : combined.length === 0 ? (
           <div className="rounded-lg bg-gray-50 p-8 text-center">
             <p className="text-gray-600">سفارشی با این وضعیت یافت نشد.</p>
           </div>
         ) : (
           <>
-            {mappedOrders.map(({ rawOrder, ...order }) => (
-              <OrderCard
-                key={order.id}
-                {...order}
-                onViewDetails={() => setSelectedOrder(rawOrder)}
-                onOpenFullDetails={() => persistOrderSnapshot(rawOrder)}
-              />
-            ))}
+            {combined.map((row) => {
+              const { rawOrder, isGroupRow, onViewDetails, onOpenFullDetails, sortDate, ...rest } = row;
+              return (
+                <OrderCard
+                  key={row.id}
+                  {...rest}
+                  onViewDetails={onViewDetails}
+                  onOpenFullDetails={onOpenFullDetails}
+                />
+              );
+            })}
 
             <div className="hidden overflow-x-auto lg:flex">
               <table className="w-full">
                 <tbody className="divide-y divide-gray-100">
-                  {mappedOrders.map(({ rawOrder, ...order }) => (
-                    <OrderRow
-                      key={order.id}
-                      {...order}
-                      onViewDetails={() => setSelectedOrder(rawOrder)}
-                      onOpenFullDetails={() => persistOrderSnapshot(rawOrder)}
-                    />
-                  ))}
+                  {combined.map((row) => {
+                    const { rawOrder, isGroupRow, onViewDetails, onOpenFullDetails, sortDate, ...rest } = row;
+                    return (
+                      <OrderRow
+                        key={row.id}
+                        {...rest}
+                        onViewDetails={onViewDetails}
+                        onOpenFullDetails={onOpenFullDetails}
+                      />
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -56,6 +56,8 @@ Users can "reserve" shipping at checkout, delaying delivery by 48 hours. During 
 - Reserve badge with countdown on `OrderCard` and `OrderRow`
 - "ارسال الان" (Ship Now) button calls `OrderService.releaseReserve(orderId)`
 - Order detail shows `ReserveInfoCard` when IsReserveOrder
+- **Reserve group row**: On the orders list (`/orders`), orders with the same `ReserveGroupId` are shown as a single grouped row: "سفارش رزروی (n سفارش)" linking to `/orders/reserve/[reserveGroupId]`. Non-reserve orders are shown as individual rows. Logic in `Tabs.tsx`: `reserveGroupMap`, `mapReserveGroupToProps`, combined list per tab.
+- **Reserve group page**: `GET /orders/my-orders?reserveGroupId=:id` and frontend route `app/(user)/orders/reserve/[reserveGroupId]/page.tsx` list all orders in that group; each row links to `/orders/[id]` and supports release-reserve.
 
 ### Types
 
@@ -72,6 +74,10 @@ Users can "reserve" shipping at checkout, delaying delivery by 48 hours. During 
 - `backend/src/api/cart/services/cart.ts` — Reserve fields in finalizeCartToOrder
 - `backend/src/jobs/expireReserveOrders.ts`
 - `frontend/src/components/ShoppingCart/Bill/ReserveShipping.tsx`
-- `frontend/src/components/ShoppingCart/Bill/index.tsx` — Merge flow
+- `frontend/src/components/ShoppingCart/Bill/index.tsx` — Merge flow; SnappPay eligibility runs in merge mode without `shippingId` (shipping from parent).
 - `frontend/src/services/order/reserve.ts` — getActiveReserve, releaseReserve
+- `frontend/src/services/order/index.ts` — getMyOrders(page, pageSize, options?) with `options.reserveGroupId` for group page
+- `frontend/src/components/User/Orders/Tabs.tsx` — Reserve group rows and mixed list
 - `frontend/src/components/User/Orders/Detail/ReserveInfoCard.tsx`
+- `frontend/src/app/(user)/orders/reserve/[reserveGroupId]/page.tsx` — Reserve group detail page
+- `backend/src/api/order/controllers/order.ts` — getMyOrders accepts query `reserveGroupId`
