@@ -1,6 +1,10 @@
 "use client";
 
+import dayjs from "dayjs";
+import jalaliday from "jalaliday";
 import type { HeroSliderMeta, HeroSliderPayload } from "@/types/super-admin/heroSlider";
+
+dayjs.extend(jalaliday);
 
 type Props = {
   draft: HeroSliderPayload;
@@ -34,7 +38,8 @@ export default function PublishBar({
           </p>
           {meta?.publishedAt ? (
             <p className="text-xs text-slate-500">
-              آخرین انتشار: {new Date(meta.publishedAt).toLocaleString("fa-IR")}
+              آخرین انتشار:{" "}
+              {(dayjs(meta.publishedAt) as dayjs.Dayjs & { calendar: (c: string) => dayjs.Dayjs }).calendar("jalali").locale("fa").format("YYYY/MM/DD HH:mm")}
             </p>
           ) : (
             <p className="text-xs text-amber-600">هنوز اسلایدر هیرو منتشر نشده است.</p>

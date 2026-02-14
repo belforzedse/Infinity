@@ -13,10 +13,11 @@ export default function OrderFailure() {
   const [transactionId] = useAtom(transactionIdAtom);
 
   useEffect(() => {
+    if (!orderId) return;
     trackMatomoEvent({
       category: "checkout",
       action: "order_failure_page_view",
-      onceKey: `order-failure-page:${orderId || "unknown"}`,
+      onceKey: `order-failure-page:${orderId}`,
     });
   }, [orderId]);
 

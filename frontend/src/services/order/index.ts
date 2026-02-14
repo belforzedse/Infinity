@@ -107,9 +107,9 @@ export interface Order {
   Type: string;
   ShippingCost: number;
   ShippingBarcode?: string;
-  IsReserveOrder?: boolean;
-  ReserveExpiresAt?: string | null;
-  ReserveGroupId?: string | null;
+  isReserveOrder?: boolean;
+  reserveExpiresAt?: string | null;
+  reserveGroupId?: string | null;
   Description?: string;
   Note?: string;
   createdAt: string;

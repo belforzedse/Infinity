@@ -4,6 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Tabs from "@/components/Kits/Tabs";
 import { PersianOrderStatus } from "@/constants/enums";
+import { getOrderStatusCategory } from "@/utils/statusTranslations";
+import { IMAGE_BASE_URL, PLACEHOLDER_IMAGE } from "@/utils/orderDisplayConstants";
+import {
+  formatOrderDate,
+  formatOrderTime,
+  mapOrderToDisplayProps,
+  persistOrderSnapshot as persistOrderSnapshotHelper,
+} from "@/utils/orderDisplayHelpers";
 import OrderRow from "./OrderRow";
 import OrderCard from "./OrderCard";
 import OrderCardSkeleton from "./OrderCardSkeleton";
@@ -39,10 +47,6 @@ type OrderRowProps = {
   isGroupRow?: boolean;
   sortDate?: string;
 };
-
-const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinitycolor.co/";
-const placeholderImage =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
 
 export default function OrdersTabs() {
   const router = useRouter();
@@ -144,11 +148,11 @@ export default function OrdersTabs() {
     };
   }, [orders, matchesSearch]);
 
-  // Reserve groups: one row per ReserveGroupId (orders that have ReserveGroupId)
+  // Reserve groups: one row per reserveGroupId (orders that have reserveGroupId)
   const reserveGroupMap = useMemo(() => {
     const map = new Map<string, Order[]>();
     for (const order of orders) {
-      const gid = order.ReserveGroupId;
+      const gid = order.reserveGroupId;
       if (gid) {
         const list = map.get(gid) ?? [];
         list.push(order);
@@ -156,49 +160,11 @@ export default function OrdersTabs() {
       }
     }
     // Sort orders within each group by date desc
-    map.forEach((list) => list.sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime()));
+    map.forEach((list) => {
+      list.sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
+    });
     return map;
   }, [orders]);
-
-  const nonReserveOrders = useMemo(
-    () => orders.filter((o) => !o.ReserveGroupId),
-    [orders],
-  );
-
-  const orderStatusCategory = useCallback((order: Order): PersianOrderStatus => {
-    if (
-      order.Status === "Done" ||
-      order.Status === "DELIVERED" ||
-      order.Status === "تحویل داده شده"
-    )
-      return PersianOrderStatus.DELIVERED;
-    if (
-      order.Status === "Cancelled" ||
-      order.Status === "CANCELLED" ||
-      order.Status === "لغو شده"
-    )
-      return PersianOrderStatus.CANCELLED;
-    return PersianOrderStatus.INPROGRESS;
-  }, []);
-
-  // Helper function to format date to Persian
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("fa-IR", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    }).format(date);
-  };
-
-  // Helper function to format time
-  const formatTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("fa-IR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
 
   const mapReserveGroupToProps = useCallback(
     (reserveGroupId: string, groupOrders: Order[]): OrderRowProps => {
@@ -209,7 +175,7 @@ export default function OrdersTabs() {
         | null
         | undefined;
       const coverImage = product?.cover_image ?? product?.CoverImage;
-      const image = coverImage?.url ? `${imageBaseUrl}${coverImage.url}` : placeholderImage;
+      const image = coverImage?.url ? `${IMAGE_BASE_URL}${coverImage.url}` : PLACEHOLDER_IMAGE;
       const totalPrice = groupOrders.reduce(
         (sum, o) =>
           sum +
@@ -217,7 +183,7 @@ export default function OrdersTabs() {
           (o.ShippingCost ?? 0),
         0,
       );
-      const statuses = groupOrders.map(orderStatusCategory);
+      const statuses = groupOrders.map((o) => getOrderStatusCategory(o.Status));
       const status = statuses.some((s) => s === PersianOrderStatus.INPROGRESS)
         ? PersianOrderStatus.INPROGRESS
         : statuses.some((s) => s === PersianOrderStatus.DELIVERED)
@@ -227,8 +193,8 @@ export default function OrdersTabs() {
       return {
         id: `reserve-${reserveGroupId}`,
         title: `سفارش رزروی (${faNum(groupOrders.length)} سفارش)`,
-        date: first ? formatDate(first.createdAt) : "",
-        time: first ? formatTime(first.createdAt) : "",
+        date: first ? formatOrderDate(first.createdAt) : "",
+        time: first ? formatOrderTime(first.createdAt) : "",
         price: faNum(totalPrice),
         status,
         image,
@@ -237,106 +203,49 @@ export default function OrdersTabs() {
         onViewDetails: () => router.push(groupDetailHref),
         onOpenFullDetails: () => router.push(groupDetailHref),
         isReserveOrder: true,
-        reserveExpiresAt: first?.ReserveExpiresAt ?? null,
+        reserveExpiresAt: first?.reserveExpiresAt ?? null,
         reserveGroupOrderCount: groupOrders.length,
         rawOrder: null,
         isGroupRow: true,
         sortDate: first?.createdAt,
       };
     },
-    [formatDate, formatTime, orderStatusCategory, router],
+    [router],
   );
 
-  // Map API order to the component props format
-  const mapOrderToProps = (order: Order, allOrders: Order[]) => {
-    const firstItem = order.order_items[0];
-    // Use actual product image, fallback to simple gray placeholder
-    const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
-    const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinitycolor.co/";
-    const product = firstItem?.product_variation?.product as any;
-    const coverImage = product?.cover_image || product?.CoverImage;
-    const image = coverImage?.url
-      ? `${imageBaseUrl}${coverImage.url}`
-      : placeholderImage;
-    const category =
-      firstItem?.product_variation?.product?.Title ||
-      firstItem?.product_variation?.product?.Title ||
-      firstItem?.ProductTitle ||
-      "محصول";
-
-    const totalPrice =
-      order.order_items.reduce((sum, item) => sum + item.Count * item.PerAmount, 0) +
-      order.ShippingCost;
-
-    let status = PersianOrderStatus.INPROGRESS;
-    if (
-      order.Status === "Done" ||
-      order.Status === "DELIVERED" ||
-      order.Status === "تحویل داده شده"
-    ) {
-      status = PersianOrderStatus.DELIVERED;
-    } else if (
-      order.Status === "Cancelled" ||
-      order.Status === "CANCELLED" ||
-      order.Status === "لغو شده"
-    ) {
-      status = PersianOrderStatus.CANCELLED;
-    }
-
-    const reserveGroupOrderCount =
-      order.ReserveGroupId && order.IsReserveOrder
-        ? allOrders.filter(
-            (o) => o.ReserveGroupId === order.ReserveGroupId && o.IsReserveOrder,
-          ).length
-        : undefined;
-
-    return {
-      id: order.id.toString(),
-      title: `سفارش شماره #${order.id}`,
-      date: formatDate(order.createdAt),
-      status,
-      price: faNum(totalPrice),
-      image,
-      category,
-      time: formatTime(order.createdAt),
-      orderId: order.id,
-      shippingBarcode: order.ShippingBarcode,
-      detailHref: `/orders/${order.id}`,
-      rawOrder: order,
-      isGroupRow: false,
-      sortDate: order.createdAt,
-      isReserveOrder: order.IsReserveOrder,
-      reserveExpiresAt: order.ReserveExpiresAt,
-      reserveGroupOrderCount,
-      onReleaseReserve: handleReleaseReserve,
-      isReleasingReserve: releasingOrderId === order.id,
-      onViewDetails: () => setSelectedOrder(order),
-      onOpenFullDetails: () => persistOrderSnapshot(order),
-    };
-  };
-
-  const persistOrderSnapshot = (order: Order) => {
-    if (typeof window === "undefined") return;
-    try {
-      sessionStorage.setItem(
-        `infinity:order-detail:${order.id}`,
-        JSON.stringify(order),
-      );
-    } catch (error) {
-      console.warn("Failed to persist order snapshot", error);
-    }
-  };
+  const mapOrderToProps = useCallback(
+    (order: Order, allOrders: Order[]) =>
+      mapOrderToDisplayProps(order, {
+        imageBaseUrl: IMAGE_BASE_URL,
+        placeholderImage: PLACEHOLDER_IMAGE,
+        formatDate: formatOrderDate,
+        formatTime: formatOrderTime,
+        faNum,
+        ordersLength: 0,
+        getReserveGroupCount: (o) =>
+          o.reserveGroupId && o.isReserveOrder
+            ? allOrders.filter(
+                (a) => a.reserveGroupId === o.reserveGroupId && a.isReserveOrder,
+              ).length
+            : undefined,
+        handleReleaseReserve,
+        persistOrderSnapshot: persistOrderSnapshotHelper,
+        releasingOrderId,
+        setSelectedOrder,
+      }),
+    [handleReleaseReserve, releasingOrderId],
+  );
 
   const tabContent = ORDER_STATUS.map(({ value }) => {
     const statusOrders = ordersByStatus[value as keyof typeof ordersByStatus] || [];
     const reserveGroupIdsInTab = new Set(
-      statusOrders.filter((o) => o.ReserveGroupId).map((o) => o.ReserveGroupId as string),
+      statusOrders.filter((o) => o.reserveGroupId).map((o) => o.reserveGroupId as string),
     );
     const groupRows: OrderRowProps[] = Array.from(reserveGroupIdsInTab).map((gid) =>
       mapReserveGroupToProps(gid, reserveGroupMap.get(gid) ?? []),
     );
     const orderRows = statusOrders
-      .filter((o) => !o.ReserveGroupId)
+      .filter((o) => !o.reserveGroupId)
       .map((o) => mapOrderToProps(o, orders));
     const combined = [...groupRows, ...orderRows].sort((a, b) => {
       const tA = new Date(a.sortDate ?? 0).getTime();
@@ -370,30 +279,16 @@ export default function OrdersTabs() {
         ) : (
           <>
             {combined.map((row) => {
-              const { rawOrder, isGroupRow, onViewDetails, onOpenFullDetails, sortDate, ...rest } = row;
-              return (
-                <OrderCard
-                  key={row.id}
-                  {...rest}
-                  onViewDetails={onViewDetails}
-                  onOpenFullDetails={onOpenFullDetails}
-                />
-              );
+              const { rawOrder, isGroupRow, sortDate, ...rest } = row;
+              return <OrderCard key={row.id} {...rest} />;
             })}
 
             <div className="hidden overflow-x-auto lg:flex">
               <table className="w-full">
                 <tbody className="divide-y divide-gray-100">
                   {combined.map((row) => {
-                    const { rawOrder, isGroupRow, onViewDetails, onOpenFullDetails, sortDate, ...rest } = row;
-                    return (
-                      <OrderRow
-                        key={row.id}
-                        {...rest}
-                        onViewDetails={onViewDetails}
-                        onOpenFullDetails={onOpenFullDetails}
-                      />
-                    );
+                    const { rawOrder, isGroupRow, sortDate, ...rest } = row;
+                    return <OrderRow key={row.id} {...rest} />;
                   })}
                 </tbody>
               </table>

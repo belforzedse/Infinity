@@ -159,11 +159,16 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
         const isReserveOrder = !!shippingData.reserveShipping || !!shippingData.reserveOrderData;
         if (shippingData.reserveOrderData?.isMerge) {
           reserveGroupId = shippingData.reserveOrderData.reserveGroupId;
-          reserveExpiresAt = shippingData.reserveOrderData.reserveExpiresAt;
+          const raw = shippingData.reserveOrderData.reserveExpiresAt;
+          if (raw != null) {
+            const d = new Date(raw as string | number | Date);
+            reserveExpiresAt = Number.isNaN(d.getTime()) ? undefined : d;
+          }
         } else if (shippingData.reserveShipping) {
           const { randomUUID } = await import("node:crypto");
           reserveGroupId = randomUUID();
-          const windowHours = Number(process.env.RESERVE_ORDER_WINDOW_HOURS || 48);
+          const windowHoursRaw = Number(process.env.RESERVE_ORDER_WINDOW_HOURS || 48);
+          const windowHours = Number.isFinite(windowHoursRaw) ? windowHoursRaw : 48;
           reserveExpiresAt = new Date(Date.now() + windowHours * 60 * 60 * 1000);
         }
 

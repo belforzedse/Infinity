@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import OrderService from "@/services/order";
 import type { Order } from "@/services/order";
@@ -22,6 +22,18 @@ function formatCountdown(expiresAt: string): string {
 
 export default function ReserveInfoCard({ order, onReleased }: Props) {
   const [isReleasing, setIsReleasing] = useState(false);
+  const [countdownText, setCountdownText] = useState<string>(() =>
+    order.reserveExpiresAt ? formatCountdown(order.reserveExpiresAt) : "",
+  );
+
+  useEffect(() => {
+    if (!order.reserveExpiresAt) return;
+    setCountdownText(formatCountdown(order.reserveExpiresAt));
+    const id = setInterval(() => {
+      setCountdownText(formatCountdown(order.reserveExpiresAt!));
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [order.reserveExpiresAt]);
 
   const handleRelease = useCallback(async () => {
     try {
@@ -36,9 +48,9 @@ export default function ReserveInfoCard({ order, onReleased }: Props) {
     }
   }, [order.id, onReleased]);
 
-  if (!order.IsReserveOrder || !order.ReserveExpiresAt) return null;
+  if (!order.isReserveOrder || !order.reserveExpiresAt) return null;
 
-  const expiresAt = new Date(order.ReserveExpiresAt);
+  const expiresAt = new Date(order.reserveExpiresAt);
   const isExpired = expiresAt.getTime() <= Date.now();
 
   return (
@@ -51,7 +63,7 @@ export default function ReserveInfoCard({ order, onReleased }: Props) {
             <p className="text-sm text-amber-800">
               {isExpired
                 ? "مهلت رزرو به پایان رسیده است."
-                : `مهلت افزودن به سفارش: ${formatCountdown(order.ReserveExpiresAt)}`}
+                : `مهلت افزودن به سفارش: ${countdownText}`}
             </p>
           </div>
         </div>

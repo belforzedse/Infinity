@@ -12,8 +12,14 @@ import OrderRowSkeleton from "@/components/User/Orders/OrderRowSkeleton";
 import OrderDetailsDrawer from "@/components/User/Orders/OrderDetailsDrawer";
 import OrderService from "@/services/order";
 import type { Order } from "@/services/order";
-import { PersianOrderStatus } from "@/constants/enums";
 import { faNum } from "@/utils/faNum";
+import { IMAGE_BASE_URL, PLACEHOLDER_IMAGE } from "@/utils/orderDisplayConstants";
+import {
+  formatOrderDate,
+  formatOrderTime,
+  mapOrderToDisplayProps,
+  persistOrderSnapshot,
+} from "@/utils/orderDisplayHelpers";
 import { ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -34,12 +40,24 @@ export default function ReserveGroupPage() {
     }
   }, [router]);
 
+  const RESERVE_GROUP_PAGE_SIZE = 100;
+
   const loadOrders = useCallback(async () => {
     if (!reserveGroupId) return;
     try {
       setLoading(true);
-      const response = await OrderService.getMyOrders(1, 100, { reserveGroupId });
-      setOrders(response.data);
+      const first = await OrderService.getMyOrders(1, RESERVE_GROUP_PAGE_SIZE, { reserveGroupId });
+      const pageCount = first.meta?.pagination?.pageCount ?? 1;
+      if (pageCount <= 1) {
+        setOrders(first.data);
+        return;
+      }
+      const all: Order[] = [...first.data];
+      for (let p = 2; p <= pageCount; p++) {
+        const next = await OrderService.getMyOrders(p, RESERVE_GROUP_PAGE_SIZE, { reserveGroupId });
+        all.push(...next.data);
+      }
+      setOrders(all);
     } catch (err) {
       console.error("Error fetching reserve group orders:", err);
       setOrders([]);
@@ -69,93 +87,21 @@ export default function ReserveGroupPage() {
     [loadOrders],
   );
 
-  const formatDate = useCallback((dateString: string): string => {
-    return new Intl.DateTimeFormat("fa-IR", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    }).format(new Date(dateString));
-  }, []);
-
-  const formatTime = useCallback((dateString: string): string => {
-    return new Intl.DateTimeFormat("fa-IR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(dateString));
-  }, []);
-
-  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinitycolor.co/";
-  const placeholderImage =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
-
-  const persistOrderSnapshot = useCallback((order: Order) => {
-    try {
-      sessionStorage.setItem(`infinity:order-detail:${order.id}`, JSON.stringify(order));
-    } catch {
-      // ignore
-    }
-  }, []);
-
   const mapOrderToProps = useCallback(
-    (order: Order) => {
-      const firstItem = order.order_items?.[0];
-      const product = firstItem?.product_variation?.product as
-        | { cover_image?: { url?: string }; CoverImage?: { url?: string } }
-        | null
-        | undefined;
-      const coverImage = product?.cover_image ?? product?.CoverImage;
-      const image = coverImage?.url ? `${imageBaseUrl}${coverImage.url}` : placeholderImage;
-      const category =
-        firstItem?.product_variation?.product?.Title ||
-        firstItem?.ProductTitle ||
-        "محصول";
-      const totalPrice =
-        (order.order_items?.reduce((sum, item) => sum + item.Count * item.PerAmount, 0) ?? 0) +
-        (order.ShippingCost ?? 0);
-
-      let status = PersianOrderStatus.INPROGRESS;
-      if (
-        order.Status === "Done" ||
-        order.Status === "DELIVERED" ||
-        order.Status === "تحویل داده شده"
-      )
-        status = PersianOrderStatus.DELIVERED;
-      else if (
-        order.Status === "Cancelled" ||
-        order.Status === "CANCELLED" ||
-        order.Status === "لغو شده"
-      )
-        status = PersianOrderStatus.CANCELLED;
-
-      return {
-        id: order.id.toString(),
-        title: `سفارش شماره #${order.id}`,
-        date: formatDate(order.createdAt),
-        time: formatTime(order.createdAt),
-        price: faNum(totalPrice),
-        status,
-        image,
-        category,
-        orderId: order.id,
-        shippingBarcode: order.ShippingBarcode,
-        detailHref: `/orders/${order.id}`,
-        isReserveOrder: order.IsReserveOrder,
-        reserveExpiresAt: order.ReserveExpiresAt,
-        reserveGroupOrderCount: orders.length,
-        onReleaseReserve: handleReleaseReserve,
-        isReleasingReserve: releasingOrderId === order.id,
-        onViewDetails: () => setSelectedOrder(order),
-        onOpenFullDetails: () => persistOrderSnapshot(order),
-      };
-    },
-    [
-      formatDate,
-      formatTime,
-      orders.length,
-      persistOrderSnapshot,
-      handleReleaseReserve,
-      releasingOrderId,
-    ],
+    (order: Order) =>
+      mapOrderToDisplayProps(order, {
+        imageBaseUrl: IMAGE_BASE_URL,
+        placeholderImage: PLACEHOLDER_IMAGE,
+        formatDate: formatOrderDate,
+        formatTime: formatOrderTime,
+        faNum,
+        ordersLength: orders.length,
+        handleReleaseReserve,
+        persistOrderSnapshot,
+        releasingOrderId,
+        setSelectedOrder,
+      }),
+    [orders.length, handleReleaseReserve, releasingOrderId],
   );
 
   const rows = useMemo(() => orders.map(mapOrderToProps), [orders, mapOrderToProps]);
@@ -225,26 +171,18 @@ export default function ReserveGroupPage() {
           ) : (
             <>
               <div className="lg:hidden">
-                {rows.map((props) => (
-                  <OrderCard
-                    key={props.id}
-                    {...props}
-                    onViewDetails={props.onViewDetails}
-                    onOpenFullDetails={props.onOpenFullDetails}
-                  />
-                ))}
+                {rows.map((row) => {
+                  const { rawOrder, isGroupRow, sortDate, ...rest } = row;
+                  return <OrderCard key={row.id} {...rest} />;
+                })}
               </div>
               <div className="hidden overflow-x-auto lg:flex">
                 <table className="w-full">
                   <tbody className="divide-y divide-gray-100">
-                    {rows.map((props) => (
-                      <OrderRow
-                        key={props.id}
-                        {...props}
-                        onViewDetails={props.onViewDetails}
-                        onOpenFullDetails={props.onOpenFullDetails}
-                      />
-                    ))}
+                    {rows.map((row) => {
+                      const { rawOrder, isGroupRow, sortDate, ...rest } = row;
+                      return <OrderRow key={row.id} {...rest} />;
+                    })}
                   </tbody>
                 </table>
               </div>

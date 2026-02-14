@@ -3,20 +3,12 @@ import type { ActiveReserveResponse } from "../cart/types/cart";
 
 /**
  * Get the user's active reserve order (if any), with all linked orders in the group.
- * Returns the full API shape { data: { reserveGroupId, ... } | null } so callers can use .data.
+ * API returns body { data: null } or { data: { reserveGroupId, reserveExpiresAt, orders, orderCount } }.
+ * We return that shape so callers (e.g. Bill) can use result.data.
  */
 export const getActiveReserve = async (): Promise<ActiveReserveResponse> => {
   const response = await apiClient.get<ActiveReserveResponse>("/orders/active-reserve");
-  // API returns { data: null } or { data: { reserveGroupId, reserveExpiresAt, orders, orderCount } }.
-  // Return that shape so callers (e.g. Bill) can use result.data.
-  if (response != null && typeof response === "object" && "data" in response) {
-    return response as unknown as ActiveReserveResponse;
-  }
-  // If response was unwrapped (payload only), normalize to { data: payload } or { data: null }
-  if (response != null && typeof response === "object" && "reserveGroupId" in response) {
-    return { data: response as ActiveReserveResponse["data"] };
-  }
-  return { data: null };
+  return response.data;
 };
 
 /**

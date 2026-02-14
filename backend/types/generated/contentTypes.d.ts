@@ -1639,7 +1639,7 @@ export interface ApiOrderOrder extends Schema.CollectionType {
     DiscountCode: Attribute.String;
     external_id: Attribute.String;
     external_source: Attribute.String;
-    IsReserveOrder: Attribute.Boolean & Attribute.DefaultTo<false>;
+    isReserveOrder: Attribute.Boolean & Attribute.DefaultTo<false>;
     Note: Attribute.Text;
     order_items: Attribute.Relation<"api::order.order", "oneToMany", "api::order-item.order-item">;
     PaymentGateway: Attribute.Enumeration<
@@ -1649,8 +1649,8 @@ export interface ApiOrderOrder extends Schema.CollectionType {
     ReservationStatus: Attribute.Enumeration<["Reserved", "Released", "Consumed", "Expired"]> &
       Attribute.DefaultTo<"Released">;
     ReservedUntil: Attribute.DateTime;
-    ReserveExpiresAt: Attribute.DateTime;
-    ReserveGroupId: Attribute.String;
+    reserveExpiresAt: Attribute.DateTime;
+    reserveGroupId: Attribute.String;
     shipping: Attribute.Relation<"api::order.order", "manyToOne", "api::shipping.shipping">;
     ShippingBarcode: Attribute.String;
     ShippingBoxSizeId: Attribute.Integer &

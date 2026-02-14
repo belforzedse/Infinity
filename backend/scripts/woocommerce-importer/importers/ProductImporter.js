@@ -1249,12 +1249,10 @@ class ProductImporter {
    * @returns {string} - Generated slug with Persian characters preserved
    */
   generateProductSlug(wcProduct) {
-    // Always generate slug from product name to preserve Persian characters
-    // WooCommerce slugs are often transliterated (e.g., "baroni" instead of "بارانی")
-    // We want to preserve the Persian characters from the product name
-    if (wcProduct.name && wcProduct.name.trim()) {
-      const generatedSlug = this.generateSlugFromTitle(wcProduct.name);
-      return generatedSlug;
+    // Generate slug from normalized product name so it matches the Title (which uses normalizeProductName)
+    const normalizedName = this.normalizeProductName(wcProduct.name);
+    if (normalizedName) {
+      return this.generateSlugFromTitle(normalizedName);
     }
 
     // Fallback: use WooCommerce slug if name is not available (shouldn't happen normally)

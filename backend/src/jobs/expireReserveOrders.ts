@@ -4,7 +4,7 @@ const MAX_CONSECUTIVE_FAILURES = 5;
 let consecutiveFailures = 0;
 
 /**
- * Clears IsReserveOrder and ReserveExpiresAt on orders whose reserve window has expired.
+ * Clears isReserveOrder and reserveExpiresAt on orders whose reserve window has expired.
  * Runs every 5-10 minutes. Orders become normal "Started" orders ready for admin to ship.
  */
 export function startExpireReserveOrdersJob(strapi: Strapi) {
@@ -24,30 +24,30 @@ export function startExpireReserveOrdersJob(strapi: Strapi) {
       const now = new Date();
       const expiredOrders = await strapi.db.query("api::order.order").findMany({
         where: {
-          IsReserveOrder: true,
-          ReserveExpiresAt: { $lte: now.toISOString() },
+          isReserveOrder: true,
+          reserveExpiresAt: { $lte: now.toISOString() },
         },
-        select: ["id", "ReserveGroupId", "user"],
+        select: ["id", "reserveGroupId", "user"],
       });
 
       const groupIds = [
         ...new Set(
           (expiredOrders || [])
-            .map((o: { ReserveGroupId?: string | null }) => o.ReserveGroupId)
+            .map((o: { reserveGroupId?: string | null }) => o.reserveGroupId)
             .filter((g): g is string => !!g)
         ),
       ];
 
       for (const groupId of groupIds) {
         const groupOrders = await strapi.db.query("api::order.order").findMany({
-          where: { ReserveGroupId: groupId },
+          where: { reserveGroupId: groupId },
           select: ["id"],
         });
         for (const o of groupOrders || []) {
           await strapi.entityService.update("api::order.order", o.id, {
             data: {
-              IsReserveOrder: false,
-              ReserveExpiresAt: null,
+              isReserveOrder: false,
+              reserveExpiresAt: null,
             },
           });
         }

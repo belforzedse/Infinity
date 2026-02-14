@@ -1,42 +1,22 @@
 'use client';
 
-import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeftBannerSpec } from '../types';
 import imageLoader from "@/utils/imageLoader";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
+import { useResolvedImage } from "@/hooks/useResolvedImage";
 
 interface LeftBannerProps {
   spec: LeftBannerSpec;
   className?: string;
 }
 
-const HERO_IMAGE_PLACEHOLDER_SRC = "/images/placeholders/image-placeholder.svg";
-
 export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const { background, foregroundImage } = spec;
-  const normalizedForegroundSrc =
-    typeof foregroundImage.src === "string" ? foregroundImage.src.trim() : "";
-  const [resolvedForegroundSrc, setResolvedForegroundSrc] = useState<string>(
-    normalizedForegroundSrc || HERO_IMAGE_PLACEHOLDER_SRC,
-  );
-  const [hideForegroundImage, setHideForegroundImage] = useState(false);
+  const { resolvedSrc, shouldRender: shouldRenderForegroundImage, handleError: handleForegroundImageError } =
+    useResolvedImage(foregroundImage.src);
 
-  useEffect(() => {
-    setResolvedForegroundSrc(normalizedForegroundSrc || HERO_IMAGE_PLACEHOLDER_SRC);
-    setHideForegroundImage(false);
-  }, [normalizedForegroundSrc]);
-
-  const handleForegroundImageError = () => {
-    if (resolvedForegroundSrc !== HERO_IMAGE_PLACEHOLDER_SRC) {
-      setResolvedForegroundSrc(HERO_IMAGE_PLACEHOLDER_SRC);
-      return;
-    }
-    setHideForegroundImage(true);
-  };
-
-  const shouldRenderForegroundImage = !hideForegroundImage && Boolean(resolvedForegroundSrc);
   const resolvedBackgroundValue =
     typeof background.value === "string" ? background.value.trim() : "";
   const shouldUseImageBackground = background.type === "image" && Boolean(resolvedBackgroundValue);
@@ -52,8 +32,6 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const backgroundStyle =
     !shouldUseImageBackground
       ? { backgroundColor: resolvedBackgroundValue || "#f8fafc" }
-      : background.type === 'color'
-      ? { backgroundColor: background.value }
       : {
           backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
           backgroundColor: !backgroundImageUrl ? "#f8fafc" : undefined,
@@ -68,7 +46,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   // Calculate background position based on position value
   const getBackgroundPosition = (pos?: string) => {
     const posValue = pos || 'center';
-    const positionStyles: { [key: string]: any } = {
+    const positionStyles: Record<string, React.CSSProperties> = {
       'center': { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' },
       'bottom center': { left: '50%', bottom: 0, transform: 'translateX(-50%)' },
       'bottom left': { left: 0, bottom: 0, transform: 'none' },
@@ -99,7 +77,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
       {/* Foreground image - can overlap background */}
       {shouldRenderForegroundImage ? (
         <Image
-          src={resolvedForegroundSrc}
+          src={resolvedSrc}
           loader={imageLoader}
           alt={foregroundImage.alt || "تصویر بنر"}
           width={foregroundImage.width}

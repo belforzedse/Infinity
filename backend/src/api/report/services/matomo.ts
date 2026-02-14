@@ -1,3 +1,5 @@
+import { parsePositiveInt } from "../../../utils/parsePositiveInt";
+
 type MatomoRow = Record<string, any>;
 
 export type TrafficRange = {
@@ -46,11 +48,6 @@ export type TrafficDashboardPayload = {
 
 const DEFAULT_TIMEOUT_MS = 8000;
 const STEP_ORDER = ["view_item", "add_to_cart", "begin_checkout", "purchase"] as const;
-
-function parsePositiveInt(value: string | undefined, fallback: number): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
 
 function toYyyyMmDd(value: Date): string {
   return value.toISOString().split("T")[0];

@@ -11,6 +11,7 @@ import ShippingInfoCard from "./ShippingInfoCard";
 import OrderItemsList from "./OrderItemsList";
 import SupportActions from "./SupportActions";
 import ReserveInfoCard from "./ReserveInfoCard";
+import toast from "react-hot-toast";
 
 interface OrderDetailPageClientProps {
   orderId: string;
@@ -172,11 +173,17 @@ export default function OrderDetailPageClient({ orderId }: OrderDetailPageClient
             </div>
           ) : null}
 
-          {order.IsReserveOrder && (
+          {order.isReserveOrder && (
             <ReserveInfoCard
               order={order}
-              onReleased={() => {
-                OrderService.getOrderDetail(order.id).then(setOrder);
+              onReleased={async () => {
+                try {
+                  const result = await OrderService.getOrderDetail(order.id);
+                  setOrder(result);
+                } catch (err) {
+                  console.error("Failed to refresh order after release", err);
+                  toast.error("خطا در به‌روزرسانی سفارش");
+                }
               }}
             />
           )}

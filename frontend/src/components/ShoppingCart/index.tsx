@@ -7,7 +7,7 @@ import ShoppingCartSuccessOrderSubmit from "./SuccessOrderSubmit";
 import { submitOrderStepAtom } from "@/atoms/Order";
 import { useAtom } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
-import ShoppingCartBillForm from "./‌Bill";
+import ShoppingCartBillForm from "./Bill";
 import ShoppingCartMobileTable from "./Table/Mobile";
 import ShoppingCartDesktopTable from "./Table/Desktop";
 import { useCart } from "@/contexts/CartContext";

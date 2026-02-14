@@ -1,6 +1,6 @@
 "use client";
 
-import ShoppingCartBillForm from "@/components/ShoppingCart/‌Bill";
+import ShoppingCartBillForm from "@/components/ShoppingCart/Bill";
 import { motion } from "framer-motion";
 import React from "react";
 import PageContainer from "@/components/layout/PageContainer";

@@ -1,12 +1,13 @@
+import type { ReactElement } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-type SuperAdminLogoProps = {
+interface SuperAdminLogoProps {
   /** When true, renders a small icon-sized logo for collapsed sidebar */
   compact?: boolean;
-};
+}
 
-export default function SuperAdminLogo({ compact = false }: SuperAdminLogoProps) {
+export default function SuperAdminLogo({ compact = false }: SuperAdminLogoProps): ReactElement {
   if (compact) {
     return (
       <Link href="/" className="flex items-center justify-center" aria-label="Logo">

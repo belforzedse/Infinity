@@ -142,14 +142,14 @@
       ],
       "default": "Unknown"
     },
-    "IsReserveOrder": {
+    "isReserveOrder": {
       "type": "boolean",
       "default": false
     },
-    "ReserveExpiresAt": {
+    "reserveExpiresAt": {
       "type": "datetime"
     },
-    "ReserveGroupId": {
+    "reserveGroupId": {
       "type": "string"
     }
   }

@@ -14,8 +14,25 @@ import { SubmitOrderStep } from "@/types/Order";
 import { useCart } from "@/contexts/CartContext";
 import { trackFunnelStep, trackMatomoEvent } from "@/lib/analytics/matomo";
 
+/** Type guard for object with optional code string (e.g. PaymentError). */
+function hasCode(x: unknown): x is { code: string } {
+  return (
+    typeof x === "object" &&
+    x !== null &&
+    "code" in x &&
+    typeof (x as { code: unknown }).code === "string"
+  );
+}
+
+/**
+ * Derive a stable error code from payment callback errors.
+ * Prefers error.code when present; falls back to message-based detection.
+ */
 function getPaymentCallbackErrorCode(error: unknown): string {
-  const message = String((error as any)?.message || "").toLowerCase();
+  if (hasCode(error)) return error.code;
+  const message = (
+    error instanceof Error ? error.message : String(error ?? "")
+  ).toLowerCase();
   if (message.includes("ناقص")) return "MISSING_PARAMS";
   if (message.includes("network")) return "NETWORK_ERROR";
   if (message.includes("timeout")) return "TIMEOUT";
@@ -57,6 +74,7 @@ function PaymentCallbackContent() {
 
   useEffect(() => {
     const handlePaymentCallback = async () => {
+      let orderIdToVerify: string | null = null;
       try {
         setLoading(true);
         setTransactionId(null);
@@ -76,7 +94,7 @@ function PaymentCallbackContent() {
           }
         }
 
-        const orderIdToVerify = resNum || pendingOrderId;
+        orderIdToVerify = resNum || pendingOrderId;
         const refIdToVerify = refNum || pendingRefId;
 
         if (!orderIdToVerify || !refIdToVerify) {
@@ -85,7 +103,7 @@ function PaymentCallbackContent() {
 
         // Verify payment with backend
         const verificationResult = await OrderService.verifyPayment(
-          Number(orderIdToVerify),
+          Number(orderIdToVerify!),
           refIdToVerify,
         );
 
@@ -132,14 +150,16 @@ function PaymentCallbackContent() {
           setSubmitOrderStep(SubmitOrderStep.Failure);
           router.push("/orders/failure");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "خطا در بررسی وضعیت پرداخت";
         trackMatomoEvent({
           category: "checkout",
           action: "payment_callback_error",
           name: getPaymentCallbackErrorCode(err),
-          onceKey: `payment-callback-error:${getPaymentCallbackErrorCode(err)}`,
+          onceKey: `payment-callback-error:${orderIdToVerify ?? "unknown"}:${getPaymentCallbackErrorCode(err)}`,
         });
-        setError(err.message || "خطا در بررسی وضعیت پرداخت");
+        setError(errorMessage);
         setSubmitOrderStep(SubmitOrderStep.Failure);
         setTransactionId(null);
         router.push("/orders/failure");

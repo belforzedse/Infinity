@@ -1,3 +1,5 @@
+import { PersianOrderStatus } from "@/constants/enums";
+
 export type StatusTone = "info" | "success" | "warning" | "danger";
 
 interface StatusMeta {
@@ -106,6 +108,19 @@ const GENERIC_TRANSLATIONS: Record<string, string> = {
   canceled: "لغو شده",
 };
 
+/** Funnel step keys used in traffic/Matomo reports. */
+export const FUNNEL_STEP_MAP: Record<string, string> = {
+  view_item: "مشاهده محصول",
+  add_to_cart: "افزودن به سبد",
+  begin_checkout: "شروع تسویه",
+  purchase: "خرید نهایی",
+};
+
+export const translateFunnelStep = (step?: string | null): string => {
+  if (!step) return "";
+  return FUNNEL_STEP_MAP[step] ?? step;
+};
+
 const getMeta = (map: Record<string, StatusMeta>, value?: string | null): StatusMeta => {
   if (!value) {
     return { label: "نامشخص", tone: "info" };
@@ -120,6 +135,21 @@ export const getOrderStatusMeta = (status?: string | null): StatusMeta => {
 
 export const translateOrderStatus = (status?: string | null): string =>
   getOrderStatusMeta(status).label;
+
+const DELIVERED_KEYS = ["done", "delivered", "completed", "success", "تحویل داده شده"];
+const CANCELLED_KEYS = ["cancelled", "canceled", "returned", "failed", "لغو شده"];
+
+/** Maps raw backend order Status to the UI category enum (tabs / row display). */
+export const getOrderStatusCategory = (status?: string | null): PersianOrderStatus => {
+  const normalized = normalizeKey(status);
+  if (DELIVERED_KEYS.includes(normalized)) {
+    return PersianOrderStatus.DELIVERED;
+  }
+  if (CANCELLED_KEYS.includes(normalized)) {
+    return PersianOrderStatus.CANCELLED;
+  }
+  return PersianOrderStatus.INPROGRESS;
+};
 
 export const getPaymentStatusMeta = (status?: string | null): StatusMeta => {
   return getMeta(PAYMENT_STATUS_MAP, status);

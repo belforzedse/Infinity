@@ -185,17 +185,19 @@ function ShoppingCartBillForm({}: Props) {
   }, []);
 
   useEffect(() => {
-    if (selectableGateways.length === 0) {
-      setError(EMPTY_GATEWAYS_ERROR);
-      return;
-    }
-
-    setError((prev) => (prev === EMPTY_GATEWAYS_ERROR ? null : prev));
-
-    if (!selectableGateways.includes(gateway)) {
-      setGateway(selectableGateways[0]);
-    }
-  }, [selectableGateways, gateway]);
+    setError((prev) =>
+      selectableGateways.length === 0
+        ? EMPTY_GATEWAYS_ERROR
+        : prev === EMPTY_GATEWAYS_ERROR
+          ? null
+          : prev,
+    );
+    setGateway((prev) =>
+      selectableGateways.length > 0 && !selectableGateways.includes(prev)
+        ? selectableGateways[0]
+        : prev,
+    );
+  }, [selectableGateways]);
 
   // Refresh discount preview when code or shipping changes (stable deps)
   useEffect(() => {
@@ -669,15 +671,23 @@ function ShoppingCartBillForm({}: Props) {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setMergeChoice("merge")}
-              className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (isSubmitting) return;
+                setMergeChoice("merge");
+              }}
+              className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               اضافه به سفارش رزروی (بدون هزینه ارسال)
             </button>
             <button
               type="button"
-              onClick={() => setMergeChoice("new")}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (isSubmitting) return;
+                setMergeChoice("new");
+              }}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               ثبت سفارش جدید
             </button>
@@ -700,7 +710,8 @@ function ShoppingCartBillForm({}: Props) {
                 اقلام فعلی به سفارش رزروی شما اضافه می‌شوند. هزینه ارسال از قبل پرداخت شده است.
               </p>
               <p className="mt-2 text-lg font-medium text-pink-600">
-                قابل پرداخت: {(totalPrice - (discountPreview?.discount ?? 0)).toLocaleString()} تومان
+                قابل پرداخت:{" "}
+                {Math.max(0, totalPrice - (discountPreview?.discount ?? 0)).toLocaleString()} تومان
               </p>
             </div>
           ) : (

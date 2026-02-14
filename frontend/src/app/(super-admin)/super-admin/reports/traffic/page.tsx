@@ -8,6 +8,7 @@ import { faNum } from "@/utils/faNum";
 import type { TrafficDashboard, TrafficRealtime } from "@/types/super-admin/reports/traffic";
 import { getTrafficDashboard, getTrafficRealtime } from "@/services/super-admin/reports/traffic";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { translateFunnelStep } from "@/utils/statusTranslations";
 
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), {
   ssr: false,
@@ -60,14 +61,7 @@ function formatSecondsSince(value?: string) {
 }
 
 function formatFunnelStep(step: TrafficDashboard["funnel"][number]["step"]): string {
-  const labelMap: Record<TrafficDashboard["funnel"][number]["step"], string> = {
-    view_item: "مشاهده محصول",
-    add_to_cart: "افزودن به سبد",
-    begin_checkout: "شروع تسویه",
-    purchase: "خرید نهایی",
-  };
-
-  return labelMap[step] || step;
+  return translateFunnelStep(step) || step;
 }
 
 export default function TrafficReportPage() {
@@ -237,8 +231,11 @@ export default function TrafficReportPage() {
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:min-w-[450px]">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-neutral-500">بروزرسانی لحظه‌ای</label>
+                  <label htmlFor="auto-refresh-select" className="text-xs font-medium text-neutral-500">
+                    بروزرسانی لحظه‌ای
+                  </label>
                   <select
+                    id="auto-refresh-select"
                     value={String(autoRefreshSeconds)}
                     onChange={(event) => setAutoRefreshSeconds(Number(event.target.value))}
                     className="rounded-lg border border-neutral-300 px-3 py-2 text-sm transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
@@ -566,7 +563,7 @@ function RealtimeMetric({
   delta?: number;
 }) {
   const deltaText =
-    delta === 0 ? null : `${delta > 0 ? "+" : ""}${faNum(Math.abs(delta))}`;
+    delta === 0 ? null : (delta > 0 ? "+" : "-") + faNum(Math.abs(delta));
   const deltaClassName =
     delta > 0
       ? "bg-emerald-100 text-emerald-700"

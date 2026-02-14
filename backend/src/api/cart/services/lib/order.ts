@@ -153,9 +153,9 @@ if (reservation) {
     delivery_address: deliveryAddressId || undefined,
   };
   if (reserveData) {
-    orderData.IsReserveOrder = true;
-    orderData.ReserveGroupId = reserveData.reserveGroupId;
-    orderData.ReserveExpiresAt = reserveData.reserveExpiresAt;
+    orderData.isReserveOrder = true;
+    orderData.reserveGroupId = reserveData.reserveGroupId;
+    orderData.reserveExpiresAt = reserveData.reserveExpiresAt;
   }
 
   // Use transaction context if provided

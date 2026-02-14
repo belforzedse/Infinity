@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
 import clsx from "clsx";
+import { formatCountdown } from "@/utils/formatCountdown";
 import PaymentStatusButton from "./PaymentStatusButton";
 import ShowFactorButton from "./ShowFactorButton";
 import { Eye, Clock } from "lucide-react";
@@ -28,15 +30,6 @@ interface Props {
   isReleasingReserve?: boolean;
 }
 
-function formatCountdown(expiresAt: string): string {
-  const end = new Date(expiresAt).getTime();
-  const now = Date.now();
-  const diff = Math.max(0, end - now);
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  return `${hours}س ${minutes}د`;
-}
-
 export default function OrderCard({
   image,
   category,
@@ -56,6 +49,17 @@ export default function OrderCard({
   onReleaseReserve,
   isReleasingReserve,
 }: Props) {
+  const [countdownText, setCountdownText] = useState<string>(() =>
+    reserveExpiresAt && isReserveOrder ? formatCountdown(reserveExpiresAt) : "",
+  );
+
+  useEffect(() => {
+    if (!reserveExpiresAt || !isReserveOrder) return;
+    setCountdownText(formatCountdown(reserveExpiresAt));
+    const id = setInterval(() => setCountdownText(formatCountdown(reserveExpiresAt)), 60_000);
+    return () => clearInterval(id);
+  }, [reserveExpiresAt, isReserveOrder]);
+
   return (
     <div className="mb-3 flex flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
       <div className="grid grid-cols-4">
@@ -127,7 +131,7 @@ export default function OrderCard({
             {isReserveOrder && reserveExpiresAt && (
               <span className="flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs text-amber-800">
                 <Clock className="h-3.5 w-3.5" />
-                ارسال رزروی ({formatCountdown(reserveExpiresAt)})
+                ارسال رزروی ({countdownText || formatCountdown(reserveExpiresAt)})
                 {reserveGroupOrderCount && reserveGroupOrderCount > 1 && (
                   <span> • {reserveGroupOrderCount} سفارش</span>
                 )}

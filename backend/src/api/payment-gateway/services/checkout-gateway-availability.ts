@@ -44,24 +44,31 @@ const resolveGatewayAvailabilityMap = async (
     availability.set(gateway.code, true);
   }
 
-  const rows = (await strapi.entityService.findMany(
-    "api::payment-gateway.payment-gateway",
-    {
-      fields: ["Title", "IsActive"],
-      pagination: { page: 1, pageSize: 200 },
-    },
-  )) as Array<{ Title?: string; IsActive?: boolean }> | null;
+  try {
+    const rows = (await strapi.entityService.findMany(
+      "api::payment-gateway.payment-gateway",
+      {
+        fields: ["Title", "IsActive"],
+        pagination: { page: 1, pageSize: 200 },
+      },
+    )) as Array<{ Title?: string; IsActive?: boolean }> | null;
 
-  for (const row of rows || []) {
-    const mappedCode = mapGatewayTitleToCode(row?.Title);
-    if (!mappedCode || !SUPPORTED_CODES.has(mappedCode)) continue;
+    for (const row of rows || []) {
+      const mappedCode = mapGatewayTitleToCode(row?.Title);
+      if (!mappedCode || !SUPPORTED_CODES.has(mappedCode)) continue;
 
-    if (row?.IsActive === false) {
-      availability.set(mappedCode, false);
+      if (row?.IsActive === false) {
+        availability.set(mappedCode, false);
+      }
     }
-  }
 
-  return availability;
+    return availability;
+  } catch (error) {
+    strapi.log.error("resolveGatewayAvailabilityMap: failed to fetch payment gateways", {
+      error,
+    });
+    return availability;
+  }
 };
 
 export const getAvailableCheckoutGateways = async (

@@ -44,9 +44,9 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       const parentOrders = await strapi.db.query("api::order.order").findMany({
         where: {
           user: { id: user.id },
-          ReserveGroupId: reserveGroupId.trim(),
-          IsReserveOrder: true,
-          ReserveExpiresAt: { $gt: now.toISOString() },
+          reserveGroupId: reserveGroupId.trim(),
+          isReserveOrder: true,
+          reserveExpiresAt: { $gt: now.toISOString() },
         },
         populate: { delivery_address: true, shipping: true },
         orderBy: { Date: "asc" },
@@ -61,8 +61,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       resolvedShippingId = parent.shipping?.id ?? parent.shipping;
       resolvedShippingCost = 0;
       reserveOrderData = {
-        reserveGroupId: parent.ReserveGroupId,
-        reserveExpiresAt: new Date(parent.ReserveExpiresAt),
+        reserveGroupId: parent.reserveGroupId,
+        reserveExpiresAt: new Date(parent.reserveExpiresAt),
         isMerge: true,
       };
     }
@@ -286,7 +286,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
 
     const gatewayEnabled = await isCheckoutGatewayEnabled(strapi, selectedGateway);
     if (!gatewayEnabled) {
-      return ctx.badRequest("Selected payment gateway is disabled", {
+      return ctx.badRequest("درگاه پرداخت انتخاب‌شده غیرفعال است.", {
         data: {
           success: false,
           errorCode: "PAYMENT_GATEWAY_DISABLED",
@@ -569,8 +569,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
           refId: "",
           financialSummary: financialSummary,
           requestId: "wallet",
-          ...(order.ReserveGroupId && { reserveGroupId: order.ReserveGroupId }),
-          ...(order.ReserveExpiresAt && { reserveExpiresAt: order.ReserveExpiresAt }),
+          ...(order.reserveGroupId && { reserveGroupId: order.reserveGroupId }),
+          ...(order.reserveExpiresAt && { reserveExpiresAt: order.reserveExpiresAt }),
         },
       };
     }
@@ -701,8 +701,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         refId: paymentResult.refId,
         financialSummary: financialSummary,
         requestId: paymentResult.requestId,
-        ...(order.ReserveGroupId && { reserveGroupId: order.ReserveGroupId }),
-        ...(order.ReserveExpiresAt && { reserveExpiresAt: order.ReserveExpiresAt }),
+        ...(order.reserveGroupId && { reserveGroupId: order.reserveGroupId }),
+        ...(order.reserveExpiresAt && { reserveExpiresAt: order.reserveExpiresAt }),
       },
     };
   } catch (error: any) {
