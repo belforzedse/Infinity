@@ -27,7 +27,7 @@ export function startExpireReserveOrdersJob(strapi: Strapi) {
           IsReserveOrder: true,
           ReserveExpiresAt: { $lte: now.toISOString() },
         },
-        fields: ["id", "ReserveGroupId", "user"],
+        select: ["id", "ReserveGroupId", "user"],
       });
 
       const groupIds = [
@@ -41,7 +41,7 @@ export function startExpireReserveOrdersJob(strapi: Strapi) {
       for (const groupId of groupIds) {
         const groupOrders = await strapi.db.query("api::order.order").findMany({
           where: { ReserveGroupId: groupId },
-          fields: ["id"],
+          select: ["id"],
         });
         for (const o of groupOrders || []) {
           await strapi.entityService.update("api::order.order", o.id, {
