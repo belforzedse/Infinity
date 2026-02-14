@@ -7,6 +7,19 @@ import { useEffect, useState } from "react";
 import type { Navigation, NavigationCategory } from "@/types/super-admin/navigation";
 import { getNavigation } from "@/services/super-admin/navigation/get";
 import { updateNavigation } from "@/services/super-admin/navigation/update";
+import CustomizationPreviewSection from "@/components/SuperAdmin/CustomizationPreviewSection";
+import NavigationPreview from "./NavigationPreview";
+
+function parseCategoriesForEmpty(value: NavigationFormData["product_categories"]): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function NavigationEditor() {
   const [data, setData] = useState<NavigationFormData | null>(null);
@@ -49,6 +62,28 @@ export default function NavigationEditor() {
     <UpsertPageContentWrapper<NavigationFormData>
       config={config}
       data={data}
+      usePanelLayout
+      footer={(formData) => {
+        const categories = parseCategoriesForEmpty(formData.product_categories);
+        const isEmpty = categories.length === 0;
+        return (
+          <CustomizationPreviewSection
+            title="پیش‌نمایش قالب"
+            browserFrame
+            empty={
+              isEmpty
+                ? {
+                    title: "دسته‌بندی در منو وجود ندارد",
+                    description:
+                      "دسته‌بندی‌های منوی ناوبری را در فرم بالا انتخاب و ذخیره کنید تا پیش‌نمایش نمایش داده شود.",
+                  }
+                : undefined
+            }
+          >
+            <NavigationPreview product_categories={formData.product_categories} />
+          </CustomizationPreviewSection>
+        );
+      }}
       onSubmit={async (formData) => {
         try {
           let productCategories = formData.product_categories;

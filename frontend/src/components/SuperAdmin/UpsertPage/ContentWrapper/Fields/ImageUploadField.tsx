@@ -80,9 +80,9 @@ export default function ImageUploadField({
   const previewUrl = hasImage ? resolveAssetUrl(value.trim()) : "";
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-3">
       <div
-        className={`relative overflow-hidden rounded-2xl border border-dashed ${
+        className={`relative min-w-0 overflow-hidden rounded-2xl border border-dashed ${
           isDragging ? "border-pink-400 bg-pink-50" : "border-slate-200 bg-slate-50"
         }`}
         onDragOver={(e) => {

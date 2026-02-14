@@ -2,103 +2,73 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
+import HomePromoBanners from "@/components/Home/PromoBanners";
+import CustomizationPreviewSection from "@/components/SuperAdmin/CustomizationPreviewSection";
 import UpsertPageContentWrapper from "@/components/SuperAdmin/UpsertPage/ContentWrapper";
 import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
 import { updateSuperAdminSettings } from "@/services/super-admin/settings/update";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
-import resolveAssetUrl from "@/utils/resolveAssetUrl";
 import { config } from "./config";
 
-const getSafeTitleColor = (value?: string) => value?.trim() || "#ffffff";
-const getSafeButtonColor = (value?: string) => value?.trim() || "#111827";
-
-function HomeBannersPreview({ data }: { data: SuperAdminSettings }) {
+function HomeBannersPreviewInner({ data }: { data: SuperAdminSettings }) {
   const banners = useMemo(
     () => [
       {
-        id: "one",
-        label: "بنر اول",
-        imageUrl: data.homeBannerOneImage?.trim(),
-        title: data.homeBannerOneTitle?.trim(),
-        titleColor: getSafeTitleColor(data.homeBannerOneTitleColor),
+        id: "home-banner-one",
+        imageUrl: data.homeBannerOneImage?.trim() ?? "",
+        title: data.homeBannerOneTitle?.trim() ?? "",
+        titleColor: data.homeBannerOneTitleColor?.trim() || "#ffffff",
         buttonText: data.homeBannerOneButtonText?.trim(),
-        buttonColor: getSafeButtonColor(data.homeBannerOneButtonColor),
+        buttonColor: data.homeBannerOneButtonColor?.trim() || "#111827",
         buttonHref: data.homeBannerOneButtonHref?.trim(),
       },
       {
-        id: "two",
-        label: "بنر دوم",
-        imageUrl: data.homeBannerTwoImage?.trim(),
-        title: data.homeBannerTwoTitle?.trim(),
-        titleColor: getSafeTitleColor(data.homeBannerTwoTitleColor),
+        id: "home-banner-two",
+        imageUrl: data.homeBannerTwoImage?.trim() ?? "",
+        title: data.homeBannerTwoTitle?.trim() ?? "",
+        titleColor: data.homeBannerTwoTitleColor?.trim() || "#ffffff",
         buttonText: data.homeBannerTwoButtonText?.trim(),
-        buttonColor: getSafeButtonColor(data.homeBannerTwoButtonColor),
+        buttonColor: data.homeBannerTwoButtonColor?.trim() || "#111827",
         buttonHref: data.homeBannerTwoButtonHref?.trim(),
       },
     ],
     [data],
   );
 
+  return <HomePromoBanners banners={banners} />;
+}
+
+function isBannerReady(imageUrl: string, title: string) {
+  return Boolean(imageUrl) && Boolean(title);
+}
+
+function HomeBannersPreview({ data }: { data: SuperAdminSettings }) {
+  const hasBannerOne = isBannerReady(
+    data.homeBannerOneImage?.trim() ?? "",
+    data.homeBannerOneTitle?.trim() ?? "",
+  );
+  const hasBannerTwo = isBannerReady(
+    data.homeBannerTwoImage?.trim() ?? "",
+    data.homeBannerTwoTitle?.trim() ?? "",
+  );
+  const isEmpty = !hasBannerOne && !hasBannerTwo;
+
   return (
-    <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-pink-50/40 p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex flex-col">
-          <span className="text-lg font-semibold text-slate-800">پیش‌نمایش زنده</span>
-          <span className="text-sm text-slate-500">
-            این پیش‌نمایش به صورت زنده با هر تغییر بروزرسانی می‌شود.
-          </span>
-        </div>
-        <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-pink-600 shadow-sm">
-          Home Banners
-        </span>
-      </div>
-
-      <div className="grid gap-5">
-        {banners.map((banner) => {
-          const hasImage = Boolean(banner.imageUrl);
-          const background = hasImage
-            ? `url(${resolveAssetUrl(banner.imageUrl)})`
-            : "linear-gradient(135deg, #fdf2f8 0%, #f1f5f9 100%)";
-          const titleText = banner.title || "عنوان بنر اینجا قرار می‌گیرد";
-          const buttonText = banner.buttonText || "مشاهده بیشتر";
-
-          return (
-            <div
-              key={banner.id}
-              className="relative h-[452px] overflow-hidden rounded-[34px] border border-white/60 bg-slate-100 shadow-sm"
-              style={{
-                backgroundImage: background,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              <div className="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
-                {banner.label}
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-black/5 to-transparent" />
-              <div className="relative z-10 flex h-full flex-col items-center justify-start gap-4 px-6 pt-10 text-center md:pt-14">
-                <h3
-                  className="text-3xl font-medium leading-tight md:text-[44px]"
-                  style={{ color: banner.titleColor }}
-                >
-                  {titleText}
-                </h3>
-                <div className="flex flex-col items-center gap-1.5">
-                  <button
-                    type="button"
-                    className="inline-flex items-center text-sm font-medium transition hover:opacity-80 md:text-lg"
-                    style={{ color: banner.buttonColor }}
-                  >
-                    {buttonText}
-                    <span className="ml-1 text-xl">←</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <CustomizationPreviewSection
+      title="پیش‌نمایش قالب"
+      browserFrame
+      empty={
+        isEmpty
+          ? {
+              title: "بنری تنظیم نشده است",
+              description:
+                "برای مشاهده پیش‌نمایش، تصویر یا عنوان بنرهای اول و دوم را در فرم بالا وارد کنید.",
+            }
+          : undefined
+      }
+    >
+      <HomeBannersPreviewInner data={data} />
+    </CustomizationPreviewSection>
   );
 }
 
@@ -128,6 +98,7 @@ export default function HomeBannersSettingsPage() {
     <UpsertPageContentWrapper
       config={config}
       data={data}
+      usePanelLayout
       footer={(formData) => <HomeBannersPreview data={formData} />}
       onSubmit={async (formData) => {
         try {

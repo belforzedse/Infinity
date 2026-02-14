@@ -1,5 +1,5 @@
 "use client";
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import CalendarIcon from "../Icons/CalendarIcon";
 import AddButton from "../../Layout/ContentWrapper/Button/Add";
@@ -7,8 +7,10 @@ import ActiveBox from "./ActiveBox";
 import FieldRenderer from "./FieldRenderer";
 import { useRouter } from "next/navigation";
 import logger from "@/utils/logger";
-import type { Field} from "./types";
+import type { Field } from "./types";
 import { isStandardField, isRadioTextWithChips, isCategoriesListField } from "./types";
+import { PanelLeftClose, PanelRight } from "lucide-react";
+import CustomizationEditorPanel from "../../CustomizationEditorPanel";
 
 type ActionButtonsProps = {
   onSubmit: () => void;
@@ -48,6 +50,8 @@ type Props<T> = {
   footer?: ReactNode | ((data: T) => ReactNode);
   customSidebar?: ReactNode;
   onSubmit?: (data: T) => Promise<void>;
+  /** When true and footer is set, preview is on the left and form is in a collapsible panel (hero-style). */
+  usePanelLayout?: boolean;
 };
 
 const mobileColSpan = {
@@ -83,12 +87,13 @@ const desktopColSpan = {
 export default function UpsertPageContentWrapper<T extends { createdAt: Date; updatedAt: Date }>(
   props: Props<T>,
 ) {
-  const { config, data, footer, onSubmit: onSubmitProp } = props;
+  const { config, data, footer, onSubmit: onSubmitProp, usePanelLayout } = props;
 
   const router = useRouter();
 
   const [formData, setFormData] = useState<T>(data ?? ({} as T));
   const [isLoading, setIsLoading] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -121,23 +126,26 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
     }));
   };
 
-  return (
-    <div className="mt-0 flex flex-col gap-2 md:mt-7 md:gap-4">
-      <div className="flex items-center justify-between">
-        <span className="text-3xl text-foreground-primary">{config.headTitle}</span>
+  const isPanel = Boolean(usePanelLayout && footer);
+  const formGridClass = isPanel ? "grid-cols-1" : "grid-cols-12";
+  const formMainClass = isPanel ? "col-span-1" : "col-span-12 md:col-span-9";
+  const formSidebarClass = isPanel ? "col-span-1 mt-3" : "col-span-12 mt-3 flex flex-col gap-3 md:col-span-3 md:mt-0";
+  const formTimestampStickyClass = isPanel ? "" : "md:sticky md:top-5";
+  const formActionsVisibleClass = isPanel ? "flex" : "hidden md:grid";
+  const sectionGridClass = isPanel ? "grid-cols-1" : "grid-cols-12";
+  const getFieldColClass = (field: Field<T>) =>
+    isPanel
+      ? "col-span-1 min-w-0"
+      : `${mobileColSpan[field.mobileColSpan as keyof typeof mobileColSpan]} ${desktopColSpan[field.colSpan as keyof typeof desktopColSpan]}`;
 
-        {config.addButton && (
-          <AddButton text={config.addButton.text} path={config.addButton.path ?? "#"} />
-        )}
-      </div>
-
-      <form className="mt-3 w-full md:mt-0" onSubmit={onSubmit}>
-        <div className="grid w-full grid-cols-12 gap-3">
+  const formElement = (
+    <form className={`mt-3 w-full md:mt-0 ${isPanel ? "min-w-0 max-w-full overflow-hidden" : "min-w-0"}`} onSubmit={onSubmit}>
+        <div className={`grid w-full min-w-0 gap-3 ${formGridClass}`}>
           {/* Form Section */}
-          <div className="col-span-12 md:col-span-9">
+          <div className={`min-w-0 ${formMainClass}`}>
             {config.config.map((item, index) => (
-              <div key={index} className="mb-3 rounded-2xl bg-white p-3 md:p-5">
-                <div className="flex flex-col gap-4">
+              <div key={index} className={`mb-3 rounded-2xl bg-white p-3 md:p-5 ${isPanel ? "min-w-0" : ""}`}>
+                <div className={`flex flex-col gap-4 ${isPanel ? "min-w-0" : ""}`}>
                   {/* Header Section */}
                   <div className="flex items-center justify-between">
                     <span className="text-xl text-neutral-600">
@@ -153,10 +161,10 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
                   {item.sections.map((section, sectionIndex) => (
                     <div
                       key={sectionIndex}
-                      className="grid auto-rows-auto grid-cols-12 gap-5 rounded-2xl border border-slate-100 p-3 md:p-5"
+                      className={`grid min-w-0 auto-rows-auto gap-5 rounded-2xl border border-slate-100 p-3 md:p-5 ${sectionGridClass}`}
                     >
                       {section.header && (
-                        <div className="col-span-12 flex items-center justify-between">
+                        <div className={`flex items-center justify-between ${isPanel ? "col-span-1" : "col-span-12"}`}>
                           <span className="text-xl text-foreground-primary">
                             {section.header.title}
                           </span>
@@ -175,11 +183,7 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
                                   ? String(field.name)
                                   : `${String(field.provinceField)}-${String(field.cityField)}`
                           }
-                          className={`${
-                            mobileColSpan[field.mobileColSpan as keyof typeof mobileColSpan]
-                          } ${
-                            desktopColSpan[field.colSpan as keyof typeof desktopColSpan]
-                          } flex flex-col gap-1`}
+                          className={`${getFieldColClass(field)} flex min-w-0 flex-col gap-1`}
                         >
                           {field.label && (
                             <div className="flex items-center justify-between">
@@ -206,8 +210,8 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
             ))}
           </div>
 
-          {/* Mobile Action Buttons */}
-          <div className="col-span-12 flex w-full md:hidden">
+          {/* Mobile Action Buttons (hidden in panel; panel uses the single action row below) */}
+          <div className={`flex w-full ${isPanel ? "hidden" : "col-span-12 md:hidden"}`}>
             <div className="flex w-full items-center gap-2">
               {config.actionButtons({
                 onSubmit: onSubmit,
@@ -217,10 +221,10 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
             </div>
           </div>
 
-          {/* Timestamp Section - Fixed position */}
-          <div className="col-span-12 mt-3 flex flex-col gap-3 md:col-span-3 md:mt-0">
+          {/* Timestamp Section */}
+          <div className={`flex min-w-0 flex-col gap-3 ${formSidebarClass}`}>
             {config.showTimestamp && (
-              <div className="flex flex-col gap-3 rounded-2xl bg-white p-5 md:sticky md:top-5">
+              <div className={`flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-5 ${formTimestampStickyClass}`}>
                 {/* Create At Section */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -230,11 +234,11 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
                   </div>
 
                   <span className="text-sm text-slate-500">
-                    {data?.createdAt.toLocaleString("fa-IR", {
+                    {data?.createdAt?.toLocaleString("fa-IR", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
-                    })}
+                    }) ?? "—"}
                   </span>
                 </div>
 
@@ -250,11 +254,11 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
                   </div>
 
                   <span className="text-sm text-slate-500">
-                    {data?.updatedAt.toLocaleString("fa-IR", {
+                    {data?.updatedAt?.toLocaleString("fa-IR", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
-                    })}
+                    }) ?? "—"}
                   </span>
                 </div>
               </div>
@@ -279,10 +283,10 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
           </div>
         </div>
 
-        {/* Desktop Action Buttons */}
-        <div className="mt-4 hidden w-full grid-cols-12 md:grid">
-          <div className="col-span-9">
-            <div className="flex items-center justify-end gap-2">
+        {/* Desktop / Panel Action Buttons */}
+        <div className={`mt-4 w-full ${formActionsVisibleClass} ${isPanel ? "flex flex-col" : "grid-cols-12 md:grid"}`}>
+          <div className={isPanel ? "w-full" : "col-span-9"}>
+            <div className="flex w-full flex-wrap items-center justify-end gap-2">
               {config.actionButtons({
                 onSubmit: onSubmit,
                 onCancel: onCancel,
@@ -292,7 +296,53 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
           </div>
         </div>
       </form>
+  );
 
+  if (usePanelLayout && footer) {
+    return (
+      <div className="mt-0 flex flex-col gap-2 md:mt-7 md:gap-4">
+        <div className="flex items-center justify-between">
+          <span className="text-3xl text-foreground-primary">{config.headTitle}</span>
+          {config.addButton && (
+            <AddButton text={config.addButton.text} path={config.addButton.path ?? "#"} />
+          )}
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => setPanelCollapsed((p) => !p)}
+            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+            title={panelCollapsed ? "نمایش پنل ویرایش" : "بستن پنل ویرایش"}
+            aria-label={panelCollapsed ? "نمایش پنل ویرایش" : "بستن پنل ویرایش"}
+          >
+            {panelCollapsed ? (
+              <PanelRight className="h-4 w-4" aria-hidden />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" aria-hidden />
+            )}
+          </button>
+        </div>
+        <div className="flex flex-col gap-4 overflow-x-hidden xl:flex-row">
+          <div className="min-w-0 flex-1">
+            {typeof footer === "function" ? footer(formData) : footer}
+          </div>
+          <CustomizationEditorPanel isCollapsed={panelCollapsed}>
+            {formElement}
+          </CustomizationEditorPanel>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-0 flex flex-col gap-2 md:mt-7 md:gap-4">
+      <div className="flex items-center justify-between">
+        <span className="text-3xl text-foreground-primary">{config.headTitle}</span>
+        {config.addButton && (
+          <AddButton text={config.addButton.text} path={config.addButton.path ?? "#"} />
+        )}
+      </div>
+      {formElement}
       <div className="mt-9 grid grid-cols-12">
         <div className="col-span-12 md:col-span-9">
           {typeof footer === "function" ? footer(formData) : footer}
