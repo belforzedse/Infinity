@@ -56,6 +56,19 @@ textarea:focus-visible {
   .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
   }
+
+  /* Neutral scrollbar for panels (e.g. customization editor) so they don't use accent pink */
+  .scrollbar-neutral {
+    scrollbar-color: #94a3b8 transparent; /* slate-400 */
+  }
+
+  .scrollbar-neutral::-webkit-scrollbar-thumb {
+    background-color: #94a3b8;
+  }
+
+  .scrollbar-neutral::-webkit-scrollbar-thumb:hover {
+    background-color: #64748b; /* slate-500 */
+  }
 }
 
 /* Custom Scrollbar Styles */

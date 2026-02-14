@@ -7,6 +7,13 @@ import { atom, useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import type { FileType } from "@/components/Product/add/FileUploader/types";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import {
+  hasTypedMediaMime,
+  reorderArrayWithGuards,
+  reorderImageMediaPreservingSlots,
+  shouldReorderUntypedMediaAsImages,
+  type UploadMediaEntry,
+} from "./mediaReorder";
 
 interface UploadingState {
   image: boolean;
@@ -341,6 +348,45 @@ export function useUpload({
     }
   };
 
+  const reorderImages = (oldIndex: number, newIndex: number) => {
+    setImages((prevImages) => reorderArrayWithGuards(prevImages, oldIndex, newIndex));
+
+    setProductData((prev: any) => {
+      // TODO: Replace cast with strongly typed product data
+      if (!prev) return prev;
+
+      const media = (((prev as any).Media || []) as UploadMediaEntry[]);
+      if (!Array.isArray(media) || media.length === 0) {
+        return prev;
+      }
+
+      let nextMedia = media;
+
+      // Edit mode media includes MIME metadata and can be reordered as an image subset.
+      if (isEditMode || hasTypedMediaMime(media)) {
+        nextMedia = reorderImageMediaPreservingSlots(media, oldIndex, newIndex);
+      } else if (
+        shouldReorderUntypedMediaAsImages({
+          mediaLength: media.length,
+          imageCount: images.length,
+          videoCount: videos.length,
+        })
+      ) {
+        // Add mode fallback when every media entry is currently an image.
+        nextMedia = reorderArrayWithGuards(media, oldIndex, newIndex);
+      }
+
+      if (nextMedia === media) {
+        return prev;
+      }
+
+      return {
+        ...(prev as any),
+        Media: nextMedia,
+      };
+    });
+  };
+
   return {
     images,
     videos,
@@ -348,5 +394,6 @@ export function useUpload({
     uploadingState,
     handleFileUpload,
     removeFile,
+    reorderImages,
   };
 }

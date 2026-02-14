@@ -88,6 +88,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                     <TextBanner
                       title={layout.topLeftTextBanner.title}
                       subtitle={layout.topLeftTextBanner.subtitle}
+                      marginBottomPx={layout.topLeftTextBanner.marginBottomPx}
                       className={layout.topLeftTextBanner.className}
                       titleClassName={layout.topLeftTextBanner.titleClassName}
                       subtitleClassName={layout.topLeftTextBanner.subtitleClassName}

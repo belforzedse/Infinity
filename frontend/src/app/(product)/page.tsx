@@ -16,6 +16,8 @@ import { BlogCarousel } from "@/components/Blog";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
 import TabletSlider from "@/components/Hero/tabletSlider";
+import { defaultSliderConfig } from "@/components/Hero/config";
+import { mapCmsHeroSliderToLayouts } from "@/components/Hero/config/fromCms";
 import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
@@ -122,6 +124,20 @@ export default async function Home() {
     Boolean(featuredCategorySlug) &&
     Boolean(featuredCategoryBannerImage) &&
     featuredCategorySmallProducts.length > 0;
+  const heroFromCms = mapCmsHeroSliderToLayouts(homepageSettings.homeHeroSliderPublished);
+  const hasHeroSlides =
+    heroFromCms.desktopSlides.length > 0 ||
+    heroFromCms.tabletSlides.length > 0 ||
+    heroFromCms.mobileSlides.length > 0;
+  const effectiveHero = hasHeroSlides
+    ? heroFromCms
+    : {
+        desktopSlides: defaultSliderConfig.desktop,
+        tabletSlides: defaultSliderConfig.tablet,
+        mobileSlides: defaultSliderConfig.mobile,
+        autoplayIntervalMs: defaultSliderConfig.autoplayInterval ?? 600000,
+        autoplayEligibility: [] as boolean[],
+      };
 
   return (
     <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
@@ -130,13 +146,25 @@ export default async function Home() {
 
       <section className="space-y-6">
         <Reveal variant="zoom-in" duration={650}>
-          <MobileSlider />
+          <MobileSlider
+            slides={effectiveHero.mobileSlides}
+            autoplayInterval={effectiveHero.autoplayIntervalMs}
+            autoplayEligibility={effectiveHero.autoplayEligibility}
+          />
         </Reveal>
         <Reveal delay={50} variant="zoom-in" duration={650}>
-          <TabletSlider />
+          <TabletSlider
+            slides={effectiveHero.tabletSlides}
+            autoplayInterval={effectiveHero.autoplayIntervalMs}
+            autoplayEligibility={effectiveHero.autoplayEligibility}
+          />
         </Reveal>
         <Reveal delay={100} variant="zoom-in" duration={650}>
-          <DesktopSlider />
+          <DesktopSlider
+            slides={effectiveHero.desktopSlides}
+            autoplayInterval={effectiveHero.autoplayIntervalMs}
+            autoplayEligibility={effectiveHero.autoplayEligibility}
+          />
         </Reveal>
       </section>
 

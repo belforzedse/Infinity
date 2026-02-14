@@ -281,6 +281,29 @@ describe("CartService", () => {
     });
   });
 
+  describe("getAvailableGateways", () => {
+    it("fetches available gateways successfully", async () => {
+      mockGet.mockResolvedValueOnce({
+        data: {
+          gateways: [{ code: "samankish" }, { code: "mellat" }, { code: "wallet" }],
+        },
+      } as any);
+
+      const result = await CartService.getAvailableGateways();
+
+      expect(mockGet).toHaveBeenCalledWith("/payment-gateway/available");
+      expect(result).toEqual(["samankish", "mellat", "wallet"]);
+    });
+
+    it("falls back to default gateway list when request fails", async () => {
+      mockGet.mockRejectedValueOnce(new Error("Network Error"));
+
+      const result = await CartService.getAvailableGateways();
+
+      expect(result).toEqual(["samankish", "mellat", "snappay", "wallet"]);
+    });
+  });
+
   it("exports all required cart service methods", () => {
     const expectedMethods = [
       "getUserCart",
@@ -288,6 +311,7 @@ describe("CartService", () => {
       "updateCartItem",
       "removeCartItem",
       "checkCartStock",
+      "getAvailableGateways",
       "finalizeCart",
       "getSnappEligible",
       "getShippingPreview",

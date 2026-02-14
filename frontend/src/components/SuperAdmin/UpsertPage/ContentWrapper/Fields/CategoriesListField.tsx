@@ -15,6 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import CopyIcon from "../../Icons/CopyIcon";
 
 type Category = {
@@ -53,17 +54,27 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
-      {...attributes}
-      {...listeners}
+      className="flex items-center gap-2 rounded-lg bg-slate-50 p-3"
     >
-      <div className="flex flex-col">
+      <button
+        type="button"
+        className="touch-none rounded-md p-1 text-slate-400 hover:bg-slate-100"
+        aria-label="جابجایی برای تغییر ترتیب"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <div className="min-w-0 flex-1 flex flex-col">
         <span className="font-medium">{category.title}</span>
         <span className="text-xs text-slate-500">{category.slug}</span>
       </div>
-
       {!readOnly && (
-        <button onClick={() => onRemove(category.id)} className="text-red-500">
+        <button
+          type="button"
+          onClick={() => onRemove(category.id)}
+          className="shrink-0 text-red-500 hover:underline"
+        >
           حذف
         </button>
       )}

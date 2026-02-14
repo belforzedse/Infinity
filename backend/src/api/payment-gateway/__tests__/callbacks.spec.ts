@@ -274,4 +274,73 @@ describe("verifyPaymentHandler", () => {
       "https://new.infinitycolor.co/payment/success?orderId=700&transactionId=SN-OK",
     );
   });
+
+  it("uses status fallback when SnappPay verify fails but status is VERIFY", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    const snappayService = {
+      status: jest
+        .fn()
+        .mockResolvedValueOnce({
+          successful: true,
+          response: { status: "VERIFY_PENDING", transactionId: "SN-FB" },
+        })
+        .mockResolvedValueOnce({
+          successful: true,
+          response: { status: "VERIFY", transactionId: "SN-FB" },
+        })
+        .mockResolvedValueOnce({
+          successful: true,
+          response: { status: "SETTLED", transactionId: "SN-FB" },
+        }),
+      verify: jest.fn().mockResolvedValue({
+        successful: false,
+        errorData: { message: "timeout" },
+      }),
+      settle: jest.fn().mockResolvedValue({ successful: true }),
+      revert: jest.fn(),
+    };
+    registerService("api::payment-gateway.snappay", snappayService);
+
+    (strapi.entityService.findOne as jest.Mock).mockImplementation(async (uid: string) => {
+      if (uid === "api::order.order") {
+        return {
+          id: 701,
+          order_items: [
+            {
+              Count: 1,
+              product_variation: {
+                product_stock: { id: 302, Count: 5 },
+              },
+            },
+          ],
+        };
+      }
+      return null;
+    });
+
+    const ctx = createCtx({
+      request: {
+        body: {
+          OrderId: "701",
+          state: "OK",
+          transactionId: "SN-FB",
+          paymentToken: "PT-FB",
+        },
+      },
+    });
+
+    await verifyPaymentHandler(strapi as any, ctx);
+
+    expect(snappayService.verify).toHaveBeenCalledWith("PT-FB");
+    expect(snappayService.settle).toHaveBeenCalledWith("PT-FB");
+    expect(snappayService.status).toHaveBeenCalledTimes(3);
+    expect(strapi.entityService.update).toHaveBeenCalledWith(
+      "api::order.order",
+      701,
+      { data: { Status: "Started" } },
+    );
+    expect(ctx.redirect).toHaveBeenCalledWith(
+      "https://new.infinitycolor.co/payment/success?orderId=701&transactionId=SN-FB",
+    );
+  });
 });

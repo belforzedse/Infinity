@@ -1,5 +1,14 @@
 import type { ImageResponse, ProductCategory } from "./media";
 
+export type CheckoutGatewayCode = "samankish" | "snappay" | "wallet" | "mellat";
+
+export const DEFAULT_CHECKOUT_GATEWAYS: CheckoutGatewayCode[] = [
+  "samankish",
+  "mellat",
+  "snappay",
+  "wallet",
+];
+
 export interface CartItemResponse {
   id: number;
   Count: number;
@@ -111,7 +120,7 @@ export interface FinalizeCartRequest {
     Description?: string;
     save?: boolean;
   };
-  gateway?: "samankish" | "snappay" | "wallet" | "mellat";
+  gateway?: CheckoutGatewayCode;
   mobile?: string;
   discountCode?: string;
 }

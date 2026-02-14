@@ -159,6 +159,63 @@ describe("finalizeToOrderHandler", () => {
     );
   });
 
+  it("returns PAYMENT_GATEWAY_DISABLED when selected gateway is disabled in backend", async () => {
+    const { strapi, registerService } = createStrapiMock();
+    registerService("api::cart.cart", {
+      finalizeCartToOrder: jest.fn().mockResolvedValue({
+        success: true,
+        order: { id: 160 },
+        contract: { id: 170, Amount: 200_000 },
+        financialSummary: { payable: 200_000 },
+      }),
+      clearCart: jest.fn(),
+    });
+
+    (strapi.entityService.findMany as jest.Mock).mockResolvedValue([
+      { Title: "SnappPay", IsActive: false },
+    ]);
+
+    mockEntityFindOne(strapi, {
+      "api::shipping.shipping": () => ({ id: 3 }),
+      "api::local-user-address.local-user-address": () => ({
+        id: 22,
+        shipping_city: {},
+        user: { id: 1 },
+      }),
+    });
+
+    const ctx = createCtx({
+      request: {
+        body: {
+          shipping: 3,
+          addressId: 22,
+          gateway: "snappay",
+        },
+      },
+    });
+
+    const handler = finalizeToOrderHandler(strapi);
+    await expect(handler(ctx)).rejects.toMatchObject({
+      message: "Selected payment gateway is disabled",
+      status: 400,
+    });
+
+    expect(ctx.badRequest).toHaveBeenCalledWith(
+      "Selected payment gateway is disabled",
+      expect.objectContaining({
+        data: expect.objectContaining({
+          success: false,
+          errorCode: "PAYMENT_GATEWAY_DISABLED",
+          gateway: "snappay",
+        }),
+      }),
+    );
+
+    expect(mockedRequestSnappPayment).not.toHaveBeenCalled();
+    expect(mockedRequestSamanPayment).not.toHaveBeenCalled();
+    expect(mockedRequestMellatPayment).not.toHaveBeenCalled();
+  });
+
   it("settles the order immediately when wallet funding succeeds", async () => {
     const { strapi, registerService, registerQuery } = createStrapiMock();
     const cartService = {

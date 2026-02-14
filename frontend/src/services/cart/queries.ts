@@ -1,5 +1,9 @@
 import { apiClient } from "../index";
-import type { CartStockCheckResponse } from "./types/cart";
+import type {
+  CartStockCheckResponse,
+  CheckoutGatewayCode,
+} from "./types/cart";
+import { DEFAULT_CHECKOUT_GATEWAYS } from "./types/cart";
 import { unwrap } from "./helpers/response";
 
 type SnappEligibilityResponse = {
@@ -15,6 +19,13 @@ type ShippingPreviewResponse = {
   weight?: number;
   message?: string;
 };
+
+interface AvailableGatewaysResponse {
+  gateways?: Array<{
+    code?: string;
+    title?: string;
+  }>;
+}
 
 export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
   const response = await apiClient.get<CartStockCheckResponse>("/carts/check-stock");
@@ -69,5 +80,22 @@ export const getShippingPreview = async (
     return unwrap<ShippingPreviewResponse>(response) ?? { success: false, shipping: 0 };
   } catch {
     return { success: false, shipping: 0 };
+  }
+};
+
+export const getAvailableGateways = async (): Promise<CheckoutGatewayCode[]> => {
+  try {
+    const response = await apiClient.get<AvailableGatewaysResponse>("/payment-gateway/available");
+    const payload = unwrap<AvailableGatewaysResponse>(response);
+    const gatewayCodes = (payload?.gateways || [])
+      .map((item) => String(item?.code || "").toLowerCase())
+      .filter(
+        (code): code is CheckoutGatewayCode =>
+          code === "samankish" || code === "mellat" || code === "snappay" || code === "wallet",
+      );
+
+    return gatewayCodes;
+  } catch {
+    return [...DEFAULT_CHECKOUT_GATEWAYS];
   }
 };

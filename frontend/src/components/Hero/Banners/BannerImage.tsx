@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import imageLoader from "@/utils/imageLoader";
 
 type BannerImageProps = {
   src: string;
@@ -27,11 +28,15 @@ export default function BannerImage({
   href,
   objectPosition,
 }: BannerImageProps) {
+  const normalizedSrc = typeof src === "string" ? src.trim() : "";
+  if (!normalizedSrc) return null;
+
   const imageStyle = objectPosition ? { objectPosition } : undefined;
 
   const img = (
     <Image
-      src={src}
+      src={normalizedSrc}
+      loader={imageLoader}
       alt={alt}
       width={width}
       height={height}

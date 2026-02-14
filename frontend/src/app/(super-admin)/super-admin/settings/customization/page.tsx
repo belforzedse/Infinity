@@ -23,6 +23,12 @@ const tiles = [
     href: "/super-admin/settings/customization/featured-category",
     icon: <FiGrid className="h-5 w-5" />,
   },
+  {
+    title: "اسلایدر هیرو",
+    description: "محتوای اسلایدر هیرو صفحه اصلی را در قالب ثابت مدیریت کنید.",
+    href: "/super-admin/settings/customization/hero-slider",
+    icon: <FiImage className="h-5 w-5" />,
+  },
 ];
 
 export default function SettingsCustomizationPage() {

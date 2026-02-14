@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { Option } from "@/components/Kits/Form/Select";
 import ShoppingCartBillInformationForm from "./InformationForm";
@@ -14,6 +14,10 @@ import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
 import type { ShippingMethod } from "@/services/shipping";
 import { CartService } from "@/services";
+import {
+  DEFAULT_CHECKOUT_GATEWAYS,
+  type CheckoutGatewayCode,
+} from "@/services/cart/types/cart";
 import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";
 import { useCart } from "@/contexts/CartContext";
@@ -90,10 +94,13 @@ function ShoppingCartBillForm({}: Props) {
   const shippingCost = watchShippingMethod
     ? Number(watchShippingMethod.attributes?.Price || 0)
     : undefined;
-  const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
+  const addressId = watchAddress ? Number(watchAddress?.id) : undefined;
 
   // Gateway selection state
-  const [gateway, setGateway] = useState<"samankish" | "snappay" | "wallet" | "mellat">("samankish");
+  const [gateway, setGateway] = useState<CheckoutGatewayCode>("samankish");
+  const [availableGateways, setAvailableGateways] = useState<CheckoutGatewayCode[]>([
+    ...DEFAULT_CHECKOUT_GATEWAYS,
+  ]);
   const [snappEligible, setSnappEligible] = useState<boolean>(false); // Start as not eligible
   const [snappTitle, setSnappTitle] = useState<string | undefined>(undefined);
   const [snappDescription, setSnappDescription] = useState<string | undefined>(undefined);
@@ -114,6 +121,12 @@ function ShoppingCartBillForm({}: Props) {
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
   const { totalPrice, totalItems, clearCart } = useCart();
+  const selectableGateways = useMemo(() => availableGateways.filter((gw) => gw !== "snappay" || snappEligible), [availableGateways, snappEligible]);
+
+  const shippingToman = shippingCost ?? 0;
+  const discountToman = discountPreview?.discount ?? 0;
+  const subtotalToman = totalPrice;
+  const totalToman = Math.max(0, Math.round(subtotalToman - discountToman + shippingToman));
 
   // Persist/restore discount code
   useEffect(() => {
@@ -129,6 +142,32 @@ function ShoppingCartBillForm({}: Props) {
       else localStorage.removeItem("discountCode");
     } catch {}
   }, [discountCode]);
+
+  useEffect(() => {
+    const loadAvailableGateways = async () => {
+      try {
+        const gateways = await CartService.getAvailableGateways();
+        setAvailableGateways(gateways);
+      } catch {
+        setAvailableGateways([...DEFAULT_CHECKOUT_GATEWAYS]);
+      }
+    };
+
+    loadAvailableGateways();
+  }, []);
+
+  useEffect(() => {
+    if (selectableGateways.length === 0) {
+      setError(EMPTY_GATEWAYS_ERROR);
+      return;
+    }
+
+    setError((prev) => (prev === EMPTY_GATEWAYS_ERROR ? null : prev));
+
+    if (!selectableGateways.includes(gateway)) {
+      setGateway(selectableGateways[0]);
+    }
+  }, [selectableGateways, gateway]);
 
   // Refresh discount preview when code or shipping changes (stable deps)
   useEffect(() => {
@@ -166,18 +205,8 @@ function ShoppingCartBillForm({}: Props) {
           return;
         }
 
-        // Calculate the final amount (قابل پرداخت) to send to Snappay eligible
-        const shippingToman = shippingCost ?? 0;
-        const discountToman = discountPreview?.discount ?? 0;
-        const subtotalToman = totalPrice;
-        const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
-        const finalAmount = Math.max(
-          0,
-          Math.round(subtotalToman - discountToman + taxToman + shippingToman),
-        );
-
         const res = await CartService.getSnappEligible({
-          amount: finalAmount,
+          amount: totalToman,
         });
         // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
@@ -191,7 +220,7 @@ function ShoppingCartBillForm({}: Props) {
       }
     };
     run();
-  }, [shippingId, shippingCost, discountCode, discountPreview, totalPrice]);
+  }, [shippingId, totalToman]);
 
   // Load wallet balance once
   useEffect(() => {
@@ -205,6 +234,7 @@ function ShoppingCartBillForm({}: Props) {
   }, []);
 
   // Validate cart has items and total price on mount
+  const EMPTY_GATEWAYS_ERROR = "در حال حاضر هیچ درگاه پرداختی فعال نیست";
   const EMPTY_CART_ERROR = "سبد خرید شما خالی است یا مبلغ نامعتبر است";
   useEffect(() => {
     if (!currentUser) {
@@ -290,6 +320,11 @@ function ShoppingCartBillForm({}: Props) {
     // Validate total price is positive
     if (totalPrice <= 0) {
       setError("مبلغ سفارش باید بیشتر از صفر باشد");
+      return;
+    }
+
+    if (selectableGateways.length === 0 || !selectableGateways.includes(gateway)) {
+      setError("درگاه پرداخت انتخاب شده در دسترس نیست");
       return;
     }
 
@@ -538,17 +573,6 @@ function ShoppingCartBillForm({}: Props) {
     }
   };
 
-  // Compute required amount (toman -> IRR) for wallet enablement, independent of discountPreview presence
-  // Fallbacks: subtotal + tax + shipping when no discount is applied
-  const shippingToman = shippingCost ?? 0;
-  const discountToman = discountPreview?.discount ?? 0;
-  const subtotalToman = totalPrice;
-  const taxToman = Math.round(((subtotalToman - discountToman) * 10) / 100);
-  const totalToman = Math.max(
-    0,
-    Math.round(subtotalToman - discountToman + taxToman + shippingToman),
-  );
-
   const requiredAmountIrr = totalToman * 10;
   const submitOrderStep = useAtomValue(submitOrderStepAtom);
 
@@ -626,6 +650,7 @@ function ShoppingCartBillForm({}: Props) {
           <ShoppingCartBillPaymentGateway
             selected={gateway}
             onChange={setGateway}
+            availableGateways={availableGateways}
             snappEligible={snappEligible}
             snappTitle={snappTitle}
             snappDescription={snappDescription}

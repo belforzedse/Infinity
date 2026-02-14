@@ -6,6 +6,10 @@ import {
   requestSamanPayment,
   requestSnappPayment,
 } from "./gateway-helpers";
+import {
+  isCheckoutGatewayEnabled,
+  normalizeCheckoutGatewayCode,
+} from "../../../payment-gateway/services/checkout-gateway-availability";
 
 export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
   const { user } = ctx.state;
@@ -231,11 +235,25 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       callbackURL: callbackURL || "/orders/payment-callback",
     });
 
-    const selectedGateway = String(gateway || "mellat").toLowerCase();
+    const requestedGateway = String(gateway || "mellat").toLowerCase();
+    const selectedGateway =
+      normalizeCheckoutGatewayCode(requestedGateway) || "mellat";
+
+    const gatewayEnabled = await isCheckoutGatewayEnabled(strapi, selectedGateway);
+    if (!gatewayEnabled) {
+      return ctx.badRequest("Selected payment gateway is disabled", {
+        data: {
+          success: false,
+          errorCode: "PAYMENT_GATEWAY_DISABLED",
+          gateway: selectedGateway,
+        },
+      });
+    }
+
     const paymentGatewayLabel =
       selectedGateway === "snappay"
         ? "SnappPay"
-        : selectedGateway === "samankish" || selectedGateway === "saman"
+        : selectedGateway === "samankish"
         ? "SamanKish"
         : selectedGateway === "wallet"
         ? "Wallet"
@@ -527,7 +545,7 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
       );
       if (response) return response;
       paymentResult = pr;
-    } else if (selectedGateway === "samankish" || selectedGateway === "saman") {
+    } else if (selectedGateway === "samankish") {
       const { paymentResult: pr } = await requestSamanPayment(strapi, {
         order,
         contract,

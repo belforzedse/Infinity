@@ -1,23 +1,62 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeftBannerSpec } from '../types';
+import imageLoader from "@/utils/imageLoader";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 interface LeftBannerProps {
   spec: LeftBannerSpec;
   className?: string;
 }
 
+const HERO_IMAGE_PLACEHOLDER_SRC = "/images/placeholders/image-placeholder.svg";
+
 export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const { background, foregroundImage } = spec;
+  const normalizedForegroundSrc =
+    typeof foregroundImage.src === "string" ? foregroundImage.src.trim() : "";
+  const [resolvedForegroundSrc, setResolvedForegroundSrc] = useState<string>(
+    normalizedForegroundSrc || HERO_IMAGE_PLACEHOLDER_SRC,
+  );
+  const [hideForegroundImage, setHideForegroundImage] = useState(false);
 
-  // Determine background styling
+  useEffect(() => {
+    setResolvedForegroundSrc(normalizedForegroundSrc || HERO_IMAGE_PLACEHOLDER_SRC);
+    setHideForegroundImage(false);
+  }, [normalizedForegroundSrc]);
+
+  const handleForegroundImageError = () => {
+    if (resolvedForegroundSrc !== HERO_IMAGE_PLACEHOLDER_SRC) {
+      setResolvedForegroundSrc(HERO_IMAGE_PLACEHOLDER_SRC);
+      return;
+    }
+    setHideForegroundImage(true);
+  };
+
+  const shouldRenderForegroundImage = !hideForegroundImage && Boolean(resolvedForegroundSrc);
+  const resolvedBackgroundValue =
+    typeof background.value === "string" ? background.value.trim() : "";
+  const shouldUseImageBackground = background.type === "image" && Boolean(resolvedBackgroundValue);
+  const backgroundImageUrl = shouldUseImageBackground ? resolveAssetUrl(resolvedBackgroundValue) : "";
+  const objectPosition =
+    (typeof foregroundImage.focalX === "number" && typeof foregroundImage.focalY === "number")
+      ? `${foregroundImage.focalX}% ${foregroundImage.focalY}%`
+      : (foregroundImage.objectPosition || "center");
+  const objectFit = foregroundImage.objectFit || "contain";
+  const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
+
+  // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
   const backgroundStyle =
-    background.type === 'color'
+    !shouldUseImageBackground
+      ? { backgroundColor: resolvedBackgroundValue || "#f8fafc" }
+      : background.type === 'color'
       ? { backgroundColor: background.value }
       : {
-          backgroundImage: `url(${background.value})`,
+          backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
+          backgroundColor: !backgroundImageUrl ? "#f8fafc" : undefined,
           backgroundSize: background.backgroundSize || 'cover',
           backgroundPosition: background.position || 'center'
         };
@@ -58,20 +97,26 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
         }}
       />
       {/* Foreground image - can overlap background */}
-      <Image
-        src={foregroundImage.src}
-        alt={foregroundImage.alt}
-        width={foregroundImage.width}
-        height={foregroundImage.height}
-        sizes={foregroundImage.sizes}
-        priority={foregroundImage.priority}
-        loading={foregroundImage.loading}
-        className={`absolute inset-0 lg:h-full lg:w-full ${foregroundImage.className || "object-contain"}`}
-        style={{
-          objectPosition: foregroundImage.objectPosition || "center",
-          zIndex: 10,
-        }}
-      />
+      {shouldRenderForegroundImage ? (
+        <Image
+          src={resolvedForegroundSrc}
+          loader={imageLoader}
+          alt={foregroundImage.alt || "تصویر بنر"}
+          width={foregroundImage.width}
+          height={foregroundImage.height}
+          sizes={foregroundImage.sizes}
+          priority={foregroundImage.priority}
+          loading={foregroundImage.loading}
+          onError={handleForegroundImageError}
+          className={`absolute inset-0 lg:h-full lg:w-full ${foregroundImage.className || "object-contain"}`}
+          style={{
+            objectPosition,
+            objectFit,
+            transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+            zIndex: 10,
+          }}
+        />
+      ) : null}
     </div>
   );
 

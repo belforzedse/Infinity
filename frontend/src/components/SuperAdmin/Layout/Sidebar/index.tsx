@@ -81,9 +81,8 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
           // Mobile: full width overlay
           "w-[280px]",
           // Tablet: collapsible width
-          isCollapsed ? "md:w-[80px]" : "md:w-[280px]",
-          // Desktop: fixed width
-          "lg:w-[250px]",
+          // Desktop: collapsible width (same as tablet when collapsed)
+          isCollapsed ? "md:w-[80px] lg:w-[80px]" : "md:w-[280px] lg:w-[250px]",
           // Transform for mobile overlay only
           "transform md:transform-none",
           isOpen ? "translate-x-0" : "translate-x-full md:translate-x-0",
@@ -112,10 +111,10 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
           </svg>
         </button>
 
-        {/* Toggle button for tablet (md-lg) */}
+        {/* Toggle button for tablet and desktop - on sidebar edge */}
         {onToggleCollapse && (
           <button
-            className="absolute left-2 top-4 hidden rounded-full p-1.5 hover:bg-neutral-100 md:flex lg:hidden items-center justify-center z-10"
+            className="absolute left-0 top-4 hidden h-8 items-center justify-center rounded-l-none rounded-r-full border border-neutral-200 bg-white pl-1 pr-2 hover:bg-neutral-50 md:flex z-10 shadow-sm"
             onClick={onToggleCollapse}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -138,10 +137,17 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
           </button>
         )}
 
-        {/* Logo section - non-sticky, will scroll */}
+        {/* Logo section - full when expanded */}
         {!isCollapsed && (
           <div className="flex items-center justify-center p-3 pb-4 flex-shrink-0">
             <Logo />
+          </div>
+        )}
+
+        {/* Compact logo when collapsed - first icon */}
+        {isCollapsed && (
+          <div className="flex flex-shrink-0 items-center justify-center border-b border-neutral-100 px-2 py-4 md:py-3">
+            <Logo compact />
           </div>
         )}
 

@@ -5,10 +5,26 @@
 import { factories } from "@strapi/strapi";
 import { computeCouponDiscount } from "../../cart/services/lib/discounts";
 import { Strapi } from "@strapi/strapi";
+import { getAvailableCheckoutGateways } from "../services/checkout-gateway-availability";
 
 export default factories.createCoreController(
   "api::payment-gateway.payment-gateway",
   ({ strapi }: { strapi: Strapi }) => ({
+    async availableGateways(ctx) {
+      try {
+        const gateways = await getAvailableCheckoutGateways(strapi);
+        return ctx.send({ data: { gateways } });
+      } catch (error) {
+        strapi.log.error("Failed to resolve available checkout gateways", {
+          message: (error as Error)?.message || String(error),
+          stack: (error as Error)?.stack,
+        });
+        return ctx.badRequest("Failed to resolve available checkout gateways", {
+          data: { success: false, error: (error as Error)?.message || String(error) },
+        });
+      }
+    },
+
     // Test endpoint for debugging Mellat gateway
     async testMellat(ctx) {
       try {

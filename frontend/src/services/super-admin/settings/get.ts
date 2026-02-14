@@ -5,10 +5,15 @@ import { defaultSettings, normalizeSuperAdminSettings } from "@/types/super-admi
 export async function getSuperAdminSettings(): Promise<SuperAdminSettings> {
   try {
     const res = await apiClient.get("/settings?populate=*");
-    const data = (res as any)?.data?.attributes;
-    if (!data) return defaultSettings();
+    const raw = (res as { data?: { id?: number; attributes?: Record<string, unknown>; createdAt?: string; updatedAt?: string } })?.data;
+    if (!raw) return defaultSettings();
 
-    return normalizeSuperAdminSettings(data, (res as any).data?.id || 1);
+    const data = {
+      ...(raw.attributes ?? {}),
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt,
+    };
+    return normalizeSuperAdminSettings(data, raw.id ?? 1);
   } catch (error: any) {
     if (error && (error.status === 404 || error.response?.status === 404)) {
       return defaultSettings();

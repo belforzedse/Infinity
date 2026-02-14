@@ -5,6 +5,14 @@
 export default {
   routes: [
     {
+      method: "GET",
+      path: "/payment-gateway/available",
+      handler: "payment-gateway.availableGateways",
+      config: {
+        auth: { scope: [] },
+      },
+    },
+    {
       method: "POST",
       path: "/payment-gateway/test-mellat",
       handler: "payment-gateway.testMellat",

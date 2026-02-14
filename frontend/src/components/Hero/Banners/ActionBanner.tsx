@@ -1,13 +1,18 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ActionBannerSpec } from '../types';
+import imageLoader from "@/utils/imageLoader";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 interface ActionBannerProps {
   spec: ActionBannerSpec;
 }
+
+const HERO_IMAGE_PLACEHOLDER_SRC = "/images/placeholders/image-placeholder.svg";
 
 export function ActionBanner({ spec }: ActionBannerProps) {
   const {
@@ -23,6 +28,26 @@ export function ActionBanner({ spec }: ActionBannerProps) {
     background,
     contentAlignment,
   } = spec;
+  const normalizedImageSrc = typeof image.src === "string" ? image.src.trim() : "";
+  const [resolvedImageSrc, setResolvedImageSrc] = useState<string>(
+    normalizedImageSrc || HERO_IMAGE_PLACEHOLDER_SRC,
+  );
+  const [hideImage, setHideImage] = useState(false);
+
+  useEffect(() => {
+    setResolvedImageSrc(normalizedImageSrc || HERO_IMAGE_PLACEHOLDER_SRC);
+    setHideImage(false);
+  }, [normalizedImageSrc]);
+
+  const handleImageError = () => {
+    if (resolvedImageSrc !== HERO_IMAGE_PLACEHOLDER_SRC) {
+      setResolvedImageSrc(HERO_IMAGE_PLACEHOLDER_SRC);
+      return;
+    }
+    setHideImage(true);
+  };
+
+  const shouldRenderImage = !hideImage && Boolean(resolvedImageSrc);
   const alignmentClass =
     contentAlignment === "top"
       ? "justify-start"
@@ -30,13 +55,29 @@ export function ActionBanner({ spec }: ActionBannerProps) {
         ? "justify-end"
         : "justify-center";
   const spacingClass = spec.paddingClassName ?? "px-4 py-4 pr-8";
+  const objectPosition =
+    (typeof image.focalX === "number" && typeof image.focalY === "number")
+      ? `${image.focalX}% ${image.focalY}%`
+      : (image.objectPosition || "center");
+  const objectFit = image.objectFit || "contain";
+  const zoom = typeof image.zoom === "number" ? image.zoom : 1;
+  const hasInlineTitleColor =
+    /^#([0-9a-f]{3,8})$/i.test(colors?.titleColor || "") ||
+    /^(rgba?|hsla?)\(/i.test(colors?.titleColor || "");
+  const hasInlineSubtitleColor =
+    /^#([0-9a-f]{3,8})$/i.test(colors?.subtitleColor || "") ||
+    /^(rgba?|hsla?)\(/i.test(colors?.subtitleColor || "");
 
-  // Determine background styling
+  // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
+  const resolvedBgImageUrl = background?.type === 'image' && background?.value
+    ? resolveAssetUrl(background.value)
+    : "";
   const bgStyle = background
     ? background.type === 'color'
       ? { backgroundColor: background.value }
       : {
-          backgroundImage: `url(${background.value})`,
+          backgroundImage: resolvedBgImageUrl ? `url(${resolvedBgImageUrl})` : undefined,
+          backgroundColor: !resolvedBgImageUrl ? (colors?.background || '#f8fafc') : undefined,
           backgroundSize: background.backgroundSize || 'cover',
           backgroundPosition: background.position || 'center'
         }
@@ -69,7 +110,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
   // Build title classes
   const titleClasses = [
     titleClassName,
-    colors?.titleColor || 'text-gray-900',
+    hasInlineTitleColor ? '' : (colors?.titleColor || 'text-gray-900'),
     typography?.titleFont || 'font-bold',
     typography?.titleSize || 'text-lg',
     typography?.titleWeight || 'font-bold',
@@ -82,7 +123,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
   // Build subtitle classes
   const subtitleClasses = [
     subtitleClassName,
-    colors?.subtitleColor || 'text-gray-600',
+    hasInlineSubtitleColor ? '' : (colors?.subtitleColor || 'text-gray-600'),
     typography?.subtitleFont || 'font-normal',
     typography?.subtitleSize || 'text-sm',
     typography?.subtitleWeight || 'font-semibold',
@@ -110,33 +151,52 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           }}
         />
         {/* Foreground image - can overlap background */}
-        <Image
-          src={image.src}
-          alt={image.alt}
-          width={image.width}
-          height={image.height}
-          sizes={image.sizes}
-          priority={image.priority}
-          loading={image.loading}
-          className={`absolute ${image.className || "object-contain"}`}
-          style={{
-            objectPosition: image.objectPosition || "center",
-            zIndex: 10,
-            width: (image as any).customWidth || '100%',
-            height: (image as any).customHeight || '100%',
-            left: 0,
-            top: 0,
-          }}
-        />
+        {shouldRenderImage ? (
+          <Image
+            src={resolvedImageSrc}
+            loader={imageLoader}
+            alt={image.alt || "تصویر بنر"}
+            width={image.width}
+            height={image.height}
+            sizes={image.sizes}
+            priority={image.priority}
+            loading={image.loading}
+            onError={handleImageError}
+            className={`absolute ${image.className || "object-contain"}`}
+            style={{
+              objectPosition,
+              objectFit,
+              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+              zIndex: 10,
+              width: (image as any).customWidth || '100%',
+              height: (image as any).customHeight || '100%',
+              left: 0,
+              top: 0,
+            }}
+          />
+        ) : null}
         {/* Content overlay */}
         <div className={`relative z-20 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right`}>
-          <h2 className={titleClasses}>{title}</h2>
+          <h2 className={titleClasses} style={hasInlineTitleColor ? { color: colors?.titleColor } : undefined}>
+            {title}
+          </h2>
 
-          {subtitle && <p className={`${subtitleClasses} mt-2`}>{subtitle}</p>}
+          {subtitle && (
+            <p
+              className={`${subtitleClasses} mt-2`}
+              style={hasInlineSubtitleColor ? { color: colors?.subtitleColor } : undefined}
+            >
+              {subtitle}
+            </p>
+          )}
 
           {button && (
             <div className="mt-2">
-              <Link href={button.href} className={`group ${buttonClasses}`}>
+              <Link
+                href={button.href}
+                className={`group ${buttonClasses}`}
+                style={button.style as { [key: string]: string | number } | undefined}
+              >
                 {button.showArrow && (
                   <ArrowLeft className={`inline-block mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1 ${button.arrowClassName || ''}`} />
                 )}
@@ -154,29 +214,48 @@ export function ActionBanner({ spec }: ActionBannerProps) {
     <div dir="ltr" className={`relative ${bgColor} ${className}`} style={background ? bgStyle : {}}>
       {/* Absolutely positioned image on the left */}
       <div className="absolute inset-0 left-0 w-1/3">
-        <Image
-          src={image.src}
-          alt={image.alt}
-          width={image.width}
-          height={image.height}
-          sizes={image.sizes}
-          priority={image.priority}
-          loading={image.loading}
-          className={`h-full w-full ${image.className || "object-contain"}`}
-          style={{
-            objectPosition: image.objectPosition || "center left",
-          }}
-        />
+        {shouldRenderImage ? (
+          <Image
+            src={resolvedImageSrc}
+            loader={imageLoader}
+            alt={image.alt || "تصویر بنر"}
+            width={image.width}
+            height={image.height}
+            sizes={image.sizes}
+            priority={image.priority}
+            loading={image.loading}
+            onError={handleImageError}
+            className={`h-full w-full ${image.className || "object-contain"}`}
+            style={{
+              objectPosition: image.objectPosition || objectPosition || "center left",
+              objectFit,
+              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+            }}
+          />
+        ) : null}
       </div>
       {/* Content on the right */}
       <div className={`relative z-10 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right`}>
-        <h2 className={titleClasses}>{title}</h2>
+        <h2 className={titleClasses} style={hasInlineTitleColor ? { color: colors?.titleColor } : undefined}>
+          {title}
+        </h2>
 
-        {subtitle && <p className={`${subtitleClasses} mt-2`}>{subtitle}</p>}
+        {subtitle && (
+          <p
+            className={`${subtitleClasses} mt-2`}
+            style={hasInlineSubtitleColor ? { color: colors?.subtitleColor } : undefined}
+          >
+            {subtitle}
+          </p>
+        )}
 
         {button && (
           <div className="mt-2">
-            <Link href={button.href} className={`group ${buttonClasses}`}>
+            <Link
+              href={button.href}
+              className={`group ${buttonClasses}`}
+              style={button.style as { [key: string]: string | number } | undefined}
+            >
               {button.showArrow && (
                 <ArrowLeft className={`inline-block mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1 ${button.arrowClassName || ''}`} />
               )}

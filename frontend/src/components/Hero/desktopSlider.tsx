@@ -1,36 +1,37 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+
+import React, { useMemo } from "react";
 import DesktopHero from "./desktopHero";
 import { defaultSliderConfig, type DesktopLayout } from "./config";
 import PaginationDesktop from "./PaginationDesktop";
+import { useAutoplaySlider } from "./useAutoplaySlider";
 
 interface DesktopSliderProps {
   slides?: DesktopLayout[];
   autoplayInterval?: number;
+  autoplayEligibility?: boolean[];
 }
 
 export default function DesktopSlider({
   slides: customSlides,
   autoplayInterval = defaultSliderConfig.autoplayInterval,
+  autoplayEligibility,
 }: DesktopSliderProps = {}) {
   const slides = useMemo(() => customSlides ?? defaultSliderConfig.desktop, [customSlides]);
-  const [index, setIndex] = useState(0);
+  const { index, setIndex, next, prev } = useAutoplaySlider({
+    slidesLength: slides.length,
+    autoplayInterval,
+    autoplayEligibility,
+  });
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % slides.length);
-    }, autoplayInterval);
-    return () => clearInterval(id);
-  }, [slides.length, autoplayInterval]);
-
-  const next = () => setIndex((i) => (i + 1) % slides.length);
-  const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
+  if (slides.length === 0) {
+    return null;
+  }
 
   return (
     <div className="desktop-slider-container relative hidden flex-col gap-8 pb-12">
       <DesktopHero layout={slides[index]} slideKey={index} />
 
-      {/* Bottom controls below the hero content */}
       <div className="flex items-center justify-center py-4">
         <PaginationDesktop
           total={slides.length}
@@ -50,4 +51,3 @@ export default function DesktopSlider({
     </div>
   );
 }
-
