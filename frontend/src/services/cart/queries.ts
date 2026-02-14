@@ -20,12 +20,12 @@ type ShippingPreviewResponse = {
   message?: string;
 };
 
-type AvailableGatewaysResponse = {
+interface AvailableGatewaysResponse {
   gateways?: Array<{
     code?: string;
     title?: string;
   }>;
-};
+}
 
 export const checkCartStock = async (): Promise<CartStockCheckResponse> => {
   const response = await apiClient.get<CartStockCheckResponse>("/carts/check-stock");

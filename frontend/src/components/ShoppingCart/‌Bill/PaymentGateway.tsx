@@ -187,7 +187,7 @@ function ShoppingCartBillPaymentGateway({
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-xs text-neutral-600">موجودی:</span>
                     <span className="text-xl font-bold text-pink-500">
-                      {(walletBalanceIrr / 10).toLocaleString()} تومان
+                      {Math.round(walletBalanceIrr / 10).toLocaleString()} تومان
                     </span>
                   </div>
                   {wallet.helper && <div className="flex w-full justify-center">{wallet.helper}</div>}

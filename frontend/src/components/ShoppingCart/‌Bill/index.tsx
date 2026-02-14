@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { Option } from "@/components/Kits/Form/Select";
 import ShoppingCartBillInformationForm from "./InformationForm";
@@ -94,7 +94,7 @@ function ShoppingCartBillForm({}: Props) {
   const shippingCost = watchShippingMethod
     ? Number(watchShippingMethod.attributes?.Price || 0)
     : undefined;
-  const addressId = watchAddress ? Number((watchAddress as any)?.id) : undefined;
+  const addressId = watchAddress ? Number(watchAddress?.id) : undefined;
 
   // Gateway selection state
   const [gateway, setGateway] = useState<CheckoutGatewayCode>("samankish");
@@ -121,9 +121,7 @@ function ShoppingCartBillForm({}: Props) {
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
   const { totalPrice, totalItems, clearCart } = useCart();
-  const selectableGateways = availableGateways.filter(
-    (gw) => gw !== "snappay" || snappEligible,
-  );
+  const selectableGateways = useMemo(() => availableGateways.filter((gw) => gw !== "snappay" || snappEligible), [availableGateways, snappEligible]);
 
   const shippingToman = shippingCost ?? 0;
   const discountToman = discountPreview?.discount ?? 0;

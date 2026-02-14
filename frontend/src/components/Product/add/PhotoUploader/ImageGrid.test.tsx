@@ -21,7 +21,14 @@ jest.mock("@dnd-kit/core", () => {
         <button
           type="button"
           data-testid="trigger-drag"
-          onClick={() => onDragEnd({ active: { id: "image-0" }, over: { id: "image-1" } })}
+          onClick={() => {
+            const els = document.querySelectorAll("[data-sortable-id]");
+            const id0 = els[0]?.getAttribute("data-sortable-id");
+            const id1 = els[1]?.getAttribute("data-sortable-id");
+            if (id0 && id1) {
+              onDragEnd({ active: { id: id0 }, over: { id: id1 } });
+            }
+          }}
         >
           trigger drag
         </button>
@@ -89,5 +96,16 @@ describe("PhotoUploaderImageGrid", () => {
     fireEvent.click(screen.getByTestId("remove-0"));
 
     expect(onRemoveFile).toHaveBeenCalledWith(0);
+  });
+
+  it("does not mount DndContext when onReorder is not provided", () => {
+    render(
+      <PhotoUploaderImageGrid
+        previews={["/one.jpg", "/two.jpg"]}
+        onRemoveFile={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId("trigger-drag")).toBeNull();
   });
 });

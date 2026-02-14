@@ -14,10 +14,15 @@ import {
   type HeroSlotConfig,
   type HeroTabletSlotKey,
 } from "@/types/super-admin/heroSlider";
-import { DesktopCanvas, MobileCanvas, TabletCanvas } from "./canvases";
-import { SlotEditorContent } from "./editors";
-import { getFrameByDevice, makeLayoutsSafe, slotLabelMap } from "./utils";
-import type { DeviceMode, SlotKey } from "./utils";
+import { DesktopCanvas, MobileCanvas, TabletCanvas } from "@/components/SuperAdmin/HeroSliderEditor/canvases";
+import { SlotEditorContent } from "@/components/SuperAdmin/HeroSliderEditor/editors";
+import {
+  getFrameByDevice,
+  makeLayoutsSafe,
+  slotLabelMap,
+  type DeviceMode,
+  type SlotKey,
+} from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
 export type { DeviceMode, SlotKey };
 
@@ -25,7 +30,7 @@ type Props = {
   slide: HeroSlideConfig | null;
   device: DeviceMode;
   selectedSlotKey: SlotKey | null;
-  onSelectSlot: (slotKey: SlotKey) => void;
+  onSelectSlot: (slotKey: SlotKey, anchorEl?: HTMLElement) => void;
   onDeselectSlot?: () => void;
   onChangeSelectedSlot: (next: HeroSlotConfig) => void;
   onDeviceChange?: (device: DeviceMode) => void;

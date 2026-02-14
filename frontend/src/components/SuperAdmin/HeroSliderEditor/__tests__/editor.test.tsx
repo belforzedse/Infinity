@@ -89,7 +89,7 @@ describe("Hero slider editor", () => {
     render(<HeroSliderCustomizationPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/اسلات در حال ویرایش:/)).toBeInTheDocument();
+      expect(screen.getByText(/در حال ویرایش:/)).toBeInTheDocument();
       expect(screen.getByText("تیتر")).toBeInTheDocument();
     });
 

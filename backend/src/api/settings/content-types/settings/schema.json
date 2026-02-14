@@ -105,15 +105,18 @@
     },
     "homeHeroSliderDraft": {
       "type": "json",
-      "default": {}
+      "default": {},
+      "description": "Draft hero slider payload: object with version, autoplayIntervalMs, and slides array (hero slide objects with devices/slots). Used in super-admin editor before publish."
     },
     "homeHeroSliderPublished": {
       "type": "json",
-      "default": {}
+      "default": {},
+      "description": "Published hero slider payload: object with version, autoplayIntervalMs, and slides array (hero slide objects). Consumed by the frontend home page for desktop, tablet, and mobile sliders."
     },
     "homeHeroSliderMeta": {
       "type": "json",
-      "default": {}
+      "default": {},
+      "description": "Hero slider publish metadata: object with version (1), publishedAt (ISO date string), and publishedBy (user id or null)."
     }
   }
 }

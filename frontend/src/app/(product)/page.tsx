@@ -125,7 +125,10 @@ export default async function Home() {
     Boolean(featuredCategoryBannerImage) &&
     featuredCategorySmallProducts.length > 0;
   const heroFromCms = mapCmsHeroSliderToLayouts(homepageSettings.homeHeroSliderPublished);
-  const hasHeroSlides = heroFromCms.desktopSlides.length > 0;
+  const hasHeroSlides =
+    heroFromCms.desktopSlides.length > 0 ||
+    heroFromCms.tabletSlides.length > 0 ||
+    heroFromCms.mobileSlides.length > 0;
   const effectiveHero = hasHeroSlides
     ? heroFromCms
     : {

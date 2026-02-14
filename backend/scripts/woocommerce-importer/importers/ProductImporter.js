@@ -1015,7 +1015,19 @@ class ProductImporter {
     }
 
     const normalizedName = this.normalizeProductName(wcProduct.name);
-    const slug = this.generateSlugFromTitle(normalizedName);
+    let slug;
+    if (wcProduct.slug != null && String(wcProduct.slug).trim() !== "") {
+      try {
+        const decoded = decodeURIComponent(String(wcProduct.slug).trim());
+        const cleaned = this.cleanSlug(decoded);
+        slug = cleaned || this.generateProductSlug(wcProduct);
+      } catch (e) {
+        this.logger.debug(`⚠️ Failed to decode slug "${wcProduct.slug}", using fallback`);
+        slug = this.generateProductSlug(wcProduct);
+      }
+    } else {
+      slug = this.generateProductSlug(wcProduct);
+    }
 
     // Prepare description - use main description if available, otherwise use short_description
     let descriptionContent = "";

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 const DEFAULT_INTERVAL_MS = 600000;
+const MIN_INTERVAL_MS = 3000;
 
 export interface UseAutoplaySliderOptions {
   /** Total number of slides */
@@ -36,8 +37,8 @@ export function useAutoplaySlider({
   const [playKey, setPlayKey] = useState(0);
 
   const normalizedInterval =
-    typeof autoplayInterval === "number" && autoplayInterval >= 3000
-      ? autoplayInterval
+    typeof autoplayInterval === "number"
+      ? Math.max(autoplayInterval, MIN_INTERVAL_MS)
       : DEFAULT_INTERVAL_MS;
 
   const hasEligibleAutoplaySlides = useMemo(() => {
@@ -68,7 +69,7 @@ export function useAutoplaySlider({
     setIndex((i) => (i >= slidesLength ? 0 : i));
   }, [slidesLength]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (slidesLength === 0) return;
     if (
       autoplayEligibility &&
@@ -92,18 +93,27 @@ export function useAutoplaySlider({
     return () => clearInterval(id);
   }, [slidesLength, normalizedInterval, hasEligibleAutoplaySlides, findNextAutoplayIndex]);
 
-  const next = () => {
+  const next = useCallback(() => {
+    if (slidesLength === 0) return;
     setIndex((i) => (i + 1) % slidesLength);
     setPlayKey((k) => k + 1);
-  };
-  const prev = () => {
+  }, [slidesLength]);
+
+  const prev = useCallback(() => {
+    if (slidesLength === 0) return;
     setIndex((i) => (i - 1 + slidesLength) % slidesLength);
     setPlayKey((k) => k + 1);
-  };
-  const goTo = (i: number) => {
-    setIndex(i);
-    setPlayKey((k) => k + 1);
-  };
+  }, [slidesLength]);
+
+  const goTo = useCallback(
+    (i: number) => {
+      if (slidesLength === 0) return;
+      const clamped = Math.max(0, Math.min(i, slidesLength - 1));
+      setIndex(clamped);
+      setPlayKey((k) => k + 1);
+    },
+    [slidesLength],
+  );
 
   return { index, setIndex, goTo, next, prev, playKey };
 }

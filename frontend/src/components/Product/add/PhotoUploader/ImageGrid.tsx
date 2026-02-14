@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import PhotoUploaderImagePreview from "@/components/Product/add/PhotoUploader/ImagePreview";
 import {
   DndContext,
@@ -49,7 +49,7 @@ const SortablePreviewItem: React.FC<SortablePreviewItemProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
+    <div ref={setNodeRef} style={style} className="relative" data-sortable-id={id}>
       {sortable && (
         <button
           type="button"
@@ -69,23 +69,38 @@ const SortablePreviewItem: React.FC<SortablePreviewItemProps> = ({
   );
 };
 
+function generateStableId(): string {
+  return `image-${crypto.randomUUID()}`;
+}
+
+const KEYBOARD_SENSOR_OPTIONS = { coordinateGetter: sortableKeyboardCoordinates };
+
 const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFile, onReorder }) => {
-  const sortableItems = useMemo(
-    () =>
-      previews.map((preview, index) => ({
-        id: `image-${index}`,
-        preview,
-        index,
-      })),
-    [previews],
-  );
+  const stableIdsRef = useRef<string[]>([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    useSensor(KeyboardSensor, KEYBOARD_SENSOR_OPTIONS),
   );
+
+  const sortableItems = useMemo(() => {
+    let ids = stableIdsRef.current;
+    if (ids.length < previews.length) {
+      ids = [...ids];
+      while (ids.length < previews.length) {
+        ids.push(generateStableId());
+      }
+      stableIdsRef.current = ids;
+    } else if (ids.length > previews.length) {
+      ids = ids.slice(0, previews.length);
+      stableIdsRef.current = ids;
+    }
+    return previews.map((preview, index) => ({
+      id: stableIdsRef.current[index],
+      preview,
+      index,
+    }));
+  }, [previews]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     if (!onReorder) return;

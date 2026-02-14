@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from "react";
 import { Pencil } from "lucide-react";
-import { slotLabelMap, type SlotKey } from "./utils";
+import { slotLabelMap, type SlotKey } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
 type EditableSlotProps = {
   slotKey: SlotKey;
