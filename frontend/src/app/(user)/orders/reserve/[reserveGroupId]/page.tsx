@@ -84,7 +84,7 @@ export default function ReserveGroupPage() {
     }).format(new Date(dateString));
   }, []);
 
-  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.new.infinitycolor.co/";
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinitycolor.co/";
   const placeholderImage =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
 

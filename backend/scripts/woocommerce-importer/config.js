@@ -93,14 +93,14 @@ module.exports = {
   // Strapi API Configuration
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
-    baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.new.infinitycolor.co/api",
+    baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.co/api",
     auth: {
       token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: true, defaultValue: "" }),
     },
     // Credential options for interactive selection
     credentials: {
       production: {
-        baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.new.infinitycolor.co/api",
+        baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.co/api",
         token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: true, defaultValue: "" }),
       },
       staging: {

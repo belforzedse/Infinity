@@ -116,11 +116,11 @@ describe('Mellat v3 Payment Gateway - Real Service', () => {
     });
 
     it('should generate production callback from environment', () => {
-      process.env.URL = 'https://api.new.infinitycolor.co/';
+      process.env.URL = 'https://api.infinitycolor.co/';
 
       const result = service.formatCallbackUrl();
 
-      expect(result).toBe('https://api.new.infinitycolor.co/api/orders/payment-callback');
+      expect(result).toBe('https://api.infinitycolor.co/api/orders/payment-callback');
     });
 
     it('should handle URLs with trailing slashes', () => {

@@ -61,7 +61,7 @@ describe("Wallet Topup Operations", () => {
       const paymentResponse = await samanService.requestPayment({
         orderId: topup.id,
         amount,
-        callbackURL: "https://api.new.infinitycolor.co/api/wallet/payment-callback",
+        callbackURL: "https://api.infinitycolor.co/api/wallet/payment-callback",
         resNum: `${Date.now()}123`,
       });
 
@@ -132,7 +132,7 @@ describe("Wallet Topup Operations", () => {
         orderId: Number(topup.id),
         amount: Math.round(amount),
         userId,
-        callbackURL: "https://api.new.infinitycolor.co/api/wallet/payment-callback",
+        callbackURL: "https://api.infinitycolor.co/api/wallet/payment-callback",
         contractId: undefined,
         amountInRial: true,
       });

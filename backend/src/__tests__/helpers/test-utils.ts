@@ -89,7 +89,7 @@ export const createStrapiMock = () => {
     },
     config: {
       get: jest.fn((key: string, defaultValue?: string) => {
-        if (key === "server.url") return "https://api.new.infinitycolor.co";
+        if (key === "server.url") return "https://api.infinitycolor.co";
         return defaultValue;
       }),
     },

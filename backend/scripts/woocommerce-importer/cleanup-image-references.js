@@ -199,7 +199,7 @@ async function main() {
   let customToken = '';
 
   if (environment === '3') {
-    customUrl = await prompt('Enter Strapi API URL (e.g., https://api.new.infinitycolor.co/api): ');
+    customUrl = await prompt('Enter Strapi API URL (e.g., https://api.infinitycolor.co/api): ');
     customToken = await prompt('Enter Strapi API Token: ');
     if (!customUrl || !customToken) {
       console.log('❌ URL and Token are required!');
@@ -210,7 +210,7 @@ async function main() {
 
   const config = {
     production: {
-      url: 'https://api.new.infinitycolor.co/api',
+      url: 'https://api.infinitycolor.co/api',
       token: process.env.STRAPI_TOKEN_PROD || '',
     },
     staging: {

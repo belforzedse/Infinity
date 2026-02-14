@@ -361,7 +361,7 @@ async function selectCredentials() {
 
   console.log("\n📋 Available Environments:\n");
   console.log("  1️⃣  Production");
-  console.log("     URL: https://api.new.infinitycolor.co/api\n");
+  console.log("     URL: https://api.infinitycolor.co/api\n");
   console.log("  2️⃣  Staging");
   console.log("     URL: https://api.staging.infinitycolor.org/api\n");
   console.log("  3️⃣  Local");
@@ -387,7 +387,7 @@ async function selectCredentials() {
   if (selected === "custom") {
     // Prompt for custom credentials
     const customUrl = await prompt(
-      "Enter Strapi API URL (e.g., https://api.new.infinitycolor.co/api): ",
+      "Enter Strapi API URL (e.g., https://api.infinitycolor.co/api): ",
     );
     const customToken = await prompt("Enter Strapi API Token: ");
 

@@ -1,0 +1,40 @@
+---
+description: Production backend API domain and environment variable override pattern
+globs:
+alwaysApply: false
+---
+
+# Backend API Domain
+
+## Production API Domain
+
+The production backend API is served at **`https://api.infinitycolor.co`**.
+
+All code fallbacks use this domain. Never use `api.new.infinitycolor.co` or `api.infinitycolor.org` for production.
+
+## Environment Variable Override Pattern
+
+Environment variables **override** hardcoded fallbacks in code. When adding new API URL references:
+
+### Backend
+
+- **`URL`**: Full backend base URL (e.g. `https://api.infinitycolor.co`)
+- **`SAMAN_CALLBACK_URL`**: `https://api.infinitycolor.co/api/wallet/payment-callback`
+- **`SNAPPAY_RETURN_URL`**: `https://api.infinitycolor.co/api/orders/payment-callback`
+
+### Frontend
+
+- **`NEXT_PUBLIC_API_BASE_URL`**: `https://api.infinitycolor.co/api`
+- **`NEXT_PUBLIC_IMAGE_BASE_URL`**: `https://api.infinitycolor.co/`
+
+### Code Pattern
+
+```typescript
+const baseUrl = process.env.URL || "https://api.infinitycolor.co";
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.infinitycolor.co/api";
+```
+
+## Related Documentation
+
+- [API_INFINITYCOLOR_CO_SETUP.md](../../API_INFINITYCOLOR_CO_SETUP.md) - Server setup (DNS, SSL, Nginx, env vars)
+- [DOMAIN_MIGRATION_INSTRUCTIONS.md](../../DOMAIN_MIGRATION_INSTRUCTIONS.md) - Full domain migration notes
