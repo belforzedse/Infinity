@@ -267,10 +267,29 @@ export const getMyOrders = async (
   }
 
   try {
-    const response = await apiClient.get(`/orders/my-orders?page=${page}&pageSize=${pageSize}`);
+    const response = await apiClient.get<{ data?: Order[]; meta?: OrdersResponse["meta"] }>(
+      `/orders/my-orders?page=${page}&pageSize=${pageSize}`,
+    );
 
-    // Ensure response has the expected structure
-    if (!response.data || !Array.isArray(response.data)) {
+    // Support multiple response shapes: direct array, { data, meta }, or { data: { data, meta } }
+    const raw = response as { data?: Order[] | { data?: Order[]; meta?: OrdersResponse["meta"] }; meta?: OrdersResponse["meta"] } | Order[] | null | undefined;
+    let ordersArray: Order[] = [];
+    if (Array.isArray(raw)) {
+      ordersArray = raw;
+    } else if (raw && typeof raw === "object") {
+      const inner = raw.data;
+      if (Array.isArray(inner)) {
+        ordersArray = inner;
+      } else if (inner && typeof inner === "object" && Array.isArray(inner.data)) {
+        ordersArray = inner.data;
+      }
+    }
+
+    const metaFromResponse =
+      (raw && typeof raw === "object" && !Array.isArray(raw) && "meta" in raw && (raw as { meta: OrdersResponse["meta"] }).meta) ??
+      (raw && typeof raw === "object" && raw.data && typeof raw.data === "object" && !Array.isArray(raw.data) && "meta" in raw.data && (raw.data as { meta: OrdersResponse["meta"] }).meta);
+
+    if (!ordersArray.length && !metaFromResponse) {
       return {
         data: [],
         meta: {
@@ -284,30 +303,34 @@ export const getMyOrders = async (
       };
     }
 
-    // Add full image URLs to order items
-    const ordersWithFullImageUrls = (response.data as Order[]).map((order: Order) => ({
+    // Add full image URLs and normalize CoverImage -> cover_image for order items
+    const ordersWithFullImageUrls = ordersArray.map((order: Order) => ({
       ...order,
-      order_items: order.order_items.map((item: OrderItem) => ({
-        ...item,
-        product_variation: {
-          ...item.product_variation,
-          product: item.product_variation.product
-            ? {
-                ...item.product_variation.product,
-                cover_image: item.product_variation.product.cover_image
-                  ? {
-                      ...item.product_variation.product.cover_image,
-                      url: getFullImageUrl(item.product_variation.product.cover_image.url),
-                    }
-                  : undefined,
-              }
-            : null,
-        },
-      })),
+      order_items: (order.order_items ?? []).map((item: OrderItem) => {
+        const product = item.product_variation?.product as
+          | (Record<string, unknown> & { CoverImage?: { url?: string }; cover_image?: { url?: string } })
+          | null
+          | undefined;
+        const coverImage = product?.cover_image ?? product?.CoverImage;
+        const imageUrl = coverImage?.url;
+        return {
+          ...item,
+          product_variation: {
+            ...item.product_variation,
+            product: item.product_variation?.product
+              ? {
+                  ...item.product_variation.product,
+                  cover_image: imageUrl
+                    ? { url: getFullImageUrl(imageUrl) }
+                    : undefined,
+                }
+              : null,
+          },
+        };
+      }),
     }));
 
-    // Ensure meta has the expected structure
-    const pagination = response.meta?.pagination || {
+    const pagination = metaFromResponse?.pagination ?? {
       page,
       pageSize,
       pageCount: 1,
