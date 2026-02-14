@@ -10,6 +10,8 @@ import PaymentSummaryCard from "./PaymentSummaryCard";
 import ShippingInfoCard from "./ShippingInfoCard";
 import OrderItemsList from "./OrderItemsList";
 import SupportActions from "./SupportActions";
+import ReserveInfoCard from "./ReserveInfoCard";
+import toast from "react-hot-toast";
 
 interface OrderDetailPageClientProps {
   orderId: string;
@@ -170,6 +172,21 @@ export default function OrderDetailPageClient({ orderId }: OrderDetailPageClient
               {warning}
             </div>
           ) : null}
+
+          {order.isReserveOrder && (
+            <ReserveInfoCard
+              order={order}
+              onReleased={async () => {
+                try {
+                  const result = await OrderService.getOrderDetail(order.id);
+                  setOrder(result);
+                } catch (err) {
+                  console.error("Failed to refresh order after release", err);
+                  toast.error("خطا در به‌روزرسانی سفارش");
+                }
+              }}
+            />
+          )}
 
           <div className="grid gap-4 lg:grid-cols-2">
             <OrderTimeline order={order} />

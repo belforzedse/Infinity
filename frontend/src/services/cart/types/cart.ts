@@ -107,8 +107,8 @@ export interface UpdateItemRequest {
 }
 
 export interface FinalizeCartRequest {
-  shipping: number;
-  shippingCost: number;
+  shipping?: number;
+  shippingCost?: number;
   description?: string;
   note?: string;
   callbackURL?: string;
@@ -123,6 +123,8 @@ export interface FinalizeCartRequest {
   gateway?: CheckoutGatewayCode;
   mobile?: string;
   discountCode?: string;
+  reserveShipping?: boolean;
+  reserveGroupId?: string;
 }
 
 export interface FinalizeCartResponse {
@@ -140,4 +142,15 @@ export interface FinalizeCartResponse {
     total: number;
   };
   requestId?: string;
+  reserveGroupId?: string;
+  reserveExpiresAt?: string;
+}
+
+export interface ActiveReserveResponse {
+  data: {
+    reserveGroupId: string;
+    reserveExpiresAt: string;
+    orders: unknown[];
+    orderCount: number;
+  } | null;
 }

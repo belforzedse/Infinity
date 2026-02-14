@@ -272,12 +272,17 @@ export default function PDPHeroInfoAction({
   };
 
   const handleToggleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    trackMatomoEvent({
-      category: "engagement",
-      action: isLiked ? "remove_from_wishlist" : "add_to_wishlist",
-      name: `${productId}:${name}`,
-    });
-    await toggleLike(e);
+    try {
+      await toggleLike(e);
+      trackMatomoEvent({
+        category: "engagement",
+        action: isLiked ? "remove_from_wishlist" : "add_to_wishlist",
+        name: `${productId}:${name}`,
+      });
+    } catch (err) {
+      logger.error("Failed to toggle like", { productId, name, error: err });
+      toast.error("خطا در به‌روزرسانی علاقه‌مندی");
+    }
   };
 
   // Generate options based on available stock (limit to max 5 or available stock)

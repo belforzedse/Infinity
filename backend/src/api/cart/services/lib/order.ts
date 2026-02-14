@@ -36,7 +36,8 @@ export const createOrderAndItems = async (
   note?: string,
   deliveryAddressId?: number,
   reservation?: { status: "Reserved"; until: Date },
-  trx?: any
+  trx?: any,
+  reserveData?: { reserveGroupId: string; reserveExpiresAt: Date }
 ) => {
   // Validate cart items before proceeding
   if (!cart.cart_items || cart.cart_items.length === 0) {
@@ -138,7 +139,7 @@ if (reservation) {
      throw new Error("INVALID_RESERVATION: Reservation date must be in the future");
    }
  }
-  const orderData = {
+  const orderData: Record<string, unknown> = {
     user: userId,
     Status: "Paying" as OrderStatus,
     ReservationStatus: reservation?.status,
@@ -151,6 +152,11 @@ if (reservation) {
     Note: note || "",
     delivery_address: deliveryAddressId || undefined,
   };
+  if (reserveData) {
+    orderData.isReserveOrder = true;
+    orderData.reserveGroupId = reserveData.reserveGroupId;
+    orderData.reserveExpiresAt = reserveData.reserveExpiresAt;
+  }
 
   // Use transaction context if provided
   const entityServiceOptions: any = { data: orderData };

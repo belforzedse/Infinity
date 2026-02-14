@@ -62,7 +62,7 @@ export default async function middleware(request: NextRequest) {
       try {
         // Fetch product slug from API
         const productId = identifier;
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.new.infinitycolor.co/api';
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.infinitycolor.co/api';
         const apiUrl = `${apiBaseUrl}/products/${productId}?fields[0]=Slug`;
 
         const apiResponse = await fetch(apiUrl, {

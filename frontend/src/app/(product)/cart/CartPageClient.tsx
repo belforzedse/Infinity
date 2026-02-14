@@ -6,7 +6,7 @@ import ShoppingCartMobileTable from "@/components/ShoppingCart/Table/Mobile";
 import CartSkeleton from "@/components/Skeletons/CartSkeleton";
 import EmptyShoppingCart from "@/components/ShoppingCart/Empty";
 import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { getRandomProducts } from "@/services/product/homepage";
@@ -51,17 +51,21 @@ export default function CartPageClient() {
     };
   }, [isLoading, cartItems.length]);
 
+  const totalValue = useMemo(
+    () => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [cartItems],
+  );
+
   useEffect(() => {
     if (isLoading) return;
     if (cartItems.length <= 0) return;
-    const totalValue = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     trackMatomoEvent({
       category: "ecommerce",
       action: "view_cart",
       value: totalValue,
       onceKey: `view-cart:${cartItems.length}:${Math.round(totalValue)}`,
     });
-  }, [isLoading, cartItems]);
+  }, [isLoading, cartItems.length, totalValue]);
 
   if (isLoading) return <CartSkeleton />;
   if (cartItems.length === 0) {

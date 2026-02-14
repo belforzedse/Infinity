@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, type ReactElement, useState } from "react";
 import { Pencil } from "lucide-react";
 import { slotLabelMap, type SlotKey } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
@@ -18,7 +18,7 @@ export function EditableSlot({
   onSelect,
   className,
   children,
-}: EditableSlotProps): JSX.Element {
+}: EditableSlotProps): ReactElement {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const label = slotLabelMap[slotKey] || slotKey;

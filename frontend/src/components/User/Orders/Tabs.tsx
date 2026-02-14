@@ -1,8 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Tabs from "@/components/Kits/Tabs";
 import { PersianOrderStatus } from "@/constants/enums";
+import { getOrderStatusCategory } from "@/utils/statusTranslations";
+import { IMAGE_BASE_URL, PLACEHOLDER_IMAGE } from "@/utils/orderDisplayConstants";
+import {
+  formatOrderDate,
+  formatOrderTime,
+  mapOrderToDisplayProps,
+  persistOrderSnapshot as persistOrderSnapshotHelper,
+} from "@/utils/orderDisplayHelpers";
 import OrderRow from "./OrderRow";
 import OrderCard from "./OrderCard";
 import OrderCardSkeleton from "./OrderCardSkeleton";
@@ -12,15 +21,42 @@ import type { Order } from "@/services/order";
 import OrderService from "@/services/order";
 import { faNum } from "@/utils/faNum";
 import { Search, RefreshCcw } from "lucide-react";
+import toast from "react-hot-toast";
 import OrderDetailsDrawer from "./OrderDetailsDrawer";
 
+type OrderRowProps = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  price: string;
+  status: PersianOrderStatus;
+  image: string;
+  category: string;
+  orderId?: number;
+  shippingBarcode?: string;
+  detailHref: string;
+  onViewDetails: () => void;
+  onOpenFullDetails?: () => void;
+  isReserveOrder?: boolean;
+  reserveExpiresAt?: string | null;
+  reserveGroupOrderCount?: number;
+  onReleaseReserve?: (orderId: number) => void;
+  isReleasingReserve?: boolean;
+  rawOrder?: Order | null;
+  isGroupRow?: boolean;
+  sortDate?: string;
+};
+
 export default function OrdersTabs() {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [releasingOrderId, setReleasingOrderId] = useState<number | null>(null);
   const pageSize = 20; // Fetch more orders for tabs
 
   const loadOrders = useCallback(async (targetPage: number) => {
@@ -47,6 +83,23 @@ export default function OrdersTabs() {
 
   const clearSearch = () => setSearchTerm("");
 
+  const handleReleaseReserve = useCallback(
+    async (orderId: number) => {
+      try {
+        setReleasingOrderId(orderId);
+        await OrderService.releaseReserve(orderId);
+        toast.success("سفارش شما برای ارسال آماده شد");
+        await loadOrders(page);
+      } catch (err: unknown) {
+        console.error("Failed to release reserve:", err);
+        toast.error("خطا در به‌روزرسانی. لطفاً دوباره تلاش کنید.");
+      } finally {
+        setReleasingOrderId(null);
+      }
+    },
+    [loadOrders, page],
+  );
+
   const matchesSearch = useCallback(
     (order: Order) => {
       const term = searchTerm.trim();
@@ -69,122 +122,140 @@ export default function OrdersTabs() {
   const ordersByStatus = useMemo(() => {
     const filtered = orders.filter(matchesSearch);
     return {
-      "همه سفارش‌ها": filtered, // All orders
+      "همه سفارش‌ها": filtered,
       [PersianOrderStatus.INPROGRESS]: filtered.filter(
         (order) =>
-          order.Status === "Paying" || // Waiting for payment
+          order.Status === "Paying" ||
           order.Status === "Started" ||
           order.Status === "Processing" ||
           order.Status === "Shipment" ||
           order.Status === "PROCESSING" ||
           order.Status === "SHIPPED" ||
-          order.Status === "جاری", // Persian status
+          order.Status === "جاری",
       ),
       [PersianOrderStatus.DELIVERED]: filtered.filter(
         (order) =>
           order.Status === "Done" ||
           order.Status === "DELIVERED" ||
-          order.Status === "تحویل داده شده", // Persian status
+          order.Status === "تحویل داده شده",
       ),
       [PersianOrderStatus.CANCELLED]: filtered.filter(
         (order) =>
           order.Status === "Cancelled" ||
           order.Status === "CANCELLED" ||
-          order.Status === "لغو شده", // Persian status
+          order.Status === "لغو شده",
       ),
     };
   }, [orders, matchesSearch]);
 
-  // Helper function to format date to Persian
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("fa-IR", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    }).format(date);
-  };
-
-  // Helper function to format time
-  const formatTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("fa-IR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
-
-  // Map API order to the component props format
-  const mapOrderToProps = (order: Order) => {
-    const firstItem = order.order_items[0];
-    // Use actual product image, fallback to simple gray placeholder
-    const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f3f4f6' width='200' height='200'/%3E%3C/svg%3E";
-    const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.new.infinitycolor.co/";
-    const product = firstItem?.product_variation?.product as any;
-    const coverImage = product?.cover_image || product?.CoverImage;
-    const image = coverImage?.url
-      ? `${imageBaseUrl}${coverImage.url}`
-      : placeholderImage;
-    const category =
-      firstItem?.product_variation?.product?.Title ||
-      firstItem?.product_variation?.product?.Title ||
-      firstItem?.ProductTitle ||
-      "محصول";
-
-    const totalPrice =
-      order.order_items.reduce((sum, item) => sum + item.Count * item.PerAmount, 0) +
-      order.ShippingCost;
-
-    let status = PersianOrderStatus.INPROGRESS;
-    if (
-      order.Status === "Done" ||
-      order.Status === "DELIVERED" ||
-      order.Status === "تحویل داده شده"
-    ) {
-      status = PersianOrderStatus.DELIVERED;
-    } else if (
-      order.Status === "Cancelled" ||
-      order.Status === "CANCELLED" ||
-      order.Status === "لغو شده"
-    ) {
-      status = PersianOrderStatus.CANCELLED;
+  // Reserve groups: one row per reserveGroupId (orders that have reserveGroupId)
+  const reserveGroupMap = useMemo(() => {
+    const map = new Map<string, Order[]>();
+    for (const order of orders) {
+      const gid = order.reserveGroupId;
+      if (gid) {
+        const list = map.get(gid) ?? [];
+        list.push(order);
+        map.set(gid, list);
+      }
     }
+    // Sort orders within each group by date desc
+    map.forEach((list) => {
+      list.sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
+    });
+    return map;
+  }, [orders]);
 
-    return {
-      id: order.id.toString(),
-      title: `سفارش شماره #${order.id}`,
-      date: formatDate(order.createdAt),
-      status,
-      price: faNum(totalPrice),
-      image,
-      category,
-      time: formatTime(order.createdAt),
-      orderId: order.id,
-      shippingBarcode: order.ShippingBarcode,
-      detailHref: `/orders/${order.id}`,
-      rawOrder: order,
-    };
-  };
-
-  const persistOrderSnapshot = (order: Order) => {
-    if (typeof window === "undefined") return;
-    try {
-      sessionStorage.setItem(
-        `infinity:order-detail:${order.id}`,
-        JSON.stringify(order),
+  const mapReserveGroupToProps = useCallback(
+    (reserveGroupId: string, groupOrders: Order[]): OrderRowProps => {
+      const first = groupOrders[0];
+      const firstItem = first?.order_items?.[0];
+      const product = firstItem?.product_variation?.product as
+        | { cover_image?: { url?: string }; CoverImage?: { url?: string } }
+        | null
+        | undefined;
+      const coverImage = product?.cover_image ?? product?.CoverImage;
+      const image = coverImage?.url ? `${IMAGE_BASE_URL}${coverImage.url}` : PLACEHOLDER_IMAGE;
+      const totalPrice = groupOrders.reduce(
+        (sum, o) =>
+          sum +
+          (o.order_items?.reduce((s, i) => s + i.Count * i.PerAmount, 0) ?? 0) +
+          (o.ShippingCost ?? 0),
+        0,
       );
-    } catch (error) {
-      console.warn("Failed to persist order snapshot", error);
-    }
-  };
+      const statuses = groupOrders.map((o) => getOrderStatusCategory(o.Status));
+      const status = statuses.some((s) => s === PersianOrderStatus.INPROGRESS)
+        ? PersianOrderStatus.INPROGRESS
+        : statuses.some((s) => s === PersianOrderStatus.DELIVERED)
+          ? PersianOrderStatus.DELIVERED
+          : PersianOrderStatus.CANCELLED;
+      const groupDetailHref = `/orders/reserve/${reserveGroupId}`;
+      return {
+        id: `reserve-${reserveGroupId}`,
+        title: `سفارش رزروی (${faNum(groupOrders.length)} سفارش)`,
+        date: first ? formatOrderDate(first.createdAt) : "",
+        time: first ? formatOrderTime(first.createdAt) : "",
+        price: faNum(totalPrice),
+        status,
+        image,
+        category: "سفارش رزروی",
+        detailHref: groupDetailHref,
+        onViewDetails: () => router.push(groupDetailHref),
+        onOpenFullDetails: () => router.push(groupDetailHref),
+        isReserveOrder: true,
+        reserveExpiresAt: first?.reserveExpiresAt ?? null,
+        reserveGroupOrderCount: groupOrders.length,
+        rawOrder: null,
+        isGroupRow: true,
+        sortDate: first?.createdAt,
+      };
+    },
+    [router],
+  );
+
+  const mapOrderToProps = useCallback(
+    (order: Order, allOrders: Order[]) =>
+      mapOrderToDisplayProps(order, {
+        imageBaseUrl: IMAGE_BASE_URL,
+        placeholderImage: PLACEHOLDER_IMAGE,
+        formatDate: formatOrderDate,
+        formatTime: formatOrderTime,
+        faNum,
+        ordersLength: 0,
+        getReserveGroupCount: (o) =>
+          o.reserveGroupId && o.isReserveOrder
+            ? allOrders.filter(
+                (a) => a.reserveGroupId === o.reserveGroupId && a.isReserveOrder,
+              ).length
+            : undefined,
+        handleReleaseReserve,
+        persistOrderSnapshot: persistOrderSnapshotHelper,
+        releasingOrderId,
+        setSelectedOrder,
+      }),
+    [handleReleaseReserve, releasingOrderId],
+  );
 
   const tabContent = ORDER_STATUS.map(({ value }) => {
     const statusOrders = ordersByStatus[value as keyof typeof ordersByStatus] || [];
-    const mappedOrders = statusOrders.map(mapOrderToProps);
+    const reserveGroupIdsInTab = new Set(
+      statusOrders.filter((o) => o.reserveGroupId).map((o) => o.reserveGroupId as string),
+    );
+    const groupRows: OrderRowProps[] = Array.from(reserveGroupIdsInTab).map((gid) =>
+      mapReserveGroupToProps(gid, reserveGroupMap.get(gid) ?? []),
+    );
+    const orderRows = statusOrders
+      .filter((o) => !o.reserveGroupId)
+      .map((o) => mapOrderToProps(o, orders));
+    const combined = [...groupRows, ...orderRows].sort((a, b) => {
+      const tA = new Date(a.sortDate ?? 0).getTime();
+      const tB = new Date(b.sortDate ?? 0).getTime();
+      return tB - tA;
+    });
 
     return (
       <div key={value} className="w-full">
-        {loading && mappedOrders.length === 0 ? (
+        {loading && combined.length === 0 ? (
           <>
             <div className="lg:hidden">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -201,32 +272,24 @@ export default function OrdersTabs() {
               </table>
             </div>
           </>
-        ) : mappedOrders.length === 0 ? (
+        ) : combined.length === 0 ? (
           <div className="rounded-lg bg-gray-50 p-8 text-center">
             <p className="text-gray-600">سفارشی با این وضعیت یافت نشد.</p>
           </div>
         ) : (
           <>
-            {mappedOrders.map(({ rawOrder, ...order }) => (
-              <OrderCard
-                key={order.id}
-                {...order}
-                onViewDetails={() => setSelectedOrder(rawOrder)}
-                onOpenFullDetails={() => persistOrderSnapshot(rawOrder)}
-              />
-            ))}
+            {combined.map((row) => {
+              const { rawOrder, isGroupRow, sortDate, ...rest } = row;
+              return <OrderCard key={row.id} {...rest} />;
+            })}
 
             <div className="hidden overflow-x-auto lg:flex">
               <table className="w-full">
                 <tbody className="divide-y divide-gray-100">
-                  {mappedOrders.map(({ rawOrder, ...order }) => (
-                    <OrderRow
-                      key={order.id}
-                      {...order}
-                      onViewDetails={() => setSelectedOrder(rawOrder)}
-                      onOpenFullDetails={() => persistOrderSnapshot(rawOrder)}
-                    />
-                  ))}
+                  {combined.map((row) => {
+                    const { rawOrder, isGroupRow, sortDate, ...rest } = row;
+                    return <OrderRow key={row.id} {...rest} />;
+                  })}
                 </tbody>
               </table>
             </div>

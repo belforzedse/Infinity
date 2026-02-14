@@ -195,8 +195,7 @@ export default function ProductColorsPage() {
       await apiClient.delete(`${ENDPOINTS.PRODUCT.COLORS}/${deleteId}`);
 
       invalidateColorCaches();
-      // Update local state
-      setColors((prev) => prev.filter((c) => c.id !== deleteId));
+      await fetchColors();
       setDeleteConfirmOpen(false);
       setDeleteId(null);
       toast.success("رنگ با موفقیت حذف شد");

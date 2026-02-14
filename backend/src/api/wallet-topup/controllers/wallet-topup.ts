@@ -40,11 +40,11 @@ export default factories.createCoreController(
         }
 
         const configuredBase = String(
-          strapi.config.get("server.url", process.env.URL || "https://api.new.infinitycolor.co/"),
+          strapi.config.get("server.url", process.env.URL || "https://api.infinitycolor.co/"),
         );
         let baseUrl = configuredBase.trim();
         if (!/^https?:\/\//i.test(baseUrl)) {
-          baseUrl = process.env.URL || "https://api.new.infinitycolor.co/";
+          baseUrl = process.env.URL || "https://api.infinitycolor.co/";
         }
         baseUrl = baseUrl.replace(/\/$/, "").replace(/\/api$/i, "");
         const callbackURL = `${baseUrl}/api/wallet/payment-callback`;

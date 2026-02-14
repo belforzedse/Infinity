@@ -15,7 +15,7 @@ import {
   type HeroLineHeightToken,
   type HeroTextStyle,
 } from "@/types/super-admin/heroSlider";
-import { resolveColorForInput } from "../utils";
+import { resolveColorForInput } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
 type TextStyleEditorProps = {
   label: string;

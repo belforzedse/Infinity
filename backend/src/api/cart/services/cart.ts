@@ -143,12 +143,34 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           throw new Error("INVALID_RESERVATION: Reservation date must be in the future");
         }
 
-        // Resolve base shipping cost (will be replaced by Anipo for non-4)
-        let finalShippingCost = await resolveShippingCost(
-          strapi as any,
-          shippingData.shippingId,
-          shippingData.shippingCost
-        );
+        // Resolve base shipping cost (merge orders pay 0; will be replaced by Anipo for non-4)
+        let finalShippingCost =
+          shippingData.reserveOrderData?.isMerge === true
+            ? 0
+            : await resolveShippingCost(
+                strapi as any,
+                shippingData.shippingId,
+                shippingData.shippingCost
+              );
+
+        // Reserve order fields: new reserve or merge into existing
+        let reserveGroupId: string | undefined;
+        let reserveExpiresAt: Date | undefined;
+        const isReserveOrder = !!shippingData.reserveShipping || !!shippingData.reserveOrderData;
+        if (shippingData.reserveOrderData?.isMerge) {
+          reserveGroupId = shippingData.reserveOrderData.reserveGroupId;
+          const raw = shippingData.reserveOrderData.reserveExpiresAt;
+          if (raw != null) {
+            const d = new Date(raw as string | number | Date);
+            reserveExpiresAt = Number.isNaN(d.getTime()) ? undefined : d;
+          }
+        } else if (shippingData.reserveShipping) {
+          const { randomUUID } = await import("node:crypto");
+          reserveGroupId = randomUUID();
+          const windowHoursRaw = Number(process.env.RESERVE_ORDER_WINDOW_HOURS || 48);
+          const windowHours = Number.isFinite(windowHoursRaw) ? windowHoursRaw : 48;
+          reserveExpiresAt = new Date(Date.now() + windowHours * 60 * 60 * 1000);
+        }
 
         // Create new order with enum values
         const orderData = {
@@ -174,7 +196,8 @@ export default factories.createCoreService("api::cart.cart", ({ strapi }) => ({
           shippingData.note,
           shippingData.addressId,
           reservation,
-          trx
+          trx,
+          isReserveOrder ? { reserveGroupId, reserveExpiresAt } : undefined
         );
 
         strapi.log.info("Order and items created successfully", {

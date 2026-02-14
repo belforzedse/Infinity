@@ -4,6 +4,7 @@
 
 import type { RoleName } from "../../../utils/roles";
 import { ROLE_NAMES, roleIsAllowed, fetchUserWithRole } from "../../../utils/roles";
+import { parsePositiveInt } from "../../../utils/parsePositiveInt";
 import {
   getMatomoRealtimePayload,
   getMatomoTrafficDashboardPayload,
@@ -11,10 +12,6 @@ import {
 } from "../services/matomo";
 
 type Interval = "day" | "week" | "month";
-function parsePositiveInt(value: string | undefined, fallback: number): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
 
 function isForceFresh(value: unknown): boolean {
   if (typeof value !== "string") return false;

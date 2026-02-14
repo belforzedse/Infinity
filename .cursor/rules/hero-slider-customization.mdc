@@ -70,6 +70,7 @@ Font size dropdowns show human-friendly labels via `getFontSizeDisplayLabel()` a
 ## Key Files
 
 - [frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page
+- [frontend/src/hooks/useHeroSliderEditor.ts](frontend/src/hooks/useHeroSliderEditor.ts) — **useHeroSliderEditor**: Custom hook that owns all hero slider editor state, effects, and handlers. Responsibilities: data fetch (`getHeroSliderDraftAndPublished`), draft/published/meta state, selected slide/slot/device syncing, slide CRUD (add, duplicate, delete, reorder), slot updates, save draft, publish, link/tracking changes. Exposes minimal API: `isLoading`, `isSavingDraft`, `isPublishing`, `draft`, `published`, `meta`, `selectedSlide`, `selectedSlot`, `slotTrackingForForm`, selection setters, and handler functions.
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Preview + in-place editing
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/editors/](frontend/src/components/SuperAdmin/HeroSliderEditor/editors/) — Slot editors
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/](frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/) — Device canvases

@@ -7,13 +7,14 @@ import ShoppingCartBillInformationForm from "./InformationForm";
 import ShoppingCartBillDeliveryForm from "./DeliveryForm";
 import ShoppingCartBillDiscountCoupon from "./DiscountCoupon";
 import ShoppingCartBillPaymentGateway from "./PaymentGateway";
+import ReserveShipping from "./ReserveShipping";
 import { CheckoutProgress } from "../CheckoutProgress";
 import { orderIdAtom, orderNumberAtom, submitOrderStepAtom } from "@/atoms/Order";
 import { useAtom, useAtomValue } from "jotai";
 import { SubmitOrderStep } from "@/types/Order";
 import { useRouter } from "next/navigation";
 import type { ShippingMethod } from "@/services/shipping";
-import { CartService } from "@/services";
+import { CartService, OrderService } from "@/services";
 import {
   DEFAULT_CHECKOUT_GATEWAYS,
   type CheckoutGatewayCode,
@@ -120,6 +121,13 @@ function ShoppingCartBillForm({}: Props) {
     | undefined
   >(undefined);
   const [walletBalanceIrr, setWalletBalanceIrr] = useState<number>(0);
+  const [reserveShipping, setReserveShipping] = useState(false);
+  const [activeReserve, setActiveReserve] = useState<{
+    reserveGroupId: string;
+    reserveExpiresAt: string;
+    orderCount: number;
+  } | null>(null);
+  const [mergeChoice, setMergeChoice] = useState<"merge" | "new" | null>(null);
   const { totalPrice, totalItems, clearCart } = useCart();
   const selectableGateways = useMemo(() => availableGateways.filter((gw) => gw !== "snappay" || snappEligible), [availableGateways, snappEligible]);
 
@@ -144,6 +152,26 @@ function ShoppingCartBillForm({}: Props) {
   }, [discountCode]);
 
   useEffect(() => {
+    const loadActiveReserve = async () => {
+      if (!currentUser) return;
+      try {
+        const res = await OrderService.getActiveReserve();
+        const d = (res as { data?: { reserveGroupId: string; reserveExpiresAt: string; orderCount: number } | null }).data;
+        if (d?.reserveGroupId) {
+          setActiveReserve({ reserveGroupId: d.reserveGroupId, reserveExpiresAt: d.reserveExpiresAt, orderCount: d.orderCount });
+          setMergeChoice(null);
+        } else {
+          setActiveReserve(null);
+          setMergeChoice(null);
+        }
+      } catch {
+        setActiveReserve(null);
+      }
+    };
+    loadActiveReserve();
+  }, [currentUser]);
+
+  useEffect(() => {
     const loadAvailableGateways = async () => {
       try {
         const gateways = await CartService.getAvailableGateways();
@@ -157,17 +185,19 @@ function ShoppingCartBillForm({}: Props) {
   }, []);
 
   useEffect(() => {
-    if (selectableGateways.length === 0) {
-      setError(EMPTY_GATEWAYS_ERROR);
-      return;
-    }
-
-    setError((prev) => (prev === EMPTY_GATEWAYS_ERROR ? null : prev));
-
-    if (!selectableGateways.includes(gateway)) {
-      setGateway(selectableGateways[0]);
-    }
-  }, [selectableGateways, gateway]);
+    setError((prev) =>
+      selectableGateways.length === 0
+        ? EMPTY_GATEWAYS_ERROR
+        : prev === EMPTY_GATEWAYS_ERROR
+          ? null
+          : prev,
+    );
+    setGateway((prev) =>
+      selectableGateways.length > 0 && !selectableGateways.includes(prev)
+        ? selectableGateways[0]
+        : prev,
+    );
+  }, [selectableGateways]);
 
   // Refresh discount preview when code or shipping changes (stable deps)
   useEffect(() => {
@@ -193,12 +223,19 @@ function ShoppingCartBillForm({}: Props) {
     run();
   }, [discountCode, shippingId, shippingCost]);
 
-  // Re-check SnappPay eligibility when shipping or discount changes (stable deps)
+  // Re-check SnappPay eligibility when shipping, discount, or merge choice changes
+  // In merge mode we don't have shippingId (shipping comes from parent order), so allow eligibility check by amount only
   useEffect(() => {
     const run = async () => {
       try {
-        if (!shippingId) {
-          // Don't show SnappPay if no shipping selected
+        const isMergeMode = mergeChoice === "merge";
+        if (!isMergeMode && !shippingId) {
+          setSnappEligible(false);
+          setSnappTitle(undefined);
+          setSnappDescription(undefined);
+          return;
+        }
+        if (totalToman <= 0) {
           setSnappEligible(false);
           setSnappTitle(undefined);
           setSnappDescription(undefined);
@@ -208,19 +245,17 @@ function ShoppingCartBillForm({}: Props) {
         const res = await CartService.getSnappEligible({
           amount: totalToman,
         });
-        // Only set to eligible if API explicitly returns true
         setSnappEligible(!!res.eligible);
         setSnappTitle(res.title);
         setSnappDescription(res.description);
-      } catch (error) {
-        // On error, hide SnappPay (don't show it by default)
+      } catch {
         setSnappEligible(false);
         setSnappTitle(undefined);
         setSnappDescription(undefined);
       }
     };
     run();
-  }, [shippingId, totalToman]);
+  }, [shippingId, totalToman, mergeChoice]);
 
   // Load wallet balance once
   useEffect(() => {
@@ -268,22 +303,22 @@ function ShoppingCartBillForm({}: Props) {
   };
 
   const onSubmit = async (data: FormData) => {
-    // Clear previous errors
     setError(null);
 
-    // Validate required fields
     const selectedAddressId = data.address?.id ? Number(data.address.id) : undefined;
     const inlineAddressFieldsFilled =
       !!watchProvince && !!watchCity && !!watchPostalCode && !!watchFullAddress;
+    const isMergeMode = mergeChoice === "merge";
 
-    if (!selectedAddressId && !inlineAddressFieldsFilled) {
-      setError("لطفا یک آدرس ذخیره شده را انتخاب یا آدرس جدید وارد کنید");
-      return;
-    }
-
-    if (!data.shippingMethod) {
-      setError("لطفا روش ارسال را انتخاب کنید");
-      return;
+    if (!isMergeMode) {
+      if (!selectedAddressId && !inlineAddressFieldsFilled) {
+        setError("لطفا یک آدرس ذخیره شده را انتخاب یا آدرس جدید وارد کنید");
+        return;
+      }
+      if (!data.shippingMethod) {
+        setError("لطفا روش ارسال را انتخاب کنید");
+        return;
+      }
     }
 
     if (!data.phoneNumber || data.phoneNumber.trim() === "") {
@@ -298,19 +333,16 @@ function ShoppingCartBillForm({}: Props) {
       return;
     }
 
-    if (!selectedAddressId) {
-      // Inline address validation
+    if (!isMergeMode && !selectedAddressId) {
       if (!watchProvince || !watchCity) {
         setError("لطفا استان و شهر را انتخاب کنید");
         return;
       }
-
       const postal = (watchPostalCode || "").replace(/\D/g, "");
       if (postal.length !== 10) {
         setError("کد پستی باید ۱۰ رقم باشد");
         return;
       }
-
       if (!watchFullAddress || watchFullAddress.trim().length < 5) {
         setError("لطفا آدرس دقیق را وارد کنید");
         return;
@@ -357,29 +389,40 @@ function ShoppingCartBillForm({}: Props) {
         }
       }
 
-      const addressPayload = selectedAddressId
-        ? undefined
+      const addressPayload =
+        isMergeMode || selectedAddressId
+          ? undefined
+          : {
+              shipping_city: Number(watchCity?.id),
+              PostalCode: (watchPostalCode || "").replace(/\D/g, ""),
+              FullAddress: (watchFullAddress || "").trim(),
+              Description: data.addressDescription?.trim() || undefined,
+              save: watchSaveAddress,
+            };
+
+      const finalizeData: Record<string, unknown> = isMergeMode
+        ? {
+            reserveGroupId: activeReserve?.reserveGroupId,
+            callbackURL: "/orders/payment-callback",
+            gateway,
+            mobile: data.phoneNumber?.replace(/\D/g, ""),
+            discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
+            note: data.notes || undefined,
+          }
         : {
-            shipping_city: Number(watchCity?.id),
-            PostalCode: (watchPostalCode || "").replace(/\D/g, ""),
-            FullAddress: (watchFullAddress || "").trim(),
-            Description: data.addressDescription?.trim() || undefined,
-            save: watchSaveAddress,
+            shipping: Number(data.shippingMethod!.id),
+            shippingCost: Number(data.shippingMethod!.attributes.Price),
+            note: data.notes || undefined,
+            callbackURL: "/orders/payment-callback",
+            addressId: selectedAddressId,
+            addressPayload,
+            gateway,
+            mobile: data.phoneNumber?.replace(/\D/g, ""),
+            discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
+            reserveShipping: reserveShipping || undefined,
           };
 
-      const finalizeData = {
-        shipping: Number(data.shippingMethod.id),
-        shippingCost: Number(data.shippingMethod.attributes.Price),
-        note: data.notes || undefined,
-        callbackURL: "/orders/payment-callback",
-        addressId: selectedAddressId,
-        addressPayload,
-        gateway: gateway,
-        mobile: data.phoneNumber?.replace(/\D/g, ""),
-        discountCode: discountCode || localStorage.getItem("discountCode") || undefined,
-      } as any;
-
-      const cartResponse = await CartService.finalizeCart(finalizeData);
+      const cartResponse = await CartService.finalizeCart(finalizeData as any);
 
       if (!cartResponse.success) {
         console.error("❌ Cart finalization failed:", cartResponse);
@@ -430,6 +473,9 @@ function ShoppingCartBillForm({}: Props) {
               break;
             case "ADDRESS_NOT_FOUND":
               displayError = "آدرس انتخاب شده یافت نشد. لطفاً آدرس دیگری انتخاب کنید";
+              break;
+            case "RESERVE_NOT_FOUND":
+              displayError = "سفارش رزروی معتبر یافت نشد یا منقضی شده است. لطفاً سفارش جدید ثبت کنید.";
               break;
             default:
               // Use backend message if available
@@ -605,6 +651,8 @@ function ShoppingCartBillForm({}: Props) {
     });
   }, [gateway, shippingId]);
 
+  const isMergeMode = mergeChoice === "merge";
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <span className="text-lg text-neutral-800 lg:text-3xl">اطلاعات صورت حساب</span>
@@ -613,6 +661,39 @@ function ShoppingCartBillForm({}: Props) {
         steps={["Information", "Delivery", "Payment"]}
       /> */}
       {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
+
+      {activeReserve && mergeChoice === null && (
+        <div className="rounded-lg border border-pink-200 bg-pink-50/50 p-4">
+          <p className="mb-3 text-sm font-medium text-neutral-800">
+            شما یک سفارش رزروی فعال دارید ({activeReserve.orderCount} سفارش). آیا می‌خواهید به آن
+            اضافه کنید؟
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (isSubmitting) return;
+                setMergeChoice("merge");
+              }}
+              className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              اضافه به سفارش رزروی (بدون هزینه ارسال)
+            </button>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (isSubmitting) return;
+                setMergeChoice("new");
+              }}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              ثبت سفارش جدید
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ShoppingCartBillInformationForm
@@ -623,12 +704,29 @@ function ShoppingCartBillForm({}: Props) {
         />
 
         <div className="mb-20 flex flex-col gap-6">
-          <ShoppingCartBillDeliveryForm
-            control={control}
-            setValue={setValue}
-            selectedShipping={watchShippingMethod}
-            discountPreview={discountPreview}
-          />
+          {isMergeMode ? (
+            <div className="rounded-2xl bg-stone-50 p-5">
+              <p className="text-neutral-800">
+                اقلام فعلی به سفارش رزروی شما اضافه می‌شوند. هزینه ارسال از قبل پرداخت شده است.
+              </p>
+              <p className="mt-2 text-lg font-medium text-pink-600">
+                قابل پرداخت:{" "}
+                {Math.max(0, totalPrice - (discountPreview?.discount ?? 0)).toLocaleString()} تومان
+              </p>
+            </div>
+          ) : (
+            <>
+              <ShoppingCartBillDeliveryForm
+                control={control}
+                setValue={setValue}
+                selectedShipping={watchShippingMethod}
+                discountPreview={discountPreview}
+              />
+              {(mergeChoice === "new" || !activeReserve) && (
+                <ReserveShipping checked={reserveShipping} onChange={setReserveShipping} />
+              )}
+            </>
+          )}
           <ShoppingCartBillDiscountCoupon
             shippingId={watchShippingMethod ? Number(watchShippingMethod.id) : undefined}
             shippingCost={

@@ -7,6 +7,7 @@ import productLifeCycles from "./api/product/lifecycles";
 import productVariationLifeCycles from "./api/product-variation/lifecycles";
 import { ensureIranLocations } from "./jobs/ensureLocations";
 import { startExpireStockReservationsJob } from "./jobs/expireStockReservations";
+import { startExpireReserveOrdersJob } from "./jobs/expireReserveOrders";
 
 type ControllerActions = Record<string, ReadonlyArray<string> | "*">;
 type FullAccessSpec = { mode: "all" };
@@ -446,6 +447,11 @@ export default {
       startExpireStockReservationsJob(strapi);
     } catch (error) {
       strapi.log.error("Failed to start expire stock reservations job", error);
+    }
+    try {
+      startExpireReserveOrdersJob(strapi);
+    } catch (error) {
+      strapi.log.error("Failed to start expire reserve orders job", error);
     }
     // Migrate any existing local-users to plugin users by creating a bridge (idempotent)
     (async function migrateLocalUsers() {

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import PhotoUploaderImagePreview from "@/components/Product/add/PhotoUploader/ImagePreview";
+import { generateStableId } from "@/utils/stableId";
 import {
   DndContext,
   closestCenter,
@@ -69,20 +70,6 @@ const SortablePreviewItem: React.FC<SortablePreviewItemProps> = ({
   );
 };
 
-function generateStableId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return `image-${crypto.randomUUID()}`;
-  }
-  const bytes = new Uint8Array(16);
-  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
-    crypto.getRandomValues(bytes);
-  } else {
-    for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256);
-  }
-  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-  return `image-${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-${["8", "9", "a", "b"][Math.floor(Math.random() * 4)]}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
-}
-
 const KEYBOARD_SENSOR_OPTIONS = { coordinateGetter: sortableKeyboardCoordinates };
 
 const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFile, onReorder }) => {
@@ -102,6 +89,8 @@ const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFi
       }
       stableIdsRef.current = ids;
     } else if (ids.length > previews.length) {
+      // When list shrinks, trim from the end. IDs only need to be unique per drag session;
+      // the DnD context resets on re-render, so dropping from the tail is intentional.
       ids = ids.slice(0, previews.length);
       stableIdsRef.current = ids;
     }

@@ -15,6 +15,14 @@ export default {
     },
     {
       method: "GET",
+      path: "/orders/active-reserve",
+      handler: "order.getActiveReserve",
+      config: {
+        auth: { scope: [] },
+      },
+    },
+    {
+      method: "GET",
       path: "/orders/:id/payment-status",
       handler: "order.checkPaymentStatus",
       config: {
@@ -33,6 +41,14 @@ export default {
       method: "GET",
       path: "/orders/my-orders/:id",
       handler: "order.getMyOrderDetail",
+      config: {
+        auth: { scope: [] },
+      },
+    },
+    {
+      method: "POST",
+      path: "/orders/:id/release-reserve",
+      handler: "order.releaseReserve",
       config: {
         auth: { scope: [] },
       },

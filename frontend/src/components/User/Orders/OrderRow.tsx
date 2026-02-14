@@ -1,12 +1,14 @@
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import CancelIcon from "../Icons/CancelIcon";
 import TickIcon from "../Icons/TickIcon";
 import { PersianOrderStatus } from "@/constants/enums";
 import clsx from "clsx";
+import { formatCountdown } from "@/utils/formatCountdown";
 import PaymentStatusButton from "./PaymentStatusButton";
 import ShowFactorButton from "./ShowFactorButton";
-import { Eye } from "lucide-react";
+import { Eye, Clock } from "lucide-react";
 
 interface Props {
   image: string;
@@ -21,6 +23,11 @@ interface Props {
   detailHref: string;
   onViewDetails: () => void;
   onOpenFullDetails?: () => void;
+  isReserveOrder?: boolean;
+  reserveExpiresAt?: string | null;
+  reserveGroupOrderCount?: number;
+  onReleaseReserve?: (orderId: number) => void;
+  isReleasingReserve?: boolean;
 }
 
 export default function OrderRow({
@@ -36,7 +43,23 @@ export default function OrderRow({
   detailHref,
   onViewDetails,
   onOpenFullDetails,
+  isReserveOrder,
+  reserveExpiresAt,
+  reserveGroupOrderCount,
+  onReleaseReserve,
+  isReleasingReserve,
 }: Props) {
+  const [countdownText, setCountdownText] = useState<string>(() =>
+    reserveExpiresAt && isReserveOrder ? formatCountdown(reserveExpiresAt) : "",
+  );
+
+  useEffect(() => {
+    if (!reserveExpiresAt || !isReserveOrder) return;
+    setCountdownText(formatCountdown(reserveExpiresAt));
+    const id = setInterval(() => setCountdownText(formatCountdown(reserveExpiresAt)), 60_000);
+    return () => clearInterval(id);
+  }, [reserveExpiresAt, isReserveOrder]);
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="py-3 pl-4">
@@ -80,7 +103,26 @@ export default function OrderRow({
         </div>
       </td>
       <td className="w-fit py-3 text-left">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {isReserveOrder && reserveExpiresAt && (
+            <span className="flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs text-amber-800">
+              <Clock className="h-3.5 w-3.5" />
+              ارسال رزروی ({countdownText || formatCountdown(reserveExpiresAt)})
+              {reserveGroupOrderCount && reserveGroupOrderCount > 1 && (
+                <span> • {reserveGroupOrderCount} سفارش</span>
+              )}
+            </span>
+          )}
+          {isReserveOrder && orderId && onReleaseReserve && (
+            <button
+              type="button"
+              onClick={() => onReleaseReserve(orderId)}
+              disabled={isReleasingReserve}
+              className="text-xs rounded-lg border border-pink-200 px-2 py-1 text-pink-600 transition hover:bg-pink-50 disabled:opacity-50"
+            >
+              {isReleasingReserve ? "در حال پردازش..." : "ارسال الان"}
+            </button>
+          )}
           {orderId && <PaymentStatusButton orderId={orderId} />}
           {shippingBarcode ? (
             <a

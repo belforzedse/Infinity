@@ -1,4 +1,5 @@
 import { apiClient } from "../index";
+import { getActiveReserve, releaseReserve } from "./reserve";
 import { IMAGE_BASE_URL } from "@/constants/api";
 
 // Simple cache implementation for orders
@@ -100,13 +101,15 @@ export interface OrderItem {
 }
 
 export interface Order {
-
   id: number;
   Status: string;
   Date: string;
   Type: string;
   ShippingCost: number;
   ShippingBarcode?: string;
+  isReserveOrder?: boolean;
+  reserveExpiresAt?: string | null;
+  reserveGroupId?: string | null;
   Description?: string;
   Note?: string;
   createdAt: string;
@@ -244,30 +247,68 @@ export const getOrderPaymentStatus = async (
   }
 };
 
+export interface GetMyOrdersOptions {
+  reserveGroupId?: string;
+}
+
 /**
  * Get the list of orders for the current user
  * @param page Page number for pagination
  * @param pageSize Number of orders per page
+ * @param options Optional filters (e.g. reserveGroupId for reserve group page)
  * @returns List of user orders with pagination metadata
  */
 export const getMyOrders = async (
   page: number = 1,
   pageSize: number = 10,
+  options?: GetMyOrdersOptions,
 ): Promise<OrdersResponse> => {
-  const cacheKey = `orders_${page}_${pageSize}`;
+  const reserveGroupId = options?.reserveGroupId;
+  const cacheKey = reserveGroupId
+    ? `orders_${page}_${pageSize}_reserve_${reserveGroupId}`
+    : `orders_${page}_${pageSize}`;
 
-  // Check cache first
   const shouldUseCache = process.env.NODE_ENV !== "test";
   const cachedData = shouldUseCache ? orderCache.get(cacheKey) : null;
   if (cachedData) {
     return cachedData;
   }
 
-  try {
-    const response = await apiClient.get(`/orders/my-orders?page=${page}&pageSize=${pageSize}`);
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (reserveGroupId) params.set("reserveGroupId", reserveGroupId);
 
-    // Ensure response has the expected structure
-    if (!response.data || !Array.isArray(response.data)) {
+  try {
+    const response = await apiClient.get<{ data?: Order[]; meta?: OrdersResponse["meta"] }>(
+      `/orders/my-orders?${params.toString()}`,
+    );
+
+    // Support multiple response shapes: direct array, { data, meta }, or { data: { data, meta } }
+    const raw = response as { data?: Order[] | { data?: Order[]; meta?: OrdersResponse["meta"] }; meta?: OrdersResponse["meta"] } | Order[] | null | undefined;
+    let ordersArray: Order[] = [];
+    if (Array.isArray(raw)) {
+      ordersArray = raw;
+    } else if (raw && typeof raw === "object") {
+      const inner = raw.data;
+      if (Array.isArray(inner)) {
+        ordersArray = inner;
+      } else if (inner && typeof inner === "object" && Array.isArray(inner.data)) {
+        ordersArray = inner.data;
+      }
+    }
+
+    type Meta = OrdersResponse["meta"];
+    const rawObj = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as { data?: unknown; meta?: Meta }) : null;
+    let metaFromResponse: Meta | undefined;
+    if (rawObj && "meta" in rawObj && rawObj.meta && typeof rawObj.meta === "object" && "pagination" in rawObj.meta) {
+      metaFromResponse = rawObj.meta as Meta;
+    } else if (rawObj?.data && typeof rawObj.data === "object" && !Array.isArray(rawObj.data) && "meta" in rawObj.data) {
+      const inner = rawObj.data as { meta?: Meta };
+      if (inner.meta && typeof inner.meta === "object" && "pagination" in inner.meta) {
+        metaFromResponse = inner.meta;
+      }
+    }
+
+    if (!ordersArray.length && !metaFromResponse) {
       return {
         data: [],
         meta: {
@@ -281,30 +322,34 @@ export const getMyOrders = async (
       };
     }
 
-    // Add full image URLs to order items
-    const ordersWithFullImageUrls = (response.data as Order[]).map((order: Order) => ({
+    // Add full image URLs and normalize CoverImage -> cover_image for order items
+    const ordersWithFullImageUrls = ordersArray.map((order: Order) => ({
       ...order,
-      order_items: order.order_items.map((item: OrderItem) => ({
-        ...item,
-        product_variation: {
-          ...item.product_variation,
-          product: item.product_variation.product
-            ? {
-                ...item.product_variation.product,
-                cover_image: item.product_variation.product.cover_image
-                  ? {
-                      ...item.product_variation.product.cover_image,
-                      url: getFullImageUrl(item.product_variation.product.cover_image.url),
-                    }
-                  : undefined,
-              }
-            : null,
-        },
-      })),
+      order_items: (order.order_items ?? []).map((item: OrderItem) => {
+        const product = item.product_variation?.product as
+          | (Record<string, unknown> & { CoverImage?: { url?: string }; cover_image?: { url?: string } })
+          | null
+          | undefined;
+        const coverImage = product?.cover_image ?? product?.CoverImage;
+        const imageUrl = coverImage?.url;
+        return {
+          ...item,
+          product_variation: {
+            ...item.product_variation,
+            product: item.product_variation?.product
+              ? {
+                  ...item.product_variation.product,
+                  cover_image: imageUrl
+                    ? { url: getFullImageUrl(imageUrl) }
+                    : undefined,
+                }
+              : null,
+          },
+        };
+      }),
     }));
 
-    // Ensure meta has the expected structure
-    const pagination = response.meta?.pagination || {
+    const pagination = metaFromResponse?.pagination ?? {
       page,
       pageSize,
       pageCount: 1,
@@ -359,6 +404,8 @@ const OrderService = {
   getOrderPaymentStatus,
   getMyOrders,
   getOrderDetail,
+  getActiveReserve,
+  releaseReserve,
   async generateAnipoBarcode(orderId: number, weight?: number, boxSizeId?: number): Promise<any> {
     try {
       const body: any = {};
