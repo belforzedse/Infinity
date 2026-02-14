@@ -89,7 +89,7 @@ async function triggerHeroSliderRevalidation(strapi: { log: { warn: (msg: string
 
   const results = await Promise.allSettled(revalidationPromises);
   const successful = results.filter(
-    (r): r is PromiseFulfilledResult<{ success: boolean }> =>
+    (r): r is PromiseFulfilledResult<{ url: string; success: boolean }> =>
       r.status === "fulfilled" && r.value?.success,
   ).length;
   strapi.log.info(`[Settings] Hero-slider revalidation completed: ${successful}/${frontendUrls.length} successful`);
