@@ -65,7 +65,7 @@
     },
     "external_id": {
       "type": "string",
-      "unique": false
+      "unique": true
     },
     "external_source": {
       "type": "string"

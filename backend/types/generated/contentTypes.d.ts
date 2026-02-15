@@ -2384,7 +2384,7 @@ export interface ApiProductVariationProductVariation extends Schema.CollectionTy
         },
         string
       >;
-    external_id: Attribute.String;
+    external_id: Attribute.String & Attribute.Unique;
     external_source: Attribute.String;
     general_discounts: Attribute.Relation<
       "api::product-variation.product-variation",
@@ -2483,7 +2483,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
       Attribute.Private;
     Description: Attribute.RichText;
     discounts: Attribute.Relation<"api::product.product", "manyToMany", "api::discount.discount">;
-    external_id: Attribute.String;
+    external_id: Attribute.String & Attribute.Unique;
     external_source: Attribute.String;
     Files: Attribute.Media<"files", true>;
     Media: Attribute.Media<"images" | "videos", true>;
