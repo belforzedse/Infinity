@@ -308,6 +308,11 @@ export default function UpsertPageContentWrapper<T extends { createdAt: Date; up
           )}
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
+          {config.actionButtons({
+            onSubmit,
+            onCancel,
+            isLoading,
+          })}
           <button
             type="button"
             onClick={() => setPanelCollapsed((p) => !p)}

@@ -237,6 +237,16 @@ class WooCommerceClient extends BaseApiClient {
   }
 
   /**
+   * Get a single product variation by ID
+   */
+  async getProductVariationById(productId, variationId) {
+    const response = await this.retryRequest(() =>
+      this.client.get(`/products/${productId}/variations/${variationId}`),
+    );
+    return response.data;
+  }
+
+  /**
    * Get product by slug from WooCommerce
    */
   async getProductBySlug(slug) {

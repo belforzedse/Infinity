@@ -483,8 +483,8 @@ class VariationImporter {
       .filter((id) => Number.isFinite(id));
 
     if (!missingOnly) {
-      productIds = this.getProductIdsSortedByOldestVariation();
-      this.logger.info(`📅 Update-all: products ordered by oldest variation first`);
+      productIds = this.getProductIdsSortedByMinVariationId();
+      this.logger.info(`📅 Update-all: processing from variation id 1 upward (products ordered by min variation id)`);
     } else {
       productIds.sort((a, b) => a - b);
     }
@@ -696,7 +696,7 @@ class VariationImporter {
         }
 
         if (!missingOnly) {
-          variations = this.sortVariationsByOldestFirst(variations);
+          variations = this.sortVariationsByIdAsc(variations);
         }
 
         for (const variation of variations) {
@@ -779,59 +779,48 @@ class VariationImporter {
   }
 
   /**
-   * Get product IDs sorted by oldest variation first (by variation importedAt).
-   * Used in update-all mode so variations added longest ago are updated first.
-   * Products with no variation mappings are ordered by product importedAt, then at end.
+   * Get product IDs sorted by minimum variation ID (so we process variation id 1, 2, 3... first).
+   * Used in update-all mode so variations are updated from lowest ID to highest.
+   * Products with no variation mappings are placed at the end.
    */
-  getProductIdsSortedByOldestVariation() {
+  getProductIdsSortedByMinVariationId() {
     const productIds = Array.from(this.productMappingCache.keys())
       .map((id) => Number.parseInt(id, 10))
       .filter((id) => Number.isFinite(id));
 
     const variationMappings = this.duplicateTracker.getAllMappings("variations");
-    const productMappings = this.duplicateTracker.getAllMappings("products");
 
-    const productOldestVariationAt = new Map();
+    const productMinVariationId = new Map();
     for (const productId of productIds) {
-      let oldest = null;
+      let minId = Infinity;
       for (const [wcVariationId, mapping] of Object.entries(variationMappings)) {
         const mappingProductId =
           typeof mapping.productId === "number"
             ? mapping.productId
             : Number.parseInt(mapping.productId, 10);
-        if (mappingProductId === productId && mapping.importedAt) {
-          if (oldest == null || mapping.importedAt < oldest) {
-            oldest = mapping.importedAt;
-          }
+        if (mappingProductId === productId) {
+          const vid = Number.parseInt(wcVariationId, 10);
+          if (Number.isFinite(vid) && vid < minId) minId = vid;
         }
       }
-      if (oldest == null) {
-        const pm = productMappings[productId.toString()];
-        oldest = pm && pm.importedAt ? pm.importedAt : "9999-12-31T23:59:59.999Z";
-      }
-      productOldestVariationAt.set(productId, oldest);
+      productMinVariationId.set(productId, minId === Infinity ? Number.MAX_SAFE_INTEGER : minId);
     }
 
     return productIds.slice().sort((a, b) => {
-      const dateA = productOldestVariationAt.get(a) || "9999-12-31T23:59:59.999Z";
-      const dateB = productOldestVariationAt.get(b) || "9999-12-31T23:59:59.999Z";
-      return dateA.localeCompare(dateB);
+      const idA = productMinVariationId.get(a) ?? Number.MAX_SAFE_INTEGER;
+      const idB = productMinVariationId.get(b) ?? Number.MAX_SAFE_INTEGER;
+      return idA - idB;
     });
   }
 
   /**
-   * Sort variations array so oldest-imported (by mapping importedAt) come first.
-   * Variations not in the mapping are placed at the end.
+   * Sort variations by WooCommerce variation ID ascending (id 1, 2, 3...).
    */
-  sortVariationsByOldestFirst(variations) {
-    const variationMap = this.duplicateTracker.ensureMapping("variations");
-    const fallback = "9999-12-31T23:59:59.999Z";
+  sortVariationsByIdAsc(variations) {
     return variations.slice().sort((a, b) => {
-      const mapA = variationMap.get(a.id.toString());
-      const mapB = variationMap.get(b.id.toString());
-      const dateA = (mapA && mapA.importedAt) || fallback;
-      const dateB = (mapB && mapB.importedAt) || fallback;
-      return dateA.localeCompare(dateB);
+      const idA = Number.parseInt(a.id, 10) || 0;
+      const idB = Number.parseInt(b.id, 10) || 0;
+      return idA - idB;
     });
   }
 
