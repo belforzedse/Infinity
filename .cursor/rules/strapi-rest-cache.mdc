@@ -6,27 +6,53 @@ alwaysApply: false
 
 # Strapi REST Cache
 
-The backend uses **strapi-plugin-rest-cache** (v4) to cache REST responses in memory. This reduces repeated DB hits for the same product/category/navigation requests.
+The backend uses **strapi-plugin-rest-cache** (v4) to cache REST API GET responses in memory. This reduces repeated DB hits for the same product/category/navigation requests.
 
 ## Configuration
 
 - **File:** `backend/config/plugins.ts` under the `"rest-cache"` key.
-- **Provider:** `memory` (LRU, max 100k entries, maxAge 5 minutes).
-- **Invalidation:** Cache is invalidated when the related content type is updated (create/update/delete).
+- **Provider:** `memory` (strapi-provider-rest-cache-memory). Uses cache-manager with an in-memory LRU store.
+  - **provider.options.max:** Max number of cache entries (e.g. 100000). Passed to the underlying store.
+  - **provider.getTimeout:** Max ms to wait for a cache get (default 500; we use 100).
+- **Strategy:**
+  - **strategy.maxAge:** TTL per cached response in **milliseconds** (e.g. 5 * 60 * 1000 = 5 min). Plugin default is 3600000 (1 h).
+  - **strategy.contentTypes:** Array of content-type UIDs to cache (GET only). Only these types are cached.
+  - **strategy.clearRelatedCache:** When one content type is purged, related content types’ cache keys are also cleared (plugin default true).
+- **Cache bypass (hitpass):** Requests with `Authorization` or `Cookie` header are **not** served from cache (and do not populate it). Authenticated requests always hit the API.
 
-## Cached content types
+## Invalidation (when cache is cleared)
 
-All listed below are **semi-dynamic**: same 5 min TTL and invalidation on content update.
+- **REST API:** When a cached content type is created/updated/deleted via the **public REST API** (POST/PUT/PATCH/DELETE), the plugin’s purge middleware clears the relevant cache entries.
+- **Admin panel:** When content is created/updated/deleted via the **Content Manager** (Admin API routes), the plugin’s purgeAdmin middleware clears the cache for that content type (and related, if clearRelatedCache is true).
+- **DB lifecycles (programmatic/imports):** The app bootstrap in `src/index.ts` subscribes to `afterCreate` / `afterUpdate` / `afterDelete` for every cached content type and calls `cacheStore.clearByUid(uid, {}, true)`. So updates via entity service, document service, or imports (e.g. WooCommerce importer) also invalidate the REST cache. No extra code in lifecycles is required.
+- **Manual:** From code use `strapi.plugin('rest-cache').service('cacheStore').clearByUid(uid, params, wildcard)` or the plugin’s Admin “Purge” action.
+
+## Cached content types (our config)
+
+All of the following use the same **strategy.maxAge** (5 min) and are invalidated as above.
 
 - Footer, navigation, product-category (and related), product-size-helper, product-tag, variation colors/models/sizes, shipping (and cities/provinces).
 - Product, product-variation, product-faq, product-review*, discount, general-discount.
 
-Cart, order, stock, wallet, address, and transaction APIs are **not** cached.
+**Not cached:** Cart, order, stock, wallet, address, transactions (and any content type not listed in strategy.contentTypes).
 
 ## Dependency
 
-- **Package:** `strapi-plugin-rest-cache` (^4.2.9) in `backend/package.json`. The plugin brings in `strapi-provider-rest-cache-memory` as a dependency.
+- **Package:** `strapi-plugin-rest-cache` (^4.2.9) in `backend/package.json`. It depends on `strapi-provider-rest-cache-memory` (^4.2.9).
 
 ## Other caching
 
-- **cache-headers** middleware (`backend/src/middlewares/cache-headers.ts`) sets HTTP Cache-Control and ETag for product/static/user GET requests (browser/CDN caching); the request still hits Strapi unless cached by CDN/browser.
+- **cache-headers** middleware (`backend/src/middlewares/cache-headers.ts`) sets HTTP Cache-Control and ETag for some GET requests (browser/CDN); the request still hits Strapi unless cached by CDN/browser.
+
+## Note on Redis
+
+The REST cache uses the **memory** provider (in-process LRU in the Strapi Node process). A separate **Redis** instance in the stack (if present) is not used by this plugin unless you switch to a Redis rest-cache provider.
+
+## Verified against plugin source
+
+- Defaults and config shape: `node_modules/strapi-plugin-rest-cache/server/config/index.js`
+- Purge on REST: `server/middlewares/purge.js` (runs after next(), then clearByUid)
+- Purge on Admin: `server/middlewares/purgeAdmin.js`; Admin routes: `server/utils/middlewares/createRouter.js` (adminRoutes)
+- Cache lookup bypass: `server/utils/middlewares/shouldLookup.js`; default hitpass uses `authorization` or `cookie` header
+- Memory provider: `node_modules/strapi-provider-rest-cache-memory/lib/MemoryCacheProvider.js` (set() uses maxAge in ms, converts to ttl seconds for cache-manager)
+- Store: cache-manager memory store uses `max` and `ttl` (seconds) for LRU options

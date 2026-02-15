@@ -1,0 +1,22 @@
+# Scale override: second Strapi instance. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
+# All Strapis share the same Postgres, Redis, and uploads volume.
+
+services:
+  strapi-2:
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    container_name: infinity-strapi-2
+    env_file:
+      - ${ENV_FILE:-main.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:1338:1337"
+    restart: unless-stopped
+    volumes:
+      - backend_uploads-data:/app/public
+    networks:
+      - infinity-network

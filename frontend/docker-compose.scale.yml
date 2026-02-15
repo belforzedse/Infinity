@@ -1,0 +1,20 @@
+# Scale override: extra Next.js instances. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
+# Nginx should proxy to next_upstream (3000, 3001, 3002).
+
+services:
+  frontend-2:
+    image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
+    env_file:
+      - ${ENV_FILE:-main.env}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+
+  frontend-3:
+    image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
+    env_file:
+      - ${ENV_FILE:-main.env}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3002:3000"

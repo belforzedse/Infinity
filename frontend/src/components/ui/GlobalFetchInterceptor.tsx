@@ -2,7 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { adjustPendingRequests } from "@/atoms/loading";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, REQUEST_TIMEOUT } from "@/constants/api";
+
+/** Max time a single request can keep the global loading overlay visible. Prevents stuck UI when API hangs. */
+const OVERLAY_MAX_MS = REQUEST_TIMEOUT + 5000;
 
 export default function GlobalFetchInterceptor() {
   const recentInteraction = useRef(false);
@@ -112,11 +115,22 @@ export default function GlobalFetchInterceptor() {
       } catch {}
 
       adjustPendingRequests(1);
+      let released = false;
+      const release = () => {
+        if (!released) {
+          released = true;
+          adjustPendingRequests(-1);
+        }
+      };
+      const timeoutId = window.setTimeout(release, OVERLAY_MAX_MS);
       try {
         const res = await originalFetch(input as any, init);
         return res;
       } finally {
-        adjustPendingRequests(-1);
+        try {
+          window.clearTimeout(timeoutId);
+        } catch {}
+        release();
       }
     }
 

@@ -446,6 +446,31 @@ export default {
   bootstrap({ strapi }) {
     strapi.db.lifecycles.subscribe(productLifeCycles);
     strapi.db.lifecycles.subscribe(productVariationLifeCycles);
+
+    // Invalidate rest-cache when cached content types change via DB (imports, scripts, entityService)
+    const restCache = strapi.plugin("rest-cache");
+    if (restCache) {
+      const cacheStore = restCache.service("cacheStore") as {
+        clearByUid: (uid: string, params?: object, wildcard?: boolean) => Promise<void>;
+      };
+      const cacheConfig = restCache.service("cacheConfig") as { getUids: () => string[] };
+      const uids = cacheConfig.getUids();
+      for (const uid of uids) {
+        strapi.db.lifecycles.subscribe({
+          models: [uid],
+          async afterCreate() {
+            await cacheStore.clearByUid(uid, {}, true);
+          },
+          async afterUpdate() {
+            await cacheStore.clearByUid(uid, {}, true);
+          },
+          async afterDelete() {
+            await cacheStore.clearByUid(uid, {}, true);
+          },
+        });
+      }
+    }
+
     ensureIranLocations(strapi).catch((err) => {
       strapi.log.error("Failed to ensure province/city seed", err);
     });

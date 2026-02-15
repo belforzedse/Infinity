@@ -1,0 +1,26 @@
+---
+description: Docker load scaling: compose scale overrides, CI deploy, Nginx upstreams
+globs: backend/docker-compose*.yml, frontend/docker-compose*.yml, .github/workflows/*-cicd.yml, docs/nginx-upstream-snippet.conf, docs/DOCKER-LOAD-SCALING-GUIDE.md
+---
+
+# Docker Load Scaling
+
+## Overview
+
+The app runs **multiple frontend and backend containers** in production when using the scale override. Same Postgres, Redis, and uploads volume; only more API/Next workers.
+
+## Repo pieces
+
+- **backend/docker-compose.scale.yml** – Adds `strapi-2` on host port 1338. Use with `docker compose -f docker-compose.yml -f docker-compose.scale.yml`.
+- **frontend/docker-compose.scale.yml** – Adds `frontend-2` (3001) and `frontend-3` (3002). Same image/env.
+- **CI/CD** – `frontend-cicd.yml` and `backend-cicd.yml` upload both base and scale compose files and deploy with:
+  - `docker compose -f docker-compose.yml -f docker-compose.scale.yml ...`
+  So every deploy (main/dev/experimental) brings up the scaled stack.
+- **Nginx** – Server config must use upstreams for load balancing. Snippet: **docs/nginx-upstream-snippet.conf** (include before `server {}`, then `proxy_pass http://next_upstream` and `proxy_pass http://strapi_upstream`). Full steps: **docs/DOCKER-LOAD-SCALING-GUIDE.md**.
+
+## Conventions
+
+- Backend scale: one extra Strapi (`strapi-2`), same volumes/networks as base.
+- Frontend scale: two extra Next.js services (`frontend-2`, `frontend-3`), same env_file.
+- Strapi upstream uses `ip_hash` so admin sessions stick to one instance.
+- To run single-instance on server: omit the scale file (e.g. `docker compose up -d` only).

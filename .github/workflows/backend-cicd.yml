@@ -9,10 +9,12 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-cicd.yml'
+      - 'backend/docker-compose.scale.yml'
   pull_request:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-cicd.yml'
+      - 'backend/docker-compose.scale.yml'
   workflow_dispatch:
 
 env:
@@ -125,7 +127,7 @@ jobs:
           username: ${{ secrets.BACKEND_USER }}
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
-          source: backend/docker-compose.yml
+          source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
           target: /opt/infinity/backend/
 
       - name: Deploy to production
@@ -155,9 +157,9 @@ jobs:
             POSTGRES_DB=${DB_NAME}
             EOF
             export IMAGE_TAG=main
-            docker compose --env-file "$ENV_FILE" pull
-            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" pull
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
             fi
@@ -170,7 +172,7 @@ jobs:
           username: ${{ secrets.BACKEND_USER }}
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
-          source: backend/docker-compose.yml
+          source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
           target: /opt/infinity/backend/
 
       - name: Deploy to staging
@@ -200,9 +202,9 @@ jobs:
             POSTGRES_DB=${DB_NAME}
             EOF
             export IMAGE_TAG=dev
-            docker compose --env-file "$ENV_FILE" pull
-            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" pull
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
             fi
@@ -215,7 +217,7 @@ jobs:
           username: ${{ secrets.BACKEND_USER }}
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
-          source: backend/docker-compose.yml
+          source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
           target: /opt/infinity/backend/
 
       - name: Deploy to experimental
@@ -245,9 +247,9 @@ jobs:
             POSTGRES_DB=${DB_NAME}
             EOF
             export IMAGE_TAG=experimental
-            docker compose --env-file "$ENV_FILE" pull
-            docker compose --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
-            docker compose --env-file "$ENV_FILE" up -d --remove-orphans
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" pull
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
+            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
             fi

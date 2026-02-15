@@ -1,15 +1,8 @@
 // This page is now SSR (Server Component) by removing "use client"
-// Revalidate every 30 seconds to show updated product prices, stock, and discounts
-export const revalidate = 30; // 30 seconds
+// Revalidate every 60s to balance freshness with server load (fewer revalidations = less Strapi/Next CPU)
+export const revalidate = 60;
 
-import NewIcon from "@/components/PDP/Icons/NewIcon";
-import OffIcon from "@/components/PDP/Icons/OffIcon";
-import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import type { Metadata } from "next";
-import {
-  getFeaturedCategoryProductsByRating,
-  getHomepageSections,
-} from "@/services/product/homepage";
 import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
 import { BlogCarousel } from "@/components/Blog";
@@ -18,15 +11,15 @@ import MobileSlider from "@/components/Hero/mobileSlider";
 import TabletSlider from "@/components/Hero/tabletSlider";
 import { defaultSliderConfig } from "@/components/Hero/config";
 import { mapCmsHeroSliderToLayouts } from "@/components/Hero/config/fromCms";
+import { Suspense } from "react";
 import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import HomePromoBanners from "@/components/Home/PromoBanners";
-import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
-import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
+import HomeProductSections from "./HomeProductSections";
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
@@ -58,14 +51,21 @@ async function getLatestBlogPosts() {
   }
 }
 
+function ProductSectionsFallback() {
+  return (
+    <section className="space-y-8">
+      <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {[...Array(8)].map((i) => (
+          <div key={i} className="aspect-[3/4] animate-pulse rounded-lg bg-gray-200" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function Home() {
-  const [
-    { discounted: discountedProducts, new: newProducts, favorites: favoriteProducts },
-    latestBlogPosts,
-    parentCategories,
-    homepageSettings,
-  ] = await Promise.all([
-    getHomepageSections(),
+  const [latestBlogPosts, parentCategories, homepageSettings] = await Promise.all([
     getLatestBlogPosts(),
     getProductCategories({ parentsWithChildrenOnly: true, sort: "Title:asc" }),
     getPublicSuperAdminSettings(),
@@ -98,32 +98,6 @@ export default async function Home() {
   const featuredCategorySlug = homepageSettings.homeFeaturedCategorySlug?.trim() || "";
   const featuredCategoryBannerImage =
     homepageSettings.homeFeaturedCategoryBannerImage?.trim() || "";
-  const featuredCategoryProducts = featuredCategorySlug && featuredCategoryBannerImage
-    ? await getFeaturedCategoryProductsByRating(featuredCategorySlug, 6)
-    : [];
-
-  const featuredCategorySmallProducts: ProductSmallCardProps[] = featuredCategoryProducts
-    .filter((product) => Boolean(product.images?.[0]))
-    .slice(0, 6)
-    .map((product) => ({
-      id: product.id,
-      slug: product.slug,
-      title: product.title,
-      category: product.category,
-      likedCount: product.seenCount || 0,
-      price: product.price,
-      discountedPrice: product.discountPrice,
-      discount: product.discount,
-      image: product.images[0] || "",
-      isAvailable: product.isAvailable,
-      colorsCount: product.colorsCount,
-      colorCodes: product.colorCodes,
-    }));
-
-  const hasFeaturedCategorySection =
-    Boolean(featuredCategorySlug) &&
-    Boolean(featuredCategoryBannerImage) &&
-    featuredCategorySmallProducts.length > 0;
   const heroFromCms = mapCmsHeroSliderToLayouts(homepageSettings.homeHeroSliderPublished);
   const hasHeroSlides =
     heroFromCms.desktopSlides.length > 0 ||
@@ -168,57 +142,18 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {discountedProducts.length > 0 && (
-        <section>
-          <Reveal variant="fade-up" duration={700}>
-            <OffersListHomePage
-              icon={<OffIcon />}
-              title="تخفیف‌های وسوسه انگیز"
-              products={discountedProducts}
-            />
-          </Reveal>
-        </section>
-      )}
+      <Suspense fallback={<ProductSectionsFallback />}>
+        <HomeProductSections
+          featuredCategorySlug={featuredCategorySlug}
+          featuredCategoryBannerImage={featuredCategoryBannerImage}
+        />
+      </Suspense>
 
       {parentCategories.length > 0 && (
         <section className="space-y-6">
           <CategoryCarousel categories={parentCategories} />
         </section>
       )}
-
-      <section className="space-y-10">
-        <div className="hidden space-y-10 md:block">
-          <Reveal variant="fade-up" duration={700}>
-            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
-          </Reveal>
-
-          {favoriteProducts.length > 0 && (
-            <Reveal variant="fade-up" duration={700}>
-              <OffersListHomePage
-                icon={<NewIcon />}
-                title="محبوب ترین ها"
-                products={favoriteProducts}
-              />
-            </Reveal>
-          )}
-        </div>
-
-        <div className="space-y-10 md:hidden">
-          <Reveal variant="blur-up" duration={1500}>
-            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
-          </Reveal>
-
-          {favoriteProducts.length > 0 && (
-            <Reveal variant="blur-up" duration={1500}>
-              <OffersListHomePage
-                icon={<NewIcon />}
-                title="محبوب ترین ها"
-                products={favoriteProducts}
-              />
-            </Reveal>
-          )}
-        </div>
-      </section>
 
       {hasPromoBanners && (
         <section>
@@ -228,18 +163,6 @@ export default async function Home() {
                 <HomePromoBanners banners={promoBanners} />
               </div>
             </div>
-          </Reveal>
-        </section>
-      )}
-
-      {hasFeaturedCategorySection && (
-        <section>
-          <Reveal variant="fade-up" duration={700}>
-            <FeaturedCategorySection
-              bannerImageUrl={featuredCategoryBannerImage}
-              categorySlug={featuredCategorySlug}
-              products={featuredCategorySmallProducts}
-            />
           </Reveal>
         </section>
       )}

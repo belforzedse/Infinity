@@ -5,8 +5,8 @@ export default () => ({
         name: "memory",
         getTimeout: 100,
         options: {
-          max: 100000,
-          maxAge: 5 * 60 * 1000, // 5 minutes (300000ms) - reasonable for e-commerce
+          max: 100000, // max cache entries (LRU)
+          ttl: 5 * 60, // default TTL in seconds for store (per-response TTL is strategy.maxAge in ms)
         },
       },
       strategy: {

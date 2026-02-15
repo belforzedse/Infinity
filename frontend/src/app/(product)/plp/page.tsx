@@ -1,4 +1,4 @@
-export const revalidate = 30; // refresh product listing every 30 seconds
+export const revalidate = 60; // balance freshness with server load
 
 import { Suspense } from "react";
 import { notFound } from "next/navigation";

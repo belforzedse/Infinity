@@ -1,0 +1,53 @@
+---
+description: Next.js server load and capacity - how we reduce blocking and when to scale
+globs: frontend/src/app/**/*.tsx, frontend/next.config.ts
+alwaysApply: false
+---
+
+# Frontend Server Capacity
+
+When the Next.js server "can't handle" traffic, clicks and navigation feel unresponsive because the **server is blocking** on slow work (SSR, Strapi fetches) and can't serve new requests in time.
+
+## What we do to reduce load
+
+1. **Revalidate (ISR)**  
+   Homepage and PLP use `revalidate = 60`. Cached responses serve many users; the server only revalidates every 60s, so fewer heavy Strapi calls.
+
+2. **Streaming**  
+   Homepage heavy data (product sections) is in a separate async component inside `<Suspense>`. The shell (hero, categories, blog, settings) is sent first; product sections stream when ready. So:
+   - TTFB improves (first byte doesn’t wait for the big product fetch).
+   - The server can start the next request sooner instead of blocking until everything is done.
+
+3. **No-store only where needed**  
+   Large product responses use `cache: 'no-store'` to avoid Next.js 2MB cache limit; other fetches can use default caching when possible.
+
+## When the server is still overloaded
+
+- **Strapi slow**: Next waits on Strapi; fix backend (rest-cache, DB, scaling).
+- **High concurrency**: Many users hit at once; one Node process can only do so much.
+- **Heavy pages**: PDP/PLP with deep populate and many params still do a lot of work per request.
+
+## Scaling options (from Next.js docs)
+
+1. **Multiple instances**  
+   Run several Next.js processes (e.g. multiple `next start` or `node .next/standalone/server.js`, or more Docker/K8s replicas) behind Nginx or another load balancer. Each process uses its own CPU core(s); more processes = more throughput. Next.js does not run in cluster mode by default, so you scale by adding processes/containers.
+
+2. **Shared cache when using multiple instances**  
+   The default cache is **in-memory per process**. If you run multiple servers or containers, each has its own cache (not shared) and cache is lost on restart. For consistency and to avoid duplicate work:
+   - Use a **custom cache handler** so all instances share one cache (e.g. Redis).
+   - In `next.config`: set `cacheHandler: require.resolve('./cache-handler.js')` and `cacheMaxMemorySize: 0` to disable in-memory and use your handler. The handler is used for ISR, route handler responses, and image optimization (not for `'use cache'` directives; those use `cacheHandlers` plural).
+   - Next.js docs (Context7): cacheHandlers, incrementalCacheHandlerPath, self-hosting guide; Redis cache handler example in `cacheHandlers.mdx`.
+
+3. **Standalone (you already use this)**  
+   With `output: 'standalone'`, run `node .next/standalone/server.js` (or `node server.js` from inside the standalone folder). Use `PORT` and `HOSTNAME` env vars. Copy `public` and `.next/static` into standalone if not using a CDN for static assets.
+
+4. **Proxy / load balancer**  
+   When running behind a proxy (e.g. Nginx), use `next start --keepAliveTimeout 70000` (or equivalent for standalone server) so connections aren’t closed too early by the proxy.
+
+5. **CDN**  
+   Cache HTML at the edge for public pages to reduce hits to Next.
+
+## Related
+
+- Strapi rest-cache: `.cursor/rules/strapi-rest-cache.mdc`
+- Global loading overlay (stuck UI): `frontend/src/components/ui/GlobalFetchInterceptor.tsx` (timeout) and `GlobalLoadingOverlay.tsx` (click-through after 60s)
