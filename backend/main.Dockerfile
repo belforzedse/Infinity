@@ -35,7 +35,7 @@ WORKDIR /app
 
 COPY --from=builder /app /app
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN --mount=type=cache,target=/root/.npm npm prune --omit=dev && chmod +x /app/docker-entrypoint.sh
+RUN --mount=type=cache,target=/root/.npm npm prune --omit=dev && chmod +x /app/docker-entrypoint.sh && chown -R node:node /app
 
 EXPOSE 1337
 USER root
