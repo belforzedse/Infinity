@@ -738,8 +738,55 @@ export default {
       }
     })();
 
-    // Backfill and enforce main category flags for top-level categories only (idempotent)
-    (async function backfillMainCategories() {
+    // One-time migration: reset all legacy main-category flags to false.
+    // This keeps categories non-main by default and avoids implicit auto-selection.
+    (async function resetLegacyMainCategoryDefaults() {
+      try {
+        const migrationStore = strapi.store({ type: "core", name: "migrations" });
+        const migrationKey = "reset-main-categories-default-v1";
+        const alreadyRan = await migrationStore.get({ key: migrationKey });
+        if (alreadyRan) {
+          return;
+        }
+
+        type ProductCategoryRecord = { id: number; isMainCategory?: boolean | null };
+        const categories = (await strapi.entityService.findMany(
+          "api::product-category.product-category",
+          { fields: ["id", "isMainCategory"], limit: -1 },
+        )) as ProductCategoryRecord[];
+
+        let resetCount = 0;
+        for (const category of categories) {
+          if (!category.isMainCategory) continue;
+          await strapi.entityService.update(
+            "api::product-category.product-category",
+            category.id,
+            { data: { isMainCategory: false } },
+          );
+          resetCount += 1;
+        }
+
+        await migrationStore.set({
+          key: migrationKey,
+          value: {
+            executedAt: new Date().toISOString(),
+            resetCount,
+          },
+        });
+
+        strapi.log.info("Product category main-category reset migration completed", {
+          total: categories.length,
+          resetCount,
+        });
+      } catch (error) {
+        strapi.log.error("Failed to run main-category reset migration", {
+          error: (error as any)?.message,
+        });
+      }
+    })();
+
+    // Ongoing safety: child categories cannot remain marked as main.
+    (async function enforceMainCategoryHierarchy() {
       try {
         type ProductCategoryRecord = {
           id: number;
@@ -756,40 +803,27 @@ export default {
           },
         )) as ProductCategoryRecord[];
 
-        let promoted = 0;
-        let demoted = 0;
-
+        let demotedChildren = 0;
         for (const category of categories) {
-          const hasParent = !!category.parent?.id;
+          const isChild = Boolean(category.parent?.id);
           const isMainCategory = Boolean(category.isMainCategory);
+          if (!isChild || !isMainCategory) continue;
 
-          if (!hasParent && !isMainCategory) {
-            await strapi.entityService.update(
-              "api::product-category.product-category",
-              category.id,
-              { data: { isMainCategory: true } },
-            );
-            promoted += 1;
-            continue;
-          }
-
-          if (hasParent && isMainCategory) {
-            await strapi.entityService.update(
-              "api::product-category.product-category",
-              category.id,
-              { data: { isMainCategory: false } },
-            );
-            demoted += 1;
-          }
+          await strapi.entityService.update(
+            "api::product-category.product-category",
+            category.id,
+            { data: { isMainCategory: false } },
+          );
+          demotedChildren += 1;
         }
 
-        strapi.log.info("Product category main flag backfill finished", {
-          total: categories.length,
-          promoted,
-          demoted,
-        });
+        if (demotedChildren > 0) {
+          strapi.log.info("Product category hierarchy enforcement completed", {
+            demotedChildren,
+          });
+        }
       } catch (error) {
-        strapi.log.error("Failed to backfill product category main flags", {
+        strapi.log.error("Failed to enforce main-category hierarchy", {
           error: (error as any)?.message,
         });
       }
