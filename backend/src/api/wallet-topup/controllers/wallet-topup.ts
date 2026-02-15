@@ -6,7 +6,7 @@ import { factories } from "@strapi/strapi";
 import type { Strapi } from "@strapi/strapi";
 
 const FRONTEND_BASE =
-  process.env.FRONTEND_URL || "https://new.infinitycolor.co";
+  process.env.FRONTEND_URL || "https://infinitycolor.co";
 export default factories.createCoreController(
   "api::wallet-topup.wallet-topup",
   ({ strapi }: { strapi: Strapi }) => ({

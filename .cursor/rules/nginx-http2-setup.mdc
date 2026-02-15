@@ -5,6 +5,8 @@ globs: **/*nginx*.conf,**/nginx.conf
 
 # Nginx HTTP/2 Configuration for Infinity Store
 
+**Full setup (Nginx + Certbot from scratch):** See [docs/nginx-certbot-setup.md](../../docs/nginx-certbot-setup.md) for step-by-step install, certificates for **infinitycolor.co** / **api.infinitycolor.co**, and renewal.
+
 ## Quick Setup Guide
 
 ### Step 1: Verify Nginx Version

@@ -1,9 +1,9 @@
-# Domain Migration Instructions: new.infinitycolor.co
+# Domain Migration Instructions: infinitycolor.co
 
 ## ✅ Completed Code Changes
 
 All code changes have been completed to migrate from the old domains to the new ones:
-- **Old Frontend**: `infinitycolor.org` → **New Frontend**: `new.infinitycolor.co`
+- **Old Frontend**: `infinitycolor.org` → **New Frontend**: `infinitycolor.co`
 - **Old Backend**: `api.infinitycolor.org` → **New Backend**: `api.infinitycolor.co`
 
 ### Files Updated
@@ -54,10 +54,10 @@ The following steps **MUST** be performed manually by you or your infrastructure
 
 You need to configure DNS records for your new domains:
 
-#### For `new.infinitycolor.co` (Frontend)
+#### For `infinitycolor.co` (Frontend)
 ```
 Type: A or CNAME
-Name: new.infinitycolor.co
+Name: infinitycolor.co
 Value: [Your frontend server IP or hostname]
 TTL: 3600 (or your preferred value)
 ```
@@ -81,7 +81,7 @@ Obtain and configure HTTPS certificates for both domains:
 #### Option A: Using Certbot (Let's Encrypt)
 ```bash
 # For frontend
-sudo certbot certonly --nginx -d new.infinitycolor.co
+sudo certbot certonly --nginx -d infinitycolor.co
 
 # For backend
 sudo certbot certonly --nginx -d api.infinitycolor.co
@@ -106,7 +106,7 @@ Update your nginx configuration to serve the new domains:
 ```nginx
 server {
     listen 80;
-    server_name new.infinitycolor.co;
+    server_name infinitycolor.co;
     
     # Redirect HTTP to HTTPS
     return 301 https://$server_name$request_uri;
@@ -114,10 +114,10 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name new.infinitycolor.co;
+    server_name infinitycolor.co;
     
-    ssl_certificate /etc/letsencrypt/live/new.infinitycolor.co/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/new.infinitycolor.co/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/infinitycolor.co/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/infinitycolor.co/privkey.pem;
     
     # Your existing frontend proxy config
     location / {
@@ -187,8 +187,8 @@ Update these in your backend deployment (Docker, PM2, hosting platform, etc.):
 URL=https://api.infinitycolor.co
 
 # Frontend URL (for callbacks)
-FRONTEND_URL=https://new.infinitycolor.co
-FRONTEND_BASE_URL=https://new.infinitycolor.co
+FRONTEND_URL=https://infinitycolor.co
+FRONTEND_BASE_URL=https://infinitycolor.co
 
 # Update payment callback URLs if explicitly set
 SAMAN_CALLBACK_URL=https://api.infinitycolor.co/api/wallet/payment-callback
@@ -199,8 +199,8 @@ SNAPPAY_RETURN_URL=https://api.infinitycolor.co/api/orders/payment-callback
 Update these in your frontend deployment:
 ```bash
 # Frontend site URL
-NEXT_PUBLIC_SITE_URL=https://new.infinitycolor.co
-NEXT_PUBLIC_SITE_BASE_URL=https://new.infinitycolor.co
+NEXT_PUBLIC_SITE_URL=https://infinitycolor.co
+NEXT_PUBLIC_SITE_BASE_URL=https://infinitycolor.co
 
 # Backend API URL
 NEXT_PUBLIC_API_BASE_URL=https://api.infinitycolor.co/api
@@ -217,19 +217,19 @@ NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinitycolor.co/
 
 The backend CORS should already allow the new domain through environment variables, but verify:
 
-Check `backend/config/middlewares.ts` - it should use `process.env.FRONTEND_URL`, which you'll set to `https://new.infinitycolor.co`.
+Check `backend/config/middlewares.ts` - it should use `process.env.FRONTEND_URL`, which you'll set to `https://infinitycolor.co`.
 
 If you have hardcoded CORS origins, update them:
 ```typescript
 // In backend/config/middlewares.ts or similar
 origin: [
-  'https://new.infinitycolor.co',
+  'https://infinitycolor.co',
   'https://staging.infinitycolor.org',  // Keep if still needed
   // Remove old production domain after migration is complete
 ]
 ```
 
-**Action Required**: Verify CORS configuration allows new.infinitycolor.co
+**Action Required**: Verify CORS configuration allows infinitycolor.co
 
 ---
 
@@ -237,7 +237,7 @@ origin: [
 
 If you're using cookies for authentication that need to be shared between frontend and backend:
 
-Update cookie domain to `.infinitycolor.co` (note the leading dot) to allow cookies to be shared between `new.infinitycolor.co` and `api.infinitycolor.co`.
+Update cookie domain to `.infinitycolor.co` (note the leading dot) to allow cookies to be shared between `infinitycolor.co` and `api.infinitycolor.co`.
 
 **Action Required**: Review and update cookie domain settings if needed
 
@@ -253,9 +253,9 @@ Update callback URLs in any third-party services:
 - **Saman Kish (Wallet)**: Update callback URL to `https://api.infinitycolor.co/api/wallet/payment-callback`
 
 #### Other Services (if applicable)
-- **OAuth providers** (Google, Facebook, etc.): Update redirect URIs to use `new.infinitycolor.co`
+- **OAuth providers** (Google, Facebook, etc.): Update redirect URIs to use `infinitycolor.co`
 - **Webhooks**: Update webhook URLs if any external services send data to your API
-- **Email service**: Update any links in email templates to use `new.infinitycolor.co`
+- **Email service**: Update any links in email templates to use `infinitycolor.co`
 
 **Action Required**: Update all third-party service callback URLs
 
@@ -277,7 +277,7 @@ server {
     ssl_certificate /path/to/old/cert/fullchain.pem;
     ssl_certificate_key /path/to/old/cert/privkey.pem;
     
-    return 301 https://new.infinitycolor.co$request_uri;
+    return 301 https://infinitycolor.co$request_uri;
 }
 
 # Redirect old backend domain
@@ -295,7 +295,7 @@ server {
 ```
 
 #### Option B: Cloudflare Page Rules
-- Create page rule: `infinitycolor.org/*` → Forward to `https://new.infinitycolor.co/$1` (301 redirect)
+- Create page rule: `infinitycolor.org/*` → Forward to `https://infinitycolor.co/$1` (301 redirect)
 - Create page rule: `api.infinitycolor.org/*` → Forward to `https://api.infinitycolor.co/$1` (301 redirect)
 
 **Action Required**: Configure 301 redirects from old domains (recommended)
@@ -342,7 +342,7 @@ Use this checklist to ensure you complete all steps:
 - [ ] **Nginx**: Update nginx configuration (if applicable)
 - [ ] **Backend Env**: Update backend environment variables
 - [ ] **Frontend Env**: Update frontend environment variables
-- [ ] **CORS**: Verify CORS allows new.infinitycolor.co
+- [ ] **CORS**: Verify CORS allows infinitycolor.co
 - [ ] **Cookies**: Update cookie domain if needed
 - [ ] **Payment Gateways**: Update callback URLs in Mellat, SnappPay, Saman
 - [ ] **OAuth**: Update OAuth redirect URIs (if applicable)
@@ -357,7 +357,7 @@ Use this checklist to ensure you complete all steps:
 ## 🆘 Troubleshooting
 
 ### Issue: CORS errors in browser console
-**Solution**: Verify that `FRONTEND_URL` environment variable in backend is set to `https://new.infinitycolor.co` and backend is restarted.
+**Solution**: Verify that `FRONTEND_URL` environment variable in backend is set to `https://infinitycolor.co` and backend is restarted.
 
 ### Issue: Payment callbacks fail
 **Solution**: Verify that payment gateway callback URLs are updated in the gateway's admin panel.
@@ -379,8 +379,8 @@ If you encounter issues during migration:
 1. Check nginx error logs: `sudo tail -f /var/log/nginx/error.log`
 2. Check application logs
 3. Verify all environment variables are set correctly
-4. Test DNS resolution: `nslookup new.infinitycolor.co`
-5. Test SSL: `openssl s_client -connect new.infinitycolor.co:443`
+4. Test DNS resolution: `nslookup infinitycolor.co`
+5. Test SSL: `openssl s_client -connect infinitycolor.co:443`
 
 ---
 

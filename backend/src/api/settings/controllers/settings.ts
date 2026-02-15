@@ -40,7 +40,7 @@ async function triggerHeroSliderRevalidation(strapi: { log: { warn: (msg: string
   const frontendUrls = [
     process.env.NEXTJS_REVALIDATION_URL,
     "https://staging.infinitycolor.org",
-    "https://new.infinitycolor.co",
+    "https://infinitycolor.co",
   ].filter(Boolean) as string[];
 
   if (frontendUrls.length === 0) {

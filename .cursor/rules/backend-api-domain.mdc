@@ -10,7 +10,7 @@ alwaysApply: false
 
 The production backend API is served at **`https://api.infinitycolor.co`**.
 
-All code fallbacks use this domain. Never use `api.new.infinitycolor.co` or `api.infinitycolor.org` for production.
+All code fallbacks use this domain. Never use `api.infinitycolor.org` or legacy domains for production; use `api.infinitycolor.co`.
 
 ## Environment Variable Override Pattern
 

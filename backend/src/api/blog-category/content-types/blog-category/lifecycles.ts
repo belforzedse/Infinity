@@ -19,7 +19,7 @@ function ensureSlug(data: Record<string, any>) {
 async function triggerBlogListingRevalidation() {
   const frontendUrls = [
     "https://staging.infinitycolor.org",
-    "https://new.infinitycolor.co",
+    "https://infinitycolor.co",
   ];
 
   const revalidationSecret = process.env.REVALIDATION_SECRET;

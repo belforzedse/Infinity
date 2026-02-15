@@ -391,7 +391,7 @@ describe("Wallet Topup Operations", () => {
         );
 
         ctx.redirect(
-          `https://new.infinitycolor.co/wallet?status=failure&state=${encodeURIComponent(
+          `https://infinitycolor.co/wallet?status=failure&state=${encodeURIComponent(
             stateNormalized
           )}`
         );
@@ -460,7 +460,7 @@ describe("Wallet Topup Operations", () => {
         );
 
         ctx.redirect(
-          "https://new.infinitycolor.co/wallet?status=failure&reason=verify"
+          "https://infinitycolor.co/wallet?status=failure&reason=verify"
         );
       }
 
@@ -526,7 +526,7 @@ describe("Wallet Topup Operations", () => {
           await strapi.entityService.update("api::wallet-topup.wallet-topup", topup.id, {
             data: { Status: "Failed" },
           });
-          ctx.redirect("https://new.infinitycolor.co/wallet?status=failure&reason=verify");
+          ctx.redirect("https://infinitycolor.co/wallet?status=failure&reason=verify");
         }
       }
 
@@ -600,7 +600,7 @@ describe("Wallet Topup Operations", () => {
         await strapi.entityService.update("api::wallet-topup.wallet-topup", topup.id, {
           data: { Status: "Failed" },
         });
-        ctx.redirect("https://new.infinitycolor.co/wallet?status=failure&reason=settle");
+        ctx.redirect("https://infinitycolor.co/wallet?status=failure&reason=settle");
       }
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(
@@ -703,7 +703,7 @@ describe("Wallet Topup Operations", () => {
         },
       });
 
-      ctx.redirect("https://new.infinitycolor.co/wallet?status=success");
+      ctx.redirect("https://infinitycolor.co/wallet?status=success");
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(
         "api::local-user-wallet.local-user-wallet",
@@ -864,7 +864,7 @@ describe("Wallet Topup Operations", () => {
 
       if (!topups || topups.length === 0) {
         ctx.redirect(
-          "https://new.infinitycolor.co/wallet?status=failure&reason=not_found"
+          "https://infinitycolor.co/wallet?status=failure&reason=not_found"
         );
       }
 

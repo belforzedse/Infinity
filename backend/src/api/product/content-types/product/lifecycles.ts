@@ -12,7 +12,7 @@ async function triggerProductRevalidation(slug: string) {
   // Hardcoded for now (TODO: move to environment variables)
   const frontendUrls = [
     "https://staging.infinitycolor.org",
-    "https://new.infinitycolor.co",
+    "https://infinitycolor.co",
   ];
 
   // Get revalidation secret from environment variable

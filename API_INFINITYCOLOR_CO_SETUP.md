@@ -78,13 +78,13 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## 4. Optional: Redirect from Old Domain
 
-If `api.new.infinitycolor.co` was previously used, add a redirect block:
+If `api.infinitycolor.co` was previously used, add a redirect block:
 
 ```nginx
 server {
     listen 80;
     listen 443 ssl http2;
-    server_name api.new.infinitycolor.co;
+    server_name api.infinitycolor.co;
     return 301 https://api.infinitycolor.co$request_uri;
 }
 ```
@@ -97,8 +97,8 @@ server {
 
 ```bash
 URL=https://api.infinitycolor.co
-FRONTEND_URL=https://new.infinitycolor.co
-FRONTEND_BASE_URL=https://new.infinitycolor.co
+FRONTEND_URL=https://infinitycolor.co
+FRONTEND_BASE_URL=https://infinitycolor.co
 
 # Payment callbacks
 SAMAN_CALLBACK_URL=https://api.infinitycolor.co/api/wallet/payment-callback
@@ -110,8 +110,8 @@ SNAPPAY_RETURN_URL=https://api.infinitycolor.co/api/orders/payment-callback
 ```bash
 NEXT_PUBLIC_API_BASE_URL=https://api.infinitycolor.co/api
 NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinitycolor.co/
-NEXT_PUBLIC_SITE_URL=https://new.infinitycolor.co
-NEXT_PUBLIC_SITE_BASE_URL=https://new.infinitycolor.co
+NEXT_PUBLIC_SITE_URL=https://infinitycolor.co
+NEXT_PUBLIC_SITE_BASE_URL=https://infinitycolor.co
 ```
 
 Environment variables take precedence over code fallbacks. Set these on the server before deploying.
@@ -148,7 +148,7 @@ Update callback URLs in each provider's dashboard:
 
 | Issue | Solution |
 |-------|----------|
-| CORS errors | Verify `FRONTEND_URL` in backend is `https://new.infinitycolor.co` and restart backend |
+| CORS errors | Verify `FRONTEND_URL` in backend is `https://infinitycolor.co` and restart backend |
 | Payment callbacks fail | Verify Mellat, SnappPay, Saman callback URLs in their admin panels |
 | Images don't load | Verify `NEXT_PUBLIC_IMAGE_BASE_URL` is `https://api.infinitycolor.co/` in frontend env |
 | 404 for API calls | Verify `NEXT_PUBLIC_API_BASE_URL` is `https://api.infinitycolor.co/api` in frontend env |

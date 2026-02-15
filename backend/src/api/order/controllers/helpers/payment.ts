@@ -3,7 +3,7 @@ import { consumeOrderReservation, releaseOrderReservation } from "../../../../ut
 import { logAdminActivity } from "../../../../utils/adminActivity";
 import { decrementStockAtomic } from "../../../cart/services/lib/stock";
 const getFrontendBaseUrl = () =>
-  (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://new.infinitycolor.co").replace(
+  (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://infinitycolor.co").replace(
     /\/$/,
     "",
   );

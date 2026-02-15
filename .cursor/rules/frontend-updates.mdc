@@ -16,7 +16,7 @@ This note documents several UX and infrastructure adjustments so future contribu
 
 ## Wallet Callback Domain
 - `backend/main.env` now sets `FRONTEND_URL=https://infinitycolor.org`.
-- Backend wallet callbacks (e.g., `wallet-topup` controller) redirect to this domain; do not reintroduce `new.infinitycolor.org`.
+- Backend wallet callbacks (e.g., `wallet-topup` controller) redirect to this domain; do not reintroduce legacy frontend domains (e.g. new.infinitycolor.co).
 - Frontend wallet page listens for `?status=success|failure|pending` (plus `reason`/`code`) and shows a dismissible banner. Any future callback should keep using these query params for consistency.
 
 ## Super-Admin Product Media Uploads
