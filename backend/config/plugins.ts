@@ -1,4 +1,9 @@
-export default () => ({
+export default ({ env }) => ({
+  documentation: {
+    // The documentation plugin writes generated JSON into /src on startup.
+    // Disable by default in production to avoid filesystem permission issues.
+    enabled: env.bool("STRAPI_ENABLE_DOCUMENTATION", env("NODE_ENV") !== "production"),
+  },
   "rest-cache": {
     config: {
       provider: {

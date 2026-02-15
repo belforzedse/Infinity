@@ -13,7 +13,6 @@ export default [
   {
     name: "strapi::cors",
     config: {
-      enabled: true,
       origin: corsOrigins,
       credentials: true,
     },

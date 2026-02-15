@@ -423,16 +423,15 @@ export default {
    * This gives you an opportunity to extend code.
    */
   register({ strapi }) {
-    if (strapi.plugin("documentation")) {
-      strapi
-        .plugin("documentation")
-        .service("override")
-        .registerOverride(override, {});
+    try {
+      const documentationPlugin = strapi.plugin("documentation");
+      if (!documentationPlugin) return;
 
-      strapi
-        .plugin("documentation")
-        .service("override")
-        .registerOverride(localUserOverride, {});
+      const overrideService = documentationPlugin.service("override");
+      overrideService.registerOverride(override, {});
+      overrideService.registerOverride(localUserOverride, {});
+    } catch {
+      strapi.log.debug("Documentation plugin is disabled; skipping documentation overrides.");
     }
   },
 
