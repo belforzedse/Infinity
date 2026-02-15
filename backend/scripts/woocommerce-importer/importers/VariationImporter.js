@@ -478,10 +478,16 @@ class VariationImporter {
       : "variation-import-imported-progress.json";
     const activeNameFilter = Array.isArray(nameFilter) ? nameFilter : [];
 
-    const productIds = Array.from(this.productMappingCache.keys())
+    let productIds = Array.from(this.productMappingCache.keys())
       .map((id) => Number.parseInt(id, 10))
-      .filter((id) => Number.isFinite(id))
-      .sort((a, b) => a - b);
+      .filter((id) => Number.isFinite(id));
+
+    if (!missingOnly) {
+      productIds = this.getProductIdsSortedByOldestVariation();
+      this.logger.info(`📅 Update-all: products ordered by oldest variation first`);
+    } else {
+      productIds.sort((a, b) => a - b);
+    }
 
     if (productIds.length === 0) {
       this.logger.info(`📂 No imported products found in mapping cache`);
@@ -682,11 +688,15 @@ class VariationImporter {
           perVariationPage,
         );
 
-        const variations = Array.isArray(variationResult.data) ? variationResult.data : [];
+        let variations = Array.isArray(variationResult.data) ? variationResult.data : [];
 
         if (variations.length === 0) {
           hasMoreVariations = false;
           break;
+        }
+
+        if (!missingOnly) {
+          variations = this.sortVariationsByOldestFirst(variations);
         }
 
         for (const variation of variations) {
@@ -766,6 +776,63 @@ class VariationImporter {
     }
 
     this.logger.info(`📂 Loaded ${this.productMappingCache.size} product mappings`);
+  }
+
+  /**
+   * Get product IDs sorted by oldest variation first (by variation importedAt).
+   * Used in update-all mode so variations added longest ago are updated first.
+   * Products with no variation mappings are ordered by product importedAt, then at end.
+   */
+  getProductIdsSortedByOldestVariation() {
+    const productIds = Array.from(this.productMappingCache.keys())
+      .map((id) => Number.parseInt(id, 10))
+      .filter((id) => Number.isFinite(id));
+
+    const variationMappings = this.duplicateTracker.getAllMappings("variations");
+    const productMappings = this.duplicateTracker.getAllMappings("products");
+
+    const productOldestVariationAt = new Map();
+    for (const productId of productIds) {
+      let oldest = null;
+      for (const [wcVariationId, mapping] of Object.entries(variationMappings)) {
+        const mappingProductId =
+          typeof mapping.productId === "number"
+            ? mapping.productId
+            : Number.parseInt(mapping.productId, 10);
+        if (mappingProductId === productId && mapping.importedAt) {
+          if (oldest == null || mapping.importedAt < oldest) {
+            oldest = mapping.importedAt;
+          }
+        }
+      }
+      if (oldest == null) {
+        const pm = productMappings[productId.toString()];
+        oldest = pm && pm.importedAt ? pm.importedAt : "9999-12-31T23:59:59.999Z";
+      }
+      productOldestVariationAt.set(productId, oldest);
+    }
+
+    return productIds.slice().sort((a, b) => {
+      const dateA = productOldestVariationAt.get(a) || "9999-12-31T23:59:59.999Z";
+      const dateB = productOldestVariationAt.get(b) || "9999-12-31T23:59:59.999Z";
+      return dateA.localeCompare(dateB);
+    });
+  }
+
+  /**
+   * Sort variations array so oldest-imported (by mapping importedAt) come first.
+   * Variations not in the mapping are placed at the end.
+   */
+  sortVariationsByOldestFirst(variations) {
+    const variationMap = this.duplicateTracker.ensureMapping("variations");
+    const fallback = "9999-12-31T23:59:59.999Z";
+    return variations.slice().sort((a, b) => {
+      const mapA = variationMap.get(a.id.toString());
+      const mapB = variationMap.get(b.id.toString());
+      const dateA = (mapA && mapA.importedAt) || fallback;
+      const dateB = (mapB && mapB.importedAt) || fallback;
+      return dateA.localeCompare(dateB);
+    });
   }
 
   /**

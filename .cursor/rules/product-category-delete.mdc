@@ -1,0 +1,63 @@
+---
+description: Product category delete flow with product reassignment. Use when implementing or modifying category deletion in super-admin.
+globs:
+alwaysApply: false
+---
+# Product Category Delete with Reassignment
+
+## Overview
+
+Super-admins can delete product categories from the categories page. When a category has products, the admin must select a target category to reassign those products to before deletion proceeds.
+
+## Backend
+
+### Custom Endpoint
+
+- **Route:** `POST /product-categories/:id/delete-with-reassign`
+- **Auth:** Superadmin only (JWT + role-based policy)
+- **Body:** `{ targetCategoryId: number }`
+
+### Controller Logic (product-category controller)
+
+1. Validate category and target exist; target must differ from source
+2. **Block deletion** if the category has child categories (admin must delete children first)
+3. Reassign products:
+   - `product_main_category` → set to `targetCategoryId` for all products with main category = id
+   - `product_other_categories` → remove this category from the list for any product that has it
+4. Delete `product_category_contents` linked to this category
+5. Delete the category
+
+### Product–Category Relations
+
+- **product_main_category** (manyToOne): each product has one main category
+- **product_other_categories** (manyToMany): products can be in multiple categories
+
+Products with the deleted category as main or in other categories are updated accordingly before the category is removed.
+
+## Frontend
+
+### DeleteCategoryModal
+
+- **Location:** `frontend/src/components/SuperAdmin/DeleteCategoryModal.tsx`
+- Fetches all categories via `getAllCategories`, excludes the category being deleted
+- User must select a target category from the dropdown before confirming
+- Disabled when no other categories exist (cannot delete the last category)
+
+### Categories Page Integration
+
+- Delete button on `ParentCategoryCard` and `ChildCategoryCard` (table.tsx)
+- `getCategoryColumns(onDelete)` and `MobileTable({ data, onDelete })` accept optional `onDelete` callback
+- Page state: `deleteModalCategory`, `isDeleting`
+- On success: toast, close modal, trigger `refreshTable` atom
+
+### Delete Service
+
+- **File:** `frontend/src/services/super-admin/product/category/delete.ts`
+- Signature: `deleteCategory(id: string, targetCategoryId: number): Promise<DeleteCategoryResult>`
+- Calls `POST /product-categories/:id/delete-with-reassign` with body `{ targetCategoryId }`
+
+## Error Messages
+
+- **Category has children:** "امکان حذف دسته‌بندی دارای فرزند وجود ندارد. ابتدا دسته‌های فرزند را حذف کنید."
+- **Target = source:** "Target category must differ from the category being deleted"
+- **Target not found:** "Target category not found"

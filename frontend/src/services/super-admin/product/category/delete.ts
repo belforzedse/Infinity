@@ -1,29 +1,19 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS } from "@/constants/api";
-import type { PaginatedResponse } from "@/types/api";
 
-export interface CategoryAttributes {
-  Title: string;
-  Slug: string;
-  Parent?: string;
-  createdAt: string;
-  updatedAt: string;
+export interface DeleteCategoryResult {
+  success: boolean;
+  reassignedCount: number;
 }
 
-interface Item {
-  id: number;
-  attributes: CategoryAttributes;
-}
-
-export const deleteCategory = async (id: string): Promise<PaginatedResponse<Item>> => {
-  try {
-    const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}`;
-    //const accessToken = localStorage.getItem("accessToken");
-
-    const response = await apiClient.delete<PaginatedResponse<Item>>(endpoint);
-    return response.data;
-  } catch (error) {
-    console.error("Error deleting category:", error);
-    throw error;
-  }
+export const deleteCategory = async (
+  id: string,
+  targetCategoryId: number,
+): Promise<DeleteCategoryResult> => {
+  const endpoint = `${ENDPOINTS.PRODUCT.CATEGORY}/${id}/delete-with-reassign`;
+  const response = await apiClient.post<{ data: DeleteCategoryResult }>(endpoint, {
+    targetCategoryId,
+  });
+  const res = response.data as { data?: DeleteCategoryResult };
+  return (res?.data ?? res) as DeleteCategoryResult;
 };

@@ -602,6 +602,24 @@
     "status": "publish",
     "rating": "0.00"
   },
+  "693062": {
+    "strapiId": 2107,
+    "importedAt": "2026-02-15T08:40:42.496Z",
+    "name": "تونیک OppsiR00480",
+    "slug": "oppsir00480-tonic",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "693968": {
+    "strapiId": 2110,
+    "importedAt": "2026-02-15T08:39:42.425Z",
+    "name": "کراپ کبریتی R00503",
+    "slug": "match-crop-r00503",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
   "695317": {
     "strapiId": 2108,
     "importedAt": "2026-02-15T08:39:21.968Z",
@@ -616,6 +634,24 @@
     "importedAt": "2026-02-15T08:39:29.572Z",
     "name": "شال لبه مرواریدی حریر OppsiS00266",
     "slug": "oppsis00266-silk-pearl-edge-shawl",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "701836": {
+    "strapiId": 2111,
+    "importedAt": "2026-02-15T08:41:05.991Z",
+    "name": "شال کنفی s00326",
+    "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d9%81%da%a9%db%8c-s00326",
+    "type": "variable",
+    "status": "publish",
+    "rating": "0.00"
+  },
+  "704843": {
+    "strapiId": 2112,
+    "importedAt": "2026-02-15T08:41:22.010Z",
+    "name": "شلوار کتان مام فیت R00548",
+    "slug": "mom-fit-r00548-linen-pants",
     "type": "variable",
     "status": "publish",
     "rating": "0.00"

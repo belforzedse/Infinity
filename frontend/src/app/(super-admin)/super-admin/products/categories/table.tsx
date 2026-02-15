@@ -6,6 +6,7 @@ import Modal from "@/components/Kits/Modal";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 import Link from "next/link";
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const CATEGORY_IMAGE_PLACEHOLDER =
@@ -112,7 +113,15 @@ const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
+type OnDeleteCategory = (category: { id: string | number; title: string }) => void;
+
+const ChildCategoryCard = ({
+  child,
+  onDelete,
+}: {
+  child: CategoryChild;
+  onDelete?: OnDeleteCategory;
+}) => {
   const colorValue = normalizeHexColor(child.attributes?.Color);
   const imageSrc = resolveCategoryImageSrc(child.attributes?.Image);
   const imageAlt =
@@ -148,13 +157,31 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
             <p className="truncate font-mono text-[10px] text-slate-400">
               {child.attributes?.Slug || "بدون نامک"}
             </p>
-            <Link
-              href={`/super-admin/products/categories/edit/${child.id}`}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
-              aria-label="ویرایش دسته‌بندی فرزند"
-            >
-              <EditIcon />
-            </Link>
+            <div className="flex items-center gap-1">
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onDelete({
+                      id: child.id,
+                      title: child.attributes?.Title || "Unnamed",
+                    });
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100"
+                  aria-label="حذف دسته‌بندی فرزند"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <Link
+                href={`/super-admin/products/categories/edit/${child.id}`}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+                aria-label="ویرایش دسته‌بندی فرزند"
+              >
+                <EditIcon />
+              </Link>
+            </div>
           </div>
 
           <div className="min-w-0">
@@ -179,7 +206,13 @@ const ChildCategoryCard = ({ child }: { child: CategoryChild }) => {
   );
 };
 
-const ParentCategoryCard = ({ category }: { category: Category }) => {
+const ParentCategoryCard = ({
+  category,
+  onDelete,
+}: {
+  category: Category;
+  onDelete?: OnDeleteCategory;
+}) => {
   const [isChildrenModalOpen, setIsChildrenModalOpen] = useState(false);
   const childCategories = getChildCategories(category);
   const hasChildren = childCategories.length > 0;
@@ -251,6 +284,21 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
               >
                 <ChevronRightIcon />
               </button>
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onDelete({
+                      id: category.id,
+                      title: category.attributes?.Title || "Unnamed",
+                    })
+                  }
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100"
+                  aria-label="حذف دسته‌بندی"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
               <Link
                 href={`/super-admin/products/categories/edit/${category.id}`}
                 className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
@@ -272,7 +320,11 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
         {hasChildren ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {childCategories.map((child) => (
-              <ChildCategoryCard key={child.id} child={child} />
+              <ChildCategoryCard
+                key={child.id}
+                child={child}
+                onDelete={onDelete}
+              />
             ))}
           </div>
         ) : (
@@ -283,7 +335,9 @@ const ParentCategoryCard = ({ category }: { category: Category }) => {
   );
 };
 
-export const getCategoryColumns = (): ColumnDef<Category>[] => [
+export const getCategoryColumns = (
+  onDelete?: OnDeleteCategory,
+): ColumnDef<Category>[] => [
   {
     accessorKey: "attributes.Title",
     header: "دسته‌بندی",
@@ -291,20 +345,27 @@ export const getCategoryColumns = (): ColumnDef<Category>[] => [
       cellClassName: "p-0",
     },
     cell: ({ row }) => {
-      return <ParentCategoryCard category={row.original} />;
+      return <ParentCategoryCard category={row.original} onDelete={onDelete} />;
     },
   },
 ];
 
 type Props = {
   data: Category[] | undefined;
+  onDelete?: OnDeleteCategory;
 };
 
-export const MobileTable = ({ data }: Props) => {
+export const MobileTable = ({ data, onDelete }: Props) => {
   return (
     <div className="space-y-4">
       {data?.map((row) => {
-        return <ParentCategoryCard key={row.id} category={row} />;
+        return (
+          <ParentCategoryCard
+            key={row.id}
+            category={row}
+            onDelete={onDelete}
+          />
+        );
       })}
     </div>
   );
