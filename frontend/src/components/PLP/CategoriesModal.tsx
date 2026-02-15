@@ -71,7 +71,8 @@ export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProp
                       return (
                         <Link
                           key={category.id}
-                          href={{ pathname: "/plp", query: { category: category.slug } }}
+                          href={`/plp?category=${encodeURIComponent(category.slug)}`}
+                          prefetch={false}
                           onClick={onClose}
                           className="flex flex-col items-center gap-2"
                         >

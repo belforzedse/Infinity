@@ -16,12 +16,12 @@ export default function PLPHeaderDesktopNav() {
   const pathname = usePathname();
   const params = useSearchParams();
 
-  // Transform navigation items to NavItem format
+  // Transform navigation items to NavItem format (encode slug for correct query parsing)
   const navItems: NavItem[] = [
     { label: "خانه", href: "/" },
     ...navigation.map((item) => ({
       label: item.title,
-      href: `/plp?category=${item.slug}`,
+      href: `/plp?category=${encodeURIComponent(item.slug)}`,
       hasDropdown: false,
     })),
   ];
@@ -57,6 +57,7 @@ export default function PLPHeaderDesktopNav() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={item.href === "/"}
               aria-current={isActive ? "page" : undefined}
               className={[
                 "pressable text-sm flex items-center underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",

@@ -52,12 +52,12 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
     },
   );
 
-  // Transform navigation items to MenuItem format
+  // Transform navigation items to MenuItem format (encode slug for correct query parsing)
   const menuItems: MenuItem[] = [
     { label: "خانه", href: "/" },
     ...navigation.map((item) => ({
       label: item.title,
-      href: `/plp?category=${item.slug}`,
+      href: `/plp?category=${encodeURIComponent(item.slug)}`,
     })),
   ];
 
@@ -142,6 +142,7 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                             <Link
                               key={item.href}
                               href={item.href}
+                              prefetch={false}
                               className="relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-pink-50"
                               onClick={onClose}
                             >

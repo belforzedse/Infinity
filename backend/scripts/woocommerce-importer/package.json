@@ -19,6 +19,7 @@
     "variations-dedup": "node dedup-variations-by-external-id.js",
     "products-dedup": "node dedup-variations-by-external-id.js --products-only",
     "full-dedup": "node dedup-variations-by-external-id.js --full",
+    "publish-all-variations": "node publish-all-variations.js",
     "orders": "node index.js orders",
     "orders-all": "node index.js orders --all --batch-size 50",
     "users": "node index.js users",

@@ -182,7 +182,8 @@ const PLPBottomNavigation = () => {
                   return (
                     <Link
                       key={category.id}
-                      href={{ pathname: "/plp", query: { category: category.slug } }}
+                      href={`/plp?category=${encodeURIComponent(category.slug)}`}
+                      prefetch={false}
                       onClick={closeCategories}
                       className="flex flex-col items-center gap-2"
                     >

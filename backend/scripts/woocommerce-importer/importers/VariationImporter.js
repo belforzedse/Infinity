@@ -913,12 +913,16 @@ class VariationImporter {
         return { isDryRun: true, mode, data: strapiVariation };
       }
 
-      await this.createVariationAttributes(wcVariation, strapiVariation);
+      const skipDefaultAttributes = Boolean(existingStrapiId);
+      await this.createVariationAttributes(wcVariation, strapiVariation, {
+        skipDefaultAttributes,
+      });
 
       let variationId = existingStrapiId;
       let mode = "create";
 
       if (existingStrapiId) {
+        // Full payload: Price, DiscountPrice, SKU, IsPublished, product, attributes (color/size/model)
         await this.strapiClient.updateProductVariation(existingStrapiId, strapiVariation);
         variationId = existingStrapiId;
         mode = "update";
@@ -1016,8 +1020,9 @@ class VariationImporter {
 
   /**
    * Create variation attributes (color, size, model)
+   * @param {object} options - Optional: { skipDefaultAttributes: true } to skip adding default color (e.g. when only updating stock on existing variations)
    */
-  async createVariationAttributes(wcVariation, strapiVariation) {
+  async createVariationAttributes(wcVariation, strapiVariation, options = {}) {
     const presentAttributes = new Set();
 
     if (Array.isArray(wcVariation.attributes)) {
@@ -1051,14 +1056,19 @@ class VariationImporter {
       }
     }
 
-    await this.addDefaultAttributes(strapiVariation, presentAttributes, wcVariation.id);
+    await this.addDefaultAttributes(strapiVariation, presentAttributes, wcVariation.id, options);
   }
 
   /**
    * Add default attributes for types not present in WooCommerce data
-   * Note: Default size and model creation has been removed - only color defaults are added
+   * Note: Default size and model creation has been removed - only color defaults are added.
+   * When options.skipDefaultAttributes is true (e.g. update-existing mode), default color is not added so only stock/price etc. are updated.
    */
-  async addDefaultAttributes(strapiVariation, presentAttributes, variationId) {
+  async addDefaultAttributes(strapiVariation, presentAttributes, variationId, options = {}) {
+    if (options.skipDefaultAttributes) {
+      return;
+    }
+
     const defaultAttrs = this.config.import.defaults.variationAttributes;
 
     if (!presentAttributes.has("color") && !strapiVariation.product_variation_color) {

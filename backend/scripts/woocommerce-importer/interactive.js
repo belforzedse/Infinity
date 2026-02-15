@@ -824,7 +824,8 @@ async function runUpdateAllVariations() {
   console.log(
     "This will scan all imported products and process every variation:\n" +
       "  • Create variations that are not yet in Strapi\n" +
-      "  • Update existing variations (price, stock, attributes, etc.)\n",
+      "  • Update existing variations: Price, DiscountPrice, SKU, IsPublished,\n" +
+      "    color/size/model attributes, and stock quantity from WooCommerce.\n",
   );
 
   const limitInput = await prompt("Limit variations to process this run (default: 50000, or 0 for no limit): ");
