@@ -16,8 +16,10 @@ The backend uses **strapi-plugin-rest-cache** (v4) to cache REST responses in me
 
 ## Cached content types
 
-- Static: footer, navigation, product-category (and related), product-size-helper, product-tag, variation colors/models/sizes, shipping (and cities/provinces).
-- Semi-dynamic (5 min acceptable): product, product-variation, product-faq, product-review*, discount, general-discount.
+All listed below are **semi-dynamic**: same 5 min TTL and invalidation on content update.
+
+- Footer, navigation, product-category (and related), product-size-helper, product-tag, variation colors/models/sizes, shipping (and cities/provinces).
+- Product, product-variation, product-faq, product-review*, discount, general-discount.
 
 Cart, order, stock, wallet, address, and transaction APIs are **not** cached.
 
