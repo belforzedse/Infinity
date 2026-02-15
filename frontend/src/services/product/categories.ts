@@ -112,7 +112,7 @@ function dedupeCategoriesById(categories: ProductCategorySummary[]): ProductCate
   for (const c of categories) {
     if (!byId.has(c.id)) byId.set(c.id, c);
   }
-  return [...byId.values()];
+  return Array.from(byId.values());
 }
 
 export async function getProductCategories(
