@@ -7,6 +7,19 @@ import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
 import { validateBlogSlug, generateUniqueBlogSlug } from "../../../utils/slugValidation";
 import { enrichBlogPostsWithAuthorNames } from "../../../utils/blog-helpers";
 import { normalizePopulateQuery } from "../../../utils/normalizePopulate";
+import {
+  buildCacheKey,
+  getCacheTtlFromEnv,
+  isCacheDebugHeaderEnabled,
+  shouldBypassEndpointCache,
+  withCache,
+  type CacheStatus,
+} from "../../../utils/responseCache";
+
+function setCacheHeaderIfEnabled(ctx: any, status: CacheStatus) {
+  if (!isCacheDebugHeaderEnabled()) return;
+  ctx.set("X-Backend-Cache", status);
+}
 
 const blogPostController = factories.createCoreController("api::blog-post.blog-post" as any, ({ strapi }: { strapi: any }) => ({
   ensureDefaultPopulate(ctx: any, _populate?: any) {
@@ -219,10 +232,10 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
 
     // Increment view count for published posts (only for non-admin users)
     if (post.Status === "Published" && !hasEditorRole) {
-      const currentViewCount = post.ViewCount || 0;
-      await strapi.entityService.update("api::blog-post.blog-post", id, {
-        data: { ViewCount: currentViewCount + 1 },
-      });
+      const viewService = strapi.service("api::product-view.product-view") as {
+        queueBlogPostView: (blogPostId: number) => Promise<void>;
+      };
+      void viewService.queueBlogPostView(Number(id));
     }
 
     return { data: post };
@@ -359,23 +372,69 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
   // Get post by slug
   async findBySlug(ctx: any) {
     const { slug } = ctx.params;
-    const user = (await (this as any).resolveUserFromAuthHeader(ctx)) || ctx.state.user;
+    const bypassCache = shouldBypassEndpointCache(ctx.request?.headers as Record<string, unknown>);
 
+    const populate = {
+      blog_category: true,
+      blog_tags: true,
+      blog_author: {
+        populate: {
+          Avatar: true,
+        },
+      },
+      FeaturedImage: true,
+    };
+
+    if (!bypassCache) {
+      const cacheKey = buildCacheKey({
+        routeId: "blog-post.by-slug",
+        params: { slug },
+        query: ctx.query || {},
+        locale: String(ctx.query?.locale || ""),
+        authSegment: "anon",
+      });
+
+      const cachedPayload = await withCache(
+        {
+          key: cacheKey,
+          ttlSec: getCacheTtlFromEnv("CACHE_TTL_BLOG_SLUG_SEC", 120),
+          bypass: false,
+          onStatus: (status) => setCacheHeaderIfEnabled(ctx, status),
+          shouldCacheValue: (value) => Boolean((value as any)?.data),
+        },
+        async () => {
+          const posts = await strapi.entityService.findMany("api::blog-post.blog-post", {
+            filters: { Slug: slug, Status: "Published" },
+            populate,
+            limit: 1,
+          });
+
+          const post = posts[0];
+          if (!post) return null;
+          return { data: post };
+        },
+      );
+
+      if (!cachedPayload?.data) {
+        return ctx.notFound("Post not found");
+      }
+
+      const viewService = strapi.service("api::product-view.product-view") as {
+        queueBlogPostView: (blogPostId: number) => Promise<void>;
+      };
+      void viewService.queueBlogPostView(Number(cachedPayload.data.id));
+
+      return cachedPayload;
+    }
+
+    const user = (await (this as any).resolveUserFromAuthHeader(ctx)) || ctx.state.user;
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
     const posts = await strapi.entityService.findMany("api::blog-post.blog-post", {
       filters: { Slug: slug },
-      populate: {
-        blog_category: true,
-        blog_tags: true,
-        blog_author: {
-          populate: {
-            Avatar: true,
-          },
-        },
-        FeaturedImage: true,
-      },
+      populate,
+      limit: 1,
     });
 
     const post = posts[0];
@@ -384,19 +443,18 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
       return ctx.notFound("Post not found");
     }
 
-    // If not Editor+ and post is not published, deny access
     if (!hasEditorRole && post.Status !== "Published") {
       return ctx.notFound("Post not found");
     }
 
-    // Increment view count for published posts (only for non-admin users)
     if (post.Status === "Published" && !hasEditorRole) {
-      const currentViewCount = post.ViewCount || 0;
-      await strapi.entityService.update("api::blog-post.blog-post", post.id, {
-        data: { ViewCount: currentViewCount + 1 },
-      });
+      const viewService = strapi.service("api::product-view.product-view") as {
+        queueBlogPostView: (blogPostId: number) => Promise<void>;
+      };
+      void viewService.queueBlogPostView(Number(post.id));
     }
 
+    setCacheHeaderIfEnabled(ctx, "BYPASS");
     return { data: post };
   }
 }));

@@ -3,19 +3,23 @@ import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Reveal from "@/components/Reveal";
 import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
+import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import {
   getHomepageSections,
   getFeaturedCategoryProductsByRating,
 } from "@/services/product/homepage";
 import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
+import type { ProductCategorySummary } from "@/services/product/categories";
 
 /** Streamed block: heavy product sections so shell can send first and reduce server blocking. */
 export default async function HomeProductSections({
   featuredCategorySlug,
   featuredCategoryBannerImage,
+  mainCategories,
 }: {
   featuredCategorySlug: string;
   featuredCategoryBannerImage: string;
+  mainCategories: ProductCategorySummary[];
 }) {
   const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts] =
     await Promise.all([
@@ -58,6 +62,12 @@ export default async function HomeProductSections({
               products={discounted}
             />
           </Reveal>
+        </section>
+      )}
+
+      {mainCategories.length > 0 && (
+        <section className="space-y-6">
+          <CategoryCarousel categories={mainCategories} />
         </section>
       )}
 

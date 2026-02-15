@@ -3,11 +3,12 @@ import { getProductCategories, type ProductCategorySummary } from "@/services/pr
 
 interface UseProductCategoriesOptions {
   parentOnly?: boolean;
+  mainOnly?: boolean;
   initial?: ProductCategorySummary[];
 }
 
 export const useProductCategories = (options: UseProductCategoriesOptions = {}) => {
-  const { parentOnly = false, initial } = options;
+  const { parentOnly = false, mainOnly = false, initial } = options;
   const [categories, setCategories] = useState<ProductCategorySummary[]>(initial ?? []);
   const [isLoading, setIsLoading] = useState(!initial);
 
@@ -18,7 +19,7 @@ export const useProductCategories = (options: UseProductCategoriesOptions = {}) 
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
-        const data = await getProductCategories({ parentOnly });
+        const data = await getProductCategories({ parentOnly, mainOnly });
         if (!isMounted) return;
         setCategories(data);
       } catch (error) {
@@ -35,7 +36,7 @@ export const useProductCategories = (options: UseProductCategoriesOptions = {}) 
     return () => {
       isMounted = false;
     };
-  }, [initial, parentOnly]);
+  }, [initial, parentOnly, mainOnly]);
 
   return { categories, isLoading };
 };

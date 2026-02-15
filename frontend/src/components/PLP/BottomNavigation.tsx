@@ -17,7 +17,7 @@ const PLPBottomNavigation = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
-  const { categories, isLoading: isLoadingCategories } = useProductCategories({ parentOnly: true });
+  const { categories, isLoading: isLoadingCategories } = useProductCategories({ mainOnly: true });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);

@@ -1811,6 +1811,7 @@ export interface ApiProductCategoryProductCategory extends Schema.CollectionType
     external_id: Attribute.String;
     external_source: Attribute.String;
     Image: Attribute.Media<"images">;
+    isMainCategory: Attribute.Boolean & Attribute.DefaultTo<false>;
     parent: Attribute.Relation<
       "api::product-category.product-category",
       "manyToOne",

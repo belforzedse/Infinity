@@ -16,7 +16,6 @@ import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
-import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import HomePromoBanners from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
@@ -67,7 +66,7 @@ function ProductSectionsFallback() {
 export default async function Home() {
   const [latestBlogPosts, parentCategories, homepageSettings] = await Promise.all([
     getLatestBlogPosts(),
-    getProductCategories({ parentsWithChildrenOnly: true, sort: "Title:asc" }),
+    getProductCategories({ mainOnly: true, sort: "Title:asc" }),
     getPublicSuperAdminSettings(),
   ]);
 
@@ -146,14 +145,9 @@ export default async function Home() {
         <HomeProductSections
           featuredCategorySlug={featuredCategorySlug}
           featuredCategoryBannerImage={featuredCategoryBannerImage}
+          mainCategories={parentCategories}
         />
       </Suspense>
-
-      {parentCategories.length > 0 && (
-        <section className="space-y-6">
-          <CategoryCarousel categories={parentCategories} />
-        </section>
-      )}
 
       {hasPromoBanners && (
         <section>

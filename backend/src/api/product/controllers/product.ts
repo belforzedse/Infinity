@@ -4,6 +4,14 @@
 
 import { factories } from "@strapi/strapi";
 import { roleIsAllowed, MANAGEMENT_ROLES } from "../../../utils/roles";
+import {
+  buildCacheKey,
+  getCacheTtlFromEnv,
+  isCacheDebugHeaderEnabled,
+  shouldBypassEndpointCache,
+  withCache,
+  type CacheStatus,
+} from "../../../utils/responseCache";
 
 /**
  * Check if the user is an admin (superadmin, store manager, or editor)
@@ -35,6 +43,19 @@ function isAdminUser(user: any): boolean {
   }
 
   return false;
+}
+
+function readProductStatus(product: any): string | undefined {
+  return product?.attributes?.Status || product?.Status;
+}
+
+function readProductRemovedAt(product: any): string | null | undefined {
+  return product?.attributes?.removedAt || product?.removedAt;
+}
+
+function setCacheHeaderIfEnabled(ctx: any, status: CacheStatus) {
+  if (!isCacheDebugHeaderEnabled()) return;
+  ctx.set("X-Backend-Cache", status);
 }
 
 const PRODUCT_POPULATE = {
@@ -71,6 +92,108 @@ const PRODUCT_POPULATE = {
     },
   },
 } as const;
+
+async function findProductBySlugInternal(
+  strapi: any,
+  decodedSlug: string,
+  isAdmin: boolean,
+): Promise<any | null> {
+  const filters: any = {
+    Slug: decodedSlug,
+    removedAt: { $null: true },
+  };
+
+  if (!isAdmin) {
+    filters.Status = "Active";
+  }
+
+  let products = await strapi.entityService.findMany("api::product.product", {
+    filters,
+    populate: PRODUCT_POPULATE,
+    pagination: { limit: 1 },
+  });
+
+  let product = (products as unknown[])[0] || null;
+
+  if (!product) {
+    strapi.log.info(
+      `[Product.findBySlug] No exact match for slug: "${decodedSlug}", trying raw SQL query...`,
+    );
+    try {
+      const knex = strapi.db.connection;
+      let rawQuery = knex("products").where("slug", decodedSlug).whereNull("removed_at");
+
+      if (!isAdmin) {
+        rawQuery = rawQuery.where("status", "Active");
+      }
+
+      const rawProducts = await rawQuery.limit(1);
+      if (rawProducts.length > 0) {
+        const productId = rawProducts[0].id;
+        const foundFilters: any = { id: productId };
+
+        if (!isAdmin) {
+          foundFilters.Status = "Active";
+        }
+
+        const foundProducts = await strapi.entityService.findMany("api::product.product", {
+          filters: foundFilters,
+          populate: PRODUCT_POPULATE,
+          pagination: { limit: 1 },
+        });
+        product = (foundProducts as unknown[])[0] || null;
+        if (product) {
+          strapi.log.info(`[Product.findBySlug] Found product via raw SQL query: ${productId}`);
+        }
+      }
+    } catch (sqlError) {
+      strapi.log.warn("[Product.findBySlug] Raw SQL query failed:", sqlError);
+    }
+  }
+
+  if (!product) {
+    strapi.log.info(
+      `[Product.findBySlug] No product found with slug: "${decodedSlug}", trying ID fallback...`,
+    );
+
+    const idMatch = decodedSlug.match(/^\d+$/);
+    if (idMatch) {
+      const productId = parseInt(decodedSlug, 10);
+      strapi.log.info(`[Product.findBySlug] Attempting ID-based lookup for product ID: ${productId}`);
+
+      const idFilters: any = {
+        id: productId,
+        removedAt: { $null: true },
+      };
+
+      if (!isAdmin) {
+        idFilters.Status = "Active";
+      }
+
+      const productsById = await strapi.entityService.findMany("api::product.product", {
+        filters: idFilters,
+        populate: PRODUCT_POPULATE,
+        pagination: { limit: 1 },
+      });
+
+      const productById = (productsById as unknown[])[0] || null;
+      if (productById) {
+        strapi.log.info(`[Product.findBySlug] Found product by ID: ${productId}`);
+        return productById;
+      }
+
+      strapi.log.warn(
+        `[Product.findBySlug] Product with ID ${productId} not found or is trashed`,
+      );
+    } else {
+      strapi.log.warn(
+        `[Product.findBySlug] Slug "${decodedSlug}" is not numeric, cannot use ID fallback`,
+      );
+    }
+  }
+
+  return product;
+}
 
 export default factories.createCoreController(
   "api::product.product",
@@ -115,10 +238,9 @@ export default factories.createCoreController(
 
     async find(ctx, next) {
       // @ts-expect-error Strapi controller typings require two args; we only need ctx for filtering
-      const filtersApplied = this.applyPublicProductFilters(ctx);
+      this.applyPublicProductFilters(ctx);
       const response = await (super.find as any)(ctx, next);
 
-      // Super admin paths are allowed; public already filtered
       return response;
     },
 
@@ -132,22 +254,22 @@ export default factories.createCoreController(
       }
 
       const product = response?.data;
-      const status = product?.attributes?.Status;
-      const removedAt = product?.attributes?.removedAt;
+      const status = readProductStatus(product);
+      const removedAt = readProductRemovedAt(product);
       if (status !== "Active" || removedAt) {
         return ctx.notFound("Product not found");
       }
 
-      // Increment view count for non-admin users viewing Active products
       const user = ctx.state.user;
       const isAdmin = isAdminUser(user);
       if (!isAdmin && status === "Active" && product?.id) {
         try {
-          const productViewService = strapi.service("api::product-view.product-view");
-          await productViewService.incrementProductView(product.id);
+          const productViewService = strapi.service("api::product-view.product-view") as {
+            queueProductView: (productId: number) => Promise<void>;
+          };
+          void productViewService.queueProductView(product.id);
         } catch (viewError) {
-          // Log error but don't fail the request
-          strapi.log.warn("[Product.findOne] Failed to increment view count:", viewError);
+          strapi.log.warn("[Product.findOne] Failed to queue view count increment:", viewError);
         }
       }
 
@@ -167,25 +289,44 @@ export default factories.createCoreController(
           return ctx.badRequest("Search query (q) is required");
         }
 
-        // Check if user is admin - admins can see all products including drafts
         const user = ctx.state.user;
         const isAdmin = isAdminUser(user);
+        const bypassCache = shouldBypassEndpointCache(ctx.request?.headers as Record<string, unknown>) || isAdmin;
 
-        // Call the search service with the query parameter and admin status
-        const { results, pagination } = await strapi
-          .service("api::product.product")
-          .search(q, { ...ctx.query, isAdmin });
+        const cacheKey = buildCacheKey({
+          routeId: "product.search",
+          query: ctx.query || {},
+          locale: String(ctx.query?.locale || ""),
+          authSegment: bypassCache ? "auth" : "anon",
+        });
 
-        const productService: any = strapi.service("api::product.product");
-        return {
-          // Defensive filter to align with service-level publish rules
-          data: (results as any[] || []).filter((p: any) =>
-            productService.hasPublishedStockedVariation(
-              p?.attributes ? { product_variations: p.attributes.product_variations?.data } : p
-            )
-          ),
-          meta: { pagination },
-        };
+        const payload = await withCache(
+          {
+            key: cacheKey,
+            ttlSec: getCacheTtlFromEnv("CACHE_TTL_PRODUCT_SEARCH_SEC", 20),
+            bypass: bypassCache,
+            onStatus: (status) => setCacheHeaderIfEnabled(ctx, status),
+            shouldCacheValue: (value) => Array.isArray((value as any)?.data),
+          },
+          async () => {
+            const { results, pagination } = await strapi
+              .service("api::product.product")
+              .search(q, { ...ctx.query, isAdmin });
+
+            const productService: any = strapi.service("api::product.product");
+            const resultList = Array.isArray(results) ? results : [];
+            return {
+              data: resultList.filter((p: any) =>
+                productService.hasPublishedStockedVariation(
+                  p?.attributes ? { product_variations: p.attributes.product_variations?.data } : p,
+                ),
+              ),
+              meta: { pagination },
+            };
+          },
+        );
+
+        return payload;
       } catch (error) {
         return ctx.badRequest("An error occurred while searching products", {
           error: (error as Error).message,
@@ -206,145 +347,74 @@ export default factories.createCoreController(
           return ctx.badRequest("Slug parameter is required");
         }
 
-        // Decode the slug in case it contains Persian characters
-        // Handle both encoded and already-decoded slugs
         let decodedSlug = slug;
         try {
           decodedSlug = decodeURIComponent(slug);
-        } catch (e) {
-          // If decoding fails, use the slug as-is (might already be decoded)
+        } catch {
           decodedSlug = slug;
         }
 
-        // Log for debugging
-        strapi.log.info(`[Product.findBySlug] Looking up product with slug/ID: "${decodedSlug}" (original: "${slug}")`);
+        strapi.log.info(
+          `[Product.findBySlug] Looking up product with slug/ID: "${decodedSlug}" (original: "${slug}")`,
+        );
 
-        // Check if user is admin - admins can see all products including drafts
         const user = ctx.state.user;
         const isAdmin = isAdminUser(user);
+        const bypassCache = shouldBypassEndpointCache(ctx.request?.headers as Record<string, unknown>) || isAdmin;
 
-        // Build filters - exclude trashed products, conditionally filter by Status
-        const filters: any = {
-          Slug: decodedSlug,
-          removedAt: { $null: true }, // Exclude trashed products
-        };
-
-        // Only filter by Active status for non-admin users
-        if (!isAdmin) {
-          filters.Status = "Active";
-        }
-
-        // Find product by slug - try exact match first
-        let products = await strapi.entityService.findMany("api::product.product", {
-          filters,
-          populate: PRODUCT_POPULATE,
-          pagination: { limit: 1 },
+        const cacheKey = buildCacheKey({
+          routeId: "product.by-slug",
+          params: { slug: decodedSlug },
+          query: ctx.query || {},
+          locale: String(ctx.query?.locale || ""),
+          authSegment: bypassCache ? "auth" : "anon",
         });
 
-        let product = (products as unknown[])[0];
-
-        // If not found, try using raw SQL query for better Persian character handling
-        if (!product) {
-          strapi.log.info(`[Product.findBySlug] No exact match for slug: "${decodedSlug}", trying raw SQL query...`);
-          try {
-            const knex = strapi.db.connection;
-            let rawQuery = knex('products')
-              .where('slug', decodedSlug)
-              .whereNull('removed_at');
-
-            // Only filter by Active status for non-admin users
-            if (!isAdmin) {
-              rawQuery = rawQuery.where('status', 'Active');
+        const payload = await withCache(
+          {
+            key: cacheKey,
+            ttlSec: getCacheTtlFromEnv("CACHE_TTL_PRODUCT_BY_SLUG_SEC", 60),
+            bypass: bypassCache,
+            onStatus: (status) => setCacheHeaderIfEnabled(ctx, status),
+            shouldCacheValue: (value) => Boolean((value as any)?.data),
+          },
+          async () => {
+            const product = await findProductBySlugInternal(strapi, decodedSlug, isAdmin);
+            if (!product) {
+              return null;
             }
+            return { data: product };
+          },
+        );
 
-            const rawProducts = await rawQuery.limit(1);
-
-            if (rawProducts.length > 0) {
-              const productId = rawProducts[0].id;
-              const foundFilters: any = { id: productId };
-
-              // Only filter by Active status for non-admin users
-              if (!isAdmin) {
-                foundFilters.Status = "Active";
-              }
-
-              const foundProducts = await strapi.entityService.findMany("api::product.product", {
-                filters: foundFilters,
-                populate: PRODUCT_POPULATE,
-                pagination: { limit: 1 },
-              });
-              product = (foundProducts as unknown[])[0];
-              if (product) {
-                strapi.log.info(`[Product.findBySlug] Found product via raw SQL query: ${productId}`);
-              }
-            }
-          } catch (sqlError) {
-            strapi.log.warn(`[Product.findBySlug] Raw SQL query failed:`, sqlError);
-          }
-        }
-
-        if (!product) {
-          strapi.log.info(`[Product.findBySlug] No product found with slug: "${decodedSlug}", trying ID fallback...`);
-
-          // Try to find by ID as fallback for backwards compatibility
-          // Use findMany to ensure consistent response format with slug lookup
-          const idMatch = decodedSlug.match(/^\d+$/);
-          if (idMatch) {
-            const productId = parseInt(decodedSlug, 10);
-            strapi.log.info(`[Product.findBySlug] Attempting ID-based lookup for product ID: ${productId}`);
-
-            // Build filters for ID lookup
-            const idFilters: any = {
-              id: productId,
-              removedAt: { $null: true }, // Exclude trashed products
-            };
-
-            // Only filter by Active status for non-admin users
-            if (!isAdmin) {
-              idFilters.Status = "Active";
-            }
-
-            const productsById = await strapi.entityService.findMany("api::product.product", {
-              filters: idFilters,
-              populate: PRODUCT_POPULATE,
-              pagination: { limit: 1 },
-            });
-
-            const productById = (productsById as unknown[])[0];
-
-            if (productById) {
-              strapi.log.info(`[Product.findBySlug] Found product by ID: ${productId}`);
-              return {
-                data: productById,
-              };
-            } else {
-              strapi.log.warn(`[Product.findBySlug] Product with ID ${productId} not found or is trashed`);
-            }
-          } else {
-            strapi.log.warn(`[Product.findBySlug] Slug "${decodedSlug}" is not numeric, cannot use ID fallback`);
-          }
-
+        if (!payload?.data) {
           strapi.log.error(`[Product.findBySlug] Product not found for slug/ID: ${decodedSlug}`);
           return ctx.notFound("Product not found");
         }
 
-        const productData = product as { id: number; Title?: string; attributes?: { Status?: string } };
-        strapi.log.info(`[Product.findBySlug] Successfully found product: ${productData.id} (${productData.Title || 'N/A'})`);
+        const productData = payload.data;
+        const status = readProductStatus(productData);
+        const removedAt = readProductRemovedAt(productData);
+        if (!isAdmin && (status !== "Active" || removedAt)) {
+          return ctx.notFound("Product not found");
+        }
 
-        // Increment view count for non-admin users viewing Active products
-        if (!isAdmin && productData.attributes?.Status === "Active") {
+        strapi.log.info(
+          `[Product.findBySlug] Successfully found product: ${productData.id} (${productData.Title || "N/A"})`,
+        );
+
+        if (!isAdmin && status === "Active" && productData?.id) {
           try {
-            const productViewService = strapi.service("api::product-view.product-view");
-            await productViewService.incrementProductView(productData.id);
+            const productViewService = strapi.service("api::product-view.product-view") as {
+              queueProductView: (productId: number) => Promise<void>;
+            };
+            void productViewService.queueProductView(Number(productData.id));
           } catch (viewError) {
-            // Log error but don't fail the request
-            strapi.log.warn("[Product.findBySlug] Failed to increment view count:", viewError);
+            strapi.log.warn("[Product.findBySlug] Failed to queue view count increment:", viewError);
           }
         }
 
-        return {
-          data: product,
-        };
+        return payload;
       } catch (error) {
         strapi.log.error("[Product.findBySlug] Error finding product by slug:", error);
         return ctx.badRequest("An error occurred while finding the product", {
@@ -352,5 +422,5 @@ export default factories.createCoreController(
         });
       }
     },
-  })
+  }),
 );

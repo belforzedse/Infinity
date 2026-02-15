@@ -3,6 +3,22 @@ import { logAdminActivity, logAdminProductEdit } from "../../../../utils/adminAc
 import { generateUniqueProductSlug } from "../../../../utils/productSlug";
 
 type AuditAction = "Create" | "Update" | "Delete";
+const PRODUCT_COUNTER_ONLY_FIELDS = new Set(["SeenCount"]);
+const UPDATE_METADATA_FIELDS = new Set([
+  "updatedAt",
+  "updated_at",
+  "updatedBy",
+  "updated_by",
+  "publishedAt",
+  "published_at",
+]);
+
+function isCounterOnlyProductUpdate(data: Record<string, unknown> | undefined): boolean {
+  if (!data || typeof data !== "object") return false;
+  const fields = Object.keys(data).filter((field) => !UPDATE_METADATA_FIELDS.has(field));
+  if (fields.length === 0) return false;
+  return fields.every((field) => PRODUCT_COUNTER_ONLY_FIELDS.has(field));
+}
 
 /**
  * Call Next.js revalidation API to invalidate cache for product pages
@@ -164,6 +180,10 @@ export default {
     if (!id) return;
 
     const { data } = event.params;
+    if (isCounterOnlyProductUpdate(data)) {
+      event.state = { ...(event.state || {}), counterOnlyUpdate: true };
+      return;
+    }
 
     const previous = await strapi.entityService.findOne(
       "api::product.product",
@@ -203,6 +223,9 @@ export default {
   async afterUpdate(event) {
     const { result, state } = event as any;
     if (!result?.id) return;
+    if (state?.counterOnlyUpdate || isCounterOnlyProductUpdate((event as any)?.params?.data)) {
+      return;
+    }
     const actor = resolveAuditActor(event as any);
 
     const previous = state?.previousProduct || {};

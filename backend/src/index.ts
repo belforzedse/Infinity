@@ -8,6 +8,7 @@ import productVariationLifeCycles from "./api/product-variation/lifecycles";
 import { ensureIranLocations } from "./jobs/ensureLocations";
 import { startExpireStockReservationsJob } from "./jobs/expireStockReservations";
 import { startExpireReserveOrdersJob } from "./jobs/expireReserveOrders";
+import { startFlushViewCountersJob } from "./jobs/flushViewCounters";
 
 type ControllerActions = Record<string, ReadonlyArray<string> | "*">;
 type FullAccessSpec = { mode: "all" };
@@ -399,6 +400,34 @@ async function assignRolePermissions(strapi: Strapi, role: { id: number; name: s
   }
 }
 
+const COUNTER_ONLY_FIELDS_BY_UID: Record<string, ReadonlySet<string>> = {
+  "api::product.product": new Set(["SeenCount"]),
+  "api::blog-post.blog-post": new Set(["ViewCount"]),
+};
+
+const UPDATE_METADATA_FIELDS = new Set([
+  "updatedAt",
+  "updated_at",
+  "updatedBy",
+  "updated_by",
+  "publishedAt",
+  "published_at",
+]);
+
+function isCounterOnlyUpdate(uid: string, payload: Record<string, unknown> | undefined): boolean {
+  const allowedFields = COUNTER_ONLY_FIELDS_BY_UID[uid];
+  if (!allowedFields || !payload || typeof payload !== "object") {
+    return false;
+  }
+
+  const meaningfulFields = Object.keys(payload).filter((field) => !UPDATE_METADATA_FIELDS.has(field));
+  if (meaningfulFields.length === 0) {
+    return false;
+  }
+
+  return meaningfulFields.every((field) => allowedFields.has(field));
+}
+
 export const RedisClient = createClient({
   url: process.env.REDIS_URL,
   ...(process.env.REDIS_PASSWORD && { password: process.env.REDIS_PASSWORD }),
@@ -460,7 +489,10 @@ export default {
           async afterCreate() {
             await cacheStore.clearByUid(uid, {}, true);
           },
-          async afterUpdate() {
+          async afterUpdate(event: any) {
+            if (isCounterOnlyUpdate(uid, event?.params?.data)) {
+              return;
+            }
             await cacheStore.clearByUid(uid, {}, true);
           },
           async afterDelete() {
@@ -482,6 +514,11 @@ export default {
       startExpireReserveOrdersJob(strapi);
     } catch (error) {
       strapi.log.error("Failed to start expire reserve orders job", error);
+    }
+    try {
+      startFlushViewCountersJob(strapi);
+    } catch (error) {
+      strapi.log.error("Failed to start flush view counters job", error);
     }
     // Migrate any existing local-users to plugin users by creating a bridge (idempotent)
     (async function migrateLocalUsers() {
@@ -696,6 +733,63 @@ export default {
         }
       } catch (error) {
         strapi.log.error("Failed to ensure settings entry", {
+          error: (error as any)?.message,
+        });
+      }
+    })();
+
+    // Backfill and enforce main category flags for top-level categories only (idempotent)
+    (async function backfillMainCategories() {
+      try {
+        type ProductCategoryRecord = {
+          id: number;
+          isMainCategory?: boolean | null;
+          parent?: { id: number } | null;
+        };
+
+        const categories = (await strapi.entityService.findMany(
+          "api::product-category.product-category",
+          {
+            fields: ["id", "isMainCategory"],
+            populate: { parent: { fields: ["id"] } },
+            limit: -1,
+          },
+        )) as ProductCategoryRecord[];
+
+        let promoted = 0;
+        let demoted = 0;
+
+        for (const category of categories) {
+          const hasParent = !!category.parent?.id;
+          const isMainCategory = Boolean(category.isMainCategory);
+
+          if (!hasParent && !isMainCategory) {
+            await strapi.entityService.update(
+              "api::product-category.product-category",
+              category.id,
+              { data: { isMainCategory: true } },
+            );
+            promoted += 1;
+            continue;
+          }
+
+          if (hasParent && isMainCategory) {
+            await strapi.entityService.update(
+              "api::product-category.product-category",
+              category.id,
+              { data: { isMainCategory: false } },
+            );
+            demoted += 1;
+          }
+        }
+
+        strapi.log.info("Product category main flag backfill finished", {
+          total: categories.length,
+          promoted,
+          demoted,
+        });
+      } catch (error) {
+        strapi.log.error("Failed to backfill product category main flags", {
           error: (error as any)?.message,
         });
       }

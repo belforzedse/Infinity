@@ -57,6 +57,11 @@ const ENDPOINT_PATTERNS = {
     /^\/api\/navigations/i,
     /^\/api\/settings/i,
     /^\/api\/site-settings/i,
+    /^\/api\/blog-categories/i,
+    /^\/api\/blog-tags/i,
+    /^\/api\/blog-authors/i,
+    /^\/api\/faq-categories/i,
+    /^\/api\/faq-questions/i,
   ],
 
   // Product data (semi-dynamic, short cache)
@@ -67,6 +72,8 @@ const ENDPOINT_PATTERNS = {
     /^\/api\/product-reviews/i,
     /^\/api\/discounts/i,
     /^\/api\/general-discounts/i,
+    /^\/api\/blog-posts/i,
+    /^\/api\/blog-comments\/post/i,
   ],
 
   // User-specific data (no cache)

@@ -38,6 +38,7 @@ interface RawProductCategory {
     Title?: string;
     Slug?: string;
     Color?: string | null;
+    isMainCategory?: boolean | null;
     Image?: CategoryImageField | null;
     parent?: CategoryRelation | null;
     children?: ChildrenRelation | null;
@@ -45,6 +46,7 @@ interface RawProductCategory {
   Title?: string;
   Slug?: string;
   Color?: string | null;
+  isMainCategory?: boolean | null;
   Image?: CategoryImageField | null;
   parent?: CategoryRelation | null;
   children?: ChildrenRelation | null;
@@ -60,12 +62,14 @@ export interface ProductCategorySummary {
   imageWidth?: number | null;
   imageHeight?: number | null;
   parentId: number | null;
+  isMainCategory: boolean;
   /** True when category has at least one child (only set when children were populated). */
   hasChildren?: boolean;
 }
 
 export interface FetchProductCategoriesOptions {
   parentOnly?: boolean;
+  mainOnly?: boolean;
   /**
    * When true, only return parent categories that have at least one child.
    * Implies parentOnly. Use for homepage carousel so leaf-only parents are hidden.
@@ -125,12 +129,16 @@ export async function getProductCategories(
   params.append("fields[0]", "Title");
   params.append("fields[1]", "Slug");
   params.append("fields[2]", "Color");
+  params.append("fields[3]", "isMainCategory");
   params.append("populate[0]", "Image");
   params.append("populate[1]", "parent");
 
-  const parentOnly = options.parentOnly || options.parentsWithChildrenOnly;
+  const parentOnly = options.parentOnly || options.parentsWithChildrenOnly || options.mainOnly;
   if (parentOnly) {
     params.append("filters[parent][id][$null]", "true");
+  }
+  if (options.mainOnly) {
+    params.append("filters[isMainCategory][$eq]", "true");
   }
   if (options.parentsWithChildrenOnly) {
     params.append("populate[2]", "children");
@@ -158,6 +166,7 @@ export async function getProductCategories(
       logger.info("[ProductCategories] Fetching categories", {
         url: url.replace(API_BASE_URL, "[BASE_URL]"),
         parentOnly: !!parentOnly,
+        mainOnly: !!options.mainOnly,
         parentsWithChildrenOnly: !!options.parentsWithChildrenOnly,
       });
     }
@@ -192,6 +201,7 @@ export async function getProductCategories(
         const slug = attrs.Slug || String(item.id);
         const color = normalizeHexColor(attrs.Color);
         const parentId = attrs.parent?.data?.id ?? null;
+        const isMainCategory = Boolean(attrs.isMainCategory);
         const image = resolveCategoryImage(attrs.Image);
         const childrenData = attrs.children?.data ?? item.children?.data;
         const hasChildren = Array.isArray(childrenData) && childrenData.length > 0;
@@ -206,6 +216,7 @@ export async function getProductCategories(
           imageWidth: image.width,
           imageHeight: image.height,
           parentId,
+          isMainCategory,
           hasChildren: options.parentsWithChildrenOnly ? hasChildren : undefined,
         } as ProductCategorySummary;
       })

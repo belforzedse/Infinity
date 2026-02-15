@@ -32,6 +32,10 @@
     "Color": {
       "type": "string"
     },
+    "isMainCategory": {
+      "type": "boolean",
+      "default": false
+    },
     "parent": {
       "type": "relation",
       "relation": "manyToOne",

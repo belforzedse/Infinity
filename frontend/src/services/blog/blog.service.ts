@@ -581,10 +581,15 @@ class BlogService {
       });
     }
 
-    const response = await fetch(url, {
+    const fetchOptions: RequestInit & { next?: { revalidate: number } } = {
       headers: this.getHeaders(),
-      cache: "no-store",
-    });
+      cache: "default",
+    };
+    if (typeof window === "undefined") {
+      fetchOptions.next = { revalidate: 60 };
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unable to read error response');

@@ -78,6 +78,10 @@ jest.mock('../index', () => ({
     set: jest.fn(),
     del: jest.fn(),
     exists: jest.fn(),
+    incr: jest.fn(),
+    expire: jest.fn(),
+    getDel: jest.fn(),
+    scanIterator: jest.fn(async function* () {}),
   }),
 }));
 

@@ -3,6 +3,22 @@
  *
  * Triggers Next.js on-demand revalidation when blog posts are published or updated
  */
+const BLOG_COUNTER_ONLY_FIELDS = new Set(["ViewCount"]);
+const UPDATE_METADATA_FIELDS = new Set([
+  "updatedAt",
+  "updated_at",
+  "updatedBy",
+  "updated_by",
+  "publishedAt",
+  "published_at",
+]);
+
+function isCounterOnlyBlogUpdate(data: Record<string, unknown> | undefined): boolean {
+  if (!data || typeof data !== "object") return false;
+  const fields = Object.keys(data).filter((field) => !UPDATE_METADATA_FIELDS.has(field));
+  if (fields.length === 0) return false;
+  return fields.every((field) => BLOG_COUNTER_ONLY_FIELDS.has(field));
+}
 
 /**
  * Call Next.js revalidation API to invalidate cache
@@ -76,6 +92,9 @@ export default {
 
   async afterUpdate(event: any) {
     const { result } = event;
+    if (isCounterOnlyBlogUpdate(event?.params?.data)) {
+      return;
+    }
 
     // Trigger revalidation when:
     // 1. Post is published (Status changed to Published)
@@ -130,4 +149,3 @@ export default {
     await Promise.allSettled(revalidationPromises);
   },
 };
-

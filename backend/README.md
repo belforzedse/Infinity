@@ -30,6 +30,17 @@ up and down and up and down and
   - `MATOMO_TIMEOUT_MS` (default `8000`)
   - `TRAFFIC_DASHBOARD_CACHE_TTL_MS` (default `30000`)
   - `TRAFFIC_REALTIME_CACHE_TTL_MS` (default `10000`)
+- **Endpoint cache and async counters**: configure conservative anonymous-only response caching + batched view counters:
+  - `ENABLE_ENDPOINT_RESPONSE_CACHE` (default `true`)
+  - `CACHE_ONLY_ANONYMOUS` (default `true`)
+  - `CACHE_TTL_PRODUCT_BY_SLUG_SEC` (default `60`)
+  - `CACHE_TTL_PRODUCT_SEARCH_SEC` (default `20`)
+  - `CACHE_TTL_BLOG_SLUG_SEC` (default `120`)
+  - `CACHE_TTL_BLOG_COMMENTS_SEC` (default `60`)
+  - `CACHE_DEBUG_HEADER` (default `false`; emits `X-Backend-Cache: HIT|MISS|BYPASS`)
+  - `ENABLE_ASYNC_VIEW_COUNTERS` (default `true`)
+  - `VIEW_COUNTER_FLUSH_INTERVAL_MS` (default `60000`)
+  - `VIEW_COUNTER_BUCKET_SEC` (default `60`)
 
 ### Development
 

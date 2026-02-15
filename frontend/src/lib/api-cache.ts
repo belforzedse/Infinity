@@ -64,6 +64,11 @@ const CACHE_CONFIGS: Array<{
     pattern: /\/api\/(products|product-variations|product-faqs|product-reviews|discounts|general-discounts)/i,
     config: { maxAge: 30000, staleWhileRevalidate: 60000 },
   },
+  // Blog and FAQ content - 60s cache, 2min stale window
+  {
+    pattern: /\/api\/(blog-posts|blog-comments\/post|blog-categories|blog-tags|blog-authors|faq-categories|faq-questions)/i,
+    config: { maxAge: 60000, staleWhileRevalidate: 120000 },
+  },
 ];
 
 // Endpoints that should never be cached
@@ -291,4 +296,3 @@ if (typeof window !== "undefined") {
 
 export { apiCache, shouldCache, getCacheConfig };
 export type { CachedResponse, CacheConfig };
-

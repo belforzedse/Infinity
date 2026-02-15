@@ -6,6 +6,19 @@ import { factories } from "@strapi/strapi";
 import { fetchUserWithRole, roleIsAllowed } from "../../../utils/roles";
 import { resolveUserDisplayName } from "../../../utils/blog-helpers";
 import { normalizePopulateQuery } from "../../../utils/normalizePopulate";
+import {
+  buildCacheKey,
+  getCacheTtlFromEnv,
+  isCacheDebugHeaderEnabled,
+  shouldBypassEndpointCache,
+  withCache,
+  type CacheStatus,
+} from "../../../utils/responseCache";
+
+function setCacheHeaderIfEnabled(ctx: any, status: CacheStatus) {
+  if (!isCacheDebugHeaderEnabled()) return;
+  ctx.set("X-Backend-Cache", status);
+}
 
 export default factories.createCoreController("api::blog-comment.blog-comment", ({ strapi }) => ({
   // Resolve user even when auth middleware is disabled (auth: false)
@@ -176,13 +189,47 @@ export default factories.createCoreController("api::blog-comment.blog-comment", 
   // Get comments for a specific blog post
   async findByPost(ctx) {
     const { postId } = ctx.params;
+    const bypassCache = shouldBypassEndpointCache(ctx.request?.headers as Record<string, unknown>);
+
+    if (!bypassCache) {
+      const cacheKey = buildCacheKey({
+        routeId: "blog-comment.by-post",
+        params: { postId },
+        query: ctx.query || {},
+        locale: String(ctx.query?.locale || ""),
+        authSegment: "anon",
+      });
+
+      const payload = await withCache(
+        {
+          key: cacheKey,
+          ttlSec: getCacheTtlFromEnv("CACHE_TTL_BLOG_COMMENTS_SEC", 60),
+          bypass: false,
+          onStatus: (status) => setCacheHeaderIfEnabled(ctx, status),
+          shouldCacheValue: (value) => Array.isArray((value as any)?.data),
+        },
+        async () => {
+          const comments = await strapi.entityService.findMany("api::blog-comment.blog-comment", {
+            filters: {
+              blog_post: postId,
+              Status: "Approved",
+            },
+            sort: { createdAt: "desc" },
+            populate: ["user", "blog_post"],
+          });
+
+          return { data: comments };
+        },
+      );
+
+      return payload;
+    }
+
     const user = (await this.resolveUserFromAuthHeader(ctx)) || ctx.state.user;
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
     const filters: any = { blog_post: postId };
-
-    // If not Editor+, only show approved comments
     if (!hasEditorRole) {
       filters.Status = "Approved";
     }
@@ -190,9 +237,10 @@ export default factories.createCoreController("api::blog-comment.blog-comment", 
     const comments = await strapi.entityService.findMany("api::blog-comment.blog-comment", {
       filters,
       sort: { createdAt: "desc" },
-      populate: ["user", "blog_post"]
+      populate: ["user", "blog_post"],
     });
 
+    setCacheHeaderIfEnabled(ctx, "BYPASS");
     return { data: comments };
   },
 

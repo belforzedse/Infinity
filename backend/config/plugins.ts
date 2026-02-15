@@ -92,6 +92,12 @@ export default ({ env }) => {
             "api::product-review-reply.product-review-reply",
             "api::discount.discount",
             "api::general-discount.general-discount",
+            "api::settings.settings",
+            "api::blog-category.blog-category",
+            "api::blog-tag.blog-tag",
+            "api::blog-author.blog-author",
+            "api::faq-category.faq-category",
+            "api::faq-question.faq-question",
           ],
           // Not cached: cart, order, stock, wallet, address, transactions (real-time)
         },

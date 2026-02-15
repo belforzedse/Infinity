@@ -47,10 +47,17 @@ const stripParentOnlyFields = (data: Record<string, any>) => {
   data.Color = null;
 };
 
+const enforceMainCategoryRules = (data: Record<string, any>, parentId: number | null | undefined) => {
+  if (parentId) {
+    data.isMainCategory = false;
+  }
+};
+
 export default {
   async beforeCreate(event) {
     const data = event.params?.data ?? {};
     const parentId = extractParentId(data.parent);
+    enforceMainCategoryRules(data, parentId);
     if (parentId) {
       stripParentOnlyFields(data);
     }
@@ -72,6 +79,7 @@ export default {
       }
     }
 
+    enforceMainCategoryRules(data, parentId);
     if (parentId) {
       stripParentOnlyFields(data);
     }
