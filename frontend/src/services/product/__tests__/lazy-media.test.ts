@@ -71,6 +71,16 @@ describe("lazy media helpers", () => {
     const urls = await getLazySecondaryMediaByProductId(1101, 3);
 
     expect(mockedGetPublic).toHaveBeenCalledTimes(1);
+    expect(mockedGetPublic).toHaveBeenCalledWith(
+      expect.stringContaining("_skip_global_loader=1"),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "x-skip-global-loader": "1",
+        }),
+        suppressAuthRedirect: true,
+        timeout: 8000,
+      }),
+    );
     expect(urls).toHaveLength(3);
     expect(urls[0]).toContain("/uploads/gallery-1.webp");
     expect(urls[2]).toContain("/uploads/gallery-3.webp");

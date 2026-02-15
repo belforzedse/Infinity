@@ -336,12 +336,16 @@ export const getLazySecondaryMediaByProductId = async (
     `populate[CoverImage][fields][0]=url&` +
     `populate[Media][fields][0]=url&` +
     `populate[Media][fields][1]=mime&` +
+    `_skip_global_loader=1&` +
     `pagination[limit]=1&` +
     `pagination[withCount]=false`;
 
   const requestPromise = (async (): Promise<string[]> => {
     try {
       const response = await apiClient.getPublic<any>(endpoint, {
+        headers: {
+          "x-skip-global-loader": "1",
+        },
         suppressAuthRedirect: true,
         timeout: 8000,
       });
