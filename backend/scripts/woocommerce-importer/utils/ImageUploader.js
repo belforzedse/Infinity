@@ -439,11 +439,12 @@ class ImageUploader {
       });
       form.append("fileInfo", fileInfo);
 
+      const uploadHeaders = { ...form.getHeaders() };
+      if (!this.config.strapi.usePublicAccess && this.config.strapi.auth?.token) {
+        uploadHeaders.Authorization = `Bearer ${this.config.strapi.auth.token}`;
+      }
       const response = await axios.post(`${this.config.strapi.baseUrl}/upload`, form, {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: `Bearer ${this.config.strapi.auth.token}`,
-        },
+        headers: uploadHeaders,
         timeout: this.config.images.uploadTimeout,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,

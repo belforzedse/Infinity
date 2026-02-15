@@ -94,6 +94,7 @@ module.exports = {
   strapi: {
     // Default to production - will be overridden by user selection in interactive mode
     baseUrl: process.env.STRAPI_IMPORT_PRODUCTION_URL || "https://api.infinitycolor.co/api",
+    usePublicAccess: false, // When true, no Authorization header (requests as public)
     auth: {
       token: requiredEnvVar("STRAPI_API_TOKEN_PRODUCTION", { optional: true, defaultValue: "" }),
     },

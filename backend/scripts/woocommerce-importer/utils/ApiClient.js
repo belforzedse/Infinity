@@ -435,15 +435,32 @@ class WordPressClient extends BaseApiClient {
 class StrapiClient extends BaseApiClient {
   constructor(config, logger) {
     super(config.strapi, logger);
+    this.fullConfig = config;
+
+    const headers = {
+      "Content-Type": "application/json",
+      "User-Agent": "WooCommerce-Strapi-Importer/1.0",
+    };
+    if (!config.strapi.usePublicAccess && config.strapi.auth?.token) {
+      headers.Authorization = `Bearer ${config.strapi.auth.token}`;
+    }
 
     this.client = axios.create({
       baseURL: config.strapi.baseUrl,
       timeout: 30000,
-      headers: {
-        Authorization: `Bearer ${config.strapi.auth.token}`,
-        "Content-Type": "application/json",
-        "User-Agent": "WooCommerce-Strapi-Importer/1.0",
-      },
+      headers,
+    });
+
+    // Request interceptor: apply current config (supports credential change + public access)
+    this.client.interceptors.request.use((requestConfig) => {
+      const strapi = this.fullConfig.strapi;
+      requestConfig.baseURL = strapi.baseUrl;
+      if (strapi.usePublicAccess) {
+        delete requestConfig.headers.Authorization;
+      } else if (strapi.auth?.token) {
+        requestConfig.headers.Authorization = `Bearer ${strapi.auth.token}`;
+      }
+      return requestConfig;
     });
 
     // Response interceptor for logging

@@ -14,7 +14,7 @@ const VariationImporter = require("./importers/VariationImporter");
 const OrderImporter = require("./importers/OrderImporter");
 const UserImporter = require("./importers/UserImporter");
 const BlogPostImporter = require("./importers/BlogPostImporter");
-const { dedup: dedupVariations } = require("./dedup-variations-by-external-id");
+const { dedup: dedupVariations, fullDedup } = require("./dedup-variations-by-external-id");
 const DuplicateTracker = require("./utils/DuplicateTracker");
 const { syncShippingLocations } = require("./utils/ShippingSeeder");
 const Logger = require("./utils/Logger");
@@ -286,6 +286,7 @@ let importOptions = {
     dryRun: false,
     onlyImported: true,
     onlyMissing: false,
+    updateAllVariations: false,
     useNameFilter: false,
   },
   orders: { enabled: false, limit: 50, page: 1, dryRun: false },
@@ -368,8 +369,12 @@ async function selectCredentials() {
   console.log("     URL: http://localhost:1337/api\n");
   console.log("  4️⃣  Custom");
   console.log("     Enter custom URL and token\n");
+  console.log("  5️⃣  Public (no auth)");
+  console.log(
+    "     Use as unauthenticated - requires STRAPI_CONTENT_API_ALLOW_ALL=true on server\n",
+  );
 
-  const choice = await prompt("Select environment (1-4, default: 1): ");
+  const choice = await prompt("Select environment (1-5, default: 1): ");
 
   let selected = "production";
   if (choice === "2") {
@@ -378,13 +383,41 @@ async function selectCredentials() {
     selected = "local";
   } else if (choice === "4") {
     selected = "custom";
+  } else if (choice === "5") {
+    selected = "public";
   }
 
   selectedCredentialEnv = selected;
 
   // Apply selected credentials to config
   let creds;
-  if (selected === "custom") {
+  if (selected === "public") {
+    // Public access: no token, requests appear as unauthenticated
+    const baseUrlInput = await prompt(
+      "Enter Strapi API URL (default: https://api.infinitycolor.co/api): ",
+    );
+    let baseUrl = baseUrlInput.trim() || "https://api.infinitycolor.co/api";
+    if (!baseUrl.endsWith("/api")) {
+      baseUrl = `${baseUrl.replace(/\/$/, "")}/api`;
+    }
+    creds = {
+      baseUrl,
+      token: "",
+      usePublicAccess: true,
+    };
+    config.strapi.baseUrl = creds.baseUrl;
+    config.strapi.auth.token = "";
+    config.strapi.usePublicAccess = true;
+    config.duplicateTracking.storageDir = config.duplicateTracking.environments.production;
+    duplicateTracker = new DuplicateTracker(config, logger);
+    console.log(`\n✅ Using PUBLIC access (no auth)`);
+    console.log(`   Base URL: ${config.strapi.baseUrl}`);
+    console.log(
+      `   ⚠️  Ensure STRAPI_CONTENT_API_ALLOW_ALL=true is set on the server\n`,
+    );
+    await prompt("Press Enter to continue...");
+    return;
+  } else if (selected === "custom") {
     // Prompt for custom credentials
     const customUrl = await prompt(
       "Enter Strapi API URL (e.g., https://api.infinitycolor.co/api): ",
@@ -422,6 +455,7 @@ async function selectCredentials() {
 
   config.strapi.baseUrl = creds.baseUrl;
   config.strapi.auth.token = creds.token;
+  config.strapi.usePublicAccess = false;
 
   // Set environment-specific storage directory for import tracking
   config.duplicateTracking.storageDir = config.duplicateTracking.environments[selected];
@@ -494,6 +528,7 @@ async function showMainMenu() {
     if (type === "variations") {
       console.log(`     Only Imported Parents: ${opts.onlyImported ? "Yes" : "No"}`);
       console.log(`     Missing Only: ${opts.onlyMissing ? "Yes" : "No"}`);
+      console.log(`     Update All Variations: ${opts.updateAllVariations ? "Yes" : "No"}`);
       console.log(`     Keyword Filter (کیف/کفش): ${opts.useNameFilter ? "On" : "Off"}`);
     }
     if (type === "blogPosts") {
@@ -514,14 +549,16 @@ async function showMainMenu() {
   console.log("  5️⃣  Configure Variations Import");
   console.log("  6️⃣  Configure Orders Import");
   console.log("  7️⃣  Configure Blog Posts Import (WordPress)");
-  console.log("  8️⃣  Run All Enabled Importers");
-  console.log("  9️⃣  View Import Status & Mappings");
-  console.log("  🔟  Clear All Mappings (Reset Progress)");
-  console.log("  1️⃣1️⃣ Sync Shipping Provinces & Cities");
-  console.log("  1️⃣2️⃣ Deduplicate Variations (by external_id)");
-  console.log("  1️⃣3️⃣ Exit\n");
+  console.log("  8️⃣  Update all existing variations");
+  console.log("  9️⃣  Run All Enabled Importers");
+  console.log("  🔟  View Import Status & Mappings");
+  console.log("  1️⃣1️⃣ Clear All Mappings (Reset Progress)");
+  console.log("  1️⃣2️⃣ Sync Shipping Provinces & Cities");
+  console.log("  1️⃣3️⃣ Deduplicate Variations (by external_id)");
+  console.log("  1️⃣4️⃣ Full Dedup (Products + Variations by external_id)");
+  console.log("  1️⃣5️⃣ Exit\n");
 
-  const choice = await prompt("Enter your choice (1-13): ");
+  const choice = await prompt("Enter your choice (1-15): ");
   return choice;
 }
 
@@ -588,7 +625,20 @@ async function configureImporter(type) {
       opts.onlyMissing = onlyMissingInput.toLowerCase() === "y";
       if (opts.onlyMissing) {
         opts.onlyImported = true;
+        opts.updateAllVariations = false;
         console.log(`✅ Missing-only mode enabled (forcing imported-only mode)`);
+      }
+    }
+
+    if (!opts.onlyMissing && opts.onlyImported) {
+      const updateAllInput = await prompt(
+        `Update ALL variations for imported products (create missing + update existing)? (y/n, default: n): `,
+      );
+      if (updateAllInput.trim()) {
+        opts.updateAllVariations = updateAllInput.toLowerCase() === "y";
+        if (opts.updateAllVariations) {
+          console.log(`✅ Update-all mode: will process every variation for imported products`);
+        }
       }
     }
 
@@ -763,6 +813,58 @@ async function configureImporter(type) {
 }
 
 /**
+ * Run "Update all existing variations": scan imported products and process every variation
+ * (create missing, update existing). Uses same progress file as variations-imported scan.
+ */
+async function runUpdateAllVariations() {
+  console.clear();
+  console.log(`\n${"=".repeat(80)}`);
+  console.log("🔄 Update all existing variations");
+  console.log(`${"=".repeat(80)}\n`);
+  console.log(
+    "This will scan all imported products and process every variation:\n" +
+      "  • Create variations that are not yet in Strapi\n" +
+      "  • Update existing variations (price, stock, attributes, etc.)\n",
+  );
+
+  const limitInput = await prompt("Limit variations to process this run (default: 50000, or 0 for no limit): ");
+  const limit = limitInput.trim() === "" ? 50000 : Math.max(0, parseInt(limitInput, 10) || 0);
+  const effectiveLimit = limit === 0 ? 999999 : limit;
+
+  const dryRunInput = await prompt("Dry run? (y/n, default: n): ");
+  const dryRun = dryRunInput.trim() !== "" && dryRunInput.toLowerCase() === "y";
+
+  const forceInput = await prompt("Ignore progress and start from beginning? (y/n, default: n): ");
+  const force = forceInput.trim() !== "" && forceInput.toLowerCase() === "y";
+
+  const confirm = await prompt("\nProceed? (y/n): ");
+  if (confirm.toLowerCase() !== "y") {
+    console.log("\n❌ Cancelled.\n");
+    await prompt("Press Enter to continue...");
+    return;
+  }
+
+  try {
+    const importer = new VariationImporter(config, logger);
+    await importer.import({
+      limit: effectiveLimit,
+      page: 1,
+      dryRun,
+      onlyImported: true,
+      force,
+      scanImportedProducts: true,
+      missingOnly: false,
+      nameFilter: null,
+      logParentNames: true,
+    });
+    console.log("\n✅ Update all variations completed!\n");
+  } catch (error) {
+    console.error(`\n❌ Update all variations failed: ${error.message}\n`);
+  }
+  await prompt("Press Enter to continue...");
+}
+
+/**
  * Run all enabled importers in correct order
  */
 async function runAllImporters() {
@@ -861,13 +963,14 @@ async function runAllImporters() {
         });
       } else if (type === "variations") {
         const importer = new VariationImporter(config, logger);
+        const scanByMapping = opts.onlyMissing || opts.updateAllVariations;
         stats[type] = await importer.import({
           limit: opts.limit,
           page: opts.page,
           dryRun: opts.dryRun,
           onlyImported: opts.onlyImported,
           missingOnly: opts.onlyMissing,
-          scanImportedProducts: opts.onlyMissing,
+          scanImportedProducts: scanByMapping,
           nameFilter: opts.useNameFilter ? undefined : null,
         });
       } else if (type === "orders") {
@@ -1042,6 +1145,63 @@ async function runVariationDedup() {
 }
 
 /**
+ * Run full deduplication (products + variations) by external_id in Strapi.
+ */
+async function runFullDedup() {
+  console.clear();
+  console.log(`\n🚀 Full Deduplication (Products + Variations by external_id)\n`);
+  console.log("This will deduplicate both products and variations by external_id:");
+  console.log("  1. First: Deduplicate products (keeping most recent - highest ID)");
+  console.log("  2. Then: Deduplicate variations (keeping best quality variation)\n");
+  console.log("A dry run is recommended first.\n");
+
+  const dryRunInput = await prompt("Run in dry-run mode? (y/n, default: y): ");
+  const dryRun = dryRunInput.trim() ? dryRunInput.toLowerCase() !== "n" : true;
+  const ignoreForbiddenInput = await prompt(
+    "Ignore forbidden relation endpoints and continue deletes? (y/n, default: n): ",
+  );
+  const ignoreForbidden = ignoreForbiddenInput.trim()
+    ? ignoreForbiddenInput.toLowerCase() === "y"
+    : false;
+  let skipRelations = [];
+  if (ignoreForbidden) {
+    const skipInput = await prompt(
+      "Skip order-items/product-variation-logs checks entirely? (y/n, default: y): ",
+    );
+    const shouldSkip = skipInput.trim() ? skipInput.toLowerCase() !== "n" : true;
+    if (shouldSkip) {
+      skipRelations = ["order-items", "product-variation-logs"];
+    }
+    const skipStocksInput = await prompt(
+      "Skip product-stocks rewiring entirely? (y/n, default: n): ",
+    );
+    const skipStocks = skipStocksInput.trim()
+      ? skipStocksInput.toLowerCase() === "y"
+      : false;
+    if (skipStocks) {
+      skipRelations = [...new Set([...skipRelations, "product-stocks"])];
+    }
+  }
+
+  if (!dryRun) {
+    const confirm = await prompt('Type "full-dedup" to confirm running live: ');
+    if (confirm !== "full-dedup") {
+      console.log("\n❌ Full deduplication cancelled\n");
+      await prompt("Press Enter to continue...");
+      return;
+    }
+  }
+
+  try {
+    await fullDedup({ dryRun, ignoreForbidden, skipRelations });
+  } catch (error) {
+    console.log(`\n❌ Full deduplication failed: ${error.message}\n`);
+  }
+
+  await prompt("Press Enter to continue...");
+}
+
+/**
  * Run the interactive main loop for the WooCommerce → Strapi importer CLI.
  *
  * Starts by selecting credentials, then repeatedly shows the main menu and dispatches
@@ -1089,15 +1249,18 @@ async function main() {
           await configureImporter("blogPosts");
           break;
         case "8":
-          await runAllImporters();
+          await runUpdateAllVariations();
           break;
         case "9":
-          await showStatus();
+          await runAllImporters();
           break;
         case "10":
-          await clearMappings();
+          await showStatus();
           break;
         case "11":
+          await clearMappings();
+          break;
+        case "12":
           try {
             await syncShippingLocations(config, logger);
           } catch (error) {
@@ -1105,10 +1268,13 @@ async function main() {
           }
           await prompt("Press Enter to continue...");
           break;
-        case "12":
+        case "13":
           await runVariationDedup();
           break;
-        case "13":
+        case "14":
+          await runFullDedup();
+          break;
+        case "15":
           console.log("\n👋 Goodbye!\n");
           running = false;
           break;

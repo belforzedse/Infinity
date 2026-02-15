@@ -56,8 +56,24 @@ node index.js all --limit 100
 | `products` | Import products | `--limit`, `--page`, `--categories`, `--dry-run` |
 | `variations` | Import product variations | `--limit`, `--page`, `--dry-run`, `--only-imported` |
 | `variations-imported` | Import variations for imported products only | `--limit`, `--page`, `--dry-run` |
+| `variations-missing` | Import only variations not yet in mappings | `--limit`, `--page`, `--dry-run`, `--force` |
+| `variations-update-all` | Update ALL variations for imported products (create missing + update existing) | `--limit`, `--all`, `--dry-run`, `--force` |
 | `orders` | Import orders | `--limit`, `--page`, `--dry-run` |
 | `all` | Import all data types | `--limit`, `--dry-run` |
+
+### Variation import modes
+
+- **`variations`** / **`variations-imported`** – Paginate WooCommerce products (optionally only those already in Strapi) and import variations; existing ones are updated, new ones created.
+- **`variations-missing`** – Scan by Strapi product mapping and import **only** variations that are not yet in the variation mapping (skips already-imported variations).
+- **`variations-update-all`** – Scan by Strapi product mapping and process **every** variation: create missing ones and **update** existing ones (price, stock, attributes, etc.). Use this to refresh all variation data from WooCommerce.
+
+Example: update every variation for all imported products (with a limit of 5000 per run, or use `--all` to ignore limit):
+
+```bash
+node index.js variations-update-all --limit 5000
+# or
+node index.js variations-update-all --all
+```
 
 ## ⚙️ Configuration
 

@@ -545,6 +545,8 @@ class VariationImporter {
 
     if (missingOnly) {
       this.logger.info(`🧩 Missing-only mode enabled (skipping already imported variations)`);
+    } else {
+      this.logger.info(`🔄 Update-all mode: processing every variation (create or update)`);
     }
 
     let processedInThisSession = 0;
