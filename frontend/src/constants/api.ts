@@ -3,11 +3,21 @@
  * This file contains all the constants related to API calls
  */
 // Base URLs
+const DEFAULT_API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://api.infinitycolor.co/api"
+    : "http://localhost:1337/api";
+const DEFAULT_IMAGE_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://api.infinitycolor.co"
+    : "http://localhost:1337";
+
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:1337/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL;
 export const STRAPI_TOKEN =
   process.env.NEXT_PUBLIC_STRAPI_TOKEN;
-export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:1337";
+export const IMAGE_BASE_URL =
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL || DEFAULT_IMAGE_BASE_URL;
 // API Versions
 export const API_VERSION = "v1";
 

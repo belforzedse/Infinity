@@ -8,8 +8,19 @@ import logger from "@/utils/logger";
 const PRODUCT_COMMON_FIELDS = [
   "fields[0]=Title",
   "fields[1]=Slug",
-  "fields[2]=Description",
-  "fields[3]=Status"
+  "fields[2]=Status",
+  "fields[3]=AverageRating",
+  "fields[4]=SeenCount",
+  "fields[5]=createdAt",
+].join("&");
+
+const HOMEPAGE_PRODUCT_POPULATE = [
+  "populate[0]=CoverImage",
+  "populate[1]=product_main_category",
+  "populate[2]=product_variations",
+  "populate[3]=product_variations.product_stock",
+  "populate[4]=product_variations.general_discounts",
+  "populate[5]=product_variations.product_variation_color",
 ].join("&");
 
 const productHasStock = (product: any): boolean => {
@@ -39,27 +50,20 @@ export const getHomepageSections = async (): Promise<{
   new: ProductCardProps[];
   favorites: ProductCardProps[];
 }> => {
-  // Fetch a larger pool of products (60) to ensure we have enough for all sections after filtering
-  // Include Slug field for SEO-friendly URLs
+  // Fetch a shared pool for homepage sections while keeping payload small enough for cacheability.
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
-    `populate[0]=CoverImage&` +
-    `populate[1]=product_main_category&` +
-    `populate[2]=product_variations&` +
-    `populate[3]=product_variations.product_stock&` +
-    `populate[4]=product_variations.general_discounts&` +
-    `populate[5]=product_variations.product_variation_color&` +
-    `populate[6]=Media&` +
+    `${HOMEPAGE_PRODUCT_POPULATE}&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
-    `pagination[limit]=60`; // Fetch more to have enough after filtering
+    `pagination[limit]=48&` +
+    `pagination[withCount]=false`;
 
   try {
-    // cache: 'no-store' — response exceeds Next.js Data Cache 2MB limit
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -136,15 +140,17 @@ export const getFeaturedCategoryProductsByRating = async (
   params.append("filters[product_variations][product_stock][Count][$gt]", "0");
   params.append("sort[0]", "AverageRating:desc");
   params.append("pagination[limit]", String(limit));
+  params.append("pagination[withCount]", "false");
   params.append("populate[0]", "CoverImage");
   params.append("populate[1]", "product_main_category");
   params.append("populate[2]", "product_variations");
   params.append("populate[3]", "product_variations.product_stock");
   params.append("populate[4]", "product_variations.general_discounts");
   params.append("populate[5]", "product_variations.product_variation_color");
-  params.append("populate[6]", "Media");
   params.append("fields[0]", "Title");
   params.append("fields[1]", "Slug");
+  params.append("fields[2]", "Status");
+  params.append("fields[3]", "AverageRating");
 
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`;
 
@@ -173,17 +179,12 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
-    `populate[0]=CoverImage&` +
-    `populate[1]=product_main_category&` +
-    `populate[2]=product_variations&` +
-    `populate[3]=product_variations.product_stock&` +
-    `populate[4]=product_variations.general_discounts&` +
-    `populate[5]=product_variations.product_variation_color&` +
-    `populate[6]=Media&` +
+    `${HOMEPAGE_PRODUCT_POPULATE}&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
-    `pagination[limit]=20`;
+    `pagination[limit]=20&` +
+    `pagination[withCount]=false`;
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -248,17 +249,13 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
-    `populate[0]=CoverImage&` +
-    `populate[1]=product_main_category&` +
-    `populate[2]=product_variations&` +
-    `populate[3]=product_variations.product_stock&` +
-    `populate[4]=product_variations.general_discounts&` +
-    `populate[5]=product_variations.product_variation_color&` +
-    `populate[6]=Media&` +
+    `${HOMEPAGE_PRODUCT_POPULATE}&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
-    `sort[0]=createdAt:desc&pagination[limit]=20`;
+    `sort[0]=createdAt:desc&` +
+    `pagination[limit]=20&` +
+    `pagination[withCount]=false`;
 
 
   try {
@@ -284,17 +281,13 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
-    `populate[0]=CoverImage&` +
-    `populate[1]=product_main_category&` +
-    `populate[2]=product_variations&` +
-    `populate[3]=product_variations.product_stock&` +
-    `populate[4]=product_variations.general_discounts&` +
-    `populate[5]=product_variations.product_variation_color&` +
-    `populate[6]=Media&` +
+    `${HOMEPAGE_PRODUCT_POPULATE}&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
-    `sort[0]=AverageRating:desc&pagination[limit]=20`;
+    `sort[0]=AverageRating:desc&` +
+    `pagination[limit]=20&` +
+    `pagination[withCount]=false`;
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -323,16 +316,13 @@ export const getRandomProducts = async (
   const endpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
       `filters[removedAt][$null]=true&` +
-      `populate[0]=CoverImage&` +
-      `populate[1]=product_main_category&` +
-      `populate[2]=product_variations&` +
-      `populate[3]=product_variations.product_stock&` +
-      `populate[4]=product_variations.general_discounts&` +
+      `${HOMEPAGE_PRODUCT_POPULATE}&` +
       `${PRODUCT_COMMON_FIELDS}&` +
       // Hide zero-price variations
       `filters[product_variations][Price][$gte]=1&` +
       `filters[product_variations][product_stock][Count][$gt]=0&` +
-      `pagination[limit]=${poolSize}`;
+      `pagination[limit]=${poolSize}&` +
+      `pagination[withCount]=false`;
 
 
   try {

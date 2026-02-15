@@ -85,10 +85,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const defaultApiBaseDomain =
+    process.env.NODE_ENV === "production"
+      ? "https://api.infinitycolor.co"
+      : "http://localhost:1337";
+
   // Extract base domain for prefetch (API_BASE_URL in constants includes /api suffix)
   const API_BASE_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL
     ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api$/, "")
-    : "http://localhost:1337";
+    : defaultApiBaseDomain;
 
   return (
     <html
