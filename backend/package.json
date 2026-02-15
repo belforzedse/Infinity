@@ -59,6 +59,7 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "5.3.4",
     "redis": "^4.7.0",
+    "strapi-plugin-rest-cache": "^4.2.9",
     "styled-components": "5.3.3"
   },
   "devDependencies": {

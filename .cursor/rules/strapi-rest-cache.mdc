@@ -1,0 +1,30 @@
+---
+description: Strapi REST cache plugin - in-memory response cache for public API to reduce DB load
+globs: backend/config/plugins.ts, backend/src/**/lifecycles.ts
+alwaysApply: false
+---
+
+# Strapi REST Cache
+
+The backend uses **strapi-plugin-rest-cache** (v4) to cache REST responses in memory. This reduces repeated DB hits for the same product/category/navigation requests.
+
+## Configuration
+
+- **File:** `backend/config/plugins.ts` under the `"rest-cache"` key.
+- **Provider:** `memory` (LRU, max 100k entries, maxAge 5 minutes).
+- **Invalidation:** Cache is invalidated when the related content type is updated (create/update/delete).
+
+## Cached content types
+
+- Static: footer, navigation, product-category (and related), product-size-helper, product-tag, variation colors/models/sizes, shipping (and cities/provinces).
+- Semi-dynamic (5 min acceptable): product, product-variation, product-faq, product-review*, discount, general-discount.
+
+Cart, order, stock, wallet, address, and transaction APIs are **not** cached.
+
+## Dependency
+
+- **Package:** `strapi-plugin-rest-cache` (^4.2.9) in `backend/package.json`. The plugin brings in `strapi-provider-rest-cache-memory` as a dependency.
+
+## Other caching
+
+- **cache-headers** middleware (`backend/src/middlewares/cache-headers.ts`) sets HTTP Cache-Control and ETag for product/static/user GET requests (browser/CDN caching); the request still hits Strapi unless cached by CDN/browser.
