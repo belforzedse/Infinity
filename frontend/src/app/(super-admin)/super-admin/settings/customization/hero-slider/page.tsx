@@ -28,6 +28,7 @@ export default function HeroSliderCustomizationPage() {
           onSaveDraft={editor.handleSaveDraft}
           onPublish={editor.handlePublish}
           onAddSlide={editor.addSlide}
+          onSyncTabletMobileFromDesktop={editor.syncTabletMobileFromDesktop}
         />
 
         <TemplatePreview

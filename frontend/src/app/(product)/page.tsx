@@ -67,7 +67,7 @@ export default async function Home() {
   ] = await Promise.all([
     getHomepageSections(),
     getLatestBlogPosts(),
-    getProductCategories({ parentOnly: true, sort: "Title:asc" }),
+    getProductCategories({ parentsWithChildrenOnly: true, sort: "Title:asc" }),
     getPublicSuperAdminSettings(),
   ]);
 

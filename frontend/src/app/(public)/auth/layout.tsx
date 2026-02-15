@@ -6,6 +6,8 @@ import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { UserService } from "@/services";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
+import { currentUserAtom, userLoadingAtom } from "@/lib/atoms/auth";
+import { jotaiStore } from "@/lib/jotaiStore";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -28,10 +30,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     // Get the redirect parameter if it exists
     const redirectParam = searchParams.get("redirect");
 
-    // Redirect authenticated users based on role (or to the redirect URL if provided)
+    // Redirect authenticated users based on role (or to the redirect URL if provided).
+    // Set currentUserAtom so checkout (and other pages) see the user immediately and don't redirect back to auth.
     UserService.me()
       .then((me) => {
-        // If there's a redirect parameter, prioritize it
+        jotaiStore.set(currentUserAtom, me);
+        jotaiStore.set(userLoadingAtom, false);
         if (redirectParam) {
           router.replace(redirectParam);
         } else if (me?.isAdmin) {

@@ -468,8 +468,8 @@ function sanitizeImageUrl(value: unknown): string {
 
   if (normalized.startsWith("/")) return normalized;
   if (/^https?:\/\//i.test(normalized)) return normalized;
-
-  return "";
+  // Strapi may return relative paths like "uploads/..."; normalize so resolveAssetUrl can build full URL
+  return `/${normalized}`;
 }
 
 function sanitizeDateIso(value: unknown): string | undefined {
@@ -1014,6 +1014,145 @@ function normalizeSlide(value: unknown, index: number): HeroSlideConfig {
       },
       mobile: {
         slots: normalizeMobileSlots(isRecord(devicesRaw.mobile) ? devicesRaw.mobile.slots : undefined),
+      },
+    },
+  };
+}
+
+/**
+ * Syncs tablet and mobile slots from desktop content. Copies content (title, subtitle,
+ * images, links, tracking) from desktop slots and applies device-specific default
+ * styling for tablet and mobile.
+ */
+export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlideConfig {
+  const d = slide.devices.desktop.slots;
+
+  const headlineContent = {
+    title: d.topLeftTextBanner.title,
+    subtitle: d.topLeftTextBanner.subtitle,
+    link: d.topLeftTextBanner.link,
+    tracking: d.topLeftTextBanner.tracking,
+  };
+
+  const mainVisualContent = {
+    backgroundImageUrl: d.rightBanner.backgroundImageUrl,
+    foregroundImageUrl: d.rightBanner.foregroundImageUrl,
+    foregroundAlt: d.rightBanner.foregroundAlt,
+    link: d.rightBanner.link,
+    tracking: d.rightBanner.tracking,
+    backgroundColor: d.rightBanner.backgroundColor,
+    backgroundType: d.rightBanner.backgroundType,
+  };
+
+  const cardLeftContent = {
+    title: d.bottomActionBannerLeft.title,
+    subtitle: d.bottomActionBannerLeft.subtitle,
+    imageUrl: d.bottomActionBannerLeft.imageUrl,
+    imageAlt: d.bottomActionBannerLeft.imageAlt,
+    imageHref: d.bottomActionBannerLeft.imageHref,
+    buttonLabel: d.bottomActionBannerLeft.buttonLabel,
+    buttonHref: d.bottomActionBannerLeft.buttonHref,
+    link: d.bottomActionBannerLeft.link,
+    tracking: d.bottomActionBannerLeft.tracking,
+    backgroundImageUrl: d.bottomActionBannerLeft.backgroundImageUrl,
+    backgroundColor: d.bottomActionBannerLeft.backgroundColor,
+    backgroundType: d.bottomActionBannerLeft.backgroundType,
+  };
+
+  const cardRightContent = {
+    title: d.bottomActionBannerRight.title,
+    subtitle: d.bottomActionBannerRight.subtitle,
+    imageUrl: d.bottomActionBannerRight.imageUrl,
+    imageAlt: d.bottomActionBannerRight.imageAlt,
+    imageHref: d.bottomActionBannerRight.imageHref,
+    buttonLabel: d.bottomActionBannerRight.buttonLabel,
+    buttonHref: d.bottomActionBannerRight.buttonHref,
+    link: d.bottomActionBannerRight.link,
+    tracking: d.bottomActionBannerRight.tracking,
+    backgroundImageUrl: d.bottomActionBannerRight.backgroundImageUrl,
+    backgroundColor: d.bottomActionBannerRight.backgroundColor,
+    backgroundType: d.bottomActionBannerRight.backgroundType,
+  };
+
+  return {
+    ...slide,
+    devices: {
+      ...slide.devices,
+      tablet: {
+        slots: {
+          primaryBanner: normalizeHeadlineSlot(headlineContent, {
+            titleStyle: {
+              ...DEFAULT_PRIMARY_TITLE_STYLE,
+              fontSize: "lg:text-[40px] 2xl:text-[48px]",
+            },
+            subtitleStyle: {
+              ...DEFAULT_PRIMARY_SUBTITLE_STYLE,
+              fontSize: "lg:text-[24px] 2xl:text-[28px]",
+            },
+            backgroundColor: "bg-stone-50",
+            bottomMarginPx: 0,
+            className: DEFAULT_TABLET_HEADLINE_CLASSNAME,
+            titleClassName: "",
+            subtitleClassName: "",
+          }),
+          bottomActionBannerLeft: normalizeCardSlot(cardLeftContent, {
+            className: DEFAULT_TABLET_CARD_LEFT_CLASSNAME,
+            imageClassName: DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME,
+            imageObjectPosition: "",
+            contentAlignment: "center",
+          }),
+          bottomActionBannerRight: normalizeCardSlot(cardRightContent, {
+            className: DEFAULT_TABLET_CARD_RIGHT_CLASSNAME,
+            imageClassName: DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME,
+            imageObjectPosition: "left",
+            contentAlignment: "bottom",
+          }),
+          heroBanner: normalizeMainVisualSlot(mainVisualContent, {
+            backgroundWidth: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH,
+            backgroundHeight: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT,
+            backgroundPosition: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION,
+            backgroundSize: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE,
+            backgroundClassName: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+            foregroundClassName: DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME,
+            foregroundObjectPosition: DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION,
+          }),
+        },
+      },
+      mobile: {
+        slots: {
+          primaryBanner: normalizeHeadlineSlot(headlineContent, {
+            titleStyle: DEFAULT_PRIMARY_TITLE_STYLE,
+            subtitleStyle: DEFAULT_PRIMARY_SUBTITLE_STYLE,
+            backgroundColor: "bg-stone-50",
+            bottomMarginPx: 0,
+            className: DEFAULT_MOBILE_HEADLINE_CLASSNAME,
+            titleClassName: "",
+            subtitleClassName: "",
+          }),
+          bottomActionBannerLeft: normalizeCardSlot(cardLeftContent, {
+            className: DEFAULT_MOBILE_CARD_LEFT_CLASSNAME,
+            imageClassName: DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
+            imageObjectPosition: "bottom left",
+            contentAlignment: "center",
+            paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+          }),
+          bottomActionBannerRight: normalizeCardSlot(cardRightContent, {
+            className: DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME,
+            imageClassName: DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
+            imageObjectPosition: "left",
+            contentAlignment: "center",
+            paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+          }),
+          heroBanner: normalizeMainVisualSlot(mainVisualContent, {
+            backgroundWidth: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH,
+            backgroundHeight: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT,
+            backgroundPosition: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION,
+            backgroundSize: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE,
+            backgroundClassName: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME,
+            foregroundClassName: DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME,
+            foregroundObjectPosition: DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION,
+          }),
+        },
       },
     },
   };

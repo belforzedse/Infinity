@@ -24,6 +24,23 @@ alwaysApply: false
 ### Mobile
 - Same slot keys as tablet
 
+## Auto-Sync: Desktop to Tablet and Mobile
+
+When desktop slides are done, tablet and mobile slides are auto-generated from desktop content:
+
+1. **On save draft**: Tablet and mobile slots are automatically synced from desktop before saving. Content (title, subtitle, images, links, tracking) is copied; styling uses device-specific defaults (not desktop styling).
+2. **Manual sync button**: "همگام‌سازی تبلت و موبایل از دسکتاپ" in the PublishBar runs the sync immediately (in-memory, without saving).
+
+**Slot mapping** (desktop → tablet/mobile):
+| Desktop | Tablet | Mobile |
+|---------|--------|--------|
+| `topLeftTextBanner` | `primaryBanner` | `primaryBanner` |
+| `rightBanner` | `heroBanner` | `heroBanner` |
+| `bottomActionBannerLeft` | `bottomActionBannerLeft` | `bottomActionBannerLeft` |
+| `bottomActionBannerRight` | `bottomActionBannerRight` | `bottomActionBannerRight` |
+
+**Implementation**: `syncTabletAndMobileFromDesktop` in [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) extracts content from desktop slots and passes it through `normalizeHeadlineSlot`, `normalizeCardSlot`, `normalizeMainVisualSlot` with device-specific defaults.
+
 ## CMS Mapping
 
 - Editor payload (`HeroSliderPayload`) is stored via `/settings/hero-slider/draft` (PUT) and published via `/settings/hero-slider/publish` (POST).
@@ -70,10 +87,10 @@ Font size dropdowns show human-friendly labels via `getFontSizeDisplayLabel()` a
 ## Key Files
 
 - [frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page
-- [frontend/src/hooks/useHeroSliderEditor.ts](frontend/src/hooks/useHeroSliderEditor.ts) — **useHeroSliderEditor**: Custom hook that owns all hero slider editor state, effects, and handlers. Responsibilities: data fetch (`getHeroSliderDraftAndPublished`), draft/published/meta state, selected slide/slot/device syncing, slide CRUD (add, duplicate, delete, reorder), slot updates, save draft, publish, link/tracking changes. Exposes minimal API: `isLoading`, `isSavingDraft`, `isPublishing`, `draft`, `published`, `meta`, `selectedSlide`, `selectedSlot`, `slotTrackingForForm`, selection setters, and handler functions.
+- [frontend/src/hooks/useHeroSliderEditor.ts](frontend/src/hooks/useHeroSliderEditor.ts) — **useHeroSliderEditor**: Custom hook that owns all hero slider editor state, effects, and handlers. Responsibilities: data fetch (`getHeroSliderDraftAndPublished`), draft/published/meta state, selected slide/slot/device syncing, slide CRUD (add, duplicate, delete, reorder), slot updates, save draft (with auto-sync of tablet/mobile from desktop), publish, `syncTabletMobileFromDesktop` for manual sync, link/tracking changes. Exposes minimal API: `isLoading`, `isSavingDraft`, `isPublishing`, `draft`, `published`, `meta`, `selectedSlide`, `selectedSlot`, `slotTrackingForForm`, selection setters, and handler functions.
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Preview + in-place editing
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/editors/](frontend/src/components/SuperAdmin/HeroSliderEditor/editors/) — Slot editors
 - [frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/](frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/) — Device canvases
 - [frontend/src/components/Hero/config/fromCms.ts](frontend/src/components/Hero/config/fromCms.ts) — CMS → layout mapping
-- [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) — Types and defaults
+- [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) — Types, defaults, `syncTabletAndMobileFromDesktop`
 - [frontend/src/types/super-admin/heroSliderPackages.ts](frontend/src/types/super-admin/heroSliderPackages.ts) — Style presets

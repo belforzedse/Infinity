@@ -9,6 +9,7 @@ import {
 import {
   createDefaultHeroSliderPayload,
   normalizeHeroSliderPayload,
+  syncTabletAndMobileFromDesktop,
   type HeroDesktopSlotKey,
   type HeroMobileSlotKey,
   type HeroSlideConfig,
@@ -266,7 +267,11 @@ export function useHeroSliderEditor() {
   const handleSaveDraft = async () => {
     try {
       setIsSavingDraft(true);
-      const savedDraft = await updateHeroSliderDraft(draft);
+      const syncedDraft: HeroSliderPayload = {
+        ...draft,
+        slides: draft.slides.map(syncTabletAndMobileFromDesktop),
+      };
+      const savedDraft = await updateHeroSliderDraft(syncedDraft);
       setDraft(savedDraft);
       toast.success("پیش‌نویس هیرو ذخیره شد");
     } catch (error) {
@@ -275,6 +280,14 @@ export function useHeroSliderEditor() {
     } finally {
       setIsSavingDraft(false);
     }
+  };
+
+  const syncTabletMobileFromDesktop = () => {
+    setDraft((prev) => ({
+      ...prev,
+      slides: prev.slides.map(syncTabletAndMobileFromDesktop),
+    }));
+    toast.success("تبلت و موبایل از دسکتاپ همگام‌سازی شدند");
   };
 
   const handlePublish = async () => {
@@ -348,6 +361,7 @@ export function useHeroSliderEditor() {
     updateSelectedSlide,
     handleSaveDraft,
     handlePublish,
+    syncTabletMobileFromDesktop,
     handleSelectedSlotLinkChange,
     handleSelectedSlotTrackingChange,
     updateAutoplayIntervalMs,

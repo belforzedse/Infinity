@@ -27,6 +27,10 @@ interface CategoryRelation {
   data?: { id: number } | null;
 }
 
+interface ChildrenRelation {
+  data?: { id: number }[] | null;
+}
+
 interface RawProductCategory {
   id: number;
   attributes?: {
@@ -35,12 +39,14 @@ interface RawProductCategory {
     Color?: string | null;
     Image?: CategoryImageField | null;
     parent?: CategoryRelation | null;
+    children?: ChildrenRelation | null;
   };
   Title?: string;
   Slug?: string;
   Color?: string | null;
   Image?: CategoryImageField | null;
   parent?: CategoryRelation | null;
+  children?: ChildrenRelation | null;
 }
 
 export interface ProductCategorySummary {
@@ -53,10 +59,17 @@ export interface ProductCategorySummary {
   imageWidth?: number | null;
   imageHeight?: number | null;
   parentId: number | null;
+  /** True when category has at least one child (only set when children were populated). */
+  hasChildren?: boolean;
 }
 
 export interface FetchProductCategoriesOptions {
   parentOnly?: boolean;
+  /**
+   * When true, only return parent categories that have at least one child.
+   * Implies parentOnly. Use for homepage carousel so leaf-only parents are hidden.
+   */
+  parentsWithChildrenOnly?: boolean;
   limit?: number;
   sort?: string;
   cache?: RequestCache;
@@ -94,6 +107,14 @@ const normalizeHexColor = (value?: string | null): string | null => {
   return trimmed;
 };
 
+function dedupeCategoriesById(categories: ProductCategorySummary[]): ProductCategorySummary[] {
+  const byId = new Map<number, ProductCategorySummary>();
+  for (const c of categories) {
+    if (!byId.has(c.id)) byId.set(c.id, c);
+  }
+  return [...byId.values()];
+}
+
 export async function getProductCategories(
   options: FetchProductCategoriesOptions = {},
 ): Promise<ProductCategorySummary[]> {
@@ -106,8 +127,12 @@ export async function getProductCategories(
   params.append("populate[0]", "Image");
   params.append("populate[1]", "parent");
 
-  if (options.parentOnly) {
+  const parentOnly = options.parentOnly || options.parentsWithChildrenOnly;
+  if (parentOnly) {
     params.append("filters[parent][id][$null]", "true");
+  }
+  if (options.parentsWithChildrenOnly) {
+    params.append("populate[2]", "children");
   }
 
   const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
@@ -128,7 +153,8 @@ export async function getProductCategories(
     if (typeof window === "undefined") {
       logger.info("[ProductCategories] Fetching categories", {
         url: url.replace(API_BASE_URL, "[BASE_URL]"),
-        parentOnly: !!options.parentOnly,
+        parentOnly: !!parentOnly,
+        parentsWithChildrenOnly: !!options.parentsWithChildrenOnly,
       });
     }
 
@@ -157,6 +183,8 @@ export async function getProductCategories(
         const color = normalizeHexColor(attrs.Color);
         const parentId = attrs.parent?.data?.id ?? null;
         const image = resolveCategoryImage(attrs.Image);
+        const childrenData = attrs.children?.data ?? item.children?.data;
+        const hasChildren = Array.isArray(childrenData) && childrenData.length > 0;
 
         return {
           id: item.id,
@@ -168,15 +196,21 @@ export async function getProductCategories(
           imageWidth: image.width,
           imageHeight: image.height,
           parentId,
+          hasChildren: options.parentsWithChildrenOnly ? hasChildren : undefined,
         } as ProductCategorySummary;
       })
       .filter((item) => item.slug);
 
-    if (options.parentOnly) {
-      return mapped.filter((item) => !item.parentId);
+    if (parentOnly) {
+      const noParent = mapped.filter((item) => !item.parentId);
+      const deduped = dedupeCategoriesById(noParent);
+      if (options.parentsWithChildrenOnly) {
+        return deduped.filter((c) => c.hasChildren === true);
+      }
+      return deduped;
     }
 
-    return mapped;
+    return dedupeCategoriesById(mapped);
   } catch (error) {
     if (typeof window === "undefined") {
       logger.error("[ProductCategories] Unexpected error fetching categories", {

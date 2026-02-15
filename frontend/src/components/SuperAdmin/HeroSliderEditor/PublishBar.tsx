@@ -15,6 +15,7 @@ type Props = {
   onSaveDraft: () => void;
   onPublish: () => void;
   onAddSlide: () => void;
+  onSyncTabletMobileFromDesktop: () => void;
 };
 
 export default function PublishBar({
@@ -26,6 +27,7 @@ export default function PublishBar({
   onSaveDraft,
   onPublish,
   onAddSlide,
+  onSyncTabletMobileFromDesktop,
 }: Props) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -53,6 +55,15 @@ export default function PublishBar({
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
             افزودن اسلاید
+          </button>
+          <button
+            type="button"
+            onClick={onSyncTabletMobileFromDesktop}
+            disabled={draft.slides.length === 0}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            title="کپی محتوای دسکتاپ به تبلت و موبایل با استایل پیش‌فرض"
+          >
+            همگام‌سازی تبلت و موبایل از دسکتاپ
           </button>
           <button
             type="button"

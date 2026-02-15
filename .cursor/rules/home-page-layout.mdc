@@ -18,7 +18,7 @@ The Home Page is structured as follows:
 1. **Hero Section** - Main banner at the top with responsive images for mobile/desktop
 2. **Secondary Banners** - Flex layout with different arrangements on mobile vs desktop
 3. **Discounted Products Section** - Shows products with discounts using `OffersListHomePage` component
-4. **Categories Section** - Grid display of product categories with images and backgrounds
+4. **Categories Section** - Category carousel showing only **parent categories that have at least one child** (no leaf-only parents, no duplicates). Data from `getProductCategories({ parentsWithChildrenOnly: true, sort: "Title:asc" })` in [src/services/product/categories.ts](mdc:frontend/src/services/product/categories.ts).
 5. **New Products Section** - Uses `OffersListHomePage` with `NewIcon` component
 6. **Popular Products Section** - Shows highest rated products
 

@@ -22,7 +22,8 @@ import {
 import toast from "react-hot-toast";
 import WalletService from "@/services/wallet";
 import { useCart } from "@/contexts/CartContext";
-import { currentUserAtom } from "@/lib/atoms/auth";
+import { currentUserAtom, userLoadingAtom } from "@/lib/atoms/auth";
+import { ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
 import { trackFunnelStep, trackMatomoEvent } from "@/lib/analytics/matomo";
 
 export type FormData = {
@@ -50,26 +51,35 @@ function ShoppingCartBillForm({}: Props) {
   const [__, setOrderNumber] = useAtom(orderNumberAtom);
   const router = useRouter();
   const currentUser = useAtomValue(currentUserAtom);
+  const userLoading = useAtomValue(userLoadingAtom);
   const [hasRedirected, setHasRedirected] = useState(false);
 
-  // Check authentication on mount - redirect to login if not authenticated
+  // Check authentication on mount - redirect to login if not authenticated.
+  // Wait for global auth loading to finish so we don't redirect while user is still being fetched
+  // (avoids loop when returning from auth with valid token).
   useEffect(() => {
-    // Get current pathname to avoid redirecting if already on auth page
     if (typeof window === "undefined") return;
 
     const currentPath = window.location.pathname;
-
-    // Only redirect if we're on checkout and not authenticated, and we haven't already redirected
-    if (currentPath.includes("/checkout") && !currentUser && !hasRedirected) {
-      setHasRedirected(true);
-      // User is not logged in, redirect to login with return URL
-      // Use hard browser navigation to preserve query parameters properly
-      const authUrl = "/auth?redirect=/checkout";
-      window.location.href = authUrl;
-    } else if (!currentPath.includes("/checkout")) {
+    if (!currentPath.includes("/checkout")) {
       setHasRedirected(false);
+      return;
     }
-  }, [currentUser, hasRedirected]);
+
+    // Don't redirect while user is still loading (AuthInitializer may be populating currentUser)
+    if (userLoading) return;
+    // Don't redirect if we already have a user
+    if (currentUser) return;
+    // Don't redirect if we've already sent the user to auth this "session"
+    if (hasRedirected) return;
+    // Belt-and-suspenders: if token exists, give the app a moment to hydrate user
+    const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    if (token) return;
+
+    setHasRedirected(true);
+    const authUrl = "/auth?redirect=/checkout";
+    window.location.href = authUrl;
+  }, [currentUser, userLoading, hasRedirected]);
 
   const {
     register,
