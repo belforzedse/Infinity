@@ -28,10 +28,16 @@ ENV NODE_ENV=production \
     STRAPI_DISABLE_SOURCEMAPS=${STRAPI_DISABLE_SOURCEMAPS} \
     NODE_OPTIONS=${NODE_OPTIONS}
 
+# su-exec so entrypoint can create uploads dir then run as node
+RUN apk add --no-cache su-exec
+
 WORKDIR /app
 
 COPY --from=builder /app /app
-RUN --mount=type=cache,target=/root/.npm npm prune --omit=dev
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN --mount=type=cache,target=/root/.npm npm prune --omit=dev && chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 1337
+USER root
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["npm", "run", "start:prod"]
