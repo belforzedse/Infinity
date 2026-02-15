@@ -504,7 +504,7 @@ export default async function PLPPage({
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.co";
   const SITE_NAME = "فروشگاه پوشاک اینفینیتی";
   // Use category title if available, fallback to slug
   const displayCategoryName = categoryTitle || validatedCategory;

@@ -33,25 +33,25 @@ export const FOOTER_DATA: FooterData = {
       { title: "فروشگاه", url: "/plp" },
       { title: "سبد خرید", url: "/cart" },
       // { title: "ویدیوهای آموزشی", url: "https://infinitycolor.co/videos/" },
-      { title: "اینفینیتی مگ", url: "https://new.infinitycolor.co/blog/" },
+      { title: "اینفینیتی مگ", url: "https://infinitycolor.co/blog/" },
     ],
   },
   second: {
     header: "دسترسی سریع",
     links: [
-      { title: "خرید بافت", url: "https://new.infinitycolor.co/plp?category=پلیور-و-بافت/" },
-      { title: "خرید پیراهن زنانه", url: "https://new.infinitycolor.co/plp?category=shirt/" },
+      { title: "خرید بافت", url: "https://infinitycolor.co/plp?category=پلیور-و-بافت/" },
+      { title: "خرید پیراهن زنانه", url: "https://infinitycolor.co/plp?category=shirt/" },
       {
         title: "خرید شال و روسری",
-        url: "https://new.infinitycolor.co/plp?category=shawls-and-scarves/",
+        url: "https://infinitycolor.co/plp?category=shawls-and-scarves/",
       },
       {
         title: "خرید شومیز",
-        url: "https://new.infinitycolor.co/plp?category=paperback-and-tonic/",
+        url: "https://infinitycolor.co/plp?category=paperback-and-tonic/",
       },
       {
         title: "خرید مانتو",
-        url: "https://new.infinitycolor.co/plp?category=coat-and-mantle/",
+        url: "https://infinitycolor.co/plp?category=coat-and-mantle/",
       },
     ],
   },
