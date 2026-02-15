@@ -150,8 +150,6 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
 
     const user = (await (this as any).resolveUserFromAuthHeader(ctx)) || ctx.state.user;
 
-    strapi.log.debug("🔍 Original populate from frontend:", JSON.stringify(ctx.query.populate, null, 2));
-
     const actorRoleName = await this.getActorRoleName(user?.id, user);
     const hasEditorRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
@@ -192,17 +190,6 @@ const blogPostController = factories.createCoreController("api::blog-post.blog-p
     const response = await (this as any).transformResponse(enrichedResults, {
       pagination,
     }) as any;
-
-    const postsCount = response?.data?.length || 0;
-    strapi.log.debug(`📊 Blog post find result: ${postsCount} posts`);
-    if (postsCount > 0) {
-      const firstPost = response.data?.[0];
-      const firstAuthor = firstPost?.attributes?.blog_author || firstPost?.blog_author;
-      strapi.log.debug(`👤 Author in response: ${firstAuthor ? "EXISTS" : "MISSING"}`);
-      if (firstAuthor) {
-        strapi.log.debug(`📝 Author name: ${firstAuthor.ResolvedAuthorName || firstAuthor.Name}`);
-      }
-    }
 
     return response;
   },
