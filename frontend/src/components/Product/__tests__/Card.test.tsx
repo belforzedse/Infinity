@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ProductCard, { type ProductCardProps } from "../Card";
 import { faNum } from "@/utils/faNum";
 
@@ -11,10 +11,21 @@ jest.mock("@/hooks/useProductLike", () => ({
   })),
 }));
 
+jest.mock("@/services/product/product", () => ({
+  __esModule: true,
+  getLazySecondaryMediaByProductId: jest.fn(),
+}));
+
 jest.mock("../ImageSlider", () => ({
   __esModule: true,
   default: ({ images, title }: { images: string[]; title: string }) => (
-    <div data-testid="image-slider">{title}</div>
+    <div
+      data-testid="image-slider"
+      data-image-count={images.length}
+      data-images={images.join(",")}
+    >
+      {title}
+    </div>
   ),
 }));
 
@@ -31,6 +42,10 @@ jest.mock("../Icons/GridIcon", () => ({
 }));
 
 describe("ProductCard", () => {
+  const useProductLike = require("@/hooks/useProductLike").default;
+  const getLazySecondaryMediaByProductId =
+    require("@/services/product/product").getLazySecondaryMediaByProductId;
+
   const mockProps: ProductCardProps = {
     images: ["/image1.jpg", "/image2.jpg"],
     category: "Category Name",
@@ -40,6 +55,16 @@ describe("ProductCard", () => {
     seenCount: 50,
     isAvailable: true,
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useProductLike.mockReturnValue({
+      isLiked: false,
+      isLoading: false,
+      toggleLike: jest.fn(),
+    });
+    getLazySecondaryMediaByProductId.mockResolvedValue([]);
+  });
 
   it("should render product card with basic information", () => {
     render(<ProductCard {...mockProps} />);
@@ -185,5 +210,103 @@ describe("ProductCard", () => {
     render(<ProductCard {...mockProps} price={100000} discountPrice={0} />);
 
     expect(screen.queryByText(`${faNum(0)} تومان`)).not.toBeInTheDocument();
+  });
+
+  it("should lazy-load secondary images once on hover when initial image count is one", async () => {
+    getLazySecondaryMediaByProductId.mockResolvedValue(["/image2.jpg", "/image3.jpg"]);
+    const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
+    const article = container.querySelector("article");
+
+    expect(article).toBeInTheDocument();
+    fireEvent.mouseEnter(article!);
+    fireEvent.mouseEnter(article!);
+
+    await waitFor(() => {
+      expect(getLazySecondaryMediaByProductId).toHaveBeenCalledTimes(1);
+    });
+
+    const slider = screen.getByTestId("image-slider");
+    expect(slider).toHaveAttribute("data-image-count", "3");
+    expect(slider).toHaveAttribute("data-images", "/image1.jpg,/image2.jpg,/image3.jpg");
+  });
+
+  it("should not request lazy media when product already has multiple images", () => {
+    const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg", "/image2.jpg"]} />);
+    const article = container.querySelector("article");
+
+    expect(article).toBeInTheDocument();
+    fireEvent.mouseEnter(article!);
+
+    expect(getLazySecondaryMediaByProductId).not.toHaveBeenCalled();
+  });
+
+  it("should lazy-load secondary media on keyboard focus intent", async () => {
+    getLazySecondaryMediaByProductId.mockResolvedValue(["/image2.jpg"]);
+    render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
+
+    fireEvent.focus(screen.getByRole("link"));
+
+    await waitFor(() => {
+      expect(getLazySecondaryMediaByProductId).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("should lazy-load secondary media on first touch intent", async () => {
+    getLazySecondaryMediaByProductId.mockResolvedValue(["/image2.jpg"]);
+    const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
+    const article = container.querySelector("article");
+
+    expect(article).toBeInTheDocument();
+    fireEvent.touchStart(article!);
+
+    await waitFor(() => {
+      expect(getLazySecondaryMediaByProductId).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("should merge lazy-loaded images without duplicates", async () => {
+    getLazySecondaryMediaByProductId.mockResolvedValue(["/image1.jpg", "/image2.jpg", "/image2.jpg"]);
+    const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
+    const article = container.querySelector("article");
+
+    expect(article).toBeInTheDocument();
+    fireEvent.mouseEnter(article!);
+
+    await waitFor(() => {
+      expect(getLazySecondaryMediaByProductId).toHaveBeenCalledTimes(1);
+    });
+
+    const slider = screen.getByTestId("image-slider");
+    expect(slider).toHaveAttribute("data-image-count", "2");
+    expect(slider).toHaveAttribute("data-images", "/image1.jpg,/image2.jpg");
+  });
+
+  it("should keep original images when lazy media fetch fails", async () => {
+    getLazySecondaryMediaByProductId.mockRejectedValue(new Error("fetch failed"));
+    const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
+    const article = container.querySelector("article");
+
+    expect(article).toBeInTheDocument();
+    fireEvent.mouseEnter(article!);
+
+    await waitFor(() => {
+      expect(getLazySecondaryMediaByProductId).toHaveBeenCalledTimes(1);
+    });
+
+    const slider = screen.getByTestId("image-slider");
+    expect(slider).toHaveAttribute("data-image-count", "1");
+    expect(slider).toHaveAttribute("data-images", "/image1.jpg");
+  });
+
+  it("should not lazy-load secondary media for unavailable products", () => {
+    const { container } = render(
+      <ProductCard {...mockProps} images={["/image1.jpg"]} isAvailable={false} />,
+    );
+    const article = container.querySelector("article");
+
+    expect(article).toBeInTheDocument();
+    fireEvent.mouseEnter(article!);
+
+    expect(getLazySecondaryMediaByProductId).not.toHaveBeenCalled();
   });
 });

@@ -244,6 +244,130 @@ const resolveColorData = (
   }
   return input as VariationColorRelation;
 };
+
+const DEFAULT_LAZY_SECONDARY_MEDIA_LIMIT = 3;
+
+type LazyMediaAsset = {
+  attributes?: {
+    url?: string | null;
+    mime?: string | null;
+  } | null;
+} | null;
+
+type LazyMediaProductEntity = {
+  attributes?: {
+    CoverImage?: {
+      data?: {
+        attributes?: {
+          url?: string | null;
+        } | null;
+      } | null;
+    } | null;
+    Media?: {
+      data?: LazyMediaAsset[] | null;
+    } | null;
+  } | null;
+} | null;
+
+const lazySecondaryMediaResolved = new Map<number, string[]>();
+const lazySecondaryMediaPending = new Map<number, Promise<string[]>>();
+
+const normalizeAssetUrl = (path?: string | null): string => {
+  if (!path || typeof path !== "string") return "";
+  const trimmed = path.trim();
+  if (!trimmed) return "";
+  return resolveAssetUrl(trimmed);
+};
+
+export const extractLazySecondaryMediaUrls = (
+  product: LazyMediaProductEntity,
+): string[] => {
+  if (!product?.attributes) return [];
+
+  const coverUrl = normalizeAssetUrl(
+    product.attributes.CoverImage?.data?.attributes?.url,
+  );
+  const mediaItems = product.attributes.Media?.data;
+  if (!Array.isArray(mediaItems) || mediaItems.length === 0) {
+    return [];
+  }
+
+  const imageUrls = mediaItems
+    .filter((mediaItem) => {
+      const mime = mediaItem?.attributes?.mime;
+      return typeof mime === "string" && mime.startsWith("image/");
+    })
+    .map((mediaItem) => normalizeAssetUrl(mediaItem?.attributes?.url))
+    .filter((url): url is string => Boolean(url));
+
+  const deduped = Array.from(new Set(imageUrls));
+  return coverUrl ? deduped.filter((url) => url !== coverUrl) : deduped;
+};
+
+export const getLazySecondaryMediaByProductId = async (
+  productId: number,
+  limit: number = DEFAULT_LAZY_SECONDARY_MEDIA_LIMIT,
+): Promise<string[]> => {
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return [];
+  }
+
+  const safeLimit =
+    Number.isFinite(limit) && limit > 0
+      ? Math.floor(limit)
+      : DEFAULT_LAZY_SECONDARY_MEDIA_LIMIT;
+
+  const resolved = lazySecondaryMediaResolved.get(productId);
+  if (resolved) {
+    return resolved.slice(0, safeLimit);
+  }
+
+  const pending = lazySecondaryMediaPending.get(productId);
+  if (pending) {
+    const urls = await pending;
+    return urls.slice(0, safeLimit);
+  }
+
+  const endpoint =
+    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[id][$eq]=${productId}&` +
+    `filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
+    `fields[0]=Slug&` +
+    `populate[CoverImage][fields][0]=url&` +
+    `populate[Media][fields][0]=url&` +
+    `populate[Media][fields][1]=mime&` +
+    `pagination[limit]=1&` +
+    `pagination[withCount]=false`;
+
+  const requestPromise = (async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.getPublic<any>(endpoint, {
+        suppressAuthRedirect: true,
+        timeout: 8000,
+      });
+
+      const product = Array.isArray(response?.data) ? response.data[0] : null;
+      const urls = extractLazySecondaryMediaUrls(product);
+      lazySecondaryMediaResolved.set(productId, urls);
+      return urls;
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        logger.warn("[LazyMedia] Failed to fetch secondary media", {
+          productId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+      lazySecondaryMediaResolved.set(productId, []);
+      return [];
+    } finally {
+      lazySecondaryMediaPending.delete(productId);
+    }
+  })();
+
+  lazySecondaryMediaPending.set(productId, requestPromise);
+  const urls = await requestPromise;
+  return urls.slice(0, safeLimit);
+};
 // Get product by ID instead of slug since current API doesn't have slug field
 export const getProductById = async (id: string): Promise<ApiResponse<ProductDetail>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies&populate[15]=product_reviews.product_review_replies.user&populate[16]=product_reviews.product_review_replies.user.user_info`;

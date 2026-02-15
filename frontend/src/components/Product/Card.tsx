@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { type FC, useState, useMemo, useCallback } from "react";
+import { type FC, useState, useMemo, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { faNum } from "@/utils/faNum";
 import useProductLike from "@/hooks/useProductLike";
+import { getLazySecondaryMediaByProductId } from "@/services/product/product";
 
 // Components
 import ImageSlider from "./ImageSlider";
@@ -65,6 +66,8 @@ const ProductCard: FC<ProductCardProps> = ({
   // State
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [enrichedImages, setEnrichedImages] = useState(images);
+  const hasRequestedLazyMedia = useRef(false);
 
   // Hooks
   const {
@@ -76,6 +79,13 @@ const ProductCard: FC<ProductCardProps> = ({
   });
 
   // Memoized values
+  const imageSignature = useMemo(() => images.join("|"), [images]);
+
+  useEffect(() => {
+    setEnrichedImages(images);
+    hasRequestedLazyMedia.current = false;
+  }, [id, imageSignature]);
+
   const productUrl = useMemo(() => (slug ? `/pdp/${slug}` : `/pdp/${id.toString()}`), [slug, id]);
 
   const hasDiscount = useMemo(
@@ -84,8 +94,8 @@ const ProductCard: FC<ProductCardProps> = ({
   );
 
   const validImages = useMemo(
-    () => images.filter((img) => img && typeof img === "string" && img.trim() !== ""),
-    [images],
+    () => enrichedImages.filter((img) => img && typeof img === "string" && img.trim() !== ""),
+    [enrichedImages],
   );
 
   const variationImages = useMemo(() => validImages.slice(1, 4), [validImages]);
@@ -122,11 +132,49 @@ const ProductCard: FC<ProductCardProps> = ({
     [toggleLike],
   );
 
+  const maybeLoadSecondaryMedia = useCallback(async () => {
+    if (!isAvailable) return;
+    if (hasRequestedLazyMedia.current) return;
+    if (!Number.isInteger(id) || id <= 0) return;
+    if (validImages.length > 1) return;
+
+    hasRequestedLazyMedia.current = true;
+
+    try {
+      const secondaryImages = await getLazySecondaryMediaByProductId(id, 3);
+      if (!secondaryImages.length) return;
+
+      setEnrichedImages((currentImages) =>
+        Array.from(
+          new Set(
+            [...currentImages, ...secondaryImages].filter(
+              (img) => img && typeof img === "string" && img.trim() !== "",
+            ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.debug("[ProductCard] Secondary media fetch failed", {
+          productId: id,
+          error,
+        });
+      }
+    }
+  }, [id, isAvailable, validImages.length]);
+
+  const handleInteractionIntent = useCallback(() => {
+    void maybeLoadSecondaryMedia();
+  }, [maybeLoadSecondaryMedia]);
+
   return (
     <>
       <article
         className={`${isAvailable ? "group" : ""} relative w-full md:mx-auto md:w-fit`}
         aria-label={`محصول ${title}`}
+        onMouseEnter={handleInteractionIntent}
+        onFocusCapture={handleInteractionIntent}
+        onTouchStart={handleInteractionIntent}
       >
         <Link
           href={productUrl}
@@ -137,7 +185,7 @@ const ProductCard: FC<ProductCardProps> = ({
             {/* Image Section */}
             <div className="relative overflow-hidden rounded-[20px] md:h-[270px] md:w-[250px]">
               <ImageSlider
-                images={images}
+                images={enrichedImages}
                 title={title}
                 priority={priority}
                 isAvailable={isAvailable}
@@ -214,7 +262,9 @@ const ProductCard: FC<ProductCardProps> = ({
             id,
             title,
             slug,
-            imageUrl: images.find((img) => img && typeof img === "string" && img.trim() !== ""),
+            imageUrl: enrichedImages.find(
+              (img) => img && typeof img === "string" && img.trim() !== "",
+            ),
             price,
             discountPrice,
           }}
