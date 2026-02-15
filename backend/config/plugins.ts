@@ -10,6 +10,7 @@ export default () => ({
         },
       },
       strategy: {
+        maxAge: 5 * 60 * 1000, // 5 min TTL per cached response (plugin default is 1h)
         contentTypes: [
           // Semi-dynamic: 5 min TTL, invalidate on content update
           "api::footer.footer",
