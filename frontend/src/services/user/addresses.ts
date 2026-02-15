@@ -2,6 +2,7 @@
 import { handleAuthErrors } from "@/utils/auth";
 import { apiClient } from "@/lib/api-client";
 import { apiCache } from "@/lib/api-cache";
+import { CHECKOUT_MAX_RETRIES, CHECKOUT_REQUEST_TIMEOUT_MS } from "@/constants/api";
 
 // Use the central auth error handler instead of local implementation
 const handleAuthError = (error: any) => {
@@ -60,9 +61,10 @@ export const invalidateAddressCache = (): void => {
 
 export const getUserAddresses = async (): Promise<UserAddress[]> => {
   try {
-    const response = await apiClient.get(
-      "/local-user-addresses/me?pagination[page]=1&pagination[pageSize]=100&sort=createdAt:desc",
-    );
+    const response = await apiClient.get("/local-user-addresses/me?pagination[page]=1&pagination[pageSize]=100&sort=createdAt:desc", {
+      timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+      retries: CHECKOUT_MAX_RETRIES,
+    });
 
     return response.data as UserAddress[];
   } catch (error) {

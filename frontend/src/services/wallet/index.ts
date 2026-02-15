@@ -1,4 +1,5 @@
 import { apiClient } from "../index";
+import { CHECKOUT_MAX_RETRIES, CHECKOUT_REQUEST_TIMEOUT_MS } from "@/constants/api";
 
 export interface ChargeIntentResponse {
   success: boolean;
@@ -18,7 +19,10 @@ export interface WalletMeResponse {
 }
 
 export const getMyWallet = async (): Promise<WalletMeResponse> => {
-  const res = await apiClient.get<WalletMeResponse>("/local-user-wallet/me");
+  const res = await apiClient.get<WalletMeResponse>("/local-user-wallet/me", {
+    timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+    retries: CHECKOUT_MAX_RETRIES,
+  });
   return res as any;
 };
 

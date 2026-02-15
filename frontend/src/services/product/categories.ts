@@ -1,6 +1,7 @@
-import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL, CHECKOUT_REQUEST_TIMEOUT_MS, ENDPOINTS } from "@/constants/api";
 import logger from "@/utils/logger";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
 
 export interface CategoryImageFormats {
   thumbnail?: { url?: string; width?: number; height?: number };
@@ -134,6 +135,9 @@ export async function getProductCategories(
   if (options.parentsWithChildrenOnly) {
     params.append("populate[2]", "children");
   }
+  if (typeof window !== "undefined") {
+    params.append("_skip_global_loader", "1");
+  }
 
   const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
 
@@ -158,7 +162,13 @@ export async function getProductCategories(
       });
     }
 
-    const response = await fetch(url, requestInit);
+    const response =
+      typeof window === "undefined"
+        ? await fetch(url, requestInit)
+        : await fetchWithTimeout(url, {
+            ...requestInit,
+            timeoutMs: CHECKOUT_REQUEST_TIMEOUT_MS,
+          });
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Unknown error");

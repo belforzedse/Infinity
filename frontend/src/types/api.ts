@@ -28,6 +28,7 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean | undefined>;
   timeout?: number;
+  retries?: number;
   withCredentials?: boolean;
   skipAuth?: boolean; // Flag to skip authentication for public endpoints
   suppressAuthRedirect?: boolean;

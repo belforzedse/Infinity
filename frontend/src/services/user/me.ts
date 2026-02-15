@@ -1,4 +1,8 @@
-import { ENDPOINTS } from "@/constants/api"; // removed unused: HTTP_STATUS
+import {
+  CHECKOUT_MAX_RETRIES,
+  CHECKOUT_REQUEST_TIMEOUT_MS,
+  ENDPOINTS,
+} from "@/constants/api"; // removed unused: HTTP_STATUS
 import { handleAuthErrors } from "@/utils/auth";
 import type { ApiError } from "@/types/api";
 import { apiClient } from "@/lib/api-client";
@@ -39,6 +43,8 @@ export const me = async (requireAdmin: boolean = false): Promise<MeResponse> => 
       },
       // Force no caching for admin checks to ensure fresh role data
       cache: requireAdmin ? 'no-store' : 'default',
+      timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+      retries: CHECKOUT_MAX_RETRIES,
     });
 
     // Get the actual response data regardless of shape

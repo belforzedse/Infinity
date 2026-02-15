@@ -15,6 +15,11 @@ export const API_VERSION = "v1";
 // Request Timeout (in milliseconds)
 // 45s to allow slow API/upstream; retries handle transient issues
 export const REQUEST_TIMEOUT = 45000; // 45 seconds
+// Faster timeout profile for checkout-critical reads to reduce long-tail loading
+export const CHECKOUT_REQUEST_TIMEOUT_MS = 10000;
+export const CHECKOUT_MAX_RETRIES = 1;
+// Maximum time the fullscreen global overlay can block interactions
+export const GLOBAL_OVERLAY_MAX_BLOCKING_MS = 6000;
 
 // Retry Configuration
 export const RETRY_CONFIG = {

@@ -72,7 +72,7 @@ function ShoppingCartBillDeliveryForm({
     };
 
     fetchShippingMethods();
-  }, [setValue, selectedShipping]);
+  }, []);
 
   return (
     <div className="flex flex-col gap-5 rounded-2xl bg-stone-50 p-5">

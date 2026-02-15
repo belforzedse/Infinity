@@ -1,4 +1,5 @@
 import { apiClient } from "./index";
+import { CHECKOUT_MAX_RETRIES, CHECKOUT_REQUEST_TIMEOUT_MS } from "@/constants/api";
 
 export interface ShippingMethod {
   id: number;
@@ -62,7 +63,10 @@ export const getShippingMethods = async (
   const endpoint = `/shippings${queryString ? `?${queryString}` : ""}`;
 
   try {
-    const response = await apiClient.getPublic(endpoint);
+    const response = await apiClient.getPublic(endpoint, {
+      timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+      retries: CHECKOUT_MAX_RETRIES,
+    });
     return response.data as ShippingMethod[];
   } catch (error) {
     console.error("Error fetching shipping methods:", error);

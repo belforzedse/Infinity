@@ -174,6 +174,7 @@ class ApiClient {
     }
 
     const urlString = url.toString();
+    const retries = options?.retries ?? RETRY_CONFIG.maxRetries;
 
     // Generate cache key for request deduplication and caching
     const cacheKey = apiCache.generateKey(method, urlString, data);
@@ -205,7 +206,7 @@ class ApiClient {
           // Track background refresh to prevent duplicates
           const bgPromise = this.retryRequest(() =>
             this.executeRequest<T>(method, urlString, data, options, cached.etag)
-          )
+          , retries)
             .then(response => {
               // Update cache with fresh response
               const etag = this.extractETag(response.headers);
@@ -230,7 +231,7 @@ class ApiClient {
     // Execute request with retry logic
     const requestPromise = this.retryRequest(() =>
       this.executeRequest<T>(method, urlString, data, options, null)
-    );
+    , retries);
 
     // Track pending request (store the full requestPromise, not just data)
     // This ensures the cached pending value matches the method contract (Promise<ApiResponse<T>>)

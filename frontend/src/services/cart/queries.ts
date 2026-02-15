@@ -5,6 +5,7 @@ import type {
 } from "./types/cart";
 import { DEFAULT_CHECKOUT_GATEWAYS } from "./types/cart";
 import { unwrap } from "./helpers/response";
+import { CHECKOUT_MAX_RETRIES, CHECKOUT_REQUEST_TIMEOUT_MS } from "@/constants/api";
 
 type SnappEligibilityResponse = {
   eligible: boolean;
@@ -52,7 +53,10 @@ export const getSnappEligible = async (
 
 
   try {
-    const response = await apiClient.get<SnappEligibilityResponse>(url);
+    const response = await apiClient.get<SnappEligibilityResponse>(url, {
+      timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+      retries: CHECKOUT_MAX_RETRIES,
+    });
     return unwrap<SnappEligibilityResponse>(response) ?? { eligible: false };
   } catch {
     return { eligible: false };
@@ -85,7 +89,10 @@ export const getShippingPreview = async (
 
 export const getAvailableGateways = async (): Promise<CheckoutGatewayCode[]> => {
   try {
-    const response = await apiClient.get<AvailableGatewaysResponse>("/payment-gateway/available");
+    const response = await apiClient.get<AvailableGatewaysResponse>("/payment-gateway/available", {
+      timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+      retries: CHECKOUT_MAX_RETRIES,
+    });
     const payload = unwrap<AvailableGatewaysResponse>(response);
     const gatewayCodes = (payload?.gateways || [])
       .map((item) => String(item?.code || "").toLowerCase())

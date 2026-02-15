@@ -6,10 +6,11 @@ import SuspenseLoader from "./SuspenseLoader";
 import useSmoothLoading from "@/hooks/useSmoothLoading";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { GLOBAL_OVERLAY_MAX_BLOCKING_MS } from "@/constants/api";
 
 /** After this many ms, stop blocking clicks so the UI never stays stuck. */
-const MAX_BLOCKING_MS = 60_000;
+const MAX_BLOCKING_MS = GLOBAL_OVERLAY_MAX_BLOCKING_MS;
 
 export default function GlobalLoadingOverlay() {
   const pathname = usePathname();
@@ -22,21 +23,22 @@ export default function GlobalLoadingOverlay() {
     minVisibleMs: 300,
   });
 
-  const visibleSinceRef = useRef<number | null>(null);
   const [allowClickThrough, setAllowClickThrough] = useState(false);
 
   useEffect(() => {
-    if (visible) {
-      if (visibleSinceRef.current === null) visibleSinceRef.current = Date.now();
-      const elapsed = Date.now() - (visibleSinceRef.current ?? 0);
-      if (elapsed >= MAX_BLOCKING_MS && !allowClickThrough) {
-        setAllowClickThrough(true);
-      }
-    } else {
-      visibleSinceRef.current = null;
+    if (!visible) {
       setAllowClickThrough(false);
+      return;
     }
-  }, [visible, allowClickThrough]);
+
+    const timeoutId = window.setTimeout(() => {
+      setAllowClickThrough(true);
+    }, MAX_BLOCKING_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [visible]);
 
   // Skip overlay on super-admin routes where it interferes with editing UX
   if (pathname?.startsWith("/super-admin")) return null;

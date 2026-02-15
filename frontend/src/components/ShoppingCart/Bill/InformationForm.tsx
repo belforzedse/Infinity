@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import type { UseFormRegister, FieldErrors, Control, UseFormSetValue } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import Input from "@/components/Kits/Form/Input";
 import type { Option } from "@/components/Kits/Form/Select";
 import Select from "@/components/Kits/Form/Select";
@@ -16,6 +16,7 @@ import { addressesAtom, addressesLoadingAtom, addressesErrorAtom } from "@/atoms
 import AddAddress from "@/components/User/Address/AddAddress";
 import { getProvinces, getCities } from "@/services/location";
 import type { Province, City } from "@/services/location";
+import { currentUserAtom } from "@/lib/atoms/auth";
 
 interface Props {
   register: UseFormRegister<FormData>;
@@ -29,6 +30,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
   const [addresses, setAddresses] = useAtom(addressesAtom);
   const [loading, setLoading] = useAtom(addressesLoadingAtom);
   const [error, setError] = useAtom(addressesErrorAtom);
+  const currentUser = useAtomValue(currentUserAtom);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [isAddAddressModalOpen, setIsAddAddressModalOpen] = useState(false);
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -57,26 +59,8 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
       }
     };
 
-    const fetchUserInfo = async () => {
-      try {
-        const user = await UserService.me();
-
-        // Prefill form with user data
-        if (user) {
-          setValue("fullName", `${user.FirstName} ${user.LastName}`);
-          setValue("phoneNumber", user.Phone);
-        }
-      } catch (err: any) {
-        console.error("Failed to fetch user info:", err);
-        const rawErrorMessage = extractErrorMessage(err);
-        const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت اطلاعات کاربری");
-        toast.error(message);
-      }
-    };
-
     // Fetch addresses on mount
     fetchAddresses();
-    fetchUserInfo();
 
     // Refetch addresses when page becomes visible (user returns from another tab/page)
     const handleVisibilityChange = () => {
@@ -90,7 +74,38 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [setValue, setAddresses, setLoading, setError]);
+  }, [setAddresses, setLoading, setError]);
+
+  useEffect(() => {
+    const applyUserInfo = (user: { FirstName?: string; LastName?: string; Phone?: string }) => {
+      const fullName = [user.FirstName || "", user.LastName || ""].join(" ").trim();
+      if (fullName) setValue("fullName", fullName);
+      if (user.Phone) setValue("phoneNumber", user.Phone);
+    };
+
+    if (currentUser) {
+      applyUserInfo(currentUser as unknown as { FirstName?: string; LastName?: string; Phone?: string });
+      return;
+    }
+
+    if (typeof window !== "undefined" && !localStorage.getItem("accessToken")) {
+      return;
+    }
+
+    const fetchUserInfo = async () => {
+      try {
+        const user = await UserService.me();
+        if (user) applyUserInfo(user);
+      } catch (err: any) {
+        console.error("Failed to fetch user info:", err);
+        const rawErrorMessage = extractErrorMessage(err);
+        const message = translateErrorMessage(rawErrorMessage, "خطا در دریافت اطلاعات کاربری");
+        toast.error(message);
+      }
+    };
+
+    fetchUserInfo();
+  }, [currentUser, setValue]);
 
   // Watch the current address value from the form
   const selectedAddress = useWatch({ control, name: "address" });
