@@ -13,9 +13,8 @@ export const API_VERSION = "v1";
 
 
 // Request Timeout (in milliseconds)
-// Reduced to 30s with retry logic for better UX
-// Retries handle transient network issues
-export const REQUEST_TIMEOUT = 30000; // 30 seconds
+// 45s to allow slow API/upstream; retries handle transient issues
+export const REQUEST_TIMEOUT = 45000; // 45 seconds
 
 // Retry Configuration
 export const RETRY_CONFIG = {

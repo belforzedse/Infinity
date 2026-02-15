@@ -57,13 +57,14 @@ export const getHomepageSections = async (): Promise<{
     `pagination[limit]=60`; // Fetch more to have enough after filtering
 
   try {
+    // cache: 'no-store' — response exceeds Next.js Data Cache 2MB limit
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 60 }, // Revalidate every minute
+      cache: "no-store",
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
-    }).then(res => res.json());
+    }).then((res) => res.json());
 
     const allProducts = (response as any)?.data || [];
     const availableProducts = allProducts.filter(productHasStock);

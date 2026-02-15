@@ -297,6 +297,56 @@ Renewal keeps using the same paths; Nginx already points to `/etc/letsencrypt/li
 
 ---
 
+## Nginx tuning (worker_connections and timeouts)
+
+If you see **"768 worker_connections are not enough"** or **"upstream timed out"** in `error.log`, apply the following.
+
+### 1. Increase worker_connections (main Nginx config)
+
+Each page load opens many connections (fonts, CSS, JS). The default 768 is too low.
+
+Edit the main config:
+
+```bash
+sudo nano /etc/nginx/nginx.conf
+```
+
+Find the `events { }` block and set:
+
+```nginx
+events {
+    worker_connections 4096;
+    # use epoll;   # uncomment on Linux for better performance
+}
+```
+
+If there is no `events { }` block, add it at the top level (e.g. after the `user` directive).
+
+### 2. Increase proxy timeouts (site config)
+
+So slow upstream responses (Next.js/Strapi) don’t cause 504s.
+
+Edit your site config (e.g. `/etc/nginx/sites-available/infinitycolor.org` or `infinitycolor`):
+
+Inside each `location /` that has `proxy_pass` to the frontend (3000) or API (1337), add or adjust:
+
+```nginx
+proxy_connect_timeout 90s;
+proxy_send_timeout 90s;
+proxy_read_timeout 90s;
+```
+
+(You can use 120s if the app is often slow.)
+
+### 3. Test and reload
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
 ## Quick reference
 
 | Item | Value |

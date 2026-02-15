@@ -1,9 +1,23 @@
+const frontendUrl = process.env.FRONTEND_URL || process.env.FRONTEND_BASE_URL || "https://infinitycolor.co";
+const corsOrigins = [
+  frontendUrl.replace(/\/$/, ""),
+  "http://localhost:2888",
+  "http://127.0.0.1:2888",
+];
+
 export default [
   "strapi::logger",
   "strapi::errors",
   "strapi::security",
   "strapi::poweredBy",
-  "strapi::cors",
+  {
+    name: "strapi::cors",
+    config: {
+      enabled: true,
+      origin: corsOrigins,
+      credentials: true,
+    },
+  },
   "strapi::query",
   {
     name: "strapi::body",
