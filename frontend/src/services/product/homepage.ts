@@ -40,18 +40,24 @@ const productHasStock = (product: any): boolean => {
   });
 };
 
+const HOMEPAGE_FETCH_OPTIONS = {
+  next: { revalidate: 60 } as const,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+};
+
 /**
- * Fetch all homepage product sections in one API call
- * Reduces 3 API calls to 1 (66% reduction)
- * Filters and sorts products in memory for each section
+ * Fetch homepage product sections: batch for discounted + favorites, separate request for "new" (title contains G).
+ * "جدیدترین ها" = products whose Title contains "G" (case-insensitive), newest first, up to 20.
  */
 export const getHomepageSections = async (): Promise<{
   discounted: ProductCardProps[];
   new: ProductCardProps[];
   favorites: ProductCardProps[];
 }> => {
-  // Fetch a shared pool for homepage sections while keeping payload small enough for cacheability.
-  const endpoint =
+  const batchEndpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
     `${HOMEPAGE_PRODUCT_POPULATE}&` +
@@ -61,18 +67,27 @@ export const getHomepageSections = async (): Promise<{
     `pagination[limit]=48&` +
     `pagination[withCount]=false`;
 
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 60 },
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    }).then((res) => res.json());
+  const newEndpoint =
+    `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
+    `filters[Title][$containsi]=G&` +
+    `${HOMEPAGE_PRODUCT_POPULATE}&` +
+    `${PRODUCT_COMMON_FIELDS}&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
+    `sort[0]=createdAt:desc&` +
+    `pagination[limit]=20&` +
+    `pagination[withCount]=false`;
 
-    const allProducts = (response as any)?.data || [];
+  try {
+    const [batchResponse, newResponse] = await Promise.all([
+      fetch(`${API_BASE_URL}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) => res.json()),
+      fetch(`${API_BASE_URL}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) => res.json()),
+    ]);
+
+    const allProducts = (batchResponse as { data?: unknown[] })?.data || [];
     const availableProducts = allProducts.filter(productHasStock);
-    logger.info(`[BatchHomepage] Fetched ${allProducts.length} total products for all sections`);
+    logger.info(`[BatchHomepage] Fetched ${allProducts.length} total products for discounted/favorites`);
 
     // Filter for discounted products
     const discountedProducts = availableProducts.filter((product: any) => {
@@ -91,14 +106,8 @@ export const getHomepageSections = async (): Promise<{
       return hasDiscountedVariation;
     }).slice(0, 20); // Limit to 20
 
-    // Filter for new products (by createdAt)
-    const newProducts = [...availableProducts]
-      .sort((a: any, b: any) => {
-        const dateA = new Date(a.attributes.createdAt).getTime();
-        const dateB = new Date(b.attributes.createdAt).getTime();
-        return dateB - dateA; // Newest first
-      })
-      .slice(0, 20);
+    const newProductsRaw = (newResponse as { data?: unknown[] })?.data || [];
+    const newProducts = (newProductsRaw as unknown[]).filter(productHasStock).slice(0, 20);
 
     // Filter for favorite products (by rating)
     const favoriteProducts = [...availableProducts]
@@ -109,7 +118,7 @@ export const getHomepageSections = async (): Promise<{
       })
       .slice(0, 20);
 
-    logger.info(`[BatchHomepage] Split into: ${discountedProducts.length} discounted, ${newProducts.length} new, ${favoriteProducts.length} favorites`);
+    logger.info(`[BatchHomepage] Split into: ${discountedProducts.length} discounted, ${newProducts.length} new (title contains G), ${favoriteProducts.length} favorites`);
 
     return {
       discounted: formatProductsToCardProps(discountedProducts),

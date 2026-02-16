@@ -16,6 +16,7 @@ import {
   userLoadingAtom,
 } from "@/lib/atoms/auth";
 import { setAccessToken } from "@/utils/accessToken";
+import { isProfileIncomplete } from "@/utils/profile";
 import AuthReturnButton from "@/components/Auth/ReturnButton";
 
 export default function LoginPage() {
@@ -55,6 +56,16 @@ export default function LoginPage() {
             setUserData(me);
             setLoadingUser(false);
             setUserError(null);
+
+            // Redirect incomplete profiles to complete their info (non-admin only)
+            if (!me.isAdmin && isProfileIncomplete(me)) {
+              const params = new URLSearchParams();
+              if (me.Phone) params.set("phone", me.Phone);
+              if (storedRedirectUrl) params.set("redirect", storedRedirectUrl);
+              router.push(`/auth/register/info${params.toString() ? `?${params.toString()}` : ""}`);
+              setRedirectUrl(null);
+              return;
+            }
 
             // Use stored redirect URL if available, otherwise use role-based redirect
             if (storedRedirectUrl) {

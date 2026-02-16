@@ -1,0 +1,70 @@
+---
+description: Profile completion flow, validation, and incomplete-profile notice. Use when changing signup, login, register-info, or user profile UX.
+globs:
+alwaysApply: false
+---
+# Profile Completion Flow
+
+This rule documents how the application ensures users have at least first and last name set, and how incomplete profiles are prompted to complete their data.
+
+## Problem Addressed
+
+Users could end up with empty `local-user-info` records because:
+- OTP login creates a user and a profile with only the `user` relation (no name).
+- Existing users logging in via OTP or password were never sent to the "complete profile" step.
+- The register-info endpoint did not enforce required fields.
+
+## Backend Validation
+
+**File**: [backend/src/api/auth/controllers/auth.ts](backend/src/api/auth/controllers/auth.ts)
+
+The `registerInfo` handler validates before any DB work:
+- `firstName`: required, non-empty string. Returns 400 with message `"نام الزامی است"` if missing.
+- `lastName`: required, non-empty string. Returns 400 with message `"نام خانوادگی الزامی است"` if missing.
+- `birthDate` and `password` remain optional.
+
+Validation is request-scoped only: it does not modify or overwrite existing user records. Existing users with empty names remain unchanged until they submit the register-info form with names filled in.
+
+## Profile Completeness Check
+
+**File**: [frontend/src/utils/profile.ts](frontend/src/utils/profile.ts)
+
+- `isProfileIncomplete(user: MeResponse): boolean` — returns `true` when `FirstName` or `LastName` is missing or whitespace-only.
+- Used by login pages (redirect logic) and by `ProfileCompletionBanner`.
+
+## Login Flow Redirect
+
+When a non-admin user logs in (password or OTP) and their profile is incomplete:
+1. After `UserService.me()`, the app checks `!me.isAdmin && isProfileIncomplete(me)`.
+2. If true, redirect to `/auth/register/info?phone=...` (and optional `redirect=...` for post-completion).
+3. Otherwise, normal redirect (stored redirect URL, `/super-admin`, or `/account`).
+
+**Files**:
+- [frontend/src/app/(public)/auth/login/page.tsx](frontend/src/app/(public)/auth/login/page.tsx) — password login
+- [frontend/src/app/(public)/auth/login/otp/page.tsx](frontend/src/app/(public)/auth/login/otp/page.tsx) — OTP login
+
+## Register Info Page
+
+**File**: [frontend/src/app/(public)/auth/register/info/page.tsx](frontend/src/app/(public)/auth/register/info/page.tsx)
+
+- Used both for **new users** (after OTP during registration) and **existing users** (redirected from login when profile is incomplete).
+- Phone can come from query param `phone` or from `localStorage` key `pendingPhone`.
+- **Post-submit redirect**:
+  - If query has `redirect` and it is a path starting with `/`, navigate there.
+  - Otherwise navigate to `/account` (user is already logged in; no need to send to `/auth/login`).
+
+## Profile Completion Banner
+
+**File**: [frontend/src/components/User/Account/ProfileCompletionBanner.tsx](frontend/src/components/User/Account/ProfileCompletionBanner.tsx)
+
+- Amber/warning banner shown when the current user’s profile is incomplete (`isProfileIncomplete(userData)`).
+- Hidden for admins and when profile is complete.
+- **Dismissal**: Stored in `sessionStorage` under key `profileCompletionBannerDismissed`; banner reappears in a new session.
+- Contains a link "تکمیل اطلاعات" to `/account` and a close button.
+- **Placement**: Rendered in [frontend/src/app/(user)/layout.tsx](frontend/src/app/(user)/layout.tsx) above `{children}`, so it appears on all authenticated user pages (account, orders, wallet, addresses, etc.).
+
+## Related Types and Services
+
+- `MeResponse`: [frontend/src/services/user/me.ts](frontend/src/services/user/me.ts) — includes `FirstName`, `LastName`, `Phone`, etc.
+- Profile update: PUT `/auth/self` (see [frontend/src/services/user/updateProfile.ts](frontend/src/services/user/updateProfile.ts)).
+- Register info API: POST `/auth/register-info` (see [frontend/src/services/auth/register.ts](frontend/src/services/auth/register.ts)).

@@ -336,6 +336,18 @@ async function registerInfo(ctx) {
       ? birthDate.trim()
       : null;
 
+  // Validation applies only to this request; does not modify existing records except via the update below after validation passes.
+  if (!firstName || typeof firstName !== "string" || firstName.trim().length === 0) {
+    ctx.status = 400;
+    ctx.body = { message: "نام الزامی است" };
+    return;
+  }
+  if (!lastName || typeof lastName !== "string" || lastName.trim().length === 0) {
+    ctx.status = 400;
+    ctx.body = { message: "نام خانوادگی الزامی است" };
+    return;
+  }
+
   try {
     if (!user?.id) {
       const authHeader = ctx.request.header.authorization || "";

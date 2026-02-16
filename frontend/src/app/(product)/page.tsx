@@ -109,15 +109,18 @@ export default async function Home() {
     heroFromCms.desktopSlides.length > 0 ||
     heroFromCms.tabletSlides.length > 0 ||
     heroFromCms.mobileSlides.length > 0;
-  const effectiveHero = hasHeroSlides
-    ? heroFromCms
-    : {
-        desktopSlides: defaultSliderConfig.desktop,
-        tabletSlides: defaultSliderConfig.tablet,
-        mobileSlides: defaultSliderConfig.mobile,
-        autoplayIntervalMs: defaultSliderConfig.autoplayInterval ?? 600000,
-        autoplayEligibility: [] as boolean[],
-      };
+  // Default true: use hardcoded slides unless explicitly disabled via env
+  const forceFallback = process.env.NEXT_PUBLIC_FORCE_HERO_FALLBACK !== "false";
+  const effectiveHero =
+    forceFallback || !hasHeroSlides
+      ? {
+          desktopSlides: defaultSliderConfig.desktop,
+          tabletSlides: defaultSliderConfig.tablet,
+          mobileSlides: defaultSliderConfig.mobile,
+          autoplayIntervalMs: defaultSliderConfig.autoplayInterval ?? 600000,
+          autoplayEligibility: [] as boolean[],
+        }
+      : heroFromCms;
 
   return (
     <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">

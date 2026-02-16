@@ -86,10 +86,13 @@ export default function RegisterInfoPage() {
       });
 
       if (res.token || res.message) {
-        // Preserve redirect parameter when redirecting to login
+        // If user came from login redirect (incomplete profile), send to their intended destination or account
         const redirectParam = searchParams.get("redirect");
-        const redirectQuery = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : "";
-        router.push(`/auth/login${redirectQuery}`);
+        if (redirectParam && redirectParam.startsWith("/")) {
+          router.push(redirectParam);
+        } else {
+          router.push("/account");
+        }
       }
     } catch (error: any) {
       console.error(error);

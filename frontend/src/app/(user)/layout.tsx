@@ -2,6 +2,7 @@
 
 import Footer from "@/components/PLP/Footer";
 import Header from "@/components/User/Header";
+import ProfileCompletionBanner from "@/components/User/Account/ProfileCompletionBanner";
 import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
 import { useAccountFreshData } from "@/hooks/useAccountFreshData";
@@ -49,7 +50,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     <div className="public-layout bg-white pt-5">
       <div className="container mx-auto px-4 lg:p-0">
         <Header />
-
+        <ProfileCompletionBanner />
         {children}
 
         <footer>
