@@ -69,6 +69,12 @@ export async function updateSuperAdminSettings(
   if (settings.blogCategoryBannerOrder !== undefined) {
     data.blogCategoryBannerOrder = settings.blogCategoryBannerOrder;
   }
+  if (settings.homeNewestProductIds !== undefined) {
+    data.homeNewestProductIds = settings.homeNewestProductIds;
+  }
+  if (settings.homeDiscountedProductIds !== undefined) {
+    data.homeDiscountedProductIds = settings.homeDiscountedProductIds;
+  }
 
   if (Object.keys(data).length === 0) return;
 

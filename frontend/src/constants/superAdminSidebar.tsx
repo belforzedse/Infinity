@@ -78,6 +78,11 @@ const superAdminSidebar: SidebarItem[] = [
         href: "/super-admin/products",
       },
       {
+        id: "homepage-products",
+        label: "محصولات صفحه اصلی",
+        href: "/super-admin/products/homepage",
+      },
+      {
         id: "product-categories",
         label: "دسته بندی ها",
         href: "/super-admin/products/categories",

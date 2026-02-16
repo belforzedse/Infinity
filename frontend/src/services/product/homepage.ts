@@ -5,6 +5,7 @@ import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
 import { productTitleMatchesKeywords } from "@/utils/product";
 import logger from "@/utils/logger";
+import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 
 // Common fields for product queries
 const PRODUCT_COMMON_FIELDS = [
@@ -51,8 +52,44 @@ const HOMEPAGE_FETCH_OPTIONS = {
 };
 
 /**
+ * Fetch products by IDs with the same populate/fields as homepage sections.
+ * Returns products in the same order as the requested ids (Strapi order is undefined).
+ */
+export const getProductsByIds = async (ids: number[]): Promise<ProductCardProps[]> => {
+  if (ids.length === 0) return [];
+  const idParams = ids.map((id, i) => `filters[id][$in][${i}]=${id}`).join("&");
+  const endpoint =
+    `${ENDPOINTS.PRODUCT.PRODUCT}?${idParams}&` +
+    `filters[Status][$eq]=Active&` +
+    `filters[removedAt][$null]=true&` +
+    `${HOMEPAGE_PRODUCT_POPULATE}&` +
+    `${PRODUCT_COMMON_FIELDS}&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&` +
+    `pagination[limit]=${Math.max(ids.length, 20)}&` +
+    `pagination[withCount]=false`;
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) =>
+      res.json(),
+    );
+    const rawList = (response as { data?: unknown[] })?.data ?? [];
+    const withStock = (rawList as unknown[]).filter(productHasStock);
+    const idToIndex = new Map(ids.map((id, i) => [id, i]));
+    const sorted = [...withStock].sort((a: any, b: any) => {
+      const aIdx = idToIndex.get(Number(a?.id ?? 0)) ?? 999;
+      const bIdx = idToIndex.get(Number(b?.id ?? 0)) ?? 999;
+      return aIdx - bIdx;
+    });
+    return formatProductsToCardProps(sorted);
+  } catch (error) {
+    logger.error("[Homepage] getProductsByIds error:", error as any);
+    return [];
+  }
+};
+
+/**
  * Fetch homepage product sections: batch for discounted + favorites, separate request for "new" (title matches PRODUCT_BOOST_KEYWORDS).
- * "جدیدترین ها" = products whose Title contains any boost keyword (case-insensitive), newest first, up to 20.
+ * If settings contain curated product IDs (homeNewestProductIds, homeDiscountedProductIds), those are used instead of algorithmic selection.
  */
 export const getHomepageSections = async (): Promise<{
   discounted: ProductCardProps[];
@@ -83,58 +120,87 @@ export const getHomepageSections = async (): Promise<{
     `pagination[withCount]=false`;
 
   try {
-    const [batchResponse, newResponse] = await Promise.all([
-      fetch(`${API_BASE_URL}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) => res.json()),
-      fetch(`${API_BASE_URL}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) => res.json()),
+    const settings = await getPublicSuperAdminSettings();
+    const curatedNewest = settings.homeNewestProductIds.length > 0;
+    const curatedDiscounted = settings.homeDiscountedProductIds.length > 0;
+
+    const batchPromise = fetch(`${API_BASE_URL}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then(
+      (res) => res.json(),
+    );
+    const newPromise = curatedNewest
+      ? getProductsByIds(settings.homeNewestProductIds)
+      : fetch(`${API_BASE_URL}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS)
+          .then((res) => res.json())
+          .then((newResponse: { data?: unknown[] }) => {
+            const raw = newResponse?.data ?? [];
+            return formatProductsToCardProps(
+              (raw as unknown[]).filter(productHasStock).slice(0, 20),
+            );
+          });
+    const discountedCuratedPromise = curatedDiscounted
+      ? getProductsByIds(settings.homeDiscountedProductIds)
+      : Promise.resolve<ProductCardProps[] | null>(null);
+
+    const [batchResponse, newProducts, discountedCurated] = await Promise.all([
+      batchPromise,
+      newPromise,
+      discountedCuratedPromise,
     ]);
 
-    const allProducts = (batchResponse as { data?: unknown[] })?.data || [];
+    const allProducts = (batchResponse as { data?: unknown[] })?.data ?? [];
     const availableProducts = allProducts.filter(productHasStock);
     logger.info(`[BatchHomepage] Fetched ${allProducts.length} total products for discounted/favorites`);
 
-    // Filter for discounted products, then sort so products with G in title come first
-    const discountedProducts = availableProducts
-      .filter((product: any) => {
-        const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
-          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-          const hasStock = typeof stockCount === "number" && stockCount > 0;
-          if (!hasStock) return false;
+    let discounted: ProductCardProps[];
+    if (discountedCurated && discountedCurated.length > 0) {
+      discounted = discountedCurated;
+    } else {
+      const discountedProducts = availableProducts
+        .filter((product: any) => {
+          const variations = product?.attributes?.product_variations;
+          const data = variations?.data;
+          if (!Array.isArray(data)) return false;
+          return data.some((variation: any) => {
+            const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
+            const hasStock = typeof stockCount === "number" && stockCount > 0;
+            if (!hasStock) return false;
+            const price = parseFloat(String(variation.attributes?.Price ?? 0));
+            const generalDiscounts = variation.attributes?.general_discounts?.data;
+            if (Array.isArray(generalDiscounts) && generalDiscounts.length > 0) return true;
+            const discountPrice = variation.attributes?.DiscountPrice
+              ? parseFloat(String(variation.attributes.DiscountPrice))
+              : null;
+            return discountPrice != null && discountPrice < price;
+          });
+        })
+        .sort((a: any, b: any) => {
+          const aMatch = productTitleMatchesKeywords(a);
+          const bMatch = productTitleMatchesKeywords(b);
+          if (aMatch && !bMatch) return -1;
+          if (!aMatch && bMatch) return 1;
+          return 0;
+        })
+        .slice(0, 20);
+      discounted = formatProductsToCardProps(discountedProducts);
+    }
 
-          const price = parseFloat(variation.attributes.Price);
-          const generalDiscounts = variation.attributes.general_discounts?.data;
-          if (generalDiscounts && generalDiscounts.length > 0) return true;
-
-          const discountPrice = variation.attributes.DiscountPrice ? parseFloat(variation.attributes.DiscountPrice) : null;
-          return discountPrice && discountPrice < price;
-        });
-        return hasDiscountedVariation;
-      })
-      .sort((a: any, b: any) => {
-        const aMatch = productTitleMatchesKeywords(a);
-        const bMatch = productTitleMatchesKeywords(b);
-        if (aMatch && !bMatch) return -1;
-        if (!aMatch && bMatch) return 1;
-        return 0;
-      })
-      .slice(0, 20); // Limit to 20
-
-    const newProductsRaw = (newResponse as { data?: unknown[] })?.data || [];
-    const newProducts = (newProductsRaw as unknown[]).filter(productHasStock).slice(0, 20);
-
-    // Filter for favorite products (by rating)
     const favoriteProducts = [...availableProducts]
       .sort((a: any, b: any) => {
-        const ratingA = parseFloat(a.attributes.AverageRating) || 0;
-        const ratingB = parseFloat(b.attributes.AverageRating) || 0;
-        return ratingB - ratingA; // Highest rating first
+        const attrsA = a?.attributes;
+        const attrsB = b?.attributes;
+        const ratingA = parseFloat(String(attrsA?.AverageRating ?? 0)) || 0;
+        const ratingB = parseFloat(String(attrsB?.AverageRating ?? 0)) || 0;
+        return ratingB - ratingA;
       })
       .slice(0, 20);
 
-    logger.info(`[BatchHomepage] Split into: ${discountedProducts.length} discounted, ${newProducts.length} new (title contains G), ${favoriteProducts.length} favorites`);
+    logger.info(
+      `[BatchHomepage] Split into: ${discounted.length} discounted, ${newProducts.length} new, ${favoriteProducts.length} favorites`,
+    );
 
     return {
-      discounted: formatProductsToCardProps(discountedProducts),
-      new: formatProductsToCardProps(newProducts),
+      discounted,
+      new: newProducts,
       favorites: formatProductsToCardProps(favoriteProducts),
     };
   } catch (error) {

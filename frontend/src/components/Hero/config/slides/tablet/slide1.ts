@@ -87,8 +87,8 @@ export const slide1 = new TabletSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     button: {
-      label: "دامن های پاییزه ",
-      href: "/shop/category",
+      label: "بافت ها",
+      href: "/plp",
       className: "text-white text-sm font-normal rounded-lg",
       showArrow: true,
     },
@@ -102,7 +102,7 @@ export const slide1 = new TabletSlideBuilder()
       alt: "Category Banner",
       width: 800,
       height: 900,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain",
       objectPosition: "left",
     },
@@ -132,7 +132,7 @@ export const slide1 = new TabletSlideBuilder()
     },
     button: {
       label: "دامن های پاییزه ",
-      href: "/shop/category",
+      href: "/plp",
       className: "text-white text-sm font-normal rounded-lg",
       showArrow: true,
     },

@@ -117,6 +117,16 @@
       "type": "json",
       "default": {},
       "description": "Hero slider publish metadata: object with version (1), publishedAt (ISO date string), and publishedBy (user id or null)."
+    },
+    "homeNewestProductIds": {
+      "type": "json",
+      "default": [],
+      "description": "Curated product IDs for the 'جدیدترین ها' section on the homepage. Empty array = algorithmic fallback."
+    },
+    "homeDiscountedProductIds": {
+      "type": "json",
+      "default": [],
+      "description": "Curated product IDs for the 'تخفیف‌های وسوسه انگیز' section on the homepage. Empty array = algorithmic fallback."
     }
   }
 }

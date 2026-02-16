@@ -35,6 +35,19 @@ export const normalizeBlogCategoryBannerOrder = (value: unknown): BlogCategoryBa
   return result;
 };
 
+export const normalizeHomepageProductIds = (value: unknown): number[] => {
+  if (!Array.isArray(value)) return [];
+  const result: number[] = [];
+  const seen = new Set<number>();
+  for (const item of value) {
+    const id = Number(item);
+    if (!Number.isFinite(id) || id <= 0 || seen.has(id)) continue;
+    seen.add(id);
+    result.push(id);
+  }
+  return result;
+};
+
 export type SuperAdminSettings = {
   id: number;
   filterPublicProductsByTitle: boolean;
@@ -63,6 +76,8 @@ export type SuperAdminSettings = {
   homeHeroSliderDraft: HeroSliderPayload;
   homeHeroSliderPublished: HeroSliderPayload;
   homeHeroSliderMeta: HeroSliderMeta | null;
+  homeNewestProductIds: number[];
+  homeDiscountedProductIds: number[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -95,6 +110,8 @@ export const defaultSettings = (): SuperAdminSettings => ({
   homeHeroSliderDraft: createDefaultHeroSliderPayload(),
   homeHeroSliderPublished: createDefaultHeroSliderPayload(),
   homeHeroSliderMeta: null,
+  homeNewestProductIds: [],
+  homeDiscountedProductIds: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -151,6 +168,8 @@ export const normalizeSuperAdminSettings = (
   homeHeroSliderDraft: normalizeHeroSliderPayload(data?.homeHeroSliderDraft),
   homeHeroSliderPublished: normalizeHeroSliderPayload(data?.homeHeroSliderPublished),
   homeHeroSliderMeta: normalizeHeroSliderMeta(data?.homeHeroSliderMeta),
+  homeNewestProductIds: normalizeHomepageProductIds(data?.homeNewestProductIds),
+  homeDiscountedProductIds: normalizeHomepageProductIds(data?.homeDiscountedProductIds),
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });

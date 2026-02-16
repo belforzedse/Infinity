@@ -1,0 +1,74 @@
+---
+description: Homepage product curation: super-admin page, settings fields, and fallback behavior for «جدیدترین ها» and «تخفیف‌های وسوسه انگیز» carousels.
+globs:
+alwaysApply: false
+---
+
+# Homepage Product Curation
+
+## Overview
+
+Two carousels on the public home page can be **manually curated** by admins:
+
+- **جدیدترین ها** (Newest)
+- **تخفیف‌های وسوسه انگیز** (Discounted)
+
+The **محبوب ترین ها** (Most Popular) carousel is always algorithmic (by rating); it is not configurable.
+
+## Settings Fields (Backend)
+
+Stored on the **Settings** single type (`api::settings.settings`):
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `homeNewestProductIds` | JSON (array of numbers) | Product IDs for the «جدیدترین ها» section, in display order. |
+| `homeDiscountedProductIds` | JSON (array of numbers) | Product IDs for the «تخفیف‌های وسوسه انگیز» section, in display order. |
+
+- **Empty array** for either field means: use **algorithmic** selection (same as before curation existed).
+- Non-empty array: only those products are shown, in the given order (subject to stock/active filters).
+
+Schema: [backend/src/api/settings/content-types/settings/schema.json](backend/src/api/settings/content-types/settings/schema.json).
+
+## Super-Admin Page
+
+- **Path:** `/super-admin/products/homepage`
+- **Sidebar:** مدیریت محصولات → محصولات صفحه اصلی
+- **Config:** [frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx](frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx)
+
+Behavior:
+
+- Loads current `homeNewestProductIds` and `homeDiscountedProductIds` from settings.
+- Fetches product summaries (id, title, image) for those IDs for display.
+- Two sections, each with:
+  - Product search (reuses `ProductSearch` from Order/Coupons).
+  - Ordered list of selected products with remove and move up/down.
+- Save writes both ID arrays back via `updateSuperAdminSettings({ homeNewestProductIds, homeDiscountedProductIds })`.
+
+Info text: «اگر برای هر بخش محصولی انتخاب نشود، در صفحه اصلی محصولات به صورت خودکار نمایش داده می‌شوند.»
+
+## Data Flow
+
+1. **Super-admin:** User selects/orders products → Save → `PUT /api/settings` with `homeNewestProductIds` and `homeDiscountedProductIds`.
+2. **Public homepage:** `HomeProductSections` calls `getHomepageSections()` (see [frontend/src/services/product/homepage.ts](frontend/src/services/product/homepage.ts)).
+3. `getHomepageSections()`:
+   - Fetches public settings via `getPublicSuperAdminSettings()`.
+   - If `homeNewestProductIds.length > 0`: fetches those products with `getProductsByIds()` and uses them for «جدیدترین ها».
+   - Else: uses algorithmic «new» (keyword + `createdAt`).
+   - If `homeDiscountedProductIds.length > 0`: fetches those products with `getProductsByIds()` and uses them for «تخفیف‌های وسوسه انگیز».
+   - Else: uses algorithmic discounted (from batch).
+   - Favorites (محبوب ترین ها) always from batch, sorted by rating.
+
+## Frontend Types
+
+- Settings type and normalizers: [frontend/src/types/super-admin/settings.ts](frontend/src/types/super-admin/settings.ts)  
+  - `SuperAdminSettings.homeNewestProductIds`, `homeDiscountedProductIds`  
+  - `normalizeHomepageProductIds(value)` for safe parsing of the JSON arrays.
+- Update payload: [frontend/src/services/super-admin/settings/update.ts](frontend/src/services/super-admin/settings/update.ts) sends these two fields when provided.
+
+## Key Files
+
+- Backend schema: `backend/src/api/settings/content-types/settings/schema.json`
+- Homepage sections fetch + getProductsByIds: `frontend/src/services/product/homepage.ts`
+- Super-admin page: `frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx`
+- Picker component: `frontend/src/components/SuperAdmin/Products/HomepageProductPicker.tsx`
+- Product summaries by IDs (super-admin): `frontend/src/services/super-admin/product/get.ts` → `getProductSummariesByIds`

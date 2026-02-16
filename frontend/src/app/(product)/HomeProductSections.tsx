@@ -53,6 +53,51 @@ export default async function HomeProductSections({
 
   return (
     <>
+      {/* 1. جدیدترین ها (Newest) */}
+      <section className="space-y-10">
+        <div className="hidden space-y-10 md:block">
+          <Reveal variant="fade-up" duration={700}>
+            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
+          </Reveal>
+        </div>
+        <div className="space-y-10 md:hidden">
+          <Reveal variant="blur-up" duration={1500}>
+            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 2. Category carousel */}
+      {mainCategories.length > 0 && (
+        <section className="space-y-6">
+          <CategoryCarousel categories={mainCategories} />
+        </section>
+      )}
+
+      {/* 3. محبوب ترین ها (Most popular) */}
+      {favorites.length > 0 && (
+        <section className="space-y-10">
+          <div className="hidden md:block">
+            <Reveal variant="fade-up" duration={700}>
+              <OffersListHomePage
+                icon={<NewIcon />}
+                title="محبوب ترین ها"
+                products={favorites}
+              />
+            </Reveal>
+          </div>
+          <div className="md:hidden">
+            <Reveal variant="blur-up" duration={1500}>
+              <OffersListHomePage
+                icon={<NewIcon />}
+                title="محبوب ترین ها"
+                products={favorites}
+              />
+            </Reveal>
+          </div>
+        </section>
+      )}
+
       {discounted.length > 0 && (
         <section>
           <Reveal variant="fade-up" duration={700}>
@@ -64,43 +109,6 @@ export default async function HomeProductSections({
           </Reveal>
         </section>
       )}
-
-      {mainCategories.length > 0 && (
-        <section className="space-y-6">
-          <CategoryCarousel categories={mainCategories} />
-        </section>
-      )}
-
-      <section className="space-y-10">
-        <div className="hidden space-y-10 md:block">
-          <Reveal variant="fade-up" duration={700}>
-            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
-          </Reveal>
-          {favorites.length > 0 && (
-            <Reveal variant="fade-up" duration={700}>
-              <OffersListHomePage
-                icon={<NewIcon />}
-                title="محبوب ترین ها"
-                products={favorites}
-              />
-            </Reveal>
-          )}
-        </div>
-        <div className="space-y-10 md:hidden">
-          <Reveal variant="blur-up" duration={1500}>
-            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
-          </Reveal>
-          {favorites.length > 0 && (
-            <Reveal variant="blur-up" duration={1500}>
-              <OffersListHomePage
-                icon={<NewIcon />}
-                title="محبوب ترین ها"
-                products={favorites}
-              />
-            </Reveal>
-          )}
-        </div>
-      </section>
 
       {hasFeaturedCategorySection && (
         <section>

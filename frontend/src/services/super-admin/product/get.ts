@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS } from "@/constants/api";
+import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import { paramCreator } from "@/utils/paramCreator";
 import type { TagAttributes } from "./tag/get";
@@ -89,3 +89,40 @@ export const getProduct = async (
 
   return response as any;
 };
+
+export type ProductSummary = {
+  id: number;
+  title: string;
+  image?: string;
+};
+
+/**
+ * Fetch minimal product data (id, title, image) by IDs for display in pickers.
+ * Preserves order of requested ids in the result.
+ */
+export async function getProductSummariesByIds(ids: number[]): Promise<ProductSummary[]> {
+  if (ids.length === 0) return [];
+  const params = new URLSearchParams();
+  ids.forEach((id, i) => params.set(`filters[id][$in][${i}]`, String(id)));
+  params.set("populate[0]", "CoverImage");
+  params.set("fields[0]", "Title");
+  params.set("fields[1]", "id");
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`;
+  const res = (await apiClient.get(endpoint, { cache: "no-store" })) as any;
+  const list = res?.data ?? [];
+  const idToIndex = new Map(ids.map((id, i) => [id, i]));
+  const withOrder = list.map((raw: any) => {
+    const id = raw.id;
+    const attrs = raw.attributes ?? {};
+    const title = typeof attrs.Title === "string" ? attrs.Title : `محصول #${id}`;
+    let image: string | undefined;
+    const cover = attrs.CoverImage as CoverImageField | undefined;
+    if (cover?.data?.attributes?.url) {
+      const url = cover.data.attributes.url;
+      image = url.startsWith("http") ? url : `${IMAGE_BASE_URL}${url}`;
+    }
+    return { id, title, image, order: idToIndex.get(id) ?? 0 };
+  });
+  withOrder.sort((a: any, b: any) => a.order - b.order);
+  return withOrder.map(({ id, title, image }: any) => ({ id, title, image }));
+}

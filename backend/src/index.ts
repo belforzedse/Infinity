@@ -727,6 +727,8 @@ export default {
               blogDefaultBannerLinkText: "",
               blogDefaultBannerLinkColor: "",
               blogCategoryBannerOrder: [],
+              homeNewestProductIds: [],
+              homeDiscountedProductIds: [],
             },
           });
           strapi.log.info("✓ Created default settings entry");

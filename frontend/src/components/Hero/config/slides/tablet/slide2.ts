@@ -50,14 +50,14 @@ export const slide2 = new TabletSlideBuilder()
   })
   // Bottom left action banner
   .bottomActionBannerLeft({
-    title: "پلیور ها",
+    title: "پلیورها ",
     subtitle: "",
     image: {
       src: "/images/HeroSlider/ActionBannerRight/Slide2.webp",
       alt: "Category Banner",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className:
         "h-full w-full rounded-lg mb-2 scale-110 translate-x-2 -translate-y-6 object-contain",
       objectPosition: " ",
@@ -87,22 +87,22 @@ export const slide2 = new TabletSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     button: {
-      label: "بافتی ها ",
-      href: "/shop/category",
+      label: "بافتنی ها",
+      href: "/plp",
       className: "text-white text-sm font-normal rounded-lg",
       showArrow: true,
     },
   })
   // Bottom right action banner
   .bottomActionBannerRight({
-    title: "دامن ها",
+    title: "کت ها",
     subtitle: "",
     image: {
       src: "/images/HeroSlider/ActionBannerLeft/Slide2.webp",
       alt: "Category Banner",
       width: 800,
       height: 900,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain",
       objectPosition: "left",
     },
@@ -131,8 +131,8 @@ export const slide2 = new TabletSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     button: {
-      label: "دامن های پاییزه ",
-      href: "/shop/category",
+      label: "مانتو",
+      href: "/plp",
       className: "text-white text-sm font-normal rounded-lg",
       showArrow: true,
     },
