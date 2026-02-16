@@ -218,6 +218,7 @@ const ProductCard: FC<ProductCardProps> = ({
               <ColorSwatches
                 colorCodes={colorCodes}
                 colorsCount={colorsCount}
+                size="sm"
                 className="absolute bottom-2 right-2 transition-opacity duration-300 md:group-hover:opacity-0"
               />
             </div>

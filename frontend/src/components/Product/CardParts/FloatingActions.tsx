@@ -21,7 +21,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   onShare,
 }) => {
   const buttonBaseClass =
-    "glass-chip flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-full ring-1 ring-white/60 transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] shadow-[0_0_10px_rgba(236,72,153,0.15)] touch-manipulation";
+    "glass-chip flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full ring-1 ring-white/60 transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] shadow-[0_0_10px_rgba(236,72,153,0.15)] touch-manipulation";
 
   return (
     <div
@@ -41,28 +41,28 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         aria-pressed={isLiked}
       >
         <HeartIcon
-          className={`h-5 w-5 transition-colors md:h-4 md:w-4 ${
+          className={`h-3.5 w-3.5 transition-colors md:h-4 md:w-4 ${
             isLiked ? "fill-pink-600 text-pink-600" : "text-neutral-500"
           }`}
           filled={isLiked}
         />
       </button>
 
-      {/* Quick View Button */}
+      {/* Quick View Button - hidden on mobile */}
       <button
         type="button"
         onClick={onQuickView}
-        className={`${buttonBaseClass} z-20 opacity-100 md:-translate-y-10 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
+        className={`${buttonBaseClass} z-20 hidden opacity-0 md:flex md:-translate-y-10 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
         aria-label="نمایش سریع محصول"
       >
         <EyeIcon className="h-5 w-5 text-neutral-500 md:h-4 md:w-4" />
       </button>
 
-      {/* Share Button */}
+      {/* Share Button - hidden on mobile */}
       <button
         type="button"
         onClick={onShare}
-        className={`${buttonBaseClass} z-10 opacity-100 md:-translate-y-20 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
+        className={`${buttonBaseClass} z-10 hidden opacity-0 md:flex md:-translate-y-20 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
         aria-label="اشتراک‌گذاری"
       >
         <ShuffleIcon className="h-5 w-5 text-neutral-500 md:h-4 md:w-4" />
