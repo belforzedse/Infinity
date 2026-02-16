@@ -294,7 +294,7 @@ describe('Auth Controller - Real Implementation', () => {
       await authController.login(ctx);
 
       // ✅ Real validation rejects wrong OTP
-      expect(ctx.badRequest).toHaveBeenCalledWith('otp is invalid');
+      expect(ctx.badRequest).toHaveBeenCalledWith('کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.');
       expect(jwtService.issue).not.toHaveBeenCalled();
     });
 
@@ -308,7 +308,7 @@ describe('Auth Controller - Real Implementation', () => {
 
     await authController.login(ctx);
 
-    expect(ctx.badRequest).toHaveBeenCalledWith('otp or otpToken is invalid');
+    expect(ctx.badRequest).toHaveBeenCalledWith('کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.');
   });
 
     it('should reject malformed otpToken format', async () => {
@@ -319,7 +319,7 @@ describe('Auth Controller - Real Implementation', () => {
       await authController.login(ctx);
 
       // ✅ Real validation checks token format
-      expect(ctx.badRequest).toHaveBeenCalledWith('otp or otpToken is invalid');
+      expect(ctx.badRequest).toHaveBeenCalledWith('کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.');
     });
 
     it('should confirm unconfirmed user on login', async () => {
@@ -412,7 +412,7 @@ describe('Auth Controller - Real Implementation', () => {
       'User not found or password is incorrect'
     );
 
-    expect(ctx.unauthorized).toHaveBeenCalledWith('User not found or password is incorrect');
+    expect(ctx.unauthorized).toHaveBeenCalledWith('شماره همراه یا رمز عبور اشتباه است.');
     expect(jwtService.issue).not.toHaveBeenCalled();
   });
 
@@ -425,7 +425,7 @@ describe('Auth Controller - Real Implementation', () => {
       'Phone and password are required'
     );
 
-    expect(ctx.badRequest).toHaveBeenCalledWith('Phone and password are required');
+    expect(ctx.badRequest).toHaveBeenCalledWith('شماره همراه و رمز عبور الزامی است.');
   });
 
     it('should handle user not found', async () => {
@@ -440,7 +440,7 @@ describe('Auth Controller - Real Implementation', () => {
       'User not found or password is incorrect'
     );
 
-    expect(ctx.unauthorized).toHaveBeenCalledWith('User not found or password is incorrect');
+    expect(ctx.unauthorized).toHaveBeenCalledWith('شماره همراه یا رمز عبور اشتباه است.');
   });
   });
 
@@ -580,7 +580,7 @@ describe('Auth Controller - Real Implementation', () => {
 
       await authController.self(ctx);
 
-      expect(ctx.unauthorized).toHaveBeenCalledWith('Unauthorized');
+      expect(ctx.unauthorized).toHaveBeenCalledWith('احراز هویت ناموفق بود. دوباره تلاش کنید.');
     });
   });
 

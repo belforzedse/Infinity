@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/constants/api";
+import { PRODUCT_BOOST_KEYWORDS } from "@/constants/productKeywords";
 import { getFeaturedCategoryProductsByRating, getHomepageSections } from "../homepage";
 
 const mockFetch = jest.fn();
@@ -10,7 +11,7 @@ describe("homepage service", () => {
   });
 
   describe("getHomepageSections", () => {
-    it("should make two requests: batch for discounted/favorites and separate for new (title contains G)", async () => {
+    it("should make two requests: batch for discounted/favorites and separate for new (title matches boost keywords)", async () => {
       mockFetch
         .mockResolvedValueOnce({
           json: async () => ({ data: [] }),
@@ -28,7 +29,11 @@ describe("homepage service", () => {
       expect(batchUrl.searchParams.get("pagination[limit]")).toBe("48");
 
       expect(`${newUrl.origin}${newUrl.pathname}`).toBe(`${API_BASE_URL}/products`);
-      expect(newUrl.searchParams.get("filters[Title][$containsi]")).toBe("G");
+      // Single keyword uses filters[Title][$containsi]; multiple use filters[$or][n][Title][$containsi]
+      const titleFilter =
+        newUrl.searchParams.get("filters[Title][$containsi]") ??
+        newUrl.searchParams.get("filters[$or][0][Title][$containsi]");
+      expect(PRODUCT_BOOST_KEYWORDS).toContain(titleFilter);
       expect(newUrl.searchParams.get("sort[0]")).toBe("createdAt:desc");
       expect(newUrl.searchParams.get("pagination[limit]")).toBe("20");
     });

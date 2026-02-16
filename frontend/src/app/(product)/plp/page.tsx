@@ -216,6 +216,7 @@ async function getProducts(
   queryParams.append("fields[1]", "Slug");
   queryParams.append("fields[2]", "Description");
   queryParams.append("fields[3]", "Status");
+  queryParams.append("fields[4]", "createdAt");
 
   // Fetch all products (or a large batch) for global sorting
   // We'll paginate after sorting to ensure consistent ordering across pages
@@ -326,6 +327,23 @@ async function getProducts(
         return hasAvailableVariation;
       }
 
+      // If hasDiscount (تخفیف های وسوسه انگیز), filter to discounted products only
+      if (hasDiscount) {
+        const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
+          if (!variation?.attributes?.IsPublished) return false;
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          if (typeof stockCount !== "number" || stockCount <= 0) return false;
+          const price = parseFloat(variation.attributes.Price || "0");
+          const generalDiscounts = variation.attributes.general_discounts?.data;
+          if (generalDiscounts && generalDiscounts.length > 0) return true;
+          const discountPrice = variation.attributes.DiscountPrice
+            ? parseFloat(variation.attributes.DiscountPrice)
+            : null;
+          return discountPrice !== null && discountPrice < price;
+        });
+        if (!hasDiscountedVariation) return false;
+      }
+
       return true;
     });
 
@@ -355,6 +373,14 @@ async function getProducts(
         if (aHasStock && !bHasStock) return -1;
         if (!aHasStock && bHasStock) return 1;
         return getProductCreatedAt(b) - getProductCreatedAt(a);
+      }
+
+      // تخفیف های وسوسه انگیز: sort products with G in title first
+      if (hasDiscount) {
+        const aHasG = productTitleHasG(a);
+        const bHasG = productTitleHasG(b);
+        if (aHasG && !bHasG) return -1;
+        if (!aHasG && bHasG) return 1;
       }
 
       if (aHasStock && !bHasStock) return -1;
@@ -486,8 +512,10 @@ export default async function PLPPage({
     categoryTitle = categoryData.attributes.Title;
   }
 
-  // Fetch all categories so we can resolve category + descendants (and pass to client for filter changes)
-  const allCategories = await getProductCategories({ revalidate: 3600 });
+  // Fetch all categories only when a category filter is present (speeds up /plp with no category)
+  const allCategories = validatedCategory
+    ? await getProductCategories({ revalidate: 3600 })
+    : [];
   const categorySlugs =
     validatedCategory && allCategories.length > 0
       ? getCategoryAndDescendantSlugs(allCategories, validatedCategory)

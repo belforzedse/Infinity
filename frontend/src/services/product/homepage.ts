@@ -1,7 +1,9 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS, API_BASE_URL } from "@/constants/api";
+import { buildTitleKeywordFilter } from "@/constants/productKeywords";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
+import { productTitleMatchesKeywords } from "@/utils/product";
 import logger from "@/utils/logger";
 
 // Common fields for product queries
@@ -41,7 +43,7 @@ const productHasStock = (product: any): boolean => {
 };
 
 const HOMEPAGE_FETCH_OPTIONS = {
-  next: { revalidate: 60 } as const,
+  next: { revalidate: 90 } as const,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -49,8 +51,8 @@ const HOMEPAGE_FETCH_OPTIONS = {
 };
 
 /**
- * Fetch homepage product sections: batch for discounted + favorites, separate request for "new" (title contains G).
- * "جدیدترین ها" = products whose Title contains "G" (case-insensitive), newest first, up to 20.
+ * Fetch homepage product sections: batch for discounted + favorites, separate request for "new" (title matches PRODUCT_BOOST_KEYWORDS).
+ * "جدیدترین ها" = products whose Title contains any boost keyword (case-insensitive), newest first, up to 20.
  */
 export const getHomepageSections = async (): Promise<{
   discounted: ProductCardProps[];
@@ -64,13 +66,14 @@ export const getHomepageSections = async (): Promise<{
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
     `filters[product_variations][product_stock][Count][$gt]=0&` +
-    `pagination[limit]=48&` +
+    `pagination[limit]=36&` +
     `pagination[withCount]=false`;
 
+  const titleFilter = buildTitleKeywordFilter();
   const newEndpoint =
     `${ENDPOINTS.PRODUCT.PRODUCT}?filters[Status][$eq]=Active&` +
     `filters[removedAt][$null]=true&` +
-    `filters[Title][$containsi]=G&` +
+    (titleFilter ? `${titleFilter}&` : "") +
     `${HOMEPAGE_PRODUCT_POPULATE}&` +
     `${PRODUCT_COMMON_FIELDS}&` +
     `filters[product_variations][Price][$gte]=1&` +
@@ -89,22 +92,31 @@ export const getHomepageSections = async (): Promise<{
     const availableProducts = allProducts.filter(productHasStock);
     logger.info(`[BatchHomepage] Fetched ${allProducts.length} total products for discounted/favorites`);
 
-    // Filter for discounted products
-    const discountedProducts = availableProducts.filter((product: any) => {
-      const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
-        const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-        const hasStock = typeof stockCount === "number" && stockCount > 0;
-        if (!hasStock) return false;
+    // Filter for discounted products, then sort so products with G in title come first
+    const discountedProducts = availableProducts
+      .filter((product: any) => {
+        const hasDiscountedVariation = product.attributes.product_variations?.data?.some((variation: any) => {
+          const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
+          const hasStock = typeof stockCount === "number" && stockCount > 0;
+          if (!hasStock) return false;
 
-        const price = parseFloat(variation.attributes.Price);
-        const generalDiscounts = variation.attributes.general_discounts?.data;
-        if (generalDiscounts && generalDiscounts.length > 0) return true;
+          const price = parseFloat(variation.attributes.Price);
+          const generalDiscounts = variation.attributes.general_discounts?.data;
+          if (generalDiscounts && generalDiscounts.length > 0) return true;
 
-        const discountPrice = variation.attributes.DiscountPrice ? parseFloat(variation.attributes.DiscountPrice) : null;
-        return discountPrice && discountPrice < price;
-      });
-      return hasDiscountedVariation;
-    }).slice(0, 20); // Limit to 20
+          const discountPrice = variation.attributes.DiscountPrice ? parseFloat(variation.attributes.DiscountPrice) : null;
+          return discountPrice && discountPrice < price;
+        });
+        return hasDiscountedVariation;
+      })
+      .sort((a: any, b: any) => {
+        const aMatch = productTitleMatchesKeywords(a);
+        const bMatch = productTitleMatchesKeywords(b);
+        if (aMatch && !bMatch) return -1;
+        if (!aMatch && bMatch) return 1;
+        return 0;
+      })
+      .slice(0, 20); // Limit to 20
 
     const newProductsRaw = (newResponse as { data?: unknown[] })?.data || [];
     const newProducts = (newProductsRaw as unknown[]).filter(productHasStock).slice(0, 20);

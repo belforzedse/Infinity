@@ -78,14 +78,14 @@ describe("Authentication Flow Integration", () => {
 
       // Mock verifyOTP failure
       sessionStorageMock.getItem.mockReturnValue(otpToken);
-      const verifyError = new Error("Invalid OTP");
+      const verifyError = new Error("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
       mockPost.mockRejectedValueOnce(verifyError);
 
       // Send OTP successfully
       await AuthService.sendOTP(phoneNumber);
 
       // Verify OTP fails
-      await expect(AuthService.verifyOTP(invalidOtp)).rejects.toThrow("Invalid OTP");
+      await expect(AuthService.verifyOTP(invalidOtp)).rejects.toThrow("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
     });
 
     it("handles missing OTP token during verification", async () => {

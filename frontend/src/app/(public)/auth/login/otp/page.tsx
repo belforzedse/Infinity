@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   const handleLogin = async ({ verificationCode }: { verificationCode: string }) => {
     if (verificationCode.length === 6) {
-      const fallbackMessage = "Login failed. Please try again.";
+      const fallbackMessage = "ورود ناموفق بود. دوباره تلاش کنید.";
 
       try {
         const response = await AuthService.verifyOTP(verificationCode.split("").reverse().join(""));

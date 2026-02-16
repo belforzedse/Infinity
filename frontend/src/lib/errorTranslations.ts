@@ -1,5 +1,22 @@
 // Error message translations from backend (English) to Persian
+// All user-facing errors should be Persian; this map catches any stray English.
 export const ERROR_MESSAGE_MAP: Record<string, string> = {
+  // OTP / auth errors (fallback if backend ever returns English)
+  "otp or otptoken is invalid": "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
+  "otptoken is invalid or expired": "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
+  "otptoken is invalid": "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
+  "otp is invalid": "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
+  "invalid otp": "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
+  "login failed": "ورود ناموفق بود. دوباره تلاش کنید.",
+  "phone is required": "شماره همراه الزامی است.",
+  "phone is invalid": "شماره همراه معتبر نیست. دوباره تلاش کنید.",
+  "phone and password are required": "شماره همراه و رمز عبور الزامی است.",
+  "user not found or password is incorrect": "شماره همراه یا رمز عبور اشتباه است.",
+  "unauthorized": "احراز هویت ناموفق بود. دوباره تلاش کنید.",
+  "something went wrong": "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.",
+  "please try again": "دوباره تلاش کنید.",
+  "try again": "دوباره تلاش کنید.",
+
   // Uniqueness errors
   "this attribute must be unique": "این نام قبلاً استفاده شده است. لطفاً نام متفاوتی انتخاب کنید.",
   "attribute must be unique": "این نام قبلاً استفاده شده است. لطفاً نام متفاوتی انتخاب کنید.",
@@ -34,7 +51,7 @@ export const ERROR_MESSAGE_MAP: Record<string, string> = {
  */
 export const translateErrorMessage = (
   errorMessage: string,
-  defaultMessage: string = "خطا در ایجاد ویژگی جدید. لطفاً دوباره تلاش کنید.",
+  defaultMessage: string = "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.",
 ): string => {
   if (!errorMessage) return defaultMessage;
 

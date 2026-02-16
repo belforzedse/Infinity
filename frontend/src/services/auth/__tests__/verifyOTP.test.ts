@@ -82,12 +82,12 @@ describe("verifyOTP", () => {
   it("handles API errors correctly", async () => {
     const otp = "123456";
     const otpToken = "mock-otp-token";
-    const error = new Error("Invalid OTP");
+    const error = new Error("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
 
     sessionStorageMock.getItem.mockReturnValue(otpToken);
     mockPost.mockRejectedValueOnce(error);
 
-    await expect(verifyOTP(otp)).rejects.toThrow("Invalid OTP");
+    await expect(verifyOTP(otp)).rejects.toThrow("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
   });
 
   it("returns response with user data", async () => {

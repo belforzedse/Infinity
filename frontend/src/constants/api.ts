@@ -93,11 +93,11 @@ export const HTTP_STATUS = {
   INTERNAL_SERVER_ERROR: 500,
 };
 
-// Error Messages
+// Error Messages (all in Persian; vague errors include "دوباره تلاش کنید")
 export const ERROR_MESSAGES = {
-  DEFAULT: "Something went wrong. Please try again later.",
-  NETWORK: "Network error. Please check your internet connection.",
-  TIMEOUT: "Request timed out. Please try again.",
-  UNAUTHORIZED: "You are not authorized to perform this action.",
-  NOT_FOUND: "The requested resource was not found.",
+  DEFAULT: "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.",
+  NETWORK: "خطای شبکه. اتصال اینترنت خود را بررسی کنید.",
+  TIMEOUT: "زمان درخواست به پایان رسید. دوباره تلاش کنید.",
+  UNAUTHORIZED: "احراز هویت نشده‌اید. دوباره تلاش کنید.",
+  NOT_FOUND: "موردی یافت نشد. دوباره تلاش کنید.",
 };

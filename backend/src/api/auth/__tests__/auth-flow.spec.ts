@@ -34,7 +34,7 @@ describe("Auth Flow", () => {
       const result = validatePhone(ctx, "0912345678");
 
       expect(ctx.status).toBe(400);
-      expect(ctx.body.message).toBe("phone is invalid");
+      expect(ctx.body.message).toBe("شماره همراه معتبر نیست. دوباره تلاش کنید.");
     });
 
     it("should reject phone not starting with 09", () => {
@@ -42,7 +42,7 @@ describe("Auth Flow", () => {
       const result = validatePhone(ctx, "08123456789");
 
       expect(ctx.status).toBe(400);
-      expect(ctx.body.message).toBe("phone is invalid");
+      expect(ctx.body.message).toBe("شماره همراه معتبر نیست. دوباره تلاش کنید.");
     });
 
     it("should reject empty phone", () => {
@@ -50,7 +50,7 @@ describe("Auth Flow", () => {
       const result = validatePhone(ctx, "");
 
       expect(ctx.status).toBe(400);
-      expect(ctx.body.message).toBe("phone is required");
+      expect(ctx.body.message).toBe("شماره همراه الزامی است.");
     });
 
     it("should reject null phone", () => {
@@ -58,7 +58,7 @@ describe("Auth Flow", () => {
       const result = validatePhone(ctx, null as any);
 
       expect(ctx.status).toBe(400);
-      expect(ctx.body.message).toBe("phone is required");
+      expect(ctx.body.message).toBe("شماره همراه الزامی است.");
     });
   });
 
@@ -213,10 +213,10 @@ describe("Auth Flow", () => {
 
       await expect(async () => {
         if (String(otpObj.code) !== String(otp)) {
-          throw ctx.badRequest("otp is invalid");
+          throw ctx.badRequest("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
         }
       }).rejects.toMatchObject({
-        message: "otp is invalid",
+        message: "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
         status: 400,
       });
     });
@@ -239,10 +239,10 @@ describe("Auth Flow", () => {
 
       await expect(async () => {
         if (!otpObjStr) {
-          throw ctx.badRequest("otpToken is invalid");
+          throw ctx.badRequest("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
         }
       }).rejects.toMatchObject({
-        message: "otpToken is invalid",
+        message: "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.",
         status: 400,
       });
     });

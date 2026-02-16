@@ -2,7 +2,7 @@ export function validatePhone(ctx, phone: string) {
   if (!phone) {
     ctx.status = 400;
     ctx.body = {
-      message: "phone is required",
+      message: "شماره همراه الزامی است.",
     };
     return ctx;
   }
@@ -17,7 +17,7 @@ export function validatePhone(ctx, phone: string) {
   if (!isValid) {
     ctx.status = 400;
     ctx.body = {
-      message: "phone is invalid",
+      message: "شماره همراه معتبر نیست. دوباره تلاش کنید.",
     };
     return ctx;
   }

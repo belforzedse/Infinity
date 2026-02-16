@@ -107,6 +107,8 @@ export default function PLPList({
   const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
     [],
   );
+  /** Full category list from client fetch; used for descendant slugs when server did not pass allCategories (e.g. /plp with no category). */
+  const [allCategoriesLocal, setAllCategoriesLocal] = useState<ProductCategorySummary[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   useEffect(() => {
@@ -131,8 +133,10 @@ export default function PLPList({
         const categories = await getProductCategories({ sort: "Title:asc" });
         if (!categories || categories.length === 0) {
           setCategoryOptions([]);
+          setAllCategoriesLocal([]);
           return;
         }
+        setAllCategoriesLocal(categories);
         const mapped = categories.map((cat) => ({
           id: cat.slug || String(cat.id),
           title: cat.name || cat.slug || String(cat.id),
@@ -141,6 +145,7 @@ export default function PLPList({
       } catch (error) {
         console.error("[PLP] Error fetching categories:", error);
         setCategoryOptions([]);
+        setAllCategoriesLocal([]);
       } finally {
         setIsLoadingCategories(false);
       }
@@ -178,6 +183,7 @@ export default function PLPList({
     queryParams.append("fields[1]", "Slug");
     queryParams.append("fields[2]", "Description");
     queryParams.append("fields[3]", "Status");
+    queryParams.append("fields[4]", "createdAt");
 
     // Add pagination
     queryParams.append("pagination[page]", page);
@@ -192,11 +198,13 @@ export default function PLPList({
     // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
     queryParams.append("filters[product_variations][Price][$gt]", "0");
 
-    // Category filter: include selected category and all its children
+    // Category filter: include selected category and all its children (use server list or client-fetched list)
     if (category) {
+      const categoriesForDescendants =
+        allCategoriesProp.length > 0 ? allCategoriesProp : allCategoriesLocal;
       const slugs =
-        allCategoriesProp.length > 0
-          ? getCategoryAndDescendantSlugs(allCategoriesProp, category)
+        categoriesForDescendants.length > 0
+          ? getCategoryAndDescendantSlugs(categoriesForDescendants, category)
           : [category];
       if (slugs.length > 0) {
         slugs.forEach((slug, i) => {
@@ -262,11 +270,28 @@ export default function PLPList({
         // Filter out products without images (can't filter at API level for relations)
         productsArray = productsArray.filter(hasImage);
 
-        // CRITICAL: Sort products by stock availability FIRST, before any other operations
-        // This ensures in-stock products always appear before out-of-stock products
+        // CRITICAL: Sort products by stock availability FIRST; when "newest" sort or discount filter, put products with g/G in title first
         productsArray.sort((a: any, b: any) => {
           const aHasStock = hasAvailableStock(a);
           const bHasStock = hasAvailableStock(b);
+
+          if (sort === "createdAt:desc") {
+            const aHasG = productTitleHasG(a);
+            const bHasG = productTitleHasG(b);
+            if (aHasG && !bHasG) return -1;
+            if (!aHasG && bHasG) return 1;
+            if (aHasStock && !bHasStock) return -1;
+            if (!aHasStock && bHasStock) return 1;
+            return getProductCreatedAt(b) - getProductCreatedAt(a);
+          }
+
+          // تخفیف های وسوسه انگیز: sort products with G in title first
+          if (discountOnly === "true") {
+            const aHasG = productTitleHasG(a);
+            const bHasG = productTitleHasG(b);
+            if (aHasG && !bHasG) return -1;
+            if (!aHasG && bHasG) return 1;
+          }
 
           if (aHasStock && !bHasStock) return -1;
           if (!aHasStock && bHasStock) return 1;
@@ -334,6 +359,7 @@ export default function PLPList({
     page,
     category,
     allCategoriesProp,
+    allCategoriesLocal,
     available,
     minPrice,
     maxPrice,
@@ -420,6 +446,18 @@ export default function PLPList({
     discountedSidebarProducts,
     suggestedSidebarProducts,
   });
+
+  // When discount filter is active (تخفیف های وسوسه انگیز PLP), sort products with G in title first
+  const displayProducts = useMemo(() => {
+    if (discountOnly !== "true") return validProducts;
+    return [...validProducts].sort((a, b) => {
+      const aHasG = productTitleHasG(a);
+      const bHasG = productTitleHasG(b);
+      if (aHasG && !bHasG) return -1;
+      if (!aHasG && bHasG) return 1;
+      return 0;
+    });
+  }, [validProducts, discountOnly]);
 
   const selectedCategoryTitle = useMemo(() => {
     if (!category) return null;
@@ -686,8 +724,8 @@ export default function PLPList({
             <NoData category={category || initialCategory} />
           ) : (
             <>
-              <PLPDesktopList products={validProducts} includeMedia={isDesktop} />
-              <PLPMobileList products={validProducts} />
+              <PLPDesktopList products={displayProducts} includeMedia={isDesktop} />
+              <PLPMobileList products={displayProducts} />
 
               {/* Pagination */}
               <Pagination

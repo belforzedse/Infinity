@@ -1,0 +1,33 @@
+# Product Boost Keywords
+
+## Overview
+
+Keywords used to boost products in featured sections (جدیدترین ها, تخفیف های وسوسه انگیز). Products whose title contains any of these (case-insensitive) appear first.
+
+## Source of Truth
+
+`frontend/src/constants/productKeywords.ts`
+
+```typescript
+export const PRODUCT_BOOST_KEYWORDS = ["G"] as const;
+```
+
+## Expanding the Keyword List
+
+1. Add new keywords to the `PRODUCT_BOOST_KEYWORDS` array.
+2. No other code changes needed—API filter and client-side checks use this list automatically.
+
+Example:
+```typescript
+export const PRODUCT_BOOST_KEYWORDS = ["G", "new", "جدید"] as const;
+```
+
+## Related Code
+
+- **API filter**: `buildTitleKeywordFilter()` in `productKeywords.ts` — builds Strapi `$containsi` filter (single: `filters[Title][$containsi]=X`; multiple: `filters[$or][n][Title][$containsi]=X`)
+- **Client-side check**: `productTitleMatchesKeywords()` in `utils/product.ts` — returns true if product title contains any keyword (case-insensitive)
+- **Usage**: homepage.ts (جدیدترین ها, تخفیف), plp/page.tsx, PLP/List.tsx
+
+## Backward Compatibility
+
+`productTitleHasG` is kept as an alias for `productTitleMatchesKeywords` for existing call sites.

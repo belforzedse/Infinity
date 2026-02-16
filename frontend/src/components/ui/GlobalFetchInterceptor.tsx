@@ -87,10 +87,37 @@ export default function GlobalFetchInterceptor() {
         if (method === "OPTIONS" || method === "HEAD") {
           return originalFetch(input as any, init);
         }
-        const isPureStatic = /\.(png|jpg|jpeg|gif|svg|webp|ico|css|woff2?|map)$/i.test(
+        // Ignore requests for images (browser marks these when loading image resources)
+        const req = typeof input === "object" && input instanceof Request ? input : null;
+        if (req?.destination === "image") {
+          return originalFetch(input as any, init);
+        }
+        const isPureStatic = /\.(png|jpg|jpeg|gif|svg|webp|avif|ico|bmp|css|woff2?|map)$/i.test(
           url.pathname,
         );
         if (isPureStatic) {
+          return originalFetch(input as any, init);
+        }
+        // Ignore image/media requests: Strapi uploads, CDN paths, and any fetch with Accept: image/*
+        const isImageOrMediaPath =
+          url.pathname.includes("/uploads/") ||
+          url.pathname.startsWith("/upload/") ||
+          /^\/(media|images?|imgs?|assets)(\/|$)/i.test(url.pathname);
+        const acceptsImages = (() => {
+          try {
+            let h: Headers | null = null;
+            if (init?.headers instanceof Headers) h = init.headers;
+            else if (init?.headers) h = new Headers(init.headers as HeadersInit);
+            else if (typeof input !== "string" && (input as Request).headers)
+              h = (input as Request).headers;
+            if (!h) return false;
+            const accept = h.get("Accept") ?? h.get("accept") ?? "";
+            return /image\//i.test(accept);
+          } catch {
+            return false;
+          }
+        })();
+        if (isImageOrMediaPath || acceptsImages) {
           return originalFetch(input as any, init);
         }
         // Ignore Next.js internal and image proxy requests

@@ -72,7 +72,7 @@ export default async function Home() {
         sort: "Title:asc",
         featuredOnly: true,
         allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
-        revalidate: 60,
+        revalidate: 90,
       }),
     getPublicSuperAdminSettings(),
   ]);

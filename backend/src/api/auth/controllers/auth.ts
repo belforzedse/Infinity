@@ -1,6 +1,14 @@
 /**
  * A set of functions called "actions" for `auth`
+ * All user-facing error messages are in Persian.
  */
+
+const OTP_INVALID_MESSAGE = "کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.";
+const LOGIN_FAILED_MESSAGE = "ورود ناموفق بود. دوباره تلاش کنید.";
+const OTP_SEND_FAILED_MESSAGE = "ارسال کد تایید ناموفق بود. دوباره تلاش کنید.";
+const UNAUTHORIZED_MESSAGE = "احراز هویت ناموفق بود. دوباره تلاش کنید.";
+const PHONE_PASSWORD_REQUIRED_MESSAGE = "شماره همراه و رمز عبور الزامی است.";
+const USER_NOT_FOUND_OR_PASSWORD_INCORRECT = "شماره همراه یا رمز عبور اشتباه است.";
 
 import { RedisClient } from "../../../index";
 import { validatePhone } from "../utils/validations";
@@ -59,7 +67,7 @@ async function otp(ctx) {
     });
     ctx.status = 500;
     ctx.body = {
-      message: "Failed to send OTP. Please try again later.",
+      message: OTP_SEND_FAILED_MESSAGE,
       error: "OTP_SEND_FAILED",
     };
   }
@@ -70,7 +78,7 @@ async function login(ctx) {
     const { otp, otpToken } = ctx.request.body;
 
     if (String(otp || "").length !== 6 || !otpToken?.includes(".")) {
-      ctx.badRequest("otp or otpToken is invalid");
+      ctx.badRequest(OTP_INVALID_MESSAGE);
       return;
     }
 
@@ -79,7 +87,7 @@ async function login(ctx) {
     try {
       const redisData = await (await RedisClient).get(otpToken);
       if (!redisData) {
-        ctx.badRequest("otpToken is invalid or expired");
+        ctx.badRequest(OTP_INVALID_MESSAGE);
         return;
       }
       otpObj = JSON.parse(redisData);
@@ -88,17 +96,17 @@ async function login(ctx) {
         otpToken,
         error: (error as Error).message,
       });
-      ctx.badRequest("otpToken is invalid");
+      ctx.badRequest(OTP_INVALID_MESSAGE);
       return;
     }
 
     if (!otpObj?.code) {
-      ctx.badRequest("otpToken is invalid");
+      ctx.badRequest(OTP_INVALID_MESSAGE);
       return;
     }
 
     if (String(otpObj.code) !== String(otp)) {
-      ctx.badRequest("otp is invalid");
+      ctx.badRequest(OTP_INVALID_MESSAGE);
       return;
     }
 
@@ -154,7 +162,7 @@ async function login(ctx) {
     });
     ctx.status = 500;
     ctx.body = {
-      message: "Login failed. Please try again later.",
+      message: LOGIN_FAILED_MESSAGE,
       error: "LOGIN_FAILED",
     };
   }
@@ -177,7 +185,7 @@ async function self(ctx) {
   try {
     let pluginUserId = await resolvePluginUserId(ctx);
     if (!pluginUserId) {
-      return ctx.unauthorized("Unauthorized");
+      return ctx.unauthorized(UNAUTHORIZED_MESSAGE);
     }
 
     const fullUser = await strapi.entityService.findOne("plugin::users-permissions.user", Number(pluginUserId), {
@@ -185,7 +193,7 @@ async function self(ctx) {
     });
 
     if (!fullUser) {
-      return ctx.unauthorized("Unauthorized");
+      return ctx.unauthorized(UNAUTHORIZED_MESSAGE);
     }
 
     // Determine administrative flag based on plugin role name
@@ -231,7 +239,7 @@ async function updateSelf(ctx) {
   try {
     const pluginUserId = await resolvePluginUserId(ctx);
     if (!pluginUserId) {
-      return ctx.unauthorized("Unauthorized");
+      return ctx.unauthorized(UNAUTHORIZED_MESSAGE);
     }
 
     const body = ctx.request.body ?? {};
@@ -370,7 +378,7 @@ async function registerInfo(ctx) {
     }
 
     if (!user?.id) {
-      return ctx.unauthorized("Unauthorized");
+      return ctx.unauthorized(UNAUTHORIZED_MESSAGE);
     }
 
     const pluginUserId = Number(user.id);
@@ -453,7 +461,7 @@ async function loginWithPassword(ctx) {
   const { phone, password } = ctx.request.body;
 
   if (!phone || !password) {
-    ctx.badRequest("Phone and password are required");
+    ctx.badRequest(PHONE_PASSWORD_REQUIRED_MESSAGE);
     return;
   }
 
@@ -481,7 +489,7 @@ async function loginWithPassword(ctx) {
     .findOne({ where: { phone: sanitizedPhone }, select: ["id", "password"] });
 
   if (!finalUser) {
-    ctx.unauthorized("User not found or password is incorrect");
+    ctx.unauthorized(USER_NOT_FOUND_OR_PASSWORD_INCORRECT);
     return;
   }
 
@@ -493,7 +501,7 @@ async function loginWithPassword(ctx) {
   const isPasswordValid = await userService.validatePassword(password, finalUser.password);
 
   if (!isPasswordValid) {
-    ctx.unauthorized("User not found or password is incorrect");
+    ctx.unauthorized(USER_NOT_FOUND_OR_PASSWORD_INCORRECT);
     return;
   }
 
@@ -506,7 +514,7 @@ async function resetPassword(ctx) {
   const { otp, otpToken, newPassword } = ctx.request.body;
 
   if (String(otp || "").length !== 6 || !otpToken?.includes(".")) {
-    ctx.badRequest("otp or otpToken is invalid");
+    ctx.badRequest(OTP_INVALID_MESSAGE);
     return;
   }
 
@@ -515,7 +523,7 @@ async function resetPassword(ctx) {
   try {
     const redisData = await (await RedisClient).get(otpToken);
     if (!redisData) {
-      ctx.badRequest("otpToken is invalid or expired");
+      ctx.badRequest(OTP_INVALID_MESSAGE);
       return;
     }
     otpObj = JSON.parse(redisData);
@@ -524,17 +532,17 @@ async function resetPassword(ctx) {
       otpToken,
       error: (error as Error).message,
     });
-    ctx.badRequest("otpToken is invalid");
+    ctx.badRequest(OTP_INVALID_MESSAGE);
     return;
   }
 
   if (!otpObj?.code) {
-    ctx.badRequest("otpToken is invalid");
+    ctx.badRequest(OTP_INVALID_MESSAGE);
     return;
   }
 
   if (String(otpObj.code) !== String(otp)) {
-    ctx.badRequest("otp is invalid");
+    ctx.badRequest(OTP_INVALID_MESSAGE);
     return;
   }
 
@@ -544,7 +552,7 @@ async function resetPassword(ctx) {
     otpObj.merchant,
   );
   if (!pluginUser) {
-    ctx.unauthorized("Unauthorized");
+    ctx.unauthorized(UNAUTHORIZED_MESSAGE);
     return;
   }
 

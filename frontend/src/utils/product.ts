@@ -1,3 +1,4 @@
+import { PRODUCT_BOOST_KEYWORDS } from "@/constants/productKeywords";
 import { computeDiscountForVariation } from "@/utils/discounts";
 import type { DiscountVariationInput } from "@/utils/discounts";
 
@@ -218,18 +219,27 @@ export const getMinInStockVariationPrice = (product: ProductWithVariations): num
   return minPrice === Infinity ? 0 : minPrice;
 };
 
-/** True if product title contains the letter "g" (case-insensitive). Used for PLP "newest" sort boost. */
-export function productTitleHasG(
+/** True if product title contains any PRODUCT_BOOST_KEYWORDS (case-insensitive). Used for جدیدترین ها, تخفیف های وسوسه انگیز sort boost. */
+export function productTitleMatchesKeywords(
   product: { attributes?: { Title?: string } },
 ): boolean {
   const title = product.attributes?.Title ?? "";
-  return /g/i.test(title);
+  if (!title) return false;
+  const lower = title.toLowerCase();
+  return PRODUCT_BOOST_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
 }
 
-/** CreatedAt timestamp for sorting; 0 if missing. */
-export function getProductCreatedAt(
-  product: { attributes?: { createdAt?: string }; createdAt?: string },
-): number {
-  const d = product.attributes?.createdAt ?? (product as { createdAt?: string }).createdAt;
-  return d ? new Date(d).getTime() : 0;
+/** @deprecated Use productTitleMatchesKeywords. Kept for backward compatibility. */
+export const productTitleHasG = productTitleMatchesKeywords;
+
+/** CreatedAt timestamp for sorting; 0 if missing. Accepts any product-like object (PLP Product, API response, etc.). */
+export function getProductCreatedAt(product: object): number {
+  const p = product as Record<string, unknown>;
+  const attrs = p.attributes;
+  const d =
+    (attrs &&
+      typeof attrs === "object" &&
+      (attrs as Record<string, unknown>).createdAt) ??
+    p.createdAt;
+  return typeof d === "string" ? new Date(d).getTime() : 0;
 }

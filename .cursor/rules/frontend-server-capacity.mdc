@@ -11,7 +11,7 @@ When the Next.js server "can't handle" traffic, clicks and navigation feel unres
 ## What we do to reduce load
 
 1. **Revalidate (ISR)**  
-   Homepage and PLP use `revalidate = 60`. Cached responses serve many users; the server only revalidates every 60s, so fewer heavy Strapi calls.
+   Homepage uses `revalidate = 90` (shell categories and homepage product sections); PLP uses 60. Cached responses serve many users; the server revalidates less often, so fewer heavy Strapi calls.
 
 2. **Streaming**  
    Homepage heavy data (product sections) is in a separate async component inside `<Suspense>`. The shell (hero, categories, blog, settings) is sent first; product sections stream when ready. So:
@@ -22,7 +22,7 @@ When the Next.js server "can't handle" traffic, clicks and navigation feel unres
    Large product responses use `cache: 'no-store'` to avoid Next.js 2MB cache limit; other fetches can use default caching when possible.
 
 4. **Categories on server-rendered pages**  
-   Homepage and other public server components that call `getProductCategories` must pass `revalidate: 60` (or an appropriate value). The categories service uses cacheable fetch when `revalidate` is set on the server, so Next.js Data Cache is used and Strapi is not hit on every request. Do not use `no-store` for these server-side category fetches; reserve `no-store` for super-admin or post-mutation refetches where freshness is required.
+   Homepage and other public server components that call `getProductCategories` must pass `revalidate: 90` (or an appropriate value) for homepage; use 60 or higher elsewhere. The categories service uses cacheable fetch when `revalidate` is set on the server, so Next.js Data Cache is used and Strapi is not hit on every request. Do not use `no-store` for these server-side category fetches; reserve `no-store` for super-admin or post-mutation refetches where freshness is required.
 
 ## When the server is still overloaded
 
