@@ -10,6 +10,7 @@ import ProfileIcon from "./Icons/ProfileIcon";
 import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
 import { hapticButton } from "@/utils/haptics";
+import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { useProductCategories } from "@/hooks/useProductCategories";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
 
@@ -17,7 +18,10 @@ const PLPBottomNavigation = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
-  const { categories, isLoading: isLoadingCategories } = useProductCategories({ mainOnly: true });
+  const { categories, isLoading: isLoadingCategories } = useProductCategories({
+    mainOnly: true,
+    allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCategoriesMounted, setIsCategoriesMounted] = useState(false);
   const [isCategoriesVisible, setIsCategoriesVisible] = useState(false);

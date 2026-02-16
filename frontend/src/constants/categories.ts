@@ -72,4 +72,19 @@ export const categories: Category[] = [
   },
 ];
 
+/**
+ * Category name substrings used to filter categories on the homepage carousel
+ * and bottom navbar category sheet. Only categories whose name contains at least
+ * one of these strings are shown there.
+ */
+export const ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS: readonly string[] = [
+  "کیف",
+  "دامن",
+  "کت",
+  "لباس زیر",
+  "شال و روسری",
+  "پیراهن",
+  "شلوار",
+];
+
 export default categories;

@@ -3,6 +3,7 @@
 export const revalidate = 60;
 
 import type { Metadata } from "next";
+import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
 import { BlogCarousel } from "@/components/Blog";
@@ -66,7 +67,11 @@ function ProductSectionsFallback() {
 export default async function Home() {
   const [latestBlogPosts, parentCategories, homepageSettings] = await Promise.all([
     getLatestBlogPosts(),
-    getProductCategories({ mainOnly: true, sort: "Title:asc" }),
+    getProductCategories({
+        mainOnly: true,
+        sort: "Title:asc",
+        allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
+      }),
     getPublicSuperAdminSettings(),
   ]);
 

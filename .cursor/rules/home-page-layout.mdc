@@ -18,7 +18,7 @@ The Home Page is structured as follows:
 1. **Hero Section** - Main banner at the top with responsive images for mobile/desktop
 2. **Secondary Banners** - Flex layout with different arrangements on mobile vs desktop
 3. **Discounted Products Section** - Shows products with discounts using `OffersListHomePage` component
-4. **Categories Section** - Category carousel showing only **parent categories that have at least one child** (no leaf-only parents, no duplicates). Data from `getProductCategories({ parentsWithChildrenOnly: true, sort: "Title:asc" })` in [src/services/product/categories.ts](mdc:frontend/src/services/product/categories.ts).
+4. **Categories Section** - Category carousel showing **main categories** whose name contains one of the allowed Persian substrings (e.g. کیف، دامن، کت، لباس زیر، شال و روسری، پیراهن، شلوار). Data from `getProductCategories({ mainOnly: true, sort: "Title:asc", allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS })` in [src/app/(product)/page.tsx](mdc:frontend/src/app/(product)/page.tsx). The allowlist is defined in [frontend/src/constants/categories.ts](mdc:frontend/src/constants/categories.ts).
 5. **New Products Section** - Uses `OffersListHomePage` with `NewIcon` component
 6. **Popular Products Section** - Shows highest rated products
 

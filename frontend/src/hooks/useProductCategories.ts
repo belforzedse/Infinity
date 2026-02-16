@@ -4,11 +4,13 @@ import { getProductCategories, type ProductCategorySummary } from "@/services/pr
 interface UseProductCategoriesOptions {
   parentOnly?: boolean;
   mainOnly?: boolean;
+  /** When provided, only categories whose name includes one of these substrings are returned. */
+  allowedNameSubstrings?: readonly string[];
   initial?: ProductCategorySummary[];
 }
 
 export const useProductCategories = (options: UseProductCategoriesOptions = {}) => {
-  const { parentOnly = false, mainOnly = false, initial } = options;
+  const { parentOnly = false, mainOnly = false, allowedNameSubstrings, initial } = options;
   const [categories, setCategories] = useState<ProductCategorySummary[]>(initial ?? []);
   const [isLoading, setIsLoading] = useState(!initial);
 
@@ -19,7 +21,11 @@ export const useProductCategories = (options: UseProductCategoriesOptions = {}) 
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
-        const data = await getProductCategories({ parentOnly, mainOnly });
+        const data = await getProductCategories({
+          parentOnly,
+          mainOnly,
+          allowedNameSubstrings,
+        });
         if (!isMounted) return;
         setCategories(data);
       } catch (error) {
@@ -36,7 +42,7 @@ export const useProductCategories = (options: UseProductCategoriesOptions = {}) 
     return () => {
       isMounted = false;
     };
-  }, [initial, parentOnly, mainOnly]);
+  }, [initial, parentOnly, mainOnly, allowedNameSubstrings]);
 
   return { categories, isLoading };
 };

@@ -75,6 +75,11 @@ export interface FetchProductCategoriesOptions {
    * Implies parentOnly. Use for homepage carousel so leaf-only parents are hidden.
    */
   parentsWithChildrenOnly?: boolean;
+  /**
+   * When provided, only return categories whose name includes at least one of these substrings.
+   * Used for homepage carousel and bottom nav category sheet.
+   */
+  allowedNameSubstrings?: readonly string[];
   limit?: number;
   sort?: string;
   cache?: RequestCache;
@@ -222,16 +227,23 @@ export async function getProductCategories(
       })
       .filter((item) => item.slug);
 
+    let result: ProductCategorySummary[];
     if (parentOnly) {
       const noParent = mapped.filter((item) => !item.parentId);
       const deduped = dedupeCategoriesById(noParent);
-      if (options.parentsWithChildrenOnly) {
-        return deduped.filter((c) => c.hasChildren === true);
-      }
-      return deduped;
+      result = options.parentsWithChildrenOnly
+        ? deduped.filter((c) => c.hasChildren === true)
+        : deduped;
+    } else {
+      result = dedupeCategoriesById(mapped);
     }
 
-    return dedupeCategoriesById(mapped);
+    if (options.allowedNameSubstrings?.length) {
+      const substrings = options.allowedNameSubstrings;
+      result = result.filter((c) => substrings.some((sub) => c.name.includes(sub)));
+    }
+
+    return result;
   } catch (error) {
     if (typeof window === "undefined") {
       logger.error("[ProductCategories] Unexpected error fetching categories", {

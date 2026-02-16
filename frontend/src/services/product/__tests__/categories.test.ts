@@ -85,4 +85,45 @@ describe("getProductCategories", () => {
     expect(url.searchParams.get("filters[parent][id][$null]")).toBe("true");
     expect(url.searchParams.get("filters[isMainCategory][$eq]")).toBeNull();
   });
+
+  it("filters by allowedNameSubstrings when provided", async () => {
+    mockedFetchWithTimeout.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            id: 1,
+            attributes: {
+              Title: "کیف دستی",
+              Slug: "bag",
+              parent: { data: null },
+            },
+          },
+          {
+            id: 2,
+            attributes: {
+              Title: "دامن",
+              Slug: "skirt",
+              parent: { data: null },
+            },
+          },
+          {
+            id: 3,
+            attributes: {
+              Title: "پلیور",
+              Slug: "pullover",
+              parent: { data: null },
+            },
+          },
+        ],
+      }),
+    } as Response);
+
+    const categories = await getProductCategories({
+      allowedNameSubstrings: ["کیف", "دامن"],
+    });
+
+    expect(categories).toHaveLength(2);
+    expect(categories.map((c) => c.name)).toEqual(["کیف دستی", "دامن"]);
+  });
 });

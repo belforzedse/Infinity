@@ -1,0 +1,26 @@
+---
+description: Homepage category carousel and bottom navbar category sheet are restricted to categories whose name contains one of the allowed Persian substrings. Use when changing which categories appear on home or in the nav sheet.
+globs:
+alwaysApply: false
+---
+# Home and Nav Category Filter
+
+The **homepage category carousel** and the **bottom navbar category sheet** (the sheet that opens when the user taps "دسته بندی ها" on mobile) show only categories whose **name** contains at least one of these substrings:
+
+- کیف
+- دامن
+- کت
+- لباس زیر
+- شال و روسری
+- پیراهن
+- شلوار
+
+## Where it is defined
+
+- **Constant**: [frontend/src/constants/categories.ts](mdc:frontend/src/constants/categories.ts) exports `ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS` (readonly array). Edit this list to change which categories appear on the homepage carousel and in the bottom nav sheet.
+- **Service**: [frontend/src/services/product/categories.ts](mdc:frontend/src/services/product/categories.ts) — `getProductCategories()` accepts optional `allowedNameSubstrings?: readonly string[]`. When provided, the returned list is filtered in-memory so each category’s `name` includes at least one of the substrings.
+- **Usage**: Home page passes the constant when fetching categories for the carousel; [BottomNavigation](mdc:frontend/src/components/PLP/BottomNavigation.tsx) uses `useProductCategories({ mainOnly: true, allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS })`.
+
+## Other category UIs
+
+The **categories page**, **PLP filter**, **CategoriesModal**, and other call sites do **not** pass `allowedNameSubstrings`, so they continue to show all categories (no name filter).
