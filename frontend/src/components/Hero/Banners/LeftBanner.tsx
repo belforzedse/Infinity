@@ -13,12 +13,12 @@ interface LeftBannerProps {
   className?: string;
 }
 
-const HERO_IMAGE_PLACEHOLDER_SRC = "/images/placeholders/image-placeholder.svg";
-
 export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const { background, foregroundImage } = spec;
-  const { resolvedSrc, shouldRender: shouldRenderForegroundImage, handleError: handleForegroundImageError } =
+  const hasForegroundSrc = Boolean(foregroundImage.src?.trim());
+  const { resolvedSrc, shouldRender: shouldRenderFromHook, handleError: handleForegroundImageError } =
     useResolvedImage(foregroundImage.src);
+  const shouldRenderForegroundImage = hasForegroundSrc && shouldRenderFromHook;
 
   const resolvedBackgroundValue =
     typeof background.value === "string" ? background.value.trim() : "";
@@ -32,12 +32,14 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
 
   // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
+  // When using an image, set a fallback backgroundColor so areas not covered by the image
+  // (e.g. top when position is "bottom" and size is "contain") are not transparent and don't show a band.
   const backgroundStyle =
     !shouldUseImageBackground
       ? { backgroundColor: resolvedBackgroundValue || "#f8fafc" }
       : {
           backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
-          backgroundColor: !backgroundImageUrl ? "#f8fafc" : undefined,
+          backgroundColor: backgroundImageUrl ? "#f5f2ef" : "#f8fafc", // fallback for uncovered areas (e.g. beige-tinted neutral)
           backgroundSize: background.backgroundSize || 'cover',
           backgroundPosition: background.position || 'center'
         };

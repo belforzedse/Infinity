@@ -57,10 +57,11 @@ The PLP is structured to display product listings with filtering capabilities:
 - Mobile: Filter drawer accessed via button and product grid
 - Different card styles for different viewports
 
-## Pagination
-- Support for paginated results
-- Page navigation controls
-- Shows count of total available products
+## Pagination and Performance
+- **API pagination**: Products are fetched one page at a time (`pagination[page]`, `pagination[pageSize]=30`). No 500-product fetch; server uses Strapi `meta.pagination` for total and pageCount.
+- **Server-side sort**: Non-price sorts (e.g. `createdAt:desc`) are sent to the API (`sort[0]=...`). Price sort is applied in-memory on the current page only.
+- **Deferred sidebar**: Sidebar suggestions (شاید بپسندید, تخفیف های آخرماه) are loaded in a Suspense boundary via [AsyncSidebarProducts](frontend/src/components/PLP/List/AsyncSidebarProducts.tsx) so the main PLP content is not blocked by `getHomepageSections()`. The page passes `sidebarSlot={<Suspense><AsyncSidebarProducts /></Suspense>}` to PLPList.
+- Page navigation and client-side filter changes use the same pagination (page + pageSize 30) in [PLP/List.tsx](mdc:frontend/src/components/PLP/List.tsx) `fetchProducts`.
 
 ## No Results State
 - Dedicated component for when filters return no products

@@ -7,17 +7,19 @@ import { DesktopSlideBuilder } from "../../slideFactory";
 export const slide1 = new DesktopSlideBuilder()
   // Top left text banner with blue theme and custom typography
   .topLeftTextBanner({
-    title: "لباســـی که خودت را توش پیدا می‌کنی",
-    subtitle: "جزئیات کوچک، تأثیر بزرگ.",
-    className: "w-full gap-[8px] pb-[68px] mb-[10px] rounded-3xl px-[36px] pt-[30px]",
+    title: "نیوکالکشن اینفینیتی جلوتر از مد  ",
+    subtitle: "این بار فراتر از مـــد باش ",
+    className: "w-full gap-[8px] pb-[40x] rounded-3xl px-[36px] pt-[30px]",
     colors: {
-      background: "bg-slate-50",
-      titleColor: "text-[#94B5D2]",
-      subtitleColor: "text-gray-600",
+      background: "",
+      titleColor: "text-[#9E8578]",
+      subtitleColor: "text-[#DAC9BA]",
     },
     typography: {
-      titleSize: "lg:text-[48px] 2xl:text-[50px]",
-      subtitleSize: "lg:text-[26px] 2xl:text-[30px]",
+      titleFont: "font-rokh",           // Font family for title
+      subtitleFont: "font-kaghaz",          // Font family for subtitle
+      titleSize: "lg:text-[26px] 2xl:text-[30px]",
+      subtitleSize: "lg:text-[48px] 2xl:text-[80px] ",
       titleWeight: "font-bold",
       subtitleWeight: "font-semibold",
       titleLeading: "leading-tight",
@@ -109,7 +111,7 @@ export const slide1 = new DesktopSlideBuilder()
       className: "rounded-3xl",
     },
     button: {
-      label: "بافت ها" ,
+      label: "بافت ها",
       href: "/plp",
       className: "text-white text-[20px] font-normal rounded-lg",
       showArrow: true,
@@ -122,13 +124,13 @@ export const slide1 = new DesktopSlideBuilder()
       value: "/images/HeroSlider/Square/Desktop1Background.png",
       alt: "Background",
       width: "520px",
-      height: "427px",
-      position: "bottom center",
-      backgroundSize: "cover",
+      height: "530px",
+      position: "bottom",
+      backgroundSize: "contain",
       className: "rounded-3xl",
     },
     foregroundImage: {
-      src: "/images/HeroSlider/Square/Desktop1Foreground.webp",
+      src: "",
       alt: "Hero Side Image",
       width: 650,
       height: 650,

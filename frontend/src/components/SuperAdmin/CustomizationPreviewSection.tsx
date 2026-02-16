@@ -45,7 +45,7 @@ export function BrowserChrome({ children }: { children: ReactNode }) {
           <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
         </div>
         <div className="flex-1 rounded-md bg-white px-3 py-1.5 text-[11px] text-slate-400">
-          infinitycolor.co
+          new.infinitycolor.co
         </div>
       </div>
       <div className="min-h-[280px] max-h-[min(72vh,680px)] flex-1 overflow-auto bg-white p-4">

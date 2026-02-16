@@ -90,7 +90,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.co";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
 
   let product: ProductDetail | undefined = undefined;
 
@@ -717,7 +717,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     },
   ];
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.co";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
   const productUrl = `${SITE_URL}/pdp/${slug}`;
   const averageRating = productData.attributes.AverageRating || 0;
   const reviewCount = productData.attributes.RatingCount || productReviews.length;

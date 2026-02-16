@@ -18,7 +18,7 @@ export const categories: Category[] = [
     slug: "coat-and-mantle",
     width: 180,
     height: 248,
-    href: "https://infinitycolor.co/shop/coat-and-mantle/",
+    href: "https://new.infinitycolor.co/shop/coat-and-mantle/",
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ export const categories: Category[] = [
     slug: "پلیور-و-بافت",
     width: 194,
     height: 219,
-    href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+    href: "https://new.infinitycolor.co/shop/پلیور-و-بافت/",
   },
   {
     id: 3,
@@ -38,7 +38,7 @@ export const categories: Category[] = [
     slug: "skirt",
     width: 214,
     height: 181,
-    href: "https://infinitycolor.co/shop/skirt/",
+    href: "https://new.infinitycolor.co/shop/skirt/",
   },
   {
     id: 4,
@@ -48,7 +48,7 @@ export const categories: Category[] = [
     slug: "under-wear",
     width: 183,
     height: 219,
-    href: "https://infinitycolor.co/shop/under-wear/",
+    href: "https://new.infinitycolor.co/shop/under-wear/",
   },
   {
     id: 5,
@@ -58,7 +58,7 @@ export const categories: Category[] = [
     slug: "pants",
     width: 154,
     height: 255,
-    href: "https://infinitycolor.co/shop/pants/",
+    href: "https://new.infinitycolor.co/shop/pants/",
   },
   {
     id: 6,
@@ -68,7 +68,7 @@ export const categories: Category[] = [
     slug: "shawls-and-scarves",
     height: 212,
     width: 159,
-    href: "https://infinitycolor.co/shop/shawls-and-scarves/",
+    href: "https://new.infinitycolor.co/shop/shawls-and-scarves/",
   },
 ];
 

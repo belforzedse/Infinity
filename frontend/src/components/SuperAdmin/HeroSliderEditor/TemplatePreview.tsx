@@ -182,7 +182,7 @@ export default function TemplatePreview({
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                   </div>
                   <div className="flex-1 rounded-md bg-white px-3 py-1.5 text-[11px] text-slate-400">
-                    infinitycolor.co
+                    new.infinitycolor.co
                   </div>
                 </div>
                 <div className="flex min-h-0 flex-1 overflow-hidden">

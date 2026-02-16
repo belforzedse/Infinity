@@ -44,6 +44,8 @@ interface PLPListProps {
   searchQuery?: string;
   discountedSidebarProducts?: ProductCardProps[];
   suggestedSidebarProducts?: ProductCardProps[];
+  /** When provided, rendered in the sidebar instead of default suggestions (e.g. Suspense + AsyncSidebarProducts). */
+  sidebarSlot?: React.ReactNode;
 }
 
 export default function PLPList({
@@ -54,6 +56,7 @@ export default function PLPList({
   searchQuery,
   discountedSidebarProducts = [],
   suggestedSidebarProducts = [],
+  sidebarSlot,
 }: PLPListProps) {
   // URL state management with nuqs
   // These hooks are safe to use in client components - the adapter is in root layout
@@ -447,6 +450,21 @@ export default function PLPList({
     suggestedSidebarProducts,
   });
 
+  const sidebarContent = sidebarSlot ?? (
+    <>
+      <SidebarSuggestions
+        title="شاید بپسندید"
+        icon={<HeartIcon />}
+        items={mappedSuggestedSidebar.length > 0 ? mappedSuggestedSidebar : sidebarProducts}
+      />
+      <SidebarSuggestions
+        title="تخفیف های آخرماه"
+        icon={<DiscountIcon />}
+        items={mappedDiscountedSidebar.length > 0 ? mappedDiscountedSidebar : sidebarProducts}
+      />
+    </>
+  );
+
   // When discount filter is active (تخفیف های وسوسه انگیز PLP), sort products with G in title first
   const displayProducts = useMemo(() => {
     if (discountOnly !== "true") return validProducts;
@@ -661,17 +679,7 @@ export default function PLPList({
               isLoadingCategories={isLoadingCategories}
             />
 
-            <SidebarSuggestions
-              title="شاید بپسندید"
-              icon={<HeartIcon />}
-              items={mappedSuggestedSidebar.length > 0 ? mappedSuggestedSidebar : sidebarProducts}
-            />
-
-            <SidebarSuggestions
-              title="تخفیف های آخرماه"
-              icon={<DiscountIcon />}
-              items={mappedDiscountedSidebar.length > 0 ? mappedDiscountedSidebar : sidebarProducts}
-            />
+            {sidebarContent}
           </div>
         </div>
 

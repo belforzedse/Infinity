@@ -9,7 +9,7 @@ import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
-import { getHomepageSections } from "@/services/product/homepage";
+import AsyncSidebarProducts from "@/components/PLP/List/AsyncSidebarProducts";
 import logger from "@/utils/logger";
 import type { Variation } from "@/types/Product";
 import type { Metadata } from "next";
@@ -218,9 +218,9 @@ async function getProducts(
   queryParams.append("fields[3]", "Status");
   queryParams.append("fields[4]", "createdAt");
 
-  // Fetch all products (or a large batch) for global sorting
-  // We'll paginate after sorting to ensure consistent ordering across pages
-  queryParams.append("pagination[pageSize]", "500"); // Fetch up to 500 products for sorting
+  // API pagination: one page per request for performance (no 500-product fetch).
+  queryParams.append("pagination[page]", String(page));
+  queryParams.append("pagination[pageSize]", String(pageSize));
 
   // Add filters
   queryParams.append("filters[Status][$eq]", "Active");
@@ -232,7 +232,7 @@ async function getProducts(
   // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
   queryParams.append("filters[product_variations][Price][$gt]", "0");
 
-  // Category filter: include selected category and all its children
+  // Category filter: parent + all descendants (e.g. شال + روسری ابریشم). categorySlugs is built via getCategoryAndDescendantSlugs.
   if (categorySlugs && categorySlugs.length > 0) {
     categorySlugs.forEach((slug, i) => {
       queryParams.append(`filters[product_main_category][Slug][$in][${i}]`, slug);
@@ -277,12 +277,10 @@ async function getProducts(
     queryParams.append("filters[product_variations][Usage][$eq]", usage);
   }
 
-  // Don't apply any API-level sorting - we'll sort everything client-side
-  // This ensures stock sorting happens first, before any other sorting
-  // Only apply non-price sorting if explicitly requested (but stock takes priority)
-  // if (sort && sort !== "price:asc" && sort !== "price:desc") {
-  //   queryParams.append("sort[0]", sort);
-  // }
+  // Server-side sort where supported (price sort remains in-memory on current page only).
+  if (sort && sort !== "price:asc" && sort !== "price:desc") {
+    queryParams.append("sort[0]", sort);
+  }
 
   // Construct final URL
   const url = `${baseUrl}?${queryParams.toString()}`;
@@ -347,24 +345,20 @@ async function getProducts(
       return true;
     });
 
-    // CRITICAL: Sort by stock availability FIRST, before any other operations
-    // When sort is "newest" (createdAt:desc), also put products with "g" or "G" in title first
-    filteredProducts.sort((a: Product, b: Product) => {
-      const hasStock = (product: Product): boolean => {
-        if (!product.attributes.product_variations?.data) return false;
-        return product.attributes.product_variations.data.some((variation) => {
-          if (!variation.attributes?.IsPublished) return false;
-          const stockData = variation.attributes?.product_stock;
-          if (!stockData) return false;
-          const stockCount = stockData?.data?.attributes?.Count;
-          if (typeof stockCount !== "number" || stockCount <= 0) return false;
-          return true;
-        });
-      };
+    // Light in-memory sort only for current page (API already applied sort for createdAt etc.).
+    // Stock-first and "G" title ordering for newest/discount; price sort for price:asc/desc.
+    const hasStock = (product: Product): boolean => {
+      if (!product.attributes.product_variations?.data) return false;
+      return product.attributes.product_variations.data.some((variation) => {
+        if (!variation.attributes?.IsPublished) return false;
+        const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
+        return typeof stockCount === "number" && stockCount > 0;
+      });
+    };
 
+    filteredProducts.sort((a: Product, b: Product) => {
       const aHasStock = hasStock(a);
       const bHasStock = hasStock(b);
-
       if (sort === "createdAt:desc") {
         const aHasG = productTitleHasG(a);
         const bHasG = productTitleHasG(b);
@@ -374,84 +368,53 @@ async function getProducts(
         if (!aHasStock && bHasStock) return 1;
         return getProductCreatedAt(b) - getProductCreatedAt(a);
       }
-
-      // تخفیف های وسوسه انگیز: sort products with G in title first
       if (hasDiscount) {
         const aHasG = productTitleHasG(a);
         const bHasG = productTitleHasG(b);
         if (aHasG && !bHasG) return -1;
         if (!aHasG && bHasG) return 1;
       }
-
       if (aHasStock && !bHasStock) return -1;
       if (!aHasStock && bHasStock) return 1;
       return 0;
     });
 
-    // Frontend price sorting (applied after stock sorting)
     if (sort === "price:asc" || sort === "price:desc") {
       const getMinVariationPrice = (product: Product): number => {
         const variations = product.attributes.product_variations?.data || [];
         let minPrice = Infinity;
-
         for (const variation of variations) {
-          // Only consider published variations with stock
           if (!variation.attributes.IsPublished) continue;
-
           const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
           if (typeof stockCount === "number" && stockCount <= 0) continue;
-
           const discountResult = computeDiscountForVariation(variation.attributes);
           const finalPrice = discountResult?.finalPrice || Number(variation.attributes.Price) || 0;
-
-          if (finalPrice > 0 && finalPrice < minPrice) {
-            minPrice = finalPrice;
-          }
+          if (finalPrice > 0 && finalPrice < minPrice) minPrice = finalPrice;
         }
-
         return minPrice === Infinity ? 0 : minPrice;
       };
-
-      // Sort by price, but maintain stock priority (in-stock products first)
       filteredProducts.sort((a: Product, b: Product) => {
-        // First, check stock status (maintain stock priority)
-        const aHasStock = a.attributes.product_variations?.data?.some((v) =>
-          v.attributes.IsPublished &&
-          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
-          v.attributes.product_stock.data.attributes.Count > 0
-        ) || false;
-
-        const bHasStock = b.attributes.product_variations?.data?.some((v) =>
-          v.attributes.IsPublished &&
-          typeof v.attributes.product_stock?.data?.attributes?.Count === "number" &&
-          v.attributes.product_stock.data.attributes.Count > 0
-        ) || false;
-
-        // If stock status differs, stock comes first
+        const aHasStock = hasStock(a);
+        const bHasStock = hasStock(b);
         if (aHasStock && !bHasStock) return -1;
         if (!aHasStock && bHasStock) return 1;
-
-        // If same stock status, sort by price
         const priceA = getMinVariationPrice(a);
         const priceB = getMinVariationPrice(b);
         return sort === "price:asc" ? priceA - priceB : priceB - priceA;
       });
     }
 
-    // Now paginate the sorted results client-side
-    const totalProducts = filteredProducts.length;
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(totalProducts / pageSize);
+    const meta = data.meta?.pagination;
+    const total = typeof meta?.total === "number" ? meta.total : filteredProducts.length;
+    const pageCount = typeof meta?.pageCount === "number" ? meta.pageCount : Math.ceil(total / pageSize);
 
     return {
-      products: paginatedProducts,
+      products: filteredProducts,
       pagination: {
         page: page,
         pageSize: pageSize,
-        pageCount: totalPages,
-        total: totalProducts,
+        pageCount,
+        total,
       },
     };
   } catch (error) {
@@ -512,7 +475,7 @@ export default async function PLPPage({
     categoryTitle = categoryData.attributes.Title;
   }
 
-  // Fetch all categories only when a category filter is present (speeds up /plp with no category)
+  // Fetch full category tree (parent + children) when a category filter is present so product list includes parent and all descendants.
   const allCategories = validatedCategory
     ? await getProductCategories({ revalidate: 3600 })
     : [];
@@ -526,7 +489,7 @@ export default async function PLPPage({
   const { products, pagination } = await getProducts(
     categorySlugs,
     page,
-    30, // Reduced page size for better performance
+    30,
     showAvailableOnly,
     minPrice,
     maxPrice,
@@ -540,13 +503,24 @@ export default async function PLPPage({
     hasDiscount,
   );
 
-  // Fetch sidebar products
-  const { discounted, favorites } = await getHomepageSections();
+  // Sidebar is loaded in a Suspense boundary so main PLP content is not blocked by getHomepageSections().
+  const sidebarSlot = (
+    <Suspense
+      fallback={
+        <div className="flex flex-col gap-7">
+          <div className="h-20 animate-pulse rounded bg-slate-100" />
+          <div className="h-20 animate-pulse rounded bg-slate-100" />
+        </div>
+      }
+    >
+      <AsyncSidebarProducts />
+    </Suspense>
+  );
 
   // Determine if we're showing search results or category results
   const isSearchResults = !!search;
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://infinitycolor.co";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
   const SITE_NAME = "فروشگاه پوشاک اینفینیتی";
   // Use category title if available, fallback to slug
   const displayCategoryName = categoryTitle || validatedCategory;
@@ -616,8 +590,7 @@ export default async function PLPPage({
           category={validatedCategory}
           allCategories={allCategories}
           searchQuery={search}
-          discountedSidebarProducts={discounted}
-          suggestedSidebarProducts={favorites}
+          sidebarSlot={sidebarSlot}
         />
       </Suspense>
     </PageContainer>
