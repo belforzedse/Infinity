@@ -23,8 +23,17 @@ import {
   isHeroSlideVisible,
   normalizeHeroSliderPayload,
 } from "@/types/super-admin/heroSlider";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 const DEFAULT_AUTOPLAY_INTERVAL_MS = 600000;
+
+/** Resolve Strapi upload paths (/uploads/...) to absolute API URL so slider images load. */
+function resolveCmsImageUrl(url: string | undefined): string {
+  if (!url?.trim()) return "";
+  if (/^(https?:)?\/\//i.test(url) || url.startsWith("data:")) return url;
+  if (url.startsWith("/uploads")) return resolveAssetUrl(url);
+  return resolveAssetUrl(url);
+}
 
 type CmsHeroMappingResult = {
   autoplayIntervalMs: number;
@@ -110,10 +119,11 @@ function buildButtonClass(slot: HeroCardSlot, baseClassName?: string): string {
 function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBannerSpec {
   const href = slot.buttonHref || slot.link?.href || base.button?.href || "";
   const imageHref = slot.imageHref || href || base.image.href || undefined;
-  const backgroundValue =
+  const backgroundImageResolved =
     slot.backgroundType === "image" && slot.backgroundImageUrl
-      ? slot.backgroundImageUrl
-      : slot.backgroundColor || "#f8fafc";
+      ? resolveCmsImageUrl(slot.backgroundImageUrl)
+      : "";
+  const backgroundValue = backgroundImageResolved || slot.backgroundColor || "#f8fafc";
 
   return {
     ...base,
@@ -124,7 +134,7 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
     subtitleClassName: mergeClassNames(base.subtitleClassName, slot.subtitleClassName),
     image: {
       ...base.image,
-      src: slot.imageUrl || base.image.src,
+      src: resolveCmsImageUrl(slot.imageUrl) || base.image.src,
       alt: slot.imageAlt || base.image.alt,
       href: imageHref,
       objectFit: "contain",
@@ -148,7 +158,7 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
       titleTracking: slot.titleStyle.letterSpacing,
     },
     background: {
-      type: slot.backgroundType,
+      type: slot.backgroundType === "image" && backgroundImageResolved ? "image" : "color",
       value: backgroundValue,
       width: slot.backgroundWidth || base.background?.width || "100%",
       height: slot.backgroundHeight || base.background?.height || "100%",
@@ -174,14 +184,17 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
 }
 
 function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): LeftBannerSpec {
-  const hasBackgroundImage = slot.backgroundType === "image" && Boolean(slot.backgroundImageUrl);
+  const resolvedBgUrl = slot.backgroundType === "image" && slot.backgroundImageUrl
+    ? resolveCmsImageUrl(slot.backgroundImageUrl)
+    : "";
+  const hasBackgroundImage = Boolean(resolvedBgUrl);
   return {
     ...base,
     background: {
       ...base.background,
       type: hasBackgroundImage ? "image" : "color",
       value: hasBackgroundImage
-        ? slot.backgroundImageUrl
+        ? resolvedBgUrl
         : slot.backgroundColor || base.background.value,
       backgroundSize: slot.backgroundSize || "cover",
       position: slot.backgroundPosition || base.background.position || "center",
@@ -191,7 +204,7 @@ function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): Le
     },
     foregroundImage: {
       ...base.foregroundImage,
-      src: slot.foregroundImageUrl || base.foregroundImage.src,
+      src: resolveCmsImageUrl(slot.foregroundImageUrl) || base.foregroundImage.src,
       alt: slot.foregroundAlt || base.foregroundImage.alt,
       href: slot.link?.href || base.foregroundImage.href,
       objectFit: "contain",

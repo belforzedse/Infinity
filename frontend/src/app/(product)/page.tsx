@@ -70,6 +70,7 @@ export default async function Home() {
     getProductCategories({
         mainOnly: true,
         sort: "Title:asc",
+        featuredOnly: true,
         allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
         revalidate: 60,
       }),

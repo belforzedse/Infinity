@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 import XIcon from "@/components/User/Icons/XIcon";
 import { usePathname } from "next/navigation";
-import { useNavigation } from "@/hooks/api/useNavigation";
+import { useProductCategories } from "@/hooks/useProductCategories";
 import HomeIcon from "@/components/PLP/Icons/HomeIcon";
 import SidebarItem from "@/components/User/Sidebar/SidebarItem";
 import SearchIcon from "@/components/PLP/Icons/SearchIcon";
@@ -25,8 +25,7 @@ interface MenuItem {
 
 export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
   const pathname = usePathname();
-  // Only trigger the API fetch when the menu is open
-  const { navigation, loading } = useNavigation(isOpen);
+  const { categories, isLoading: loading } = useProductCategories({ mainOnly: true });
   const panelRef = React.useRef<HTMLDivElement>(null);
 
   // Swipe-to-close gesture for mobile
@@ -52,11 +51,10 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
     },
   );
 
-  // Transform navigation items to MenuItem format (encode slug for correct query parsing)
   const menuItems: MenuItem[] = [
     { label: "خانه", href: "/" },
-    ...navigation.map((item) => ({
-      label: item.title,
+    ...categories.map((item) => ({
+      label: item.name,
       href: `/plp?category=${encodeURIComponent(item.slug)}`,
     })),
   ];

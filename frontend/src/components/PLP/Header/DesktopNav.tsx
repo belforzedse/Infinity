@@ -2,7 +2,7 @@
 
 import ChevronDownIcon from "@/components/Search/Icons/ChevronDownIcon";
 import Link from "next/link";
-import { useNavigation } from "@/hooks/api/useNavigation";
+import { useProductCategories } from "@/hooks/useProductCategories";
 import { usePathname, useSearchParams } from "next/navigation";
 
 interface NavItem {
@@ -12,15 +12,14 @@ interface NavItem {
 }
 
 export default function PLPHeaderDesktopNav() {
-  const { navigation, loading } = useNavigation();
+  const { categories, isLoading: loading } = useProductCategories({ mainOnly: true });
   const pathname = usePathname();
   const params = useSearchParams();
 
-  // Transform navigation items to NavItem format (encode slug for correct query parsing)
   const navItems: NavItem[] = [
     { label: "خانه", href: "/" },
-    ...navigation.map((item) => ({
-      label: item.title,
+    ...categories.map((item) => ({
+      label: item.name,
       href: `/plp?category=${encodeURIComponent(item.slug)}`,
       hasDropdown: false,
     })),

@@ -4,13 +4,15 @@ import { getProductCategories, type ProductCategorySummary } from "@/services/pr
 interface UseProductCategoriesOptions {
   parentOnly?: boolean;
   mainOnly?: boolean;
+  /** When true, only categories marked as featured in Strapi (carousel / bottom nav sheet). */
+  featuredOnly?: boolean;
   /** When provided, only categories whose name includes one of these substrings are returned. */
   allowedNameSubstrings?: readonly string[];
   initial?: ProductCategorySummary[];
 }
 
 export const useProductCategories = (options: UseProductCategoriesOptions = {}) => {
-  const { parentOnly = false, mainOnly = false, allowedNameSubstrings, initial } = options;
+  const { parentOnly = false, mainOnly = false, featuredOnly, allowedNameSubstrings, initial } = options;
   const [categories, setCategories] = useState<ProductCategorySummary[]>(initial ?? []);
   const [isLoading, setIsLoading] = useState(!initial);
 
@@ -24,6 +26,7 @@ export const useProductCategories = (options: UseProductCategoriesOptions = {}) 
         const data = await getProductCategories({
           parentOnly,
           mainOnly,
+          featuredOnly,
           allowedNameSubstrings,
         });
         if (!isMounted) return;
@@ -42,7 +45,7 @@ export const useProductCategories = (options: UseProductCategoriesOptions = {}) 
     return () => {
       isMounted = false;
     };
-  }, [initial, parentOnly, mainOnly, allowedNameSubstrings]);
+  }, [initial, parentOnly, mainOnly, featuredOnly, allowedNameSubstrings]);
 
   return { categories, isLoading };
 };

@@ -73,9 +73,9 @@ export const categories: Category[] = [
 ];
 
 /**
- * Category name substrings used to filter categories on the homepage carousel
- * and bottom navbar category sheet. Only categories whose name contains at least
- * one of these strings are shown there.
+ * Category name substrings used as fallback filter when "Featured" is not used.
+ * Includes مانتو and پلیور so they match Strapi category names; used for
+ * homepage carousel and bottom nav sheet when featuredOnly is false.
  */
 export const ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS: readonly string[] = [
   "کیف",
@@ -85,6 +85,8 @@ export const ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS: readonly string[] = [
   "شال و روسری",
   "پیراهن",
   "شلوار",
+  "مانتو",
+  "پلیور",
 ];
 
 export default categories;

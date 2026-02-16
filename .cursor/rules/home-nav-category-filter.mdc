@@ -1,26 +1,21 @@
 ---
-description: Homepage category carousel and bottom navbar category sheet are restricted to categories whose name contains one of the allowed Persian substrings. Use when changing which categories appear on home or in the nav sheet.
-globs:
+description: Featured categories and name filter for carousel and bottom nav; header shows all main.
+globs: frontend/src/constants/categories.ts, frontend/src/services/product/categories.ts, backend/src/api/product-category/content-types/product-category/schema.json
 alwaysApply: false
 ---
-# Home and Nav Category Filter
+# Home and Nav Category Display
 
-The **homepage category carousel** and the **bottom navbar category sheet** (the sheet that opens when the user taps "دسته بندی ها" on mobile) show only categories whose **name** contains at least one of these substrings:
+## Header (desktop + mobile menu)
 
-- کیف
-- دامن
-- کت
-- لباس زیر
-- شال و روسری
-- پیراهن
-- شلوار
+Shows **all main categories** with no filter: `useProductCategories({ mainOnly: true })`.
 
-## Where it is defined
+## Homepage carousel and bottom nav sheet (دسته بندی ها)
 
-- **Constant**: [frontend/src/constants/categories.ts](mdc:frontend/src/constants/categories.ts) exports `ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS` (readonly array). Edit this list to change which categories appear on the homepage carousel and in the bottom nav sheet.
-- **Service**: [frontend/src/services/product/categories.ts](mdc:frontend/src/services/product/categories.ts) — `getProductCategories()` accepts optional `allowedNameSubstrings?: readonly string[]`. When provided, the returned list is filtered in-memory so each category’s `name` includes at least one of the substrings.
-- **Usage**: Home page passes the constant when fetching categories for the carousel; [BottomNavigation](mdc:frontend/src/components/PLP/BottomNavigation.tsx) uses `useProductCategories({ mainOnly: true, allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS })`.
+Use **Featured** first, then fall back to **name filter**:
 
-## Other category UIs
+- **Strapi**: Product Category has a **featured** boolean. In Strapi Admin → Product Categories, check "Featured" on categories that should appear in the homepage carousel and in the bottom nav category sheet.
+- **Frontend**: `getProductCategories({ mainOnly: true, featuredOnly: true, allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS })` and `useProductCategories({ mainOnly: true, featuredOnly: true, allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS })`. The service returns featured categories when any exist; if none are featured, it filters by `allowedNameSubstrings` (مانتو, پلیور, دامن, etc.) so something always shows.
 
-The **categories page**, **PLP filter**, **CategoriesModal**, and other call sites do **not** pass `allowedNameSubstrings`, so they continue to show all categories (no name filter).
+## Name filter constant
+
+- [frontend/src/constants/categories.ts](mdc:frontend/src/constants/categories.ts) exports `ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS` (includes مانتو, پلیور, دامن, کت, …). Used only as fallback when no categories are marked featured.

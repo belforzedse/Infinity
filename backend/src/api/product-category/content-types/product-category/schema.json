@@ -25,14 +25,16 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "Color": {
       "type": "string"
     },
     "isMainCategory": {
+      "type": "boolean",
+      "default": false
+    },
+    "featured": {
       "type": "boolean",
       "default": false
     },

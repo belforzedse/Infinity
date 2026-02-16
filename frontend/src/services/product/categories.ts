@@ -39,6 +39,7 @@ interface RawProductCategory {
     Slug?: string;
     Color?: string | null;
     isMainCategory?: boolean | null;
+    featured?: boolean | null;
     Image?: CategoryImageField | null;
     parent?: CategoryRelation | null;
     children?: ChildrenRelation | null;
@@ -47,6 +48,7 @@ interface RawProductCategory {
   Slug?: string;
   Color?: string | null;
   isMainCategory?: boolean | null;
+  featured?: boolean | null;
   Image?: CategoryImageField | null;
   parent?: CategoryRelation | null;
   children?: ChildrenRelation | null;
@@ -65,6 +67,8 @@ export interface ProductCategorySummary {
   isMainCategory: boolean;
   /** True when category has at least one child (only set when children were populated). */
   hasChildren?: boolean;
+  /** True when category is marked as featured in Strapi (for carousel / bottom nav). */
+  featured?: boolean;
 }
 
 export interface FetchProductCategoriesOptions {
@@ -76,8 +80,12 @@ export interface FetchProductCategoriesOptions {
    */
   parentsWithChildrenOnly?: boolean;
   /**
+   * When true, only return categories marked as featured in Strapi (homepage carousel and bottom nav sheet).
+   */
+  featuredOnly?: boolean;
+  /**
    * When provided, only return categories whose name includes at least one of these substrings.
-   * Used for homepage carousel and bottom nav category sheet.
+   * Fallback when featured is not used; used for homepage carousel and bottom nav category sheet.
    */
   allowedNameSubstrings?: readonly string[];
   limit?: number;
@@ -135,6 +143,7 @@ export async function getProductCategories(
   params.append("fields[1]", "Slug");
   params.append("fields[2]", "Color");
   params.append("fields[3]", "isMainCategory");
+  params.append("fields[4]", "featured");
   params.append("populate[0]", "Image");
   params.append("populate[1]", "parent");
 
@@ -230,6 +239,7 @@ export async function getProductCategories(
           parentId,
           isMainCategory,
           hasChildren: options.parentsWithChildrenOnly ? hasChildren : undefined,
+          featured: Boolean(attrs.featured),
         } as ProductCategorySummary;
       })
       .filter((item) => item.slug);
@@ -245,7 +255,15 @@ export async function getProductCategories(
       result = dedupeCategoriesById(mapped);
     }
 
-    if (options.allowedNameSubstrings?.length) {
+    if (options.featuredOnly) {
+      const featured = result.filter((c) => c.featured);
+      if (featured.length > 0) {
+        result = featured;
+      } else if (options.allowedNameSubstrings?.length) {
+        const substrings = options.allowedNameSubstrings;
+        result = result.filter((c) => substrings.some((sub) => c.name.includes(sub)));
+      }
+    } else if (options.allowedNameSubstrings?.length) {
       const substrings = options.allowedNameSubstrings;
       result = result.filter((c) => substrings.some((sub) => c.name.includes(sub)));
     }

@@ -20,6 +20,7 @@ const PLPBottomNavigation = () => {
   const { totalItems } = useCart();
   const { categories, isLoading: isLoadingCategories } = useProductCategories({
     mainOnly: true,
+    featuredOnly: true,
     allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);

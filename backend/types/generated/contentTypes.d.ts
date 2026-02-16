@@ -1810,6 +1810,7 @@ export interface ApiProductCategoryProductCategory extends Schema.CollectionType
       Attribute.Private;
     external_id: Attribute.String;
     external_source: Attribute.String;
+    featured: Attribute.Boolean & Attribute.DefaultTo<false>;
     Image: Attribute.Media<"images">;
     isMainCategory: Attribute.Boolean & Attribute.DefaultTo<false>;
     parent: Attribute.Relation<
