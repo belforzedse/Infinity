@@ -50,20 +50,29 @@ export const slide1 = new TabletSlideBuilder()
   })
   // Bottom left action banner
   .bottomActionBannerLeft({
-    title: "دامن ها",
+    title: "پلیور ها",
     subtitle: "",
     image: {
       src: "/images/HeroSlider/ActionBannerLeft/Slide1.webp",
       alt: "Category Banner",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className:
         "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain",
       objectPosition: " ",
     },
     className: "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl",
     contentAlignment: "center",
+    background: {
+      type: "color",
+      value: "#CFB99C",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-xl",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -99,6 +108,15 @@ export const slide1 = new TabletSlideBuilder()
     },
     className: "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px]  rounded-xl",
     contentAlignment: "bottom",
+    background: {
+      type: "color",
+      value: "#A6C2DB",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-xl",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",

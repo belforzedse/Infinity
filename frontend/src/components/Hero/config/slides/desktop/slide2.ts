@@ -51,7 +51,7 @@ export const slide2 = new DesktopSlideBuilder()
       alt: "Category Banner",
       width: 400,
       height: 400,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-auto w-auto rounded-lg pl-8 pb-4 object-contain",
       objectPosition: " left",
     },
@@ -66,8 +66,8 @@ export const slide2 = new DesktopSlideBuilder()
       className: "rounded-3xl",
     },
     button: {
-      label: "دامن های پاییزه ",
-      href: "/shop/category",
+      label: "مانتو",
+      href: "/plp",
       className: "text-white text-[20px] font-normal rounded-lg",
       showArrow: true,
     },
@@ -97,7 +97,7 @@ export const slide2 = new DesktopSlideBuilder()
       alt: "Category Banner",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: " rounded-lg pl-8 object-contain",
       objectPosition: "left",
       customWidth: "200px", // NEW: Set image display width
@@ -115,7 +115,7 @@ export const slide2 = new DesktopSlideBuilder()
     },
     button: {
       label: "بافتنی ها",
-      href: "/shop/category",
+      href: "/plp",
       className: "text-white text-[20px] font-normal rounded-lg",
       showArrow: true,
     },

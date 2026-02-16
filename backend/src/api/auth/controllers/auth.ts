@@ -9,6 +9,7 @@ const OTP_SEND_FAILED_MESSAGE = "ارسال کد تایید ناموفق بود.
 const UNAUTHORIZED_MESSAGE = "احراز هویت ناموفق بود. دوباره تلاش کنید.";
 const PHONE_PASSWORD_REQUIRED_MESSAGE = "شماره همراه و رمز عبور الزامی است.";
 const USER_NOT_FOUND_OR_PASSWORD_INCORRECT = "شماره همراه یا رمز عبور اشتباه است.";
+const PASSWORD_RESET_FAILED_MESSAGE = "تغییر رمز عبور ناموفق بود. دوباره تلاش کنید.";
 
 import { RedisClient } from "../../../index";
 import { validatePhone } from "../utils/validations";
@@ -564,11 +565,11 @@ async function resetPassword(ctx) {
       },
     });
 
-    ctx.body = { message: "password reset successfully" };
+    ctx.body = { message: "رمز عبور با موفقیت تغییر کرد." };
   } catch (err) {
     strapi.log.error(err);
     ctx.status = 500;
-    ctx.body = { message: err.message };
+    ctx.body = { message: PASSWORD_RESET_FAILED_MESSAGE };
   }
 }
 

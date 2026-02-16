@@ -8,8 +8,10 @@ import TransactionsList from "@/components/User/Wallet/TransactionsList";
 import TransactionsIcon from "@/components/User/Icons/TransactionsIcon";
 import UserContainer from "@/components/layout/UserContainer";
 import AccountQuickLinks from "@/components/User/Account/QuickLinks";
-import { AlertCircleIcon, CheckIcon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon, InfoIcon } from "lucide-react";
 import WalletService from "@/services/wallet";
+
+const WALLET_CHARGE_DISABLED = true;
 
 function StatusBanner({ variant, title, description }: { variant: "success" | "error"; title: string; description: string }) {
   const styles =
@@ -25,6 +27,18 @@ function StatusBanner({ variant, title, description }: { variant: "success" | "e
       <div className="flex flex-col gap-1">
         <span className="font-semibold">{title}</span>
         <span className="text-xs md:text-sm">{description}</span>
+      </div>
+    </div>
+  );
+}
+
+function ChargingDisabledNotice() {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 text-sm md:text-base">
+      <InfoIcon className="mt-0.5 h-5 w-5 flex-shrink-0" />
+      <div className="flex flex-col gap-1">
+        <span className="font-semibold">شارژ کیف پول به‌صورت موقت غیرفعال است</span>
+        <span className="text-xs md:text-sm">به زودی امکان شارژ مجدد فراهم خواهد شد.</span>
       </div>
     </div>
   );
@@ -156,6 +170,7 @@ export default function WalletPage() {
       {statusConfig ? (
         <StatusBanner variant={statusConfig.variant} title={statusConfig.title} description={statusConfig.description} />
       ) : null}
+      {WALLET_CHARGE_DISABLED ? <ChargingDisabledNotice /> : null}
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
         <aside className="hidden w-full max-w-[240px] flex-shrink-0 lg:block">
           <UserSidebar />
@@ -203,7 +218,7 @@ export default function WalletPage() {
             ) : (
               <>
                 <WalletBalance />
-                <IncreaseBalance />
+                <IncreaseBalance chargeDisabled={WALLET_CHARGE_DISABLED} />
               </>
             )}
           </div>

@@ -6,7 +6,7 @@ import { MobileSlideBuilder } from "../../slideFactory";
 
 export const slide5 = new MobileSlideBuilder()
   .heroBanner({
-    background: { type: "color", value: "bg-orange-100" },
+    background: { type: "color", value: "#ffedd5" },
     foregroundImage: {
       src: "/images/side3.png",
       alt: "Hero",
@@ -44,6 +44,15 @@ export const slide5 = new MobileSlideBuilder()
       className: "h-full w-full rounded-lg object-contain md:object-cover",
     },
     className: "rounded-lg",
+    background: {
+      type: "color",
+      value: "#c2410c",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-lg",
+    },
     colors: {
       background: "bg-gradient-to-b from-orange-700/70 to-red-600/50",
       titleColor: "text-orange-50",
@@ -71,6 +80,15 @@ export const slide5 = new MobileSlideBuilder()
       className: "h-full w-full rounded-lg object-contain md:object-cover",
     },
     className: "rounded-lg",
+    background: {
+      type: "color",
+      value: "#312e81",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-lg",
+    },
     colors: {
       background: "bg-gradient-to-t from-indigo-900/70 to-purple-600/50",
       titleColor: "text-indigo-100",

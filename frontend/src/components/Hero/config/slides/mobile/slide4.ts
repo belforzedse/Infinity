@@ -62,6 +62,15 @@ export const slide4 = new MobileSlideBuilder()
       objectPosition: "bottom left",
     },
     className: "rounded-lg",
+    background: {
+      type: "color",
+      value: "#CFB99C",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-lg",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -96,6 +105,15 @@ export const slide4 = new MobileSlideBuilder()
       objectPosition: "left",
     },
     className: "rounded-lg",
+    background: {
+      type: "color",
+      value: "#A6C2DB",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-lg",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",

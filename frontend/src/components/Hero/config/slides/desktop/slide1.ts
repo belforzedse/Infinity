@@ -49,7 +49,7 @@ export const slide1 = new DesktopSlideBuilder()
       alt: "Category Banner",
       width: 800,
       height: 900,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-full w-full rounded-lg pl-2 object-contain",
       objectPosition: "left",
     },
@@ -65,14 +65,14 @@ export const slide1 = new DesktopSlideBuilder()
     },
     button: {
       label: "دامن های پاییزه ",
-      href: "/shop/category",
+      href: "/plp",
       className: "text-white text-[20px] font-normal rounded-lg",
       showArrow: true,
     },
   })
   // Bottom left action banner (image only, with brightness effect)
   .bottomActionBannerLeft({
-    title: "دامن ها",
+    title: "پلیور ها",
     subtitle: "",
     className: "h-[80%]",
     colors: {
@@ -94,7 +94,7 @@ export const slide1 = new DesktopSlideBuilder()
       alt: "Category Banner",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-full w-full rounded-lg mb-2 -translate-y-4 object-contain",
       objectPosition: "top left ",
     },
@@ -109,8 +109,8 @@ export const slide1 = new DesktopSlideBuilder()
       className: "rounded-3xl",
     },
     button: {
-      label: "دامن های پاییزه ",
-      href: "/shop/category",
+      label: "بافت ها" ,
+      href: "/plp",
       className: "text-white text-[20px] font-normal rounded-lg",
       showArrow: true,
     },

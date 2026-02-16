@@ -231,7 +231,7 @@ export class MobileSlideBuilder {
       heroBanner: {
         background: {
           type: "color",
-          value: "bg-slate-50",
+          value: "#f8fafc",
           width: "100%",
           height: "100%",
           position: "center",
@@ -394,7 +394,7 @@ export class TabletSlideBuilder {
       heroBanner: {
         background: {
           type: "color",
-          value: "bg-slate-50",
+          value: "#f8fafc",
           width: "100%",
           height: "100%",
           position: "center",

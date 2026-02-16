@@ -5,10 +5,15 @@ import { PREDEFINED_INCREASE_BALANCE_AMOUNTS } from "../Constnats";
 import LeftUpArrowIcon from "../Icons/LeftUpArrowIcon";
 import WalletService from "@/services/wallet";
 
-const IncreaseBalance = () => {
+interface IncreaseBalanceProps {
+  chargeDisabled?: boolean;
+}
+
+const IncreaseBalance = ({ chargeDisabled = false }: IncreaseBalanceProps) => {
   const [increaseAmount, setIncreaseAmount] = useState(50000);
 
   const handleAmountSelect = (amount: number) => {
+    if (chargeDisabled) return;
     setIncreaseAmount(amount);
   };
 
@@ -27,12 +32,14 @@ const IncreaseBalance = () => {
           {PREDEFINED_INCREASE_BALANCE_AMOUNTS.map((amount) => (
             <button
               key={amount}
+              type="button"
+              disabled={chargeDisabled}
               onClick={() => handleAmountSelect(amount)}
               className={`rounded-lg border bg-white px-3 py-2 ${
                 increaseAmount === amount
                   ? "text-lg border-blue-500 text-blue-500 lg:text-xl"
                   : "border border-slate-100 text-slate-400 hover:border-blue-500 hover:text-blue-500"
-              } text-center transition-all duration-200`}
+              } disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-slate-100 disabled:hover:text-slate-400 text-center transition-all duration-200`}
             >
               {priceFormatter(amount)} تومان
             </button>
@@ -41,8 +48,11 @@ const IncreaseBalance = () => {
       </div>
 
       <button
-        className="flex w-full items-center justify-center gap-1 rounded-lg bg-pink-500 px-10 py-3 text-white lg:w-fit"
+        type="button"
+        disabled={chargeDisabled}
+        className="flex w-full items-center justify-center gap-1 rounded-lg bg-pink-500 px-10 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60 lg:w-fit"
         onClick={async () => {
+          if (chargeDisabled) return;
           try {
             // UI shows toman; backend expects IRR
             const amountIrr = Number(increaseAmount) * 10;

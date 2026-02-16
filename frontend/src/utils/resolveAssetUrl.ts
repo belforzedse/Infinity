@@ -11,6 +11,12 @@ export const resolveAssetUrl = (path?: string | null): string => {
   }
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  // Local public assets - served by Next.js, stay on frontend origin
+  if (path.startsWith("/images/") || path.startsWith("/blog/")) {
+    return normalizedPath;
+  }
+
   const imageBase = (IMAGE_BASE_URL || "").replace(/\/$/, "");
   const apiBase = (API_BASE_URL || "").replace(/\/$/, "").replace(/\/api$/, "");
 

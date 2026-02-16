@@ -1,0 +1,32 @@
+---
+description: All user-facing error messages must be in Persian; vague errors must include "دوباره تلاش کنید"
+globs: 
+alwaysApply: false
+---
+# Persian Error Messages
+
+## Policy
+
+- **No English errors**: All user-facing error messages must be in Persian.
+- **Vague errors**: When the error is generic or unclear, include "دوباره تلاش کنید" (try again).
+
+## Backend
+
+- Auth controller (`backend/src/api/auth/controllers/auth.ts`): Uses Persian constants for OTP, login, and auth errors.
+- Phone validation (`backend/src/api/auth/utils/validations.ts`): Returns Persian messages.
+- Prefer Persian in `ctx.badRequest()`, `ctx.unauthorized()`, and `ctx.body.message`.
+
+## Frontend
+
+- `frontend/src/constants/api.ts`: `ERROR_MESSAGES` are all in Persian.
+- `frontend/src/lib/errorTranslations.ts`: Maps any stray English backend messages to Persian; default fallback includes "دوباره تلاش کنید".
+- Auth fallbacks (e.g. OTP page): Use Persian messages.
+
+## Example Persian Messages
+
+| Context | Message |
+|---------|---------|
+| OTP invalid/expired | کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید. |
+| Login failed | ورود ناموفق بود. دوباره تلاش کنید. |
+| Generic/vague | متأسفانه مشکلی پیش آمد. دوباره تلاش کنید. |
+| Network | خطای شبکه. اتصال اینترنت خود را بررسی کنید. |

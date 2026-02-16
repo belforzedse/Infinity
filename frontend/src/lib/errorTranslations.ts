@@ -31,8 +31,7 @@ export const ERROR_MESSAGE_MAP: Record<string, string> = {
   "invalid request": "درخواست نامعتبر است. لطفاً دوباره تلاش کنید.",
   "invalid color code": "کد رنگ نامعتبر است. لطفاً کد رنگ صحیح را وارد کنید.",
 
-  // Authorization errors
-  "unauthorized": "شما مجاز به انجام این عمل نیستید.",
+  // Authorization errors (unauthorized above in OTP section)
   "forbidden": "شما مجاز به انجام این عمل نیستید.",
 
   // Not found errors

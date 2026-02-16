@@ -64,6 +64,15 @@ export const slide2 = new TabletSlideBuilder()
     },
     className: "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl",
     contentAlignment: "center",
+    background: {
+      type: "color",
+      value: "#A28D71",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-xl",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -99,6 +108,15 @@ export const slide2 = new TabletSlideBuilder()
     },
     className: "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px]  rounded-xl",
     contentAlignment: "bottom",
+    background: {
+      type: "color",
+      value: "#374C5F",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-xl",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",

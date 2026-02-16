@@ -482,7 +482,7 @@ describe('Auth Controller - Real Implementation', () => {
       );
 
       expect(ctx.body).toEqual({
-        message: 'password reset successfully',
+        message: 'رمز عبور با موفقیت تغییر کرد.',
       });
     });
 

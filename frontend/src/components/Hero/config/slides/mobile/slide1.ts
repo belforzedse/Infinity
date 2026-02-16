@@ -50,19 +50,28 @@ export const slide1 = new MobileSlideBuilder()
   })
   // Bottom left action banner
   .bottomActionBannerLeft({
-    title: "دامن ها",
+    title: "پلیور ها",
     subtitle: "",
     image: {
       src: "/images/HeroSlider/ActionBannerLeft/Slide1.webp",
       alt: "Category Banner",
       width: 600,
       height: 600,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-full w-full rounded-lg mb-2 scale-150 -translate-y-4 object-contain",
       objectPosition: "bottom left",
     },
     className: "rounded-lg",
     paddingClassName: "px-3 py-4 pr-3",
+    background: {
+      type: "color",
+      value: "#CFB99C",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-lg",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -77,8 +86,8 @@ export const slide1 = new MobileSlideBuilder()
       subtitleTracking: "tracking-normal",
     },
     button: {
-      label: "دامن های پاییزه ",
-      href: "/shop/category",
+      label: "بافت ها",
+      href: "/plp",
       className: "text-white text-sm font-normal rounded-lg",
       showArrow: true,
     },
@@ -92,12 +101,21 @@ export const slide1 = new MobileSlideBuilder()
       alt: "Category Banner",
       width: 800,
       height: 900,
-      href: "https://infinitycolor.co/shop/پلیور-و-بافت/",
+      href: "/plp",
       className: "h-full w-full rounded-lg scale-125 pl-2 object-contain",
       objectPosition: "left",
     },
     className: "rounded-lg ",
     paddingClassName: "px-3 py-4 pr-3",
+    background: {
+      type: "color",
+      value: "#A6C2DB",
+      width: "100%",
+      height: "100%",
+      position: "center",
+      backgroundSize: "cover",
+      className: "rounded-lg",
+    },
     colors: {
       titleColor: "text-white",
       subtitleColor: "text-gray-600",
@@ -113,7 +131,7 @@ export const slide1 = new MobileSlideBuilder()
     },
     button: {
       label: "دامن های پاییزه ",
-      href: "/shop/category",
+      href: "/plp",
       className: "text-white text-sm font-normal rounded-lg",
       showArrow: true,
     },
