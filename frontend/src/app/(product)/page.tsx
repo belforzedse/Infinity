@@ -71,6 +71,7 @@ export default async function Home() {
         mainOnly: true,
         sort: "Title:asc",
         allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
+        revalidate: 60,
       }),
     getPublicSuperAdminSettings(),
   ]);

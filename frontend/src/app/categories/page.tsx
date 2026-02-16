@@ -30,7 +30,11 @@ const getSoftBackground = (color?: string | null) => {
 };
 
 export default async function CategoriesPage() {
-  const categories = await getProductCategories({ parentOnly: true, sort: "Title:asc" });
+  const categories = await getProductCategories({
+    parentOnly: true,
+    sort: "Title:asc",
+    revalidate: 60,
+  });
 
   return (
     <PageContainer variant="wide" className="space-y-8 pb-16 pt-10">

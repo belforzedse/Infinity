@@ -33,7 +33,11 @@ const breadcrumbItems = [
 ];
 
 export default async function AboutPage() {
-  const categories = await getProductCategories({ parentOnly: true, sort: "Title:asc" });
+  const categories = await getProductCategories({
+    parentOnly: true,
+    sort: "Title:asc",
+    revalidate: 60,
+  });
 
   return (
     <>

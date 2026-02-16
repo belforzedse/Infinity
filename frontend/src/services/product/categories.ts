@@ -154,12 +154,19 @@ export async function getProductCategories(
 
   const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
 
+  // Server-side: when revalidate is set, use cacheable fetch so Next.js Data Cache is used.
+  // Client-side or when cache is explicitly set: respect options.cache (default no-store for fresh data).
+  const useCacheable =
+    typeof window === "undefined" &&
+    typeof options.revalidate === "number" &&
+    options.cache !== "no-store";
+
   const requestInit: RequestInit & { next?: { revalidate: number } } = {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    cache: options.cache ?? "no-store",
+    cache: useCacheable ? "default" : (options.cache ?? "no-store"),
   };
 
   if (typeof window === "undefined" && typeof options.revalidate === "number") {
