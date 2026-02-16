@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef, type SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
 import { getDeviceInfo } from "@/utils/device-detection";
@@ -246,78 +245,51 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
               </form>
             </div>
 
-            <motion.div
-              className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white"
-              dir="rtl"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <AnimatePresence mode="wait">
-                {loading && (
-                  <motion.div
-                    className="text-xs px-3 py-2 text-gray-500"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+            <div className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white" dir="rtl">
+              {loading && (
+                <div className="text-xs px-3 py-2 text-gray-500">
+                  در حال جستجو…
+                </div>
+              )}
+              {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
+                <div className="text-xs px-3 py-2 text-gray-500">
+                  موردی یافت نشد
+                </div>
+              )}
+              {!loading && suggestions.length > 0 && (
+                <>
+                  {suggestions.map((s, idx) => (
+                    <SearchSuggestionCard
+                      key={s.id}
+                      id={s.id}
+                      title={s.Title}
+                      price={s.Price}
+                      discountPrice={s.DiscountPrice}
+                      discount={s.Discount}
+                      category={s.category}
+                      image={s.image}
+                      isAvailable={s.isAvailable}
+                      onClick={() => {
+                        closeModal({ force: true });
+                        router.push(`/pdp/${s.slug || s.id}`);
+                      }}
+                      index={idx}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeModal({ force: true });
+                      trackSearch(searchQuery.trim(), "mobile_view_all");
+                      router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                    }}
+                    className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
                   >
-                    در حال جستجو…
-                  </motion.div>
-                )}
-                {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
-                  <motion.div
-                    className="text-xs px-3 py-2 text-gray-500"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    موردی یافت نشد
-                  </motion.div>
-                )}
-                {!loading && suggestions.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    {suggestions.map((s, idx) => (
-                      <SearchSuggestionCard
-                        key={s.id}
-                        id={s.id}
-                        title={s.Title}
-                        price={s.Price}
-                        discountPrice={s.DiscountPrice}
-                        discount={s.Discount}
-                        category={s.category}
-                        image={s.image}
-                        isAvailable={s.isAvailable}
-                        onClick={() => {
-                          closeModal({ force: true });
-                          router.push(`/pdp/${s.slug || s.id}`);
-                        }}
-                        index={idx}
-                      />
-                    ))}
-                    <motion.button
-                      type="button"
-                        onClick={() => {
-                          closeModal({ force: true });
-                          trackSearch(searchQuery.trim(), "mobile_view_all");
-                          router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
-                        }}
-                      className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: suggestions.length * 0.03 }}
-                      whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      مشاهده همه نتایج
-                    </motion.button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                    مشاهده همه نتایج
+                  </button>
+                </>
+              )}
+            </div>
 
             <div className="mt-4">
               <button

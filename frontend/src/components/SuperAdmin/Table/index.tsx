@@ -18,7 +18,6 @@ import { atom, useAtom } from "jotai";
 import { useQueryState } from "nuqs";
 import ReportTableSkeleton from "@/components/Skeletons/ReportTableSkeleton";
 import { apiCache } from "@/lib/api-cache";
-import { AnimatePresence } from "framer-motion";
 import { AnimatedTableRow } from "./AnimatedTableRow";
 
 declare module "@tanstack/table-core" {
@@ -539,7 +538,7 @@ export function SuperAdminTable<TData, TValue>({
               {showSkeleton ? (
                 <ReportTableSkeleton columns={columns.length} />
               ) : table.getRowModel().rows?.length ? (
-                <AnimatePresence mode="popLayout" initial={false}>
+                <>
                   {table.getRowModel().rows.map((row) => {
                     const resolvedKey = resolveRowKey(row.original as TData);
                   const rowKey = resolvedKey || String(row.id); // fallback avoids empty/unstable keys
@@ -598,7 +597,7 @@ export function SuperAdminTable<TData, TValue>({
                       </AnimatedTableRow>
                     );
                   })}
-                </AnimatePresence>
+                </>
               ) : (
                 <tr>
                   <td

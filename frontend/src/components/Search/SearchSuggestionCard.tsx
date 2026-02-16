@@ -2,8 +2,6 @@ import Image from "next/image";
 import { faNum } from "@/utils/faNum";
 import type { FC, ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-
 export interface SearchSuggestionCardProps {
   id: number;
   title: string;
@@ -65,19 +63,12 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
   }, [id, query, title]);
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
-      className={`w-full border-b border-gray-100 p-3 text-right transition-colors last:border-b-0 ${
+      className={`w-full border-b border-gray-100 p-3 text-right transition-colors last:border-b-0 active:scale-[0.98] ${
         isActive ? "bg-pink-50" : "hover:bg-gray-50"
       }`}
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15, delay: index * 0.03 }}
-      whileHover={{
-        backgroundColor: isActive ? "rgba(252, 231, 243, 1)" : "rgba(249, 250, 251, 1)",
-      }}
-      whileTap={{ scale: 0.98 }}
       role="option"
       aria-selected={isActive}
       title={title}
@@ -158,7 +149,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
           </div>
         )}
       </div>
-    </motion.button>
+    </button>
   );
 };
 

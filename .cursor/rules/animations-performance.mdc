@@ -1,0 +1,57 @@
+# Animations & Performance for Older Devices
+
+## Overview
+
+To ensure smooth operation on older/slower devices, the frontend limits heavy JavaScript animations. Most UI transitions use simple CSS or no animation.
+
+## Animation Policy
+
+### ✅ KEEP (Homepage Slider Only)
+
+**Hero components** use `framer-motion` for the homepage slider experience:
+
+- `frontend/src/components/Hero/desktopHero.tsx`
+- `frontend/src/components/Hero/tabletHero.tsx`
+- `frontend/src/components/Hero/mobileHero.tsx`
+- `frontend/src/components/Hero/animations.ts`
+
+These respect `prefers-reduced-motion` via `useReducedMotion` and use tuned presets.
+
+### ❌ AVOID (Use CSS or Remove)
+
+Do **not** add new `framer-motion` usage outside the Hero. For other components:
+
+1. **Use CSS transitions** — `transition-colors`, `transition-opacity`, `transition-transform` with `duration-200` or `duration-300`
+2. **Use Tailwind utilities** — `hover:`, `focus:`, `active:scale-95`, etc.
+3. **Avoid** — `motion.div`, `AnimatePresence`, `whileTap`, `whileHover`, spring transitions
+
+### Components Already Simplified
+
+The following were refactored from framer-motion to CSS or plain DOM:
+
+| Component | Change |
+|-----------|--------|
+| `GlobalLoadingOverlay` | Removed AnimatePresence/motion; conditional render only |
+| `ShoppingCart` | Removed step transitions; plain conditional render |
+| `CheckoutPageClient`, `CartPageClient` | Replaced motion.section with section |
+| Product/Blog layouts | Replaced motion.section with section |
+| `PLPDesktopSearch`, `MobileSearch` | Removed motion form/buttons/dropdowns |
+| `SearchSuggestionCard` | Replaced motion.button with button + `active:scale-[0.98]` |
+| `FilterBox`, `FilterBoxWithItems` | Removed AnimatePresence; simple conditional render |
+| `CustomizationEditorPanel` | Replaced motion.div with div + CSS transition |
+| Super Admin Sidebar | Removed AnimatePresence for submenus |
+| `HeroSliderEditor/TemplatePreview` | Replaced motion.div with div |
+| `SuperAdminTable` / `AnimatedTableRow` | Replaced with plain `tr` |
+| `ProductSearch`, `UserSearchSection`, `SelectedProducts` | Removed motion |
+| `admin-activity` page | Removed AnimatePresence and motion.tr |
+| `DebugPanel` | Removed motion button and panel |
+
+### Reveal Component
+
+`Reveal.tsx` uses **CSS transitions** and `IntersectionObserver` (lightweight). No framer-motion. Keep this pattern for scroll-reveal effects.
+
+## Adding New Animations
+
+1. Prefer **CSS-only** transitions for hover, focus, and simple show/hide
+2. Use `@media (prefers-reduced-motion: reduce)` or Tailwind `motion-reduce:*` for accessibility
+3. Do not add new framer-motion imports outside `Hero/` and `Hero/animations.ts`

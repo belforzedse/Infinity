@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { Pencil, PanelLeftClose, PanelRight } from "lucide-react";
 import { mapHeroSlideToLayoutsForEditor } from "@/components/Hero/config/fromCms";
 import {
@@ -240,19 +239,9 @@ export default function TemplatePreview({
           </div>
 
           {useSidePanel ? (
-            <motion.div
-              className="flex flex-shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white xl:min-h-[400px]"
-              initial={false}
-              animate={{
-                width: isPanelCollapsed ? 0 : 320,
-                opacity: isPanelCollapsed ? 0 : 1,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 35,
-              }}
-              style={{ minWidth: 0 }}
+            <div
+              className={`flex flex-shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition-all duration-300 xl:min-h-[400px] ${isPanelCollapsed ? "w-0 min-w-0 opacity-0" : ""}`}
+              style={{ minWidth: 0, width: isPanelCollapsed ? 0 : 320 }}
             >
               <div className="w-[320px] shrink-0">
                 {selectedSlot ? (
@@ -269,7 +258,7 @@ export default function TemplatePreview({
                   </div>
                 )}
               </div>
-            </motion.div>
+            </div>
           ) : null}
         </div>
       )}

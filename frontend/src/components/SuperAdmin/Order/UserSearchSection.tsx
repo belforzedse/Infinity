@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { apiClient } from "@/services";
-import { motion, AnimatePresence } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
 import { translatePluginRoleLabel } from "@/constants/roleLabels";
 
@@ -289,11 +288,7 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
 
       {/* Search Input */}
       <div ref={containerRef} className="relative">
-        <motion.div
-          className={`relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200`}
-          animate={{ scale: isFocused ? 1.02 : 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 22 }}
-        >
+        <div className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200">
           <div className="flex w-full items-center justify-between px-2">
             <input
               type="text"
@@ -319,25 +314,15 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
               aria-expanded={open}
             />
 
-            <motion.div
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm"
-              whileTap={{ scale: 0.95 }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm">
               <SearchIcon className="h-5 w-5 text-white" />
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Suggestions dropdown */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
-            >
+        {open && (
+          <div className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl">
               {loading && (
                 <div className="text-xs px-3 py-2 text-neutral-500">
                   در حال جستجو…
@@ -381,9 +366,8 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
                     </div>
                   </button>
                 ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
   );

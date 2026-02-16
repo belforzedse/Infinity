@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
 
 const PANEL_WIDTH = 320;
 
@@ -13,8 +12,7 @@ type Props = {
 
 /**
  * Collapsible side panel matching the hero slider editor style:
- * rounded-xl border, 320px width, spring animation.
- * Use with CustomizationPreviewSection's editorPanel prop for the toggle in the header.
+ * rounded-xl border, 320px width. Use with CustomizationPreviewSection's editorPanel prop.
  */
 export default function CustomizationEditorPanel({
   children,
@@ -22,19 +20,9 @@ export default function CustomizationEditorPanel({
   emptyMessage = "یک بخش را برای ویرایش انتخاب کنید",
 }: Props) {
   return (
-    <motion.div
-      className="flex flex-shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white xl:min-h-[400px]"
-      initial={false}
-      animate={{
-        width: isCollapsed ? 0 : PANEL_WIDTH,
-        opacity: isCollapsed ? 0 : 1,
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 35,
-      }}
-      style={{ minWidth: 0 }}
+    <div
+      className={`flex flex-shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition-all duration-300 xl:min-h-[400px] ${isCollapsed ? "w-0 min-w-0 opacity-0" : ""}`}
+      style={{ minWidth: 0, width: isCollapsed ? 0 : PANEL_WIDTH }}
     >
       <div className="h-full shrink-0 overflow-hidden" style={{ width: `${PANEL_WIDTH}px` }}>
         {children != null ? (
@@ -47,7 +35,7 @@ export default function CustomizationEditorPanel({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 

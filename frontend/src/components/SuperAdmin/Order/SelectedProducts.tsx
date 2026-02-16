@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 
 type OrderItem = {
   id: number;
@@ -55,13 +54,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       {/* Items List */}
       <div className="space-y-3">
         {items.map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="border border-slate-200 rounded-lg p-4"
-          >
+          <div key={item.id} className="border border-slate-200 rounded-lg p-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 flex-shrink-0">
                 {item.image ? (
@@ -171,7 +164,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 

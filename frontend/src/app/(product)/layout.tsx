@@ -11,7 +11,6 @@ import dynamic from "next/dynamic";
 import { useCart } from "@/contexts/CartContext";
 import React, { Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
-import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import GlassSurface from "@/components/GlassSurface";
 
@@ -202,15 +201,9 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         </Suspense>
       </div>
 
-      <motion.section
-        key={pathname}
-        id="content"
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-      >
+      <section key={pathname} id="content">
         {children}
-      </motion.section>
+      </section>
 
       <footer>
         <Footer />

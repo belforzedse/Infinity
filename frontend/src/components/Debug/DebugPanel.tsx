@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import DebugInfo from "./DebugInfo";
 import DebugConsole from "./DebugConsole";
 import DebugNetwork from "./DebugNetwork";
@@ -68,24 +67,18 @@ const DebugPanel: React.FC<DebugPanelProps> = ({
   return (
     <>
       {/* Toggle Button */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
+      <button
         className="fixed bottom-4 right-4 z-[9999] flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700"
         onClick={() => setIsOpen(!isOpen)}
         title="Toggle Debug Panel (Ctrl+Shift+D)"
       >
         🐛
-      </motion.button>
+      </button>
 
       {/* Debug Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            style={{
+      {isOpen && (
+        <div
+          style={{
               left: position.x,
               top: position.y,
             }}
@@ -133,9 +126,8 @@ const DebugPanel: React.FC<DebugPanelProps> = ({
               {activeTab === "performance" && <DebugPerformance />}
               {activeTab === "state" && <DebugState />}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </>
   );
 };

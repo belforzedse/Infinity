@@ -5,7 +5,6 @@ import ShoppingCartDesktopTable from "@/components/ShoppingCart/Table/Desktop";
 import ShoppingCartMobileTable from "@/components/ShoppingCart/Table/Mobile";
 import CartSkeleton from "@/components/Skeletons/CartSkeleton";
 import EmptyShoppingCart from "@/components/ShoppingCart/Empty";
-import { motion } from "framer-motion";
 import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { ProductCardProps } from "@/components/Product/Card";
@@ -77,11 +76,7 @@ export default function CartPageClient() {
   }
 
   return (
-    <motion.section
-      initial={{ opacity: 0, x: 16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-    >
+    <section>
       <PageContainer variant="wide" className="space-y-6 pb-16 pt-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <div className="flex-1">
@@ -108,6 +103,6 @@ export default function CartPageClient() {
           </div>
         )}
       </PageContainer>
-    </motion.section>
+    </section>
   );
 }

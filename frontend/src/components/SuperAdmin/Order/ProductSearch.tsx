@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { apiClient } from "@/services";
 import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
-import { motion } from "framer-motion";
 import SearchIcon from "@/components/Search/Icons/SearchIcon";
 
 export type ProductVariation = {
@@ -268,9 +267,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     <div className="space-y-4">
       {/* Search Input */}
       <div className="relative">
-        <motion.div
-          className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200"
-        >
+        <div className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200">
           <div className="flex w-full items-center justify-between px-2">
             <input
               type="text"
@@ -280,14 +277,11 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
               className="text-sm flex-1 bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
             />
 
-            <motion.div
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm"
-              whileTap={{ scale: 0.95 }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm">
               <SearchIcon className="h-5 w-5 text-white" />
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Results */}

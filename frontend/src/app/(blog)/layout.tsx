@@ -4,7 +4,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
 import DesktopSearch from "@/components/Search/PLPDesktopSearch";
@@ -162,15 +161,9 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
         <HeaderDesktopNav />
       </div>
 
-      <motion.section
-        key={pathname}
-        id="content"
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-      >
+      <section key={pathname} id="content">
         {children}
-      </motion.section>
+      </section>
 
       <footer>
         <Footer />

@@ -4,7 +4,6 @@ import superAdminSidebar, { getSidebarItemsForRole } from "@/constants/superAdmi
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
 import React, { useState, Fragment, useEffect, useMemo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import ExitIcon from "../Icons/ExitIcon";
 import { usePathname, useRouter } from "next/navigation";
@@ -314,57 +313,43 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
                     )}
                   </div>
 
-                  {/* Submenu with expand/collapse animation */}
-                  <AnimatePresence initial={false}>
-                    {hasChildren && isOpenMenu && !isCollapsed && (
-                      <motion.div
-                        key={`${item.id}-submenu`}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                        className="mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50"
-                        id={`submenu-${item.id}`}
-                      >
-                        {item.children.map((child, index) => {
-                          const curr = pathname.replace(/\/$/, "");
-                          const href = (child.href ?? "").replace(/\/$/, "");
-                          const active = !!href && (curr === href || curr.startsWith(href + "/"));
-                          return (
-                            <Fragment key={child.id}>
-                              <motion.div
-                                initial={{ opacity: 0, y: -4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                transition={{ duration: 0.15, delay: index * 0.03 }}
-                              >
-                        <Link
-                          href={child.href}
-                          onClick={(e) => e.stopPropagation()}
-                          className={clsx(
-                            "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
-                            "transition-colors duration-150",
-                            "relative pl-6 pr-2",
-                            active
-                              ? "bg-neutral-100 font-medium text-neutral-900"
-                              : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
-                          )}
-                        >
-                          {child.label}
-                          {active && (
-                            <span className="absolute -right-1.5 top-1/2 h-8 w-2 -translate-y-1/2 rounded-r-full bg-pink-500" />
-                          )}
-                        </Link>
-                              </motion.div>
-                              {index !== item.children.length - 1 && (
-                                <div className="mx-4 h-px bg-neutral-100" />
+                  {/* Submenu */}
+                  {hasChildren && isOpenMenu && !isCollapsed && (
+                    <div
+                      className="mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50"
+                      id={`submenu-${item.id}`}
+                    >
+                      {item.children.map((child, index) => {
+                        const curr = pathname.replace(/\/$/, "");
+                        const href = (child.href ?? "").replace(/\/$/, "");
+                        const active = !!href && (curr === href || curr.startsWith(href + "/"));
+                        return (
+                          <Fragment key={child.id}>
+                            <Link
+                              href={child.href}
+                              onClick={(e) => e.stopPropagation()}
+                              className={clsx(
+                                "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                                "transition-colors duration-150",
+                                "relative pl-6 pr-2",
+                                active
+                                  ? "bg-neutral-100 font-medium text-neutral-900"
+                                  : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900",
                               )}
-                            </Fragment>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                            >
+                              {child.label}
+                              {active && (
+                                <span className="absolute -right-1.5 top-1/2 h-8 w-2 -translate-y-1/2 rounded-r-full bg-pink-500" />
+                              )}
+                            </Link>
+                            {index !== item.children.length - 1 && (
+                              <div className="mx-4 h-px bg-neutral-100" />
+                            )}
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -7,7 +7,6 @@ import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
-import { AnimatePresence, motion } from "framer-motion";
 import ChevronDownIcon from "@/components/SuperAdmin/Layout/Icons/ChevronDownIcon";
 import clsx from "clsx";
 
@@ -641,18 +640,11 @@ export default function AdminActivityReportPage() {
                                   </td>
                                 </tr>
 
-                                {/* Expanded activities with animation */}
-                                <AnimatePresence initial={false}>
-                                  {isExpanded && (
-                                    <tr key={`${group.id}-expanded`}>
-                                      <td colSpan={7} className="p-0">
-                                        <motion.div
-                                          initial={{ height: 0, opacity: 0 }}
-                                          animate={{ height: "auto", opacity: 1 }}
-                                          exit={{ height: 0, opacity: 0 }}
-                                          transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                                          className="overflow-hidden bg-neutral-50"
-                                        >
+                                {/* Expanded activities */}
+                                {isExpanded && (
+                                  <tr key={`${group.id}-expanded`}>
+                                    <td colSpan={7} className="p-0">
+                                      <div className="overflow-hidden bg-neutral-50">
                                           <div className="px-6 py-2">
                                             <table className="w-full">
                                               <tbody>
@@ -663,12 +655,8 @@ export default function AdminActivityReportPage() {
                                                   const timestamp = activity.timestamp || activity.createdAt;
 
                                                   return (
-                                                    <motion.tr
+                                                    <tr
                                                       key={activity.id}
-                                                      initial={{ opacity: 0, y: -4 }}
-                                                      animate={{ opacity: 1, y: 0 }}
-                                                      exit={{ opacity: 0, y: -4 }}
-                                                      transition={{ duration: 0.15, delay: index * 0.03 }}
                                                       className="border-b border-neutral-100 last:border-b-0 hover:bg-neutral-100"
                                                     >
                                                       <td className="px-4 py-3 text-sm text-neutral-600">
@@ -701,17 +689,16 @@ export default function AdminActivityReportPage() {
                                                       <td className="px-4 py-3 text-xs text-neutral-500">
                                                         {activity.IP || "-"}
                                                       </td>
-                                                    </motion.tr>
+                                                    </tr>
                                                   );
                                                 })}
                                               </tbody>
                                             </table>
                                           </div>
-                                        </motion.div>
-                                      </td>
-                                    </tr>
-                                  )}
-                                </AnimatePresence>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
                               </>
                             ) : (
                               // Single activity - show directly without collapse

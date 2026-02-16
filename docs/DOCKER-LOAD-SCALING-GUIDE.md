@@ -6,6 +6,31 @@ This guide explains how to run **multiple frontend (Next.js) and backend (Strapi
 
 ---
 
+## Quick start: 5 Next + 4 Strapi
+
+1. **Backend** (from repo root or server backend dir):
+   ```bash
+   cd backend
+   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
+   ```
+   Starts 1 Postgres, 1 Redis, and 4 Strapi containers (ports 1337, 1338, 1339, 1340).
+
+2. **Frontend** (from repo root or server frontend dir):
+   ```bash
+   cd frontend
+   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
+   ```
+   Starts 5 Next.js containers (ports 3000–3004).
+
+3. **Nginx:** Copy the upstream blocks from `docs/nginx-upstream-snippet.conf` into your site config (before any `server { }`), then use `proxy_pass http://next_upstream;` and `proxy_pass http://strapi_upstream;` in the frontend and API location blocks. Test and reload:
+   ```bash
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+
+4. **Verify:** `docker ps` should show 5 frontend and 4 Strapi containers; site and API should respond.
+
+---
+
 ## Will two Strapis mess up the data?
 
 **No. Data is not duplicated or corrupted.**
@@ -50,9 +75,6 @@ services:
     container_name: infinity-strapi-2
     env_file:
       - ${ENV_FILE:-main.env}
-    environment:
-      # Strapi listens on 1337 inside the container; we map a different host port
-      - PORT=1337
     depends_on:
       infinity-postgres:
         condition: service_healthy
@@ -65,12 +87,48 @@ services:
       - backend_uploads-data:/app/public
     networks:
       - infinity-network
+
+  strapi-3:
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    container_name: infinity-strapi-3
+    env_file:
+      - ${ENV_FILE:-main.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:1339:1337"
+    restart: unless-stopped
+    volumes:
+      - backend_uploads-data:/app/public
+    networks:
+      - infinity-network
+
+  strapi-4:
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    container_name: infinity-strapi-4
+    env_file:
+      - ${ENV_FILE:-main.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:1340:1337"
+    restart: unless-stopped
+    volumes:
+      - backend_uploads-data:/app/public
+    networks:
+      - infinity-network
 ```
 
 - **Same image and env_file** as the first Strapi.
 - **Same volume** `backend_uploads-data` so uploads are shared.
-- **Host port 1338** so Nginx can send traffic to both 1337 and 1338.
-- No new database or Redis service; both Strapis use the existing ones.
+- **Host ports 1338, 1339, 1340** so Nginx can send traffic to all four Strapis (1337–1340).
+- No new database or Redis service; all Strapis use the existing ones.
 
 ### 1.2 Start the backend with the second Strapi
 
@@ -123,10 +181,26 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3002:3000"
+
+  frontend-4:
+    image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
+    env_file:
+      - ${ENV_FILE:-main.env}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3003:3000"
+
+  frontend-5:
+    image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
+    env_file:
+      - ${ENV_FILE:-main.env}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3004:3000"
 ```
 
-- Each container listens on **port 3000 inside** the container (Next.js standalone default). Host ports 3000, 3001, 3002 map to each container’s 3000.
-- You can remove `frontend-3` if you only want two frontend instances.
+- Each container listens on **port 3000 inside** the container (Next.js standalone default). Host ports 3000–3004 map to each container’s 3000.
+- The repo’s `frontend/docker-compose.scale.yml` defines 5 Next instances by default; remove services or Nginx upstream lines to run fewer.
 
 ### 2.2 Start the frontend with extra replicas
 
@@ -156,25 +230,29 @@ Edit the file that defines your HTTPS servers (e.g. `/etc/nginx/sites-available/
 **Add these upstream blocks** (right after any global directives, before the first `server`):
 
 ```nginx
-# Upstream for Next.js (2 or 3 instances)
+# Upstream for Next.js (5 instances: 3000–3004)
 upstream next_upstream {
     server 127.0.0.1:3000;
     server 127.0.0.1:3001;
     server 127.0.0.1:3002;
+    server 127.0.0.1:3003;
+    server 127.0.0.1:3004;
     keepalive 32;
 }
 
-# Upstream for Strapi (2 instances). ip_hash so the same client always hits the same Strapi (preserves admin session).
+# Upstream for Strapi (4 instances). ip_hash so the same client always hits the same Strapi (preserves admin session).
 upstream strapi_upstream {
     ip_hash;
     server 127.0.0.1:1337;
     server 127.0.0.1:1338;
+    server 127.0.0.1:1339;
+    server 127.0.0.1:1340;
     keepalive 32;
 }
 ```
 
-- **next_upstream:** Round-robin across 3000, 3001, 3002. If you only run two frontends, remove the `3002` line.
-- **strapi_upstream:** `ip_hash` ensures the same client IP always goes to the same Strapi so in-memory admin sessions work. Both instances still use the same Postgres and Redis.
+- **next_upstream:** Round-robin across 3000–3004. To run fewer frontends, remove the corresponding `server` lines and scale down the frontend compose.
+- **strapi_upstream:** `ip_hash` ensures the same client IP always goes to the same Strapi so in-memory admin sessions work. All instances use the same Postgres and Redis.
 
 ### 3.2 Use the upstreams in proxy_pass
 
@@ -313,7 +391,7 @@ healthcheck:
 | Why ip_hash for Strapi? | So the same browser (admin) always hits the same Strapi and in-memory admin sessions work. |
 | Do I need two databases? | No. One Postgres and one Redis for all Strapi containers. |
 | Do I need two upload volumes? | No. All Strapis mount the same `backend_uploads-data` volume. |
-| How many frontend/Strapi replicas? | Start with 2 of each; add a third frontend (3002) if needed. |
+| How many frontend/Strapi replicas? | Default scale is 5 Next (3000–3004) and 4 Strapi (1337–1340). Adjust by adding/removing services in the scale compose and Nginx upstream. |
 
 Files to add or edit:
 

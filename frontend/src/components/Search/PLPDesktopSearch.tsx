@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
 import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
-import { motion, AnimatePresence } from "framer-motion";
 import SearchSuggestionCard from "./SearchSuggestionCard";
 import { trackSearch } from "@/lib/analytics/matomo";
 
@@ -193,12 +192,10 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
   };
 
   return (
-    <motion.form
+    <form
       onSubmit={handleSubmit}
       ref={containerRef}
       className={`relative flex w-[320px] items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200 md:w-[360px] lg:w-[420px] ${className}`}
-      animate={{ scale: isFocused ? 1.02 : 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 22 }}
     >
       <div className="flex w-full items-center justify-between px-2">
         <input
@@ -227,28 +224,22 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
           aria-controls="plp-desktop-suggestions"
         />
 
-        <motion.button
+        <button
           type="submit"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm"
-          whileTap={{ scale: 0.95 }}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm active:scale-95 transition-transform"
         >
           <SearchIcon className="h-5 w-5 text-white" />
-        </motion.button>
+        </button>
       </div>
 
       {/* Suggestions dropdown */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full min-w-[320px] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
-            role="listbox"
-            aria-label="پیشنهادهای جستجو"
-            id="plp-desktop-suggestions"
-          >
+      {open && (
+        <div
+          className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full min-w-[320px] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
+          role="listbox"
+          aria-label="پیشنهادهای جستجو"
+          id="plp-desktop-suggestions"
+        >
             {/* Screen reader announcement for result count */}
             {!loading && suggestions.length > 0 && (
               <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
@@ -338,7 +329,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                     </div>
                   ))}
                 {!loading && suggestions.length > 0 && (
-                  <motion.button
+                  <button
                     type="button"
                     onClick={() => {
                       persistRecent(searchQuery);
@@ -346,19 +337,15 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                       router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
                     }}
                     className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
                   >
                     مشاهده همه نتایج
-                  </motion.button>
+                  </button>
                 )}
               </>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.form>
+        </div>
+      )}
+    </form>
   );
 };
 
