@@ -17,6 +17,8 @@ import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { computeDiscountForVariation } from "@/utils/discounts";
 import { validateCategorySlug } from "@/utils/category-validation";
+import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
+import { getProductCategories } from "@/services/product/categories";
 
 interface Product {
   id: number;
@@ -49,7 +51,7 @@ interface Product {
 }
 
 async function getProducts(
-  category?: string,
+  categorySlugs?: string[],
   page = 1,
   pageSize = 30, // Reduced page size for better performance
   showAvailableOnly = false,
@@ -228,9 +230,11 @@ async function getProducts(
   // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
   queryParams.append("filters[product_variations][Price][$gt]", "0");
 
-  // Category filter
-  if (category) {
-    queryParams.append("filters[product_main_category][Slug][$eq]", category);
+  // Category filter: include selected category and all its children
+  if (categorySlugs && categorySlugs.length > 0) {
+    categorySlugs.forEach((slug, i) => {
+      queryParams.append(`filters[product_main_category][Slug][$in][${i}]`, slug);
+    });
   }
 
   // Price range filters (these will work in combination with the base Price > 0 filter)
@@ -481,8 +485,17 @@ export default async function PLPPage({
     categoryTitle = categoryData.attributes.Title;
   }
 
+  // Fetch all categories so we can resolve category + descendants (and pass to client for filter changes)
+  const allCategories = await getProductCategories({ revalidate: 3600 });
+  const categorySlugs =
+    validatedCategory && allCategories.length > 0
+      ? getCategoryAndDescendantSlugs(allCategories, validatedCategory)
+      : validatedCategory
+        ? [validatedCategory]
+        : undefined;
+
   const { products, pagination } = await getProducts(
-    validatedCategory,
+    categorySlugs,
     page,
     30, // Reduced page size for better performance
     showAvailableOnly,
@@ -572,6 +585,7 @@ export default async function PLPPage({
           products={products}
           pagination={pagination}
           category={validatedCategory}
+          allCategories={allCategories}
           searchQuery={search}
           discountedSidebarProducts={discounted}
           suggestedSidebarProducts={favorites}

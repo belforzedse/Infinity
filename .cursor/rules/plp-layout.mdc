@@ -24,9 +24,15 @@ The PLP is structured to display product listings with filtering capabilities:
 - Supports URL query parameters for all filters
 - Builds complex query parameters for API calls
 
+## Category Filter (Includes Children)
+- When filtering by a category (e.g. کت / coat), the PLP shows **that category and all its child categories**.
+- Implemented via `getCategoryAndDescendantSlugs()` in [frontend/src/utils/category-descendants.ts](mdc:frontend/src/utils/category-descendants.ts): given a category slug and the full category tree, returns the slug plus all descendant slugs.
+- The products API is called with `filters[product_main_category][Slug][$in][0]=...` etc. so Strapi returns products whose main category is the selected one or any of its children.
+- Server: [plp/page.tsx](mdc:frontend/src/app/(product)/plp/page.tsx) fetches all categories, resolves `categorySlugs`, and passes `allCategories` to `PLPList`. Client: [PLP/List.tsx](mdc:frontend/src/components/PLP/List.tsx) uses `allCategories` to resolve descendants when the user changes the category in the filter.
+
 ## Filter System
 - Filter parameters:
-  - Category
+  - Category (includes children; see above)
   - Availability (show available products only)
   - Price range (min/max)
   - Size

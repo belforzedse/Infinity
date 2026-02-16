@@ -2,7 +2,8 @@
 
 import NoData from "./NoData";
 import { apiClient } from "@/services";
-import { getProductCategories } from "@/services/product/categories";
+import { getProductCategories, type ProductCategorySummary } from "@/services/product/categories";
+import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { faNum } from "@/utils/faNum";
 import type { ProductCardProps } from "@/components/Product/Card";
 import Filter from "./List/Filter";
@@ -33,6 +34,8 @@ interface PLPListProps {
   products: PLPProduct[];
   pagination: PLPPagination;
   category?: string;
+  /** All categories with parentId (for resolving category + children in filter). */
+  allCategories?: ProductCategorySummary[];
   searchQuery?: string;
   discountedSidebarProducts?: ProductCardProps[];
   suggestedSidebarProducts?: ProductCardProps[];
@@ -42,6 +45,7 @@ export default function PLPList({
   products: initialProducts,
   pagination: initialPagination,
   category: initialCategory,
+  allCategories: allCategoriesProp = [],
   searchQuery,
   discountedSidebarProducts = [],
   suggestedSidebarProducts = [],
@@ -183,9 +187,19 @@ export default function PLPList({
     // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
     queryParams.append("filters[product_variations][Price][$gt]", "0");
 
-    // Category filter
+    // Category filter: include selected category and all its children
     if (category) {
-      queryParams.append("filters[product_main_category][Slug][$eq]", category);
+      const slugs =
+        allCategoriesProp.length > 0
+          ? getCategoryAndDescendantSlugs(allCategoriesProp, category)
+          : [category];
+      if (slugs.length > 0) {
+        slugs.forEach((slug, i) => {
+          queryParams.append(`filters[product_main_category][Slug][$in][${i}]`, slug);
+        });
+      } else {
+        queryParams.append("filters[product_main_category][Slug][$eq]", category);
+      }
     }
 
     // Availability filter - check for actual stock (Count > 0) not just IsPublished
@@ -314,6 +328,7 @@ export default function PLPList({
   }, [
     page,
     category,
+    allCategoriesProp,
     available,
     minPrice,
     maxPrice,
