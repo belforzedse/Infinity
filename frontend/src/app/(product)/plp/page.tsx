@@ -16,6 +16,7 @@ import type { Metadata } from "next";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { computeDiscountForVariation } from "@/utils/discounts";
+import { productTitleHasG, getProductCreatedAt } from "@/utils/product";
 import { validateCategorySlug } from "@/utils/category-validation";
 import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getProductCategories } from "@/services/product/categories";
@@ -329,25 +330,16 @@ async function getProducts(
     });
 
     // CRITICAL: Sort by stock availability FIRST, before any other operations
-    // This ensures in-stock products always appear before out-of-stock products
+    // When sort is "newest" (createdAt:desc), also put products with "g" or "G" in title first
     filteredProducts.sort((a: Product, b: Product) => {
-      // Helper function to check if product has available stock
-      // A product is "in stock" if it has at least one published variation with stock > 0
       const hasStock = (product: Product): boolean => {
         if (!product.attributes.product_variations?.data) return false;
-
         return product.attributes.product_variations.data.some((variation) => {
-          // Must be published
           if (!variation.attributes?.IsPublished) return false;
-
-          // Check stock count - handle various data structures
           const stockData = variation.attributes?.product_stock;
           if (!stockData) return false;
-
           const stockCount = stockData?.data?.attributes?.Count;
-          // Check if stockCount exists and is a positive number
           if (typeof stockCount !== "number" || stockCount <= 0) return false;
-
           return true;
         });
       };
@@ -355,10 +347,19 @@ async function getProducts(
       const aHasStock = hasStock(a);
       const bHasStock = hasStock(b);
 
-      // Products with stock come first (return -1 means a comes before b)
+      if (sort === "createdAt:desc") {
+        const aHasG = productTitleHasG(a);
+        const bHasG = productTitleHasG(b);
+        if (aHasG && !bHasG) return -1;
+        if (!aHasG && bHasG) return 1;
+        if (aHasStock && !bHasStock) return -1;
+        if (!aHasStock && bHasStock) return 1;
+        return getProductCreatedAt(b) - getProductCreatedAt(a);
+      }
+
       if (aHasStock && !bHasStock) return -1;
       if (!aHasStock && bHasStock) return 1;
-      return 0; // Keep original order if both have same stock status
+      return 0;
     });
 
     // Frontend price sorting (applied after stock sorting)

@@ -217,3 +217,19 @@ export const getMinInStockVariationPrice = (product: ProductWithVariations): num
 
   return minPrice === Infinity ? 0 : minPrice;
 };
+
+/** True if product title contains the letter "g" (case-insensitive). Used for PLP "newest" sort boost. */
+export function productTitleHasG(
+  product: { attributes?: { Title?: string } },
+): boolean {
+  const title = product.attributes?.Title ?? "";
+  return /g/i.test(title);
+}
+
+/** CreatedAt timestamp for sorting; 0 if missing. */
+export function getProductCreatedAt(
+  product: { attributes?: { createdAt?: string }; createdAt?: string },
+): number {
+  const d = product.attributes?.createdAt ?? (product as { createdAt?: string }).createdAt;
+  return d ? new Date(d).getTime() : 0;
+}

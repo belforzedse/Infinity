@@ -17,7 +17,12 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import notify from "@/utils/notify";
 import { SORT_LABELS } from "./sortOptions";
-import { getMinInStockVariationPrice, hasAvailableStock } from "@/utils/product";
+import {
+  getMinInStockVariationPrice,
+  hasAvailableStock,
+  productTitleHasG,
+  getProductCreatedAt,
+} from "@/utils/product";
 import { useSidebarProducts } from "@/hooks/useSidebarProducts";
 import PLPDesktopList from "./List/PLPDesktopList";
 import PLPMobileList from "./List/PLPMobileList";
