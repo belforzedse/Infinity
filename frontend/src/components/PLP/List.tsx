@@ -348,13 +348,8 @@ export default function PLPList({
           status: (error as any)?.status,
         });
         notify.error("خطا در بارگیری محصولات");
-        setProducts([]);
-        setPagination({
-          page: parseInt(page) || 1,
-          pageSize: 20,
-          pageCount: 0,
-          total: 0,
-        });
+        // Do not overwrite products/pagination on error: keep server-rendered list so PLP is not empty when client fetch fails (e.g. CORS, network).
+        // setProducts([]) and setPagination(zeros) removed so SSR data is preserved.
       })
       .finally(() => {
         setIsLoading(false);

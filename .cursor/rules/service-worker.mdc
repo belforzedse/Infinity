@@ -1,0 +1,30 @@
+# Service Worker (PWA / Offline Cart)
+
+## Scope
+
+- **File:** `frontend/public/sw.js`
+- **Purpose:** Offline cart support; caches cart and some API data; offline fallback for PWA users.
+
+## Cross-origin requests
+
+The service worker **does not intercept cross-origin requests**. Only same-origin requests (`url.origin === self.origin`) are handled.
+
+- **Reason:** Requests to the public API (e.g. `https://api.infinitycolor.co`) must be performed by the browser so the real API response includes CORS headers. If the SW intercepted them and returned 503 on failure, that response would have no `Access-Control-Allow-Origin`, causing a CORS error in the console and empty PLP.
+- **Effect:** All fetches to `api.infinitycolor.co` (or any other origin) go directly to the network; the SW never responds with 503 for those.
+
+## What the SW handles (same-origin only)
+
+- `/api/cart`, `/cart` – network-first, cache fallback
+- Other `/api/` paths on the **same origin** – network-first, cache fallback (e.g. if you had a Next.js API route under `/api/`)
+- Static assets – cache-first or network-first
+- Navigation – network-first; offline.html only for PWA users when offline
+
+## Skipped (never intercepted)
+
+- Cross-origin requests (different origin from the page)
+- `/auth/self`, `/_next/static/`, `/_next/image`
+
+## When changing SW logic
+
+- Do not add handling for cross-origin API URLs; keep the early `url.origin !== self.origin` return.
+- After deploying a new `sw.js`, users may need to refresh or wait for the SW to update before the new behavior applies.

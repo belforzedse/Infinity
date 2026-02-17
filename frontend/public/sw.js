@@ -100,6 +100,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Never intercept cross-origin requests (e.g. api.infinitycolor.co).
+  // Let the browser perform them so CORS is handled by the real API response.
+  // Otherwise the SW can return 503 on failure without CORS headers → CORS error in console.
+  try {
+    if (url.origin !== self.origin) {
+      return;
+    }
+  } catch (_) {
+    return;
+  }
+
   // Skip service worker for auth endpoints - they need fresh data for role checks
   // Also skip Next.js static assets - Next.js handles cache-busting with hashed filenames
   // Skip Next.js image optimization - let Next.js handle image optimization
