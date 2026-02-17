@@ -45,7 +45,7 @@ export default function GlobalLoadingOverlay() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-start justify-center">
+    <div className="fixed inset-0 z-[1000] flex items-start justify-center animate-in fade-in duration-200">
       {/* Backdrop: stop blocking clicks after MAX_BLOCKING_MS so UI never stays stuck */}
       <div
         className={`absolute inset-0 bg-white/40 backdrop-blur-[2px] transition-opacity ${allowClickThrough ? "pointer-events-none" : ""}`}
