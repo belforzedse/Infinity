@@ -35,12 +35,12 @@ RUN NODE_ENV=production npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-ARG STRAPI_BUILD_TIME_URL=""
+# Only STRAPI_INTERNAL_URL is set in the image so runtime uses internal URL.
+# STRAPI_BUILD_TIME_URL is build-only (builder stage); do not set here.
 ARG STRAPI_INTERNAL_URL=""
 
 ENV NEXT_TELEMETRY_DISABLED=1 \
     NODE_ENV=production \
-    STRAPI_BUILD_TIME_URL=${STRAPI_BUILD_TIME_URL} \
     STRAPI_INTERNAL_URL=${STRAPI_INTERNAL_URL}
 
 COPY --from=builder /app/public ./public

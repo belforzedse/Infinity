@@ -134,6 +134,7 @@ jobs:
             cat <<-'EOF' > main.env
             ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
+            sed -i '/^STRAPI_BUILD_TIME_URL=/d' main.env
             export IMAGE_TAG=main
             export ENV_FILE=main.env
             docker compose -f docker-compose.yml -f docker-compose.scale.yml pull
@@ -168,6 +169,7 @@ jobs:
             cat <<-'EOF' > dev.env
             ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
+            sed -i '/^STRAPI_BUILD_TIME_URL=/d' dev.env
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
             docker compose -f docker-compose.yml -f docker-compose.scale.yml pull
@@ -202,6 +204,7 @@ jobs:
             cat <<-'EOF' > main.env
             ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
+            sed -i '/^STRAPI_BUILD_TIME_URL=/d' main.env
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env
             docker compose -f docker-compose.yml -f docker-compose.scale.yml pull
