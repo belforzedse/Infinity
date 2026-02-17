@@ -20,6 +20,7 @@ import { productTitleHasG, getProductCreatedAt } from "@/utils/product";
 import { validateCategorySlug } from "@/utils/category-validation";
 import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getProductCategories } from "@/services/product/categories";
+import type { PLPProduct } from "@/components/PLP/types";
 
 interface Product {
   id: number;
@@ -283,29 +284,53 @@ async function getProducts(
     queryParams.append("sort[0]", sort);
   }
 
-  // Construct final URL
-  const url = `${baseUrl}?${queryParams.toString()}`;
+  // Construct final URL (internal first; fallback to public API if unreachable)
+  const queryString = queryParams.toString();
+  const url = `${baseUrl}?${queryString}`;
+  const fallbackUrl = `${API_BASE_URL}/products?${queryString}`;
 
+  let response: Response;
+  let data: { data?: unknown[]; meta?: { pagination?: { total?: number; pageCount?: number } } };
   try {
-    const response = await fetchWithTimeout(url, {
+    response = await fetchWithTimeout(url, {
       timeoutMs: 15000,
       next: { revalidate: 60 },
     });
-    const data = await response.json();
-
-    if (!response.ok) {
-      logger.error("[PLP] Products API error", {
-        status: response.status,
-        url: url.replace(/\?.*/, "?…"),
-        error: data?.error?.message ?? String(data),
+    data = await response.json();
+  } catch (firstErr) {
+    logger.warn("[PLP] Products fetch failed (internal URL?), retrying with public API", {
+      error: String(firstErr),
+      urlHint: baseUrl.replace(/\?.*/, ""),
+    });
+    try {
+      response = await fetchWithTimeout(fallbackUrl, {
+        timeoutMs: 15000,
+        next: { revalidate: 60 },
       });
+      data = await response.json();
+    } catch (secondErr) {
+      logger.error("[PLP] Products fetch failed (public fallback)", { error: String(secondErr) });
       return {
         products: [],
         pagination: { page, pageSize, pageCount: 0, total: 0 },
       };
     }
+  }
 
-    const rawProducts = Array.isArray(data?.data) ? data.data : [];
+  if (!response.ok) {
+    logger.error("[PLP] Products API error", {
+      status: response.status,
+      url: (response.url || url).replace(/\?.*/, "?…"),
+      error: (data as { error?: { message?: string } })?.error?.message ?? String(data),
+    });
+    return {
+      products: [],
+      pagination: { page, pageSize, pageCount: 0, total: 0 },
+    };
+  }
+
+  try {
+    const rawProducts = (Array.isArray(data?.data) ? data.data : []) as Product[];
     // Post-fetch filtering: We filter for images here since API-level filtering for relations is limited
     // Price filtering is done at API level, but we double-check for edge cases
     let filteredProducts = rawProducts.filter((product: Product) => {
@@ -418,6 +443,13 @@ async function getProducts(
       });
     }
 
+    if (rawProducts.length > 0 && filteredProducts.length === 0) {
+      logger.warn("[PLP] All products filtered out (e.g. no CoverImage or valid price)", {
+        rawCount: rawProducts.length,
+        categorySlugs: categorySlugs?.slice(0, 3),
+      });
+    }
+
     const meta = data.meta?.pagination;
     const total = typeof meta?.total === "number" ? meta.total : filteredProducts.length;
     const pageCount = typeof meta?.pageCount === "number" ? meta.pageCount : Math.ceil(total / pageSize);
@@ -432,7 +464,7 @@ async function getProducts(
       },
     };
   } catch (error) {
-    logger.error("Error fetching products", { error: String(error) });
+    logger.error("[PLP] Error parsing or filtering products", { error: String(error) });
     return {
       products: [],
       pagination: {
@@ -599,7 +631,7 @@ export default async function PLPPage({
 
       <Suspense fallback={<ProductListSkeleton />}>
         <PLPList
-          products={products}
+          products={products as PLPProduct[]}
           pagination={pagination}
           category={validatedCategory}
           allCategories={allCategories}
