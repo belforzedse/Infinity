@@ -7,6 +7,8 @@ const corsOrigins = [
   "http://127.0.0.1:2888",
 ].filter((origin, i, arr) => arr.indexOf(origin) === i); // dedupe
 
+const allowedOriginsSet = new Set(corsOrigins);
+
 export default [
   "strapi::logger",
   "strapi::errors",
@@ -15,8 +17,17 @@ export default [
   {
     name: "strapi::cors",
     config: {
-      origin: corsOrigins,
+      origin: (ctx: { request: { header: { origin?: string } } }): string | string[] => {
+        const origin = ctx.request.header.origin;
+        if (origin && allowedOriginsSet.has(origin)) {
+          return origin;
+        }
+        return "";
+      },
       credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+      headers: ["Content-Type", "Authorization", "Origin", "Accept", "Accept-Language"],
+      keepHeaderOnError: true,
     },
   },
   "strapi::query",
