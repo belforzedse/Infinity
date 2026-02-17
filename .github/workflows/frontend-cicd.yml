@@ -85,12 +85,8 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.SITE_URL }}
           NEXT_PUBLIC_MATOMO_URL: ${{ secrets.FRONTEND_MATOMO_URL }}
           NEXT_PUBLIC_MATOMO_SITE_ID: ${{ secrets.FRONTEND_MATOMO_SITE_ID }}
+          STRAPI_BUILD_TIME_URL: ${{ secrets.FRONTEND_STRAPI_BUILD_TIME_URL }}
         run: |
-          cat <<'ENVFILE' > main.env
-          ${{ secrets.FRONTEND_ENV_FILE }}
-          ENVFILE
-          STRAPI_BUILD_TIME_URL=$(grep '^STRAPI_BUILD_TIME_URL=' main.env 2>/dev/null | cut -d= -f2- | tr -d '"' | tr -d "'") || true
-          STRAPI_INTERNAL_URL=$(grep '^STRAPI_INTERNAL_URL=' main.env 2>/dev/null | cut -d= -f2- | tr -d '"' | tr -d "'") || true
           docker build \
             --build-arg NEXT_PUBLIC_API_BASE_URL="${NEXT_PUBLIC_API_BASE_URL}" \
             --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="${NEXT_PUBLIC_IMAGE_BASE_URL}" \
@@ -99,7 +95,6 @@ jobs:
             --build-arg NEXT_PUBLIC_MATOMO_URL="${NEXT_PUBLIC_MATOMO_URL}" \
             --build-arg NEXT_PUBLIC_MATOMO_SITE_ID="${NEXT_PUBLIC_MATOMO_SITE_ID}" \
             --build-arg STRAPI_BUILD_TIME_URL="${STRAPI_BUILD_TIME_URL}" \
-            --build-arg STRAPI_INTERNAL_URL="${STRAPI_INTERNAL_URL}" \
             --build-arg GITHUB_SHA="${{ github.sha }}" \
             -f ${{ steps.meta.outputs.dockerfile }} \
             -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} \
